@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Image from "next/image";
+import Nav from "@/app/ui/nav";
+import AuthActions from "@/app/ui/authActions";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,7 +19,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <div className="grid grid-cols-12 gap-4 bg-white">
+          <div className="col-start-2 col-span-10">
+            <div className="grid grid-cols-2 gap-4 mt-10 mb-2">
+              <div className="flex items-center">
+                <Image src="/images/logo.svg" alt="Oltukai logo" width={100} height={80} className="mr-6" />
+                <Nav />
+              </div>
+              <div className="flex justify-end">
+                <AuthActions />
+              </div>
+            </div>
+          </div>
+        </div>
+        {children}
+      </body>
     </html>
   );
 }
