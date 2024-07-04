@@ -1,12 +1,13 @@
 import Image from "next/image";
-import Nav from "@/app/ui/nav";
-import AuthActions from "@/app/ui/authActions";
+import IconRadioButtonGroup from "@/app/ui/iconRadioButtonGroup";
+import {Input} from "@willikay11/solgates-component-library";
+import SubTopBar from "@/app/ui/subTopBar";
 
 export default function Home() {
   return (
     <main className="h-full grid grid-cols-12 gap-4">
         <div className="col-span-12">
-            <div className="h-[80px] w-full bg-gray-50"></div>
+            <SubTopBar />
         </div>
       {/*<Image*/}
       {/*    alt="Mountains"*/}

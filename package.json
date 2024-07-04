@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hugeicons/react-pro": "^0.3.2",
+    "@willikay11/solgates-component-library": "^2.9.5",
     "clsx": "^2.1.1",
     "next": "14.2.4",
     "react": "^18",

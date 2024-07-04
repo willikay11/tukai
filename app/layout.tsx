@@ -4,8 +4,11 @@ import "./globals.css";
 import Image from "next/image";
 import Nav from "@/app/ui/nav";
 import AuthActions from "@/app/ui/authActions";
+import {hugeiconsLicense} from "@hugeicons/react-pro";
 
 const inter = Inter({ subsets: ["latin"] });
+
+hugeiconsLicense('B5A34573-91DB466D-98590156-0211F4FC');
 
 export const metadata: Metadata = {
   title: "Create Next App",
