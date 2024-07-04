@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
+import { satoshi } from '@/app/ui/fonts';
 import Image from "next/image";
 import Nav from "@/app/ui/nav";
 import AuthActions from "@/app/ui/authActions";
-import {hugeiconsLicense} from "@hugeicons/react-pro";
-
-const inter = Inter({ subsets: ["latin"] });
-
-hugeiconsLicense('B5A34573-91DB466D-98590156-0211F4FC');
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -22,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={satoshi.className}>
         <div className="grid grid-cols-12 gap-4 bg-white">
           <div className="col-start-2 col-span-10">
             <div className="grid grid-cols-2 gap-4 mt-10 mb-2">
