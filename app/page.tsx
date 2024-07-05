@@ -1,8 +1,8 @@
-import Image from "next/image";
-import IconRadioButtonGroup from "@/app/ui/iconRadioButtonGroup";
-import {Input} from "@willikay11/solgates-component-library";
 import SubTopBar from "@/app/ui/subTopBar";
 import SubTopBarFilters from "@/app/ui/subTopBarFilters";
+import {EventsSkeleton} from "@/app/ui/skeletons";
+import {Suspense} from "react";
+import Experiences from "@/app/ui/experiences";
 
 export default function Home() {
   return (
@@ -11,6 +11,12 @@ export default function Home() {
             <SubTopBar />
             <SubTopBarFilters />
         </div>
+        <div className="col-start-2 col-span-10">
+            <Suspense fallback={<EventsSkeleton />}>
+                <Experiences />
+            </Suspense>
+        </div>
+
     </main>
   );
 }
