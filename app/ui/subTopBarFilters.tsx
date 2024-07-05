@@ -1,118 +1,10 @@
 'use client';
 
-import {
-    AngryBirdIcon, ArrowLeft01Icon, ArrowRight01Icon,
-    Backpack03Icon,
-    BicycleIcon,
-    CowboyHatIcon,
-    Directions01Icon,
-    Directions02Icon, EquipmentGym03Icon,
-    FirePitIcon,
-    FishFoodIcon,
-    FootballPitchIcon,
-    SkippingRopeIcon,
-    SunsetIcon,
-    SwimmingIcon,
-    TruckDeliveryIcon,
-    TruckMonsterIcon,
-    WorkoutRunIcon,
-    WorkoutSportIcon
-} from "@hugeicons/react-pro";
 import {useEffect, useRef, useState} from "react";
 import clsx from "clsx";
+import {interests} from "@/app/lib/placeholderData";
+import {ArrowLeft01Icon, ArrowRight01Icon} from "@hugeicons/react-pro";
 
-const options = [
-    {
-        label: 'Hiking',
-        icon: <Directions01Icon size={20} />,
-        value: 'hiking'
-    },
-    {
-        label: 'Running',
-        icon: <WorkoutRunIcon size={20} />,
-        value: 'running'
-    },
-    {
-        label: 'Camping',
-        icon: <FirePitIcon size={20} />,
-        value: 'camping'
-    },
-    {
-        label: 'Bicycle',
-        icon: <BicycleIcon size={20} />,
-        value: 'bicycle'
-    },
-    {
-        label: 'Backpacking',
-        icon: <Backpack03Icon size={20} />,
-        value: 'backpacking'
-    },
-    {
-        label: 'Walking',
-        icon: <WorkoutSportIcon size={20} />,
-        value: 'walking'
-    },
-    {
-        label: 'Off-road Driving',
-        icon: <TruckMonsterIcon size={20} />,
-        value: 'off-road-driving'
-    },
-    {
-        label: 'Bird Watching',
-        icon: <AngryBirdIcon size={20} />,
-        value: 'bird-watching'
-    },
-    {
-        label: 'Horse Riding',
-        icon: <CowboyHatIcon size={20} />,
-        value: 'horse-riding'
-    },
-    {
-        label: 'Parks & Museums',
-        icon: <Directions02Icon size={20} />,
-        value: 'parks-&-museums'
-    },
-    {
-        label: 'Fishing',
-        icon: <FishFoodIcon size={20} />,
-        value: 'fishing'
-    },
-    {
-        label: 'Scenic Driving/Road Trip',
-        icon: <TruckDeliveryIcon size={20} />,
-        value: 'scenic-driving-road-trip'
-    },
-    {
-        label: 'Sunset',
-        icon: <SunsetIcon size={20} />,
-        value: 'sunset'
-    },
-    {
-        label: 'Rock Climbing',
-        icon: <SkippingRopeIcon size={20} />,
-        value: 'rock-climbing'
-    },
-    {
-        label: 'Water Sports',
-        icon: <SwimmingIcon size={20} />,
-        value: 'water-sports'
-    },
-    {
-        label: 'Sports Activity',
-        icon: <FootballPitchIcon size={20} />,
-        value: 'sports-activity'
-    },
-    {
-        label: 'Bird Watching',
-        icon: <AngryBirdIcon size={20} />,
-        value: 'bird-watching'
-    },
-    {
-        label: 'Gym',
-        icon: <EquipmentGym03Icon size={20} />,
-        value: 'gym'
-    },
-]
 export default function SubTopBarFilters() {
     let scrollBy = 500;
     const ref = useRef();
@@ -154,7 +46,7 @@ export default function SubTopBarFilters() {
                         <ArrowLeft01Icon size={20} className="text-gray-700" />
                     </button>
                     <div ref={ref} className="h-full flex items-center overflow-hidden scroll-smooth">
-                        {options.map((option, index) => (
+                        {interests.map((option, index) => (
                             <button key={option.label}
                                     className={clsx('flex flex-col items-center justify-center h-[60px]', {
                                         'text-primary border-b-[1px] border-primary': selectedOption === option.value,

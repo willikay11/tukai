@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import {usePathname} from "next/navigation";
+import {hugeiconsLicense} from "@hugeicons/react-pro";
 
 const backgroundImages = [
     {
@@ -15,8 +16,13 @@ const backgroundImages = [
     {
         image: '/images/infinite-pool.svg',
         path: '/auth/sign-up-free'
+    },
+    {
+        image: '/images/kilimanjaro.svg',
+        path: '/auth/interests'
     }
-]
+];
+
 export default function Layout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
 
