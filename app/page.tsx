@@ -1,25 +1,22 @@
-import Image from "next/image";
-import Nav from "@/app/ui/nav";
-import AuthActions from "@/app/ui/authActions";
+import SubTopBar from "@/app/ui/subTopBar";
+import SubTopBarFilters from "@/app/ui/subTopBarFilters";
+import {EventsSkeleton} from "@/app/ui/skeletons";
+import {Suspense} from "react";
+import Experiences from "@/app/ui/experiences";
 
 export default function Home() {
   return (
     <main className="h-full grid grid-cols-12 gap-4">
         <div className="col-span-12">
-            <div className="h-[80px] w-full bg-gray-50"></div>
+            <SubTopBar />
+            <SubTopBarFilters />
         </div>
-      {/*<Image*/}
-      {/*    alt="Mountains"*/}
-      {/*    src="/images/hill-decent.svg"*/}
-      {/*    quality={100}*/}
-      {/*    fill*/}
-      {/*    sizes="100vw"*/}
-      {/*    style={{*/}
-      {/*      objectFit: 'cover',*/}
-      {/*      backgroundPosition: 'center',*/}
-      {/*      zIndex: -1*/}
-      {/*    }}*/}
-      {/*/>*/}
+        <div className="col-start-2 col-span-10">
+            <Suspense fallback={<EventsSkeleton />}>
+                <Experiences />
+            </Suspense>
+        </div>
+
     </main>
   );
 }

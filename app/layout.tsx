@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
+import { satoshi } from '@/app/ui/fonts';
 import Image from "next/image";
 import Nav from "@/app/ui/nav";
 import AuthActions from "@/app/ui/authActions";
-
-const inter = Inter({ subsets: ["latin"] });
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -19,15 +18,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={satoshi.className}>
         <div className="grid grid-cols-12 gap-4 bg-white">
           <div className="col-start-2 col-span-10">
-            <div className="grid grid-cols-2 gap-4 mt-10 mb-2">
-              <div className="flex items-center">
-                <Image src="/images/logo.svg" alt="Oltukai logo" width={100} height={80} className="mr-6" />
+            <div className="grid grid-cols-2 gap-4 mt-10">
+              <div className="flex items-start h-[40px]">
+                <Link href="/">
+                  <Image src="/images/logo.svg" alt="Oltukai logo" width={100} height={80} className="mr-6" />
+                </Link>
                 <Nav />
               </div>
-              <div className="flex justify-end">
+              <div className="flex items-start justify-end h-[40px]">
                 <AuthActions />
               </div>
             </div>
