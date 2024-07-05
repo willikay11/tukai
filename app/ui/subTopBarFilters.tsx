@@ -7,13 +7,14 @@ import {ArrowLeft01Icon, ArrowRight01Icon} from "@hugeicons/react-pro";
 
 export default function SubTopBarFilters() {
     let scrollBy = 500;
-    const ref = useRef();
+    const ref = useRef<any>();
     const [showPrevBtn, setShowPrevBtn] = useState<boolean>(false);
     const [showNextBtn, setShowNextBtn] = useState<boolean>(true);
     const [selectedOption, setSelectedOption] = useState<string>('hiking');
 
     useEffect(() => {
         if (ref.current) {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
             scrollBy = ref?.current?.offsetWidth - 100;
 
             window.addEventListener('resize', () => {
@@ -27,7 +28,7 @@ export default function SubTopBarFilters() {
             });
 
             ref?.current?.addEventListener("scroll", () => {
-                if ((ref.current.offsetWidth + ref.current?.scrollLeft) >= ref?.current?.scrollWidth - 5) {
+                if ((ref.current?.offsetWidth + ref.current?.scrollLeft) >= ref?.current?.scrollWidth - 5) {
                     setShowNextBtn(false);
                 }
 

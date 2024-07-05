@@ -42,7 +42,7 @@ export default function Page() {
                 </div>
 
                 <div className="flex">
-                    <p className="text-gray-700 text-xs">Wrong Number? <Anchor>Edit</Anchor></p>
+                    <p className="text-gray-700 text-xs">Wrong Number? <Anchor link="">Edit</Anchor></p>
                 </div>
             </>
         );
