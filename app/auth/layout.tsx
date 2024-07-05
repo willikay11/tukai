@@ -20,6 +20,10 @@ const backgroundImages = [
     {
         image: '/images/kilimanjaro.svg',
         path: '/auth/interests'
+    },
+    {
+        image: '/images/man-bridge-running.svg',
+        path: '/auth/payments'
     }
 ];
 
