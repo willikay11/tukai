@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import {usePathname} from "next/navigation";
-import {hugeiconsLicense} from "@hugeicons/react-pro";
 
 const backgroundImages = [
     {
@@ -24,6 +23,10 @@ const backgroundImages = [
     {
         image: '/images/man-bridge-running.svg',
         path: '/auth/payments'
+    },
+    {
+        image: '/images/santorini.svg',
+        path: '/auth/subscribe'
     }
 ];
 

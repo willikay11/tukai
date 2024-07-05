@@ -8,7 +8,7 @@ import {
     FirePitIcon,
     FishFoodIcon,
     FootballPitchIcon,
-    More03Icon,
+    MoreIcon,
     SkippingRopeIcon,
     SunsetIcon,
     SwimmingIcon,
@@ -116,7 +116,7 @@ const interests = [
     },
     {
         label: 'Other',
-        icon: <More03Icon size={20} />,
+        icon: <MoreIcon size={20} />,
         value: 'other'
     },
 ];
