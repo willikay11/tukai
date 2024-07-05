@@ -11,6 +11,10 @@ const backgroundImages = [
     {
         image: '/images/hikers-walking.svg',
         path: '/auth/sign-up'
+    },
+    {
+        image: '/images/infinite-pool.svg',
+        path: '/auth/sign-up-free'
     }
 ]
 export default function Layout({ children }: { children: React.ReactNode }) {
