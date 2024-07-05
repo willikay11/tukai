@@ -11,18 +11,6 @@ export default function Home() {
             <SubTopBar />
             <SubTopBarFilters />
         </div>
-      {/*<Image*/}
-      {/*    alt="Mountains"*/}
-      {/*    src="/images/hill-decent.svg"*/}
-      {/*    quality={100}*/}
-      {/*    fill*/}
-      {/*    sizes="100vw"*/}
-      {/*    style={{*/}
-      {/*      objectFit: 'cover',*/}
-      {/*      backgroundPosition: 'center',*/}
-      {/*      zIndex: -1*/}
-      {/*    }}*/}
-      {/*/>*/}
     </main>
   );
 }
