@@ -39,7 +39,7 @@ export default function Page() {
             </div>
 
             <div className="mb-4 w-full flex items-center">
-                <span className="text-xs w-full text-center">Don't have an account? <Anchor link="/auth/sign-up">Sign up for free</Anchor></span>
+                <span className="text-xs w-full text-center">Don&apos;t have an account? <Anchor link="/auth/sign-up">Sign up for free</Anchor></span>
             </div>
 
             <div className="mb-3">
