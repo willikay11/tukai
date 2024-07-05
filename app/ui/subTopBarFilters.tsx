@@ -16,6 +16,16 @@ export default function SubTopBarFilters() {
         if (ref.current) {
             scrollBy = ref?.current?.offsetWidth - 100;
 
+            window.addEventListener('resize', () => {
+                if(ref?.current?.scrollWidth === ref?.current?.offsetWidth){
+                    setShowNextBtn(false);
+                }
+
+                if(ref?.current?.scrollWidth > ref?.current?.offsetWidth){
+                    setShowNextBtn(true);
+                }
+            });
+
             ref?.current?.addEventListener("scroll", () => {
                 if ((ref.current.offsetWidth + ref.current?.scrollLeft) >= ref?.current?.scrollWidth - 5) {
                     setShowNextBtn(false);

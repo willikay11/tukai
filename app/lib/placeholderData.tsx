@@ -55,11 +55,6 @@ const interests = [
         value: 'off-road-driving'
     },
     {
-        label: 'Bird Watching',
-            icon: <AngryBirdIcon size={20} />,
-        value: 'bird-watching'
-    },
-    {
         label: 'Horse Riding',
             icon: <CowboyHatIcon size={20} />,
         value: 'horse-riding'
@@ -107,11 +102,6 @@ const interests = [
     {
         label: 'Gym',
             icon: <EquipmentGym03Icon size={20} />,
-        value: 'gym'
-    },
-    {
-        label: 'Gym',
-        icon: <EquipmentGym03Icon size={20} />,
         value: 'gym'
     },
     {
