@@ -10,6 +10,7 @@ import {
     WorkoutRunIcon
 } from "@hugeicons/react-pro";
 import {Anchor, Button} from "@/app/ui/form";
+import {useRouter} from "next/navigation";
 
 hugeiconsLicense('890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=');
 
@@ -71,6 +72,8 @@ const features  = [
     }
 ];
 export default function Page() {
+    const router = useRouter()
+
     return(
         <>
             <div className="mb-4">
@@ -107,11 +110,11 @@ export default function Page() {
             </div>
 
             <div className="mb-2.5">
-                <Button onClick={() => {}}>Start Your Subscription</Button>
+                <Button onClick={() => router.push('/auth/subscribe')}>Start Your Subscription</Button>
             </div>
 
             <div className="flex items-center justify-center w-full">
-                <Anchor>Skip</Anchor>
+                <Anchor link="/">Skip</Anchor>
             </div>
         </>
     );

@@ -51,7 +51,7 @@ export default function SubTopBarFilters() {
                                     className={clsx('flex flex-col items-center justify-center h-[60px]', {
                                         'text-primary border-b-[1px] border-primary': selectedOption === option.value,
                                         'text-gray-500': selectedOption !== option.value,
-                                        'mr-[25px]': index !== options.length - 1,
+                                        'mr-[25px]': index !== interests.length - 1,
                                     })}
                                     onClick={() => setSelectedOption(option.value)}
                             >

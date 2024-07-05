@@ -4,9 +4,11 @@ import {hugeiconsLicense} from "@hugeicons/react-pro";
 import {useState} from "react";
 import {Button} from "@/app/ui/form";
 import clsx from "clsx";
+import {useRouter} from "next/navigation";
 
 hugeiconsLicense('890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=');
 export default function Page() {
+    const router = useRouter()
     const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
 
     const addOrRemoveInterest = (value: string) => {
@@ -50,7 +52,7 @@ export default function Page() {
             </div>
 
             <div>
-                <Button onClick={() => {}}>Submit</Button>
+                <Button onClick={() => router.push('/auth/payments')}>Submit</Button>
             </div>
         </>
     )

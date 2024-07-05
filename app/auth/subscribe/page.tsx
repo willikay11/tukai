@@ -118,7 +118,7 @@ export default function Page() {
             </div>
 
             <div className="flex items-center justify-center w-full">
-                <Anchor>Cancel</Anchor>
+                <Anchor link="/">Cancel</Anchor>
             </div>
         </>
     )

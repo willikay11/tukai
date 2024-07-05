@@ -27,7 +27,7 @@ export default function Page() {
             </div>
 
             <div className="flex justify-end mb-4">
-                <Anchor>Forgot Password</Anchor>
+                <Anchor link="">Forgot Password</Anchor>
             </div>
 
             <div className="mb-2.5">
@@ -39,12 +39,12 @@ export default function Page() {
             </div>
 
             <div className="mb-4 w-full flex items-center">
-                <span className="text-xs w-full text-center">Don't have an account? <Anchor>Sign up for free</Anchor></span>
+                <span className="text-xs w-full text-center">Don't have an account? <Anchor link="/auth/sign-up">Sign up for free</Anchor></span>
             </div>
 
             <div className="mb-3">
-                <p className="text-xs">By continuing to use Oltukai, you agree to our <Anchor>Terms of Use</Anchor>
-                    &nbsp;and <Anchor>Privacy Policy</Anchor></p>
+                <p className="text-xs">By continuing to use Oltukai, you agree to our <Anchor link="">Terms of Use</Anchor>
+                    &nbsp;and <Anchor link="">Privacy Policy</Anchor></p>
             </div>
 
             <div className="w-[134.5%] h-[1px] bg-gray-200 mb-4 -ml-[4rem] "  />

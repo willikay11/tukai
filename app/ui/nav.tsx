@@ -19,9 +19,11 @@ export default function Nav() {
         <>
             {
                 links.map((link) => (
-                    <Link href={link.href} key={link.name} className="mr-4">
+                    <Link href={link.href} key={link.name} className={clsx('mr-4 h-full', {
+                        'border-b-[1px] border-primary': pathname === link.href
+                    })}>
                         <span className={clsx("text-xs", {
-                            'text-primary font-semibold underline underline-offset-8': pathname === link.href
+                            'text-primary font-semibold': pathname === link.href
                         })}>{link.name}</span>
                     </Link>
                 ))
