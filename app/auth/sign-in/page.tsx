@@ -31,7 +31,7 @@ export default function Page() {
             </div>
 
             <div className="flex justify-end mb-4">
-                <Anchor link="">Forgot Password</Anchor>
+                <Anchor link="">Forgot Password?</Anchor>
             </div>
 
             <div className="mb-2.5">
