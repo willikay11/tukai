@@ -11,7 +11,7 @@ export default function SubTopBar() {
                     <div className="h-full flex items-center justify-between">
                         <IconRadioButtonGroup />
                         <div className="w-96 h-10 rounded-full border-[1px] border-gray-200 inline-flex bg-white items-center justify-between pl-2 pr-1">
-                            <Search01Icon size={16} className="text-gray-500 mr-2" />
+                            <Search01Icon size={16} className="text-gray-500 mr-2" variant="twotone" />
                             <div className="w-[90%] flex flex-col">
                                 <p className="text-xs mb-0 text-gray-700">What&apos;s the plan?</p>
                                 <input
@@ -20,11 +20,11 @@ export default function SubTopBar() {
                                 />
                             </div>
                             <div className="ml-2 h-[30px] w-[30px] rounded-full flex items-center justify-center bg-gray-100">
-                                <FilterHorizontalIcon className="text-gray-800" size={15} />
+                                <FilterHorizontalIcon className="text-gray-800" size={15} variant="twotone" />
                             </div>
                         </div>
                         <div className="inline-flex items-center">
-                            <Sun02Icon size={18} className="text-yellow-500" />
+                            <Sun02Icon size={18} className="text-yellow-500" variant="twotone" />
                             <span className="text-xs text-gray-500 mx-2">26°</span>
                             <div className="h-[10px] w-[1px] bg-gray-300 mr-2" />
                             <span className="text-xs text-gray-500">Nairobi, Kenya</span>

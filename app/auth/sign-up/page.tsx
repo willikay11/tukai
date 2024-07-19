@@ -4,6 +4,7 @@ import Image from "next/image";
 import {Anchor, Button } from "@/app/ui/form";
 import { GoogleIcon, hugeiconsLicense } from "@hugeicons/react-pro";
 import { useRouter } from 'next/navigation'
+import MobileStore from "@/app/ui/mobileStore";
 
 
 hugeiconsLicense('890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=');
@@ -40,16 +41,13 @@ export default function Page() {
             </div>
 
             <div className="mb-3">
-                <p className="text-xs">By continuing to use Oltukai, you agree to our <Anchor link="">Terms of Use</Anchor>
+                <p className="text-xs font-normal">By continuing to use Oltukai, you agree to our <Anchor link="">Terms of Use</Anchor>
                     &nbsp;and <Anchor link="">Privacy Policy</Anchor></p>
             </div>
 
             <div className="w-[134.5%] h-[1px] bg-gray-200 mb-4 -ml-[4rem] "  />
 
-            <div className="inline-flex items-center justify-center w-full">
-                <Image src="/images/apple_store.svg" height={60} width={118} alt="Google play store" className="mr-2" />
-                <Image src="/images/google_play_store.svg" height={90} width={118} alt="Google play store" />
-            </div>
+            <MobileStore />
         </>
     )
 }

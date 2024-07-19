@@ -64,5 +64,15 @@ export async function fetchExperiences() {
             distance: '22 KM',
             duration: '2 Hrs 30 mins'
         },
+        {
+            id: '7',
+            name: 'Mt Kenya (Point Thompson)',
+            image: '/images/four.svg',
+            rating: '4.5',
+            reviews: 54,
+            location: 'Central Kenya',
+            distance: '22 KM',
+            duration: '2 Hrs 30 mins'
+        },
     ];
 }
