@@ -47,14 +47,14 @@ export default function SubTopBarFilters() {
     return(
         <div className="w-full bg-white border-b-[1px] border-gray-100">
             <div className="grid grid-cols-12 gap-4">
-                <div className="col-start-2 col-span-10 relative">
+                 <div className="col-start-2 col-span-10 relative">
                     <button className={clsx('p-1 border-[1px] text-gray-300 rounded-full bg-white drop-shadow-[0_0_4px_rgba(0,0,0,0.25)] absolute left-0 top-3', {
                         'hidden': !showPrevBtn,
                         'block': showPrevBtn
                     })} onClick={() => {
                         ref.current?.scrollTo({ left: ref.current?.scrollLeft - scrollBy })
                     }}>
-                        <ArrowLeft01Icon size={20} className="text-gray-700" />
+                        <ArrowLeft01Icon size={20} className="text-gray-700" variant="twotone" />
                     </button>
                     <div ref={ref} className="h-full flex items-center overflow-hidden scroll-smooth">
                         {interests.map((option, index) => (
@@ -77,7 +77,7 @@ export default function SubTopBarFilters() {
                     })} onClick={() => {
                         ref.current?.scrollTo({ left: ref.current?.scrollLeft + scrollBy })
                     }}>
-                        <ArrowRight01Icon size={20} className="text-gray-700" />
+                        <ArrowRight01Icon size={20} className="text-gray-700" variant="twotone" />
                     </button>
                 </div>
             </div>

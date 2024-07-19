@@ -4,6 +4,7 @@ import Image from "next/image";
 import {Anchor, Button, Input} from "@/app/ui/form";
 import { GoogleIcon, hugeiconsLicense, LockKeyIcon, Mail02Icon} from "@hugeicons/react-pro";
 import {useRouter} from "next/navigation";
+import MobileStore from "@/app/ui/mobileStore";
 
 hugeiconsLicense('890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=');
 
@@ -18,11 +19,11 @@ export default function Page() {
             </div>
 
             <div className="mb-2">
-                <Input placeholder="Enter Email Address" type="text" icon={<Mail02Icon size={16} />} />
+                <Input placeholder="Enter Email Address" type="text" icon={<Mail02Icon size={16}  variant="twotone" />} />
             </div>
 
             <div className="mb-2">
-                <Input placeholder="Enter Password" type="password" icon={<LockKeyIcon size={16} />} />
+                <Input placeholder="Enter Password" type="password" icon={<LockKeyIcon size={16}  variant="twotone" />} />
             </div>
 
             <div className="mb-2.5">
@@ -36,7 +37,7 @@ export default function Page() {
             <div className="mb-2.5">
                 <Button onClick={() => {}} type="blue">
                     <div className="inline-flex items-center">
-                        <GoogleIcon className="text-white mr-2" /> Continue with Google
+                        <GoogleIcon className="text-white mr-2" variant="twotone" /> Continue with Google
                     </div>
                 </Button>
             </div>
@@ -52,10 +53,7 @@ export default function Page() {
 
             <div className="w-[134.5%] h-[1px] bg-gray-200 mb-4 -ml-[4rem] "  />
 
-            <div className="inline-flex items-center justify-center w-full">
-                <Image src="/images/apple_store.svg" height={60} width={118} alt="Google play store" className="mr-2" />
-                <Image src="/images/google_play_store.svg" height={90} width={118} alt="Google play store" />
-            </div>
+            <MobileStore />
         </>
     )
 }

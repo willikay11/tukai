@@ -13,11 +13,11 @@ export default function IconRadioButtonGroup() {
         { label: 'one', icon: <GridViewIcon className={clsx('', {
             'text-white': selectedOption === 'one',
             'text-gray-500': selectedOption !== 'one',
-            })} size={18} variant="stroke" />},
+            })} size={18} variant="twotone" />},
         { label: 'two', icon: <MapPinpoint02Icon className={clsx('', {
                 'text-white': selectedOption === 'two',
                 'text-gray-500': selectedOption !== 'two',
-            })} size={18} variant={"stroke"} />}
+            })} size={18} variant="twotone" />}
     ]
 
     return (

@@ -9,11 +9,11 @@ export default async function Experiences(){
     const experiences: Experience[] = await fetchExperiences(); // Fetch data inside the component
 
     return(
-        <div className="grid grid-cols-12 gap-x-4 gap-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7 gap-x-4 gap-y-8">
             {experiences.map((experience) => (
-                <div key={experience.id} className="cursor-pointer col-span-6 md:col-span-4 lg:col-span-3 2xl:col-span-2">
-                    <div className="flex flex-col mb-2">
-                        <Image src={experience.image} height={320} width={320} alt={experience.name} />
+                <div key={experience.id} className="cursor-pointer">
+                    <div className="flex flex-col mb-2 relative">
+                        <Image src={experience.image} height={320} width={320} layout="responsive" alt={experience.name} />
                     </div>
                     <div className="flex flex-col items-start justify-start bg-white">
                         <div className="flex mb-1">
