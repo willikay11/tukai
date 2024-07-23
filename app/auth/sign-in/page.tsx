@@ -37,7 +37,7 @@ export default function Page() {
             <div className="mb-2.5">
                 <Button onClick={() => {}} type="blue">
                     <div className="inline-flex items-center">
-                        <GoogleIcon className="text-white mr-2" variant="twotone" /> Continue with Google
+                        <GoogleIcon className="text-white mr-2" variant="solid" type="sharp" /> Continue with Google
                     </div>
                 </Button>
             </div>

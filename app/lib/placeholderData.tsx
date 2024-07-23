@@ -7,11 +7,13 @@ import {
     Directions02Icon, EquipmentGym03Icon,
     FirePitIcon,
     FishFoodIcon,
-    FootballPitchIcon,
+    FootballPitchIcon, HandPrayerIcon, KidIcon,
     MoreIcon,
+    NoodlesIcon,
+    ShoppingBasket01Icon,
     SkippingRopeIcon,
     SunsetIcon,
-    SwimmingIcon,
+    SwimmingIcon, TongueWinkLeftIcon,
     TruckDeliveryIcon,
     TruckMonsterIcon,
     WorkoutRunIcon,
@@ -103,6 +105,31 @@ const interests = [
         label: 'Gym',
             icon: <EquipmentGym03Icon size={20} variant="twotone" />,
         value: 'gym'
+    },
+    {
+        label: 'Night Life',
+        icon: <TongueWinkLeftIcon size={20} variant="twotone" />,
+        value: 'night-life'
+    },
+    {
+        label: 'Eatery',
+        icon: <NoodlesIcon size={20} variant="twotone" />,
+        value: 'eatery'
+    },
+    {
+        label: 'Worship',
+        icon: <HandPrayerIcon size={20} variant="twotone" />,
+        value: 'worship'
+    },
+    {
+        label: 'Shopping',
+        icon: <ShoppingBasket01Icon size={20} variant="twotone" />,
+        value: 'shopping'
+    },
+    {
+        label: 'Kids',
+        icon: <KidIcon size={20} variant="twotone" />,
+        value: 'kids'
     },
     {
         label: 'Other',
