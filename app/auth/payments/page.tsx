@@ -104,7 +104,7 @@ export default function Page() {
             <div className="w-[134.5%] h-[1px] bg-gray-200 mb-4 -ml-[4rem]" style={{ boxShadow: ' 0px -1px 4px 0px rgba(0, 0, 0, 0.12)'}} />
 
             <div className="inline-flex items-center justify-center w-full mb-2">
-                <span className="text-xs text-gray-700"><span className="font-bold">US $1.OO</span> a month</span>
+                <span className="text-xs text-gray-700"><span className="font-bold">US$1.OO</span> a month</span>
                 <div className="h-[5px] w-[5px] rounded-full bg-green-500 mx-2"></div>
                 <span className="text-xs text-gray-700">Cancel Anytime</span>
             </div>
