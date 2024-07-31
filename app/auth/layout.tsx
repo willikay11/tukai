@@ -64,10 +64,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 alt="Mountains"
                 src={backgroundImages.find((backgroundImage) => backgroundImage.path === pathname)?.image ?? 'images/hill-decent.svg'}
                 quality={100}
-                fill
+                width={100}
+                height={100}
                 sizes="100vw"
                 className="top-6 md:top-20"
                 style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '115vh',
                     objectFit: 'cover',
                     backgroundPosition: 'center',
                     zIndex: -1,

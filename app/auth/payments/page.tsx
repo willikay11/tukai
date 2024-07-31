@@ -101,7 +101,7 @@ export default function Page() {
                 }
             </div>
 
-            <div className="w-[134.5%] h-[1px] bg-gray-200 mb-4 -ml-[4rem]" style={{ boxShadow: ' 0px -1px 4px 0px rgba(0, 0, 0, 0.12)'}} />
+            <div className="h-[1px] bg-gray-200 mb-4 -mx-[1.875rem] md:-mx-[3.875rem]" style={{ boxShadow: ' 0px -1px 4px 0px rgba(0, 0, 0, 0.12)'}} />
 
             <div className="inline-flex items-center justify-center w-full mb-2">
                 <span className="text-xs text-gray-700"><span className="font-bold">US$1.OO</span> a month</span>
@@ -110,7 +110,7 @@ export default function Page() {
             </div>
 
             <div className="mb-2.5">
-                <Button onClick={() => router.push('/auth/subscribe')}>Start Your Subscription</Button>
+                <Button block onClick={() => router.push('/auth/subscribe')}>Start Your Subscription</Button>
             </div>
 
             <div className="flex items-center justify-center w-full">

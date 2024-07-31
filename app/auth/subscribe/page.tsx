@@ -139,7 +139,7 @@ export default function Page() {
 
 
             <div className="mb-4">
-                <Button onClick={() => setPaymentSent(true)}>Submit</Button>
+                <Button block onClick={() => setPaymentSent(true)}>Submit</Button>
             </div>
 
             <div className="flex items-center justify-center w-full">

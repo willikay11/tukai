@@ -11,12 +11,11 @@ export default function Home() {
             <SubTopBar />
             <SubTopBarFilters />
         </div>
-        <div className="col-span-12 mx-4 md:mx-0 md:col-start-2 md:col-span-10">
+        <div className="col-span-12 mx-4 md:mx-0 md:col-start-2 md:col-span-10 mb-4">
             <Suspense fallback={<EventsSkeleton />}>
                 <Experiences />
             </Suspense>
         </div>
-
     </main>
   );
 }

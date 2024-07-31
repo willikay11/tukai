@@ -1,7 +1,7 @@
 import {ReactNode} from "react";
 import clsx from "clsx";
 
-export default function Button({children, onClick , type = 'primary', size = 'no', block = false }: { children: ReactNode, onClick: () => void, type?: 'primary' | 'blue', size?: 'small' | 'normal' | 'large', block?: boolean }) {
+export default function Button({children, onClick , type = 'primary', size = 'normal', block = false }: { children: ReactNode, onClick: () => void, type?: 'primary' | 'blue', size?: 'small' | 'normal' | 'large', block?: boolean }) {
     return(
         <button
             className={clsx(`rounded-[8px] text-xs text-white`, {
