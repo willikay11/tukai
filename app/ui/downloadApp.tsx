@@ -24,7 +24,7 @@ export default function DownloadApp () {
                         <p className="text-xs text-gray-400 font-normal">Enjoy the best experience on the app</p>
                     </div>
                 </div>
-                <Button className="h-2.5" onClick={() => console.log('Download app')} size="small">Use App</Button>
+                <Button onClick={() => console.log('Download app')} size="small">Use App</Button>
             </div>
         </div>
     )
