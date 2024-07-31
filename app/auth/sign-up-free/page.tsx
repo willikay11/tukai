@@ -35,7 +35,7 @@ export default function Page() {
             </div>
 
             <div className="mb-2.5">
-                <Button onClick={() => router.push('/auth/interests')}>Create a Free Account</Button>
+                <Button block onClick={() => router.push('/auth/interests')}>Create a Free Account</Button>
             </div>
 
 
@@ -48,7 +48,7 @@ export default function Page() {
                     &nbsp;and <Anchor link="">Privacy Policy</Anchor></p>
             </div>
 
-            <div className="w-[134.5%] h-[1px] bg-gray-200 mb-4 -ml-[4rem] "  />
+            <div className="h-[1px] bg-gray-200 mb-4 -mx-[1.875rem] md:-mx-[3.875rem]" />
 
             <MobileStore />
         </>

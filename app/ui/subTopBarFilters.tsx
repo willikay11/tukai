@@ -32,6 +32,10 @@ export default function SubTopBarFilters() {
                     setShowNextBtn(false);
                 }
 
+                if ((ref.current?.offsetWidth + ref.current?.scrollLeft) < ref?.current?.scrollWidth) {
+                    setShowNextBtn(true);
+                }
+
                 if (ref.current?.scrollLeft > 0) {
                     setShowPrevBtn(true);
                 }
@@ -47,7 +51,7 @@ export default function SubTopBarFilters() {
     return(
         <div className="w-full bg-white border-b-[1px] border-gray-100">
             <div className="grid grid-cols-12 gap-4">
-                 <div className="col-start-2 col-span-10 relative">
+                 <div className="col-span-12 mx-4 md:mx-0 md:col-start-2 md:col-span-10 relative">
                     <button className={clsx('p-1 border-[1px] text-gray-300 rounded-full bg-white drop-shadow-[0_0_4px_rgba(0,0,0,0.25)] absolute left-0 top-3', {
                         'hidden': !showPrevBtn,
                         'block': showPrevBtn

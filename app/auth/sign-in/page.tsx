@@ -27,7 +27,7 @@ export default function Page() {
             </div>
 
             <div className="mb-2.5">
-                <Button onClick={() => router.push('/')}>Sign In</Button>
+                <Button block onClick={() => router.push('/')}>Sign In</Button>
             </div>
 
             <div className="flex justify-end mb-4">
@@ -35,9 +35,9 @@ export default function Page() {
             </div>
 
             <div className="mb-2.5">
-                <Button onClick={() => {}} type="blue">
+                <Button block onClick={() => {}} type="blue">
                     <div className="inline-flex items-center">
-                        <GoogleIcon className="text-white mr-2" variant="twotone" /> Continue with Google
+                        <GoogleIcon className="text-white mr-2" variant="solid" type="sharp" /> Continue with Google
                     </div>
                 </Button>
             </div>
@@ -51,7 +51,7 @@ export default function Page() {
                     &nbsp;and <Anchor link="">Privacy Policy</Anchor></p>
             </div>
 
-            <div className="w-[134.5%] h-[1px] bg-gray-200 mb-4 -ml-[4rem] "  />
+            <div className="h-[1px] bg-gray-200 mb-4 -mx-[1.875rem] md:-mx-[3.875rem]" />
 
             <MobileStore />
         </>

@@ -52,7 +52,7 @@ export default function Page() {
             </div>
 
             <div>
-                <Button onClick={() => router.push('/auth/payments')}>Submit</Button>
+                <Button block onClick={() => router.push('/auth/payments')}>Submit</Button>
             </div>
         </>
     )
