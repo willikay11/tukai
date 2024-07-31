@@ -43,13 +43,13 @@ export default function Page() {
     const [selectedOption, setSelectedOption] = useState('mpesa');
     const [paymentSent, setPaymentSent] = useState<boolean>(false);
 
-    // useEffect(() => {
-    //     if (paymentSent) {
-    //         setTimeout(() => {
-    //             router.push(`/`);
-    //         }, 2000);
-    //     }
-    // }, [paymentSent]);
+    useEffect(() => {
+        if (paymentSent) {
+            setTimeout(() => {
+                router.push(`/`);
+            }, 2000);
+        }
+    }, [paymentSent]);
 
     if (paymentSent) {
         return (
