@@ -5,46 +5,68 @@ import {
     CallIcon,
     CreditCardIcon,
     GlobalIcon,
-    hugeiconsLicense, Loading02Icon,
+    hugeiconsLicense, Loading02Icon, Loading03Icon,
     PinLocation02Icon,
     SquareLock01Icon
 } from "@hugeicons/react-pro";
 import clsx from "clsx";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Anchor, Button, Input} from "@/app/ui/form";
+import Image from "next/image";
+import {useRouter} from "next/navigation";
 
 hugeiconsLicense('890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=');
 
 const options = [
     {
         label: 'M-Pesa',
-        value: 'mpesa'
+        value: 'mpesa',
+        icon: {
+            src: '/images/mpesa.png',
+            height: 20,
+            width: 40,
+        }
     },
     {
         label: 'Credit Card',
-        value: 'credit-card'
+        value: 'credit-card',
+        icon: {
+            src: '/images/mastercard.png',
+            height: 20,
+            width: 37,
+        }
     },
 ];
 
 export default function Page() {
+    const router = useRouter()
     const [selectedOption, setSelectedOption] = useState('mpesa');
     const [paymentSent, setPaymentSent] = useState<boolean>(false);
+
+    // useEffect(() => {
+    //     if (paymentSent) {
+    //         setTimeout(() => {
+    //             router.push(`/`);
+    //         }, 2000);
+    //     }
+    // }, [paymentSent]);
+
     if (paymentSent) {
         return (
-            <>
+            <div className="px-8">
                 <div className="flex justify-center w-full mb-2">
-                    <Loading02Icon size={42} className="text-gray-500" />
+                    <Loading03Icon size={42} className="text-gray-500" />
                 </div>
 
                 <div className="mb-2">
-                    <p className="text-gray-700 text-xs mb-1">A payment request was sent to +254 716 909 815.</p>
+                    <p className="text-gray-700 text-xs mb-1">A payment request was sent to <span className="font-medium">+254 716 909 815</span>.</p>
                     <p className="text-gray-700 text-xs"> Please enter the M-Pesa pin to complete the payment.</p>
                 </div>
 
                 <div className="flex">
                     <p className="text-gray-700 text-xs">Wrong Number? <Anchor link="">Edit</Anchor></p>
                 </div>
-            </>
+            </div>
         );
     }
     return(
@@ -75,10 +97,13 @@ export default function Page() {
                                     'block': selectedOption === option.value,
                                 })} />
                             </div>
-                            <span className={clsx("ml-2 text-xs text-gray-700", {
+                            <span className={clsx("ml-2 text-xs text-gray-700 inline-flex items-center", {
                                 'font-bold': selectedOption === option.value,
                                 'font-normal': selectedOption !== option.value,
-                            })}>{option.label}</span>
+                            })}>{option.label}
+                                <div className="h-[6px] w-[1px] rounded-[2px] bg-gray-300 mx-2" />
+                                <Image src={option.icon.src} alt={option.label} className={`h-[${option.icon.height}px] !w-[${option.icon.width}px]`} height={option.icon.height} width={option.icon.width} />
+                            </span>
                         </div>
                     ))
                 }
