@@ -49,11 +49,11 @@ const options = [
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const animationElement = useRef();
+    const animationElement = useRef<any>();
     const [optionIndex, setOptionIndex] = useState<number>(0);
 
     useEffect(() => {
-        animationElement.current.addEventListener('animationiteration', () => {
+        animationElement?.current.addEventListener('animationiteration', () => {
             setOptionIndex(optionIndex => optionIndex < options.length - 1 ? optionIndex + 1 : 0)
         });
     }, [animationElement]);
