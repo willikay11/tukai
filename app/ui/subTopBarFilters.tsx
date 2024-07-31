@@ -32,6 +32,10 @@ export default function SubTopBarFilters() {
                     setShowNextBtn(false);
                 }
 
+                if ((ref.current?.offsetWidth + ref.current?.scrollLeft) < ref?.current?.scrollWidth) {
+                    setShowNextBtn(true);
+                }
+
                 if (ref.current?.scrollLeft > 0) {
                     setShowPrevBtn(true);
                 }

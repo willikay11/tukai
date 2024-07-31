@@ -58,11 +58,27 @@ body {
   animation-fill-mode: forwards;
 }
 
+.fade-out {
+  opacity: 0;
+  animation: fadeOutAnimation ease 2s;
+  animation-iteration-count: 1;
+  animation-fill-mode: backwards;
+}
+
 @keyframes fadeInAnimation {
   0% {
     opacity: 0;
   }
   50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeOutAnimation {
+  0% {
     opacity: 1;
   }
   100% {

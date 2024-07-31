@@ -6,6 +6,7 @@ import Nav from "@/app/ui/nav";
 import AuthActions from "@/app/ui/authActions";
 import Link from "next/link";
 import GlobalLoading from "@/app/ui/globalLoading";
+import DownloadApp from "@/app/ui/downloadApp";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -21,7 +22,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={satoshi.className}>
         <GlobalLoading />
-        <div className="grid grid-cols-12 gap-4 bg-white">
+        <div className="grid grid-cols-12 md:gap-4 bg-white">
+          <DownloadApp />
           <div className="col-span-12 mx-4 md:mx-0 md:col-start-2 md:col-span-10">
             <div className="inline-flex justify-between w-full md:grid md:grid-cols-2 md:gap-4 md:mt-10">
               <div className="flex items-center md:items-start h-[40px]">
