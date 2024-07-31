@@ -35,7 +35,7 @@ const backgroundImages = [
 const options = [
     {
         label: 'Night life',
-        class: 'text-blue-600'
+        class: 'text-blue-400'
     },
     {
         label: 'Hiking',
@@ -59,21 +59,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }, [animationElement]);
 
     return(
-        <div>
+        <div className="h-screen">
             <Image
                 alt="Mountains"
                 src={backgroundImages.find((backgroundImage) => backgroundImage.path === pathname)?.image ?? 'images/hill-decent.svg'}
                 quality={100}
                 fill
                 sizes="100vw"
+                className="top-6 md:top-20"
                 style={{
                     objectFit: 'cover',
                     backgroundPosition: 'center',
                     zIndex: -1,
-                    top: '5rem'
                 }}
             />
-            <div className="flex flex-col items-center justify-center mt-12">
+            <div className="flex flex-col items-center justify-center mt-4 md:mt-12">
                 <div className="text-center mb-4">
                     <p className="text-white text-4xl font-black mb-2">
                         Plan & Discover
@@ -84,8 +84,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         {options[optionIndex].label}
                     </p>
                 </div>
-                <div className="bg-white rounded-[15px] w-[30.938rem]">
-                    <div className="px-16 py-8">
+                <div className="bg-white rounded-[15px] mx-2.5 md:mx-0 md:w-[30.938rem]">
+                    <div className="px-8 md:px-16 py-8">
                         {children}
                     </div>
                 </div>

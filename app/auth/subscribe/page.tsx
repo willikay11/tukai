@@ -32,8 +32,8 @@ const options = [
         value: 'credit-card',
         icon: {
             src: '/images/mastercard.png',
-            height: 20,
-            width: 37,
+            height: 18,
+            width: 30,
         }
     },
 ];
@@ -53,7 +53,7 @@ export default function Page() {
 
     if (paymentSent) {
         return (
-            <div className="px-8">
+            <div className="px-4 md:px-8">
                 <div className="flex justify-center w-full mb-2">
                     <Loading03Icon size={42} className="text-gray-500" />
                 </div>

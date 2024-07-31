@@ -22,15 +22,15 @@ export default function RootLayout({
       <body className={satoshi.className}>
         <GlobalLoading />
         <div className="grid grid-cols-12 gap-4 bg-white">
-          <div className="col-start-2 col-span-10">
-            <div className="grid grid-cols-2 gap-4 mt-10">
-              <div className="flex items-start h-[40px]">
-                <Link href="/">
+          <div className="col-span-12 mx-4 md:mx-0 md:col-start-2 md:col-span-10">
+            <div className="inline-flex justify-between w-full md:grid md:grid-cols-2 md:gap-4 md:mt-10">
+              <div className="flex items-center md:items-start h-[40px]">
+                <Link href="/" className="hidden md:block">
                   <Image src="/images/logo.svg" alt="Oltukai logo" width={100} height={80} className="mr-6" />
                 </Link>
                 <Nav />
               </div>
-              <div className="flex items-start justify-end h-[40px]">
+              <div className="flex items-center md:items-start justify-end h-[40px]">
                 <AuthActions />
               </div>
             </div>

@@ -2,6 +2,7 @@
 import { usePathname } from 'next/navigation';
 import Link from "next/link";
 import clsx from "clsx";
+import {Menu02Icon} from "@hugeicons/react-pro";
 
 const links = [
     { name: 'Explore', href: '/' },
@@ -17,17 +18,28 @@ export default function Nav() {
 
     return(
         <>
-            {
-                links.map((link) => (
-                    <Link href={link.href} key={link.name} className={clsx('mr-4 h-full', {
-                        'border-b-[1px] border-primary': pathname === link.href
-                    })}>
-                        <span className={clsx("text-xs", {
-                            'text-primary font-semibold': pathname === link.href
-                        })}>{link.name}</span>
-                    </Link>
-                ))
-            }
+            <div className="md:hidden">
+                <Menu02Icon size={20} variant="twotone" type="rounded" />
+            </div>
+            <div className="hidden md:block">
+                {
+                    links.map((link) => (
+                        <Link
+                            href={link.href}
+                            key={link.name}
+                            className={clsx('mr-4 h-full', {
+                                'border-b-[1px] border-primary': pathname === link.href
+                            })}>
+                            <span
+                                className={clsx("text-xs", {
+                                    'text-primary font-semibold': pathname === link.href
+                                })}>
+                                {link.name}
+                            </span>
+                        </Link>
+                    ))
+                }
+            </div>
         </>
     );
 }
