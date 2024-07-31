@@ -51,3 +51,21 @@ body {
     text-wrap: balance;
   }
 }
+
+.fade-in-out {
+  animation: fadeInAnimation ease 2s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fadeInAnimation {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

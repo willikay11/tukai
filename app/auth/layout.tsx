@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import {usePathname} from "next/navigation";
+import {useEffect, useRef, useState} from "react";
+import clsx from "clsx";
 
 const backgroundImages = [
     {
@@ -30,8 +32,31 @@ const backgroundImages = [
     }
 ];
 
+const options = [
+    {
+        label: 'Night life',
+        class: 'text-blue-600'
+    },
+    {
+        label: 'Hiking',
+        class: 'text-teal-400'
+    },
+    {
+        label: 'Camping',
+        class: 'text-yellow-400'
+    }
+];
+
 export default function Layout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
+    const animationElement = useRef();
+    const [optionIndex, setOptionIndex] = useState<number>(0);
+
+    useEffect(() => {
+        animationElement.current.addEventListener('animationiteration', () => {
+            setOptionIndex(optionIndex => optionIndex < options.length - 1 ? optionIndex + 1 : 0)
+        });
+    }, [animationElement]);
 
     return(
         <div>
@@ -53,8 +78,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <p className="text-white text-4xl font-black mb-2">
                         Plan & Discover
                     </p>
-                    <p className="text-blue-600 text-4xl font-black">
-                        Night Life
+                    <p
+                       ref={animationElement}
+                       className={`text-4xl font-black fade-in-out ${options[optionIndex].class}`}>
+                        {options[optionIndex].label}
                     </p>
                 </div>
                 <div className="bg-white rounded-[15px] w-[30.938rem]">
