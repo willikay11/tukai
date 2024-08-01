@@ -1,45 +1,45 @@
 'use client';
 import { usePathname } from 'next/navigation';
-import Link from "next/link";
-import clsx from "clsx";
-import {Menu02Icon} from "@hugeicons/react-pro";
+import Link from 'next/link';
+import clsx from 'clsx';
+import { Menu02Icon } from '@hugeicons/react-pro';
 
 const links = [
-    { name: 'Explore', href: '/' },
-    {
-        name: 'Experiences',
-        href: '/experiences',
-    },
-    { name: 'Community', href: '/community' },
+  { name: 'Explore', href: '/' },
+  {
+    name: 'Experiences',
+    href: '/experiences',
+  },
+  { name: 'Community', href: '/community' },
 ];
 
 export default function Nav() {
-    const pathname = usePathname();
+  const pathname = usePathname();
 
-    return(
-        <>
-            <div className="md:hidden">
-                <Menu02Icon size={20} variant="twotone" type="rounded" />
-            </div>
-            <div className="hidden md:inline-flex md:h-[40px]">
-                {
-                    links.map((link) => (
-                        <Link
-                            href={link.href}
-                            key={link.name}
-                            className={clsx('mr-4 h-full block', {
-                                'border-b-[1px] border-primary': pathname === link.href
-                            })}>
-                            <span
-                                className={clsx("text-xs", {
-                                    'text-primary font-semibold': pathname === link.href
-                                })}>
-                                {link.name}
-                            </span>
-                        </Link>
-                    ))
-                }
-            </div>
-        </>
-    );
+  return (
+    <>
+      <div className="md:hidden">
+        <Menu02Icon size={20} variant="twotone" type="rounded" />
+      </div>
+      <div className="hidden md:inline-flex md:h-[40px]">
+        {links.map((link) => (
+          <Link
+            href={link.href}
+            key={link.name}
+            className={clsx('mr-4 block h-full', {
+              'border-b-[1px] border-primary': pathname === link.href,
+            })}
+          >
+            <span
+              className={clsx('text-xs', {
+                'font-semibold text-primary': pathname === link.href,
+              })}
+            >
+              {link.name}
+            </span>
+          </Link>
+        ))}
+      </div>
+    </>
+  );
 }
