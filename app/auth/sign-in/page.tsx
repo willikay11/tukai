@@ -20,11 +20,24 @@ export default function Page() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<Inputs>({ mode: 'onChange', });
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data);
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+      try {
+          const response = await fetch('/auth/sign-in/api', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+          });
+
+          if (response.status === 200) {
+          } else {
+          }
+      } catch (e) {
+          console.log(e);
+      }
+  };
 
   return (
     <>
