@@ -5,6 +5,8 @@ import { GoogleIcon, hugeiconsLicense, LockKeyIcon, Mail02Icon } from '@hugeicon
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import MobileStore from '@/app/ui/mobileStore';
+import {useContext} from "react";
+import {NotificationContext} from "@/providers/NotificationProvider";
 
 hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
@@ -16,6 +18,7 @@ type Inputs = {
 };
 export default function Page() {
   const router = useRouter();
+  const toast = useContext(NotificationContext);
 
   const {
     register,
@@ -31,9 +34,14 @@ export default function Page() {
               body: JSON.stringify(data),
           });
 
-          if (response.status === 200) {
-          } else {
+          const res = await response.json();
+
+          if (!response.ok) {
+              toast.open('error', 'Login unsuccessful', res.message);
+              return;
           }
+
+          toast.open('success', 'Login successful', 'Welcome Back!')
       } catch (e) {
           console.log(e);
       }

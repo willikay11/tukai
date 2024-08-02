@@ -12,10 +12,10 @@
   "dependencies": {
     "@headlessui/react": "^2.1.2",
     "@hugeicons/react-pro": "^0.3.2",
-    "@willikay11/solgates-component-library": "^2.9.5",
     "clsx": "^2.1.1",
     "next": "14.2.4",
     "nextjs-toploader": "^1.6.12",
+    "prettier-plugin-tailwindcss": "^0.6.5",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.52.1",
@@ -33,7 +33,6 @@
     "eslint-plugin-react": "^7.35.0",
     "postcss": "^8",
     "prettier": "^3.3.3",
-    "prettier-plugin-tailwindcss": "^0.6.5",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }

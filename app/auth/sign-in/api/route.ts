@@ -11,15 +11,22 @@ export async function POST(req: Request) {
     });
 
     if (res.status !== 200) {
-      return new Response('Invalid credentials', {
-        status: 401,
-      });
+      return Response.json(
+        {
+          message: 'Invalid credentials',
+        },
+        {
+          status: 401,
+        },
+      );
     }
 
-    return new Response('Login successful', {
+    return Response.json({
+      message: 'Login successful',
       status: 200,
     });
   } catch (error) {
+    console.log(error);
     return new Response('Invalid credentials', {
       status: 401,
     });
