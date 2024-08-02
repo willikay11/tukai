@@ -1,8 +1,8 @@
 'use client';
 
-import Image from 'next/image';
 import { Anchor, Button, Input } from '@/app/ui/form';
 import { GoogleIcon, hugeiconsLicense, LockKeyIcon, Mail02Icon } from '@hugeicons/react-pro';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import MobileStore from '@/app/ui/mobileStore';
 
@@ -10,8 +10,21 @@ hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
 );
 
+type Inputs = {
+  email: string;
+  password: string;
+};
 export default function Page() {
   const router = useRouter();
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<Inputs>({ mode: 'onChange', });
+
+  const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data);
 
   return (
     <>
@@ -20,27 +33,41 @@ export default function Page() {
         <p className="text-xl font-black text-gray-700">Add your details to continue!</p>
       </div>
 
-      <div className="mb-2">
-        <Input
-          placeholder="Enter Email Address"
-          type="text"
-          icon={<Mail02Icon size={16} variant="twotone" />}
-        />
-      </div>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="mb-2">
+          <Input
+            name="email"
+            placeholder="Enter Email Address"
+            type="text"
+            icon={<Mail02Icon size={16} variant="twotone" />}
+            refs={...register('email', {
+              required: 'Please enter your email address',
+              pattern: {
+                value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                message: 'Invalid email address',
+              },
+            })}
+            error={errors.email?.message}
+          />
+        </div>
 
-      <div className="mb-2">
-        <Input
-          placeholder="Enter Password"
-          type="password"
-          icon={<LockKeyIcon size={16} variant="twotone" />}
-        />
-      </div>
+        <div className="mb-2">
+          <Input
+            name="password"
+            placeholder="Enter Password"
+            type="password"
+            icon={<LockKeyIcon size={16} variant="twotone" />}
+            refs={...register('password', { required: 'Please enter password' })}
+            error={errors.password?.message}
+          />
+        </div>
 
-      <div className="mb-2.5">
-        <Button block onClick={() => router.push('/')}>
-          Sign In
-        </Button>
-      </div>
+        <div className="mb-2.5">
+          <Button block htmlType="submit">
+            Sign In
+          </Button>
+        </div>
+      </form>
 
       <div className="mb-4 flex justify-end">
         <Anchor link="">Forgot Password?</Anchor>

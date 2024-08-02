@@ -3,13 +3,15 @@ import clsx from 'clsx';
 
 export default function Button({
   children,
+  htmlType = 'button',
   onClick,
   type = 'primary',
   size = 'normal',
   block = false,
 }: {
   children: ReactNode;
-  onClick: () => void;
+  htmlType?: 'submit' | 'reset' | 'button';
+  onClick?: () => void;
   type?: 'primary' | 'blue';
   size?: 'small' | 'normal' | 'large';
   block?: boolean;
@@ -24,7 +26,8 @@ export default function Button({
         'w-full': block,
         'px-3': !block,
       })}
-      onClick={onClick}
+      onClick={() => onClick?.()}
+      type={htmlType}
     >
       {children}
     </button>

@@ -1,6 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { Input as I } from '@headlessui/react';
 import { ViewIcon, ViewOffIcon } from '@hugeicons/react-pro';
+import clsx from 'clsx';
 
 function ViewPassword({ visible, onClick }: { visible: boolean; onClick: () => void }) {
   return visible ? (
@@ -14,24 +15,43 @@ export default function Input({
   placeholder,
   type,
   icon,
+  name,
+  error,
+  refs,
 }: {
   placeholder: string;
   type: 'text' | 'password';
   icon: ReactNode;
+  name: string;
+  error?: string;
+  refs?: any;
 }) {
   const [viewPassword, setViewPassword] = useState<boolean>(false);
 
   return (
-    <div className="inline-flex h-[3.375rem] w-full items-center rounded-[8px] border-[1px] px-4 hover:border-primary focus:border-primary">
-      <div className="mr-2 text-gray-500">{icon}</div>
-      <I
-        className="w-full text-xs text-gray-500 outline-0 placeholder:text-xs"
-        placeholder={placeholder}
-        type={viewPassword ? 'text' : type}
-      />
-      {type === 'password' ? (
-        <ViewPassword visible={viewPassword} onClick={() => setViewPassword(!viewPassword)} />
-      ) : null}
-    </div>
+    <>
+      <div
+        className={clsx(
+          'inline-flex h-[3.375rem] w-full items-center rounded-[8px] border-[1px] px-4',
+          {
+            'hover:border-primary focus:border-primary': !error,
+            'border-red-400': error,
+          },
+        )}
+      >
+        <div className="mr-2 text-gray-500">{icon}</div>
+        <I
+          className="w-full text-xs text-gray-500 outline-0 placeholder:text-xs"
+          // name={name}
+          placeholder={placeholder}
+          type={viewPassword ? 'text' : type}
+          {...refs}
+        />
+        {type === 'password' ? (
+          <ViewPassword visible={viewPassword} onClick={() => setViewPassword(!viewPassword)} />
+        ) : null}
+      </div>
+      {error ? <div className="mt-1 text-xs text-red-600">{error}</div> : null}
+    </>
   );
 }
