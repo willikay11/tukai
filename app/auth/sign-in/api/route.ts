@@ -1,6 +1,3 @@
-import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
-import { encrypt } from 'next/dist/server/app-render/encryption-utils';
 import { storeToken } from '@/app/lib/actions';
 
 export async function POST(req: Request) {
@@ -39,7 +36,8 @@ export async function POST(req: Request) {
       status: 200,
     });
   } catch (error) {
-    return new Response('Invalid credentials', {
+    return Response.json({
+      message: 'Invalid credentials',
       status: 401,
     });
   }
