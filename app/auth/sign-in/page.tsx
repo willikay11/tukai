@@ -5,7 +5,7 @@ import { GoogleIcon, hugeiconsLicense, LockKeyIcon, Mail02Icon } from '@hugeicon
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import MobileStore from '@/app/ui/mobileStore';
-import {useContext} from "react";
+import {useContext, useState} from "react";
 import {NotificationContext} from "@/providers/NotificationProvider";
 
 hugeiconsLicense(
@@ -19,6 +19,7 @@ type Inputs = {
 export default function Page() {
   const router = useRouter();
   const toast = useContext(NotificationContext);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const {
     register,
@@ -27,6 +28,7 @@ export default function Page() {
   } = useForm<Inputs>({ mode: 'onChange', });
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
+      setIsSubmitting(true);
       const response = await fetch('/auth/sign-in/api', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -36,12 +38,13 @@ export default function Page() {
       const res = await response.json();
 
       if (!response.ok) {
+          setIsSubmitting(false);
           toast.open('error', 'Login unsuccessful', res.message);
           return;
       }
 
       toast.open('success', 'Login successful', 'Welcome Back!');
-
+      setIsSubmitting(false);
       router.push('/');
   };
 
@@ -82,7 +85,7 @@ export default function Page() {
         </div>
 
         <div className="mb-2.5">
-          <Button block htmlType="submit">
+          <Button block htmlType="submit" loading={isSubmitting}>
             Sign In
           </Button>
         </div>
