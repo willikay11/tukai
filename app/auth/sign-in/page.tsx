@@ -27,24 +27,22 @@ export default function Page() {
   } = useForm<Inputs>({ mode: 'onChange', });
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-      try {
-          const response = await fetch('/auth/sign-in/api', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(data),
-          });
+      const response = await fetch('/auth/sign-in/api', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+      });
 
-          const res = await response.json();
+      const res = await response.json();
 
-          if (!response.ok) {
-              toast.open('error', 'Login unsuccessful', res.message);
-              return;
-          }
-
-          toast.open('success', 'Login successful', 'Welcome Back!')
-      } catch (e) {
-          console.log(e);
+      if (!response.ok) {
+          toast.open('error', 'Login unsuccessful', res.message);
+          return;
       }
+
+      toast.open('success', 'Login successful', 'Welcome Back!');
+
+      router.push('/');
   };
 
   return (

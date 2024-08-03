@@ -1,8 +1,13 @@
+import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
+import { encrypt } from 'next/dist/server/app-render/encryption-utils';
+import { storeToken } from '@/app/lib/actions';
+
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
 
-    const res = await fetch('https://api.oltukai.co/v1/accounts/auth/token/', {
+    const response = await fetch('https://api.oltukai.co/v1/accounts/auth/token/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -10,7 +15,7 @@ export async function POST(req: Request) {
       body: JSON.stringify({ email, password }),
     });
 
-    if (res.status !== 200) {
+    if (!response.ok) {
       return Response.json(
         {
           message: 'Invalid credentials',
@@ -21,12 +26,19 @@ export async function POST(req: Request) {
       );
     }
 
+    const res = await response.json();
+
+    await storeToken(res.access, res.refresh);
+
     return Response.json({
       message: 'Login successful',
+      data: {
+        firstName: 'William',
+        lastName: 'Kamau',
+      },
       status: 200,
     });
   } catch (error) {
-    console.log(error);
     return new Response('Invalid credentials', {
       status: 401,
     });
