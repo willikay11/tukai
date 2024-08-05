@@ -53,7 +53,7 @@ body {
 }
 
 .fade-in-out {
-  animation: fadeInAnimation ease 2s;
+  animation: fadeInAnimation ease 1.5s;
   animation-iteration-count: infinite;
   animation-fill-mode: forwards;
 }

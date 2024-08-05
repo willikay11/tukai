@@ -1,59 +1,128 @@
 'use client';
 
-import Image from "next/image";
-import {Anchor, Button, Input} from "@/app/ui/form";
-import { GoogleIcon, hugeiconsLicense, LockKeyIcon, Mail02Icon} from "@hugeicons/react-pro";
-import {useRouter} from "next/navigation";
-import MobileStore from "@/app/ui/mobileStore";
+import { Anchor, Button, Input } from '@/app/ui/form';
+import { GoogleIcon, hugeiconsLicense, LockKeyIcon, Mail02Icon } from '@hugeicons/react-pro';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
+import MobileStore from '@/app/ui/mobileStore';
+import {useContext, useState} from "react";
+import {NotificationContext} from "@/providers/NotificationProvider";
+import {SessionContext} from "@/providers/SessionProvider";
 
-hugeiconsLicense('890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=');
+hugeiconsLicense(
+  '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
+);
 
+type Inputs = {
+  email: string;
+  password: string;
+};
 export default function Page() {
-    const router = useRouter()
+  const router = useRouter();
+  const toast = useContext(NotificationContext);
+  const { setUser } = useContext(SessionContext);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-    return (
-        <>
-            <div className="mb-4">
-                <p className="text-gray-700 text-xl font-black">Welcome Back!</p>
-                <p className="text-gray-700 text-xl font-black">Add your details to continue!</p>
-            </div>
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Inputs>({ mode: 'onChange', });
 
-            <div className="mb-2">
-                <Input placeholder="Enter Email Address" type="text" icon={<Mail02Icon size={16}  variant="twotone" />} />
-            </div>
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+      setIsSubmitting(true);
+      const response = await fetch('/auth/sign-in/api', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+      });
 
-            <div className="mb-2">
-                <Input placeholder="Enter Password" type="password" icon={<LockKeyIcon size={16}  variant="twotone" />} />
-            </div>
+      const res = await response.json();
 
-            <div className="mb-2.5">
-                <Button block onClick={() => router.push('/')}>Sign In</Button>
-            </div>
+      if (!response.ok) {
+          setIsSubmitting(false);
+          toast.open('error', 'Login unsuccessful', res.message);
+          return;
+      }
 
-            <div className="flex justify-end mb-4">
-                <Anchor link="">Forgot Password?</Anchor>
-            </div>
+      toast.open('success', 'Login successful', 'Welcome Back!');
+      setIsSubmitting(false);
+      setUser(res.data);
+      router.push('/');
+  };
 
-            <div className="mb-2.5">
-                <Button block onClick={() => {}} type="blue">
-                    <div className="inline-flex items-center">
-                        <GoogleIcon className="text-white mr-2" variant="solid" type="sharp" /> Continue with Google
-                    </div>
-                </Button>
-            </div>
+  return (
+    <>
+      <div className="mb-4">
+        <p className="text-xl font-black text-gray-700">Welcome Back!</p>
+        <p className="text-xl font-black text-gray-700">Add your details to continue!</p>
+      </div>
 
-            <div className="mb-4 w-full flex items-center">
-                <span className="text-xs w-full text-center">Don&apos;t have an account? <Anchor link="/auth/sign-up">Sign up for free</Anchor></span>
-            </div>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="mb-2">
+          <Input
+            name="email"
+            placeholder="Enter Email Address"
+            type="text"
+            icon={<Mail02Icon size={16} variant="twotone" />}
+            refs={...register('email', {
+              required: 'Please enter your email address',
+              pattern: {
+                value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                message: 'Invalid email address',
+              },
+            })}
+            error={errors.email?.message}
+          />
+        </div>
 
-            <div className="mb-3">
-                <p className="text-xs">By continuing to use Oltukai, you agree to our <Anchor link="">Terms of Use</Anchor>
-                    &nbsp;and <Anchor link="">Privacy Policy</Anchor></p>
-            </div>
+        <div className="mb-2">
+          <Input
+            name="password"
+            placeholder="Enter Password"
+            type="password"
+            icon={<LockKeyIcon size={16} variant="twotone" />}
+            refs={...register('password', { required: 'Please enter password' })}
+            error={errors.password?.message}
+          />
+        </div>
 
-            <div className="h-[1px] bg-gray-200 mb-4 -mx-[1.875rem] md:-mx-[3.875rem]" />
+        <div className="mb-2.5">
+          <Button block htmlType="submit" loading={isSubmitting}>
+            Sign In
+          </Button>
+        </div>
+      </form>
 
-            <MobileStore />
-        </>
-    )
+      <div className="mb-4 flex justify-end">
+        <Anchor link="">Forgot Password?</Anchor>
+      </div>
+
+      <div className="mb-2.5">
+        <Button block onClick={() => {}} type="blue">
+          <div className="inline-flex items-center">
+            <GoogleIcon className="mr-2 text-white" variant="solid" type="sharp" /> Continue with
+            Google
+          </div>
+        </Button>
+      </div>
+
+      <div className="mb-4 flex w-full items-center">
+        <span className="w-full text-center text-xs">
+          Don&apos;t have an account? <Anchor link="/auth/sign-up">Sign up for free</Anchor>
+        </span>
+      </div>
+
+      <div className="mb-3">
+        <p className="text-xs">
+          By continuing to use Oltukai, you agree to our <Anchor link="">Terms of Use</Anchor>
+          &nbsp;and <Anchor link="">Privacy Policy</Anchor>
+        </p>
+      </div>
+
+      <div className="-mx-[1.875rem] mb-4 h-[1px] bg-gray-200 md:-mx-[3.875rem]" />
+
+      <MobileStore />
+    </>
+  );
 }

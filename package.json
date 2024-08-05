@@ -6,26 +6,36 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write ."
   },
   "dependencies": {
+    "@headlessui/react": "^2.1.2",
     "@hugeicons/react-pro": "^0.3.2",
-    "@willikay11/solgates-component-library": "^2.9.5",
+    "@reduxjs/toolkit": "^2.2.7",
     "clsx": "^2.1.1",
     "next": "14.2.4",
     "nextjs-toploader": "^1.6.12",
+    "prettier-plugin-tailwindcss": "^0.6.5",
     "react": "^18",
     "react-dom": "^18",
+    "react-hook-form": "^7.52.1",
+    "react-redux": "^9.1.2",
     "react-slick": "^0.30.2",
+    "redux-persist": "^6.0.0",
     "slick-carousel": "^1.8.1"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "eslint": "^8",
+    "eslint": "^8.57.0",
     "eslint-config-next": "14.2.4",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react": "^7.35.0",
     "postcss": "^8",
+    "prettier": "^3.3.3",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }
