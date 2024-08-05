@@ -16,7 +16,19 @@ export async function POST(req: Request) {
       }),
     });
 
-    console.log(response);
+    const res = await response.json();
+    console.log(res);
+
+    if (!response.ok) {
+      return Response.json(
+        {
+          message: res?.errors?.[0]?.detail,
+        },
+        {
+          status: 400,
+        },
+      );
+    }
 
     return Response.json({
       status: 200,

@@ -36,9 +36,13 @@ export async function POST(req: Request) {
       status: 200,
     });
   } catch (error) {
-    return Response.json({
-      message: 'Invalid credentials',
-      status: 401,
-    });
+    return Response.json(
+      {
+        message: 'Invalid credentials',
+      },
+      {
+        status: 401,
+      },
+    );
   }
 }
