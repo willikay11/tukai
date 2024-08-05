@@ -9,6 +9,7 @@ import GlobalLoading from '@/app/ui/globalLoading';
 import DownloadApp from '@/app/ui/downloadApp';
 import NotificationProvider from '@/providers/NotificationProvider';
 import SessionProvider from '@/providers/SessionProvider';
+import { ReduxProvider } from './redux-provider';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -23,34 +24,36 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={satoshi.className}>
-        <SessionProvider>
-          <NotificationProvider>
-            <GlobalLoading />
-            <div className="grid grid-cols-12 bg-white md:gap-4">
-              <DownloadApp />
-              <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
-                <div className="inline-flex w-full justify-between md:mt-10 md:grid md:grid-cols-2 md:gap-4">
-                  <div className="flex h-[40px] items-center md:items-start">
-                    <Link href="/" className="hidden md:block">
-                      <Image
-                        src="/images/logo.svg"
-                        alt="Oltukai logo"
-                        width={100}
-                        height={80}
-                        className="mr-6"
-                      />
-                    </Link>
-                    <Nav />
-                  </div>
-                  <div className="flex h-[40px] items-center justify-end md:items-start">
-                    <AuthActions />
+        <ReduxProvider>
+          <SessionProvider>
+            <NotificationProvider>
+              <GlobalLoading />
+              <div className="grid grid-cols-12 bg-white md:gap-4">
+                <DownloadApp />
+                <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
+                  <div className="inline-flex w-full justify-between md:mt-10 md:grid md:grid-cols-2 md:gap-4">
+                    <div className="flex h-[40px] items-center md:items-start">
+                      <Link href="/" className="hidden md:block">
+                        <Image
+                          src="/images/logo.svg"
+                          alt="Oltukai logo"
+                          width={100}
+                          height={80}
+                          className="mr-6"
+                        />
+                      </Link>
+                      <Nav />
+                    </div>
+                    <div className="flex h-[40px] items-center justify-end md:items-start">
+                      <AuthActions />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            {children}
-          </NotificationProvider>
-        </SessionProvider>
+              {children}
+            </NotificationProvider>
+          </SessionProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

@@ -16,6 +16,7 @@ export default function Input({
   type,
   icon,
   name,
+  defaultValue,
   error,
   refs,
 }: {
@@ -23,13 +24,14 @@ export default function Input({
   type: 'text' | 'password';
   icon: ReactNode;
   name: string;
+  defaultValue?: string;
   error?: string;
   refs?: any;
 }) {
   const [viewPassword, setViewPassword] = useState<boolean>(false);
 
   return (
-    <>
+    <div className="flex flex-col">
       <div
         className={clsx(
           'inline-flex h-[3.375rem] w-full items-center rounded-[8px] border-[1px] px-4',
@@ -42,7 +44,8 @@ export default function Input({
         <div className="mr-2 text-gray-500">{icon}</div>
         <I
           className="w-full text-xs text-gray-500 outline-0 placeholder:text-xs"
-          // name={name}
+          name={name}
+          defaultValue={defaultValue}
           placeholder={placeholder}
           type={viewPassword ? 'text' : type}
           {...refs}
@@ -52,6 +55,6 @@ export default function Input({
         ) : null}
       </div>
       {error ? <div className="mt-1 text-xs text-red-600">{error}</div> : null}
-    </>
+    </div>
   );
 }

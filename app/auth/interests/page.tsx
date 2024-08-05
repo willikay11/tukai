@@ -1,17 +1,34 @@
 'use client';
-import { interests } from '@/app/lib/placeholderData';
 import { hugeiconsLicense } from '@hugeicons/react-pro';
-import { useState } from 'react';
+import * as HugeIcons from '@hugeicons/react-pro';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/app/ui/form';
 import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
 
 hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
 );
 export default function Page() {
   const router = useRouter();
+  const newUser = useSelector((state) => state.newUser);
+  const [interests, setInterests] = useState<{ id: string; name: string; icon: string }[]>([]);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+
+  const getInterests = async () => {
+    const response = await fetch('/auth/interests/api', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    const res = await response.json();
+    setInterests(res?.interests);
+  };
+
+  useEffect(() => {
+    getInterests();
+  }, []);
 
   const addOrRemoveInterest = (value: string) => {
     if (selectedInterests.includes(value)) {
@@ -35,11 +52,11 @@ export default function Page() {
 
       <div className="mb-4 inline-flex flex-wrap gap-x-2 gap-y-2">
         {interests.map((interest) => {
-          const active = selectedInterests.includes(interest.value);
+          const active = selectedInterests.includes(interest.id);
           return (
             <div
-              key={interest.value}
-              onClick={() => addOrRemoveInterest(interest.value)}
+              key={interest.id}
+              onClick={() => addOrRemoveInterest(interest.id)}
               className={clsx(
                 'inline-flex w-fit cursor-pointer items-center rounded-full px-4 py-2',
                 {
@@ -48,8 +65,13 @@ export default function Page() {
                 },
               )}
             >
-              <div className="mr-2">{interest.icon}</div>
-              <span className="text-xs">{interest.label}</span>
+              <div className="mr-2">
+                {React.createElement(HugeIcons[`${interest.icon}`], {
+                  size: 16,
+                  variant: 'twotone',
+                })}
+              </div>
+              <span className="text-xs">{interest.name}</span>
             </div>
           );
         })}

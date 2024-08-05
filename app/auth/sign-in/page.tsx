@@ -20,9 +20,8 @@ type Inputs = {
 export default function Page() {
   const router = useRouter();
   const toast = useContext(NotificationContext);
-    const { setUser } = useContext(SessionContext);
-
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const { setUser } = useContext(SessionContext);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const {
     register,
