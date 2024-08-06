@@ -1,4 +1,4 @@
-export default function Loader({ size = 5 }: { size: number }) {
+export default function Loader({ size = 5 }: { size?: number }) {
   return (
     <svg className={`mr-2 h-${size} w-${size} animate-spin`} viewBox="3 3 18 18">
       <path

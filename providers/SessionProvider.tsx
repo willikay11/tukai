@@ -1,10 +1,10 @@
 'use client';
 
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, ReactNode, useEffect, useState } from 'react';
 
-export const SessionContext = createContext(undefined);
+export const SessionContext = createContext({});
 
-export default function SessionProvider({ children }) {
+export default function SessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<{ firstName: string; lastName: string } | undefined>();
 
   const fetchUserProfile = async () => {

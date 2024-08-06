@@ -1,3 +1,4 @@
+// noinspection
 'use client';
 import { hugeiconsLicense } from '@hugeicons/react-pro';
 import * as HugeIcons from '@hugeicons/react-pro';
@@ -15,8 +16,8 @@ hugeiconsLicense(
 );
 export default function Page() {
   const router = useRouter();
-  const toast = useContext(NotificationContext);
-  const newUser = useSelector((state) => state.newUser);
+  const toast: any = useContext(NotificationContext);
+  const newUser = useSelector((state: any) => state.newUser);
   const [loading, setLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [interests, setInterests] = useState<{ id: string; name: string; icon: string }[]>([]);
@@ -99,10 +100,12 @@ export default function Page() {
                 )}
               >
                 <div className="mr-2">
-                  {React.createElement(HugeIcons[`${interest.icon}`], {
-                    size: 16,
-                    variant: 'twotone',
-                  })}
+                  {
+                    React.createElement(HugeIcons[`${interest.icon}`], {
+                      size: 16,
+                      variant: 'twotone',
+                    }) as any
+                  }
                 </div>
                 <span className="text-xs">{interest.name}</span>
               </div>

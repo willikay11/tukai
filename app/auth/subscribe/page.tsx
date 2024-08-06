@@ -141,6 +141,7 @@ export default function Page() {
       {selectedOption === 'mpesa' ? (
         <div className="mb-4">
           <Input
+            name="phoneNumber"
             placeholder="Enter M-Pesa number"
             type="text"
             icon={<CallIcon size={20} className="text-gray-600" />}
@@ -150,6 +151,7 @@ export default function Page() {
         <>
           <div className="mb-2">
             <Input
+              name="cardNumber"
               placeholder="Card Number"
               type="text"
               icon={<CreditCardIcon size={20} className="text-gray-600" />}
@@ -158,12 +160,14 @@ export default function Page() {
 
           <div className="mb-2 grid grid-cols-2 gap-x-2">
             <Input
+              name="expiryDate"
               placeholder="Expiry Date"
               type="text"
               icon={<Calendar04Icon size={20} className="text-gray-600" />}
             />
 
             <Input
+              name="cvv"
               placeholder="CVV"
               type="text"
               icon={<SquareLock01Icon size={20} className="text-gray-600" />}
@@ -172,6 +176,7 @@ export default function Page() {
 
           <div className="mb-2">
             <Input
+              name="postCode"
               placeholder="Postcode"
               type="text"
               icon={<PinLocation02Icon size={20} className="text-gray-600" />}
@@ -180,6 +185,7 @@ export default function Page() {
 
           <div className="mb-2">
             <Input
+              name="country"
               placeholder="Country/Region"
               type="text"
               icon={<GlobalIcon size={20} className="text-gray-600" />}

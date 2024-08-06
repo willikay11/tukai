@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { Anchor, Button } from '@/app/ui/form';
 import { GoogleIcon, hugeiconsLicense } from '@hugeicons/react-pro';
 import { useRouter } from 'next/navigation';

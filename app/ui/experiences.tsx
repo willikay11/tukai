@@ -1,5 +1,5 @@
 import { Experience } from '@/app/lib/definitions';
-import { hugeiconsLicense, StarIcon } from '@hugeicons/react-pro';
+import { hugeiconsLicense } from '@hugeicons/react-pro';
 import { fetchExperiences } from '@/app/lib/data';
 import SingleExperience from '@/app/ui/experience';
 

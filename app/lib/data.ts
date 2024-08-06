@@ -1,5 +1,3 @@
-import { Experience } from '@/app/lib/definitions';
-
 export async function fetchExperiences() {
   await new Promise((resolve) => setTimeout(resolve, 3000));
 

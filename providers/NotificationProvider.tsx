@@ -1,12 +1,19 @@
 'use client';
 
-import React, { createContext, useState } from 'react';
+import React, { createContext, ReactNode, useState } from 'react';
 import Notification from '@/app/ui/Notification';
+
+export type INotification = {
+  type: 'success' | 'info' | 'error';
+  title: string;
+  message: string;
+  timeout?: number;
+};
 
 export const NotificationContext = createContext({});
 
-export default function NotificationProvider({ children }) {
-  const [toasts, setToasts] = useState([]);
+export default function NotificationProvider({ children }: { children: ReactNode }) {
+  const [toasts, setToasts] = useState<any[]>([]);
 
   const open = (
     type: 'success' | 'info' | 'error',
@@ -22,7 +29,7 @@ export default function NotificationProvider({ children }) {
     return id;
   };
 
-  const close = (id) => setToasts((toasts) => toasts.filter((toast) => toast.id !== id));
+  const close = (id: number) => setToasts((toasts) => toasts.filter((toast) => toast.id !== id));
 
   return (
     <NotificationContext.Provider value={{ open, close }}>
