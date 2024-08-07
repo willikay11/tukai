@@ -34,7 +34,7 @@ export default function NotificationProvider({ children }: { children: ReactNode
   return (
     <NotificationContext.Provider value={{ open, close }}>
       {children}
-      <div className="absolute right-2 top-6">
+      <div className="right-2 top-6" style={{ position: 'fixed' }}>
         {toasts.map(({ id, type, title, message }) => (
           <div className="mb-2" key={id}>
             <Notification type={type} title={title} message={message} onClose={() => close(id)} />

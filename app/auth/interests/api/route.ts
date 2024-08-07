@@ -31,6 +31,12 @@ export async function POST(req: Request) {
 
     return Response.json({
       status: 200,
+      data: {
+        id: res.id,
+        firstName: res.first_name,
+        lastName: res?.last_name,
+        email: res?.email,
+      },
       message: 'Account created successfully',
     });
   } catch (e) {

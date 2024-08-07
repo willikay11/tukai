@@ -5,7 +5,9 @@ import React, { createContext, ReactNode, useEffect, useState } from 'react';
 export const SessionContext = createContext({});
 
 export default function SessionProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<{ firstName: string; lastName: string } | undefined>();
+  const [user, setUser] = useState<
+    { id: string; firstName: string; lastName: string; email: string } | undefined
+  >();
 
   const fetchUserProfile = async () => {
     const response = await fetch('/auth/profile/api', {

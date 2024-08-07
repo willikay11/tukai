@@ -28,7 +28,7 @@ export default function Button({
         role="status"
         className="flex items-center justify-center space-x-2"
       >
-        <Loader size={4} />
+        <Loader size="small" />
         {children}
       </div>
     );

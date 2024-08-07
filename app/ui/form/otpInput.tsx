@@ -1,15 +1,17 @@
 import clsx from 'clsx';
 import { Input as I } from '@headlessui/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const Input = ({
   fieldIndex,
+  onChange,
   refs,
   placeholder,
   defaultValue,
   error,
 }: {
   fieldIndex: number;
+  onChange: (index: number, val: string | undefined) => void;
   refs?: any;
   placeholder?: string;
   defaultValue?: string;
@@ -63,8 +65,10 @@ const Input = ({
               newValue = newValue.slice(0, 1);
             }
             setValue(newValue);
+            onChange(fieldIndex - 1, newValue);
             goToNext();
           } else {
+            onChange(fieldIndex - 1, undefined);
             goToPrevious();
           }
         }}
@@ -73,14 +77,40 @@ const Input = ({
     </div>
   );
 };
-export default function OtpInput({ error }: { error?: string }) {
+export default function OtpInput({
+  onComplete,
+  error,
+}: {
+  onComplete: (token: string) => void;
+  error?: string;
+}) {
+  const [otp, setOtp] = useState<string | undefined>();
+  const update = (index: number, val: string | undefined) => {
+    if (typeof val === 'string') {
+      setOtp((prevState) => {
+        if (prevState) {
+          return `${prevState}${val}`;
+        }
+        return val;
+      });
+    } else {
+      setOtp((prevState) => prevState?.slice(0, index));
+    }
+  };
+
+  useEffect(() => {
+    if (otp?.length === 4) {
+      onComplete(otp);
+    }
+  }, [otp]);
+
   return (
     <div className="flex flex-col">
       <div className="grid grid-cols-4 gap-2">
-        <Input fieldIndex={1} error={error} />
-        <Input fieldIndex={2} error={error} />
-        <Input fieldIndex={3} error={error} />
-        <Input fieldIndex={4} error={error} />
+        <Input fieldIndex={1} error={error} onChange={(index, val) => update(index, val)} />
+        <Input fieldIndex={2} error={error} onChange={(index, val) => update(index, val)} />
+        <Input fieldIndex={3} error={error} onChange={(index, val) => update(index, val)} />
+        <Input fieldIndex={4} error={error} onChange={(index, val) => update(index, val)} />
       </div>
       {error ? <div className="mt-1 text-xs text-red-600">{error}</div> : null}
     </div>

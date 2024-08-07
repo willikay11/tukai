@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import Loader from '@/app/ui/form/loader';
 import { NotificationContext } from '@/providers/NotificationProvider';
 import { removeUser } from '@/slices/userSlice';
+import { SessionContext } from '@/providers/SessionProvider';
 
 hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
@@ -17,6 +18,7 @@ hugeiconsLicense(
 export default function Page() {
   const router = useRouter();
   const toast: any = useContext(NotificationContext);
+  const session: any = useContext(SessionContext);
   const newUser = useSelector((state: any) => state.newUser);
   const [loading, setLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -42,6 +44,7 @@ export default function Page() {
     toast.open('success', 'Account created', 'Your next adventure awaits!');
     setIsSubmitting(false);
     removeUser();
+    session.setUser(res.data);
     router.push('/auth/otp-confirmation');
   };
   const getInterests = async () => {
@@ -82,7 +85,7 @@ export default function Page() {
       <div className="mb-4 inline-flex w-full flex-wrap gap-x-2 gap-y-2">
         {loading ? (
           <div className="my-2.5 inline-flex w-full items-center justify-center">
-            <Loader size={8} />
+            <Loader size="large" />
           </div>
         ) : interests.length ? (
           interests.map((interest) => {

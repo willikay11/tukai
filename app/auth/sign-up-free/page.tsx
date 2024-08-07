@@ -35,8 +35,6 @@ export default function Page() {
     formState: { errors },
   } = useForm<Inputs>({ mode: 'onChange' });
 
-  console.log(newUser);
-
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setIsSubmitting(true);
     delete data?.confirmPassword;
