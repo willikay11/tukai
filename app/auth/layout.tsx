@@ -29,6 +29,10 @@ const backgroundImages = [
     image: '/images/santorini.svg',
     path: '/auth/subscribe',
   },
+  {
+    image: '/images/santorini.svg',
+    path: '/auth/otp-confirmation',
+  },
 ];
 
 const options = [

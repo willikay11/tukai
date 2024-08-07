@@ -42,7 +42,7 @@ export default function Page() {
     toast.open('success', 'Account created', 'Your next adventure awaits!');
     setIsSubmitting(false);
     removeUser();
-    router.push('/auth/payments');
+    router.push('/auth/otp-confirmation');
   };
   const getInterests = async () => {
     const response = await fetch('/auth/interests/api', {

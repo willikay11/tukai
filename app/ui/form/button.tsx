@@ -14,7 +14,7 @@ export default function Button({
   children: ReactNode;
   htmlType?: 'submit' | 'reset' | 'button';
   onClick?: () => void;
-  type?: 'primary' | 'blue';
+  type?: 'primary' | 'blue' | 'link';
   size?: 'small' | 'normal' | 'large';
   block?: boolean;
   loading?: boolean;
@@ -28,7 +28,7 @@ export default function Button({
         role="status"
         className="flex items-center justify-center space-x-2"
       >
-        <Loader />
+        <Loader size={4} />
         {children}
       </div>
     );
@@ -36,11 +36,12 @@ export default function Button({
   return (
     <button
       disabled={loading}
-      className={clsx(`rounded-[8px] text-xs text-white`, {
-        'bg-primary': type === 'primary',
-        'bg-blue-500': type === 'blue',
-        'h-[3.375rem]': size === 'normal',
-        'h-8': size === 'small',
+      className={clsx(`inline-flex justify-center rounded-[8px] text-xs`, {
+        'bg-primary text-white': type === 'primary',
+        'bg-blue-500 text-white': type === 'blue',
+        'bg-white text-primary': type === 'link',
+        'py-5': size === 'normal',
+        'py-2': size === 'small',
         'w-full': block,
         'px-3': !block,
       })}
