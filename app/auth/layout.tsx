@@ -10,6 +10,10 @@ const backgroundImages = [
     path: '/auth/sign-in',
   },
   {
+    image: '/images/hill-decent.webp',
+    path: '/auth/forgot-password',
+  },
+  {
     image: '/images/hikers-walking.webp',
     path: '/auth/sign-up',
   },

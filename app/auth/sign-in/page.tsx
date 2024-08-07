@@ -97,7 +97,7 @@ export default function Page() {
       </form>
 
       <div className="mb-4 flex justify-end">
-        <Anchor link="">Forgot Password?</Anchor>
+        <Anchor link="/auth/forgot-password">Forgot Password?</Anchor>
       </div>
 
       <div className="mb-2.5">

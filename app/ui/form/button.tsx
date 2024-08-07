@@ -37,9 +37,9 @@ export default function Button({
     <button
       disabled={loading}
       className={clsx(`inline-flex justify-center rounded-[8px] text-xs`, {
-        'bg-primary text-white': type === 'primary',
+        'bg-primary font-medium text-white': type === 'primary',
         'bg-blue-500 text-white': type === 'blue',
-        'bg-white text-primary': type === 'link',
+        'bg-white px-0 py-0 text-primary': type === 'link',
         'py-5': size === 'normal',
         'py-2': size === 'small',
         'w-full': block,
