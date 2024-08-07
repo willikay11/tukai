@@ -68,7 +68,7 @@ export default function Page() {
             </p>
           </div>
 
-          <Button block onClick={() => router.push('/auth')}>
+          <Button block onClick={() => router.push('/auth/reset-password')}>
             Continue
           </Button>
 
