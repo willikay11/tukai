@@ -8,15 +8,18 @@ import { Mail02Icon, MailSend02Icon } from '@hugeicons/react-pro';
 import { NotificationContext } from '@/providers/NotificationProvider';
 import { useRouter } from 'next/navigation';
 import MobileStore from '@/app/ui/mobileStore';
+import { useDispatch } from 'react-redux';
+import { addEmail } from '@/slices/resetSlice';
 
 type Inputs = {
   email: string;
 };
 export default function Page() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const toast: any = useContext(NotificationContext);
   const [email, setEmail] = useState<string>();
-  const [verificationSent, setVerificationSent] = useState<boolean>(true);
+  const [verificationSent, setVerificationSent] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const {
@@ -42,6 +45,7 @@ export default function Page() {
       return;
     }
 
+    dispatch(addEmail(data.email));
     setIsSubmitting(false);
     setVerificationSent(true);
   };

@@ -19,7 +19,7 @@ export default function Page() {
   const router = useRouter();
   const toast: any = useContext(NotificationContext);
   const session: any = useContext(SessionContext);
-  const newUser = useSelector((state: any) => state.newUser);
+  const newUser = useSelector((state: any) => state.userReducer.newUser);
   const [loading, setLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [interests, setInterests] = useState<{ id: string; name: string; icon: string }[]>([]);

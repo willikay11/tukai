@@ -27,7 +27,7 @@ export default function Page() {
   // let password;
   const router = useRouter();
   const dispatch = useDispatch();
-  const newUser = useSelector((state: any) => state.newUser);
+  const newUser = useSelector((state: any) => state.userReducer.newUser);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const {
     register,

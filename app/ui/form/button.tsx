@@ -40,10 +40,10 @@ export default function Button({
         'bg-primary font-medium text-white': type === 'primary',
         'bg-blue-500 text-white': type === 'blue',
         'bg-white px-0 py-0 text-primary': type === 'link',
-        'py-5': size === 'normal',
-        'py-2': size === 'small',
+        'py-5': size === 'normal' && type !== 'link',
+        'py-2': size === 'small' && type !== 'link',
         'w-full': block,
-        'px-3': !block,
+        'px-3': !block && type !== 'link',
       })}
       onClick={() => onClick?.()}
       type={htmlType}
