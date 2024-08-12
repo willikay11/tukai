@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import MobileStore from '@/app/ui/mobileStore';
 import { useDispatch } from 'react-redux';
 import { addEmail } from '@/slices/resetSlice';
+import SuccessMessage from '@/app/ui/messages/success';
 
 type Inputs = {
   email: string;
@@ -54,27 +55,18 @@ export default function Page() {
     <>
       {verificationSent ? (
         <div className="mx-4">
-          <div className="mb-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
-              <MailSend02Icon variant="duotone" className="text-green-800" size={30} />
-            </div>
-          </div>
-
-          <div className="mb-4">
-            <p className="text-xl font-black text-gray-700">Verification Code Sent</p>
-          </div>
-
-          <div className="mb-4">
-            <p className="text-xs text-gray-700">
-              A verification code was sent to your email;{' '}
-              <span className="text-primary">{email}</span>. Please check your email and enter the
-              code.
-            </p>
-          </div>
-
-          <Button block onClick={() => router.push('/auth/reset-password')}>
-            Continue
-          </Button>
+          <SuccessMessage
+            icon="MailSend02Icon"
+            title="Verification Code Sent"
+            description="A verification code was sent to your email, "
+            subDescription={
+              <>
+                <span className="text-primary">{email}</span>. Please check your email and enter the
+                code.
+              </>
+            }
+            onContinue={() => router.push('/auth/reset-password')}
+          />
 
           <div className="mb-4 mt-4 flex justify-center">
             <span className="mr-1 text-xs">Wrong email?</span>

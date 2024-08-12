@@ -1,7 +1,7 @@
 // noinspection TypeScriptValidateTypes
 
 'use client';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import OtpInput from '@/app/ui/form/otpInput';
 import { Button, Input } from '@/app/ui/form';
 import { LockKeyIcon, RefreshIcon } from '@hugeicons/react-pro';
@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import MobileStore from '@/app/ui/mobileStore';
 import { NotificationContext } from '@/providers/NotificationProvider';
+import SuccessMessage from '@/app/ui/messages/success';
 
 type Inputs = {
   password: string;
@@ -27,6 +28,7 @@ export default function Page() {
   const [token, setToken] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [enterPassword, setEnterPassword] = useState<boolean>(false);
+  const [passwordChanged, setPasswordChanged] = useState<boolean>(false);
 
   const onNext = () => {
     setEnterPassword(true);
@@ -34,22 +36,29 @@ export default function Page() {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setIsSubmitting(true);
-    const response = await fetch('/auth/reset-password/api', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, password: data.password }),
-    });
-
-    const res = await response.json();
-
+    // const response = await fetch('/auth/reset-password/api', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ token, password: data.password }),
+    // });
+    //
+    // const res = await response.json();
+    //
     setIsSubmitting(false);
+    //
+    // if (!response.ok) {
+    //   setIsSubmitting(false);
+    //   toast.open('error', 'Failure', res.message);
+    //   return;
+    // }
 
-    if (!response.ok) {
-      setIsSubmitting(false);
-      toast.open('error', 'Failure', res.message);
-      return;
-    }
+    console.log();
+    setPasswordChanged(true);
   };
+
+  useEffect(() => {
+    console.log(passwordChanged);
+  }, [passwordChanged]);
 
   return (
     <>
@@ -105,6 +114,13 @@ export default function Page() {
             </div>
           </form>
         </div>
+      ) : passwordChanged ? (
+        <SuccessMessage
+          icon="CheckmarkCircle03Icon"
+          title="Password reset complete"
+          description="Your new password was created successfully."
+          onContinue={() => router.push('/auth/sign-in')}
+        />
       ) : (
         <div className="mx-4">
           <div className="mb-2">
