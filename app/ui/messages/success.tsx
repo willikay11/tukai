@@ -9,12 +9,14 @@ export default function SuccessMessage({
   description,
   onContinue,
   subDescription,
+  buttonTitle = 'Continue',
 }: {
   title: string;
   icon: string;
   description: string;
   onContinue: () => void;
   subDescription?: ReactNode;
+  buttonTitle?: string;
 }) {
   return (
     <>
@@ -42,7 +44,7 @@ export default function SuccessMessage({
       </div>
 
       <Button block onClick={onContinue}>
-        Continue
+        {buttonTitle}
       </Button>
     </>
   );

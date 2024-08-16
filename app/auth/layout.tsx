@@ -41,6 +41,10 @@ const backgroundImages = [
     image: '/images/santorini.webp',
     path: '/auth/otp-confirmation',
   },
+  {
+    image: '/images/man-bridge-running.webp',
+    path: '/auth/terms-of-service',
+  },
 ];
 
 const options = [

@@ -114,6 +114,7 @@ export default function Page() {
           icon="CheckmarkCircle03Icon"
           title="Password reset complete"
           description="Your new password was created successfully."
+          buttonTitle="Done"
           onContinue={() => router.push('/auth/sign-in')}
         />
       ) : (

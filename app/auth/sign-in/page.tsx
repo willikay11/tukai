@@ -117,8 +117,9 @@ export default function Page() {
 
       <div className="mb-3">
         <p className="text-xs">
-          By continuing to use Oltukai, you agree to our <Anchor link="">Terms of Use</Anchor>
-          &nbsp;and <Anchor link="">Privacy Policy</Anchor>
+          By continuing to use Oltukai, you agree to our{' '}
+          <Anchor link="/auth/terms-of-service">Terms of Use</Anchor>
+          &nbsp;and <Anchor link="/auth/terms-of-service">Privacy Policy</Anchor>
         </p>
       </div>
 
