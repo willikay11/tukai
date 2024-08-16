@@ -36,29 +36,24 @@ export default function Page() {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setIsSubmitting(true);
-    // const response = await fetch('/auth/reset-password/api', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ token, password: data.password }),
-    // });
-    //
-    // const res = await response.json();
-    //
-    setIsSubmitting(false);
-    //
-    // if (!response.ok) {
-    //   setIsSubmitting(false);
-    //   toast.open('error', 'Failure', res.message);
-    //   return;
-    // }
+    const response = await fetch('/auth/reset-password/api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, password: data.password }),
+    });
 
-    console.log();
+    const res = await response.json();
+
+    setIsSubmitting(false);
+
+    if (!response.ok) {
+      setIsSubmitting(false);
+      toast.open('error', 'Failure', res.message);
+      return;
+    }
+    setEnterPassword(false);
     setPasswordChanged(true);
   };
-
-  useEffect(() => {
-    console.log(passwordChanged);
-  }, [passwordChanged]);
 
   return (
     <>
