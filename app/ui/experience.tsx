@@ -13,10 +13,11 @@ export default function SingleExperience({ experience }: { experience: Experienc
       <div className="relative mb-2 flex flex-col">
         <Image
           src={experience.image}
-          height={320}
-          width={320}
-          layout="responsive"
+          height={500}
+          width={500}
           alt={experience.name}
+          className="rounded-[5px]"
+          quality={100}
         />
         <div
           className="absolute right-2 top-2 cursor-pointer"

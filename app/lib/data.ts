@@ -5,7 +5,7 @@ export async function fetchExperiences() {
     {
       id: '1',
       name: 'Mt Kenya (Point Thompson)',
-      image: '/images/hikers-happy.svg',
+      image: '/images/seven.jpg',
       rating: '4.5',
       reviews: 54,
       location: 'Central Kenya',
@@ -15,7 +15,7 @@ export async function fetchExperiences() {
     {
       id: '2',
       name: 'Mt Kenya (Point Thompson)',
-      image: '/images/man-rainforest.svg',
+      image: '/images/eight.jpg',
       rating: '4.5',
       reviews: 54,
       location: 'Central Kenya',
@@ -25,7 +25,7 @@ export async function fetchExperiences() {
     {
       id: '3',
       name: 'Mt Kenya (Point Thompson)',
-      image: '/images/one.svg',
+      image: '/images/one.jpg',
       rating: '4.5',
       reviews: 54,
       location: 'Central Kenya',
@@ -35,7 +35,7 @@ export async function fetchExperiences() {
     {
       id: '4',
       name: 'Mt Kenya (Point Thompson)',
-      image: '/images/two.svg',
+      image: '/images/two.jpg',
       rating: '4.5',
       reviews: 54,
       location: 'Central Kenya',
@@ -45,7 +45,7 @@ export async function fetchExperiences() {
     {
       id: '5',
       name: 'Mt Kenya (Point Thompson)',
-      image: '/images/three.svg',
+      image: '/images/three.jpg',
       rating: '4.5',
       reviews: 54,
       location: 'Central Kenya',
@@ -55,7 +55,7 @@ export async function fetchExperiences() {
     {
       id: '6',
       name: 'Mt Kenya (Point Thompson)',
-      image: '/images/four.svg',
+      image: '/images/five.jpg',
       rating: '4.5',
       reviews: 54,
       location: 'Central Kenya',
@@ -65,7 +65,7 @@ export async function fetchExperiences() {
     {
       id: '7',
       name: 'Mt Kenya (Point Thompson)',
-      image: '/images/four.svg',
+      image: '/images/four.jpg',
       rating: '4.5',
       reviews: 54,
       location: 'Central Kenya',
