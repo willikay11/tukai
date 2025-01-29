@@ -1,76 +1,32 @@
-export async function fetchExperiences() {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+import axios from 'axios';
+import { parseSnakeToCamel } from '@/app/utils/parseSnakeToCamel';
 
-  return [
-    {
-      id: '1',
-      name: 'Mt Kenya (Point Thompson)',
-      image: '/images/seven.jpg',
-      rating: '4.5',
-      reviews: 54,
-      location: 'Central Kenya',
-      distance: '22 KM',
-      duration: '2 Hrs 30 mins',
-    },
-    {
-      id: '2',
-      name: 'Mt Kenya (Point Thompson)',
-      image: '/images/eight.jpg',
-      rating: '4.5',
-      reviews: 54,
-      location: 'Central Kenya',
-      distance: '22 KM',
-      duration: '2 Hrs 30 mins',
-    },
-    {
-      id: '3',
-      name: 'Mt Kenya (Point Thompson)',
-      image: '/images/one.jpg',
-      rating: '4.5',
-      reviews: 54,
-      location: 'Central Kenya',
-      distance: '22 KM',
-      duration: '2 Hrs 30 mins',
-    },
-    {
-      id: '4',
-      name: 'Mt Kenya (Point Thompson)',
-      image: '/images/two.jpg',
-      rating: '4.5',
-      reviews: 54,
-      location: 'Central Kenya',
-      distance: '22 KM',
-      duration: '2 Hrs 30 mins',
-    },
-    {
-      id: '5',
-      name: 'Mt Kenya (Point Thompson)',
-      image: '/images/three.jpg',
-      rating: '4.5',
-      reviews: 54,
-      location: 'Central Kenya',
-      distance: '22 KM',
-      duration: '2 Hrs 30 mins',
-    },
-    {
-      id: '6',
-      name: 'Mt Kenya (Point Thompson)',
-      image: '/images/five.jpg',
-      rating: '4.5',
-      reviews: 54,
-      location: 'Central Kenya',
-      distance: '22 KM',
-      duration: '2 Hrs 30 mins',
-    },
-    {
-      id: '7',
-      name: 'Mt Kenya (Point Thompson)',
-      image: '/images/four.jpg',
-      rating: '4.5',
-      reviews: 54,
-      location: 'Central Kenya',
-      distance: '22 KM',
-      duration: '2 Hrs 30 mins',
-    },
-  ];
+export interface ApiResponse<T = any> {
+  status: number;
+  success: boolean;
+  data?: T;
+  message?: string;
+}
+export async function fetchExperiences(): Promise<ApiResponse<any>> {
+  try {
+    const res = await axios.get('https://api.tukai.co/v1/experiences/', {
+      headers: {
+        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJhY2Nlc3MiLCJleHAiOjE3NDU5NTQwMDYsImlhdCI6MTczODE3ODAwNiwianRpIjoiY2I3YTA1MzEwMTcwNDk0NWJiNzgxMDM1MTAzNTllMTEiLCJ1c2VyX2lkIjoiMDU4Yjc4NTMtYzVmNC00ZTQzLWIzNTYtZGExZThjZTA1ZjZlIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImhhc19pbnRlcmVzdHMiOnRydWUsImhhc19iaWxsaW5nX2RldGFpbHMiOnRydWUsImhhc19zdWJzY3JpYmVkIjp0cnVlfQ.sdlHd4g5vpgQgbbHzx-MokjQMbXciMArky6ipesKGXA`,
+      },
+    });
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
 }

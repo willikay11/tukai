@@ -2,7 +2,7 @@ import SubTopBar from '@/app/ui/subTopBar';
 import SubTopBarFilters from '@/app/ui/subTopBarFilters';
 import { EventsSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
-import Experiences from '@/app/ui/experiences';
+import Experiences from '@/app/ui/experiences/experiences';
 
 export default function Home() {
   return (
