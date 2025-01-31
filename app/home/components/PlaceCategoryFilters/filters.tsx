@@ -15,7 +15,7 @@ export default function PlaceCategoriesScrollFilters({
   const ref = useRef<any>();
   const [showPrevBtn, setShowPrevBtn] = useState<boolean>(false);
   const [showNextBtn, setShowNextBtn] = useState<boolean>(true);
-  const [selectedOption, setSelectedOption] = useState<string>('hiking');
+  const [selectedOption, setSelectedOption] = useState<string>(null);
 
   useEffect(() => {
     if (ref.current) {
@@ -76,7 +76,8 @@ export default function PlaceCategoriesScrollFilters({
             className={clsx(
               'flex h-[2.5rem] flex-row items-center justify-center rounded-[2.5rem] bg-gray-100 px-4 py-2',
               {
-                'bg-emerald-100 text-primary': selectedOption === placesCategory.name,
+                'bg-emerald-100 text-primary':
+                  selectedOption === placesCategory.name || (selectedOption == null && index === 0),
                 'text-gray-500': selectedOption !== placesCategory.name,
                 'mr-[10px]': index !== placesCategories.length - 1,
               },
@@ -87,7 +88,8 @@ export default function PlaceCategoriesScrollFilters({
             <span
               className={clsx('ml-2 text-nowrap text-xs', {
                 'text-gray-700': selectedOption !== placesCategory.name,
-                'font-semibold text-primary': selectedOption === placesCategory.name,
+                'font-semibold text-primary':
+                  selectedOption === placesCategory.name || (selectedOption == null && index === 0),
               })}
             >
               {placesCategory.name}

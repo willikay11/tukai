@@ -63,7 +63,7 @@ export default function RootLayout({
                           alt="Oltukai logo"
                           width={80}
                           height={70}
-                          className="mr-6"
+                          className="md:mr-6 lg:mr-10 xl:mr-20"
                         />
                       </Link>
                       <Nav />
