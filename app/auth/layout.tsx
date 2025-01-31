@@ -1,34 +1,49 @@
 'use client';
-
+import React from 'react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import clsx from 'clsx';
 
 const backgroundImages = [
   {
-    image: '/images/hill-decent.svg',
+    image: '/images/hill-decent.webp',
     path: '/auth/sign-in',
   },
   {
-    image: '/images/hikers-walking.svg',
+    image: '/images/hill-decent.webp',
+    path: '/auth/forgot-password',
+  },
+  {
+    image: '/images/hill-decent.webp',
+    path: '/auth/reset-password',
+  },
+  {
+    image: '/images/hikers-walking.webp',
     path: '/auth/sign-up',
   },
   {
-    image: '/images/infinite-pool.svg',
+    image: '/images/infinite-pool.webp',
     path: '/auth/sign-up-free',
   },
   {
-    image: '/images/kilimanjaro.svg',
+    image: '/images/kilimanjaro.webp',
     path: '/auth/interests',
   },
   {
-    image: '/images/man-bridge-running.svg',
+    image: '/images/man-bridge-running.webp',
     path: '/auth/payments',
   },
   {
-    image: '/images/santorini.svg',
+    image: '/images/santorini.webp',
     path: '/auth/subscribe',
+  },
+  {
+    image: '/images/santorini.webp',
+    path: '/auth/otp-confirmation',
+  },
+  {
+    image: '/images/man-bridge-running.webp',
+    path: '/auth/terms-of-service',
   },
 ];
 

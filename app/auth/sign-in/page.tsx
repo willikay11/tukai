@@ -1,3 +1,5 @@
+// noinspection TypeScriptValidateTypes,JSRemoveUnnecessaryParentheses
+
 'use client';
 
 import { Anchor, Button, Input } from '@/app/ui/form';
@@ -5,9 +7,9 @@ import { GoogleIcon, hugeiconsLicense, LockKeyIcon, Mail02Icon } from '@hugeicon
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import MobileStore from '@/app/ui/mobileStore';
-import {useContext, useState} from "react";
-import {NotificationContext} from "@/providers/NotificationProvider";
-import {SessionContext} from "@/providers/SessionProvider";
+import { useContext, useState } from 'react';
+import { NotificationContext } from '@/providers/NotificationProvider';
+import { SessionContext } from '@/providers/SessionProvider';
 
 hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
@@ -19,36 +21,36 @@ type Inputs = {
 };
 export default function Page() {
   const router = useRouter();
-  const toast = useContext(NotificationContext);
-  const { setUser } = useContext(SessionContext);
+  const toast: any = useContext(NotificationContext);
+  const session: any = useContext(SessionContext);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Inputs>({ mode: 'onChange', });
+  } = useForm<Inputs>({ mode: 'onChange' });
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-      setIsSubmitting(true);
-      const response = await fetch('/auth/sign-in/api', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-      });
+    setIsSubmitting(true);
+    const response = await fetch('/auth/sign-in/api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
 
-      const res = await response.json();
+    const res = await response.json();
 
-      if (!response.ok) {
-          setIsSubmitting(false);
-          toast.open('error', 'Login unsuccessful', res.message);
-          return;
-      }
-
-      toast.open('success', 'Login successful', 'Welcome Back!');
+    if (!response.ok) {
       setIsSubmitting(false);
-      setUser(res.data);
-      router.push('/');
+      toast.open('error', 'Login unsuccessful', res.message);
+      return;
+    }
+
+    toast.open('success', 'Login successful', 'Welcome Back!');
+    setIsSubmitting(false);
+    session.setUser(res.data);
+    router.push('/');
   };
 
   return (
@@ -65,7 +67,7 @@ export default function Page() {
             placeholder="Enter Email Address"
             type="text"
             icon={<Mail02Icon size={16} variant="twotone" />}
-            refs={...register('email', {
+            refs={register('email', {
               required: 'Please enter your email address',
               pattern: {
                 value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
@@ -82,7 +84,7 @@ export default function Page() {
             placeholder="Enter Password"
             type="password"
             icon={<LockKeyIcon size={16} variant="twotone" />}
-            refs={...register('password', { required: 'Please enter password' })}
+            refs={register('password', { required: 'Please enter password' })}
             error={errors.password?.message}
           />
         </div>
@@ -95,7 +97,7 @@ export default function Page() {
       </form>
 
       <div className="mb-4 flex justify-end">
-        <Anchor link="">Forgot Password?</Anchor>
+        <Anchor link="/auth/forgot-password">Forgot Password?</Anchor>
       </div>
 
       <div className="mb-2.5">
@@ -115,8 +117,9 @@ export default function Page() {
 
       <div className="mb-3">
         <p className="text-xs">
-          By continuing to use Oltukai, you agree to our <Anchor link="">Terms of Use</Anchor>
-          &nbsp;and <Anchor link="">Privacy Policy</Anchor>
+          By continuing to use Oltukai, you agree to our{' '}
+          <Anchor link="/auth/terms-of-service">Terms of Use</Anchor>
+          &nbsp;and <Anchor link="/auth/terms-of-service">Privacy Policy</Anchor>
         </p>
       </div>
 

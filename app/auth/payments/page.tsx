@@ -4,7 +4,6 @@ import {
   CheckListIcon,
   Edit01Icon,
   hugeiconsLicense,
-  MapsLocation01Icon,
   MapsLocation02Icon,
   Message02Icon,
   RouteBlockIcon,

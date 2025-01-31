@@ -1,3 +1,5 @@
+// noinspection TypeScriptValidateTypes
+
 'use client';
 
 import { Anchor, Button, Input } from '@/app/ui/form';
@@ -5,9 +7,9 @@ import { hugeiconsLicense, LockKeyIcon, Mail02Icon, UserIcon } from '@hugeicons/
 import { useRouter } from 'next/navigation';
 import MobileStore from '@/app/ui/mobileStore';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import {useDispatch, useSelector} from "react-redux";
-import {addUser} from "@/slices/userSlice";
-import {useState} from "react";
+import { useDispatch, useSelector } from 'react-redux';
+import { addUser } from '@/slices/userSlice';
+import { useState } from 'react';
 
 hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
@@ -17,15 +19,15 @@ type Inputs = {
   firstName: string;
   lastName: string;
   email: string;
-  password: string;
-  confirmPassword: string;
+  password?: string;
+  confirmPassword?: string;
 };
 
 export default function Page() {
-  let password;
+  // let password;
   const router = useRouter();
   const dispatch = useDispatch();
-  const newUser = useSelector((state) => state.newUser);
+  const newUser = useSelector((state: any) => state.userReducer.newUser);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const {
     register,
@@ -33,14 +35,12 @@ export default function Page() {
     formState: { errors },
   } = useForm<Inputs>({ mode: 'onChange' });
 
-  console.log(newUser);
-
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-      setIsSubmitting(true);
-      delete data.confirmPassword;
-      dispatch(addUser(data));
-      router.push('/auth/interests');
-      setIsSubmitting(false);
+    setIsSubmitting(true);
+    delete data?.confirmPassword;
+    dispatch(addUser(data));
+    router.push('/auth/interests');
+    setIsSubmitting(false);
   };
 
   return (
@@ -58,11 +58,10 @@ export default function Page() {
             defaultValue={newUser?.payload?.firstName}
             type="text"
             icon={<UserIcon size={16} />}
-            refs={...register('firstName', {
+            refs={register('firstName', {
               required: 'Please enter your first name',
             })}
             error={errors.firstName?.message}
-
           />
           <Input
             name="lastName"
@@ -70,7 +69,7 @@ export default function Page() {
             defaultValue={newUser?.payload?.lastName}
             type="text"
             icon={<UserIcon size={16} />}
-            refs={...register('lastName', {
+            refs={register('lastName', {
               required: 'Please enter your last name',
             })}
             error={errors.lastName?.message}
@@ -84,7 +83,7 @@ export default function Page() {
             defaultValue={newUser?.payload?.email}
             type="text"
             icon={<Mail02Icon size={16} />}
-            refs={...register('email', {
+            refs={register('email', {
               required: 'Please enter your email address',
               pattern: {
                 value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
@@ -102,9 +101,9 @@ export default function Page() {
             type="password"
             defaultValue={newUser?.payload?.password}
             icon={<LockKeyIcon size={16} />}
-            refs={...register('password', {
+            refs={register('password', {
               required: 'Please enter your password',
-              onBlur: (e) => password = e.target.value,
+              // onBlur: (e) => (password = e.target.value),
             })}
             error={errors.password?.message}
           />
@@ -117,7 +116,7 @@ export default function Page() {
             defaultValue={newUser?.payload?.password}
             type="password"
             icon={<LockKeyIcon size={16} />}
-            refs={...register('confirmPassword', {
+            refs={register('confirmPassword', {
               required: 'Please enter your password',
               // pattern: {
               //     value: /apple/,

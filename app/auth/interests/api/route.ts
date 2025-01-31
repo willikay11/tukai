@@ -17,7 +17,6 @@ export async function POST(req: Request) {
     });
 
     const res = await response.json();
-    console.log(res);
 
     if (!response.ok) {
       return Response.json(
@@ -32,9 +31,24 @@ export async function POST(req: Request) {
 
     return Response.json({
       status: 200,
+      data: {
+        id: res.id,
+        firstName: res.first_name,
+        lastName: res?.last_name,
+        email: res?.email,
+      },
       message: 'Account created successfully',
     });
-  } catch (e) {}
+  } catch (e) {
+    return Response.json(
+      {
+        message: 'Account not created',
+      },
+      {
+        status: 400,
+      },
+    );
+  }
 }
 
 export async function GET() {

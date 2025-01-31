@@ -3,8 +3,12 @@
 import { Cancel01Icon, InformationCircleIcon, TickDouble01Icon } from '@hugeicons/react-pro';
 import React, { ReactNode } from 'react';
 
-const getColors = (type) => {
-  let c: { lightColor: string; darkColor: string; icon: ReactNode } = {};
+const getColors = (type: 'success' | 'info' | 'error') => {
+  let c: { lightColor: string; darkColor: string; icon: ReactNode } = {
+    lightColor: 'bg-blue-50',
+    darkColor: 'bg-blue-100',
+    icon: <InformationCircleIcon variant="twotone" className="text-green-400" size={16} />,
+  };
   switch (type) {
     case 'error': {
       c = {
@@ -23,11 +27,7 @@ const getColors = (type) => {
       break;
     }
     default: {
-      c = {
-        lightColor: 'bg-blue-50',
-        darkColor: 'bg-blue-100',
-        icon: <InformationCircleIcon variant="twotone" className="text-green-400" size={16} />,
-      };
+      break;
     }
   }
 

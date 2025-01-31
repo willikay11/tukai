@@ -12,11 +12,12 @@ export default function SingleExperience({ experience }: { experience: Experienc
     <>
       <div className="relative mb-2 flex flex-col">
         <Image
-          src={experience.image}
-          height={320}
-          width={320}
-          layout="responsive"
-          alt={experience.name}
+          src={experience.photos.find((photo) => photo.isCover)?.photo ?? ''}
+          height={500}
+          width={500}
+          alt={experience.title}
+          className="rounded-[5px]"
+          quality={100}
         />
         <div
           className="absolute right-2 top-2 cursor-pointer"
@@ -34,14 +35,14 @@ export default function SingleExperience({ experience }: { experience: Experienc
       </div>
       <div className="flex flex-col items-start justify-start bg-white">
         <div className="mb-1 flex">
-          <p className="text-xs font-bold text-gray-800">{experience.name}</p>
+          <p className="text-xs font-bold text-gray-800">{experience.title}</p>
         </div>
         <div className="mb-1 inline-flex items-center">
-          <span className="text-xs text-gray-600">{experience.location}</span>
+          <span className="text-xs text-gray-600">{experience.location.name}</span>
           <div className="mx-1 h-[6px] w-[1px] rounded bg-gray-300" />
-          <span className="text-xs text-gray-600">{experience.distance}</span>
-          <div className="mx-1 h-[6px] w-[1px] rounded bg-gray-300" />
-          <span className="text-xs text-gray-600">{experience.duration}</span>
+          {/*<span className="text-xs text-gray-600">{experience.distance}</span>*/}
+          {/*<div className="mx-1 h-[6px] w-[1px] rounded bg-gray-300" />*/}
+          {/*<span className="text-xs text-gray-600">{experience.duration}</span>*/}
         </div>
         <div className="inline-flex items-center">
           <StarIcon
@@ -53,9 +54,9 @@ export default function SingleExperience({ experience }: { experience: Experienc
             })}
             onClick={() => setRated(!rated)}
           />
-          <span className="text-xs text-gray-600">{experience.rating}</span>
-          <div className="mx-1 h-[6px] w-[1px] rounded bg-gray-300" />
-          <span className="text-xs text-gray-600">{experience.reviews} Reviews</span>
+          {/*<span className="text-xs text-gray-600">{experience.rating}</span>*/}
+          {/*<div className="mx-1 h-[6px] w-[1px] rounded bg-gray-300" />*/}
+          {/*<span className="text-xs text-gray-600">{experience.reviews} Reviews</span>*/}
         </div>
       </div>
     </>
