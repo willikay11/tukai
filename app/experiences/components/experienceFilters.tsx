@@ -8,7 +8,7 @@ export default async function ExperienceFilters() {
           <ScrollFilters
             filters={[
               { label: 'All Experiences', value: '1', icon: 'WorkoutStretchingIcon' },
-              { label: 'Reserved Experiences', value: '2', icon: 'CalenderAdd01Icon' },
+              { label: 'Reserved Experiences', value: '2', icon: 'CalendarAdd01Icon' },
               { label: 'Saved', value: '3', icon: 'Bookmark02Icon' },
               { label: 'Hosting', value: '4', icon: 'WavingHand02Icon' },
             ]}
