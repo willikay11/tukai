@@ -1,15 +1,14 @@
 'use client';
 
-import { PlaceCategory } from '@/app/lib/definitions';
 import clsx from 'clsx';
 import { ArrowLeft01Icon, ArrowRight01Icon } from '@hugeicons/react-pro';
 import { useEffect, useRef, useState } from 'react';
 import IconComponent from '@/app/ui/iconComponent';
 
-export default function PlaceCategoriesScrollFilters({
-  placesCategories,
+export default function ScrollFilters({
+  filters,
 }: {
-  placesCategories: PlaceCategory[];
+  filters: { label: string; value: string; icon: string }[];
 }) {
   let scrollBy = 500;
   const ref = useRef<any>();
@@ -70,29 +69,29 @@ export default function PlaceCategoriesScrollFilters({
         <ArrowLeft01Icon size={20} className="text-gray-700" variant="twotone" />
       </button>
       <div ref={ref} className="flex h-[5rem] items-center overflow-hidden scroll-smooth">
-        {placesCategories.map((placesCategory, index) => (
+        {filters.map((filter, index) => (
           <button
-            key={placesCategory.id}
+            key={filter.label}
             className={clsx(
               'flex h-[2.5rem] flex-row items-center justify-center rounded-[2.5rem] bg-gray-100 px-4 py-2',
               {
                 'bg-emerald-100 text-primary':
-                  selectedOption === placesCategory.name || (selectedOption == null && index === 0),
-                'text-gray-500': selectedOption !== placesCategory.name,
-                'mr-[10px]': index !== placesCategories.length - 1,
+                  selectedOption === filter.label || (selectedOption == null && index === 0),
+                'text-gray-500': selectedOption !== filter.label,
+                'mr-[10px]': index !== filters.length - 1,
               },
             )}
-            onClick={() => setSelectedOption(placesCategory.name)}
+            onClick={() => setSelectedOption(filter.label)}
           >
-            <IconComponent iconName={placesCategory.icon} size={18} />
+            <IconComponent iconName={filter.icon} size={18} />
             <span
               className={clsx('ml-2 text-nowrap text-xs', {
-                'text-gray-700': selectedOption !== placesCategory.name,
+                'text-gray-700': selectedOption !== filter.label,
                 'font-semibold text-primary':
-                  selectedOption === placesCategory.name || (selectedOption == null && index === 0),
+                  selectedOption === filter.label || (selectedOption == null && index === 0),
               })}
             >
-              {placesCategory.name}
+              {filter.label}
             </span>
           </button>
         ))}
