@@ -14,44 +14,26 @@ export default function IconRadioButtonGroup() {
   const options = [
     {
       label: 'one',
-      icon: (
-        <GridViewIcon
-          className={clsx('', {
-            'text-white': selectedOption === 'one',
-            'text-gray-500': selectedOption !== 'one',
-          })}
-          size={18}
-          variant="twotone"
-        />
-      ),
+      icon: <GridViewIcon size={16} variant="twotone" />,
     },
     {
       label: 'two',
-      icon: (
-        <MapPinpoint02Icon
-          className={clsx('', {
-            'text-white': selectedOption === 'two',
-            'text-gray-500': selectedOption !== 'two',
-          })}
-          size={18}
-          variant="twotone"
-        />
-      ),
+      icon: <MapPinpoint02Icon size={16} variant="twotone" />,
     },
   ];
 
   return (
-    <div className="item-center flex rounded-[50px] border-[1px] border-gray-200 bg-white px-1 py-1">
+    <div className="item-center flex h-10 rounded-[50px] border-[1px] border-gray-200 bg-white px-1 py-1">
       <div className={`grid grid-cols-2 gap-2`}>
         {options.map((option) => (
           <div
             key={option.label}
             onClick={() => setSelectedOption(option.label)}
             className={clsx(
-              'flex h-[35px] w-[35px] cursor-pointer items-center justify-center rounded-full',
+              'flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full',
               {
-                'bg-primary': option.label === selectedOption,
-                'bg-gray-50': option.label !== selectedOption,
+                'bg-emerald-100 text-primary': option.label === selectedOption,
+                'bg-gray-50 text-gray-500': option.label !== selectedOption,
               },
             )}
           >

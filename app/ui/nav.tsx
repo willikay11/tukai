@@ -22,12 +22,12 @@ export default function Nav() {
       <div className="md:hidden">
         <Menu02Icon size={20} variant="twotone" type="rounded" />
       </div>
-      <div className="hidden md:inline-flex md:h-[40px]">
+      <div className="hidden md:inline-flex md:h-full">
         {links.map((link) => (
           <Link
             href={link.href}
             key={link.name}
-            className={clsx('mr-4 inline-flex h-full items-start', {
+            className={clsx('mr-4 inline-flex h-full items-center', {
               'border-b-[1px] border-primary text-primary': pathname === link.href,
             })}
           >
