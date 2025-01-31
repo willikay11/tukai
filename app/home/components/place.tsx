@@ -6,7 +6,6 @@ import { useState } from 'react';
 import clsx from 'clsx';
 
 export default function SinglePlace({ place }: { place: Place }) {
-  const [rated, setRated] = useState<boolean>(false);
   const [bookmarked, setBookmarked] = useState<boolean>(false);
   const [hasError, setHasError] = useState(false);
 
