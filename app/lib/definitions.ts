@@ -67,3 +67,24 @@ export type User = {
   displayName: string;
   picture: string;
 };
+
+export type Place = {
+  id: string;
+  title: string;
+  location: Location;
+  category: PlaceCategory;
+  photos: ExperiencePhoto[];
+  totalReviews: number;
+  averageRating: number;
+  isBookmarked: boolean;
+  status: Status;
+  dateCreated: string;
+};
+
+export type PlaceCategory = {
+  id: string;
+  name: string;
+  icon: string;
+  group: string;
+  placesCount: number;
+};

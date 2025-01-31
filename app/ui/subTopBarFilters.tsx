@@ -66,19 +66,29 @@ export default function SubTopBarFilters() {
           >
             <ArrowLeft01Icon size={20} className="text-gray-700" variant="twotone" />
           </button>
-          <div ref={ref} className="flex h-full items-center overflow-hidden scroll-smooth">
+          <div ref={ref} className="flex h-[60px] items-center overflow-hidden scroll-smooth">
             {interests.map((option, index) => (
               <button
                 key={option.label}
-                className={clsx('flex h-[60px] flex-col items-center justify-center', {
-                  'border-b-[1px] border-primary text-primary': selectedOption === option.value,
-                  'text-gray-500': selectedOption !== option.value,
-                  'mr-[25px]': index !== interests.length - 1,
-                })}
+                className={clsx(
+                  'flex h-[40px] flex-row items-center justify-center rounded-[2.5rem] bg-gray-100 px-4 py-2',
+                  {
+                    'bg-emerald-100 text-primary': selectedOption === option.value,
+                    'text-gray-500': selectedOption !== option.value,
+                    'mr-[10px]': index !== interests.length - 1,
+                  },
+                )}
                 onClick={() => setSelectedOption(option.value)}
               >
                 {option.icon}
-                <span className="text-nowrap text-xs">{option.label}</span>
+                <span
+                  className={clsx('ml-2 text-nowrap text-xs', {
+                    'text-gray-700': selectedOption !== option.value,
+                    'font-semibold text-primary': selectedOption === option.value,
+                  })}
+                >
+                  {option.label}
+                </span>
               </button>
             ))}
           </div>
