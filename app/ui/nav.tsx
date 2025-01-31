@@ -28,7 +28,7 @@ export default function Nav() {
             href={link.href}
             key={link.name}
             className={clsx('mr-4 inline-flex h-full items-center', {
-              'border-b-[1px] border-primary text-primary': pathname === link.href,
+              'border-b-[1px] border-primary text-primary': link.href.includes(pathname),
             })}
           >
             <div className="inline-flex items-center">
@@ -36,7 +36,7 @@ export default function Nav() {
               <span
                 className={clsx('ml-1 text-xs', {
                   'text-gray-800': pathname !== link.href,
-                  'font-semibold text-primary': pathname === link.href,
+                  'font-semibold text-primary': link.href.includes(pathname),
                 })}
               >
                 {link.name}
