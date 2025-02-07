@@ -1,16 +1,16 @@
 // noinspection TypeScriptValidateTypes
 
 'use client';
-import React, { useContext, useEffect, useState } from 'react';
-import OtpInput from '@/app/ui/form/otpInput';
-import { Button, Input } from '@/app/ui/form';
+import React, { useContext, useState } from 'react';
+import OtpInput from '@/app/components/form/otpInput';
+import { Button, Input } from '@/app/components/form';
 import { LockKeyIcon, RefreshIcon } from '@hugeicons/react-pro';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import MobileStore from '@/app/ui/mobileStore';
+import MobileStore from '@/app/components/mobileStore';
 import { NotificationContext } from '@/providers/NotificationProvider';
-import SuccessMessage from '@/app/ui/messages/success';
+import SuccessMessage from '@/app/components/messages/success';
 
 type Inputs = {
   password: string;

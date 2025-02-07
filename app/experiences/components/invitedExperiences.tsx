@@ -1,5 +1,5 @@
-// import { Experience } from '@/app/lib/definitions';
-// import { ApiResponse, fetchExperiences } from '@/app/lib/data';
+// import { Experience } from '@/lib/definitions';
+// import { ApiResponse, fetchExperiences } from '@/lib/data';
 // import SingleInvitedExperience from '@/app/experiences/components/singleInvitedExperience';
 
 export default async function InvitedExperiences() {

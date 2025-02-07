@@ -1,4 +1,4 @@
-import { EventsSkeleton, PillsSkeleton } from '@/app/ui/skeletons';
+import { EventsSkeleton, PillsSkeleton } from '@/app/components/skeletons';
 import { Suspense } from 'react';
 import ListPlaces from '@/app/home/components/list';
 import PlaceCategoryFilters from '@/app/home/components/PlaceCategoryFilters';

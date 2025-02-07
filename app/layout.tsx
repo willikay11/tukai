@@ -1,17 +1,17 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import './globals.css';
-import { satoshi } from '@/app/ui/fonts';
+import { satoshi } from '@/app/components/fonts';
 import Image from 'next/image';
-import Nav from '@/app/ui/nav';
-import AuthActions from '@/app/ui/authActions';
+import Nav from '@/app/components/nav';
+import AuthActions from '@/app/components/authActions';
 import Link from 'next/link';
-import GlobalLoading from '@/app/ui/globalLoading';
-import DownloadApp from '@/app/ui/downloadApp';
+import GlobalLoading from '@/app/components/globalLoading';
+import DownloadApp from '@/app/components/downloadApp';
 import NotificationProvider from '@/providers/NotificationProvider';
 import SessionProvider from '@/providers/SessionProvider';
 import { ReduxProvider } from './redux-provider';
-import IconRadioButtonGroup from '@/app/ui/iconRadioButtonGroup';
+import IconRadioButtonGroup from '@/app/components/iconRadioButtonGroup';
 import { FilterHorizontalIcon, hugeiconsLicense, Search01Icon } from '@hugeicons/react-pro';
 
 hugeiconsLicense(

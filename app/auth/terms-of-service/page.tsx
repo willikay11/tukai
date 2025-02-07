@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Button } from '@/app/ui/form';
+import { Button } from '@/app/components/form';
 
 export default function Page() {
   const router = useRouter();

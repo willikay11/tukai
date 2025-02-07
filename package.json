@@ -13,6 +13,7 @@
     "@headlessui/react": "^2.1.2",
     "@hugeicons/react-pro": "^0.3.2",
     "@reduxjs/toolkit": "^2.2.7",
+    "@tanstack/react-query": "^5.66.0",
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
     "eslint": "^8.57.0",

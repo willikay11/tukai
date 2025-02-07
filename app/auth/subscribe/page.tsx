@@ -12,7 +12,7 @@ import {
 } from '@hugeicons/react-pro';
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
-import { Anchor, Button, Input } from '@/app/ui/form';
+import { Anchor, Button, Input } from '@/app/components/form';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 

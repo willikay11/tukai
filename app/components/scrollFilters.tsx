@@ -3,7 +3,7 @@
 import clsx from 'clsx';
 import { ArrowLeft01Icon, ArrowRight01Icon } from '@hugeicons/react-pro';
 import { useEffect, useRef, useState } from 'react';
-import IconComponent from '@/app/ui/iconComponent';
+import IconComponent from '@/app/components/iconComponent';
 
 export default function ScrollFilters({
   filters,

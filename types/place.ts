@@ -1,0 +1,17 @@
+import { ExperiencePhoto } from '@/types/experiencePhoto';
+import { PlaceCategory } from '@/types/placeCategory';
+import { Location } from '@/types/location';
+import { Status } from '@/enums/status';
+
+export type Place = {
+  id: string;
+  title: string;
+  location: Location;
+  category: PlaceCategory;
+  photos: ExperiencePhoto[];
+  totalReviews: number;
+  averageRating: number;
+  isBookmarked: boolean;
+  status: Status;
+  dateCreated: string;
+};

@@ -1,6 +1,6 @@
-import { fetchPlaceCategories } from '@/app/lib/data';
-import ScrollFilters from '@/app/ui/scrollFilters';
-import { PlaceCategory } from '@/app/lib/definitions';
+import ScrollFilters from '@/app/components/scrollFilters';
+import { fetchPlaceCategories } from '@/services/place';
+import { PlaceCategory } from '@/types/placeCategory';
 
 export default async function PlaceCategoryFilters() {
   const placeCategories = await fetchPlaceCategories();

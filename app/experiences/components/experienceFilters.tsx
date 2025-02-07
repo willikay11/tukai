@@ -1,4 +1,4 @@
-import ScrollFilters from '@/app/ui/scrollFilters';
+import ScrollFilters from '@/app/components/scrollFilters';
 
 export default async function ExperienceFilters() {
   return (

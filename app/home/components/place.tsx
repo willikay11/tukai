@@ -1,9 +1,9 @@
 'use client';
 import Image from 'next/image';
 import { Bookmark02Icon, StarIcon } from '@hugeicons/react-pro';
-import { Place } from '@/app/lib/definitions';
 import { useState } from 'react';
 import clsx from 'clsx';
+import { Place } from '@/types/place';
 
 export default function SinglePlace({ place }: { place: Place }) {
   const [bookmarked, setBookmarked] = useState<boolean>(false);
