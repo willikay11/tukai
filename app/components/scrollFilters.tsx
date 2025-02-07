@@ -4,17 +4,24 @@ import clsx from 'clsx';
 import { ArrowLeft01Icon, ArrowRight01Icon } from '@hugeicons/react-pro';
 import { useEffect, useRef, useState } from 'react';
 import IconComponent from '@/app/components/iconComponent';
-
+import { useRouter } from 'next/navigation';
 export default function ScrollFilters({
   filters,
+  selectedCategoryId,
 }: {
   filters: { label: string; value: string; icon: string }[];
+  selectedCategoryId: string;
 }) {
   let scrollBy = 500;
   const ref = useRef<any>();
   const [showPrevBtn, setShowPrevBtn] = useState<boolean>(false);
   const [showNextBtn, setShowNextBtn] = useState<boolean>(true);
-  const [selectedOption, setSelectedOption] = useState<string>(null);
+  const [selectedOption, setSelectedOption] = useState<string>(selectedCategoryId);
+  const router = useRouter();
+
+  useEffect(() => {
+    setSelectedOption(selectedCategoryId); // Update selected category if changed
+  }, [selectedCategoryId]);
 
   useEffect(() => {
     if (ref.current) {
@@ -52,6 +59,14 @@ export default function ScrollFilters({
     }
   });
 
+  // Handle filter change and update URL with categoryId
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedOption(categoryId);
+
+    // Update the query params in the URL without reloading the page, but only if on the client-side
+    router.push(`?categoryId=${categoryId}`);
+  };
+
   return (
     <div className="relative">
       <button
@@ -71,24 +86,22 @@ export default function ScrollFilters({
       <div ref={ref} className="flex h-[5rem] items-center overflow-hidden scroll-smooth">
         {filters.map((filter, index) => (
           <button
-            key={filter.label}
+            key={filter.value}
             className={clsx(
-              'flex h-[2.5rem] flex-row items-center justify-center rounded-[2.5rem] bg-gray-100 px-4 py-2',
+              'flex h-[2.5rem] flex-row items-center justify-center rounded-[2.5rem] px-4 py-2',
               {
-                'bg-emerald-100 text-primary':
-                  selectedOption === filter.label || (selectedOption == null && index === 0),
-                'text-gray-500': selectedOption !== filter.label,
+                'bg-emerald-100 text-primary': selectedOption === filter.value,
+                'bg-gray-100 text-gray-500': selectedOption !== filter.value,
                 'mr-[10px]': index !== filters.length - 1,
               },
             )}
-            onClick={() => setSelectedOption(filter.label)}
+            onClick={() => handleCategoryChange(filter.value)}
           >
             <IconComponent iconName={filter.icon} size={18} />
             <span
               className={clsx('ml-2 text-nowrap text-xs', {
-                'text-gray-700': selectedOption !== filter.label,
-                'font-semibold text-primary':
-                  selectedOption === filter.label || (selectedOption == null && index === 0),
+                'text-gray-700': selectedOption !== filter.value,
+                'font-semibold text-primary': selectedOption === filter.value,
               })}
             >
               {filter.label}

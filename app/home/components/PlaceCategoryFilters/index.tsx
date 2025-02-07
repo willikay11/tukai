@@ -1,12 +1,15 @@
+'use client';
 import ScrollFilters from '@/app/components/scrollFilters';
-// import { fetchPlaceCategories } from '@/services/place';
 import { PlaceCategory } from '@/types/placeCategory';
-import { usePlaceCategories } from '@/hooks/placeCategories';
 
 type placeCategoryFilterProps = {
   placeCategories: PlaceCategory[];
+  selectedCategoryId: string;
 };
-export default function PlaceCategoryFilters({ placeCategories }: placeCategoryFilterProps) {
+export default function PlaceCategoryFilters({
+  placeCategories,
+  selectedCategoryId,
+}: placeCategoryFilterProps) {
   return (
     <div className="w-full border-b-[1px] border-gray-100 bg-white">
       <div className="grid grid-cols-12 gap-4">
@@ -17,6 +20,7 @@ export default function PlaceCategoryFilters({ placeCategories }: placeCategoryF
               value: placeCategory.id,
               icon: placeCategory.icon,
             }))}
+            selectedCategoryId={selectedCategoryId}
           />
         </div>
       </div>
