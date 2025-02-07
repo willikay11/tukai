@@ -1,10 +1,18 @@
 import { EventsSkeleton, PillsSkeleton } from '@/app/components/skeletons';
-import { Suspense } from 'react';
-import ListPlaces from '@/app/home/components/list';
-import PlaceCategoryFilters from '@/app/home/components/PlaceCategoryFilters';
 
 import { fetchPlaceCategories, fetchPlaces } from '@/services/place';
+import dynamic from 'next/dynamic';
 
+// Dynamically import components with skeleton fallback
+const PlaceCategoryFilters = dynamic(() => import('@/app/home/components/PlaceCategoryFilters'), {
+  ssr: false,
+  loading: () => <PillsSkeleton />,
+});
+
+const ListPlaces = dynamic(() => import('@/app/home/components/list'), {
+  ssr: false,
+  loading: () => <EventsSkeleton />,
+});
 export default async function Home({ searchParams }: { searchParams: { categoryId?: string } }) {
   const categoryIdFromQuery = searchParams?.categoryId;
 
@@ -20,17 +28,13 @@ export default async function Home({ searchParams }: { searchParams: { categoryI
   return (
     <main className="grid h-full grid-cols-12 gap-4">
       <div className="col-span-12">
-        <Suspense fallback={<PillsSkeleton />}>
-          <PlaceCategoryFilters
-            placeCategories={placeCategories.data.results}
-            selectedCategoryId={selectedCategoryId}
-          />
-        </Suspense>
+        <PlaceCategoryFilters
+          placeCategories={placeCategories.data.results}
+          selectedCategoryId={selectedCategoryId}
+        />
       </div>
       <div className="col-span-12 mx-4 mb-4 md:col-span-10 md:col-start-2 md:mx-0">
-        <Suspense fallback={<EventsSkeleton />}>
-          <ListPlaces places={places?.data?.results} />
-        </Suspense>
+        <ListPlaces initialPlaces={places?.data?.results} selectedCategoryId={selectedCategoryId} />
       </div>
     </main>
   );
