@@ -1,8 +1,8 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { fetchPlaceCategories } from '@/services/place';
 
 export const usePlaceCategories = () => {
-  return useSuspenseQuery({
+  return useQuery({
     queryKey: ['placeCategories'],
     queryFn: async () => await fetchPlaceCategories(),
   });

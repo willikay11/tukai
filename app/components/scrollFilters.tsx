@@ -10,7 +10,7 @@ export default function ScrollFilters({
   selectedCategoryId,
 }: {
   filters: { label: string; value: string; icon: string }[];
-  selectedCategoryId: string;
+  selectedCategoryId?: string;
 }) {
   let scrollBy = 500;
   const ref = useRef<any>();
@@ -19,6 +19,7 @@ export default function ScrollFilters({
   const [selectedOption, setSelectedOption] = useState<string>(selectedCategoryId);
   const router = useRouter();
 
+  // Get category from URL or use default
   useEffect(() => {
     setSelectedOption(selectedCategoryId); // Update selected category if changed
   }, [selectedCategoryId]);
@@ -64,7 +65,7 @@ export default function ScrollFilters({
     setSelectedOption(categoryId);
 
     // Update the query params in the URL without reloading the page, but only if on the client-side
-    router.push(`?categoryId=${categoryId}`);
+    router.replace(`?categoryId=${categoryId}`, { scroll: false });
   };
 
   return (
