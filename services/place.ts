@@ -26,8 +26,6 @@ export async function fetchPlaceCategories(): Promise<ApiResponse> {
   try {
     const res = await api.get('/v1/places/categories/?page_size=100');
 
-    console.log('fetched categories');
-
     return {
       status: res.status,
       success: true,
