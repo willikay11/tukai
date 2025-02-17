@@ -3,14 +3,14 @@
 
 import React, { useContext, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { Anchor, Button, Input } from '@/app/ui/form';
-import { Mail02Icon, MailSend02Icon } from '@hugeicons/react-pro';
+import { Anchor, Button, Input } from '@/app/components/form';
+import { Mail02Icon } from '@hugeicons/react-pro';
 import { NotificationContext } from '@/providers/NotificationProvider';
 import { useRouter } from 'next/navigation';
-import MobileStore from '@/app/ui/mobileStore';
+import MobileStore from '@/app/components/mobileStore';
 import { useDispatch } from 'react-redux';
 import { addEmail } from '@/slices/resetSlice';
-import SuccessMessage from '@/app/ui/messages/success';
+import SuccessMessage from '@/app/components/messages/success';
 
 type Inputs = {
   email: string;

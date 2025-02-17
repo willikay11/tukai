@@ -1,7 +1,7 @@
 'use client';
 
-import OtpInput from '@/app/ui/form/otpInput';
-import { Button } from '@/app/ui/form';
+import OtpInput from '@/app/components/form/otpInput';
+import { Button } from '@/app/components/form';
 import { RefreshIcon } from '@hugeicons/react-pro';
 import { useContext, useState } from 'react';
 import { useRouter } from 'next/navigation';

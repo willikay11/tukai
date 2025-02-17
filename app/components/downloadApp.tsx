@@ -2,7 +2,7 @@
 
 import { Cancel01Icon, hugeiconsLicense } from '@hugeicons/react-pro';
 import Image from 'next/image';
-import { Button } from '@/app/ui/form';
+import { Button } from '@/app/components/form';
 import { useState } from 'react';
 import clsx from 'clsx';
 

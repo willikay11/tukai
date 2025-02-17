@@ -1,4 +1,4 @@
-import { storeToken } from '@/app/lib/actions';
+import { storeToken } from '@/lib/actions';
 
 export async function POST(req: Request) {
   try {

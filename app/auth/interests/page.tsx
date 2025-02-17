@@ -3,11 +3,11 @@
 import { hugeiconsLicense } from '@hugeicons/react-pro';
 import * as HugeIcons from '@hugeicons/react-pro';
 import React, { useContext, useEffect, useState } from 'react';
-import { Button } from '@/app/ui/form';
+import { Button } from '@/app/components/form';
 import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
-import Loader from '@/app/ui/form/loader';
+import Loader from '@/app/components/form/loader';
 import { NotificationContext } from '@/providers/NotificationProvider';
 import { removeUser } from '@/slices/userSlice';
 import { SessionContext } from '@/providers/SessionProvider';

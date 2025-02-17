@@ -14,7 +14,7 @@ import {
   ViewOffIcon,
   WorkoutRunIcon,
 } from '@hugeicons/react-pro';
-import { Anchor, Button } from '@/app/ui/form';
+import { Anchor, Button } from '@/app/components/form';
 import { useRouter } from 'next/navigation';
 
 hugeiconsLicense(

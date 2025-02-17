@@ -1,9 +1,9 @@
 'use client';
 import Image from 'next/image';
 import { Bookmark02Icon, StarIcon } from '@hugeicons/react-pro';
-import { Experience } from '@/app/lib/definitions';
 import { useState } from 'react';
 import clsx from 'clsx';
+import { Experience } from '@/types/experience';
 
 export default function SingleInvitedExperience({ experience }: { experience: Experience }) {
   const [rated, setRated] = useState<boolean>(false);

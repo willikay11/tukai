@@ -2,10 +2,10 @@
 
 'use client';
 
-import { Anchor, Button, Input } from '@/app/ui/form';
+import { Anchor, Button, Input } from '@/app/components/form';
 import { hugeiconsLicense, LockKeyIcon, Mail02Icon, UserIcon } from '@hugeicons/react-pro';
 import { useRouter } from 'next/navigation';
-import MobileStore from '@/app/ui/mobileStore';
+import MobileStore from '@/app/components/mobileStore';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { addUser } from '@/slices/userSlice';

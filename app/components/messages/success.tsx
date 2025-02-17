@@ -1,5 +1,4 @@
-import { MailSend02Icon } from '@hugeicons/react-pro';
-import { Button } from '@/app/ui/form';
+import { Button } from '@/app/components/form';
 import React, { ReactNode } from 'react';
 import * as HugeIcons from '@hugeicons/react-pro';
 

@@ -1,9 +1,9 @@
 'use client';
 
-import { Anchor, Button } from '@/app/ui/form';
+import { Anchor, Button } from '@/app/components/form';
 import { GoogleIcon, hugeiconsLicense } from '@hugeicons/react-pro';
 import { useRouter } from 'next/navigation';
-import MobileStore from '@/app/ui/mobileStore';
+import MobileStore from '@/app/components/mobileStore';
 
 hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',

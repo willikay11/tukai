@@ -2,11 +2,11 @@
 
 'use client';
 
-import { Anchor, Button, Input } from '@/app/ui/form';
+import { Anchor, Button, Input } from '@/app/components/form';
 import { GoogleIcon, hugeiconsLicense, LockKeyIcon, Mail02Icon } from '@hugeicons/react-pro';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import MobileStore from '@/app/ui/mobileStore';
+import MobileStore from '@/app/components/mobileStore';
 import { useContext, useState } from 'react';
 import { NotificationContext } from '@/providers/NotificationProvider';
 import { SessionContext } from '@/providers/SessionProvider';

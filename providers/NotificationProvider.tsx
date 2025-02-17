@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, ReactNode, useState } from 'react';
-import Notification from '@/app/ui/Notification';
+import Notification from '@/app/components/Notification';
 
 export type INotification = {
   type: 'success' | 'info' | 'error';
