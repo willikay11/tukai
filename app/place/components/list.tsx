@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { motion } from 'framer-motion'; // ✅ Framer Motion for smooth transitions
-import SinglePlace from '@/app/home/components/place';
+import SinglePlace from '@/app/place/components/place';
 import { Place } from '@/types/place';
 import { usePlaces } from '@/hooks/places';
 import { EventSkeleton, EventsSkeleton } from '@/app/components/skeletons';
@@ -84,7 +84,7 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
               transition={{ duration: 0.3 }}
               className="cursor-pointer"
             >
-              <Link href={`/experiences/${place.id}`}>
+              <Link target="_blank" href={`/place/${place.id}`}>
                 <SinglePlace place={place} />
               </Link>
             </motion.div>

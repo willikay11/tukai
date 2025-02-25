@@ -1,21 +1,25 @@
 import Image from 'next/image';
-import {
-  ArrowLeft02Icon,
-  Bookmark02Icon,
-  CheckmarkBadge02Icon,
-  Share08Icon,
-} from '@hugeicons/react-pro';
-export default function ViewExperiencePage() {
+import { Bookmark02Icon, CheckmarkBadge02Icon, Share08Icon } from '@hugeicons/react-pro';
+import { ApiResponse } from '@/types/apiResponse';
+import { fetchPlace } from '@/services/place';
+import { Place } from '@/types/place';
+import DescriptionShowMore from '@/app/components/descriptionShowMore';
+export default async function ViewExperiencePage({ params }: { params: { experienceId: string } }) {
+  const placeResponse: ApiResponse = await fetchPlace(params.experienceId);
+
+  if (!placeResponse.data) {
+    return;
+  }
+
+  const place: Place = placeResponse.data;
+
   return (
     <main className="grid grid-cols-12 gap-4">
-      <div className="col-span-12 mt-8 md:col-span-6 md:col-start-4">
+      <div className="col-span-12 mt-8 md:col-span-6 md:col-start-4 2xl:col-span-4 2xl:col-start-5">
         <div className="mb-3 inline-flex w-full justify-between">
           <div className="inline-flex">
-            <div className="mr-3.5 flex items-start">
-              <ArrowLeft02Icon size={24} variant="twotone" />
-            </div>
             <div className="flex flex-col">
-              <p className="mb-1 text-2xl font-black text-gray-700">Tigoni E-Bike Tours</p>
+              <p className="mb-1 text-2xl font-black text-gray-700">{place.title}</p>
               <p className="text-base text-gray-700">Feb 23, 10:00 AM - 5:00 PM</p>
             </div>
           </div>
@@ -109,12 +113,9 @@ export default function ViewExperiencePage() {
         </div>
         <div className="flex flex-col">
           <p className="mb-1 text-base font-black text-gray-600">About</p>
-          <p className="text-sm font-normal text-gray-600">
-            Resting nicely in Central Kenya, Mt Kenya is the pride of Kenyan skies. It is a fixture
-            in Kenyan history. It is a common name in Kenyan schools from a very young age. For
-            some, it is home. For others the mountain holds religious and spiritual relevance. It is
-            also a destination for one of the most adventurous yet affordable hiking trips...
-          </p>
+          <div className="text-sm font-normal text-gray-600">
+            <DescriptionShowMore text={place.description} />
+          </div>
         </div>
       </div>
     </main>

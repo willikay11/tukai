@@ -1,8 +1,8 @@
 import { PillsSkeleton } from '@/app/components/skeletons';
 
 import { Suspense } from 'react';
-import PlaceCategoryFilters from '@/app/home/components/PlaceCategoryFilters';
-import ListPlaces from '@/app/home/components/list';
+import PlaceCategoryFilters from '@/app/place/components/PlaceCategoryFilters';
+import ListPlaces from '@/app/place/components/list';
 import { fetchPlaceCategories } from '@/services/place';
 import { unstable_cache } from 'next/cache';
 
