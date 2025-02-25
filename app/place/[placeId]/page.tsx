@@ -1,25 +1,28 @@
 import Image from 'next/image';
 import { Bookmark02Icon, Share08Icon } from '@hugeicons/react-pro';
 import { ApiResponse } from '@/types/apiResponse';
-import { fetchPlace, fetchPlaceProperties } from '@/services/place';
-import { Place, PlaceProperty } from '@/types/place';
+import { fetchPlace, fetchPlaceProperties, fetchPlaceSocialLinks } from '@/services/place';
+import { Place, PlaceProperty, PlaceSocialLink } from '@/types/place';
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
 import { ExperiencePhoto } from '@/types/experiencePhoto';
 import Rating from '@/app/components/rating';
 import { Button } from '@/components/ui/button';
 import IconComponent from '@/app/components/iconComponent';
 import { Separator } from '@/components/ui/separator';
+import SocialLinks from '@/app/components/socialLinks';
+import GoogleMapComponent from '@/app/components/googleMap';
 export default async function ViewPlacePage({ params }: { params: { placeId: string } }) {
   const placeResponse: ApiResponse = await fetchPlace(params.placeId);
-
   const placePropertyResponse: ApiResponse = await fetchPlaceProperties(params.placeId);
+  const placeSocialLinksResponse: ApiResponse = await fetchPlaceSocialLinks(params.placeId);
 
   if (!placeResponse.data) {
     return;
   }
 
   const place: Place = placeResponse.data;
-  const placeProperties: PlaceProperty[] = placePropertyResponse.data.results;
+  const placeProperties: PlaceProperty[] = placePropertyResponse.data?.results;
+  const placeSocialLinks: PlaceSocialLink[] = placeSocialLinksResponse.data?.results;
 
   return (
     <main className="grid grid-cols-12 gap-4">
@@ -122,6 +125,13 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
         <div className="my-2.5">
           <Separator />
         </div>
+        <div className="mb-4">
+          <SocialLinks links={placeSocialLinks} />
+        </div>
+
+        {/*<div className="mb-4">*/}
+        {/*  <GoogleMapComponent />*/}
+        {/*</div>*/}
       </div>
     </main>
   );

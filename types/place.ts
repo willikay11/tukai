@@ -24,3 +24,10 @@ export type PlaceProperty = {
   icon?: string;
   canCopy?: boolean;
 };
+
+export type PlaceSocialLink = {
+  id: string;
+  platformName: string;
+  url: string;
+  icon?: string;
+};
