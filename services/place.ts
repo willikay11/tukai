@@ -28,6 +28,26 @@ export async function fetchPlaces(
   }
 }
 
+export async function fetchPlace(id?: string): Promise<ApiResponse> {
+  try {
+    const res = await api.get(`/v1/places/${id}`);
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+}
+
 export async function fetchPlaceCategories(): Promise<ApiResponse> {
   try {
     const res = await api.get('/v1/places/categories/?page_size=100');

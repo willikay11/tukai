@@ -6,6 +6,7 @@ import { Status } from '@/enums/status';
 export type Place = {
   id: string;
   title: string;
+  description: string;
   location: Location;
   category: PlaceCategory;
   photos: ExperiencePhoto[];

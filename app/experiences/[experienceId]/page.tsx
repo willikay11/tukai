@@ -1,21 +1,26 @@
 import Image from 'next/image';
-import {
-  ArrowLeft02Icon,
-  Bookmark02Icon,
-  CheckmarkBadge02Icon,
-  Share08Icon,
-} from '@hugeicons/react-pro';
-export default function ViewExperiencePage() {
+import { Bookmark02Icon, CheckmarkBadge02Icon, Share08Icon } from '@hugeicons/react-pro';
+import { ApiResponse } from '@/types/apiResponse';
+import { fetchPlace } from '@/services/place';
+import { Place } from '@/types/place';
+import DescriptionShowMore from '@/app/components/descriptionShowMore';
+import { ExperiencePhoto } from '@/types/experiencePhoto';
+export default async function ViewExperiencePage({ params }: { params: { experienceId: string } }) {
+  const placeResponse: ApiResponse = await fetchPlace(params.experienceId);
+
+  if (!placeResponse.data) {
+    return;
+  }
+
+  const place: Place = placeResponse.data;
+
   return (
     <main className="grid grid-cols-12 gap-4">
-      <div className="col-span-12 mt-8 md:col-span-6 md:col-start-4">
+      <div className="col-span-12 mt-8 md:col-span-6 md:col-start-4 2xl:col-span-4 2xl:col-start-5">
         <div className="mb-3 inline-flex w-full justify-between">
           <div className="inline-flex">
-            <div className="mr-3.5 flex items-start">
-              <ArrowLeft02Icon size={24} variant="twotone" />
-            </div>
             <div className="flex flex-col">
-              <p className="mb-1 text-2xl font-black text-gray-700">Tigoni E-Bike Tours</p>
+              <p className="mb-1 text-2xl font-black text-gray-700">{place.title}</p>
               <p className="text-base text-gray-700">Feb 23, 10:00 AM - 5:00 PM</p>
             </div>
           </div>
@@ -30,7 +35,10 @@ export default function ViewExperiencePage() {
         <div className="mb-4 flex flex-col">
           <div className="relative mb-2 aspect-square h-[16.25rem] w-full">
             <Image
-              src="/images/santorini.webp"
+              src={
+                place.photos.find((photo: ExperiencePhoto) => photo.isCover)?.photo ||
+                place.photos[0].photo
+              }
               alt=""
               quality={100}
               layout="fill"
@@ -41,7 +49,7 @@ export default function ViewExperiencePage() {
           <div className="grid grid-cols-3 gap-2">
             <div className="relative aspect-square h-[6.25rem] w-full">
               <Image
-                src="/images/lake.jpeg"
+                src={place.photos[1].photo}
                 alt=""
                 quality={100}
                 layout="fill"
@@ -52,7 +60,7 @@ export default function ViewExperiencePage() {
 
             <div className="relative aspect-square h-[6.25rem] w-full">
               <Image
-                src="/images/infinite-pool.webp"
+                src={place.photos[2].photo}
                 alt=""
                 quality={100}
                 layout="fill"
@@ -62,7 +70,7 @@ export default function ViewExperiencePage() {
 
             <div className="relative aspect-square h-[6.25rem] w-full">
               <Image
-                src="/images/man-bridge-running.webp"
+                src={place.photos[3].photo}
                 alt=""
                 quality={100}
                 layout="fill"
@@ -70,7 +78,9 @@ export default function ViewExperiencePage() {
                 className="rounded-br-[15px]"
               />
               <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
-                <span className="text-sm font-black text-white">+46 Photos</span>
+                <span className="text-sm font-black text-white">
+                  +{place.photos.length - 4} Photos
+                </span>
               </div>
             </div>
           </div>
@@ -109,12 +119,9 @@ export default function ViewExperiencePage() {
         </div>
         <div className="flex flex-col">
           <p className="mb-1 text-base font-black text-gray-600">About</p>
-          <p className="text-sm font-normal text-gray-600">
-            Resting nicely in Central Kenya, Mt Kenya is the pride of Kenyan skies. It is a fixture
-            in Kenyan history. It is a common name in Kenyan schools from a very young age. For
-            some, it is home. For others the mountain holds religious and spiritual relevance. It is
-            also a destination for one of the most adventurous yet affordable hiking trips...
-          </p>
+          <div className="text-sm font-normal text-gray-600">
+            <DescriptionShowMore text={place.description} maxLength={600} />
+          </div>
         </div>
       </div>
     </main>

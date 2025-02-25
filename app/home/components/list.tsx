@@ -84,7 +84,7 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
               transition={{ duration: 0.3 }}
               className="cursor-pointer"
             >
-              <Link href={`/experiences/${place.id}`}>
+              <Link target="_blank" href={`/experiences/${place.id}`}>
                 <SinglePlace place={place} />
               </Link>
             </motion.div>
