@@ -4,7 +4,6 @@ import { ApiResponse } from '@/types/apiResponse';
 import { fetchPlace } from '@/services/place';
 import { Place } from '@/types/place';
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
-import { ExperiencePhoto } from '@/types/experiencePhoto';
 export default async function ViewExperiencePage({ params }: { params: { experienceId: string } }) {
   const placeResponse: ApiResponse = await fetchPlace(params.experienceId);
 
@@ -35,10 +34,7 @@ export default async function ViewExperiencePage({ params }: { params: { experie
         <div className="mb-4 flex flex-col">
           <div className="relative mb-2 aspect-square h-[16.25rem] w-full">
             <Image
-              src={
-                place.photos.find((photo: ExperiencePhoto) => photo.isCover)?.photo ||
-                place.photos[0].photo
-              }
+              src="/images/santorini.webp"
               alt=""
               quality={100}
               layout="fill"
@@ -49,7 +45,7 @@ export default async function ViewExperiencePage({ params }: { params: { experie
           <div className="grid grid-cols-3 gap-2">
             <div className="relative aspect-square h-[6.25rem] w-full">
               <Image
-                src={place.photos[1].photo}
+                src="/images/lake.jpeg"
                 alt=""
                 quality={100}
                 layout="fill"
@@ -60,7 +56,7 @@ export default async function ViewExperiencePage({ params }: { params: { experie
 
             <div className="relative aspect-square h-[6.25rem] w-full">
               <Image
-                src={place.photos[2].photo}
+                src="/images/infinite-pool.webp"
                 alt=""
                 quality={100}
                 layout="fill"
@@ -70,7 +66,7 @@ export default async function ViewExperiencePage({ params }: { params: { experie
 
             <div className="relative aspect-square h-[6.25rem] w-full">
               <Image
-                src={place.photos[3].photo}
+                src="/images/man-bridge-running.webp"
                 alt=""
                 quality={100}
                 layout="fill"
@@ -78,9 +74,7 @@ export default async function ViewExperiencePage({ params }: { params: { experie
                 className="rounded-br-[15px]"
               />
               <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
-                <span className="text-sm font-black text-white">
-                  +{place.photos.length - 4} Photos
-                </span>
+                <span className="text-sm font-black text-white">+46 Photos</span>
               </div>
             </div>
           </div>
@@ -120,7 +114,7 @@ export default async function ViewExperiencePage({ params }: { params: { experie
         <div className="flex flex-col">
           <p className="mb-1 text-base font-black text-gray-600">About</p>
           <div className="text-sm font-normal text-gray-600">
-            <DescriptionShowMore text={place.description} maxLength={600} />
+            <DescriptionShowMore text={place.description} />
           </div>
         </div>
       </div>

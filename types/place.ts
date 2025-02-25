@@ -16,3 +16,11 @@ export type Place = {
   status: Status;
   dateCreated: string;
 };
+
+export type PlaceProperty = {
+  id: string;
+  key: string;
+  value: string;
+  icon?: string;
+  canCopy?: boolean;
+};
