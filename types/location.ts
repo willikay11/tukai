@@ -3,7 +3,7 @@ export type Location = {
   name: string;
   pointLat: number;
   pointLong: number;
-  point: string;
+  point: { type: string; coordinates: [number, number] };
   formattedAddress: string;
   street: string;
   city: string;

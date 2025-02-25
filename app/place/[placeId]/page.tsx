@@ -129,9 +129,12 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
           <SocialLinks links={placeSocialLinks} />
         </div>
 
-        {/*<div className="mb-4">*/}
-        {/*  <GoogleMapComponent />*/}
-        {/*</div>*/}
+        <div className="mb-4 rounded-[8px]">
+          <GoogleMapComponent
+            lat={place.location.point.coordinates[1]}
+            lng={place.location.point.coordinates[0]}
+          />
+        </div>
       </div>
     </main>
   );
