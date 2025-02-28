@@ -1,7 +1,9 @@
 'use client';
 
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, OverlayView } from '@react-google-maps/api';
 import { useEffect, useState } from 'react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { MapPinpoint02Icon } from '@hugeicons-pro/core-twotone-rounded';
 
 const containerStyle = {
   width: '100%',
@@ -26,7 +28,13 @@ export default function GoogleMapComponent({ lat, lng }: { lat?: number; lng?: n
   return (
     <LoadScript googleMapsApiKey={API_KEY}>
       <GoogleMap mapContainerStyle={containerStyle} center={{ lat, lng }} zoom={18}>
-        <Marker position={{ lat, lng }} />
+        <OverlayView position={{ lat, lng }} mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
+          <div className="absolute flex h-56 w-56 -translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-red-600 bg-opacity-20">
+            <div className="flex h-28 w-28 items-center justify-center rounded-full bg-red-600">
+              <HugeiconsIcon icon={MapPinpoint02Icon} className="text-white" size={48} />
+            </div>
+          </div>
+        </OverlayView>
       </GoogleMap>
     </LoadScript>
   );
