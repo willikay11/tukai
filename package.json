@@ -11,7 +11,12 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.1.2",
+    "@hugeicons-pro/core-solid-rounded": "^1.0.10",
+    "@hugeicons-pro/core-solid-sharp": "^1.0.10",
+    "@hugeicons-pro/core-twotone-rounded": "^1.0.10",
+    "@hugeicons/react": "^1.0.4",
     "@hugeicons/react-pro": "^0.3.2",
+    "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-separator": "^1.1.2",
     "@radix-ui/react-slot": "^1.1.2",
     "@react-google-maps/api": "^2.20.6",

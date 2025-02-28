@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Bookmark02Icon, Share08Icon } from '@hugeicons/react-pro';
+import { Bookmark02Icon, CheckmarkBadge02Icon, Share08Icon } from '@hugeicons/react-pro';
 import { ApiResponse } from '@/types/apiResponse';
 import { fetchPlace, fetchPlaceProperties, fetchPlaceSocialLinks } from '@/services/place';
 import { Place, PlaceProperty, PlaceSocialLink } from '@/types/place';
@@ -63,48 +63,61 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
             />
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <div className="relative aspect-square h-[6.25rem] w-full">
-              <Image
-                src={place.photos[1].photo}
-                alt=""
-                quality={100}
-                layout="fill"
-                objectFit="cover"
-                className="rounded-bl-[15px]"
-              />
-            </div>
-
-            <div className="relative aspect-square h-[6.25rem] w-full">
-              <Image
-                src={place.photos[2].photo}
-                alt=""
-                quality={100}
-                layout="fill"
-                objectFit="cover"
-              />
-            </div>
-
-            <div className="relative aspect-square h-[6.25rem] w-full">
-              <Image
-                src={place.photos[3].photo}
-                alt=""
-                quality={100}
-                layout="fill"
-                objectFit="cover"
-                className="rounded-br-[15px]"
-              />
-              <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
-                <span className="text-sm font-black text-white">
-                  +{place.photos.length - 4} Photos
-                </span>
+            {place.photos[1]?.photo && (
+              <div className="relative aspect-square h-[6.25rem] w-full">
+                <Image
+                  src={place.photos[1].photo}
+                  alt=""
+                  quality={100}
+                  layout="fill"
+                  objectFit="cover"
+                  className="rounded-bl-[15px]"
+                />
               </div>
-            </div>
+            )}
+
+            {place.photos[2]?.photo && (
+              <div className="relative aspect-square h-[6.25rem] w-full">
+                <Image
+                  src={place.photos[2].photo}
+                  alt=""
+                  quality={100}
+                  layout="fill"
+                  objectFit="cover"
+                />
+              </div>
+            )}
+
+            {place.photos[3]?.photo && (
+              <div className="relative aspect-square h-[6.25rem] w-full">
+                <Image
+                  src={place.photos[3].photo}
+                  alt=""
+                  quality={100}
+                  layout="fill"
+                  objectFit="cover"
+                  className="rounded-br-[15px]"
+                />
+                <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
+                  <span className="text-sm font-black text-white">
+                    +{place.photos.length - 4} Photos
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className="mb-4 flex flex-col">
           <p className="mb-1 text-base font-black text-gray-600">About</p>
           <div className="text-sm font-normal text-gray-600">
-            <DescriptionShowMore text={place.description} maxLength={600} />
+            <DescriptionShowMore
+              photo={
+                place.photos.find((photo: ExperiencePhoto) => photo.isCover)?.photo ||
+                place.photos[0].photo
+              }
+              text={place.description}
+              maxLength={600}
+            />
           </div>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -134,6 +147,50 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
             lat={place.location.point.coordinates[1]}
             lng={place.location.point.coordinates[0]}
           />
+        </div>
+      </div>
+      <div className="col-span-12 bg-gray-100 py-4">
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-12 md:col-start-4 2xl:col-start-5">
+            <p className="mb-2.5 text-base font-semibold text-gray-800">
+              Local Guides - <span className="font-normal">coming soon</span>
+            </p>
+            <div className="inline-flex">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="mr-4 w-fit rounded-[8px] bg-white px-4 py-2">
+                  <div className="flex flex-row">
+                    <div className="relative mr-2 flex aspect-square h-20 w-20 flex-col">
+                      <Image
+                        src="/images/two.jpg"
+                        alt=""
+                        quality={100}
+                        layout="fill"
+                        objectFit="cover"
+                        className="rounded-[8px]"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <p className="mb-1.5 inline-flex text-sm font-black text-gray-800">
+                        <span>Cameron Williamson</span>
+                        <CheckmarkBadge02Icon
+                          size={16}
+                          variant="solid"
+                          className="text-green-600"
+                        />
+                      </p>
+                      <div className="mb-1.5 inline-flex items-center">
+                        <Rating rating={4.5} />
+                        <span className="text-sm font-medium">4.5</span>
+                        <div className="mx-2 h-[4px] w-[4px] rounded-full bg-gray-100" />
+                        <span className="text-sm font-medium">54 Reviews</span>
+                      </div>
+                      <p className="text-sm font-medium">Ksh. 20,000.00/person</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </main>
