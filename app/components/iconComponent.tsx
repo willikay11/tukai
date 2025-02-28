@@ -1,10 +1,8 @@
 'use client';
 
-// import * as HugeIcons from '@hugeicons/react-pro';
 import * as Icons from '@hugeicons-pro/core-twotone-rounded';
 
 import { HugeiconsIcon } from '@hugeicons/react';
-import { HugeiconsProps } from '@hugeicons/react-pro';
 import React from 'react';
 
 type IconName = keyof typeof Icons;
