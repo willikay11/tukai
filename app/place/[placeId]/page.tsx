@@ -171,7 +171,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
                     </div>
                     <div className="flex flex-col">
                       <p className="mb-1.5 inline-flex text-sm font-black text-gray-800">
-                        <span>Cameron Williamson</span>
+                        <span className="mr-2">Cameron Williamson</span>
                         <CheckmarkBadge02Icon
                           size={16}
                           variant="solid"
