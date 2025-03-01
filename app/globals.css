@@ -58,7 +58,7 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-input[type=number]{
+input[type='number'] {
   -moz-appearance: textfield;
 }
 
@@ -95,8 +95,6 @@ input[type=number]{
     opacity: 0;
   }
 }
-
-
 
 @layer base {
   :root {
@@ -153,8 +151,6 @@ input[type=number]{
     --chart-5: 340 75% 55%;
   }
 }
-
-
 
 @layer base {
   * {

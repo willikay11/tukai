@@ -1,7 +1,8 @@
-import { ExperiencePhoto } from '@/types/experiencePhoto';
+import { Photo } from '@/types/photo';
 import { PlaceCategory } from '@/types/placeCategory';
 import { Location } from '@/types/location';
 import { Status } from '@/enums/status';
+import { User } from './user';
 
 export type Place = {
   id: string;
@@ -9,7 +10,7 @@ export type Place = {
   description: string;
   location: Location;
   category: PlaceCategory;
-  photos: ExperiencePhoto[];
+  photos: Photo[];
   totalReviews: number;
   averageRating: number;
   isBookmarked: boolean;
@@ -30,4 +31,16 @@ export type PlaceSocialLink = {
   platformName: string;
   url: string;
   icon?: string;
+};
+
+export type PlaceReview = {
+  id: string;
+  title: string;
+  description: string;
+  dateCreated: string;
+  reviewer: User;
+  totalLikes: number;
+  totalComments: number;
+  rating: number;
+  photos: Photo[];
 };

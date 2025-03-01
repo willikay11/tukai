@@ -6,7 +6,7 @@ import sanitizeHtml from 'sanitize-html';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { ExperiencePhoto } from '@/types/experiencePhoto';
+import { ExperiencePhoto } from '@/types/photo';
 
 const DescriptionShowMore = ({
   photo,

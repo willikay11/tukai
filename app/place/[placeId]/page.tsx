@@ -4,13 +4,14 @@ import { ApiResponse } from '@/types/apiResponse';
 import { fetchPlace, fetchPlaceProperties, fetchPlaceSocialLinks } from '@/services/place';
 import { Place, PlaceProperty, PlaceSocialLink } from '@/types/place';
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
-import { ExperiencePhoto } from '@/types/experiencePhoto';
+import { Photo } from '@/types/photo';
 import Rating from '@/app/components/rating';
 import { Button } from '@/components/ui/button';
 import IconComponent from '@/app/components/iconComponent';
 import { Separator } from '@/components/ui/separator';
 import SocialLinks from '@/app/components/socialLinks';
 import GoogleMapComponent from '@/app/components/googleMap';
+import PlaceTabs from '@/app/place/components/placeTabs';
 export default async function ViewPlacePage({ params }: { params: { placeId: string } }) {
   const placeResponse: ApiResponse = await fetchPlace(params.placeId);
   const placePropertyResponse: ApiResponse = await fetchPlaceProperties(params.placeId);
@@ -52,8 +53,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
           <div className="relative mb-2 aspect-square h-[16.25rem] w-full">
             <Image
               src={
-                place.photos.find((photo: ExperiencePhoto) => photo.isCover)?.photo ||
-                place.photos[0].photo
+                place.photos.find((photo: Photo) => photo.isCover)?.photo || place.photos[0].photo
               }
               alt=""
               quality={100}
@@ -112,8 +112,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
           <div className="text-sm font-normal text-gray-600">
             <DescriptionShowMore
               photo={
-                place.photos.find((photo: ExperiencePhoto) => photo.isCover)?.photo ||
-                place.photos[0].photo
+                place.photos.find((photo: Photo) => photo.isCover)?.photo || place.photos[0].photo
               }
               text={place.description}
               maxLength={600}
@@ -192,6 +191,9 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
             </div>
           </div>
         </div>
+      </div>
+      <div className="col-span-12 md:col-span-6 md:col-start-4 2xl:col-span-4 2xl:col-start-5">
+        <PlaceTabs placeId={params.placeId} />
       </div>
     </main>
   );
