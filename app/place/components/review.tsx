@@ -7,6 +7,9 @@ import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { PlaceReview } from '@/types/place';
 import moment from 'moment';
+import ImageCarousel from '@/components/ui/imageCarousel';
+import { Photo } from '@/types/photo';
+
 export default function Review({ review }: { review: PlaceReview }) {
   return (
     <div className="flex flex-col">
@@ -39,6 +42,15 @@ export default function Review({ review }: { review: PlaceReview }) {
           </Button>
         </div>
       </div>
+      {review.photos.length > 0 && (
+        <div className="mt-2 w-full">
+          <ImageCarousel
+            imageHeight="h-96"
+            images={review.photos.map((photo: Photo) => photo.photo)}
+          />
+        </div>
+      )}
+      {review.title && <p className="mt-2 text-sm font-semibold text-gray-700">{review?.title}</p>}
       <div className="mt-2">
         <p className="text-sm font-normal text-gray-500">{review.description}</p>
       </div>
