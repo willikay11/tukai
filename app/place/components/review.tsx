@@ -9,6 +9,7 @@ import { PlaceReview } from '@/types/place';
 import moment from 'moment';
 import ImageCarousel from '@/components/ui/imageCarousel';
 import { Photo } from '@/types/photo';
+import IconComponent from '@/app/components/iconComponent';
 
 export default function Review({ review }: { review: PlaceReview }) {
   return (
@@ -38,7 +39,7 @@ export default function Review({ review }: { review: PlaceReview }) {
         </div>
         <div className="flex flex-col">
           <Button variant="text">
-            <MoreHorizontalCircle01Icon size={20} className="text-gray-500" />
+            <IconComponent iconName="MoreHorizontalCircle01Icon" size={20} />
           </Button>
         </div>
       </div>

@@ -6,7 +6,6 @@ import sanitizeHtml from 'sanitize-html';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { ExperiencePhoto } from '@/types/photo';
 
 const DescriptionShowMore = ({
   photo,
@@ -79,6 +78,7 @@ const DescriptionShowMore = ({
                   className="overflow-y-auto p-6"
                   style={{ maxHeight: 'calc(100vh - 5rem - 16.25rem)' }}
                 >
+                  <p className="mb-1 text-base font-black text-gray-600">About</p>
                   <div dangerouslySetInnerHTML={{ __html: safeText }} />
                 </div>
               </motion.div>
