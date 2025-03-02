@@ -16,8 +16,7 @@ type placeReviewsProps = {
 export default function Reviews({ placeId }: placeReviewsProps) {
   const { data: reviews } = usePlaceReviews(placeId);
 
-  console.log(reviews);
   return reviews?.data?.results?.map((review: PlaceReview) => (
-    <Review key={review.id} review={review} />
+    <Review key={review.id} placeId={placeId} review={review} />
   ));
 }

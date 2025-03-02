@@ -127,3 +127,47 @@ export async function fetchPlaceReviews(id: string): Promise<ApiResponse> {
     };
   }
 }
+
+export async function fetchPlaceReviewComments(id: string, reviewId: string): Promise<ApiResponse> {
+  try {
+    const res = await api.get(`/v1/places/${id}/reviews/${reviewId}/comments/`);
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+}
+
+export async function createPlaceReviewComment(
+  id: string,
+  reviewId: string,
+  data: any,
+): Promise<ApiResponse> {
+  try {
+    const res = await api.post(`/v1/places/${id}/reviews/${reviewId}/comments/`, data);
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+}

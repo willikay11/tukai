@@ -1,5 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
-import { fetchPlaces, fetchPlaceCategories, fetchPlaceReviews } from '@/services/place';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  fetchPlaces,
+  fetchPlaceCategories,
+  fetchPlaceReviews,
+  fetchPlaceReviewComments,
+  createPlaceReviewComment,
+} from '@/services/place';
 
 export const usePlaces = ({
   categoryId,
@@ -28,5 +34,27 @@ export const usePlaceReviews = (id: string) => {
   return useQuery({
     queryKey: ['placeReviews', id],
     queryFn: async () => await fetchPlaceReviews(id),
+  });
+};
+
+export const usePlaceReviewComments = (placeId: string, reviewId: string, enabled: boolean) => {
+  return useQuery({
+    queryKey: ['placeReviewComments', placeId, reviewId],
+    queryFn: async () => await fetchPlaceReviewComments(placeId, reviewId),
+    enabled,
+  });
+};
+
+export const useCreatePlaceReviewComment = (
+  placeId: string,
+  reviewId: string,
+  data?: { post_id: string; commenter_id: string; content: string },
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: any) => await createPlaceReviewComment(placeId, reviewId, data),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviewComments', placeId, reviewId] });
+    },
   });
 };

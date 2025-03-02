@@ -57,11 +57,10 @@ const DescriptionShowMore = ({
             <div className="col-span-12 md:col-span-6 md:col-start-4 2xl:col-span-4 2xl:col-start-5">
               <motion.div
                 initial={{ y: '100%', opacity: 0 }}
-                animate={{ y: '5rem', opacity: 1 }}
+                animate={{ y: '0rem', opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 120, damping: 15 }}
-                className="relative h-full w-full rounded-2xl bg-white shadow-xl"
-                // style={{ maxHeight: 'calc(100vh - 5rem)', overflow: 'hidden' }}
+                className="relative h-full w-full rounded-t-2xl bg-white shadow-xl"
               >
                 <div className="relative aspect-square h-[16.25rem] w-full">
                   <Image
