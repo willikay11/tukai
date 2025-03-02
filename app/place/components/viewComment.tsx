@@ -1,6 +1,5 @@
 'use client';
 
-import IconComponent from '@/app/components/iconComponent';
 import { Button } from '@/components/ui/button';
 import { Comment } from '@/types/comment';
 import Image from 'next/image';

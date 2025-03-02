@@ -12,9 +12,19 @@ import { Photo } from '@/types/photo';
 import IconComponent from '@/app/components/iconComponent';
 import AddReviewComment from './addReviewComment';
 import { useState } from 'react';
+import { useLikePlaceReview } from '@/hooks/places';
 
 export default function Review({ placeId, review }: { placeId: string; review: PlaceReview }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isLiked, setIsLiked] = useState(false);
+
+  const { mutate: likeReview } = useLikePlaceReview(placeId, review.id);
+
+  const handleLikeReview = () => {
+    setIsLiked(!isLiked);
+    likeReview();
+  };
+
   return (
     <>
       <AddReviewComment
@@ -68,9 +78,15 @@ export default function Review({ placeId, review }: { placeId: string; review: P
           <p className="text-sm font-normal text-gray-500">{review.description}</p>
         </div>
         <div className="mt-2 flex inline-flex">
-          <Button variant="text" className="mr-3">
-            <FavouriteIcon size={20} className="text-gray-500" />
-            <span className="text-sm font-medium">{review.totalLikes} Likes</span>
+          <Button variant="text" className="mr-3" onClick={handleLikeReview}>
+            <FavouriteIcon
+              variant={isLiked ? 'solid' : 'twotone'}
+              size={40}
+              className={`${isLiked ? 'text-red-500' : 'text-gray-500'}`}
+            />
+            <span className="text-sm font-medium">
+              {Math.max(0, review?.totalLikes + (isLiked ? 1 : -1))} Likes
+            </span>
           </Button>
           <Button variant="text" onClick={() => setIsOpen(true)}>
             <Message02Icon size={20} />

@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  usePlaceReviewComments,
-  useCreatePlaceReviewComment,
-  useLikePlaceReviewComment,
-} from '@/hooks/places';
+import { usePlaceReviewComments, useCreatePlaceReviewComment } from '@/hooks/places';
 import ViewComment from './viewComment';
 import { Comment } from '@/types/comment';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -45,7 +41,6 @@ export default function Comments({ placeId, reviewId }: { placeId: string; revie
     }
   }, [isSuccess]);
 
-  console.log(comments);
   return (
     <div>
       <div className="px-16">
@@ -60,7 +55,7 @@ export default function Comments({ placeId, reviewId }: { placeId: string; revie
           <div className="mx-2 h-[8px] w-[8px] rounded-full bg-gray-300" />
           <p className="text-xl font-semibold text-gray-700">{comments?.data?.count} Comments</p>
         </div>
-        <div className="max-h-64 overflow-y-auto">
+        <div className="max-h-96 overflow-y-auto">
           {comments?.data?.results?.map((comment: Comment) => (
             <ViewComment key={comment.id} comment={comment} placeId={placeId} reviewId={reviewId} />
           ))}

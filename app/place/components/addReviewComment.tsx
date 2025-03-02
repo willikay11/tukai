@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { usePlaceReviewComments } from '@/hooks/places';
 import Comments from './comments';
 
 type addReviewCommentProps = {

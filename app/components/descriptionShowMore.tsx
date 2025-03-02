@@ -60,7 +60,7 @@ const DescriptionShowMore = ({
                 animate={{ y: '0rem', opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 120, damping: 15 }}
-                className="relative h-full w-full rounded-t-2xl bg-white shadow-xl"
+                className="relative mt-20 h-full w-full rounded-t-2xl bg-white shadow-xl"
               >
                 <div className="relative aspect-square h-[16.25rem] w-full">
                   <Image
@@ -73,10 +73,7 @@ const DescriptionShowMore = ({
                   />
                 </div>
 
-                <div
-                  className="overflow-y-auto p-6"
-                  style={{ maxHeight: 'calc(100vh - 5rem - 16.25rem)' }}
-                >
+                <div className="max overflow-y-auto p-6">
                   <p className="mb-1 text-base font-black text-gray-600">About</p>
                   <div dangerouslySetInnerHTML={{ __html: safeText }} />
                 </div>

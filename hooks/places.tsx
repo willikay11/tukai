@@ -6,6 +6,7 @@ import {
   fetchPlaceReviewComments,
   createPlaceReviewComment,
   likePlaceReviewComment,
+  likePlaceReview,
 } from '@/services/place';
 
 export const usePlaces = ({
@@ -60,11 +61,7 @@ export const useCreatePlaceReviewComment = (
   });
 };
 
-export const useLikePlaceReviewComment = (
-  placeId: string,
-  reviewId: string,
-  commentId: string,
-) => {
+export const useLikePlaceReviewComment = (placeId: string, reviewId: string, commentId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () =>
@@ -75,6 +72,20 @@ export const useLikePlaceReviewComment = (
       }),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['placeReviewComments', placeId, reviewId] });
+    },
+  });
+};
+
+export const useLikePlaceReview = (placeId: string, reviewId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () =>
+      await likePlaceReview(placeId, reviewId, {
+        place_id: placeId,
+        review_id: reviewId,
+      }),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
     },
   });
 };
