@@ -5,6 +5,7 @@ import {
   fetchPlaceReviews,
   fetchPlaceReviewComments,
   createPlaceReviewComment,
+  likePlaceReviewComment,
 } from '@/services/place';
 
 export const usePlaces = ({
@@ -53,6 +54,25 @@ export const useCreatePlaceReviewComment = (
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: any) => await createPlaceReviewComment(placeId, reviewId, data),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviewComments', placeId, reviewId] });
+    },
+  });
+};
+
+export const useLikePlaceReviewComment = (
+  placeId: string,
+  reviewId: string,
+  commentId: string,
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () =>
+      await likePlaceReviewComment(placeId, reviewId, commentId, {
+        place_id: placeId,
+        review_id: reviewId,
+        comment_id: commentId,
+      }),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['placeReviewComments', placeId, reviewId] });
     },

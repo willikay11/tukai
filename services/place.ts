@@ -171,3 +171,31 @@ export async function createPlaceReviewComment(
     };
   }
 }
+
+export async function likePlaceReviewComment(
+  id: string,
+  reviewId: string,
+  commentId?: string,
+  data?: any,
+): Promise<ApiResponse> {
+  try {
+    console.log(data);
+    const res = await api.post(
+      `/v1/places/${id}/reviews/${reviewId}/comments/${commentId}/like/`,
+      data,
+    );
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+    };
+  }
+}
