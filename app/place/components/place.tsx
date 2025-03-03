@@ -4,6 +4,7 @@ import { Bookmark02Icon, StarIcon } from '@hugeicons/react-pro';
 import { useState } from 'react';
 import clsx from 'clsx';
 import { Place } from '@/types/place';
+import ImageCarousel from '@/components/ui/imageCarousel';
 
 export default function SinglePlace({ place }: { place: Place }) {
   const [bookmarked, setBookmarked] = useState<boolean>(false);
@@ -14,16 +15,7 @@ export default function SinglePlace({ place }: { place: Place }) {
       <div className="relative mb-2 flex flex-col">
         <div className="relative aspect-square w-full overflow-hidden rounded-[5px]">
           {!hasError ? (
-            <Image
-              src={
-                place.photos.find((photo) => photo.isCover)?.photo ?? place.photos[0]?.photo ?? ''
-              }
-              alt={place.title}
-              quality={100}
-              layout="fill"
-              objectFit="cover"
-              onError={() => setHasError(true)}
-            />
+            <ImageCarousel images={place.photos.map((photo) => photo.photo)} imageHeight="h-full" />
           ) : (
             <div className="h-full w-full bg-gray-50" />
           )}
