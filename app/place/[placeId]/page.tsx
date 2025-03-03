@@ -4,13 +4,17 @@ import { ApiResponse } from '@/types/apiResponse';
 import { fetchPlace, fetchPlaceProperties, fetchPlaceSocialLinks } from '@/services/place';
 import { Place, PlaceProperty, PlaceSocialLink } from '@/types/place';
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
-import { ExperiencePhoto } from '@/types/experiencePhoto';
+import { Photo } from '@/types/photo';
 import Rating from '@/app/components/rating';
 import { Button } from '@/components/ui/button';
 import IconComponent from '@/app/components/iconComponent';
 import { Separator } from '@/components/ui/separator';
 import SocialLinks from '@/app/components/socialLinks';
 import GoogleMapComponent from '@/app/components/googleMap';
+import PlaceTabs from '@/app/place/components/placeTabs';
+import AddReview from '../components/addReview';
+import BookmarkPlace from '../components/bookmarkPlace';
+
 export default async function ViewPlacePage({ params }: { params: { placeId: string } }) {
   const placeResponse: ApiResponse = await fetchPlace(params.placeId);
   const placePropertyResponse: ApiResponse = await fetchPlaceProperties(params.placeId);
@@ -40,7 +44,11 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
           </div>
           <div className="inline-flex items-start">
             <div className="inline-flex h-full items-center justify-center">
-              <Bookmark02Icon size={16} variant="twotone" className="text-primary" />
+              <BookmarkPlace
+                placeId={params.placeId}
+                userId="058b7853-c5f4-4e43-b356-da1e8ce05f6e"
+                bookmarked={place.isBookmarked}
+              />
               <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" />
               <Share08Icon size={16} variant="twotone" className="text-primary" />
               <div className="mr-2" />
@@ -52,8 +60,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
           <div className="relative mb-2 aspect-square h-[16.25rem] w-full">
             <Image
               src={
-                place.photos.find((photo: ExperiencePhoto) => photo.isCover)?.photo ||
-                place.photos[0].photo
+                place.photos.find((photo: Photo) => photo.isCover)?.photo || place.photos[0].photo
               }
               alt=""
               quality={100}
@@ -112,8 +119,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
           <div className="text-sm font-normal text-gray-600">
             <DescriptionShowMore
               photo={
-                place.photos.find((photo: ExperiencePhoto) => photo.isCover)?.photo ||
-                place.photos[0].photo
+                place.photos.find((photo: Photo) => photo.isCover)?.photo || place.photos[0].photo
               }
               text={place.description}
               maxLength={600}
@@ -192,6 +198,9 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
             </div>
           </div>
         </div>
+      </div>
+      <div className="col-span-12 md:col-span-6 md:col-start-4 2xl:col-span-4 2xl:col-start-5">
+        <PlaceTabs placeId={params.placeId} />
       </div>
     </main>
   );

@@ -107,3 +107,156 @@ export async function fetchPlaceSocialLinks(id: string): Promise<ApiResponse> {
     };
   }
 }
+
+export async function fetchPlaceReviews(id: string): Promise<ApiResponse> {
+  try {
+    const res = await api.get(`/v1/places/${id}/reviews/`);
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+}
+
+export async function fetchPlaceReviewComments(id: string, reviewId: string): Promise<ApiResponse> {
+  try {
+    const res = await api.get(`/v1/places/${id}/reviews/${reviewId}/comments/`);
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+}
+
+export async function createPlaceReviewComment(
+  id: string,
+  reviewId: string,
+  data: any,
+): Promise<ApiResponse> {
+  try {
+    const res = await api.post(`/v1/places/${id}/reviews/${reviewId}/comments/`, data);
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+}
+
+export async function likePlaceReviewComment(
+  id: string,
+  reviewId: string,
+  commentId?: string,
+  data?: any,
+): Promise<ApiResponse> {
+  try {
+    const res = await api.post(
+      `/v1/places/${id}/reviews/${reviewId}/comments/${commentId}/like/`,
+      data,
+    );
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+    };
+  }
+}
+
+export async function likePlaceReview(
+  id: string,
+  reviewId: string,
+  data: any,
+): Promise<ApiResponse> {
+  try {
+    console.log(data);
+    const res = await api.post(`/v1/places/${id}/reviews/${reviewId}/like/`, data);
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+    };
+  }
+}
+
+export async function bookmarkPlace(id: string, data: any): Promise<ApiResponse> {
+  try {
+    const res = await api.post(`/v1/places/${id}/bookmark/`, data);
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+    };
+  }
+}
+
+export async function unbookmarkPlace(id: string, data: any): Promise<ApiResponse> {
+  try {
+    const res = await api.delete(`/v1/places/${id}/unbookmark/`, data);
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+    };
+  }
+}

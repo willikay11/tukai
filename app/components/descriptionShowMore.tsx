@@ -6,7 +6,6 @@ import sanitizeHtml from 'sanitize-html';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { ExperiencePhoto } from '@/types/experiencePhoto';
 
 const DescriptionShowMore = ({
   photo,
@@ -58,11 +57,10 @@ const DescriptionShowMore = ({
             <div className="col-span-12 md:col-span-6 md:col-start-4 2xl:col-span-4 2xl:col-start-5">
               <motion.div
                 initial={{ y: '100%', opacity: 0 }}
-                animate={{ y: '5rem', opacity: 1 }}
+                animate={{ y: '0rem', opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 120, damping: 15 }}
-                className="relative h-full w-full rounded-2xl bg-white shadow-xl"
-                // style={{ maxHeight: 'calc(100vh - 5rem)', overflow: 'hidden' }}
+                className="relative mt-20 h-full w-full rounded-t-2xl bg-white shadow-xl"
               >
                 <div className="relative aspect-square h-[16.25rem] w-full">
                   <Image
@@ -75,10 +73,8 @@ const DescriptionShowMore = ({
                   />
                 </div>
 
-                <div
-                  className="overflow-y-auto p-6"
-                  style={{ maxHeight: 'calc(100vh - 5rem - 16.25rem)' }}
-                >
+                <div className="max overflow-y-auto p-6">
+                  <p className="mb-1 text-base font-black text-gray-600">About</p>
                   <div dangerouslySetInnerHTML={{ __html: safeText }} />
                 </div>
               </motion.div>
