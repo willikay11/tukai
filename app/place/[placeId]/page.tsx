@@ -12,6 +12,9 @@ import { Separator } from '@/components/ui/separator';
 import SocialLinks from '@/app/components/socialLinks';
 import GoogleMapComponent from '@/app/components/googleMap';
 import PlaceTabs from '@/app/place/components/placeTabs';
+import AddReview from '../components/addReview';
+import BookmarkPlace from '../components/bookmarkPlace';
+
 export default async function ViewPlacePage({ params }: { params: { placeId: string } }) {
   const placeResponse: ApiResponse = await fetchPlace(params.placeId);
   const placePropertyResponse: ApiResponse = await fetchPlaceProperties(params.placeId);
@@ -41,7 +44,11 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
           </div>
           <div className="inline-flex items-start">
             <div className="inline-flex h-full items-center justify-center">
-              <Bookmark02Icon size={16} variant="twotone" className="text-primary" />
+              <BookmarkPlace
+                placeId={params.placeId}
+                userId="058b7853-c5f4-4e43-b356-da1e8ce05f6e"
+                bookmarked={place.isBookmarked}
+              />
               <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" />
               <Share08Icon size={16} variant="twotone" className="text-primary" />
               <div className="mr-2" />
