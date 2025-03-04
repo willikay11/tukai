@@ -40,7 +40,7 @@ export default function AddReviewComment({
               animate={{ y: '0rem', opacity: 1 }}
               exit={{ y: '100%', opacity: 0 }}
               transition={{ type: 'spring', stiffness: 120, damping: 15 }}
-              className="absolute bottom-0 h-fit min-h-48 w-full rounded-t-2xl bg-white pb-4 pt-8 shadow-xl"
+              className="absolute bottom-0 h-fit min-h-48 w-full rounded-t-2xl bg-white px-16 pb-4 pt-8 shadow-xl"
             >
               <Comments placeId={placeId} reviewId={reviewId} />
             </motion.div>

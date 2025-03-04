@@ -9,10 +9,12 @@ export default function BookmarkPlace({
   placeId,
   userId,
   bookmarked,
+  className = 'text-gray-500',
 }: {
   placeId: string;
   userId: string;
   bookmarked: boolean;
+  className?: string;
 }) {
   const [isBookmarked, setIsBookmarked] = useState(bookmarked);
   const { mutate: bookmarkPlace } = useBookmarkPlace(placeId, userId);
@@ -21,16 +23,19 @@ export default function BookmarkPlace({
   return (
     <Button
       variant="text"
-      className="mr-1"
-      onClick={() => {
-        setIsBookmarked(!isBookmarked);
+      className="h-fit"
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        e.nativeEvent.stopImmediatePropagation();
         isBookmarked ? unbookmarkPlace() : bookmarkPlace();
+        setIsBookmarked(!isBookmarked);
       }}
     >
       <Bookmark02Icon
         size={16}
         variant={isBookmarked ? 'solid' : 'twotone'}
-        className={`${isBookmarked ? 'text-red-500' : 'text-gray-500'}`}
+        className={`${isBookmarked ? 'text-red-500' : className}`}
       />
     </Button>
   );
