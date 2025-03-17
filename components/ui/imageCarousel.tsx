@@ -23,7 +23,9 @@ const ImageCarousel = ({ images, imageHeight }: { images: string[]; imageHeight:
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index}>
-              <TukaiImage src={image} alt={`Image ${index + 1}`} />
+              <div className={cn('relative aspect-square w-full')}>
+                <TukaiImage src={image} alt={`Image ${index + 1}`} />
+              </div>
             </CarouselItem>
           ))}
         </CarouselContent>

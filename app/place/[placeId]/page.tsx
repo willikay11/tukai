@@ -12,6 +12,7 @@ import SocialLinks from '@/app/components/socialLinks';
 import GoogleMapComponent from '@/app/components/googleMap';
 import PlaceTabs from '@/app/place/components/placeTabs';
 import PlaceActions from '../components/placeActions';
+import PhotoGallery from '@/components/ui/PhotoGallery';
 
 export default async function ViewPlacePage({ params }: { params: { placeId: string } }) {
   const placeResponse: ApiResponse = await fetchPlace(params.placeId);
@@ -49,63 +50,8 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
             />
           </div>
         </div>
-        <div className="mb-4 flex flex-col">
-          <div className="relative mb-2 aspect-square h-[16.25rem] w-full">
-            <Image
-              src={
-                place.photos.find((photo: Photo) => photo.isCover)?.photo || place.photos[0].photo
-              }
-              alt=""
-              quality={100}
-              layout="fill"
-              objectFit="cover"
-              className="rounded-tl-[15px] rounded-tr-[15px]"
-            />
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {place.photos[1]?.photo && (
-              <div className="relative aspect-square h-[6.25rem] w-full">
-                <Image
-                  src={place.photos[1].photo}
-                  alt=""
-                  quality={100}
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-bl-[15px]"
-                />
-              </div>
-            )}
-
-            {place.photos[2]?.photo && (
-              <div className="relative aspect-square h-[6.25rem] w-full">
-                <Image
-                  src={place.photos[2].photo}
-                  alt=""
-                  quality={100}
-                  layout="fill"
-                  objectFit="cover"
-                />
-              </div>
-            )}
-
-            {place.photos[3]?.photo && (
-              <div className="relative aspect-square h-[6.25rem] w-full">
-                <Image
-                  src={place.photos[3].photo}
-                  alt=""
-                  quality={100}
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-br-[15px]"
-                />
-                <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
-                  <span className="text-sm font-black text-white">
-                    +{place.photos.length - 4} Photos
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
+        <div className="mb-4">
+          <PhotoGallery photos={place.photos} />
         </div>
         <div className="mb-4 flex flex-col">
           <p className="mb-1 text-base font-black text-gray-600">About</p>

@@ -24,7 +24,6 @@ export async function fetchExperiences(): Promise<ApiResponse> {
 
 export async function fetchExperience(id: string): Promise<ApiResponse> {
   try {
-    console.log(id);
     const response = await api.get(`/v1/experiences/${id}`);
 
     return {
