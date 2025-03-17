@@ -12,8 +12,6 @@ export default function SingleExperience({ experience }: { experience: Experienc
   const [bookmarked, setBookmarked] = useState<boolean>(false);
   const [hasError, setHasError] = useState(false);
 
-  console.log(experience);
-
   return (
     <>
       <div className="relative mb-2 flex flex-col">
