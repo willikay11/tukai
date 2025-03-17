@@ -8,6 +8,7 @@ const nextConfig = {
   },
   images: {
     domains: ['tukai-storage.s3.amazonaws.com'],
+    unoptimized: true,
   },
 };
 

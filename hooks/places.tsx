@@ -8,6 +8,8 @@ import {
   likePlaceReviewComment,
   likePlaceReview,
   unbookmarkPlace,
+  bookmarkPlace,
+  createPlaceReview,
 } from '@/services/place';
 
 export const usePlaces = ({
@@ -94,7 +96,7 @@ export const useLikePlaceReview = (placeId: string, reviewId: string) => {
 export const useBookmarkPlace = (placeId: string, userId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async () => await unbookmarkPlace(placeId, { user_id: userId }),
+    mutationFn: async () => await bookmarkPlace(placeId, { user_id: userId }),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['place', placeId] });
     },
@@ -110,3 +112,13 @@ export const useUnbookmarkPlace = (placeId: string, userId: string) => {
     },
   });
 };
+
+export const useCreatePlaceReview = (placeId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: any) => await createPlaceReview(placeId, data),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
+    },
+  });
+};  

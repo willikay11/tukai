@@ -42,23 +42,19 @@ const ImageCarousel = ({ images, imageHeight }: { images: string[]; imageHeight:
             </CarouselItem>
           ))}
         </CarouselContent>
-        <button 
+        <button
           type="button"
-          className="absolute left-1 top-1/2 z-50 -translate-y-1/2 transform opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-auto"
+          className="pointer-events-auto absolute left-1 top-1/2 z-50 -translate-y-1/2 transform opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           onClick={handleButtonClick}
         >
-          <CarouselPrevious 
-            className={cn('left-0')} 
-          />
+          <CarouselPrevious className={cn('left-0')} />
         </button>
-        <button 
+        <button
           type="button"
-          className="absolute right-1 top-1/2 z-50 -translate-y-1/2 transform opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-auto"
+          className="pointer-events-auto absolute right-1 top-1/2 z-50 -translate-y-1/2 transform opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           onClick={handleButtonClick}
         >
-          <CarouselNext 
-            className={cn('right-0')} 
-          />  
+          <CarouselNext className={cn('right-0')} />
         </button>
       </Carousel>
     </div>

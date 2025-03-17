@@ -4,21 +4,23 @@ import { Bookmark02Icon, StarIcon } from '@hugeicons/react-pro';
 import { useState } from 'react';
 import clsx from 'clsx';
 import { Experience } from '@/types/experience';
+import ImageCarousel from '@/components/ui/imageCarousel';
 
 export default function SingleExperience({ experience }: { experience: Experience }) {
   const [rated, setRated] = useState<boolean>(false);
   const [bookmarked, setBookmarked] = useState<boolean>(false);
+  const [hasError, setHasError] = useState(false);
+
   return (
     <>
       <div className="relative mb-2 flex flex-col">
-        <Image
-          src={experience.photos.find((photo) => photo.isCover)?.photo ?? ''}
-          height={500}
-          width={500}
-          alt={experience.title}
-          className="rounded-[5px]"
-          quality={100}
-        />
+        <div className="relative aspect-square w-full overflow-hidden rounded-[5px]">
+          {!hasError ? (
+            <ImageCarousel images={experience.photos.map((photo) => photo.photo)} imageHeight="h-full" />
+          ) : (
+            <div className="h-full w-full bg-gray-50" />
+          )}
+        </div>
         <div
           className="absolute right-2 top-2 cursor-pointer"
           onClick={() => setBookmarked(!bookmarked)}
@@ -38,7 +40,7 @@ export default function SingleExperience({ experience }: { experience: Experienc
           <p className="text-xs font-bold text-gray-800">{experience.title}</p>
         </div>
         <div className="mb-1 inline-flex items-center">
-          <span className="text-xs text-gray-600">{experience.location.name}</span>
+          <span className="text-xs text-gray-600">{experience?.priceStartsFrom}</span>
           <div className="mx-1 h-[6px] w-[1px] rounded bg-gray-300" />
           {/*<span className="text-xs text-gray-600">{experience.distance}</span>*/}
           {/*<div className="mx-1 h-[6px] w-[1px] rounded bg-gray-300" />*/}

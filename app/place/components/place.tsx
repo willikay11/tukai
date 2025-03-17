@@ -5,14 +5,13 @@ import { useState } from 'react';
 import clsx from 'clsx';
 import { Place } from '@/types/place';
 import ImageCarousel from '@/components/ui/imageCarousel';
-
+import BookmarkPlace from './bookmarkPlace';
 export default function SinglePlace({ place }: { place: Place }) {
-  const [bookmarked, setBookmarked] = useState<boolean>(false);
   const [hasError, setHasError] = useState(false);
 
   return (
     <>
-      <div className="relative mb-2 flex flex-col">
+      <div className="group relative mb-2 flex flex-col">
         <div className="relative aspect-square w-full overflow-hidden rounded-[5px]">
           {!hasError ? (
             <ImageCarousel images={place.photos.map((photo) => photo.photo)} imageHeight="h-full" />
@@ -20,17 +19,12 @@ export default function SinglePlace({ place }: { place: Place }) {
             <div className="h-full w-full bg-gray-50" />
           )}
         </div>
-        <div
-          className="absolute right-2 top-2 cursor-pointer"
-          onClick={() => setBookmarked(!bookmarked)}
-        >
-          <Bookmark02Icon
-            size={16}
-            className={clsx('', {
-              'text-white': !bookmarked,
-              'text-red-600': bookmarked,
-            })}
-            variant={bookmarked ? 'solid' : 'twotone'}
+        <div className="invisible absolute right-2 top-2 cursor-pointer group-hover:visible">
+          <BookmarkPlace
+            placeId={place.id}
+            userId="058b7853-c5f4-4e43-b356-da1e8ce05f6e"
+            bookmarked={place.isBookmarked}
+            className="text-white"
           />
         </div>
       </div>

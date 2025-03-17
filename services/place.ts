@@ -244,7 +244,26 @@ export async function bookmarkPlace(id: string, data: any): Promise<ApiResponse>
 
 export async function unbookmarkPlace(id: string, data: any): Promise<ApiResponse> {
   try {
-    const res = await api.delete(`/v1/places/${id}/unbookmark/`, data);
+    const res = await api.delete(`/v1/places/${id}/unbookmark/`, { data });
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+    };
+  }
+}
+
+export async function createPlaceReview(id: string, data: any): Promise<ApiResponse> {
+  try {
+    const res = await api.post(`/v1/places/${id}/reviews/`, data);
 
     return {
       status: res.status,
