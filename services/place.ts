@@ -205,7 +205,6 @@ export async function likePlaceReview(
   data: any,
 ): Promise<ApiResponse> {
   try {
-    console.log(data);
     const res = await api.post(`/v1/places/${id}/reviews/${reviewId}/like/`, data);
 
     return {

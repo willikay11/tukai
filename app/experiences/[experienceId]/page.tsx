@@ -1,3 +1,4 @@
+'use client';
 import Image from 'next/image';
 import { Bookmark02Icon, CheckmarkBadge02Icon, Share08Icon } from '@hugeicons/react-pro';
 import { ApiResponse } from '@/types/apiResponse';
@@ -11,7 +12,7 @@ import numeral from 'numeral';
 import IconComponent from '@/app/components/iconComponent';
 import GoogleMapComponent from '@/app/components/googleMap';
 import { Separator } from '@/components/ui/separator';
-
+import PhotoGallery from '@/components/ui/PhotoGallery';
 export default async function ViewExperiencePage({ params }: { params: { experienceId: string } }) {
   const experienceResponse: ApiResponse = await fetchExperience(params.experienceId);
 
@@ -20,6 +21,8 @@ export default async function ViewExperiencePage({ params }: { params: { experie
   }
 
   const experience: Experience = experienceResponse.data;
+
+  console.log(experience.photos);
 
   return (
     <main className="grid grid-cols-12 gap-4">
@@ -42,64 +45,8 @@ export default async function ViewExperiencePage({ params }: { params: { experie
             </div>
           </div>
         </div>
-        <div className="mb-4 flex flex-col">
-          <div className="relative mb-2 aspect-square h-[16.25rem] w-full">
-            <Image
-              src={
-                experience.photos.find((photo: Photo) => photo.isCover)?.photo ||
-                experience.photos[0].photo
-              }
-              alt=""
-              quality={100}
-              layout="fill"
-              objectFit="cover"
-              className="rounded-tl-[15px] rounded-tr-[15px]"
-            />
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {experience.photos[1]?.photo && (
-              <div className="relative aspect-square h-[6.25rem] w-full">
-                <Image
-                  src={experience.photos[1].photo}
-                  alt=""
-                  quality={100}
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-bl-[15px]"
-                />
-              </div>
-            )}
-
-            {experience.photos[2]?.photo && (
-              <div className="relative aspect-square h-[6.25rem] w-full">
-                <Image
-                  src={experience.photos[2].photo}
-                  alt=""
-                  quality={100}
-                  layout="fill"
-                  objectFit="cover"
-                />
-              </div>
-            )}
-
-            {experience.photos[3]?.photo && (
-              <div className="relative aspect-square h-[6.25rem] w-full">
-                <Image
-                  src={experience.photos[3].photo}
-                  alt=""
-                  quality={100}
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-br-[15px]"
-                />
-                <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
-                  <span className="text-sm font-black text-white">
-                    +{experience.photos.length - 4} Photos
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
+        <div className="mb-4">
+          <PhotoGallery photos={experience.photos} />
         </div>
         <div className="mb-4 grid grid-cols-12 gap-4">
           <div className="col-span-7">
