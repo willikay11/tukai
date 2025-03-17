@@ -29,9 +29,9 @@ export default function GoogleMapComponent({ lat, lng }: { lat?: number; lng?: n
     <LoadScript googleMapsApiKey={API_KEY}>
       <GoogleMap mapContainerStyle={containerStyle} center={{ lat, lng }} zoom={18}>
         <OverlayView position={{ lat, lng }} mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}>
-          <div className="absolute flex h-40 w-40 -translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-red-600 bg-opacity-20">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-600">
-              <HugeiconsIcon icon={MapPinpoint02Icon} className="text-white" size={40} />
+          <div className="absolute flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full bg-red-600 bg-opacity-20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-600">
+              <HugeiconsIcon icon={MapPinpoint02Icon} className="text-white" size={20} />
             </div>
           </div>
         </OverlayView>

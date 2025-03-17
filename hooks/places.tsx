@@ -121,4 +121,4 @@ export const useCreatePlaceReview = (placeId: string) => {
       queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
     },
   });
-};  
+};

@@ -56,7 +56,7 @@ export function EventSkeleton() {
 
 export function ImageSkeleton() {
   return (
-    <div className={`${shimmer} relative`}>
+    <div className={`${shimmer} relative h-full w-full`}>
       <div className="h-full w-full rounded-md bg-gray-200 text-sm font-medium" />
     </div>
   );
