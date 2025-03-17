@@ -54,7 +54,6 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@types/fslightbox-react": "^1.7.8",
     "@types/node": "^20",
     "@types/numeral": "^2.0.5",
     "@types/react": "^18",
