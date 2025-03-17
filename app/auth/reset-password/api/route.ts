@@ -15,8 +15,6 @@ export async function POST(req: Request) {
 
     const res = await response.json();
 
-    console.log(res);
-
     if (!response.ok) {
       return Response.json(
         {

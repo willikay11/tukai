@@ -22,8 +22,6 @@ export default async function ViewExperiencePage({ params }: { params: { experie
 
   const experience: Experience = experienceResponse.data;
 
-  console.log(experience.photos);
-
   return (
     <main className="grid grid-cols-12 gap-4">
       <div className="col-span-12 mt-8 md:col-span-6 md:col-start-4 2xl:col-span-4 2xl:col-start-5">
