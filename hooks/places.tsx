@@ -10,6 +10,7 @@ import {
   unbookmarkPlace,
   bookmarkPlace,
   createPlaceReview,
+  uploadPlaceReviewImages,
 } from '@/services/place';
 
 export const usePlaces = ({
@@ -117,6 +118,18 @@ export const useCreatePlaceReview = (placeId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: any) => await createPlaceReview(placeId, data),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
+    },
+  });
+};
+
+export const useUploadPlaceReviewImages = (placeId: string, reviewId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: any) => {
+      return await uploadPlaceReviewImages(placeId, reviewId, data);
+    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
     },

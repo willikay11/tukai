@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 
 import {
@@ -24,25 +25,29 @@ const ImageCarousel = ({ images, imageHeight }: { images: string[]; imageHeight:
           {images.map((image, index) => (
             <CarouselItem key={index}>
               <div className={cn('relative aspect-square w-full')}>
-                <TukaiImage src={image} alt={`Image ${index + 1}`} />
+                <TukaiImage src={image} alt={`Image ${index + 1}`} className="rounded-[8px]" />
               </div>
             </CarouselItem>
           ))}
         </CarouselContent>
-        <button
-          type="button"
-          className="pointer-events-auto absolute left-1 top-1/2 z-50 -translate-y-1/2 transform opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          onClick={handleButtonClick}
-        >
-          <CarouselPrevious className={cn('left-0')} />
-        </button>
-        <button
-          type="button"
-          className="pointer-events-auto absolute right-1 top-1/2 z-50 -translate-y-1/2 transform opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          onClick={handleButtonClick}
-        >
-          <CarouselNext className={cn('right-0')} />
-        </button>
+        {images.length > 1 && (
+          <>
+            <button
+              type="button"
+              className="pointer-events-auto absolute left-1 top-1/2 z-50 -translate-y-1/2 transform opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              onClick={handleButtonClick}
+            >
+              <CarouselPrevious className={cn('left-0')} />
+            </button>
+            <button
+              type="button"
+              className="pointer-events-auto absolute right-1 top-1/2 z-50 -translate-y-1/2 transform opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              onClick={handleButtonClick}
+            >
+              <CarouselNext className={cn('right-0')} />
+            </button>
+          </>
+        )}
       </Carousel>
     </div>
   );

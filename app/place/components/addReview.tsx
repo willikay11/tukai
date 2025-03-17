@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Form,
@@ -17,7 +17,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { StarIcon } from '@hugeicons/react-pro';
-import { useCreatePlaceReview } from '@/hooks/places';
+import { useCreatePlaceReview, useUploadPlaceReviewImages } from '@/hooks/places';
+import ImageUpload from '@/components/ui/imageUpload';
+
 type addReviewProps = {
   isOpen: boolean;
   placeTitle: string;
@@ -35,16 +37,23 @@ const formSchema = z.object({
   rating: z.number().min(1, {
     message: 'Please rate the place.',
   }),
+  images: z.array(z.instanceof(File)).optional(),
 });
 
 export default function AddReview({ isOpen, placeTitle, placeId, closeModal }: addReviewProps) {
-  const { mutate: createPlaceReview, isSuccess } = useCreatePlaceReview(placeId);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+  const { mutate: createPlaceReview, isSuccess, data: reviewData } = useCreatePlaceReview(placeId);
+
+  const { mutate: uploadPlaceReviewImages, isSuccess: isUploadSuccess } =
+    useUploadPlaceReviewImages(placeId, reviewData?.data?.id);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
       description: '',
       rating: 0,
+      images: [],
     },
   });
 
@@ -58,6 +67,19 @@ export default function AddReview({ isOpen, placeTitle, placeId, closeModal }: a
     });
   }
 
+  const handleUploadImages = () => {
+    selectedFiles.forEach((file, index) => {
+      const formData = new FormData();
+      formData.append('photo', file);
+      formData.append('place', placeId);
+      if (index === 0) {
+        formData.append('is_cover', 'true');
+      }
+      console.log(selectedFiles.length);
+      uploadPlaceReviewImages(formData, reviewData?.data?.id);
+    });
+  };
+
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add('overflow-hidden');
@@ -69,11 +91,22 @@ export default function AddReview({ isOpen, placeTitle, placeId, closeModal }: a
   }, [isOpen]);
 
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess && selectedFiles.length > 0) {
+      handleUploadImages();
+    } else if (isSuccess && selectedFiles.length === 0) {
+      form.reset();
+      closeModal();
+    } 
+  }, [isSuccess]);
+
+  useEffect(() => {
+    if (isUploadSuccess) {
       form.reset();
       closeModal();
     }
-  }, [isSuccess]);
+  }, [isUploadSuccess]);
+
+  console.log('form.formState', form.formState.isSubmitting);
 
   return (
     isOpen && (
@@ -132,6 +165,23 @@ export default function AddReview({ isOpen, placeTitle, placeId, closeModal }: a
                         </FormItem>
                       )}
                     />
+
+                    <FormField
+                      control={form.control}
+                      name="images"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-normal text-gray-700">
+                            Have any amazing photos of {placeTitle}?
+                          </FormLabel>
+                          <FormControl>
+                            <ImageUpload onImagesChange={setSelectedFiles} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     <FormField
                       control={form.control}
                       name="rating"

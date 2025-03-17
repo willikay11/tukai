@@ -278,3 +278,30 @@ export async function createPlaceReview(id: string, data: any): Promise<ApiRespo
     };
   }
 }
+
+export async function uploadPlaceReviewImages(
+  id: string,
+  reviewId: string,
+  data: any,
+): Promise<ApiResponse> {
+  try {
+    const res = await api.post(`/v1/places/${id}/reviews/${reviewId}/photos/`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+    };
+  }
+}

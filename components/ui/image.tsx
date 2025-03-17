@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { ImageSkeleton } from '@/app/components/skeletons';
-import { cn } from '@/lib/utils';
 import Image, { ImageProps } from 'next/image';
 
 export default function TukaiImage({ src, alt, ...props }: ImageProps) {

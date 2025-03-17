@@ -10,7 +10,7 @@ type placeTabsProps = {
 
 export default function PlaceTabs({ placeId }: placeTabsProps) {
   return (
-    <Tabs defaultValue="reviews" className="w-3/4">
+    <Tabs defaultValue="reviews" className="w-1/2">
       <TabsList>
         <TabsTrigger value="reviews">Reviews</TabsTrigger>
         <TabsTrigger value="experiences">Experiences</TabsTrigger>
