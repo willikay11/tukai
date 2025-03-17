@@ -1,22 +1,27 @@
 'use client';
-import Image from 'next/image';
-import { Bookmark02Icon, StarIcon } from '@hugeicons/react-pro';
+import { Bookmark02Icon } from '@hugeicons/react-pro';
 import { useState } from 'react';
 import clsx from 'clsx';
 import { Experience } from '@/types/experience';
 import ImageCarousel from '@/components/ui/imageCarousel';
-
+import numeral from 'numeral';
+import moment from 'moment';
+import { Button } from '@/components/ui/button';
 export default function SingleExperience({ experience }: { experience: Experience }) {
-  const [rated, setRated] = useState<boolean>(false);
   const [bookmarked, setBookmarked] = useState<boolean>(false);
   const [hasError, setHasError] = useState(false);
+
+  console.log(experience);
 
   return (
     <>
       <div className="relative mb-2 flex flex-col">
         <div className="relative aspect-square w-full overflow-hidden rounded-[5px]">
           {!hasError ? (
-            <ImageCarousel images={experience.photos.map((photo) => photo.photo)} imageHeight="h-full" />
+            <ImageCarousel
+              images={experience.photos.map((photo) => photo.photo)}
+              imageHeight="h-full"
+            />
           ) : (
             <div className="h-full w-full bg-gray-50" />
           )}
@@ -40,26 +45,20 @@ export default function SingleExperience({ experience }: { experience: Experienc
           <p className="text-xs font-bold text-gray-800">{experience.title}</p>
         </div>
         <div className="mb-1 inline-flex items-center">
-          <span className="text-xs text-gray-600">{experience?.priceStartsFrom.currency} {experience?.priceStartsFrom.amount}</span>
-          <div className="mx-1 h-[6px] w-[1px] rounded bg-gray-300" />
-          {/*<span className="text-xs text-gray-600">{experience.distance}</span>*/}
-          {/*<div className="mx-1 h-[6px] w-[1px] rounded bg-gray-300" />*/}
-          {/*<span className="text-xs text-gray-600">{experience.duration}</span>*/}
+          <span className="text-xs font-medium text-gray-700">
+            {experience?.priceStartsFrom.currency}{' '}
+            {numeral(experience?.priceStartsFrom.amount).format('0,0')} /person
+          </span>
         </div>
         <div className="inline-flex items-center">
-          <StarIcon
-            variant="solid"
-            size={14}
-            className={clsx('mr-1', {
-              'text-yellow-400': rated,
-              'text-gray-300': !rated,
-            })}
-            onClick={() => setRated(!rated)}
-          />
-          {/*<span className="text-xs text-gray-600">{experience.rating}</span>*/}
-          {/*<div className="mx-1 h-[6px] w-[1px] rounded bg-gray-300" />*/}
-          {/*<span className="text-xs text-gray-600">{experience.reviews} Reviews</span>*/}
+          <span className="text-xs font-normal text-gray-700">
+            {moment(experience?.startDate).format('MMM D, YYYY')} -{' '}
+            {moment(experience?.endDate).format('MMM D, YYYY')}
+          </span>
         </div>
+        <Button variant="primary-text" size="sm">
+          {experience.host.displayName}
+        </Button>
       </div>
     </>
   );

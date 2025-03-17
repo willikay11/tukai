@@ -14,7 +14,7 @@ export default function PlaceActions({
   placeId: string;
   userId: string;
   bookmarked: boolean;
-  placeTitle: string;   
+  placeTitle: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 

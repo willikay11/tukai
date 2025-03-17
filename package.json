@@ -38,6 +38,7 @@
     "motion": "^12.4.3",
     "next": "14.2.4",
     "nextjs-toploader": "^1.6.12",
+    "numeral": "^2.0.6",
     "prettier-plugin-tailwindcss": "^0.6.5",
     "react": "^18",
     "react-dom": "^18",
@@ -53,6 +54,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/numeral": "^2.0.5",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/sanitize-html": "^2.13.0",

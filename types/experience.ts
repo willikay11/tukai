@@ -3,10 +3,12 @@ import { Status } from '@/enums/status';
 import { User } from '@/types/user';
 import { Location } from '@/types/location';
 import { Photo } from './photo';
+import { Ticket } from './ticket';
 
 export type Experience = {
   id: string;
   title: string;
+  description: string;
   location: Location;
   startDate: string;
   endDate: string;
@@ -14,8 +16,10 @@ export type Experience = {
   priceStartsFrom: { amount: number; currency: string };
   ticketsAvailable: boolean;
   isSoldOut: boolean;
+  isPublic: boolean;
   isBookmarked: boolean;
   categories: ExperienceCategory[];
+  tickets: Ticket[];
   photos: Photo[];
   status: Status;
   host: User;
