@@ -11,7 +11,7 @@ export type Experience = {
   startDate: string;
   endDate: string;
   currency: string;
-  priceStartsFrom: string;
+  priceStartsFrom: { amount: number; currency: string };
   ticketsAvailable: boolean;
   isSoldOut: boolean;
   isBookmarked: boolean;

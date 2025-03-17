@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { EventsSkeleton, PillsSkeleton } from '@/app/components/skeletons';
 import Experiences from '@/app/experiences/components/experiences';
 import ExperienceFilters from '@/app/experiences/components/experienceFilters';
-import InvitedExperiences from '@/app/experiences/components/invitedExperiences';
+// import InvitedExperiences from '@/app/experiences/components/invitedExperiences';
 
 export default function ExperiencesPage() {
   return (

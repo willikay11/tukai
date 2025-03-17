@@ -40,7 +40,7 @@ export default function SingleExperience({ experience }: { experience: Experienc
           <p className="text-xs font-bold text-gray-800">{experience.title}</p>
         </div>
         <div className="mb-1 inline-flex items-center">
-          <span className="text-xs text-gray-600">{experience?.priceStartsFrom}</span>
+          <span className="text-xs text-gray-600">{experience?.priceStartsFrom.currency} {experience?.priceStartsFrom.amount}</span>
           <div className="mx-1 h-[6px] w-[1px] rounded bg-gray-300" />
           {/*<span className="text-xs text-gray-600">{experience.distance}</span>*/}
           {/*<div className="mx-1 h-[6px] w-[1px] rounded bg-gray-300" />*/}
