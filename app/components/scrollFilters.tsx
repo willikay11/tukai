@@ -97,7 +97,7 @@ export default function ScrollFilters({
     <div className="relative">
       <button
         className={clsx(
-          'absolute left-0 top-6 rounded-full border-[1px] bg-white p-1 text-gray-300 drop-shadow-[0_0_4px_rgba(0,0,0,0.25)]',
+          'absolute left-0 top-6 rounded-full border-[1px] bg-white p-1 text-gray-300 shadow-scroll-filters',
           {
             hidden: !showPrevBtn,
             block: showPrevBtn,
@@ -144,7 +144,7 @@ export default function ScrollFilters({
       </div>
       <button
         className={clsx(
-          'absolute right-0 top-6 rounded-full border-[1px] bg-white p-1 text-gray-300 drop-shadow-[0_0_4px_rgba(0,0,0,0.25)]',
+          'absolute right-0 top-6 rounded-full border-[1px] bg-white p-1 text-gray-300 shadow-scroll-filters',
           {
             hidden: !showNextBtn,
             block: showNextBtn,

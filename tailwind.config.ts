@@ -57,6 +57,7 @@ const config: Config = {
       },
       boxShadow: {
         'top-md': '0 -2px 10px -1px rgba(0, 0, 0, 0.1), 0 -2px 2px -1px rgba(0, 0, 0, 0.06)',
+        'scroll-filters': '0 0px 8px 17px rgb(255 255 255), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
       },
       keyframes: {
         shimmer: {
