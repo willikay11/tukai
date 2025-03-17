@@ -1,8 +1,8 @@
 import { ExperienceCategory } from '@/types/experienceCategory';
-import { ExperiencePhoto } from '@/types/photo';
 import { Status } from '@/enums/status';
 import { User } from '@/types/user';
 import { Location } from '@/types/location';
+import { Photo } from './photo';
 
 export type Experience = {
   id: string;
@@ -16,7 +16,7 @@ export type Experience = {
   isSoldOut: boolean;
   isBookmarked: boolean;
   categories: ExperienceCategory[];
-  photos: ExperiencePhoto[];
+  photos: Photo[];
   status: Status;
   host: User;
   coHosts: User[];
