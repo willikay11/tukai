@@ -1,6 +1,5 @@
 import React from 'react';
 
-import Image from 'next/image';
 import {
   Carousel,
   CarouselContent,
@@ -9,7 +8,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { cn } from '@/lib/utils';
-import { ImageSkeleton } from '@/app/components/skeletons';
+import TukaiImage from '@/components/ui/image';
 
 const ImageCarousel = ({ images, imageHeight }: { images: string[]; imageHeight: string }) => {
   const handleButtonClick = (e: React.MouseEvent) => {
@@ -24,21 +23,7 @@ const ImageCarousel = ({ images, imageHeight }: { images: string[]; imageHeight:
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index}>
-              <div className={cn('relative aspect-square w-full', imageHeight)}>
-                <ImageSkeleton />
-                <Image
-                  src={image}
-                  alt={`Image ${index + 1}`}
-                  quality={100}
-                  layout="fill"
-                  objectFit="cover"
-                  className="carousel-image rounded-[8px] opacity-0 transition-opacity duration-300"
-                  onLoadingComplete={(image) => {
-                    image.classList.remove('opacity-0');
-                  }}
-                  loading="lazy"
-                />
-              </div>
+              <TukaiImage src={image} alt={`Image ${index + 1}`} />
             </CarouselItem>
           ))}
         </CarouselContent>

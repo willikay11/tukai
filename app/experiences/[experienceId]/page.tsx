@@ -9,8 +9,6 @@ import { Photo } from '@/types/photo';
 import { Button } from '@/components/ui/button';
 import numeral from 'numeral';
 import IconComponent from '@/app/components/iconComponent';
-import { HugeiconsIcon } from '@hugeicons/react';
-import { Clock01Icon } from '@hugeicons-pro/core-twotone-rounded';
 import GoogleMapComponent from '@/app/components/googleMap';
 import { Separator } from '@/components/ui/separator';
 
