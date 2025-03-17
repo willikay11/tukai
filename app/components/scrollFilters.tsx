@@ -16,9 +16,34 @@ export default function ScrollFilters({
   const ref = useRef<any>();
   const [showPrevBtn, setShowPrevBtn] = useState<boolean>(false);
   const [showNextBtn, setShowNextBtn] = useState<boolean>(true);
-  const [selectedOption, setSelectedOption] = useState<string>(selectedCategoryId);
+  const [selectedOption, setSelectedOption] = useState<string | undefined>(selectedCategoryId);
   const router = useRouter();
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const slider = ref.current;
+    slider.isDown = true;
+    slider.startX = e.pageX - slider.offsetLeft;
+    slider.scrollLeft = slider.scrollLeft;
+  };
+
+  const handleMouseLeave = () => {
+    const slider = ref.current;
+    slider.isDown = false;
+  };
+
+  const handleMouseUp = () => {
+    const slider = ref.current;
+    slider.isDown = false;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const slider = ref.current;
+    if (!slider.isDown) return;
+    e.preventDefault();
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - slider.startX) * 2; // Scroll-fast
+    slider.scrollLeft = slider.scrollLeft - walk;
+  };
   // Get category from URL or use default
   useEffect(() => {
     setSelectedOption(selectedCategoryId); // Update selected category if changed
@@ -72,7 +97,7 @@ export default function ScrollFilters({
     <div className="relative">
       <button
         className={clsx(
-          'absolute left-0 top-6 rounded-full border-[1px] bg-white p-1 text-gray-300 drop-shadow-[0_0_4px_rgba(0,0,0,0.25)]',
+          'absolute left-0 top-6 rounded-full border-[1px] bg-white p-1 text-gray-300 shadow-scroll-filters',
           {
             hidden: !showPrevBtn,
             block: showPrevBtn,
@@ -84,7 +109,14 @@ export default function ScrollFilters({
       >
         <ArrowLeft01Icon size={20} className="text-gray-700" variant="twotone" />
       </button>
-      <div ref={ref} className="flex h-[5rem] items-center overflow-hidden scroll-smooth">
+      <div
+        ref={ref}
+        className="flex h-[5rem] items-center overflow-x-auto scroll-smooth no-scrollbar"
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeave}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+      >
         {filters.map((filter, index) => (
           <button
             key={filter.value}
@@ -112,7 +144,7 @@ export default function ScrollFilters({
       </div>
       <button
         className={clsx(
-          'absolute right-0 top-6 rounded-full border-[1px] bg-white p-1 text-gray-300 drop-shadow-[0_0_4px_rgba(0,0,0,0.25)]',
+          'absolute right-0 top-6 rounded-full border-[1px] bg-white p-1 text-gray-300 shadow-scroll-filters',
           {
             hidden: !showNextBtn,
             block: showNextBtn,
