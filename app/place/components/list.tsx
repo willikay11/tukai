@@ -6,6 +6,7 @@ import { Place } from '@/types/place';
 import { usePlaces } from '@/hooks/places';
 import { EventSkeleton, EventsSkeleton } from '@/app/components/skeletons';
 import { useCallback, useRef, useState, useEffect } from 'react';
+import NoData from '@/components/ui/noData';
 
 type ListPlacesProps = {
   selectedCategoryId?: string;
@@ -15,7 +16,7 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
   const [page, setPage] = useState(1);
   const [placeList, setPlaceList] = useState<Place[]>([]);
   const [endPage, setEndPage] = useState<number | null>(null);
-  const [isFetching, setIsFetching] = useState(false); // ✅ Track if fetching
+  const [isFetching, setIsFetching] = useState(false);
 
   const { data: places, isLoading } = usePlaces({
     categoryId: selectedCategoryId,
@@ -56,13 +57,17 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
     setIsFetching(false);
   }, [places]);
 
+  if (!isLoading && placeList.length === 0) {
+    return <NoData message="No places found" />;
+  }
+
   return (
     <>
       <motion.div
         initial={{ opacity: 1 }}
-        animate={{ opacity: placeList.length > 0 ? 0 : 1 }}
+        animate={{ opacity: isLoading && placeList.length === 0 ? 0 : 1 }}
         transition={{ duration: 0.5 }}
-        className={placeList.length > 0 ? 'hidden' : 'block'}
+        className={isLoading && placeList.length === 0 ? 'block' : 'hidden'}
       >
         <EventsSkeleton />
       </motion.div>

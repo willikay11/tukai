@@ -1,18 +1,13 @@
 import { storeToken } from '@/lib/actions';
+import api from '@/services/apiService';
 
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
 
-    const response = await fetch('https://api.oltukai.co/v1/accounts/auth/token/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    const response = await api.post('/v1/accounts/login/', { email, password });
 
-    if (!response.ok) {
+    if (response.status !== 200) {
       return Response.json(
         {
           message: 'Invalid credentials',
@@ -23,7 +18,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const res = await response.json();
+    const res = response.data;
 
     await storeToken(res.access, res.refresh);
 

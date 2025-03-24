@@ -3,17 +3,13 @@
 'use client';
 
 import { Anchor, Button, Input } from '@/app/components/form';
-import { GoogleIcon, hugeiconsLicense, LockKeyIcon, Mail02Icon } from '@hugeicons/react-pro';
+import { GoogleIcon, LockKeyIcon, Mail02Icon } from '@hugeicons/react-pro';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import MobileStore from '@/app/components/mobileStore';
 import { useContext, useState } from 'react';
 import { NotificationContext } from '@/providers/NotificationProvider';
 import { SessionContext } from '@/providers/SessionProvider';
-
-hugeiconsLicense(
-  '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
-);
 
 type Inputs = {
   email: string;

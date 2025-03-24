@@ -35,6 +35,14 @@ export function EventsSkeleton() {
       <EventSkeleton />
       <EventSkeleton />
       <EventSkeleton />
+      <EventSkeleton />
+      <EventSkeleton />
+      <EventSkeleton />
+      <EventSkeleton />
+      <EventSkeleton />
+      <EventSkeleton />
+      <EventSkeleton />
+      <EventSkeleton />
     </div>
   );
 }
