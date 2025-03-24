@@ -106,8 +106,6 @@ export default function AddReview({ isOpen, placeTitle, placeId, closeModal }: a
     }
   }, [isUploadSuccess]);
 
-  console.log('form.formState', form.formState.isSubmitting);
-
   return (
     isOpen && (
       <div className="fixed inset-0 z-50 bg-black/50">
