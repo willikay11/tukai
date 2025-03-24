@@ -285,6 +285,7 @@ export async function uploadPlaceReviewImages(
   data: any,
 ): Promise<ApiResponse> {
   try {
+    
     const res = await api.post(`/v1/places/${id}/reviews/${reviewId}/photos/`, data, {
       headers: {
         'Content-Type': 'multipart/form-data',
