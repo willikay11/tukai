@@ -96,7 +96,7 @@ export default function AddReview({ isOpen, placeTitle, placeId, closeModal }: a
     } else if (isSuccess && selectedFiles.length === 0) {
       form.reset();
       closeModal();
-    } 
+    }
   }, [isSuccess]);
 
   useEffect(() => {
