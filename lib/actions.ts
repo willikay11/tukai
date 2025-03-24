@@ -21,3 +21,8 @@ export async function storeToken(accessToken: string, refreshToken: string) {
     maxAge: 60 * 60 * 24 * 7,
   });
 }
+
+export async function deleteToken() {
+  cookies().delete('accessToken');
+  cookies().delete('refreshToken');
+}
