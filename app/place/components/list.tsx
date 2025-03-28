@@ -7,7 +7,10 @@ import { usePlaces } from '@/hooks/places';
 import { EventSkeleton, EventsSkeleton } from '@/app/components/skeletons';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import NoData from '@/components/ui/noData';
-
+import { useSession } from 'next-auth/react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import SignInForm from '@/components/ui/form/sign-in';
+import { toast } from '@/hooks/use-toast';
 type ListPlacesProps = {
   selectedCategoryId?: string;
 };
@@ -17,7 +20,8 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
   const [placeList, setPlaceList] = useState<Place[]>([]);
   const [endPage, setEndPage] = useState<number | null>(null);
   const [isFetching, setIsFetching] = useState(false);
-
+  const { data: session } = useSession();
+  const [open, setOpen] = useState(false);
   const { data: places, isLoading } = usePlaces({
     categoryId: selectedCategoryId,
     page,
@@ -63,6 +67,18 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
 
   return (
     <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="px-16">
+          <SignInForm onLogin={() => {
+            setOpen(false);
+            toast({
+              description: 'Welcome Back!',
+              variant: 'success',
+            });
+          }} />
+        </DialogContent>
+      </Dialog>
+
       <motion.div
         initial={{ opacity: 1 }}
         animate={{ opacity: isLoading && placeList.length === 0 ? 0 : 1 }}
@@ -89,9 +105,15 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
               transition={{ duration: 0.3 }}
               className="cursor-pointer"
             >
-              <Link target="_blank" href={`/place/${place.id}`}>
-                <SinglePlace place={place} />
-              </Link>
+              {session?.user  ? (
+                <Link target="_blank" href={`/place/${place.id}`}>
+                  <SinglePlace place={place} />
+                </Link>
+              ) : (
+                <div onClick={() => setOpen(true)}>
+                  <SinglePlace place={place} />
+                </div>
+              )}
             </motion.div>
           );
         })}

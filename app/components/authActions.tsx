@@ -86,11 +86,11 @@ export default function AuthActions() {
                     </NavigationMenuLink>
                     <NavigationMenuLink
                       onClick={handleLogout}
-                      className="cursor-pointer text-sm text-gray-600"
+                      className="cursor-pointer"
                     >
-                      <div className="inline-flex items-center gap-2">
+                      <div className="inline-flex items-center gap-2 ">
                         <IconComponent iconName="Logout04Icon" size={15} color="gray" />
-                        Logout
+                        <span className="text-sm text-gray-600 font-satoshi">Logout</span>
                       </div>
                     </NavigationMenuLink>
                   </div>
