@@ -1,10 +1,9 @@
-import { storeToken } from '@/lib/actions';
 
 export async function POST(req: Request) {
   try {
     const { userId, token } = await req.json();
 
-    const response = await fetch('https://api.oltukai.co/v1/accounts/verify-account/', {
+    const response = await fetch('https://api.tukai.co/v1/accounts/verify-account/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -25,7 +24,7 @@ export async function POST(req: Request) {
 
     const res = await response.json();
 
-    await storeToken(res.access, res.refresh);
+    // await storeToken(res.access, res.refresh);
 
     return Response.json({
       message: 'Account activated successfully',

@@ -7,10 +7,9 @@ import { GoogleIcon, LockKeyIcon, Mail02Icon } from '@hugeicons/react-pro';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import MobileStore from '@/app/components/mobileStore';
-import { useContext, useState } from 'react';
-import { NotificationContext } from '@/providers/NotificationProvider';
-// import { SessionContext } from '@/providers/SessionProvider';
-import { signIn, signOut, useSession } from "next-auth/react";
+import { useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { toast } from '@/hooks/use-toast';
 
 type Inputs = {
   email: string;
@@ -18,9 +17,6 @@ type Inputs = {
 };
 export default function Page() {
   const router = useRouter();
-  const toast: any = useContext(NotificationContext);
-  // const session: any = useContext(SessionContext);
-  const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const {
@@ -39,10 +35,19 @@ export default function Page() {
     setIsSubmitting(false);
 
     if (res?.status === 200) {
-      toast.open('success', 'Login successful', 'Welcome Back!');
+      toast({
+        // title: "Login successful",
+        description: 'Welcome Back!',
+        variant: 'success',
+      });
+
       router.push('/');
     } else {
-      toast.open('error', 'Login unsuccessful', res?.error);
+      toast({
+        // title: "Login unsuccessful",
+        description: res?.error,
+        variant: 'destructive',
+      });
     }
   };
 

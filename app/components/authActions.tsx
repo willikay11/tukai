@@ -11,15 +11,17 @@ import {
   NavigationMenuContent,
 } from '@/components/ui/navigation-menu';
 import { useRouter } from 'next/navigation';
-import { deleteToken } from '@/lib/actions';
-import { signOut, useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
+import IconComponent from '@/app/components/iconComponent';
+import { Separator } from '@/components/ui/separator';
+
 export default function AuthActions() {
   const router = useRouter();
   const { data: session } = useSession();
 
   const handleLogout = async () => {
-    await signOut({ redirect: false })
+    await signOut({ redirect: false });
     router.push('/');
   };
 
@@ -45,16 +47,53 @@ export default function AuthActions() {
                   />
                   <div className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-[1px] border-white bg-red-600" />
                 </div>
-                <span className="ml-2 mr-2.5 text-xs text-gray-600">
-                  {session?.user?.name}
-                </span>
-                <NavigationMenuContent className="p-2 rounded-lg w-20">
-                  <NavigationMenuLink
-                    onClick={handleLogout}
-                    className="text-sm text-gray-600 cursor-pointer"
-                  >
-                    Logout
-                  </NavigationMenuLink>
+                <span className="ml-2 mr-2.5 text-xs text-gray-600">{session?.user?.name}</span>
+                <NavigationMenuContent className="w-54 rounded-lg p-2">
+                  <div className="flex w-40 flex-col gap-2">
+                  <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
+                      <div className="inline-flex items-center gap-2">
+                        <IconComponent iconName="UserIcon" size={15} color="gray" />
+                        My Profile
+                      </div>
+                    </NavigationMenuLink>
+
+                    <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
+                      <div className="inline-flex items-center gap-2">
+                        <IconComponent iconName="Bookmark02Icon" size={15} color="gray" />
+                        Wishlist
+                      </div>
+                    </NavigationMenuLink>
+
+                    <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
+                      <div className="inline-flex items-center gap-2">
+                        <IconComponent iconName="SchoolBell02Icon" size={15} color="gray" />
+                        Messages
+                      </div>
+                    </NavigationMenuLink>
+
+                    <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
+                      <div className="inline-flex items-center gap-2">
+                        <IconComponent iconName="BubbleChatIcon" size={15} color="gray" />
+                        Notifications
+                      </div>
+                    </NavigationMenuLink>
+                    <Separator />
+                    <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
+                      <div className="inline-flex items-center gap-2">
+                        <IconComponent iconName="DirectionRight01Icon" size={15} color="gray" />
+                        Tour Guide Account
+                      </div>
+                    </NavigationMenuLink>
+                    <NavigationMenuLink
+                      onClick={handleLogout}
+                      className="cursor-pointer text-sm text-gray-600"
+                    >
+                      <div className="inline-flex items-center gap-2">
+                        <IconComponent iconName="Logout04Icon" size={15} color="gray" />
+                        Logout
+                      </div>
+                    </NavigationMenuLink>
+                  </div>
                 </NavigationMenuContent>
               </NavigationMenuTrigger>
             </NavigationMenuItem>

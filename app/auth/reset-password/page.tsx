@@ -9,8 +9,8 @@ import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import MobileStore from '@/app/components/mobileStore';
-import { NotificationContext } from '@/providers/NotificationProvider';
 import SuccessMessage from '@/app/components/messages/success';
+import { toast } from '@/hooks/use-toast';
 
 type Inputs = {
   password: string;
@@ -18,7 +18,6 @@ type Inputs = {
 };
 export default function Page() {
   const router = useRouter();
-  const toast: any = useContext(NotificationContext);
   const account = useSelector((state: any) => state.resetReducer.account);
   const {
     register,
@@ -48,7 +47,11 @@ export default function Page() {
 
     if (!response.ok) {
       setIsSubmitting(false);
-      toast.open('error', 'Failure', res.message);
+      toast({
+        title: 'Failure',
+        description: res.message,
+        variant: 'destructive',
+      });
       return;
     }
     setEnterPassword(false);
