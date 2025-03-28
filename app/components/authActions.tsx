@@ -2,9 +2,6 @@
 
 import Link from 'next/link';
 import { ArrowDown01Icon, UserAdd01Icon } from '@hugeicons/react-pro';
-import { useContext } from 'react';
-import { SessionContext } from '@/providers/SessionProvider';
-import { Menu, MenuButton, MenuItems } from '@headlessui/react';
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -15,12 +12,14 @@ import {
 } from '@/components/ui/navigation-menu';
 import { useRouter } from 'next/navigation';
 import { deleteToken } from '@/lib/actions';
+import { signOut, useSession } from 'next-auth/react'
+import Image from 'next/image';
 export default function AuthActions() {
-  const session: any = useContext(SessionContext);
   const router = useRouter();
+  const { data: session } = useSession();
 
   const handleLogout = async () => {
-    await deleteToken();
+    await signOut({ redirect: false })
     router.push('/');
   };
 
@@ -30,20 +29,24 @@ export default function AuthActions() {
         <span className="text-xs text-gray-800">Become A Tour Guide</span>
       </Link>
       <div className="mx-2 h-[10px] w-[1px] bg-secondary" />
-      {session.user !== undefined ? (
+      {session?.user ? (
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuTrigger>
-                <div className="relative flex h-7 w-7 items-center justify-center rounded-full bg-blue-600">
-                  <span className="text-xs text-white">
-                    {session.user?.firstName?.charAt(0).toUpperCase()}
-                    {session.user?.lastName?.charAt(0).toUpperCase()}
-                  </span>
+                <div className="relative aspect-square h-7 w-7">
+                  <Image
+                    src={session?.user?.image || ''}
+                    alt={session?.user?.name || ''}
+                    className="h-7 w-7 rounded-full"
+                    quality={100}
+                    layout="fill"
+                    objectFit="cover"
+                  />
                   <div className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-[1px] border-white bg-red-600" />
                 </div>
                 <span className="ml-2 mr-2.5 text-xs text-gray-600">
-                  {session.user?.firstName} {session.user.lastName}
+                  {session?.user?.name}
                 </span>
                 <NavigationMenuContent className="p-2 rounded-lg w-20">
                   <NavigationMenuLink

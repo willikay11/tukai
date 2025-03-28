@@ -74,41 +74,41 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, [animationElement]);
 
   return (
-    <div className="h-screen">
-      <Image
-        alt="Mountains"
-        src={
-          backgroundImages.find((backgroundImage) => backgroundImage.path === pathname)?.image ??
-          'images/hill-decent.svg'
-        }
-        quality={100}
-        width={100}
-        height={100}
-        sizes="100vw"
-        className="top-6 md:top-20"
-        style={{
-          position: 'absolute',
-          width: '100%',
-          height: '115vh',
-          objectFit: 'cover',
-          backgroundPosition: 'center',
-          zIndex: -1,
-        }}
-      />
-      <div className="mt-4 flex flex-col items-center justify-center md:mt-12">
-        <div className="mb-4 text-center">
-          <p className="mb-2 text-4xl font-black text-white">Plan & Discover</p>
-          <p
-            ref={animationElement}
-            className={`fade-in-out text-4xl font-black ${options[optionIndex].class}`}
-          >
-            {options[optionIndex].label}
-          </p>
-        </div>
-        <div className="mx-2.5 rounded-[15px] bg-white md:mx-0 md:w-[30.938rem]">
-          <div className="px-8 py-8 md:px-16">{children}</div>
+      <div className="h-screen">
+        <Image
+          alt="Mountains"
+          src={
+            backgroundImages.find((backgroundImage) => backgroundImage.path === pathname)?.image ??
+            'images/hill-decent.svg'
+          }
+          quality={100}
+          width={100}
+          height={100}
+          sizes="100vw"
+          className="top-6 md:top-20"
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '115vh',
+            objectFit: 'cover',
+            backgroundPosition: 'center',
+            zIndex: -1,
+          }}
+        />
+        <div className="mt-4 flex flex-col items-center justify-center md:mt-12">
+          <div className="mb-4 text-center">
+            <p className="mb-2 text-4xl font-black text-white">Plan & Discover</p>
+            <p
+              ref={animationElement}
+              className={`fade-in-out text-4xl font-black ${options[optionIndex].class}`}
+            >
+              {options[optionIndex].label}
+            </p>
+          </div>
+          <div className="mx-2.5 rounded-[15px] bg-white md:mx-0 md:w-[30.938rem]">
+            <div className="px-8 py-8 md:px-16">{children}</div>
+          </div>
         </div>
       </div>
-    </div>
   );
 }

@@ -9,7 +9,8 @@ import { useRouter } from 'next/navigation';
 import MobileStore from '@/app/components/mobileStore';
 import { useContext, useState } from 'react';
 import { NotificationContext } from '@/providers/NotificationProvider';
-import { SessionContext } from '@/providers/SessionProvider';
+// import { SessionContext } from '@/providers/SessionProvider';
+import { signIn, signOut, useSession } from "next-auth/react";
 
 type Inputs = {
   email: string;
@@ -18,7 +19,8 @@ type Inputs = {
 export default function Page() {
   const router = useRouter();
   const toast: any = useContext(NotificationContext);
-  const session: any = useContext(SessionContext);
+  // const session: any = useContext(SessionContext);
+  const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const {
@@ -29,24 +31,19 @@ export default function Page() {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setIsSubmitting(true);
-    const response = await fetch('/auth/sign-in/api', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+    const res = await signIn('credentials', {
+      email: data.email,
+      password: data.password,
+      redirect: false,
     });
-
-    const res = await response.json();
-
-    if (!response.ok) {
-      setIsSubmitting(false);
-      toast.open('error', 'Login unsuccessful', res.message);
-      return;
-    }
-
-    toast.open('success', 'Login successful', 'Welcome Back!');
     setIsSubmitting(false);
-    session.setUser(res.data);
-    router.push('/');
+
+    if (res?.status === 200) {
+      toast.open('success', 'Login successful', 'Welcome Back!');
+      router.push('/');
+    } else {
+      toast.open('error', 'Login unsuccessful', res?.error);
+    }
   };
 
   return (
@@ -97,7 +94,7 @@ export default function Page() {
       </div>
 
       <div className="mb-2.5">
-        <Button block onClick={() => {}} type="blue">
+        <Button block onClick={() => signIn('google')} type="blue">
           <div className="inline-flex items-center">
             <GoogleIcon className="mr-2 text-white" variant="solid" type="sharp" /> Continue with
             Google
