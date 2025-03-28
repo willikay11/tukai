@@ -1,23 +1,19 @@
 // noinspection
 'use client';
-import { hugeiconsLicense } from '@hugeicons/react-pro';
-import * as HugeIcons from '@hugeicons/react-pro';
 import React, { useContext, useEffect, useState } from 'react';
 import { Button } from '@/app/components/form';
 import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import Loader from '@/app/components/form/loader';
-import { NotificationContext } from '@/providers/NotificationProvider';
 import { removeUser } from '@/slices/userSlice';
 import { SessionContext } from '@/providers/SessionProvider';
-
-hugeiconsLicense(
-  '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
-);
+import { toast } from '@/hooks/use-toast';
+import IconComponent from '@/app/components/iconComponent';
+import moment from 'moment-timezone';
 export default function Page() {
+  const timezone = moment.tz.guess();
   const router = useRouter();
-  const toast: any = useContext(NotificationContext);
   const session: any = useContext(SessionContext);
   const newUser = useSelector((state: any) => state.userReducer.newUser);
   const [loading, setLoading] = useState<boolean>(true);
@@ -30,23 +26,32 @@ export default function Page() {
     const response = await fetch('/auth/interests/api', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...newUser.payload, ...{ interests: interests } }),
+      body: JSON.stringify({ ...newUser.payload, ...{ interests: interests, timezone: timezone } }),
     });
 
     const res = await response.json();
 
     if (!response.ok) {
       setIsSubmitting(false);
-      toast.open('error', 'Sign up unsuccessful', res.message);
+      toast({
+        title: 'Sign up unsuccessful',
+        description: res.message,
+        variant: 'destructive',
+      });
       return;
     }
 
-    toast.open('success', 'Account created', 'Your next adventure awaits!');
+    toast({
+      title: 'Account created',
+      description: 'Your next adventure awaits!',
+      variant: 'success',
+    });
     setIsSubmitting(false);
     removeUser();
     session.setUser(res.data);
     router.push('/auth/otp-confirmation');
   };
+
   const getInterests = async () => {
     const response = await fetch('/auth/interests/api', {
       method: 'GET',
@@ -103,12 +108,7 @@ export default function Page() {
                 )}
               >
                 <div className="mr-2">
-                  {
-                    React.createElement(HugeIcons[`${interest.icon}`], {
-                      size: 16,
-                      variant: 'twotone',
-                    }) as any
-                  }
+                  <IconComponent iconName={interest.icon} size={16} />
                 </div>
                 <span className="text-xs">{interest.name}</span>
               </div>

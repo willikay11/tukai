@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, ReactNode, useEffect, useState } from 'react';
-
+import { SessionProvider as SProvider } from 'next-auth/react';
 export const SessionContext = createContext({});
 
 export default function SessionProvider({ children }: { children: ReactNode }) {
@@ -27,5 +27,9 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
     fetchUserProfile();
   }, []);
 
-  return <SessionContext.Provider value={{ user, setUser }}>{children}</SessionContext.Provider>;
+  return (
+    <SessionContext.Provider value={{ user, setUser }}>
+      <SProvider>{children}</SProvider>
+    </SessionContext.Provider>
+  );
 }

@@ -1,6 +1,7 @@
 import { Button } from '@/app/components/form';
 import React, { ReactNode } from 'react';
 import * as HugeIcons from '@hugeicons/react-pro';
+import IconComponent from '../iconComponent';
 
 export default function SuccessMessage({
   title,
@@ -21,13 +22,14 @@ export default function SuccessMessage({
     <>
       <div className="mb-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
-          {
+          {/* {
             React.createElement(HugeIcons[`${icon}`], {
               size: 30,
               variant: 'duotone',
               className: 'text-green-800',
             }) as any
-          }
+          } */}
+          <IconComponent iconName={icon} size={30} color="green" />
         </div>
       </div>
 

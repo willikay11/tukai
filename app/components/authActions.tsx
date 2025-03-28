@@ -2,9 +2,6 @@
 
 import Link from 'next/link';
 import { ArrowDown01Icon, UserAdd01Icon } from '@hugeicons/react-pro';
-import { useContext } from 'react';
-import { SessionContext } from '@/providers/SessionProvider';
-import { Menu, MenuButton, MenuItems } from '@headlessui/react';
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -14,13 +11,17 @@ import {
   NavigationMenuContent,
 } from '@/components/ui/navigation-menu';
 import { useRouter } from 'next/navigation';
-import { deleteToken } from '@/lib/actions';
+import { signOut, useSession } from 'next-auth/react';
+import Image from 'next/image';
+import IconComponent from '@/app/components/iconComponent';
+import { Separator } from '@/components/ui/separator';
+
 export default function AuthActions() {
-  const session: any = useContext(SessionContext);
   const router = useRouter();
+  const { data: session } = useSession();
 
   const handleLogout = async () => {
-    await deleteToken();
+    await signOut({ redirect: false });
     router.push('/');
   };
 
@@ -30,28 +31,69 @@ export default function AuthActions() {
         <span className="text-xs text-gray-800">Become A Tour Guide</span>
       </Link>
       <div className="mx-2 h-[10px] w-[1px] bg-secondary" />
-      {session.user !== undefined ? (
+      {session?.user ? (
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuTrigger>
-                <div className="relative flex h-7 w-7 items-center justify-center rounded-full bg-blue-600">
-                  <span className="text-xs text-white">
-                    {session.user?.firstName?.charAt(0).toUpperCase()}
-                    {session.user?.lastName?.charAt(0).toUpperCase()}
-                  </span>
+                <div className="relative aspect-square h-7 w-7">
+                  <Image
+                    src={session?.user?.image || ''}
+                    alt={session?.user?.name || ''}
+                    className="h-7 w-7 rounded-full"
+                    quality={100}
+                    layout="fill"
+                    objectFit="cover"
+                  />
                   <div className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-[1px] border-white bg-red-600" />
                 </div>
-                <span className="ml-2 mr-2.5 text-xs text-gray-600">
-                  {session.user?.firstName} {session.user.lastName}
-                </span>
-                <NavigationMenuContent className="p-2 rounded-lg w-20">
-                  <NavigationMenuLink
-                    onClick={handleLogout}
-                    className="text-sm text-gray-600 cursor-pointer"
-                  >
-                    Logout
-                  </NavigationMenuLink>
+                <span className="ml-2 mr-2.5 text-xs text-gray-600">{session?.user?.name}</span>
+                <NavigationMenuContent className="w-54 rounded-lg p-2">
+                  <div className="flex w-40 flex-col gap-2">
+                  <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
+                      <div className="inline-flex items-center gap-2">
+                        <IconComponent iconName="UserIcon" size={15} color="gray" />
+                        My Profile
+                      </div>
+                    </NavigationMenuLink>
+
+                    <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
+                      <div className="inline-flex items-center gap-2">
+                        <IconComponent iconName="Bookmark02Icon" size={15} color="gray" />
+                        Wishlist
+                      </div>
+                    </NavigationMenuLink>
+
+                    <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
+                      <div className="inline-flex items-center gap-2">
+                        <IconComponent iconName="SchoolBell02Icon" size={15} color="gray" />
+                        Messages
+                      </div>
+                    </NavigationMenuLink>
+
+                    <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
+                      <div className="inline-flex items-center gap-2">
+                        <IconComponent iconName="BubbleChatIcon" size={15} color="gray" />
+                        Notifications
+                      </div>
+                    </NavigationMenuLink>
+                    <Separator />
+                    <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
+                      <div className="inline-flex items-center gap-2">
+                        <IconComponent iconName="DirectionRight01Icon" size={15} color="gray" />
+                        Tour Guide Account
+                      </div>
+                    </NavigationMenuLink>
+                    <NavigationMenuLink
+                      onClick={handleLogout}
+                      className="cursor-pointer text-sm text-gray-600"
+                    >
+                      <div className="inline-flex items-center gap-2">
+                        <IconComponent iconName="Logout04Icon" size={15} color="gray" />
+                        Logout
+                      </div>
+                    </NavigationMenuLink>
+                  </div>
                 </NavigationMenuContent>
               </NavigationMenuTrigger>
             </NavigationMenuItem>

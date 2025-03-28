@@ -1,8 +1,8 @@
 export async function POST(req: Request) {
   try {
-    const { firstName, lastName, email, password, interests } = await req.json();
+    const { firstName, lastName, email, password, interests, timezone } = await req.json();
 
-    const response = await fetch('https://api.oltukai.co/v1/accounts/users/', {
+    const response = await fetch('https://api.tukai.co/v1/accounts/users/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -12,7 +12,9 @@ export async function POST(req: Request) {
         last_name: lastName,
         email,
         password,
-        interests,
+        interests_ids: interests.map((interest: any) => interest.id),
+        accepted_terms: true,
+        timezone,
       }),
     });
 
@@ -52,7 +54,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-  const response = await fetch('https://api.oltukai.co/v1/accounts/interests?page_size=1000', {
+  const response = await fetch('https://api.tukai.co/v1/accounts/interests?page_size=1000', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

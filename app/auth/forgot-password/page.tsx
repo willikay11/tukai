@@ -5,12 +5,12 @@ import React, { useContext, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Anchor, Button, Input } from '@/app/components/form';
 import { Mail02Icon } from '@hugeicons/react-pro';
-import { NotificationContext } from '@/providers/NotificationProvider';
 import { useRouter } from 'next/navigation';
 import MobileStore from '@/app/components/mobileStore';
 import { useDispatch } from 'react-redux';
 import { addEmail } from '@/slices/resetSlice';
 import SuccessMessage from '@/app/components/messages/success';
+import { toast } from '@/hooks/use-toast';
 
 type Inputs = {
   email: string;
@@ -18,7 +18,6 @@ type Inputs = {
 export default function Page() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const toast: any = useContext(NotificationContext);
   const [email, setEmail] = useState<string>();
   const [verificationSent, setVerificationSent] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -42,7 +41,11 @@ export default function Page() {
 
     if (!response.ok) {
       setIsSubmitting(false);
-      toast.open('error', 'Failure', res.message);
+      toast({
+        title: 'Failure',
+        description: res.message,
+        variant: 'destructive',
+      });
       return;
     }
 
