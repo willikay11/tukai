@@ -34,8 +34,10 @@ export function Toaster() {
                     color="white"
                   />
                 </div>
-                {title && <ToastTitle>{title}</ToastTitle>}
-                {description && <ToastDescription>{description}</ToastDescription>}
+                <div className="flex flex-col">
+                  {title && <ToastTitle>{title}</ToastTitle>}
+                  {description && <ToastDescription>{description}</ToastDescription>}
+                </div>
               </div>
             </div>
             {action}

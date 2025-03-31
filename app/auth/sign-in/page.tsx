@@ -8,12 +8,16 @@ import { useRouter } from 'next/navigation';
 
 export default function Page() {
   const router = useRouter();
-  return <SignInForm onLogin={() => {
-    toast({
-      description: 'Welcome Back!',
-      variant: 'success',
-    });
+  return (
+    <SignInForm
+      onLogin={() => {
+        toast({
+          description: 'Welcome Back!',
+          variant: 'success',
+        });
 
-    router.push('/');
-  }} />;
+        router.push('/');
+      }}
+    />
+  );
 }

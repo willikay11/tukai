@@ -12,7 +12,7 @@ export async function POST(req: Request) {
         last_name: lastName,
         email,
         password,
-        interests_ids: interests.map((interest: any) => interest.id),
+        interests_ids: interests,
         accepted_terms: true,
         timezone,
       }),

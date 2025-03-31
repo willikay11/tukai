@@ -1,21 +1,22 @@
 // noinspection
 'use client';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/app/components/form';
 import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import Loader from '@/app/components/form/loader';
 import { removeUser } from '@/slices/userSlice';
-import { SessionContext } from '@/providers/SessionProvider';
 import { toast } from '@/hooks/use-toast';
 import IconComponent from '@/app/components/iconComponent';
 import moment from 'moment-timezone';
+import { useSession } from 'next-auth/react';
+
 export default function Page() {
   const timezone = moment.tz.guess();
   const router = useRouter();
-  const session: any = useContext(SessionContext);
   const newUser = useSelector((state: any) => state.userReducer.newUser);
+  const { data: session } = useSession();
   const [loading, setLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [interests, setInterests] = useState<{ id: string; name: string; icon: string }[]>([]);
@@ -23,10 +24,24 @@ export default function Page() {
 
   const onSubmit = async () => {
     setIsSubmitting(true);
+
+    let body;
+    if (session?.user?.sessionType === 'sign-up') {
+      body = {
+        firstName: session?.user?.name?.split(' ')[0],
+        lastName: session?.user?.name?.split(' ')[1],
+        email: session?.user?.email,
+        interests: selectedInterests,
+        timezone: timezone,
+      };
+    } else {
+      body = { ...session?.user, ...{ interests: selectedInterests, timezone: timezone } };
+    }
+
     const response = await fetch('/auth/interests/api', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...newUser.payload, ...{ interests: interests, timezone: timezone } }),
+      body: JSON.stringify(body),
     });
 
     const res = await response.json();
@@ -48,7 +63,6 @@ export default function Page() {
     });
     setIsSubmitting(false);
     removeUser();
-    session.setUser(res.data);
     router.push('/auth/otp-confirmation');
   };
 

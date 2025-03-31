@@ -1,16 +1,24 @@
 'use client';
 
 import { Anchor, Button } from '@/app/components/form';
-import { GoogleIcon, hugeiconsLicense } from '@hugeicons/react-pro';
+import { GoogleIcon } from '@hugeicons/react-pro';
 import { useRouter } from 'next/navigation';
-import MobileStore from '@/app/components/mobileStore';
+import { signIn } from 'next-auth/react';
 
-hugeiconsLicense(
-  '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
-);
+import MobileStore from '@/app/components/mobileStore';
 
 export default function Page() {
   const router = useRouter();
+
+  const handleSignUp = async () => {
+    const result = await signIn('google', { callbackUrl: '/auth/interests' });
+
+    if (result?.error) {
+      console.log(result?.error);
+    } else {
+      router.push('/auth/interests');
+    }
+  };
 
   return (
     <>
@@ -37,7 +45,7 @@ export default function Page() {
       </div>
 
       <div className="mb-2.5">
-        <Button block onClick={() => {}} type="blue">
+        <Button block onClick={() => handleSignUp()} type="blue">
           <div className="inline-flex items-center">
             <GoogleIcon className="mr-2 text-white" variant="solid" type="sharp" /> Continue with
             Google

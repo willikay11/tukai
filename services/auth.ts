@@ -35,9 +35,9 @@ export const socialSignIn = async (backend: 'google-oauth2' | 'facebook', access
     const response = await api.post(`/v1/accounts/social/${backend}/login/`, {
       access_token: accessToken,
     });
-    return parseSnakeToCamel(response.data);
+    return parseSnakeToCamel({ ...response.data, success: true });
   } catch (error) {
-    console.error(error);
-    throw error;
+    // console.error(error);
+    return { success: false };
   }
 };

@@ -3,17 +3,13 @@
 'use client';
 
 import { Anchor, Button, Input } from '@/app/components/form';
-import { hugeiconsLicense, LockKeyIcon, Mail02Icon, UserIcon } from '@hugeicons/react-pro';
+import { LockKeyIcon, Mail02Icon, UserIcon } from '@hugeicons/react-pro';
 import { useRouter } from 'next/navigation';
 import MobileStore from '@/app/components/mobileStore';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { addUser } from '@/slices/userSlice';
 import { useState } from 'react';
-
-hugeiconsLicense(
-  '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
-);
 
 type Inputs = {
   firstName: string;
