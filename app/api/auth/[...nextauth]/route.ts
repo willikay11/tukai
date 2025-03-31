@@ -6,6 +6,18 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { User } from '@/types/user';
 
+// Define the extended session type
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      sessionType?: string; // Add this line
+    };
+  }
+}
+
 export const authOptions = {
   providers: [
     GoogleProvider({
@@ -58,11 +70,12 @@ export const authOptions = {
     }) {
       if (account?.provider === 'google') {
         const response = await socialSignIn('google-oauth2', account.access_token);
-        if (response.access) {
+        if (response?.success) {
           token.accessToken = account.access_token;
           token.refreshToken = account.refresh_token;
+          token.sessionType = 'sign-in';
         } else {
-          return false;
+          token.sessionType = 'sign-up';
         }
         token.id = profile?.sub;
         token.name = profile?.name;
@@ -84,6 +97,7 @@ export const authOptions = {
         name: token.name,
         email: token.email,
         image: token.picture,
+        sessionType: token.sessionType,
       };
       return session;
     },
