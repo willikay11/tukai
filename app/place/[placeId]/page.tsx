@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Bookmark02Icon, CheckmarkBadge02Icon, Share08Icon } from '@hugeicons/react-pro';
+import { CheckmarkBadge02Icon } from '@hugeicons/react-pro';
 import { ApiResponse } from '@/types/apiResponse';
 import { fetchPlace, fetchPlaceProperties, fetchPlaceSocialLinks } from '@/services/place';
 import { Place, PlaceProperty, PlaceSocialLink } from '@/types/place';

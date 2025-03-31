@@ -88,6 +88,7 @@ export const authOptions = {
         token.picture = user.picture;
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
+        token.sessionType = 'sign-in';
       }
       return token;
     },

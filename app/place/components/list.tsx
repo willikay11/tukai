@@ -107,7 +107,7 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
               transition={{ duration: 0.3 }}
               className="cursor-pointer"
             >
-              {session?.user ? (
+              {session?.user && session?.user?.sessionType === 'sign-in' ? (
                 <Link target="_blank" href={`/place/${place.id}`}>
                   <SinglePlace place={place} />
                 </Link>
