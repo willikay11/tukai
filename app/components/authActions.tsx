@@ -50,7 +50,7 @@ export default function AuthActions() {
                 <span className="ml-2 mr-2.5 text-xs text-gray-600">{session?.user?.name}</span>
                 <NavigationMenuContent className="w-54 rounded-lg p-2">
                   <div className="flex w-40 flex-col gap-2">
-                  <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
+                    <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
                       <div className="inline-flex items-center gap-2">
                         <IconComponent iconName="UserIcon" size={15} color="gray" />
                         My Profile
@@ -84,13 +84,10 @@ export default function AuthActions() {
                         Tour Guide Account
                       </div>
                     </NavigationMenuLink>
-                    <NavigationMenuLink
-                      onClick={handleLogout}
-                      className="cursor-pointer"
-                    >
-                      <div className="inline-flex items-center gap-2 ">
+                    <NavigationMenuLink onClick={handleLogout} className="cursor-pointer">
+                      <div className="inline-flex items-center gap-2">
                         <IconComponent iconName="Logout04Icon" size={15} color="gray" />
-                        <span className="text-sm text-gray-600 font-satoshi">Logout</span>
+                        <span className="font-satoshi text-sm text-gray-600">Logout</span>
                       </div>
                     </NavigationMenuLink>
                   </div>

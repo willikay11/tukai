@@ -12,7 +12,6 @@ import IconComponent from '@/app/components/iconComponent';
 import moment from 'moment-timezone';
 import { useSession } from 'next-auth/react';
 
-
 export default function Page() {
   const timezone = moment.tz.guess();
   const router = useRouter();
@@ -28,7 +27,7 @@ export default function Page() {
 
     let body;
     if (session?.user?.sessionType === 'sign-up') {
-      body = { 
+      body = {
         firstName: session?.user?.name?.split(' ')[0],
         lastName: session?.user?.name?.split(' ')[1],
         email: session?.user?.email,
@@ -38,7 +37,7 @@ export default function Page() {
     } else {
       body = { ...session?.user, ...{ interests: selectedInterests, timezone: timezone } };
     }
-    
+
     const response = await fetch('/auth/interests/api', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

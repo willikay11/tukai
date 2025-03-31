@@ -69,13 +69,15 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="px-16">
-          <SignInForm onLogin={() => {
-            setOpen(false);
-            toast({
-              description: 'Welcome Back!',
-              variant: 'success',
-            });
-          }} />
+          <SignInForm
+            onLogin={() => {
+              setOpen(false);
+              toast({
+                description: 'Welcome Back!',
+                variant: 'success',
+              });
+            }}
+          />
         </DialogContent>
       </Dialog>
 
@@ -105,7 +107,7 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
               transition={{ duration: 0.3 }}
               className="cursor-pointer"
             >
-              {session?.user  ? (
+              {session?.user ? (
                 <Link target="_blank" href={`/place/${place.id}`}>
                   <SinglePlace place={place} />
                 </Link>

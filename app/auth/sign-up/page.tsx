@@ -7,12 +7,11 @@ import { signIn } from 'next-auth/react';
 
 import MobileStore from '@/app/components/mobileStore';
 
-
 export default function Page() {
   const router = useRouter();
 
   const handleSignUp = async () => {
-    const result = await signIn("google", { callbackUrl: "/auth/interests" });
+    const result = await signIn('google', { callbackUrl: '/auth/interests' });
 
     if (result?.error) {
       console.log(result?.error);

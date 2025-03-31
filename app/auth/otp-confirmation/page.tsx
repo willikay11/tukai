@@ -64,7 +64,7 @@ export default function OtpConfirmation() {
       toast({
         title: 'OTP Failure',
         description: res.message,
-        variant: 'destructive', 
+        variant: 'destructive',
       });
       return;
     }
@@ -84,7 +84,7 @@ export default function OtpConfirmation() {
           A four digit code was sent to <span className="text-primary">{email}</span>
         </p>
         <OtpInput onComplete={(token) => setToken(token)} />
-        <div className="inline-flex w-full justify-center my-2.5">
+        <div className="my-2.5 inline-flex w-full justify-center">
           <Button type="link" onClick={resendCode} loading={isResending}>
             <RefreshIcon variant="twotone" size={16} className="mr-2" />
             Resend Code
