@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'; // ✅ Framer Motion for smooth transiti
 import SinglePlace from '@/app/place/components/place';
 import { Place } from '@/types/place';
 import { usePlaces } from '@/hooks/places';
-import { EventSkeleton, EventsSkeleton } from '@/app/components/skeletons';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import NoData from '@/components/ui/noData';
 import { useSession } from 'next-auth/react';
@@ -21,7 +20,18 @@ const placeholders: Place[] = Array.from({ length: 12 }, (_, index) => ({
   id: `placeholder-${index}`,
   title: 'Loading...',
   description: '',
-  location: { id: '', name: '', pointLat: 0, pointLong: 0, point: { type: 'Point', coordinates: [0, 0] }, formattedAddress: '', street: '', city: '', state: '', country: '' },
+  location: {
+    id: '',
+    name: '',
+    pointLat: 0,
+    pointLong: 0,
+    point: { type: 'Point', coordinates: [0, 0] },
+    formattedAddress: '',
+    street: '',
+    city: '',
+    state: '',
+    country: '',
+  },
   category: { id: '', name: '', icon: '', group: '', placesCount: 0 },
   dateCreated: '',
   photos: [],
@@ -47,8 +57,7 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
 
   const lastPlaceElementRef = useCallback(
     (node: HTMLDivElement) => {
-      if (isLoading || !places?.data?.results)
-        return;
+      if (isLoading || !places?.data?.results) return;
 
       if (observer.current) observer.current.disconnect();
 
@@ -67,19 +76,33 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
 
   useEffect(() => {
     if (isLoading && !placeList.some((place) => place.id.startsWith('placeholder-'))) {
-      setPlaceList((prevPlaceList) => [...prevPlaceList, ...placeholders]);``
-    } else if (!isLoading && places?.data?.results) { 
-        setPlaceList((prevPlaceList) => [...prevPlaceList.filter((place) => !place.id.startsWith('placeholder-')), ...places.data.results]);
-        if (places.data.count) {
-          setEndPage(Math.ceil(places.data.count / 12));
-        }
+      setPlaceList((prevPlaceList) => [...prevPlaceList, ...placeholders]);
+      ``;
+    } else if (!isLoading && places?.data?.results) {
+      setPlaceList((prevPlaceList) => [
+        ...prevPlaceList.filter((place) => !place.id.startsWith('placeholder-')),
+        ...places.data.results,
+      ]);
+      if (places.data.count) {
+        setEndPage(Math.ceil(places.data.count / 12));
+      }
     } else if (!isLoading) {
-      setPlaceList((prevPlaceList) => prevPlaceList.filter((place) => !place.id.startsWith('placeholder-')));
+      setPlaceList((prevPlaceList) =>
+        prevPlaceList.filter((place) => !place.id.startsWith('placeholder-')),
+      );
     }
   }, [places, isLoading]);
 
   if (!isLoading && placeList.length === 0) {
-    return <NoData message="No places found" />;
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, ease: 'easeInOut' }}
+      >
+        <NoData message="No places found" />
+      </motion.div>
+    );
   }
 
   return (

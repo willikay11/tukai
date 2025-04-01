@@ -11,9 +11,7 @@ export default function SinglePlace({ place }: { place: Place }) {
   const [hasError, setHasError] = useState(false);
 
   if (place.id.startsWith('placeholder-')) {
-    return (
-      <EventSkeleton />
-    );
+    return <EventSkeleton />;
   }
 
   return (

@@ -7,10 +7,15 @@ import ImageCarousel from '@/components/ui/imageCarousel';
 import numeral from 'numeral';
 import moment from 'moment';
 import { Button } from '@/components/ui/button';
+import { EventSkeleton } from '@/app/components/skeletons';
 
 export default function SingleExperience({ experience }: { experience: Experience }) {
   const [bookmarked, setBookmarked] = useState<boolean>(false);
   const [hasError, setHasError] = useState(false);
+
+  if (experience.id.startsWith('placeholder-')) {
+    return <EventSkeleton />;
+  }
 
   return (
     <>
