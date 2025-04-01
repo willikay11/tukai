@@ -16,5 +16,5 @@ export async function middleware(request: NextRequest) {
 
 // Configure the middleware to run on specific paths
 export const config = {
-  matcher: ['/place/:path*', '/experiences/:path*'], // Adjust the paths as needed
+  matcher: ['/place/:path*'], // Adjust the paths as needed
 };

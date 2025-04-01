@@ -11,15 +11,30 @@ import { useSession } from 'next-auth/react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import SignInForm from '@/components/ui/form/sign-in';
 import { toast } from '@/hooks/use-toast';
+import { Status } from '@/enums/status';
+
 type ListPlacesProps = {
   selectedCategoryId?: string;
 };
 
+const placeholders: Place[] = Array.from({ length: 12 }, (_, index) => ({
+  id: `placeholder-${index}`,
+  title: 'Loading...',
+  description: '',
+  location: { id: '', name: '', pointLat: 0, pointLong: 0, point: { type: 'Point', coordinates: [0, 0] }, formattedAddress: '', street: '', city: '', state: '', country: '' },
+  category: { id: '', name: '', icon: '', group: '', placesCount: 0 },
+  dateCreated: '',
+  photos: [],
+  totalReviews: 0,
+  averageRating: 0,
+  isBookmarked: false,
+  status: 'DRAFT' as Status,
+}));
+
 export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
   const [page, setPage] = useState(1);
-  const [placeList, setPlaceList] = useState<Place[]>([]);
+  const [placeList, setPlaceList] = useState<Place[]>(placeholders);
   const [endPage, setEndPage] = useState<number | null>(null);
-  const [isFetching, setIsFetching] = useState(false);
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
   const { data: places, isLoading } = usePlaces({
@@ -32,14 +47,13 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
 
   const lastPlaceElementRef = useCallback(
     (node: HTMLDivElement) => {
-      if (isLoading || isFetching || !places?.data?.results || (endPage !== null && page > endPage))
+      if (isLoading || !places?.data?.results)
         return;
 
       if (observer.current) observer.current.disconnect();
 
       observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) {
-          setIsFetching(true);
+        if (entries[0].isIntersecting && endPage !== null && page < endPage) {
           setTimeout(() => {
             setPage((prevPage) => prevPage + 1);
           }, 500);
@@ -48,18 +62,21 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
 
       if (node) observer.current.observe(node);
     },
-    [isLoading, isFetching, places, page, endPage],
+    [isLoading, places, page, endPage],
   );
 
   useEffect(() => {
-    if (places?.data?.results) {
-      setPlaceList((prevPlaceList) => [...prevPlaceList, ...places.data.results]);
-      if (places.data.end_index) {
-        setEndPage(places.data.end_index);
-      }
+    if (isLoading && !placeList.some((place) => place.id.startsWith('placeholder-'))) {
+      setPlaceList((prevPlaceList) => [...prevPlaceList, ...placeholders]);``
+    } else if (!isLoading && places?.data?.results) { 
+        setPlaceList((prevPlaceList) => [...prevPlaceList.filter((place) => !place.id.startsWith('placeholder-')), ...places.data.results]);
+        if (places.data.count) {
+          setEndPage(Math.ceil(places.data.count / 12));
+        }
+    } else if (!isLoading) {
+      setPlaceList((prevPlaceList) => prevPlaceList.filter((place) => !place.id.startsWith('placeholder-')));
     }
-    setIsFetching(false);
-  }, [places]);
+  }, [places, isLoading]);
 
   if (!isLoading && placeList.length === 0) {
     return <NoData message="No places found" />;
@@ -82,29 +99,20 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
       </Dialog>
 
       <motion.div
-        initial={{ opacity: 1 }}
-        animate={{ opacity: isLoading && placeList.length === 0 ? 0 : 1 }}
-        transition={{ duration: 0.5 }}
-        className={isLoading && placeList.length === 0 ? 'block' : 'hidden'}
-      >
-        <EventsSkeleton />
-      </motion.div>
-
-      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7"
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+        className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"
       >
         {placeList.map((place: Place, index: number) => {
           const isLastElement = index === placeList.length - 1;
           return (
             <motion.div
               key={place.id}
-              ref={isLastElement ? lastPlaceElementRef : undefined}
+              ref={isLastElement && !isLoading ? lastPlaceElementRef : undefined}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.2 }}
               className="cursor-pointer"
             >
               {session?.user && session?.user?.sessionType === 'sign-in' ? (
@@ -119,19 +127,6 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
             </motion.div>
           );
         })}
-
-        {isFetching && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-            className="contents"
-          >
-            {Array.from({ length: 12 }).map((_, index) => (
-              <EventSkeleton key={index} />
-            ))}
-          </motion.div>
-        )}
       </motion.div>
     </>
   );

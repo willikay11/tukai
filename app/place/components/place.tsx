@@ -1,13 +1,20 @@
 'use client';
-import Image from 'next/image';
-import { Bookmark02Icon, StarIcon } from '@hugeicons/react-pro';
+import { StarIcon } from '@hugeicons/react-pro';
 import { useState } from 'react';
 import clsx from 'clsx';
 import { Place } from '@/types/place';
 import ImageCarousel from '@/components/ui/imageCarousel';
 import BookmarkPlace from './bookmarkPlace';
+import { EventSkeleton } from '@/app/components/skeletons';
+
 export default function SinglePlace({ place }: { place: Place }) {
   const [hasError, setHasError] = useState(false);
+
+  if (place.id.startsWith('placeholder-')) {
+    return (
+      <EventSkeleton />
+    );
+  }
 
   return (
     <>
