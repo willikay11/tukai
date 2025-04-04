@@ -75,7 +75,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
               ) : null}
               <div className="flex flex-col">
                 <p className="text-sm font-bold text-gray-700">{placeProperty.key}</p>
-                <p className="text-sm font-normal text-gray-500">{placeProperty.value}</p>
+                <p className="text-sm font-medium text-gray-500">{placeProperty.value}</p>
               </div>
             </div>
           ))}

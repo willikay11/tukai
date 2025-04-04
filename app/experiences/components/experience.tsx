@@ -51,11 +51,11 @@ export default function SingleExperience({ experience }: { experience: Experienc
         <div className="mb-1 inline-flex items-center">
           <span className="text-xs font-medium text-gray-700">
             {experience?.priceStartsFrom.currency}{' '}
-            {numeral(experience?.priceStartsFrom.amount).format('0,0')} /person
+            {numeral(experience?.priceStartsFrom.amount).format('0,0')} / person
           </span>
         </div>
         <div className="inline-flex items-center">
-          <span className="text-xs font-normal text-gray-700">
+          <span className="text-xs font-medium text-gray-700">
             {moment(experience?.startDate).format('MMM D, YYYY')} -{' '}
             {moment(experience?.endDate).format('MMM D, YYYY')}
           </span>

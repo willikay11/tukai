@@ -39,9 +39,9 @@ export default function SinglePlace({ place }: { place: Place }) {
         </div>
         <div className="mb-1 inline-flex items-center">
           <span className="text-xs text-gray-600">{place?.location?.name}</span>
-          <span className="text-xs text-gray-600">{place?.location?.formattedAddress}</span>
-          {/*<div className="mx-1 h-[6px] w-[1px] rounded bg-gray-300" />*/}
-          {/*<span className="text-xs text-gray-600">{experience.duration}</span>*/}
+          <span className="text-xs font-medium text-gray-600">
+            {place?.location?.formattedAddress}
+          </span>
         </div>
         <div className="inline-flex items-center">
           <StarIcon

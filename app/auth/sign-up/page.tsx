@@ -3,22 +3,23 @@
 import { Anchor, Button } from '@/app/components/form';
 import { GoogleIcon } from '@hugeicons/react-pro';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 
 import MobileStore from '@/app/components/mobileStore';
+import { useEffect } from 'react';
 
 export default function Page() {
   const router = useRouter();
 
-  const handleSignUp = async () => {
-    const result = await signIn('google', { callbackUrl: '/auth/interests' });
+  const { data: session } = useSession();
 
-    if (result?.error) {
-      console.log(result?.error);
-    } else {
+  useEffect(() => {
+    if (session?.user && session?.user?.sessionType === 'sign-up') {
       router.push('/auth/interests');
+    } else if (session?.user && session?.user?.sessionType === 'sign-in') {
+      router.push('/');
     }
-  };
+  }, [session]);
 
   return (
     <>
@@ -45,7 +46,7 @@ export default function Page() {
       </div>
 
       <div className="mb-2.5">
-        <Button block onClick={() => handleSignUp()} type="blue">
+        <Button block onClick={() => signIn('google')} type="blue">
           <div className="inline-flex items-center">
             <GoogleIcon className="mr-2 text-white" variant="solid" type="sharp" /> Continue with
             Google

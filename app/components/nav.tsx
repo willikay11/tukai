@@ -11,7 +11,11 @@ const links = [
     href: '/experiences',
     icon: <Calendar04Icon size={18} variant="twotone" />,
   },
-  { name: 'Community', href: '/community', icon: <UserMultipleIcon size={18} variant="twotone" /> },
+  {
+    name: 'Communities',
+    href: '/community',
+    icon: <UserMultipleIcon size={18} variant="twotone" />,
+  },
 ];
 
 export default function Nav() {
