@@ -133,7 +133,7 @@ export default function ScrollFilters({
             <IconComponent iconName={filter.icon} size={18} />
             <span
               className={clsx('ml-2 text-nowrap text-xs', {
-                'text-gray-700': selectedOption !== filter.value,
+                'font-medium text-gray-700': selectedOption !== filter.value,
                 'font-semibold text-primary': selectedOption === filter.value,
               })}
             >

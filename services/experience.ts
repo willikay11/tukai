@@ -2,9 +2,9 @@ import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { ApiResponse } from '@/types/apiResponse';
 import api from '@/services/apiService';
 
-export async function fetchExperiences(): Promise<ApiResponse> {
+export async function fetchExperiences(page: number): Promise<ApiResponse> {
   try {
-    const response = await api.get('/v1/experiences/');
+    const response = await api.get(`/v1/experiences/?page=${page}`);
 
     return {
       status: response.status,

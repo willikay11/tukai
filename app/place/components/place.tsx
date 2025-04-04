@@ -1,13 +1,18 @@
 'use client';
-import Image from 'next/image';
-import { Bookmark02Icon, StarIcon } from '@hugeicons/react-pro';
+import { StarIcon } from '@hugeicons/react-pro';
 import { useState } from 'react';
 import clsx from 'clsx';
 import { Place } from '@/types/place';
 import ImageCarousel from '@/components/ui/imageCarousel';
 import BookmarkPlace from './bookmarkPlace';
+import { EventSkeleton } from '@/app/components/skeletons';
+
 export default function SinglePlace({ place }: { place: Place }) {
   const [hasError, setHasError] = useState(false);
+
+  if (place.id.startsWith('placeholder-')) {
+    return <EventSkeleton />;
+  }
 
   return (
     <>
@@ -34,9 +39,9 @@ export default function SinglePlace({ place }: { place: Place }) {
         </div>
         <div className="mb-1 inline-flex items-center">
           <span className="text-xs text-gray-600">{place?.location?.name}</span>
-          <span className="text-xs text-gray-600">{place?.location?.formattedAddress}</span>
-          {/*<div className="mx-1 h-[6px] w-[1px] rounded bg-gray-300" />*/}
-          {/*<span className="text-xs text-gray-600">{experience.duration}</span>*/}
+          <span className="text-xs font-medium text-gray-600">
+            {place?.location?.formattedAddress}
+          </span>
         </div>
         <div className="inline-flex items-center">
           <StarIcon

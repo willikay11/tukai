@@ -41,3 +41,23 @@ export const socialSignIn = async (backend: 'google-oauth2' | 'facebook', access
     return { success: false };
   }
 };
+
+export const userExists = async (email: string) => {
+  try {
+    const response = await api.get(`/v1/accounts/users/exists?email=${email}`);
+    return parseSnakeToCamel(response.data);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const getUser = async (email: string) => {
+  try {
+    const response = await api.get(`/v1/accounts/users?email=${email}`);
+    return parseSnakeToCamel(response.data);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};

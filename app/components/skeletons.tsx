@@ -51,7 +51,7 @@ export function EventSkeleton() {
   return (
     <div className={`${shimmer} relative`}>
       <div className="mb-2 flex">
-        <div className="h-[20rem] w-full rounded-md bg-gray-200 text-sm font-medium md:h-[20rem] 2xl:h-[10rem]" />
+        <div className="h-[20rem] w-full rounded-md bg-gray-200 text-sm font-medium md:h-[20rem] 2xl:h-[10rem] 2xl:h-[17rem]" />
       </div>
       <div className="flex flex-col items-start justify-start bg-white">
         <div className="mb-2 h-5 w-40 rounded-[6px] bg-gray-200" />

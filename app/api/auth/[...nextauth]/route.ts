@@ -1,7 +1,7 @@
 import NextAuth, { Session } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { profile, signIn, socialSignIn } from '@/services/auth';
+import { profile, signIn, getUser } from '@/services/auth';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { User } from '@/types/user';
@@ -69,7 +69,9 @@ export const authOptions = {
       profile: any;
     }) {
       if (account?.provider === 'google') {
-        const response = await socialSignIn('google-oauth2', account.access_token);
+        // const response = await socialSignIn('google-oauth2', account.access_token);
+        const response = await getUser(profile?.email);
+        console.log(response);
         if (response?.success) {
           token.accessToken = account.access_token;
           token.refreshToken = account.refresh_token;
