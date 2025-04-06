@@ -153,7 +153,7 @@ export default function Experiences() {
               transition={{ duration: 0.3 }}
               className="cursor-pointer"
             >
-              {session?.user && session?.user?.sessionType === 'sign-in' ? (
+              {session?.user ? (
                 <Link target="_blank" href={`/experiences/${experience.id}`}>
                   <SingleExperience experience={experience} />
                 </Link>

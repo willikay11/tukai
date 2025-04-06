@@ -26,8 +26,9 @@ export default function Page() {
     setIsSubmitting(true);
 
     let body;
-    if (session?.user?.sessionType === 'sign-up') {
+    if (session?.user) {
       body = {
+        id: session?.user?.id,
         firstName: session?.user?.name?.split(' ')[0],
         lastName: session?.user?.name?.split(' ')[1],
         email: session?.user?.email,
@@ -35,11 +36,11 @@ export default function Page() {
         timezone: timezone,
       };
     } else {
-      body = { ...session?.user, ...{ interests: selectedInterests, timezone: timezone } };
+      body = { ...newUser, ...{ interests: selectedInterests, timezone: timezone } };
     }
 
     const response = await fetch('/auth/interests/api', {
-      method: 'POST',
+      method: session?.user ? 'PUT' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
@@ -49,7 +50,7 @@ export default function Page() {
     if (!response.ok) {
       setIsSubmitting(false);
       toast({
-        title: 'Sign up unsuccessful',
+        title: 'Interests not saved',
         description: res.message,
         variant: 'destructive',
       });
@@ -57,13 +58,18 @@ export default function Page() {
     }
 
     toast({
-      title: 'Account created',
+      title: 'Interests saved',
       description: 'Your next adventure awaits!',
       variant: 'success',
     });
     setIsSubmitting(false);
     removeUser();
-    router.push('/auth/otp-confirmation');
+
+    if (session?.user) {
+      router.push('/auth/payments');
+    } else {
+      router.push('/auth/otp-confirmation');
+    }
   };
 
   const getInterests = async () => {

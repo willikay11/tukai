@@ -3,23 +3,12 @@
 import { Anchor, Button } from '@/app/components/form';
 import { GoogleIcon } from '@hugeicons/react-pro';
 import { useRouter } from 'next/navigation';
-import { signIn, useSession } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
 
 import MobileStore from '@/app/components/mobileStore';
-import { useEffect } from 'react';
 
 export default function Page() {
   const router = useRouter();
-
-  const { data: session } = useSession();
-
-  useEffect(() => {
-    if (session?.user && session?.user?.sessionType === 'sign-up') {
-      router.push('/auth/interests');
-    } else if (session?.user && session?.user?.sessionType === 'sign-in') {
-      router.push('/');
-    }
-  }, [session]);
 
   return (
     <>

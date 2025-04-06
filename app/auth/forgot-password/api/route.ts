@@ -2,7 +2,7 @@ export async function POST(req: Request) {
   try {
     const { email } = await req.json();
 
-    const response = await fetch('https://api.oltukai.co/v1/accounts/password-reset/', {
+    const response = await fetch('https://api.tukai.co/v1/accounts/password-reset/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

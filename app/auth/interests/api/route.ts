@@ -1,3 +1,6 @@
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getServerSession } from 'next-auth';
+
 export async function POST(req: Request) {
   try {
     const { firstName, lastName, email, password, interests, timezone } = await req.json();
@@ -66,5 +69,47 @@ export async function GET() {
   return Response.json({
     interests: res?.results,
     status: 200,
+  });
+}
+
+export async function PUT(req: Request) {
+  const { id, interests } = await req.json();
+
+  const session = await getServerSession(authOptions);
+  const token = session?.user?.accessToken;
+
+  const response = await fetch(`https://api.tukai.co/v1/accounts/users/${id}/`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      interests_ids: interests,
+    }),
+  });
+
+  const res = await response.json();
+
+  if (!response.ok) {
+    return Response.json(
+      {
+        message: res?.errors?.[0]?.detail,
+      },
+      {
+        status: 400,
+      },
+    );
+  }
+
+  return Response.json({
+    status: 200,
+    data: {
+      id: res.id,
+      firstName: res.first_name,
+      lastName: res?.last_name,
+      email: res?.email,
+      interests: res?.interests,
+    },
   });
 }

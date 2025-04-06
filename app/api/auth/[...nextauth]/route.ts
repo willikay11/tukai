@@ -1,19 +1,24 @@
-import NextAuth, { Session } from 'next-auth';
+import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { profile, signIn, getUser } from '@/services/auth';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import { profile, signIn, socialSignIn } from '@/services/auth';
+import jwt from 'jsonwebtoken';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { User } from '@/types/user';
+import { JwtPayload } from '@/types/jwt';
 
 // Define the extended session type
 declare module 'next-auth' {
   interface Session {
     user: {
+      id?: string | null;
       name?: string | null;
       email?: string | null;
       image?: string | null;
-      sessionType?: string; // Add this line
+      accessToken?: string | null;
+      hasInterests?: boolean | null;
+      hasBillingDetails?: boolean | null;
+      hasSubscribed?: boolean | null;
     };
   }
 }
@@ -55,6 +60,11 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async signIn() {
+      // console.log(credentials);
+      // const response = await userExists(profile?.email);
+      // if (response?.exists) {
+      //   return '/auth/sign-in?error=UserExists';
+      // }
       return true;
     },
     async jwt({
@@ -69,20 +79,22 @@ export const authOptions = {
       profile: any;
     }) {
       if (account?.provider === 'google') {
-        // const response = await socialSignIn('google-oauth2', account.access_token);
-        const response = await getUser(profile?.email);
-        console.log(response);
-        if (response?.success) {
-          token.accessToken = account.access_token;
-          token.refreshToken = account.refresh_token;
-          token.sessionType = 'sign-in';
-        } else {
-          token.sessionType = 'sign-up';
+        const response = await socialSignIn('google-oauth2', account?.access_token);
+        const decoded = parseSnakeToCamel(jwt.decode(response.access)) as JwtPayload;
+
+        if (!decoded) {
+          throw new Error('Invalid token');
         }
-        token.id = profile?.sub;
+        token.id = decoded?.userId;
         token.name = profile?.name;
         token.email = profile?.email;
         token.picture = profile?.picture;
+        token.accessToken = response.access;
+        token.refreshToken = response.refresh;
+        token.emailVerified = decoded?.emailVerified;
+        token.hasInterests = decoded?.hasInterests;
+        token.hasBillingDetails = decoded?.hasBillingDetails;
+        token.hasSubscribed = decoded?.hasSubscribed;
       } else if (user) {
         token.id = user.id;
         token.name = user.displayName;
@@ -90,7 +102,6 @@ export const authOptions = {
         token.picture = user.picture;
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
-        token.sessionType = 'sign-in';
       }
       return token;
     },
@@ -100,7 +111,10 @@ export const authOptions = {
         name: token.name,
         email: token.email,
         image: token.picture,
-        sessionType: token.sessionType,
+        accessToken: token.accessToken,
+        hasInterests: token.hasInterests,
+        hasBillingDetails: token.hasBillingDetails,
+        hasSubscribed: token.hasSubscribed,
       };
       return session;
     },

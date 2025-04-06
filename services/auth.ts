@@ -1,5 +1,6 @@
 import api from './apiService';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
+
 export const signIn = async (email: string, password: string) => {
   try {
     const response = await api.post('/v1/accounts/login/', { email, password });
@@ -36,8 +37,8 @@ export const socialSignIn = async (backend: 'google-oauth2' | 'facebook', access
       access_token: accessToken,
     });
     return parseSnakeToCamel({ ...response.data, success: true });
-  } catch (error) {
-    // console.error(error);
+  } catch (error: any) {
+    console.error(error?.response?.data);
     return { success: false };
   }
 };
