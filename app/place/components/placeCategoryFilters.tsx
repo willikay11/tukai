@@ -15,11 +15,13 @@ export default function PlaceCategoryFilters({
       <div className="grid grid-cols-12 gap-4">
         <div className="relative col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
           <ScrollFilters
-            filters={placeCategories.map((placeCategory: PlaceCategory) => ({
-              label: placeCategory.name,
-              value: placeCategory.id,
-              icon: placeCategory.icon,
-            }))}
+            filters={placeCategories
+              .sort((a, b) => b.placesCount - a.placesCount)
+              .map((placeCategory: PlaceCategory) => ({
+                label: placeCategory.name,
+                value: placeCategory.id,
+                icon: placeCategory.icon,
+              }))}
             selectedCategoryId={selectedCategoryId}
           />
         </div>

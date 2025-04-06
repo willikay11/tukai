@@ -31,7 +31,7 @@ export default function AuthActions() {
         <span className="text-xs text-gray-800">Become A Tour Guide</span>
       </Link>
       <div className="mx-2 h-[10px] w-[1px] bg-secondary" />
-      {session?.user && session?.user?.sessionType === 'sign-in' ? (
+      {session?.user ? (
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>

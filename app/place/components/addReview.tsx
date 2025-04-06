@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { StarIcon } from '@hugeicons/react-pro';
 import { useCreatePlaceReview, useUploadPlaceReviewImages } from '@/hooks/places';
 import ImageUpload from '@/components/ui/imageUpload';
+import { useSession } from 'next-auth/react';
 
 type addReviewProps = {
   isOpen: boolean;
@@ -42,7 +43,7 @@ const formSchema = z.object({
 
 export default function AddReview({ isOpen, placeTitle, placeId, closeModal }: addReviewProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-
+  const { data: session } = useSession();
   const { mutate: createPlaceReview, isSuccess, data: reviewData } = useCreatePlaceReview(placeId);
 
   const { mutate: uploadPlaceReviewImages, isSuccess: isUploadSuccess } =
@@ -63,7 +64,7 @@ export default function AddReview({ isOpen, placeTitle, placeId, closeModal }: a
       title: values.title,
       description: values.description,
       rating: values.rating,
-      reviewer_id: '058b7853-c5f4-4e43-b356-da1e8ce05f6e',
+      reviewer_id: session?.user?.id,
     });
   }
 

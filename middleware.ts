@@ -6,7 +6,7 @@ export async function middleware(request: NextRequest) {
   const token: any = await getToken({ req: request });
 
   // Check if the user is authenticated
-  if (!token || token?.sessionType !== 'sign-in') {
+  if (!token) {
     // Redirect to the sign-in page if the user is not authenticated
     return NextResponse.redirect(new URL('/auth/sign-in', request.url));
   }

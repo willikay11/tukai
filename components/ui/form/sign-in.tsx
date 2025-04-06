@@ -89,7 +89,11 @@ export default function SignInForm({ onLogin }: { onLogin: () => void }) {
       </div>
 
       <div className="mb-2.5">
-        <Button block onClick={() => signIn('google')} type="blue">
+        <Button
+          block
+          onClick={() => signIn('google', { state: JSON.stringify({ trigger: 'sign-in' }) })}
+          type="blue"
+        >
           <div className="inline-flex items-center">
             <GoogleIcon className="mr-2 text-white" variant="solid" type="sharp" /> Continue with
             Google
