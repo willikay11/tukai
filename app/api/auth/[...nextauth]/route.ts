@@ -51,6 +51,9 @@ export const authOptions = {
         const user: User = await profile(decoded.userId);
         return {
           ...user,
+          hasInterests: decoded?.hasInterests,
+          hasBillingDetails: decoded?.hasBillingDetails,
+          hasSubscribed: decoded?.hasSubscribed,
           accessToken: response.access,
           refreshToken: response.refresh,
         };

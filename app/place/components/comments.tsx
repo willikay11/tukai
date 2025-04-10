@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { useEffect } from 'react';
+import NoData from '@/components/ui/noData';
 
 const formSchema = z.object({
   comment: z.string().min(2, {
@@ -19,7 +20,11 @@ const formSchema = z.object({
 
 export default function Comments({ placeId, reviewId }: { placeId: string; reviewId: string }) {
   const { data: comments } = usePlaceReviewComments(placeId, reviewId, true);
-  const { mutate: createComment, isSuccess } = useCreatePlaceReviewComment(placeId, reviewId);
+  const {
+    mutate: createComment,
+    isSuccess,
+    isPending,
+  } = useCreatePlaceReviewComment(placeId, reviewId);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -43,7 +48,7 @@ export default function Comments({ placeId, reviewId }: { placeId: string; revie
 
   return (
     <div>
-      <div className="px-16">
+      <div className="px-16 pt-8">
         <div className="mb-4 inline-flex items-center">
           <p className="text-xl font-semibold text-gray-700">
             {comments?.data?.results?.reduce(
@@ -59,9 +64,15 @@ export default function Comments({ placeId, reviewId }: { placeId: string; revie
           {comments?.data?.results?.map((comment: Comment) => (
             <ViewComment key={comment.id} comment={comment} placeId={placeId} reviewId={reviewId} />
           ))}
+
+          {comments?.data?.results?.length === 0 && (
+            <div className="mt-2">
+              <NoData message="Be the first to comment" />
+            </div>
+          )}
         </div>
       </div>
-      <div className="mt-2 px-16 pt-4 shadow-top-md">
+      <div className="mb-8 mt-2 px-16 pt-4 shadow-top-md">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -76,13 +87,8 @@ export default function Comments({ placeId, reviewId }: { placeId: string; revie
                 </FormItem>
               )}
             />
-            <Button
-              size="lg"
-              className="w-full"
-              type="submit"
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? 'Submitting...' : 'Submit'}
+            <Button size="lg" className="w-full" type="submit" disabled={isPending}>
+              {isPending ? 'Submitting...' : 'Submit'}
             </Button>
           </form>
         </Form>

@@ -13,11 +13,12 @@ import IconComponent from '@/app/components/iconComponent';
 import AddReviewComment from './addReviewComment';
 import { useState } from 'react';
 import { useLikePlaceReview } from '@/hooks/places';
+import { useSession } from 'next-auth/react';
 
 export default function Review({ placeId, review }: { placeId: string; review: PlaceReview }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState(false);
-
+  const { data: session } = useSession();
   const { mutate: likeReview } = useLikePlaceReview(placeId, review.id);
 
   const handleLikeReview = () => {
@@ -57,11 +58,13 @@ export default function Review({ placeId, review }: { placeId: string; review: P
               </div>
             </div>
           </div>
-          <div className="flex flex-col">
-            <Button variant="text">
-              <IconComponent iconName="MoreHorizontalCircle01Icon" size={20} />
-            </Button>
-          </div>
+          {review.reviewer.id === session?.user?.id && (
+            <div className="flex flex-col">
+              <Button variant="text">
+                <IconComponent iconName="MoreHorizontalCircle01Icon" size={20} />
+              </Button>
+            </div>
+          )}
         </div>
         {review.photos.length > 0 && (
           <div className="mt-2 w-full">
