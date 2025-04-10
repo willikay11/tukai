@@ -15,9 +15,11 @@ import { useState } from 'react';
 import { useDeletePlaceReview, useLikePlaceReview } from '@/hooks/places';
 import { useSession } from 'next-auth/react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import AddReview from './addReview';
 
 export default function Review({ placeId, review }: { placeId: string; review: PlaceReview }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState(false);
   const { data: session } = useSession();
   const { mutate: likeReview } = useLikePlaceReview(placeId, review.id);
@@ -40,6 +42,14 @@ export default function Review({ placeId, review }: { placeId: string; review: P
         isOpen={isOpen}
         closeModal={() => setIsOpen(false)}
       />
+      <AddReview
+        placeId={placeId}
+        isOpen={isEditOpen}
+        placeTitle={review.title}
+        closeModal={() => setIsEditOpen(false)}
+        review={review}
+      />
+
       <div className="flex flex-col">
         <div className="flex w-full items-center justify-between">
           <div className="inline-flex">
@@ -72,7 +82,7 @@ export default function Review({ placeId, review }: { placeId: string; review: P
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-fit h-fit flex flex-col gap-2 rounded-[15px] shadow-md border-gray-200">
-                <Button variant="text" className="p-0 h-fit justify-start">
+                <Button variant="text" className="p-0 h-fit justify-start" onClick={() => setIsEditOpen(true)}>
                   <IconComponent iconName="Edit02Icon" size={20} color="green" />
                   Edit Review
                 </Button>

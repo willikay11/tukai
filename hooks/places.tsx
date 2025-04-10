@@ -12,6 +12,7 @@ import {
   createPlaceReview,
   uploadPlaceReviewImages,
   deletePlaceReview,
+  updatePlaceReview,
 } from '@/services/place';
 
 export const usePlaces = ({
@@ -119,6 +120,16 @@ export const useCreatePlaceReview = (placeId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: any) => await createPlaceReview(placeId, data),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
+    },
+  });
+};
+
+export const useUpdatePlaceReview = (placeId: string, reviewId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: any) => await updatePlaceReview(placeId, reviewId, data),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
     },

@@ -306,6 +306,26 @@ export async function uploadPlaceReviewImages(
   }
 }
 
+export async function updatePlaceReview(id: string, reviewId: string, data: any): Promise<ApiResponse> {
+  try {
+    const res = await api.put(`/v1/places/${id}/reviews/${reviewId}/`, data);
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+    };
+  }
+}
+
+
 export async function deletePlaceReview(id: string, reviewId: string): Promise<ApiResponse> {
   try {
     const res = await api.delete(`/v1/places/${id}/reviews/${reviewId}/`);
