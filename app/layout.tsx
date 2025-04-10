@@ -11,10 +11,10 @@ import DownloadApp from '@/app/components/downloadApp';
 import SessionProvider from '@/providers/SessionProvider';
 import { ReduxProvider } from './redux-provider';
 import IconRadioButtonGroup from '@/app/components/iconRadioButtonGroup';
-import { FilterHorizontalIcon, hugeiconsLicense, Search01Icon } from '@hugeicons/react-pro';
+import { hugeiconsLicense } from '@hugeicons/react-pro';
 import ReactQueryClientProvider from '@/providers/ReactQueryProvider';
 import { Toaster } from '@/components/ui/toaster';
-import { getSession } from 'next-auth/react';
+import Search from './components/search';
 
 hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
@@ -25,30 +25,11 @@ export const metadata: Metadata = {
     "Tukai is your go-to app for discovering exciting events and experiences happening around you. Whether you're looking for live concerts, festivals, social gatherings, or cultural events, Tukai makes it easy to stay connected and find the best activities in your area. Explore and enjoy real-time updates on local experiences tailored to your interests, and never miss out on the fun again.",
 };
 
-const Search = () => {
-  return (
-    <div className="inline-flex h-10 w-full items-center justify-between rounded-full border-[1px] border-gray-200 bg-white py-4 pl-4 pr-1">
-      <Search01Icon size={20} className="mr-2 text-gray-500" variant="twotone" />
-      <div className="flex w-full flex-col md:w-[90%]">
-        <p className="mb-0 text-xs text-gray-700">What&apos;s the plan?</p>
-        <input
-          className="mt-[2px] h-full w-full text-[11px] outline-0 placeholder:text-[11px] placeholder:text-gray-400 hover:border-primary focus:border-primary"
-          placeholder={`Any experience . Anywhere . Any day`}
-        />
-      </div>
-      <div className="ml-2 flex h-[30px] w-[36px] items-center justify-center rounded-full bg-gray-100">
-        <FilterHorizontalIcon className="text-gray-800" size={15} variant="twotone" />
-      </div>
-    </div>
-  );
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
- 
   return (
     <html lang="en">
       <body className={satoshi.className}>

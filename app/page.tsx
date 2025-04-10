@@ -22,7 +22,9 @@ export default async function Home({ searchParams }: { searchParams: { categoryI
   // Default to the first filter (or get it from query params if available)
   const selectedCategoryId =
     categoryIdFromQuery ||
-    placeCategories?.data?.results?.sort((a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount)?.[0].id;
+    placeCategories?.data?.results?.sort(
+      (a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount,
+    )?.[0].id;
 
   return (
     <main className="grid h-full grid-cols-12 gap-4">

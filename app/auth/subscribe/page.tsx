@@ -43,7 +43,11 @@ export default function Page() {
         />
       </div>
 
-      <Paystack isOpen={isPaystackOpen} closeModal={() => setIsPaystackOpen(false)} url={paymentMethod?.verificationResponse || ''} />
+      <Paystack
+        isOpen={isPaystackOpen}
+        closeModal={() => setIsPaystackOpen(false)}
+        url={paymentMethod?.verificationResponse || ''}
+      />
       {currentStep === 0 && (
         <PaymentDetails
           onSuccess={({

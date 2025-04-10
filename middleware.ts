@@ -9,12 +9,11 @@ export async function middleware(request: NextRequest) {
   // Exclude auth routes from middleware
   if (
     pathname.startsWith('/api/auth') ||
-    pathname.startsWith('/auth')
+    pathname.startsWith('/auth') ||
+    ((pathname === '/' || pathname === '/experiences' || pathname === '/communities') && !token)
   ) {
     return NextResponse.next();
   }
-
-  console.log(token);
 
   // Check if the user is authenticated
   if (!token) {

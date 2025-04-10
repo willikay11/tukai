@@ -39,9 +39,12 @@ const formSchema = z.object({
   country: z.string().min(2, {
     message: 'Please enter a country.',
   }),
-  phoneNumber: z.string().optional().refine((val) => val === '', {
-    message: 'Please enter a valid phone number.',
-  }),
+  phoneNumber: z
+    .string()
+    .optional()
+    .refine((val) => val === '', {
+      message: 'Please enter a valid phone number.',
+    }),
 });
 
 export default function PaymentDetails({
