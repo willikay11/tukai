@@ -23,7 +23,10 @@ export default function Review({ placeId, review }: { placeId: string; review: P
   const [isLiked, setIsLiked] = useState(false);
   const { data: session } = useSession();
   const { mutate: likeReview } = useLikePlaceReview(placeId, review.id);
-  const { mutate: deleteReview, isPending: isDeletingReview } = useDeletePlaceReview(placeId, review.id);
+  const { mutate: deleteReview, isPending: isDeletingReview } = useDeletePlaceReview(
+    placeId,
+    review.id,
+  );
 
   const handleLikeReview = () => {
     setIsLiked(!isLiked);
@@ -81,12 +84,21 @@ export default function Review({ placeId, review }: { placeId: string; review: P
                   <IconComponent iconName="MoreHorizontalCircle01Icon" size={20} />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-fit h-fit flex flex-col gap-2 rounded-[15px] shadow-md border-gray-200">
-                <Button variant="text" className="p-0 h-fit justify-start" onClick={() => setIsEditOpen(true)}>
+              <PopoverContent className="flex h-fit w-fit flex-col gap-2 rounded-[15px] border-gray-200 shadow-md">
+                <Button
+                  variant="text"
+                  className="h-fit justify-start p-0"
+                  onClick={() => setIsEditOpen(true)}
+                >
                   <IconComponent iconName="Edit02Icon" size={20} color="green" />
                   Edit Review
                 </Button>
-                <Button variant="text" className="p-0 h-fit justify-start" onClick={handleDeleteReview} disabled={isDeletingReview}>
+                <Button
+                  variant="text"
+                  className="h-fit justify-start p-0"
+                  onClick={handleDeleteReview}
+                  disabled={isDeletingReview}
+                >
                   <IconComponent iconName="Delete04Icon" size={20} color="red" />
                   {isDeletingReview ? 'Deleting...' : 'Delete Review'}
                 </Button>

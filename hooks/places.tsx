@@ -13,6 +13,7 @@ import {
   uploadPlaceReviewImages,
   deletePlaceReview,
   updatePlaceReview,
+  deletePlaceReviewImage,
 } from '@/services/place';
 
 export const usePlaces = ({
@@ -152,6 +153,16 @@ export const useDeletePlaceReview = (placeId: string, reviewId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => await deletePlaceReview(placeId, reviewId),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
+    },
+  });
+};
+
+export const useDeletePlaceReviewImage = (placeId: string, reviewId: string, imageId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => await deletePlaceReviewImage(placeId, reviewId, imageId),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
     },

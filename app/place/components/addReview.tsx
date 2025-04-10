@@ -16,11 +16,17 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { StarIcon } from '@hugeicons/react-pro';
-import { useCreatePlaceReview, useUpdatePlaceReview, useUploadPlaceReviewImages } from '@/hooks/places';
+import {
+  useCreatePlaceReview,
+  useUpdatePlaceReview,
+  useUploadPlaceReviewImages,
+} from '@/hooks/places';
 import ImageUpload from '@/components/ui/imageUpload';
 import { useSession } from 'next-auth/react';
 import Drawer from '@/components/ui/drawer';
 import { PlaceReview } from '@/types/place';
+import { Photo } from '@/types/photo';
+import { deletePlaceReviewImage } from '@/services/place';
 
 type addReviewProps = {
   isOpen: boolean;
@@ -43,7 +49,13 @@ const formSchema = z.object({
   images: z.array(z.instanceof(File)).optional(),
 });
 
-export default function AddReview({ isOpen, placeTitle, placeId, closeModal, review }: addReviewProps) {
+export default function AddReview({
+  isOpen,
+  placeTitle,
+  placeId,
+  closeModal,
+  review,
+}: addReviewProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const { data: session } = useSession();
   const {
@@ -53,7 +65,11 @@ export default function AddReview({ isOpen, placeTitle, placeId, closeModal, rev
     isPending,
   } = useCreatePlaceReview(placeId);
 
-  const { mutate: updatePlaceReview, isSuccess: isUpdateSuccess, isPending: isUpdatePending } = useUpdatePlaceReview(placeId, review?.id || '');
+  const {
+    mutate: updatePlaceReview,
+    isSuccess: isUpdateSuccess,
+    isPending: isUpdatePending,
+  } = useUpdatePlaceReview(placeId, review?.id || '');
 
   const { mutate: uploadPlaceReviewImages, isSuccess: isUploadSuccess } =
     useUploadPlaceReviewImages(placeId, reviewData?.data?.id);
@@ -99,6 +115,10 @@ export default function AddReview({ isOpen, placeTitle, placeId, closeModal, rev
       console.log(selectedFiles.length);
       uploadPlaceReviewImages(formData, reviewData?.data?.id);
     });
+  };
+
+  const handleDeleteImage = (image: Photo) => {
+    deletePlaceReviewImage(placeId, reviewData?.data?.id, image.id);
   };
 
   useEffect(() => {
@@ -181,7 +201,11 @@ export default function AddReview({ isOpen, placeTitle, placeId, closeModal, rev
                     Have any amazing photos of {placeTitle}?
                   </FormLabel>
                   <FormControl>
-                    <ImageUpload onImagesChange={setSelectedFiles} />
+                    <ImageUpload
+                      onImagesChange={setSelectedFiles}
+                      currentImages={review?.photos}
+                      onDeleteImage={handleDeleteImage}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -216,7 +240,12 @@ export default function AddReview({ isOpen, placeTitle, placeId, closeModal, rev
                 </FormItem>
               )}
             />
-            <Button size="lg" className="w-full" type="submit" disabled={isPending || isUpdatePending}>
+            <Button
+              size="lg"
+              className="w-full"
+              type="submit"
+              disabled={isPending || isUpdatePending}
+            >
               {isPending || isUpdatePending ? 'Submitting...' : 'Submit'}
             </Button>
           </form>
