@@ -5,16 +5,27 @@ import { useSubscriptionPlans } from '@/hooks/subscriptions';
 import StepIndicator from '@/components/ui/stepIndicator';
 import PaymentDetails from './components/paymentDetails';
 import Package from './components/package';
-
+import { useSession } from 'next-auth/react';
+import Paystack from './components/paystack';
 export default function Page() {
   const [paymentMethod, setPaymentMethod] = useState<{
     paymentMethodId: string;
     phoneNumber: string;
     paymentOption: string;
+    verificationResponse: string;
   } | null>(null);
   const [selectedSubscriptionPlan, setSelectedSubscriptionPlan] = useState<string | null>(null);
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [currentStep, setCurrentStep] = useState<number>(0);
+  const [isPaystackOpen, setIsPaystackOpen] = useState<boolean>(false);
   const { data: subscriptionPlans } = useSubscriptionPlans();
+  const { data: session } = useSession();
+
+  // TODO: Add endpoint to pull billing details from the database
+  // useEffect(() => {
+  //   if (session?.user?.hasBillingDetails) {
+  //     setCurrentStep(1);
+  //   }
+  // }, [session]);
 
   return (
     <>
@@ -32,19 +43,23 @@ export default function Page() {
         />
       </div>
 
+      <Paystack isOpen={isPaystackOpen} closeModal={() => setIsPaystackOpen(false)} url={paymentMethod?.verificationResponse || ''} />
       {currentStep === 0 && (
         <PaymentDetails
           onSuccess={({
             paymentMethodId,
             phoneNumber,
             paymentOption,
+            verificationResponse,
           }: {
             paymentMethodId: string;
             phoneNumber: string;
             paymentOption: string;
+            verificationResponse: string;
           }) => {
-            setPaymentMethod({ paymentMethodId, phoneNumber, paymentOption });
-            setCurrentStep(1);
+            setPaymentMethod({ paymentMethodId, phoneNumber, paymentOption, verificationResponse });
+            setIsPaystackOpen(true);
+            // setCurrentStep(1);
           }}
         />
       )}

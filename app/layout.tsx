@@ -14,6 +14,7 @@ import IconRadioButtonGroup from '@/app/components/iconRadioButtonGroup';
 import { FilterHorizontalIcon, hugeiconsLicense, Search01Icon } from '@hugeicons/react-pro';
 import ReactQueryClientProvider from '@/providers/ReactQueryProvider';
 import { Toaster } from '@/components/ui/toaster';
+import { getSession } from 'next-auth/react';
 
 hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
@@ -47,6 +48,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+ 
   return (
     <html lang="en">
       <body className={satoshi.className}>

@@ -6,6 +6,7 @@ import ListPlaces from '@/app/place/components/list';
 import { fetchPlaceCategories } from '@/services/place';
 import { unstable_cache } from 'next/cache';
 import { PlaceCategory } from '@/types/placeCategory';
+
 const getPlaceCategories = unstable_cache(
   async () => {
     return await fetchPlaceCategories();

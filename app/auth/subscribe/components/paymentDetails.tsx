@@ -39,8 +39,8 @@ const formSchema = z.object({
   country: z.string().min(2, {
     message: 'Please enter a country.',
   }),
-  phoneNumber: z.string().min(2, {
-    message: 'Please enter a phone number.',
+  phoneNumber: z.string().optional().refine((val) => val === '', {
+    message: 'Please enter a valid phone number.',
   }),
 });
 
@@ -51,6 +51,7 @@ export default function PaymentDetails({
     paymentMethodId: string;
     phoneNumber: string;
     paymentOption: string;
+    verificationResponse: string;
   }) => void;
 }) {
   const [selectedOption, setSelectedOption] = useState('mpesa');
@@ -102,6 +103,7 @@ export default function PaymentDetails({
       paymentMethodId: res.data.paymentMethod.id,
       phoneNumber: values.phoneNumber,
       paymentOption: selectedOption,
+      verificationResponse: res.data.verificationResponse?.authorizationUrl,
     });
   }
 
