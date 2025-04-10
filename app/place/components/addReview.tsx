@@ -16,16 +16,24 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { StarIcon } from '@hugeicons/react-pro';
-import { useCreatePlaceReview, useUploadPlaceReviewImages } from '@/hooks/places';
+import {
+  useCreatePlaceReview,
+  useUpdatePlaceReview,
+  useUploadPlaceReviewImages,
+} from '@/hooks/places';
 import ImageUpload from '@/components/ui/imageUpload';
 import { useSession } from 'next-auth/react';
 import Drawer from '@/components/ui/drawer';
+import { PlaceReview } from '@/types/place';
+import { Photo } from '@/types/photo';
+import { deletePlaceReviewImage } from '@/services/place';
 
 type addReviewProps = {
   isOpen: boolean;
   placeTitle: string;
   placeId: string;
   closeModal: () => void;
+  review?: PlaceReview;
 };
 
 const formSchema = z.object({
@@ -41,7 +49,13 @@ const formSchema = z.object({
   images: z.array(z.instanceof(File)).optional(),
 });
 
-export default function AddReview({ isOpen, placeTitle, placeId, closeModal }: addReviewProps) {
+export default function AddReview({
+  isOpen,
+  placeTitle,
+  placeId,
+  closeModal,
+  review,
+}: addReviewProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const { data: session } = useSession();
   const {
@@ -51,27 +65,43 @@ export default function AddReview({ isOpen, placeTitle, placeId, closeModal }: a
     isPending,
   } = useCreatePlaceReview(placeId);
 
+  const {
+    mutate: updatePlaceReview,
+    isSuccess: isUpdateSuccess,
+    isPending: isUpdatePending,
+  } = useUpdatePlaceReview(placeId, review?.id || '');
+
   const { mutate: uploadPlaceReviewImages, isSuccess: isUploadSuccess } =
     useUploadPlaceReviewImages(placeId, reviewData?.data?.id);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
-      description: '',
-      rating: 0,
+      title: review?.title || '',
+      description: review?.description || '',
+      rating: review?.rating || 0,
       images: [],
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    createPlaceReview({
-      place_id: placeId,
-      title: values.title,
-      description: values.description,
-      rating: values.rating,
-      reviewer_id: session?.user?.id,
-    });
+    if (review) {
+      updatePlaceReview({
+        place_id: placeId,
+        title: values.title,
+        description: values.description,
+        rating: values.rating,
+        reviewer_id: session?.user?.id,
+      });
+    } else {
+      createPlaceReview({
+        place_id: placeId,
+        title: values.title,
+        description: values.description,
+        rating: values.rating,
+        reviewer_id: session?.user?.id,
+      });
+    }
   }
 
   const handleUploadImages = () => {
@@ -87,6 +117,10 @@ export default function AddReview({ isOpen, placeTitle, placeId, closeModal }: a
     });
   };
 
+  const handleDeleteImage = (image: Photo) => {
+    deletePlaceReviewImage(placeId, reviewData?.data?.id, image.id);
+  };
+
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add('overflow-hidden');
@@ -98,13 +132,13 @@ export default function AddReview({ isOpen, placeTitle, placeId, closeModal }: a
   }, [isOpen]);
 
   useEffect(() => {
-    if (isSuccess && selectedFiles.length > 0) {
+    if ((isSuccess || isUpdateSuccess) && selectedFiles.length > 0) {
       handleUploadImages();
-    } else if (isSuccess && selectedFiles.length === 0) {
+    } else if ((isSuccess || isUpdateSuccess) && selectedFiles.length === 0) {
       form.reset();
       closeModal();
     }
-  }, [isSuccess]);
+  }, [isSuccess, isUpdateSuccess]);
 
   useEffect(() => {
     if (isUploadSuccess) {
@@ -167,7 +201,11 @@ export default function AddReview({ isOpen, placeTitle, placeId, closeModal }: a
                     Have any amazing photos of {placeTitle}?
                   </FormLabel>
                   <FormControl>
-                    <ImageUpload onImagesChange={setSelectedFiles} />
+                    <ImageUpload
+                      onImagesChange={setSelectedFiles}
+                      currentImages={review?.photos}
+                      onDeleteImage={handleDeleteImage}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -202,8 +240,13 @@ export default function AddReview({ isOpen, placeTitle, placeId, closeModal }: a
                 </FormItem>
               )}
             />
-            <Button size="lg" className="w-full" type="submit" disabled={isPending}>
-              {isPending ? 'Submitting...' : 'Submit'}
+            <Button
+              size="lg"
+              className="w-full"
+              type="submit"
+              disabled={isPending || isUpdatePending}
+            >
+              {isPending || isUpdatePending ? 'Submitting...' : 'Submit'}
             </Button>
           </form>
         </Form>

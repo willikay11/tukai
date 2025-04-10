@@ -12,6 +12,8 @@ import {
   createPlaceReview,
   uploadPlaceReviewImages,
   deletePlaceReview,
+  updatePlaceReview,
+  deletePlaceReviewImage,
 } from '@/services/place';
 
 export const usePlaces = ({
@@ -125,6 +127,16 @@ export const useCreatePlaceReview = (placeId: string) => {
   });
 };
 
+export const useUpdatePlaceReview = (placeId: string, reviewId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: any) => await updatePlaceReview(placeId, reviewId, data),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
+    },
+  });
+};
+
 export const useUploadPlaceReviewImages = (placeId: string, reviewId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -141,6 +153,16 @@ export const useDeletePlaceReview = (placeId: string, reviewId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => await deletePlaceReview(placeId, reviewId),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
+    },
+  });
+};
+
+export const useDeletePlaceReviewImage = (placeId: string, reviewId: string, imageId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => await deletePlaceReviewImage(placeId, reviewId, imageId),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
     },

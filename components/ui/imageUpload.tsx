@@ -3,14 +3,23 @@
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from 'react';
 import IconComponent from '@/app/components/iconComponent';
 import { Button } from './button';
+import { Photo } from '@/types/photo';
 
 export default function ImageUpload({
   onImagesChange,
+  currentImages,
+  onDeleteImage,
 }: {
   onImagesChange: (images: File[]) => void;
+  currentImages?: Photo[];
+  onDeleteImage: (image: Photo) => void;
 }) {
-  const [images, setImages] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
+  const [images, setImages] = useState<File[]>(
+    currentImages ? currentImages.map((image) => new File([], image.photo)) : [],
+  );
+  const [previews, setPreviews] = useState<string[]>(
+    currentImages?.map((image) => image.photo) || [],
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -55,6 +64,10 @@ export default function ImageUpload({
 
     setImages((prev) => prev.filter((_, i) => i !== index));
     setPreviews((prev) => prev.filter((_, i) => i !== index));
+
+    if (currentImages) {
+      onDeleteImage(currentImages[index]);
+    }
   };
 
   const handleBrowseClick = () => {
