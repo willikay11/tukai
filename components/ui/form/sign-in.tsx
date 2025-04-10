@@ -91,7 +91,12 @@ export default function SignInForm({ onLogin }: { onLogin: () => void }) {
       <div className="mb-2.5">
         <Button
           block
-          onClick={() => signIn('google', { state: JSON.stringify({ trigger: 'sign-in' }) })}
+          onClick={() =>
+            signIn('google', {
+              redirect: false,
+              callbackUrl: '/',
+            })
+          }
           type="blue"
         >
           <div className="inline-flex items-center">

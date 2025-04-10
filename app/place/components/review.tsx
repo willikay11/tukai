@@ -2,7 +2,7 @@
 
 import Rating from '@/app/components/rating';
 import { Button } from '@/components/ui/button';
-import { FavouriteIcon, Message02Icon, MoreHorizontalCircle01Icon } from '@hugeicons/react-pro';
+import { FavouriteIcon, Message02Icon } from '@hugeicons/react-pro';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { PlaceReview } from '@/types/place';
@@ -12,17 +12,24 @@ import { Photo } from '@/types/photo';
 import IconComponent from '@/app/components/iconComponent';
 import AddReviewComment from './addReviewComment';
 import { useState } from 'react';
-import { useLikePlaceReview } from '@/hooks/places';
+import { useDeletePlaceReview, useLikePlaceReview } from '@/hooks/places';
+import { useSession } from 'next-auth/react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export default function Review({ placeId, review }: { placeId: string; review: PlaceReview }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState(false);
-
+  const { data: session } = useSession();
   const { mutate: likeReview } = useLikePlaceReview(placeId, review.id);
+  const { mutate: deleteReview, isPending: isDeletingReview } = useDeletePlaceReview(placeId, review.id);
 
   const handleLikeReview = () => {
     setIsLiked(!isLiked);
     likeReview();
+  };
+
+  const handleDeleteReview = () => {
+    deleteReview();
   };
 
   return (
@@ -57,11 +64,25 @@ export default function Review({ placeId, review }: { placeId: string; review: P
               </div>
             </div>
           </div>
-          <div className="flex flex-col">
-            <Button variant="text">
-              <IconComponent iconName="MoreHorizontalCircle01Icon" size={20} />
-            </Button>
-          </div>
+          {review.reviewer.id === session?.user?.id && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="text">
+                  <IconComponent iconName="MoreHorizontalCircle01Icon" size={20} />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-fit h-fit flex flex-col gap-2 rounded-[15px] shadow-md border-gray-200">
+                <Button variant="text" className="p-0 h-fit justify-start">
+                  <IconComponent iconName="Edit02Icon" size={20} color="green" />
+                  Edit Review
+                </Button>
+                <Button variant="text" className="p-0 h-fit justify-start" onClick={handleDeleteReview} disabled={isDeletingReview}>
+                  <IconComponent iconName="Delete04Icon" size={20} color="red" />
+                  {isDeletingReview ? 'Deleting...' : 'Delete Review'}
+                </Button>
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
         {review.photos.length > 0 && (
           <div className="mt-2 w-full">

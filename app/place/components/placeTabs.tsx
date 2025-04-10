@@ -11,7 +11,7 @@ type placeTabsProps = {
 export default function PlaceTabs({ placeId }: placeTabsProps) {
   return (
     <Tabs defaultValue="reviews" className="w-1/2">
-      <TabsList>
+      <TabsList className="sticky top-0 z-50 w-full bg-white rounded-none">
         <TabsTrigger value="reviews">Reviews</TabsTrigger>
         <TabsTrigger value="experiences">Experiences</TabsTrigger>
         <TabsTrigger value="community">Community</TabsTrigger>

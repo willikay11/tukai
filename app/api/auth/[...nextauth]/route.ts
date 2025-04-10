@@ -51,6 +51,9 @@ export const authOptions = {
         const user: User = await profile(decoded.userId);
         return {
           ...user,
+          hasInterests: decoded?.hasInterests,
+          hasBillingDetails: decoded?.hasBillingDetails,
+          hasSubscribed: decoded?.hasSubscribed,
           accessToken: response.access,
           refreshToken: response.refresh,
         };
@@ -102,6 +105,9 @@ export const authOptions = {
         token.picture = user.picture;
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
+        token.hasInterests = user.hasInterests;
+        token.hasBillingDetails = user.hasBillingDetails;
+        token.hasSubscribed = user.hasSubscribed;
       }
       return token;
     },

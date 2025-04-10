@@ -21,10 +21,10 @@ export default function Package({
 }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const onSubmit = async () => {
     setIsSubmitting(true);
-    
+
     const response = await fetch('/auth/subscribe/api', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -38,7 +38,7 @@ export default function Package({
     setIsSubmitting(false);
 
     if (!response.ok) {
-      toast({ 
+      toast({
         title: 'Subscription Failure',
         description: res.message,
         variant: 'destructive',
@@ -52,8 +52,7 @@ export default function Package({
       variant: 'success',
     });
 
-
-    router.push('/'); 
+    router.push('/');
   };
 
   return (
