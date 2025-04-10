@@ -103,7 +103,13 @@ export default function ImageUpload({
             ))}
           </div>
           <div className="mt-1 inline-flex items-center">
-            <Button variant="primary-text">
+            <Button
+              variant="primary-text"
+              onClick={(e) => {
+                e.preventDefault();
+                handleBrowseClick();
+              }}
+            >
               <IconComponent iconName="ImageAdd02Icon" color="text-emerald-500/70" size={16} />
               Add more photos
             </Button>
@@ -117,14 +123,6 @@ export default function ImageUpload({
           onDrop={handleDrop}
           onDragOver={handleDragOver}
         >
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept=".jpg,.jpeg,.png"
-            multiple
-            className="inline-flex hidden items-center justify-center"
-          />
           <IconComponent iconName="ImageAdd02Icon" color="text-emerald-500/70" size={24} />
           <p className="mt-2 text-sm font-medium text-gray-700">
             Drop your photo(s) here or browse
@@ -132,6 +130,14 @@ export default function ImageUpload({
           <p className="mt-1 text-sm text-gray-400">Supports JPG and PNG</p>
         </div>
       )}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept=".jpg,.jpeg,.png"
+        multiple
+        className="inline-flex hidden items-center justify-center"
+      />
     </div>
   );
 }

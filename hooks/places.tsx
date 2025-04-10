@@ -163,8 +163,5 @@ export const useDeletePlaceReviewImage = (placeId: string, reviewId: string, ima
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => await deletePlaceReviewImage(placeId, reviewId, imageId),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
-    },
   });
 };
