@@ -72,7 +72,7 @@ export default function AddReview({
   } = useUpdatePlaceReview(placeId, review?.id || '');
 
   const { mutate: uploadPlaceReviewImages, isSuccess: isUploadSuccess } =
-    useUploadPlaceReviewImages(placeId, reviewData?.data?.id);
+    useUploadPlaceReviewImages(placeId, review?.id || reviewData?.data?.id);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -105,20 +105,19 @@ export default function AddReview({
   }
 
   const handleUploadImages = () => {
-    selectedFiles.forEach((file, index) => {
+    selectedFiles.filter((file) => !review?.photos?.some((photo) => photo.photo === file.name)).forEach((file, index) => {
       const formData = new FormData();
       formData.append('photo', file);
       formData.append('place', placeId);
       if (index === 0) {
         formData.append('is_cover', 'true');
       }
-      console.log(selectedFiles.length);
-      uploadPlaceReviewImages(formData, reviewData?.data?.id);
+      uploadPlaceReviewImages(formData);
     });
   };
 
   const handleDeleteImage = (image: Photo) => {
-    deletePlaceReviewImage(placeId, reviewData?.data?.id, image.id);
+    deletePlaceReviewImage(placeId, review?.id || reviewData?.data?.id, image.id);
   };
 
   useEffect(() => {
