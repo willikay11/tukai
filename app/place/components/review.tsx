@@ -18,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import AddReview from './addReview';
 
 export default function Review({ placeId, review }: { placeId: string; review: PlaceReview }) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState(false);
@@ -78,7 +79,7 @@ export default function Review({ placeId, review }: { placeId: string; review: P
             </div>
           </div>
           {review.reviewer.id === session?.user?.id && (
-            <Popover>
+            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
               <PopoverTrigger asChild>
                 <Button variant="text">
                   <IconComponent iconName="MoreHorizontalCircle01Icon" size={20} />
@@ -88,7 +89,10 @@ export default function Review({ placeId, review }: { placeId: string; review: P
                 <Button
                   variant="text"
                   className="h-fit justify-start p-0"
-                  onClick={() => setIsEditOpen(true)}
+                  onClick={() => {
+                    setIsPopoverOpen(false);
+                    setIsEditOpen(true);
+                  }}
                 >
                   <IconComponent iconName="Edit02Icon" size={20} color="green" />
                   Edit Review
