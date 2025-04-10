@@ -11,6 +11,7 @@ import {
   bookmarkPlace,
   createPlaceReview,
   uploadPlaceReviewImages,
+  deletePlaceReview,
 } from '@/services/place';
 
 export const usePlaces = ({
@@ -130,6 +131,16 @@ export const useUploadPlaceReviewImages = (placeId: string, reviewId: string) =>
     mutationFn: async (data: any) => {
       return await uploadPlaceReviewImages(placeId, reviewId, data);
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
+    },
+  });
+};
+
+export const useDeletePlaceReview = (placeId: string, reviewId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => await deletePlaceReview(placeId, reviewId),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
     },
