@@ -44,7 +44,6 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
           <div className="inline-flex items-start">
             <PlaceActions
               placeId={params.placeId}
-              userId="058b7853-c5f4-4e43-b356-da1e8ce05f6e"
               bookmarked={place.isBookmarked}
               placeTitle={place.title}
             />

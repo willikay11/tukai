@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { Textarea } from '@/components/ui/textarea';
 import { useEffect } from 'react';
 import NoData from '@/components/ui/noData';
-
+import { useSession } from 'next-auth/react';
 const formSchema = z.object({
   comment: z.string().min(2, {
     message: 'Please enter a comment.',
@@ -19,6 +19,7 @@ const formSchema = z.object({
 });
 
 export default function Comments({ placeId, reviewId }: { placeId: string; reviewId: string }) {
+  const { data: session } = useSession();
   const { data: comments } = usePlaceReviewComments(placeId, reviewId, true);
   const {
     mutate: createComment,
@@ -35,7 +36,7 @@ export default function Comments({ placeId, reviewId }: { placeId: string; revie
   function onSubmit(values: z.infer<typeof formSchema>) {
     createComment({
       post_id: placeId,
-      commenter_id: '058b7853-c5f4-4e43-b356-da1e8ce05f6e',
+      commenter_id: session?.user?.id,
       content: values.comment,
     });
   }
