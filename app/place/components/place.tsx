@@ -6,9 +6,10 @@ import { Place } from '@/types/place';
 import ImageCarousel from '@/components/ui/imageCarousel';
 import BookmarkPlace from './bookmarkPlace';
 import { EventSkeleton } from '@/app/components/skeletons';
-
+import { useSession } from 'next-auth/react';
 export default function SinglePlace({ place }: { place: Place }) {
   const [hasError, setHasError] = useState(false);
+  const { data: session } = useSession();
 
   if (place.id.startsWith('placeholder-')) {
     return <EventSkeleton />;
@@ -25,12 +26,14 @@ export default function SinglePlace({ place }: { place: Place }) {
           )}
         </div>
         <div className="invisible absolute right-2 top-2 cursor-pointer group-hover:visible">
-          <BookmarkPlace
-            placeId={place.id}
-            userId="058b7853-c5f4-4e43-b356-da1e8ce05f6e"
-            bookmarked={place.isBookmarked}
-            className="text-white"
-          />
+          {session?.user?.id && (
+            <BookmarkPlace
+              placeId={place.id}
+              userId={session?.user?.id}
+              bookmarked={place.isBookmarked}
+              className="text-white"
+            />
+          )}
         </div>
       </div>
       <div className="flex flex-col items-start justify-start bg-white">
