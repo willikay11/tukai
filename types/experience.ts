@@ -26,3 +26,7 @@ export type Experience = {
   coHosts: User[];
   dateCreated: string;
 };
+
+export function isExperience(item: any): item is Experience {
+  return 'ticketsAvailable' in item && 'isSoldOut' in item;
+}

@@ -2,9 +2,18 @@ import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { ApiResponse } from '@/types/apiResponse';
 import api from '@/services/apiService';
 
-export async function fetchExperiences(page: number): Promise<ApiResponse> {
+export async function fetchExperiences(
+  page: number,
+  perPage: number,
+  search?: string,
+): Promise<ApiResponse> {
   try {
-    const response = await api.get(`/v1/experiences/?page=${page}`);
+    const queryParams = new URLSearchParams();
+    if (page) queryParams.append('page', page.toString());
+    if (perPage) queryParams.append('page_size', perPage.toString());
+    if (search) queryParams.append('search', search);
+
+    const response = await api.get(`/v1/experiences/?${queryParams.toString()}`);
 
     return {
       status: response.status,

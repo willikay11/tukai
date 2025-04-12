@@ -105,15 +105,17 @@ export default function AddReview({
   }
 
   const handleUploadImages = () => {
-    selectedFiles.filter((file) => !review?.photos?.some((photo) => photo.photo === file.name)).forEach((file, index) => {
-      const formData = new FormData();
-      formData.append('photo', file);
-      formData.append('place', placeId);
-      if (index === 0) {
-        formData.append('is_cover', 'true');
-      }
-      uploadPlaceReviewImages(formData);
-    });
+    selectedFiles
+      .filter((file) => !review?.photos?.some((photo) => photo.photo === file.name))
+      .forEach((file, index) => {
+        const formData = new FormData();
+        formData.append('photo', file);
+        formData.append('place', placeId);
+        if (index === 0) {
+          formData.append('is_cover', 'true');
+        }
+        uploadPlaceReviewImages(formData);
+      });
   };
 
   const handleDeleteImage = (image: Photo) => {

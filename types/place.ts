@@ -44,3 +44,7 @@ export type PlaceReview = {
   rating: number;
   photos: Photo[];
 };
+
+export function isPlace(item: any): item is Place {
+  return 'totalReviews' in item && 'averageRating' in item;
+}

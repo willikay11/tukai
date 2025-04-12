@@ -27,7 +27,7 @@ export const usePlaces = ({
 }) => {
   return useQuery({
     queryKey: ['placeCategories', categoryId, page],
-    queryFn: async () => await fetchPlaces(categoryId, page),
+    queryFn: async () => await fetchPlaces(page, 12, categoryId),
     enabled,
   });
 };
