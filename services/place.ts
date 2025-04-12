@@ -3,14 +3,19 @@ import api from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
 
 export async function fetchPlaces(
-  categoryId?: string,
   page = 1,
   perPage = 12,
+  categoryId?: string,
+  search?: string,
 ): Promise<ApiResponse> {
   try {
-    const res = await api.get(
-      `/v1/places/?categories=${categoryId}&page=${page}&page_size=${perPage}`,
-    );
+    const queryParams = new URLSearchParams();
+    if (categoryId) queryParams.append('categories', categoryId);
+    if (page) queryParams.append('page', page.toString());
+    if (perPage) queryParams.append('page_size', perPage.toString());
+    if (search) queryParams.append('search', search);
+
+    const res = await api.get(`/v1/places/?${queryParams.toString()}`);
 
     return {
       status: res.status,

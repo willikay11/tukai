@@ -6,7 +6,7 @@ export const useExperiences = (
 ) => {
   return useQuery({
     queryKey: ['experiences', page],
-    queryFn: async () => await fetchExperiences(page),
+    queryFn: async () => await fetchExperiences(page, 12),
     enabled: enabled,
   });
 };
