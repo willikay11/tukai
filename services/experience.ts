@@ -5,6 +5,7 @@ import api from '@/services/apiService';
 export async function fetchExperiences(
   page: number,
   perPage: number,
+  categoryId?: string,
   search?: string,
 ): Promise<ApiResponse> {
   try {
@@ -12,7 +13,7 @@ export async function fetchExperiences(
     if (page) queryParams.append('page', page.toString());
     if (perPage) queryParams.append('page_size', perPage.toString());
     if (search) queryParams.append('search', search);
-
+    if (categoryId) queryParams.append('category_id', categoryId);
     const response = await api.get(`/v1/experiences/?${queryParams.toString()}`);
 
     return {

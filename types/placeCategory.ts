@@ -4,4 +4,5 @@ export type PlaceCategory = {
   icon: string;
   group: string;
   placesCount: number;
+  image?: string;
 };

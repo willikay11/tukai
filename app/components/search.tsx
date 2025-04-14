@@ -10,10 +10,18 @@ import TukaiImage from '@/components/ui/image';
 import { SearchResult } from '@/types/search';
 import IconComponent from './iconComponent';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import Image from 'next/image';
+import { usePlaceCategories } from '@/hooks/places';
+import { PlaceCategory } from '@/types/placeCategory';
+
 export default function Search() {
   const pathname = usePathname();
+  const { data: placeCategories } = usePlaceCategories();
   const [query, setQuery] = useState('');
-  const { data: searchResults } = useSearch(query);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>();
+  const { data: searchResults } = useSearch(query, selectedCategory);
   const inputRef = useRef<HTMLDivElement | null>(null);
   const [popoverWidth, setPopoverWidth] = useState<number | undefined>(undefined);
 
@@ -23,10 +31,14 @@ export default function Search() {
     }
   }, [inputRef.current]);
 
-  console.log(searchResults);
+  useEffect(() => {
+    if (searchResults) {
+      setShowSearchResults(true);
+    }
+  }, [searchResults]);
 
   return (
-    <Popover open={query !== ''} onOpenChange={() => setQuery('')}>
+    <Popover open={showSearchResults} onOpenChange={() => setShowSearchResults(false)}>
       <PopoverTrigger asChild>
         <div
           ref={inputRef}
@@ -67,6 +79,36 @@ export default function Search() {
         style={{ width: popoverWidth }}
       >
         <div className="flex flex-col gap-2">
+          <div className="flex flex-col">
+            <div className="inline-flex w-full items-center justify-between">
+              <p className="text-sm font-bold text-gray-700">Cities</p>
+              <Button variant="text" className="text-sm text-primary">
+                See All
+                <IconComponent iconName="ArrowRight01Icon" size={15} color="primary" />
+              </Button>
+            </div>
+            <div className="mb-2 flex items-center gap-2 overflow-x-auto scroll-smooth no-scrollbar">
+              {placeCategories?.data?.results
+                ?.filter((category: PlaceCategory) => category.group === 'cities')
+                .map((category: PlaceCategory) => (
+                  <div
+                    className="relative w-[100px] flex-shrink-0 cursor-pointer"
+                    onClick={() => setSelectedCategory(category.id)}
+                  >
+                    <Image
+                      src={category?.image ?? ''}
+                      alt={category.name}
+                      className="rounded-[8px]"
+                      width={100}
+                      height={100}
+                    />
+                    <p className="absolute bottom-0.5 left-0.5 p-1 text-xs font-bold text-white">
+                      {category.name}
+                    </p>
+                  </div>
+                ))}
+            </div>
+          </div>
           <div className="flex flex-col gap-2">
             {searchResults?.map((result: SearchResult) => (
               <Link
