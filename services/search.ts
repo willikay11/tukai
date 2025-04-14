@@ -4,10 +4,10 @@ import { fetchPlaces } from './place';
 import { SearchResult } from '@/types/search';
 import { isExperience } from '@/types/experience';
 
-export const searchPlaces = async (query: string): Promise<SearchResult[]> => {
+export const searchPlaces = async (query: string, categoryId?: string, perPage?: number): Promise<SearchResult[]> => {
   const [places, experiences] = await Promise.all([
-    fetchPlaces(1, 12, undefined, query),
-    fetchExperiences(1, 12, query),
+    fetchPlaces(1, perPage ?? 5, categoryId, query),
+    fetchExperiences(1, perPage ?? 5, categoryId, query),
   ]);
 
   const placesData = parseSnakeToCamel(places.data?.results);

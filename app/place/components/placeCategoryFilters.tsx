@@ -17,6 +17,7 @@ export default function PlaceCategoryFilters({
           <ScrollFilters
             filters={placeCategories
               .sort((a, b) => b.placesCount - a.placesCount)
+              .filter((placeCategory: PlaceCategory) => placeCategory.group !== 'cities')
               .map((placeCategory: PlaceCategory) => ({
                 label: placeCategory.name,
                 value: placeCategory.id,
