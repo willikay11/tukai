@@ -14,16 +14,21 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { usePlaceCategories } from '@/hooks/places';
 import { PlaceCategory } from '@/types/placeCategory';
+import clsx from 'clsx';
 
 export default function Search() {
   const pathname = usePathname();
   const { data: placeCategories } = usePlaceCategories();
   const [query, setQuery] = useState('');
+  const [tag, setTag] = useState<PlaceCategory | undefined>();
   const [showSearchResults, setShowSearchResults] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>();
-  const { data: searchResults } = useSearch(query, selectedCategory);
+  const { data: searchResults } = useSearch(query, tag?.id);
   const inputRef = useRef<HTMLDivElement | null>(null);
   const [popoverWidth, setPopoverWidth] = useState<number | undefined>(undefined);
+
+  const removeTag = () => {
+    setTag(undefined);
+  };
 
   useEffect(() => {
     if (inputRef.current) {
@@ -38,23 +43,39 @@ export default function Search() {
   }, [searchResults]);
 
   return (
-    <Popover open={showSearchResults} onOpenChange={() => setShowSearchResults(false)}>
+    <Popover open={showSearchResults} onOpenChange={(isOpen) => setShowSearchResults(isOpen)}>
       <PopoverTrigger asChild>
         <div
           ref={inputRef}
           className="relative inline-flex h-10 w-full items-center justify-between rounded-full border-[1px] border-gray-200 bg-white py-4 pl-4 pr-1"
         >
           <Search01Icon size={20} className="mr-2 text-gray-500" variant="twotone" />
-          <div className="flex w-full flex-col md:w-[90%]">
-            <p className="mb-0 text-xs text-gray-700">
-              {pathname === '/' || pathname.includes('/place')
-                ? "What's the plan?"
+          <div onClick={() => setShowSearchResults(true)} className={clsx('flex w-full md:w-[90%]', {
+            'mt-0 flex-row items-center': query.length > 0 || tag,
+            'flex-col': !query && !tag
+          })}>
+            {!query && !tag && (
+              <p className="mb-0 text-xs text-gray-700">
+                {pathname === '/' || pathname.includes('/place')
+                  ? "What's the plan?"
                 : pathname.includes('/experiences')
                   ? 'Find Experiences?'
                   : 'Find Your Communities?'}
-            </p>
+              </p>
+            )}
+            {tag && (
+              <span className="text-sm inline-flex items-center gap-1 cursor-pointer px-3 py-1 rounded-full bg-gray-100 mr-2" onClick={() => removeTag()}>
+                {tag.name}
+                <div className="flex items-center justify-center rounded-full bg-gray-400 p-1">
+                  <IconComponent iconName="Cancel01Icon" size={12} color="white" />
+                </div>
+              </span>
+            )}
             <input
-              className="mt-[2px] h-full w-full text-[11px] outline-0 placeholder:text-[11px] placeholder:text-gray-400 hover:border-primary focus:border-primary"
+              className={clsx(
+                'mt-[2px] h-full w-full text-[11px] outline-0 placeholder:text-[11px] placeholder:text-gray-400 hover:border-primary focus:border-primary',
+                query.length > 0 && tag && 'mt-0'
+              )}
               placeholder={
                 pathname === '/' || pathname.includes('/place')
                   ? 'Any City . Any day'
@@ -69,8 +90,8 @@ export default function Search() {
               }}
             />
           </div>
-          <div className="ml-2 flex h-[30px] w-[36px] items-center justify-center rounded-full bg-gray-100">
-            <FilterHorizontalIcon className="text-gray-800" size={15} variant="twotone" />
+          <div className="ml-2 flex h-[30px] w-[36px] items-center justify-center rounded-full bg-gray-100 cursor-pointer" onClick={() => setShowSearchResults(false)}>
+            <IconComponent iconName={showSearchResults ? 'Cancel01Icon' : 'FilterHorizontalIcon'} size={15} color="gray" />
           </div>
         </div>
       </PopoverTrigger>
@@ -88,12 +109,12 @@ export default function Search() {
               </Button>
             </div>
             <div className="mb-2 flex items-center gap-2 overflow-x-auto scroll-smooth no-scrollbar">
-              {placeCategories?.data?.results
+              {tag === undefined && placeCategories?.data?.results
                 ?.filter((category: PlaceCategory) => category.group === 'cities')
                 .map((category: PlaceCategory) => (
                   <div
                     className="relative w-[100px] flex-shrink-0 cursor-pointer"
-                    onClick={() => setSelectedCategory(category.id)}
+                    onClick={() => setTag(category)}
                   >
                     <Image
                       src={category?.image ?? ''}
