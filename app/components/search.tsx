@@ -1,5 +1,5 @@
 'use client';
-import { Search01Icon, FilterHorizontalIcon } from '@hugeicons/react-pro';
+import { Search01Icon } from '@hugeicons/react-pro';
 import { usePathname } from 'next/navigation';
 import { useSearch } from '@/hooks/search';
 import { useState, useRef, useEffect } from 'react';
