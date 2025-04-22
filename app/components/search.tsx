@@ -50,21 +50,27 @@ export default function Search() {
           className="relative inline-flex h-10 w-full items-center justify-between rounded-full border-[1px] border-gray-200 bg-white py-4 pl-4 pr-1"
         >
           <Search01Icon size={20} className="mr-2 text-gray-500" variant="twotone" />
-          <div onClick={() => setShowSearchResults(true)} className={clsx('flex w-full md:w-[90%]', {
-            'mt-0 flex-row items-center': query.length > 0 || tag,
-            'flex-col': !query && !tag
-          })}>
+          <div
+            onClick={() => setShowSearchResults(true)}
+            className={clsx('flex w-full md:w-[90%]', {
+              'mt-0 flex-row items-center': query.length > 0 || tag,
+              'flex-col': !query && !tag,
+            })}
+          >
             {!query && !tag && (
               <p className="mb-0 text-xs text-gray-700">
                 {pathname === '/' || pathname.includes('/place')
                   ? "What's the plan?"
-                : pathname.includes('/experiences')
-                  ? 'Find Experiences?'
-                  : 'Find Your Communities?'}
+                  : pathname.includes('/experiences')
+                    ? 'Find Experiences?'
+                    : 'Find Your Communities?'}
               </p>
             )}
             {tag && (
-              <span className="text-sm inline-flex items-center gap-1 cursor-pointer px-3 py-1 rounded-full bg-gray-100 mr-2" onClick={() => removeTag()}>
+              <span
+                className="mr-2 inline-flex cursor-pointer items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-sm"
+                onClick={() => removeTag()}
+              >
                 {tag.name}
                 <div className="flex items-center justify-center rounded-full bg-gray-400 p-1">
                   <IconComponent iconName="Cancel01Icon" size={12} color="white" />
@@ -74,7 +80,7 @@ export default function Search() {
             <input
               className={clsx(
                 'mt-[2px] h-full w-full text-[11px] outline-0 placeholder:text-[11px] placeholder:text-gray-400 hover:border-primary focus:border-primary',
-                query.length > 0 && tag && 'mt-0'
+                query.length > 0 && tag && 'mt-0',
               )}
               placeholder={
                 pathname === '/' || pathname.includes('/place')
@@ -90,8 +96,15 @@ export default function Search() {
               }}
             />
           </div>
-          <div className="ml-2 flex h-[30px] w-[36px] items-center justify-center rounded-full bg-gray-100 cursor-pointer" onClick={() => setShowSearchResults(false)}>
-            <IconComponent iconName={showSearchResults ? 'Cancel01Icon' : 'FilterHorizontalIcon'} size={15} color="gray" />
+          <div
+            className="ml-2 flex h-[30px] w-[36px] cursor-pointer items-center justify-center rounded-full bg-gray-100"
+            onClick={() => setShowSearchResults(false)}
+          >
+            <IconComponent
+              iconName={showSearchResults ? 'Cancel01Icon' : 'FilterHorizontalIcon'}
+              size={15}
+              color="gray"
+            />
           </div>
         </div>
       </PopoverTrigger>
@@ -109,25 +122,26 @@ export default function Search() {
               </Button>
             </div>
             <div className="mb-2 flex items-center gap-2 overflow-x-auto scroll-smooth no-scrollbar">
-              {tag === undefined && placeCategories?.data?.results
-                ?.filter((category: PlaceCategory) => category.group === 'cities')
-                .map((category: PlaceCategory) => (
-                  <div
-                    className="relative w-[100px] flex-shrink-0 cursor-pointer"
-                    onClick={() => setTag(category)}
-                  >
-                    <Image
-                      src={category?.image ?? ''}
-                      alt={category.name}
-                      className="rounded-[8px]"
-                      width={100}
-                      height={100}
-                    />
-                    <p className="absolute bottom-0.5 left-0.5 p-1 text-xs font-bold text-white">
-                      {category.name}
-                    </p>
-                  </div>
-                ))}
+              {tag === undefined &&
+                placeCategories?.data?.results
+                  ?.filter((category: PlaceCategory) => category.group === 'cities')
+                  .map((category: PlaceCategory) => (
+                    <div
+                      className="relative w-[100px] flex-shrink-0 cursor-pointer"
+                      onClick={() => setTag(category)}
+                    >
+                      <Image
+                        src={category?.image ?? ''}
+                        alt={category.name}
+                        className="rounded-[8px]"
+                        width={100}
+                        height={100}
+                      />
+                      <p className="absolute bottom-0.5 left-0.5 p-1 text-xs font-bold text-white">
+                        {category.name}
+                      </p>
+                    </div>
+                  ))}
             </div>
           </div>
           <div className="flex flex-col gap-2">
