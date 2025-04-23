@@ -17,6 +17,8 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Ticket } from '@/types/ticket';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -40,11 +42,14 @@ export default function Reserve({
     },
   });
 
+
   console.log(experience);
 
   return (
-    <Drawer isOpen={isOpen} setIsOpen={closeModal}>
-      <div className="flex flex-col p-12">
+    <Dialog open={isOpen} onOpenChange={closeModal}>
+      <DialogContent className="px-16">
+
+      <div className="flex flex-col">
         <div className="relative mb-2.5 aspect-square h-[10.625rem] w-full">
           <Image
             src={
@@ -59,7 +64,7 @@ export default function Reserve({
           />
         </div>
         <p className="mb-1 text-2xl font-black text-gray-700">{experience.title}</p>
-        <p className="text-base text-gray-700">
+        <p className="text-base text-gray-700 mb-3">
           {moment(experience.startDate)?.format('MMM D, YYYY')} -{' '}
           {moment(experience.endDate)?.format('MMM D, YYYY')}
         </p>
@@ -73,27 +78,33 @@ export default function Reserve({
                 <FormItem>
                   <FormLabel className="text-base font-black text-gray-700">Ticket Type</FormLabel>
                   <FormControl>
-                    <Select className="h-[55px]">
-                      <SelectTrigger>
+                    <Select>
+                      <SelectTrigger className="h-[55px]">
                         <SelectValue placeholder="Ticket Type" />
                       </SelectTrigger>
                       <SelectContent>
                         {experience.tickets.map((ticket: Ticket) => (
                           <SelectItem key={ticket.id} value={ticket.id}>
-                            {ticket.name}
+                            <div className='flex flex-row'>
+                              <div className='flex flex-col'>
+                                <p className='text-base font-bold text-gray-700'>{ticket.name}</p>
+                                <p className='text-sm text-gray-700'>{experience.currency} {ticket.price}/person</p>
+                              </div>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
                   <FormMessage />
-                </FormItem>
+                </FormItem> 
               )}
             />
             
           </div>
-        </Form>
-      </div>
-    </Drawer>
+          </Form>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
