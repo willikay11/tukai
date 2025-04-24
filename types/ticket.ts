@@ -4,6 +4,6 @@ export type Ticket = {
   quantity: number;
   price: number;
   experience: string;
-  availableStock: number;
+  availableQuantity: number;
   dateCreated: string;
 };
