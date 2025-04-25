@@ -13,7 +13,7 @@ const links = [
   },
   {
     name: 'Communities',
-    href: '/community',
+    href: '/communities',
     icon: <UserMultipleIcon size={18} variant="twotone" />,
   },
 ];

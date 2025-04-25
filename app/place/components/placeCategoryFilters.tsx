@@ -23,7 +23,7 @@ export default function PlaceCategoryFilters({
                 value: placeCategory.id,
                 icon: placeCategory.icon,
               }))}
-            selectedCategoryId={selectedCategoryId}
+            selectedCategory={selectedCategoryId}
           />
         </div>
       </div>

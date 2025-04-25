@@ -27,10 +27,10 @@ export default function AuthActions() {
 
   return (
     <div className="flex items-center">
-      <Link href="">
+      {/* <Link href="">
         <span className="text-xs text-gray-800">Become A Tour Guide</span>
       </Link>
-      <div className="mx-2 h-[10px] w-[1px] bg-secondary" />
+      <div className="mx-2 h-[10px] w-[1px] bg-secondary" /> */}
       {session?.user ? (
         <NavigationMenu>
           <NavigationMenuList>

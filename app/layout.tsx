@@ -41,32 +41,32 @@ export default function RootLayout({
               <div className="grid grid-cols-12 border-b-[1px] border-gray-100 bg-white md:gap-4">
                 <DownloadApp />
                 <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
-                  <div className="inline-flex h-[80px] w-full items-center justify-between md:mt-6">
-                    <div className="flex h-full items-center">
+                  <div className="inline-flex h-[80px] grid grid-cols-12 w-full items-center justify-between md:mt-6">
+                    <div className="flex h-full items-center col-span-4">
                       <Link href="/" className="hidden h-full items-center md:flex">
                         <Image
                           src="/images/logo.svg"
                           alt="Oltukai logo"
                           width={80}
                           height={70}
-                          className="md:mr-6 lg:mr-10 xl:mr-20"
+                          className="md:mr-6 lg:mr-5 xl:mr-10"
                         />
                       </Link>
                       <Nav />
                     </div>
-                    <div className="inline-flex">
+                    <div className="inline-flex col-span-6 justify-center">
                       <div className="mr-2 hidden w-72 md:block">
                         <Search />
                       </div>
                       <IconRadioButtonGroup />
                     </div>
-                    <div className="flex h-full items-center justify-end">
+                    <div className="flex h-full items-center justify-end col-span-2">
                       <AuthActions />
                     </div>
                   </div>
                 </div>
               </div>
-              {children}
+                {children}
             </ReactQueryClientProvider>
           </SessionProvider>
         </ReduxProvider>

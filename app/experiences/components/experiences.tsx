@@ -1,3 +1,4 @@
+
 'use client';
 import SingleExperience from '@/app/experiences/components/experience';
 import { Experience } from '@/types/experience';
@@ -12,7 +13,9 @@ import { useSession } from 'next-auth/react';
 import NoData from '@/components/ui/noData';
 import { motion } from 'framer-motion';
 import { Status } from '@/enums/status';
-
+type ListExperiencesProps = {
+  category?: string;
+};
 const placeholders: Experience[] = Array.from({ length: 12 }, (_, index) => ({
   id: `placeholder-${index}`,
   title: 'Loading...',
@@ -54,7 +57,7 @@ const placeholders: Experience[] = Array.from({ length: 12 }, (_, index) => ({
   coHosts: [],
 }));
 
-export default function Experiences() {
+export default function Experiences({ category }: ListExperiencesProps) {
   const [page, setPage] = useState(1);
   const [experienceList, setExperienceList] = useState<Experience[]>(placeholders);
   const [endPage, setEndPage] = useState<number | null>(null);
@@ -63,6 +66,7 @@ export default function Experiences() {
   const { data: experiences, isLoading } = useExperiences({
     page,
     enabled: true,
+    category,
   });
 
   const observer = useRef<IntersectionObserver | null>(null);
