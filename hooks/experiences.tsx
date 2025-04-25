@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { fetchExperience, fetchExperiences, purchaseExperienceTicket } from '@/services/experience';
 import { useQueryClient } from '@tanstack/react-query';
+
 export const useExperiences = (
   { page, enabled, category }: { page: number; enabled: boolean; category?: string } = { page: 1, enabled: true, category: 'all' },
 ) => {

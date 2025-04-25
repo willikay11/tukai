@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { User } from '@/types/user';
 import { JwtPayload } from '@/types/jwt';
-
+import { Interest } from '@/types/interest';
 // Define the extended session type
 declare module 'next-auth' {
   interface Session {
@@ -19,6 +19,7 @@ declare module 'next-auth' {
       hasInterests?: boolean | null;
       hasBillingDetails?: boolean | null;
       hasSubscribed?: boolean | null;
+      interests?: Interest[] | null;
     };
   }
 }
@@ -43,12 +44,15 @@ export const authOptions = {
         const response = await signIn(credentials.email, credentials.password);
 
         const decoded = parseSnakeToCamel(jwt.decode(response.access)) as JwtPayload;
-
+        
         if (!decoded) {
           throw new Error('Invalid token');
         }
 
         const user: User = await profile(decoded.userId);
+
+        console.log(user);
+
         return {
           ...user,
           hasInterests: decoded?.hasInterests,
@@ -103,6 +107,7 @@ export const authOptions = {
         token.name = user.displayName ?? `${user.firstName} ${user.lastName}`;
         token.email = user.email;
         token.picture = user.picture;
+        token.interests = user.interests;
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
         token.hasInterests = user.hasInterests;
@@ -117,6 +122,7 @@ export const authOptions = {
         name: token.name,
         email: token.email,
         image: token.picture,
+        interests: token.interests,
         accessToken: token.accessToken,
         hasInterests: token.hasInterests,
         hasBillingDetails: token.hasBillingDetails,
