@@ -14,6 +14,7 @@ import numeral from 'numeral';
 import PaymentForm, { paymentFormSchema } from '@/components/ui/paymentForm';
 import { Button } from '@/components/ui/button';
 import { z } from 'zod';
+import { usePurchaseExperienceTicket } from '@/hooks/experiences';
 export default function Reserve({
   isOpen,
   closeModal,
@@ -23,6 +24,7 @@ export default function Reserve({
   closeModal: () => void;
   experience: Experience;
 }) {
+  const { mutate: purchaseExperienceTicket } = usePurchaseExperienceTicket();
   const formRef = useRef<any>();
   const [reservedTickets, setReservedTickets] = useState<
     { ticketId: string; quantity: number; price: number }[]
@@ -40,7 +42,10 @@ export default function Reserve({
   };
 
   const handleSubmit = (values: z.infer<typeof paymentFormSchema>, paymentOption: string) => {
-    console.log(values, paymentOption);
+    purchaseExperienceTicket({
+      experienceId: experience.id,
+      reservedTickets,
+    });
   };
 
   return (

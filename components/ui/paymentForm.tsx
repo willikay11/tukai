@@ -38,12 +38,12 @@ export const paymentFormSchema = z.object({
   country: z.string().min(2, {
     message: 'Please enter a country.',
   }),
-  phoneNumber: z
-    .string()
-    .optional()
-    .refine((val) => val === '', {
-      message: 'Please enter a valid phone number.',
-    }),
+  // phoneNumber: z
+  //   .string()
+  //   .optional()
+  //   .refine((val) => val === '', {
+  //     message: 'Please enter a valid phone number.',
+  //   }),
 });
 
 const PaymentForm = forwardRef(
@@ -60,7 +60,7 @@ const PaymentForm = forwardRef(
       defaultValues: {
         postCode: '',
         country: '',
-        phoneNumber: '',
+        // phoneNumber: '',
       },
     });
 
@@ -155,7 +155,7 @@ const PaymentForm = forwardRef(
               )}
             />
 
-            {selectedOption === 'mobile_money' ? (
+            {/* {selectedOption === 'mobile_money' ? (
               <FormField
                 control={form.control}
                 name="phoneNumber"
@@ -173,7 +173,7 @@ const PaymentForm = forwardRef(
                   </FormItem>
                 )}
               />
-            ) : null}
+            ) : null} */}
           </form>
         </Form>
       </>
