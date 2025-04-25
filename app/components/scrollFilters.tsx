@@ -7,16 +7,16 @@ import IconComponent from '@/app/components/iconComponent';
 import { useRouter } from 'next/navigation';
 export default function ScrollFilters({
   filters,
-  selectedCategoryId,
+  selectedCategory,
 }: {
   filters: { label: string; value: string; icon: string }[];
-  selectedCategoryId?: string;
+  selectedCategory?: string;
 }) {
   let scrollBy = 500;
   const ref = useRef<any>();
   const [showPrevBtn, setShowPrevBtn] = useState<boolean>(false);
   const [showNextBtn, setShowNextBtn] = useState<boolean>(true);
-  const [selectedOption, setSelectedOption] = useState<string | undefined>(selectedCategoryId);
+  const [selectedOption, setSelectedOption] = useState<string | undefined>(selectedCategory);
   const router = useRouter();
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -46,8 +46,8 @@ export default function ScrollFilters({
   };
   // Get category from URL or use default
   useEffect(() => {
-    setSelectedOption(selectedCategoryId); // Update selected category if changed
-  }, [selectedCategoryId]);
+    setSelectedOption(selectedCategory); // Update selected category if changed
+  }, [selectedCategory]);
 
   useEffect(() => {
     if (ref.current) {
@@ -90,7 +90,7 @@ export default function ScrollFilters({
     setSelectedOption(categoryId);
 
     // Update the query params in the URL without reloading the page, but only if on the client-side
-    router.replace(`?categoryId=${categoryId}`, { scroll: false });
+    router.replace(`?category=${categoryId}`, { scroll: false });
   };
 
   return (

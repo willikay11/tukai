@@ -100,7 +100,7 @@ export const authOptions = {
         token.hasSubscribed = decoded?.hasSubscribed;
       } else if (user) {
         token.id = user.id;
-        token.name = user.displayName;
+        token.name = user.displayName ?? `${user.firstName} ${user.lastName}`;
         token.email = user.email;
         token.picture = user.picture;
         token.accessToken = user.accessToken;

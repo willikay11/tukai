@@ -1,11 +1,12 @@
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { ApiResponse } from '@/types/apiResponse';
 import api from '@/services/apiService';
+import { getSession } from 'next-auth/react';
 
 export async function fetchExperiences(
   page: number,
   perPage: number,
-  categoryId?: string,
+  category?: string,
   search?: string,
 ): Promise<ApiResponse> {
   try {
@@ -13,7 +14,18 @@ export async function fetchExperiences(
     if (page) queryParams.append('page', page.toString());
     if (perPage) queryParams.append('page_size', perPage.toString());
     if (search) queryParams.append('search', search);
-    if (categoryId) queryParams.append('category_id', categoryId);
+    if (category === 'reserved') {
+      const session = await getSession();
+      queryParams.append('reserved_by', session?.user?.id || '');
+    }
+    if (category === 'saved') {
+      const session = await getSession();
+      queryParams.append('bookmarked', session?.user?.id || '');
+    }
+    if (category === 'hosting') {
+      const session = await getSession();
+      queryParams.append('hosted_by', session?.user?.id || '');
+    }
     const response = await api.get(`/v1/experiences/?${queryParams.toString()}`);
 
     return {

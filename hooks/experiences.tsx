@@ -2,11 +2,11 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { fetchExperience, fetchExperiences, purchaseExperienceTicket } from '@/services/experience';
 import { useQueryClient } from '@tanstack/react-query';
 export const useExperiences = (
-  { page, enabled }: { page: number; enabled: boolean } = { page: 1, enabled: true },
+  { page, enabled, category }: { page: number; enabled: boolean; category?: string } = { page: 1, enabled: true, category: 'all' },
 ) => {
   return useQuery({
-    queryKey: ['experiences', page],
-    queryFn: async () => await fetchExperiences(page, 12),
+    queryKey: ['experiences', page, category],
+    queryFn: async () => await fetchExperiences(page, 12, category),
     enabled: enabled,
   });
 };
