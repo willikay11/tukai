@@ -1,14 +1,13 @@
 'use client';
 import { useState } from 'react';
 import sanitizeHtml from 'sanitize-html';
-import { Community } from '@/types/community';
+import { Community, CommunityMember } from '@/types/community';
 import ImageCarousel from '@/components/ui/imageCarousel';
 import { EventSkeleton } from '@/app/components/skeletons';
-import { Bookmark02Icon } from '@hugeicons/react-pro';
 import clsx from 'clsx';
+import { Avatar, AvatarImage } from '@/components/ui/avatar';
 
 export default function SingleCommunity({ community }: { community: Community }) {
-  const [bookmarked, setBookmarked] = useState<boolean>(false);
   const [hasError, setHasError] = useState(false);
 
   // Sanitize text to prevent XSS (if content is dynamic)
@@ -37,19 +36,6 @@ export default function SingleCommunity({ community }: { community: Community })
             <div className="h-full w-full bg-gray-50" />
           )}
         </div>
-        <div
-          className="absolute right-2 top-2 cursor-pointer"
-          onClick={() => setBookmarked(!bookmarked)}
-        >
-          <Bookmark02Icon
-            size={16}
-            className={clsx('', {
-              'text-white': !bookmarked,
-              'text-red-600': bookmarked,
-            })}
-            variant={bookmarked ? 'solid' : 'twotone'}
-          />
-        </div>
       </div>
       <div className="flex flex-col items-start justify-start bg-white">
         <div className="mb-1 flex">
@@ -58,7 +44,20 @@ export default function SingleCommunity({ community }: { community: Community })
         <div className="mb-1 inline-flex items-center">
           <span className="text-xs font-medium text-gray-700">{displayedText}</span>
         </div>
-        <div className="inline-flex items-center"></div>
+        <div className="flex items-center relative">
+          {
+            community.members.slice(0, 5).map((member: CommunityMember, index: number) => (
+              <div key={member.id} className={clsx('relative rounded-full bg-gray-200', index === 0 && 'ml-0', index > 0 && `-ml-1`)}>
+                <Avatar className="h-[20px] w-[20px]">
+                  <AvatarImage src={member.user.picture} />
+                </Avatar>
+              </div>
+            ))
+          }
+          {community.members.length > 5 && (
+            <span className="text-xs font-medium text-gray-700 ml-1">{`+${community.members.length - 5}`}</span>
+          )}
+        </div>
       </div>
     </div>
   );

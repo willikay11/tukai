@@ -12,7 +12,7 @@ export async function getInterestBasedCommunities(
     if (page) queryParams.append('page', page.toString());
     if (perPage) queryParams.append('page_size', perPage.toString());
     if (search) queryParams.append('search', search);
-    // if (category) queryParams.append('categories', category);
+    if (category) queryParams.append('categories', category);
     const response = await api.get(`/v1/communities/?${queryParams.toString()}`);
     return {
       status: response.status,
