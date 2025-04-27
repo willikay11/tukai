@@ -66,9 +66,10 @@ const PaymentForm = forwardRef(
 
     // Expose the submit function to the parent component
     useImperativeHandle(ref, () => ({
-      submit: () => form.handleSubmit((values) => {
-        onSubmit(values, selectedOption);
-      })(),
+      submit: () =>
+        form.handleSubmit((values) => {
+          onSubmit(values, selectedOption);
+        })(),
       formState: form.formState,
     }));
 
@@ -116,7 +117,7 @@ const PaymentForm = forwardRef(
             </div>
           ))}
         </div>
- 
+
         <Form {...form}>
           <form className="space-y-4">
             <FormField

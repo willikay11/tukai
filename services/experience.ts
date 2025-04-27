@@ -64,7 +64,9 @@ export async function fetchExperience(id: string): Promise<ApiResponse> {
   }
 }
 
-export async function purchaseExperienceTicket(data: { reservedTickets: { ticketId: string; quantity: number }[] }): Promise<ApiResponse> {
+export async function purchaseExperienceTicket(data: {
+  reservedTickets: { ticketId: string; quantity: number }[];
+}): Promise<ApiResponse> {
   try {
     const response = await api.post(`/v1/experiences/ticket-purchases/`, {
       ticket_purchases: data.reservedTickets.map((ticket) => ({

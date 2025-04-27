@@ -30,9 +30,9 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
         </div>
       </div> */}
       <div className="col-span-12 mx-4 mb-4 md:col-span-10 md:col-start-2 md:mx-0">
-          <p className="mb-4 mt-2.5 text-xl font-semibold text-gray-700">Discover Experiences</p>
-          <Experiences key={categoryFromQuery} category={categoryFromQuery} />
-        </div>
+        <p className="mb-4 mt-2.5 text-xl font-semibold text-gray-700">Discover Experiences</p>
+        <Experiences key={categoryFromQuery} category={categoryFromQuery} />
+      </div>
     </main>
   );
 }
