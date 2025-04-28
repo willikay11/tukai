@@ -13,6 +13,7 @@ import PhotoGallery from '@/components/ui/PhotoGallery';
 import ExperienceOrganiser from '../components/experienceOrganiser';
 import ExperienceActions from '../components/experienceActions';
 import ExperienceDetails from '../components/experienceDetails';
+import Share from '@/components/ui/share';
 
 export default async function ViewExperiencePage({ params }: { params: { experienceId: string } }) {
   const experienceResponse: ApiResponse = await fetchExperience(params.experienceId);
@@ -40,7 +41,14 @@ export default async function ViewExperiencePage({ params }: { params: { experie
               <div className="inline-flex items-center">
                 <Bookmark02Icon size={16} variant="twotone" className="text-primary" />
                 <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" />
-                <Share08Icon size={16} variant="twotone" className="text-primary" />
+                <Share
+                  coverPhoto={
+                    experience.photos?.find((photo: Photo) => photo.isCover)?.photo ||
+                    experience.photos[0].photo
+                  }
+                  title={experience.title}
+                  link={`${process.env.NEXT_PUBLIC_APP_URL}/experiences/${experience.id}`}
+                />
               </div>
             </div>
           </div>
