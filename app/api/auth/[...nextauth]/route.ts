@@ -44,7 +44,7 @@ export const authOptions = {
         const response = await signIn(credentials.email, credentials.password);
 
         const decoded = parseSnakeToCamel(jwt.decode(response.access)) as JwtPayload;
-        
+
         if (!decoded) {
           throw new Error('Invalid token');
         }

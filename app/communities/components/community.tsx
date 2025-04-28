@@ -1,58 +1,67 @@
 'use client';
-import { useState } from "react";
-import { Community } from "@/types/community";
-import ImageCarousel from "@/components/ui/imageCarousel";
+import { useState } from 'react';
+import sanitizeHtml from 'sanitize-html';
+import { Community, CommunityMember } from '@/types/community';
+import ImageCarousel from '@/components/ui/imageCarousel';
 import { EventSkeleton } from '@/app/components/skeletons';
-import { Bookmark02Icon } from "@hugeicons/react-pro";
-import clsx from "clsx";
+import clsx from 'clsx';
+import { Avatar, AvatarImage } from '@/components/ui/avatar';
 
 export default function SingleCommunity({ community }: { community: Community }) {
-    const [bookmarked, setBookmarked] = useState<boolean>(false);
-    const [hasError, setHasError] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
-    if (community.id.startsWith('placeholder-')) {
-      return <EventSkeleton />;
-    }
+  // Sanitize text to prevent XSS (if content is dynamic)
+  const safeText = sanitizeHtml(community.description);
 
-    return (
-        <>
-        <div className="relative mb-2 flex flex-col">
-          <div className="relative aspect-square w-full overflow-hidden rounded-[5px]">
-            {!hasError ? (
-              <ImageCarousel
-                images={community.photos.map((photo) => photo.photo)}
-                imageHeight="h-full"
-              />
-            ) : (
-              <div className="h-full w-full bg-gray-50" />
-            )}
-          </div>
-          <div
-            className="absolute right-2 top-2 cursor-pointer"
-            onClick={() => setBookmarked(!bookmarked)}
-          >
-            <Bookmark02Icon
-              size={16}
-              className={clsx('', {
-                'text-white': !bookmarked,
-                'text-red-600': bookmarked,
-              })}
-              variant={bookmarked ? 'solid' : 'twotone'}
+  // Determine whether to truncate text
+  const shouldTruncate = community.description.length > 100;
+  const displayedText = !shouldTruncate ? safeText : safeText.slice(0, 100) + '...';
+
+  if (community.id.startsWith('placeholder-')) {
+    return <EventSkeleton />;
+  }
+
+  return (
+    <div className="flex flex-col">
+      <div className="relative mb-2 flex flex-col">
+        <div className="relative aspect-square w-full overflow-hidden rounded-[5px]">
+          {!hasError ? (
+            <ImageCarousel
+              images={community.photos.map((photo) => photo.photo)}
+              imageHeight="h-full"
             />
-          </div>
+          ) : (
+            <div className="h-full w-full bg-gray-50" />
+          )}
         </div>
-        <div className="flex flex-col items-start justify-start bg-white">
-          <div className="mb-1 flex">
-            <p className="text-xs font-bold text-gray-800">{community.title}</p>
-          </div>
-          <div className="mb-1 inline-flex items-center">
-            <span className="text-xs font-medium text-gray-700">
-              {community.description}
-            </span>
-          </div>
-          <div className="inline-flex items-center">
-          </div>
+      </div>
+      <div className="flex flex-col items-start justify-start bg-white">
+        <div className="mb-1 flex">
+          <p className="text-xs font-bold text-gray-800">{community.title}</p>
         </div>
-      </>
-    )
+        <div className="mb-1 inline-flex items-center">
+          <span className="text-xs font-medium text-gray-700">{displayedText}</span>
+        </div>
+        <div className="relative flex items-center">
+          {community.members.slice(0, 5).map((member: CommunityMember, index: number) => (
+            <div
+              key={member.id}
+              className={clsx(
+                'relative rounded-full bg-gray-200',
+                index === 0 && 'ml-0',
+                index > 0 && `-ml-1`,
+              )}
+            >
+              <Avatar className="h-[20px] w-[20px]">
+                <AvatarImage src={member.user.picture} />
+              </Avatar>
+            </div>
+          ))}
+          {community.members.length > 5 && (
+            <span className="ml-1 text-xs font-medium text-gray-700">{`+${community.members.length - 5}`}</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

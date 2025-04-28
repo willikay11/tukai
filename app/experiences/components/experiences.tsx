@@ -1,4 +1,3 @@
-
 'use client';
 import SingleExperience from '@/app/experiences/components/experience';
 import { Experience } from '@/types/experience';
