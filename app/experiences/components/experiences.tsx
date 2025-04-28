@@ -12,6 +12,7 @@ import { useSession } from 'next-auth/react';
 import NoData from '@/components/ui/noData';
 import { motion } from 'framer-motion';
 import { Status } from '@/enums/status';
+
 type ListExperiencesProps = {
   category?: string;
 };
@@ -156,15 +157,15 @@ export default function Experiences({ category }: ListExperiencesProps) {
               transition={{ duration: 0.3 }}
               className="cursor-pointer"
             >
-              {session?.user ? (
+              {/* {session?.user ? ( */}
                 <Link target="_blank" href={`/experiences/${experience.id}`}>
                   <SingleExperience experience={experience} />
                 </Link>
-              ) : (
+              {/* ) : (
                 <div onClick={() => setOpen(true)}>
                   <SingleExperience experience={experience} />
                 </div>
-              )}
+              )} */}
             </motion.div>
           );
         })}
