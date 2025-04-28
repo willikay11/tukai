@@ -15,14 +15,12 @@ export default function SingleCommunity({ community }: { community: Community })
 
   // Determine whether to truncate text
   const shouldTruncate = community.description.length > 100;
-  const displayedText = !shouldTruncate
-    ? safeText
-    : safeText.slice(0, 100) + '...';
+  const displayedText = !shouldTruncate ? safeText : safeText.slice(0, 100) + '...';
 
   if (community.id.startsWith('placeholder-')) {
     return <EventSkeleton />;
   }
-  
+
   return (
     <div className="flex flex-col">
       <div className="relative mb-2 flex flex-col">
@@ -44,18 +42,23 @@ export default function SingleCommunity({ community }: { community: Community })
         <div className="mb-1 inline-flex items-center">
           <span className="text-xs font-medium text-gray-700">{displayedText}</span>
         </div>
-        <div className="flex items-center relative">
-          {
-            community.members.slice(0, 5).map((member: CommunityMember, index: number) => (
-              <div key={member.id} className={clsx('relative rounded-full bg-gray-200', index === 0 && 'ml-0', index > 0 && `-ml-1`)}>
-                <Avatar className="h-[20px] w-[20px]">
-                  <AvatarImage src={member.user.picture} />
-                </Avatar>
-              </div>
-            ))
-          }
+        <div className="relative flex items-center">
+          {community.members.slice(0, 5).map((member: CommunityMember, index: number) => (
+            <div
+              key={member.id}
+              className={clsx(
+                'relative rounded-full bg-gray-200',
+                index === 0 && 'ml-0',
+                index > 0 && `-ml-1`,
+              )}
+            >
+              <Avatar className="h-[20px] w-[20px]">
+                <AvatarImage src={member.user.picture} />
+              </Avatar>
+            </div>
+          ))}
           {community.members.length > 5 && (
-            <span className="text-xs font-medium text-gray-700 ml-1">{`+${community.members.length - 5}`}</span>
+            <span className="ml-1 text-xs font-medium text-gray-700">{`+${community.members.length - 5}`}</span>
           )}
         </div>
       </div>

@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import SingleCommunity from './community';
 import { Status } from '@/enums/status';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 const placeholders: Community[] = Array.from({ length: 12 }, (_, index) => ({
   id: `placeholder-${index}`,
   title: 'Loading...',
@@ -34,9 +35,15 @@ const placeholders: Community[] = Array.from({ length: 12 }, (_, index) => ({
   },
   members: [],
   dateModified: '',
-}))
+}));
 
-export default function InterestBasedCommunities({ interest, color }: { interest: Interest, color: {bg: string, color: string} }) {
+export default function InterestBasedCommunities({
+  interest,
+  color,
+}: {
+  interest: Interest;
+  color: { bg: string; color: string };
+}) {
   const [communityList, setCommunityList] = useState<Community[]>(placeholders);
 
   const {
@@ -57,7 +64,7 @@ export default function InterestBasedCommunities({ interest, color }: { interest
 
   return (
     <div className="mb-2.5">
-      <div className="inline-flex items-center gap-2 mb-4">
+      <div className="mb-4 inline-flex items-center gap-2">
         <div className="inline-flex items-center gap-2">
           {interest.icon && (
             <div className={`rounded-full ${color.bg} p-2`}>
@@ -65,9 +72,7 @@ export default function InterestBasedCommunities({ interest, color }: { interest
             </div>
           )}
           <div className="flex flex-col">
-            <p className={clsx('text-nowrap text-sm font-bold text-gray-700')}>
-              {interest.name}
-            </p>
+            <p className={clsx('text-nowrap text-sm font-bold text-gray-700')}>{interest.name}</p>
             <p className={clsx('text-nowrap text-xs font-normal text-gray-400')}>
               {communities?.data.results.length} communities
             </p>
@@ -82,7 +87,9 @@ export default function InterestBasedCommunities({ interest, color }: { interest
         className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"
       >
         {communityList.map((community: Community) => (
-          <SingleCommunity key={community.id} community={community} />
+          <Link href={`/communities/${community.id}`} target="_blank">
+            <SingleCommunity key={community.id} community={community} />
+          </Link>
         ))}
       </motion.div>
     </div>

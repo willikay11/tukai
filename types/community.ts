@@ -9,11 +9,16 @@ export type CommunityMember = {
   dateCreated: string;
 };
 
+export type CommunityCategory = {
+  id: string;
+  name: string;
+};
+
 export type Community = {
   id: string;
   title: string;
   description: string;
-  categories: string[];
+  categories: CommunityCategory[];
   isPublic: boolean;
   status: string;
   photos: Photo[];

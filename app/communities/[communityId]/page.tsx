@@ -1,0 +1,101 @@
+import { Bookmark02Icon, Share08Icon } from '@hugeicons/react-pro';
+import { ApiResponse } from '@/types/apiResponse';
+import DescriptionShowMore from '@/app/components/descriptionShowMore';
+import { Photo } from '@/types/photo';
+import { Button } from '@/components/ui/button';
+import IconComponent from '@/app/components/iconComponent';
+import GoogleMapComponent from '@/app/components/googleMap';
+import { Separator } from '@/components/ui/separator';
+import PhotoGallery from '@/components/ui/PhotoGallery';
+import { Community } from '@/types/community';
+import { fetchCommunity } from '@/services/community';
+
+export default async function ViewCommunityPage({ params }: { params: { communityId: string } }) {
+  const communityResponse: ApiResponse = await fetchCommunity(params.communityId);
+
+  if (!communityResponse.data) {
+    return;
+  }
+
+  const community: Community = communityResponse.data;
+
+  return (
+    <>
+      <main className="grid grid-cols-12 gap-4">
+        <div className="col-span-12 mt-8 md:col-span-6 md:col-start-4 2xl:col-span-4 2xl:col-start-5">
+          <div className="mb-3 inline-flex w-full justify-between">
+            <div className="inline-flex">
+              <div className="flex flex-col">
+                <p className="mb-1 text-2xl font-black text-gray-700">{community.title}</p>
+              </div>
+            </div>
+            <div className="inline-flex items-start">
+              <div className="inline-flex items-center">
+                <Bookmark02Icon size={16} variant="twotone" className="text-primary" />
+                <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" />
+                <Share08Icon size={16} variant="twotone" className="text-primary" />
+              </div>
+            </div>
+          </div>
+          <div className="mb-4">
+            <PhotoGallery photos={community.photos} />
+          </div>
+          <div className="flex flex-col">
+            <p className="mb-1 text-base font-black text-gray-600">About</p>
+            <div className="text-sm font-normal text-gray-600 mb-2.5">
+              <DescriptionShowMore
+                text={community.description}
+                photo={
+                  community.photos.find((photo: Photo) => photo.isCover)?.photo ||
+                  community.photos[0].photo
+                }
+              />
+            </div>
+            <div className="inline-flex gap-2">
+              {community.categories.map((category) => (
+                <div
+                  className="inline-flex w-fit rounded-full bg-gray-100 px-4 py-2"
+                  key={category.id}
+                >
+                  <div className="flex flex-col">
+                    <p className="text-sm text-gray-700">{category.name}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* <div className="mt-4 grid grid-cols-3 gap-4">
+              <ExperienceDetails experience={experience} />
+            </div> */}
+
+            <div className="my-4">
+              <Separator />
+            </div>
+
+            <div className="mb-4 rounded-[8px]">
+              <GoogleMapComponent
+                lat={community.location.point.coordinates[1]}
+                lng={community.location.point.coordinates[0]}
+              />
+            </div>
+
+            <div className="mb-4">
+              <p className="text-base font-bold text-gray-700">Cancellation Policy</p>
+              <p className="text-sm font-normal text-gray-500">
+                Free cancellation before 2 PM on Feb 22.
+              </p>
+            </div>
+
+            <div className="my-4">
+              <Separator />
+            </div>
+
+            <Button variant="text" className="justify-start">
+              <IconComponent iconName="Flag02Icon" color="red" size={18} />
+              Report this experience
+            </Button>
+          </div>
+        </div>
+      </main>
+    </>
+  );
+}
