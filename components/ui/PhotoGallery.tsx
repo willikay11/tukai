@@ -16,10 +16,6 @@ const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
     setIsLoading(true);
   };
 
-  useEffect(() => {
-    console.log('photoIndex: ', photoIndex);
-  }, [photoIndex]);
-
   return (
     <>
       <div className="flex flex-col">
@@ -67,11 +63,13 @@ const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
                 src={photos[3].photo}
                 alt=""
                 quality={100}
-                className="ursor-pointer rounded-br-[15px]"
+                className="cursor-pointer rounded-br-[15px]"
               />
-              <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
-                <span className="text-sm font-black text-white">+{photos.length - 4} Photos</span>
-              </div>
+              {photos.length - 4 > 0 && (
+                <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
+                  <span className="text-sm font-black text-white">+{photos.length - 4} Photos</span>
+                </div>
+              )}
             </div>
           )}
         </div>

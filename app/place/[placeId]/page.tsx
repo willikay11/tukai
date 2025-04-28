@@ -46,6 +46,9 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
               placeId={params.placeId}
               bookmarked={place.isBookmarked}
               placeTitle={place.title}
+              coverPhoto={
+                place.photos?.find((photo: Photo) => photo.isCover)?.photo || place.photos[0].photo
+              }
             />
           </div>
         </div>

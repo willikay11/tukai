@@ -1,9 +1,7 @@
-import { Bookmark02Icon, Share08Icon } from '@hugeicons/react-pro';
+import { Share08Icon } from '@hugeicons/react-pro';
 import { ApiResponse } from '@/types/apiResponse';
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
 import { Photo } from '@/types/photo';
-import { Button } from '@/components/ui/button';
-import IconComponent from '@/app/components/iconComponent';
 import GoogleMapComponent from '@/app/components/googleMap';
 import { Separator } from '@/components/ui/separator';
 import PhotoGallery from '@/components/ui/PhotoGallery';
@@ -11,6 +9,8 @@ import { Community, CommunityMember } from '@/types/community';
 import { fetchCommunity } from '@/services/community';
 import CommunityMembers from '../components/communityMembers';
 import CommunityAdministrator from '../components/communityAdministrator';
+import Share from '@/components/ui/share';
+
 export default async function ViewCommunityPage({ params }: { params: { communityId: string } }) {
   const communityResponse: ApiResponse = await fetchCommunity(params.communityId);
 
@@ -30,11 +30,15 @@ export default async function ViewCommunityPage({ params }: { params: { communit
                 <p className="mb-1 text-2xl font-black text-gray-700">{community.title}</p>
               </div>
             </div>
-            <div className="inline-flex items-start">
+            <div className="inline-flex items-center">
               <div className="inline-flex items-center">
-                <Bookmark02Icon size={16} variant="twotone" className="text-primary" />
-                <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" />
-                <Share08Icon size={16} variant="twotone" className="text-primary" />
+                {/* <Bookmark02Icon size={16} variant="twotone" className="text-primary" /> */}
+                {/* <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" /> */}
+                <Share
+                  coverPhoto={community.photos[0].photo}
+                  title={community.title}
+                  link={`${process.env.NEXT_PUBLIC_APP_URL}/communities/${community.id}`}
+                />
               </div>
             </div>
           </div>
