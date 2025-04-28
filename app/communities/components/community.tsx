@@ -41,7 +41,7 @@ export default function SingleCommunity({ community }: { community: Community })
         <div className="mb-1 inline-flex items-center">
           <span className="text-xs font-medium text-gray-700">{displayedText}</span>
         </div>
-        <CommunityMembers members={community.members} />
+        <CommunityMembers members={community.members} size="20px" />
       </div>
     </div>
   );

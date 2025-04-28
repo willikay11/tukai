@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import 'react-18-image-lightbox/style.css'; // This only needs to be imported once in your app
 import TukaiImage from './image';
 import Lightbox from 'react-18-image-lightbox';
+import clsx from 'clsx';
 
 const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,10 +28,21 @@ const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
             src={photos.find((photo: Photo) => photo.isCover)?.photo || photos[0].photo}
             alt=""
             quality={100}
-            className="cursor-pointer rounded-tl-[15px] rounded-tr-[15px]"
+            className={clsx(
+              'cursor-pointer',
+              photos.length > 1 && 'rounded-tl-[15px] rounded-tr-[15px]',
+              photos.length === 1 && 'rounded-[15px]',
+            )}
           />
         </div>
-        <div className="grid grid-cols-3 gap-2">
+        <div
+          className={clsx(
+            'grid gap-2',
+            photos.length - 1 === 1 && 'grid-cols-1',
+            photos.length - 1 === 2 && 'grid-cols-2',
+            photos.length - 1 > 2 && 'grid-cols-3',
+          )}
+        >
           {photos[1]?.photo && (
             <div
               className="relative aspect-square h-[6.25rem] w-full"
@@ -50,7 +62,11 @@ const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
               className="relative aspect-square h-[6.25rem] w-full"
               onClick={() => handleImageClick(2)}
             >
-              <TukaiImage src={photos[2].photo} alt="" quality={100} className="cursor-pointer" />
+              <TukaiImage src={photos[2].photo} alt="" quality={100} className={clsx(
+                'cursor-pointer',
+                photos.length -1 === 2 && 'rounded-br-[15px]',
+              )}
+              />
             </div>
           )}
 

@@ -1,8 +1,8 @@
 'use client';
 
-import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { CommunityMember } from '@/types/community';
 import clsx from 'clsx';
+import Image from 'next/image';
 
 export default function CommunityMembers({
   members,
@@ -22,9 +22,16 @@ export default function CommunityMembers({
             index > 0 && `-ml-1`,
           )}
         >
-          <Avatar className={`h-[${size}] w-[${size}]`}>
-            <AvatarImage src={member.user.picture} />
-          </Avatar>
+          <div className={`relative aspect-square`} style={{ width: size, height: size }}>
+            <Image
+              src={member.user.picture || ''}
+              alt={member.user.firstName || ''}
+              className="h-7 w-7 rounded-full"
+              quality={100}
+              layout="fill"
+              objectFit="cover"
+            />
+          </div>
         </div>
       ))}
       {members.length > 5 && (
