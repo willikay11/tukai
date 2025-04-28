@@ -7,9 +7,10 @@ import IconComponent from '@/app/components/iconComponent';
 import GoogleMapComponent from '@/app/components/googleMap';
 import { Separator } from '@/components/ui/separator';
 import PhotoGallery from '@/components/ui/PhotoGallery';
-import { Community } from '@/types/community';
+import { Community, CommunityMember } from '@/types/community';
 import { fetchCommunity } from '@/services/community';
-
+import CommunityMembers from '../components/communityMembers';
+import CommunityAdministrator from '../components/communityAdministrator';
 export default async function ViewCommunityPage({ params }: { params: { communityId: string } }) {
   const communityResponse: ApiResponse = await fetchCommunity(params.communityId);
 
@@ -42,7 +43,7 @@ export default async function ViewCommunityPage({ params }: { params: { communit
           </div>
           <div className="flex flex-col">
             <p className="mb-1 text-base font-black text-gray-600">About</p>
-            <div className="text-sm font-normal text-gray-600 mb-2.5">
+            <div className="mb-2.5 text-sm font-normal text-gray-600">
               <DescriptionShowMore
                 text={community.description}
                 photo={
@@ -51,7 +52,7 @@ export default async function ViewCommunityPage({ params }: { params: { communit
                 }
               />
             </div>
-            <div className="inline-flex gap-2">
+            <div className="mb-2.5 inline-flex gap-2">
               {community.categories.map((category) => (
                 <div
                   className="inline-flex w-fit rounded-full bg-gray-100 px-4 py-2"
@@ -63,9 +64,33 @@ export default async function ViewCommunityPage({ params }: { params: { communit
                 </div>
               ))}
             </div>
-            {/* <div className="mt-4 grid grid-cols-3 gap-4">
-              <ExperienceDetails experience={experience} />
-            </div> */}
+
+            <div className="mb-2.5">
+              <CommunityMembers members={community.members} size="30px" />
+            </div>
+            <div className="flex flex-col">
+              <p className="text-sm font-bold text-gray-700">Community Type</p>
+              <p className="text-sm font-normal text-gray-500">
+                {community.isPublic ? 'Public' : 'Private (Only invited guests can join)'}
+              </p>
+            </div>
+
+            <div className="my-4">
+              <Separator />
+            </div>
+
+            <div className="flex flex-col">
+              <p className="mb-2.5 text-sm font-bold text-gray-700">Administrators</p>
+              <div className="inline-flex gap-2">
+                {community.members
+                  .filter(
+                    (member: CommunityMember) => member.role === 'admin' || member.role === 'owner',
+                  )
+                  .map((member) => (
+                    <CommunityAdministrator key={member.id} member={member} size="30px" />
+                  ))}
+              </div>
+            </div>
 
             <div className="my-4">
               <Separator />
@@ -78,21 +103,9 @@ export default async function ViewCommunityPage({ params }: { params: { communit
               />
             </div>
 
-            <div className="mb-4">
-              <p className="text-base font-bold text-gray-700">Cancellation Policy</p>
-              <p className="text-sm font-normal text-gray-500">
-                Free cancellation before 2 PM on Feb 22.
-              </p>
-            </div>
-
             <div className="my-4">
               <Separator />
             </div>
-
-            <Button variant="text" className="justify-start">
-              <IconComponent iconName="Flag02Icon" color="red" size={18} />
-              Report this experience
-            </Button>
           </div>
         </div>
       </main>

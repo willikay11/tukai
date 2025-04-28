@@ -4,9 +4,8 @@ import sanitizeHtml from 'sanitize-html';
 import { Community, CommunityMember } from '@/types/community';
 import ImageCarousel from '@/components/ui/imageCarousel';
 import { EventSkeleton } from '@/app/components/skeletons';
-import clsx from 'clsx';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
-
+import CommunityMembers from './communityMembers';
 export default function SingleCommunity({ community }: { community: Community }) {
   const [hasError, setHasError] = useState(false);
 
@@ -42,25 +41,7 @@ export default function SingleCommunity({ community }: { community: Community })
         <div className="mb-1 inline-flex items-center">
           <span className="text-xs font-medium text-gray-700">{displayedText}</span>
         </div>
-        <div className="relative flex items-center">
-          {community.members.slice(0, 5).map((member: CommunityMember, index: number) => (
-            <div
-              key={member.id}
-              className={clsx(
-                'relative rounded-full bg-gray-200',
-                index === 0 && 'ml-0',
-                index > 0 && `-ml-1`,
-              )}
-            >
-              <Avatar className="h-[20px] w-[20px]">
-                <AvatarImage src={member.user.picture} />
-              </Avatar>
-            </div>
-          ))}
-          {community.members.length > 5 && (
-            <span className="ml-1 text-xs font-medium text-gray-700">{`+${community.members.length - 5}`}</span>
-          )}
-        </div>
+        <CommunityMembers members={community.members} />
       </div>
     </div>
   );
