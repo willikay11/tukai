@@ -16,6 +16,7 @@ import { Status } from '@/enums/status';
 type ListExperiencesProps = {
   category?: string;
 };
+
 const placeholders: Experience[] = Array.from({ length: 12 }, (_, index) => ({
   id: `placeholder-${index}`,
   title: 'Loading...',
