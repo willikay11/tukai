@@ -1,4 +1,3 @@
-import { Share08Icon } from '@hugeicons/react-pro';
 import { ApiResponse } from '@/types/apiResponse';
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
 import { Photo } from '@/types/photo';
@@ -10,6 +9,7 @@ import { fetchCommunity } from '@/services/community';
 import CommunityMembers from '../components/communityMembers';
 import CommunityAdministrator from '../components/communityAdministrator';
 import Share from '@/components/ui/share';
+import UpcomingExperiences from '../components/upcomingExperiences';
 
 export default async function ViewCommunityPage({ params }: { params: { communityId: string } }) {
   const communityResponse: ApiResponse = await fetchCommunity(params.communityId);
@@ -107,9 +107,7 @@ export default async function ViewCommunityPage({ params }: { params: { communit
               />
             </div>
 
-            <div className="my-4">
-              <Separator />
-            </div>
+            <UpcomingExperiences category={community.categories[0].id} />
           </div>
         </div>
       </main>

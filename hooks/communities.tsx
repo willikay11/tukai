@@ -7,14 +7,22 @@ export const useInterestBasedCommunities = (
     enabled,
     category,
     search,
-  }: { page: number; enabled: boolean; category?: string; search?: string } = {
+    showUpComingExperiences,
+  }: {
+    page: number;
+    enabled: boolean;
+    category?: string;
+    search?: string;
+    showUpComingExperiences?: boolean;
+  } = {
     page: 1,
     enabled: true,
   },
 ) => {
   return useQuery({
     queryKey: ['communities', page, category, search],
-    queryFn: async () => await getInterestBasedCommunities(category, page, 12, search),
+    queryFn: async () =>
+      await getInterestBasedCommunities(category, page, 12, search, showUpComingExperiences),
     enabled: enabled,
   });
 };

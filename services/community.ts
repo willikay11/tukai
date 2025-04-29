@@ -6,6 +6,7 @@ export async function getInterestBasedCommunities(
   page: number = 1,
   perPage: number = 12,
   search?: string,
+  showUpComingExperiences?: boolean,
 ) {
   try {
     const queryParams = new URLSearchParams();
@@ -13,6 +14,7 @@ export async function getInterestBasedCommunities(
     if (perPage) queryParams.append('page_size', perPage.toString());
     if (search) queryParams.append('search', search);
     if (category) queryParams.append('category', category);
+    if (showUpComingExperiences) queryParams.append('upcoming_experiences', 'true');
     const response = await api.get(`/v1/communities/?${queryParams.toString()}`);
     return {
       status: response.status,
