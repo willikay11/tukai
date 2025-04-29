@@ -10,7 +10,7 @@ export async function fetchPlaces(
 ): Promise<ApiResponse> {
   try {
     const queryParams = new URLSearchParams();
-    if (categoryId) queryParams.append('categories', categoryId);
+    if (categoryId) queryParams.append('category', categoryId);
     if (page) queryParams.append('page', page.toString());
     if (perPage) queryParams.append('page_size', perPage.toString());
     if (search) queryParams.append('search', search);
