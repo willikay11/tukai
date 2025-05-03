@@ -13,6 +13,8 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { useSendMessage } from '@/hooks/comms';
+import { useEffect } from 'react';
+import { toast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   content: z.string().min(2, {
@@ -36,7 +38,7 @@ export default function SendMessage({
     },
   });
 
-  const { mutate: sendMessage, isPending } = useSendMessage();
+  const { mutate: sendMessage, isPending, isSuccess, isError } = useSendMessage();
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     sendMessage({
@@ -44,6 +46,25 @@ export default function SendMessage({
       recipientId: recipientId,
     });
   }
+
+  useEffect(() => {
+    if (isSuccess) {
+      setOpen(false);
+      form.reset();
+      toast({
+        title: 'Success',
+        description: 'Message sent successfully',
+      });
+    }
+
+    if (isError) {
+      toast({
+        title: 'Error',
+        description: 'Failed to send message',
+        variant: 'destructive',
+      });
+    }
+  }, [isSuccess, isError]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -67,7 +88,7 @@ export default function SendMessage({
                   </FormItem>
                 )}
               />
-              <Button size="lg" className="w-full mt-2.5" type="submit" disabled={isPending}>
+              <Button size="lg" className="mt-2.5 w-full" type="submit" disabled={isPending}>
                 {isPending ? 'Submitting...' : 'Submit'}
               </Button>
             </form>

@@ -1,9 +1,9 @@
 'use client';
 
-import { useInterestBasedCommunities } from '@/hooks/communities';
+import { useGetCommunities } from '@/hooks/communities';
 
 export default function UpcomingExperiences({ category }: { category: string }) {
-  const { data: upcomingExperiences } = useInterestBasedCommunities({
+  const { data: upcomingExperiences } = useGetCommunities({
     page: 1,
     enabled: true,
     showUpComingExperiences: true,

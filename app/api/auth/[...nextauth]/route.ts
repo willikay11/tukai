@@ -49,9 +49,9 @@ export const authOptions = {
           throw new Error('Invalid token');
         }
 
-        const user: User = await profile(decoded.userId);
+        const user: User = await profile(decoded.userId, response.access);
 
-        console.log(user);
+        console.log(response.access);
 
         return {
           ...user,

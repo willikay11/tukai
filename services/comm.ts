@@ -1,5 +1,5 @@
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
-import api from './apiService';
+import {api} from './apiService';
 import { getSession } from 'next-auth/react';
 
 export const sendMessage = async ({

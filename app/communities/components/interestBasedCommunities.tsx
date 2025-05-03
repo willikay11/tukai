@@ -1,8 +1,7 @@
 'use client';
 
 import IconComponent from '@/app/components/iconComponent';
-import NoData from '@/components/ui/noData';
-import { useInterestBasedCommunities } from '@/hooks/communities';
+import { useGetCommunities } from '@/hooks/communities';
 import { Community } from '@/types/community';
 import { Interest } from '@/types/interest';
 import clsx from 'clsx';
@@ -11,6 +10,7 @@ import SingleCommunity from './community';
 import { Status } from '@/enums/status';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+
 const placeholders: Community[] = Array.from({ length: 12 }, (_, index) => ({
   id: `placeholder-${index}`,
   title: 'Loading...',
@@ -50,7 +50,7 @@ export default function InterestBasedCommunities({
     data: communities,
     isLoading,
     error,
-  } = useInterestBasedCommunities({ page: 1, enabled: true, category: interest.id });
+  } = useGetCommunities({ page: 1, enabled: true, category: interest.id });
 
   useEffect(() => {
     if (communities?.data.results) {

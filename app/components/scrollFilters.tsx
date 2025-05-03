@@ -117,7 +117,7 @@ export default function ScrollFilters({
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
       >
-        {filters.map((filter, index) => (
+        {filters?.map((filter, index) => (
           <button
             key={filter.value}
             className={clsx(
