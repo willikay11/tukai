@@ -62,10 +62,11 @@ const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
               className="relative aspect-square h-[6.25rem] w-full"
               onClick={() => handleImageClick(2)}
             >
-              <TukaiImage src={photos[2].photo} alt="" quality={100} className={clsx(
-                'cursor-pointer',
-                photos.length -1 === 2 && 'rounded-br-[15px]',
-              )}
+              <TukaiImage
+                src={photos[2].photo}
+                alt=""
+                quality={100}
+                className={clsx('cursor-pointer', photos.length - 1 === 2 && 'rounded-br-[15px]')}
               />
             </div>
           )}

@@ -1,10 +1,23 @@
-import {api} from '@/services/apiService';
-import { ApiResponse } from '@/types/apiResponse';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
+import {api} from './apiService';
+import { getSession } from 'next-auth/react';
 
-export async function fetchSubscriptionPlans(): Promise<ApiResponse> {
+export const sendMessage = async ({
+  content,
+  recipientId,
+}: {
+  content: string;
+  recipientId: string;
+}) => {
   try {
-    const response = await api.get(`/v1/subscriptions/plans`);
+    const session = await getSession();
+    const senderId = session?.user?.id;
+
+    const response = await api.post('/v1/comms/messages/', {
+      sender_id: senderId,
+      recipient_id: recipientId,
+      content: content,
+    });
 
     return {
       status: response.status,
@@ -20,4 +33,4 @@ export async function fetchSubscriptionPlans(): Promise<ApiResponse> {
       message: error.response?.data?.message || 'An unexpected error occurred',
     };
   }
-}
+};

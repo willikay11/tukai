@@ -1,7 +1,8 @@
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { ApiResponse } from '@/types/apiResponse';
-import api from '@/services/apiService';
+import { api, apiWithToken } from '@/services/apiService';
 import { getSession } from 'next-auth/react';
+
 
 export async function fetchExperiences(
   page: number,
@@ -26,7 +27,8 @@ export async function fetchExperiences(
       const session = await getSession();
       queryParams.append('hosted_by', session?.user?.id || '');
     }
-    const response = await api.get(`/v1/experiences/?${queryParams.toString()}`);
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.get(`/v1/experiences/?${queryParams.toString()}`);
 
     return {
       status: response.status,

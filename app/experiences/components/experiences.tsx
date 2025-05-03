@@ -159,9 +159,9 @@ export default function Experiences({ category }: ListExperiencesProps) {
               className="cursor-pointer"
             >
               {/* {session?.user ? ( */}
-                <Link target="_blank" href={`/experiences/${experience.id}`}>
-                  <SingleExperience experience={experience} />
-                </Link>
+              <Link target="_blank" href={`/experiences/${experience.id}`}>
+                <SingleExperience experience={experience} />
+              </Link>
               {/* ) : (
                 <div onClick={() => setOpen(true)}>
                   <SingleExperience experience={experience} />

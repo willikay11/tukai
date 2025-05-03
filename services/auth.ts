@@ -1,4 +1,4 @@
-import api from './apiService';
+import {api} from './apiService';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 export const signIn = async (email: string, password: string) => {
@@ -21,9 +21,13 @@ export const signUp = async (email: string, password: string) => {
   }
 };
 
-export const profile = async (id: string) => {
+export const profile = async (id: string, token?: string) => {
   try {
-    const response = await api.get(`/v1/accounts/users/${id}/`);
+    const response = await api.get(`/v1/accounts/users/${id}/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return parseSnakeToCamel(response.data);
   } catch (error) {
     console.error(error);

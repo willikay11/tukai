@@ -1,11 +1,15 @@
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
-import api from './apiService';
+import {api} from './apiService';
+import { getSession } from 'next-auth/react';
 
 export async function getInterestBasedCommunities(
   category?: string,
   page: number = 1,
   perPage: number = 12,
   search?: string,
+  showUpComingExperiences?: boolean,
+  recommendedCommunities?: boolean,
+  popularCommunities?: boolean,
 ) {
   try {
     const queryParams = new URLSearchParams();
@@ -13,6 +17,9 @@ export async function getInterestBasedCommunities(
     if (perPage) queryParams.append('page_size', perPage.toString());
     if (search) queryParams.append('search', search);
     if (category) queryParams.append('category', category);
+    if (showUpComingExperiences) queryParams.append('upcoming_experiences', 'true');
+    if (recommendedCommunities) queryParams.append('recommended', 'true');
+    if (popularCommunities) queryParams.append('popular', 'true');
     const response = await api.get(`/v1/communities/?${queryParams.toString()}`);
     return {
       status: response.status,
@@ -31,9 +38,14 @@ export async function getInterestBasedCommunities(
 }
 
 export async function fetchCommunity(communityId: string) {
-  console.log('Fetching community:', communityId);
   try {
-    const response = await api.get(`/v1/communities/${communityId}`);
+    const session = await getSession();
+    console.log(session);
+    const response = await api.get(`/v1/communities/${communityId}`, {
+      headers: {
+        Authorization: `Bearer ${session?.user?.accessToken}`,
+      },
+    });
     return {
       status: response.status,
       success: true,
