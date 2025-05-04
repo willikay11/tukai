@@ -38,7 +38,7 @@ type addReviewProps = {
       deleteReviewImage: (reviewId: string, imageId: string) => void;
       isSuccess: boolean;
       isUpdateSuccess: undefined;
-      isPending: boolean;
+      isSubmitting: boolean;
       isUploadSuccess: boolean;
       isUpdatePending: undefined;
     }
@@ -53,7 +53,7 @@ type addReviewProps = {
       isUpdateSuccess: boolean;
       isUploadSuccess: boolean;
       isUpdatePending: boolean;
-      isPending: undefined;
+      isSubmitting: undefined;
     }
 );
 
@@ -70,7 +70,7 @@ const formSchema = z.object({
   images: z.array(z.instanceof(File)).optional(),
 });
 
-export default function AddReview({ type, isOpen, placeTitle, id, closeModal, review, createReview, updateReview, uploadReviewImages, deleteReviewImage, isSuccess, isUpdateSuccess, isUploadSuccess, isPending, isUpdatePending }: addReviewProps) {
+export default function AddReview({ type, isOpen, placeTitle, id, closeModal, review, createReview, updateReview, uploadReviewImages, deleteReviewImage, isSuccess, isUpdateSuccess, isUploadSuccess, isSubmitting, isUpdatePending }: addReviewProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const { data: session } = useSession();
 
@@ -245,9 +245,9 @@ export default function AddReview({ type, isOpen, placeTitle, id, closeModal, re
               size="lg"
               className="w-full"
               type="submit"
-              disabled={isPending || isUpdatePending}
+              disabled={isSubmitting || isUpdatePending}
             >
-              {isPending || isUpdatePending ? 'Submitting...' : 'Submit'}
+              {isSubmitting || isUpdatePending ? 'Submitting...' : 'Submit'}
             </Button>
           </form>
         </Form>

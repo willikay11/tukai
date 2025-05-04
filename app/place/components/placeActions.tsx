@@ -26,7 +26,7 @@ export default function PlaceActions({
     mutate: createPlaceReview,
     isSuccess,
     data: reviewData,
-    isPending,
+    isPending: isSubmitting,
   } = useCreatePlaceReview();
   const { mutate: uploadPlaceReviewImages, isSuccess: isUploadSuccess } = useUploadPlaceReviewImages();
   const { mutate: deletePlaceReviewImage, isSuccess: isDeleteReviewImageSuccess } = useDeletePlaceReviewImage();
@@ -66,7 +66,7 @@ export default function PlaceActions({
         isSuccess={isSuccess}
         isUpdateSuccess={undefined}
         isUploadSuccess={isUploadSuccess}
-        isPending={isPending}
+        isSubmitting={isSubmitting}
         isUpdatePending={undefined}
       />  
     </>

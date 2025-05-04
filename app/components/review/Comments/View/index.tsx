@@ -6,7 +6,7 @@ import Image from 'next/image';
 import moment from 'moment';
 import { Separator } from '@/components/ui/separator';
 import { FavouriteIcon } from '@hugeicons/react-pro';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLikePlaceReviewComment } from '@/hooks/places';
 
 export default function ViewComment({
@@ -20,6 +20,10 @@ export default function ViewComment({
 }) {
   const { mutate: likeComment } = useLikePlaceReviewComment(placeId, reviewId, comment.id);
   const [isLiked, setIsLiked] = useState(false);
+
+  useEffect(() => {
+    setIsLiked(comment?.isLiked);
+  }, [comment]);
 
   const onLikeComment = () => {
     setIsLiked(!isLiked);
@@ -41,7 +45,7 @@ export default function ViewComment({
             />
           </div>
           <div className="ml-1">
-            <div className="font-bold text-gray-700">{comment?.commenter?.displayName}</div>
+            <div className="font-bold text-gray-700">{comment?.commenter?.firstName} {comment?.commenter?.lastName}</div>
             <div className="inline-flex items-center">
               <span className="text-sm text-gray-500">
                 {moment(comment?.dateCreated).format('MMM YYYY')}
@@ -67,7 +71,7 @@ export default function ViewComment({
             className={`${isLiked ? 'text-red-500' : 'text-gray-500'}`}
           />
           <span className="text-sm font-medium">
-            {Math.max(0, comment?.totalLikes + (isLiked ? 1 : -1))} Likes
+            {Math.max(0, comment?.totalLikes)} Likes
           </span>
         </Button>
       </div>

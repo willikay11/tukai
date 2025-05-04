@@ -60,6 +60,7 @@ export default function Review({
     setIsLiked(review.isLiked);
   }, [review]);
 
+  console.log(review.reviewer);
   return (
     <>
       <AddReviewComment
@@ -83,7 +84,7 @@ export default function Review({
         isUpdatePending={isUpdatePending}
         createReview={undefined}
         isSuccess={undefined}
-        isPending={undefined}
+        isSubmitting={undefined}
       />
 
       <div className="flex flex-col">
@@ -100,7 +101,7 @@ export default function Review({
               />
             </div>
             <div className="ml-1">
-              <div className="font-bold text-gray-700">{review.reviewer.displayName}</div>
+              <div className="font-bold text-gray-700">{review.reviewer.firstName} {review.reviewer.lastName}</div>
               <div className="inline-flex items-center">
                 <Rating rating={review.rating} />
                 <div className="mx-1 h-1 w-1 rounded-full bg-gray-200" />

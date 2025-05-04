@@ -1,5 +1,5 @@
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
-import { api } from '@/services/apiService';
+import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
 import { getSession } from 'next-auth/react';
 
@@ -56,8 +56,6 @@ export async function fetchPlace(id?: string): Promise<ApiResponse> {
 
 export async function fetchPlaceCategories(): Promise<ApiResponse> {
   try {
-    const session = await getSession();
-
     const res = await api.get('/v1/places/categories/?page_size=100');
 
     return {
@@ -343,7 +341,8 @@ export async function deletePlaceReviewImage(
   imageId: string,
 ): Promise<ApiResponse> {
   try {
-    const res = await api.delete(`/v1/places/${id}/reviews/${reviewId}/photos/${imageId}/`);
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.delete(`/v1/places/${id}/reviews/${reviewId}/photos/${imageId}/`);
 
     return {
       status: res.status,

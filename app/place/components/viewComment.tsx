@@ -66,7 +66,7 @@ export default function ViewComment({
             className={`${isLiked ? 'text-red-500' : 'text-gray-500'}`}
           />
           <span className="text-sm font-medium">
-            {Math.max(0, comment?.totalLikes + (isLiked ? 1 : -1))} Likes
+            {Math.max(0, comment?.totalLikes)} Likes
           </span>
         </Button>
       </div>
