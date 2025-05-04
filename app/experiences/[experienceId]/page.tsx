@@ -13,7 +13,7 @@ import PhotoGallery from '@/components/ui/PhotoGallery';
 import ExperienceOrganiser from '../components/experienceOrganiser';
 import ExperienceActions from '../components/experienceActions';
 import ExperienceDetails from '../components/experienceDetails';
-import Share from '@/components/ui/share';
+import Share from '@/app/components/share';
 
 export default async function ViewExperiencePage({ params }: { params: { experienceId: string } }) {
   const experienceResponse: ApiResponse = await fetchExperience(params.experienceId);

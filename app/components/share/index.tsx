@@ -1,9 +1,10 @@
 'use client';
 
-import { Dialog } from './dialog';
+import React from 'react';
+import { Dialog } from '@/components/ui/dialog';
 import Image from 'next/image';
 
-import { DialogContent } from './dialog';
+import { DialogContent } from '@/components/ui/dialog';
 import {
   CopyLinkIcon,
   Share08Icon,
@@ -14,7 +15,7 @@ import {
   Facebook02Icon,
 } from '@hugeicons/react-pro';
 import { useState } from 'react';
-import { Button } from './button';
+import { Button } from '@/components/ui/button';
 
 const shareOptions = [
   {
@@ -99,8 +100,9 @@ export default function Share({
                 alt={title}
                 quality={100}
                 layout="fill"
-                objectFit="cover"
+                // objectFit="cover"
                 className="rounded-2xl"
+                style={{ objectFit: 'cover' }}
               />
             </div>
 

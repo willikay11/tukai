@@ -1,0 +1,8 @@
+{
+    "presets": [
+      "next/babel", // This preset includes all the necessary settings for Next.js
+      "@babel/preset-typescript", // For TypeScript support
+      "@babel/preset-react" // For JSX/React support
+    ]
+  }
+  

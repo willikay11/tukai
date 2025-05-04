@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import AddReview from './addReview';
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import Share from '@/components/ui/share';
+import Share from '@/app/components/share';
 import { useBookmarkPlace } from '@/hooks/places';
 import Bookmark from '@/app/components/bookmark';
 
