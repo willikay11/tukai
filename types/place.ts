@@ -39,6 +39,7 @@ export type PlaceReview = {
   description: string;
   dateCreated: string;
   reviewer: User;
+  isLiked: boolean;
   totalLikes: number;
   totalComments: number;
   rating: number;

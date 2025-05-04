@@ -11,7 +11,7 @@ import ImageCarousel from '@/components/ui/imageCarousel';
 import { Photo } from '@/types/photo';
 import IconComponent from '@/app/components/iconComponent';
 import AddReviewComment from './addReviewComment';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDeletePlaceReview, useLikePlaceReview } from '@/hooks/places';
 import { useSession } from 'next-auth/react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -37,6 +37,10 @@ export default function Review({ placeId, review }: { placeId: string; review: P
   const handleDeleteReview = () => {
     deleteReview();
   };
+
+  useEffect(() => {
+    setIsLiked(review.isLiked);
+  }, [review]);
 
   return (
     <>
@@ -132,7 +136,7 @@ export default function Review({ placeId, review }: { placeId: string; review: P
               className={`${isLiked ? 'text-red-500' : 'text-gray-500'}`}
             />
             <span className="text-sm font-medium">
-              {Math.max(0, review?.totalLikes + (isLiked ? 1 : -1))} Likes
+              {Math.max(0, review?.totalLikes)} Likes
             </span>
           </Button>
           <Button variant="text" onClick={() => setIsOpen(true)}>

@@ -27,8 +27,7 @@ export async function fetchExperiences(
       const session = await getSession();
       queryParams.append('hosted_by', session?.user?.id || '');
     }
-    const axiosInstance = await apiWithToken();
-    const response = await axiosInstance.get(`/v1/experiences/?${queryParams.toString()}`);
+    const response = await api.get(`/v1/experiences/?${queryParams.toString()}`);
 
     return {
       status: response.status,
@@ -70,12 +69,16 @@ export async function purchaseExperienceTicket(data: {
   reservedTickets: { ticketId: string; quantity: number }[];
 }): Promise<ApiResponse> {
   try {
+    console.log('data: ', data);
+
     const response = await api.post(`/v1/experiences/ticket-purchases/`, {
       ticket_purchases: data.reservedTickets.map((ticket) => ({
         ticket_id: ticket.ticketId,
         quantity: ticket.quantity,
       })),
     });
+
+    console.log('response: ', response);
 
     return {
       status: response.status,

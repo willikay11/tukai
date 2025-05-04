@@ -51,8 +51,6 @@ export const authOptions = {
 
         const user: User = await profile(decoded.userId, response.access);
 
-        console.log(response.access);
-
         return {
           ...user,
           hasInterests: decoded?.hasInterests,
@@ -67,7 +65,6 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async signIn() {
-      // console.log(credentials);
       // const response = await userExists(profile?.email);
       // if (response?.exists) {
       //   return '/auth/sign-in?error=UserExists';

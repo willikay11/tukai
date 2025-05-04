@@ -1,11 +1,12 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import BookmarkPlace from './bookmarkPlace';
 import AddReview from './addReview';
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Share from '@/components/ui/share';
+import { useBookmarkPlace } from '@/hooks/places';
+import Bookmark from '@/app/components/bookmark';
 
 export default function PlaceActions({
   placeId,
@@ -21,11 +22,19 @@ export default function PlaceActions({
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
 
+  const { mutate: bookmarkPlace } = useBookmarkPlace(placeId, session?.user?.id || '');
+
   return (
     <>
       <div className="inline-flex h-full items-center justify-center">
         {session?.user?.id && (
-          <BookmarkPlace placeId={placeId} userId={session?.user?.id} bookmarked={bookmarked} />
+          <Bookmark
+            id={placeId}
+            userId={session?.user?.id}
+            bookmarked={bookmarked}
+            onBookmark={() => bookmarkPlace()}
+            onUnbookmark={() => bookmarkPlace()}
+          />
         )}
         <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" />
         <Share

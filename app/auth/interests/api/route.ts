@@ -5,6 +5,13 @@ export async function POST(req: Request) {
   try {
     const { firstName, lastName, email, password, interests, timezone } = await req.json();
 
+    console.log('interests: ', interests);
+    console.log('timezone: ', timezone);
+    console.log('firstName: ', firstName);
+    console.log('lastName: ', lastName);
+    console.log('email: ', email);
+    console.log('password: ', password);
+
     const response = await fetch('https://api.tukai.co/v1/accounts/users/', {
       method: 'POST',
       headers: {

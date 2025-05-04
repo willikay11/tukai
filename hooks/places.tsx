@@ -7,7 +7,6 @@ import {
   createPlaceReviewComment,
   likePlaceReviewComment,
   likePlaceReview,
-  unbookmarkPlace,
   bookmarkPlace,
   createPlaceReview,
   uploadPlaceReviewImages,
@@ -101,16 +100,6 @@ export const useBookmarkPlace = (placeId: string, userId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => await bookmarkPlace(placeId, { user_id: userId }),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['place', placeId] });
-    },
-  });
-};
-
-export const useUnbookmarkPlace = (placeId: string, userId: string) => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async () => await unbookmarkPlace(placeId, { user_id: userId }),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['place', placeId] });
     },

@@ -49,7 +49,6 @@ export async function PUT(req: Request) {
       body: JSON.stringify({ email, category: 'account_verification' }),
     });
 
-    console.log(response);
     if (!response.ok) {
       return Response.json(
         {
