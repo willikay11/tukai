@@ -1,8 +1,8 @@
-const nextJest = require('next/jest')
+const nextJest = require('next/jest');
 
 const createJestConfig = nextJest({
   dir: './',
-})
+});
 
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
@@ -18,6 +18,6 @@ const customJestConfig = {
   transformIgnorePatterns: [
     '/node_modules/(?!@hugeicons/)', // If you're using libraries in node_modules that need transformation, add them here
   ],
-}
+};
 
-module.exports = createJestConfig(customJestConfig)
+module.exports = createJestConfig(customJestConfig);

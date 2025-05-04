@@ -82,16 +82,16 @@ export const useLikePlaceReviewComment = (placeId: string, reviewId: string, com
   });
 };
 
-export const useLikePlaceReview = (placeId: string, reviewId: string) => {
+export const useLikePlaceReview = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async () =>
+    mutationFn: async ({ placeId, reviewId }: { placeId: string; reviewId: string }) =>
       await likePlaceReview(placeId, reviewId, {
         place_id: placeId,
         review_id: reviewId,
       }),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
+    onSettled: (_, __, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviews', variables.placeId] });
     },
   });
 };
@@ -106,51 +106,56 @@ export const useBookmarkPlace = (placeId: string, userId: string) => {
   });
 };
 
-export const useCreatePlaceReview = (placeId: string) => {
+export const useCreatePlaceReview = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: any) => await createPlaceReview(placeId, data),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
+    mutationFn: async ({ placeId, data }: { placeId: string; data: any }) => await createPlaceReview(placeId, data),
+    onSettled: (_, __, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviews', variables.placeId] });
     },
   });
 };
 
-export const useUpdatePlaceReview = (placeId: string, reviewId: string) => {
+export const useUpdatePlaceReview = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: any) => await updatePlaceReview(placeId, reviewId, data),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
+    mutationFn: async ({ placeId, reviewId, data }: { placeId: string; reviewId: string; data: any }) =>
+      await updatePlaceReview(placeId, reviewId, data),
+    onSettled: (_, __, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviews', variables.placeId] });
     },
   });
 };
 
-export const useUploadPlaceReviewImages = (placeId: string, reviewId: string) => {
+export const useUploadPlaceReviewImages = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async ({ placeId, reviewId, data }: { placeId: string; reviewId: string; data: any }) => {
       return await uploadPlaceReviewImages(placeId, reviewId, data);
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
+    onSettled: (_, __, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviews', variables.placeId] });
     },
   });
 };
 
-export const useDeletePlaceReview = (placeId: string, reviewId: string) => {
+export const useDeletePlaceReview = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async () => await deletePlaceReview(placeId, reviewId),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['placeReviews', placeId] });
+    mutationFn: async ({ placeId, reviewId }: { placeId: string; reviewId: string }) =>
+      await deletePlaceReview(placeId, reviewId),
+    onSettled: (_, __, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviews', variables.placeId] });
     },
   });
 };
 
-export const useDeletePlaceReviewImage = (placeId: string, reviewId: string, imageId: string) => {
+export const useDeletePlaceReviewImage = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async () => await deletePlaceReviewImage(placeId, reviewId, imageId),
+    mutationFn: async ({ placeId, reviewId, imageId }: { placeId: string; reviewId: string; imageId: string }) => await deletePlaceReviewImage(placeId, reviewId, imageId),
+    onSettled: (_, __, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['placeReviews', variables.placeId] });
+    },  
   });
 };

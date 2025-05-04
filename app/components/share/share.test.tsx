@@ -43,6 +43,4 @@ describe('Share Component', () => {
     fireEvent.click(copyLinkButton);
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(props.link);
   });
-
-  
 });

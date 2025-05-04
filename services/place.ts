@@ -1,5 +1,5 @@
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
-import {api} from '@/services/apiService';
+import { api } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
 import { getSession } from 'next-auth/react';
 
@@ -215,7 +215,6 @@ export async function likePlaceReview(
   try {
     const res = await api.post(`/v1/places/${id}/reviews/${reviewId}/like/`, data);
 
-    console.log('res: ', res);
     return {
       status: res.status,
       success: true,
@@ -249,7 +248,6 @@ export async function bookmarkPlace(id: string, data: any): Promise<ApiResponse>
     };
   }
 }
-
 
 export async function createPlaceReview(id: string, data: any): Promise<ApiResponse> {
   try {

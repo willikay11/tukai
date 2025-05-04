@@ -3,12 +3,13 @@ const React = require('react');
 module.exports = new Proxy(
   {},
   {
-    get: (_, iconName) =>
+    get:
+      (_, iconName) =>
       ({ className = '', ...props }) =>
         React.createElement('svg', {
           'data-testid': iconName,
           className,
           ...props,
         }),
-  }
+  },
 );

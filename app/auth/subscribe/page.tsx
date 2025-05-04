@@ -68,7 +68,7 @@ export default function Page() {
           }}
         />
       )}
-  
+
       {currentStep === 1 && (
         <Package
           subscriptionPlans={subscriptionPlans?.data?.results}

@@ -3,7 +3,6 @@ import { ApiResponse } from '@/types/apiResponse';
 import { api, apiWithToken } from '@/services/apiService';
 import { getSession } from 'next-auth/react';
 
-
 export async function fetchExperiences(
   page: number,
   perPage: number,

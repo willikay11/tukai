@@ -78,7 +78,7 @@ export default function PaymentDetails({
 
       <Button
         size="lg"
-        className="w-full mt-3"
+        className="mt-3 w-full"
         type="submit"
         disabled={formRef.current?.formState.isSubmitting}
         onClick={() => formRef.current?.submit()}

@@ -1,12 +1,12 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import AddReview from './addReview';
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Share from '@/app/components/share';
-import { useBookmarkPlace } from '@/hooks/places';
+import { useBookmarkPlace, useCreatePlaceReview, useDeletePlaceReviewImage, useUploadPlaceReviewImages } from '@/hooks/places';
 import Bookmark from '@/app/components/bookmark';
+import AddReview from '@/app/components/review/AddReview';
 
 export default function PlaceActions({
   placeId,
@@ -22,6 +22,14 @@ export default function PlaceActions({
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
 
+  const {
+    mutate: createPlaceReview,
+    isSuccess,
+    data: reviewData,
+    isPending,
+  } = useCreatePlaceReview();
+  const { mutate: uploadPlaceReviewImages, isSuccess: isUploadSuccess } = useUploadPlaceReviewImages();
+  const { mutate: deletePlaceReviewImage, isSuccess: isDeleteReviewImageSuccess } = useDeletePlaceReviewImage();
   const { mutate: bookmarkPlace } = useBookmarkPlace(placeId, session?.user?.id || '');
 
   return (
@@ -43,12 +51,24 @@ export default function PlaceActions({
         <div className="mr-2" />
         <Button onClick={() => setIsOpen(true)}>Add Review</Button>
       </div>
+
       <AddReview
+        type="create"
+        id={placeId}
         isOpen={isOpen}
         placeTitle={placeTitle}
-        placeId={placeId}
         closeModal={() => setIsOpen(false)}
-      />
+        review={reviewData?.data}
+        createReview={(data: any) => createPlaceReview({ placeId, data })}
+        updateReview={undefined}
+        uploadReviewImages={(reviewId: string, data: any) => uploadPlaceReviewImages({ placeId, reviewId, data })}
+        deleteReviewImage={(reviewId: string, imageId: string) => deletePlaceReviewImage({ placeId, reviewId, imageId })}
+        isSuccess={isSuccess}
+        isUpdateSuccess={undefined}
+        isUploadSuccess={isUploadSuccess}
+        isPending={isPending}
+        isUpdatePending={undefined}
+      />  
     </>
   );
 }
