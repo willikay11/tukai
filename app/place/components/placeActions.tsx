@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Share from '@/components/ui/share';
 import { useBookmarkPlace } from '@/hooks/places';
-import Bookmark from '@/app/bookmark';
+import Bookmark from '@/app/components/bookmark';
 
 export default function PlaceActions({
   placeId,
