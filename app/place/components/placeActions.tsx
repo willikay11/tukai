@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Share from '@/components/ui/share';
 import { useBookmarkPlace } from '@/hooks/places';
-import Bookmark from '@/app/components/bookmark';
+import Bookmark from '@/app/bookmark';
 
 export default function PlaceActions({
   placeId,
@@ -29,8 +29,6 @@ export default function PlaceActions({
       <div className="inline-flex h-full items-center justify-center">
         {session?.user?.id && (
           <Bookmark
-            id={placeId}
-            userId={session?.user?.id}
             bookmarked={bookmarked}
             onBookmark={() => bookmarkPlace()}
             onUnbookmark={() => bookmarkPlace()}

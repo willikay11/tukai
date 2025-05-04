@@ -1,20 +1,15 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useBookmarkPlace, useUnbookmarkPlace } from '@/hooks/places';
 import { Bookmark02Icon } from '@hugeicons/react-pro';
 import { useState } from 'react';
 
 export default function Bookmark({
-  id,
-  userId,
   bookmarked,
   onBookmark,
   onUnbookmark,
   className = 'text-gray-500',
 }: {
-  id: string;
-  userId: string;
   bookmarked: boolean;
   onBookmark: () => void;
   onUnbookmark: () => void;
@@ -34,6 +29,7 @@ export default function Bookmark({
       }}
     >
       <Bookmark02Icon
+        id="bookmark"
         size={16}
         variant={isBookmarked ? 'solid' : 'twotone'}
         className={`${isBookmarked ? 'text-red-500' : className}`}
