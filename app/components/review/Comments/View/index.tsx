@@ -45,7 +45,9 @@ export default function ViewComment({
             />
           </div>
           <div className="ml-1">
-            <div className="font-bold text-gray-700">{comment?.commenter?.firstName} {comment?.commenter?.lastName}</div>
+            <div className="font-bold text-gray-700">
+              {comment?.commenter?.firstName} {comment?.commenter?.lastName}
+            </div>
             <div className="inline-flex items-center">
               <span className="text-sm text-gray-500">
                 {moment(comment?.dateCreated).format('MMM YYYY')}
@@ -70,9 +72,7 @@ export default function ViewComment({
             size={40}
             className={`${isLiked ? 'text-red-500' : 'text-gray-500'}`}
           />
-          <span className="text-sm font-medium">
-            {Math.max(0, comment?.totalLikes)} Likes
-          </span>
+          <span className="text-sm font-medium">{Math.max(0, comment?.totalLikes)} Likes</span>
         </Button>
       </div>
       <div className="mb-4 mt-2">

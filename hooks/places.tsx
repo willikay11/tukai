@@ -109,7 +109,8 @@ export const useBookmarkPlace = (placeId: string, userId: string) => {
 export const useCreatePlaceReview = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ placeId, data }: { placeId: string; data: any }) => await createPlaceReview(placeId, data),
+    mutationFn: async ({ placeId, data }: { placeId: string; data: any }) =>
+      await createPlaceReview(placeId, data),
     onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: ['placeReviews', variables.placeId] });
     },
@@ -119,8 +120,15 @@ export const useCreatePlaceReview = () => {
 export const useUpdatePlaceReview = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ placeId, reviewId, data }: { placeId: string; reviewId: string; data: any }) =>
-      await updatePlaceReview(placeId, reviewId, data),
+    mutationFn: async ({
+      placeId,
+      reviewId,
+      data,
+    }: {
+      placeId: string;
+      reviewId: string;
+      data: any;
+    }) => await updatePlaceReview(placeId, reviewId, data),
     onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: ['placeReviews', variables.placeId] });
     },
@@ -130,7 +138,15 @@ export const useUpdatePlaceReview = () => {
 export const useUploadPlaceReviewImages = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ placeId, reviewId, data }: { placeId: string; reviewId: string; data: any }) => {
+    mutationFn: async ({
+      placeId,
+      reviewId,
+      data,
+    }: {
+      placeId: string;
+      reviewId: string;
+      data: any;
+    }) => {
       return await uploadPlaceReviewImages(placeId, reviewId, data);
     },
     onSettled: (_, __, variables) => {
@@ -153,9 +169,17 @@ export const useDeletePlaceReview = () => {
 export const useDeletePlaceReviewImage = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ placeId, reviewId, imageId }: { placeId: string; reviewId: string; imageId: string }) => await deletePlaceReviewImage(placeId, reviewId, imageId),
+    mutationFn: async ({
+      placeId,
+      reviewId,
+      imageId,
+    }: {
+      placeId: string;
+      reviewId: string;
+      imageId: string;
+    }) => await deletePlaceReviewImage(placeId, reviewId, imageId),
     onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: ['placeReviews', variables.placeId] });
-    },  
+    },
   });
 };

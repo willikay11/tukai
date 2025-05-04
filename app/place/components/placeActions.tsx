@@ -4,7 +4,12 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Share from '@/app/components/share';
-import { useBookmarkPlace, useCreatePlaceReview, useDeletePlaceReviewImage, useUploadPlaceReviewImages } from '@/hooks/places';
+import {
+  useBookmarkPlace,
+  useCreatePlaceReview,
+  useDeletePlaceReviewImage,
+  useUploadPlaceReviewImages,
+} from '@/hooks/places';
 import Bookmark from '@/app/components/bookmark';
 import AddReview from '@/app/components/review/AddReview';
 
@@ -28,8 +33,10 @@ export default function PlaceActions({
     data: reviewData,
     isPending: isSubmitting,
   } = useCreatePlaceReview();
-  const { mutate: uploadPlaceReviewImages, isSuccess: isUploadSuccess } = useUploadPlaceReviewImages();
-  const { mutate: deletePlaceReviewImage, isSuccess: isDeleteReviewImageSuccess } = useDeletePlaceReviewImage();
+  const { mutate: uploadPlaceReviewImages, isSuccess: isUploadSuccess } =
+    useUploadPlaceReviewImages();
+  const { mutate: deletePlaceReviewImage, isSuccess: isDeleteReviewImageSuccess } =
+    useDeletePlaceReviewImage();
   const { mutate: bookmarkPlace } = useBookmarkPlace(placeId, session?.user?.id || '');
 
   return (
@@ -61,14 +68,18 @@ export default function PlaceActions({
         review={reviewData?.data}
         createReview={(data: any) => createPlaceReview({ placeId, data })}
         updateReview={undefined}
-        uploadReviewImages={(reviewId: string, data: any) => uploadPlaceReviewImages({ placeId, reviewId, data })}
-        deleteReviewImage={(reviewId: string, imageId: string) => deletePlaceReviewImage({ placeId, reviewId, imageId })}
+        uploadReviewImages={(reviewId: string, data: any) =>
+          uploadPlaceReviewImages({ placeId, reviewId, data })
+        }
+        deleteReviewImage={(reviewId: string, imageId: string) =>
+          deletePlaceReviewImage({ placeId, reviewId, imageId })
+        }
         isSuccess={isSuccess}
         isUpdateSuccess={undefined}
         isUploadSuccess={isUploadSuccess}
         isSubmitting={isSubmitting}
         isUpdatePending={undefined}
-      />  
+      />
     </>
   );
 }

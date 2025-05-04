@@ -1,6 +1,13 @@
 'use client';
 
-import { useDeletePlaceReview, useDeletePlaceReviewImage, useLikePlaceReview, usePlaceReviews, useUpdatePlaceReview, useUploadPlaceReviewImages } from '@/hooks/places';
+import {
+  useDeletePlaceReview,
+  useDeletePlaceReviewImage,
+  useLikePlaceReview,
+  usePlaceReviews,
+  useUpdatePlaceReview,
+  useUploadPlaceReviewImages,
+} from '@/hooks/places';
 import Review from '@/app/components/review';
 import { Review as ReviewType } from '@/types/review';
 import NoData from '@/components/ui/noData';
@@ -19,8 +26,10 @@ export default function Reviews({ placeId }: placeReviewsProps) {
     isPending: isUpdatePending,
   } = useUpdatePlaceReview();
 
-  const { mutate: uploadPlaceReviewImages, isSuccess: isUploadSuccess } = useUploadPlaceReviewImages();
-  const { mutate: deletePlaceReviewImage, isSuccess: isDeleteReviewImageSuccess } = useDeletePlaceReviewImage();
+  const { mutate: uploadPlaceReviewImages, isSuccess: isUploadSuccess } =
+    useUploadPlaceReviewImages();
+  const { mutate: deletePlaceReviewImage, isSuccess: isDeleteReviewImageSuccess } =
+    useDeletePlaceReviewImage();
 
   if (reviews?.data?.results?.length === 0 && !isLoading) {
     return (

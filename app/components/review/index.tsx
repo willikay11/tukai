@@ -103,7 +103,7 @@ export default function Review({
             <div className="ml-1">
               <div className="font-bold text-gray-700">{review.reviewer.firstName} {review.reviewer.lastName}</div>
               <div className="inline-flex items-center">
-                <Rating rating={review.rating} />
+                <Rating rating={review.rating} showCount={true} showMultiStar={true} />
                 <div className="mx-1 h-1 w-1 rounded-full bg-gray-200" />
                 <span className="text-sm text-gray-500">
                   {moment(review.dateCreated).format('MMM YYYY')}

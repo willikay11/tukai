@@ -342,7 +342,9 @@ export async function deletePlaceReviewImage(
 ): Promise<ApiResponse> {
   try {
     const axiosInstance = await apiWithToken();
-    const res = await axiosInstance.delete(`/v1/places/${id}/reviews/${reviewId}/photos/${imageId}/`);
+    const res = await axiosInstance.delete(
+      `/v1/places/${id}/reviews/${reviewId}/photos/${imageId}/`,
+    );
 
     return {
       status: res.status,
