@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { fetchExperience, fetchExperiences, purchaseExperienceTicket } from '@/services/experience';
+import { fetchExperience, fetchExperiences, purchaseExperienceTicket, bookmarkExperience } from '@/services/experience';
 import { useQueryClient } from '@tanstack/react-query';
 
 export const useExperiences = (
@@ -36,4 +36,14 @@ export const usePurchaseExperienceTicket = () => {
       queryClient.invalidateQueries({ queryKey: ['experience'] });
     },
   });
+};
+
+export const useBookmarkExperience = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => await bookmarkExperience(id),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['experience'] });
+    },
+  }); 
 };
