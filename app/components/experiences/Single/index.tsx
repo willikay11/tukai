@@ -57,7 +57,7 @@ export default function SingleExperience({ experience }: { experience: Experienc
           </span>
         </div>
         <Button variant="primary-text" size="sm">
-          {experience.host.displayName}
+          {experience.host.displayName || `${experience.host.firstName} ${experience.host.lastName}`}
         </Button>
       </div>
     </>
