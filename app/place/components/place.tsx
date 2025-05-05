@@ -4,12 +4,15 @@ import { useState } from 'react';
 import clsx from 'clsx';
 import { Place } from '@/types/place';
 import ImageCarousel from '@/components/ui/imageCarousel';
-import BookmarkPlace from './bookmarkPlace';
 import { EventSkeleton } from '@/app/components/skeletons';
 import { useSession } from 'next-auth/react';
+import BookmarkPlace from '@/app/components/bookmark';
+import { useBookmarkPlace } from '@/hooks/places';
+
 export default function SinglePlace({ place }: { place: Place }) {
   const [hasError, setHasError] = useState(false);
   const { data: session } = useSession();
+  const { mutate: bookmarkPlace } = useBookmarkPlace(place.id, session?.user?.id || '');
 
   if (place.id.startsWith('placeholder-')) {
     return <EventSkeleton />;
@@ -28,9 +31,9 @@ export default function SinglePlace({ place }: { place: Place }) {
         <div className="invisible absolute right-2 top-2 cursor-pointer group-hover:visible">
           {session?.user?.id && (
             <BookmarkPlace
-              placeId={place.id}
-              userId={session?.user?.id}
               bookmarked={place.isBookmarked}
+              onBookmark={() => bookmarkPlace()}
+              onUnbookmark={() => bookmarkPlace()}
               className="text-white"
             />
           )}

@@ -1,5 +1,5 @@
 'use client';
-import SingleExperience from '@/app/components/experience/Single';
+import SingleExperience from '@/app/components/experiences/Single';
 import { Experience } from '@/types/experience';
 import Link from 'next/link';
 import { Dialog } from '@/components/ui/dialog';

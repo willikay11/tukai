@@ -1,5 +1,5 @@
 'use client';
-import ListExperiences from '@/app/components/experience/List';
+import ListExperiences from '@/app/components/experiences/List';
 import { useExperiences } from '@/hooks/experiences';
 import { useState } from 'react';
 
