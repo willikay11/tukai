@@ -1,4 +1,4 @@
-import {api} from './apiService';
+import { api } from './apiService';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 export const signIn = async (email: string, password: string) => {

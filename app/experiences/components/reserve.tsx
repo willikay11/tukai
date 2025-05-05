@@ -4,7 +4,6 @@ import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 import moment from 'moment';
 import Image from 'next/image';
-
 import { Ticket } from '@/types/ticket';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Quantity from '@/components/ui/quantity';
@@ -15,6 +14,8 @@ import PaymentForm, { paymentFormSchema } from '@/components/ui/paymentForm';
 import { Button } from '@/components/ui/button';
 import { z } from 'zod';
 import { usePurchaseExperienceTicket } from '@/hooks/experiences';
+import { useEffect } from 'react';
+
 export default function Reserve({
   isOpen,
   closeModal,
@@ -24,7 +25,8 @@ export default function Reserve({
   closeModal: () => void;
   experience: Experience;
 }) {
-  const { mutate: purchaseExperienceTicket } = usePurchaseExperienceTicket();
+  const { mutate: purchaseExperienceTicket, isPending: isPurchasingExperienceTicket } =
+    usePurchaseExperienceTicket();
   const formRef = useRef<any>();
   const [reservedTickets, setReservedTickets] = useState<
     { ticketId: string; quantity: number; price: number }[]
@@ -42,11 +44,16 @@ export default function Reserve({
   };
 
   const handleSubmit = (values: z.infer<typeof paymentFormSchema>, paymentOption: string) => {
+    console.log('values: ', values, paymentOption);
     purchaseExperienceTicket({
       experienceId: experience.id,
       reservedTickets,
     });
   };
+
+  useEffect(() => {
+    console.log('formRef: ', formRef.current);
+  }, [formRef]);
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
@@ -118,9 +125,9 @@ export default function Reserve({
               className="w-full"
               type="submit"
               onClick={() => formRef.current?.submit()}
-              disabled={formRef.current?.formState?.isSubmitting}
+              disabled={isPurchasingExperienceTicket}
             >
-              {formRef.current?.formState?.isSubmitting ? 'Submitting...' : 'Submit'}
+              {isPurchasingExperienceTicket ? 'Submitting...' : 'Submit'}
             </Button>
           </div>
         </div>

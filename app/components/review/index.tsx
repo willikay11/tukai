@@ -5,29 +5,47 @@ import { Button } from '@/components/ui/button';
 import { FavouriteIcon, Message02Icon } from '@hugeicons/react-pro';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
-import { PlaceReview } from '@/types/place';
+import { Review as ReviewType } from '@/types/review';
 import moment from 'moment';
 import ImageCarousel from '@/components/ui/imageCarousel';
 import { Photo } from '@/types/photo';
 import IconComponent from '@/app/components/iconComponent';
-import AddReviewComment from './addReviewComment';
-import { useState } from 'react';
-import { useDeletePlaceReview, useLikePlaceReview } from '@/hooks/places';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import AddReview from './addReview';
+import AddReview from './AddReview';
+import AddReviewComment from './AddReviewComment';
 
-export default function Review({ placeId, review }: { placeId: string; review: PlaceReview }) {
+export default function Review({
+  id,
+  review,
+  likeReview,
+  deleteReview,
+  isDeletingReview,
+  updateReview,
+  uploadReviewImages,
+  deleteReviewImage,
+  isUpdateSuccess,
+  isUploadSuccess,
+  isUpdatePending,
+}: {
+  id: string;
+  review: ReviewType;
+  likeReview: () => void;
+  deleteReview: () => void;
+  updateReview: (data: any) => void;
+  uploadReviewImages: (data: any) => void;
+  deleteReviewImage: (reviewId: string, imageId: string) => void;
+  isDeletingReview: boolean;
+  isUpdateSuccess: boolean;
+  isUploadSuccess: boolean;
+  isUpdatePending: boolean;
+}) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState(false);
   const { data: session } = useSession();
-  const { mutate: likeReview } = useLikePlaceReview(placeId, review.id);
-  const { mutate: deleteReview, isPending: isDeletingReview } = useDeletePlaceReview(
-    placeId,
-    review.id,
-  );
 
   const handleLikeReview = () => {
     setIsLiked(!isLiked);
@@ -38,20 +56,34 @@ export default function Review({ placeId, review }: { placeId: string; review: P
     deleteReview();
   };
 
+  useEffect(() => {
+    setIsLiked(review.isLiked);
+  }, [review]);
+
   return (
     <>
       <AddReviewComment
-        placeId={placeId}
+        id={id}
         reviewId={review.id}
         isOpen={isOpen}
         closeModal={() => setIsOpen(false)}
       />
       <AddReview
-        placeId={placeId}
+        type="update"
+        id={id}
         isOpen={isEditOpen}
         placeTitle={review.title}
         closeModal={() => setIsEditOpen(false)}
         review={review}
+        updateReview={updateReview}
+        uploadReviewImages={uploadReviewImages}
+        deleteReviewImage={deleteReviewImage}
+        isUpdateSuccess={isUpdateSuccess}
+        isUploadSuccess={isUploadSuccess}
+        isUpdatePending={isUpdatePending}
+        createReview={undefined}
+        isSuccess={undefined}
+        isSubmitting={undefined}
       />
 
       <div className="flex flex-col">
@@ -68,9 +100,11 @@ export default function Review({ placeId, review }: { placeId: string; review: P
               />
             </div>
             <div className="ml-1">
-              <div className="font-bold text-gray-700">{review.reviewer.displayName}</div>
+              <div className="font-bold text-gray-700">
+                {review.reviewer.firstName} {review.reviewer.lastName}
+              </div>
               <div className="inline-flex items-center">
-                <Rating rating={review.rating} />
+                <Rating rating={review.rating} showCount={true} showMultiStar={true} />
                 <div className="mx-1 h-1 w-1 rounded-full bg-gray-200" />
                 <span className="text-sm text-gray-500">
                   {moment(review.dateCreated).format('MMM YYYY')}
@@ -131,9 +165,7 @@ export default function Review({ placeId, review }: { placeId: string; review: P
               size={40}
               className={`${isLiked ? 'text-red-500' : 'text-gray-500'}`}
             />
-            <span className="text-sm font-medium">
-              {Math.max(0, review?.totalLikes + (isLiked ? 1 : -1))} Likes
-            </span>
+            <span className="text-sm font-medium">{Math.max(0, review?.totalLikes)} Likes</span>
           </Button>
           <Button variant="text" onClick={() => setIsOpen(true)}>
             <Message02Icon size={20} />

@@ -1,17 +1,19 @@
 'use client';
-import { Bookmark02Icon } from '@hugeicons/react-pro';
 import { useState } from 'react';
-import clsx from 'clsx';
 import { Experience } from '@/types/experience';
 import ImageCarousel from '@/components/ui/imageCarousel';
 import numeral from 'numeral';
 import moment from 'moment';
 import { Button } from '@/components/ui/button';
 import { EventSkeleton } from '@/app/components/skeletons';
+import Bookmark from '../../bookmark';
+import { useBookmarkExperience } from '@/hooks/experiences';
 
 export default function SingleExperience({ experience }: { experience: Experience }) {
-  const [bookmarked, setBookmarked] = useState<boolean>(false);
+  const [bookmarked, setBookmarked] = useState<boolean>(experience.isBookmarked);
   const [hasError, setHasError] = useState(false);
+
+  const { mutate: bookmarkExperience } = useBookmarkExperience();
 
   if (experience.id.startsWith('placeholder-')) {
     return <EventSkeleton />;
@@ -30,21 +32,15 @@ export default function SingleExperience({ experience }: { experience: Experienc
             <div className="h-full w-full bg-gray-50" />
           )}
         </div>
-        <div
-          className="absolute right-2 top-2 cursor-pointer"
-          onClick={() => setBookmarked(!bookmarked)}
-        >
-          <Bookmark02Icon
-            size={16}
-            className={clsx('', {
-              'text-white': !bookmarked,
-              'text-red-600': bookmarked,
-            })}
-            variant={bookmarked ? 'solid' : 'twotone'}
+        <div className="absolute right-2 top-2">
+          <Bookmark
+            bookmarked={bookmarked}
+            onBookmark={() => bookmarkExperience(experience.id)}
+            onUnbookmark={() => bookmarkExperience(experience.id)}
           />
         </div>
       </div>
-      <div className="flex flex-col items-start justify-start bg-white">
+      <div className="flex flex-col items-start justify-start bg-transparent">
         <div className="mb-1 flex">
           <p className="text-xs font-bold text-gray-800">{experience.title}</p>
         </div>

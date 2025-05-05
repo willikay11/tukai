@@ -17,7 +17,7 @@ const getPlaceCategories = unstable_cache(
 export default async function Home({ searchParams }: { searchParams: { category?: string } }) {
   const categoryFromQuery = searchParams?.category;
 
-  const placeCategories = await fetchPlaceCategories();
+  const placeCategories = await getPlaceCategories();
   // Default to the first filter (or get it from query params if available)
   const selectedCategoryId =
     categoryFromQuery ||
@@ -25,7 +25,6 @@ export default async function Home({ searchParams }: { searchParams: { category?
       (a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount,
     )?.[0].id;
 
-  console.log(placeCategories);
   return (
     <main className="grid h-full grid-cols-12 gap-4 px-4 md:px-0">
       <div className="col-span-12">

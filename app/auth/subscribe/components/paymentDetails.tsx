@@ -29,6 +29,8 @@ export default function PaymentDetails({
       data.phoneNumber = values.phoneNumber;
     }
 
+    console.log('data: ', data);
+
     const response = await fetch('/auth/subscribe/api', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -76,9 +78,10 @@ export default function PaymentDetails({
 
       <Button
         size="lg"
-        className="w-full"
+        className="mt-3 w-full"
         type="submit"
         disabled={formRef.current?.formState.isSubmitting}
+        onClick={() => formRef.current?.submit()}
       >
         {formRef.current?.formState.isSubmitting ? 'Submitting...' : 'Submit'}
       </Button>

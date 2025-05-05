@@ -36,7 +36,10 @@ export default function Page() {
         timezone: timezone,
       };
     } else {
-      body = { ...newUser, ...{ interests: selectedInterests, timezone: timezone } };
+      body = {
+        ...newUser?.payload,
+        ...{ interests: selectedInterests, timezone: timezone },
+      };
     }
 
     const response = await fetch('/auth/interests/api', {

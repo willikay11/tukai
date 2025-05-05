@@ -3,7 +3,6 @@ import { getSession } from 'next-auth/react';
 
 const getAccessToken = async () => {
   const session = await getSession();
-  console.log(session);
   return session?.user?.accessToken;
 };
 

@@ -1,5 +1,5 @@
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
-import {api} from './apiService';
+import { api } from './apiService';
 import { getSession } from 'next-auth/react';
 
 export async function getInterestBasedCommunities(
@@ -40,7 +40,6 @@ export async function getInterestBasedCommunities(
 export async function fetchCommunity(communityId: string) {
   try {
     const session = await getSession();
-    console.log(session);
     const response = await api.get(`/v1/communities/${communityId}`, {
       headers: {
         Authorization: `Bearer ${session?.user?.accessToken}`,

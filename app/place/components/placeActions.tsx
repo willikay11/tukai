@@ -1,11 +1,17 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import BookmarkPlace from './bookmarkPlace';
-import AddReview from './addReview';
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import Share from '@/components/ui/share';
+import Share from '@/app/components/share';
+import {
+  useBookmarkPlace,
+  useCreatePlaceReview,
+  useDeletePlaceReviewImage,
+  useUploadPlaceReviewImages,
+} from '@/hooks/places';
+import Bookmark from '@/app/components/bookmark';
+import AddReview from '@/app/components/review/AddReview';
 
 export default function PlaceActions({
   placeId,
@@ -21,11 +27,27 @@ export default function PlaceActions({
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
 
+  const {
+    mutate: createPlaceReview,
+    isSuccess,
+    data: reviewData,
+    isPending: isSubmitting,
+  } = useCreatePlaceReview();
+  const { mutate: uploadPlaceReviewImages, isSuccess: isUploadSuccess } =
+    useUploadPlaceReviewImages();
+  const { mutate: deletePlaceReviewImage, isSuccess: isDeleteReviewImageSuccess } =
+    useDeletePlaceReviewImage();
+  const { mutate: bookmarkPlace } = useBookmarkPlace(placeId, session?.user?.id || '');
+
   return (
     <>
       <div className="inline-flex h-full items-center justify-center">
         {session?.user?.id && (
-          <BookmarkPlace placeId={placeId} userId={session?.user?.id} bookmarked={bookmarked} />
+          <Bookmark
+            bookmarked={bookmarked}
+            onBookmark={() => bookmarkPlace()}
+            onUnbookmark={() => bookmarkPlace()}
+          />
         )}
         <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" />
         <Share
@@ -36,11 +58,27 @@ export default function PlaceActions({
         <div className="mr-2" />
         <Button onClick={() => setIsOpen(true)}>Add Review</Button>
       </div>
+
       <AddReview
+        type="create"
+        id={placeId}
         isOpen={isOpen}
         placeTitle={placeTitle}
-        placeId={placeId}
         closeModal={() => setIsOpen(false)}
+        review={reviewData?.data}
+        createReview={(data: any) => createPlaceReview({ placeId, data })}
+        updateReview={undefined}
+        uploadReviewImages={(reviewId: string, data: any) =>
+          uploadPlaceReviewImages({ placeId, reviewId, data })
+        }
+        deleteReviewImage={(reviewId: string, imageId: string) =>
+          deletePlaceReviewImage({ placeId, reviewId, imageId })
+        }
+        isSuccess={isSuccess}
+        isUpdateSuccess={undefined}
+        isUploadSuccess={isUploadSuccess}
+        isSubmitting={isSubmitting}
+        isUpdatePending={undefined}
       />
     </>
   );

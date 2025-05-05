@@ -7,4 +7,5 @@ export type Comment = {
   content: string;
   totalLikes: number;
   dateCreated: string;
+  isLiked: boolean;
 };

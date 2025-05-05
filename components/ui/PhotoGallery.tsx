@@ -83,7 +83,7 @@ const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
                 className="cursor-pointer rounded-br-[15px]"
               />
               {photos.length - 4 > 0 && (
-                <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
+                <div className="absolute bottom-0 left-0 right-0 top-0 flex cursor-pointer items-center justify-center">
                   <span className="text-sm font-black text-white">+{photos.length - 4} Photos</span>
                 </div>
               )}

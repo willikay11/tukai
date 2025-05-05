@@ -1,4 +1,4 @@
-import {api} from '@/services/apiService';
+import { api } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 

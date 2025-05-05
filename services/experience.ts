@@ -3,11 +3,11 @@ import { ApiResponse } from '@/types/apiResponse';
 import { api, apiWithToken } from '@/services/apiService';
 import { getSession } from 'next-auth/react';
 
-
 export async function fetchExperiences(
   page: number,
   perPage: number,
   category?: string,
+  invited?: boolean,
   search?: string,
 ): Promise<ApiResponse> {
   try {
@@ -20,15 +20,16 @@ export async function fetchExperiences(
       queryParams.append('reserved_by', session?.user?.id || '');
     }
     if (category === 'saved') {
-      const session = await getSession();
-      queryParams.append('bookmarked', session?.user?.id || '');
+      queryParams.append('bookmarked', "true");
     }
     if (category === 'hosting') {
-      const session = await getSession();
-      queryParams.append('hosted_by', session?.user?.id || '');
+      queryParams.append('hosted_by', 'true');
     }
-    const axiosInstance = await apiWithToken();
-    const response = await axiosInstance.get(`/v1/experiences/?${queryParams.toString()}`);
+    if (invited) {
+      queryParams.append('invited', 'true');
+    }
+
+    const response = await api.get(`/v1/experiences/?${queryParams.toString()}`);
 
     return {
       status: response.status,
@@ -76,6 +77,28 @@ export async function purchaseExperienceTicket(data: {
         quantity: ticket.quantity,
       })),
     });
+
+    console.log('response: ', response);
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+}
+
+export async function bookmarkExperience(id: string): Promise<ApiResponse> {
+  try {
+    const response = await api.post(`/v1/experiences/${id}/bookmark/`);
 
     return {
       status: response.status,

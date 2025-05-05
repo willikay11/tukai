@@ -2,14 +2,13 @@ import { Photo } from '@/types/photo';
 import { PlaceCategory } from '@/types/placeCategory';
 import { Location } from '@/types/location';
 import { Status } from '@/enums/status';
-import { User } from './user';
 
 export type Place = {
   id: string;
   title: string;
   description: string;
   location: Location;
-  category: PlaceCategory;
+  categories: PlaceCategory[];
   photos: Photo[];
   totalReviews: number;
   averageRating: number;
@@ -31,18 +30,6 @@ export type PlaceSocialLink = {
   platformName: string;
   url: string;
   icon?: string;
-};
-
-export type PlaceReview = {
-  id: string;
-  title: string;
-  description: string;
-  dateCreated: string;
-  reviewer: User;
-  totalLikes: number;
-  totalComments: number;
-  rating: number;
-  photos: Photo[];
 };
 
 export function isPlace(item: any): item is Place {

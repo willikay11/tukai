@@ -1,17 +1,17 @@
 'use client';
 
 import { useEffect } from 'react';
-import Comments from './comments';
+import Comments from '../Comments/Add';
 import Drawer from '@/components/ui/drawer';
 type addReviewCommentProps = {
-  placeId: string;
+  id: string;
   reviewId: string;
   isOpen: boolean;
   closeModal: (isOpen: boolean) => void;
 };
 
 export default function AddReviewComment({
-  placeId,
+  id,
   reviewId,
   isOpen,
   closeModal,
@@ -28,7 +28,7 @@ export default function AddReviewComment({
 
   return (
     <Drawer isOpen={isOpen} setIsOpen={closeModal}>
-      <Comments placeId={placeId} reviewId={reviewId} />
+      <Comments placeId={id} reviewId={reviewId} />
     </Drawer>
   );
 }

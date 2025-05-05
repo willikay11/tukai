@@ -13,7 +13,8 @@ import PhotoGallery from '@/components/ui/PhotoGallery';
 import ExperienceOrganiser from '../components/experienceOrganiser';
 import ExperienceActions from '../components/experienceActions';
 import ExperienceDetails from '../components/experienceDetails';
-import Share from '@/components/ui/share';
+import BookmarkExperience from '../components/bookmarkExperience';
+import Share from '@/app/components/share';
 
 export default async function ViewExperiencePage({ params }: { params: { experienceId: string } }) {
   const experienceResponse: ApiResponse = await fetchExperience(params.experienceId);
@@ -22,6 +23,8 @@ export default async function ViewExperiencePage({ params }: { params: { experie
   }
 
   const experience: Experience = experienceResponse.data;
+
+  console.log(experience);
 
   return (
     <>
@@ -39,7 +42,7 @@ export default async function ViewExperiencePage({ params }: { params: { experie
             </div>
             <div className="inline-flex items-start">
               <div className="inline-flex items-center">
-                <Bookmark02Icon size={16} variant="twotone" className="text-primary" />
+                <BookmarkExperience experience={experience} />
                 <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" />
                 <Share
                   coverPhoto={

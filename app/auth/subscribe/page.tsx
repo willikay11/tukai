@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSubscriptionPlans } from '@/hooks/subscriptions';
 import StepIndicator from '@/components/ui/stepIndicator';
 import PaymentDetails from './components/paymentDetails';
@@ -21,11 +21,11 @@ export default function Page() {
   const { data: session } = useSession();
 
   // TODO: Add endpoint to pull billing details from the database
-  // useEffect(() => {
-  //   if (session?.user?.hasBillingDetails) {
-  //     setCurrentStep(1);
-  //   }
-  // }, [session]);
+  useEffect(() => {
+    if (session?.user?.hasBillingDetails) {
+      setCurrentStep(1);
+    }
+  }, [session]);
 
   return (
     <>
@@ -48,6 +48,7 @@ export default function Page() {
         closeModal={() => setIsPaystackOpen(false)}
         url={paymentMethod?.verificationResponse || ''}
       />
+
       {currentStep === 0 && (
         <PaymentDetails
           onSuccess={({
@@ -67,6 +68,7 @@ export default function Page() {
           }}
         />
       )}
+
       {currentStep === 1 && (
         <Package
           subscriptionPlans={subscriptionPlans?.data?.results}

@@ -8,7 +8,7 @@ import { Community, CommunityMember } from '@/types/community';
 import { fetchCommunity } from '@/services/community';
 import CommunityMembers from '../components/communityMembers';
 import CommunityAdministrator from '../components/communityAdministrator';
-import Share from '@/components/ui/share';
+import Share from '@/app/components/share';
 import UpcomingExperiences from '../components/upcomingExperiences';
 
 export default async function ViewCommunityPage({ params }: { params: { communityId: string } }) {

@@ -27,6 +27,8 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
   const placeProperties: PlaceProperty[] = placePropertyResponse.data?.results;
   const placeSocialLinks: PlaceSocialLink[] = placeSocialLinksResponse.data?.results;
 
+  console.log('place', place.categories);
+
   return (
     <main className="grid grid-cols-12 gap-4">
       <div className="col-span-12 mt-8 md:col-span-6 md:col-start-4 2xl:col-span-4 2xl:col-start-5">
@@ -141,7 +143,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
         </div>
       </div>
       <div className="col-span-12 md:col-span-6 md:col-start-4 2xl:col-span-4 2xl:col-start-5">
-        <PlaceTabs placeId={params.placeId} />
+        <PlaceTabs placeId={params.placeId} categories={place.categories} />
       </div>
     </main>
   );

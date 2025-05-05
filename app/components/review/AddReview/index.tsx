@@ -16,25 +16,46 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { StarIcon } from '@hugeicons/react-pro';
-import {
-  useCreatePlaceReview,
-  useUpdatePlaceReview,
-  useUploadPlaceReviewImages,
-} from '@/hooks/places';
 import ImageUpload from '@/components/ui/imageUpload';
 import { useSession } from 'next-auth/react';
 import Drawer from '@/components/ui/drawer';
-import { PlaceReview } from '@/types/place';
+import { Review } from '@/types/review';
 import { Photo } from '@/types/photo';
-import { deletePlaceReviewImage } from '@/services/place';
 
 type addReviewProps = {
+  type: 'create' | 'update';
+  id: string;
   isOpen: boolean;
   placeTitle: string;
-  placeId: string;
   closeModal: () => void;
-  review?: PlaceReview;
-};
+} & (
+  | {
+      type: 'create';
+      review: undefined;
+      createReview: (data: any) => void;
+      updateReview: undefined;
+      uploadReviewImages: (reviewId: string, data: any) => void;
+      deleteReviewImage: (reviewId: string, imageId: string) => void;
+      isSuccess: boolean;
+      isUpdateSuccess: undefined;
+      isSubmitting: boolean;
+      isUploadSuccess: boolean;
+      isUpdatePending: undefined;
+    }
+  | {
+      type: 'update';
+      review: Review;
+      createReview: undefined;
+      updateReview: (data: any) => void;
+      uploadReviewImages: (reviewId: string, data: any) => void;
+      deleteReviewImage: (reviewId: string, imageId: string) => void;
+      isSuccess: undefined;
+      isUpdateSuccess: boolean;
+      isUploadSuccess: boolean;
+      isUpdatePending: boolean;
+      isSubmitting: undefined;
+    }
+);
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -50,29 +71,24 @@ const formSchema = z.object({
 });
 
 export default function AddReview({
+  type,
   isOpen,
   placeTitle,
-  placeId,
+  id,
   closeModal,
   review,
+  createReview,
+  updateReview,
+  uploadReviewImages,
+  deleteReviewImage,
+  isSuccess,
+  isUpdateSuccess,
+  isUploadSuccess,
+  isSubmitting,
+  isUpdatePending,
 }: addReviewProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const { data: session } = useSession();
-  const {
-    mutate: createPlaceReview,
-    isSuccess,
-    data: reviewData,
-    isPending,
-  } = useCreatePlaceReview(placeId);
-
-  const {
-    mutate: updatePlaceReview,
-    isSuccess: isUpdateSuccess,
-    isPending: isUpdatePending,
-  } = useUpdatePlaceReview(placeId, review?.id || '');
-
-  const { mutate: uploadPlaceReviewImages, isSuccess: isUploadSuccess } =
-    useUploadPlaceReviewImages(placeId, review?.id || reviewData?.data?.id);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -85,17 +101,17 @@ export default function AddReview({
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    if (review) {
-      updatePlaceReview({
-        place_id: placeId,
+    if (type === 'update') {
+      updateReview({
+        place_id: id,
         title: values.title,
         description: values.description,
         rating: values.rating,
         reviewer_id: session?.user?.id,
       });
     } else {
-      createPlaceReview({
-        place_id: placeId,
+      createReview({
+        place_id: id,
         title: values.title,
         description: values.description,
         rating: values.rating,
@@ -104,22 +120,22 @@ export default function AddReview({
     }
   }
 
-  const handleUploadImages = () => {
+  const handleUploadImages = (reviewId: string) => {
     selectedFiles
       .filter((file) => !review?.photos?.some((photo) => photo.photo === file.name))
       .forEach((file, index) => {
         const formData = new FormData();
         formData.append('photo', file);
-        formData.append('place', placeId);
+        formData.append('place', id);
         if (index === 0) {
           formData.append('is_cover', 'true');
         }
-        uploadPlaceReviewImages(formData);
+        uploadReviewImages(reviewId, formData);
       });
   };
 
   const handleDeleteImage = (image: Photo) => {
-    deletePlaceReviewImage(placeId, review?.id || reviewData?.data?.id, image.id);
+    deleteReviewImage(review?.id || '', image.id);
   };
 
   useEffect(() => {
@@ -134,7 +150,7 @@ export default function AddReview({
 
   useEffect(() => {
     if ((isSuccess || isUpdateSuccess) && selectedFiles.length > 0) {
-      handleUploadImages();
+      handleUploadImages(review?.id || '');
     } else if ((isSuccess || isUpdateSuccess) && selectedFiles.length === 0) {
       form.reset();
       closeModal();
@@ -245,9 +261,9 @@ export default function AddReview({
               size="lg"
               className="w-full"
               type="submit"
-              disabled={isPending || isUpdatePending}
+              disabled={isSubmitting || isUpdatePending}
             >
-              {isPending || isUpdatePending ? 'Submitting...' : 'Submit'}
+              {isSubmitting || isUpdatePending ? 'Submitting...' : 'Submit'}
             </Button>
           </form>
         </Form>
