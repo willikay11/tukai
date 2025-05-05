@@ -20,13 +20,13 @@ export default function ExperienceOrganiser({ experience }: { experience: Experi
               src={experience.host.picture}
               width={40}
               height={40}
-              alt={experience.host.displayName}
+              alt={experience.host.displayName || experience.host.firstName}
               className="mr-2.5 h-fit rounded-full"
             />
             <div className="flex flex-col">
               <div className="inline-flex items-center">
                 <p className="mr-1 text-sm font-semibold text-gray-700">
-                  {experience.host.displayName}
+                  {experience.host.displayName || `${experience.host.firstName} ${experience.host.lastName}`}
                 </p>
                 <CheckmarkBadge02Icon size={16} variant="solid" className="text-primary" />
               </div>

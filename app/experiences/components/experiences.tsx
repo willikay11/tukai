@@ -1,6 +1,7 @@
 'use client';
 import ListExperiences from '@/app/components/experiences/List';
 import { useExperiences } from '@/hooks/experiences';
+import clsx from 'clsx';
 import { useState } from 'react';
 
 type ListExperiencesProps = {
@@ -28,7 +29,10 @@ export default function Experiences({ type, category, skeletonCount = 12 }: List
       experiences={type === 'discover' ? experiences?.data?.results : invitedExperiences?.data?.results}
       isLoading={isLoading}
       count={type === 'discover' ? experiences?.data?.count : invitedExperiences?.data?.count}
-      className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"
+      className={clsx('grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 ', {
+        'lg:grid-cols-3 2xl:grid-cols-4': type === 'invited',
+        'lg:grid-cols-4 2xl:grid-cols-6': type === 'discover',
+      })}
       page={page}
       setPage={setPage}
       skeletonCount={skeletonCount}
