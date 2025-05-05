@@ -68,8 +68,6 @@ export async function purchaseExperienceTicket(data: {
   reservedTickets: { ticketId: string; quantity: number }[];
 }): Promise<ApiResponse> {
   try {
-    console.log('data: ', data);
-
     const response = await api.post(`/v1/experiences/ticket-purchases/`, {
       ticket_purchases: data.reservedTickets.map((ticket) => ({
         ticket_id: ticket.ticketId,

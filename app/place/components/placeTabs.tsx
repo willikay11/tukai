@@ -14,10 +14,10 @@ type placeTabsProps = {
 export default function PlaceTabs({ placeId, categories }: placeTabsProps) {
   return (
     <Tabs defaultValue="reviews" className="w-1/2">
-      <TabsList className="sticky top-0 z-50 w-full rounded-none bg-white justify-start">
+      <TabsList className="sticky top-0 z-50 w-full justify-start rounded-none bg-white">
         <TabsTrigger value="reviews">Reviews</TabsTrigger>
         <TabsTrigger value="experiences">Experiences</TabsTrigger>
-        <TabsTrigger value="community">Community</TabsTrigger>
+        <TabsTrigger value="communities">Communities</TabsTrigger>
         <TabsTrigger value="photos">Photos</TabsTrigger>
       </TabsList>
       <TabsContent value="reviews">
@@ -26,7 +26,7 @@ export default function PlaceTabs({ placeId, categories }: placeTabsProps) {
       <TabsContent value="experiences">
         <TabExperiences categories={categories?.map((category) => category.id)} />
       </TabsContent>
-      <TabsContent value="community">
+      <TabsContent value="communities">
         <div className="my-2">
           <NoData message="No communities" />
         </div>

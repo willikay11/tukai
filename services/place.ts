@@ -1,7 +1,6 @@
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
-import { getSession } from 'next-auth/react';
 
 export async function fetchPlaces(
   page = 1,
