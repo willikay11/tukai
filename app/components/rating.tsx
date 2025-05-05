@@ -21,8 +21,8 @@ const Rating = ({
             variant="solid"
             size={14}
             className={clsx('mr-0.5', {
-            'text-yellow-400': rating > 0,
-            'text-gray-300': rating === 0,
+              'text-yellow-400': rating > 0,
+              'text-gray-300': rating === 0,
             })}
           />
         ))

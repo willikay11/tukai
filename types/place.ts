@@ -8,7 +8,7 @@ export type Place = {
   title: string;
   description: string;
   location: Location;
-  category: PlaceCategory;
+  categories: PlaceCategory[];
   photos: Photo[];
   totalReviews: number;
   averageRating: number;

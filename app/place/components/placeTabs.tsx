@@ -3,15 +3,18 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Reviews from './reviews';
 import NoData from '@/components/ui/noData';
+import { PlaceCategory } from '@/types/placeCategory';
+import TabExperiences from './experiences';
 
 type placeTabsProps = {
   placeId: string;
+  categories: PlaceCategory[];
 };
 
-export default function PlaceTabs({ placeId }: placeTabsProps) {
+export default function PlaceTabs({ placeId, categories }: placeTabsProps) {
   return (
     <Tabs defaultValue="reviews" className="w-1/2">
-      <TabsList className="sticky top-0 z-50 w-full rounded-none bg-white">
+      <TabsList className="sticky top-0 z-50 w-full rounded-none bg-white justify-start">
         <TabsTrigger value="reviews">Reviews</TabsTrigger>
         <TabsTrigger value="experiences">Experiences</TabsTrigger>
         <TabsTrigger value="community">Community</TabsTrigger>
@@ -21,9 +24,7 @@ export default function PlaceTabs({ placeId }: placeTabsProps) {
         <Reviews placeId={placeId} />
       </TabsContent>
       <TabsContent value="experiences">
-        <div className="my-2">
-          <NoData message="No experiences" />
-        </div>
+        <TabExperiences categories={categories?.map((category) => category.id)} />
       </TabsContent>
       <TabsContent value="community">
         <div className="my-2">
