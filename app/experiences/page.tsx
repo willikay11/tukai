@@ -7,7 +7,7 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
   const categoryFromQuery = searchParams?.category;
 
   return (
-    <main className="grid h-full grid-cols-12 gap-4 px-4 md:px-0">
+    <main className="grid h-full grid-cols-12 gap-x-4 px-4 md:px-0">
       <div className="col-span-12">
         <Suspense fallback={<PillsSkeleton />}>
           <ExperienceFilters category={categoryFromQuery} />
@@ -29,9 +29,21 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
           </div>
         </div>
       </div> */}
+      {
+        (categoryFromQuery === 'all' || categoryFromQuery === undefined) && (
+          <div className="col-span-12 bg-gray-100">
+            <div className="grid h-full grid-cols-12 py-4">
+              <div className="col-span-12  md:col-span-10 md:col-start-2 md:mx-0">
+                <p className="text-xl font-semibold text-gray-700 mb-4">Invited Experiences</p>
+                <Experiences type="invited" skeletonCount={3} />
+              </div>
+            </div>
+          </div>
+        )
+      }
       <div className="col-span-12 mx-4 mb-4 md:col-span-10 md:col-start-2 md:mx-0">
         <p className="mb-4 mt-2.5 text-xl font-semibold text-gray-700">Discover Experiences</p>
-        <Experiences key={categoryFromQuery} category={categoryFromQuery} />
+        <Experiences key={categoryFromQuery} category={categoryFromQuery} type="discover" />
       </div>
     </main>
   );

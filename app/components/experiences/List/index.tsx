@@ -16,6 +16,7 @@ type ListExperiencesProps = {
   isLoading: boolean;
   count: number;
   experiences: Experience[];
+  invitedExperiences?: Experience[];
   page: number;
   setPage: (nextPage: number) => void;
   skeletonCount?: number;

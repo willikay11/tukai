@@ -3,15 +3,16 @@ import { fetchExperience, fetchExperiences, purchaseExperienceTicket } from '@/s
 import { useQueryClient } from '@tanstack/react-query';
 
 export const useExperiences = (
-  { page, enabled, category }: { page: number; enabled: boolean; category?: string } = {
+  { page, enabled, category, invited = false }: { page: number; enabled: boolean; category?: string; invited?: boolean } = {
     page: 1,
     enabled: true,
     category: 'all',
+    invited: false,
   },
 ) => {
   return useQuery({
-    queryKey: ['experiences', page, category],
-    queryFn: async () => await fetchExperiences(page, 12, category),
+    queryKey: ['experiences', page, category, invited],
+    queryFn: async () => await fetchExperiences(page, 12, category, invited),
     enabled: enabled,
   });
 };

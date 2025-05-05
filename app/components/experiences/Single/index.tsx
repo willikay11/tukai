@@ -44,7 +44,7 @@ export default function SingleExperience({ experience }: { experience: Experienc
           />
         </div>
       </div>
-      <div className="flex flex-col items-start justify-start bg-white">
+      <div className="flex flex-col items-start justify-start bg-transparent">
         <div className="mb-1 flex">
           <p className="text-xs font-bold text-gray-800">{experience.title}</p>
         </div>
