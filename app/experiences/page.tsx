@@ -33,7 +33,7 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
         (categoryFromQuery === 'all' || categoryFromQuery === undefined) && (
           <div className="col-span-12 bg-gray-100">
             <div className="grid h-full grid-cols-12 py-4">
-              <div className="col-span-12  md:col-span-10 md:col-start-2 md:mx-0">
+              <div className="col-span-12 md:col-span-10 md:col-start-2 md:mx-0">
                 <p className="text-xl font-semibold text-gray-700 mb-4">Invited Experiences</p>
                 <Experiences type="invited" skeletonCount={3} />
               </div>
@@ -42,7 +42,7 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
         )
       }
       <div className="col-span-12 mx-4 mb-4 md:col-span-10 md:col-start-2 md:mx-0">
-        <p className="mb-4 mt-2.5 text-xl font-semibold text-gray-700">Discover Experiences</p>
+        <p className="mb-4 mt-2.5 text-xl font-semibold text-gray-700">{`${(categoryFromQuery === 'all' || categoryFromQuery === undefined) ? 'Discover' : categoryFromQuery.charAt(0).toUpperCase() + categoryFromQuery.slice(1)} Experiences`}</p>
         <Experiences key={categoryFromQuery} category={categoryFromQuery} type="discover" />
       </div>
     </main>
