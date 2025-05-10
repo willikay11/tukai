@@ -16,6 +16,7 @@ export const api = axios.create({
 
 export const apiWithToken = async () => {
   const token = await getAccessToken();
+  console.log('token', token);
   return axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://api.tukai.co',
     headers: {

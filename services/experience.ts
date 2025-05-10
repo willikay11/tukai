@@ -9,6 +9,7 @@ export async function fetchExperiences(
   type?: string,
   category?: string,
   invited?: boolean,
+  isPublic?: boolean,
   search?: string,
 ): Promise<ApiResponse> {
   try {
@@ -27,20 +28,19 @@ export async function fetchExperiences(
     if (type === 'hosting') {
       queryParams.append('hosted_by', 'true');
     }
-    if (type) {
-      queryParams.append('invited', 'true');
-    }
+
     if (category) {
       queryParams.append('category', category);
     }
     if (invited) {
-      queryParams.append('is_public', 'false');
-    } else {
+      queryParams.append('invited', 'true');
+    }
+    if (isPublic) {
       queryParams.append('is_public', 'true');
+    } else {
+      queryParams.append('is_public', 'false');
     }
 
-    console.log('queryParams: ', queryParams.toString());
-    
     const axiosInstance = await apiWithToken();
     const response = await axiosInstance.get(`/v1/experiences/?${queryParams.toString()}`);
 

@@ -14,16 +14,18 @@ export const useExperiences = (
     type,
     category,
     invited = false,
-  }: { page: number; enabled: boolean; type?: string; category?: string; invited?: boolean } = {
+    isPublic = true,
+  }: { page: number; enabled: boolean; type?: string; category?: string; invited?: boolean; isPublic?: boolean } = {
     page: 1,
     enabled: true,
     type: 'all',
     invited: false,
+    isPublic: true,
   },
 ) => {
   return useQuery({
     queryKey: ['experiences', page, type, category, invited],
-    queryFn: async () => await fetchExperiences(page, 12, type, category, invited),
+    queryFn: async () => await fetchExperiences(page, 12, type, category, invited, isPublic),
     enabled: enabled,
   });
 };
