@@ -8,7 +8,7 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
 
   return (
     <main className="grid h-full grid-cols-12 gap-x-4 px-4 md:px-0">
-      <div className="col-span-12">
+      <div className="col-span-12 sticky top-[105px] z-10 bg-white">
         <Suspense fallback={<PillsSkeleton />}>
           <ExperienceFilters category={categoryFromQuery} />
         </Suspense>

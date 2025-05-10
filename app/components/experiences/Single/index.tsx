@@ -27,6 +27,15 @@ export default function SingleExperience({
     return <EventSkeleton />;
   }
 
+  const dateSlot = (
+    <div className="inline-flex items-center">
+      <span className="text-xs font-normal text-gray-500">
+        {moment(experience?.startDate).format('MMM D, YYYY')} -{' '}
+        {moment(experience?.endDate).format('MMM D, YYYY')}
+      </span>
+    </div>
+  );
+
   return (
     <>
       <div className="relative mb-2 flex flex-col">
@@ -68,13 +77,14 @@ export default function SingleExperience({
             {experience?.priceStartsFrom.currency}{' '}
             {numeral(experience?.priceStartsFrom.amount).format('0,0')} / person
           </span>
+          {type === 'invited' && (
+            <>
+              <div className="mx-1 h-[3px] w-[3px] rounded-full bg-gray-400" />
+              {dateSlot}
+            </>
+          )}
         </div>
-        <div className="inline-flex items-center">
-          <span className="text-xs font-medium text-gray-700">
-            {moment(experience?.startDate).format('MMM D, YYYY')} -{' '}
-            {moment(experience?.endDate).format('MMM D, YYYY')}
-          </span>
-        </div>
+        {type === 'discover' && dateSlot}
         <Button variant="primary-text" size="sm">
           {experience.host.displayName ||
             `${experience.host.firstName} ${experience.host.lastName}`}

@@ -35,6 +35,8 @@ export async function fetchExperiences(
     }
     if (invited) {
       queryParams.append('is_public', 'false');
+    } else {
+      queryParams.append('is_public', 'true');
     }
 
     const response = await api.get(`/v1/experiences/?${queryParams.toString()}`);

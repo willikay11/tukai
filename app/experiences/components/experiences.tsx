@@ -16,6 +16,7 @@ export default function Experiences({ type, category, skeletonCount = 12 }: List
     page,
     enabled: type === 'discover',
     category,
+    invited: false,
   });
 
   const { data: invitedExperiences } = useExperiences({
