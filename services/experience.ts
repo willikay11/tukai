@@ -39,7 +39,10 @@ export async function fetchExperiences(
       queryParams.append('is_public', 'true');
     }
 
-    const response = await api.get(`/v1/experiences/?${queryParams.toString()}`);
+    console.log('queryParams: ', queryParams.toString());
+    
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.get(`/v1/experiences/?${queryParams.toString()}`);
 
     return {
       status: response.status,
@@ -108,7 +111,8 @@ export async function purchaseExperienceTicket(data: {
 
 export async function bookmarkExperience(id: string): Promise<ApiResponse> {
   try {
-    const response = await api.post(`/v1/experiences/${id}/bookmark/`);
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.post(`/v1/experiences/${id}/bookmark/`);
 
     return {
       status: response.status,
