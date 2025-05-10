@@ -8,8 +8,16 @@ import { Button } from '@/components/ui/button';
 import { EventSkeleton } from '@/app/components/skeletons';
 import Bookmark from '../../bookmark';
 import { useBookmarkExperience } from '@/hooks/experiences';
+import { cn } from '@/lib/utils';
+import Pills from '@/app/components/pills';
 
-export default function SingleExperience({ experience }: { experience: Experience }) {
+export default function SingleExperience({
+  type,
+  experience,
+}: {
+  type: 'discover' | 'invited';
+  experience: Experience;
+}) {
   const [bookmarked, setBookmarked] = useState<boolean>(experience.isBookmarked);
   const [hasError, setHasError] = useState(false);
 
@@ -22,15 +30,26 @@ export default function SingleExperience({ experience }: { experience: Experienc
   return (
     <>
       <div className="relative mb-2 flex flex-col">
-        <div className="relative aspect-square w-full overflow-hidden rounded-[5px]">
+        <div
+          className={cn('relative w-full overflow-hidden rounded-[5px]', {
+            'aspect-square': type === 'discover',
+            'aspect-[16/9]': type === 'invited',
+          })}
+        >
           {!hasError ? (
             <ImageCarousel
               images={experience.photos.map((photo) => photo.photo)}
-              imageHeight="h-full"
+              aspectRatio={type === 'discover' ? 'aspect-square' : 'aspect-[16/9]'}
             />
           ) : (
             <div className="h-full w-full bg-gray-50" />
           )}
+        </div>
+        <div className="absolute left-2 top-2">
+          <Pills
+            pills={experience?.categories?.map((category) => category.name) || []}
+            showMax={type === 'discover' ? 1 : 3}
+          />
         </div>
         <div className="absolute right-2 top-2">
           <Bookmark
@@ -57,7 +76,8 @@ export default function SingleExperience({ experience }: { experience: Experienc
           </span>
         </div>
         <Button variant="primary-text" size="sm">
-          {experience.host.displayName || `${experience.host.firstName} ${experience.host.lastName}`}
+          {experience.host.displayName ||
+            `${experience.host.firstName} ${experience.host.lastName}`}
         </Button>
       </div>
     </>

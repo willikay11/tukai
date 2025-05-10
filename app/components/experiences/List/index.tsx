@@ -20,6 +20,7 @@ type ListExperiencesProps = {
   page: number;
   setPage: (nextPage: number) => void;
   skeletonCount?: number;
+  type: 'discover' | 'invited';
 };
 
 const placeholders = (skeletonCount: number): Experience[] => {
@@ -66,6 +67,7 @@ const placeholders = (skeletonCount: number): Experience[] => {
 };
 
 export default function ListExperiences({
+  type,
   experiences,
   isLoading,
   count,
@@ -170,7 +172,7 @@ export default function ListExperiences({
             >
               {/* {session?.user ? ( */}
               <Link target="_blank" href={`/experiences/${experience.id}`}>
-                <SingleExperience experience={experience} />
+                <SingleExperience type={type} experience={experience} />
               </Link>
               {/* ) : (
                 <div onClick={() => setOpen(true)}>

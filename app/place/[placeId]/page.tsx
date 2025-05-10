@@ -78,7 +78,10 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
               <div className="flex flex-col">
                 <p className="text-sm font-bold text-gray-700">{placeProperty.key}</p>
                 {placeProperty.key === 'Phone Number' ? (
-                  <a href={`tel:${placeProperty.value}`} className="text-sm font-medium text-gray-500">
+                  <a
+                    href={`tel:${placeProperty.value}`}
+                    className="text-sm font-medium text-gray-500"
+                  >
                     {placeProperty.value}
                   </a>
                 ) : (

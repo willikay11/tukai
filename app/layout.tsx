@@ -38,7 +38,7 @@ export default function RootLayout({
             <ReactQueryClientProvider>
               <GlobalLoading />
               <Toaster />
-              <div className="grid grid-cols-12 border-b-[1px] border-gray-100 bg-white md:gap-4 sticky top-0 z-50">
+              <div className="sticky top-0 z-50 grid grid-cols-12 border-b-[1px] border-gray-100 bg-white md:gap-4">
                 <DownloadApp />
                 <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
                   <div className="inline-flex grid h-[80px] w-full grid-cols-12 items-center justify-between md:mt-6">

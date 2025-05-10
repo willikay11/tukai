@@ -69,7 +69,7 @@ export default function Share({
     }
 
     if (option === 'WhatsApp') {
-      window.open(`https://wa.me/?text=${link}`, '_blank');
+      window.open(`https://wa.me/?text=${encodeURIComponent(link)}`, '_blank');
     }
 
     if (option === 'Messenger') {

@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 export default function ExperienceOrganiser({ experience }: { experience: Experience }) {
   const [open, setOpen] = useState(false);
-  
+
   return (
     <>
       <SendMessage open={open} setOpen={setOpen} recipientId={experience.host.id} />
@@ -26,7 +26,8 @@ export default function ExperienceOrganiser({ experience }: { experience: Experi
             <div className="flex flex-col">
               <div className="inline-flex items-center">
                 <p className="mr-1 text-sm font-semibold text-gray-700">
-                  {experience.host.displayName || `${experience.host.firstName} ${experience.host.lastName}`}
+                  {experience.host.displayName ||
+                    `${experience.host.firstName} ${experience.host.lastName}`}
                 </p>
                 <CheckmarkBadge02Icon size={16} variant="solid" className="text-primary" />
               </div>

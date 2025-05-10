@@ -26,16 +26,19 @@ export default function Experiences({ type, category, skeletonCount = 12 }: List
 
   return (
     <ListExperiences
-      experiences={type === 'discover' ? experiences?.data?.results : invitedExperiences?.data?.results}
+      experiences={
+        type === 'discover' ? experiences?.data?.results : invitedExperiences?.data?.results
+      }
       isLoading={isLoading}
       count={type === 'discover' ? experiences?.data?.count : invitedExperiences?.data?.count}
-      className={clsx('grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 ', {
+      className={clsx('grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2', {
         'lg:grid-cols-3 2xl:grid-cols-4': type === 'invited',
         'lg:grid-cols-4 2xl:grid-cols-6': type === 'discover',
       })}
       page={page}
       setPage={setPage}
       skeletonCount={skeletonCount}
+      type={type}
     />
   );
 }

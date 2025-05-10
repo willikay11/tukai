@@ -1,9 +1,20 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { fetchExperience, fetchExperiences, purchaseExperienceTicket, bookmarkExperience } from '@/services/experience';
+import {
+  fetchExperience,
+  fetchExperiences,
+  purchaseExperienceTicket,
+  bookmarkExperience,
+} from '@/services/experience';
 import { useQueryClient } from '@tanstack/react-query';
 
 export const useExperiences = (
-  { page, enabled, type, category, invited = false }: { page: number; enabled: boolean; type?: string; category?: string; invited?: boolean } = {
+  {
+    page,
+    enabled,
+    type,
+    category,
+    invited = false,
+  }: { page: number; enabled: boolean; type?: string; category?: string; invited?: boolean } = {
     page: 1,
     enabled: true,
     type: 'all',
@@ -45,5 +56,5 @@ export const useBookmarkExperience = () => {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['experience'] });
     },
-  }); 
+  });
 };

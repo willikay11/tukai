@@ -22,7 +22,7 @@ export async function fetchExperiences(
       queryParams.append('reserved_by', session?.user?.id || '');
     }
     if (type === 'saved') {
-      queryParams.append('bookmarked', "true");
+      queryParams.append('bookmarked', 'true');
     }
     if (type === 'hosting') {
       queryParams.append('hosted_by', 'true');
@@ -32,6 +32,9 @@ export async function fetchExperiences(
     }
     if (category) {
       queryParams.append('category', category);
+    }
+    if (invited) {
+      queryParams.append('is_public', 'false');
     }
 
     const response = await api.get(`/v1/experiences/?${queryParams.toString()}`);
