@@ -27,8 +27,6 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
   const placeProperties: PlaceProperty[] = placePropertyResponse.data?.results;
   const placeSocialLinks: PlaceSocialLink[] = placeSocialLinksResponse.data?.results;
 
-  console.log('place', place.categories);
-
   return (
     <main className="grid grid-cols-12 gap-4">
       <div className="col-span-12 mt-8 md:col-span-6 md:col-start-4 2xl:col-span-4 2xl:col-start-5">
@@ -39,7 +37,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
               <div className="inline-flex items-center">
                 <span className="text-xs">{place.location.formattedAddress}</span>
                 <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" />
-                <Rating rating={place.averageRating} />
+                <Rating rating={place.averageRating} showCount={true} />
               </div>
             </div>
           </div>
@@ -79,7 +77,13 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
               ) : null}
               <div className="flex flex-col">
                 <p className="text-sm font-bold text-gray-700">{placeProperty.key}</p>
-                <p className="text-sm font-medium text-gray-500">{placeProperty.value}</p>
+                {placeProperty.key === 'Phone Number' ? (
+                  <a href={`tel:${placeProperty.value}`} className="text-sm font-medium text-gray-500">
+                    {placeProperty.value}
+                  </a>
+                ) : (
+                  <p className="text-sm font-medium text-gray-500">{placeProperty.value}</p>
+                )}
               </div>
             </div>
           ))}

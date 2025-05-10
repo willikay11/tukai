@@ -12,7 +12,7 @@ export default function TabExperiences({ categories }: ListExperiencesProps) {
   const { data: experiences, isLoading } = useExperiences({
     page,
     enabled: true,
-    category: categories.join(','),
+    category: categories.map((category) => `category=${category}`).join(','),
   });
 
   return (

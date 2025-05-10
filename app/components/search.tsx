@@ -19,7 +19,7 @@ import clsx from 'clsx';
 export default function Search() {
   const pathname = usePathname();
   const { data: placeCategories } = usePlaceCategories();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState<string>();
   const [tag, setTag] = useState<PlaceCategory | undefined>();
   const [showSearchResults, setShowSearchResults] = useState(false);
   const { data: searchResults } = useSearch(query, tag?.id);
@@ -53,7 +53,7 @@ export default function Search() {
           <div
             onClick={() => setShowSearchResults(true)}
             className={clsx('flex w-full md:w-[90%]', {
-              'mt-0 flex-row items-center': query.length > 0 || tag,
+              'mt-0 flex-row items-center': query && query.length > 0 || tag,
               'flex-col': !query && !tag,
             })}
           >
@@ -80,7 +80,7 @@ export default function Search() {
             <input
               className={clsx(
                 'mt-[2px] h-full w-full text-[11px] outline-0 placeholder:text-[11px] placeholder:text-gray-400 hover:border-primary focus:border-primary',
-                query.length > 0 && tag && 'mt-0',
+                query && query.length > 0 && tag && 'mt-0',
               )}
               placeholder={
                 pathname === '/' || pathname.includes('/place')
@@ -98,7 +98,11 @@ export default function Search() {
           </div>
           <div
             className="ml-2 flex h-[30px] w-[36px] cursor-pointer items-center justify-center rounded-full bg-gray-100"
-            onClick={() => setShowSearchResults(false)}
+            onClick={() => {
+              setShowSearchResults(false)
+              setQuery(undefined)
+              setTag(undefined)
+            }}
           >
             <IconComponent
               iconName={showSearchResults ? 'Cancel01Icon' : 'FilterHorizontalIcon'}
