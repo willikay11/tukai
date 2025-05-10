@@ -32,7 +32,7 @@ export default function Experiences({ type, category, skeletonCount = 12 }: List
   const { data: experiences, isLoading } = useExperiences({
     page,
     enabled: type === 'discover',
-    category,
+    type: category,
     invited: false,
   });
 

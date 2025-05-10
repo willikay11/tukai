@@ -39,6 +39,8 @@ export async function fetchExperiences(
       queryParams.append('is_public', 'true');
     }
 
+    console.log('queryParams: ', queryParams.toString());
+    
     const axiosInstance = await apiWithToken();
     const response = await axiosInstance.get(`/v1/experiences/?${queryParams.toString()}`);
 
