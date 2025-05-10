@@ -1,8 +1,8 @@
 'use client';
 
-import Bookmark from "@/app/components/bookmark";
-import { useBookmarkExperience } from "@/hooks/experiences";
-import { Experience } from "@/types/experience";
+import Bookmark from '@/app/components/bookmark';
+import { useBookmarkExperience } from '@/hooks/experiences';
+import { Experience } from '@/types/experience';
 
 export default function BookmarkExperience({ experience }: { experience: Experience }) {
   const { mutate: bookmarkExperience } = useBookmarkExperience();

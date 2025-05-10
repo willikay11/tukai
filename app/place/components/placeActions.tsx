@@ -54,7 +54,7 @@ export default function PlaceActions({
         <Share
           coverPhoto={coverPhoto}
           title={placeTitle}
-          link={`${process.env.NEXT_PUBLIC_APP_URL}/places/${placeId}`}
+          link={`Check out this place ${placeTitle} on Tukai, ${process.env.NEXT_PUBLIC_APP_URL}/places/${placeId}`}
         />
         <div className="mr-2" />
         <Button onClick={() => setIsOpen(true)}>Add Review</Button>

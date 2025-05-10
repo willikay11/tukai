@@ -53,7 +53,7 @@ export default function Search() {
           <div
             onClick={() => setShowSearchResults(true)}
             className={clsx('flex w-full md:w-[90%]', {
-              'mt-0 flex-row items-center': query && query.length > 0 || tag,
+              'mt-0 flex-row items-center': (query && query.length > 0) || tag,
               'flex-col': !query && !tag,
             })}
           >
@@ -99,9 +99,9 @@ export default function Search() {
           <div
             className="ml-2 flex h-[30px] w-[36px] cursor-pointer items-center justify-center rounded-full bg-gray-100"
             onClick={() => {
-              setShowSearchResults(false)
-              setQuery(undefined)
-              setTag(undefined)
+              setShowSearchResults(false);
+              setQuery(undefined);
+              setTag(undefined);
             }}
           >
             <IconComponent

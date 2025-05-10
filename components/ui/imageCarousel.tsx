@@ -11,7 +11,13 @@ import {
 import { cn } from '@/lib/utils';
 import TukaiImage from '@/components/ui/image';
 
-const ImageCarousel = ({ images, imageHeight }: { images: string[]; imageHeight: string }) => {
+const ImageCarousel = ({
+  images,
+  aspectRatio = 'aspect-square',
+}: {
+  images: string[];
+  aspectRatio?: string;
+}) => {
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
@@ -24,7 +30,7 @@ const ImageCarousel = ({ images, imageHeight }: { images: string[]; imageHeight:
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index}>
-              <div className={cn('relative aspect-square w-full')}>
+              <div className={cn('relative w-full', aspectRatio)}>
                 <TukaiImage src={image} alt={`Image ${index + 1}`} className="rounded-[8px]" />
               </div>
             </CarouselItem>
