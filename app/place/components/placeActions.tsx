@@ -47,6 +47,7 @@ export default function PlaceActions({
             bookmarked={bookmarked}
             onBookmark={() => bookmarkPlace()}
             onUnbookmark={() => bookmarkPlace()}
+            className="text-primary"
           />
         )}
         <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" />

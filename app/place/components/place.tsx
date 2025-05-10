@@ -28,7 +28,7 @@ export default function SinglePlace({ place }: { place: Place }) {
             <div className="h-full w-full bg-gray-50" />
           )}
         </div>
-        <div className="invisible absolute right-2 top-2 cursor-pointer group-hover:visible">
+        <div className="invisible absolute right-2 top-2 cursor-pointer group-hover:visible rounded-full bg-gray-800/50 p-1 h-6 w-6 flex items-center justify-center">
           {session?.user?.id && (
             <BookmarkPlace
               bookmarked={place.isBookmarked}

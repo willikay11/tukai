@@ -6,27 +6,32 @@ import { getSession } from 'next-auth/react';
 export async function fetchExperiences(
   page: number,
   perPage: number,
+  type?: string,
   category?: string,
   invited?: boolean,
   search?: string,
 ): Promise<ApiResponse> {
   try {
     const queryParams = new URLSearchParams();
+    queryParams.append('status', 'published');
     if (page) queryParams.append('page', page.toString());
     if (perPage) queryParams.append('page_size', perPage.toString());
     if (search) queryParams.append('search', search);
-    if (category === 'reserved') {
+    if (type === 'reserved') {
       const session = await getSession();
       queryParams.append('reserved_by', session?.user?.id || '');
     }
-    if (category === 'saved') {
+    if (type === 'saved') {
       queryParams.append('bookmarked', "true");
     }
-    if (category === 'hosting') {
+    if (type === 'hosting') {
       queryParams.append('hosted_by', 'true');
     }
-    if (invited) {
+    if (type) {
       queryParams.append('invited', 'true');
+    }
+    if (category) {
+      queryParams.append('category', category);
     }
 
     const response = await api.get(`/v1/experiences/?${queryParams.toString()}`);

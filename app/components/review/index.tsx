@@ -169,7 +169,7 @@ export default function Review({
           </Button>
           <Button variant="text" onClick={() => setIsOpen(true)}>
             <Message02Icon size={20} />
-            <span className="text-sm font-medium">Comment</span>
+            <span className="text-sm font-medium"> {review.totalComments} Comments</span>
           </Button>
         </div>
         <div className="my-2">

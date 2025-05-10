@@ -39,6 +39,7 @@ const placeholders: Place[] = Array.from({ length: 12 }, (_, index) => ({
   averageRating: 0,
   isBookmarked: false,
   status: 'DRAFT' as Status,
+  categories: [],
 }));
 
 export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
