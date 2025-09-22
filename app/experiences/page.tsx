@@ -29,9 +29,9 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
           </div>
         </div>
       </div> */}
-      {(categoryFromQuery === 'all' || categoryFromQuery === undefined) && (
+      {/* {(categoryFromQuery === 'all' || categoryFromQuery === undefined) && (
         <Experiences type="invited" skeletonCount={3} />
-      )}
+      )} */}
       <Experiences key={categoryFromQuery} category={categoryFromQuery} type="discover" />
     </main>
   );

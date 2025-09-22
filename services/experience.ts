@@ -2,6 +2,8 @@ import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { ApiResponse } from '@/types/apiResponse';
 import { api, apiWithToken } from '@/services/apiService';
 import { getSession } from 'next-auth/react';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 export async function fetchExperiences(
   page: number,
@@ -9,6 +11,7 @@ export async function fetchExperiences(
   type?: string,
   category?: string,
   invited?: boolean,
+  isPublic?: boolean,
   search?: string,
 ): Promise<ApiResponse> {
   try {
@@ -27,22 +30,20 @@ export async function fetchExperiences(
     if (type === 'hosting') {
       queryParams.append('hosted_by', 'true');
     }
-    if (type) {
-      queryParams.append('invited', 'true');
-    }
+
     if (category) {
       queryParams.append('category', category);
     }
     if (invited) {
-      queryParams.append('is_public', 'false');
-    } else {
+      queryParams.append('invited', 'true');
+    }
+    if (isPublic) {
       queryParams.append('is_public', 'true');
+    } else {
+      queryParams.append('is_public', 'false');
     }
 
-    console.log('queryParams: ', queryParams.toString());
-    
-    const axiosInstance = await apiWithToken();
-    const response = await axiosInstance.get(`/v1/experiences/?${queryParams.toString()}`);
+    const response = await api.get(`/v1/experiences/?${queryParams.toString()}`);
 
     return {
       status: response.status,
@@ -62,6 +63,9 @@ export async function fetchExperiences(
 
 export async function fetchExperience(id: string): Promise<ApiResponse> {
   try {
+    // const session = await getServerSession(authOptions);
+
+    // const axiosInstance = await apiWithToken(session?.user?.accessToken);
     const response = await api.get(`/v1/experiences/${id}`);
 
     return {

@@ -47,7 +47,9 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
               bookmarked={place.isBookmarked}
               placeTitle={place.title}
               coverPhoto={
-                place.photos?.find((photo: Photo) => photo.isCover)?.photo || place.photos[0].photo
+                place?.photos?.find((photo: Photo) => photo.isCover)?.photo ||
+                place?.photos[0]?.photo ||
+                'https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg'
               }
             />
           </div>
@@ -60,7 +62,9 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
           <div className="text-sm font-normal text-gray-600">
             <DescriptionShowMore
               photo={
-                place.photos.find((photo: Photo) => photo.isCover)?.photo || place.photos[0].photo
+                place?.photos.find((photo: Photo) => photo.isCover)?.photo ||
+                place?.photos[0]?.photo ||
+                'https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg'
               }
               text={place.description}
               maxLength={600}
@@ -100,8 +104,8 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
 
         <div className="mb-4 rounded-[8px]">
           <GoogleMapComponent
-            lat={place.location.point.coordinates[1]}
-            lng={place.location.point.coordinates[0]}
+            lat={place?.location?.point?.coordinates[1]}
+            lng={place?.location?.point?.coordinates[0]}
           />
         </div>
       </div>

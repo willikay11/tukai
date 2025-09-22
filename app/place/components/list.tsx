@@ -108,7 +108,7 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
 
   return (
     <>
-      <Dialog open={open} onOpenChange={setOpen}>
+      {/* <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="px-16">
           <SignInForm
             onLogin={() => {
@@ -120,7 +120,7 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
             }}
           />
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       <motion.div
         initial={{ opacity: 0 }}
@@ -139,7 +139,10 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
               transition={{ duration: 0.2 }}
               className="cursor-pointer"
             >
-              {session?.user ? (
+              <Link target="_blank" href={`/place/${place.id}`}>
+                <SinglePlace place={place} />
+              </Link>
+              {/* {session?.user ? (
                 <Link target="_blank" href={`/place/${place.id}`}>
                   <SinglePlace place={place} />
                 </Link>
@@ -147,7 +150,7 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
                 <div onClick={() => setOpen(true)}>
                   <SinglePlace place={place} />
                 </div>
-              )}
+              )} */}
             </motion.div>
           );
         })}
