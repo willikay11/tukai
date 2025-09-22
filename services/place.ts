@@ -58,7 +58,7 @@ export async function fetchPlaceCategories(): Promise<ApiResponse> {
     const res = await api.get('/v1/places/categories/?page_size=100');
 
     return {
-      status: res.status,
+      status: 200,
       success: true,
       data: parseSnakeToCamel(res.data),
     };
@@ -159,6 +159,7 @@ export async function createPlaceReviewComment(
   data: any,
 ): Promise<ApiResponse> {
   try {
+    const api = await apiWithToken();
     const res = await api.post(`/v1/places/${id}/reviews/${reviewId}/comments/`, data);
 
     return {
@@ -184,6 +185,7 @@ export async function likePlaceReviewComment(
   data?: any,
 ): Promise<ApiResponse> {
   try {
+    const api = await apiWithToken();
     const res = await api.post(
       `/v1/places/${id}/reviews/${reviewId}/comments/${commentId}/like/`,
       data,
@@ -210,6 +212,7 @@ export async function likePlaceReview(
   data: any,
 ): Promise<ApiResponse> {
   try {
+    const api = await apiWithToken();
     const res = await api.post(`/v1/places/${id}/reviews/${reviewId}/like/`, data);
 
     return {
@@ -229,6 +232,7 @@ export async function likePlaceReview(
 
 export async function bookmarkPlace(id: string, data: any): Promise<ApiResponse> {
   try {
+    const api = await apiWithToken();
     const res = await api.post(`/v1/places/${id}/bookmark/`, data);
 
     return {
@@ -248,6 +252,7 @@ export async function bookmarkPlace(id: string, data: any): Promise<ApiResponse>
 
 export async function createPlaceReview(id: string, data: any): Promise<ApiResponse> {
   try {
+    const api = await apiWithToken();
     const res = await api.post(`/v1/places/${id}/reviews/`, data);
 
     return {
@@ -271,6 +276,7 @@ export async function uploadPlaceReviewImages(
   data: any,
 ): Promise<ApiResponse> {
   try {
+    const api = await apiWithToken();
     const res = await api.post(`/v1/places/${id}/reviews/${reviewId}/photos/`, data, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -298,6 +304,7 @@ export async function updatePlaceReview(
   data: any,
 ): Promise<ApiResponse> {
   try {
+    const api = await apiWithToken();
     const res = await api.put(`/v1/places/${id}/reviews/${reviewId}/`, data);
 
     return {
@@ -317,6 +324,7 @@ export async function updatePlaceReview(
 
 export async function deletePlaceReview(id: string, reviewId: string): Promise<ApiResponse> {
   try {
+    const api = await apiWithToken();
     const res = await api.delete(`/v1/places/${id}/reviews/${reviewId}/`);
 
     return {
@@ -340,10 +348,8 @@ export async function deletePlaceReviewImage(
   imageId: string,
 ): Promise<ApiResponse> {
   try {
-    const axiosInstance = await apiWithToken();
-    const res = await axiosInstance.delete(
-      `/v1/places/${id}/reviews/${reviewId}/photos/${imageId}/`,
-    );
+    const api = await apiWithToken();
+    const res = await api.delete(`/v1/places/${id}/reviews/${reviewId}/photos/${imageId}/`);
 
     return {
       status: res.status,

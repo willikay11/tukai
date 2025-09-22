@@ -1,13 +1,14 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { profile, signIn, socialSignIn } from '@/services/auth';
 import jwt from 'jsonwebtoken';
+import { socialSignIn, signIn, refreshToken, profile as getProfile } from '@/services/auth';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
-import { User } from '@/types/user';
 import { JwtPayload } from '@/types/jwt';
+import { User } from '@/types/user';
 import { Interest } from '@/types/interest';
-// Define the extended session type
+
+// ✅ Extend NextAuth Session type
 declare module 'next-auth' {
   interface Session {
     user: {
@@ -21,15 +22,45 @@ declare module 'next-auth' {
       hasSubscribed?: boolean | null;
       interests?: Interest[] | null;
     };
+    error?: string;
+  }
+}
+
+async function refreshAccessToken(token: any) {
+  try {
+    const data = await refreshToken(token);
+
+    // Decode new access token to extract expiry
+    const decoded = jwt.decode(data.access) as JwtPayload;
+    const accessTokenExpires = decoded?.exp ? decoded.exp * 1000 : Date.now() + 3600 * 1000;
+
+    return {
+      ...token,
+      accessToken: data.access,
+      accessTokenExpires,
+      refresh: token.refreshToken,
+    };
+  } catch (error: any) {
+    console.error('❌ Refresh token failed:', error.data);
+    return {
+      ...token,
+      accessToken: undefined,
+      refreshToken: undefined,
+      accessTokenExpires: 0,
+      error: 'RefreshAccessTokenError',
+    };
   }
 }
 
 export const authOptions = {
   providers: [
+    // 🔹 Google OAuth
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
+
+    // 🔹 Credentials login
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -45,11 +76,9 @@ export const authOptions = {
 
         const decoded = parseSnakeToCamel(jwt.decode(response.access)) as JwtPayload;
 
-        if (!decoded) {
-          throw new Error('Invalid token');
-        }
+        if (!decoded) throw new Error('Invalid token');
 
-        const user: User = await profile(decoded.userId, response.access);
+        const user: User = await getProfile(decoded.userId, response.access);
 
         return {
           ...user,
@@ -63,43 +92,30 @@ export const authOptions = {
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
+  session: { strategy: 'jwt' },
   callbacks: {
-    async signIn() {
-      // const response = await userExists(profile?.email);
-      // if (response?.exists) {
-      //   return '/auth/sign-in?error=UserExists';
-      // }
-      return true;
-    },
-    async jwt({
-      token,
-      user,
-      account,
-      profile,
-    }: {
-      token: any;
-      user: any;
-      account: any;
-      profile: any;
-    }) {
+    async jwt({ token, user, account, profile }: any) {
+      // --- Initial login: Google ---
       if (account?.provider === 'google') {
-        const response = await socialSignIn('google-oauth2', account?.access_token);
+        const response = await socialSignIn('google-oauth2', account.access_token);
         const decoded = parseSnakeToCamel(jwt.decode(response.access)) as JwtPayload;
 
-        if (!decoded) {
-          throw new Error('Invalid token');
-        }
         token.id = decoded?.userId;
         token.name = profile?.name;
         token.email = profile?.email;
         token.picture = profile?.picture;
         token.accessToken = response.access;
         token.refreshToken = response.refresh;
-        token.emailVerified = decoded?.emailVerified;
+        token.accessTokenExpires = decoded?.exp ? decoded.exp * 1000 : Date.now() + 3600 * 1000;
         token.hasInterests = decoded?.hasInterests;
         token.hasBillingDetails = decoded?.hasBillingDetails;
         token.hasSubscribed = decoded?.hasSubscribed;
-      } else if (user) {
+        return token;
+      }
+
+      // --- Initial login: Credentials ---
+      if (user) {
+        const decoded = jwt.decode(user.accessToken) as JwtPayload;
         token.id = user.id;
         token.name = user.displayName ?? `${user.firstName} ${user.lastName}`;
         token.email = user.email;
@@ -107,12 +123,22 @@ export const authOptions = {
         token.interests = user.interests;
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
+        token.accessTokenExpires = decoded?.exp ? decoded.exp * 1000 : Date.now() + 3600 * 1000;
         token.hasInterests = user.hasInterests;
         token.hasBillingDetails = user.hasBillingDetails;
         token.hasSubscribed = user.hasSubscribed;
+        return token;
       }
-      return token;
+
+      // --- If token is still valid, return it ---
+      if (Date.now() < (token.accessTokenExpires || 0)) {
+        return token;
+      }
+
+      // --- Otherwise, refresh it ---
+      return await refreshAccessToken(token?.refreshToken);
     },
+
     async session({ session, token }: { session: any; token: any }) {
       session.user = {
         id: token.id,
@@ -125,10 +151,12 @@ export const authOptions = {
         hasBillingDetails: token.hasBillingDetails,
         hasSubscribed: token.hasSubscribed,
       };
+      session.error = token.error;
       return session;
     },
   },
 };
 
+// Export for Next.js App Router (app/api/auth/[...nextauth]/route.ts)
 const handler = NextAuth(authOptions as any);
 export { handler as GET, handler as POST };

@@ -15,7 +15,14 @@ export const useExperiences = (
     category,
     invited = false,
     isPublic = true,
-  }: { page: number; enabled: boolean; type?: string; category?: string; invited?: boolean; isPublic?: boolean } = {
+  }: {
+    page: number;
+    enabled: boolean;
+    type?: string;
+    category?: string;
+    invited?: boolean;
+    isPublic?: boolean;
+  } = {
     page: 1,
     enabled: true,
     type: 'all',

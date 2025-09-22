@@ -18,6 +18,7 @@ export default async function Home({ searchParams }: { searchParams: { category?
   const categoryFromQuery = searchParams?.category;
 
   const placeCategories = await getPlaceCategories();
+
   // Default to the first filter (or get it from query params if available)
   const selectedCategoryId =
     categoryFromQuery ||
@@ -35,7 +36,7 @@ export default async function Home({ searchParams }: { searchParams: { category?
           />
         </Suspense>
       </div>
-      <div className="col-span-12 mx-4 mb-4 md:col-span-10 md:col-start-2 md:mx-0">
+      <div className="col-span-12 mb-4 md:col-span-10 md:col-start-2 md:mx-0 md:mx-4">
         <ListPlaces key={selectedCategoryId} selectedCategoryId={selectedCategoryId} />
       </div>
     </main>

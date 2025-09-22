@@ -10,12 +10,16 @@ export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://api.tukai.co',
   headers: {
     'Content-Type': 'application/json',
-    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJhY2Nlc3MiLCJleHAiOjE3NTQwMjA1OTksImlhdCI6MTc0NjI0NDU5OSwianRpIjoiMDA0OTIwM2QzNDVkNDM2ZDk3MzNlMzRlYTZlZDJlM2YiLCJ1c2VyX2lkIjoiMDU4Yjc4NTMtYzVmNC00ZTQzLWIzNTYtZGExZThjZTA1ZjZlIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImhhc19pbnRlcmVzdHMiOnRydWUsImhhc19iaWxsaW5nX2RldGFpbHMiOnRydWUsImhhc19zdWJzY3JpYmVkIjp0cnVlfQ.5FPxf1e1DyTkCBaJtGV-UvYp4CuPc_Z-H3BwmLqx1p4`,
+    // 'ngrok-skip-browser-warning': 'true'
+    // Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJhY2Nlc3MiLCJleHAiOjE3NTY0ODA3OTgsImlhdCI6MTc1NjQ3OTg5OCwianRpIjoiNTllNDNlYmQ4OTVhNDgwNDk2M2NmODdhZTZkYzlkZGUiLCJ1c2VyX2lkIjoiZGU4ODRkNTktYzU5Yy00NjdjLThkOGUtY2I5NzYwNGZlZTRmIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImhhc19pbnRlcmVzdHMiOnRydWUsImhhc19mdWxsX25hbWUiOnRydWUsImhhc19iaWxsaW5nX2RldGFpbHMiOnRydWUsImhhc19zdWJzY3JpYmVkIjp0cnVlfQ.Virohow4c5QxSBiAMZHqxCMasMUqPC_YZWZu8XRUf5E`,
   },
 });
 
-export const apiWithToken = async () => {
-  const token = await getAccessToken();
+export const apiWithToken = async (token?: string) => {
+  if (!token) {
+    const bearerToken = await getAccessToken();
+    token = bearerToken || '';
+  }
   console.log('token', token);
   return axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://api.tukai.co',

@@ -23,7 +23,7 @@ export default function IconRadioButtonGroup() {
   ];
 
   return (
-    <div className="item-center flex h-10 rounded-[50px] border-[1px] border-gray-200 bg-white px-1 py-1">
+    <div className="item-center flex hidden h-10 rounded-[50px] border-[1px] border-gray-200 bg-white px-1 py-1">
       <div className={`grid grid-cols-2 gap-2`}>
         {options.map((option) => (
           <div
