@@ -28,7 +28,7 @@ export default async function Home({ searchParams }: { searchParams: { category?
 
   return (
     <main className="grid h-full grid-cols-12 gap-4 px-4 md:px-0">
-      <div className="sticky top-[105px] z-50 col-span-12">
+      <div className="sticky top-[81px] z-50 col-span-12 md:top-[105px]">
         <Suspense fallback={<PillsSkeleton />}>
           <PlaceCategoryFilters
             placeCategories={placeCategories?.data?.results}
@@ -36,7 +36,7 @@ export default async function Home({ searchParams }: { searchParams: { category?
           />
         </Suspense>
       </div>
-      <div className="col-span-12 mb-4 md:col-span-10 md:col-start-2 md:mx-0 md:mx-4">
+      <div className="col-span-12 mb-4 md:col-span-10 md:col-start-2 md:mx-0">
         <ListPlaces key={selectedCategoryId} selectedCategoryId={selectedCategoryId} />
       </div>
     </main>
