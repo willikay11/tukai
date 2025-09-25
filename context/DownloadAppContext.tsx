@@ -42,12 +42,13 @@ export const DownloadAppProvider = ({ children }: { children: ReactNode }) => {
   return (
     <DownloadAppContext.Provider value={{ onOpen }}>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="h-fit w-[20rem] max-w-none p-0">
+        <DialogContent className="h-fit w-[80%] !p-0 md:w-[20rem]">
           <div className="px-4 pt-4">
             <p className="mb-2.5 text-sm text-gray-700">Please download the app to continue</p>
             <Button
               className="h-[45px] w-full"
               onClick={() => {
+                onDownloadApp();
                 setIsOpen(false);
               }}
             >
