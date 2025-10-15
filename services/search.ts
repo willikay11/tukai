@@ -11,7 +11,13 @@ export const searchPlaces = async (
 ): Promise<SearchResult[]> => {
   const [places, experiences] = await Promise.all([
     fetchPlaces(1, perPage ?? 5, categoryId, query),
-    fetchExperiences(1, perPage ?? 5, 'all', categoryId, false, query),
+    fetchExperiences({
+      page: 1,
+      page_size: perPage ?? 5,
+      category: categoryId,
+      invited: false,
+      search: query,
+    }),
   ]);
 
   const placesData = parseSnakeToCamel(places.data?.results);
