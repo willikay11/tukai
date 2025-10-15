@@ -11,13 +11,18 @@ type ListExperiencesProps = {
   date?: string;
 };
 
-export default function Experiences({ title, category, skeletonCount = 12, date }: ListExperiencesProps) {
+export default function Experiences({
+  title,
+  category,
+  skeletonCount = 12,
+  date,
+}: ListExperiencesProps) {
   const [page, setPage] = useState(1);
   const { data: experiences, isLoading } = useExperiences(
     {
       page,
       category: category,
-      date
+      date,
     },
     true,
   );

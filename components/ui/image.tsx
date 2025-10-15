@@ -5,23 +5,35 @@ import Image, { ImageProps } from 'next/image';
 
 export default function TukaiImage({ src, alt, ...props }: ImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
   return (
     <>
-      {!isLoaded && <ImageSkeleton />}
-      <Image
-        src={src}
-        alt={alt}
-        quality={100}
-        layout="fill"
-        objectFit="cover"
-        className="carousel-image opacity-0 transition-opacity duration-300"
-        onLoadingComplete={(image) => {
-          image.classList.remove('opacity-0');
-          setIsLoaded(true);
-        }}
-        loading="lazy"
-        {...props}
-      />
+      {!isLoaded && !hasError && <ImageSkeleton />}
+      {!hasError && (
+        <Image
+          src={src}
+          alt={alt}
+          quality={100}
+          layout="fill"
+          objectFit="cover"
+          className="carousel-image opacity-0 transition-opacity duration-300"
+          onLoadingComplete={(image) => {
+            image.classList.remove('opacity-0');
+            setIsLoaded(true);
+          }}
+          onError={() => {
+            setHasError(true);
+            setIsLoaded(true);
+          }}
+          loading="lazy"
+          {...props}
+        />
+      )}
+      {hasError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-500">
+          <span className="text-sm">Image not available</span>
+        </div>
+      )}
     </>
   );
 }

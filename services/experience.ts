@@ -20,7 +20,6 @@ export type ExperiencesQueryParams = {
 };
 
 export async function fetchExperiences(params: ExperiencesQueryParams): Promise<ApiResponse> {
-  console.log(params);
   try {
     const response = await api.get(`/v1/experiences/`, { params });
 
