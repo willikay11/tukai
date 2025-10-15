@@ -4,35 +4,22 @@ import {
   fetchExperiences,
   purchaseExperienceTicket,
   bookmarkExperience,
+  ExperiencesQueryParams,
 } from '@/services/experience';
 import { useQueryClient } from '@tanstack/react-query';
 
-export const useExperiences = (
-  {
-    page,
-    enabled,
-    type,
-    category,
-    invited = false,
-    isPublic = true,
-  }: {
-    page: number;
-    enabled: boolean;
-    type?: string;
-    category?: string;
-    invited?: boolean;
-    isPublic?: boolean;
-  } = {
-    page: 1,
-    enabled: true,
-    type: 'all',
-    invited: false,
-    isPublic: true,
-  },
-) => {
+export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean) => {
   return useQuery({
-    queryKey: ['experiences', page, type, category, invited],
-    queryFn: async () => await fetchExperiences(page, 12, type, category, invited, isPublic),
+    queryKey: [
+      'experiences',
+      params.page,
+      params.page_size,
+      params.reserved_by,
+      params.category,
+      params.invited,
+      params.date,
+    ],
+    queryFn: async () => await fetchExperiences(params),
     enabled: enabled,
   });
 };

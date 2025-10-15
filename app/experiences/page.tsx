@@ -1,7 +1,8 @@
 import { Suspense } from 'react';
 import { PillsSkeleton } from '@/app/components/skeletons';
-import Experiences from './components/experiences';
+import Experiences from './components/List/experiences';
 import ExperienceFilters from './components/experienceFilters';
+import moment from 'moment';
 
 export default function ExperiencesPage({ searchParams }: { searchParams: { category?: string } }) {
   const categoryFromQuery = searchParams?.category;
@@ -32,7 +33,21 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
       {/* {(categoryFromQuery === 'all' || categoryFromQuery === undefined) && (
         <Experiences type="invited" skeletonCount={3} />
       )} */}
-      <Experiences key={categoryFromQuery} category={categoryFromQuery} type="discover" />
+      <Experiences
+        key={categoryFromQuery}
+        category={categoryFromQuery}
+        title={`Happening Today: ${moment().format('Do MMMM, YYYY')}`}
+        date={moment().format('YYYY-MM-DD')}
+      />
+
+      <Experiences
+        key={categoryFromQuery}
+        category={categoryFromQuery}
+        title={`Happening Tommorrow: ${moment().add('days', 1).format('Do MMMM, YYYY')}`}
+        date={moment().add('days', 1).format('YYYY-MM-DD')}
+      />
+
+      <Experiences key={categoryFromQuery} category={categoryFromQuery} title="Discover" />
     </main>
   );
 }

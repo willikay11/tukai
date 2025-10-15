@@ -2,48 +2,26 @@ import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { ApiResponse } from '@/types/apiResponse';
 import { api, apiWithToken } from '@/services/apiService';
 import { getSession } from 'next-auth/react';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
-export async function fetchExperiences(
-  page: number,
-  perPage: number,
-  type?: string,
-  category?: string,
-  invited?: boolean,
-  isPublic?: boolean,
-  search?: string,
-): Promise<ApiResponse> {
+export type ExperiencesQueryParams = {
+  search?: string;
+  bookmarked?: boolean;
+  sold_out?: boolean;
+  is_public?: boolean;
+  is_paid?: boolean;
+  status?: string;
+  category?: string;
+  reserved_by?: string;
+  hosted_by?: string;
+  page?: number;
+  page_size?: number;
+  invited?: boolean;
+  date?: string;
+};
+
+export async function fetchExperiences(params: ExperiencesQueryParams): Promise<ApiResponse> {
   try {
-    const queryParams = new URLSearchParams();
-    queryParams.append('status', 'published');
-    if (page) queryParams.append('page', page.toString());
-    if (perPage) queryParams.append('page_size', perPage.toString());
-    if (search) queryParams.append('search', search);
-    if (type === 'reserved') {
-      const session = await getSession();
-      queryParams.append('reserved_by', session?.user?.id || '');
-    }
-    if (type === 'saved') {
-      queryParams.append('bookmarked', 'true');
-    }
-    if (type === 'hosting') {
-      queryParams.append('hosted_by', 'true');
-    }
-
-    if (category) {
-      queryParams.append('category', category);
-    }
-    if (invited) {
-      queryParams.append('invited', 'true');
-    }
-    if (isPublic) {
-      queryParams.append('is_public', 'true');
-    } else {
-      queryParams.append('is_public', 'false');
-    }
-
-    const response = await api.get(`/v1/experiences/?${queryParams.toString()}`);
+    const response = await api.get(`/v1/experiences/`, { params });
 
     return {
       status: response.status,
