@@ -1,4 +1,5 @@
 'use client';
+
 import { useState } from 'react';
 import { ImageSkeleton } from '@/app/components/skeletons';
 import Image, { ImageProps } from 'next/image';

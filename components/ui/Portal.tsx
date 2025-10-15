@@ -1,23 +1,22 @@
-// components/Portal.tsx
-'use client';
+// 'use client';
 
-import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+// import { useEffect, useState } from 'react';
+// import { createPortal } from 'react-dom';
 
-export function Portal({
-  children,
-  target = document.body,
-}: {
-  children: React.ReactNode;
-  target?: Element;
-}) {
-  const [mounted, setMounted] = useState(false);
+// export function Portal({
+//   children,
+//   target = document.body,
+// }: {
+//   children: React.ReactNode;
+//   target?: Element;
+// }) {
+//   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+//   useEffect(() => {
+//     setMounted(true);
+//   }, []);
 
-  if (!mounted) return null;
+//   if (!mounted) return null;
 
-  return createPortal(children, target);
-}
+//   return createPortal(children, target);
+// }
