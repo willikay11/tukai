@@ -1,20 +1,15 @@
-'use client';
-
 import { Button } from '@/components/ui/button';
 import numeral from 'numeral';
 import { Experience } from '@/types/experience';
-import Reserve from './reserve';
-import { useState } from 'react';
+import Link from 'next/link';
 
 export default function ExperienceActions({ experience }: { experience: Experience }) {
-  const [isOpen, setIsOpen] = useState(false);
   return (
-    <>
-      <Reserve isOpen={isOpen} closeModal={() => setIsOpen(false)} experience={experience} />
-      <Button size="lg" className="h-full w-full" onClick={() => setIsOpen(true)}>
+    <Link href={`/experiences/${experience.id}/reserve`}>
+      <Button size="lg" className="h-full w-full">
         {experience.priceStartsFrom.currency}{' '}
         {numeral(experience.priceStartsFrom.amount).format('0,0')} | Make Reservation
       </Button>
-    </>
+    </Link>
   );
 }

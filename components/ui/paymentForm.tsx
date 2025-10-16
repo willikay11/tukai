@@ -75,44 +75,27 @@ const PaymentForm = forwardRef(
 
     return (
       <>
-        <div className="mb-2 flex flex-col">
+        <div className="mb-2 inline-flex">
           {options.map((option) => (
             <div
               key={option.value}
               className="mb-2 inline-flex cursor-pointer items-center"
               onClick={() => setSelectedOption(option.value)}
             >
-              <div
-                className={clsx(
-                  'inline-flex h-4 w-4 items-center justify-center rounded-full border-[1px] bg-white checked:text-orange-600 checked:hover:bg-orange-600 focus:border-transparent focus:ring-0 focus:ring-blue-300 checked:focus:bg-orange-600 checked:active:bg-orange-600',
-                  {
-                    'border-primary': selectedOption === option.value,
-                    'border-gray-300': selectedOption !== option.value,
-                  },
-                )}
-              >
-                <div
-                  className={clsx('h-2.5 w-2.5 rounded-full bg-primary', {
-                    hidden: selectedOption !== option.value,
-                    block: selectedOption === option.value,
-                  })}
-                />
-              </div>
               <span
-                className={clsx('ml-2 inline-flex items-center text-xs text-gray-700', {
-                  'font-bold': selectedOption === option.value,
-                  'font-normal': selectedOption !== option.value,
+                className={clsx('ml-2 inline-flex items-center text-xs text-gray-700 p-3 rounded-lg', {
+                  'font-bold bg-green-50 border-[1px] border-green-700': selectedOption === option.value,
+                  'font-normal bg-gray-100': selectedOption !== option.value,
                 })}
               >
-                {option.label}
-                <div className="mx-2 h-[6px] w-[1px] rounded-[2px] bg-gray-300" />
                 <Image
                   src={option.icon.src}
                   alt={option.label}
-                  className={`h-[${option.icon.height}px] !w-[${option.icon.width}px]`}
+                  className={`h-[${option.icon.height}px] !w-[${option.icon.width}px] mr-2`}
                   height={option.icon.height}
                   width={option.icon.width}
                 />
+                {option.label}
               </span>
             </div>
           ))}
