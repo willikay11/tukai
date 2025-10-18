@@ -96,12 +96,19 @@ export default function Share({
             <p className="text-2xl font-black text-gray-700">Share Location</p>
 
             <div className="relative aspect-square h-[10.25rem] w-full">
-              <TukaiImage src={coverPhoto} alt={title} quality={100} fill className='rounded-2xl' style={{ objectFit: 'cover'}} />
+              <TukaiImage
+                src={coverPhoto}
+                alt={title}
+                quality={100}
+                fill
+                className="rounded-2xl"
+                style={{ objectFit: 'cover' }}
+              />
             </div>
 
             <p className="text-base font-bold text-gray-600">{title}</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
               {shareOptions.map((option) => (
                 <Button
                   key={option.title}

@@ -18,7 +18,9 @@ export default function TukaiImage({ src, alt, ...props }: ImageProps) {
           quality={100}
           layout="fill"
           objectFit="cover"
-          className={clsx(`carousel-image opacity-0 transition-opacity duration-300 ${props?.className}`)}
+          className={clsx(
+            `carousel-image opacity-0 transition-opacity duration-300 ${props?.className}`,
+          )}
           onLoadingComplete={(image) => {
             image.classList.remove('opacity-0');
             setIsLoaded(true);
@@ -32,7 +34,11 @@ export default function TukaiImage({ src, alt, ...props }: ImageProps) {
         />
       )}
       {hasError && (
-        <div className={clsx(`absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-500 ${props.className}`)}>
+        <div
+          className={clsx(
+            `absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-500 ${props.className}`,
+          )}
+        >
           <span className="text-sm">Image not available</span>
         </div>
       )}

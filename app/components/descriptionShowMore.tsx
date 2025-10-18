@@ -52,15 +52,14 @@ const DescriptionShowMore = ({
 
       <Drawer isOpen={isOpen} setIsOpen={setIsOpen}>
         <div className="relative aspect-square h-[16.25rem] w-full">
-          {/* <Image
+          <TukaiImage
             src={photo}
             alt=""
             quality={100}
-            layout="fill"
-            objectFit="cover"
+            fill
             className="rounded-t-2xl"
-          /> */}
-          <TukaiImage src={photo} alt='' quality={100} fill className='rounded-t-2xl' style={{ objectFit: 'cover' }} />
+            style={{ objectFit: 'cover' }}
+          />
         </div>
 
         <div className="max p-6">
