@@ -83,10 +83,14 @@ const PaymentForm = forwardRef(
               onClick={() => setSelectedOption(option.value)}
             >
               <span
-                className={clsx('ml-2 inline-flex items-center text-xs text-gray-700 p-3 rounded-lg', {
-                  'font-bold bg-green-50 border-[1px] border-green-700': selectedOption === option.value,
-                  'font-normal bg-gray-100': selectedOption !== option.value,
-                })}
+                className={clsx(
+                  'ml-2 inline-flex items-center rounded-lg p-3 text-xs text-gray-700',
+                  {
+                    'border-[1px] border-green-700 bg-green-50 font-bold':
+                      selectedOption === option.value,
+                    'bg-gray-100 font-normal': selectedOption !== option.value,
+                  },
+                )}
               >
                 <Image
                   src={option.icon.src}

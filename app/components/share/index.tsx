@@ -16,6 +16,7 @@ import {
 } from '@hugeicons/react-pro';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import TukaiImage from '@/components/ui/image';
 
 const shareOptions = [
   {
@@ -95,12 +96,11 @@ export default function Share({
             <p className="text-2xl font-black text-gray-700">Share Location</p>
 
             <div className="relative aspect-square h-[10.25rem] w-full">
-              <Image
+              <TukaiImage
                 src={coverPhoto}
                 alt={title}
                 quality={100}
-                layout="fill"
-                // objectFit="cover"
+                fill
                 className="rounded-2xl"
                 style={{ objectFit: 'cover' }}
               />
@@ -108,7 +108,7 @@ export default function Share({
 
             <p className="text-base font-bold text-gray-600">{title}</p>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
               {shareOptions.map((option) => (
                 <Button
                   key={option.title}

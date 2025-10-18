@@ -27,7 +27,7 @@ export default async function ViewExperiencePage({ params }: { params: { experie
   return (
     <>
       <main className="grid grid-cols-12 gap-4">
-        <div className="col-span-12 mt-8 mx-4 md:mx-0 md:col-span-10 md:col-start-2 lg:mx-0 lg:col-span-6 lg:col-start-4 2xl:mx-0 2xl:col-span-4 2xl:col-start-5">
+        <div className="col-span-12 mx-4 mt-8 md:col-span-10 md:col-start-2 md:mx-0 lg:col-span-6 lg:col-start-4 lg:mx-0 2xl:col-span-4 2xl:col-start-5 2xl:mx-0">
           <div className="mb-3 inline-flex w-full justify-between">
             <div className="inline-flex">
               <div className="flex flex-col">
@@ -75,7 +75,7 @@ export default async function ViewExperiencePage({ params }: { params: { experie
                 }
               />
             </div>
-            <div className="inline-flex gap-2 mt-2.5">
+            <div className="mt-2.5 inline-flex gap-2">
               {experience.categories.map((category) => (
                 <div
                   className="inline-flex w-fit rounded-full bg-gray-100 px-4 py-2"

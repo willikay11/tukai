@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import IconComponent from './iconComponent';
 import Drawer from '@/components/ui/drawer';
+import TukaiImage from '@/components/ui/image';
 
 const DescriptionShowMore = ({
   photo,
@@ -51,13 +52,13 @@ const DescriptionShowMore = ({
 
       <Drawer isOpen={isOpen} setIsOpen={setIsOpen}>
         <div className="relative aspect-square h-[16.25rem] w-full">
-          <Image
+          <TukaiImage
             src={photo}
             alt=""
             quality={100}
-            layout="fill"
-            objectFit="cover"
+            fill
             className="rounded-t-2xl"
+            style={{ objectFit: 'cover' }}
           />
         </div>
 

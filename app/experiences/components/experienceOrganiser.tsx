@@ -17,10 +17,10 @@ export default function ExperienceOrganiser({ experience }: { experience: Experi
       <div className="inline-flex w-full rounded-[15px] bg-blue-50 px-2 py-3.5">
         <div className="inline-flex w-full justify-between">
           <div className="inline-flex">
-          <Avatar className={`h-[40px] w-[40px] mr-2.5`}>
-            <AvatarImage src={experience.host.picture} />
-            <AvatarFallback />
-          </Avatar>
+            <Avatar className={`mr-2.5 h-[40px] w-[40px]`}>
+              <AvatarImage src={experience.host.picture} />
+              <AvatarFallback />
+            </Avatar>
             <div className="flex flex-col">
               <div className="inline-flex items-center">
                 <p className="mr-1 text-sm font-semibold text-gray-700">

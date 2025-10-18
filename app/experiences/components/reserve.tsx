@@ -63,20 +63,30 @@ export default function Reserve({ experience }: { experience: Experience }) {
           className="rounded-2xl"
         />
       </div>
-      <p className="mb-1 text-1xl font-black text-gray-700">{experience.title}</p>
-      <p className="mb-3 text-base text-gray-500 inline-flex items-center mb-4">
+      <p className="text-1xl mb-1 font-black text-gray-700">{experience.title}</p>
+      <p className="mb-3 mb-4 inline-flex items-center text-base text-gray-500">
         {moment(experience.startDate).format('MMM DD')}
-        <Separator style={{ height: '10px', width: '10px', borderRadius: '50%', marginRight: 10, marginLeft: 10 }} />
+        <Separator
+          style={{
+            height: '10px',
+            width: '10px',
+            borderRadius: '50%',
+            marginRight: 10,
+            marginLeft: 10,
+          }}
+        />
         {moment(experience.startDate)?.format('HH:mm A')} -{' '}
         {moment(experience.endDate)?.format('HH:mm A')}
       </p>
 
-      <Separator style={{ height: '7px', width: '100%', borderRadius: '20px', backgroundColor: '#F3F4F6' }} />
+      <Separator
+        style={{ height: '7px', width: '100%', borderRadius: '20px', backgroundColor: '#F3F4F6' }}
+      />
 
-      <div className="flex flex-col mt-4 mb-4">
+      <div className="mb-4 mt-4 flex flex-col">
         <p className="mb-2 text-base font-bold text-gray-700">Ticket Type</p>
         {experience.tickets.map((ticket: Ticket) => (
-          <div key={ticket.id} className="flex w-full flex-row justify-between mb-2.5">
+          <div key={ticket.id} className="mb-2.5 flex w-full flex-row justify-between">
             <div className="flex flex-col items-start">
               <p className="text-sm font-bold text-gray-700">{ticket.name}</p>
               <p className="text-sm text-gray-500">
@@ -109,9 +119,11 @@ export default function Reserve({ experience }: { experience: Experience }) {
         </div>
       </div>
 
-      <Separator style={{ height: '7px', width: '100%', borderRadius: '20px', backgroundColor: '#F3F4F6' }} />
+      <Separator
+        style={{ height: '7px', width: '100%', borderRadius: '20px', backgroundColor: '#F3F4F6' }}
+      />
 
-      <div className="mt-3 flex flex-col mt-4">
+      <div className="mt-3 mt-4 flex flex-col">
         <p className="mb-2 text-sm font-bold text-gray-700">Payment Information</p>
         <PaymentForm ref={formRef} onSubmit={handleSubmit} />
       </div>
