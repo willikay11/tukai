@@ -106,7 +106,7 @@ export default function AuthActions() {
         //   <span className="text-xs text-gray-800">Sign In/Sign Up</span>
         // </Link>
         <div className="inline-flex cursor-pointer" onClick={() => onOpen()}>
-          <UserAdd01Icon size={15} className="mr-2 text-gray-700" />
+          <UserAdd01Icon size={16} className="mr-2 text-gray-700" />
           <span className="text-xs text-gray-800">Sign In/Sign Up</span>
         </div>
       )}

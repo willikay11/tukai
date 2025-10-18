@@ -27,7 +27,7 @@ export default function Experiences({
     true,
   );
   return (
-    <div className={clsx('col-span-12 mx-4 mb-4 mt-4 md:col-span-10 md:col-start-2 md:mx-0')}>
+    <div className={clsx('col-span-12 mb-4 mt-4 md:col-span-10 md:col-start-2 md:mx-0')}>
       <p className="mb-4 text-xl font-semibold text-gray-700">{title}</p>
       <ListExperiences
         experiences={experiences?.data?.results}

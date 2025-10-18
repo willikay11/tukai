@@ -42,9 +42,13 @@ export default function RootLayout({
               <DownloadAppProvider>
                 <div className="sticky top-0 z-50 grid grid-cols-12 border-b-[1px] border-gray-100 bg-white md:gap-4">
                   <DownloadApp />
+                  <div className='inline-flex justify-between col-span-12 mx-4 mt-2.5 md:hidden lg:hidden 2xl:hidden'>
+                    <Nav />
+                    <AuthActions />
+                  </div>
                   <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
                     <div className="inline-flex grid h-[80px] w-full grid-cols-12 items-center justify-between md:mt-6">
-                      <div className="col-span-1 flex h-full items-center md:col-span-4 lg:col-span-4">
+                      <div className="hidden flex h-full items-center md:inline-flex md:col-span-5 lg:inline-flex lg:col-span-5">
                         <Link href="/" className="hidden h-full items-center md:flex">
                           <Image
                             src="/images/logo.svg"
@@ -56,13 +60,13 @@ export default function RootLayout({
                         </Link>
                         <Nav />
                       </div>
-                      <div className="col-span-9 inline-flex justify-center md:col-span-6 lg:col-span-6">
-                        <div className="mr-2 w-72 md:block">
+                      <div className="col-span-12 inline-flex justify-center md:col-span-4 lg:col-span-4">
+                        <div className="w-full md:inline-flex">
                           <Search />
                         </div>
                         <IconRadioButtonGroup />
                       </div>
-                      <div className="col-span-2 flex h-full items-center justify-end md:col-span-2 lg:col-span-2">
+                      <div className="hidden flex h-full items-center justify-end md:inline-flex md:col-span-3 lg:inline-flex lg:col-span-3">
                         <AuthActions />
                       </div>
                     </div>
