@@ -51,10 +51,8 @@ export default function AuthActions() {
                   />
                   <div className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-[1px] border-white bg-red-600" />
                 </div>
-                <span className="ml-2 mr-2.5 text-xs text-gray-600">
-                  {session?.user?.name}
-                </span>
-                <NavigationMenuContent className="w-54 rounded-lg p-2 z-50">
+                <span className="ml-2 mr-2.5 text-xs text-gray-600">{session?.user?.name}</span>
+                <NavigationMenuContent className="w-54 z-50 rounded-lg p-2">
                   <div className="flex w-40 flex-col gap-2">
                     <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
                       <div className="inline-flex items-center gap-2">
