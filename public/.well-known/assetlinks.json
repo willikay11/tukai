@@ -1,0 +1,32 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.tukai.preview",
+      "sha256_cert_fingerprints": [
+        "A7:B6:7F:B6:49:CA:44:F0:E5:01:44:A0:28:BB:CF:EB:EC:C3:C9:F4:99:30:02:6D:A4:4A:B9:11:46:9C:F5:1F"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.tukai.app",
+      "sha256_cert_fingerprints": [
+        "4A:64:E8:15:7F:BF:FD:E3:EF:31:85:C9:4A:CA:61:6F:44:1B:EC:12:D2:5D:27:DF:A3:5C:79:24:C3:DC:52:0C"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.tukai.dev",
+      "sha256_cert_fingerprints": [
+        "BD:31:9A:3F:13:15:07:B6:9F:BC:51:C1:A8:B1:B4:E1:AD:96:B7:51:37:6B:F3:E5:75:47:C4:72:83:6E:20:B1"
+      ]
+    }
+  }
+]

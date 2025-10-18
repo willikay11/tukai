@@ -29,7 +29,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
 
   return (
     <main className="grid grid-cols-12 gap-4">
-      <div className="col-span-12 mt-8 md:col-span-6 md:col-start-4 2xl:col-span-4 2xl:col-start-5">
+      <div className="col-span-12 mt-8 mx-4 md:mx-0 md:col-span-6 md:col-start-4 2xl:mx-0 2xl:col-span-4 2xl:col-start-5">
         <div className="mb-3 inline-flex w-full justify-between">
           <div className="inline-flex">
             <div className="flex flex-col">
@@ -109,7 +109,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
           />
         </div>
       </div>
-      <div className="col-span-12 bg-gray-100 py-4">
+      {/* <div className="col-span-12 bg-gray-100 py-4">
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-12 md:col-start-4 2xl:col-start-5">
             <p className="mb-2.5 text-base font-semibold text-gray-800">
@@ -152,7 +152,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       <div className="col-span-12 md:col-span-6 md:col-start-4 2xl:col-span-4 2xl:col-start-5">
         <PlaceTabs placeId={params.placeId} categories={place.categories} />
       </div>

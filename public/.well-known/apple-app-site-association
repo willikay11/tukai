@@ -1,0 +1,23 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": [
+          "J7L9AB26YG.com.tukai.preview",
+          "J7L9AB26YG.com.tukai.dev",
+          "J7L9AB26YG.com.tukai.app"
+        ],
+        "paths": [
+          "/(tabs)/*",
+          "/place/*",
+          "/experience/*",
+          "/user-profile/*",
+          "/tour-guide/*",
+          "/community/*",
+          "/local-guides/*"
+        ]
+      }
+    ]
+  }
+}
