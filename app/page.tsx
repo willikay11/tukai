@@ -28,7 +28,7 @@ export default async function Home({ searchParams }: { searchParams: { category?
 
   return (
     <main className="grid h-full grid-cols-12 gap-4 px-4 md:px-0">
-      <div className="sticky top-[81px] z-50 col-span-12 md:top-[105px]">
+      <div className="sticky top-[81px] z-20 col-span-12 md:top-[105px]">
         <Suspense fallback={<PillsSkeleton />}>
           <PlaceCategoryFilters
             placeCategories={placeCategories?.data?.results}

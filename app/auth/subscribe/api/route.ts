@@ -36,26 +36,29 @@ export async function CreateBillingDetails(data: any) {
       },
     });
 
-    const response = await fetch('https://api.tukai.co/v1/payments/billing-details/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/v1/payments/billing-details/`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          billing_address: {
+            user: session?.user?.id,
+            country: countryCode,
+            is_active: true,
+          },
+          payment_method: {
+            user: session?.user?.id,
+            payment_option: paymentOption,
+            mobile_money_phone: phoneNumber,
+            is_active: true,
+          },
+        }),
       },
-      body: JSON.stringify({
-        billing_address: {
-          user: session?.user?.id,
-          country: countryCode,
-          is_active: true,
-        },
-        payment_method: {
-          user: session?.user?.id,
-          payment_option: paymentOption,
-          mobile_money_phone: phoneNumber,
-          is_active: true,
-        },
-      }),
-    });
+    );
 
     const res = await response.json();
 
@@ -94,7 +97,7 @@ export async function CreateSubscription(data: any) {
     const session = await getServerSession(authOptions);
     const token = session?.user?.accessToken;
 
-    const response = await fetch('https://api.tukai.co/v1/subscriptions/', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/subscriptions/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

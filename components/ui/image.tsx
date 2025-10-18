@@ -5,7 +5,12 @@ import { ImageSkeleton } from '@/app/components/skeletons';
 import Image, { ImageProps } from 'next/image';
 import clsx from 'clsx';
 
-export default function TukaiImage({ src, alt, ...props }: ImageProps) {
+export default function TukaiImage({
+  src,
+  alt,
+  showNotFoundText = true,
+  ...props
+}: ImageProps & { showNotFoundText?: boolean }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   return (
@@ -39,7 +44,7 @@ export default function TukaiImage({ src, alt, ...props }: ImageProps) {
             `absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-500 ${props.className}`,
           )}
         >
-          <span className="text-sm">Image not available</span>
+          {showNotFoundText && <span className="text-sm">Image not available</span>}
         </div>
       )}
     </>

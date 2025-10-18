@@ -2,7 +2,7 @@ export async function POST(req: Request) {
   try {
     const { token, password } = await req.json();
 
-    const response = await fetch('https://api.oltukai.co/v1/accounts/password-reset/', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/accounts/password-reset/`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

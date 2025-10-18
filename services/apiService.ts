@@ -7,7 +7,7 @@ const getAccessToken = async () => {
 };
 
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://api.tukai.co',
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     'Content-Type': 'application/json',
     // 'ngrok-skip-browser-warning': 'true'
@@ -22,7 +22,7 @@ export const apiWithToken = async (token?: string) => {
   }
   console.log('token', token);
   return axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://api.tukai.co',
+    baseURL: process.env.NEXT_PUBLIC_API_URL,
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,

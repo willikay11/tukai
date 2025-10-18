@@ -2,13 +2,16 @@ export async function POST(req: Request) {
   try {
     const { email, token } = await req.json();
 
-    const response = await fetch('https://api.tukai.co/v1/accounts/token-verification/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/v1/accounts/token-verification/`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token, email, category: 'account_verification' }),
       },
-      body: JSON.stringify({ token, email, category: 'account_verification' }),
-    });
+    );
 
     if (!response.ok) {
       return Response.json(
@@ -41,7 +44,7 @@ export async function PUT(req: Request) {
   try {
     const { email } = await req.json();
 
-    const response = await fetch('https://api.tukai.co/v1/accounts/token', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/accounts/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
