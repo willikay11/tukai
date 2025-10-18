@@ -5,14 +5,7 @@ export async function POST(req: Request) {
   try {
     const { firstName, lastName, email, password, interests, timezone } = await req.json();
 
-    console.log('interests: ', interests);
-    console.log('timezone: ', timezone);
-    console.log('firstName: ', firstName);
-    console.log('lastName: ', lastName);
-    console.log('email: ', email);
-    console.log('password: ', password);
-
-    const response = await fetch('https://api.tukai.co/v1/accounts/users/', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/accounts/users/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -64,12 +57,15 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-  const response = await fetch('https://api.tukai.co/v1/accounts/interests?page_size=1000', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/v1/accounts/interests?page_size=1000`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     },
-  });
+  );
 
   const res = await response.json();
 
@@ -85,7 +81,7 @@ export async function PUT(req: Request) {
   const session = await getServerSession(authOptions);
   const token = session?.user?.accessToken;
 
-  const response = await fetch(`https://api.tukai.co/v1/accounts/users/${id}/`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/accounts/users/${id}/`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

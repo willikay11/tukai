@@ -46,7 +46,7 @@ export default function OtpConfirmation() {
       variant: 'success',
     });
     setIsSubmitting(false);
-    router.push('/auth/payments');
+    router.push('/');
   };
 
   const resendCode = async () => {

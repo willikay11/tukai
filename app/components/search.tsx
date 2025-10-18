@@ -134,12 +134,10 @@ export default function Search() {
                       className="relative w-[100px] flex-shrink-0 cursor-pointer"
                       onClick={() => setTag(category)}
                     >
-                      <Image
-                        src={category?.image ?? ''}
+                      <TukaiImage
+                        src={category?.image}
                         alt={category.name}
                         className="rounded-[8px]"
-                        width={100}
-                        height={100}
                       />
                       <p className="absolute bottom-0.5 left-0.5 p-1 text-xs font-bold text-white">
                         {category.name}

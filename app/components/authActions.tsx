@@ -16,6 +16,7 @@ import Image from 'next/image';
 import IconComponent from '@/app/components/iconComponent';
 import { Separator } from '@/components/ui/separator';
 import { useDownloadApp } from '@/context/DownloadAppContext';
+import TukaiImage from '@/components/ui/image';
 
 export default function AuthActions() {
   const { onOpen } = useDownloadApp();
@@ -39,20 +40,21 @@ export default function AuthActions() {
             <NavigationMenuItem>
               <NavigationMenuTrigger>
                 <div className="relative aspect-square h-7 w-7">
-                  <Image
+                  <TukaiImage
                     src={session?.user?.image || ''}
                     alt={session?.user?.name || ''}
                     className="h-7 w-7 rounded-full"
                     quality={100}
-                    layout="fill"
-                    objectFit="cover"
+                    fill
+                    style={{ objectFit: 'cover' }}
+                    showNotFoundText={false}
                   />
                   <div className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-[1px] border-white bg-red-600" />
                 </div>
-                <span className="ml-2 mr-2.5 hidden text-xs text-gray-600 md:block">
+                <span className="ml-2 mr-2.5 text-xs text-gray-600">
                   {session?.user?.name}
                 </span>
-                <NavigationMenuContent className="w-54 rounded-lg p-2">
+                <NavigationMenuContent className="w-54 rounded-lg p-2 z-50">
                   <div className="flex w-40 flex-col gap-2">
                     <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
                       <div className="inline-flex items-center gap-2">
@@ -101,14 +103,10 @@ export default function AuthActions() {
           </NavigationMenuList>
         </NavigationMenu>
       ) : (
-        // <Link href="/auth/sign-in" className="inline-flex">
-        //   <UserAdd01Icon size={15} className="mr-2 text-gray-700" />
-        //   <span className="text-xs text-gray-800">Sign In/Sign Up</span>
-        // </Link>
-        <div className="inline-flex cursor-pointer" onClick={() => onOpen()}>
-          <UserAdd01Icon size={16} className="mr-2 text-gray-700" />
+        <Link href="/auth/sign-in" className="inline-flex">
+          <UserAdd01Icon size={15} className="mr-2 text-gray-700" />
           <span className="text-xs text-gray-800">Sign In/Sign Up</span>
-        </div>
+        </Link>
       )}
     </div>
   );
