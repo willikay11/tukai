@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Experience } from '@/types/experience';
 import SendMessage from '@/app/components/sendMessage';
 import { useState } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function ExperienceOrganiser({ experience }: { experience: Experience }) {
   const [open, setOpen] = useState(false);
@@ -16,13 +17,10 @@ export default function ExperienceOrganiser({ experience }: { experience: Experi
       <div className="inline-flex w-full rounded-[15px] bg-blue-50 px-2 py-3.5">
         <div className="inline-flex w-full justify-between">
           <div className="inline-flex">
-            <Image
-              src={experience.host.picture}
-              width={40}
-              height={40}
-              alt={experience.host.displayName || experience.host.firstName}
-              className="mr-2.5 h-fit rounded-full"
-            />
+          <Avatar className={`h-[40px] w-[40px] mr-2.5`}>
+            <AvatarImage src={experience.host.picture} />
+            <AvatarFallback />
+          </Avatar>
             <div className="flex flex-col">
               <div className="inline-flex items-center">
                 <p className="mr-1 text-sm font-semibold text-gray-700">
