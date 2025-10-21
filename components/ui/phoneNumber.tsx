@@ -3,17 +3,28 @@ import { cn } from '@/lib/utils';
 import { Select, SelectValue, SelectItem, SelectContent, SelectTrigger } from './select';
 import { Separator } from './separator';
 
-interface PhoneNumberInputProps extends React.ComponentProps<'input'> {
+interface PhoneNumberInputProps extends Omit<React.ComponentProps<'input'>, 'onChange'> {
   icon?: React.ReactNode;
+  onChange?: (value: string) => void;
 }
-
 const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberInputProps>(
-  ({ className, type, icon, ...props }, ref) => {
+  ({ className, type = 'tel', icon, onChange, ...props }, ref) => {
+    const [countryCode, setCountryCode] = React.useState('+254');
+    const [localNumber, setLocalNumber] = React.useState('');
+
+    React.useEffect(() => {
+      if (onChange) {
+        onChange(`${countryCode}${localNumber}`);
+      }
+    }, [countryCode, localNumber, onChange]);
+
     return (
       <div className="flex items-center rounded-[10px] border border-gray-500 border-input px-2 shadow-sm focus-within:border-primary focus-within:outline-none disabled:cursor-not-allowed disabled:opacity-50">
-        {icon && <div className="mr-2">{icon}</div>}
-        <Select onValueChange={() => {}}>
-          <SelectTrigger className="w-fit border-none shadow-none focus:ring-none ring-transparent">
+        <Select onValueChange={(val) => setCountryCode(val)}>
+          <SelectTrigger
+            className="focus:ring-none w-fit border-none px-0 pl-2 pr-2 shadow-none ring-transparent"
+            prefixIcon={icon}
+          >
             <SelectValue placeholder="+254" />
           </SelectTrigger>
           <SelectContent>
@@ -22,7 +33,10 @@ const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberInputProps>(
             <SelectItem value="+256">+256</SelectItem>
           </SelectContent>
         </Select>
-        <Separator orientation='vertical' className='h-4 w-[2px] mr-3 border-gray-300 rounded-[10px]' />
+        <Separator
+          orientation="vertical"
+          className="mr-3 h-4 w-[2px] rounded-[10px] border-gray-300"
+        />
         <input
           type={type}
           className={cn(
@@ -30,6 +44,7 @@ const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberInputProps>(
             className,
           )}
           ref={ref}
+          onChange={(e) => setLocalNumber(e.target.value)}
           {...props}
         />
       </div>

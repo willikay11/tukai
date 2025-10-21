@@ -7,6 +7,11 @@ import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import IconComponent from '@/app/components/iconComponent';
 
+interface SelectTriggerProps
+  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> {
+  prefixIcon?: string | React.ReactNode; // Allow string (for iconName) or full node
+}
+
 const Select = SelectPrimitive.Root;
 
 const SelectGroup = SelectPrimitive.Group;
@@ -15,8 +20,8 @@ const SelectValue = SelectPrimitive.Value;
 
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+  SelectTriggerProps
+>(({ className, children, prefixIcon, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
@@ -25,7 +30,16 @@ const SelectTrigger = React.forwardRef<
     )}
     {...props}
   >
-    {children}
+    <div className="flex flex-row items-start">
+      {typeof prefixIcon === 'string' ? (
+        <div className="mr-2">
+          <IconComponent iconName={prefixIcon} size={18} color="#000" />
+        </div>
+      ) : (
+        <div className="mr-2">{prefixIcon}</div>
+      )}
+      {children}
+    </div>
     <SelectPrimitive.Icon asChild>
       <IconComponent iconName="ArrowDown01Icon" size={20} color="#000" />
     </SelectPrimitive.Icon>

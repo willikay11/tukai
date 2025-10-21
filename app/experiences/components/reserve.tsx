@@ -48,7 +48,7 @@ export default function Reserve({ experience }: { experience: Experience }) {
   }, [formRef]);
 
   return (
-    <div className="flex flex-col">
+    <div className="mb-4 flex flex-col">
       <p className="mb-2.5 text-2xl font-black text-gray-700">Make Reservation</p>
       <div className="relative mb-2.5 aspect-square h-[10.625rem] w-full">
         <Image

@@ -10,6 +10,7 @@ import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { CallIcon, PinLocation02Icon, GlobalIcon } from '@hugeicons/react-pro';
 import { PhoneNumber } from './phoneNumber';
+import { Select, SelectValue, SelectTrigger, SelectItem, SelectContent } from './select';
 
 const options = [
   {
@@ -34,15 +35,18 @@ const options = [
 
 export const paymentFormSchema = z.object({
   postCode: z.string().min(2, {
-    message: 'Please enter a postcode.',
+    message: 'Please enter your postcode.',
   }),
   country: z.string().min(2, {
-    message: 'Please enter a country.',
+    message: 'Please enter your country.',
+  }),
+  address: z.string().min(2, {
+    message: 'Please enter your address',
   }),
   phoneNumber: z
     .string()
     .optional()
-    .refine((val) => val === '', {
+    .refine((val) => !val || /^\+\d{6,15}$/.test(val), {
       message: 'Please enter a valid phone number.',
     }),
 });
@@ -60,8 +64,8 @@ const PaymentForm = forwardRef(
       resolver: zodResolver(paymentFormSchema),
       defaultValues: {
         postCode: '',
-        country: '',
-        // phoneNumber: '',
+        country: 'KE',
+        phoneNumber: '',
       },
     });
 
@@ -84,14 +88,11 @@ const PaymentForm = forwardRef(
               onClick={() => setSelectedOption(option.value)}
             >
               <span
-                className={clsx(
-                  'inline-flex items-center rounded-lg p-3 text-xs text-gray-700',
-                  {
-                    'border-[1px] border-green-700 bg-green-50 font-bold':
-                      selectedOption === option.value,
-                    'bg-gray-100 font-normal': selectedOption !== option.value,
-                  },
-                )}
+                className={clsx('inline-flex items-center rounded-lg p-3 text-xs text-gray-700', {
+                  'border-[1px] border-green-700 bg-green-50 font-bold':
+                    selectedOption === option.value,
+                  'bg-gray-100 font-normal': selectedOption !== option.value,
+                })}
               >
                 <Image
                   src={option.icon.src}
@@ -119,7 +120,8 @@ const PaymentForm = forwardRef(
                         placeholder="Enter M-Pesa number"
                         type="text"
                         icon={<CallIcon size={20} className="text-gray-600" />}
-                        {...field}
+                        onChange={(val) => field.onChange(val)}
+                        // value={field.value || ''}
                       />
                     </FormControl>
                     <FormMessage />
@@ -128,23 +130,7 @@ const PaymentForm = forwardRef(
               />
             ) : null}
 
-            <FormField
-              control={form.control}
-              name="postCode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      placeholder="Postcode"
-                      type="text"
-                      icon={<PinLocation02Icon size={20} className="text-gray-600" />}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <p className="text-sm font-bold text-gray-700">Billing Address</p>
 
             <FormField
               control={form.control}
@@ -152,17 +138,62 @@ const PaymentForm = forwardRef(
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
-                      placeholder="Country/Region"
-                      type="text"
-                      icon={<GlobalIcon size={20} className="text-gray-600" />}
-                      {...field}
-                    />
+                    <Select {...field}>
+                      <SelectTrigger
+                        className="h-[55px] w-full"
+                        prefixIcon={<GlobalIcon size={20} className="text-gray-600" />}
+                      >
+                        <SelectValue placeholder="KE" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="KE">Kenya</SelectItem>
+                        <SelectItem value="UG">Uganda</SelectItem>
+                        <SelectItem value="TZ">Tanzania</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            <div className="grid grid-cols-2 gap-2">
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        placeholder="Town/City"
+                        type="text"
+                        icon={<PinLocation02Icon size={20} className="text-gray-600" />}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="postCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        placeholder="Postcode"
+                        type="text"
+                        icon={<PinLocation02Icon size={20} className="text-gray-600" />}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </form>
         </Form>
       </>
