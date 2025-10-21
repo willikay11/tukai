@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { CallIcon, PinLocation02Icon, GlobalIcon } from '@hugeicons/react-pro';
+import { PhoneNumber } from './phoneNumber';
 
 const options = [
   {
@@ -75,16 +76,16 @@ const PaymentForm = forwardRef(
 
     return (
       <>
-        <div className="mb-2 inline-flex">
+        <div className="mb-2 inline-flex space-x-2">
           {options.map((option) => (
             <div
               key={option.value}
-              className="mb-2 inline-flex cursor-pointer items-center"
+              className="mb-2 flex cursor-pointer items-center"
               onClick={() => setSelectedOption(option.value)}
             >
               <span
                 className={clsx(
-                  'ml-2 inline-flex items-center rounded-lg p-3 text-xs text-gray-700',
+                  'inline-flex items-center rounded-lg p-3 text-xs text-gray-700',
                   {
                     'border-[1px] border-green-700 bg-green-50 font-bold':
                       selectedOption === option.value,
@@ -107,6 +108,26 @@ const PaymentForm = forwardRef(
 
         <Form {...form}>
           <form className="space-y-4">
+            {selectedOption === 'mobile_money' ? (
+              <FormField
+                control={form.control}
+                name="phoneNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <PhoneNumber
+                        placeholder="Enter M-Pesa number"
+                        type="text"
+                        icon={<CallIcon size={20} className="text-gray-600" />}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : null}
+
             <FormField
               control={form.control}
               name="postCode"
@@ -142,26 +163,6 @@ const PaymentForm = forwardRef(
                 </FormItem>
               )}
             />
-
-            {selectedOption === 'mobile_money' ? (
-              <FormField
-                control={form.control}
-                name="phoneNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter M-Pesa number"
-                        type="text"
-                        icon={<CallIcon size={20} className="text-gray-600" />}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ) : null}
           </form>
         </Form>
       </>
