@@ -38,6 +38,7 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
         category={categoryFromQuery}
         title={`Happening Today: ${moment().format('Do MMMM, YYYY')}`}
         date={moment().format('YYYY-MM-DD')}
+        isPortal={true}
       />
 
       <Experiences
@@ -45,6 +46,7 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
         category={categoryFromQuery}
         title={`Happening Tommorrow: ${moment().add('days', 1).format('Do MMMM, YYYY')}`}
         date={moment().add('days', 1).format('YYYY-MM-DD')}
+        isPortal={true}
       />
 
       <Experiences key={categoryFromQuery} category={categoryFromQuery} title="Discover" />
