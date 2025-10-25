@@ -7,6 +7,7 @@ import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { JwtPayload } from '@/types/jwt';
 import { User } from '@/types/user';
 import { Interest } from '@/types/interest';
+import { Token } from '@/types/token';
 
 // ✅ Extend NextAuth Session type
 declare module 'next-auth' {
@@ -26,9 +27,9 @@ declare module 'next-auth' {
   }
 }
 
-async function refreshAccessToken(token: any) {
+async function refreshAccessToken(token: Token) {
   try {
-    const data = await refreshToken(token);
+    const data = await refreshToken(token.refreshToken);
 
     // Decode new access token to extract expiry
     const decoded = jwt.decode(data.access) as JwtPayload;
@@ -136,7 +137,7 @@ export const authOptions = {
       }
 
       // --- Otherwise, refresh it ---
-      return await refreshAccessToken(token?.refreshToken);
+      return await refreshAccessToken(token);
     },
 
     async session({ session, token }: { session: any; token: any }) {

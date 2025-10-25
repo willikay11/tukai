@@ -6,8 +6,6 @@ export async function middleware(request: NextRequest) {
   const token: any = await getToken({ req: request });
   const { pathname } = request.nextUrl;
 
-  console.log('Middleware running for path:', pathname);
-
   // Exclude auth routes from middleware
   if (
     pathname.startsWith('/api/auth') ||
