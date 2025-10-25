@@ -32,6 +32,7 @@ export default function Nav() {
         className={clsx('mr-4 inline-flex h-full items-center', {
           'text-primary md:border-b-[1px] md:border-primary': pathname === link.href,
         })}
+        onClick={() => setOpen(false)}
       >
         <div className="inline-flex items-center">
           {showIcon && link.icon}
