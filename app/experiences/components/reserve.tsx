@@ -5,7 +5,6 @@ import { Photo } from '@/types/photo';
 import moment from 'moment';
 import Image from 'next/image';
 import { Ticket } from '@/types/ticket';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Quantity from '@/components/ui/quantity';
 import { Separator } from '@/components/ui/separator';
 import { useRef, useState } from 'react';
@@ -14,7 +13,6 @@ import PaymentForm, { paymentFormSchema } from '@/components/ui/paymentForm';
 import { Button } from '@/components/ui/button';
 import { z } from 'zod';
 import { usePurchaseExperienceTicket } from '@/hooks/experiences';
-import { useEffect } from 'react';
 
 export default function Reserve({ experience }: { experience: Experience }) {
   const { mutate: purchaseExperienceTicket, isPending: isPurchasingExperienceTicket } =
@@ -35,17 +33,12 @@ export default function Reserve({ experience }: { experience: Experience }) {
     }
   };
 
-  const handleSubmit = (values: z.infer<typeof paymentFormSchema>, paymentOption: string) => {
-    console.log('values: ', values, paymentOption);
+  const handleSubmit = (values: z.infer<typeof paymentFormSchema>) => {
     purchaseExperienceTicket({
       experienceId: experience.id,
       reservedTickets,
     });
   };
-
-  useEffect(() => {
-    console.log('formRef: ', formRef.current);
-  }, [formRef]);
 
   return (
     <div className="mb-4 flex flex-col">
@@ -124,11 +117,10 @@ export default function Reserve({ experience }: { experience: Experience }) {
       />
 
       <div className="mt-3 mt-4 flex flex-col">
-        <p className="mb-2 text-sm font-bold text-gray-700">Payment Information</p>
-        <PaymentForm ref={formRef} onSubmit={handleSubmit} />
+        <PaymentForm ref={formRef} onSubmit={handleSubmit} paid={experience.isPaid} />
       </div>
 
-      <div className="mt-2.5">
+      <div className="mt-4">
         <Button
           size="lg"
           className="w-full"
