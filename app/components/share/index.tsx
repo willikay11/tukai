@@ -1,10 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Dialog } from '@/components/ui/dialog';
-import Image from 'next/image';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
-import { DialogContent } from '@/components/ui/dialog';
 import {
   CopyLinkIcon,
   Share08Icon,
@@ -108,7 +106,7 @@ export default function Share({
 
             <p className="text-base font-bold text-gray-600">{title}</p>
 
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+            <div className="grid grid-cols-2 gap-2">
               {shareOptions.map((option) => (
                 <Button
                   key={option.title}

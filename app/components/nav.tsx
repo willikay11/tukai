@@ -3,6 +3,8 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { Menu02Icon, Search01Icon, Calendar04Icon, UserMultipleIcon } from '@hugeicons/react-pro';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useState } from 'react';
 
 const links = [
   { name: 'Explore', href: '/', icon: <Search01Icon size={18} variant="twotone" /> },
@@ -20,35 +22,43 @@ const links = [
 
 export default function Nav() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
 
-  return (
-    <>
-      <div className="md:hidden">
-        <Menu02Icon size={20} variant="twotone" type="rounded" />
-      </div>
-      <div className="hidden md:inline-flex md:h-full">
-        {links.map((link) => (
-          <Link
-            href={link.href}
-            key={link.name}
-            className={clsx('mr-4 inline-flex h-full items-center', {
-              'border-b-[1px] border-primary text-primary': pathname === link.href,
+  const linkItems = (showIcon: boolean) =>
+    links.map((link) => (
+      <Link
+        href={link.href}
+        key={link.name}
+        className={clsx('mr-4 inline-flex h-full items-center', {
+          'text-primary md:border-b-[1px] md:border-primary': pathname === link.href,
+        })}
+      >
+        <div className="inline-flex items-center">
+          {showIcon && link.icon}
+          <span
+            className={clsx('ml-1 text-xs', {
+              'text-gray-800': pathname !== link.href,
+              'font-semibold text-primary': pathname === link.href,
             })}
           >
-            <div className="inline-flex items-center">
-              {link.icon}
-              <span
-                className={clsx('ml-1 text-xs', {
-                  'text-gray-800': pathname !== link.href,
-                  'font-semibold text-primary': pathname === link.href,
-                })}
-              >
-                {link.name}
-              </span>
-            </div>
-          </Link>
-        ))}
+            {link.name}
+          </span>
+        </div>
+      </Link>
+    ));
+  return (
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="px-6">
+          <div className="flex h-full flex-col">
+            <nav className="flex flex-col space-y-2">{linkItems(false)}</nav>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <div className="cursor-pointer md:hidden">
+        <Menu02Icon size={20} variant="twotone" type="rounded" onClick={() => setOpen(true)} />
       </div>
+      <div className="hidden md:inline-flex md:h-full">{linkItems(true)}</div>
     </>
   );
 }
