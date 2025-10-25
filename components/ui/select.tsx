@@ -7,6 +7,11 @@ import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import IconComponent from '@/app/components/iconComponent';
 
+interface SelectTriggerProps
+  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> {
+  prefixIcon?: string | React.ReactNode; // Allow string (for iconName) or full node
+}
+
 const Select = SelectPrimitive.Root;
 
 const SelectGroup = SelectPrimitive.Group;
@@ -15,17 +20,26 @@ const SelectValue = SelectPrimitive.Value;
 
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+  SelectTriggerProps
+>(({ className, children, prefixIcon, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      'flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-muted-foreground [&>span]:line-clamp-1',
+      'flex h-9 w-full items-center justify-between whitespace-nowrap rounded-[10px] border border-gray-700 border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background focus-within:border-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-muted-foreground [&>span]:line-clamp-1',
       className,
     )}
     {...props}
   >
-    {children}
+    <div className="flex flex-row items-start">
+      {typeof prefixIcon === 'string' ? (
+        <div className="mr-2">
+          <IconComponent iconName={prefixIcon} size={18} color="#000" />
+        </div>
+      ) : (
+        <div className="mr-2">{prefixIcon}</div>
+      )}
+      {children}
+    </div>
     <SelectPrimitive.Icon asChild>
       <IconComponent iconName="ArrowDown01Icon" size={20} color="#000" />
     </SelectPrimitive.Icon>

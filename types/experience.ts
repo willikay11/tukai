@@ -13,6 +13,7 @@ export type Experience = {
   startDate: string;
   endDate: string;
   currency: string;
+  isPaid: boolean;
   priceStartsFrom: { amount: number; currency: string };
   ticketsAvailable: boolean;
   isSoldOut: boolean;
