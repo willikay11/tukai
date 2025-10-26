@@ -2,13 +2,16 @@
 import ListExperiences from '@/app/components/experiences/List';
 import { useExperiences } from '@/hooks/experiences';
 import clsx from 'clsx';
-import { useState } from 'react';
+import { has } from 'lodash';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 type ListExperiencesProps = {
   title: string;
   skeletonCount?: number;
   category?: string;
   date?: string;
+  isPortal?: boolean;
 };
 
 export default function Experiences({
@@ -16,8 +19,10 @@ export default function Experiences({
   category,
   skeletonCount = 12,
   date,
+  isPortal = false,
 }: ListExperiencesProps) {
   const [page, setPage] = useState(1);
+  const [hasExperiences, setHasExperiences] = useState<boolean | null>(null);
   const { data: experiences, isLoading } = useExperiences(
     {
       page,
@@ -26,7 +31,34 @@ export default function Experiences({
     },
     true,
   );
-  return (
+
+  useEffect(() => {
+    let mounted = true;
+
+    const runCheck = async () => {
+      if (experiences?.data?.results?.length) {
+        setHasExperiences(true);
+      } else {
+        setHasExperiences(false);
+      }
+    };
+    if (isPortal) {
+      runCheck();
+    }
+    return () => {
+      mounted = false;
+    };
+  }, [experiences, isPortal]);
+
+  if (hasExperiences === null && isPortal) {
+    return null;
+  }
+
+  if (!hasExperiences && isPortal) {
+    return null;
+  }
+
+  const content = (
     <div className={clsx('col-span-12 mb-4 mt-4 md:col-span-10 md:col-start-2 md:mx-0')}>
       <p className="mb-4 text-xl font-semibold text-gray-700">{title}</p>
       <ListExperiences
@@ -43,4 +75,23 @@ export default function Experiences({
       />
     </div>
   );
+
+  if (!isPortal) {
+    return content;
+  }
+
+  const selector = '.grid.h-full.grid-cols-12.gap-x-4.px-4.md\\:px-0';
+  const target = document.querySelector(selector) as HTMLElement | null;
+
+  // If the main layout container exists, render inline to preserve the declared order.
+  if (target) {
+    return content;
+  }
+
+  // Otherwise create a portal container and mount there
+  const portalRoot = document.createElement('div');
+  portalRoot.className = 'grid h-full grid-cols-12 gap-x-4 px-4 md:px-0';
+  document.body.appendChild(portalRoot);
+
+  return createPortal(content, portalRoot);
 }
