@@ -80,12 +80,18 @@ export default function Experiences({
     return content;
   }
 
-  const target = document.body;
+  const selector = '.grid.h-full.grid-cols-12.gap-x-4.px-4.md\\:px-0';
+  const target = document.querySelector(selector) as HTMLElement | null;
 
-  if (!target) {
-    // fallback to rendering inline if portal target isn't present
+  // If the main layout container exists, render inline to preserve the declared order.
+  if (target) {
     return content;
   }
 
-  return createPortal(content, target);
+  // Otherwise create a portal container and mount there
+  const portalRoot = document.createElement('div');
+  portalRoot.className = 'grid h-full grid-cols-12 gap-x-4 px-4 md:px-0';
+  document.body.appendChild(portalRoot);
+
+  return createPortal(content, portalRoot);
 }
