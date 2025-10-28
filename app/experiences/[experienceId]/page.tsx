@@ -15,6 +15,7 @@ import ExperienceActions from '../components/experienceActions';
 import ExperienceDetails from '../components/experienceDetails';
 import BookmarkExperience from '../components/bookmarkExperience';
 import Share from '@/app/components/share';
+import { HugeiconsIcon } from '@hugeicons-pro/core-twotone-rounded';
 
 export default async function ViewExperiencePage({ params }: { params: { experienceId: string } }) {
   const experienceResponse: ApiResponse = await fetchExperience(params.experienceId);
@@ -65,7 +66,20 @@ export default async function ViewExperiencePage({ params }: { params: { experie
             </div>
           </div>
           <div className="flex flex-col">
-            <p className="mb-1 text-base font-black text-gray-600">About</p>
+            <div className="mt-2.5 inline-flex gap-2 flex-wrap">
+              {experience.categories.map((category) => (
+                <div
+                  className="inline-flex w-fit rounded-full bg-gray-100 px-4 py-2"
+                  key={category.id}
+                >
+                  <div className="inline-flex items-center gap-2">
+                    <IconComponent iconName={category.icon as string} size={16} color="gray-700" />
+                    <p className="text-sm text-gray-700">{category.name}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="mb-1 mt-2.5 text-base font-black text-gray-600">About</p>
             <div className="text-sm font-normal text-gray-600">
               <DescriptionShowMore
                 text={experience.description}
@@ -74,18 +88,6 @@ export default async function ViewExperiencePage({ params }: { params: { experie
                   experience.photos[0].photo
                 }
               />
-            </div>
-            <div className="mt-2.5 inline-flex gap-2">
-              {experience.categories.map((category) => (
-                <div
-                  className="inline-flex w-fit rounded-full bg-gray-100 px-4 py-2"
-                  key={category.id}
-                >
-                  <div className="flex flex-col">
-                    <p className="text-sm text-gray-700">{category.name}</p>
-                  </div>
-                </div>
-              ))}
             </div>
             <div className="mt-4 grid grid-cols-3 gap-4">
               <ExperienceDetails experience={experience} />
