@@ -12,6 +12,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/auth') ||
     pathname.startsWith('/experiences') ||
     pathname.startsWith('/communities') ||
+    pathname.startsWith('/place') ||
     (pathname === '/' && !token)
   ) {
     return NextResponse.next();
