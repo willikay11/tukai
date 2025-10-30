@@ -57,21 +57,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
         <div className="mb-4">
           <PhotoGallery photos={place.photos} />
         </div>
-        <div className="mb-4 flex flex-col">
-          <p className="mb-1 text-base font-black text-gray-600">About</p>
-          <div className="text-sm font-normal text-gray-600">
-            <DescriptionShowMore
-              photo={
-                place?.photos.find((photo: Photo) => photo.isCover)?.photo ||
-                place?.photos[0]?.photo ||
-                'https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg'
-              }
-              text={place.description}
-              maxLength={600}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mt-4">
           {placeProperties.map((placeProperty) => (
             <div className="inline-flex" key={placeProperty.id}>
               {placeProperty.icon ? (
@@ -94,6 +80,20 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
               </div>
             </div>
           ))}
+        </div>
+        <div className="mb-4 mt-4 flex flex-col">
+          <p className="mb-1 text-base font-black text-gray-600">About</p>
+          <div className="text-sm font-normal text-gray-600">
+            <DescriptionShowMore
+              photo={
+                place?.photos.find((photo: Photo) => photo.isCover)?.photo ||
+                place?.photos[0]?.photo ||
+                'https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg'
+              }
+              text={place.description}
+              maxLength={600}
+            />
+          </div>
         </div>
         <div className="my-2.5">
           <Separator />
