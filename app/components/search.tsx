@@ -11,19 +11,19 @@ import { SearchResult } from '@/types/search';
 import IconComponent from './iconComponent';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import Image from 'next/image';
 import { usePlaceCategories } from '@/hooks/places';
 import { PlaceCategory } from '@/types/placeCategory';
 import clsx from 'clsx';
 
 export default function Search() {
   const pathname = usePathname();
-  const { data: placeCategories } = usePlaceCategories();
+  const { data: placeCategories } = usePlaceCategories({ pageSize: 100, group: 'cities' });
   const [query, setQuery] = useState<string>();
   const [tag, setTag] = useState<PlaceCategory | undefined>();
   const [showSearchResults, setShowSearchResults] = useState(false);
   const { data: searchResults } = useSearch(query, tag?.id);
-  const inputRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const inputElRef = useRef<HTMLInputElement | null>(null);
   const [popoverWidth, setPopoverWidth] = useState<number | undefined>(undefined);
 
   const removeTag = () => {
@@ -31,10 +31,10 @@ export default function Search() {
   };
 
   useEffect(() => {
-    if (inputRef.current) {
-      setPopoverWidth(inputRef.current.offsetWidth);
+    if (containerRef.current) {
+      setPopoverWidth(containerRef.current.offsetWidth);
     }
-  }, [inputRef.current]);
+  }, [containerRef.current]);
 
   useEffect(() => {
     if (searchResults) {
@@ -42,11 +42,21 @@ export default function Search() {
     }
   }, [searchResults]);
 
+  useEffect(() => {
+    if (showSearchResults) {
+      // small timeout to ensure popover has mounted / focus isn't stolen
+      const t = setTimeout(() => {
+        inputElRef.current?.focus();
+      }, 0);
+      return () => clearTimeout(t);
+    }
+  }, [showSearchResults]);
+
   return (
     <Popover open={showSearchResults} onOpenChange={(isOpen) => setShowSearchResults(isOpen)}>
       <PopoverTrigger asChild>
         <div
-          ref={inputRef}
+          ref={containerRef}
           className="relative inline-flex h-10 w-full items-center justify-between rounded-full border-[1px] border-gray-200 bg-white py-4 pl-4 pr-1"
         >
           <Search01Icon size={20} className="mr-2 text-gray-500" variant="twotone" />
@@ -68,7 +78,7 @@ export default function Search() {
             )}
             {tag && (
               <span
-                className="mr-2 inline-flex cursor-pointer items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-sm"
+                className="mr-2 inline-flex cursor-pointer items-center gap-1 rounded-full bg-gray-100 pl-2 pr-1 py-1 text-sm"
                 onClick={() => removeTag()}
               >
                 {tag.name}
@@ -78,6 +88,7 @@ export default function Search() {
               </span>
             )}
             <input
+              ref={inputElRef}
               className={clsx(
                 'mt-[2px] h-full w-full text-[11px] outline-0 placeholder:text-[11px] placeholder:text-gray-400 hover:border-primary focus:border-primary',
                 query && query.length > 0 && tag && 'mt-0',
@@ -97,15 +108,16 @@ export default function Search() {
             />
           </div>
           <div
-            className="ml-2 flex h-[30px] w-[36px] cursor-pointer items-center justify-center rounded-full bg-gray-100"
+            className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full bg-gray-100"
             onClick={() => {
               setShowSearchResults(false);
               setQuery(undefined);
               setTag(undefined);
+              inputElRef.current!.value = '';
             }}
           >
             <IconComponent
-              iconName={showSearchResults ? 'Cancel01Icon' : 'FilterHorizontalIcon'}
+              iconName={showSearchResults || query?.length ? 'Cancel01Icon' : 'FilterHorizontalIcon'}
               size={15}
               color="gray"
             />
@@ -128,16 +140,16 @@ export default function Search() {
             <div className="mb-2 flex items-center gap-2 overflow-x-auto scroll-smooth no-scrollbar">
               {tag === undefined &&
                 placeCategories?.data?.results
-                  ?.filter((category: PlaceCategory) => category.group === 'cities')
                   .map((category: PlaceCategory) => (
                     <div
-                      className="relative w-[100px] flex-shrink-0 cursor-pointer"
+                      className="relative w-[100px] h-[100px] flex-shrink-0 cursor-pointer"
                       onClick={() => setTag(category)}
                     >
                       <TukaiImage
                         src={category?.image}
                         alt={category.name}
                         className="rounded-[8px]"
+                        showNotFoundText={false}
                       />
                       <p className="absolute bottom-0.5 left-0.5 p-1 text-xs font-bold text-white">
                         {category.name}
