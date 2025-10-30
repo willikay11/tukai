@@ -1,8 +1,9 @@
 import { Suspense } from 'react';
-import { PillsSkeleton } from '@/app/components/skeletons';
+import { EventsSkeleton, PillsSkeleton } from '@/app/components/skeletons';
 import Experiences from './components/List/experiences';
 import ExperienceFilters from './components/experienceFilters';
 import moment from 'moment';
+import InvitedExperiences from './components/List/invitedExperiences';
 
 export default function ExperiencesPage({ searchParams }: { searchParams: { category?: string } }) {
   const categoryFromQuery = searchParams?.category;
