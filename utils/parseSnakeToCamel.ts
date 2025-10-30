@@ -15,17 +15,16 @@ export function parseSnakeToCamel<T>(input: T): T {
   return input;
 }
 
-
 function toSnakeCase(str: string): string {
   return str
-    .replace(/([A-Z])/g, "_$1") // insert underscore before capital letters
+    .replace(/([A-Z])/g, '_$1') // insert underscore before capital letters
     .toLowerCase();
 }
 
 export function parseCamelToSnake<T>(input: T): T {
   if (Array.isArray(input)) {
     return input.map((item) => parseCamelToSnake(item)) as T;
-  } else if (input !== null && typeof input === "object") {
+  } else if (input !== null && typeof input === 'object') {
     return Object.keys(input).reduce((acc, key) => {
       const snakeKey = toSnakeCase(key);
       acc[snakeKey] = parseCamelToSnake((input as any)[key]);

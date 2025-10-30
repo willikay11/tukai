@@ -57,7 +57,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
         <div className="mb-4">
           <PhotoGallery photos={place.photos} />
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mt-4">
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           {placeProperties.map((placeProperty) => (
             <div className="inline-flex" key={placeProperty.id}>
               {placeProperty.icon ? (

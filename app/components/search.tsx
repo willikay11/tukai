@@ -78,7 +78,7 @@ export default function Search() {
             )}
             {tag && (
               <span
-                className="mr-2 inline-flex cursor-pointer items-center gap-1 rounded-full bg-gray-100 pl-2 pr-1 py-1 text-sm"
+                className="mr-2 inline-flex cursor-pointer items-center gap-1 rounded-full bg-gray-100 py-1 pl-2 pr-1 text-sm"
                 onClick={() => removeTag()}
               >
                 {tag.name}
@@ -117,7 +117,9 @@ export default function Search() {
             }}
           >
             <IconComponent
-              iconName={showSearchResults || query?.length ? 'Cancel01Icon' : 'FilterHorizontalIcon'}
+              iconName={
+                showSearchResults || query?.length ? 'Cancel01Icon' : 'FilterHorizontalIcon'
+              }
               size={15}
               color="gray"
             />
@@ -139,23 +141,22 @@ export default function Search() {
             </div>
             <div className="mb-2 flex items-center gap-2 overflow-x-auto scroll-smooth no-scrollbar">
               {tag === undefined &&
-                placeCategories?.data?.results
-                  .map((category: PlaceCategory) => (
-                    <div
-                      className="relative w-[100px] h-[100px] flex-shrink-0 cursor-pointer"
-                      onClick={() => setTag(category)}
-                    >
-                      <TukaiImage
-                        src={category?.image}
-                        alt={category.name}
-                        className="rounded-[8px]"
-                        showNotFoundText={false}
-                      />
-                      <p className="absolute bottom-0.5 left-0.5 p-1 text-xs font-bold text-white">
-                        {category.name}
-                      </p>
-                    </div>
-                  ))}
+                placeCategories?.data?.results.map((category: PlaceCategory) => (
+                  <div
+                    className="relative h-[100px] w-[100px] flex-shrink-0 cursor-pointer"
+                    onClick={() => setTag(category)}
+                  >
+                    <TukaiImage
+                      src={category?.image}
+                      alt={category.name}
+                      className="rounded-[8px]"
+                      showNotFoundText={false}
+                    />
+                    <p className="absolute bottom-0.5 left-0.5 p-1 text-xs font-bold text-white">
+                      {category.name}
+                    </p>
+                  </div>
+                ))}
             </div>
           </div>
           <div className="flex flex-col gap-2">

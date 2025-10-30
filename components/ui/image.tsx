@@ -44,7 +44,7 @@ export default function TukaiImage({
             `absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-500 ${props.className}`,
           )}
         >
-          {showNotFoundText && <span className="text-sm text-center">Image not available</span>}
+          {showNotFoundText && <span className="text-center text-sm">Image not available</span>}
         </div>
       )}
     </>
