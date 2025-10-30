@@ -14,6 +14,7 @@ import {
   updatePlaceReview,
   deletePlaceReviewImage,
 } from '@/services/place';
+import { PlaceCategoryParams } from '@/types/networkParam';
 
 export const usePlaces = ({
   categoryId,
@@ -31,10 +32,10 @@ export const usePlaces = ({
   });
 };
 
-export const usePlaceCategories = () => {
+export const usePlaceCategories = (params: PlaceCategoryParams = { pageSize: 100 }) => {
   return useQuery({
-    queryKey: ['placeCategories'],
-    queryFn: async () => await fetchPlaceCategories(),
+    queryKey: ['placeCategories', params],
+    queryFn: async () => await fetchPlaceCategories(params),
   });
 };
 

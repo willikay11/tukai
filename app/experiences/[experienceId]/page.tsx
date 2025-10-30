@@ -66,7 +66,7 @@ export default async function ViewExperiencePage({ params }: { params: { experie
             </div>
           </div>
           <div className="flex flex-col">
-            <div className="mt-2.5 inline-flex gap-2 flex-wrap">
+            <div className="mt-2.5 inline-flex flex-wrap gap-2">
               {experience.categories.map((category) => (
                 <div
                   className="inline-flex w-fit rounded-full bg-gray-100 px-4 py-2"

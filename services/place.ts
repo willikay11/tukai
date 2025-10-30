@@ -1,6 +1,7 @@
-import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
+import { parseCamelToSnake, parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
+import { PlaceCategoryParams } from '@/types/networkParam';
 
 export async function fetchPlaces(
   page = 1,
@@ -53,9 +54,9 @@ export async function fetchPlace(id?: string): Promise<ApiResponse> {
   }
 }
 
-export async function fetchPlaceCategories(): Promise<ApiResponse> {
+export async function fetchPlaceCategories(params?: PlaceCategoryParams): Promise<ApiResponse> {
   try {
-    const res = await api.get('/v1/places/categories/?page_size=100');
+    const res = await api.get('/v1/places/categories/', { params: parseCamelToSnake(params) });
 
     return {
       status: 200,
