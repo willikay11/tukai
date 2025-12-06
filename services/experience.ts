@@ -1,7 +1,7 @@
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { ApiResponse } from '@/types/apiResponse';
 import { api, apiWithToken } from '@/services/apiService';
-import { getSession } from 'next-auth/react';
+import { PurchaserDetails } from '@/types/purchaser';
 
 export type ExperiencesQueryParams = {
   search?: string;
@@ -62,16 +62,9 @@ export async function fetchExperience(id: string): Promise<ApiResponse> {
   }
 }
 
-export async function purchaseExperienceTicket(data: {
-  reservedTickets: { ticketId: string; quantity: number }[];
-}): Promise<ApiResponse> {
+export async function purchaseExperienceTicket(data: PurchaserDetails): Promise<ApiResponse> {
   try {
-    const response = await api.post(`/v1/experiences/ticket-purchases/`, {
-      ticket_purchases: data.reservedTickets.map((ticket) => ({
-        ticket_id: ticket.ticketId,
-        quantity: ticket.quantity,
-      })),
-    });
+    const response = await api.post(`/v1/experiences/ticket-purchases/`, data);
 
     console.log('response: ', response);
 

@@ -7,6 +7,7 @@ import {
   ExperiencesQueryParams,
 } from '@/services/experience';
 import { useQueryClient } from '@tanstack/react-query';
+import { PurchaserDetails } from '@/types/purchaser';
 
 export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean) => {
   return useQuery({
@@ -35,10 +36,7 @@ export const useFetchSingleExperience = (id: string) => {
 export const usePurchaseExperienceTicket = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: {
-      experienceId: string;
-      reservedTickets: { ticketId: string; quantity: number }[];
-    }) => await purchaseExperienceTicket(data),
+    mutationFn: async (data: PurchaserDetails) => await purchaseExperienceTicket(data),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['experience'] });
     },

@@ -8,6 +8,7 @@ import {
   MapsGlobalIconTwotoneRounded,
   PinLocationIconTwotoneRounded,
   SquareLock01TwotoneRounded,
+  UserTwotoneRounded,
 } from '@hugeicons-pro/core-twotone-rounded';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { useState, forwardRef, useImperativeHandle } from 'react';
@@ -43,31 +44,67 @@ const options = [
 ];
 
 export const paymentFormSchema = z.object({
+  firstName: z.string().min(2, { message: 'Please enter your first name.' }),
+  lastName: z.string().min(2, { message: 'Please enter your last name.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
-  cardNumber: z.string().min(12, {
-    message: 'Please enter a valid card number.',
-  }),
-  expirtyDate: z.string().min(4, {
-    message: 'Please enter a valid expiry date.',
-  }),
-  cvv: z.string().min(3, {
-    message: 'Please enter a valid CVV.',
-  }),
-  postCode: z.string().min(2, {
-    message: 'Please enter your postcode.',
-  }),
-  country: z.string().min(2, {
-    message: 'Please enter your country.',
-  }),
-  address: z.string().min(2, {
-    message: 'Please enter your address',
-  }),
+  cardNumber: z.string().optional(),
+  expirtyDate: z.string().optional(),
+  cvv: z.string().optional(),
+  postCode: z.string().optional(),
+  country: z.string(),
+  address: z.string().optional(),
   phoneNumber: z
     .string()
     .optional()
     .refine((val) => !val || /^\+\d{6,15}$/.test(val), {
       message: 'Please enter a valid phone number.',
     }),
+}).superRefine((data, ctx) => {
+  // Only validate card fields if paid is true
+  if (data.paid) {
+    if (!data.cardNumber || data.cardNumber.length < 12) {
+      ctx.addIssue({
+        path: ['cardNumber'],
+        code: z.ZodIssueCode.custom,
+        message: 'Please enter a valid card number.',
+      });
+    }
+    if (!data.expirtyDate || data.expirtyDate.length < 4) {
+      ctx.addIssue({
+        path: ['expirtyDate'],
+        code: z.ZodIssueCode.custom,
+        message: 'Please enter a valid expiry date.',
+      });
+    }
+    if (!data.cvv || data.cvv.length < 3) {
+      ctx.addIssue({
+        path: ['cvv'],
+        code: z.ZodIssueCode.custom,
+        message: 'Please enter a valid CVV.',
+      });
+    }
+    if (!data.postCode || data.postCode.length < 2) {
+      ctx.addIssue({
+        path: ['postCode'],
+        code: z.ZodIssueCode.custom,
+        message: 'Please enter your postcode.',
+      });
+    }
+    // if (!data.country || data.country.length < 2) {
+    //   ctx.addIssue({
+    //     path: ['country'],
+    //     code: z.ZodIssueCode.custom,
+    //     message: 'Please enter your country.',
+    //   });
+    // }
+    if (!data.address || data.address.length < 2) {
+      ctx.addIssue({
+        path: ['address'],
+        code: z.ZodIssueCode.custom,
+        message: 'Please enter your address',
+      });
+    }
+  }
 });
 
 const PaymentForm = forwardRef(
@@ -106,6 +143,58 @@ const PaymentForm = forwardRef(
         <Form {...form}>
           <form className="space-y-4">
             <p className="mb-2 text-sm font-bold text-gray-700">Contact Details</p>
+
+            <p className='mb-2 text-sm text-gray-700'>*Your ticket will be sent to your email on successful completion.</p>
+
+            <div className='grid grid-cols-2 gap-2'>
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        placeholder="First Name"
+                        type="text"
+                        icon={
+                          <HugeiconsIcon
+                            icon={UserTwotoneRounded}
+                            size={20}
+                            className="text-gray-600"
+                          />
+                        }
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        placeholder="Last Name"
+                        type="text"
+                        icon={
+                          <HugeiconsIcon
+                            icon={UserTwotoneRounded}
+                            size={20}
+                            className="text-gray-600"
+                          />
+                        }
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}

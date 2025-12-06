@@ -13,6 +13,7 @@ import PaymentForm, { paymentFormSchema } from '@/components/ui/paymentForm';
 import { Button } from '@/components/ui/button';
 import { z } from 'zod';
 import { usePurchaseExperienceTicket } from '@/hooks/experiences';
+import { PurchaserDetails } from '@/types/purchaser';
 
 export default function Reserve({ experience }: { experience: Experience }) {
   const { mutate: purchaseExperienceTicket, isPending: isPurchasingExperienceTicket } =
@@ -34,10 +35,28 @@ export default function Reserve({ experience }: { experience: Experience }) {
   };
 
   const handleSubmit = (values: z.infer<typeof paymentFormSchema>) => {
-    purchaseExperienceTicket({
-      experienceId: experience.id,
-      reservedTickets,
-    });
+    console.log('values:', values);
+
+    const purchaserDetails :PurchaserDetails = {
+      first_name: values.firstName,
+      last_name: values.lastName,
+      confirmation_email: values.email,
+      ticket_purchases: reservedTickets.map((ticket) => ({
+        ticket_id: ticket.ticketId,
+        quantity: ticket.quantity,
+      })),
+      billing_details: {
+        billing_address: {
+          country: values.country,
+        },
+        payment_method: {
+          payment_option: "mobile_money",
+          mobile_money_phone: values.phoneNumber
+        }
+      }
+    }
+
+    purchaseExperienceTicket(purchaserDetails);
   };
 
   return (
