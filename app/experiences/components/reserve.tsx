@@ -7,17 +7,28 @@ import Image from 'next/image';
 import { Ticket } from '@/types/ticket';
 import Quantity from '@/components/ui/quantity';
 import { Separator } from '@/components/ui/separator';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import numeral from 'numeral';
 import PaymentForm, { paymentFormSchema } from '@/components/ui/paymentForm';
 import { Button } from '@/components/ui/button';
 import { z } from 'zod';
 import { usePurchaseExperienceTicket } from '@/hooks/experiences';
 import { PurchaserDetails } from '@/types/purchaser';
+import Paystack from '@/components/ui/paystack';
+import PaymentSuccess from '@/components/ui/paymentSuccess';
 
 export default function Reserve({ experience }: { experience: Experience }) {
-  const { mutate: purchaseExperienceTicket, isPending: isPurchasingExperienceTicket } =
-    usePurchaseExperienceTicket();
+  const [isPaystackOpen, setIsPaystackOpen] = useState<boolean>(false);
+  const [isPaymentSuccessOpen, setIsPaymentSuccessOpen] = useState<boolean>(false);
+  const [showInviteGuests, setShowInviteGuests] = useState<boolean>(false);
+  const {
+    mutate: purchaseExperienceTicket,
+    isPending: isPurchasingExperienceTicket,
+    data: purchaseData,
+    isSuccess: isPurchaseSuccess,
+    isError: isPurchaseError,
+    error: purchaseError,
+  } = usePurchaseExperienceTicket();
   const formRef = useRef<any>();
   const [reservedTickets, setReservedTickets] = useState<
     { ticketId: string; quantity: number; price: number }[]
@@ -35,9 +46,7 @@ export default function Reserve({ experience }: { experience: Experience }) {
   };
 
   const handleSubmit = (values: z.infer<typeof paymentFormSchema>) => {
-    console.log('values:', values);
-
-    const purchaserDetails :PurchaserDetails = {
+    const purchaserDetails: PurchaserDetails = {
       first_name: values.firstName,
       last_name: values.lastName,
       confirmation_email: values.email,
@@ -50,14 +59,35 @@ export default function Reserve({ experience }: { experience: Experience }) {
           country: values.country,
         },
         payment_method: {
-          payment_option: "mobile_money",
-          mobile_money_phone: values.phoneNumber
-        }
-      }
+          payment_option: 'mobile_money',
+          mobile_money_phone: values.phoneNumber,
+        },
+      },
+    };
+
+    purchaseExperienceTicket(purchaserDetails, {
+      onSuccess: (data) => {
+        setIsPaystackOpen(true);
+      },
+      onError: (error) => {
+        console.error('Purchase failed:', error);
+        // Handle error - e.g., show error message
+      },
+    });
+  };
+
+  // Or use useEffect to react to state changes
+  useEffect(() => {
+    if (isPurchaseSuccess && purchaseData) {
+      console.log('Purchase data:', purchaseData);
+      // Handle the successful purchase data
     }
 
-    purchaseExperienceTicket(purchaserDetails);
-  };
+    if (isPurchaseError) {
+      console.error('Purchase error:', purchaseError);
+      // Handle the error
+    }
+  }, [isPurchaseSuccess, isPurchaseError, purchaseData, purchaseError]);
 
   return (
     <div className="mb-4 flex flex-col">
@@ -138,6 +168,27 @@ export default function Reserve({ experience }: { experience: Experience }) {
       <div className="mt-3 mt-4 flex flex-col">
         <PaymentForm ref={formRef} onSubmit={handleSubmit} paid={experience.isPaid} />
       </div>
+
+      <Paystack
+        isOpen={isPaystackOpen}
+        closeModal={(paymentSuccess) => {
+          setIsPaystackOpen(false);
+          if (paymentSuccess) {
+            setIsPaymentSuccessOpen(true);
+          }
+        }}
+        url={purchaseData?.data?.paymentDetails?.authorizationUrl || ''}
+      />
+
+      <PaymentSuccess
+        isOpen={isPaymentSuccessOpen}
+        closeModal={(goToInviteGuests) => {
+          setIsPaymentSuccessOpen(false);
+          if (goToInviteGuests) {
+            setShowInviteGuests(true);
+          }
+        }}
+      />
 
       <div className="mt-4">
         <Button

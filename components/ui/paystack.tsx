@@ -1,0 +1,70 @@
+'use client';
+
+import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
+import { toast } from '@/hooks/use-toast';
+import { useEffect, useRef } from 'react';
+
+export default function Paystack({
+  isOpen,
+  closeModal,
+  url,
+}: {
+  isOpen: boolean;
+  closeModal: (paymentSuccess: boolean) => void;
+  url: string;
+}) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Listen for postMessage events from Paystack
+    const handleMessage = (event: MessageEvent) => {
+      // Check if Paystack sends success/cancel events
+      if (event.data?.status === 'success' || event.data?.event === 'success') {
+        closeModal(true);
+      } else if (event.data?.status === 'cancelled' || event.data?.event === 'cancelled') {
+        toast({
+          title: 'Error',
+          description: 'Payment was cancelled.',
+          variant: 'destructive',
+        });
+        closeModal(false);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    // Fallback: Poll iframe accessibility (limited by same-origin policy)
+    const pollInterval = setInterval(() => {
+      try {
+        const iframeWindow = iframeRef.current?.contentWindow;
+        // This will throw an error if cross-origin
+        const iframeUrl = iframeWindow?.location.href;
+
+        // Check if URL indicates completion (adjust based on Paystack's redirect URLs)
+        if (iframeUrl?.includes('success') || iframeUrl?.includes('callback')) {
+          console.log('Payment completed - URL changed');
+          closeModal(true);
+          clearInterval(pollInterval);
+        }
+      } catch (e) {
+        // Cross-origin access blocked - this is expected
+        // You won't be able to read the URL directly
+      }
+    }, 1000);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      clearInterval(pollInterval);
+    };
+  }, [isOpen, closeModal]);
+
+  return (
+    <AlertDialog open={isOpen}>
+      <AlertDialogContent className="h-[36rem] w-[40rem] max-w-none p-0">
+        <iframe ref={iframeRef} src={url} width="100%" height="100%" className="border-0" />
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
