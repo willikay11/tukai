@@ -14,17 +14,20 @@ import { Button } from '@/components/ui/button';
 import { z } from 'zod';
 import { usePurchaseExperienceTicket } from '@/hooks/experiences';
 import { PurchaserDetails } from '@/types/purchaser';
-import Paystack from '@/app/auth/subscribe/components/paystack';
+import Paystack from '@/components/ui/paystack';
+import PaymentSuccess from '@/components/ui/paymentSuccess';
 
 export default function Reserve({ experience }: { experience: Experience }) {
   const [isPaystackOpen, setIsPaystackOpen] = useState<boolean>(false);
-  const { 
-    mutate: purchaseExperienceTicket, 
+  const [isPaymentSuccessOpen, setIsPaymentSuccessOpen] = useState<boolean>(false);
+  const [showInviteGuests, setShowInviteGuests] = useState<boolean>(false);
+  const {
+    mutate: purchaseExperienceTicket,
     isPending: isPurchasingExperienceTicket,
     data: purchaseData,
     isSuccess: isPurchaseSuccess,
     isError: isPurchaseError,
-    error: purchaseError
+    error: purchaseError,
   } = usePurchaseExperienceTicket();
   const formRef = useRef<any>();
   const [reservedTickets, setReservedTickets] = useState<
@@ -56,11 +59,11 @@ export default function Reserve({ experience }: { experience: Experience }) {
           country: values.country,
         },
         payment_method: {
-          payment_option: "mobile_money",
-          mobile_money_phone: values.phoneNumber
-        }
-      }
-    }
+          payment_option: 'mobile_money',
+          mobile_money_phone: values.phoneNumber,
+        },
+      },
+    };
 
     purchaseExperienceTicket(purchaserDetails, {
       onSuccess: (data) => {
@@ -69,7 +72,7 @@ export default function Reserve({ experience }: { experience: Experience }) {
       onError: (error) => {
         console.error('Purchase failed:', error);
         // Handle error - e.g., show error message
-      }
+      },
     });
   };
 
@@ -79,7 +82,7 @@ export default function Reserve({ experience }: { experience: Experience }) {
       console.log('Purchase data:', purchaseData);
       // Handle the successful purchase data
     }
-    
+
     if (isPurchaseError) {
       console.error('Purchase error:', purchaseError);
       // Handle the error
@@ -168,8 +171,23 @@ export default function Reserve({ experience }: { experience: Experience }) {
 
       <Paystack
         isOpen={isPaystackOpen}
-        closeModal={() => setIsPaystackOpen(false)}
+        closeModal={(paymentSuccess) => {
+          setIsPaystackOpen(false);
+          if (paymentSuccess) {
+            setIsPaymentSuccessOpen(true);
+          }
+        }}
         url={purchaseData?.data?.paymentDetails?.authorizationUrl || ''}
+      />
+
+      <PaymentSuccess
+        isOpen={isPaymentSuccessOpen}
+        closeModal={(goToInviteGuests) => {
+          setIsPaymentSuccessOpen(false);
+          if (goToInviteGuests) {
+            setShowInviteGuests(true);
+          }
+        }}
       />
 
       <div className="mt-4">

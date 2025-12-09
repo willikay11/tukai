@@ -10,7 +10,7 @@ export default function Paystack({
   url,
 }: {
   isOpen: boolean;
-  closeModal: () => void;
+  closeModal: (paymentSuccess: boolean) => void;
   url: string;
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -22,19 +22,14 @@ export default function Paystack({
     const handleMessage = (event: MessageEvent) => {
       // Check if Paystack sends success/cancel events
       if (event.data?.status === 'success' || event.data?.event === 'success') {
-        toast({
-          title: 'Success',
-          description: 'Payment completed successfully.',
-          variant: 'success',
-        });
-        closeModal();
+        closeModal(true);
       } else if (event.data?.status === 'cancelled' || event.data?.event === 'cancelled') {
         toast({
           title: 'Error',
           description: 'Payment was cancelled.',
           variant: 'destructive',
         });
-        closeModal();
+        closeModal(false);
       }
     };
 
@@ -50,7 +45,7 @@ export default function Paystack({
         // Check if URL indicates completion (adjust based on Paystack's redirect URLs)
         if (iframeUrl?.includes('success') || iframeUrl?.includes('callback')) {
           console.log('Payment completed - URL changed');
-          closeModal();
+          closeModal(true);
           clearInterval(pollInterval);
         }
       } catch (e) {
@@ -68,13 +63,7 @@ export default function Paystack({
   return (
     <AlertDialog open={isOpen}>
       <AlertDialogContent className="h-[36rem] w-[40rem] max-w-none p-0">
-        <iframe
-          ref={iframeRef}
-          src={url}
-          width="100%"
-          height="100%"
-          className="border-0"
-        />
+        <iframe ref={iframeRef} src={url} width="100%" height="100%" className="border-0" />
       </AlertDialogContent>
     </AlertDialog>
   );
