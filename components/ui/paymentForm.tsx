@@ -2,8 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Calendar04TwotoneRounded,
-  CreditCardAddTwotoneRounded,
   Mail02TwotoneRounded,
   MapsGlobalIconTwotoneRounded,
   PinLocationIconTwotoneRounded,
@@ -11,7 +9,7 @@ import {
   UserTwotoneRounded,
 } from '@hugeicons-pro/core-twotone-rounded';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { useState, forwardRef, useImperativeHandle } from 'react';
+import { useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { z } from 'zod';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -48,63 +46,48 @@ export const paymentFormSchema = z
     firstName: z.string().min(2, { message: 'Please enter your first name.' }),
     lastName: z.string().min(2, { message: 'Please enter your last name.' }),
     email: z.string().email({ message: 'Please enter a valid email address.' }),
-    cardNumber: z.string().optional(),
-    expirtyDate: z.string().optional(),
-    cvv: z.string().optional(),
     postCode: z.string().optional(),
     country: z.string(),
     address: z.string().optional(),
-    phoneNumber: z
-      .string()
-      .optional()
-      .refine((val) => !val || /^\+\d{6,15}$/.test(val), {
-        message: 'Please enter a valid phone number.',
-      }),
+    phoneNumber: z.string().optional(),
+    paymentOption: z.string().optional(),
+    paid: z.boolean().optional(),
   })
   .superRefine((data, ctx) => {
     // Only validate card fields if paid is true
     if (data.paid) {
-      if (!data.cardNumber || data.cardNumber.length < 12) {
-        ctx.addIssue({
-          path: ['cardNumber'],
-          code: z.ZodIssueCode.custom,
-          message: 'Please enter a valid card number.',
-        });
-      }
-      if (!data.expirtyDate || data.expirtyDate.length < 4) {
-        ctx.addIssue({
-          path: ['expirtyDate'],
-          code: z.ZodIssueCode.custom,
-          message: 'Please enter a valid expiry date.',
-        });
-      }
-      if (!data.cvv || data.cvv.length < 3) {
-        ctx.addIssue({
-          path: ['cvv'],
-          code: z.ZodIssueCode.custom,
-          message: 'Please enter a valid CVV.',
-        });
-      }
-      if (!data.postCode || data.postCode.length < 2) {
-        ctx.addIssue({
-          path: ['postCode'],
-          code: z.ZodIssueCode.custom,
-          message: 'Please enter your postcode.',
-        });
-      }
-      // if (!data.country || data.country.length < 2) {
-      //   ctx.addIssue({
-      //     path: ['country'],
-      //     code: z.ZodIssueCode.custom,
-      //     message: 'Please enter your country.',
-      //   });
-      // }
-      if (!data.address || data.address.length < 2) {
-        ctx.addIssue({
-          path: ['address'],
-          code: z.ZodIssueCode.custom,
-          message: 'Please enter your address',
-        });
+      if (data.paymentOption === 'mobile_money') {
+        if (!data.phoneNumber || !/^\+\d{6,15}$/.test(data.phoneNumber)) {
+          ctx.addIssue({
+            path: ['phoneNumber'],
+            code: z.ZodIssueCode.custom,
+            message: 'Please enter a valid phone number.',
+          });
+        }
+      } else if (data.paymentOption === 'card') {
+        if (!data.country) {
+          ctx.addIssue({
+            path: ['country'],
+            code: z.ZodIssueCode.custom,
+            message: 'Please enter your country.',
+          });
+        }
+
+        if (!data.postCode || data.postCode.length < 2) {
+          ctx.addIssue({
+            path: ['postCode'],
+            code: z.ZodIssueCode.custom,
+            message: 'Please enter your postcode.',
+          });
+        }
+
+        if (!data.address || data.address.length < 2) {
+          ctx.addIssue({
+            path: ['address'],
+            code: z.ZodIssueCode.custom,
+            message: 'Please enter your address',
+          });
+        }
       }
     }
   });
@@ -128,6 +111,7 @@ const PaymentForm = forwardRef(
         postCode: '',
         country: 'KE',
         phoneNumber: '',
+        paymentOption: 'mobile_money', // Add default value
       },
     });
 
@@ -139,6 +123,17 @@ const PaymentForm = forwardRef(
         })(),
       formState: form.formState,
     }));
+
+    // Update paymentOption in form when selectedOption changes
+    const handleOptionChange = (value: string) => {
+      setSelectedOption(value);
+      form.setValue('paymentOption', value);
+    };
+
+
+    useEffect(() => {
+      form.setValue('paid', paid);
+    }, [paid]);
 
     return (
       <>
@@ -233,7 +228,7 @@ const PaymentForm = forwardRef(
                     <div
                       key={option.value}
                       className="mb-2 flex cursor-pointer items-center"
-                      onClick={() => setSelectedOption(option.value)}
+                      onClick={() => handleOptionChange(option.value)}
                     >
                       <span
                         className={clsx(
@@ -279,80 +274,6 @@ const PaymentForm = forwardRef(
                   />
                 ) : selectedOption === 'card' ? (
                   <>
-                    <FormField
-                      control={form.control}
-                      name="cardNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="Card Number"
-                              type="text"
-                              icon={
-                                <HugeiconsIcon
-                                  icon={CreditCardAddTwotoneRounded}
-                                  size={20}
-                                  className="text-gray-600"
-                                />
-                              }
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <FormField
-                        control={form.control}
-                        name="expirtyDate"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input
-                                placeholder="Expiry Date(mm/yy)"
-                                type="text"
-                                icon={
-                                  <HugeiconsIcon
-                                    icon={Calendar04TwotoneRounded}
-                                    size={20}
-                                    className="text-gray-600"
-                                  />
-                                }
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="cvv"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input
-                                placeholder="CVV"
-                                type="text"
-                                icon={
-                                  <HugeiconsIcon
-                                    icon={SquareLock01TwotoneRounded}
-                                    size={20}
-                                    className="text-gray-600"
-                                  />
-                                }
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
                     <p className="text-sm font-bold text-gray-700">Billing Address</p>
 
                     <FormField
