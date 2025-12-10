@@ -16,6 +16,7 @@ import { usePurchaseExperienceTicket } from '@/hooks/experiences';
 import { PurchaserDetails } from '@/types/purchaser';
 import Paystack from '@/components/ui/paystack';
 import PaymentSuccess from '@/components/ui/paymentSuccess';
+import { toast } from '@/hooks/use-toast';
 
 export default function Reserve({ experience }: { experience: Experience }) {
   const [isPaystackOpen, setIsPaystackOpen] = useState<boolean>(false);
@@ -59,7 +60,7 @@ export default function Reserve({ experience }: { experience: Experience }) {
           country: values.country,
         },
         payment_method: {
-          payment_option: 'mobile_money',
+          payment_option: values.paymentOption || 'card',
           mobile_money_phone: values.phoneNumber,
         },
       },
@@ -70,8 +71,12 @@ export default function Reserve({ experience }: { experience: Experience }) {
         setIsPaystackOpen(true);
       },
       onError: (error) => {
-        console.error('Purchase failed:', error);
-        // Handle error - e.g., show error message
+        toast({
+          title: 'Error',
+          description:
+            (error as any)?.message,
+          variant: 'destructive',
+        });
       },
     });
   };

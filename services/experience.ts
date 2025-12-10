@@ -66,8 +66,6 @@ export async function purchaseExperienceTicket(data: PurchaserDetails): Promise<
   try {
     const response = await api.post(`/v1/experiences/ticket-purchases/`, data);
 
-    console.log('response: ', response);
-
     return {
       status: response.status,
       success: true,
@@ -75,11 +73,12 @@ export async function purchaseExperienceTicket(data: PurchaserDetails): Promise<
     };
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
-
-    return {
+    
+    throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: error.response?.data?.message || 'An error occurred while processing your ticket purchase.',
+      data: error.response?.data,
     };
   }
 }
