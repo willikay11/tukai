@@ -30,7 +30,7 @@ export default function Bookmark({
     >
       <Bookmark02Icon
         id="bookmark"
-        size={16}
+        size={18}
         variant={isBookmarked ? 'solid' : 'twotone'}
         className={`${isBookmarked ? 'text-red-500' : className}`}
       />
