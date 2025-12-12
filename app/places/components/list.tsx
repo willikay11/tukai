@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { motion } from 'framer-motion'; // ✅ Framer Motion for smooth transitions
-import SinglePlace from '@/app/place/components/place';
+
 import { Place } from '@/types/place';
 import { usePlaces } from '@/hooks/places';
 import { useCallback, useRef, useState, useEffect } from 'react';
@@ -11,6 +11,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import SignInForm from '@/components/ui/form/sign-in';
 import { toast } from '@/hooks/use-toast';
 import { Status } from '@/enums/status';
+import SinglePlace from './place';
 
 type ListPlacesProps = {
   selectedCategoryId?: string;
@@ -139,7 +140,7 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
               transition={{ duration: 0.2 }}
               className="cursor-pointer"
             >
-              <Link target="_blank" href={`/place/${place.id}`}>
+              <Link target="_blank" href={`/places/${place.id}`}>
                 <SinglePlace place={place} />
               </Link>
               {/* {session?.user ? (

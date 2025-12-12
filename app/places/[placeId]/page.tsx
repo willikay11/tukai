@@ -10,9 +10,9 @@ import IconComponent from '@/app/components/iconComponent';
 import { Separator } from '@/components/ui/separator';
 import SocialLinks from '@/app/components/socialLinks';
 import GoogleMapComponent from '@/app/components/googleMap';
-import PlaceTabs from '@/app/place/components/placeTabs';
 import PlaceActions from '../components/placeActions';
 import PhotoGallery from '@/components/ui/PhotoGallery';
+import PlaceTabs from '../components/placeTabs';
 
 export default async function ViewPlacePage({ params }: { params: { placeId: string } }) {
   const placeResponse: ApiResponse = await fetchPlace(params.placeId);
