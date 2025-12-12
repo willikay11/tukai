@@ -89,7 +89,7 @@ export default async function ViewExperiencePage({ params }: { params: { experie
                 }
               />
             </div>
-            <div className="mt-4 grid grid-cols-3 gap-4">
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
               <ExperienceDetails experience={experience} />
             </div>
 
