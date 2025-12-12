@@ -15,7 +15,6 @@ import ExperienceActions from '../components/experienceActions';
 import ExperienceDetails from '../components/experienceDetails';
 import BookmarkExperience from '../components/bookmarkExperience';
 import Share from '@/app/components/share';
-import { HugeiconsIcon } from '@hugeicons-pro/core-twotone-rounded';
 
 export default async function ViewExperiencePage({ params }: { params: { experienceId: string } }) {
   const experienceResponse: ApiResponse = await fetchExperience(params.experienceId);
