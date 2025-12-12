@@ -1,4 +1,3 @@
-import { Bookmark02Icon, Share08Icon } from '@hugeicons/react-pro';
 import { ApiResponse } from '@/types/apiResponse';
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
 import { fetchExperience } from '@/services/experience';
