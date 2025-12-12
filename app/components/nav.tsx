@@ -59,13 +59,17 @@ export default function Nav() {
       </Dialog>
       <div className="cursor-pointer inline-flex justify-center items-center md:hidden">
         <Menu02Icon size={24} variant="twotone" type="rounded" onClick={() => setOpen(true)} />
-        <Image
-          src="/images/logo.svg"
-          alt="Oltukai logo"
-          width={60}
-          height={60}
-          className="ml-2.5"
-        />
+        <Link
+          href="/">
+          <Image
+            src="/images/logo.svg"
+            alt="Oltukai logo"
+            width={60}
+            height={60}
+            className="ml-2.5"
+          />
+        </Link>
+  
       </div>
       <div className="hidden md:inline-flex md:h-full">{linkItems(true)}</div>
     </>
