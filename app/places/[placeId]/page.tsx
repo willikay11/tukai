@@ -30,18 +30,18 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
   return (
     <main className="grid grid-cols-12 gap-4">
       <div className="col-span-12 mx-4 mt-8 md:col-span-6 md:col-start-4 md:mx-0 2xl:col-span-4 2xl:col-start-5 2xl:mx-0">
-        <div className="mb-3 inline-flex w-full justify-between">
+        <div className="mb-3 block md:inline-flex w-full justify-between">
           <div className="inline-flex">
             <div className="flex flex-col">
               <p className="mb-1 text-2xl font-black text-gray-700">{place.title}</p>
               <div className="inline-flex items-center">
-                <span className="text-xs">{place.location.formattedAddress}</span>
+                <span className="text-xs font-medium">{place.location.formattedAddress}</span>
                 <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" />
                 <Rating rating={place.averageRating} showCount={true} />
               </div>
             </div>
           </div>
-          <div className="inline-flex items-start">
+          <div className="mt-2.5 md:mb-0inline-flex items-start">
             <PlaceActions
               placeId={params.placeId}
               bookmarked={place.isBookmarked}

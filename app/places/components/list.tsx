@@ -6,10 +6,7 @@ import { Place } from '@/types/place';
 import { usePlaces } from '@/hooks/places';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import NoData from '@/components/ui/noData';
-import { useSession } from 'next-auth/react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import SignInForm from '@/components/ui/form/sign-in';
-import { toast } from '@/hooks/use-toast';
+import { useSession } from 'next-auth/react';;
 import { Status } from '@/enums/status';
 import SinglePlace from './place';
 
