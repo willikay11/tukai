@@ -73,11 +73,12 @@ export async function purchaseExperienceTicket(data: PurchaserDetails): Promise<
     };
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
-    
+
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An error occurred while processing your ticket purchase.',
+      message:
+        error.response?.data?.message || 'An error occurred while processing your ticket purchase.',
       data: error.response?.data,
     };
   }

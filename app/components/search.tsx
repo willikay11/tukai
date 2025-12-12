@@ -68,7 +68,7 @@ export default function Search() {
             })}
           >
             {!query && !tag && (
-              <p className="mb-0 text-xs text-gray-700 font-medium">
+              <p className="mb-0 text-xs font-medium text-gray-700">
                 {pathname === '/' || pathname.includes('/place')
                   ? "What's the plan?"
                   : pathname.includes('/experiences')
@@ -90,7 +90,7 @@ export default function Search() {
             <input
               ref={inputElRef}
               className={clsx(
-                'mt-[2px] h-full w-full text-[11px] outline-0 placeholder:text-[11px] placeholder:text-gray-400 placeholder:font-medium hover:border-primary focus:border-primary',
+                'mt-[2px] h-full w-full text-[11px] outline-0 placeholder:text-[11px] placeholder:font-medium placeholder:text-gray-400 hover:border-primary focus:border-primary',
                 query && query.length > 0 && tag && 'mt-0',
               )}
               placeholder={
