@@ -22,6 +22,7 @@ export default function Reserve({ experience }: { experience: Experience }) {
   const [isPaystackOpen, setIsPaystackOpen] = useState<boolean>(false);
   const [isPaymentSuccessOpen, setIsPaymentSuccessOpen] = useState<boolean>(false);
   const [showInviteGuests, setShowInviteGuests] = useState<boolean>(false);
+  const [ticketError, setTicketError] = useState<string>('');
   const {
     mutate: purchaseExperienceTicket,
     isPending: isPurchasingExperienceTicket,
@@ -44,6 +45,22 @@ export default function Reserve({ experience }: { experience: Experience }) {
       const newTicket = { ticketId, quantity, price };
       setReservedTickets((prev) => [...prev.filter((t) => t.ticketId !== ticketId), newTicket]);
     }
+    
+    // Clear error when user selects tickets
+    if (ticketError) {
+      setTicketError('');
+    }
+  };
+
+  const handleFormSubmit = () => {
+    const totalTickets = reservedTickets.reduce((acc, ticket) => acc + ticket.quantity, 0);
+    
+    if (totalTickets === 0) {
+      setTicketError('Please select at least one ticket');
+      return;
+    }
+    
+    formRef.current?.submit();
   };
 
   const handleSubmit = (values: z.infer<typeof paymentFormSchema>) => {
@@ -135,7 +152,7 @@ export default function Reserve({ experience }: { experience: Experience }) {
           <div key={ticket.id} className="mb-2.5 flex w-full flex-row justify-between">
             <div className="flex flex-col items-start">
               <p className="text-sm font-bold text-gray-700">{ticket.name}</p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 mt-1">
                 {experience.currency} {numeral(ticket.price).format('0,0.00')}/person
               </p>
             </div>
@@ -151,6 +168,10 @@ export default function Reserve({ experience }: { experience: Experience }) {
             </div>
           </div>
         ))}
+
+        {ticketError && (
+          <p className="mt-2 text-sm text-red-600">{ticketError}</p>
+        )}
 
         <Separator className="my-4 h-[1px]" />
 
@@ -179,6 +200,8 @@ export default function Reserve({ experience }: { experience: Experience }) {
           setIsPaystackOpen(false);
           if (paymentSuccess) {
             setIsPaymentSuccessOpen(true);
+            formRef.current?.reset();
+            setReservedTickets([]);
           }
         }}
         url={purchaseData?.data?.paymentDetails?.authorizationUrl || ''}
@@ -199,7 +222,7 @@ export default function Reserve({ experience }: { experience: Experience }) {
           size="lg"
           className="w-full"
           type="submit"
-          onClick={() => formRef.current?.submit()}
+          onClick={handleFormSubmit}
           disabled={isPurchasingExperienceTicket}
         >
           {isPurchasingExperienceTicket ? 'Submitting...' : 'Submit'}

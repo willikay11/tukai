@@ -62,8 +62,8 @@ export default function Paystack({
 
   return (
     <AlertDialog open={isOpen}>
-      <AlertDialogContent className="h-[36rem] w-[40rem] max-w-none p-0">
-        <iframe ref={iframeRef} src={url} width="100%" height="100%" className="border-0" />
+      <AlertDialogContent className="h-[80vh] w-[calc(100%-32px)] p-0 sm:h-[36rem] sm:w-[40rem] sm:max-w-none rounded-lg">
+        <iframe ref={iframeRef} src={url} width="100%" height="100%" className="border-0 rounded-lg" />
       </AlertDialogContent>
     </AlertDialog>
   );

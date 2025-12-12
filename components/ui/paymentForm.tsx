@@ -126,6 +126,10 @@ const PaymentForm = forwardRef(
         form.handleSubmit((values) => {
           onSubmit(values, selectedOption);
         })(),
+      reset: () => {
+        form.reset();
+        setSelectedOption('mobile_money');
+      },
       formState: form.formState,
     }));
 
