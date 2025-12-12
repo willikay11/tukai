@@ -31,7 +31,7 @@ export async function fetchExperiences(params: ExperiencesQueryParams): Promise<
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
 
-    return {
+    throw {
       status: error.response?.status || 500,
       success: false,
       message: error.response?.data?.message || 'An unexpected error occurred',
@@ -54,7 +54,7 @@ export async function fetchExperience(id: string): Promise<ApiResponse> {
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
 
-    return {
+    throw {
       status: error.response?.status || 500,
       success: false,
       message: error.response?.data?.message || 'An unexpected error occurred',
@@ -96,7 +96,7 @@ export async function bookmarkExperience(id: string): Promise<ApiResponse> {
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
 
-    return {
+    throw {
       status: error.response?.status || 500,
       success: false,
       message: error.response?.data?.message || 'An unexpected error occurred',

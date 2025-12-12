@@ -1,44 +1,56 @@
-import { PillsSkeleton } from '@/app/components/skeletons';
 import { Suspense } from 'react';
-import PlaceCategoryFilters from '@/app/place/components/placeCategoryFilters';
-import ListPlaces from '@/app/place/components/list';
-import { fetchPlaceCategories } from '@/services/place';
-import { unstable_cache } from 'next/cache';
-import { PlaceCategory } from '@/types/placeCategory';
+import { PillsSkeleton } from '@/app/components/skeletons';
+import moment from 'moment';
+import ExperienceFilters from './experiences/components/experienceFilters';
+import Experiences from './experiences/components/List/experiences';
+// import InvitedExperiences from './components/List/invitedExperiences';
 
-const getPlaceCategories = unstable_cache(
-  async () => {
-    return await fetchPlaceCategories();
-  },
-  ['placeCategories'],
-  { revalidate: 3600, tags: ['placeCategories'] },
-);
-
-export default async function Home({ searchParams }: { searchParams: { category?: string } }) {
+export default function ExperiencesPage({ searchParams }: { searchParams: { category?: string } }) {
   const categoryFromQuery = searchParams?.category;
 
-  const placeCategories = await getPlaceCategories();
-
-  // Default to the first filter (or get it from query params if available)
-  const selectedCategoryId =
-    categoryFromQuery ||
-    placeCategories?.data?.results?.sort(
-      (a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount,
-    )?.[0].id;
-
   return (
-    <main className="grid h-full grid-cols-12 gap-4 px-4 md:px-0">
-      <div className="sticky top-[81px] z-20 col-span-12 md:top-[105px]">
+    <main className="grid h-full grid-cols-12 gap-x-4 px-4 md:px-0">
+      <div className="sticky top-[105px] z-10 col-span-12 bg-white">
         <Suspense fallback={<PillsSkeleton />}>
-          <PlaceCategoryFilters
-            placeCategories={placeCategories?.data?.results}
-            selectedCategoryId={selectedCategoryId}
-          />
+          <ExperienceFilters category={categoryFromQuery} />
         </Suspense>
       </div>
-      <div className="col-span-12 mb-4 md:col-span-10 md:col-start-2 md:mx-0">
-        <ListPlaces key={selectedCategoryId} selectedCategoryId={selectedCategoryId} />
-      </div>
+      {/* <div className="grid h-full grid-cols-12 gap-4">
+        <div className="col-span-12 bg-gray-100">
+          <div className="grid grid-cols-12 py-4">
+            <div className="mx-4 mb-4 md:col-span-10 md:col-start-2 md:mx-0">
+              <div className="mb-4 inline-flex items-center">
+                <span className="text-xl font-semibold text-gray-700">Invited Experiences</span>
+                <div className="mx-2 h-[2px] w-[2px] rounded-full bg-gray-400" />
+                <span className="text-xl font-normal text-gray-500">3</span>
+              </div>
+              <Suspense fallback={<EventsSkeleton />}>
+                <InvitedExperiences />
+              </Suspense>
+            </div>
+          </div>
+        </div>
+      </div> */}
+      {/* {(categoryFromQuery === 'all' || categoryFromQuery === undefined) && (
+        <Experiences type="invited" skeletonCount={3} />
+      )} */}
+      <Experiences
+        key={categoryFromQuery}
+        category={categoryFromQuery}
+        title={`Happening Today: ${moment().format('Do MMMM, YYYY')}`}
+        date={moment().format('YYYY-MM-DD')}
+        isPortal={true}
+      />
+
+      <Experiences
+        key={categoryFromQuery}
+        category={categoryFromQuery}
+        title={`Happening Tommorrow: ${moment().add('days', 1).format('Do MMMM, YYYY')}`}
+        date={moment().add('days', 1).format('YYYY-MM-DD')}
+        isPortal={true}
+      />
+
+      <Experiences key={categoryFromQuery} category={categoryFromQuery} title="Discover" />
     </main>
   );
 }

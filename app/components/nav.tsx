@@ -7,12 +7,12 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useState } from 'react';
 
 const links = [
-  { name: 'Explore', href: '/', icon: <Search01Icon size={18} variant="twotone" /> },
   {
     name: 'Experiences',
-    href: '/experiences',
+    href: '/',
     icon: <Calendar04Icon size={18} variant="twotone" />,
   },
+  { name: 'Explore', href: '/places', icon: <Search01Icon size={18} variant="twotone" /> },
   {
     name: 'Communities',
     href: '/communities',
