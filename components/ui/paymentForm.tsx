@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { CallIcon } from '@hugeicons/react-pro';
 import { PhoneNumber } from './phoneNumber';
 import { Select, SelectValue, SelectTrigger, SelectItem, SelectContent } from './select';
+import { useSession } from 'next-auth/react';
 
 const options = [
   {
@@ -104,10 +105,14 @@ const PaymentForm = forwardRef(
     ref,
   ) => {
     const [selectedOption, setSelectedOption] = useState('mobile_money');
+    const { data: session } = useSession();
 
     const form = useForm<z.infer<typeof paymentFormSchema>>({
       resolver: zodResolver(paymentFormSchema),
       defaultValues: {
+        firstName: session?.user?.name?.split(' ')[0] || '',
+        lastName: session?.user?.name?.split(' ')[1] || '',
+        email: session?.user?.email || '',
         postCode: '',
         country: 'KE',
         phoneNumber: '',
@@ -130,94 +135,106 @@ const PaymentForm = forwardRef(
       form.setValue('paymentOption', value);
     };
 
-
     useEffect(() => {
       form.setValue('paid', paid);
     }, [paid]);
+
+    // Update form values when session data becomes available
+    useEffect(() => {
+      if (session?.user) {
+        form.setValue('firstName', session.user.name?.split(' ')[0] || '');
+        form.setValue('lastName', session.user.name?.split(' ')[1] || '');
+        form.setValue('email', session.user.email || '');
+      }
+    }, [session, form]);
 
     return (
       <>
         <Form {...form}>
           <form className="space-y-4">
-            <p className="mb-2 text-sm font-bold text-gray-700">Contact Details</p>
+            {!session?.user && (
+              <>
+                <p className="mb-2 text-sm font-bold text-gray-700">Contact Details</p>
 
-            <p className="mb-2 text-sm text-gray-700">
-              *Your ticket will be sent to your email on successful completion.
-            </p>
+                <p className="mb-2 text-sm text-gray-700">
+                  *Your ticket will be sent to your email on successful completion.
+                </p>
 
-            <div className="grid grid-cols-2 gap-2">
-              <FormField
-                control={form.control}
-                name="firstName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        placeholder="First Name"
-                        type="text"
-                        icon={
-                          <HugeiconsIcon
-                            icon={UserTwotoneRounded}
-                            size={20}
-                            className="text-gray-600"
+                <div className="grid grid-cols-2 gap-2">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            placeholder="First Name"
+                            type="text"
+                            icon={
+                              <HugeiconsIcon
+                                icon={UserTwotoneRounded}
+                                size={20}
+                                className="text-gray-600"
+                              />
+                            }
+                            {...field}
                           />
-                        }
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="lastName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        placeholder="Last Name"
-                        type="text"
-                        icon={
-                          <HugeiconsIcon
-                            icon={UserTwotoneRounded}
-                            size={20}
-                            className="text-gray-600"
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            placeholder="Last Name"
+                            type="text"
+                            icon={
+                              <HugeiconsIcon
+                                icon={UserTwotoneRounded}
+                                size={20}
+                                className="text-gray-600"
+                              />
+                            }
+                            {...field}
                           />
-                        }
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      placeholder="Email"
-                      type="email"
-                      icon={
-                        <HugeiconsIcon
-                          icon={Mail02TwotoneRounded}
-                          size={20}
-                          className="text-gray-600"
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          placeholder="Email"
+                          type="email"
+                          icon={
+                            <HugeiconsIcon
+                              icon={Mail02TwotoneRounded}
+                              size={20}
+                              className="text-gray-600"
+                            />
+                          }
+                          {...field}
                         />
-                      }
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
 
             {paid && (
               <>

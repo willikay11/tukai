@@ -57,7 +57,7 @@ export default function Nav() {
           </div>
         </DialogContent>
       </Dialog>
-      <div className="cursor-pointer inline-flex justify-center items-center md:hidden">
+      <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
         <Menu02Icon size={24} variant="twotone" type="rounded" onClick={() => setOpen(true)} />
         <Image
           src="/images/logo.svg"

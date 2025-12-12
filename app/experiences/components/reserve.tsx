@@ -73,8 +73,7 @@ export default function Reserve({ experience }: { experience: Experience }) {
       onError: (error) => {
         toast({
           title: 'Error',
-          description:
-            (error as any)?.message,
+          description: (error as any)?.message,
           variant: 'destructive',
         });
       },
