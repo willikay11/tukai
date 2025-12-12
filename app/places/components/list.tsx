@@ -6,7 +6,7 @@ import { Place } from '@/types/place';
 import { usePlaces } from '@/hooks/places';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import NoData from '@/components/ui/noData';
-import { useSession } from 'next-auth/react';;
+import { useSession } from 'next-auth/react';
 import { Status } from '@/enums/status';
 import SinglePlace from './place';
 
