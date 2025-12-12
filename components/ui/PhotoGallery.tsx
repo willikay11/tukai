@@ -52,7 +52,7 @@ const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
                 src={photos?.[1].photo}
                 alt=""
                 quality={100}
-                className="cursor-pointer rounded-bl-[15px]"
+                className="cursor-pointer rounded-bl-[15px] rounded-br-[15px]"
               />
             </div>
           )}
