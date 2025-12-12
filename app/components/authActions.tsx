@@ -38,7 +38,7 @@ export default function AuthActions() {
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
-              <NavigationMenuTrigger>
+              <NavigationMenuTrigger className='pr-0'>
                 <div className="relative aspect-square h-7 w-7">
                   <TukaiImage
                     src={session?.user?.image || ''}
