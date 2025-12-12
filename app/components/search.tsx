@@ -62,13 +62,13 @@ export default function Search() {
           <Search01Icon size={20} className="mr-2 text-gray-500" variant="twotone" />
           <div
             onClick={() => setShowSearchResults(true)}
-            className={clsx('flex w-full md:w-[90%]', {
+            className={clsx('flex w-[80%]', {
               'mt-0 flex-row items-center': (query && query.length > 0) || tag,
               'flex-col': !query && !tag,
             })}
           >
             {!query && !tag && (
-              <p className="mb-0 text-xs text-gray-700">
+              <p className="mb-0 text-xs text-gray-700 font-medium">
                 {pathname === '/' || pathname.includes('/place')
                   ? "What's the plan?"
                   : pathname.includes('/experiences')
@@ -90,7 +90,7 @@ export default function Search() {
             <input
               ref={inputElRef}
               className={clsx(
-                'mt-[2px] h-full w-full text-[11px] outline-0 placeholder:text-[11px] placeholder:text-gray-400 hover:border-primary focus:border-primary',
+                'mt-[2px] h-full w-full text-[11px] outline-0 placeholder:text-[11px] placeholder:text-gray-400 placeholder:font-medium hover:border-primary focus:border-primary',
                 query && query.length > 0 && tag && 'mt-0',
               )}
               placeholder={

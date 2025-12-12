@@ -1,5 +1,6 @@
 'use client';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { Menu02Icon, Search01Icon, Calendar04Icon, UserMultipleIcon } from '@hugeicons/react-pro';
@@ -56,8 +57,15 @@ export default function Nav() {
           </div>
         </DialogContent>
       </Dialog>
-      <div className="cursor-pointer md:hidden">
-        <Menu02Icon size={20} variant="twotone" type="rounded" onClick={() => setOpen(true)} />
+      <div className="cursor-pointer inline-flex justify-center items-center md:hidden">
+        <Menu02Icon size={24} variant="twotone" type="rounded" onClick={() => setOpen(true)} />
+        <Image
+          src="/images/logo.svg"
+          alt="Oltukai logo"
+          width={60}
+          height={60}
+          className="ml-2.5"
+        />
       </div>
       <div className="hidden md:inline-flex md:h-full">{linkItems(true)}</div>
     </>
