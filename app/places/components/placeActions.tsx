@@ -12,7 +12,6 @@ import {
 } from '@/hooks/places';
 import Bookmark from '@/app/components/bookmark';
 import AddReview from '@/app/components/review/AddReview';
-import { useDownloadApp } from '@/context/DownloadAppContext';
 
 export default function PlaceActions({
   placeId,
@@ -27,7 +26,6 @@ export default function PlaceActions({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
-  const { onOpen } = useDownloadApp();
 
   const {
     mutate: createPlaceReview,
@@ -59,7 +57,7 @@ export default function PlaceActions({
           link={`Check out this place ${placeTitle} on Tukai, ${process.env.NEXT_PUBLIC_APP_URL}/places/${placeId}`}
         />
         <div className="mr-2" />
-        <Button onClick={() => onOpen()}>Add Review</Button>
+        <Button onClick={() => setIsOpen(true)}>Add Review</Button>
       </div>
 
       <AddReview

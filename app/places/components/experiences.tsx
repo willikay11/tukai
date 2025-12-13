@@ -20,7 +20,7 @@ export default function TabExperiences({ categories }: ListExperiencesProps) {
       experiences={experiences?.data?.results}
       isLoading={isLoading}
       count={experiences?.data?.count}
-      className="grid grid-cols-1 gap-x-4 gap-y-8"
+      className="grid grid-cols-1 gap-x-4 gap-y-8 px-4"
       page={page}
       setPage={setPage}
       skeletonCount={2}

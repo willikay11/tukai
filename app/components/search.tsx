@@ -162,7 +162,7 @@ export default function Search() {
           <div className="flex flex-col gap-2">
             {searchResults?.map((result: SearchResult) => (
               <Link
-                href={`/${result.type === 'experience' ? 'experiences' : 'place'}/${result.data?.id}`}
+                href={`/${result.type === 'experience' ? 'experiences' : 'places'}/${result.data?.id}`}
                 target="_blank"
                 key={result.id}
               >
