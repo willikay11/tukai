@@ -18,6 +18,7 @@ import Search from './components/search';
 import { DownloadAppProvider } from '@/context/DownloadAppContext';
 import { SelectedCategoryProvider } from '@/context/SelectedCategoryContext';
 import PageFilters from '@/components/ui/pageFilters';
+import { PillsSkeleton } from './components/skeletons';
 
 hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
@@ -75,7 +76,9 @@ export default function RootLayout({
                         </div>
                       </div>
                     </div>
-                    <PageFilters />
+                    <Suspense fallback={<PillsSkeleton />}>
+                      <PageFilters />
+                    </Suspense>
                   </div>
                   {children}
                 </SelectedCategoryProvider>

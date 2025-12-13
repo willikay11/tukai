@@ -7,11 +7,13 @@ import { Suspense, useEffect, useState } from 'react';
 import { usePlaceCategories } from '@/hooks/places';
 import { PlaceCategory } from '@/types/placeCategory';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
+import { set } from 'lodash';
 
 export default function PageFilters() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { setSelectedCategoryId, selectedCategoryId } = useSelectedCategory();
+  const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<{ label: string; value: string; icon: string }[]>();
   const { data: categories, isFetching } = usePlaceCategories({}, pathname === '/places');
   const categoryFromQuery = searchParams.get('category');
@@ -45,6 +47,7 @@ export default function PageFilters() {
         { label: 'Saved', value: 'saved', icon: 'Bookmark02Icon' },
         { label: 'Hosting', value: 'hosting', icon: 'WavingHand02Icon' },
       ]);
+      setIsLoading(false);
     }
     if (pathname === '/communities') {
       setFilters([
@@ -52,6 +55,7 @@ export default function PageFilters() {
         { label: 'Recommended', value: 'recommended', icon: 'UserSearch01Icon' },
         { label: 'Posts', value: 'posts', icon: 'GridViewIcon' },
       ]);
+      setIsLoading(false);
     }
   }, [categories, pathname]);
 
@@ -69,7 +73,7 @@ export default function PageFilters() {
       <div className="w-full border-t-[1px] border-gray-100 bg-white">
         <div className="grid grid-cols-12 gap-4">
           <div className="relative col-span-12 md:col-span-10 md:col-start-2 md:mx-0">
-            {isFetching ? (
+            {isFetching || isLoading ? (
               <PillsSkeleton />
             ) : (
               <ScrollFilters filters={filters || []} selectedCategory={selectedCategoryId} />
