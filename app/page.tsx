@@ -10,7 +10,7 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
 
   return (
     <main className="grid h-full grid-cols-12 gap-x-4 px-4 md:px-0">
-      <div className="sticky top-[105px] z-10 col-span-12 bg-white">
+      <div className="sticky top-[115px] md:top-[104px] z-10 col-span-12 bg-white">
         <Suspense fallback={<PillsSkeleton />}>
           <ExperienceFilters category={categoryFromQuery} />
         </Suspense>
