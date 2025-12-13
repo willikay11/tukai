@@ -32,10 +32,16 @@ export const usePlaces = ({
   });
 };
 
-export const usePlaceCategories = (params: PlaceCategoryParams = { pageSize: 100 }) => {
+export const usePlaceCategories = (
+  params: PlaceCategoryParams = { pageSize: 100 },
+  enabled: boolean = false,
+) => {
   return useQuery({
     queryKey: ['placeCategories', params],
     queryFn: async () => await fetchPlaceCategories(params),
+    staleTime: 3600 * 1000, // 3600 seconds (1 hour)
+    gcTime: 3600 * 1000, // Keep in cache for 1 hour
+    enabled,
   });
 };
 
