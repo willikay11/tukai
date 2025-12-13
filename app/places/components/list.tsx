@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { motion } from 'framer-motion'; // ✅ Framer Motion for smooth transitions
+import { motion } from 'framer-motion';
 
 import { Place } from '@/types/place';
 import { usePlaces } from '@/hooks/places';
@@ -8,10 +8,7 @@ import { useCallback, useRef, useState, useEffect } from 'react';
 import NoData from '@/components/ui/noData';
 import { Status } from '@/enums/status';
 import SinglePlace from './place';
-
-type ListPlacesProps = {
-  selectedCategoryId?: string;
-};
+import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 
 const placeholders: Place[] = Array.from({ length: 12 }, (_, index) => ({
   id: `placeholder-${index}`,
@@ -39,7 +36,8 @@ const placeholders: Place[] = Array.from({ length: 12 }, (_, index) => ({
   categories: [],
 }));
 
-export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
+export default function ListPlaces() {
+  const { selectedCategoryId } = useSelectedCategory();
   const [page, setPage] = useState(1);
   const [placeList, setPlaceList] = useState<Place[]>(placeholders);
   const [endPage, setEndPage] = useState<number | null>(null);
@@ -104,6 +102,7 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
   return (
     <>
       <motion.div
+        key={selectedCategoryId}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}

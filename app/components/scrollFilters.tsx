@@ -5,6 +5,7 @@ import { ArrowLeft01Icon, ArrowRight01Icon } from '@hugeicons/react-pro';
 import { useEffect, useRef, useState } from 'react';
 import IconComponent from '@/app/components/iconComponent';
 import { useRouter } from 'next/navigation';
+
 export default function ScrollFilters({
   filters,
   selectedCategory,
@@ -46,6 +47,7 @@ export default function ScrollFilters({
   };
   // Get category from URL or use default
   useEffect(() => {
+    console.log('Selected Category in ScrollFilters:', selectedCategory);
     setSelectedOption(selectedCategory); // Update selected category if changed
   }, [selectedCategory]);
 

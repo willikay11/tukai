@@ -1,7 +1,4 @@
-import { Suspense } from 'react';
-import { PillsSkeleton } from '@/app/components/skeletons';
 import moment from 'moment';
-import ExperienceFilters from './experiences/components/experienceFilters';
 import Experiences from './experiences/components/List/experiences';
 import InvitedExperiences from './experiences/components/List/invitedExperiences';
 
@@ -10,11 +7,6 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
 
   return (
     <main className="grid h-full grid-cols-12 gap-x-4 px-4 md:px-0">
-      <div className="sticky top-[115px] md:top-[104px] z-10 col-span-12 bg-white">
-        <Suspense fallback={<PillsSkeleton />}>
-          <ExperienceFilters category={categoryFromQuery} />
-        </Suspense>
-      </div>
       <InvitedExperiences skeletonCount={3} isPortal={true} category={categoryFromQuery} />
       {/* {(categoryFromQuery === 'all' || categoryFromQuery === undefined) && (
         <Experiences type="invited" skeletonCount={3} />
