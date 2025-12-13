@@ -30,7 +30,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
   return (
     <main className="grid grid-cols-12 gap-4">
       <div className="col-span-12 mx-4 mt-8 md:col-span-6 md:col-start-4 md:mx-0 2xl:col-span-4 2xl:col-start-5 2xl:mx-0">
-        <div className="mb-3 block md:inline-flex w-full justify-between">
+        <div className="mb-3 block w-full justify-between md:inline-flex">
           <div className="inline-flex">
             <div className="flex flex-col">
               <p className="mb-1 text-2xl font-black text-gray-700">{place.title}</p>
@@ -41,15 +41,14 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
               </div>
             </div>
           </div>
-          <div className="mt-2.5 md:mb-0inline-flex items-start">
+          <div className="md:mb-0inline-flex mt-2.5 items-start">
             <PlaceActions
               placeId={params.placeId}
               bookmarked={place.isBookmarked}
               placeTitle={place.title}
               coverPhoto={
                 place?.photos?.find((photo: Photo) => photo.isCover)?.photo ||
-                place?.photos[0]?.photo ||
-                'https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg'
+                place?.photos[0]?.photo
               }
             />
           </div>
@@ -87,8 +86,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
             <DescriptionShowMore
               photo={
                 place?.photos.find((photo: Photo) => photo.isCover)?.photo ||
-                place?.photos[0]?.photo ||
-                'https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg'
+                place?.photos[0]?.photo
               }
               text={place.description}
               maxLength={600}

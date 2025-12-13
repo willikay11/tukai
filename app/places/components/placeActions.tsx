@@ -59,14 +59,13 @@ export default function PlaceActions({
         </DialogContent>
       </Dialog>
       <div className="inline-flex h-full items-center justify-center">
-        {session?.user?.id && (
-          <Bookmark
-            bookmarked={bookmarked}
-            onBookmark={() => bookmarkPlace()}
-            onUnbookmark={() => bookmarkPlace()}
-            className="text-primary"
-          />
-        )}
+        <Bookmark
+          userId={session?.user?.id}
+          bookmarked={bookmarked}
+          onBookmark={() => bookmarkPlace()}
+          onUnbookmark={() => bookmarkPlace()}
+          className="text-primary"
+        />
         <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" />
         <Share
           coverPhoto={coverPhoto}
@@ -74,13 +73,17 @@ export default function PlaceActions({
           link={`Check out this place ${placeTitle} on Tukai, ${process.env.NEXT_PUBLIC_APP_URL}/places/${placeId}`}
         />
         <div className="mr-2" />
-        <Button onClick={() => {
-          if (!session?.user?.id) {
-            setOpenSignIn(true);
-          } else {
-            setIsOpen(true);
-          }
-        }}>Add Review</Button>
+        <Button
+          onClick={() => {
+            if (!session?.user?.id) {
+              setOpenSignIn(true);
+            } else {
+              setIsOpen(true);
+            }
+          }}
+        >
+          Add Review
+        </Button>
       </div>
 
       <AddReview

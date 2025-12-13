@@ -6,7 +6,6 @@ import { Place } from '@/types/place';
 import { usePlaces } from '@/hooks/places';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import NoData from '@/components/ui/noData';
-import { useSession } from 'next-auth/react';
 import { Status } from '@/enums/status';
 import SinglePlace from './place';
 
@@ -44,8 +43,6 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
   const [page, setPage] = useState(1);
   const [placeList, setPlaceList] = useState<Place[]>(placeholders);
   const [endPage, setEndPage] = useState<number | null>(null);
-  const { data: session } = useSession();
-  const [open, setOpen] = useState(false);
   const { data: places, isLoading } = usePlaces({
     categoryId: selectedCategoryId,
     page,
@@ -106,20 +103,6 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
 
   return (
     <>
-      {/* <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="px-16">
-          <SignInForm
-            onLogin={() => {
-              setOpen(false);
-              toast({
-                description: 'Welcome Back!',
-                variant: 'success',
-              });
-            }}
-          />
-        </DialogContent>
-      </Dialog> */}
-
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -140,15 +123,6 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
               <Link target="_blank" href={`/places/${place.id}`}>
                 <SinglePlace place={place} />
               </Link>
-              {/* {session?.user ? (
-                <Link target="_blank" href={`/place/${place.id}`}>
-                  <SinglePlace place={place} />
-                </Link>
-              ) : (
-                <div onClick={() => setOpen(true)}>
-                  <SinglePlace place={place} />
-                </div>
-              )} */}
             </motion.div>
           );
         })}

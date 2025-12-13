@@ -89,7 +89,6 @@ export default function Share({
         onClick={() => setOpen(true)}
       />
       <Dialog open={open} onOpenChange={setOpen}>
-
         <DialogContent className="px-6 md:w-[24rem]">
           <div className="flex flex-col gap-4">
             <p className="text-2xl font-black text-gray-700">Share Location</p>
