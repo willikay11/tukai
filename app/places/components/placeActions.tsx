@@ -15,6 +15,7 @@ import AddReview from '@/app/components/review/AddReview';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import SignInForm from '@/components/ui/form/sign-in';
 import { toast } from '@/hooks/use-toast';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 
 export default function PlaceActions({
   placeId,
@@ -28,7 +29,7 @@ export default function PlaceActions({
   coverPhoto: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [openSignIn, setOpenSignIn] = useState(false);
+  const { setOpenSignIn } = useAuthDialog();
   const { data: session } = useSession();
 
   const {
@@ -45,19 +46,6 @@ export default function PlaceActions({
 
   return (
     <>
-      <Dialog open={openSignIn} onOpenChange={setOpenSignIn}>
-        <DialogContent className="px-16">
-          <SignInForm
-            onLogin={() => {
-              setOpenSignIn(false);
-              toast({
-                description: 'Welcome Back!',
-                variant: 'success',
-              });
-            }}
-          />
-        </DialogContent>
-      </Dialog>
       <div className="inline-flex h-full items-center justify-center">
         <Bookmark
           userId={session?.user?.id}

@@ -69,23 +69,35 @@ export default function ListPlaces() {
   );
 
   useEffect(() => {
-    if (isLoading && !placeList.some((place) => place.id.startsWith('placeholder-'))) {
-      setPlaceList((prevPlaceList) => [...prevPlaceList, ...placeholders]);
-      ``;
-    } else if (!isLoading && places?.data?.results) {
-      setPlaceList((prevPlaceList) => [
-        ...prevPlaceList.filter((place) => !place.id.startsWith('placeholder-')),
-        ...places.data.results,
-      ]);
+    setPage(1);
+    setPlaceList(placeholders);
+    setEndPage(null);
+  }, [selectedCategoryId]);
+
+  useEffect(() => {
+    if (!isLoading && places?.data?.results) {
+      if (page === 1) {
+        // Replace entire list for first page
+        setPlaceList(places.data.results);
+      } else {
+        // Append to existing list for pagination
+        setPlaceList((prevPlaceList) => [
+          ...prevPlaceList.filter((place) => !place.id.startsWith('placeholder-')),
+          ...places.data.results,
+        ]);
+      }
       if (places.data.count) {
         setEndPage(Math.ceil(places.data.count / 12));
       }
-    } else if (!isLoading) {
-      setPlaceList((prevPlaceList) =>
-        prevPlaceList.filter((place) => !place.id.startsWith('placeholder-')),
-      );
+    } else if (
+      isLoading &&
+      page > 1 &&
+      !placeList.some((place) => place.id.startsWith('placeholder-'))
+    ) {
+      // Add placeholders only when loading subsequent pages
+      setPlaceList((prevPlaceList) => [...prevPlaceList, ...placeholders]);
     }
-  }, [places, isLoading]);
+  }, [places, isLoading, page]);
 
   if (!isLoading && placeList.length === 0) {
     return (

@@ -1,10 +1,15 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Bookmark from './index';
+import { AuthDialogProvider } from '@/context/AuthDialogContext';
+
+const renderWithProvider = (component: React.ReactElement) => {
+  return render(<AuthDialogProvider>{component}</AuthDialogProvider>);
+};
 
 describe('Bookmark Component', () => {
   it('should render with the correct initial state', () => {
-    render(
+    renderWithProvider(
       <Bookmark
         userId={'8129381931983'}
         bookmarked={false}
@@ -19,7 +24,7 @@ describe('Bookmark Component', () => {
 
   it('should call onBookmark when not bookmarked and clicked', () => {
     const onBookmark = jest.fn();
-    render(
+    renderWithProvider(
       <Bookmark
         userId={'8129381931983'}
         bookmarked={false}
@@ -34,7 +39,7 @@ describe('Bookmark Component', () => {
 
   it('should call onUnbookmark when bookmarked and clicked', () => {
     const onUnbookmark = jest.fn();
-    render(
+    renderWithProvider(
       <Bookmark
         userId={'8129381931983'}
         bookmarked={true}
@@ -48,7 +53,7 @@ describe('Bookmark Component', () => {
   });
 
   it('should toggle the icon variant on click', () => {
-    render(
+    renderWithProvider(
       <Bookmark
         userId={'8129381931983'}
         bookmarked={false}
