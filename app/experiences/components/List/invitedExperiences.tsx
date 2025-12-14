@@ -23,7 +23,6 @@ export default function Experiences({
   const { data: experiences, isLoading } = useExperiences(
     {
       page,
-      category: category,
       invited: true,
     },
     true,

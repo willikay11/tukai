@@ -17,6 +17,9 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
         title={`Happening Today: ${moment().format('Do MMMM, YYYY')}`}
         date={moment().format('YYYY-MM-DD')}
         isPortal={true}
+        isBookedmarked={categoryFromQuery === 'saved'}
+        isReserved={categoryFromQuery === 'reserved'}
+        isHosted={categoryFromQuery === 'hosting'}
       />
 
       <Experiences
@@ -25,9 +28,20 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
         title={`Happening Tommorrow: ${moment().add('days', 1).format('Do MMMM, YYYY')}`}
         date={moment().add('days', 1).format('YYYY-MM-DD')}
         isPortal={true}
+        isBookedmarked={categoryFromQuery === 'saved'}
+        isReserved={categoryFromQuery === 'reserved'}
+        isHosted={categoryFromQuery === 'hosting'}
       />
 
-      <Experiences key={categoryFromQuery} category={categoryFromQuery} title="Discover" />
+      <Experiences
+        key={categoryFromQuery}
+        category={categoryFromQuery}
+        title="Discover"
+        isPortal={false}
+        isBookedmarked={categoryFromQuery === 'saved'}
+        isReserved={categoryFromQuery === 'reserved'}
+        isHosted={categoryFromQuery === 'hosting'}
+      />
     </main>
   );
 }
