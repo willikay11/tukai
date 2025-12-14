@@ -53,6 +53,11 @@ export default function PageFilters() {
         { label: 'Hosting', value: 'hosting', icon: 'WavingHand02Icon', shouldBeLoggedIn: true },
       ]);
       setIsLoading(false);
+      if (categoryFromQuery == null) {
+        setSelectedCategoryId('all');
+      } else {
+        setSelectedCategoryId(categoryFromQuery);
+      }
     }
     if (pathname === '/communities') {
       setFilters([
@@ -68,7 +73,8 @@ export default function PageFilters() {
   if (
     pathname.startsWith('/places/') ||
     pathname.startsWith('/experiences/') ||
-    pathname.startsWith('/communities/')
+    pathname.startsWith('/communities/') ||
+    pathname.startsWith('/auth/')
   ) {
     return null;
   }

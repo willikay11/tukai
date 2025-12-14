@@ -1,8 +1,9 @@
 'use client';
 import ListExperiences from '@/app/components/experiences/List';
+import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { useExperiences } from '@/hooks/experiences';
 import clsx from 'clsx';
-import { has } from 'lodash';
+import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -12,22 +13,32 @@ type ListExperiencesProps = {
   category?: string;
   date?: string;
   isPortal?: boolean;
+  isReserved?: boolean;
+  isBookedmarked?: boolean;
+  isHosted?: boolean;
 };
 
 export default function Experiences({
   title,
   category,
-  skeletonCount = 12,
+  skeletonCount = 4,
   date,
   isPortal = false,
+  isReserved = false,
+  isBookedmarked = false,
+  isHosted = false,
 }: ListExperiencesProps) {
+  const { selectedCategoryId } = useSelectedCategory();
+  const { data: session } = useSession();
   const [page, setPage] = useState(1);
   const [hasExperiences, setHasExperiences] = useState<boolean | null>(null);
   const { data: experiences, isLoading } = useExperiences(
     {
       page,
-      category: category,
       date,
+      reserved_by: isReserved ? session?.user?.id || undefined : undefined,
+      hosted_by: isHosted ? session?.user?.id || undefined : undefined,
+      bookmarked: isBookedmarked ? true : undefined,
     },
     true,
   );
@@ -50,6 +61,10 @@ export default function Experiences({
     };
   }, [experiences, isPortal]);
 
+  if (isPortal &&selectedCategoryId !== 'all') {
+    return null;
+  }
+
   if (hasExperiences === null && isPortal) {
     return null;
   }
@@ -62,6 +77,7 @@ export default function Experiences({
     <div className={clsx('col-span-12 mb-4 mt-4 md:col-span-10 md:col-start-2 md:mx-0')}>
       <p className="mb-4 text-xl font-semibold text-gray-700">{title}</p>
       <ListExperiences
+        key={selectedCategoryId}
         experiences={experiences?.data?.results}
         isLoading={isLoading}
         count={experiences?.data?.count}

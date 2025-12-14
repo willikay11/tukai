@@ -2,14 +2,11 @@
 import SingleExperience from '@/app/components/experiences/Single';
 import { Experience } from '@/types/experience';
 import Link from 'next/link';
-import { Dialog } from '@/components/ui/dialog';
-import { DialogContent } from '@/components/ui/dialog';
-import { toast } from '@/hooks/use-toast';
-import SignInForm from '@/components/ui/form/sign-in';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import NoData from '@/components/ui/noData';
 import { motion } from 'framer-motion';
 import { Status } from '@/enums/status';
+import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 
 type ListExperiencesProps = {
   className: string;
@@ -76,6 +73,7 @@ export default function ListExperiences({
   page,
   setPage,
 }: ListExperiencesProps) {
+  const { selectedCategoryId } = useSelectedCategory();
   const [experienceList, setExperienceList] = useState<Experience[]>(placeholders(skeletonCount));
   const [endPage, setEndPage] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
@@ -102,28 +100,42 @@ export default function ListExperiences({
   );
 
   useEffect(() => {
-    if (
+    setPage(1);
+    setExperienceList(placeholders(skeletonCount));
+    setEndPage(null);
+  }, [selectedCategoryId]);
+
+  useEffect(() => {
+    console.log('Experiences updated:', experiences);
+    if (!isLoading && experiences && experiences.length > 0) {
+      if (page === 1) {
+        // Replace entire list for first page
+        setExperienceList(experiences);
+      } else {
+        // Append to existing list for pagination
+        setExperienceList((prevExperienceList) => [
+          ...prevExperienceList.filter((experience) => !experience.id.startsWith('placeholder-')),
+          ...experiences,
+        ]);
+      }
+      if (count) {
+        setEndPage(Math.ceil(count / 12));
+      }
+    } else if (!isLoading && experiences && experiences.length === 0 && page === 1) {
+      // Clear placeholders when no results for first page
+      setExperienceList([]);
+    } else if (
       isLoading &&
+      page > 1 &&
       !experienceList.some((experience) => experience.id.startsWith('placeholder-'))
     ) {
+      // Add placeholders only when loading subsequent pages
       setExperienceList((prevExperienceList) => [
         ...prevExperienceList,
         ...placeholders(skeletonCount),
       ]);
-    } else if (!isLoading && experiences) {
-      setExperienceList((prevExperienceList) => [
-        ...prevExperienceList.filter((experience) => !experience.id.startsWith('placeholder-')),
-        ...experiences,
-      ]);
-      if (count) {
-        setEndPage(Math.ceil(count / 12));
-      }
-    } else if (!isLoading) {
-      setExperienceList((prevExperienceList) =>
-        prevExperienceList.filter((experience) => !experience.id.startsWith('placeholder-')),
-      );
     }
-  }, [experiences, isLoading]);
+  }, [experiences, isLoading, page]);
 
   if (!isLoading && experienceList.length === 0) {
     return (
@@ -139,21 +151,8 @@ export default function ListExperiences({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="px-16">
-          <SignInForm
-            onLogin={() => {
-              setOpen(false);
-              toast({
-                description: 'Welcome Back!',
-                variant: 'success',
-              });
-            }}
-          />
-        </DialogContent>
-      </Dialog>
-
       <motion.div
+        key={selectedCategoryId}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -170,15 +169,9 @@ export default function ListExperiences({
               transition={{ duration: 0.3 }}
               className="cursor-pointer"
             >
-              {/* {session?.user ? ( */}
               <Link target="_blank" href={`/experiences/${experience.id}`}>
                 <SingleExperience type={type} experience={experience} />
               </Link>
-              {/* ) : (
-                <div onClick={() => setOpen(true)}>
-                  <SingleExperience experience={experience} />
-                </div>
-              )} */}
             </motion.div>
           );
         })}
