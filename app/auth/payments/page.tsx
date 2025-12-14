@@ -3,7 +3,6 @@
 import {
   CheckListIcon,
   Edit01Icon,
-  hugeiconsLicense,
   MapsLocation02Icon,
   Message02Icon,
   RouteBlockIcon,
@@ -16,10 +15,6 @@ import {
 } from '@hugeicons/react-pro';
 import { Anchor, Button } from '@/app/components/form';
 import { useRouter } from 'next/navigation';
-
-hugeiconsLicense(
-  '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
-);
 
 const features = [
   {

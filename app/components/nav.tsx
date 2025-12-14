@@ -14,11 +14,11 @@ const links = [
     icon: <Calendar04Icon size={18} variant="twotone" />,
   },
   { name: 'Explore', href: '/places', icon: <Search01Icon size={18} variant="twotone" /> },
-  {
-    name: 'Communities',
-    href: '/communities',
-    icon: <UserMultipleIcon size={18} variant="twotone" />,
-  },
+  // {
+  //   name: 'Communities',
+  //   href: '/communities',
+  //   icon: <UserMultipleIcon size={18} variant="twotone" />,
+  // },
 ];
 
 export default function Nav() {

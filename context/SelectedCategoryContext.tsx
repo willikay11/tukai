@@ -16,7 +16,9 @@ export const SelectedCategoryProvider = ({ children }: { children: ReactNode }) 
     <SelectedCategoryContext.Provider
       value={{
         selectedCategoryId,
-        setSelectedCategoryId: (categoryId: string) => setSelectedCategoryId(categoryId),
+        setSelectedCategoryId: (categoryId: string) => {
+          setSelectedCategoryId(categoryId);
+        },
       }}
     >
       {children}

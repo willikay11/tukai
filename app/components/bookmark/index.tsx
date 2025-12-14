@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import SignInForm from '@/components/ui/form/sign-in';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 import { toast } from '@/hooks/use-toast';
 import { Bookmark02Icon } from '@hugeicons/react-pro';
 import { useState } from 'react';
@@ -21,22 +22,9 @@ export default function Bookmark({
   className?: string;
 }) {
   const [isBookmarked, setIsBookmarked] = useState(bookmarked);
-  const [openSignIn, setOpenSignIn] = useState(false);
+  const { setOpenSignIn } = useAuthDialog();
   return (
     <>
-      <Dialog open={openSignIn} onOpenChange={setOpenSignIn}>
-        <DialogContent className="px-16">
-          <SignInForm
-            onLogin={() => {
-              setOpenSignIn(false);
-              toast({
-                description: 'Welcome Back!',
-                variant: 'success',
-              });
-            }}
-          />
-        </DialogContent>
-      </Dialog>
       <Button
         variant="text"
         className="h-fit"
