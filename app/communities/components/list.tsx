@@ -5,10 +5,7 @@ import InterestBasedCommunities from './interestBasedCommunities';
 import { Interest } from '@/types/interest';
 import RecommendedCommunities from './recommendedCommunities';
 import PopularCommunities from './popularCommunities';
-
-type ListCommunitiesProps = {
-  category?: string;
-};
+import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 
 const colors = [
   { bg: 'bg-red-100', color: 'bg-red-500' },
@@ -18,12 +15,13 @@ const colors = [
   { bg: 'bg-purple-100', color: 'bg-purple-500' },
 ];
 
-export default function List({ category }: ListCommunitiesProps) {
+export default function List() {
   const { data: session } = useSession();
+  const { selectedCategoryId } = useSelectedCategory();
 
-  if (category === 'my-communities') {
+  if (selectedCategoryId === 'my-communities') {
     return (
-      <>
+      <div key={selectedCategoryId}>
         <p className="mb-4 mt-2.5 text-xl font-semibold text-gray-700">Following</p>
         {session?.user?.interests?.map((interest: Interest) => (
           <InterestBasedCommunities
@@ -32,16 +30,16 @@ export default function List({ category }: ListCommunitiesProps) {
             color={colors[Math.floor(Math.random() * colors.length)]}
           />
         ))}
-      </>
+      </div>
     );
   }
 
-  if (category === 'recommended') {
+  if (selectedCategoryId === 'recommended') {
     return (
-      <>
+      <div key={selectedCategoryId}>
         <PopularCommunities />
         <RecommendedCommunities />
-      </>
+      </div>
     );
   }
 }

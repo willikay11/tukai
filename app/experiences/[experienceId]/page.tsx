@@ -1,4 +1,3 @@
-import { Bookmark02Icon, Share08Icon } from '@hugeicons/react-pro';
 import { ApiResponse } from '@/types/apiResponse';
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
 import { fetchExperience } from '@/services/experience';
@@ -15,7 +14,6 @@ import ExperienceActions from '../components/experienceActions';
 import ExperienceDetails from '../components/experienceDetails';
 import BookmarkExperience from '../components/bookmarkExperience';
 import Share from '@/app/components/share';
-import { HugeiconsIcon } from '@hugeicons-pro/core-twotone-rounded';
 
 export default async function ViewExperiencePage({ params }: { params: { experienceId: string } }) {
   const experienceResponse: ApiResponse = await fetchExperience(params.experienceId);
@@ -89,7 +87,7 @@ export default async function ViewExperiencePage({ params }: { params: { experie
                 }
               />
             </div>
-            <div className="mt-4 grid grid-cols-3 gap-4">
+            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
               <ExperienceDetails experience={experience} />
             </div>
 

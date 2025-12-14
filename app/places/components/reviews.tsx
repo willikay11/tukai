@@ -33,7 +33,7 @@ export default function Reviews({ placeId }: placeReviewsProps) {
 
   if (reviews?.data?.results?.length === 0 && !isLoading) {
     return (
-      <div className="my-2">
+      <div className="my-2 w-full items-center justify-center">
         <NoData message="No reviews" />
       </div>
     );

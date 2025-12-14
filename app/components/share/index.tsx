@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
 
 import {
   CopyLinkIcon,
@@ -89,10 +89,9 @@ export default function Share({
         onClick={() => setOpen(true)}
       />
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="px-12">
+        <DialogContent className="px-6 md:w-[24rem]">
           <div className="flex flex-col gap-4">
             <p className="text-2xl font-black text-gray-700">Share Location</p>
-
             <div className="relative aspect-square h-[10.25rem] w-full">
               <TukaiImage
                 src={coverPhoto}

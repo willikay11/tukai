@@ -14,11 +14,11 @@ const links = [
     icon: <Calendar04Icon size={18} variant="twotone" />,
   },
   { name: 'Explore', href: '/places', icon: <Search01Icon size={18} variant="twotone" /> },
-  {
-    name: 'Communities',
-    href: '/communities',
-    icon: <UserMultipleIcon size={18} variant="twotone" />,
-  },
+  // {
+  //   name: 'Communities',
+  //   href: '/communities',
+  //   icon: <UserMultipleIcon size={18} variant="twotone" />,
+  // },
 ];
 
 export default function Nav() {
@@ -57,15 +57,17 @@ export default function Nav() {
           </div>
         </DialogContent>
       </Dialog>
-      <div className="cursor-pointer inline-flex justify-center items-center md:hidden">
+      <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
         <Menu02Icon size={24} variant="twotone" type="rounded" onClick={() => setOpen(true)} />
-        <Image
-          src="/images/logo.svg"
-          alt="Oltukai logo"
-          width={60}
-          height={60}
-          className="ml-2.5"
-        />
+        <Link href="/">
+          <Image
+            src="/images/logo.svg"
+            alt="Oltukai logo"
+            width={60}
+            height={60}
+            className="ml-2.5"
+          />
+        </Link>
       </div>
       <div className="hidden md:inline-flex md:h-full">{linkItems(true)}</div>
     </>

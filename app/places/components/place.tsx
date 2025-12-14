@@ -28,15 +28,14 @@ export default function SinglePlace({ place }: { place: Place }) {
             <div className="h-full w-full bg-gray-50" />
           )}
         </div>
-        <div className="invisible absolute right-2 top-2 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-gray-800/50 p-1 group-hover:visible">
-          {session?.user?.id && (
-            <BookmarkPlace
-              bookmarked={place.isBookmarked}
-              onBookmark={() => bookmarkPlace()}
-              onUnbookmark={() => bookmarkPlace()}
-              className="text-white"
-            />
-          )}
+        <div className="invisible absolute right-2 top-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-gray-800/50 p-1 group-hover:visible">
+          <BookmarkPlace
+            userId={session?.user?.id}
+            bookmarked={place.isBookmarked}
+            onBookmark={() => bookmarkPlace()}
+            onUnbookmark={() => bookmarkPlace()}
+            className="text-white"
+          />
         </div>
       </div>
       <div className="flex flex-col items-start justify-start bg-white">

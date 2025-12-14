@@ -15,6 +15,7 @@ import { useSession } from 'next-auth/react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import AddReview from './AddReview';
 import AddReviewComment from './AddReviewComment';
+import TukaiImage from '@/components/ui/image';
 
 export default function Review({
   id,
@@ -90,13 +91,14 @@ export default function Review({
         <div className="flex w-full items-center justify-between">
           <div className="inline-flex">
             <div className="relative mr-2 flex aspect-square h-10 w-10 flex-col">
-              <Image
+              <TukaiImage
                 src={review.reviewer.picture}
                 alt={review.reviewer.displayName}
                 className="h-10 w-10 rounded-full"
                 quality={100}
                 layout="fill"
                 objectFit="cover"
+                showNotFoundText={false}
               />
             </div>
             <div className="ml-1">

@@ -11,18 +11,12 @@ export function PillSkeleton() {
 
 export function PillsSkeleton() {
   return (
-    <div className="w-full border-b-[1px] border-gray-100 bg-white">
-      <div className="grid grid-cols-12 gap-4">
-        <div className="relative col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
-          <div className="inline-flex h-[5rem] items-center gap-2">
-            <PillSkeleton />
-            <PillSkeleton />
-            <PillSkeleton />
-            <PillSkeleton />
-            <PillSkeleton />
-          </div>
-        </div>
-      </div>
+    <div className="inline-flex h-[5rem] items-center gap-2">
+      <PillSkeleton />
+      <PillSkeleton />
+      <PillSkeleton />
+      <PillSkeleton />
+      <PillSkeleton />
     </div>
   );
 }

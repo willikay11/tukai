@@ -5,15 +5,23 @@ import { ArrowLeft01Icon, ArrowRight01Icon } from '@hugeicons/react-pro';
 import { useEffect, useRef, useState } from 'react';
 import IconComponent from '@/app/components/iconComponent';
 import { useRouter } from 'next/navigation';
+import { useSelectedCategory } from '@/context/SelectedCategoryContext';
+import { useSession } from 'next-auth/react';
+import { useAuthDialog } from '@/context/AuthDialogContext';
+import { set } from 'lodash';
+
 export default function ScrollFilters({
   filters,
   selectedCategory,
 }: {
-  filters: { label: string; value: string; icon: string }[];
+  filters: { label: string; value: string; icon: string; shouldBeLoggedIn?: boolean }[];
   selectedCategory?: string;
 }) {
   let scrollBy = 500;
   const ref = useRef<any>();
+  const { data: session } = useSession();
+  const { setSelectedCategoryId } = useSelectedCategory();
+  const { setOpenSignIn } = useAuthDialog();
   const [showPrevBtn, setShowPrevBtn] = useState<boolean>(false);
   const [showNextBtn, setShowNextBtn] = useState<boolean>(true);
   const [selectedOption, setSelectedOption] = useState<string | undefined>(selectedCategory);
@@ -87,8 +95,12 @@ export default function ScrollFilters({
 
   // Handle filter change and update URL with categoryId
   const handleCategoryChange = (categoryId: string) => {
+    if (filters.find((filter) => filter.value === categoryId)?.shouldBeLoggedIn && !session) {
+      setOpenSignIn(true);
+      return;
+    }
     setSelectedOption(categoryId);
-
+    setSelectedCategoryId(categoryId);
     // Update the query params in the URL without reloading the page, but only if on the client-side
     router.replace(`?category=${categoryId}`, { scroll: false });
   };

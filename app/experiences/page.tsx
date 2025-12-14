@@ -1,7 +1,4 @@
-import { Suspense } from 'react';
-import { EventsSkeleton, PillsSkeleton } from '@/app/components/skeletons';
 import Experiences from './components/List/experiences';
-import ExperienceFilters from './components/experienceFilters';
 import moment from 'moment';
 import InvitedExperiences from './components/List/invitedExperiences';
 
@@ -10,11 +7,6 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
 
   return (
     <main className="grid h-full grid-cols-12 gap-x-4 px-4 md:px-0">
-      <div className="sticky top-[105px] z-10 col-span-12 bg-white">
-        <Suspense fallback={<PillsSkeleton />}>
-          <ExperienceFilters category={categoryFromQuery} />
-        </Suspense>
-      </div>
       {/* <div className="grid h-full grid-cols-12 gap-4">
         <div className="col-span-12 bg-gray-100">
           <div className="grid grid-cols-12 py-4">
