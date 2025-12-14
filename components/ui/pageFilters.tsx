@@ -36,7 +36,7 @@ export default function PageFilters() {
         categories?.data?.results?.sort(
           (a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount,
         )?.[0].id;
-
+      setIsLoading(false);  
       setSelectedCategoryId(selectedCategoryId);
     }
 
@@ -69,8 +69,8 @@ export default function PageFilters() {
   }
 
   return (
-    <div className="col-span-12 gap-4 px-4 md:px-0">
-      <div className="w-full border-t-[1px] border-gray-100 bg-white">
+    <div className="col-span-12 gap-4 px-4 md:px-0 border-t-[1px] border-gray-100">
+      <div className="w-full bg-white">
         <div className="grid grid-cols-12 gap-4">
           <div className="relative col-span-12 md:col-span-10 md:col-start-2 md:mx-0">
             {isFetching || isLoading ? (
