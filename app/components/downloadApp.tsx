@@ -3,10 +3,33 @@
 import { Cancel01Icon } from '@hugeicons/react-pro';
 import Image from 'next/image';
 import { Button } from '@/app/components/form';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function DownloadApp() {
   const [closed, setClosed] = useState<boolean>(false);
+  const [device, setDevice] = useState<'ios' | 'android' | 'other'>('other');
+
+    const onDownloadApp = () => {
+      let url = 'https://play.google.com/store/apps/details?id=com.tukaitravels.app&hl=en';
+  
+      if (device === 'ios') {
+        url = 'https://apps.apple.com/ke/app/tukai/idcom.tukaitravels.app';
+      }
+  
+      window.open(url, '_blank');
+    };
+  
+    useEffect(() => {
+      const ua = navigator.userAgent || navigator.vendor;
+  
+      if (/android/i.test(ua)) {
+        setDevice('android');
+      } else if (/iPad|iPhone|iPod/.test(ua)) {
+        setDevice('ios');
+      } else {
+        setDevice('other');
+      }
+    }, []);
 
   if (closed) return null;
 
@@ -34,7 +57,7 @@ export default function DownloadApp() {
               </p>
             </div>
           </div>
-          <Button onClick={() => console.log('Download app')} size="small">
+          <Button onClick={onDownloadApp} size="small">
             Use App
           </Button>
         </div>
