@@ -36,7 +36,7 @@ export default function PageFilters() {
         categories?.data?.results?.sort(
           (a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount,
         )?.[0].id;
-
+      setIsLoading(false);  
       setSelectedCategoryId(selectedCategoryId);
     }
 

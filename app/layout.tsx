@@ -46,8 +46,10 @@ export default function RootLayout({
               <DownloadAppProvider>
                 <SelectedCategoryProvider>
                   <div className="sticky top-0 z-50 grid grid-cols-12 border-b-[1px] border-gray-100 bg-white md:gap-x-4">
-                    <DownloadApp />
-                    <div className="col-span-12 mx-4 mt-2.5 inline-flex justify-between md:hidden lg:hidden 2xl:hidden">
+                    <div className='col-span-12 md:hidden lg:hidden 2xl:hidden'>
+                      <DownloadApp />
+                    </div>
+                    <div className="col-span-12 mx-4 mt-5 inline-flex justify-between md:hidden lg:hidden 2xl:hidden">
                       <Nav />
                       <AuthActions />
                     </div>
