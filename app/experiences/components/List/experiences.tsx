@@ -61,7 +61,7 @@ export default function Experiences({
     };
   }, [experiences, isPortal]);
 
-  if (isPortal &&selectedCategoryId !== 'all') {
+  if (isPortal && selectedCategoryId !== 'all') {
     return null;
   }
 
