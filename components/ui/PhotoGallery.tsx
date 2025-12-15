@@ -21,7 +21,7 @@ const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
     <>
       <div className="flex flex-col">
         <div
-          className="relative mb-2 aspect-square h-[16.25rem] w-full"
+          className="relative mb-2 aspect-square h-[12.25rem] w-full md:h-[16.25rem]"
           onClick={() => handleImageClick(0)}
         >
           <TukaiImage
@@ -45,7 +45,7 @@ const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
         >
           {photos[1]?.photo && (
             <div
-              className="relative aspect-square h-[6.25rem] w-full"
+              className="relative aspect-square h-[4rem] w-full md:h-[6.25rem]"
               onClick={() => handleImageClick(1)}
             >
               <TukaiImage
@@ -59,7 +59,7 @@ const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
 
           {photos?.[2]?.photo && (
             <div
-              className="relative aspect-square h-[6.25rem] w-full"
+              className="relative aspect-square h-[4rem] w-full md:h-[6.25rem]"
               onClick={() => handleImageClick(2)}
             >
               <TukaiImage
@@ -73,7 +73,7 @@ const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
 
           {photos[3]?.photo && (
             <div
-              className="relative aspect-square h-[6.25rem] w-full"
+              className="relative aspect-square h-[4rem] w-full md:h-[6.25rem]"
               onClick={() => handleImageClick(3)}
             >
               <TukaiImage

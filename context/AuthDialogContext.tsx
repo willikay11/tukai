@@ -23,7 +23,7 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
       }}
     >
       <Dialog open={openSignIn} onOpenChange={setOpenSignIn}>
-        <DialogContent className="px-16">
+        <DialogContent className="px-4 md:px-16">
           <SignInForm
             onLogin={() => {
               setOpenSignIn(false);
