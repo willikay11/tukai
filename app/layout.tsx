@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import type { Metadata } from 'next';
 import './globals.css';
 import { satoshi } from '@/app/components/fonts';
@@ -16,6 +16,10 @@ import ReactQueryClientProvider from '@/providers/ReactQueryProvider';
 import { Toaster } from '@/components/ui/toaster';
 import Search from './components/search';
 import { DownloadAppProvider } from '@/context/DownloadAppContext';
+import { SelectedCategoryProvider } from '@/context/SelectedCategoryContext';
+import PageFilters from '@/components/ui/pageFilters';
+import { PillsSkeleton } from './components/skeletons';
+import { AuthDialogProvider } from '@/context/AuthDialogContext';
 
 hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
@@ -41,39 +45,48 @@ export default function RootLayout({
               <GlobalLoading />
               <Toaster />
               <DownloadAppProvider>
-                <div className="sticky top-0 z-50 grid grid-cols-12 border-b-[1px] border-gray-100 bg-white md:gap-4">
-                  <DownloadApp />
-                  <div className="col-span-12 mx-4 mt-2.5 inline-flex justify-between md:hidden lg:hidden 2xl:hidden">
-                    <Nav />
-                    <AuthActions />
-                  </div>
-                  <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
-                    <div className="inline-flex grid h-[80px] w-full grid-cols-12 items-center justify-between md:mt-6">
-                      <div className="flex hidden h-full items-center md:col-span-5 md:inline-flex lg:col-span-5 lg:inline-flex">
-                        <Link href="/" className="hidden h-full items-center md:flex">
-                          <Image
-                            src="/images/logo.svg"
-                            alt="Oltukai logo"
-                            width={80}
-                            height={70}
-                            className="md:mr-6 lg:mr-5 xl:mr-10"
-                          />
-                        </Link>
+                <AuthDialogProvider>
+                  <SelectedCategoryProvider>
+                    <div className="sticky top-0 z-50 grid grid-cols-12 border-b-[1px] border-gray-100 bg-white md:gap-x-4">
+                      <div className="col-span-12 md:hidden lg:hidden 2xl:hidden">
+                        <DownloadApp />
+                      </div>
+                      <div className="col-span-12 mx-4 mt-5 inline-flex justify-between md:hidden lg:hidden 2xl:hidden">
                         <Nav />
-                      </div>
-                      <div className="col-span-12 inline-flex justify-center md:col-span-4 lg:col-span-4">
-                        <div className="w-full md:inline-flex">
-                          <Search />
-                        </div>
-                        <IconRadioButtonGroup />
-                      </div>
-                      <div className="flex hidden h-full items-center justify-end md:col-span-3 md:inline-flex lg:col-span-3 lg:inline-flex">
                         <AuthActions />
                       </div>
+                      <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
+                        <div className="inline-flex grid h-[80px] w-full grid-cols-12 items-center justify-between md:mt-6">
+                          <div className="flex hidden h-full items-center md:col-span-5 md:inline-flex lg:col-span-5 lg:inline-flex">
+                            <Link href="/" className="hidden h-full items-center md:flex">
+                              <Image
+                                src="/images/logo.svg"
+                                alt="Oltukai logo"
+                                width={80}
+                                height={70}
+                                className="md:mr-6 lg:mr-5 xl:mr-10"
+                              />
+                            </Link>
+                            <Nav />
+                          </div>
+                          <div className="col-span-12 inline-flex justify-center md:col-span-4 lg:col-span-4">
+                            <div className="w-full md:inline-flex">
+                              <Search />
+                            </div>
+                            <IconRadioButtonGroup />
+                          </div>
+                          <div className="flex hidden h-full items-center justify-end md:col-span-3 md:inline-flex lg:col-span-3 lg:inline-flex">
+                            <AuthActions />
+                          </div>
+                        </div>
+                      </div>
+                      <Suspense fallback={<PillsSkeleton />}>
+                        <PageFilters />
+                      </Suspense>
                     </div>
-                  </div>
-                </div>
-                {children}
+                    {children}
+                  </SelectedCategoryProvider>
+                </AuthDialogProvider>
               </DownloadAppProvider>
             </ReactQueryClientProvider>
           </SessionProvider>

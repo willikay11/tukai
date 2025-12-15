@@ -45,7 +45,7 @@ export default function Reserve({ experience }: { experience: Experience }) {
       const newTicket = { ticketId, quantity, price };
       setReservedTickets((prev) => [...prev.filter((t) => t.ticketId !== ticketId), newTicket]);
     }
-    
+
     // Clear error when user selects tickets
     if (ticketError) {
       setTicketError('');
@@ -54,12 +54,12 @@ export default function Reserve({ experience }: { experience: Experience }) {
 
   const handleFormSubmit = () => {
     const totalTickets = reservedTickets.reduce((acc, ticket) => acc + ticket.quantity, 0);
-    
+
     if (totalTickets === 0) {
       setTicketError('Please select at least one ticket');
       return;
     }
-    
+
     formRef.current?.submit();
   };
 
@@ -152,7 +152,7 @@ export default function Reserve({ experience }: { experience: Experience }) {
           <div key={ticket.id} className="mb-2.5 flex w-full flex-row justify-between">
             <div className="flex flex-col items-start">
               <p className="text-sm font-bold text-gray-700">{ticket.name}</p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="mt-1 text-sm text-gray-500">
                 {experience.currency} {numeral(ticket.price).format('0,0.00')}/person
               </p>
             </div>
@@ -169,9 +169,7 @@ export default function Reserve({ experience }: { experience: Experience }) {
           </div>
         ))}
 
-        {ticketError && (
-          <p className="mt-2 text-sm text-red-600">{ticketError}</p>
-        )}
+        {ticketError && <p className="mt-2 text-sm text-red-600">{ticketError}</p>}
 
         <Separator className="my-4 h-[1px]" />
 

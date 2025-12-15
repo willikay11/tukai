@@ -12,6 +12,10 @@ import {
 } from '@/hooks/places';
 import Bookmark from '@/app/components/bookmark';
 import AddReview from '@/app/components/review/AddReview';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import SignInForm from '@/components/ui/form/sign-in';
+import { toast } from '@/hooks/use-toast';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 
 export default function PlaceActions({
   placeId,
@@ -25,6 +29,7 @@ export default function PlaceActions({
   coverPhoto: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { setOpenSignIn } = useAuthDialog();
   const { data: session } = useSession();
 
   const {
@@ -42,14 +47,13 @@ export default function PlaceActions({
   return (
     <>
       <div className="inline-flex h-full items-center justify-center">
-        {session?.user?.id && (
-          <Bookmark
-            bookmarked={bookmarked}
-            onBookmark={() => bookmarkPlace()}
-            onUnbookmark={() => bookmarkPlace()}
-            className="text-primary"
-          />
-        )}
+        <Bookmark
+          userId={session?.user?.id}
+          bookmarked={bookmarked}
+          onBookmark={() => bookmarkPlace()}
+          onUnbookmark={() => bookmarkPlace()}
+          className="text-primary"
+        />
         <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" />
         <Share
           coverPhoto={coverPhoto}
@@ -57,7 +61,17 @@ export default function PlaceActions({
           link={`Check out this place ${placeTitle} on Tukai, ${process.env.NEXT_PUBLIC_APP_URL}/places/${placeId}`}
         />
         <div className="mr-2" />
-        <Button onClick={() => setIsOpen(true)}>Add Review</Button>
+        <Button
+          onClick={() => {
+            if (!session?.user?.id) {
+              setOpenSignIn(true);
+            } else {
+              setIsOpen(true);
+            }
+          }}
+        >
+          Add Review
+        </Button>
       </div>
 
       <AddReview

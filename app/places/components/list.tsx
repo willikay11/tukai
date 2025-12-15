@@ -1,18 +1,14 @@
 'use client';
 import Link from 'next/link';
-import { motion } from 'framer-motion'; // ✅ Framer Motion for smooth transitions
+import { motion } from 'framer-motion';
 
 import { Place } from '@/types/place';
 import { usePlaces } from '@/hooks/places';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import NoData from '@/components/ui/noData';
-import { useSession } from 'next-auth/react';
 import { Status } from '@/enums/status';
 import SinglePlace from './place';
-
-type ListPlacesProps = {
-  selectedCategoryId?: string;
-};
+import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 
 const placeholders: Place[] = Array.from({ length: 12 }, (_, index) => ({
   id: `placeholder-${index}`,
@@ -40,12 +36,11 @@ const placeholders: Place[] = Array.from({ length: 12 }, (_, index) => ({
   categories: [],
 }));
 
-export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
+export default function ListPlaces() {
+  const { selectedCategoryId } = useSelectedCategory();
   const [page, setPage] = useState(1);
   const [placeList, setPlaceList] = useState<Place[]>(placeholders);
   const [endPage, setEndPage] = useState<number | null>(null);
-  const { data: session } = useSession();
-  const [open, setOpen] = useState(false);
   const { data: places, isLoading } = usePlaces({
     categoryId: selectedCategoryId,
     page,
@@ -74,23 +69,35 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
   );
 
   useEffect(() => {
-    if (isLoading && !placeList.some((place) => place.id.startsWith('placeholder-'))) {
-      setPlaceList((prevPlaceList) => [...prevPlaceList, ...placeholders]);
-      ``;
-    } else if (!isLoading && places?.data?.results) {
-      setPlaceList((prevPlaceList) => [
-        ...prevPlaceList.filter((place) => !place.id.startsWith('placeholder-')),
-        ...places.data.results,
-      ]);
+    setPage(1);
+    setPlaceList(placeholders);
+    setEndPage(null);
+  }, [selectedCategoryId]);
+
+  useEffect(() => {
+    if (!isLoading && places?.data?.results) {
+      if (page === 1) {
+        // Replace entire list for first page
+        setPlaceList(places.data.results);
+      } else {
+        // Append to existing list for pagination
+        setPlaceList((prevPlaceList) => [
+          ...prevPlaceList.filter((place) => !place.id.startsWith('placeholder-')),
+          ...places.data.results,
+        ]);
+      }
       if (places.data.count) {
         setEndPage(Math.ceil(places.data.count / 12));
       }
-    } else if (!isLoading) {
-      setPlaceList((prevPlaceList) =>
-        prevPlaceList.filter((place) => !place.id.startsWith('placeholder-')),
-      );
+    } else if (
+      isLoading &&
+      page > 1 &&
+      !placeList.some((place) => place.id.startsWith('placeholder-'))
+    ) {
+      // Add placeholders only when loading subsequent pages
+      setPlaceList((prevPlaceList) => [...prevPlaceList, ...placeholders]);
     }
-  }, [places, isLoading]);
+  }, [places, isLoading, page]);
 
   if (!isLoading && placeList.length === 0) {
     return (
@@ -106,21 +113,8 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
 
   return (
     <>
-      {/* <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="px-16">
-          <SignInForm
-            onLogin={() => {
-              setOpen(false);
-              toast({
-                description: 'Welcome Back!',
-                variant: 'success',
-              });
-            }}
-          />
-        </DialogContent>
-      </Dialog> */}
-
       <motion.div
+        key={selectedCategoryId}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
@@ -140,15 +134,6 @@ export default function ListPlaces({ selectedCategoryId }: ListPlacesProps) {
               <Link target="_blank" href={`/places/${place.id}`}>
                 <SinglePlace place={place} />
               </Link>
-              {/* {session?.user ? (
-                <Link target="_blank" href={`/place/${place.id}`}>
-                  <SinglePlace place={place} />
-                </Link>
-              ) : (
-                <div onClick={() => setOpen(true)}>
-                  <SinglePlace place={place} />
-                </div>
-              )} */}
             </motion.div>
           );
         })}
