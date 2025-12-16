@@ -15,7 +15,7 @@ export default function PageFilters() {
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] =
     useState<{ label: string; value: string; icon: string; shouldBeLoggedIn?: boolean }[]>();
-  const { data: categories, isFetching } = usePlaceCategories({}, pathname === '/places');
+  const { data: categories, isFetching } = usePlaceCategories({ pageSize: 100 }, pathname === '/places');
   const categoryFromQuery = searchParams.get('category');
 
   useEffect(() => {
