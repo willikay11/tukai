@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.tukai.preview",
+      "package_name": "com.tukaitravels.preview",
       "sha256_cert_fingerprints": [
-        "A7:B6:7F:B6:49:CA:44:F0:E5:01:44:A0:28:BB:CF:EB:EC:C3:C9:F4:99:30:02:6D:A4:4A:B9:11:46:9C:F5:1F"
+        "23:6C:FE:3F:BB:F4:53:A5:31:29:FF:8B:8B:39:2B:7E:D6:30:D9:FD:06:E6:37:83:B1:7F:40:27:2B:CF:7D:A6"
       ]
     }
   },
@@ -13,9 +13,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.tukai.app",
+      "package_name": "com.tukaitravels.app",
       "sha256_cert_fingerprints": [
-        "4A:64:E8:15:7F:BF:FD:E3:EF:31:85:C9:4A:CA:61:6F:44:1B:EC:12:D2:5D:27:DF:A3:5C:79:24:C3:DC:52:0C"
+        "7F:47:8A:82:68:A1:C7:7D:51:D7:3D:74:DE:E0:85:B4:A9:03:DF:21:92:AA:06:F3:31:DD:A6:5C:2E:A9:B6:5A"
       ]
     }
   },
@@ -23,9 +23,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.tukai.dev",
+      "package_name": "com.tukaitravels.dev",
       "sha256_cert_fingerprints": [
-        "BD:31:9A:3F:13:15:07:B6:9F:BC:51:C1:A8:B1:B4:E1:AD:96:B7:51:37:6B:F3:E5:75:47:C4:72:83:6E:20:B1"
+        "CF:6D:83:A2:8A:C6:B8:FA:0D:B4:93:90:07:1A:C3:B8:BF:08:7E:5A:FB:4B:B1:83:88:BC:1B:62:CF:B1:08:A4"
       ]
     }
   }
