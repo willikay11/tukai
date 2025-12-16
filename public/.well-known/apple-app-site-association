@@ -4,18 +4,17 @@
     "details": [
       {
         "appIDs": [
-          "J7L9AB26YG.com.tukai.preview",
-          "J7L9AB26YG.com.tukai.dev",
-          "J7L9AB26YG.com.tukai.app"
+          "XFF564365A.com.tukaitravels.preview",
+          "XFF564365A.com.tukaitravels.dev",
+          "XFF564365A.com.tukaitravels.app"
         ],
         "paths": [
-          "/(tabs)/*",
-          "/place/*",
           "/experience/*",
-          "/user-profile/*",
-          "/tour-guide/*",
           "/community/*",
-          "/local-guides/*"
+          "/place/*",
+          "/user-profile/*",
+          "/local-guides/*",
+          "/inbox/message/*"
         ]
       }
     ]
