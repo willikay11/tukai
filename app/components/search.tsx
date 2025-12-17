@@ -1,6 +1,7 @@
 'use client';
+
 import { Search01Icon } from '@hugeicons/react-pro';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useSearch } from '@/hooks/search';
 import { useState, useRef, useEffect } from 'react';
 import { debounce } from 'lodash';
@@ -14,9 +15,14 @@ import { Button } from '@/components/ui/button';
 import { usePlaceCategories } from '@/hooks/places';
 import { PlaceCategory } from '@/types/placeCategory';
 import clsx from 'clsx';
+import { useRouter } from 'next/navigation';
+import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 
 export default function Search() {
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { setSelectedCitySearchId } = useSelectedCategory();
   const { data: placeCategories } = usePlaceCategories({ pageSize: 100, group: 'cities' }, true);
   const [query, setQuery] = useState<string>();
   const [tag, setTag] = useState<PlaceCategory | undefined>();
@@ -144,10 +150,16 @@ export default function Search() {
                 placeCategories?.data?.results.map((category: PlaceCategory) => (
                   <div
                     className="relative h-[100px] w-[100px] flex-shrink-0 cursor-pointer"
-                    onClick={() => setTag(category)}
+                    onClick={() => {
+                      setTag(category);
+                      setSelectedCitySearchId(category.id);
+                      const params = new URLSearchParams(searchParams.toString());
+                      params.set('city', category.id);
+                      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+                    }}
                   >
                     <TukaiImage
-                      src={category?.image}
+                      src={category?.image ?? ''}
                       alt={category.name}
                       className="rounded-[8px]"
                       showNotFoundText={false}

@@ -1,6 +1,7 @@
 'use client';
 
 import clsx from 'clsx';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { ArrowLeft01Icon, ArrowRight01Icon } from '@hugeicons/react-pro';
 import { useEffect, useRef, useState } from 'react';
 import IconComponent from '@/app/components/iconComponent';
@@ -8,7 +9,6 @@ import { useRouter } from 'next/navigation';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { useSession } from 'next-auth/react';
 import { useAuthDialog } from '@/context/AuthDialogContext';
-import { set } from 'lodash';
 
 export default function ScrollFilters({
   filters,
@@ -19,6 +19,8 @@ export default function ScrollFilters({
 }) {
   let scrollBy = 500;
   const ref = useRef<any>();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { data: session } = useSession();
   const { setSelectedCategoryId } = useSelectedCategory();
   const { setOpenSignIn } = useAuthDialog();
@@ -102,7 +104,9 @@ export default function ScrollFilters({
     setSelectedOption(categoryId);
     setSelectedCategoryId(categoryId);
     // Update the query params in the URL without reloading the page, but only if on the client-side
-    router.replace(`?category=${categoryId}`, { scroll: false });
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('category', categoryId);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   return (

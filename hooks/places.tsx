@@ -21,7 +21,7 @@ export const usePlaces = ({
   page,
   enabled,
 }: {
-  categoryId?: string;
+  categoryId?: string | string[];
   page: number;
   enabled: boolean;
 }) => {
