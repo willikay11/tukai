@@ -146,29 +146,29 @@ export default function Search() {
               </Button>
             </div>
             <div className="mb-2 flex items-center gap-2 overflow-x-auto scroll-smooth no-scrollbar">
-              {tag === undefined &&
-                placeCategories?.data?.results.map((category: PlaceCategory) => (
-                  <div
-                    className="relative h-[100px] w-[100px] flex-shrink-0 cursor-pointer"
-                    onClick={() => {
-                      setTag(category);
-                      setSelectedCitySearchId(category.id);
-                      const params = new URLSearchParams(searchParams.toString());
-                      params.set('city', category.id);
-                      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-                    }}
-                  >
-                    <TukaiImage
-                      src={category?.image ?? ''}
-                      alt={category.name}
-                      className="rounded-[8px]"
-                      showNotFoundText={false}
-                    />
-                    <p className="absolute bottom-0.5 left-0.5 p-1 text-xs font-bold text-white">
-                      {category.name}
-                    </p>
-                  </div>
-                ))}
+              {placeCategories?.data?.results.map((category: PlaceCategory) => (
+                <div
+                  className="relative h-[100px] w-[100px] flex-shrink-0 cursor-pointer"
+                  onClick={() => {
+                    setTag(category);
+                    setSelectedCitySearchId(category.id);
+                    setShowSearchResults(false);
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.set('city', category.id);
+                    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+                  }}
+                >
+                  <TukaiImage
+                    src={category?.image ?? ''}
+                    alt={category.name}
+                    className="rounded-[8px]"
+                    showNotFoundText={false}
+                  />
+                  <p className="absolute bottom-0.5 left-0.5 p-1 text-xs font-bold text-white">
+                    {category.name}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
           <div className="flex flex-col gap-2">

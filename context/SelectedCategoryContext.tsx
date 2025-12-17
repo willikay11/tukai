@@ -25,7 +25,7 @@ export const SelectedCategoryProvider = ({ children }: { children: ReactNode }) 
         },
         setSelectedCitySearchId: (cityId: string) => {
           setSelectedCitySearchId(cityId);
-        }
+        },
       }}
     >
       {children}

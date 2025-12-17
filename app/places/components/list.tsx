@@ -42,7 +42,9 @@ export default function ListPlaces() {
   const [placeList, setPlaceList] = useState<Place[]>(placeholders);
   const [endPage, setEndPage] = useState<number | null>(null);
   const { data: places, isLoading } = usePlaces({
-    categoryId: [selectedCategoryId, selectedCitySearchId].filter((id): id is string => Boolean(id)),
+    categoryId: [selectedCategoryId, selectedCitySearchId].filter((id): id is string =>
+      Boolean(id),
+    ),
     page,
     enabled: true,
   });
