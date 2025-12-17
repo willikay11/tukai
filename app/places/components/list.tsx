@@ -81,21 +81,28 @@ export default function ListPlaces() {
         setPlaceList(places.data.results);
       } else {
         // Append to existing list for pagination
-        setPlaceList((prevPlaceList) => [
-          ...prevPlaceList.filter((place) => !place.id.startsWith('placeholder-')),
-          ...places.data.results,
-        ]);
+        setPlaceList((prevPlaceList) => {
+          // Remove placeholders from the end
+          const withoutPlaceholders = prevPlaceList.filter(
+            (place) => !place.id.startsWith('placeholder-'),
+          );
+          return [...withoutPlaceholders, ...places.data.results];
+        });
       }
       if (places.data.count) {
         setEndPage(Math.ceil(places.data.count / 12));
       }
-    } else if (
-      isLoading &&
-      page > 1 &&
-      !placeList.some((place) => place.id.startsWith('placeholder-'))
-    ) {
-      // Add placeholders only when loading subsequent pages
-      setPlaceList((prevPlaceList) => [...prevPlaceList, ...placeholders]);
+    } else if (isLoading && page > 1) {
+      // Add placeholders only when loading subsequent pages and they're not already there
+      setPlaceList((prevPlaceList) => {
+        const hasPlaceholders = prevPlaceList.some((place) =>
+          place.id.startsWith('placeholder-'),
+        );
+        if (!hasPlaceholders) {
+          return [...prevPlaceList, ...placeholders];
+        }
+        return prevPlaceList;
+      });
     }
   }, [places, isLoading, page]);
 
