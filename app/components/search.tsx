@@ -17,7 +17,7 @@ import clsx from 'clsx';
 
 export default function Search() {
   const pathname = usePathname();
-  const { data: placeCategories } = usePlaceCategories({ pageSize: 100, group: 'cities' });
+  const { data: placeCategories } = usePlaceCategories({ pageSize: 100, group: 'cities' }, true);
   const [query, setQuery] = useState<string>();
   const [tag, setTag] = useState<PlaceCategory | undefined>();
   const [showSearchResults, setShowSearchResults] = useState(false);
