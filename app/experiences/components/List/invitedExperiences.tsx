@@ -25,7 +25,7 @@ export default function Experiences({
       page,
       invited: true,
     },
-    true,
+    session?.user?.id ? true : false,
   );
 
   useEffect(() => {
