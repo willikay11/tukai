@@ -9,9 +9,9 @@
           "XFF564365A.com.tukaitravels.app"
         ],
         "paths": [
-          "/experience/*",
+          "/experiences/*",
           "/community/*",
-          "/place/*",
+          "/places/*",
           "/user-profile/*",
           "/local-guides/*",
           "/inbox/message/*"
