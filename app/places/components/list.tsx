@@ -37,12 +37,14 @@ const placeholders: Place[] = Array.from({ length: 12 }, (_, index) => ({
 }));
 
 export default function ListPlaces() {
-  const { selectedCategoryId } = useSelectedCategory();
+  const { selectedCategoryId, selectedCitySearchId } = useSelectedCategory();
   const [page, setPage] = useState(1);
   const [placeList, setPlaceList] = useState<Place[]>(placeholders);
   const [endPage, setEndPage] = useState<number | null>(null);
   const { data: places, isLoading } = usePlaces({
-    categoryId: selectedCategoryId,
+    categoryId: [selectedCategoryId, selectedCitySearchId].filter((id): id is string =>
+      Boolean(id),
+    ),
     page,
     enabled: true,
   });
@@ -81,28 +83,21 @@ export default function ListPlaces() {
         setPlaceList(places.data.results);
       } else {
         // Append to existing list for pagination
-        setPlaceList((prevPlaceList) => {
-          // Remove placeholders from the end
-          const withoutPlaceholders = prevPlaceList.filter(
-            (place) => !place.id.startsWith('placeholder-'),
-          );
-          return [...withoutPlaceholders, ...places.data.results];
-        });
+        setPlaceList((prevPlaceList) => [
+          ...prevPlaceList.filter((place) => !place.id.startsWith('placeholder-')),
+          ...places.data.results,
+        ]);
       }
       if (places.data.count) {
         setEndPage(Math.ceil(places.data.count / 12));
       }
-    } else if (isLoading && page > 1) {
-      // Add placeholders only when loading subsequent pages and they're not already there
-      setPlaceList((prevPlaceList) => {
-        const hasPlaceholders = prevPlaceList.some((place) =>
-          place.id.startsWith('placeholder-'),
-        );
-        if (!hasPlaceholders) {
-          return [...prevPlaceList, ...placeholders];
-        }
-        return prevPlaceList;
-      });
+    } else if (
+      isLoading &&
+      page > 1 &&
+      !placeList.some((place) => place.id.startsWith('placeholder-'))
+    ) {
+      // Add placeholders only when loading subsequent pages
+      setPlaceList((prevPlaceList) => [...prevPlaceList, ...placeholders]);
     }
   }, [places, isLoading, page]);
 

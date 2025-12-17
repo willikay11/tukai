@@ -6,12 +6,18 @@ import { PlaceCategoryParams } from '@/types/networkParam';
 export async function fetchPlaces(
   page = 1,
   perPage = 12,
-  categoryId?: string,
+  categoryId?: string | string[],
   search?: string,
 ): Promise<ApiResponse> {
   try {
     const queryParams = new URLSearchParams();
-    if (categoryId) queryParams.append('category', categoryId);
+    if (categoryId) {
+      if (Array.isArray(categoryId)) {
+        categoryId.forEach((id) => queryParams.append('category', id));
+      } else {
+        queryParams.append('category', categoryId);
+      }
+    }
     if (page) queryParams.append('page', page.toString());
     if (perPage) queryParams.append('page_size', perPage.toString());
     if (search) queryParams.append('search', search);
