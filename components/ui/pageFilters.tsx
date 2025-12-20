@@ -38,7 +38,8 @@ export default function PageFilters() {
         categoryFromQuery ||
         categories?.data?.results?.sort(
           (a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount,
-        )?.[0].id;
+        )?.filter((placeCategory: PlaceCategory) => placeCategory.group !== 'cities')?.[0].id;
+
       setIsLoading(false);
       setSelectedCategoryId(selectedCategoryId);
     }
@@ -90,7 +91,7 @@ export default function PageFilters() {
             {isFetching || isLoading ? (
               <PillsSkeleton />
             ) : (
-              <ScrollFilters filters={filters || []} selectedCategory={selectedCategoryId} />
+              <ScrollFilters filters={filters || []} />
             )}
           </div>
         </div>
