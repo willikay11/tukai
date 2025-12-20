@@ -15,7 +15,10 @@ export default function PageFilters() {
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] =
     useState<{ label: string; value: string; icon: string; shouldBeLoggedIn?: boolean }[]>();
-  const { data: categories, isFetching } = usePlaceCategories({}, pathname === '/places');
+  const { data: categories, isFetching } = usePlaceCategories(
+    { pageSize: 100 },
+    pathname === '/places',
+  );
   const categoryFromQuery = searchParams.get('category');
 
   useEffect(() => {
@@ -35,7 +38,8 @@ export default function PageFilters() {
         categoryFromQuery ||
         categories?.data?.results?.sort(
           (a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount,
-        )?.[0].id;
+        )?.filter((placeCategory: PlaceCategory) => placeCategory.group !== 'cities')?.[0].id;
+
       setIsLoading(false);
       setSelectedCategoryId(selectedCategoryId);
     }
@@ -87,7 +91,7 @@ export default function PageFilters() {
             {isFetching || isLoading ? (
               <PillsSkeleton />
             ) : (
-              <ScrollFilters filters={filters || []} selectedCategory={selectedCategoryId} />
+              <ScrollFilters filters={filters || []} />
             )}
           </div>
         </div>

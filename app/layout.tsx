@@ -71,7 +71,9 @@ export default function RootLayout({
                           </div>
                           <div className="col-span-12 inline-flex justify-center md:col-span-4 lg:col-span-4">
                             <div className="w-full md:inline-flex">
-                              <Search />
+                              <Suspense fallback={<div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />}>
+                                <Search />
+                              </Suspense>
                             </div>
                             <IconRadioButtonGroup />
                           </div>

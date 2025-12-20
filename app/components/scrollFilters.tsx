@@ -1,6 +1,7 @@
 'use client';
 
 import clsx from 'clsx';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { ArrowLeft01Icon, ArrowRight01Icon } from '@hugeicons/react-pro';
 import { useEffect, useRef, useState } from 'react';
 import IconComponent from '@/app/components/iconComponent';
@@ -8,23 +9,22 @@ import { useRouter } from 'next/navigation';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { useSession } from 'next-auth/react';
 import { useAuthDialog } from '@/context/AuthDialogContext';
-import { set } from 'lodash';
 
 export default function ScrollFilters({
   filters,
-  selectedCategory,
 }: {
   filters: { label: string; value: string; icon: string; shouldBeLoggedIn?: boolean }[];
-  selectedCategory?: string;
 }) {
-  let scrollBy = 500;
+  const scrollBy = useRef<number>(500);
   const ref = useRef<any>();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { data: session } = useSession();
-  const { setSelectedCategoryId } = useSelectedCategory();
+  const { selectedCategoryId, setSelectedCategoryId } = useSelectedCategory();
   const { setOpenSignIn } = useAuthDialog();
   const [showPrevBtn, setShowPrevBtn] = useState<boolean>(false);
-  const [showNextBtn, setShowNextBtn] = useState<boolean>(true);
-  const [selectedOption, setSelectedOption] = useState<string | undefined>(selectedCategory);
+  const [showNextBtn, setShowNextBtn] = useState<boolean>(false);
+  const [selectedOption, setSelectedOption] = useState<string | undefined>(selectedCategoryId);
   const router = useRouter();
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -54,44 +54,52 @@ export default function ScrollFilters({
   };
   // Get category from URL or use default
   useEffect(() => {
-    setSelectedOption(selectedCategory); // Update selected category if changed
-  }, [selectedCategory]);
+    setSelectedOption(selectedCategoryId); // Update selected category if changed
+  }, [selectedCategoryId]);
 
   useEffect(() => {
-    if (ref.current) {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      scrollBy = ref?.current?.offsetWidth - 100;
+    const slider = ref.current;
+    if (!slider) return;
 
-      window.addEventListener('resize', () => {
-        if (ref?.current?.scrollWidth === ref?.current?.offsetWidth) {
-          setShowNextBtn(false);
-        }
+    const updateButtons = () => {
+      // update scrollBy based on visible width
+      scrollBy.current = slider.offsetWidth - 100;
 
-        if (ref?.current?.scrollWidth > ref?.current?.offsetWidth) {
-          setShowNextBtn(true);
-        }
-      });
+      // If content fits within view, hide both buttons
+      if (slider.scrollWidth <= slider.offsetWidth) {
+        setShowNextBtn(false);
+        setShowPrevBtn(false);
+        return;
+      }
 
-      ref?.current?.addEventListener('scroll', () => {
-        if (ref.current?.offsetWidth + ref.current?.scrollLeft >= ref?.current?.scrollWidth - 5) {
-          setShowNextBtn(false);
-        }
+      // Otherwise determine visibility by scroll position
+      if (slider.offsetWidth + slider.scrollLeft >= slider.scrollWidth - 5) {
+        setShowNextBtn(false);
+      } else {
+        setShowNextBtn(true);
+      }
 
-        if (ref.current?.offsetWidth + ref.current?.scrollLeft < ref?.current?.scrollWidth) {
-          setShowNextBtn(true);
-        }
+      if (slider.scrollLeft > 0) {
+        setShowPrevBtn(true);
+      } else {
+        setShowPrevBtn(false);
+      }
+    };
 
-        if (ref.current?.scrollLeft > 0) {
-          setShowPrevBtn(true);
-        }
+    // initial check
+    updateButtons();
 
-        if (ref.current?.scrollLeft === 0) {
-          setShowPrevBtn(false);
-          setShowNextBtn(true);
-        }
-      });
-    }
-  });
+    const onResize = () => updateButtons();
+    const onScroll = () => updateButtons();
+
+    window.addEventListener('resize', onResize);
+    slider.addEventListener('scroll', onScroll);
+
+    return () => {
+      window.removeEventListener('resize', onResize);
+      slider.removeEventListener('scroll', onScroll);
+    };
+  }, [filters]);
 
   // Handle filter change and update URL with categoryId
   const handleCategoryChange = (categoryId: string) => {
@@ -102,7 +110,9 @@ export default function ScrollFilters({
     setSelectedOption(categoryId);
     setSelectedCategoryId(categoryId);
     // Update the query params in the URL without reloading the page, but only if on the client-side
-    router.replace(`?category=${categoryId}`, { scroll: false });
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('category', categoryId);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   return (
@@ -116,7 +126,7 @@ export default function ScrollFilters({
           },
         )}
         onClick={() => {
-          ref.current?.scrollTo({ left: ref.current?.scrollLeft - scrollBy });
+          ref.current?.scrollTo({ left: ref.current?.scrollLeft - scrollBy.current });
         }}
       >
         <ArrowLeft01Icon size={20} className="text-gray-700" variant="twotone" />
@@ -163,7 +173,7 @@ export default function ScrollFilters({
           },
         )}
         onClick={() => {
-          ref.current?.scrollTo({ left: ref.current?.scrollLeft + scrollBy });
+          ref.current?.scrollTo({ left: ref.current?.scrollLeft + scrollBy.current });
         }}
       >
         <ArrowRight01Icon size={20} className="text-gray-700" variant="twotone" />

@@ -1,6 +1,7 @@
 'use client';
+
 import { Search01Icon } from '@hugeicons/react-pro';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useSearch } from '@/hooks/search';
 import { useState, useRef, useEffect } from 'react';
 import { debounce } from 'lodash';
@@ -14,10 +15,15 @@ import { Button } from '@/components/ui/button';
 import { usePlaceCategories } from '@/hooks/places';
 import { PlaceCategory } from '@/types/placeCategory';
 import clsx from 'clsx';
+import { useRouter } from 'next/navigation';
+import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 
 export default function Search() {
   const pathname = usePathname();
-  const { data: placeCategories } = usePlaceCategories({ pageSize: 100, group: 'cities' });
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { setSelectedCitySearchId } = useSelectedCategory();
+  const { data: placeCategories } = usePlaceCategories({ pageSize: 100, group: 'cities' }, true);
   const [query, setQuery] = useState<string>();
   const [tag, setTag] = useState<PlaceCategory | undefined>();
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -140,23 +146,29 @@ export default function Search() {
               </Button>
             </div>
             <div className="mb-2 flex items-center gap-2 overflow-x-auto scroll-smooth no-scrollbar">
-              {tag === undefined &&
-                placeCategories?.data?.results.map((category: PlaceCategory) => (
-                  <div
-                    className="relative h-[100px] w-[100px] flex-shrink-0 cursor-pointer"
-                    onClick={() => setTag(category)}
-                  >
-                    <TukaiImage
-                      src={category?.image}
-                      alt={category.name}
-                      className="rounded-[8px]"
-                      showNotFoundText={false}
-                    />
-                    <p className="absolute bottom-0.5 left-0.5 p-1 text-xs font-bold text-white">
-                      {category.name}
-                    </p>
-                  </div>
-                ))}
+              {placeCategories?.data?.results.map((category: PlaceCategory) => (
+                <div
+                  className="relative h-[100px] w-[100px] flex-shrink-0 cursor-pointer"
+                  onClick={() => {
+                    setTag(category);
+                    setSelectedCitySearchId(category.id);
+                    setShowSearchResults(false);
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.set('city', category.id);
+                    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+                  }}
+                >
+                  <TukaiImage
+                    src={category?.image ?? ''}
+                    alt={category.name}
+                    className="rounded-[8px]"
+                    showNotFoundText={false}
+                  />
+                  <p className="absolute bottom-0.5 left-0.5 p-1 text-xs font-bold text-white">
+                    {category.name}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
           <div className="flex flex-col gap-2">

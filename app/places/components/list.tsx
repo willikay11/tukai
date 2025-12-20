@@ -37,12 +37,14 @@ const placeholders: Place[] = Array.from({ length: 12 }, (_, index) => ({
 }));
 
 export default function ListPlaces() {
-  const { selectedCategoryId } = useSelectedCategory();
+  const { selectedCategoryId, selectedCitySearchId } = useSelectedCategory();
   const [page, setPage] = useState(1);
   const [placeList, setPlaceList] = useState<Place[]>(placeholders);
   const [endPage, setEndPage] = useState<number | null>(null);
   const { data: places, isLoading } = usePlaces({
-    categoryId: selectedCategoryId,
+    categoryId: [selectedCategoryId, selectedCitySearchId].filter((id): id is string =>
+      Boolean(id),
+    ),
     page,
     enabled: true,
   });

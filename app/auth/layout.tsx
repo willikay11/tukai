@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { Suspense } from 'react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -62,7 +62,7 @@ const options = [
   },
 ];
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+function AuthLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const animationElement = useRef<any>();
   const [optionIndex, setOptionIndex] = useState<number>(0);
@@ -110,5 +110,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<div className="h-screen flex items-center justify-center">Loading...</div>}>
+      <AuthLayoutContent>{children}</AuthLayoutContent>
+    </Suspense>
   );
 }

@@ -21,7 +21,13 @@ export type ExperiencesQueryParams = {
 
 export async function fetchExperiences(params: ExperiencesQueryParams): Promise<ApiResponse> {
   try {
-    const response = await api.get(`/v1/experiences/`, { params });
+    let response;
+    if (params.invited) {
+      const axiosInstance = await apiWithToken();
+      response = await axiosInstance.get(`/v1/experiences/`, { params });
+    } else {
+      response = await api.get(`/v1/experiences/`, { params });
+    }
 
     return {
       status: response.status,

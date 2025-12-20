@@ -37,8 +37,8 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
       <Experiences
         key={categoryFromQuery}
         category={categoryFromQuery}
-        title={`Happening Tommorrow: ${moment().add('days', 1).format('Do MMMM, YYYY')}`}
-        date={moment().add('days', 1).format('YYYY-MM-DD')}
+        title={`Happening Tommorrow: ${moment().add(1, 'days').format('Do MMMM, YYYY')}`}
+        date={moment().add(1, 'days').format('YYYY-MM-DD')}
         isPortal={true}
       />
 
