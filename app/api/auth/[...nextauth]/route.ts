@@ -57,8 +57,10 @@ export const authOptions = {
   providers: [
     // 🔹 Google OAuth
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      // clientId: process.env.GOOGLE_CLIENT_ID!,
+      // clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: '133831052324-4urha5qu28smav2o0qm3beal1pp33q4p.apps.googleusercontent.com',
+      clientSecret: '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',
     }),
 
     // 🔹 Credentials login
