@@ -15,7 +15,7 @@ export type Experience = {
   currency: string;
   isPaid: boolean;
   ticketSalesClosingDuration: number;
-  ticketSalesClosingUnit: string;
+  ticketSalesClosingUnit: 'minutes' | 'hours' | 'days';
   ticketSalesClosingCondition: 'before_end' | 'before_start';
   priceStartsFrom: { amount: number; currency: string };
   ticketsAvailable: boolean;
