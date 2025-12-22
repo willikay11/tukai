@@ -112,7 +112,7 @@ export default function ScrollFilters({
     // Update the query params in the URL without reloading the page, but only if on the client-side
     const params = new URLSearchParams(searchParams.toString());
     params.set('category', categoryId);
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    router.replace(`${pathname}?${params.toString()}`, { scroll: true });
   };
 
   return (
