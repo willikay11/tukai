@@ -68,15 +68,15 @@ export default function ExperienceDetails({ experience }: { experience: Experien
         </div>
       </div>
 
-      <div className="flex flex-row">
+      {/* <div className="flex flex-row">
         <div className="mr-2 flex">
           <IconComponent iconName="CallIcon" size={18} />
         </div>
         <div className="flex flex-col">
           <p className="text-sm font-medium text-gray-700">Phone</p>
-          <p className="text-sm font-normal text-gray-500">{/* {experience.host} */}</p>
+          <p className="text-sm font-normal text-gray-500"></p>
         </div>
-      </div>
+      </div> */}
     </>
   );
 }
