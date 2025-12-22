@@ -8,6 +8,7 @@ export type User = {
   email?: string;
   status?: string;
   acceptedTerms?: boolean;
+  experienceHostedCount?: number;
   lastLogin?: string;
   createdAt?: string;
   updatedAt?: string;
