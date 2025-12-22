@@ -86,6 +86,7 @@ export const authOptions = {
           hasInterests: decoded?.hasInterests,
           hasBillingDetails: decoded?.hasBillingDetails,
           hasSubscribed: decoded?.hasSubscribed,
+          emailVerified: decoded?.emailVerified,
           accessToken: response.access,
           refreshToken: response.refresh,
         };
@@ -111,6 +112,7 @@ export const authOptions = {
         token.hasInterests = decoded?.hasInterests;
         token.hasBillingDetails = decoded?.hasBillingDetails;
         token.hasSubscribed = decoded?.hasSubscribed;
+        token.emailVerified = decoded?.emailVerified;
         return token;
       }
 
@@ -151,6 +153,7 @@ export const authOptions = {
         hasInterests: token.hasInterests,
         hasBillingDetails: token.hasBillingDetails,
         hasSubscribed: token.hasSubscribed,
+        emailVerified: token.emailVerified,
       };
       session.error = token.error;
       return session;

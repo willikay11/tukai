@@ -62,7 +62,7 @@ export default function Nav() {
         <Link href="/">
           <Image
             src="/images/logo.svg"
-            alt="Oltukai logo"
+            alt="Tukai logo"
             width={60}
             height={60}
             className="ml-2.5"
