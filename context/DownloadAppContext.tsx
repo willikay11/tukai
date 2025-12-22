@@ -21,7 +21,7 @@ export const DownloadAppProvider = ({ children }: { children: ReactNode }) => {
     let url = 'https://play.google.com/store/apps/details?id=com.tukaitravels.app&hl=en';
 
     if (device === 'ios') {
-      url = 'https://apps.apple.com/ke/app/tukai/idcom.tukaitravels.app';
+      url = 'https://apps.apple.com/us/app/tukai/id6751051486';
     }
 
     window.open(url, '_blank');
