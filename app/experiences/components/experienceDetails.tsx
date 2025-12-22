@@ -19,9 +19,9 @@ export default function ExperienceDetails({ experience }: { experience: Experien
             {moment(experience.startDate).format('MMM D, YYYY')} -{' '}
             {moment(experience.endDate).format('MMM D, YYYY')}
           </p>
-          <Button variant="primary-text" size="sm" className="mt-1 justify-start">
+          {/* <Button variant="primary-text" size="sm" className="mt-1 justify-start">
             View Other Dates
-          </Button>
+          </Button> */}
         </div>
       </div>
 
