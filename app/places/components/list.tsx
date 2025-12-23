@@ -55,7 +55,7 @@ export default function ListPlaces() {
 
   const observer = useRef<IntersectionObserver | null>(null);
   const isResettingRef = useRef<boolean>(false);
-
+  
   const lastPlaceElementRef = useCallback(
     (node: HTMLDivElement) => {
       if (isLoading || !places?.data?.results) return;
