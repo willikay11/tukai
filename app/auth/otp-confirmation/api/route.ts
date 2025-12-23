@@ -24,7 +24,7 @@ export async function POST(req: Request) {
         message: err?.response?.data?.errors?.[0]?.detail || 'Invalid credentials',
       },
       {
-        status: 401,
+        status: 400,
       },
     );
   }
@@ -50,7 +50,7 @@ export async function PUT(req: Request) {
         message: err?.response?.data?.errors?.[0]?.detail || 'Invalid credentials',
       },
       {
-        status: 401,
+        status: 400,
       },
     );
   }
