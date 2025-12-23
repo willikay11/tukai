@@ -20,9 +20,27 @@ const DescriptionShowMore = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Sanitize text to prevent XSS (if content is dynamic)
-  const safeText = sanitizeHtml(text);
-
+  // Sanitize text to prevent XSS (if content is dynamic) and ensure any
+  // anchor tags receive the expected link classes.
+  const safeText = sanitizeHtml(text, {
+    // Ensure class (and optionally target/rel) are preserved on <a>
+    allowedAttributes: {
+      a: ['href', 'name', 'target', 'rel', 'class'],
+    },
+    transformTags: {
+      a: (tagName, attribs) => {
+        const existing = attribs.class ? attribs.class + ' ' : '';
+        return {
+          tagName: 'a',
+          attribs: {
+            ...attribs,
+            class: `${existing}text-primary underline underline-offset-2 hover:text-primary transition-colors`,
+          },
+        } as any;
+      },
+    },
+  });
+  
   // Determine whether to truncate text
   const shouldTruncate = text.length > maxLength;
   const displayedText = !shouldTruncate ? safeText : safeText.slice(0, maxLength) + '...';
