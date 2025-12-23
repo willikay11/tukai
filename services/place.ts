@@ -24,7 +24,7 @@ export async function fetchPlaces(
     if (perPage) queryParams.append('page_size', perPage.toString());
     if (search) queryParams.append('search', search);
     if (lat !== undefined) queryParams.append('lat', String(lat));
-    if (lng !== undefined) queryParams.append('lng', String(lng));
+    if (lng !== undefined) queryParams.append('long', String(lng));
 
     const res = await api.get(`/v1/places/?${queryParams.toString()}`);
 
