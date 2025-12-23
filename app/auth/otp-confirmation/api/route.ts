@@ -47,7 +47,7 @@ export async function PUT(req: Request) {
     console.error('Resend OTP Error:', err?.response ?? err);
     return Response.json(
       {
-        message: 'Invalid credentials',
+        message: err?.response?.data?.errors?.[0]?.detail || 'Invalid credentials',
       },
       {
         status: 401,
