@@ -163,7 +163,7 @@ input[type='number'] {
   body {
     @apply bg-background text-foreground;
   }
-  a {
+  /* a {
     @apply text-primary underline underline-offset-2 hover:text-primary transition-colors;
-  }
+  } */
 }
