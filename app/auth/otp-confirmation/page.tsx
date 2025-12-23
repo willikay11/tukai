@@ -71,7 +71,7 @@ export default function OtpConfirmation() {
 
     toast({
       title: 'OTP sent successfully',
-      description: 'A four digit code was sent to <span className="text-primary">{email}</span>',
+      description: `A four digit code was sent to ${email}`,
       variant: 'success',
     });
   };
