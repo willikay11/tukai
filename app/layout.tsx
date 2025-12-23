@@ -57,7 +57,7 @@ export default function RootLayout({
                       </div>
                       <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
                         <div className="inline-flex grid h-[80px] w-full grid-cols-12 items-center justify-between md:mt-6">
-                          <div className="flex hidden h-full items-center md:col-span-5 md:inline-flex lg:col-span-5 lg:inline-flex">
+                          <div className="flex hidden h-full items-center md:col-span-4 md:inline-flex lg:col-span-4 lg:inline-flex">
                             <Link href="/" className="hidden h-full items-center md:flex">
                               <Image
                                 src="/images/logo.svg"
@@ -77,7 +77,7 @@ export default function RootLayout({
                             </div>
                             <IconRadioButtonGroup />
                           </div>
-                          <div className="flex hidden h-full items-center justify-end md:col-span-3 md:inline-flex lg:col-span-3 lg:inline-flex">
+                          <div className="flex hidden h-full items-center justify-end md:col-span-4 md:inline-flex lg:col-span-4 lg:inline-flex">
                             <AuthActions />
                           </div>
                         </div>

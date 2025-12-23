@@ -24,7 +24,7 @@ export async function POST(req: Request) {
         message: err?.response?.data?.errors?.[0]?.detail || 'Invalid credentials',
       },
       {
-        status: 401,
+        status: 400,
       },
     );
   }
@@ -47,10 +47,10 @@ export async function PUT(req: Request) {
     console.error('Resend OTP Error:', err?.response ?? err);
     return Response.json(
       {
-        message: 'Invalid credentials',
+        message: err?.response?.data?.errors?.[0]?.detail || 'Invalid credentials',
       },
       {
-        status: 401,
+        status: 400,
       },
     );
   }
