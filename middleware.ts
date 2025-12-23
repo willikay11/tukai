@@ -23,9 +23,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/auth/sign-in', request.url));
   }
 
-  // if (!token.hasInterests) {
-  //   return NextResponse.redirect(new URL('/auth/interests', request.url));
-  // }
+  if (!token.hasInterests) {
+    return NextResponse.redirect(new URL('/auth/interests', request.url));
+  }
 
   // if (!token.hasBillingDetails) {
   //   return NextResponse.redirect(new URL('/auth/subscribe', request.url));
