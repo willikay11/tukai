@@ -14,6 +14,9 @@ export type Experience = {
   endDate: string;
   currency: string;
   isPaid: boolean;
+  ticketSalesClosingDuration: number;
+  ticketSalesClosingUnit: 'minutes' | 'hours' | 'days';
+  ticketSalesClosingCondition: 'before_end' | 'before_start';
   priceStartsFrom: { amount: number; currency: string };
   ticketsAvailable: boolean;
   isSoldOut: boolean;

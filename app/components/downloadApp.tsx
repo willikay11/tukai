@@ -45,7 +45,7 @@ export default function DownloadApp() {
           />
           <Image
             src="/images/logo-small.svg"
-            alt="Oltukai logo"
+            alt="Tukai logo"
             width={30}
             height={40}
             className="mr-2"

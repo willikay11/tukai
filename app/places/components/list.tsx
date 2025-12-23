@@ -50,6 +50,7 @@ export default function ListPlaces() {
   });
 
   const observer = useRef<IntersectionObserver | null>(null);
+  const isResettingRef = useRef<boolean>(false);
 
   const lastPlaceElementRef = useCallback(
     (node: HTMLDivElement) => {
@@ -71,12 +72,28 @@ export default function ListPlaces() {
   );
 
   useEffect(() => {
+    // When either selected category or city search changes, reset to page 1
+    isResettingRef.current = true;
     setPage(1);
     setPlaceList(placeholders);
     setEndPage(null);
-  }, [selectedCategoryId]);
+  }, [selectedCategoryId, selectedCitySearchId]);
 
   useEffect(() => {
+    // If we're resetting due to category/city change, ignore intermediate results until
+    // we receive the results for page 1 (or loading completes).
+    if (isResettingRef.current) {
+      if (!isLoading && places?.data?.results && page === 1) {
+        // replace list with the fresh first-page data
+        setPlaceList(places.data.results);
+        if (places.data.count) {
+          setEndPage(Math.ceil(places.data.count / 12));
+        }
+        isResettingRef.current = false;
+      }
+      return;
+    }
+
     if (!isLoading && places?.data?.results) {
       if (page === 1) {
         // Replace entire list for first page
@@ -99,7 +116,7 @@ export default function ListPlaces() {
       // Add placeholders only when loading subsequent pages
       setPlaceList((prevPlaceList) => [...prevPlaceList, ...placeholders]);
     }
-  }, [places, isLoading, page]);
+  }, [places, isLoading, page, selectedCategoryId, selectedCitySearchId]);
 
   if (!isLoading && placeList.length === 0) {
     return (

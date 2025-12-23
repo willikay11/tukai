@@ -47,11 +47,7 @@ export async function fetchExperiences(params: ExperiencesQueryParams): Promise<
 
 export async function fetchExperience(id: string): Promise<ApiResponse> {
   try {
-    // const session = await getServerSession(authOptions);
-
-    // const axiosInstance = await apiWithToken(session?.user?.accessToken);
     const response = await api.get(`/v1/experiences/${id}`);
-
     return {
       status: response.status,
       success: true,

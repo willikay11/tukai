@@ -23,6 +23,17 @@ export default async function ViewExperiencePage({ params }: { params: { experie
 
   const experience: Experience = experienceResponse.data;
 
+  const closingDuration = experience?.ticketSalesClosingDuration;
+  const closingUnitRaw = experience?.ticketSalesClosingUnit ?? '';
+  const closingUnit =
+    closingDuration === 1 && closingUnitRaw.endsWith('s')
+      ? closingUnitRaw.slice(0, -1)
+      : closingUnitRaw;
+  const closingConditionText =
+    experience?.ticketSalesClosingCondition === 'before_start'
+      ? 'before the experience starts.'
+      : 'before the experience ends.';
+
   return (
     <>
       <main className="grid grid-cols-12 gap-4">
@@ -104,8 +115,8 @@ export default async function ViewExperiencePage({ params }: { params: { experie
 
             <div className="mb-4">
               <p className="text-base font-bold text-gray-700">Cancellation Policy</p>
-              <p className="text-sm font-normal text-gray-500">
-                Free cancellation before 2 PM on Feb 22.
+              <p className="text-sm font-medium text-gray-500">
+                Ticket sales close {closingDuration} {closingUnit} {closingConditionText}
               </p>
             </div>
 

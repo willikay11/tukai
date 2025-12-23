@@ -61,7 +61,7 @@ export default function RootLayout({
                             <Link href="/" className="hidden h-full items-center md:flex">
                               <Image
                                 src="/images/logo.svg"
-                                alt="Oltukai logo"
+                                alt="Tukai logo"
                                 width={80}
                                 height={70}
                                 className="md:mr-6 lg:mr-5 xl:mr-10"

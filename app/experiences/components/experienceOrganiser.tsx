@@ -1,7 +1,6 @@
 'use client';
 
 import { CheckmarkBadge02Icon } from '@hugeicons/react-pro';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Experience } from '@/types/experience';
 import SendMessage from '@/app/components/sendMessage';
@@ -29,7 +28,7 @@ export default function ExperienceOrganiser({ experience }: { experience: Experi
                 </p>
                 <CheckmarkBadge02Icon size={16} variant="solid" className="text-primary" />
               </div>
-              <p className="text-sm font-normal text-gray-600">44 Experiences organised</p>
+              <p className="text-sm font-normal text-gray-600">{experience.host.experienceHostedCount} Experiences organised</p>
             </div>
           </div>
           <Button variant="primary-light" className="h-full" onClick={() => setOpen(true)}>
