@@ -40,7 +40,7 @@ const DescriptionShowMore = ({
       },
     },
   });
-  
+
   // Determine whether to truncate text
   const shouldTruncate = text.length > maxLength;
   const displayedText = !shouldTruncate ? safeText : safeText.slice(0, maxLength) + '...';
