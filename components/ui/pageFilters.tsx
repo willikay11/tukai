@@ -36,9 +36,9 @@ export default function PageFilters() {
 
       const selectedCategoryId =
         categoryFromQuery ||
-        categories?.data?.results?.sort(
-          (a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount,
-        )?.filter((placeCategory: PlaceCategory) => placeCategory.group !== 'cities')?.[0].id;
+        categories?.data?.results
+          ?.sort((a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount)
+          ?.filter((placeCategory: PlaceCategory) => placeCategory.group !== 'cities')?.[0].id;
 
       setIsLoading(false);
       setSelectedCategoryId(selectedCategoryId);

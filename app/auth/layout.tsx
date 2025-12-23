@@ -115,7 +115,9 @@ function AuthLayoutContent({ children }: { children: React.ReactNode }) {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense fallback={<div className="h-screen flex items-center justify-center">Loading...</div>}>
+    <Suspense
+      fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}
+    >
       <AuthLayoutContent>{children}</AuthLayoutContent>
     </Suspense>
   );

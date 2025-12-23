@@ -8,6 +8,8 @@ export async function fetchPlaces(
   perPage = 12,
   categoryId?: string | string[],
   search?: string,
+  lat?: number,
+  lng?: number,
 ): Promise<ApiResponse> {
   try {
     const queryParams = new URLSearchParams();
@@ -21,6 +23,8 @@ export async function fetchPlaces(
     if (page) queryParams.append('page', page.toString());
     if (perPage) queryParams.append('page_size', perPage.toString());
     if (search) queryParams.append('search', search);
+    if (lat !== undefined) queryParams.append('lat', String(lat));
+    if (lng !== undefined) queryParams.append('lng', String(lng));
 
     const res = await api.get(`/v1/places/?${queryParams.toString()}`);
 

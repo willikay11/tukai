@@ -141,7 +141,7 @@ export default function OtpConfirmation() {
         <OtpInput onComplete={(token) => setToken(token)} />
         <div className="my-4 inline-flex w-full justify-center">
           {remainingSeconds > 0 ? (
-            <span className='inline-flex justify-center items-center text-sm text-primary'>
+            <span className="inline-flex items-center justify-center text-sm text-primary">
               {/* <RefreshIcon variant="twotone" size={16} className="mr-2" /> */}
               Resend code in {formatTime(remainingSeconds)}
             </span>

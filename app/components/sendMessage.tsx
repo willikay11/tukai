@@ -68,7 +68,7 @@ export default function SendMessage({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="px-4 md:px-6 min-w-[300px] md:min-w-[400px]">
+      <DialogContent className="min-w-[300px] px-4 md:min-w-[400px] md:px-6">
         <div className="flex flex-col gap-4">
           <p className="text-2xl font-black text-gray-700">Message Organizer</p>
           <Form {...form}>
