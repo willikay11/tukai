@@ -59,14 +59,14 @@ export default function Nav() {
       </Dialog>
       <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
         <Menu02Icon size={24} variant="twotone" type="rounded" onClick={() => setOpen(true)} />
-        <Link href="/">
+        <Link href="/" className='ml-2.5 inline-flex items-center'>
           <Image
             src="/images/logo.svg"
             alt="Tukai logo"
-            width={60}
-            height={60}
-            className="ml-2.5"
+            width={20}
+            height={20}
           />
+          <span className='ml-2 font-bold text-lg text-[#013334]'>Tukai</span>
         </Link>
       </div>
       <div className="hidden md:inline-flex md:h-full">{linkItems(true)}</div>

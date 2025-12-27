@@ -3,7 +3,7 @@
 import OtpInput from '@/app/components/form/otpInput';
 import { Button } from '@/app/components/form';
 import { RefreshIcon } from '@hugeicons/react-pro';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks/use-toast';
 import { useSelector } from 'react-redux';
@@ -15,6 +15,45 @@ export default function OtpConfirmation() {
   const [token, setToken] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isResending, setIsResending] = useState<boolean>(false);
+  const INITIAL_COUNT = 120; // seconds
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(INITIAL_COUNT);
+  const timerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // start countdown on mount
+    if (remainingSeconds > 0 && timerRef.current == null) {
+      timerRef.current = window.setInterval(() => {
+        setRemainingSeconds((s) => {
+          if (s <= 1) {
+            if (timerRef.current) {
+              clearInterval(timerRef.current);
+              timerRef.current = null;
+            }
+            return 0;
+          }
+          return s - 1;
+        });
+      }, 1000) as unknown as number;
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const formatTime = (secs: number) => {
+    const m = Math.floor(secs / 60)
+      .toString()
+      .padStart(2, '0');
+    const s = Math.floor(secs % 60)
+      .toString()
+      .padStart(2, '0');
+    return `${m}:${s}`;
+  };
 
   const { data: session } = useSession();
 
@@ -56,7 +95,6 @@ export default function OtpConfirmation() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
     });
-
     setIsResending(false);
     const res = await response.json();
 
@@ -71,9 +109,26 @@ export default function OtpConfirmation() {
 
     toast({
       title: 'OTP sent successfully',
-      description: 'A four digit code was sent to <span className="text-primary">{email}</span>',
+      description: `A four digit code was sent to ${email}`,
       variant: 'success',
     });
+
+    // restart countdown
+    setRemainingSeconds(INITIAL_COUNT);
+    if (timerRef.current == null) {
+      timerRef.current = window.setInterval(() => {
+        setRemainingSeconds((s) => {
+          if (s <= 1) {
+            if (timerRef.current) {
+              clearInterval(timerRef.current);
+              timerRef.current = null;
+            }
+            return 0;
+          }
+          return s - 1;
+        });
+      }, 1000) as unknown as number;
+    }
   };
 
   return (
@@ -84,11 +139,18 @@ export default function OtpConfirmation() {
           A four digit code was sent to <span className="text-primary">{email}</span>
         </p>
         <OtpInput onComplete={(token) => setToken(token)} />
-        <div className="my-2.5 inline-flex w-full justify-center">
-          <Button type="link" onClick={resendCode} loading={isResending}>
-            <RefreshIcon variant="twotone" size={16} className="mr-2" />
-            Resend Code
-          </Button>
+        <div className="my-4 inline-flex w-full justify-center">
+          {remainingSeconds > 0 ? (
+            <span className="inline-flex items-center justify-center text-sm text-primary">
+              {/* <RefreshIcon variant="twotone" size={16} className="mr-2" /> */}
+              Resend code in {formatTime(remainingSeconds)}
+            </span>
+          ) : (
+            <Button type="link" onClick={resendCode} loading={isResending}>
+              <RefreshIcon variant="twotone" size={16} className="mr-2" />
+              Resend Code
+            </Button>
+          )}
         </div>
         <Button block loading={isSubmitting} onClick={onSubmit}>
           Verify Account

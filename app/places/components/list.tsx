@@ -9,6 +9,7 @@ import NoData from '@/components/ui/noData';
 import { Status } from '@/enums/status';
 import SinglePlace from './place';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
+import { useLocation } from '@/context/LocationContext';
 
 const placeholders: Place[] = Array.from({ length: 12 }, (_, index) => ({
   id: `placeholder-${index}`,
@@ -38,6 +39,7 @@ const placeholders: Place[] = Array.from({ length: 12 }, (_, index) => ({
 
 export default function ListPlaces() {
   const { selectedCategoryId, selectedCitySearchId } = useSelectedCategory();
+  const { lat, lng } = useLocation();
   const [page, setPage] = useState(1);
   const [placeList, setPlaceList] = useState<Place[]>(placeholders);
   const [endPage, setEndPage] = useState<number | null>(null);
@@ -47,11 +49,13 @@ export default function ListPlaces() {
     ),
     page,
     enabled: true,
+    lat,
+    lng,
   });
 
   const observer = useRef<IntersectionObserver | null>(null);
   const isResettingRef = useRef<boolean>(false);
-
+  
   const lastPlaceElementRef = useCallback(
     (node: HTMLDivElement) => {
       if (isLoading || !places?.data?.results) return;

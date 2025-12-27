@@ -3,10 +3,9 @@
 import Image from 'next/image';
 
 export default function MobileStore() {
-  
-    const onDownloadApp = (url: string) => {
-      window.open(url, '_blank');
-    };
+  const onDownloadApp = (url: string) => {
+    window.open(url, '_blank');
+  };
 
   return (
     <div className="inline-flex w-full items-center justify-center">
@@ -16,7 +15,7 @@ export default function MobileStore() {
         height={70}
         style={{ width: '100px', height: '35px' }}
         alt="Google play store"
-        className="mr-2"
+        className="mr-2 cursor-pointer"
         onClick={() => onDownloadApp('https://apps.apple.com/us/app/tukai/id6751051486')}
       />
       <Image
@@ -25,7 +24,10 @@ export default function MobileStore() {
         height={90}
         style={{ width: '110px', height: '35px' }}
         alt="Google play store"
-        onClick={() => onDownloadApp('https://play.google.com/store/apps/details?id=com.tukaitravels.app&hl=en')}
+        className='cursor-pointer'
+        onClick={() =>
+          onDownloadApp('https://play.google.com/store/apps/details?id=com.tukaitravels.app&hl=en')
+        }
       />
     </div>
   );

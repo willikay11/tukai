@@ -54,6 +54,7 @@ async function refreshAccessToken(token: Token) {
 }
 
 export const authOptions = {
+  trustHost: true,
   providers: [
     // 🔹 Google OAuth
     GoogleProvider({
