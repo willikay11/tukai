@@ -1,11 +1,13 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import InterestBasedCommunities from './interestBasedCommunities';
-import { Interest } from '@/types/interest';
-import RecommendedCommunities from './recommendedCommunities';
-import PopularCommunities from './popularCommunities';
+
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
+import { Interest } from '@/types/interest';
+
+import InterestBasedCommunities from './interestBasedCommunities';
+import PopularCommunities from './popularCommunities';
+import RecommendedCommunities from './recommendedCommunities';
 
 const colors = [
   { bg: 'bg-red-100', color: 'bg-red-500' },

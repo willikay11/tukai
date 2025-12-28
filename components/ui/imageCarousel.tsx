@@ -8,8 +8,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import { cn } from '@/lib/utils';
 import TukaiImage from '@/components/ui/image';
+import { cn } from '@/lib/utils';
 
 const ImageCarousel = ({
   images,

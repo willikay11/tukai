@@ -1,13 +1,15 @@
 import NextAuth from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
+
 import jwt from 'jsonwebtoken';
-import { socialSignIn, signIn, refreshToken, profile as getProfile } from '@/services/auth';
-import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
-import { JwtPayload } from '@/types/jwt';
-import { User } from '@/types/user';
+
+import { profile as getProfile, refreshToken, signIn, socialSignIn } from '@/services/auth';
 import { Interest } from '@/types/interest';
+import { JwtPayload } from '@/types/jwt';
 import { Token } from '@/types/token';
+import { User } from '@/types/user';
+import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 // ✅ Extend NextAuth Session type
 declare module 'next-auth' {

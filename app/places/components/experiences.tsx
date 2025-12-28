@@ -1,7 +1,8 @@
 'use client';
+import { useState } from 'react';
+
 import ListExperiences from '@/app/components/experiences/List';
 import { useExperiences } from '@/hooks/experiences';
-import { useState } from 'react';
 
 type ListExperiencesProps = {
   categories: string[];

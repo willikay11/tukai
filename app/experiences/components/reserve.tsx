@@ -1,22 +1,25 @@
 'use client';
 
-import { Experience } from '@/types/experience';
-import { Photo } from '@/types/photo';
-import moment from 'moment';
+import { useEffect, useRef, useState } from 'react';
+
 import Image from 'next/image';
-import { Ticket } from '@/types/ticket';
+
+import moment from 'moment';
+import numeral from 'numeral';
+import { z } from 'zod';
+
+import { Button } from '@/components/ui/button';
+import PaymentForm, { paymentFormSchema } from '@/components/ui/paymentForm';
+import PaymentSuccess from '@/components/ui/paymentSuccess';
+import Paystack from '@/components/ui/paystack';
 import Quantity from '@/components/ui/quantity';
 import { Separator } from '@/components/ui/separator';
-import { useRef, useState, useEffect } from 'react';
-import numeral from 'numeral';
-import PaymentForm, { paymentFormSchema } from '@/components/ui/paymentForm';
-import { Button } from '@/components/ui/button';
-import { z } from 'zod';
 import { usePurchaseExperienceTicket } from '@/hooks/experiences';
-import { PurchaserDetails } from '@/types/purchaser';
-import Paystack from '@/components/ui/paystack';
-import PaymentSuccess from '@/components/ui/paymentSuccess';
 import { toast } from '@/hooks/use-toast';
+import { Experience } from '@/types/experience';
+import { Photo } from '@/types/photo';
+import { PurchaserDetails } from '@/types/purchaser';
+import { Ticket } from '@/types/ticket';
 
 export default function Reserve({ experience }: { experience: Experience }) {
   const [isPaystackOpen, setIsPaystackOpen] = useState<boolean>(false);

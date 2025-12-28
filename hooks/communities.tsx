@@ -1,5 +1,6 @@
-import { getInterestBasedCommunities } from '@/services/community';
 import { useQuery } from '@tanstack/react-query';
+
+import { getInterestBasedCommunities } from '@/services/community';
 
 export const useGetCommunities = (
   {

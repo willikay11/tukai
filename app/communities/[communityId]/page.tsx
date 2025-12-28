@@ -1,14 +1,15 @@
-import { ApiResponse } from '@/types/apiResponse';
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
-import { Photo } from '@/types/photo';
 import GoogleMapComponent from '@/app/components/googleMap';
-import { Separator } from '@/components/ui/separator';
-import PhotoGallery from '@/components/ui/PhotoGallery';
-import { Community, CommunityMember } from '@/types/community';
-import { fetchCommunity } from '@/services/community';
-import CommunityMembers from '../components/communityMembers';
-import CommunityAdministrator from '../components/communityAdministrator';
 import Share from '@/app/components/share';
+import PhotoGallery from '@/components/ui/PhotoGallery';
+import { Separator } from '@/components/ui/separator';
+import { fetchCommunity } from '@/services/community';
+import { ApiResponse } from '@/types/apiResponse';
+import { Community, CommunityMember } from '@/types/community';
+import { Photo } from '@/types/photo';
+
+import CommunityAdministrator from '../components/communityAdministrator';
+import CommunityMembers from '../components/communityMembers';
 import UpcomingExperiences from '../components/upcomingExperiences';
 
 export default async function ViewCommunityPage({ params }: { params: { communityId: string } }) {

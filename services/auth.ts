@@ -1,5 +1,6 @@
-import { api, getAccessToken } from './apiService';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
+
+import { api } from './apiService';
 
 export const signIn = async (email: string, password: string) => {
   try {

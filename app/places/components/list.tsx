@@ -1,15 +1,18 @@
 'use client';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
 import Link from 'next/link';
+
 import { motion } from 'framer-motion';
 
-import { Place } from '@/types/place';
-import { usePlaces } from '@/hooks/places';
-import { useCallback, useRef, useState, useEffect } from 'react';
 import NoData from '@/components/ui/noData';
-import { Status } from '@/enums/status';
-import SinglePlace from './place';
-import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { useLocation } from '@/context/LocationContext';
+import { useSelectedCategory } from '@/context/SelectedCategoryContext';
+import { Status } from '@/enums/status';
+import { usePlaces } from '@/hooks/places';
+import { Place } from '@/types/place';
+
+import SinglePlace from './place';
 
 const placeholders: Place[] = Array.from({ length: 12 }, (_, index) => ({
   id: `placeholder-${index}`,
@@ -55,7 +58,7 @@ export default function ListPlaces() {
 
   const observer = useRef<IntersectionObserver | null>(null);
   const isResettingRef = useRef<boolean>(false);
-  
+
   const lastPlaceElementRef = useCallback(
     (node: HTMLDivElement) => {
       if (isLoading || !places?.data?.results) return;

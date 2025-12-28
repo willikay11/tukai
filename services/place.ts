@@ -1,7 +1,7 @@
-import { parseCamelToSnake, parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
 import { PlaceCategoryParams } from '@/types/networkParam';
+import { parseCamelToSnake, parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 export async function fetchPlaces(
   page = 1,

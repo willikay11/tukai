@@ -1,15 +1,18 @@
 'use client';
 import { useState } from 'react';
-import { Experience } from '@/types/experience';
-import ImageCarousel from '@/components/ui/imageCarousel';
-import numeral from 'numeral';
+
 import moment from 'moment';
-import { Button } from '@/components/ui/button';
+import numeral from 'numeral';
+
+import Pills from '@/app/components/pills';
 import { EventSkeleton } from '@/app/components/skeletons';
-import Bookmark from '../../bookmark';
+import { Button } from '@/components/ui/button';
+import ImageCarousel from '@/components/ui/imageCarousel';
 import { useBookmarkExperience } from '@/hooks/experiences';
 import { cn } from '@/lib/utils';
-import Pills from '@/app/components/pills';
+import { Experience } from '@/types/experience';
+
+import Bookmark from '../../bookmark';
 
 export default function SingleExperience({
   type,

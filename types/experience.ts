@@ -1,7 +1,8 @@
-import { ExperienceCategory } from '@/types/experienceCategory';
 import { Status } from '@/enums/status';
-import { User } from '@/types/user';
+import { ExperienceCategory } from '@/types/experienceCategory';
 import { Location } from '@/types/location';
+import { User } from '@/types/user';
+
 import { Photo } from './photo';
 import { Ticket } from './ticket';
 

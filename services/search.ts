@@ -1,8 +1,9 @@
+import { isExperience } from '@/types/experience';
+import { SearchResult } from '@/types/search';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
+
 import { fetchExperiences } from './experience';
 import { fetchPlaces } from './place';
-import { SearchResult } from '@/types/search';
-import { isExperience } from '@/types/experience';
 
 export const searchPlaces = async (
   query?: string,

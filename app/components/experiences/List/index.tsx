@@ -1,12 +1,15 @@
 'use client';
-import SingleExperience from '@/app/components/experiences/Single';
-import { Experience } from '@/types/experience';
-import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import NoData from '@/components/ui/noData';
+
+import Link from 'next/link';
+
 import { motion } from 'framer-motion';
-import { Status } from '@/enums/status';
+
+import SingleExperience from '@/app/components/experiences/Single';
+import NoData from '@/components/ui/noData';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
+import { Status } from '@/enums/status';
+import { Experience } from '@/types/experience';
 
 type ListExperiencesProps = {
   className: string;

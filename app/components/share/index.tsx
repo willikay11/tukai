@@ -1,19 +1,19 @@
 'use client';
 
-import React from 'react';
-import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
+import { useState } from 'react';
 
 import {
   CopyLinkIcon,
-  Share08Icon,
+  Facebook02Icon,
   Mail01Icon,
   Message01Icon,
-  WhatsappIcon,
   MessengerIcon,
-  Facebook02Icon,
+  Share08Icon,
+  WhatsappIcon,
 } from '@hugeicons/react-pro';
-import { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import TukaiImage from '@/components/ui/image';
 
 const shareOptions = [

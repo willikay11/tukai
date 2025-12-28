@@ -1,6 +1,8 @@
-import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
-import { api } from './apiService';
 import { getSession } from 'next-auth/react';
+
+import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
+
+import { api } from './apiService';
 
 export async function getInterestBasedCommunities(
   category?: string,

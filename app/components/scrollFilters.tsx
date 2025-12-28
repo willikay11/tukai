@@ -1,14 +1,17 @@
 'use client';
 
-import clsx from 'clsx';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { ArrowLeft01Icon, ArrowRight01Icon } from '@hugeicons/react-pro';
 import { useEffect, useRef, useState } from 'react';
-import IconComponent from '@/app/components/iconComponent';
-import { useRouter } from 'next/navigation';
-import { useSelectedCategory } from '@/context/SelectedCategoryContext';
+
 import { useSession } from 'next-auth/react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+
+import { ArrowLeft01Icon, ArrowRight01Icon } from '@hugeicons/react-pro';
+import clsx from 'clsx';
+
+import IconComponent from '@/app/components/iconComponent';
 import { useAuthDialog } from '@/context/AuthDialogContext';
+import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 
 export default function ScrollFilters({
   filters,

@@ -1,5 +1,5 @@
-import { Photo } from './photo';
 import { Location } from './location';
+import { Photo } from './photo';
 import { User } from './user';
 
 export type CommunityMember = {

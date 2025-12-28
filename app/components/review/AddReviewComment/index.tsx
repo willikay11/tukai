@@ -1,8 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
-import Comments from '../Comments/Add';
+
 import Drawer from '@/components/ui/drawer';
+
+import Comments from '../Comments/Add';
+
 type addReviewCommentProps = {
   id: string;
   reviewId: string;

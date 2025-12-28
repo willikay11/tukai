@@ -24,7 +24,7 @@ export default function MobileStore() {
         height={90}
         style={{ width: '110px', height: '35px' }}
         alt="Google play store"
-        className='cursor-pointer'
+        className="cursor-pointer"
         onClick={() =>
           onDownloadApp('https://play.google.com/store/apps/details?id=com.tukaitravels.app&hl=en')
         }

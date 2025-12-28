@@ -1,8 +1,10 @@
 'use client';
 
-import { CommunityMember } from '@/types/community';
-import clsx from 'clsx';
 import Image from 'next/image';
+
+import clsx from 'clsx';
+
+import { CommunityMember } from '@/types/community';
 
 export default function CommunityMembers({
   members,

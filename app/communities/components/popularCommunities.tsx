@@ -1,9 +1,12 @@
 'use client';
 
+import Link from 'next/link';
+
+import { motion } from 'framer-motion';
+
 import { useGetCommunities } from '@/hooks/communities';
 import { Community } from '@/types/community';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
+
 import SingleCommunity from './community';
 
 export default function PopularCommunities() {

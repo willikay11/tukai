@@ -1,6 +1,7 @@
+import { getServerSession } from 'next-auth';
+
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
-import { getServerSession } from 'next-auth';
 
 export async function POST(req: Request) {
   const data = await req.json();

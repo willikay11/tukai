@@ -1,17 +1,20 @@
 import Image from 'next/image';
+
 import { CheckmarkBadge02Icon } from '@hugeicons/react-pro';
-import { ApiResponse } from '@/types/apiResponse';
-import { fetchPlace, fetchPlaceProperties, fetchPlaceSocialLinks } from '@/services/place';
-import { Place, PlaceProperty, PlaceSocialLink } from '@/types/place';
+
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
-import { Photo } from '@/types/photo';
-import Rating from '@/app/components/rating';
-import IconComponent from '@/app/components/iconComponent';
-import { Separator } from '@/components/ui/separator';
-import SocialLinks from '@/app/components/socialLinks';
 import GoogleMapComponent from '@/app/components/googleMap';
-import PlaceActions from '../components/placeActions';
+import IconComponent from '@/app/components/iconComponent';
+import Rating from '@/app/components/rating';
+import SocialLinks from '@/app/components/socialLinks';
 import PhotoGallery from '@/components/ui/PhotoGallery';
+import { Separator } from '@/components/ui/separator';
+import { fetchPlace, fetchPlaceProperties, fetchPlaceSocialLinks } from '@/services/place';
+import { ApiResponse } from '@/types/apiResponse';
+import { Photo } from '@/types/photo';
+import { Place, PlaceProperty, PlaceSocialLink } from '@/types/place';
+
+import PlaceActions from '../components/placeActions';
 import PlaceTabs from '../components/placeTabs';
 
 export default async function ViewPlacePage({ params }: { params: { placeId: string } }) {

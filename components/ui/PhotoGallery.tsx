@@ -1,10 +1,14 @@
 'use client';
-import { Photo } from '@/types/photo';
 import React, { useEffect, useState } from 'react';
-import 'react-18-image-lightbox/style.css'; // This only needs to be imported once in your app
-import TukaiImage from './image';
 import Lightbox from 'react-18-image-lightbox';
+import 'react-18-image-lightbox/style.css';
+
 import clsx from 'clsx';
+
+import { Photo } from '@/types/photo';
+
+// This only needs to be imported once in your app
+import TukaiImage from './image';
 
 const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
   const [isOpen, setIsOpen] = useState(false);

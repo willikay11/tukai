@@ -1,13 +1,17 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Comment } from '@/types/comment';
-import Image from 'next/image';
-import moment from 'moment';
-import { Separator } from '@/components/ui/separator';
-import { FavouriteIcon } from '@hugeicons/react-pro';
 import { useState } from 'react';
+
+import Image from 'next/image';
+
+import { FavouriteIcon } from '@hugeicons/react-pro';
+import moment from 'moment';
+
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { useLikePlaceReviewComment } from '@/hooks/places';
+import { Comment } from '@/types/comment';
+
 export default function ViewComment({
   comment,
   placeId,

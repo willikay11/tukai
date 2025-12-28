@@ -1,11 +1,14 @@
 'use client';
 import { useState } from 'react';
+
 import sanitizeHtml from 'sanitize-html';
-import { Community, CommunityMember } from '@/types/community';
-import ImageCarousel from '@/components/ui/imageCarousel';
+
 import { EventSkeleton } from '@/app/components/skeletons';
-import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import ImageCarousel from '@/components/ui/imageCarousel';
+import { Community } from '@/types/community';
+
 import CommunityMembers from './communityMembers';
+
 export default function SingleCommunity({ community }: { community: Community }) {
   const [hasError, setHasError] = useState(false);
 

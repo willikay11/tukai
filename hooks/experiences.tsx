@@ -1,12 +1,13 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
+
 import {
+  ExperiencesQueryParams,
+  bookmarkExperience,
   fetchExperience,
   fetchExperiences,
   purchaseExperienceTicket,
-  bookmarkExperience,
-  ExperiencesQueryParams,
 } from '@/services/experience';
-import { useQueryClient } from '@tanstack/react-query';
 import { PurchaserDetails } from '@/types/purchaser';
 
 export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean) => {

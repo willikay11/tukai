@@ -2,8 +2,7 @@
 
 import IconComponent from '@/app/components/iconComponent';
 import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
-import { toast } from '@/hooks/use-toast';
-import { useEffect, useRef } from 'react';
+
 import { Button } from './button';
 
 export default function PaymentSuccess({

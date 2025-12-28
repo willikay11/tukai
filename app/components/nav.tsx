@@ -1,11 +1,14 @@
 'use client';
-import { usePathname } from 'next/navigation';
+import { useState } from 'react';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+import { Calendar04Icon, Menu02Icon, Search01Icon } from '@hugeicons/react-pro';
 import clsx from 'clsx';
-import { Menu02Icon, Search01Icon, Calendar04Icon, UserMultipleIcon } from '@hugeicons/react-pro';
+
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { useState } from 'react';
 
 const links = [
   {

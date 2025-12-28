@@ -1,9 +1,10 @@
 'use client';
 
+import { ReactNode, createContext, useContext, useState } from 'react';
+
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import SignInForm from '@/components/ui/form/sign-in';
 import { toast } from '@/hooks/use-toast';
-import { createContext, useContext, useState, ReactNode } from 'react';
 
 type AuthDialogType = {
   setOpenSignIn: (open: boolean) => void;

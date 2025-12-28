@@ -1,5 +1,6 @@
-import Experiences from './components/List/experiences';
 import moment from 'moment';
+
+import Experiences from './components/List/experiences';
 import InvitedExperiences from './components/List/invitedExperiences';
 
 export default function ExperiencesPage({ searchParams }: { searchParams: { category?: string } }) {

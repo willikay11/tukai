@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
 import sanitizeHtml from 'sanitize-html';
+
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import Image from 'next/image';
-import IconComponent from './iconComponent';
 import Drawer from '@/components/ui/drawer';
 import TukaiImage from '@/components/ui/image';
+import { cn } from '@/lib/utils';
+
+import IconComponent from './iconComponent';
 
 const DescriptionShowMore = ({
   photo,

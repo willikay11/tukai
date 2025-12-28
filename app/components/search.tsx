@@ -1,22 +1,26 @@
 'use client';
 
-import { Search01Icon } from '@hugeicons/react-pro';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { useSearch } from '@/hooks/search';
-import { useState, useRef, useEffect } from 'react';
-import { debounce } from 'lodash';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import TukaiImage from '@/components/ui/image';
-import { SearchResult } from '@/types/search';
-import IconComponent from './iconComponent';
+import { useEffect, useRef, useState } from 'react';
+
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { usePlaceCategories } from '@/hooks/places';
-import { PlaceCategory } from '@/types/placeCategory';
-import clsx from 'clsx';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+
+import { Search01Icon } from '@hugeicons/react-pro';
+import clsx from 'clsx';
+import { debounce } from 'lodash';
+
+import { Button } from '@/components/ui/button';
+import TukaiImage from '@/components/ui/image';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
+import { usePlaceCategories } from '@/hooks/places';
+import { useSearch } from '@/hooks/search';
+import { cn } from '@/lib/utils';
+import { PlaceCategory } from '@/types/placeCategory';
+import { SearchResult } from '@/types/search';
+
+import IconComponent from './iconComponent';
 
 export default function Search() {
   const pathname = usePathname();

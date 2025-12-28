@@ -1,10 +1,11 @@
 'use client';
 
+import moment from 'moment';
+import numeral from 'numeral';
+
 import IconComponent from '@/app/components/iconComponent';
 import { Button } from '@/components/ui/button';
-import moment from 'moment';
 import { Experience } from '@/types/experience';
-import numeral from 'numeral';
 
 export default function ExperienceDetails({ experience }: { experience: Experience }) {
   return (

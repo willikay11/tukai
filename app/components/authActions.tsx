@@ -1,22 +1,23 @@
 'use client';
 
+import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 import { UserAdd01Icon } from '@hugeicons/react-pro';
+
+import IconComponent from '@/app/components/iconComponent';
+import TukaiImage from '@/components/ui/image';
 import {
   NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
-  NavigationMenuTrigger,
-  NavigationMenuLink,
   NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
-import { useRouter } from 'next/navigation';
-import { signOut, useSession } from 'next-auth/react';
-import Image from 'next/image';
-import IconComponent from '@/app/components/iconComponent';
 import { Separator } from '@/components/ui/separator';
 import { useDownloadApp } from '@/context/DownloadAppContext';
-import TukaiImage from '@/components/ui/image';
 
 export default function AuthActions() {
   const { onOpen } = useDownloadApp();

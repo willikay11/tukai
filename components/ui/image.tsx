@@ -1,9 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { ImageSkeleton } from '@/app/components/skeletons';
+
 import Image, { ImageProps } from 'next/image';
+
 import clsx from 'clsx';
+
+import { ImageSkeleton } from '@/app/components/skeletons';
 
 export default function TukaiImage({
   src,

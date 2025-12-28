@@ -1,12 +1,14 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 import { usePathname, useSearchParams } from 'next/navigation';
+
 import ScrollFilters from '@/app/components/scrollFilters';
 import { PillsSkeleton } from '@/app/components/skeletons';
-import { Suspense, useEffect, useState } from 'react';
+import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { usePlaceCategories } from '@/hooks/places';
 import { PlaceCategory } from '@/types/placeCategory';
-import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 
 export default function PageFilters() {
   const searchParams = useSearchParams();

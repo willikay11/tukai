@@ -1,10 +1,11 @@
 'use client';
 
-import { Anchor, Button } from '@/app/components/form';
-import { GoogleIcon } from '@hugeicons/react-pro';
-import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
+import { GoogleIcon } from '@hugeicons/react-pro';
+
+import { Anchor, Button } from '@/app/components/form';
 import MobileStore from '@/app/components/mobileStore';
 
 export default function Page() {

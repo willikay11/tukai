@@ -1,11 +1,14 @@
 'use client';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+
+import { useSession } from 'next-auth/react';
+
+import clsx from 'clsx';
+
 import ListExperiences from '@/app/components/experiences/List';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { useExperiences } from '@/hooks/experiences';
-import clsx from 'clsx';
-import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
 
 type ListExperiencesProps = {
   title: string;

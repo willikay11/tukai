@@ -1,27 +1,31 @@
 import React, { Suspense } from 'react';
+
 import type { Metadata } from 'next';
-import './globals.css';
-import { satoshi } from '@/app/components/fonts';
 import Image from 'next/image';
-import Nav from '@/app/components/nav';
-import AuthActions from '@/app/components/authActions';
 import Link from 'next/link';
-import GlobalLoading from '@/app/components/globalLoading';
-import DownloadApp from '@/app/components/downloadApp';
-import SessionProvider from '@/providers/SessionProvider';
-import { ReduxProvider } from './redux-provider';
-import IconRadioButtonGroup from '@/app/components/iconRadioButtonGroup';
+
 import { hugeiconsLicense } from '@hugeicons/react-pro';
-import ReactQueryClientProvider from '@/providers/ReactQueryProvider';
-import { Toaster } from '@/components/ui/toaster';
-import Search from './components/search';
-import { DownloadAppProvider } from '@/context/DownloadAppContext';
-import { SelectedCategoryProvider } from '@/context/SelectedCategoryContext';
-import { LocationProvider } from '@/context/LocationContext';
+
+import AuthActions from '@/app/components/authActions';
+import DownloadApp from '@/app/components/downloadApp';
+import { satoshi } from '@/app/components/fonts';
+import GlobalLoading from '@/app/components/globalLoading';
+import IconRadioButtonGroup from '@/app/components/iconRadioButtonGroup';
+import Nav from '@/app/components/nav';
 import PageFilters from '@/components/ui/pageFilters';
-import LocationPrompt from './components/locationPrompt';
-import { PillsSkeleton } from './components/skeletons';
+import { Toaster } from '@/components/ui/toaster';
 import { AuthDialogProvider } from '@/context/AuthDialogContext';
+import { DownloadAppProvider } from '@/context/DownloadAppContext';
+import { LocationProvider } from '@/context/LocationContext';
+import { SelectedCategoryProvider } from '@/context/SelectedCategoryContext';
+import ReactQueryClientProvider from '@/providers/ReactQueryProvider';
+import SessionProvider from '@/providers/SessionProvider';
+
+import LocationPrompt from './components/locationPrompt';
+import Search from './components/search';
+import { PillsSkeleton } from './components/skeletons';
+import './globals.css';
+import { ReduxProvider } from './redux-provider';
 
 hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',

@@ -1,11 +1,12 @@
 'use client';
 
 import * as React from 'react';
+
 import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
 import IconComponent from '@/app/components/iconComponent';
+import { cn } from '@/lib/utils';
 
 interface SelectTriggerProps
   extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> {

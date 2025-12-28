@@ -2,14 +2,17 @@
 
 'use client';
 
-import { Anchor, Button, Input } from '@/app/components/form';
-import { LockKeyIcon, Mail02Icon, UserIcon } from '@hugeicons/react-pro';
-import { useRouter } from 'next/navigation';
-import MobileStore from '@/app/components/mobileStore';
+import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
+
+import { useRouter } from 'next/navigation';
+
+import { LockKeyIcon, Mail02Icon, UserIcon } from '@hugeicons/react-pro';
+
+import { Anchor, Button, Input } from '@/app/components/form';
+import MobileStore from '@/app/components/mobileStore';
 import { addUser } from '@/slices/userSlice';
-import { useState } from 'react';
 
 type Inputs = {
   firstName: string;

@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
+
 import SendMessage from '@/app/components/sendMessage';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { CommunityMember } from '@/types/community';
-import { useState } from 'react';
+
 export default function CommunityAdministrator({
   member,
   size = '30px',
