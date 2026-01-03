@@ -13,7 +13,7 @@ import { PlaceCategory } from '@/types/placeCategory';
 export default function PageFilters() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const { setSelectedCategoryId, selectedCategoryId } = useSelectedCategory();
+  const { setSelectedCategoryId } = useSelectedCategory();
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] =
     useState<{ label: string; value: string; icon: string; shouldBeLoggedIn?: boolean }[]>();
@@ -73,14 +73,15 @@ export default function PageFilters() {
       ]);
       setIsLoading(false);
     }
-  }, [categories, pathname]);
+  }, [categories, pathname, categoryFromQuery, setSelectedCategoryId]);
 
   // Hide filters on detail pages (with IDs)
   if (
     pathname.startsWith('/places/') ||
     pathname.startsWith('/experiences/') ||
     pathname.startsWith('/communities/') ||
-    pathname.startsWith('/auth/')
+    pathname.startsWith('/auth/') ||
+    pathname.startsWith('/unsubscribe')
   ) {
     return null;
   }

@@ -36,3 +36,27 @@ export const sendMessage = async ({
     };
   }
 };
+
+export const unsubscribe = async ({ token }: { token: string }) => {
+  try {
+    const response = await api.post('/v1/comms/unsubscribe/', {
+      token,
+    });
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message:
+        error.response?.data?.message ||
+        'Failed to unsubscribe. Please try again or contact support.',
+    };
+  }
+};

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { sendMessage } from '@/services/comm';
+import { sendMessage, unsubscribe } from '@/services/comm';
 
 export const useSendMessage = () => {
   const queryClient = useQueryClient();
@@ -9,5 +9,11 @@ export const useSendMessage = () => {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['messages'] });
     },
+  });
+};
+
+export const useUnsubscribe = () => {
+  return useMutation({
+    mutationFn: async (data: { token: string }) => await unsubscribe(data),
   });
 };
