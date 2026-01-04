@@ -1,8 +1,10 @@
 import React from 'react';
 
+import * as nextNavigation from 'next/navigation';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { useUnsubscribe } from '@/hooks/comms';
 
@@ -10,9 +12,9 @@ import UnsubscribePage from './page';
 
 // Mock dependencies
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({
+  useRouter: jest.fn(() => ({
     push: jest.fn(),
-  }),
+  })),
   useSearchParams: jest.fn(),
 }));
 
@@ -29,8 +31,6 @@ jest.mock('@/app/components/form', () => ({
     <button onClick={onClick}>{children}</button>
   ),
 }));
-
-const { useSearchParams } = require('next/navigation');
 
 const createTestQueryClient = () =>
   new QueryClient({
@@ -62,26 +62,30 @@ describe('UnsubscribePage', () => {
   });
 
   it('should show loading state initially', async () => {
-    useSearchParams.mockReturnValue({
+    jest.spyOn(nextNavigation, 'useSearchParams').mockReturnValue({
       get: jest.fn().mockReturnValue('test-token'),
-    });
+    } as any);
 
     // Use a promise that doesn't resolve immediately to capture loading state
     mockMutateAsync.mockImplementation(
       () => new Promise((resolve) => setTimeout(() => resolve({ success: true }), 100)),
     );
 
-    renderWithProviders(<UnsubscribePage />);
+    await act(async () => {
+      renderWithProviders(<UnsubscribePage />);
+    });
 
     expect(screen.getByText(/Processing your unsubscribe request/i)).toBeInTheDocument();
   });
 
   it('should show error message when no token is provided', async () => {
-    useSearchParams.mockReturnValue({
+    jest.spyOn(nextNavigation, 'useSearchParams').mockReturnValue({
       get: jest.fn().mockReturnValue(null),
-    });
+    } as any);
 
-    renderWithProviders(<UnsubscribePage />);
+    await act(async () => {
+      renderWithProviders(<UnsubscribePage />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/Invalid unsubscribe link. No token provided./i)).toBeInTheDocument();
@@ -89,15 +93,17 @@ describe('UnsubscribePage', () => {
   });
 
   it('should show success message when unsubscribe is successful', async () => {
-    useSearchParams.mockReturnValue({
+    jest.spyOn(nextNavigation, 'useSearchParams').mockReturnValue({
       get: jest.fn().mockReturnValue('test-token'),
-    });
+    } as any);
 
     mockMutateAsync.mockResolvedValue({
       success: true,
     });
 
-    renderWithProviders(<UnsubscribePage />);
+    await act(async () => {
+      renderWithProviders(<UnsubscribePage />);
+    });
 
     await waitFor(() => {
       expect(
@@ -109,16 +115,18 @@ describe('UnsubscribePage', () => {
   });
 
   it('should show error message when unsubscribe fails', async () => {
-    useSearchParams.mockReturnValue({
+    jest.spyOn(nextNavigation, 'useSearchParams').mockReturnValue({
       get: jest.fn().mockReturnValue('test-token'),
-    });
+    } as any);
 
     mockMutateAsync.mockResolvedValue({
       success: false,
       message: 'Failed to unsubscribe. Please try again or contact support.',
     });
 
-    renderWithProviders(<UnsubscribePage />);
+    await act(async () => {
+      renderWithProviders(<UnsubscribePage />);
+    });
 
     await waitFor(() => {
       expect(
@@ -128,15 +136,17 @@ describe('UnsubscribePage', () => {
   });
 
   it('should show generic error message when unsubscribe fails without specific message', async () => {
-    useSearchParams.mockReturnValue({
+    jest.spyOn(nextNavigation, 'useSearchParams').mockReturnValue({
       get: jest.fn().mockReturnValue('test-token'),
-    });
+    } as any);
 
     mockMutateAsync.mockResolvedValue({
       success: false,
     });
 
-    renderWithProviders(<UnsubscribePage />);
+    await act(async () => {
+      renderWithProviders(<UnsubscribePage />);
+    });
 
     await waitFor(() => {
       expect(
@@ -148,15 +158,17 @@ describe('UnsubscribePage', () => {
   });
 
   it('should render success state with correct elements', async () => {
-    useSearchParams.mockReturnValue({
+    jest.spyOn(nextNavigation, 'useSearchParams').mockReturnValue({
       get: jest.fn().mockReturnValue('test-token'),
-    });
+    } as any);
 
     mockMutateAsync.mockResolvedValue({
       success: true,
     });
 
-    renderWithProviders(<UnsubscribePage />);
+    await act(async () => {
+      renderWithProviders(<UnsubscribePage />);
+    });
 
     await waitFor(() => {
       expect(
@@ -169,11 +181,13 @@ describe('UnsubscribePage', () => {
   });
 
   it('should render error state with correct elements', async () => {
-    useSearchParams.mockReturnValue({
+    jest.spyOn(nextNavigation, 'useSearchParams').mockReturnValue({
       get: jest.fn().mockReturnValue(null),
-    });
+    } as any);
 
-    renderWithProviders(<UnsubscribePage />);
+    await act(async () => {
+      renderWithProviders(<UnsubscribePage />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/Invalid unsubscribe link. No token provided./i)).toBeInTheDocument();
@@ -184,15 +198,19 @@ describe('UnsubscribePage', () => {
 
   it('should call router.push when Return to Home button is clicked', async () => {
     const mockPush = jest.fn();
-    jest.spyOn(require('next/navigation'), 'useRouter').mockReturnValue({
+
+    // Set up the mock before rendering
+    (nextNavigation.useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
     });
 
-    useSearchParams.mockReturnValue({
+    jest.spyOn(nextNavigation, 'useSearchParams').mockReturnValue({
       get: jest.fn().mockReturnValue(null),
-    });
+    } as any);
 
-    renderWithProviders(<UnsubscribePage />);
+    await act(async () => {
+      renderWithProviders(<UnsubscribePage />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/Invalid unsubscribe link. No token provided./i)).toBeInTheDocument();
@@ -205,15 +223,17 @@ describe('UnsubscribePage', () => {
   });
 
   it('should render page title and subtitle', async () => {
-    useSearchParams.mockReturnValue({
+    jest.spyOn(nextNavigation, 'useSearchParams').mockReturnValue({
       get: jest.fn().mockReturnValue('test-token'),
-    });
+    } as any);
 
     mockMutateAsync.mockResolvedValue({
       success: true,
     });
 
-    renderWithProviders(<UnsubscribePage />);
+    await act(async () => {
+      renderWithProviders(<UnsubscribePage />);
+    });
 
     expect(screen.getByText(/^Unsubscribe$/)).toBeInTheDocument();
     expect(screen.getByText(/Manage your email preferences/i)).toBeInTheDocument();

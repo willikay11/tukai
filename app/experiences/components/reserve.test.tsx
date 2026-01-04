@@ -21,7 +21,21 @@ jest.mock('@/hooks/use-toast', () => ({
 
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: ({ src, alt, ...props }: { src: string; alt: string; [key: string]: unknown }) => {
+  default: ({
+    src,
+    alt,
+    fill,
+    quality,
+    style,
+    ...props
+  }: {
+    src: string;
+    alt: string;
+    fill?: boolean;
+    quality?: number;
+    style?: React.CSSProperties;
+    [key: string]: unknown;
+  }) => {
     // eslint-disable-next-line @next/next/no-img-element
     return <img src={src} alt={alt} {...props} />;
   },
@@ -171,7 +185,7 @@ jest.mock('@/components/ui/quantity', () => {
 
 jest.mock('@/components/ui/separator', () => ({
   Separator: ({ style, className }: { style?: React.CSSProperties; className?: string }) => (
-    <hr data-testid="separator" style={style} className={className} />
+    <span data-testid="separator" style={style} className={className} />
   ),
 }));
 

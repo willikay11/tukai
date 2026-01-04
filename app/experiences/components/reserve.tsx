@@ -124,8 +124,8 @@ export default function Reserve({ experience }: { experience: Experience }) {
           }
           alt=""
           quality={100}
-          layout="fill"
-          objectFit="cover"
+          fill
+          style={{ objectFit: 'cover' }}
           className="rounded-2xl"
         />
       </div>

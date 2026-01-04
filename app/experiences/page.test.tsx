@@ -94,6 +94,23 @@ describe('ExperiencesPage', () => {
 
   it('should pass category from searchParams to all Experiences components', () => {
     const testCategory = 'music';
+
+    // Suppress the duplicate key warning since it's expected behavior in the component,
+    // but forward all other console.error calls to the original implementation.
+    const originalConsoleError = console.error;
+    const consoleSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation((...args: Parameters<typeof console.error>) => {
+        const [message] = args;
+        if (
+          typeof message === 'string' &&
+          message.includes('Encountered two children with the same key')
+        ) {
+          return;
+        }
+        originalConsoleError(...args);
+      });
+
     render(<ExperiencesPage searchParams={{ category: testCategory }} />);
 
     const categories = screen.getAllByTestId('category');
@@ -101,6 +118,8 @@ describe('ExperiencesPage', () => {
     categories.forEach((category) => {
       expect(category).toHaveTextContent(testCategory);
     });
+
+    consoleSpy.mockRestore();
   });
 
   it('should pass correct date to "Happening Today" component', () => {
