@@ -1,12 +1,14 @@
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 
 import Share from './index';
 
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: any) => {
-    return <img {...props} />;
+    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+    const { fill, quality, ...imgProps } = props;
+    return <img {...imgProps} />;
   },
 }));
 
@@ -27,8 +29,9 @@ describe('Share Component', () => {
     render(<Share {...props} />);
     const shareIcon = screen.getByTestId('Share08Icon');
     fireEvent.click(shareIcon);
-    const dialog = screen.getByText(/Test Title/i);
+    const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
+    expect(within(dialog).getByText('Share Location')).toBeInTheDocument();
   });
 
   it('should copy the link to clipboard when "Copy Link" is clicked', () => {

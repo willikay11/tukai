@@ -13,7 +13,7 @@ import {
 } from '@hugeicons/react-pro';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import TukaiImage from '@/components/ui/image';
 
 const shareOptions = [
@@ -91,7 +91,10 @@ export default function Share({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="px-6 md:w-[24rem]">
           <div className="flex flex-col gap-4">
-            <p className="text-2xl font-black text-gray-700">Share Location</p>
+            <DialogTitle className="text-2xl font-black text-gray-700">Share Location</DialogTitle>
+            <DialogDescription className="sr-only">
+              Share {title} via various social media platforms and messaging apps
+            </DialogDescription>
             <div className="relative aspect-square h-[10.25rem] w-full">
               <TukaiImage
                 src={coverPhoto}
