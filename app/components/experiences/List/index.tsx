@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -18,13 +18,13 @@ type ListExperiencesProps = {
   experiences: Experience[];
   invitedExperiences?: Experience[];
   page: number;
-  setPage: (nextPage: number) => void;
+  setPage: (page: number) => void;
   skeletonCount?: number;
   type: 'discover' | 'invited';
 };
 
-const placeholders = (skeletonCount: number): Experience[] => {
-  return Array.from({ length: skeletonCount }, (_, index) => ({
+const createPlaceholders = (count: number): Experience[] => {
+  return Array.from({ length: count }, (_, index) => ({
     id: `placeholder-${index}`,
     title: 'Loading...',
     description: '',
@@ -63,7 +63,7 @@ const placeholders = (skeletonCount: number): Experience[] => {
       picture: '',
     },
     coHosts: [],
-  }));
+  })) as unknown as Experience[];
 };
 
 export default function ListExperiences({
@@ -77,75 +77,108 @@ export default function ListExperiences({
   setPage,
 }: ListExperiencesProps) {
   const { selectedCategoryId } = useSelectedCategory();
-  const [experienceList, setExperienceList] = useState<Experience[]>(placeholders(skeletonCount));
+
+  const initialPlaceholders = useMemo(() => createPlaceholders(skeletonCount), [skeletonCount]);
+  const [experienceList, setExperienceList] = useState<Experience[]>(initialPlaceholders);
   const [endPage, setEndPage] = useState<number | null>(null);
-  const [open, setOpen] = useState(false);
 
-  const observer = useRef<IntersectionObserver | null>(null);
+  const prevPageRef = useRef(page);
+  const hasAddedPlaceholdersRef = useRef<Set<number>>(new Set());
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
-  const lastExperienceElementRef = useCallback(
-    (node: HTMLDivElement) => {
-      if (isLoading || !experiences) return;
+  // Calculate end page when count changes
+  useEffect(() => {
+    if (count > 0) {
+      setEndPage(Math.ceil(count / skeletonCount));
+    }
+  }, [count, skeletonCount]);
 
-      if (observer.current) observer.current.disconnect();
-
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && endPage !== null && page < endPage) {
-          setTimeout(() => {
-            setPage(page + 1);
-          }, 500);
-        }
-      });
-
-      if (node) observer.current.observe(node);
-    },
-    [isLoading, experiences, page, endPage],
-  );
-
+  // Reset on category change
   useEffect(() => {
     setPage(1);
-    setExperienceList(placeholders(skeletonCount));
+    setExperienceList(initialPlaceholders);
     setEndPage(null);
-  }, [selectedCategoryId]);
+    hasAddedPlaceholdersRef.current.clear();
+    prevPageRef.current = 1;
+  }, [selectedCategoryId, setPage, initialPlaceholders]);
 
+  // Handle experience updates
   useEffect(() => {
-    console.log('Experiences updated:', experiences);
-    if (!isLoading && experiences && experiences.length > 0) {
-      if (page === 1) {
-        // Replace entire list for first page
-        setExperienceList(experiences);
-      } else {
-        // Append to existing list for pagination
-        setExperienceList((prevExperienceList) => [
-          ...prevExperienceList.filter((experience) => !experience.id.startsWith('placeholder-')),
-          ...experiences,
+    const isFirstPage = page === 1;
+    const hasExperiences = experiences && experiences.length > 0;
+    const isEmpty = experiences && experiences.length === 0;
+
+    if (isLoading) {
+      // Only add placeholders for subsequent pages if not already added
+      if (page > 1 && prevPageRef.current !== page && !hasAddedPlaceholdersRef.current.has(page)) {
+        hasAddedPlaceholdersRef.current.add(page);
+        setExperienceList((prev) => [
+          ...prev.filter((exp) => !exp.id.startsWith('placeholder-')),
+          ...createPlaceholders(skeletonCount),
         ]);
       }
-      if (count) {
-        setEndPage(Math.ceil(count / 12));
+    } else {
+      if (hasExperiences) {
+        if (isFirstPage) {
+          setExperienceList(experiences);
+          hasAddedPlaceholdersRef.current.clear();
+        } else if (prevPageRef.current !== page) {
+          // Only append if this is a new page
+          setExperienceList((prev) => [
+            ...prev.filter((exp) => !exp.id.startsWith('placeholder-')),
+            ...experiences,
+          ]);
+        }
+      } else if (isEmpty && isFirstPage) {
+        setExperienceList([]);
+        hasAddedPlaceholdersRef.current.clear();
       }
-    } else if (!isLoading && experiences && experiences.length === 0 && page === 1) {
-      // Clear placeholders when no results for first page
-      setExperienceList([]);
-    } else if (
-      isLoading &&
-      page > 1 &&
-      !experienceList.some((experience) => experience.id.startsWith('placeholder-'))
-    ) {
-      // Add placeholders only when loading subsequent pages
-      setExperienceList((prevExperienceList) => [
-        ...prevExperienceList,
-        ...placeholders(skeletonCount),
-      ]);
     }
-  }, [experiences, isLoading, page]);
 
+    prevPageRef.current = page;
+  }, [experiences, isLoading, page, skeletonCount]);
+
+  // Intersection observer for infinite scroll
+  const lastExperienceElementRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      // Cleanup previous observer
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+
+      // Don't observe while loading or if no more pages
+      if (isLoading || !node || endPage === null || page >= endPage) return;
+
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            setPage(page + 1);
+          }
+        },
+        { threshold: 0.1, rootMargin: '100px' },
+      );
+
+      observerRef.current.observe(node);
+    },
+    [isLoading, page, endPage, setPage],
+  );
+
+  // Cleanup observer on unmount
+  useEffect(() => {
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []);
+
+  // Show no data message
   if (!isLoading && experienceList.length === 0) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, ease: 'easeInOut' }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
       >
         <NoData message="No experiences found" />
       </motion.div>
@@ -153,32 +186,32 @@ export default function ListExperiences({
   }
 
   return (
-    <>
-      <motion.div
-        key={selectedCategoryId}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        className={className}
-      >
-        {experienceList.map((experience: Experience, index: number) => {
-          const isLastElement = index === experienceList.length - 1;
-          return (
-            <motion.div
-              key={experience.id}
-              ref={isLastElement ? lastExperienceElementRef : undefined}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="cursor-pointer"
-            >
-              <Link target="_blank" href={`/experiences/${experience.id}`}>
-                <SingleExperience type={type} experience={experience} />
-              </Link>
-            </motion.div>
-          );
-        })}
-      </motion.div>
-    </>
+    <motion.div
+      key={selectedCategoryId}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className={className}
+    >
+      {experienceList.map((experience: Experience, index: number) => {
+        const isLastElement = index === experienceList.length - 1;
+        const isPlaceholder = experience.id.startsWith('placeholder-');
+
+        return (
+          <motion.div
+            key={experience.id}
+            ref={isLastElement && !isPlaceholder ? lastExperienceElementRef : undefined}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, delay: index * 0.02 }}
+            className="cursor-pointer"
+          >
+            <Link target="_blank" href={`/experiences/${experience.id}`}>
+              <SingleExperience type={type} experience={experience} />
+            </Link>
+          </motion.div>
+        );
+      })}
+    </motion.div>
   );
 }

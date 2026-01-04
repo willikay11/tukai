@@ -24,7 +24,7 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
       <Experiences
         key={categoryFromQuery}
         category={categoryFromQuery}
-        title={`Happening Tommorrow: ${moment().add(1, 'days').format('Do MMMM, YYYY')}`}
+        title={`Happening Tomorrow: ${moment().add(1, 'days').format('Do MMMM, YYYY')}`}
         date={moment().add(1, 'days').format('YYYY-MM-DD')}
         isPortal={true}
         isBookedmarked={categoryFromQuery === 'saved'}

@@ -1,7 +1,6 @@
 import moment from 'moment';
 
 import Experiences from './components/List/experiences';
-import InvitedExperiences from './components/List/invitedExperiences';
 
 export default function ExperiencesPage({ searchParams }: { searchParams: { category?: string } }) {
   const categoryFromQuery = searchParams?.category;
@@ -38,7 +37,7 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
       <Experiences
         key={categoryFromQuery}
         category={categoryFromQuery}
-        title={`Happening Tommorrow: ${moment().add(1, 'days').format('Do MMMM, YYYY')}`}
+        title={`Happening Tomorrow: ${moment().add(1, 'days').format('Do MMMM, YYYY')}`}
         date={moment().add(1, 'days').format('YYYY-MM-DD')}
         isPortal={true}
       />

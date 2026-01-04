@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { ArrowLeft01Icon, ArrowRight01Icon } from '@hugeicons/react-pro';
 import clsx from 'clsx';
@@ -136,7 +135,7 @@ export default function ScrollFilters({
       </button>
       <div
         ref={ref}
-        className="flex h-[5rem] items-center overflow-x-auto scroll-smooth no-scrollbar"
+        className="flex h-[5rem] items-center overflow-x-auto scroll-smooth scrollbar-hide"
         onMouseDown={handleMouseDown}
         onMouseLeave={handleMouseLeave}
         onMouseUp={handleMouseUp}

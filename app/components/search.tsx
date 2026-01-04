@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Search01Icon } from '@hugeicons/react-pro';
 import clsx from 'clsx';
@@ -44,7 +43,7 @@ export default function Search() {
     if (containerRef.current) {
       setPopoverWidth(containerRef.current.offsetWidth);
     }
-  }, [containerRef.current]);
+  }, []);
 
   useEffect(() => {
     if (searchResults) {
@@ -149,9 +148,10 @@ export default function Search() {
                 <IconComponent iconName="ArrowRight01Icon" size={15} color="primary" />
               </Button>
             </div>
-            <div className="mb-2 flex items-center gap-2 overflow-x-auto scroll-smooth no-scrollbar">
+            <div className="mb-2 flex items-center gap-2 overflow-x-auto scroll-smooth scrollbar-hide">
               {placeCategories?.data?.results.map((category: PlaceCategory) => (
                 <div
+                  key={category.id}
                   className="relative h-[100px] w-[100px] flex-shrink-0 cursor-pointer"
                   onClick={() => {
                     setTag(category);
