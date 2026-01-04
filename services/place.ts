@@ -15,8 +15,12 @@ export async function fetchPlaces(
     const queryParams = new URLSearchParams();
     if (categoryId) {
       if (Array.isArray(categoryId)) {
-        categoryId.forEach((id) => queryParams.append('category', id));
-      } else {
+        categoryId.forEach((id) => {
+          if (id !== 'all') {
+            queryParams.append('category', id);
+          }
+        });
+      } else if (categoryId !== 'all') {
         queryParams.append('category', categoryId);
       }
     }
