@@ -69,18 +69,24 @@ describe('PageFilters', () => {
   });
 
   describe('Hidden paths', () => {
-    it.each(['/places/123', '/experiences/456', '/communities/789', '/auth/login', '/unsubscribe'])(
-      'should not render on %s',
-      (pathname) => {
-        (nextNavigation.usePathname as jest.Mock).mockReturnValue(pathname);
-        (nextNavigation.useSearchParams as jest.Mock).mockReturnValue({
-          get: jest.fn().mockReturnValue(null),
-        });
+    it.each([
+      '/places/123',
+      '/experiences/456',
+      '/communities/789',
+      '/auth/login',
+      '/terms',
+      '/privacy',
+      '/help',
+      '/unsubscribe',
+    ])('should not render on %s', (pathname) => {
+      (nextNavigation.usePathname as jest.Mock).mockReturnValue(pathname);
+      (nextNavigation.useSearchParams as jest.Mock).mockReturnValue({
+        get: jest.fn().mockReturnValue(null),
+      });
 
-        const { container } = renderWithProviders(<PageFilters />);
-        expect(container.firstChild).toBeNull();
-      },
-    );
+      const { container } = renderWithProviders(<PageFilters />);
+      expect(container.firstChild).toBeNull();
+    });
   });
 
   describe('Places page', () => {

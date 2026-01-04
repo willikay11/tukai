@@ -81,6 +81,9 @@ export default function PageFilters() {
     pathname.startsWith('/experiences/') ||
     pathname.startsWith('/communities/') ||
     pathname.startsWith('/auth/') ||
+    pathname.startsWith('/terms') ||
+    pathname.startsWith('/privacy') ||
+    pathname.startsWith('/help') ||
     pathname.startsWith('/unsubscribe')
   ) {
     return null;
