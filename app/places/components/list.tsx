@@ -61,15 +61,13 @@ export default function ListPlaces() {
 
   const lastPlaceElementRef = useCallback(
     (node: HTMLDivElement) => {
-      if (isLoading || !places?.data?.results) return;
+      if (isLoading || !places?.data?.results || isResettingRef.current) return;
 
       if (observer.current) observer.current.disconnect();
 
       observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && endPage !== null && page < endPage) {
-          setTimeout(() => {
-            setPage((prevPage) => prevPage + 1);
-          }, 500);
+        if (entries.length > 0 && entries[0].isIntersecting && endPage !== null && page < endPage) {
+          setPage((prevPage) => prevPage + 1);
         }
       });
 
@@ -80,6 +78,10 @@ export default function ListPlaces() {
 
   useEffect(() => {
     // When either selected category or city search changes, reset to page 1
+    if (observer.current) {
+      observer.current.disconnect();
+      observer.current = null;
+    }
     isResettingRef.current = true;
     setPage(1);
     setPlaceList(placeholders);
@@ -125,6 +127,15 @@ export default function ListPlaces() {
     }
   }, [places, isLoading, page, selectedCategoryId, selectedCitySearchId]);
 
+  // Cleanup observer on unmount
+  useEffect(() => {
+    return () => {
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+    };
+  }, []);
+
   if (!isLoading && placeList.length === 0) {
     return (
       <motion.div
@@ -148,10 +159,14 @@ export default function ListPlaces() {
       >
         {placeList.map((place: Place, index: number) => {
           const isLastElement = index === placeList.length - 1;
+          const isPlaceholder = place.id.startsWith('placeholder-');
+          const shouldAttachRef =
+            isLastElement && !isLoading && !isPlaceholder && !isResettingRef.current;
+
           return (
             <motion.div
               key={place.id}
-              ref={isLastElement && !isLoading ? lastPlaceElementRef : undefined}
+              ref={shouldAttachRef ? lastPlaceElementRef : undefined}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
