@@ -37,6 +37,10 @@ export default function Search() {
 
   const removeTag = () => {
     setTag(undefined);
+    setSelectedCitySearchId('');
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('city');
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   useEffect(() => {

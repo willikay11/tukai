@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, render, screen, waitFor } from '@testing-library/react';
 
 import { useLocation } from '@/context/LocationContext';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
@@ -109,6 +110,19 @@ const createMockUsePlacesReturn = (
   }) as unknown as ReturnType<typeof usePlaces>;
 
 describe('ListPlaces', () => {
+  const createWrapper = () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+      },
+    });
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    Wrapper.displayName = 'TestWrapper';
+    return Wrapper;
+  };
+
   const setupMocks = (overrides = {}) => {
     mockUseLocation.mockReturnValue({
       lat: 0,
@@ -128,6 +142,7 @@ describe('ListPlaces', () => {
 
   beforeEach(() => {
     setupMocks();
+    jest.useFakeTimers();
     global.IntersectionObserver = jest.fn().mockImplementation(() => ({
       observe: jest.fn(),
       disconnect: jest.fn(),
@@ -137,12 +152,16 @@ describe('ListPlaces', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    act(() => {
+      jest.runAllTimers();
+    });
+    jest.useRealTimers();
   });
 
   it('should render placeholders initially', () => {
     mockUsePlaces.mockReturnValue(createMockUsePlacesReturn([], 0, true));
 
-    render(<ListPlaces />);
+    render(<ListPlaces />, { wrapper: createWrapper() });
 
     expect(screen.getAllByText('Loading...').length).toBeGreaterThan(0);
   });
@@ -151,7 +170,7 @@ describe('ListPlaces', () => {
     const mockPlaces = Array.from({ length: 12 }, (_, i) => createMockPlace(`place-${i}`));
     mockUsePlaces.mockReturnValue(createMockUsePlacesReturn(mockPlaces, 12));
 
-    render(<ListPlaces />);
+    render(<ListPlaces />, { wrapper: createWrapper() });
 
     await waitFor(() => {
       expect(screen.getByText('Place place-0')).toBeInTheDocument();
@@ -162,6 +181,7 @@ describe('ListPlaces', () => {
   it('should reset to page 1 when category changes', async () => {
     const mockPlaces = Array.from({ length: 12 }, (_, i) => createMockPlace(`place-${i}`));
     let currentPage = 1;
+    let queryEnabled = true;
     const disconnectMock = jest.fn();
     const observeMock = jest.fn();
 
@@ -171,12 +191,13 @@ describe('ListPlaces', () => {
       unobserve: jest.fn(),
     })) as unknown as typeof IntersectionObserver;
 
-    mockUsePlaces.mockImplementation(({ page }: Parameters<typeof usePlaces>[0]) => {
+    mockUsePlaces.mockImplementation(({ page, enabled }: Parameters<typeof usePlaces>[0]) => {
       currentPage = page;
+      queryEnabled = enabled ?? true;
       return createMockUsePlacesReturn(mockPlaces, 24);
     });
 
-    const { rerender } = render(<ListPlaces />);
+    const { rerender } = render(<ListPlaces />, { wrapper: createWrapper() });
 
     await waitFor(() => {
       expect(screen.getByText('Place place-0')).toBeInTheDocument();
@@ -186,28 +207,38 @@ describe('ListPlaces', () => {
     // Reset mock call counts before category change
     disconnectMock.mockClear();
 
-    // Set loading state when category changes
-    mockUsePlaces.mockImplementation(({ page }: Parameters<typeof usePlaces>[0]) => {
+    // Change category - query should be disabled temporarily
+    mockUsePlaces.mockImplementation(({ page, enabled }: Parameters<typeof usePlaces>[0]) => {
       currentPage = page;
-      return createMockUsePlacesReturn(mockPlaces, 24, true);
+      queryEnabled = enabled ?? true;
+      // When query is disabled, return loading state
+      return createMockUsePlacesReturn(mockPlaces, 24, !enabled);
     });
 
     setupMocks({ selectedCategoryId: 'cat-2' });
     rerender(<ListPlaces />);
 
-    // Verify placeholders are shown during reset
-    expect(screen.getAllByText('Loading...').length).toBeGreaterThan(0);
+    // Verify query was disabled and page reset
+    await waitFor(() => {
+      expect(queryEnabled).toBe(false);
+      expect(currentPage).toBe(1);
+    });
 
-    // Then set data back to loaded state
-    mockUsePlaces.mockImplementation(({ page }: Parameters<typeof usePlaces>[0]) => {
+    // Run timers to re-enable query within act
+    await act(async () => {
+      jest.runAllTimers();
+    });
+
+    // Rerender with query enabled
+    mockUsePlaces.mockImplementation(({ page, enabled }: Parameters<typeof usePlaces>[0]) => {
       currentPage = page;
+      queryEnabled = enabled ?? true;
       return createMockUsePlacesReturn(mockPlaces, 24);
     });
     rerender(<ListPlaces />);
 
     await waitFor(() => {
-      expect(currentPage).toBe(1);
-      // Verify that observer.disconnect() was called when category changed
+      expect(queryEnabled).toBe(true);
       expect(disconnectMock).toHaveBeenCalled();
     });
   });
@@ -215,7 +246,7 @@ describe('ListPlaces', () => {
   it('should show NoData when no places found', async () => {
     mockUsePlaces.mockReturnValue(createMockUsePlacesReturn([], 0));
 
-    render(<ListPlaces />);
+    render(<ListPlaces />, { wrapper: createWrapper() });
 
     await waitFor(() => {
       expect(screen.getByText('No places found')).toBeInTheDocument();
@@ -233,10 +264,10 @@ describe('ListPlaces', () => {
 
     mockUsePlaces.mockReturnValue(createMockUsePlacesReturn([], 0, true));
 
-    render(<ListPlaces />);
+    render(<ListPlaces />, { wrapper: createWrapper() });
 
     // Verify placeholders are rendered
-    expect(screen.getAllByText('Loading...').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Loading...').length).toBe(12); // ITEMS_PER_PAGE constant
 
     // Verify that IntersectionObserver was never created (no ref attached to placeholders)
     expect(observeMock).not.toHaveBeenCalled();
@@ -256,7 +287,7 @@ describe('ListPlaces', () => {
     const mockPlaces = Array.from({ length: 12 }, (_, i) => createMockPlace(`place-${i}`));
     mockUsePlaces.mockReturnValue(createMockUsePlacesReturn(mockPlaces, 24));
 
-    const { unmount } = render(<ListPlaces />);
+    const { unmount } = render(<ListPlaces />, { wrapper: createWrapper() });
 
     await waitFor(() => {
       expect(observeMock).toHaveBeenCalled();
@@ -272,7 +303,7 @@ describe('ListPlaces', () => {
 
     mockUsePlaces.mockReturnValue(createMockUsePlacesReturn(mockPlacesPage1, 24));
 
-    render(<ListPlaces />);
+    render(<ListPlaces />, { wrapper: createWrapper() });
 
     await waitFor(() => {
       expect(screen.getByText('Place page1-0')).toBeInTheDocument();
@@ -280,5 +311,50 @@ describe('ListPlaces', () => {
     });
 
     expect(screen.queryByText('Place page2-0')).not.toBeInTheDocument();
+  });
+
+  it('should disable query when category changes and re-enable after timeout', async () => {
+    const mockPlaces = Array.from({ length: 12 }, (_, i) => createMockPlace(`place-${i}`));
+    let queryEnabled = true;
+
+    mockUsePlaces.mockImplementation(({ enabled }: Parameters<typeof usePlaces>[0]) => {
+      queryEnabled = enabled ?? true;
+      return createMockUsePlacesReturn(mockPlaces, 12);
+    });
+
+    const { rerender } = render(<ListPlaces />, { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(screen.getByText('Place place-0')).toBeInTheDocument();
+    });
+
+    // Change category
+    mockUsePlaces.mockImplementation(({ enabled }: Parameters<typeof usePlaces>[0]) => {
+      queryEnabled = enabled ?? true;
+      return createMockUsePlacesReturn(mockPlaces, 12, !enabled);
+    });
+
+    setupMocks({ selectedCategoryId: 'cat-2' });
+    rerender(<ListPlaces />);
+
+    // Query should be disabled
+    await waitFor(() => {
+      expect(queryEnabled).toBe(false);
+    });
+
+    // Run timeout to re-enable query within act
+    await act(async () => {
+      jest.runAllTimers();
+    });
+
+    mockUsePlaces.mockImplementation(({ enabled }: Parameters<typeof usePlaces>[0]) => {
+      queryEnabled = enabled ?? true;
+      return createMockUsePlacesReturn(mockPlaces, 12);
+    });
+    rerender(<ListPlaces />);
+
+    await waitFor(() => {
+      expect(queryEnabled).toBe(true);
+    });
   });
 });

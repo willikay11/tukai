@@ -31,7 +31,7 @@ export const usePlaces = ({
   lng?: number;
 }) => {
   return useQuery({
-    queryKey: ['placeCategories', categoryId, page, lat, lng],
+    queryKey: ['places', { categoryId, page, lat, lng }],
     queryFn: async () => await fetchPlaces(page, 12, categoryId, undefined, lat, lng),
     enabled,
   });
