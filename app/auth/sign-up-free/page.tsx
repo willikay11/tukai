@@ -141,8 +141,8 @@ export default function Page() {
 
       <div className="mb-3">
         <p className="text-xs">
-          By continuing to use Tukai, you agree to our <Anchor link="">Terms of Use</Anchor>
-          &nbsp;and <Anchor link="">Privacy Policy</Anchor>
+          By continuing to use Tukai, you agree to our <Anchor link="/terms">Terms of Use</Anchor>
+          &nbsp;and <Anchor link="/privacy">Privacy Policy</Anchor>
         </p>
       </div>
 

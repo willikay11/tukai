@@ -117,9 +117,8 @@ export default function SignInForm({ onLogin }: { onLogin: () => void }) {
 
       <div className="mb-3">
         <p className="text-xs">
-          By continuing to use Tukai, you agree to our{' '}
-          <Anchor link="/auth/terms-of-service">Terms of Use</Anchor>
-          &nbsp;and <Anchor link="/auth/terms-of-service">Privacy Policy</Anchor>
+          By continuing to use Tukai, you agree to our <Anchor link="/terms">Terms of Use</Anchor>
+          &nbsp;and <Anchor link="/privacy">Privacy Policy</Anchor>
         </p>
       </div>
 
