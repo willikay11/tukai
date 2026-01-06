@@ -25,9 +25,10 @@ export default function TukaiImage({
           src={src}
           alt={alt}
           quality={100}
-          fill
+          layout="fill"
+          objectFit="cover"
           className={clsx(
-            'carousel-image object-cover opacity-0 transition-opacity duration-300',
+            'carousel-image opacity-0 transition-opacity duration-300',
             props?.className,
           )}
           onLoad={(e) => {
