@@ -8,8 +8,9 @@ import { Check } from 'lucide-react';
 import IconComponent from '@/app/components/iconComponent';
 import { cn } from '@/lib/utils';
 
-interface SelectTriggerProps
-  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> {
+interface SelectTriggerProps extends React.ComponentPropsWithoutRef<
+  typeof SelectPrimitive.Trigger
+> {
   prefixIcon?: string | React.ReactNode; // Allow string (for iconName) or full node
 }
 
