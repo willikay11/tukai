@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { getInterestBasedCommunities, joinCommunity } from '@/services/community';
+import { getInterestBasedCommunities, joinCommunity, joinCommunityWithToken } from '@/services/community';
 
 export const useGetCommunities = (
   {
@@ -46,3 +46,11 @@ export const useJoinCommunity = () => {
     mutationFn: async (communityId: string) => await joinCommunity(communityId),
   });
 };
+
+export const useJoinCommunityViaInvite = () => {
+  return useMutation({
+    mutationKey: ['joinCommunityViaInvite'],
+    mutationFn: async ({ communityId, token }: { communityId: string; token: string }) =>
+      await joinCommunityWithToken(communityId, token),
+  });
+}

@@ -17,7 +17,14 @@ import Join from '../components/join';
 import UpcomingExperiences from '../components/upcomingExperiences';
 import AuthGuard from './components/authGuard';
 
-export default async function ViewCommunityPage({ params }: { params: { communityId: string } }) {
+export default async function ViewCommunityPage({
+  params,
+  searchParams,
+}: {
+  params: { communityId: string };
+  searchParams: { token?: string };
+}) {
+  const token = searchParams.token;
   const session: Session | null = await getServerSession(authOptions as any);
 
   if (!session) {
@@ -52,6 +59,7 @@ export default async function ViewCommunityPage({ params }: { params: { communit
                   communityId={community.id}
                   members={community.members}
                   currentUserId={currentUserId}
+                  token={token}
                 />
                 <Share
                   coverPhoto={community.photos[0].photo}

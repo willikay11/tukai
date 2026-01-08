@@ -34,7 +34,7 @@ export default function UpcomingExperiences({ category }: { category: string }) 
           className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3"
         >
           {upcomingExperiences?.data?.results?.map((experience: Experience) => (
-            <Link href={`/experiences/${experience.id}`} target="_blank">
+            <Link key={experience.id} href={`/experiences/${experience.id}`} target="_blank">
               <SingleExperience key={experience.id} experience={experience} type="invited" />
             </Link>
           ))}
