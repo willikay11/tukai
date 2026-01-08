@@ -15,9 +15,14 @@ import CommunityAdministrator from '../components/communityAdministrator';
 import CommunityMembers from '../components/communityMembers';
 import Join from '../components/join';
 import UpcomingExperiences from '../components/upcomingExperiences';
+import AuthGuard from './components/authGuard';
 
 export default async function ViewCommunityPage({ params }: { params: { communityId: string } }) {
   const session: Session | null = await getServerSession(authOptions as any);
+
+  if (!session) {
+    return <AuthGuard />;
+  }
 
   const currentUserId = session?.user?.id || '';
 
