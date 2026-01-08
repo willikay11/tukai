@@ -39,9 +39,9 @@ export async function middleware(request: NextRequest) {
   //   return NextResponse.redirect(new URL('/auth/subscribe', request.url));
   // }
 
-  if (!token.emailVerified) {
-    return NextResponse.redirect(new URL('/auth/otp-confirmation', request.url));
-  }
+  // if (!token.emailVerified) {
+  //   return NextResponse.redirect(new URL('/auth/otp-confirmation', request.url));
+  // }
   return NextResponse.next();
 }
 

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import SendMessage from '@/app/components/sendMessage';
-import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { CommunityMember } from '@/types/community';
 
@@ -21,6 +21,7 @@ export default function CommunityAdministrator({
       <div className="inline-flex items-center gap-2">
         <Avatar className={`h-[${size}] w-[${size}]`}>
           <AvatarImage src={member.user.picture} />
+          <AvatarFallback />
         </Avatar>
         <div className="flex flex-col">
           <p className="text-sm font-bold text-gray-700">

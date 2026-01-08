@@ -1,8 +1,10 @@
+import { Session, getServerSession } from 'next-auth';
 import { getSession } from 'next-auth/react';
 
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
-import { api } from './apiService';
+import { api, apiWithToken } from './apiService';
 
 export async function getInterestBasedCommunities(
   category?: string,
@@ -22,7 +24,11 @@ export async function getInterestBasedCommunities(
     if (showUpComingExperiences) queryParams.append('upcoming_experiences', 'true');
     if (recommendedCommunities) queryParams.append('recommended', 'true');
     if (popularCommunities) queryParams.append('popular', 'true');
+
+    const api = await apiWithToken();
+
     const response = await api.get(`/v1/communities/?${queryParams.toString()}`);
+
     return {
       status: response.status,
       success: true,
@@ -41,7 +47,8 @@ export async function getInterestBasedCommunities(
 
 export async function fetchCommunity(communityId: string) {
   try {
-    const session = await getSession();
+    const session: any = await getServerSession(authOptions as any);
+
     const response = await api.get(`/v1/communities/${communityId}`, {
       headers: {
         Authorization: `Bearer ${session?.user?.accessToken}`,

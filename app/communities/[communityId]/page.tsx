@@ -15,6 +15,8 @@ import UpcomingExperiences from '../components/upcomingExperiences';
 export default async function ViewCommunityPage({ params }: { params: { communityId: string } }) {
   const communityResponse: ApiResponse = await fetchCommunity(params.communityId);
 
+  // console.log('communityResponse', communityResponse);
+
   if (!communityResponse.data) {
     return;
   }
@@ -48,7 +50,7 @@ export default async function ViewCommunityPage({ params }: { params: { communit
           </div>
           <div className="flex flex-col">
             <p className="mb-1 text-base font-black text-gray-600">About</p>
-            <div className="mb-2.5 text-sm font-normal text-gray-600">
+            <div className="mb-3.5 text-sm font-normal text-gray-600">
               <DescriptionShowMore
                 text={community.description}
                 photo={
@@ -57,7 +59,7 @@ export default async function ViewCommunityPage({ params }: { params: { communit
                 }
               />
             </div>
-            <div className="mb-2.5 inline-flex gap-2">
+            <div className="mb-3.5 inline-flex gap-2">
               {community.categories.map((category) => (
                 <div
                   className="inline-flex w-fit rounded-full bg-gray-100 px-4 py-2"
@@ -70,11 +72,11 @@ export default async function ViewCommunityPage({ params }: { params: { communit
               ))}
             </div>
 
-            <div className="mb-2.5">
+            <div className="mb-3.5">
               <CommunityMembers members={community.members} size="30px" />
             </div>
             <div className="flex flex-col">
-              <p className="text-sm font-bold text-gray-700">Community Type</p>
+              <p className="mb-2 text-sm font-bold text-gray-700">Community Type</p>
               <p className="text-sm font-normal text-gray-500">
                 {community.isPublic ? 'Public' : 'Private (Only invited guests can join)'}
               </p>
@@ -85,14 +87,14 @@ export default async function ViewCommunityPage({ params }: { params: { communit
             </div>
 
             <div className="flex flex-col">
-              <p className="mb-2.5 text-sm font-bold text-gray-700">Administrators</p>
+              <p className="mb-3.5 text-sm font-bold text-gray-700">Administrators</p>
               <div className="inline-flex gap-2">
                 {community.members
                   .filter(
                     (member: CommunityMember) => member.role === 'admin' || member.role === 'owner',
                   )
                   .map((member) => (
-                    <CommunityAdministrator key={member.id} member={member} size="30px" />
+                    <CommunityAdministrator key={member.id} member={member} size="40px" />
                   ))}
               </div>
             </div>
@@ -107,11 +109,10 @@ export default async function ViewCommunityPage({ params }: { params: { communit
                 lng={community.location.point.coordinates[0]}
               />
             </div>
-
-            <UpcomingExperiences category={community.categories[0].id} />
           </div>
         </div>
       </main>
+      <UpcomingExperiences category={community.categories[0].id} />
     </>
   );
 }
