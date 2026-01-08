@@ -7,6 +7,7 @@ export type CommunityMember = {
   user: User;
   role: 'owner' | 'admin' | 'moderator' | 'regular' | 'guest';
   dateCreated: string;
+  inviteStatus: 'accepted' | 'requested' | 'declined';
 };
 
 export type CommunityCategory = {

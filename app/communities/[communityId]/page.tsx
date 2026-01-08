@@ -1,3 +1,6 @@
+import { Session, getServerSession } from 'next-auth';
+
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
 import GoogleMapComponent from '@/app/components/googleMap';
 import Share from '@/app/components/share';
@@ -10,12 +13,15 @@ import { Photo } from '@/types/photo';
 
 import CommunityAdministrator from '../components/communityAdministrator';
 import CommunityMembers from '../components/communityMembers';
+import Join from '../components/join';
 import UpcomingExperiences from '../components/upcomingExperiences';
 
 export default async function ViewCommunityPage({ params }: { params: { communityId: string } }) {
-  const communityResponse: ApiResponse = await fetchCommunity(params.communityId);
+  const session: Session | null = await getServerSession(authOptions as any);
 
-  // console.log('communityResponse', communityResponse);
+  const currentUserId = session?.user?.id || '';
+
+  const communityResponse: ApiResponse = await fetchCommunity(params.communityId);
 
   if (!communityResponse.data) {
     return;
@@ -37,6 +43,11 @@ export default async function ViewCommunityPage({ params }: { params: { communit
               <div className="inline-flex items-center">
                 {/* <Bookmark02Icon size={16} variant="twotone" className="text-primary" /> */}
                 {/* <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" /> */}
+                <Join
+                  communityId={community.id}
+                  members={community.members}
+                  currentUserId={currentUserId}
+                />
                 <Share
                   coverPhoto={community.photos[0].photo}
                   title={community.title}

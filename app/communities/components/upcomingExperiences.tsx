@@ -4,19 +4,20 @@ import Link from 'next/link';
 
 import { motion } from 'framer-motion';
 
-import { useGetCommunities } from '@/hooks/communities';
-
 import SingleExperience from '@/app/components/experiences/Single';
-import { Experience } from '@/types/experience';
+import { useGetCommunities } from '@/hooks/communities';
 import { useExperiences } from '@/hooks/experiences';
+import { Experience } from '@/types/experience';
 
 export default function UpcomingExperiences({ category }: { category: string }) {
-  const { data: upcomingExperiences } = useExperiences({
-    page: 1,
-    category,
-  }, true);
-
-  console.log(upcomingExperiences);
+  const { data: upcomingExperiences } = useExperiences(
+    {
+      page: 1,
+      page_size: 3,
+      category,
+    },
+    true,
+  );
 
   return (
     <div className="grid grid-cols-12 gap-4 bg-gray-50 py-4">
@@ -34,11 +35,7 @@ export default function UpcomingExperiences({ category }: { category: string }) 
         >
           {upcomingExperiences?.data?.results?.map((experience: Experience) => (
             <Link href={`/experiences/${experience.id}`} target="_blank">
-              <SingleExperience
-                key={experience.id}
-                experience={experience}
-                type='discover'
-              />
+              <SingleExperience key={experience.id} experience={experience} type="invited" />
             </Link>
           ))}
         </motion.div>
