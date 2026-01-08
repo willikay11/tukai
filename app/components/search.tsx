@@ -1,22 +1,25 @@
 'use client';
 
-import { Search01Icon } from '@hugeicons/react-pro';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { useSearch } from '@/hooks/search';
-import { useState, useRef, useEffect } from 'react';
-import { debounce } from 'lodash';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import TukaiImage from '@/components/ui/image';
-import { SearchResult } from '@/types/search';
-import IconComponent from './iconComponent';
+import { useEffect, useRef, useState } from 'react';
+
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { usePlaceCategories } from '@/hooks/places';
-import { PlaceCategory } from '@/types/placeCategory';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+
+import { Search01Icon } from '@hugeicons/react-pro';
 import clsx from 'clsx';
-import { useRouter } from 'next/navigation';
+import { debounce } from 'lodash';
+
+import { Button } from '@/components/ui/button';
+import TukaiImage from '@/components/ui/image';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
+import { usePlaceCategories } from '@/hooks/places';
+import { useSearch } from '@/hooks/search';
+import { cn } from '@/lib/utils';
+import { PlaceCategory } from '@/types/placeCategory';
+import { SearchResult } from '@/types/search';
+
+import IconComponent from './iconComponent';
 
 export default function Search() {
   const pathname = usePathname();
@@ -34,13 +37,17 @@ export default function Search() {
 
   const removeTag = () => {
     setTag(undefined);
+    setSelectedCitySearchId('');
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('city');
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   useEffect(() => {
     if (containerRef.current) {
       setPopoverWidth(containerRef.current.offsetWidth);
     }
-  }, [containerRef.current]);
+  }, []);
 
   useEffect(() => {
     if (searchResults) {
@@ -145,9 +152,10 @@ export default function Search() {
                 <IconComponent iconName="ArrowRight01Icon" size={15} color="primary" />
               </Button>
             </div>
-            <div className="mb-2 flex items-center gap-2 overflow-x-auto scroll-smooth no-scrollbar">
+            <div className="mb-2 flex items-center gap-2 overflow-x-auto scroll-smooth scrollbar-hide">
               {placeCategories?.data?.results.map((category: PlaceCategory) => (
                 <div
+                  key={category.id}
                   className="relative h-[100px] w-[100px] flex-shrink-0 cursor-pointer"
                   onClick={() => {
                     setTag(category);

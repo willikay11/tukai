@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSubscriptionPlans } from '@/hooks/subscriptions';
-import StepIndicator from '@/components/ui/stepIndicator';
-import PaymentDetails from './components/paymentDetails';
-import Package from './components/package';
+import { useEffect, useState } from 'react';
+
 import { useSession } from 'next-auth/react';
+
 import Paystack from '@/components/ui/paystack';
+import StepIndicator from '@/components/ui/stepIndicator';
+import { useSubscriptionPlans } from '@/hooks/subscriptions';
+
+import Package from './components/package';
+import PaymentDetails from './components/paymentDetails';
 
 export default function Page() {
   const [paymentMethod, setPaymentMethod] = useState<{

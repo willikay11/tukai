@@ -2,14 +2,17 @@
 
 'use client';
 
-import { Anchor, Button, Input } from '@/app/components/form';
-import { LockKeyIcon, Mail02Icon, UserIcon } from '@hugeicons/react-pro';
-import { useRouter } from 'next/navigation';
-import MobileStore from '@/app/components/mobileStore';
+import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
+
+import { useRouter } from 'next/navigation';
+
+import { LockKeyIcon, Mail02Icon, UserIcon } from '@hugeicons/react-pro';
+
+import { Anchor, Button, Input } from '@/app/components/form';
+import MobileStore from '@/app/components/mobileStore';
 import { addUser } from '@/slices/userSlice';
-import { useState } from 'react';
 
 type Inputs = {
   firstName: string;
@@ -138,8 +141,8 @@ export default function Page() {
 
       <div className="mb-3">
         <p className="text-xs">
-          By continuing to use Tukai, you agree to our <Anchor link="">Terms of Use</Anchor>
-          &nbsp;and <Anchor link="">Privacy Policy</Anchor>
+          By continuing to use Tukai, you agree to our <Anchor link="/terms">Terms of Use</Anchor>
+          &nbsp;and <Anchor link="/privacy">Privacy Policy</Anchor>
         </p>
       </div>
 

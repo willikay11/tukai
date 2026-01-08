@@ -1,6 +1,9 @@
-import { Button } from '@/app/components/form';
 import React, { ReactNode } from 'react';
+
 import * as HugeIcons from '@hugeicons/react-pro';
+
+import { Button } from '@/app/components/form';
+
 import IconComponent from '../iconComponent';
 
 export default function SuccessMessage({

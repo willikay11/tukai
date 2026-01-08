@@ -1,11 +1,13 @@
 'use client';
 
+import { useState } from 'react';
+
 import { CheckmarkBadge02Icon } from '@hugeicons/react-pro';
+
+import SendMessage from '@/app/components/sendMessage';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Experience } from '@/types/experience';
-import SendMessage from '@/app/components/sendMessage';
-import { useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function ExperienceOrganiser({ experience }: { experience: Experience }) {
   const [open, setOpen] = useState(false);

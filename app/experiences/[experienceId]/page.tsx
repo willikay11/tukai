@@ -1,19 +1,21 @@
-import { ApiResponse } from '@/types/apiResponse';
-import DescriptionShowMore from '@/app/components/descriptionShowMore';
-import { fetchExperience } from '@/services/experience';
-import { Experience } from '@/types/experience';
 import moment from 'moment';
-import { Photo } from '@/types/photo';
-import { Button } from '@/components/ui/button';
-import IconComponent from '@/app/components/iconComponent';
+
+import DescriptionShowMore from '@/app/components/descriptionShowMore';
 import GoogleMapComponent from '@/app/components/googleMap';
-import { Separator } from '@/components/ui/separator';
+import IconComponent from '@/app/components/iconComponent';
+import Share from '@/app/components/share';
 import PhotoGallery from '@/components/ui/PhotoGallery';
-import ExperienceOrganiser from '../components/experienceOrganiser';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { fetchExperience } from '@/services/experience';
+import { ApiResponse } from '@/types/apiResponse';
+import { Experience } from '@/types/experience';
+import { Photo } from '@/types/photo';
+
+import BookmarkExperience from '../components/bookmarkExperience';
 import ExperienceActions from '../components/experienceActions';
 import ExperienceDetails from '../components/experienceDetails';
-import BookmarkExperience from '../components/bookmarkExperience';
-import Share from '@/app/components/share';
+import ExperienceOrganiser from '../components/experienceOrganiser';
 
 export default async function ViewExperiencePage({ params }: { params: { experienceId: string } }) {
   const experienceResponse: ApiResponse = await fetchExperience(params.experienceId);

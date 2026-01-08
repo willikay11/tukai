@@ -1,17 +1,31 @@
-import { ApiResponse } from '@/types/apiResponse';
+import { Session, getServerSession } from 'next-auth';
+
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
-import { Photo } from '@/types/photo';
 import GoogleMapComponent from '@/app/components/googleMap';
-import { Separator } from '@/components/ui/separator';
-import PhotoGallery from '@/components/ui/PhotoGallery';
-import { Community, CommunityMember } from '@/types/community';
-import { fetchCommunity } from '@/services/community';
-import CommunityMembers from '../components/communityMembers';
-import CommunityAdministrator from '../components/communityAdministrator';
 import Share from '@/app/components/share';
+import PhotoGallery from '@/components/ui/PhotoGallery';
+import { Separator } from '@/components/ui/separator';
+import { fetchCommunity } from '@/services/community';
+import { ApiResponse } from '@/types/apiResponse';
+import { Community, CommunityMember } from '@/types/community';
+import { Photo } from '@/types/photo';
+
+import CommunityAdministrator from '../components/communityAdministrator';
+import CommunityMembers from '../components/communityMembers';
+import Join from '../components/join';
 import UpcomingExperiences from '../components/upcomingExperiences';
+import AuthGuard from './components/authGuard';
 
 export default async function ViewCommunityPage({ params }: { params: { communityId: string } }) {
+  const session: Session | null = await getServerSession(authOptions as any);
+
+  if (!session) {
+    return <AuthGuard />;
+  }
+
+  const currentUserId = session?.user?.id || '';
+
   const communityResponse: ApiResponse = await fetchCommunity(params.communityId);
 
   if (!communityResponse.data) {
@@ -34,6 +48,11 @@ export default async function ViewCommunityPage({ params }: { params: { communit
               <div className="inline-flex items-center">
                 {/* <Bookmark02Icon size={16} variant="twotone" className="text-primary" /> */}
                 {/* <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" /> */}
+                <Join
+                  communityId={community.id}
+                  members={community.members}
+                  currentUserId={currentUserId}
+                />
                 <Share
                   coverPhoto={community.photos[0].photo}
                   title={community.title}
@@ -47,7 +66,7 @@ export default async function ViewCommunityPage({ params }: { params: { communit
           </div>
           <div className="flex flex-col">
             <p className="mb-1 text-base font-black text-gray-600">About</p>
-            <div className="mb-2.5 text-sm font-normal text-gray-600">
+            <div className="mb-3.5 text-sm font-normal text-gray-600">
               <DescriptionShowMore
                 text={community.description}
                 photo={
@@ -56,7 +75,7 @@ export default async function ViewCommunityPage({ params }: { params: { communit
                 }
               />
             </div>
-            <div className="mb-2.5 inline-flex gap-2">
+            <div className="mb-3.5 inline-flex gap-2">
               {community.categories.map((category) => (
                 <div
                   className="inline-flex w-fit rounded-full bg-gray-100 px-4 py-2"
@@ -69,11 +88,11 @@ export default async function ViewCommunityPage({ params }: { params: { communit
               ))}
             </div>
 
-            <div className="mb-2.5">
+            <div className="mb-3.5">
               <CommunityMembers members={community.members} size="30px" />
             </div>
             <div className="flex flex-col">
-              <p className="text-sm font-bold text-gray-700">Community Type</p>
+              <p className="mb-2 text-sm font-bold text-gray-700">Community Type</p>
               <p className="text-sm font-normal text-gray-500">
                 {community.isPublic ? 'Public' : 'Private (Only invited guests can join)'}
               </p>
@@ -84,14 +103,14 @@ export default async function ViewCommunityPage({ params }: { params: { communit
             </div>
 
             <div className="flex flex-col">
-              <p className="mb-2.5 text-sm font-bold text-gray-700">Administrators</p>
+              <p className="mb-3.5 text-sm font-bold text-gray-700">Administrators</p>
               <div className="inline-flex gap-2">
                 {community.members
                   .filter(
                     (member: CommunityMember) => member.role === 'admin' || member.role === 'owner',
                   )
                   .map((member) => (
-                    <CommunityAdministrator key={member.id} member={member} size="30px" />
+                    <CommunityAdministrator key={member.id} member={member} size="40px" />
                   ))}
               </div>
             </div>
@@ -106,11 +125,10 @@ export default async function ViewCommunityPage({ params }: { params: { communit
                 lng={community.location.point.coordinates[0]}
               />
             </div>
-
-            <UpcomingExperiences category={community.categories[0].id} />
           </div>
         </div>
       </main>
+      <UpcomingExperiences category={community.categories[0].id} />
     </>
   );
 }

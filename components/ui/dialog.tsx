@@ -1,11 +1,12 @@
 'use client';
 
 import * as React from 'react';
+
+import { Cancel01TwotoneRounded } from '@hugeicons-pro/core-twotone-rounded';
+import { HugeiconsIcon } from '@hugeicons/react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 
 import { cn } from '@/lib/utils';
-import { HugeiconsIcon } from '@hugeicons/react';
-import { Cancel01TwotoneRounded } from '@hugeicons-pro/core-twotone-rounded';
 
 const Dialog = DialogPrimitive.Root;
 

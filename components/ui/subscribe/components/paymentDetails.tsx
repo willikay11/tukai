@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useRef } from 'react';
+
 import { z } from 'zod';
-import { toast } from '@/hooks/use-toast';
-import PaymentForm, { paymentFormSchema } from '@/components/ui/paymentForm';
+
 import { Button } from '@/components/ui/button';
+import PaymentForm, { paymentFormSchema } from '@/components/ui/paymentForm';
+import { toast } from '@/hooks/use-toast';
 
 export default function PaymentDetails({
   onSuccess,

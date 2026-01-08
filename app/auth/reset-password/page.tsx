@@ -1,21 +1,25 @@
 // noinspection TypeScriptValidateTypes
 
 'use client';
-import React, { useContext, useState } from 'react';
-import OtpInput from '@/app/components/form/otpInput';
-import { Button, Input } from '@/app/components/form';
-import { LockKeyIcon, RefreshIcon } from '@hugeicons/react-pro';
-import { useRouter } from 'next/navigation';
-import { useSelector } from 'react-redux';
+import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import MobileStore from '@/app/components/mobileStore';
+import { useSelector } from 'react-redux';
+
+import { useRouter } from 'next/navigation';
+
+import { LockKeyIcon, RefreshIcon } from '@hugeicons/react-pro';
+
+import { Button, Input } from '@/app/components/form';
+import OtpInput from '@/app/components/form/otpInput';
 import SuccessMessage from '@/app/components/messages/success';
+import MobileStore from '@/app/components/mobileStore';
 import { toast } from '@/hooks/use-toast';
 
 type Inputs = {
   password: string;
   confirmPassword: string;
 };
+
 export default function Page() {
   const router = useRouter();
   const account = useSelector((state: any) => state.resetReducer.account);

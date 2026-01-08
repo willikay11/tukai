@@ -1,13 +1,16 @@
 'use client';
 
-import OtpInput from '@/app/components/form/otpInput';
-import { Button } from '@/app/components/form';
-import { RefreshIcon } from '@hugeicons/react-pro';
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from '@/hooks/use-toast';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+
+import { RefreshIcon } from '@hugeicons/react-pro';
+
+import { Button } from '@/app/components/form';
+import OtpInput from '@/app/components/form/otpInput';
+import { toast } from '@/hooks/use-toast';
 
 export default function OtpConfirmation() {
   const router = useRouter();

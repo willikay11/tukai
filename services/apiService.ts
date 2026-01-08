@@ -1,5 +1,6 @@
-import axios from 'axios';
 import { getSession } from 'next-auth/react';
+
+import axios from 'axios';
 
 const getAccessToken = async () => {
   const session = await getSession();

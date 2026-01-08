@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { ReactNode, createContext, useContext, useState } from 'react';
 
 type SelectedCategoryType = {
   setSelectedCategoryId: (categoryId: string) => void;

@@ -1,15 +1,19 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
+import Link from 'next/link';
+
+import clsx from 'clsx';
+import { motion } from 'framer-motion';
+
 import IconComponent from '@/app/components/iconComponent';
+import { Status } from '@/enums/status';
 import { useGetCommunities } from '@/hooks/communities';
 import { Community } from '@/types/community';
 import { Interest } from '@/types/interest';
-import clsx from 'clsx';
-import { motion } from 'framer-motion';
+
 import SingleCommunity from './community';
-import { Status } from '@/enums/status';
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
 
 const placeholders: Community[] = Array.from({ length: 12 }, (_, index) => ({
   id: `placeholder-${index}`,

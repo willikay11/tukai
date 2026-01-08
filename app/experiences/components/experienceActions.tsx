@@ -1,7 +1,9 @@
-import { Button } from '@/components/ui/button';
-import numeral from 'numeral';
-import { Experience } from '@/types/experience';
 import Link from 'next/link';
+
+import numeral from 'numeral';
+
+import { Button } from '@/components/ui/button';
+import { Experience } from '@/types/experience';
 
 export default function ExperienceActions({ experience }: { experience: Experience }) {
   return (

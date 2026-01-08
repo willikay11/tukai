@@ -1,20 +1,24 @@
 // noinspection TypeScriptValidateTypes,JSRemoveUnnecessaryParentheses
 'use client';
 
-import React, { useContext, useState } from 'react';
+import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { Anchor, Button, Input } from '@/app/components/form';
-import { Mail02Icon } from '@hugeicons/react-pro';
-import { useRouter } from 'next/navigation';
-import MobileStore from '@/app/components/mobileStore';
 import { useDispatch } from 'react-redux';
-import { addEmail } from '@/slices/resetSlice';
+
+import { useRouter } from 'next/navigation';
+
+import { Mail02Icon } from '@hugeicons/react-pro';
+
+import { Anchor, Button, Input } from '@/app/components/form';
 import SuccessMessage from '@/app/components/messages/success';
+import MobileStore from '@/app/components/mobileStore';
 import { toast } from '@/hooks/use-toast';
+import { addEmail } from '@/slices/resetSlice';
 
 type Inputs = {
   email: string;
 };
+
 export default function Page() {
   const router = useRouter();
   const dispatch = useDispatch();

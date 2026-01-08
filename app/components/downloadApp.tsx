@@ -1,9 +1,12 @@
 'use client';
 
-import { Cancel01Icon } from '@hugeicons/react-pro';
-import Image from 'next/image';
-import { Button } from '@/app/components/form';
 import { useEffect, useState } from 'react';
+
+import Image from 'next/image';
+
+import { Cancel01Icon } from '@hugeicons/react-pro';
+
+import { Button } from '@/app/components/form';
 
 export default function DownloadApp() {
   const [closed, setClosed] = useState<boolean>(false);

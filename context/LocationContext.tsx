@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { ReactNode, createContext, useContext, useEffect, useState } from 'react';
 
 type LocationState = {
   lat?: number;

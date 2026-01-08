@@ -1,13 +1,16 @@
 'use client';
-import { StarIcon } from '@hugeicons/react-pro';
 import { useState } from 'react';
-import clsx from 'clsx';
-import { Place } from '@/types/place';
-import ImageCarousel from '@/components/ui/imageCarousel';
-import { EventSkeleton } from '@/app/components/skeletons';
+
 import { useSession } from 'next-auth/react';
+
+import { StarIcon } from '@hugeicons/react-pro';
+import clsx from 'clsx';
+
 import BookmarkPlace from '@/app/components/bookmark';
+import { EventSkeleton } from '@/app/components/skeletons';
+import ImageCarousel from '@/components/ui/imageCarousel';
 import { useBookmarkPlace } from '@/hooks/places';
+import { Place } from '@/types/place';
 
 export default function SinglePlace({ place }: { place: Place }) {
   const [hasError, setHasError] = useState(false);

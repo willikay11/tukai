@@ -1,20 +1,20 @@
 'use client';
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
+
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
 
 const backgroundImages = [
   {
-    image: '/images/hill-decent.webp',
+    image: '/images/hill-descent.webp',
     path: '/auth/sign-in',
   },
   {
-    image: '/images/hill-decent.webp',
+    image: '/images/hill-descent.webp',
     path: '/auth/forgot-password',
   },
   {
-    image: '/images/hill-decent.webp',
+    image: '/images/hill-descent.webp',
     path: '/auth/reset-password',
   },
   {
@@ -40,10 +40,6 @@ const backgroundImages = [
   {
     image: '/images/santorini.webp',
     path: '/auth/otp-confirmation',
-  },
-  {
-    image: '/images/man-bridge-running.webp',
-    path: '/auth/terms-of-service',
   },
 ];
 

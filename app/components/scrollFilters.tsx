@@ -1,14 +1,16 @@
 'use client';
 
-import clsx from 'clsx';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { ArrowLeft01Icon, ArrowRight01Icon } from '@hugeicons/react-pro';
 import { useEffect, useRef, useState } from 'react';
-import IconComponent from '@/app/components/iconComponent';
-import { useRouter } from 'next/navigation';
-import { useSelectedCategory } from '@/context/SelectedCategoryContext';
+
 import { useSession } from 'next-auth/react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+
+import { ArrowLeft01Icon, ArrowRight01Icon } from '@hugeicons/react-pro';
+import clsx from 'clsx';
+
+import IconComponent from '@/app/components/iconComponent';
 import { useAuthDialog } from '@/context/AuthDialogContext';
+import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 
 export default function ScrollFilters({
   filters,
@@ -133,7 +135,7 @@ export default function ScrollFilters({
       </button>
       <div
         ref={ref}
-        className="flex h-[5rem] items-center overflow-x-auto scroll-smooth no-scrollbar"
+        className="flex h-[5rem] items-center overflow-x-auto scroll-smooth scrollbar-hide"
         onMouseDown={handleMouseDown}
         onMouseLeave={handleMouseLeave}
         onMouseUp={handleMouseUp}

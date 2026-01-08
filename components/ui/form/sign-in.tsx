@@ -1,11 +1,14 @@
 'use client';
 
-import { Anchor, Button, Input } from '@/app/components/form';
-import { GoogleIcon, LockKeyIcon, Mail02Icon } from '@hugeicons/react-pro';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import MobileStore from '@/app/components/mobileStore';
 import { useState } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+
 import { signIn } from 'next-auth/react';
+
+import { GoogleIcon, LockKeyIcon, Mail02Icon } from '@hugeicons/react-pro';
+
+import { Anchor, Button, Input } from '@/app/components/form';
+import MobileStore from '@/app/components/mobileStore';
 import { toast } from '@/hooks/use-toast';
 
 type Inputs = {
@@ -114,9 +117,8 @@ export default function SignInForm({ onLogin }: { onLogin: () => void }) {
 
       <div className="mb-3">
         <p className="text-xs">
-          By continuing to use Tukai, you agree to our{' '}
-          <Anchor link="/auth/terms-of-service">Terms of Use</Anchor>
-          &nbsp;and <Anchor link="/auth/terms-of-service">Privacy Policy</Anchor>
+          By continuing to use Tukai, you agree to our <Anchor link="/terms">Terms of Use</Anchor>
+          &nbsp;and <Anchor link="/privacy">Privacy Policy</Anchor>
         </p>
       </div>
 

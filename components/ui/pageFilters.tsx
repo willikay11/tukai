@@ -1,17 +1,19 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 import { usePathname, useSearchParams } from 'next/navigation';
+
 import ScrollFilters from '@/app/components/scrollFilters';
 import { PillsSkeleton } from '@/app/components/skeletons';
-import { Suspense, useEffect, useState } from 'react';
+import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { usePlaceCategories } from '@/hooks/places';
 import { PlaceCategory } from '@/types/placeCategory';
-import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 
 export default function PageFilters() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const { setSelectedCategoryId, selectedCategoryId } = useSelectedCategory();
+  const { setSelectedCategoryId } = useSelectedCategory();
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] =
     useState<{ label: string; value: string; icon: string; shouldBeLoggedIn?: boolean }[]>();
@@ -71,14 +73,18 @@ export default function PageFilters() {
       ]);
       setIsLoading(false);
     }
-  }, [categories, pathname]);
+  }, [categories, pathname, categoryFromQuery, setSelectedCategoryId]);
 
   // Hide filters on detail pages (with IDs)
   if (
     pathname.startsWith('/places/') ||
     pathname.startsWith('/experiences/') ||
     pathname.startsWith('/communities/') ||
-    pathname.startsWith('/auth/')
+    pathname.startsWith('/auth/') ||
+    pathname.startsWith('/terms') ||
+    pathname.startsWith('/privacy') ||
+    pathname.startsWith('/help') ||
+    pathname.startsWith('/unsubscribe')
   ) {
     return null;
   }

@@ -1,7 +1,9 @@
-import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Bookmark from './index';
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { AuthDialogProvider } from '@/context/AuthDialogContext';
+
+import Bookmark from './index';
 
 const renderWithProvider = (component: React.ReactElement) => {
   return render(<AuthDialogProvider>{component}</AuthDialogProvider>);

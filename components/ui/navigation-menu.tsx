@@ -1,9 +1,11 @@
 import * as React from 'react';
+
+import { ArrowDown01Icon } from '@hugeicons-pro/core-twotone-rounded';
+import { HugeiconsIcon } from '@hugeicons/react';
 import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu';
 import { cva } from 'class-variance-authority';
-import { HugeiconsIcon } from '@hugeicons/react';
+
 import { cn } from '@/lib/utils';
-import { ArrowDown01Icon } from '@hugeicons-pro/core-twotone-rounded';
 
 const NavigationMenu = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Root>,

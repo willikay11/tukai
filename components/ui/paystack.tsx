@@ -1,8 +1,9 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
+
 import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
 import { toast } from '@/hooks/use-toast';
-import { useEffect, useRef } from 'react';
 
 export default function Paystack({
   isOpen,

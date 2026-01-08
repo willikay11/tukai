@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+
 import { searchPlaces } from '@/services/search';
 
 export const useSearch = (query?: string, categoryId?: string) => {

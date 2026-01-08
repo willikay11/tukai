@@ -1,11 +1,14 @@
 'use client';
-import { usePathname } from 'next/navigation';
+import { useState } from 'react';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+import { Calendar04Icon, Menu02Icon, Search01Icon } from '@hugeicons/react-pro';
 import clsx from 'clsx';
-import { Menu02Icon, Search01Icon, Calendar04Icon, UserMultipleIcon } from '@hugeicons/react-pro';
+
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { useState } from 'react';
 
 const links = [
   {
@@ -59,14 +62,9 @@ export default function Nav() {
       </Dialog>
       <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
         <Menu02Icon size={24} variant="twotone" type="rounded" onClick={() => setOpen(true)} />
-        <Link href="/" className='ml-2.5 inline-flex items-center'>
-          <Image
-            src="/images/logo.svg"
-            alt="Tukai logo"
-            width={20}
-            height={20}
-          />
-          <span className='ml-2 font-bold text-lg text-[#013334]'>Tukai</span>
+        <Link href="/" className="ml-2.5 inline-flex items-center">
+          <Image src="/images/logo.svg" alt="Tukai logo" width={20} height={20} />
+          <span className="ml-2 text-lg font-bold text-[#013334]">Tukai</span>
         </Link>
       </div>
       <div className="hidden md:inline-flex md:h-full">{linkItems(true)}</div>

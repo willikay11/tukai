@@ -1,9 +1,9 @@
 'use client';
 
-import * as Icons from '@hugeicons-pro/core-twotone-rounded';
-
-import { HugeiconsIcon } from '@hugeicons/react';
 import React from 'react';
+
+import * as Icons from '@hugeicons-pro/core-twotone-rounded';
+import { HugeiconsIcon } from '@hugeicons/react';
 
 type IconName = keyof typeof Icons;
 function isValidIconName(name: string): name is IconName {

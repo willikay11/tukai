@@ -1,12 +1,12 @@
-// noinspection TypeScriptValidateTypes,JSRemoveUnnecessaryParentheses
-
 'use client';
+
+import { useRouter } from 'next/navigation';
 
 import SignInForm from '@/components/ui/form/sign-in';
 import { toast } from '@/hooks/use-toast';
-// import { useSession } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
+
 // import { useEffect } from 'react';
+// import { useSession } from 'next-auth/react';
 
 export default function Page() {
   const router = useRouter();
