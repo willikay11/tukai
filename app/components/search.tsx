@@ -67,12 +67,12 @@ export default function Search() {
 
   return (
     <Popover open={showSearchResults} onOpenChange={(isOpen) => setShowSearchResults(isOpen)}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild className='my-4 md:my-0'>
         <div
           ref={containerRef}
-          className="relative inline-flex h-10 w-full items-center justify-between rounded-full border-[1px] border-gray-200 bg-white py-4 pl-4 pr-1"
+          className="relative inline-flex h-[50px] w-full items-center justify-between rounded-[50px] border-[1px] border-gray-200 bg-white py-4 pl-4 pr-1"
         >
-          <Search01Icon size={20} className="mr-2 text-gray-500" variant="twotone" />
+          <Search01Icon size={24} className="mr-2 text-gray-500" variant="twotone" />
           <div
             onClick={() => setShowSearchResults(true)}
             className={clsx('flex w-[80%]', {
@@ -103,7 +103,7 @@ export default function Search() {
             <input
               ref={inputElRef}
               className={clsx(
-                'mt-[2px] h-full w-full text-[11px] outline-0 placeholder:text-[11px] placeholder:font-medium placeholder:text-gray-400 hover:border-primary focus:border-primary',
+                'mt-[2px] h-full w-full text-[12px] outline-0 placeholder:text-[12px] placeholder:font-medium placeholder:text-gray-400 hover:border-primary focus:border-primary',
                 query && query.length > 0 && tag && 'mt-0',
               )}
               placeholder={
@@ -121,7 +121,7 @@ export default function Search() {
             />
           </div>
           <div
-            className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full bg-gray-100"
+            className="flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full bg-gray-100"
             onClick={() => {
               setShowSearchResults(false);
               setQuery(undefined);
@@ -133,7 +133,7 @@ export default function Search() {
               iconName={
                 showSearchResults || query?.length ? 'Cancel01Icon' : 'FilterHorizontalIcon'
               }
-              size={15}
+              size={20}
               color="gray"
             />
           </div>

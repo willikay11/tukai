@@ -55,7 +55,7 @@ export default function RootLayout({
                 <LocationProvider>
                   <AuthDialogProvider>
                     <SelectedCategoryProvider>
-                      <div className="relative h-screen">
+                      <div className="relative">
                         <div className="sticky top-0 z-50 grid grid-cols-12 border-b-[1px] border-gray-100 bg-white md:gap-x-4">
                           <div className="col-span-12 md:hidden lg:hidden 2xl:hidden">
                             <DownloadApp />
@@ -74,7 +74,7 @@ export default function RootLayout({
                             <AuthActions />
                           </div>
                           <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
-                            <div className="inline-flex grid h-[70px] w-full grid-cols-12 items-center justify-between md:mt-6">
+                            <div className="inline-flex grid w-full grid-cols-12 items-center justify-between md:mt-6 md:h-[80px]">
                               <div className="flex hidden h-full items-center md:col-span-4 md:inline-flex lg:col-span-4 lg:inline-flex">
                                 <Link
                                   href="/"
