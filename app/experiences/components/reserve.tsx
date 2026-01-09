@@ -218,7 +218,7 @@ export default function Reserve({ experience }: { experience: Experience }) {
         }}
       />
 
-      <div className="mb-20 md:mb-4 mt-4">
+      <div className="mt-4">
         <Button
           size="lg"
           className="w-full"

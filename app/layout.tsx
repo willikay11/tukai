@@ -55,7 +55,7 @@ export default function RootLayout({
                 <LocationProvider>
                   <AuthDialogProvider>
                     <SelectedCategoryProvider>
-                      <div className="relative">
+                      <div className="relative mb-20 md:mb-4">
                         <div className="sticky top-0 z-50 grid grid-cols-12 border-b-[1px] border-gray-100 bg-white md:gap-x-4">
                           <div className="col-span-12 mx-4 mt-5 inline-flex justify-between md:hidden lg:hidden 2xl:hidden">
                             <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
