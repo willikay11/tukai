@@ -70,7 +70,7 @@ export default function BottomNavigation() {
           {link.icon}
           <span
             className={clsx('ml-1 text-xs', {
-              'text-gray-800': pathname !== link.href,
+              'font-medium text-gray-700': pathname !== link.href,
               'font-semibold text-primary': pathname === link.href,
             })}
           >
