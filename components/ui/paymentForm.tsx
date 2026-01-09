@@ -8,9 +8,9 @@ import Image from 'next/image';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  Location04TwotoneRounded,
   Mail02TwotoneRounded,
-  MapsGlobalIconTwotoneRounded,
-  PinLocationIconTwotoneRounded,
+  MapsGlobal02TwotoneRounded,
   SquareLock01TwotoneRounded,
   UserTwotoneRounded,
 } from '@hugeicons-pro/core-twotone-rounded';
@@ -312,7 +312,7 @@ const PaymentForm = forwardRef(
                                 className="h-[55px] w-full"
                                 prefixIcon={
                                   <HugeiconsIcon
-                                    icon={MapsGlobalIconTwotoneRounded}
+                                    icon={MapsGlobal02TwotoneRounded}
                                     size={20}
                                     className="text-gray-600"
                                   />
@@ -344,7 +344,7 @@ const PaymentForm = forwardRef(
                                 type="text"
                                 icon={
                                   <HugeiconsIcon
-                                    icon={PinLocationIconTwotoneRounded}
+                                    icon={Location04TwotoneRounded}
                                     size={20}
                                     className="text-gray-600"
                                   />

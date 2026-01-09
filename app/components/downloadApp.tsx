@@ -11,7 +11,7 @@ export default function DownloadApp() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowDownloadApp(false);
-    }, 15000); // Hide after 15 seconds
+    }, 15000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -20,7 +20,7 @@ export default function DownloadApp() {
     return null;
   }
   return (
-    <div className="fixed bottom-24 left-1 right-1 z-50 mx-4 rounded-[15px] bg-white shadow-md md:mx-auto">
+    <div className="fixed bottom-24 left-1 right-1 z-50 mx-4 rounded-[15px] bg-white shadow-md md:left-auto md:right-4 md:max-w-md">
       <div className="p-4">
         <div className="mb-2 inline-flex w-full items-center justify-between">
           <p className="mb-2 text-xl font-black text-gray-700">Download the Tukai App</p>
