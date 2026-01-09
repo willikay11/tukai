@@ -2,13 +2,15 @@
 
 import Image from 'next/image';
 
-export default function MobileStore() {
+import clsx from 'clsx';
+
+export default function MobileStore({ className }: { className?: string }) {
   const onDownloadApp = (url: string) => {
     window.open(url, '_blank');
   };
 
   return (
-    <div className="inline-flex w-full items-center justify-center">
+    <div className={clsx('inline-flex w-full items-center justify-center', className)}>
       <Image
         src="/images/apple-store.png"
         width={100}
