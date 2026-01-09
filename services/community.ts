@@ -92,12 +92,9 @@ export async function joinCommunityWithToken(communityId: string, token?: string
   try {
     const api = await apiWithToken();
 
-    const response = await api.post(
-      `/v1/communities/${communityId}/members/join-via-invite/`,
-      {
-        token: token,
-      },
-    );
+    const response = await api.post(`/v1/communities/${communityId}/members/join-via-invite/`, {
+      token: token,
+    });
 
     return {
       status: response.status,

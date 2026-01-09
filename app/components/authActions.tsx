@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { UserAdd01Icon } from '@hugeicons/react-pro';
 
 import IconComponent from '@/app/components/iconComponent';
+import { Button } from '@/components/ui/button';
 import TukaiImage from '@/components/ui/image';
 import {
   NavigationMenu,
@@ -18,7 +19,6 @@ import {
 } from '@/components/ui/navigation-menu';
 import { Separator } from '@/components/ui/separator';
 import { useDownloadApp } from '@/context/DownloadAppContext';
-import { Button } from '@/components/ui/button';
 
 export default function AuthActions() {
   const { onOpen } = useDownloadApp();

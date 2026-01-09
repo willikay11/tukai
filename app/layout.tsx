@@ -7,11 +7,11 @@ import Link from 'next/link';
 import { hugeiconsLicense } from '@hugeicons/react-pro';
 
 import AuthActions from '@/app/components/authActions';
+import BottomNavigation from '@/app/components/bottomNavigation';
 import DownloadApp from '@/app/components/downloadApp';
 import { satoshi } from '@/app/components/fonts';
 import GlobalLoading from '@/app/components/globalLoading';
 import IconRadioButtonGroup from '@/app/components/iconRadioButtonGroup';
-import Nav from '@/app/components/nav';
 import PageFilters from '@/components/ui/pageFilters';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthDialogProvider } from '@/context/AuthDialogContext';
@@ -22,6 +22,7 @@ import ReactQueryClientProvider from '@/providers/ReactQueryProvider';
 import SessionProvider from '@/providers/SessionProvider';
 
 import LocationPrompt from './components/locationPrompt';
+import Nav from './components/nav';
 import Search from './components/search';
 import { PillsSkeleton } from './components/skeletons';
 import './globals.css';
@@ -54,21 +55,14 @@ export default function RootLayout({
                 <LocationProvider>
                   <AuthDialogProvider>
                     <SelectedCategoryProvider>
-                      <div className="sticky top-0 z-50 grid grid-cols-12 border-b-[1px] border-gray-100 bg-white md:gap-x-4">
-                        <div className="col-span-12 md:hidden lg:hidden 2xl:hidden">
-                          <DownloadApp />
-                        </div>
-                        <div className="col-span-12 mx-4 mt-5 inline-flex justify-between md:hidden lg:hidden 2xl:hidden">
-                          <Nav />
-                          <AuthActions />
-                        </div>
-                        <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
-                          <div className="inline-flex grid h-[70px] w-full grid-cols-12 items-center justify-between md:mt-6">
-                            <div className="flex hidden h-full items-center md:col-span-4 md:inline-flex lg:col-span-4 lg:inline-flex">
-                              <Link
-                                href="/"
-                                className="hidden h-full items-center md:mr-6 md:flex lg:mr-3 xl:mr-6"
-                              >
+                      <div className="relative h-screen">
+                        <div className="sticky top-0 z-50 grid grid-cols-12 border-b-[1px] border-gray-100 bg-white md:gap-x-4">
+                          <div className="col-span-12 md:hidden lg:hidden 2xl:hidden">
+                            <DownloadApp />
+                          </div>
+                          <div className="col-span-12 mx-4 mt-5 inline-flex justify-between md:hidden lg:hidden 2xl:hidden">
+                            <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
+                              <Link href="/" className="inline-flex items-center">
                                 <Image
                                   src="/images/logo.svg"
                                   alt="Tukai logo"
@@ -76,31 +70,50 @@ export default function RootLayout({
                                   height={100}
                                 />
                               </Link>
-                              <Nav />
                             </div>
-                            <div className="col-span-12 inline-flex justify-center md:col-span-4 lg:col-span-4">
-                              <div className="w-full md:inline-flex">
-                                <Suspense
-                                  fallback={
-                                    <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
-                                  }
+                            <AuthActions />
+                          </div>
+                          <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
+                            <div className="inline-flex grid h-[70px] w-full grid-cols-12 items-center justify-between md:mt-6">
+                              <div className="flex hidden h-full items-center md:col-span-4 md:inline-flex lg:col-span-4 lg:inline-flex">
+                                <Link
+                                  href="/"
+                                  className="hidden h-full items-center md:mr-6 md:flex lg:mr-3 xl:mr-6"
                                 >
-                                  <Search />
-                                </Suspense>
+                                  <Image
+                                    src="/images/logo.svg"
+                                    alt="Tukai logo"
+                                    width={100}
+                                    height={100}
+                                  />
+                                </Link>
+                                <Nav />
                               </div>
-                              <IconRadioButtonGroup />
-                            </div>
-                            <div className="flex hidden h-full items-center justify-end md:col-span-4 md:inline-flex lg:col-span-4 lg:inline-flex">
-                              <AuthActions />
+                              <div className="col-span-12 inline-flex justify-center md:col-span-4 lg:col-span-4">
+                                <div className="w-full md:inline-flex">
+                                  <Suspense
+                                    fallback={
+                                      <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
+                                    }
+                                  >
+                                    <Search />
+                                  </Suspense>
+                                </div>
+                                <IconRadioButtonGroup />
+                              </div>
+                              <div className="flex hidden h-full items-center justify-end md:col-span-4 md:inline-flex lg:col-span-4 lg:inline-flex">
+                                <AuthActions />
+                              </div>
                             </div>
                           </div>
+                          <Suspense fallback={<PillsSkeleton />}>
+                            <PageFilters />
+                          </Suspense>
                         </div>
-                        <Suspense fallback={<PillsSkeleton />}>
-                          <PageFilters />
-                        </Suspense>
+                        <LocationPrompt />
+                        {children}
                       </div>
-                      <LocationPrompt />
-                      {children}
+                      <BottomNavigation />
                     </SelectedCategoryProvider>
                   </AuthDialogProvider>
                 </LocationProvider>

@@ -11,7 +11,7 @@ export default function Join({
   communityId,
   members,
   currentUserId,
-  token
+  token,
 }: {
   communityId: string;
   members: CommunityMember[];
@@ -27,7 +27,14 @@ export default function Join({
     error,
   } = useJoinCommunity();
 
-  const { mutate: joinCommunityViaInviteMutation, isPending: isInvitePending, isSuccess: isInviteSuccess, isError: isInviteError, data: inviteData, error: inviteError } = useJoinCommunityViaInvite();
+  const {
+    mutate: joinCommunityViaInviteMutation,
+    isPending: isInvitePending,
+    isSuccess: isInviteSuccess,
+    isError: isInviteError,
+    data: inviteData,
+    error: inviteError,
+  } = useJoinCommunityViaInvite();
 
   const member = members.find((member) => member?.user?.id === currentUserId);
 
@@ -51,18 +58,18 @@ export default function Join({
     if (isError || isInviteError) {
       toast({
         title: 'Unable to join community',
-        description: (error as any)?.message || (inviteError as any)?.message || 'An error occurred',
+        description:
+          (error as any)?.message || (inviteError as any)?.message || 'An error occurred',
         variant: 'destructive',
       });
     }
   }, [isSuccess, isInviteSuccess, isError, isInviteError, data, inviteData, error, inviteError]);
 
-
   useEffect(() => {
     if (token) {
       joinCommunityViaInviteMutation({ communityId, token });
     }
-  }, [token])
+  }, [token]);
 
   if (member && member.inviteStatus === 'accepted') {
     return null;
@@ -74,7 +81,11 @@ export default function Join({
       disabled={isPending || isInvitePending || (member && member.inviteStatus === 'requested')}
       className="mr-2.5"
     >
-      {member?.inviteStatus === 'requested' ? 'Pending Approval' : isPending || isInvitePending ? 'Joining...' : 'Join Community'}
+      {member?.inviteStatus === 'requested'
+        ? 'Pending Approval'
+        : isPending || isInvitePending
+          ? 'Joining...'
+          : 'Join Community'}
     </Button>
   );
 }
