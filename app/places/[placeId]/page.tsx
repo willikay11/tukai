@@ -1,7 +1,3 @@
-import Image from 'next/image';
-
-import { CheckmarkBadge02Icon } from '@hugeicons/react-pro';
-
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
 import GoogleMapComponent from '@/app/components/googleMap';
 import IconComponent from '@/app/components/iconComponent';

@@ -26,8 +26,8 @@ export default function CommunityMembers({
         >
           <div className={`relative aspect-square`} style={{ width: size, height: size }}>
             <Image
-              src={member.user.picture || ''}
-              alt={member.user.firstName || ''}
+              src={member?.user?.picture || ''}
+              alt={member?.user?.firstName || ''}
               className="h-7 w-7 rounded-full"
               quality={100}
               layout="fill"

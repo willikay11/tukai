@@ -1,6 +1,8 @@
 'use client';
 import React from 'react';
 
+import { clsx } from 'clsx';
+
 import {
   Carousel,
   CarouselContent,
@@ -30,7 +32,11 @@ const ImageCarousel = ({
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index}>
-              <div className={cn('relative w-full', aspectRatio)}>
+              <div
+                className={clsx(`relative w-full ${aspectRatio}`, {
+                  'h-[150px]': aspectRatio !== 'aspect-square',
+                })}
+              >
                 <TukaiImage src={image} alt={`Image ${index + 1}`} className="rounded-[8px]" />
               </div>
             </CarouselItem>
