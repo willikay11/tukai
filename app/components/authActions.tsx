@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import { Separator } from '@/components/ui/separator';
 import { useDownloadApp } from '@/context/DownloadAppContext';
+import { Button } from '@/components/ui/button';
 
 export default function AuthActions() {
   const { onOpen } = useDownloadApp();
@@ -103,8 +104,7 @@ export default function AuthActions() {
         </NavigationMenu>
       ) : (
         <Link href="/auth/sign-in" className="inline-flex">
-          <UserAdd01Icon size={15} className="mr-2 text-gray-700" />
-          <span className="text-xs text-gray-800">Sign In/Sign Up</span>
+          <Button>Sign In/Sign Up</Button>
         </Link>
       )}
     </div>
