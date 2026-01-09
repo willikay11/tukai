@@ -67,15 +67,14 @@ export default function RootLayout({
                             <div className="flex hidden h-full items-center md:col-span-4 md:inline-flex lg:col-span-4 lg:inline-flex">
                               <Link
                                 href="/"
-                                className="hidden h-full items-center md:mr-6 md:flex lg:mr-5 xl:mr-10"
+                                className="hidden h-full items-center md:mr-6 md:flex lg:mr-3 xl:mr-6"
                               >
                                 <Image
                                   src="/images/logo.svg"
                                   alt="Tukai logo"
-                                  width={30}
-                                  height={30}
+                                  width={100}
+                                  height={100}
                                 />
-                                <span className="ml-2 text-lg font-bold text-[#013334]">Tukai</span>
                               </Link>
                               <Nav />
                             </div>
