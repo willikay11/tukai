@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { clsx } from 'clsx';
 
@@ -20,6 +20,34 @@ const ImageCarousel = ({
   images: string[];
   aspectRatio?: string;
 }) => {
+  const [isScrolling, setIsScrolling] = useState(false);
+  const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolling(true);
+
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+
+      const timeout = setTimeout(() => {
+        setIsScrolling(false);
+      }, 150);
+
+      setScrollTimeout(timeout);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+    };
+  }, [scrollTimeout]);
+
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
@@ -46,14 +74,24 @@ const ImageCarousel = ({
           <>
             <button
               type="button"
-              className="pointer-events-auto absolute left-1 top-1/2 z-50 -translate-y-1/2 transform opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              className={cn(
+                'pointer-events-auto absolute left-1 top-1/2 z-50 -translate-y-1/2 transform opacity-0 transition-opacity duration-300 group-hover:opacity-100',
+                {
+                  '!opacity-0': isScrolling,
+                },
+              )}
               onClick={handleButtonClick}
             >
               <CarouselPrevious className={cn('left-0')} />
             </button>
             <button
               type="button"
-              className="pointer-events-auto absolute right-1 top-1/2 z-50 -translate-y-1/2 transform opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              className={cn(
+                'pointer-events-auto absolute right-1 top-1/2 z-50 -translate-y-1/2 transform opacity-0 transition-opacity duration-300 group-hover:opacity-100',
+                {
+                  '!opacity-0': isScrolling,
+                },
+              )}
               onClick={handleButtonClick}
             >
               <CarouselNext className={cn('right-0')} />
