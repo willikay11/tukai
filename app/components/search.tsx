@@ -67,7 +67,7 @@ export default function Search() {
 
   return (
     <Popover open={showSearchResults} onOpenChange={(isOpen) => setShowSearchResults(isOpen)}>
-      <PopoverTrigger asChild className='my-4 md:my-0'>
+      <PopoverTrigger asChild className="my-4 md:my-0">
         <div
           ref={containerRef}
           className="relative inline-flex h-[50px] w-full items-center justify-between rounded-[50px] border-[1px] border-gray-200 bg-white py-4 pl-4 pr-1"
