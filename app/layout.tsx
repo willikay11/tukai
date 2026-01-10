@@ -104,7 +104,7 @@ export default function RootLayout({
                             </div>
                           </div>
                         </div>
-                        <div className='sticky top-0 z-50 md:top-[6.5rem] border-t-[1px] border-gray-100 border-b-[1px] border-gray-100'>
+                        <div className='sticky top-0 z-[9] md:top-[6.5rem] border-t-[1px] border-gray-100 border-b-[1px] border-gray-100'>
                           <Suspense fallback={<PillsSkeleton />}>
                             <PageFilters />
                           </Suspense>
