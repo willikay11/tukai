@@ -50,7 +50,9 @@ export default function SingleExperience({
         >
           {!hasError ? (
             <ImageCarousel
-              images={experience.photos.map((photo) => photo.photo)}
+              images={experience.photos
+                .sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0))
+                .map((photo) => photo.photo)}
               aspectRatio={type === 'discover' ? 'aspect-square' : 'aspect-[16/9]'}
             />
           ) : (
