@@ -48,7 +48,7 @@ export const getUserInterests = async (userId: string, token: string) => {
     console.error(error);
     throw error;
   }
-}
+};
 
 export const socialSignIn = async (backend: 'google-oauth2' | 'facebook', accessToken: string) => {
   try {

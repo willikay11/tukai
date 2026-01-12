@@ -4,7 +4,13 @@ import GoogleProvider from 'next-auth/providers/google';
 
 import jwt from 'jsonwebtoken';
 
-import { profile as getProfile, getUserInterests, refreshToken, signIn, socialSignIn } from '@/services/auth';
+import {
+  profile as getProfile,
+  getUserInterests,
+  refreshToken,
+  signIn,
+  socialSignIn,
+} from '@/services/auth';
 import { Interest } from '@/types/interest';
 import { JwtPayload } from '@/types/jwt';
 import { Token } from '@/types/token';

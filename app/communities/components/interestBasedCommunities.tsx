@@ -27,14 +27,14 @@ const placeholders: Community[] = Array.from({ length: ITEMS_PER_PAGE }, (_, ind
 }));
 
 export default function InterestBasedCommunities({ category }: { category?: string[] }) {
-  if(category === undefined || category.length === 0) return null;
+  if (category === undefined || category.length === 0) return null;
 
   const {
     data: communities,
     isLoading,
     error,
   } = useGetCommunities({ page: 1, enabled: true, category });
-  
+
   const communityList = useMemo(() => {
     if (isLoading) {
       return placeholders;
