@@ -4,7 +4,7 @@ import GoogleProvider from 'next-auth/providers/google';
 
 import jwt from 'jsonwebtoken';
 
-import { profile as getProfile, refreshToken, signIn, socialSignIn } from '@/services/auth';
+import { profile as getProfile, getUserInterests, refreshToken, signIn, socialSignIn } from '@/services/auth';
 import { Interest } from '@/types/interest';
 import { JwtPayload } from '@/types/jwt';
 import { Token } from '@/types/token';
@@ -104,6 +104,7 @@ export const authOptions = {
       if (account?.provider === 'google') {
         const response = await socialSignIn('google-oauth2', account.access_token);
         const decoded = parseSnakeToCamel(jwt.decode(response.access)) as JwtPayload;
+        const interests: Interest[] = await getUserInterests();
 
         token.id = decoded?.userId;
         token.name = profile?.name;
@@ -112,10 +113,11 @@ export const authOptions = {
         token.accessToken = response.access;
         token.refreshToken = response.refresh;
         token.accessTokenExpires = decoded?.exp ? decoded.exp * 1000 : Date.now() + 3600 * 1000;
-        token.hasInterests = decoded?.hasInterests;
+        token.hasInterests = interests.length > 0;
         token.hasBillingDetails = decoded?.hasBillingDetails;
         token.hasSubscribed = decoded?.hasSubscribed;
         token.emailVerified = decoded?.emailVerified;
+        token.interests = interests;
         return token;
       }
 

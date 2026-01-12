@@ -1,6 +1,6 @@
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
-import { api } from './apiService';
+import { api, apiWithToken } from './apiService';
 
 export const signIn = async (email: string, password: string) => {
   try {
@@ -35,6 +35,17 @@ export const profile = async (id: string, token?: string) => {
     throw error;
   }
 };
+
+export const getUserInterests = async () => {
+  try {
+    const api = await apiWithToken();
+    const response = await api.get(`/v1/accounts/interests/`);
+    return parseSnakeToCamel(response.data);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
 
 export const socialSignIn = async (backend: 'google-oauth2' | 'facebook', accessToken: string) => {
   try {
