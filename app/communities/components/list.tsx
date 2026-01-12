@@ -16,7 +16,7 @@ export default function List() {
     return (
       <div key={selectedCategoryId}>
         <p className="mb-4 mt-2.5 text-xl font-semibold text-gray-700">Following</p>
-        <Communities following noDataText="You don't have any communities yet. When you create or follow communities, they will appear here." />
+        <Communities following aspectRatio="aspect-square" noDataText="You don't have any communities yet. When you create or follow communities, they will appear here." />
       </div>
     );
   }
@@ -26,7 +26,7 @@ export default function List() {
       <div key={selectedCategoryId}>
         <div className='mb-4'>
           <p className="mb-4 mt-2.5 text-xl font-semibold text-gray-700">Popular Communities</p>
-          <Communities popularCommunities />
+          <Communities popularCommunities aspectRatio="aspect-3/2" />
         </div>
 
         <InterestBasedCommunities category={session?.user?.interests?.map((category) => category.id)} />

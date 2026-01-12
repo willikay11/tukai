@@ -25,7 +25,7 @@ const placeholders: Community[] = Array.from({ length: ITEMS_PER_PAGE }, (_, ind
   isJoined: false,
 }));
 
-export default function Communities({ popularCommunities, following, noDataText }: { popularCommunities?: boolean, following?: boolean, noDataText?: string }) {
+export default function Communities({ aspectRatio, popularCommunities, following, noDataText }: { aspectRatio?: string, popularCommunities?: boolean, following?: boolean, noDataText?: string }) {
   const {
     data: communities,
     isLoading,
@@ -68,7 +68,7 @@ export default function Communities({ popularCommunities, following, noDataText 
             className="cursor-pointer"
           >
             <Link href={`/communities/${community.id}`} target="_blank">
-              <SingleCommunity community={community} aspectRatio="aspect-3/2" />
+              <SingleCommunity community={community} aspectRatio={aspectRatio} />
             </Link>
           </motion.div>
         ))}
