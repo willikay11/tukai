@@ -12,7 +12,7 @@ import { Community } from '@/types/community';
 
 import SingleCommunity from './community';
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 4;
 
 const placeholders: Community[] = Array.from({ length: ITEMS_PER_PAGE }, (_, index) => ({
   id: `placeholder-${index}`,
@@ -45,6 +45,7 @@ export default function PopularCommunities() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, ease: 'easeInOut' }}
+        className='mb-4'
       >
         <NoData message="No communities found" />
       </motion.div>
@@ -52,7 +53,7 @@ export default function PopularCommunities() {
   }
 
   return (
-    <>
+    <div className='mb-4'>
       <p className="mb-4 mt-2.5 text-xl font-semibold text-gray-700">Popular Communities</p>
 
       <motion.div
@@ -75,6 +76,6 @@ export default function PopularCommunities() {
           </motion.div>
         ))}
       </motion.div>
-    </>
+    </div>
   );
 }

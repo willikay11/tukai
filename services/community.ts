@@ -7,7 +7,7 @@ import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { api, apiWithToken } from './apiService';
 
 export async function getInterestBasedCommunities(
-  category?: string,
+  category?: string[],
   page: number = 1,
   perPage: number = 6,
   search?: string,
@@ -20,10 +20,10 @@ export async function getInterestBasedCommunities(
     if (page) queryParams.append('page', page.toString());
     if (perPage) queryParams.append('page_size', perPage.toString());
     if (search) queryParams.append('search', search);
-    if (category) queryParams.append('category', category);
+    category?.forEach((cat) => queryParams.append('category', cat));
     if (showUpComingExperiences) queryParams.append('upcoming_experiences', 'true');
     if (recommendedCommunities) queryParams.append('recommended', 'true');
-    // if (popularCommunities) queryParams.append('popular', 'true');
+    if (popularCommunities) queryParams.append('popular', '4');
 
     const api = await apiWithToken();
 
