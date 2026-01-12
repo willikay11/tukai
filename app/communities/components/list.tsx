@@ -5,18 +5,18 @@ import { useSession } from 'next-auth/react';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 
 import InterestBasedCommunities from './interestBasedCommunities';
-import PopularCommunities from './popularCommunities';
+import Communities from './Communities';
 import RecommendedCommunities from './recommendedCommunities';
 
 export default function List() {
   const { data: session } = useSession();
   const { selectedCategoryId } = useSelectedCategory();
 
-  console.log('session user interests:', session?.user);
   if (selectedCategoryId === 'my-communities') {
     return (
       <div key={selectedCategoryId}>
         <p className="mb-4 mt-2.5 text-xl font-semibold text-gray-700">Following</p>
+        <Communities following noDataText="You don't have any communities yet. When you create or follow communities, they will appear here." />
       </div>
     );
   }
@@ -24,7 +24,10 @@ export default function List() {
   if (selectedCategoryId === 'recommended') {
     return (
       <div key={selectedCategoryId}>
-        <PopularCommunities />
+        <div className='mb-4'>
+          <p className="mb-4 mt-2.5 text-xl font-semibold text-gray-700">Popular Communities</p>
+          <Communities popularCommunities />
+        </div>
 
         <InterestBasedCommunities category={session?.user?.interests?.map((category) => category.id)} />
       </div>

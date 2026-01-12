@@ -25,12 +25,12 @@ const placeholders: Community[] = Array.from({ length: ITEMS_PER_PAGE }, (_, ind
   isJoined: false,
 }));
 
-export default function PopularCommunities() {
+export default function Communities({ popularCommunities, following, noDataText }: { popularCommunities?: boolean, following?: boolean, noDataText?: string }) {
   const {
     data: communities,
     isLoading,
     error,
-  } = useGetCommunities({ page: 1, enabled: true, popularCommunities: true });
+  } = useGetCommunities({ page: 1, enabled: true, popularCommunities, following });
 
   const communityList = useMemo(() => {
     if (isLoading) {
@@ -47,15 +47,12 @@ export default function PopularCommunities() {
         transition={{ duration: 0.5, ease: 'easeInOut' }}
         className='mb-4'
       >
-        <NoData message="No communities found" />
+        <NoData message={noDataText || "No communities found"} />
       </motion.div>
     );
   }
 
   return (
-    <div className='mb-4'>
-      <p className="mb-4 mt-2.5 text-xl font-semibold text-gray-700">Popular Communities</p>
-
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -76,6 +73,5 @@ export default function PopularCommunities() {
           </motion.div>
         ))}
       </motion.div>
-    </div>
   );
 }
