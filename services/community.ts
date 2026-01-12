@@ -14,8 +14,6 @@ export async function getInterestBasedCommunities(
   popularCommunities?: boolean,
 ) {
   try {
-    console.log('InterestBasedCommunities communities API');
-
     const queryParams = new URLSearchParams();
     if (page) queryParams.append('page', page.toString());
     if (perPage) queryParams.append('page_size', perPage.toString());
