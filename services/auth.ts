@@ -43,7 +43,7 @@ export const getUserInterests = async (userId: string, token: string) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    return parseSnakeToCamel(response.data);
+    return parseSnakeToCamel(response.data?.results);
   } catch (error) {
     console.error(error);
     throw error;
