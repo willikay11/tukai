@@ -40,7 +40,7 @@ export default function List() {
     return (
       <div key={selectedCategoryId}>
         <PopularCommunities />
-        <RecommendedCommunities />
+        {/* <RecommendedCommunities /> */}
       </div>
     );
   }

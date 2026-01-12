@@ -23,7 +23,7 @@ export async function getInterestBasedCommunities(
     if (category) queryParams.append('category', category);
     if (showUpComingExperiences) queryParams.append('upcoming_experiences', 'true');
     if (recommendedCommunities) queryParams.append('recommended', 'true');
-    if (popularCommunities) queryParams.append('popular', 'true');
+    // if (popularCommunities) queryParams.append('popular', 'true');
 
     const api = await apiWithToken();
 

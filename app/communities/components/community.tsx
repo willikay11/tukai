@@ -42,7 +42,7 @@ export default function SingleCommunity({ community }: { community: Community })
           <p className="text-xs font-bold text-gray-800">{community.title}</p>
         </div>
         <div className="mb-1 inline-flex items-center">
-          <span className="text-xs font-medium text-gray-700">{displayedText}</span>
+          <div className="text-xs font-medium text-gray-700" dangerouslySetInnerHTML={{ __html: displayedText }} />
         </div>
         <CommunityMembers members={community.members} size="20px" />
       </div>

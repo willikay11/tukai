@@ -28,7 +28,7 @@ export default function PopularCommunities() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3"
+        className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"
       >
         {communities?.data?.results?.map((community: Community) => (
           <Link href={`/communities/${community.id}`} target="_blank">
