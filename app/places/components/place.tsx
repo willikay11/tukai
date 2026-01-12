@@ -30,7 +30,6 @@ export default function SinglePlace({ place }: { place: Place }) {
               images={place.photos
                 .sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0))
                 .map((photo) => photo.photo)}
-              imageHeight="h-full"
             />
           ) : (
             <div className="h-full w-full bg-gray-50" />

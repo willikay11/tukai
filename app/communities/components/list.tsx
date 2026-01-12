@@ -25,13 +25,6 @@ export default function List() {
     return (
       <div key={selectedCategoryId}>
         <p className="mb-4 mt-2.5 text-xl font-semibold text-gray-700">Following</p>
-        {session?.user?.interests?.map((interest: Interest) => (
-          <InterestBasedCommunities
-            key={interest.id}
-            interest={interest}
-            color={colors[Math.floor(Math.random() * colors.length)]}
-          />
-        ))}
       </div>
     );
   }
@@ -40,7 +33,8 @@ export default function List() {
     return (
       <div key={selectedCategoryId}>
         <PopularCommunities />
-        <RecommendedCommunities />
+
+        <InterestBasedCommunities category={session?.user?.interests?.map((category) => category.id)} />
       </div>
     );
   }

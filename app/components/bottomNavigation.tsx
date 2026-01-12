@@ -1,13 +1,11 @@
 'use client';
 import { useEffect, useState } from 'react';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { Calendar04Icon, Search01Icon } from '@hugeicons/react-pro';
+import { Calendar04Icon, Search01Icon, UserMultipleIcon } from '@hugeicons/react-pro';
 import clsx from 'clsx';
-import { link } from 'fs';
 
 const links = [
   {
@@ -20,11 +18,11 @@ const links = [
     href: '/places',
     icon: <Search01Icon size={20} variant="twotone" className="mb-1" />,
   },
-  // {
-  //   name: 'Communities',
-  //   href: '/communities',
-  //   icon: <UserMultipleIcon size={18} variant="twotone" />,
-  // },
+  {
+    name: 'Communities',
+    href: '/communities',
+    icon: <UserMultipleIcon size={18} variant="twotone" />,
+  },
 ];
 
 export default function BottomNavigation() {

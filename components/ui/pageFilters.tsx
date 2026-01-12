@@ -67,11 +67,16 @@ export default function PageFilters() {
     }
     if (pathname === '/communities') {
       setFilters([
-        { label: 'My Communities', value: 'my-communities', icon: 'UserGroupIcon' },
         { label: 'Recommended', value: 'recommended', icon: 'UserSearch01Icon' },
+        { label: 'My Communities', value: 'my-communities', icon: 'UserGroupIcon' },
         { label: 'Posts', value: 'posts', icon: 'GridViewIcon' },
       ]);
       setIsLoading(false);
+      if (categoryFromQuery == null) {
+        setSelectedCategoryId('recommended');
+      } else {
+        setSelectedCategoryId(categoryFromQuery); 
+      }
     }
   }, [categories, pathname, categoryFromQuery, setSelectedCategoryId]);
 

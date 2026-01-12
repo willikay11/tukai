@@ -18,7 +18,7 @@ export const useGetCommunities = (
   }: {
     page: number;
     enabled: boolean;
-    category?: string;
+    category?: string[];
     search?: string;
     showUpComingExperiences?: boolean;
     recommendedCommunities?: boolean;

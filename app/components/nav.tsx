@@ -5,10 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { Calendar04Icon, Menu02Icon, Search01Icon } from '@hugeicons/react-pro';
+import { Calendar04Icon, Search01Icon, UserMultipleIcon } from '@hugeicons/react-pro';
 import clsx from 'clsx';
-
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 const links = [
   {
@@ -17,11 +15,11 @@ const links = [
     icon: <Calendar04Icon size={18} variant="twotone" />,
   },
   { name: 'Explore', href: '/places', icon: <Search01Icon size={18} variant="twotone" /> },
-  // {
-  //   name: 'Communities',
-  //   href: '/communities',
-  //   icon: <UserMultipleIcon size={18} variant="twotone" />,
-  // },
+  {
+    name: 'Communities',
+    href: '/communities',
+    icon: <UserMultipleIcon size={18} variant="twotone" />,
+  },
 ];
 
 export default function Nav() {
