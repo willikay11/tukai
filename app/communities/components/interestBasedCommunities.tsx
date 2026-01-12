@@ -63,7 +63,7 @@ export default function InterestBasedCommunities({ category }: { category?: stri
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"
+        className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-6 2xl:grid-cols-6"
       >
         {communityList.map((community: Community) => (
           <motion.div
