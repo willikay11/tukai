@@ -36,10 +36,13 @@ export const profile = async (id: string, token?: string) => {
   }
 };
 
-export const getUserInterests = async (userId: string) => {
+export const getUserInterests = async (userId: string, token: string) => {
   try {
-    const api = await apiWithToken();
-    const response = await api.get(`/v1/accounts/users/${userId}/interests/`);
+    const response = await api.get(`/v1/accounts/users/${userId}/interests/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return parseSnakeToCamel(response.data);
   } catch (error) {
     console.error(error);
