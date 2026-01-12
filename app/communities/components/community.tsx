@@ -9,7 +9,7 @@ import { Community } from '@/types/community';
 
 import CommunityMembers from './communityMembers';
 
-export default function SingleCommunity({ community }: { community: Community }) {
+export default function SingleCommunity({ community, aspectRatio }: { community: Community, aspectRatio?: string }) {
   const [hasError, setHasError] = useState(false);
 
   // Sanitize text to prevent XSS (if content is dynamic)
@@ -26,11 +26,11 @@ export default function SingleCommunity({ community }: { community: Community })
   return (
     <div className="flex flex-col">
       <div className="relative mb-2 flex flex-col">
-        <div className="relative aspect-square w-full overflow-hidden rounded-[5px]">
+        <div className={`relative ${aspectRatio || 'aspect-square'} w-full overflow-hidden rounded-[5px]`}>
           {!hasError ? (
             <ImageCarousel
               images={community.photos.map((photo) => photo.photo)}
-              imageHeight="h-full"
+              aspectRatio={aspectRatio}
             />
           ) : (
             <div className="h-full w-full bg-gray-50" />

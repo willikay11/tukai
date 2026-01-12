@@ -9,7 +9,7 @@ import { api, apiWithToken } from './apiService';
 export async function getInterestBasedCommunities(
   category?: string,
   page: number = 1,
-  perPage: number = 12,
+  perPage: number = 6,
   search?: string,
   showUpComingExperiences?: boolean,
   recommendedCommunities?: boolean,
