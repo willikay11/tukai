@@ -104,7 +104,7 @@ export const authOptions = {
       if (account?.provider === 'google') {
         const response = await socialSignIn('google-oauth2', account.access_token);
         const decoded = parseSnakeToCamel(jwt.decode(response.access)) as JwtPayload;
-        const interests: Interest[] = await getUserInterests();
+        const interests: Interest[] = await getUserInterests(decoded.userId);
 
         token.id = decoded?.userId;
         token.name = profile?.name;
