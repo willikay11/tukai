@@ -3,19 +3,10 @@
 import { useSession } from 'next-auth/react';
 
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
-import { Interest } from '@/types/interest';
 
 import InterestBasedCommunities from './interestBasedCommunities';
 import PopularCommunities from './popularCommunities';
 import RecommendedCommunities from './recommendedCommunities';
-
-const colors = [
-  { bg: 'bg-red-100', color: 'bg-red-500' },
-  { bg: 'bg-blue-100', color: 'bg-blue-500' },
-  { bg: 'bg-green-100', color: 'bg-green-500' },
-  { bg: 'bg-yellow-100', color: 'bg-yellow-500' },
-  { bg: 'bg-purple-100', color: 'bg-purple-500' },
-];
 
 export default function List() {
   const { data: session } = useSession();

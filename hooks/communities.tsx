@@ -28,7 +28,6 @@ export const useGetCommunities = (
     enabled: true,
   },
 ) => {
-  console.log('InterestBasedCommunities communities hook - category:');
   return useQuery({
     queryKey: ['communities', page, category, search],
     queryFn: async () =>
