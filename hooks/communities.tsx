@@ -15,6 +15,7 @@ export const useGetCommunities = (
     showUpComingExperiences,
     recommendedCommunities,
     popularCommunities,
+    following,
   }: {
     page: number;
     enabled: boolean;
@@ -23,6 +24,7 @@ export const useGetCommunities = (
     showUpComingExperiences?: boolean;
     recommendedCommunities?: boolean;
     popularCommunities?: boolean;
+    following?: boolean;
   } = {
     page: 1,
     enabled: true,
@@ -39,6 +41,7 @@ export const useGetCommunities = (
         showUpComingExperiences,
         recommendedCommunities,
         popularCommunities,
+        following,
       ),
     enabled: enabled,
   });

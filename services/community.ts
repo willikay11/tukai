@@ -12,6 +12,7 @@ export async function getInterestBasedCommunities(
   showUpComingExperiences?: boolean,
   recommendedCommunities?: boolean,
   popularCommunities?: boolean,
+  following?: boolean,
 ) {
   try {
     const queryParams = new URLSearchParams();
@@ -22,6 +23,7 @@ export async function getInterestBasedCommunities(
     if (showUpComingExperiences) queryParams.append('upcoming_experiences', 'true');
     if (recommendedCommunities) queryParams.append('recommended', 'true');
     if (popularCommunities) queryParams.append('popular', '4');
+    if (following) queryParams.append('following', 'true');
     queryParams.append('status', 'published');
 
     const api = await apiWithToken();
