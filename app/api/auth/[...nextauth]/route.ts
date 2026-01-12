@@ -106,6 +106,8 @@ export const authOptions = {
         const decoded = parseSnakeToCamel(jwt.decode(response.access)) as JwtPayload;
         const interests: Interest[] = await getUserInterests(decoded.userId, response.access);
 
+        console.log('JWT Google sign-in interests:', interests);
+
         token.id = decoded?.userId;
         token.name = profile?.name;
         token.email = profile?.email;
