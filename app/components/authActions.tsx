@@ -72,14 +72,14 @@ export default function AuthActions() {
 
                     <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
                       <div className="inline-flex items-center gap-2">
-                        <IconComponent iconName="Notification03Icon" size={15} color="gray" />
+                        <IconComponent iconName="BubbleChatIcon" size={15} color="gray" />
                         Messages
                       </div>
                     </NavigationMenuLink>
 
                     <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
                       <div className="inline-flex items-center gap-2">
-                        <IconComponent iconName="BubbleChatIcon" size={15} color="gray" />
+                        <IconComponent iconName="Notification03Icon" size={15} color="gray" />
                         Notifications
                       </div>
                     </NavigationMenuLink>

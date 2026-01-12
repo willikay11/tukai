@@ -25,7 +25,17 @@ const placeholders: Community[] = Array.from({ length: ITEMS_PER_PAGE }, (_, ind
   isJoined: false,
 }));
 
-export default function Communities({ aspectRatio, popularCommunities, following, noDataText }: { aspectRatio?: string, popularCommunities?: boolean, following?: boolean, noDataText?: string }) {
+export default function Communities({
+  aspectRatio,
+  popularCommunities,
+  following,
+  noDataText,
+}: {
+  aspectRatio?: string;
+  popularCommunities?: boolean;
+  following?: boolean;
+  noDataText?: string;
+}) {
   const {
     data: communities,
     isLoading,
@@ -45,33 +55,33 @@ export default function Communities({ aspectRatio, popularCommunities, following
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, ease: 'easeInOut' }}
-        className='mb-4'
+        className="mb-4"
       >
-        <NoData message={noDataText || "No communities found"} />
+        <NoData message={noDataText || 'No communities found'} />
       </motion.div>
     );
   }
 
   return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"
-      >
-        {communityList.map((community: Community) => (
-          <motion.div
-            key={community.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="cursor-pointer"
-          >
-            <Link href={`/communities/${community.id}`} target="_blank">
-              <SingleCommunity community={community} aspectRatio={aspectRatio} />
-            </Link>
-          </motion.div>
-        ))}
-      </motion.div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"
+    >
+      {communityList.map((community: Community) => (
+        <motion.div
+          key={community.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="cursor-pointer"
+        >
+          <Link href={`/communities/${community.id}`} target="_blank">
+            <SingleCommunity community={community} aspectRatio={aspectRatio} />
+          </Link>
+        </motion.div>
+      ))}
+    </motion.div>
   );
 }

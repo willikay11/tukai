@@ -1,8 +1,9 @@
+import { getServerSession } from 'next-auth';
+
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 import { api, apiWithToken } from './apiService';
-import { getServerSession } from 'next-auth';
 
 export async function getInterestBasedCommunities(
   category?: string[],

@@ -15,7 +15,7 @@ export default function ExperienceOrganiser({ experience }: { experience: Experi
   return (
     <>
       <SendMessage open={open} setOpen={setOpen} recipientId={experience.host.id} />
-      <div className="inline-flex w-full rounded-[15px] bg-blue-50 px-2 py-3.5">
+      <div className="inline-flex w-full rounded-[15px] bg-blue-50 px-3 py-3.5">
         <div className="inline-flex w-full justify-between">
           <div className="inline-flex">
             <Avatar className={`mr-2.5 h-[40px] w-[40px]`}>

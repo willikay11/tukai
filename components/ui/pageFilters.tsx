@@ -75,7 +75,7 @@ export default function PageFilters() {
       if (categoryFromQuery == null) {
         setSelectedCategoryId('recommended');
       } else {
-        setSelectedCategoryId(categoryFromQuery); 
+        setSelectedCategoryId(categoryFromQuery);
       }
     }
   }, [categories, pathname, categoryFromQuery, setSelectedCategoryId]);
