@@ -12,6 +12,7 @@ export default function List() {
   const { data: session } = useSession();
   const { selectedCategoryId } = useSelectedCategory();
 
+  console.log('session user interests:', session?.user);
   if (selectedCategoryId === 'my-communities') {
     return (
       <div key={selectedCategoryId}>
