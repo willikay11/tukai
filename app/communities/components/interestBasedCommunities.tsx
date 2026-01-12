@@ -13,7 +13,7 @@ import { Community } from '@/types/community';
 
 import SingleCommunity from './community';
 
-const ITEMS_PER_PAGE = 4;
+const ITEMS_PER_PAGE = 6;
 
 const placeholders: Community[] = Array.from({ length: ITEMS_PER_PAGE }, (_, index) => ({
   id: `placeholder-${index}`,
@@ -33,6 +33,8 @@ export default function InterestBasedCommunities({ category }: { category?: stri
     error,
   } = useGetCommunities({ page: 1, enabled: true, category });
 
+  console.log('InterestBasedCommunities communities:', communities);
+  
   const communityList = useMemo(() => {
     if (isLoading) {
       return placeholders;
@@ -49,7 +51,7 @@ export default function InterestBasedCommunities({ category }: { category?: stri
       <div className="mb-4 inline-flex items-center gap-2">
         <div className="inline-flex items-center gap-2">
           <div className="flex flex-col">
-            <p className={clsx('mb-4 mt-2.5 text-xl font-semibold text-gray-700')}>
+            <p className={clsx('mb-2 mt-2.5 text-xl font-semibold text-gray-700')}>
               Based on Your Interests
             </p>
             <p className={clsx('text-nowrap text-xs font-normal text-gray-400')}>

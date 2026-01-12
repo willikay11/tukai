@@ -1,10 +1,8 @@
-import { Session, getServerSession } from 'next-auth';
-import { getSession } from 'next-auth/react';
-
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 import { api, apiWithToken } from './apiService';
+import { getServerSession } from 'next-auth';
 
 export async function getInterestBasedCommunities(
   category?: string[],
@@ -16,6 +14,8 @@ export async function getInterestBasedCommunities(
   popularCommunities?: boolean,
 ) {
   try {
+    console.log('InterestBasedCommunities communities API');
+
     const queryParams = new URLSearchParams();
     if (page) queryParams.append('page', page.toString());
     if (perPage) queryParams.append('page_size', perPage.toString());
