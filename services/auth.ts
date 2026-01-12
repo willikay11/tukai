@@ -39,7 +39,7 @@ export const profile = async (id: string, token?: string) => {
 export const getUserInterests = async (userId: string) => {
   try {
     const api = await apiWithToken();
-    const response = await api.get(`/v1/accounts/user/${userId}/interests/`);
+    const response = await api.get(`/v1/accounts/users/${userId}/interests/`);
     return parseSnakeToCamel(response.data);
   } catch (error) {
     console.error(error);
