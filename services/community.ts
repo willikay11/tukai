@@ -5,6 +5,15 @@ import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 import { api, apiWithToken } from './apiService';
 
+export type CommunityPostsQueryParams = {
+  community?: string;
+  community__is_public?: boolean;
+  author?: boolean;
+  is_liked?: boolean;
+  page?: boolean;
+  page_size?: number;
+};
+
 export async function getInterestBasedCommunities(
   category?: string[],
   page: number = 1,
@@ -105,5 +114,26 @@ export async function joinCommunityWithToken(communityId: string, token?: string
     };
   } catch (error: any) {
     throw new Error(error?.response?.data?.error || 'An unexpected error occurred');
+  }
+}
+
+export async function fetchCommunityPosts(params: CommunityPostsQueryParams) {
+  try {
+    const api = await apiWithToken();
+    const response = await api.get(`/v1/community-posts/`, { params });
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
   }
 }
