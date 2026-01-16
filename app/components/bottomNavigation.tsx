@@ -21,7 +21,7 @@ const links = [
   {
     name: 'Communities',
     href: '/communities',
-    icon: <UserMultipleIcon size={18} variant="twotone" />,
+    icon: <UserMultipleIcon size={18} variant="twotone" className='mb-1' />,
   },
 ];
 
