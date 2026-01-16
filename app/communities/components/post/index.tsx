@@ -73,7 +73,7 @@ export default function Post({
 
       {post.photos.length > 0 && (
         <div className="mt-2 w-full">
-          <ImageCarousel images={post.photos.map((photo: Photo) => photo.photo)} />
+          <ImageCarousel images={post.photos.map((photo: Photo) => photo.photo)} width='w-[25.635rem]' />
         </div>
       )}
 
