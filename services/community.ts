@@ -1,18 +1,10 @@
 import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { CommunityPostsQueryParams } from '@/types/community';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 import { api, apiWithToken } from './apiService';
-
-export type CommunityPostsQueryParams = {
-  community?: string;
-  community__is_public?: boolean;
-  author?: boolean;
-  is_liked?: boolean;
-  page?: boolean;
-  page_size?: number;
-};
 
 export async function getInterestBasedCommunities(
   category?: string[],
@@ -120,7 +112,7 @@ export async function joinCommunityWithToken(communityId: string, token?: string
 export async function fetchCommunityPosts(params: CommunityPostsQueryParams) {
   try {
     const api = await apiWithToken();
-    const response = await api.get(`/v1/community-posts/`, { params });
+    const response = await api.get(`/v1/communities/posts/`, { params });
 
     return {
       status: response.status,

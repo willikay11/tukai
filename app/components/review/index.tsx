@@ -151,10 +151,7 @@ export default function Review({
         </div>
         {review.photos.length > 0 && (
           <div className="mt-2 w-full">
-            <ImageCarousel
-              imageHeight="h-96"
-              images={review.photos.map((photo: Photo) => photo.photo)}
-            />
+            <ImageCarousel images={review.photos.map((photo: Photo) => photo.photo)} />
           </div>
         )}
         {review.title && (

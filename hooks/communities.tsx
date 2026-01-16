@@ -1,13 +1,12 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import {
-  CommunityPostsQueryParams,
   fetchCommunityPosts,
   getInterestBasedCommunities,
   joinCommunity,
   joinCommunityWithToken,
 } from '@/services/community';
-import page from '@/app/experiences/[experienceId]/reserve/page';
+import { CommunityPostsQueryParams } from '@/types/community';
 
 export const useGetCommunities = (
   {
@@ -65,12 +64,17 @@ export const useJoinCommunityViaInvite = () => {
   });
 };
 
-
 export const useCommunityPosts = (params: CommunityPostsQueryParams, enabled: boolean) => {
   return useQuery({
-    queryKey: ['communityPosts', params.page, params.page_size, params.author, params.is_liked, params.page],
-    queryFn: async () =>
-      await fetchCommunityPosts(params), 
+    queryKey: [
+      'communityPosts',
+      params.page,
+      params.page_size,
+      params.author,
+      params.is_liked,
+      params.page,
+    ],
+    queryFn: async () => await fetchCommunityPosts(params),
     enabled: enabled,
   });
 };
