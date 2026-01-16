@@ -129,3 +129,24 @@ export async function fetchCommunityPosts(params: CommunityPostsQueryParams) {
     };
   }
 }
+
+export async function fetchCommunityPostPhotos(communityId: string) {
+  try {
+    const api = await apiWithToken();
+    const response = await api.get(`/v1/communities/${communityId}/post-photos/`);
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+}

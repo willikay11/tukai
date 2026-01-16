@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import {
+  fetchCommunityPostPhotos,
   fetchCommunityPosts,
   getInterestBasedCommunities,
   joinCommunity,
@@ -75,6 +76,14 @@ export const useCommunityPosts = (params: CommunityPostsQueryParams, enabled: bo
       params.page,
     ],
     queryFn: async () => await fetchCommunityPosts(params),
+    enabled: enabled,
+  });
+};
+
+export const useCommunityPostPhotos = (communityId: string, enabled: boolean) => {
+  return useQuery({
+    queryKey: ['communityPostPhotos', communityId],
+    queryFn: async () => await fetchCommunityPostPhotos(communityId),
     enabled: enabled,
   });
 };
