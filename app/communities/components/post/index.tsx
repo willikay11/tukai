@@ -49,7 +49,7 @@ export default function Post({
             <h3 className="text-base font-semibold text-gray-900">
               {post.createdBy.firstName} {post.createdBy.lastName}
             </h3>
-            <div className="flex items-start md:items-center gap-1 text-sm text-gray-600">
+            <div className="flex items-start flex-col md:flex-row md:items-center gap-1 text-sm text-gray-600">
               {showCommunityTitle && (
                 <>
                   <span className="hidden md:inline text-gray-400">in</span>
