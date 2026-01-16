@@ -49,17 +49,17 @@ export default function Post({
             <h3 className="text-base font-semibold text-gray-900">
               {post.createdBy.firstName} {post.createdBy.lastName}
             </h3>
-            <div className="flex items-center gap-1 text-sm text-gray-600">
+            <div className="flex items-start md:items-center gap-1 text-sm text-gray-600">
               {showCommunityTitle && (
                 <>
-                  <span className="text-gray-400">in</span>
+                  <span className="hidden md:inline text-gray-400">in</span>
                   <Link
                     href={`/communities/${post.community.id}`}
                     className="flex items-center gap-1 font-medium text-primary hover:underline"
                   >
                     <span>{post.community.title}</span>
                   </Link>
-                  <span className="mx-1 text-gray-400">•</span>
+                  <span className="mx-1 text-gray-400 hidden md:inline">•</span>
                 </>
               )}
               <span className="text-gray-400">{formatDate(post.dateCreated)}</span>
@@ -73,7 +73,7 @@ export default function Post({
 
       {post.photos.length > 0 && (
         <div className="mt-2 w-full">
-          <ImageCarousel images={post.photos.map((photo: Photo) => photo.photo)} width='w-[25.635rem]' />
+          <ImageCarousel images={post.photos.map((photo: Photo) => photo.photo)} width='w-full md:w-[25.635rem]' />
         </div>
       )}
 

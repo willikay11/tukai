@@ -17,6 +17,7 @@ import Join from '../components/join';
 import UpcomingExperiences from '../components/upcomingExperiences';
 import AuthGuard from './components/authGuard';
 import CommunityTabs from './components/communityTabs';
+import IconComponent from '@/app/components/iconComponent';
 
 export default async function ViewCommunityPage({
   params,
@@ -90,8 +91,9 @@ export default async function ViewCommunityPage({
                   className="inline-flex w-fit rounded-full bg-gray-100 px-4 py-2"
                   key={category.id}
                 >
-                  <div className="flex flex-col">
-                    <p className="text-sm text-gray-700">{category.name}</p>
+                  <div className="inline-flex">
+                    <IconComponent iconName={category.icon} size={18} />
+                    <p className="ml-2 text-sm text-gray-700">{category.name}</p>
                   </div>
                 </div>
               ))}
