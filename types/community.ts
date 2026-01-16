@@ -13,6 +13,7 @@ export type CommunityMember = {
 export type CommunityCategory = {
   id: string;
   name: string;
+  icon: string;
 };
 
 export type Community = {
