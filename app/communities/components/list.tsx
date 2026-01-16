@@ -5,8 +5,8 @@ import { useSession } from 'next-auth/react';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 
 import Communities from './Communities';
+import CommunityPosts from './communityPosts';
 import InterestBasedCommunities from './interestBasedCommunities';
-import RecommendedCommunities from './recommendedCommunities';
 
 export default function List() {
   const { data: session } = useSession();
@@ -39,6 +39,14 @@ export default function List() {
         <InterestBasedCommunities
           category={session?.user?.interests?.map((category) => category.id)}
         />
+      </div>
+    );
+  }
+
+  if (selectedCategoryId === 'posts') {
+    return (
+      <div key={selectedCategoryId}>
+        <CommunityPosts />
       </div>
     );
   }

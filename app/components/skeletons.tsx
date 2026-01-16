@@ -63,3 +63,26 @@ export function ImageSkeleton() {
     </div>
   );
 }
+
+export function PostSkeleton() {
+  return (
+    <div className={`${shimmer} relative rounded-lg bg-white p-4`}>
+      <div className="mb-4 flex items-start gap-3">
+        <div className="h-12 w-12 flex-shrink-0 rounded-full bg-gray-200" />
+        <div className="flex-1">
+          <div className="mb-2 h-5 w-40 rounded-[6px] bg-gray-200" />
+          <div className="h-4 w-56 rounded-[6px] bg-gray-200" />
+        </div>
+      </div>
+      <div className="mb-4 space-y-2">
+        <div className="h-4 w-full rounded-[6px] bg-gray-200" />
+        <div className="h-4 w-full rounded-[6px] bg-gray-200" />
+        <div className="h-4 w-3/4 rounded-[6px] bg-gray-200" />
+      </div>
+      <div className="flex items-center gap-4">
+        <div className="h-5 w-20 rounded-[6px] bg-gray-200" />
+        <div className="h-5 w-24 rounded-[6px] bg-gray-200" />
+      </div>
+    </div>
+  );
+}

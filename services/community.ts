@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { CommunityPostsQueryParams } from '@/types/community';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 import { api, apiWithToken } from './apiService';
@@ -105,5 +106,47 @@ export async function joinCommunityWithToken(communityId: string, token?: string
     };
   } catch (error: any) {
     throw new Error(error?.response?.data?.error || 'An unexpected error occurred');
+  }
+}
+
+export async function fetchCommunityPosts(params: CommunityPostsQueryParams) {
+  try {
+    const api = await apiWithToken();
+    const response = await api.get(`/v1/communities/posts/`, { params });
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+}
+
+export async function fetchCommunityPostPhotos(communityId: string) {
+  try {
+    const api = await apiWithToken();
+    const response = await api.get(`/v1/communities/${communityId}/post-photos/`);
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
   }
 }

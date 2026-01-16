@@ -1,10 +1,13 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import {
+  fetchCommunityPostPhotos,
+  fetchCommunityPosts,
   getInterestBasedCommunities,
   joinCommunity,
   joinCommunityWithToken,
 } from '@/services/community';
+import { CommunityPostsQueryParams } from '@/types/community';
 
 export const useGetCommunities = (
   {
@@ -59,5 +62,28 @@ export const useJoinCommunityViaInvite = () => {
     mutationKey: ['joinCommunityViaInvite'],
     mutationFn: async ({ communityId, token }: { communityId: string; token: string }) =>
       await joinCommunityWithToken(communityId, token),
+  });
+};
+
+export const useCommunityPosts = (params: CommunityPostsQueryParams, enabled: boolean) => {
+  return useQuery({
+    queryKey: [
+      'communityPosts',
+      params.page,
+      params.page_size,
+      params.author,
+      params.is_liked,
+      params.page,
+    ],
+    queryFn: async () => await fetchCommunityPosts(params),
+    enabled: enabled,
+  });
+};
+
+export const useCommunityPostPhotos = (communityId: string, enabled: boolean) => {
+  return useQuery({
+    queryKey: ['communityPostPhotos', communityId],
+    queryFn: async () => await fetchCommunityPostPhotos(communityId),
+    enabled: enabled,
   });
 };
