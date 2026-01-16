@@ -16,9 +16,11 @@ import { cn } from '@/lib/utils';
 const ImageCarousel = ({
   images,
   aspectRatio = 'aspect-square',
+  width = 'w-full',
 }: {
   images: string[];
   aspectRatio?: string;
+  width?: string;
 }) => {
   const [isScrolling, setIsScrolling] = useState(false);
   const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -55,13 +57,13 @@ const ImageCarousel = ({
   };
 
   return (
-    <div className="group relative w-full">
-      <Carousel className="w-full">
+    <div className={clsx(`group relative ${width}`)}>
+      <Carousel className={clsx(width)}>
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index}>
               <div
-                className={clsx(`relative w-full ${aspectRatio}`, {
+                className={clsx(`relative ${width} ${aspectRatio}`, {
                   'h-[150px]': aspectRatio !== 'aspect-square',
                 })}
               >
