@@ -2,7 +2,7 @@ import { getSession } from 'next-auth/react';
 
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
-import { api } from './apiService';
+import { api, apiWithToken } from './apiService';
 
 export const sendMessage = async ({
   content,
@@ -12,6 +12,7 @@ export const sendMessage = async ({
   recipientId: string;
 }) => {
   try {
+    const api = await apiWithToken();
     const session = await getSession();
     const senderId = session?.user?.id;
 
