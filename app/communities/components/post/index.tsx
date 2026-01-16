@@ -34,7 +34,7 @@ export default function Post({
   };
 
   return (
-    <div className="flex flex-col rounded-lg bg-white p-4">
+    <div className="flex flex-col rounded-lg bg-white p-2">
       {/* Header */}
       <div className="mb-3 flex items-start justify-between">
         <div className="flex items-start gap-3">

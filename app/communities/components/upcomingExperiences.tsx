@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 import SingleExperience from '@/app/components/experiences/Single';
-import { useGetCommunities } from '@/hooks/communities';
+import NoData from '@/components/ui/noData';
 import { useExperiences } from '@/hooks/experiences';
 import { Experience } from '@/types/experience';
+import clsx from 'clsx';
 
 export default function UpcomingExperiences({ category }: { category: string }) {
   const { data: upcomingExperiences } = useExperiences(
@@ -31,13 +32,24 @@ export default function UpcomingExperiences({ category }: { category: string }) 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3"
+          className={
+            clsx("grid", {
+              'grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3': upcomingExperiences?.data?.count > 0,
+              'grid-cols-1': upcomingExperiences?.data?.count === 0,
+            })
+          }
         >
-          {upcomingExperiences?.data?.results?.map((experience: Experience) => (
-            <Link key={experience.id} href={`/experiences/${experience.id}`} target="_blank">
-              <SingleExperience key={experience.id} experience={experience} type="invited" />
-            </Link>
-          ))}
+          {upcomingExperiences?.data?.count > 0 ? (
+            upcomingExperiences?.data?.results?.map((experience: Experience) => (
+              <Link key={experience.id} href={`/experiences/${experience.id}`} target="_blank">
+                <SingleExperience key={experience.id} experience={experience} type="invited" />
+              </Link>
+            ))
+          ) : (
+            <div className="flex items-center justify-center">
+              <NoData message="No upcoming experiences found" />
+            </div>
+          )}
         </motion.div>
       </div>
     </div>
