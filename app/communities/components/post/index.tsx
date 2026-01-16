@@ -13,7 +13,13 @@ import ImageCarousel from '@/components/ui/imageCarousel';
 import { CommunityPost } from '@/types/community';
 import { Photo } from '@/types/photo';
 
-export default function Post({ post }: { post: CommunityPost }) {
+export default function Post({
+  post,
+  showCommunityTitle = true,
+}: {
+  post: CommunityPost;
+  showCommunityTitle?: boolean;
+}) {
   const [isLiked, setIsLiked] = useState(post.isLiked);
   const [likesCount, setLikesCount] = useState(post.totalLikes ?? 0);
 
@@ -44,14 +50,18 @@ export default function Post({ post }: { post: CommunityPost }) {
               {post.createdBy.firstName} {post.createdBy.lastName}
             </h3>
             <div className="flex items-center gap-1 text-sm text-gray-600">
-              <span className="text-gray-400">in</span>
-              <Link
-                href={`/communities/${post.community.id}`}
-                className="flex items-center gap-1 font-medium text-primary hover:underline"
-              >
-                <span>{post.community.title}</span>
-              </Link>
-              <span className="mx-1 text-gray-400">•</span>
+              {showCommunityTitle && (
+                <>
+                  <span className="text-gray-400">in</span>
+                  <Link
+                    href={`/communities/${post.community.id}`}
+                    className="flex items-center gap-1 font-medium text-primary hover:underline"
+                  >
+                    <span>{post.community.title}</span>
+                  </Link>
+                  <span className="mx-1 text-gray-400">•</span>
+                </>
+              )}
               <span className="text-gray-400">{formatDate(post.dateCreated)}</span>
             </div>
           </div>

@@ -36,17 +36,17 @@ export default function SingleCommunity({
         <div
           className={`relative ${aspectRatio || 'aspect-square'} w-full overflow-hidden rounded-[5px]`}
         >
-          <div className="absolute left-0 top-0 z-50 inline-flex p-3">
+          <div className="absolute left-0 top-0 z-[1] inline-flex p-3">
             {community.categories?.slice(0, 2).map((category) => (
               <div
-                className="mr-1 rounded-[40px] bg-gray-700 px-3 py-2 text-xs font-medium text-white opacity-75"
+                className="mr-1 whitespace-nowrap rounded-[40px] bg-gray-700 px-3 py-2 text-xs font-medium text-white opacity-75"
                 key={category.id}
               >
                 {category.name}
               </div>
             ))}
             {community.categories && community.categories.length > 2 && (
-              <div className="mr-1 rounded-[40px] bg-gray-700 px-3 py-2 text-xs font-medium text-white opacity-75">
+              <div className="mr-1 whitespace-nowrap rounded-[40px] bg-gray-700 px-3 py-2 text-xs font-medium text-white opacity-75">
                 +{community.categories.length - 2}
               </div>
             )}
