@@ -7,7 +7,6 @@ import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import Communities from './Communities';
 import CommunityPosts from './communityPosts';
 import InterestBasedCommunities from './interestBasedCommunities';
-import RecommendedCommunities from './recommendedCommunities';
 
 export default function List() {
   const { data: session } = useSession();

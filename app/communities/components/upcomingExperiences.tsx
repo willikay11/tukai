@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 
+import clsx from 'clsx';
 import { motion } from 'framer-motion';
 
 import SingleExperience from '@/app/components/experiences/Single';
 import NoData from '@/components/ui/noData';
 import { useExperiences } from '@/hooks/experiences';
 import { Experience } from '@/types/experience';
-import clsx from 'clsx';
 
 export default function UpcomingExperiences({ category }: { category: string }) {
   const { data: upcomingExperiences } = useExperiences(
@@ -25,19 +25,22 @@ export default function UpcomingExperiences({ category }: { category: string }) 
       <div className="col-span-12 md:col-span-7 md:col-start-4 2xl:col-span-4 2xl:col-start-5">
         <div className="mb-4 inline-flex items-center space-x-2">
           <p className="text-base font-bold text-gray-700">Upcoming Experiences</p>
-          <div className="h-[3px] w-[3px] rounded-full bg-gray-400" />
-          <p className="text-base text-gray-500">{upcomingExperiences?.data?.count}</p>
+          {upcomingExperiences?.data?.count != 0 && (
+            <>
+              <div className="h-[3px] w-[3px] rounded-full bg-gray-400" />
+              <p className="text-base text-gray-500">{upcomingExperiences?.data?.count}</p>
+            </>
+          )}
         </div>
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className={
-            clsx("grid", {
-              'grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3': upcomingExperiences?.data?.count > 0,
-              'grid-cols-1': upcomingExperiences?.data?.count === 0,
-            })
-          }
+          className={clsx('grid', {
+            'grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3':
+              upcomingExperiences?.data?.count > 0,
+            'grid-cols-1': upcomingExperiences?.data?.count === 0,
+          })}
         >
           {upcomingExperiences?.data?.count > 0 ? (
             upcomingExperiences?.data?.results?.map((experience: Experience) => (

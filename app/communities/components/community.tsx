@@ -18,7 +18,6 @@ export default function SingleCommunity({
 }) {
   const [hasError, setHasError] = useState(false);
 
-  console.log('Community:', community);
   // Sanitize text to prevent XSS (if content is dynamic)
   const safeText = sanitizeHtml(community.description);
 

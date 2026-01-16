@@ -2,6 +2,7 @@
 
 import { clsx } from 'clsx';
 
+import { PostSkeleton } from '@/app/components/skeletons';
 import NoData from '@/components/ui/noData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCommunityPosts } from '@/hooks/communities';
@@ -14,7 +15,10 @@ type communityTabsProps = {
 };
 
 export default function CommunityTabs({ communityId }: communityTabsProps) {
-  const { data: communityPosts } = useCommunityPosts({ community: communityId, page: 1 }, true);
+  const { data: communityPosts, isLoading } = useCommunityPosts(
+    { community: communityId, page: 1 },
+    true,
+  );
   return (
     <Tabs defaultValue="posts" className="w-full md:w-[75%]">
       <TabsList className="sticky top-0 w-full justify-start rounded-none bg-white">
@@ -22,16 +26,28 @@ export default function CommunityTabs({ communityId }: communityTabsProps) {
         <TabsTrigger value="photos">Photos</TabsTrigger>
       </TabsList>
       <TabsContent value="posts">
-        {communityPosts?.data?.results?.map((post: CommunityPost, index: number) => (
-          <div
-            key={post.id}
-            className={clsx({
-              'border-b-[1px] border-gray-100': index !== communityPosts.data.results.length - 1,
-            })}
-          >
-            <Post post={post} showCommunityTitle={false} />
+        {isLoading ? (
+          <>
+            <PostSkeleton />
+            <PostSkeleton />
+            <PostSkeleton />
+          </>
+        ) : communityPosts?.data?.count > 0 ? (
+          communityPosts?.data?.results?.map((post: CommunityPost, index: number) => (
+            <div
+              key={post.id}
+              className={clsx({
+                'border-b-[1px] border-gray-100': index !== communityPosts.data.results.length - 1,
+              })}
+            >
+              <Post post={post} showCommunityTitle={false} />
+            </div>
+          ))
+        ) : (
+          <div className="flex items-center justify-center py-10">
+            <NoData message="No posts found in this community" />
           </div>
-        ))}
+        )}
       </TabsContent>
     </Tabs>
   );
