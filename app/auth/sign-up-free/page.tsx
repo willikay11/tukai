@@ -64,7 +64,7 @@ export default function Page() {
     if (userExistsData?.exists === true) {
       setError('email', {
         type: 'manual',
-        message: 'This email is already registered. Please sign in instead.',
+        message: 'This email already exists. Please login or use a different email.',
       });
     } else if (userExistsData?.exists === false) {
       clearErrors('email');
