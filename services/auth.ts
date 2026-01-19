@@ -73,7 +73,6 @@ export const refreshToken = async (refreshToken: string) => {
     const response = await api.post('/v1/accounts/login/refresh/', { refresh: refreshToken });
     return parseSnakeToCamel(response.data);
   } catch (error: any) {
-    console.error('heere:', error.response.data);
     throw error;
   }
 };
