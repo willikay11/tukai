@@ -8,14 +8,14 @@ import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 
 import { LockKeyIcon, RefreshIcon } from '@hugeicons/react-pro';
+import { set } from 'lodash';
 
 import { Input } from '@/app/components/form';
 import OtpInput from '@/app/components/form/otpInput';
 import SuccessMessage from '@/app/components/messages/success';
 import MobileStore from '@/app/components/mobileStore';
-import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { set } from 'lodash';
+import { toast } from '@/hooks/use-toast';
 
 type Inputs = {
   password: string;
@@ -42,13 +42,13 @@ export default function Page() {
 
   const onResend = async () => {
     setIsResending(true);
-      const response = await fetch('/auth/forgot-password/api', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: account?.email?.payload,
-        }),
-      }); 
+    const response = await fetch('/auth/forgot-password/api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: account?.email?.payload,
+      }),
+    });
 
     const res = await response.json();
 
@@ -68,7 +68,7 @@ export default function Page() {
       description: 'Verification code resent successfully',
       variant: 'success',
     });
-  }
+  };
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setIsSubmitting(true);
@@ -140,14 +140,14 @@ export default function Page() {
             </div>
 
             <div className="mb-2.5">
-              <Button className='w-full h-[50px]' disabled={isSubmitting}>
+              <Button className="h-[50px] w-full" disabled={isSubmitting}>
                 {isSubmitting ? 'Submitting...' : 'Submit'}
               </Button>
             </div>
 
             <div className="mb-4 mt-4 flex justify-center">
               <span className="mr-1 text-xs">Wrong Token?</span>
-              <Button variant="link" className='p-0 h-fit' onClick={() => setEnterPassword(false)}>
+              <Button variant="link" className="h-fit p-0" onClick={() => setEnterPassword(false)}>
                 Edit
               </Button>
             </div>
@@ -168,7 +168,7 @@ export default function Page() {
           </div>
 
           <div className="mb-4">
-            <p className="text-xs text-gray-700 font-medium">
+            <p className="text-xs font-medium text-gray-700">
               A four digit code was sent to{' '}
               <span className="text-primary">{account?.email?.payload}</span>.
             </p>
@@ -176,12 +176,12 @@ export default function Page() {
 
           <OtpInput onComplete={(token) => setToken(token)} />
           <div className="mb-4 mt-4 inline-flex w-full justify-center">
-            <Button variant="link" className='p-0 h-fit' onClick={onResend}>
+            <Button variant="link" className="h-fit p-0" onClick={onResend}>
               <RefreshIcon variant="twotone" size={16} className="mr-2" />
               {isResending ? 'Resending...' : 'Resend Code'}
             </Button>
           </div>
-          <Button className='w-full h-[50px]' onClick={onNext}>
+          <Button className="h-[50px] w-full" onClick={onNext}>
             Submit
           </Button>
         </div>

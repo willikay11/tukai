@@ -11,7 +11,7 @@ import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { useExperiences } from '@/hooks/experiences';
 
 type ListExperiencesProps = {
-  title: string;
+  title?: string;
   skeletonCount?: number;
   category?: string;
   date?: string;
@@ -19,6 +19,7 @@ type ListExperiencesProps = {
   isReserved?: boolean;
   isBookedmarked?: boolean;
   isHosted?: boolean;
+  noDataMessage?: string;
 };
 
 export default function Experiences({
@@ -30,6 +31,7 @@ export default function Experiences({
   isReserved = false,
   isBookedmarked = false,
   isHosted = false,
+  noDataMessage,
 }: ListExperiencesProps) {
   const { selectedCategoryId } = useSelectedCategory();
   const { data: session } = useSession();
@@ -41,7 +43,7 @@ export default function Experiences({
       date,
       reserved_by: isReserved ? session?.user?.id || undefined : undefined,
       hosted_by: isHosted ? session?.user?.id || undefined : undefined,
-      bookmarked: isBookedmarked ? true : undefined,
+      bookmarked: isBookedmarked ? session?.user?.id || undefined : undefined,
     },
     true,
   );
@@ -78,7 +80,7 @@ export default function Experiences({
 
   const content = (
     <div className={clsx('col-span-12 mb-4 mt-4 md:col-span-10 md:col-start-2 md:mx-0')}>
-      <p className="mb-4 text-xl font-semibold text-gray-700">{title}</p>
+      {title && <p className="mb-4 text-xl font-semibold text-gray-700">{title}</p>}
       <ListExperiences
         key={selectedCategoryId}
         experiences={experiences?.data?.results}
@@ -91,6 +93,7 @@ export default function Experiences({
         setPage={setPage}
         skeletonCount={skeletonCount}
         type={'discover'}
+        noDataMessage={noDataMessage}
       />
     </div>
   );

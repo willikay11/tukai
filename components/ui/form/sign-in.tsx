@@ -38,7 +38,8 @@ export default function SignInForm({ onLogin }: { onLogin: () => void }) {
       onLogin();
     } else {
       toast({
-        description: 'Invalid credentials, please check your email and password or sign up if you do not have an account.',
+        description:
+          'Invalid credentials, please check your email and password or sign up if you do not have an account.',
         variant: 'destructive',
       });
     }

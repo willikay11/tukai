@@ -21,6 +21,7 @@ type ListExperiencesProps = {
   setPage: (page: number) => void;
   skeletonCount?: number;
   type: 'discover' | 'invited';
+  noDataMessage?: string;
 };
 
 const createPlaceholders = (count: number): Experience[] => {
@@ -75,6 +76,7 @@ export default function ListExperiences({
   skeletonCount = 12,
   page,
   setPage,
+  noDataMessage,
 }: ListExperiencesProps) {
   const { selectedCategoryId } = useSelectedCategory();
 
@@ -180,7 +182,7 @@ export default function ListExperiences({
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, ease: 'easeInOut' }}
       >
-        <NoData message="No experiences found" />
+        <NoData message={noDataMessage || 'No experiences found'} />
       </motion.div>
     );
   }
