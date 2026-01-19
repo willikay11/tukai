@@ -69,6 +69,7 @@ export default function Page() {
       variant: 'success',
     });
   }
+
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setIsSubmitting(true);
     const response = await fetch('/auth/reset-password/api', {
@@ -88,6 +89,10 @@ export default function Page() {
         description: res.message,
         variant: 'destructive',
       });
+
+      if (res.message.includes('provided token is invalid or has expired.')) {
+        setEnterPassword(false);
+      }
       return;
     }
     setEnterPassword(false);
@@ -142,7 +147,7 @@ export default function Page() {
 
             <div className="mb-4 mt-4 flex justify-center">
               <span className="mr-1 text-xs">Wrong Token?</span>
-              <Button variant="link" onClick={() => setEnterPassword(false)}>
+              <Button variant="link" className='p-0 h-fit' onClick={() => setEnterPassword(false)}>
                 Edit
               </Button>
             </div>
@@ -152,7 +157,7 @@ export default function Page() {
         <SuccessMessage
           icon="CheckmarkCircle03Icon"
           title="Password reset complete"
-          description="Your new password was created successfully."
+          description="Your new password was reset successfully."
           buttonTitle="Done"
           onContinue={() => router.push('/auth/sign-in')}
         />

@@ -41,7 +41,7 @@ export default function SuccessMessage({
       </div>
 
       <div className="mb-4">
-        <p className="text-xs text-gray-700">
+        <p className="text-xs text-gray-700 font-medium">
           {description}
           {subDescription ? subDescription : null}
         </p>
