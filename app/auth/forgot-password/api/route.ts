@@ -31,7 +31,6 @@ export async function POST(req: Request) {
       message: 'A verification code was sent to your email.',
     });
   } catch (e) {
-    console.error('Forgot Password Error:', e);
     return Response.json(
       {
         message: 'Unable to process request at the moment. Please try again later.',
