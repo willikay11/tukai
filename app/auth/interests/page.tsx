@@ -61,7 +61,7 @@ export default function Page() {
         variant: 'destructive',
       });
 
-      if (res?.message.incliudes('already exists')) {
+      if (res?.message.includes('already exists')) {
         router.push('/auth/sign-in');
       }
       return;
