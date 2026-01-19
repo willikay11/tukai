@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 
+import { useSession } from 'next-auth/react';
+
 import moment from 'moment';
 import numeral from 'numeral';
 
@@ -21,9 +23,8 @@ export default function SingleExperience({
   type: 'discover' | 'invited';
   experience: Experience;
 }) {
-  const [bookmarked, setBookmarked] = useState<boolean>(experience.isBookmarked);
   const [hasError, setHasError] = useState(false);
-
+  const { data: session } = useSession();
   const { mutate: bookmarkExperience } = useBookmarkExperience();
 
   if (experience.id.startsWith('placeholder-')) {
@@ -67,7 +68,8 @@ export default function SingleExperience({
         </div>
         <div className="absolute right-2 top-2">
           <Bookmark
-            bookmarked={bookmarked}
+            bookmarked={experience.isBookmarked}
+            userId={session?.user?.id}
             onBookmark={() => bookmarkExperience(experience.id)}
             onUnbookmark={() => bookmarkExperience(experience.id)}
           />

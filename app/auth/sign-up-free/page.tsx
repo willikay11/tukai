@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -38,7 +38,7 @@ export default function Page() {
   const dispatch = useDispatch();
   const newUser = useSelector((state: any) => state.userReducer.newUser);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  
+
   const {
     register,
     handleSubmit,
@@ -48,7 +48,11 @@ export default function Page() {
     clearErrors,
   } = useForm<Inputs>({ mode: 'onChange' });
 
-  const { data: userExistsData, isPending: isCheckingEmail, mutate: checkUserExists } = useUserExists();
+  const {
+    data: userExistsData,
+    isPending: isCheckingEmail,
+    mutate: checkUserExists,
+  } = useUserExists();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setIsSubmitting(true);
@@ -58,9 +62,8 @@ export default function Page() {
     setIsSubmitting(false);
   };
 
-
   // Update last checked email when we get results
-  useEffect(() => {      
+  useEffect(() => {
     if (userExistsData?.exists === true) {
       setError('email', {
         type: 'manual',
@@ -126,9 +129,9 @@ export default function Page() {
             })}
             error={errors.email?.message}
           />
-          { isCheckingEmail ? (
+          {isCheckingEmail ? (
             <div className="mt-1 text-xs text-blue-500">Checking email...</div>
-          ) : null }
+          ) : null}
         </div>
 
         <div className="mb-2">

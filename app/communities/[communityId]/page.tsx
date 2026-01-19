@@ -3,6 +3,7 @@ import { Session, getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
 import GoogleMapComponent from '@/app/components/googleMap';
+import IconComponent from '@/app/components/iconComponent';
 import Share from '@/app/components/share';
 import PhotoGallery from '@/components/ui/PhotoGallery';
 import { Separator } from '@/components/ui/separator';
@@ -17,7 +18,6 @@ import Join from '../components/join';
 import UpcomingExperiences from '../components/upcomingExperiences';
 import AuthGuard from './components/authGuard';
 import CommunityTabs from './components/communityTabs';
-import IconComponent from '@/app/components/iconComponent';
 
 export default async function ViewCommunityPage({
   params,

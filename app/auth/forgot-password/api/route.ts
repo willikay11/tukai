@@ -9,7 +9,7 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         email,
-        category: 'password_reset'
+        category: 'password_reset',
       }),
     });
 
