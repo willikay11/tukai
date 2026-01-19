@@ -136,7 +136,7 @@ export default function Page() {
                 <div className="mr-2">
                   <IconComponent iconName={interest.icon} size={16} />
                 </div>
-                <span className="text-xs">{interest.name}</span>
+                <span className="text-xs font-medium">{interest.name}</span>
               </div>
             );
           })
