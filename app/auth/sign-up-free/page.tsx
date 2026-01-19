@@ -174,13 +174,13 @@ export default function Page() {
       </form>
 
       <div className="mb-4 flex w-full items-center">
-        <span className="w-full text-center text-xs">
+        <span className="w-full text-center text-xs font-medium">
           Already have an account? <Anchor link="/auth/sign-in">Sign in</Anchor>
         </span>
       </div>
 
       <div className="mb-3">
-        <p className="text-xs">
+        <p className="text-xs font-medium">
           By continuing to use Tukai, you agree to our <Anchor link="/terms">Terms of Use</Anchor>
           &nbsp;and <Anchor link="/privacy">Privacy Policy</Anchor>
         </p>

@@ -2,13 +2,14 @@ export async function POST(req: Request) {
   try {
     const { email } = await req.json();
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/accounts/password-reset/`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/accounts/token/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         email,
+        category: 'password_reset'
       }),
     });
 
@@ -30,9 +31,10 @@ export async function POST(req: Request) {
       message: 'A verification code was sent to your email.',
     });
   } catch (e) {
+    console.error('Forgot Password Error:', e);
     return Response.json(
       {
-        message: 'Account not created',
+        message: 'Unable to process request at the moment. Please try again later.',
       },
       {
         status: 400,

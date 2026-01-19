@@ -9,11 +9,13 @@ import { useRouter } from 'next/navigation';
 
 import { LockKeyIcon, RefreshIcon } from '@hugeicons/react-pro';
 
-import { Button, Input } from '@/app/components/form';
+import { Input } from '@/app/components/form';
 import OtpInput from '@/app/components/form/otpInput';
 import SuccessMessage from '@/app/components/messages/success';
 import MobileStore from '@/app/components/mobileStore';
 import { toast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { set } from 'lodash';
 
 type Inputs = {
   password: string;
@@ -29,6 +31,7 @@ export default function Page() {
     formState: { errors },
   } = useForm<Inputs>({ mode: 'onChange' });
   const [token, setToken] = useState<string | undefined>();
+  const [isResending, setIsResending] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [enterPassword, setEnterPassword] = useState<boolean>(false);
   const [passwordChanged, setPasswordChanged] = useState<boolean>(false);
@@ -37,12 +40,41 @@ export default function Page() {
     setEnterPassword(true);
   };
 
+  const onResend = async () => {
+    setIsResending(true);
+      const response = await fetch('/auth/forgot-password/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: account?.email?.payload,
+        }),
+      }); 
+
+    const res = await response.json();
+
+    setIsResending(false);
+    if (!response.ok) {
+      setIsSubmitting(false);
+      toast({
+        title: 'Failure',
+        description: res.message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    toast({
+      title: 'Success',
+      description: 'Verification code resent successfully',
+      variant: 'success',
+    });
+  }
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setIsSubmitting(true);
     const response = await fetch('/auth/reset-password/api', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, password: data.password }),
+      body: JSON.stringify({ token, password: data.password, email: account?.email?.payload }),
     });
 
     const res = await response.json();
@@ -103,14 +135,14 @@ export default function Page() {
             </div>
 
             <div className="mb-2.5">
-              <Button block htmlType="submit" loading={isSubmitting}>
-                Submit
+              <Button className='w-full h-[50px]' disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting...' : 'Submit'}
               </Button>
             </div>
 
             <div className="mb-4 mt-4 flex justify-center">
               <span className="mr-1 text-xs">Wrong Token?</span>
-              <Button type="link" onClick={() => setEnterPassword(false)}>
+              <Button variant="link" onClick={() => setEnterPassword(false)}>
                 Edit
               </Button>
             </div>
@@ -131,7 +163,7 @@ export default function Page() {
           </div>
 
           <div className="mb-4">
-            <p className="text-xs text-gray-700">
+            <p className="text-xs text-gray-700 font-medium">
               A four digit code was sent to{' '}
               <span className="text-primary">{account?.email?.payload}</span>.
             </p>
@@ -139,12 +171,12 @@ export default function Page() {
 
           <OtpInput onComplete={(token) => setToken(token)} />
           <div className="mb-4 mt-4 inline-flex w-full justify-center">
-            <Button type="link">
+            <Button variant="link" className='p-0 h-fit' onClick={onResend}>
               <RefreshIcon variant="twotone" size={16} className="mr-2" />
-              Resend Code
+              {isResending ? 'Resending...' : 'Resend Code'}
             </Button>
           </div>
-          <Button block onClick={onNext}>
+          <Button className='w-full h-[50px]' onClick={onNext}>
             Submit
           </Button>
         </div>
