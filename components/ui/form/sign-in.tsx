@@ -87,7 +87,7 @@ export default function SignInForm({ onLogin }: { onLogin: () => void }) {
         </div>
       </form>
 
-      <div className="mb-1 flex justify-end">
+      <div className="my-2.5 flex justify-end">
         <Anchor link="/auth/forgot-password">Forgot Password?</Anchor>
       </div>
 
@@ -102,20 +102,20 @@ export default function SignInForm({ onLogin }: { onLogin: () => void }) {
           }
           type="blue"
         >
-          <div className="inline-flex items-center">
+          <div className="inline-flex items-center font-medium">
             <GoogleIcon className="mr-2 text-white" variant="solid" type="sharp" /> Continue with
             Google
           </div>
         </Button>
       </div>
 
-      <div className="mb-1 mb-4 flex w-full items-center">
+      <div className="mb-1 mb-4 flex w-full items-center font-medium">
         <span className="w-full text-center text-xs">
           Don&apos;t have an account? <Anchor link="/auth/sign-up">Sign up for free</Anchor>
         </span>
       </div>
 
-      <div className="mb-3">
+      <div className="mb-3 font-medium">
         <p className="text-xs">
           By continuing to use Tukai, you agree to our <Anchor link="/terms">Terms of Use</Anchor>
           &nbsp;and <Anchor link="/privacy">Privacy Policy</Anchor>
