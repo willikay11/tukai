@@ -50,7 +50,6 @@ async function refreshAccessToken(token: Token) {
       refresh: token.refreshToken,
     };
   } catch (error: any) {
-    console.error('❌ Refresh token failed:', error.data);
     return {
       ...token,
       accessToken: undefined,
