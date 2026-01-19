@@ -44,7 +44,7 @@ export default function Input({
       >
         <div className="mr-2 text-gray-500">{icon}</div>
         <I
-          className="w-full text-xs text-gray-500 outline-0 placeholder:text-xs"
+          className="w-full text-xs text-gray-500 font-medium outline-0 placeholder:text-xs"
           name={name}
           defaultValue={defaultValue}
           placeholder={placeholder}
