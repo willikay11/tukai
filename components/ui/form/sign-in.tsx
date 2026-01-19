@@ -109,7 +109,7 @@ export default function SignInForm({ onLogin }: { onLogin: () => void }) {
         </Button>
       </div>
 
-      <div className="mb-1 flex w-full items-center mb-4">
+      <div className="mb-1 mb-4 flex w-full items-center">
         <span className="w-full text-center text-xs">
           Don&apos;t have an account? <Anchor link="/auth/sign-up">Sign up for free</Anchor>
         </span>
