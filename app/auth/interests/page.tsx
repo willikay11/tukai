@@ -60,6 +60,10 @@ export default function Page() {
         description: res.message,
         variant: 'destructive',
       });
+
+      if (res?.message.incliudes('already exists')) {
+        router.push('/auth/sign-in');
+      }
       return;
     }
 
@@ -71,11 +75,12 @@ export default function Page() {
     setIsSubmitting(false);
     removeUser();
 
-    if (session?.user) {
-      router.push('/auth/payments');
-    } else {
-      router.push('/auth/otp-confirmation');
-    }
+    router.push('/');
+    // if (session?.user) {
+    //   router.push('/auth/payments');
+    // } else {
+    //   router.push('/auth/otp-confirmation');
+    // }
   };
 
   const getInterests = async () => {
