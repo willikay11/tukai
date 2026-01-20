@@ -1,12 +1,11 @@
-import { getServerSession } from 'next-auth';
 import { cookies } from 'next/headers';
 
 import axios from 'axios';
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getAuthSession } from './auth';
 
 export async function post(path: string, data: any, opts?: { requireAuth?: boolean }) {
-  const session: any = await getServerSession(authOptions as any);
+  const session: any = await getAuthSession();
   const accessToken = session?.user?.accessToken;
 
   const cookieStore = cookies();

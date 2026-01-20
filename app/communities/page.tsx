@@ -1,12 +1,13 @@
-import { Session, getServerSession } from 'next-auth';
+import { Session } from 'next-auth';
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getAuthSession } from '@/lib/auth';
 
 import AuthGuard from './[communityId]/components/authGuard';
 import List from './components/list';
 
 export default async function CommunitiesPage() {
-  const session: Session | null = await getServerSession(authOptions as any);
+  const session: Session | null = await getAuthSession();
 
   if (!session) {
     return <AuthGuard />;

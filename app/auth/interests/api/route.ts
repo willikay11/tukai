@@ -1,6 +1,4 @@
-import { getServerSession } from 'next-auth';
-
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getAuthSession } from '@/lib/auth';
 
 export async function POST(req: Request) {
   try {
@@ -79,7 +77,7 @@ export async function GET() {
 export async function PUT(req: Request) {
   const { id, interests } = await req.json();
 
-  const session = await getServerSession(authOptions);
+  const session = await getAuthSession();
   const token = session?.user?.accessToken;
 
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/accounts/users/${id}/`, {

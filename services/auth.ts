@@ -1,6 +1,6 @@
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
-import { api, apiWithToken } from './apiService';
+import { api } from './apiService';
 
 export const signIn = async (email: string, password: string) => {
   try {
@@ -50,7 +50,10 @@ export const getUserInterests = async (userId: string, token: string) => {
   }
 };
 
-export const socialSignIn = async (backend: 'google-oauth2' | 'facebook' | 'apple-id', accessToken: string) => {
+export const socialSignIn = async (
+  backend: 'google-oauth2' | 'facebook' | 'apple-id',
+  accessToken: string,
+) => {
   try {
     const response = await api.post(`/v1/accounts/social/${backend}/login/`, {
       access_token: accessToken,

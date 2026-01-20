@@ -1,6 +1,4 @@
-import { getServerSession } from 'next-auth';
-
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getAuthSession } from '@/lib/auth';
 import { CommunityPostsQueryParams } from '@/types/community';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
@@ -50,7 +48,7 @@ export async function getInterestBasedCommunities(
 
 export async function fetchCommunity(communityId: string) {
   try {
-    const session: any = await getServerSession(authOptions as any);
+    const session: any = await getAuthSession();
 
     const response = await api.get(`/v1/communities/${communityId}`, {
       headers: {

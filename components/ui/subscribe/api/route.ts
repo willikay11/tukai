@@ -1,6 +1,4 @@
-import { getServerSession } from 'next-auth';
-
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getAuthSession } from '@/lib/auth';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 export async function POST(req: Request) {
@@ -19,7 +17,7 @@ export async function CreateBillingDetails(data: any) {
   try {
     const { paymentOption, countryCode, phoneNumber } = data;
 
-    const session = await getServerSession(authOptions);
+    const session = await getAuthSession();
     const token = session?.user?.accessToken;
 
     const response = await fetch(
@@ -79,7 +77,7 @@ export async function CreateSubscription(data: any) {
   try {
     const { plan } = data;
 
-    const session = await getServerSession(authOptions);
+    const session = await getAuthSession();
     const token = session?.user?.accessToken;
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/subscriptions/`, {
