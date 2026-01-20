@@ -53,7 +53,7 @@ export default function SingleCommunity({
           {!hasError ? (
             <ImageCarousel
               images={community.photos.map((photo) => photo.photo)}
-              className={aspectRatio}
+              aspectRatio={aspectRatio}
             />
           ) : (
             <div className="h-full w-full bg-gray-50" />
