@@ -8,19 +8,17 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
 
   return (
     <main className="grid h-full grid-cols-12 gap-x-4 px-4 md:px-0">
-      <InvitedExperiences skeletonCount={3} isPortal={true} category={categoryFromQuery} />
 
       {(categoryFromQuery === 'all' || categoryFromQuery === undefined) && (
         <>
+          <InvitedExperiences skeletonCount={3} isPortal={true} category={categoryFromQuery} />
+
           <Experiences
             key={categoryFromQuery}
             category={categoryFromQuery}
             title={`Happening Today: ${moment().format('Do MMMM, YYYY')}`}
             date={moment().format('YYYY-MM-DD')}
             isPortal={true}
-            isBookedmarked={false}
-            isReserved={false}
-            isHosted={false}
           />
 
           <Experiences
@@ -29,9 +27,6 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
             title={`Happening Tomorrow: ${moment().add(1, 'days').format('Do MMMM, YYYY')}`}
             date={moment().add(1, 'days').format('YYYY-MM-DD')}
             isPortal={true}
-            isBookedmarked={false}
-            isReserved={false}
-            isHosted={false}
           />
 
           <Experiences
@@ -39,9 +34,6 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
             category={categoryFromQuery}
             title="Discover"
             isPortal={false}
-            isBookedmarked={false}
-            isReserved={false}
-            isHosted={false}
           />
         </>
       )}

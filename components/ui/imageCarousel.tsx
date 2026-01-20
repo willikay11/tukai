@@ -1,8 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 
-import { clsx } from 'clsx';
-
 import {
   Carousel,
   CarouselContent,
@@ -13,14 +11,15 @@ import {
 import TukaiImage from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 
+
 const ImageCarousel = ({
   images,
-  aspectRatio = 'aspect-square',
   width = 'w-full',
+  className,
 }: {
   images: string[];
-  aspectRatio?: string;
   width?: string;
+  className?: string;
 }) => {
   const [isScrolling, setIsScrolling] = useState(false);
   const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -57,15 +56,13 @@ const ImageCarousel = ({
   };
 
   return (
-    <div className={clsx(`group relative ${width}`)}>
-      <Carousel className={clsx(width)}>
+    <div className={cn('group relative', width, className)}>
+      <Carousel className={cn(width)}>
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index}>
               <div
-                className={clsx(`relative ${width} ${aspectRatio}`, {
-                  'h-[150px]': aspectRatio !== 'aspect-square',
-                })}
+                className={cn('relative', width, className)}
               >
                 <TukaiImage src={image} alt={`Image ${index + 1}`} className="rounded-[8px]" />
               </div>
