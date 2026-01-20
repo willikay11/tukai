@@ -50,7 +50,7 @@ export const getUserInterests = async (userId: string, token: string) => {
   }
 };
 
-export const socialSignIn = async (backend: 'google-oauth2' | 'facebook', accessToken: string) => {
+export const socialSignIn = async (backend: 'google-oauth2' | 'facebook' | 'apple-id', accessToken: string) => {
   try {
     const response = await api.post(`/v1/accounts/social/${backend}/login/`, {
       access_token: accessToken,
