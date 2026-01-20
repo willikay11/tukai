@@ -44,7 +44,7 @@ export default function Input({
       >
         <div className="mr-2 text-gray-500">{icon}</div>
         <I
-          className="w-full text-base scale-[0.875] origin-left transform font-medium text-gray-500 outline-0 placeholder:text-base"
+          className="w-full text-base scale-[0.875] origin-left transform font-medium text-gray-500 outline-0 focus:outline-none focus:ring-0 placeholder:text-base"
           name={name}
           defaultValue={defaultValue}
           placeholder={placeholder}
