@@ -15,10 +15,12 @@ import { cn } from '@/lib/utils';
 const ImageCarousel = ({
   images,
   width = 'w-full',
+  aspectRatio = "aspect-square",
   className,
 }: {
   images: string[];
   width?: string;
+  aspectRatio?: string;
   className?: string;
 }) => {
   const [isScrolling, setIsScrolling] = useState(false);
@@ -62,7 +64,7 @@ const ImageCarousel = ({
           {images.map((image, index) => (
             <CarouselItem key={index}>
               <div
-                className={cn('relative', width, className)}
+                className={cn('relative', width, className, aspectRatio)}
               >
                 <TukaiImage src={image} alt={`Image ${index + 1}`} className="rounded-[8px]" />
               </div>
