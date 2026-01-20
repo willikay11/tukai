@@ -10,6 +10,7 @@ import { AppleIcon, GoogleIcon, LockKeyIcon, Mail02Icon } from '@hugeicons/react
 import { Anchor, Input } from '@/app/components/form';
 import MobileStore from '@/app/components/mobileStore';
 import { toast } from '@/hooks/use-toast';
+
 import { Button } from '../button';
 
 type Inputs = {
@@ -83,8 +84,7 @@ export default function SignInForm({ onLogin }: { onLogin: () => void }) {
         </div>
 
         <div className="mb-1">
-          <Button           className='w-full h-[50px]'
- disabled={isSubmitting}>
+          <Button className="h-[50px] w-full" disabled={isSubmitting}>
             {isSubmitting ? 'Signing In...' : 'Sign In'}
           </Button>
         </div>
@@ -96,7 +96,7 @@ export default function SignInForm({ onLogin }: { onLogin: () => void }) {
 
       <div className="mb-2.5">
         <Button
-          className='w-full h-[50px] bg-blue-600 hover:bg-blue-700 focus:bg-blue-700'
+          className="h-[50px] w-full bg-blue-600 hover:bg-blue-700 focus:bg-blue-700"
           onClick={() =>
             signIn('google', {
               redirect: false,
@@ -113,7 +113,7 @@ export default function SignInForm({ onLogin }: { onLogin: () => void }) {
 
       <div className="mb-2.5">
         <Button
-          className='w-full h-[50px] bg-black hover:bg-gray-900 focus:bg-gray-900'
+          className="h-[50px] w-full bg-black hover:bg-gray-900 focus:bg-gray-900"
           onClick={() =>
             signIn('apple', {
               redirect: false,

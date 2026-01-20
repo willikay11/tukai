@@ -19,12 +19,10 @@ import { User } from '@/types/user';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 function generateAppleClientSecret() {
-  const privateKey = process.env.APPLE_PRIVATE_KEY
-    ?.replace(/\\n/g, "\n")
-    .trim();
+  const privateKey = process.env.APPLE_PRIVATE_KEY?.replace(/\\n/g, '\n').trim();
 
-  if (!privateKey?.includes("BEGIN PRIVATE KEY")) {
-    throw new Error("Invalid Apple private key");
+  if (!privateKey?.includes('BEGIN PRIVATE KEY')) {
+    throw new Error('Invalid Apple private key');
   }
 
   return jwt.sign(
@@ -32,17 +30,16 @@ function generateAppleClientSecret() {
       iss: process.env.APPLE_TEAM_ID!,
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + 15777000,
-      aud: "https://appleid.apple.com",
+      aud: 'https://appleid.apple.com',
       sub: process.env.APPLE_CLIENT_ID!,
     },
     privateKey,
     {
-      algorithm: "ES256",
+      algorithm: 'ES256',
       keyid: process.env.APPLE_KEY_ID!,
-    }
+    },
   );
 }
-
 
 // ✅ Extend NextAuth Session type
 declare module 'next-auth' {
@@ -99,7 +96,7 @@ export const authOptions = {
     // 🔹 Apple OAuth
     AppleProvider({
       clientId: process.env.APPLE_CLIENT_ID!,
-      clientSecret: generateAppleClientSecret(),
+      clientSecret: (() => generateAppleClientSecret()) as unknown as string,
     }),
 
     // 🔹 Credentials login
