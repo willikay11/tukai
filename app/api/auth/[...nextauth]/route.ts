@@ -26,7 +26,7 @@ const appleIdToken = jwt.sign(
     aud: "https://appleid.apple.com",
     sub: process.env.APPLE_CLIENT_ID!,
   },
-  process.env.APPLE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+  process.env.APPLE_PRIVATE_KEY!,
   {
     algorithm: "ES256",
     keyid: process.env.APPLE_KEY_ID!,
