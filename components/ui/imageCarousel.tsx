@@ -11,11 +11,10 @@ import {
 import TukaiImage from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 
-
 const ImageCarousel = ({
   images,
   width = 'w-full',
-  aspectRatio = "aspect-square",
+  aspectRatio = 'aspect-square',
   className,
 }: {
   images: string[];
@@ -63,9 +62,7 @@ const ImageCarousel = ({
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index}>
-              <div
-                className={cn('relative', width, className, aspectRatio)}
-              >
+              <div className={cn('relative', width, className, aspectRatio)}>
                 <TukaiImage src={image} alt={`Image ${index + 1}`} className="rounded-[8px]" />
               </div>
             </CarouselItem>

@@ -5,11 +5,12 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 
 import { signIn } from 'next-auth/react';
 
-import { GoogleIcon, LockKeyIcon, Mail02Icon } from '@hugeicons/react-pro';
+import { AppleIcon, GoogleIcon, LockKeyIcon, Mail02Icon } from '@hugeicons/react-pro';
 
-import { Anchor, Button, Input } from '@/app/components/form';
+import { Anchor, Input } from '@/app/components/form';
 import MobileStore from '@/app/components/mobileStore';
 import { toast } from '@/hooks/use-toast';
+import { Button } from '../button';
 
 type Inputs = {
   email: string;
@@ -82,8 +83,9 @@ export default function SignInForm({ onLogin }: { onLogin: () => void }) {
         </div>
 
         <div className="mb-1">
-          <Button block htmlType="submit" loading={isSubmitting}>
-            Sign In
+          <Button           className='w-full h-[50px]'
+ disabled={isSubmitting}>
+            {isSubmitting ? 'Signing In...' : 'Sign In'}
           </Button>
         </div>
       </form>
@@ -94,18 +96,34 @@ export default function SignInForm({ onLogin }: { onLogin: () => void }) {
 
       <div className="mb-2.5">
         <Button
-          block
+          className='w-full h-[50px] bg-blue-600 hover:bg-blue-700 focus:bg-blue-700'
           onClick={() =>
             signIn('google', {
               redirect: false,
               callbackUrl: '/',
             })
           }
-          type="blue"
         >
           <div className="inline-flex items-center font-medium">
             <GoogleIcon className="mr-2 text-white" variant="solid" type="sharp" /> Continue with
             Google
+          </div>
+        </Button>
+      </div>
+
+      <div className="mb-2.5">
+        <Button
+          className='w-full h-[50px] bg-black hover:bg-gray-900 focus:bg-gray-900'
+          onClick={() =>
+            signIn('apple', {
+              redirect: false,
+              callbackUrl: '/',
+            })
+          }
+        >
+          <div className="inline-flex items-center font-medium">
+            <AppleIcon className="mr-2 text-white" variant="solid" type="sharp" /> Continue with
+            Apple
           </div>
         </Button>
       </div>

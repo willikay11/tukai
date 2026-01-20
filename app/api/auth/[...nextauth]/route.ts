@@ -1,4 +1,5 @@
 import NextAuth from 'next-auth';
+import AppleProvider from 'next-auth/providers/apple';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 
@@ -16,6 +17,21 @@ import { JwtPayload } from '@/types/jwt';
 import { Token } from '@/types/token';
 import { User } from '@/types/user';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
+
+const appleIdToken = jwt.sign(
+  {
+    iss: process.env.APPLE_TEAM_ID!,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 15777000,
+    aud: "https://appleid.apple.com",
+    sub: process.env.APPLE_CLIENT_ID!,
+  },
+  process.env.APPLE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+  {
+    algorithm: "ES256",
+    keyid: process.env.APPLE_KEY_ID!,
+  }
+);
 
 // ✅ Extend NextAuth Session type
 declare module 'next-auth' {
@@ -69,6 +85,12 @@ export const authOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
 
+    // 🔹 Apple OAuth
+    AppleProvider({
+      clientId: process.env.APPLE_CLIENT_ID!,
+      clientSecret: appleIdToken,
+    }),
+
     // 🔹 Credentials login
     CredentialsProvider({
       name: 'Credentials',
@@ -114,6 +136,27 @@ export const authOptions = {
         token.id = decoded?.userId;
         token.name = profile?.name;
         token.email = profile?.email;
+        token.picture = profile?.picture;
+        token.accessToken = response.access;
+        token.refreshToken = response.refresh;
+        token.accessTokenExpires = decoded?.exp ? decoded.exp * 1000 : Date.now() + 3600 * 1000;
+        token.hasInterests = interests.length > 0;
+        token.hasBillingDetails = decoded?.hasBillingDetails;
+        token.hasSubscribed = decoded?.hasSubscribed;
+        token.emailVerified = decoded?.emailVerified;
+        token.interests = interests;
+        return token;
+      }
+
+      // --- Initial login: Apple ---
+      if (account?.provider === 'apple') {
+        const response = await socialSignIn('apple-id', account.id_token);
+        const decoded = parseSnakeToCamel(jwt.decode(response.access)) as JwtPayload;
+        const interests: Interest[] = await getUserInterests(decoded.userId, response.access);
+
+        token.id = decoded?.userId;
+        token.name = profile?.name || user?.name;
+        token.email = profile?.email || user?.email;
         token.picture = profile?.picture;
         token.accessToken = response.access;
         token.refreshToken = response.refresh;

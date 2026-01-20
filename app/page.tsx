@@ -8,7 +8,6 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
 
   return (
     <main className="grid h-full grid-cols-12 gap-x-4 px-4 md:px-0">
-
       {(categoryFromQuery === 'all' || categoryFromQuery === undefined) && (
         <>
           <InvitedExperiences skeletonCount={3} isPortal={true} category={categoryFromQuery} />
