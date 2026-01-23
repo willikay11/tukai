@@ -56,7 +56,7 @@ export default function RootLayout({
                   <AuthDialogProvider>
                     <SelectedCategoryProvider>
                       <div className="relative mb-20 md:mb-4">
-                        <div className="z-50 grid grid-cols-12 bg-white md:sticky md:top-0 md:gap-x-4">
+                        <div className="z-50 grid grid-cols-12 bg-gray md:sticky md:top-0 md:gap-x-4">
                           <div className="col-span-12 mx-4 mt-5 inline-flex justify-between md:hidden lg:hidden 2xl:hidden">
                             <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
                               <Link href="/" className="inline-flex items-center">
@@ -104,7 +104,7 @@ export default function RootLayout({
                             </div>
                           </div>
                         </div>
-                        <div className="sticky top-0 z-[9] border-b-[1px] border-t-[1px] border-gray-100 md:top-[6.5rem]">
+                        <div className="sticky top-0 z-[9] border-b-[1px] border-t-[1px] border-gray-100 md:top-[6.5rem] bg-gray-50">
                           <Suspense fallback={<PillsSkeleton />}>
                             <PageFilters />
                           </Suspense>
