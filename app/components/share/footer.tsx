@@ -7,7 +7,7 @@ import IconComponent from '../iconComponent';
 
 export default function Footer() {
   return (
-    <footer className="grid grid-cols-12 border-t border-gray-200 bg-gray-50 pb-6 pt-10">
+    <footer className="grid grid-cols-12 border-t border-gray-100 bg-gray-50 pb-6 pt-10">
       <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
         {/* Top Section */}
         <div className="grid grid-cols-12 gap-2">
