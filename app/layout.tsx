@@ -96,15 +96,15 @@ export default function RootLayout({
                                   >
                                     <Search />
                                   </Suspense>
-                                  <div className='mt-6'>
-                                    <Nav />
-                                  </div>
                                 </div>
                                 <IconRadioButtonGroup />
                               </div>
                               <div className="flex hidden h-full items-center justify-end md:col-span-4 md:inline-flex lg:col-span-4 lg:inline-flex">
                                 <AuthActions />
                               </div>
+                            </div>
+                            <div className='flex items-center justify-center mt-6'>
+                              <Nav />
                             </div>
                           </div>
                         </div>
