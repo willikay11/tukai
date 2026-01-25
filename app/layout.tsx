@@ -24,6 +24,7 @@ import SessionProvider from '@/providers/SessionProvider';
 import LocationPrompt from './components/locationPrompt';
 import Nav from './components/nav';
 import Search from './components/search';
+import Footer from './components/share/footer';
 import { PillsSkeleton } from './components/skeletons';
 import './globals.css';
 import { ReduxProvider } from './redux-provider';
@@ -55,7 +56,7 @@ export default function RootLayout({
                 <LocationProvider>
                   <AuthDialogProvider>
                     <SelectedCategoryProvider>
-                      <div className="relative mb-20 md:mb-4">
+                      <div className="relative">
                         <div className="z-50 grid grid-cols-12 bg-gray-50 md:sticky md:top-0 md:gap-x-4">
                           {/* Mobile */}
                           <div className="col-span-12 mx-4 mt-5 inline-flex justify-between md:hidden lg:hidden 2xl:hidden">
@@ -103,7 +104,7 @@ export default function RootLayout({
                                 <AuthActions />
                               </div>
                             </div>
-                            <div className='flex items-center justify-center mt-6'>
+                            <div className="mt-6 flex items-center justify-center">
                               <Nav />
                             </div>
                           </div>
@@ -114,7 +115,8 @@ export default function RootLayout({
                           </Suspense>
                         </div>
                         <LocationPrompt />
-                        {children}
+                        <div className="mb-20 md:mb-4">{children}</div>
+                        <Footer />
                       </div>
                       <DownloadApp />
                       <BottomNavigation />
