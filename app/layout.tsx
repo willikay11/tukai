@@ -74,7 +74,7 @@ export default function RootLayout({
                           {/* Browser */}
                           <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
                             <div className="inline-flex grid w-full grid-cols-12 items-center justify-between md:mt-6 md:h-fit">
-                              <div className="flex hidden h-full items-center md:col-span-4 md:inline-flex lg:col-span-4 lg:inline-flex">
+                              <div className="flex hidden h-full items-center md:col-span-3 md:inline-flex lg:col-span-4 lg:inline-flex">
                                 <Link
                                   href="/"
                                   className="hidden h-full items-center md:mr-6 md:flex lg:mr-3 xl:mr-6"
@@ -87,7 +87,7 @@ export default function RootLayout({
                                   />
                                 </Link>
                               </div>
-                              <div className="col-span-12 inline-flex justify-center md:col-span-4 lg:col-span-4">
+                              <div className="col-span-12 inline-flex justify-center md:col-span-6 lg:col-span-4">
                                 <div className="w-full md:flex-col">
                                   <Suspense
                                     fallback={
@@ -99,7 +99,7 @@ export default function RootLayout({
                                 </div>
                                 <IconRadioButtonGroup />
                               </div>
-                              <div className="flex hidden h-full items-center justify-end md:col-span-4 md:inline-flex lg:col-span-4 lg:inline-flex">
+                              <div className="flex hidden h-full items-center justify-end md:col-span-3 md:inline-flex lg:col-span-4 lg:inline-flex">
                                 <AuthActions />
                               </div>
                             </div>
