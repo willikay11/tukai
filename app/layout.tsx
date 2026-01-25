@@ -46,7 +46,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={satoshi.className}>
+      <body className={`${satoshi.className} flex min-h-screen flex-col`}>
         <ReduxProvider>
           <SessionProvider>
             <ReactQueryClientProvider>
@@ -56,7 +56,7 @@ export default function RootLayout({
                 <LocationProvider>
                   <AuthDialogProvider>
                     <SelectedCategoryProvider>
-                      <div className="relative">
+                      <div className="relative flex min-h-screen flex-col">
                         <div className="z-50 grid grid-cols-12 bg-gray-50 md:sticky md:top-0 md:gap-x-4">
                           {/* Mobile */}
                           <div className="col-span-12 mx-4 mt-5 inline-flex justify-between md:hidden lg:hidden 2xl:hidden">
@@ -104,18 +104,18 @@ export default function RootLayout({
                                 <AuthActions />
                               </div>
                             </div>
-                            <div className="mt-6 flex items-center justify-center">
+                            <div className="mt-0 md:mt-4 flex items-center justify-center">
                               <Nav />
                             </div>
                           </div>
                         </div>
-                        <div className="sticky top-0 z-[9] border-b-[1px] border-t-[1px] border-gray-100 bg-gray-50 md:top-[133px]">
+                        <div className="sticky top-0 z-[9] border-b-[1px] border-t-[1px] border-gray-100 bg-gray-50 md:top-[125px]">
                           <Suspense fallback={<PillsSkeleton />}>
                             <PageFilters />
                           </Suspense>
                         </div>
                         <LocationPrompt />
-                        <div className="mb-20 md:mb-4">{children}</div>
+                        <div className="mb-20 flex-grow md:mb-4">{children}</div>
                         <Footer />
                       </div>
                       <DownloadApp />
