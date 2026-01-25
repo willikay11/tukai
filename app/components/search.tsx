@@ -70,7 +70,7 @@ export default function Search() {
       <PopoverTrigger asChild className="my-4 md:my-0">
         <div
           ref={containerRef}
-          className="relative inline-flex h-[50px] w-full items-center justify-between rounded-[50px] border-[1px] border-gray-200 bg-white py-4 pl-4 pr-1"
+          className="relative inline-flex h-[50px] w-full items-center justify-between rounded-[50px] border-[1px] border-gray-200 bg-white py-4 pl-4 pr-1 shadow-search-bar"
         >
           <Search01Icon size={24} className="mr-2 text-gray-500" variant="twotone" />
           <div
@@ -83,7 +83,7 @@ export default function Search() {
             {!query && !tag && (
               <p className="mb-0 text-xs font-medium text-gray-700">
                 {pathname === '/' || pathname.includes('/place')
-                  ? "What's the plan?"
+                  ? "What's The Plan?"
                   : pathname.includes('/experiences')
                     ? 'Find Experiences?'
                     : 'Find Your Communities?'}
@@ -108,10 +108,10 @@ export default function Search() {
               )}
               placeholder={
                 pathname === '/' || pathname.includes('/place')
-                  ? 'Any City . Any day'
+                  ? 'Any City · Any day'
                   : pathname.includes('/experiences')
-                    ? 'Any City . By Activity'
-                    : 'Any City . By Activity'
+                    ? 'Any City · By Activity'
+                    : 'Any City · By Activity'
               }
               onChange={(e) => {
                 debounce(() => {

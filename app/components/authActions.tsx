@@ -104,7 +104,7 @@ export default function AuthActions() {
         </NavigationMenu>
       ) : (
         <Link href="/auth/sign-in" className="inline-flex">
-          <Button>Sign In/Sign Up</Button>
+          <Button className='rounded-[68px] h-[38px]'>Sign In/Sign Up</Button>
         </Link>
       )}
     </div>
