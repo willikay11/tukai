@@ -4,25 +4,42 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { Calendar04Icon, Search01Icon, UserMultipleIcon } from '@hugeicons/react-pro';
+import {
+  Bookmark01Icon,
+  Calendar04Icon,
+  Search01Icon,
+  UserIcon,
+} from '@hugeicons/react-pro';
 import clsx from 'clsx';
+import { MapsGlobal02TwotoneRounded } from '@hugeicons-pro/core-twotone-rounded';
+import IconComponent from './iconComponent';
 
 const links = [
   {
-    name: 'Experiences',
-    href: '/',
-    icon: <Calendar04Icon size={20} variant="twotone" className="mb-1" />,
-  },
-  {
     name: 'Explore',
     href: '/places',
-    icon: <Search01Icon size={20} variant="twotone" className="mb-1" />,
+    icon: <Search01Icon size={24} variant="stroke" />,
+  },
+  {
+    name: 'Experiences',
+    href: '/',
+    icon: <Calendar04Icon size={20} variant="stroke" />,
   },
   {
     name: 'Communities',
     href: '/communities',
-    icon: <UserMultipleIcon size={18} variant="twotone" className="mb-1" />,
+    icon: <IconComponent iconName="MapsGlobal02TwotoneRounded" size={20} />,
   },
+  // {
+  //   name: 'Profile',
+  //   href: '/auth/profile',
+  //   icon: <UserIcon size={24} variant="stroke" />,
+  // },
+  // {
+  //   name: 'Saved',
+  //   href: '/saved',
+  //   icon: <Bookmark01Icon size={24} variant="stroke" />,
+  // },
 ];
 
 export default function BottomNavigation() {
@@ -56,42 +73,35 @@ export default function BottomNavigation() {
   }, [lastScrollY]);
 
   const linkItems = () =>
-    links.map((link) => (
-      <Link
-        href={link.href}
-        key={link.name}
-        className={clsx('mr-4 inline-flex h-full items-center', {
-          'text-primary md:border-b-[1px] md:border-primary': pathname === link.href,
-        })}
-      >
-        <div className={clsx('flex flex-col items-center justify-center')}>
-          {link.icon}
-          <span
-            className={clsx('ml-1 text-xs', {
-              'font-medium text-gray-700': pathname !== link.href,
-              'font-semibold text-primary': pathname === link.href,
-            })}
-          >
-            {link.name}
-          </span>
-        </div>
-      </Link>
-    ));
+    links.map((link) => {
+      const isActive = pathname === link.href;
+      return (
+        <Link
+          href={link.href}
+          key={link.name}
+          className={clsx('inline-flex items-center justify-center transition-all', {
+            'rounded-full bg-[#D4F1E8] px-4 py-3 text-primary': isActive,
+            'text-gray-600': !isActive,
+          })}
+        >
+          <div className={clsx('flex items-center justify-center gap-2')}>
+            <span>{link.icon}</span>
+            {isActive && <span className="text-sm font-medium">{link.name}</span>}
+          </div>
+        </Link>
+      );
+    });
   return (
     <div
       className={clsx(
-        'fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around bg-white px-20 py-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_-2px_4px_-2px_rgba(0,0,0,0.1)] transition-transform duration-300 ease-in-out md:hidden',
+        'fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center justify-between gap-4 rounded-full bg-white px-4 py-3 shadow-lg transition-transform duration-300 ease-in-out md:hidden',
         {
           'translate-y-0': isVisible,
-          'translate-y-full': !isVisible,
+          'translate-y-[150%]': !isVisible,
         },
       )}
     >
-      {linkItems().map((item, index) => (
-        <div key={index} className="inline-flex w-1/2 justify-center">
-          {item}
-        </div>
-      ))}
+      {linkItems()}
     </div>
   );
 }
