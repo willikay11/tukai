@@ -104,7 +104,7 @@ export default function RootLayout({
                                 <AuthActions />
                               </div>
                             </div>
-                            <div className="mt-0 md:mt-4 flex items-center justify-center">
+                            <div className="mt-0 flex items-center justify-center md:mt-4">
                               <Nav />
                             </div>
                           </div>

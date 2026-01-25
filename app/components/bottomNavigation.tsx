@@ -4,14 +4,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import {
-  Bookmark01Icon,
-  Calendar04Icon,
-  Search01Icon,
-  UserIcon,
-} from '@hugeicons/react-pro';
-import clsx from 'clsx';
 import { MapsGlobal02TwotoneRounded } from '@hugeicons-pro/core-twotone-rounded';
+import { Bookmark01Icon, Calendar04Icon, Search01Icon, UserIcon } from '@hugeicons/react-pro';
+import clsx from 'clsx';
+
 import IconComponent from './iconComponent';
 
 const links = [
