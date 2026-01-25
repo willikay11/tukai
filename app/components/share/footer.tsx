@@ -52,7 +52,7 @@ export default function Footer() {
                 <IconComponent iconName="InstagramIcon" size={20} />
               </a>
               <a
-                href="https://twitter.com/tukai_app"
+                href="https://x.com/Tukaiexper69436"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-600 transition-colors hover:text-primary"
@@ -61,15 +61,15 @@ export default function Footer() {
                 <IconComponent iconName="NewTwitterIcon" size={20} />
               </a>
               <a
-                href="https://youtube.com/tukai"
+                href="https://www.tiktok.com/@tukaiexperiences"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-600 transition-colors hover:text-primary"
-                aria-label="YouTube"
+                aria-label="TikTok"
               >
                 <IconComponent iconName="TiktokIcon" size={20} />
               </a>
-              <a
+              {/* <a
                 href="https://facebook.com/tukai"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -77,7 +77,7 @@ export default function Footer() {
                 aria-label="Facebook"
               >
                 <IconComponent iconName="Facebook02Icon" size={20} />
-              </a>
+              </a> */}
             </div>
           </div>
         </div>
