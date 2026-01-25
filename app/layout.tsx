@@ -56,7 +56,8 @@ export default function RootLayout({
                   <AuthDialogProvider>
                     <SelectedCategoryProvider>
                       <div className="relative mb-20 md:mb-4">
-                        <div className="z-50 grid grid-cols-12 bg-gray md:sticky md:top-0 md:gap-x-4">
+                        <div className="z-50 grid grid-cols-12 bg-gray-50 md:sticky md:top-0 md:gap-x-4">
+                          {/* Mobile */}
                           <div className="col-span-12 mx-4 mt-5 inline-flex justify-between md:hidden lg:hidden 2xl:hidden">
                             <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
                               <Link href="/" className="inline-flex items-center">
@@ -70,8 +71,9 @@ export default function RootLayout({
                             </div>
                             <AuthActions />
                           </div>
+                          {/* Browser */}
                           <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
-                            <div className="inline-flex grid w-full grid-cols-12 items-center justify-between md:mt-6 md:h-[80px]">
+                            <div className="inline-flex grid w-full grid-cols-12 items-center justify-between md:mt-6 md:h-fit">
                               <div className="flex hidden h-full items-center md:col-span-4 md:inline-flex lg:col-span-4 lg:inline-flex">
                                 <Link
                                   href="/"
@@ -84,10 +86,9 @@ export default function RootLayout({
                                     height={100}
                                   />
                                 </Link>
-                                <Nav />
                               </div>
                               <div className="col-span-12 inline-flex justify-center md:col-span-4 lg:col-span-4">
-                                <div className="w-full md:inline-flex">
+                                <div className="w-full md:flex-col">
                                   <Suspense
                                     fallback={
                                       <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
@@ -95,6 +96,9 @@ export default function RootLayout({
                                   >
                                     <Search />
                                   </Suspense>
+                                  <div className='mt-6'>
+                                    <Nav />
+                                  </div>
                                 </div>
                                 <IconRadioButtonGroup />
                               </div>
@@ -104,7 +108,7 @@ export default function RootLayout({
                             </div>
                           </div>
                         </div>
-                        <div className="sticky top-0 z-[9] border-b-[1px] border-t-[1px] border-gray-100 md:top-[6.5rem] bg-gray-50">
+                        <div className="sticky top-0 z-[9] border-b-[1px] border-t-[1px] border-gray-100 bg-gray-50">
                           <Suspense fallback={<PillsSkeleton />}>
                             <PageFilters />
                           </Suspense>
