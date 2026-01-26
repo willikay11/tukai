@@ -95,15 +95,17 @@ export default function PageFilters() {
   }
 
   return (
-    <div className="col-span-12 gap-4 px-4 md:px-0">
-      <div className="w-full">
-        <div className="grid grid-cols-12 gap-4">
-          <div className="relative col-span-12 md:col-span-10 md:col-start-2 md:mx-0">
-            {isFetching || isLoading ? (
-              <PillsSkeleton />
-            ) : (
-              <ScrollFilters filters={filters || []} />
-            )}
+    <div className="sticky top-0 z-[9] border-b-[1px] border-t-[1px] border-gray-100 bg-gray-50 md:top-[125px]">
+      <div className="col-span-12 gap-4 px-4 md:px-0">
+        <div className="w-full">
+          <div className="grid grid-cols-12 gap-4">
+            <div className="relative col-span-12 md:col-span-10 md:col-start-2 md:mx-0">
+              {isFetching || isLoading ? (
+                <PillsSkeleton />
+              ) : (
+                <ScrollFilters filters={filters || []} />
+              )}
+            </div>
           </div>
         </div>
       </div>
