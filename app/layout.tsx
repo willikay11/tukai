@@ -104,16 +104,14 @@ export default function RootLayout({
                                 <AuthActions />
                               </div>
                             </div>
-                            <div className="mt-0 md:mt-4 flex items-center justify-center">
+                            <div className="mt-0 flex items-center justify-center md:mt-4">
                               <Nav />
                             </div>
                           </div>
                         </div>
-                        <div className="sticky top-0 z-[9] border-b-[1px] border-t-[1px] border-gray-100 bg-gray-50 md:top-[125px]">
-                          <Suspense fallback={<PillsSkeleton />}>
-                            <PageFilters />
-                          </Suspense>
-                        </div>
+                        <Suspense fallback={<PillsSkeleton />}>
+                          <PageFilters />
+                        </Suspense>
                         <LocationPrompt />
                         <div className="mb-20 flex-grow md:mb-4">{children}</div>
                         <Footer />
