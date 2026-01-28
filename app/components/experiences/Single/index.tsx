@@ -34,8 +34,9 @@ export default function SingleExperience({
   const dateSlot = (
     <div className="inline-flex items-center">
       <span className="text-xs font-normal text-gray-500">
-        {moment(experience?.startDate).format('MMM D, YYYY')} -{' '}
-        {moment(experience?.endDate).format('MMM D, YYYY')}
+        {moment(experience?.startDate).isSame(moment(experience?.endDate), 'day')
+          ? `${moment(experience?.startDate).format('MMM D, h:mm A')} - ${moment(experience?.endDate).format('h:mm A')}`
+          : `${moment(experience?.startDate).format('MMM D, YYYY HH:mm A')} - ${moment(experience?.endDate).format('MMM D, YYYY HH:mm A')}`}
       </span>
     </div>
   );
