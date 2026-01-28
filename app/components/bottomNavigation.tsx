@@ -12,14 +12,14 @@ import IconComponent from './iconComponent';
 
 const links = [
   {
-    name: 'Explore',
-    href: '/places',
-    icon: <Search01Icon size={24} variant="stroke" />,
-  },
-  {
     name: 'Experiences',
     href: '/',
     icon: <Calendar04Icon size={20} variant="stroke" />,
+  },
+  {
+    name: 'Explore',
+    href: '/places',
+    icon: <Search01Icon size={24} variant="stroke" />,
   },
   {
     name: 'Communities',
