@@ -31,7 +31,7 @@ export default function Nav() {
         href={link.href}
         key={link.name}
         className={clsx('inline-flex h-fit items-center md:pb-4', {
-          'mr-4': index !== links.length - 1,
+          'mr-6': index !== links.length - 1,
           'text-primary md:border-b-[1px] md:border-primary': pathname === link.href,
         })}
         onClick={() => setOpen(false)}

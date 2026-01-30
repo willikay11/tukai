@@ -62,7 +62,7 @@ export default function Footer() {
 
   return (
     <footer className="grid grid-cols-12 border-t border-gray-100 bg-gray-50 pb-6 pt-8 md:pt-10">
-      <div className="col-span-12 mx-4 md:mx-0 md:col-span-6 md:col-start-4 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-4 4xl:col-start-5">
+      <div className="col-span-12 mx-4 md:mx-0 md:col-span-6 md:col-start-4 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
         {/* Top Section */}
         <div className="grid grid-cols-12 gap-4 md:gap-2">
           <div className="col-span-12 flex justify-center md:col-span-2 md:justify-start">
