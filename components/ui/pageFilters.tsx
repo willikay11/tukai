@@ -95,11 +95,11 @@ export default function PageFilters() {
   }
 
   return (
-    <div className="sticky top-0 z-[9] border-b-[1px] border-t-[1px] border-gray-100 bg-gray-50 md:top-[125px]">
+    <div className="sticky top-0 z-[9] border-b-[1px] border-t-[1px] border-gray-100 bg-gray-50 md:top-[7.75rem] 3xl:top-[7.75rem] 4xl:top-[7.8rem]">
       <div className="col-span-12 gap-4 px-4 md:px-0">
         <div className="w-full">
           <div className="grid grid-cols-12 gap-4">
-            <div className="relative col-span-12 md:col-span-10 md:col-start-2 md:mx-0">
+            <div className="relative col-span-12 md:col-span-6 md:col-start-4 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-4 4xl:col-start-5 md:mx-0">
               {isFetching || isLoading ? (
                 <PillsSkeleton />
               ) : (
