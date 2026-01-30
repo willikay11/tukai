@@ -79,7 +79,7 @@ export default function Experiences({
   }
 
   const content = (
-    <div className={clsx('col-span-12 mb-4 mt-4 md:mx-0 md:col-span-6 md:col-start-4 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3')}>
+    <div className={clsx('col-span-12 mb-4 mt-4 md:mx-0 md:col-span-6 md:col-start-4 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-4 4xl:col-start-5')}>
       {title && <p className="mb-4 text-xl font-semibold text-gray-700">{title}</p>}
       <ListExperiences
         key={selectedCategoryId}
@@ -87,7 +87,7 @@ export default function Experiences({
         isLoading={isLoading}
         count={experiences?.data?.count}
         className={clsx(
-          'grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6 3xl:grid-cols-5',
+          'grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6 3xl:grid-cols-5 4xl:grid-cols-4',
         )}
         page={page}
         setPage={setPage}
