@@ -1,10 +1,65 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 import IconComponent from '../iconComponent';
 import moment from 'moment';
+import { useLocation } from '@/context/LocationContext';
+import { Button } from '@/components/ui/button';
 
 export default function Footer() {
+  const { lat, lng, status, requestLocation } = useLocation();
+  const [address, setAddress] = useState<string>('Embakasi, Nairobi');
+  const [isLoadingAddress, setIsLoadingAddress] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (status === 'granted' && lat && lng) {
+      const fetchAddress = async () => {
+        setIsLoadingAddress(true);
+        try {
+          const response = await fetch(
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+          );
+          const data = await response.json();
+          
+          if (data.results && data.results.length > 0) {
+            // Try to find locality (neighborhood/suburb) and administrative area (city)
+            const result = data.results[0];
+            let locality = '';
+            let city = '';
+            
+            for (const component of result.address_components) {
+              if (component.types.includes('sublocality') || component.types.includes('neighborhood')) {
+                locality = component.long_name;
+              }
+              if (component.types.includes('locality')) {
+                city = component.long_name;
+              }
+            }
+            
+            if (locality && city) {
+              setAddress(`${locality}, ${city}`);
+            } else if (city) {
+              setAddress(city);
+            } else {
+              // Fallback to formatted address shortened
+              const parts = result.formatted_address.split(',');
+              setAddress(parts.slice(0, 2).join(','));
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching address:', error);
+        } finally {
+          setIsLoadingAddress(false);
+        }
+      };
+      
+      fetchAddress();
+    }
+  }, [lat, lng, status]);
+
   return (
     <footer className="grid grid-cols-12 border-t border-gray-100 bg-gray-50 pb-6 pt-8 md:pt-10">
       <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
@@ -82,15 +137,33 @@ export default function Footer() {
         </div>
 
         {/* Bottom Section */}
-        <div className="mt-6 flex flex-col items-center justify-between gap-4 border-t border-gray-200 pt-4 text-sm text-gray-600 md:mt-8 md:flex-row md:pt-6">
+        <div className="mt-6 flex flex-col items-center justify-start gap-4 border-t border-gray-200 pt-4 text-sm text-gray-600 md:mt-8 md:flex-row md:pt-6">
           <p>© {moment().year()} Tukai, Inc. All Rights Reserved</p>
-          <div className="flex flex-col items-center gap-4 md:flex-row md:gap-6">
+          <div className="flex flex-col items-center gap-4 md:flex-row md:gap-6 md:ml-2.5">
             <Link href="/terms" className="hover:text-primary">
               Terms & Conditions
             </Link>
             <Link href="/privacy" className="hover:text-primary">
               Privacy Policy
             </Link>
+          </div>
+          <div className="flex flex-col items-center gap-4 md:flex-row md:gap-6 md:ml-2.5">
+            <div className="flex items-center gap-1">
+              <IconComponent iconName="LocationIcon" size={16}/>
+              <span className='text-sm text-gray-700'>
+                {isLoadingAddress || status === 'idle' ? 'Loading location...' : address}
+              </span>
+              <div className="h-1 w-1 rounded-full bg-gray-300 mx-2" />
+              <Button 
+                variant="link" 
+                className='p-0 hover:no-underline' 
+                onClick={requestLocation}
+                disabled={status === 'idle' || isLoadingAddress}
+              >
+                <IconComponent iconName="ReloadIcon" size={16} className={isLoadingAddress || status === 'idle' ? 'animate-spin' : ''} />
+                Update Location
+              </Button>
+            </div>
           </div>
         </div>
       </div>
