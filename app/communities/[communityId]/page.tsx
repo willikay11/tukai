@@ -139,7 +139,7 @@ export default async function ViewCommunityPage({
           </div>
         </div>
       </main>
-      <UpcomingExperiences category={community.categories[0].id} />
+      <UpcomingExperiences category={community.categories?.[0]?.id} />
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 mx-4 mt-2.5 md:col-span-6 md:col-start-4 md:mx-0 2xl:col-span-4 2xl:col-start-5">
           <CommunityTabs communityId={params.communityId} />

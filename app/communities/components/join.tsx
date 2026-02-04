@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { useJoinCommunity, useJoinCommunityViaInvite } from '@/hooks/communities';
@@ -18,6 +20,8 @@ export default function Join({
   currentUserId: string;
   token?: string;
 }) {
+  const router = useRouter();
+  const [isRequested, setIsRequested] = useState(false);
   const {
     mutate: joinCommunityMutation,
     isPending,
@@ -39,12 +43,20 @@ export default function Join({
   const member = members.find((member) => member?.user?.id === currentUserId);
 
   useEffect(() => {
+    if (member?.inviteStatus === 'requested') {
+      setIsRequested(true);
+    }
+  }, [member]);
+
+  useEffect(() => {
     if (isSuccess) {
       toast({
         title: 'Request Sent',
         description: 'We have received your request to join the community.',
         variant: 'success',
       });
+      setIsRequested(true);
+      // router.refresh();
     }
 
     if (isInviteSuccess) {
@@ -53,6 +65,7 @@ export default function Join({
         description: 'You have successfully joined the community via invite.',
         variant: 'success',
       });
+      router.refresh();
     }
 
     if (isError || isInviteError) {
@@ -81,7 +94,7 @@ export default function Join({
       disabled={isPending || isInvitePending || (member && member.inviteStatus === 'requested')}
       className="mr-2.5"
     >
-      {member?.inviteStatus === 'requested'
+      {isRequested
         ? 'Pending Approval'
         : isPending || isInvitePending
           ? 'Joining...'
