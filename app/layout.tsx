@@ -73,7 +73,7 @@ export default function RootLayout({
                             <AuthActions />
                           </div>
                           {/* Browser */}
-                          <div className="col-span-12 mx-4 md:col-span-6 md:col-start-4 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4 md:mx-0">
+                          <div className="col-span-12 mx-4 md:col-span-6 md:col-start-4 md:mx-0 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
                             <div className="inline-flex grid w-full grid-cols-12 items-center justify-between md:mt-6 md:h-fit">
                               <div className="flex hidden h-full items-center md:col-span-3 md:inline-flex lg:col-span-4 lg:inline-flex">
                                 <Link
@@ -85,13 +85,13 @@ export default function RootLayout({
                                     alt="Tukai logo"
                                     width={100}
                                     height={40}
-                                    className="h-10 w-auto mt-2"
+                                    className="mt-2 h-10 w-auto"
                                   />
                                 </Link>
                               </div>
                               <div className="col-span-12 md:col-span-6 lg:col-span-4">
                                 <div className="flex flex-col items-center space-y-4">
-                                  <div className="flex w-full md:max-w-sm items-center gap-2">
+                                  <div className="flex w-full items-center gap-2 md:max-w-sm">
                                     <div className="flex-1">
                                       <Suspense
                                         fallback={
@@ -103,12 +103,12 @@ export default function RootLayout({
                                     </div>
                                     <IconRadioButtonGroup />
                                   </div>
-                                  <div className="flex w-full md:max-w-sm items-center justify-center">
+                                  <div className="flex w-full items-center justify-center md:max-w-sm">
                                     <Nav />
                                   </div>
                                 </div>
                               </div>
-                              <div className="flex hidden h-full items-start justify-end mt-2 md:col-span-3 md:inline-flex lg:col-span-4 lg:inline-flex">
+                              <div className="mt-2 flex hidden h-full items-start justify-end md:col-span-3 md:inline-flex lg:col-span-4 lg:inline-flex">
                                 <AuthActions />
                               </div>
                             </div>

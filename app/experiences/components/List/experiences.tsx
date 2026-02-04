@@ -79,7 +79,11 @@ export default function Experiences({
   }
 
   const content = (
-    <div className={clsx('col-span-12 mb-4 mt-4 md:mx-0 md:col-span-6 md:col-start-4 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4')}>
+    <div
+      className={clsx(
+        'col-span-12 mb-4 mt-4 md:col-span-6 md:col-start-4 md:mx-0 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4',
+      )}
+    >
       {title && <p className="mb-4 text-xl font-semibold text-gray-700">{title}</p>}
       <ListExperiences
         key={selectedCategoryId}

@@ -1,13 +1,16 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-import IconComponent from '../iconComponent';
+import Image from 'next/image';
+import Link from 'next/link';
+
 import moment from 'moment';
-import { useLocation } from '@/context/LocationContext';
+
 import { Button } from '@/components/ui/button';
+import { useLocation } from '@/context/LocationContext';
+
+import IconComponent from '../iconComponent';
 
 export default function Footer() {
   const { lat, lng, status, requestLocation } = useLocation();
@@ -20,25 +23,28 @@ export default function Footer() {
         setIsLoadingAddress(true);
         try {
           const response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`,
           );
           const data = await response.json();
-          
+
           if (data.results && data.results.length > 0) {
             // Try to find locality (neighborhood/suburb) and administrative area (city)
             const result = data.results[0];
             let locality = '';
             let city = '';
-            
+
             for (const component of result.address_components) {
-              if (component.types.includes('sublocality') || component.types.includes('neighborhood')) {
+              if (
+                component.types.includes('sublocality') ||
+                component.types.includes('neighborhood')
+              ) {
                 locality = component.long_name;
               }
               if (component.types.includes('locality')) {
                 city = component.long_name;
               }
             }
-            
+
             if (locality && city) {
               setAddress(`${locality}, ${city}`);
             } else if (city) {
@@ -55,14 +61,14 @@ export default function Footer() {
           setIsLoadingAddress(false);
         }
       };
-      
+
       fetchAddress();
     }
   }, [lat, lng, status]);
 
   return (
     <footer className="grid grid-cols-12 border-t border-gray-100 bg-gray-50 pb-6 pt-8 md:pt-10">
-      <div className="col-span-12 mx-4 md:mx-0 md:col-span-6 md:col-start-4 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+      <div className="col-span-12 mx-4 md:col-span-6 md:col-start-4 md:mx-0 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
         {/* Top Section */}
         <div className="grid grid-cols-12 gap-4 md:gap-2">
           <div className="col-span-12 flex justify-center md:col-span-2 md:justify-start">
@@ -139,7 +145,7 @@ export default function Footer() {
         {/* Bottom Section */}
         <div className="mt-6 flex flex-col items-center justify-start gap-4 border-t border-gray-200 pt-4 text-sm text-gray-600 md:mt-8 md:flex-row md:pt-6">
           <p>© {moment().year()} Tukai, Inc. All Rights Reserved</p>
-          <div className="flex flex-col items-center gap-4 md:flex-row md:gap-6 md:ml-2.5">
+          <div className="flex flex-col items-center gap-4 md:ml-2.5 md:flex-row md:gap-6">
             <Link href="/terms" className="hover:text-primary">
               Terms & Conditions
             </Link>
@@ -147,20 +153,24 @@ export default function Footer() {
               Privacy Policy
             </Link>
           </div>
-          <div className="flex flex-col items-center gap-4 md:flex-row md:gap-6 md:ml-2.5">
+          <div className="flex flex-col items-center gap-4 md:ml-2.5 md:flex-row md:gap-6">
             <div className="flex items-center gap-1">
-              <IconComponent iconName="LocationIcon" size={16}/>
-              <span className='text-sm text-gray-700'>
+              <IconComponent iconName="LocationIcon" size={16} />
+              <span className="text-sm text-gray-700">
                 {isLoadingAddress || status === 'idle' ? 'Loading location...' : address}
               </span>
-              <div className="h-1 w-1 rounded-full bg-gray-300 mx-2" />
-              <Button 
-                variant="link" 
-                className='p-0 hover:no-underline' 
+              <div className="mx-2 h-1 w-1 rounded-full bg-gray-300" />
+              <Button
+                variant="link"
+                className="p-0 hover:no-underline"
                 onClick={requestLocation}
                 disabled={status === 'idle' || isLoadingAddress}
               >
-                <IconComponent iconName="ReloadIcon" size={16} className={isLoadingAddress || status === 'idle' ? 'animate-spin' : ''} />
+                <IconComponent
+                  iconName="ReloadIcon"
+                  size={16}
+                  className={isLoadingAddress || status === 'idle' ? 'animate-spin' : ''}
+                />
                 Update Location
               </Button>
             </div>
