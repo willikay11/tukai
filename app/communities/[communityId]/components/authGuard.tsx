@@ -13,7 +13,13 @@ export default function AuthGuard() {
   const router = useRouter();
 
   return (
-    <Dialog open={open}>
+    <Dialog
+      open={open}
+      onOpenChange={() => {
+        setOpen(false);
+        router.back();
+      }}
+    >
       <DialogContent className="px-4 md:px-16">
         <SignInForm
           onLogin={() => {
