@@ -91,7 +91,7 @@ export default function Join({
   return (
     <Button
       onClick={() => joinCommunityMutation(communityId)}
-      disabled={isPending || isInvitePending || (member && member.inviteStatus === 'requested')}
+      disabled={isPending || isInvitePending || isRequested}
       className="mr-2.5"
     >
       {isRequested
