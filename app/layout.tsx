@@ -30,6 +30,7 @@ import { PillsSkeleton } from './components/skeletons';
 import './globals.css';
 import { ReduxProvider } from './redux-provider';
 import UserLocation from './components/userLocation';
+import { User } from 'lucide-react';
 
 hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
@@ -72,6 +73,7 @@ export default function RootLayout({
                                 />
                               </Link>
                             </div>
+                            <UserLocation />
                             <AuthActions />
                           </div>
                           {/* Browser */}
@@ -80,14 +82,14 @@ export default function RootLayout({
                               <div className="flex hidden h-full items-start md:col-span-3 md:inline-flex lg:col-span-4 lg:inline-flex">
                                 <Link
                                   href="/"
-                                  className="hidden h-full items-start md:mr-6 md:flex lg:mr-3 xl:mr-6"
+                                  className="hidden h-full items-start md:mr-6 md:flex lg:mr-3 xl:mr-6 shrink-0"
                                 >
                                   <Image
                                     src="/images/logo.svg"
                                     alt="Tukai logo"
                                     width={100}
                                     height={40}
-                                    className="mt-2 h-10 w-auto"
+                                    className="mt-2 h-10 w-[100px] shrink-0"
                                   />
                                 </Link>
                                 <UserLocation />
