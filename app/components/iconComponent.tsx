@@ -14,14 +14,16 @@ export default function IconComponent({
   iconName,
   size = 20,
   color = 'bg-gray-700',
+  className,
 }: {
   iconName: string;
   size?: number;
   color?: string;
+  className?: string;
 }) {
   if (isValidIconName(iconName)) {
     const iconComponent = Icons[iconName];
-    return <HugeiconsIcon icon={iconComponent} size={size} color={color} />;
+    return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className} />;
   }
   return null;
 }

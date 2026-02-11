@@ -70,7 +70,7 @@ function AuthLayoutContent({ children }: { children: React.ReactNode }) {
   }, [animationElement]);
 
   return (
-    <div className="h-screen">
+    <div className="h-full">
       <Image
         alt="Mountains"
         src={
@@ -85,7 +85,7 @@ function AuthLayoutContent({ children }: { children: React.ReactNode }) {
         style={{
           position: 'absolute',
           width: '100%',
-          height: '115vh',
+          height: '100vh',
           objectFit: 'cover',
           backgroundPosition: 'center',
           zIndex: -1,

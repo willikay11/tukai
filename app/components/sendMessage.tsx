@@ -55,6 +55,7 @@ export default function SendMessage({
       form.reset();
       toast({
         title: 'Success',
+        variant: 'success',
         description: 'Message sent successfully',
       });
     }

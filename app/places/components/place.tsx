@@ -26,7 +26,11 @@ export default function SinglePlace({ place }: { place: Place }) {
       <div className="group relative mb-2 flex flex-col">
         <div className="relative aspect-square w-full overflow-hidden rounded-[5px]">
           {!hasError ? (
-            <ImageCarousel images={place.photos.map((photo) => photo.photo)} imageHeight="h-full" />
+            <ImageCarousel
+              images={place.photos
+                .sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0))
+                .map((photo) => photo.photo)}
+            />
           ) : (
             <div className="h-full w-full bg-gray-50" />
           )}

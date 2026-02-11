@@ -1,68 +1,48 @@
 'use client';
-
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 import Link from 'next/link';
 
 import clsx from 'clsx';
 import { motion } from 'framer-motion';
 
-import IconComponent from '@/app/components/iconComponent';
+import NoData from '@/components/ui/noData';
 import { Status } from '@/enums/status';
 import { useGetCommunities } from '@/hooks/communities';
 import { Community } from '@/types/community';
-import { Interest } from '@/types/interest';
 
 import SingleCommunity from './community';
 
-const placeholders: Community[] = Array.from({ length: 12 }, (_, index) => ({
+const ITEMS_PER_PAGE = 6;
+
+const placeholders: Community[] = Array.from({ length: ITEMS_PER_PAGE }, (_, index) => ({
   id: `placeholder-${index}`,
   title: 'Loading...',
   description: '',
-  categories: [],
-  dateCreated: '',
-  isBookmarked: false,
-  isPublic: false,
+  coverPhoto: '',
+  membersCount: 0,
   status: 'DRAFT' as Status,
-  photos: [],
-  location: {
-    id: '',
-    name: '',
-    pointLat: 0,
-    pointLong: 0,
-    point: { type: 'Point', coordinates: [0, 0] },
-    formattedAddress: '',
-    street: '',
-    city: '',
-    state: '',
-    country: '',
-  },
-  members: [],
-  dateModified: '',
+  dateCreated: '',
+  isJoined: false,
 }));
 
-export default function InterestBasedCommunities({
-  interest,
-  color,
-}: {
-  interest: Interest;
-  color: { bg: string; color: string };
-}) {
-  const [communityList, setCommunityList] = useState<Community[]>(placeholders);
+export default function InterestBasedCommunities({ category }: { category?: string[] }) {
+  if (category === undefined || category.length === 0) return null;
 
   const {
     data: communities,
     isLoading,
     error,
-  } = useGetCommunities({ page: 1, enabled: true, category: interest.id });
+  } = useGetCommunities({ page: 1, enabled: true, category });
 
-  useEffect(() => {
-    if (communities?.data.results) {
-      setCommunityList(communities.data.results);
+  const communityList = useMemo(() => {
+    if (isLoading) {
+      return placeholders;
     }
-  }, [communities]);
+    return communities?.data?.results || [];
+  }, [communities, isLoading]);
 
-  if (!isLoading && communities?.data.results.length === 0) {
+  if (!isLoading && communityList.length === 0) {
     return null;
   }
 
@@ -70,15 +50,12 @@ export default function InterestBasedCommunities({
     <div className="mb-2.5">
       <div className="mb-4 inline-flex items-center gap-2">
         <div className="inline-flex items-center gap-2">
-          {interest.icon && (
-            <div className={`rounded-full ${color.bg} p-2`}>
-              <IconComponent iconName={interest.icon} size={18} color={color.color} />
-            </div>
-          )}
           <div className="flex flex-col">
-            <p className={clsx('text-nowrap text-sm font-bold text-gray-700')}>{interest.name}</p>
+            <p className={clsx('mb-2 mt-2.5 text-xl font-semibold text-gray-700')}>
+              Based on Your Interests
+            </p>
             <p className={clsx('text-nowrap text-xs font-normal text-gray-400')}>
-              {communities?.data.results.length} communities
+              {isLoading ? '...' : `${communityList.length} communities`}
             </p>
           </div>
         </div>
@@ -88,12 +65,20 @@ export default function InterestBasedCommunities({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"
+        className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-6 2xl:grid-cols-6"
       >
         {communityList.map((community: Community) => (
-          <Link href={`/communities/${community.id}`} target="_blank">
-            <SingleCommunity key={community.id} community={community} />
-          </Link>
+          <motion.div
+            key={community.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            className="cursor-pointer"
+          >
+            <Link href={`/communities/${community.id}`} target="_blank">
+              <SingleCommunity community={community} />
+            </Link>
+          </motion.div>
         ))}
       </motion.div>
     </div>

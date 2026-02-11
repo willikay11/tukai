@@ -19,6 +19,8 @@ export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean)
       params.category,
       params.invited,
       params.date,
+      params.bookmarked,
+      params.hosted_by,
     ],
     queryFn: async () => await fetchExperiences(params),
     enabled: enabled,

@@ -31,8 +31,6 @@ export default function PaymentDetails({
       data.phoneNumber = values.phoneNumber;
     }
 
-    console.log('data: ', data);
-
     const response = await fetch('/auth/subscribe/api', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

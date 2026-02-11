@@ -1,6 +1,13 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { getInterestBasedCommunities, joinCommunity } from '@/services/community';
+import {
+  fetchCommunityPostPhotos,
+  fetchCommunityPosts,
+  getInterestBasedCommunities,
+  joinCommunity,
+  joinCommunityWithToken,
+} from '@/services/community';
+import { CommunityPostsQueryParams } from '@/types/community';
 
 export const useGetCommunities = (
   {
@@ -11,14 +18,16 @@ export const useGetCommunities = (
     showUpComingExperiences,
     recommendedCommunities,
     popularCommunities,
+    following,
   }: {
     page: number;
     enabled: boolean;
-    category?: string;
+    category?: string[];
     search?: string;
     showUpComingExperiences?: boolean;
     recommendedCommunities?: boolean;
     popularCommunities?: boolean;
+    following?: boolean;
   } = {
     page: 1,
     enabled: true,
@@ -35,6 +44,7 @@ export const useGetCommunities = (
         showUpComingExperiences,
         recommendedCommunities,
         popularCommunities,
+        following,
       ),
     enabled: enabled,
   });
@@ -44,5 +54,36 @@ export const useJoinCommunity = () => {
   return useMutation({
     mutationKey: ['joinCommunity'],
     mutationFn: async (communityId: string) => await joinCommunity(communityId),
+  });
+};
+
+export const useJoinCommunityViaInvite = () => {
+  return useMutation({
+    mutationKey: ['joinCommunityViaInvite'],
+    mutationFn: async ({ communityId, token }: { communityId: string; token: string }) =>
+      await joinCommunityWithToken(communityId, token),
+  });
+};
+
+export const useCommunityPosts = (params: CommunityPostsQueryParams, enabled: boolean) => {
+  return useQuery({
+    queryKey: [
+      'communityPosts',
+      params.page,
+      params.page_size,
+      params.author,
+      params.is_liked,
+      params.page,
+    ],
+    queryFn: async () => await fetchCommunityPosts(params),
+    enabled: enabled,
+  });
+};
+
+export const useCommunityPostPhotos = (communityId: string, enabled: boolean) => {
+  return useQuery({
+    queryKey: ['communityPostPhotos', communityId],
+    queryFn: async () => await fetchCommunityPostPhotos(communityId),
+    enabled: enabled,
   });
 };

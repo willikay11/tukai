@@ -9,6 +9,5 @@ export default function RecommendedCommunities() {
     error,
   } = useGetCommunities({ page: 1, enabled: true, recommendedCommunities: true });
 
-  console.log(communities);
   return <div>Recommended Communities</div>;
 }

@@ -5,7 +5,7 @@ import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 export type ExperiencesQueryParams = {
   search?: string;
-  bookmarked?: boolean;
+  bookmarked?: string;
   sold_out?: boolean;
   is_public?: boolean;
   is_paid?: boolean;
@@ -97,7 +97,7 @@ export async function bookmarkExperience(id: string): Promise<ApiResponse> {
       data: parseSnakeToCamel(response.data),
     };
   } catch (error: any) {
-    console.error('API Error:', error.response?.data || error.message);
+    console.log('API Error:', error.response?.data || error.message);
 
     throw {
       status: error.response?.status || 500,

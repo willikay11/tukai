@@ -45,7 +45,6 @@ export default function Paystack({
 
         // Check if URL indicates completion (adjust based on Paystack's redirect URLs)
         if (iframeUrl?.includes('success') || iframeUrl?.includes('callback')) {
-          console.log('Payment completed - URL changed');
           closeModal(true);
           clearInterval(pollInterval);
         }

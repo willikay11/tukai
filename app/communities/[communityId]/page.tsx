@@ -1,11 +1,12 @@
-import { Session, getServerSession } from 'next-auth';
+import { Session } from 'next-auth';
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
 import GoogleMapComponent from '@/app/components/googleMap';
+import IconComponent from '@/app/components/iconComponent';
 import Share from '@/app/components/share';
 import PhotoGallery from '@/components/ui/PhotoGallery';
 import { Separator } from '@/components/ui/separator';
+import { getAuthSession } from '@/lib/auth';
 import { fetchCommunity } from '@/services/community';
 import { ApiResponse } from '@/types/apiResponse';
 import { Community, CommunityMember } from '@/types/community';
@@ -16,9 +17,17 @@ import CommunityMembers from '../components/communityMembers';
 import Join from '../components/join';
 import UpcomingExperiences from '../components/upcomingExperiences';
 import AuthGuard from './components/authGuard';
+import CommunityTabs from './components/communityTabs';
 
-export default async function ViewCommunityPage({ params }: { params: { communityId: string } }) {
-  const session: Session | null = await getServerSession(authOptions as any);
+export default async function ViewCommunityPage({
+  params,
+  searchParams,
+}: {
+  params: { communityId: string };
+  searchParams: { token?: string };
+}) {
+  const token = searchParams.token;
+  const session: Session | null = await getAuthSession();
 
   if (!session) {
     return <AuthGuard />;
@@ -37,7 +46,7 @@ export default async function ViewCommunityPage({ params }: { params: { communit
   return (
     <>
       <main className="grid grid-cols-12 gap-4">
-        <div className="col-span-12 mt-8 md:col-span-6 md:col-start-4 2xl:col-span-4 2xl:col-start-5">
+        <div className="col-span-12 mx-4 mt-8 md:col-span-6 md:col-start-4 md:mx-0 2xl:col-span-4 2xl:col-start-5">
           <div className="mb-3 inline-flex w-full justify-between">
             <div className="inline-flex">
               <div className="flex flex-col">
@@ -52,6 +61,7 @@ export default async function ViewCommunityPage({ params }: { params: { communit
                   communityId={community.id}
                   members={community.members}
                   currentUserId={currentUserId}
+                  token={token}
                 />
                 <Share
                   coverPhoto={community.photos[0].photo}
@@ -78,11 +88,12 @@ export default async function ViewCommunityPage({ params }: { params: { communit
             <div className="mb-3.5 inline-flex gap-2">
               {community.categories.map((category) => (
                 <div
-                  className="inline-flex w-fit rounded-full bg-gray-100 px-4 py-2"
+                  className="inline-flex w-fit flex-shrink-0 rounded-full bg-gray-100 px-4 py-2"
                   key={category.id}
                 >
-                  <div className="flex flex-col">
-                    <p className="text-sm text-gray-700">{category.name}</p>
+                  <div className="inline-flex items-center">
+                    <IconComponent iconName={category.icon} size={18} />
+                    <p className="ml-2 whitespace-nowrap text-sm text-gray-700">{category.name}</p>
                   </div>
                 </div>
               ))}
@@ -128,7 +139,12 @@ export default async function ViewCommunityPage({ params }: { params: { communit
           </div>
         </div>
       </main>
-      <UpcomingExperiences category={community.categories[0].id} />
+      <UpcomingExperiences category={community.categories?.[0]?.id} />
+      <div className="grid grid-cols-12 gap-4">
+        <div className="col-span-12 mx-4 mt-2.5 md:col-span-6 md:col-start-4 md:mx-0 2xl:col-span-4 2xl:col-start-5">
+          <CommunityTabs communityId={params.communityId} />
+        </div>
+      </div>
     </>
   );
 }

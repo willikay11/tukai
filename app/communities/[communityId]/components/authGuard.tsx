@@ -1,7 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+
+import { useRouter } from 'next/navigation';
 
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import SignInForm from '@/components/ui/form/sign-in';
@@ -12,7 +13,13 @@ export default function AuthGuard() {
   const router = useRouter();
 
   return (
-    <Dialog open={open}>
+    <Dialog
+      open={open}
+      onOpenChange={() => {
+        setOpen(false);
+        router.back();
+      }}
+    >
       <DialogContent className="px-4 md:px-16">
         <SignInForm
           onLogin={() => {

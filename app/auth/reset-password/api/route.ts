@@ -1,17 +1,21 @@
 export async function POST(req: Request) {
   try {
-    const { token, password } = await req.json();
+    const { token, password, email } = await req.json();
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/accounts/password-reset/`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/v1/accounts/password-change/`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          token,
+          password,
+        }),
       },
-      body: JSON.stringify({
-        token,
-        password,
-      }),
-    });
+    );
 
     const res = await response.json();
 

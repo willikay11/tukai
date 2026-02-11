@@ -9,9 +9,10 @@ import { useRouter } from 'next/navigation';
 
 import { Mail02Icon } from '@hugeicons/react-pro';
 
-import { Anchor, Button, Input } from '@/app/components/form';
+import { Anchor, Input } from '@/app/components/form';
 import SuccessMessage from '@/app/components/messages/success';
 import MobileStore from '@/app/components/mobileStore';
+import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { addEmail } from '@/slices/resetSlice';
 
@@ -68,16 +69,16 @@ export default function Page() {
             description="A verification code was sent to your email, "
             subDescription={
               <>
-                <span className="text-primary">{email}</span>. Please check your email and enter the
-                code.
+                <span className="font-medium text-primary">{email}</span>. Please check your email
+                and enter the code.
               </>
             }
             onContinue={() => router.push('/auth/reset-password')}
           />
 
-          <div className="mb-4 mt-4 flex justify-center">
+          <div className="mb-4 mt-4 flex justify-center font-medium">
             <span className="mr-1 text-xs">Wrong email?</span>
-            <Button type="link" onClick={() => setVerificationSent(false)}>
+            <Button variant="link" className="h-fit p-0" onClick={() => setVerificationSent(false)}>
               Edit
             </Button>
           </div>
@@ -89,7 +90,7 @@ export default function Page() {
           </div>
 
           <div className="mb-4">
-            <p className="text-xs text-gray-700">
+            <p className="text-xs font-medium text-gray-700">
               Enter the email address you used to register so that we can sen you the Password Reset
               Link.
             </p>
@@ -114,8 +115,8 @@ export default function Page() {
             </div>
 
             <div className="mb-6">
-              <Button block htmlType="submit" loading={isSubmitting}>
-                Sign In
+              <Button className="h-[50px] w-full" disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting...' : 'Submit'}
               </Button>
             </div>
 

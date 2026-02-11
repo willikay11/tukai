@@ -7,11 +7,11 @@ import Link from 'next/link';
 import { hugeiconsLicense } from '@hugeicons/react-pro';
 
 import AuthActions from '@/app/components/authActions';
+import BottomNavigation from '@/app/components/bottomNavigation';
 import DownloadApp from '@/app/components/downloadApp';
 import { satoshi } from '@/app/components/fonts';
 import GlobalLoading from '@/app/components/globalLoading';
 import IconRadioButtonGroup from '@/app/components/iconRadioButtonGroup';
-import Nav from '@/app/components/nav';
 import PageFilters from '@/components/ui/pageFilters';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthDialogProvider } from '@/context/AuthDialogContext';
@@ -22,7 +22,9 @@ import ReactQueryClientProvider from '@/providers/ReactQueryProvider';
 import SessionProvider from '@/providers/SessionProvider';
 
 import LocationPrompt from './components/locationPrompt';
+import Nav from './components/nav';
 import Search from './components/search';
+import Footer from './components/share/footer';
 import { PillsSkeleton } from './components/skeletons';
 import './globals.css';
 import { ReduxProvider } from './redux-provider';
@@ -44,7 +46,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={satoshi.className}>
+      <body className={`${satoshi.className} flex min-h-screen flex-col`}>
         <ReduxProvider>
           <SessionProvider>
             <ReactQueryClientProvider>
@@ -54,54 +56,73 @@ export default function RootLayout({
                 <LocationProvider>
                   <AuthDialogProvider>
                     <SelectedCategoryProvider>
-                      <div className="sticky top-0 z-50 grid grid-cols-12 border-b-[1px] border-gray-100 bg-white md:gap-x-4">
-                        <div className="col-span-12 md:hidden lg:hidden 2xl:hidden">
-                          <DownloadApp />
-                        </div>
-                        <div className="col-span-12 mx-4 mt-5 inline-flex justify-between md:hidden lg:hidden 2xl:hidden">
-                          <Nav />
-                          <AuthActions />
-                        </div>
-                        <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0">
-                          <div className="inline-flex grid h-[70px] w-full grid-cols-12 items-center justify-between md:mt-6">
-                            <div className="flex hidden h-full items-center md:col-span-4 md:inline-flex lg:col-span-4 lg:inline-flex">
-                              <Link
-                                href="/"
-                                className="hidden h-full items-center md:mr-6 md:flex lg:mr-5 xl:mr-10"
-                              >
+                      <div className="relative flex min-h-screen flex-col">
+                        <div className="z-50 grid grid-cols-12 bg-gray-50 md:sticky md:top-0 md:gap-x-4">
+                          {/* Mobile */}
+                          <div className="col-span-12 mx-4 mt-5 inline-flex justify-between md:hidden lg:hidden 2xl:hidden">
+                            <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
+                              <Link href="/" className="inline-flex items-center">
                                 <Image
                                   src="/images/logo.svg"
                                   alt="Tukai logo"
-                                  width={30}
-                                  height={30}
+                                  width={100}
+                                  height={100}
                                 />
-                                <span className="ml-2 text-lg font-bold text-[#013334]">Tukai</span>
                               </Link>
-                              <Nav />
                             </div>
-                            <div className="col-span-12 inline-flex justify-center md:col-span-4 lg:col-span-4">
-                              <div className="w-full md:inline-flex">
-                                <Suspense
-                                  fallback={
-                                    <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
-                                  }
+                            <AuthActions />
+                          </div>
+                          {/* Browser */}
+                          <div className="col-span-12 mx-4 md:col-span-6 md:col-start-4 md:mx-0 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+                            <div className="inline-flex grid w-full grid-cols-12 items-center justify-between md:mt-6 md:h-fit">
+                              <div className="flex hidden h-full items-center md:col-span-3 md:inline-flex lg:col-span-4 lg:inline-flex">
+                                <Link
+                                  href="/"
+                                  className="hidden h-full items-start md:mr-6 md:flex lg:mr-3 xl:mr-6"
                                 >
-                                  <Search />
-                                </Suspense>
+                                  <Image
+                                    src="/images/logo.svg"
+                                    alt="Tukai logo"
+                                    width={100}
+                                    height={40}
+                                    className="mt-2 h-10 w-auto"
+                                  />
+                                </Link>
                               </div>
-                              <IconRadioButtonGroup />
-                            </div>
-                            <div className="flex hidden h-full items-center justify-end md:col-span-4 md:inline-flex lg:col-span-4 lg:inline-flex">
-                              <AuthActions />
+                              <div className="col-span-12 md:col-span-6 lg:col-span-4">
+                                <div className="flex flex-col items-center space-y-4">
+                                  <div className="flex w-full items-center gap-2 md:max-w-sm">
+                                    <div className="flex-1">
+                                      <Suspense
+                                        fallback={
+                                          <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
+                                        }
+                                      >
+                                        <Search />
+                                      </Suspense>
+                                    </div>
+                                    <IconRadioButtonGroup />
+                                  </div>
+                                  <div className="flex w-full items-center justify-center md:max-w-sm">
+                                    <Nav />
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="mt-2 flex hidden h-full items-start justify-end md:col-span-3 md:inline-flex lg:col-span-4 lg:inline-flex">
+                                <AuthActions />
+                              </div>
                             </div>
                           </div>
                         </div>
                         <Suspense fallback={<PillsSkeleton />}>
                           <PageFilters />
                         </Suspense>
+                        <LocationPrompt />
+                        <div className="mb-20 flex-grow md:mb-4">{children}</div>
+                        <Footer />
                       </div>
-                      <LocationPrompt />
-                      {children}
+                      <DownloadApp />
+                      <BottomNavigation />
                     </SelectedCategoryProvider>
                   </AuthDialogProvider>
                 </LocationProvider>

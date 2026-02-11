@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { UserAdd01Icon } from '@hugeicons/react-pro';
 
 import IconComponent from '@/app/components/iconComponent';
+import { Button } from '@/components/ui/button';
 import TukaiImage from '@/components/ui/image';
 import {
   NavigationMenu,
@@ -39,7 +40,7 @@ export default function AuthActions() {
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
-              <NavigationMenuTrigger className="pr-0">
+              <NavigationMenuTrigger className="bg-transparent pr-0">
                 <div className="relative aspect-square h-7 w-7">
                   <TukaiImage
                     src={session?.user?.image || ''}
@@ -55,7 +56,7 @@ export default function AuthActions() {
                 <span className="ml-2 mr-2.5 text-xs text-gray-600">{session?.user?.name}</span>
                 <NavigationMenuContent className="w-54 z-50 rounded-lg p-2">
                   <div className="flex w-40 flex-col gap-2">
-                    <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
+                    {/* <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
                       <div className="inline-flex items-center gap-2">
                         <IconComponent iconName="UserIcon" size={15} color="gray" />
                         My Profile
@@ -71,14 +72,14 @@ export default function AuthActions() {
 
                     <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
                       <div className="inline-flex items-center gap-2">
-                        <IconComponent iconName="Notification03Icon" size={15} color="gray" />
+                        <IconComponent iconName="BubbleChatIcon" size={15} color="gray" />
                         Messages
                       </div>
                     </NavigationMenuLink>
 
                     <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
                       <div className="inline-flex items-center gap-2">
-                        <IconComponent iconName="BubbleChatIcon" size={15} color="gray" />
+                        <IconComponent iconName="Notification03Icon" size={15} color="gray" />
                         Notifications
                       </div>
                     </NavigationMenuLink>
@@ -88,7 +89,7 @@ export default function AuthActions() {
                         <IconComponent iconName="DirectionRight01Icon" size={15} color="gray" />
                         Tour Guide Account
                       </div>
-                    </NavigationMenuLink>
+                    </NavigationMenuLink> */}
                     <NavigationMenuLink onClick={handleLogout} className="cursor-pointer">
                       <div className="inline-flex items-center gap-2">
                         <IconComponent iconName="Logout04Icon" size={15} color="gray" />
@@ -103,8 +104,7 @@ export default function AuthActions() {
         </NavigationMenu>
       ) : (
         <Link href="/auth/sign-in" className="inline-flex">
-          <UserAdd01Icon size={15} className="mr-2 text-gray-700" />
-          <span className="text-xs text-gray-800">Sign In/Sign Up</span>
+          <Button className="h-[38px] rounded-[68px]">Sign In/Sign Up</Button>
         </Link>
       )}
     </div>

@@ -60,6 +60,10 @@ export default function Page() {
         description: res.message,
         variant: 'destructive',
       });
+
+      if (res?.message.includes('already exists')) {
+        router.push('/auth/sign-in');
+      }
       return;
     }
 
@@ -71,11 +75,12 @@ export default function Page() {
     setIsSubmitting(false);
     removeUser();
 
-    if (session?.user) {
-      router.push('/auth/payments');
-    } else {
-      router.push('/auth/otp-confirmation');
-    }
+    router.push('/');
+    // if (session?.user) {
+    //   router.push('/auth/payments');
+    // } else {
+    //   router.push('/auth/otp-confirmation');
+    // }
   };
 
   const getInterests = async () => {
@@ -136,7 +141,7 @@ export default function Page() {
                 <div className="mr-2">
                   <IconComponent iconName={interest.icon} size={16} />
                 </div>
-                <span className="text-xs">{interest.name}</span>
+                <span className="text-xs font-medium">{interest.name}</span>
               </div>
             );
           })
