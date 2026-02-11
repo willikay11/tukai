@@ -78,7 +78,7 @@ export default function Footer() {
                 alt="Tukai logo"
                 width={100}
                 height={40}
-                className="h-10 w-auto"
+                className="mt-2 h-10 w-[100px] shrink-0"
               />
             </Link>
           </div>
