@@ -21,6 +21,7 @@ import { SelectedCategoryProvider } from '@/context/SelectedCategoryContext';
 import ReactQueryClientProvider from '@/providers/ReactQueryProvider';
 import SessionProvider from '@/providers/SessionProvider';
 
+import IconComponent from './components/iconComponent';
 import LocationPrompt from './components/locationPrompt';
 import Nav from './components/nav';
 import Search from './components/search';
@@ -28,6 +29,7 @@ import Footer from './components/share/footer';
 import { PillsSkeleton } from './components/skeletons';
 import './globals.css';
 import { ReduxProvider } from './redux-provider';
+import UserLocation from './components/userLocation';
 
 hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
@@ -75,7 +77,7 @@ export default function RootLayout({
                           {/* Browser */}
                           <div className="col-span-12 mx-4 md:col-span-6 md:col-start-4 md:mx-0 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
                             <div className="inline-flex grid w-full grid-cols-12 items-center justify-between md:mt-6 md:h-fit">
-                              <div className="flex hidden h-full items-center md:col-span-3 md:inline-flex lg:col-span-4 lg:inline-flex">
+                              <div className="flex hidden h-full items-start md:col-span-3 md:inline-flex lg:col-span-4 lg:inline-flex">
                                 <Link
                                   href="/"
                                   className="hidden h-full items-start md:mr-6 md:flex lg:mr-3 xl:mr-6"
@@ -88,9 +90,10 @@ export default function RootLayout({
                                     className="mt-2 h-10 w-auto"
                                   />
                                 </Link>
+                                <UserLocation />
                               </div>
                               <div className="col-span-12 md:col-span-6 lg:col-span-4">
-                                <div className="flex flex-col items-center space-y-4">
+                                <div className="flex flex-col items-center space-y-6">
                                   <div className="flex w-full items-center gap-2 md:max-w-sm">
                                     <div className="flex-1">
                                       <Suspense
