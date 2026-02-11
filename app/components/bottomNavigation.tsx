@@ -70,7 +70,7 @@ export default function BottomNavigation() {
 
   const linkItems = () =>
     links.map((link) => {
-      const isActive = pathname === link.href;
+      const isActive = pathname.includes(link.href);
       return (
         <Link
           href={link.href}

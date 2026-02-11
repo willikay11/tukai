@@ -32,7 +32,7 @@ export default function Nav() {
         key={link.name}
         className={clsx('inline-flex h-fit items-center md:pb-4', {
           'mr-6': index !== links.length - 1,
-          'text-primary md:border-b-[1px] md:border-primary': pathname === link.href,
+          'text-primary md:border-b-[1px] md:border-primary': pathname.includes(link.href),
         })}
         onClick={() => setOpen(false)}
       >
@@ -40,8 +40,8 @@ export default function Nav() {
           {showIcon && link.icon}
           <span
             className={clsx('ml-1 text-xs', {
-              'text-gray-800': pathname !== link.href,
-              'font-semibold text-primary': pathname === link.href,
+              'text-gray-800': !pathname.includes(link.href),
+              'font-semibold text-primary': pathname.includes(link.href),
             })}
           >
             {link.name}
