@@ -62,7 +62,7 @@ export default function UserLocation() {
   }, [lat, lng, status]);
 
   return (
-    <div className="flex items-center gap-1 rounded-[30px] bg-green-200 px-4 py-1 text-green-800 mt-4">
+    <div className="hidden lg:flex items-center gap-1 rounded-[30px] bg-green-200 px-4 py-1 text-green-800 mt-4">
       <IconComponent iconName="LocationIcon" size={16} />
       <span className="max-w-[100px] truncate whitespace-nowrap text-xs font-semibold p-0">
         {isLoadingAddress || status === 'idle' ? 'Loading location ...' : address}
