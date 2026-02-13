@@ -28,7 +28,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
 
   return (
     <main className="grid grid-cols-12 gap-4">
-      <div className="col-span-12 mx-4 mt-8 md:col-span-6 md:col-start-4 md:mx-0 2xl:col-span-4 2xl:col-start-5 2xl:mx-0">
+      <div className="col-span-12 mx-4 mt-8 md:col-span-6 md:col-start-4 md:mx-0 lg:col-span-8 lg:col-start-2 lg:mx-0 3xl:col-span-4 3xl:col-start-5">
         <div className="mb-3 block w-full justify-between md:inline-flex">
           <div className="inline-flex">
             <div className="flex flex-col">
