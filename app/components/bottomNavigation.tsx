@@ -43,6 +43,14 @@ export default function BottomNavigation() {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/';
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -70,19 +78,19 @@ export default function BottomNavigation() {
 
   const linkItems = () =>
     links.map((link) => {
-      const isActive = pathname.includes(link.href);
+      const isActiveLink = isActive(link.href);
       return (
         <Link
           href={link.href}
           key={link.name}
           className={clsx('inline-flex items-center justify-center transition-all', {
-            'rounded-full bg-[#D4F1E8] px-4 py-3 text-primary': isActive,
-            'text-gray-600': !isActive,
+            'rounded-full bg-[#D4F1E8] px-4 py-3 text-primary': isActiveLink,
+            'text-gray-600': !isActiveLink,
           })}
         >
           <div className={clsx('flex items-center justify-center gap-2')}>
             <span>{link.icon}</span>
-            {isActive && <span className="text-sm font-medium">{link.name}</span>}
+            {isActiveLink && <span className="text-sm font-medium">{link.name}</span>}
           </div>
         </Link>
       );
