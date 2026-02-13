@@ -28,6 +28,9 @@ const DescriptionShowMore = ({
     // Ensure class (and optionally target/rel) are preserved on <a>
     allowedAttributes: {
       a: ['href', 'name', 'target', 'rel', 'class'],
+      ol: ['class'],
+      ul: ['class'],
+      li: ['class'],
     },
     transformTags: {
       a: (tagName, attribs) => {
@@ -37,6 +40,26 @@ const DescriptionShowMore = ({
           attribs: {
             ...attribs,
             class: `${existing}text-primary underline underline-offset-2 hover:text-primary transition-colors`,
+          },
+        } as any;
+      },
+      ol: (tagName, attribs) => {
+        const existing = attribs.class ? attribs.class + ' ' : '';
+        return {
+          tagName: 'ol',
+          attribs: {
+            ...attribs,
+            class: `${existing}list-decimal list-inside`,
+          },
+        } as any;
+      },
+      ul: (tagName, attribs) => {
+        const existing = attribs.class ? attribs.class + ' ' : '';
+        return {
+          tagName: 'ul',
+          attribs: {
+            ...attribs,
+            class: `${existing}list-disc list-inside`,
           },
         } as any;
       },
