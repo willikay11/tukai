@@ -62,15 +62,15 @@ export default function UserLocation() {
   }, [lat, lng, status]);
 
   return (
-    <div className="flex items-center gap-1 rounded-[30px] bg-green-200 px-2 lg:px-3 py-1 text-green-800 h-fit mt-2 lg:mt-4">
+    <div className="mt-2 flex h-fit items-center gap-1 rounded-[30px] bg-green-200 px-2 py-1 text-green-800 lg:mt-4 lg:px-3">
       <IconComponent iconName="LocationIcon" size={16} />
-      <span className="max-w-[60px] lg:max-w-[100px] truncate whitespace-nowrap text-xs font-semibold p-0">
+      <span className="max-w-[60px] truncate whitespace-nowrap p-0 text-xs font-semibold lg:max-w-[100px]">
         {isLoadingAddress || status === 'idle' ? 'Loading location ...' : address}
       </span>
-      <div className="hidden md:block mx-1 lg:mx-1 h-1 w-1 rounded-full bg-green-600" />
+      <div className="mx-1 hidden h-1 w-1 rounded-full bg-green-600 md:block lg:mx-1" />
       <Button
         variant="link"
-        className="p-0 hover:no-underline h-fit"
+        className="h-fit p-0 hover:no-underline"
         onClick={requestLocation}
         disabled={status === 'idle' || isLoadingAddress}
       >

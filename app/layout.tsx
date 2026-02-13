@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { hugeiconsLicense } from '@hugeicons/react-pro';
+import { User } from 'lucide-react';
 
 import AuthActions from '@/app/components/authActions';
 import BottomNavigation from '@/app/components/bottomNavigation';
@@ -27,10 +28,9 @@ import Nav from './components/nav';
 import Search from './components/search';
 import Footer from './components/share/footer';
 import { PillsSkeleton } from './components/skeletons';
+import UserLocation from './components/userLocation';
 import './globals.css';
 import { ReduxProvider } from './redux-provider';
-import UserLocation from './components/userLocation';
-import { User } from 'lucide-react';
 
 hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',
@@ -82,7 +82,7 @@ export default function RootLayout({
                               <div className="flex hidden h-full items-start md:col-span-3 md:inline-flex lg:col-span-4 lg:inline-flex">
                                 <Link
                                   href="/"
-                                  className="hidden h-full items-start md:mr-6 md:flex lg:mr-3 xl:mr-6 shrink-0"
+                                  className="hidden h-full shrink-0 items-start md:mr-6 md:flex lg:mr-3 xl:mr-6"
                                 >
                                   <Image
                                     src="/images/logo.svg"
