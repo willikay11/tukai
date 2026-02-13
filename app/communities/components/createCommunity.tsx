@@ -4,6 +4,7 @@ import { useId, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 
 import IconComponent from '../../components/iconComponent';
@@ -37,6 +38,7 @@ const categories = [
 
 export default function CreateCommunity() {
   const uploadId = useId();
+  const visibilityId = useId();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [visibility, setVisibility] = useState<'public' | 'private'>('public');
 
@@ -125,33 +127,33 @@ export default function CreateCommunity() {
 
       <div className="mt-4">
         <p className="text-xs font-medium text-gray-600">What type of itinerary is this?</p>
-        <div className="mt-2 space-y-2">
-          <label className="flex cursor-pointer items-start gap-2 text-xs text-gray-700">
-            <input
-              type="radio"
-              name="visibility"
-              className="mt-0.5 h-3.5 w-3.5 accent-emerald-500"
-              checked={visibility === 'public'}
-              onChange={() => setVisibility('public')}
+        <RadioGroup
+          className="mt-2 space-y-2"
+          value={visibility}
+          onValueChange={(value) => setVisibility(value as 'public' | 'private')}
+        >
+          <div className="flex items-start gap-2 text-xs text-gray-700">
+            <RadioGroupItem
+              value="public"
+              id={`${visibilityId}-public`}
+              className="mt-0.5 h-3.5 w-3.5 border-emerald-500 text-emerald-600"
             />
-            <span>
+            <label htmlFor={`${visibilityId}-public`}>
               <span className="font-medium">Public</span> (Anyone can view the community and join)
-            </span>
-          </label>
-          <label className="flex cursor-pointer items-start gap-2 text-xs text-gray-700">
-            <input
-              type="radio"
-              name="visibility"
-              className="mt-0.5 h-3.5 w-3.5 accent-emerald-500"
-              checked={visibility === 'private'}
-              onChange={() => setVisibility('private')}
+            </label>
+          </div>
+          <div className="flex items-start gap-2 text-xs text-gray-700">
+            <RadioGroupItem
+              value="private"
+              id={`${visibilityId}-private`}
+              className="mt-0.5 h-3.5 w-3.5 border-emerald-500 text-emerald-600"
             />
-            <span>
+            <label htmlFor={`${visibilityId}-private`}>
               <span className="font-medium">Private</span> (Only invited guests or members of a
               given communities can view and join)
-            </span>
-          </label>
-        </div>
+            </label>
+          </div>
+        </RadioGroup>
       </div>
 
       <div className="mt-6 flex items-center justify-between">
