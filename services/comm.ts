@@ -1,6 +1,8 @@
-import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
-import { api } from './apiService';
 import { getSession } from 'next-auth/react';
+
+import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
+
+import { api, apiWithToken } from './apiService';
 
 export const sendMessage = async ({
   content,
@@ -10,6 +12,7 @@ export const sendMessage = async ({
   recipientId: string;
 }) => {
   try {
+    const api = await apiWithToken();
     const session = await getSession();
     const senderId = session?.user?.id;
 
@@ -31,6 +34,30 @@ export const sendMessage = async ({
       status: error.response?.status || 500,
       success: false,
       message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+};
+
+export const unsubscribe = async ({ token }: { token: string }) => {
+  try {
+    const response = await api.post('/v1/comms/unsubscribe/', {
+      token,
+    });
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message:
+        error.response?.data?.message ||
+        'Failed to unsubscribe. Please try again or contact support.',
     };
   }
 };

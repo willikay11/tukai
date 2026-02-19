@@ -1,6 +1,9 @@
-import { Button } from '@/app/components/form';
 import React, { ReactNode } from 'react';
+
 import * as HugeIcons from '@hugeicons/react-pro';
+
+import { Button } from '@/app/components/form';
+
 import IconComponent from '../iconComponent';
 
 export default function SuccessMessage({
@@ -38,7 +41,7 @@ export default function SuccessMessage({
       </div>
 
       <div className="mb-4">
-        <p className="text-xs text-gray-700">
+        <p className="text-xs font-medium text-gray-700">
           {description}
           {subDescription ? subDescription : null}
         </p>

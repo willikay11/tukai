@@ -1,20 +1,21 @@
 module.exports = {
   extends: [
-    'next',
     'next/core-web-vitals',
-    'eslint:recommended',
-    'plugin:react/recommended',
-    // 'plugin:@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:jest/recommended',
     'prettier',
   ],
-  plugins: ['react'],
-  parserOptions: {
-    ecmaVersion: 2021,
-    sourceType: 'module',
-  },
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint', 'jest'],
   rules: {
-    // Add your custom ESLint rules here
     'react/react-in-jsx-scope': 'off',
-    'react/jsx-uses-react': 'off',
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-explicit-any': 'warn',
+  },
+  env: {
+    browser: true,
+    node: true,
+    jest: true,
+    es2021: true,
   },
 };

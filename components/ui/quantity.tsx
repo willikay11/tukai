@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { HugeiconsIcon } from '@hugeicons/react';
+
 import {
   MinusSignCircleTwotoneRounded,
   PlusSignCircleTwotoneRounded,
 } from '@hugeicons-pro/core-twotone-rounded';
+import { HugeiconsIcon } from '@hugeicons/react';
 import clsx from 'clsx';
 
 interface QuantitySelectorProps {

@@ -1,9 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { ImageSkeleton } from '@/app/components/skeletons';
+
 import Image, { ImageProps } from 'next/image';
+
 import clsx from 'clsx';
+
+import { ImageSkeleton } from '@/app/components/skeletons';
 
 export default function TukaiImage({
   src,
@@ -13,6 +16,7 @@ export default function TukaiImage({
 }: ImageProps & { showNotFoundText?: boolean }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+
   return (
     <>
       {!isLoaded && !hasError && <ImageSkeleton />}
@@ -24,10 +28,11 @@ export default function TukaiImage({
           layout="fill"
           objectFit="cover"
           className={clsx(
-            `carousel-image opacity-0 transition-opacity duration-300 ${props?.className}`,
+            'carousel-image opacity-0 transition-opacity duration-300',
+            props?.className,
           )}
-          onLoadingComplete={(image) => {
-            image.classList.remove('opacity-0');
+          onLoad={(e) => {
+            e.currentTarget.classList.remove('opacity-0');
             setIsLoaded(true);
           }}
           onError={() => {
@@ -41,7 +46,8 @@ export default function TukaiImage({
       {hasError && (
         <div
           className={clsx(
-            `absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-500 ${props.className}`,
+            'absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-500',
+            props.className,
           )}
         >
           {showNotFoundText && <span className="text-center text-sm">Image not available</span>}

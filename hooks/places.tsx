@@ -1,18 +1,19 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import {
-  fetchPlaces,
-  fetchPlaceCategories,
-  fetchPlaceReviews,
-  fetchPlaceReviewComments,
-  createPlaceReviewComment,
-  likePlaceReviewComment,
-  likePlaceReview,
   bookmarkPlace,
   createPlaceReview,
-  uploadPlaceReviewImages,
+  createPlaceReviewComment,
   deletePlaceReview,
-  updatePlaceReview,
   deletePlaceReviewImage,
+  fetchPlaceCategories,
+  fetchPlaceReviewComments,
+  fetchPlaceReviews,
+  fetchPlaces,
+  likePlaceReview,
+  likePlaceReviewComment,
+  updatePlaceReview,
+  uploadPlaceReviewImages,
 } from '@/services/place';
 import { PlaceCategoryParams } from '@/types/networkParam';
 
@@ -20,14 +21,18 @@ export const usePlaces = ({
   categoryId,
   page,
   enabled,
+  lat,
+  lng,
 }: {
-  categoryId?: string;
+  categoryId?: string | string[];
   page: number;
   enabled: boolean;
+  lat?: number;
+  lng?: number;
 }) => {
   return useQuery({
-    queryKey: ['placeCategories', categoryId, page],
-    queryFn: async () => await fetchPlaces(page, 12, categoryId),
+    queryKey: ['places', { categoryId, page, lat, lng }],
+    queryFn: async () => await fetchPlaces(page, 12, categoryId, undefined, lat, lng),
     enabled,
   });
 };

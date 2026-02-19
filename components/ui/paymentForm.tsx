@@ -1,25 +1,29 @@
 'use client';
 
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+import { useSession } from 'next-auth/react';
+import Image from 'next/image';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  Location04TwotoneRounded,
   Mail02TwotoneRounded,
-  MapsGlobalIconTwotoneRounded,
-  PinLocationIconTwotoneRounded,
+  MapsGlobal02TwotoneRounded,
   SquareLock01TwotoneRounded,
   UserTwotoneRounded,
 } from '@hugeicons-pro/core-twotone-rounded';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { useState, forwardRef, useImperativeHandle, useEffect } from 'react';
-import { z } from 'zod';
-import clsx from 'clsx';
-import Image from 'next/image';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
 import { CallIcon } from '@hugeicons/react-pro';
+import clsx from 'clsx';
+import { z } from 'zod';
+
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+
 import { PhoneNumber } from './phoneNumber';
-import { Select, SelectValue, SelectTrigger, SelectItem, SelectContent } from './select';
-import { useSession } from 'next-auth/react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 
 const options = [
   {
@@ -308,7 +312,7 @@ const PaymentForm = forwardRef(
                                 className="h-[55px] w-full"
                                 prefixIcon={
                                   <HugeiconsIcon
-                                    icon={MapsGlobalIconTwotoneRounded}
+                                    icon={MapsGlobal02TwotoneRounded}
                                     size={20}
                                     className="text-gray-600"
                                   />
@@ -340,7 +344,7 @@ const PaymentForm = forwardRef(
                                 type="text"
                                 icon={
                                   <HugeiconsIcon
-                                    icon={PinLocationIconTwotoneRounded}
+                                    icon={Location04TwotoneRounded}
                                     size={20}
                                     className="text-gray-600"
                                   />

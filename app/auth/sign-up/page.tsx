@@ -1,11 +1,13 @@
 'use client';
 
-import { Anchor, Button } from '@/app/components/form';
-import { GoogleIcon } from '@hugeicons/react-pro';
-import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
+import { AppleIcon, GoogleIcon } from '@hugeicons/react-pro';
+
+import { Anchor } from '@/app/components/form';
 import MobileStore from '@/app/components/mobileStore';
+import { Button } from '@/components/ui/button';
 
 export default function Page() {
   const router = useRouter();
@@ -17,7 +19,7 @@ export default function Page() {
       </div>
 
       <div className="mb-4">
-        <Button block onClick={() => router.push('/auth/sign-up-free')}>
+        <Button className="h-[50px] w-full" onClick={() => router.push('/auth/sign-up-free')}>
           Create a Free Account
         </Button>
       </div>
@@ -35,10 +37,30 @@ export default function Page() {
       </div>
 
       <div className="mb-2.5">
-        <Button block onClick={() => signIn('google')} type="blue">
+        <Button
+          onClick={() => signIn('google')}
+          className="h-[50px] w-full bg-blue-600 hover:bg-blue-700 focus:bg-blue-700"
+        >
           <div className="inline-flex items-center">
             <GoogleIcon className="mr-2 text-white" variant="solid" type="sharp" /> Continue with
             Google
+          </div>
+        </Button>
+      </div>
+
+      <div className="mb-2.5">
+        <Button
+          className="h-[50px] w-full bg-black hover:bg-gray-900 focus:bg-gray-900"
+          onClick={() =>
+            signIn('apple', {
+              redirect: false,
+              callbackUrl: '/',
+            })
+          }
+        >
+          <div className="inline-flex items-center font-medium">
+            <AppleIcon className="mr-2 text-white" variant="solid" type="sharp" /> Continue with
+            Apple
           </div>
         </Button>
       </div>
@@ -51,8 +73,8 @@ export default function Page() {
 
       <div className="mb-3">
         <p className="text-xs font-normal">
-          By continuing to use Oltukai, you agree to our <Anchor link="">Terms of Use</Anchor>
-          &nbsp;and <Anchor link="">Privacy Policy</Anchor>
+          By continuing to use Tukai, you agree to our <Anchor link="/terms">Terms of Use</Anchor>
+          &nbsp;and <Anchor link="/privacy">Privacy Policy</Anchor>
         </p>
       </div>
 

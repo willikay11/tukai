@@ -1,13 +1,13 @@
-import { api, getAccessToken } from './apiService';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
+
+import { api } from './apiService';
 
 export const signIn = async (email: string, password: string) => {
   try {
     const response = await api.post('/v1/accounts/login/', { email, password });
     return response.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (error: any) {
+    throw error?.response?.data || error;
   }
 };
 
@@ -35,7 +35,24 @@ export const profile = async (id: string, token?: string) => {
   }
 };
 
-export const socialSignIn = async (backend: 'google-oauth2' | 'facebook', accessToken: string) => {
+export const getUserInterests = async (userId: string, token: string) => {
+  try {
+    const response = await api.get(`/v1/accounts/users/${userId}/interests/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return parseSnakeToCamel(response.data?.results);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const socialSignIn = async (
+  backend: 'google-oauth2' | 'facebook' | 'apple-id',
+  accessToken: string,
+) => {
   try {
     const response = await api.post(`/v1/accounts/social/${backend}/login/`, {
       access_token: accessToken,
@@ -72,7 +89,6 @@ export const refreshToken = async (refreshToken: string) => {
     const response = await api.post('/v1/accounts/login/refresh/', { refresh: refreshToken });
     return parseSnakeToCamel(response.data);
   } catch (error: any) {
-    console.error('heere:', error.response.data);
     throw error;
   }
 };

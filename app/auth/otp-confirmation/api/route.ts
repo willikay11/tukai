@@ -1,40 +1,30 @@
+import { post as serverPost } from '@/lib/serverApi';
+
 export async function POST(req: Request) {
   try {
     const { email, token } = await req.json();
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/v1/accounts/token-verification/`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token, email, category: 'account_verification' }),
-      },
-    );
-
-    if (!response.ok) {
-      return Response.json(
-        {
-          message: 'Invalid credentials',
-        },
-        {
-          status: 401,
-        },
-      );
-    }
-
-    return Response.json({
-      message: 'Account activated successfully',
-      status: 200,
+    await serverPost('/v1/accounts/token-verification/', {
+      token,
+      email,
+      category: 'account_verification',
     });
-  } catch (error) {
+
     return Response.json(
       {
-        message: 'Invalid OTP',
+        message: 'Account activated successfully',
+        status: 200,
+      },
+      { status: 200 },
+    );
+  } catch (err: any) {
+    console.error('OTP Confirmation Error:', err?.response?.data ?? err);
+    return Response.json(
+      {
+        message: err?.response?.data?.errors?.[0]?.detail || 'Invalid credentials',
       },
       {
-        status: 401,
+        status: 400,
       },
     );
   }
@@ -44,36 +34,23 @@ export async function PUT(req: Request) {
   try {
     const { email } = await req.json();
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/accounts/token`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, category: 'account_verification' }),
-    });
+    await serverPost('/v1/accounts/token/', { email, category: 'account_verification' });
 
-    if (!response.ok) {
-      return Response.json(
-        {
-          message: 'Invalid credentials',
-        },
-        {
-          status: 401,
-        },
-      );
-    }
-
-    return Response.json({
-      message: 'OTP sent successfully',
-      status: 200,
-    });
-  } catch (error) {
     return Response.json(
       {
-        message: 'Invalid email',
+        message: 'OTP sent successfully',
+        status: 200,
+      },
+      { status: 200 },
+    );
+  } catch (err: any) {
+    console.error('Resend OTP Error:', err?.response ?? err);
+    return Response.json(
+      {
+        message: err?.response?.data?.errors?.[0]?.detail || 'Invalid credentials',
       },
       {
-        status: 401,
+        status: 400,
       },
     );
   }

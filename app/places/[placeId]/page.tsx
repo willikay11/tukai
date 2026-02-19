@@ -1,17 +1,16 @@
-import Image from 'next/image';
-import { CheckmarkBadge02Icon } from '@hugeicons/react-pro';
-import { ApiResponse } from '@/types/apiResponse';
-import { fetchPlace, fetchPlaceProperties, fetchPlaceSocialLinks } from '@/services/place';
-import { Place, PlaceProperty, PlaceSocialLink } from '@/types/place';
 import DescriptionShowMore from '@/app/components/descriptionShowMore';
-import { Photo } from '@/types/photo';
-import Rating from '@/app/components/rating';
-import IconComponent from '@/app/components/iconComponent';
-import { Separator } from '@/components/ui/separator';
-import SocialLinks from '@/app/components/socialLinks';
 import GoogleMapComponent from '@/app/components/googleMap';
-import PlaceActions from '../components/placeActions';
+import IconComponent from '@/app/components/iconComponent';
+import Rating from '@/app/components/rating';
+import SocialLinks from '@/app/components/socialLinks';
 import PhotoGallery from '@/components/ui/PhotoGallery';
+import { Separator } from '@/components/ui/separator';
+import { fetchPlace, fetchPlaceProperties, fetchPlaceSocialLinks } from '@/services/place';
+import { ApiResponse } from '@/types/apiResponse';
+import { Photo } from '@/types/photo';
+import { Place, PlaceProperty, PlaceSocialLink } from '@/types/place';
+
+import PlaceActions from '../components/placeActions';
 import PlaceTabs from '../components/placeTabs';
 
 export default async function ViewPlacePage({ params }: { params: { placeId: string } }) {
@@ -29,7 +28,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
 
   return (
     <main className="grid grid-cols-12 gap-4">
-      <div className="col-span-12 mx-4 mt-8 md:col-span-6 md:col-start-4 md:mx-0 2xl:col-span-4 2xl:col-start-5 2xl:mx-0">
+      <div className="col-span-12 mx-4 mt-8 md:col-span-6 md:col-start-4 md:mx-0 lg:col-span-8 lg:col-start-3 lg:mx-0 3xl:col-span-4 3xl:col-start-5">
         <div className="mb-3 block w-full justify-between md:inline-flex">
           <div className="inline-flex">
             <div className="flex flex-col">

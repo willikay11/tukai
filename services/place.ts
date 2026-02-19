@@ -1,20 +1,34 @@
-import { parseCamelToSnake, parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
 import { PlaceCategoryParams } from '@/types/networkParam';
+import { parseCamelToSnake, parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 export async function fetchPlaces(
   page = 1,
   perPage = 12,
-  categoryId?: string,
+  categoryId?: string | string[],
   search?: string,
+  lat?: number,
+  lng?: number,
 ): Promise<ApiResponse> {
   try {
     const queryParams = new URLSearchParams();
-    if (categoryId) queryParams.append('category', categoryId);
+    if (categoryId) {
+      if (Array.isArray(categoryId)) {
+        categoryId.forEach((id) => {
+          if (id !== 'all') {
+            queryParams.append('category', id);
+          }
+        });
+      } else if (categoryId !== 'all') {
+        queryParams.append('category', categoryId);
+      }
+    }
     if (page) queryParams.append('page', page.toString());
     if (perPage) queryParams.append('page_size', perPage.toString());
     if (search) queryParams.append('search', search);
+    if (lat !== undefined) queryParams.append('lat', String(lat));
+    if (lng !== undefined) queryParams.append('long', String(lng));
 
     const res = await api.get(`/v1/places/?${queryParams.toString()}`);
 

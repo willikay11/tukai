@@ -1,11 +1,9 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getAuthSession } from '@/lib/auth';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
-import { getServerSession } from 'next-auth';
 
 export async function POST(req: Request) {
   const data = await req.json();
 
-  console.log('data: ', data);
   if (data.type === 'billingDetails') {
     return CreateBillingDetails(data);
   }
@@ -19,22 +17,8 @@ export async function CreateBillingDetails(data: any) {
   try {
     const { paymentOption, countryCode, phoneNumber } = data;
 
-    const session = await getServerSession(authOptions);
+    const session = await getAuthSession();
     const token = session?.user?.accessToken;
-
-    console.log('data11: ', {
-      billing_address: {
-        user: session?.user?.id,
-        country: countryCode,
-        is_active: true,
-      },
-      payment_method: {
-        user: session?.user?.id,
-        payment_option: paymentOption,
-        mobile_money_phone: phoneNumber,
-        is_active: true,
-      },
-    });
 
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/v1/payments/billing-details/`,
@@ -79,7 +63,6 @@ export async function CreateBillingDetails(data: any) {
       data: parseSnakeToCamel(res),
     });
   } catch (e) {
-    console.log('e: ', e);
     return Response.json(
       {
         message: 'Billing details creation failed',
@@ -94,7 +77,7 @@ export async function CreateSubscription(data: any) {
   try {
     const { plan } = data;
 
-    const session = await getServerSession(authOptions);
+    const session = await getAuthSession();
     const token = session?.user?.accessToken;
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/subscriptions/`, {

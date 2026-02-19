@@ -1,4 +1,5 @@
 import { ReactNode, useState } from 'react';
+
 import { Input as I } from '@headlessui/react';
 import { ViewIcon, ViewOffIcon } from '@hugeicons/react-pro';
 import clsx from 'clsx';
@@ -43,7 +44,7 @@ export default function Input({
       >
         <div className="mr-2 text-gray-500">{icon}</div>
         <I
-          className="w-full text-xs text-gray-500 outline-0 placeholder:text-xs"
+          className="w-full origin-left scale-[0.875] transform text-base font-medium text-gray-500 outline-0 placeholder:text-base focus:outline-none focus:ring-0"
           name={name}
           defaultValue={defaultValue}
           placeholder={placeholder}

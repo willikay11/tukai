@@ -1,24 +1,70 @@
 'use client';
 
-import OtpInput from '@/app/components/form/otpInput';
-import { Button } from '@/app/components/form';
-import { RefreshIcon } from '@hugeicons/react-pro';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from '@/hooks/use-toast';
+import { useEffect, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
-import { useSession } from 'next-auth/react';
+
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+
+import { RefreshIcon } from '@hugeicons/react-pro';
+
+import { Button } from '@/app/components/form';
+import OtpInput from '@/app/components/form/otpInput';
+import { toast } from '@/hooks/use-toast';
+import { removeUser } from '@/slices/userSlice';
 
 export default function OtpConfirmation() {
+  const dispatch = useDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const newUser = useSelector((state: any) => state.userReducer.newUser);
   const [token, setToken] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isResending, setIsResending] = useState<boolean>(false);
+  const INITIAL_COUNT = 120; // seconds
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(INITIAL_COUNT);
+  const timerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // start countdown on mount
+    if (remainingSeconds > 0 && timerRef.current == null) {
+      timerRef.current = window.setInterval(() => {
+        setRemainingSeconds((s) => {
+          if (s <= 1) {
+            if (timerRef.current) {
+              clearInterval(timerRef.current);
+              timerRef.current = null;
+            }
+            return 0;
+          }
+          return s - 1;
+        });
+      }, 1000) as unknown as number;
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const formatTime = (secs: number) => {
+    const m = Math.floor(secs / 60)
+      .toString()
+      .padStart(2, '0');
+    const s = Math.floor(secs % 60)
+      .toString()
+      .padStart(2, '0');
+    return `${m}:${s}`;
+  };
 
   const { data: session } = useSession();
 
-  const email = session?.user?.email || newUser?.payload?.email;
+  const email = session?.user?.email || newUser?.payload?.email || searchParams.get('email') || '';
 
   const onSubmit = async () => {
     setIsSubmitting(true);
@@ -45,8 +91,30 @@ export default function OtpConfirmation() {
       description: 'Account verified successfully!',
       variant: 'success',
     });
+
+    const password = newUser?.payload?.password;
+
+    if (email && password) {
+      const signInRes = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (signInRes?.status === 200) {
+        dispatch(removeUser());
+        setIsSubmitting(false);
+        router.push('/');
+        return;
+      }
+    }
+
     setIsSubmitting(false);
-    router.push('/');
+    toast({
+      title: 'Sign in required',
+      description: 'Account verified successfully. Please sign in to continue.',
+    });
+    router.push('/auth/sign-in');
   };
 
   const resendCode = async () => {
@@ -56,7 +124,6 @@ export default function OtpConfirmation() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
     });
-
     setIsResending(false);
     const res = await response.json();
 
@@ -71,9 +138,26 @@ export default function OtpConfirmation() {
 
     toast({
       title: 'OTP sent successfully',
-      description: 'A four digit code was sent to <span className="text-primary">{email}</span>',
+      description: `A four digit code was sent to ${email}`,
       variant: 'success',
     });
+
+    // restart countdown
+    setRemainingSeconds(INITIAL_COUNT);
+    if (timerRef.current == null) {
+      timerRef.current = window.setInterval(() => {
+        setRemainingSeconds((s) => {
+          if (s <= 1) {
+            if (timerRef.current) {
+              clearInterval(timerRef.current);
+              timerRef.current = null;
+            }
+            return 0;
+          }
+          return s - 1;
+        });
+      }, 1000) as unknown as number;
+    }
   };
 
   return (
@@ -84,11 +168,18 @@ export default function OtpConfirmation() {
           A four digit code was sent to <span className="text-primary">{email}</span>
         </p>
         <OtpInput onComplete={(token) => setToken(token)} />
-        <div className="my-2.5 inline-flex w-full justify-center">
-          <Button type="link" onClick={resendCode} loading={isResending}>
-            <RefreshIcon variant="twotone" size={16} className="mr-2" />
-            Resend Code
-          </Button>
+        <div className="my-4 inline-flex w-full justify-center">
+          {remainingSeconds > 0 ? (
+            <span className="inline-flex items-center justify-center text-sm text-primary">
+              {/* <RefreshIcon variant="twotone" size={16} className="mr-2" /> */}
+              Resend code in {formatTime(remainingSeconds)}
+            </span>
+          ) : (
+            <Button type="link" onClick={resendCode} loading={isResending}>
+              <RefreshIcon variant="twotone" size={16} className="mr-2" />
+              Resend Code
+            </Button>
+          )}
         </div>
         <Button block loading={isSubmitting} onClick={onSubmit}>
           Verify Account

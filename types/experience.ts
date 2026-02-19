@@ -1,7 +1,8 @@
-import { ExperienceCategory } from '@/types/experienceCategory';
 import { Status } from '@/enums/status';
-import { User } from '@/types/user';
+import { ExperienceCategory } from '@/types/experienceCategory';
 import { Location } from '@/types/location';
+import { User } from '@/types/user';
+
 import { Photo } from './photo';
 import { Ticket } from './ticket';
 
@@ -14,6 +15,9 @@ export type Experience = {
   endDate: string;
   currency: string;
   isPaid: boolean;
+  ticketSalesClosingDuration: number;
+  ticketSalesClosingUnit: 'minutes' | 'hours' | 'days';
+  ticketSalesClosingCondition: 'before_end' | 'before_start';
   priceStartsFrom: { amount: number; currency: string };
   ticketsAvailable: boolean;
   isSoldOut: boolean;

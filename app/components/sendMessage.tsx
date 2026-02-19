@@ -1,3 +1,10 @@
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import {
   Form,
@@ -8,17 +15,12 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
 import { useSendMessage } from '@/hooks/comms';
-import { useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   content: z.string().min(2, {
-    message: 'Please enter a title.',
+    message: 'Please enter a message.',
   }),
 });
 
@@ -53,6 +55,7 @@ export default function SendMessage({
       form.reset();
       toast({
         title: 'Success',
+        variant: 'success',
         description: 'Message sent successfully',
       });
     }
@@ -68,7 +71,7 @@ export default function SendMessage({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="px-12">
+      <DialogContent className="min-w-[300px] px-4 md:min-w-[400px] md:px-6">
         <div className="flex flex-col gap-4">
           <p className="text-2xl font-black text-gray-700">Message Organizer</p>
           <Form {...form}>

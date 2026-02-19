@@ -1,5 +1,6 @@
-import IconComponent from '@/app/components/iconComponent';
 import clsx from 'clsx';
+
+import IconComponent from '@/app/components/iconComponent';
 
 export default function StepIndicator({
   currentStep = 0,

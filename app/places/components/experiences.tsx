@@ -1,7 +1,8 @@
 'use client';
+import { useState } from 'react';
+
 import ListExperiences from '@/app/components/experiences/List';
 import { useExperiences } from '@/hooks/experiences';
-import { useState } from 'react';
 
 type ListExperiencesProps = {
   categories: string[];
@@ -9,11 +10,13 @@ type ListExperiencesProps = {
 
 export default function TabExperiences({ categories }: ListExperiencesProps) {
   const [page, setPage] = useState(1);
-  const { data: experiences, isLoading } = useExperiences({
-    page,
-    enabled: true,
-    category: categories.map((category) => `category=${category}`).join(','),
-  });
+  const { data: experiences, isLoading } = useExperiences(
+    {
+      page,
+      category: categories.map((category) => `category=${category}`).join(','),
+    },
+    true,
+  );
 
   return (
     <ListExperiences
@@ -24,6 +27,7 @@ export default function TabExperiences({ categories }: ListExperiencesProps) {
       page={page}
       setPage={setPage}
       skeletonCount={2}
+      type="discover"
     />
   );
 }

@@ -1,5 +1,7 @@
 import { ReactNode } from 'react';
+
 import clsx from 'clsx';
+
 import Loader from '@/app/components/form/loader';
 
 export default function Button({
@@ -10,6 +12,7 @@ export default function Button({
   size = 'normal',
   block = false,
   loading = false,
+  disabled = false,
 }: {
   children: ReactNode;
   htmlType?: 'submit' | 'reset' | 'button';
@@ -18,6 +21,7 @@ export default function Button({
   size?: 'small' | 'normal' | 'large';
   block?: boolean;
   loading?: boolean;
+  disabled?: boolean;
 }) {
   let content = children;
 
@@ -35,7 +39,7 @@ export default function Button({
   }
   return (
     <button
-      disabled={loading}
+      disabled={loading || disabled}
       className={clsx(`inline-flex justify-center rounded-[8px] text-xs`, {
         'bg-primary font-medium text-white': type === 'primary',
         'bg-blue-500 text-white': type === 'blue',

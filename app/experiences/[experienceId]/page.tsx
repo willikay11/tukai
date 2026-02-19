@@ -1,19 +1,21 @@
-import { ApiResponse } from '@/types/apiResponse';
-import DescriptionShowMore from '@/app/components/descriptionShowMore';
-import { fetchExperience } from '@/services/experience';
-import { Experience } from '@/types/experience';
 import moment from 'moment';
-import { Photo } from '@/types/photo';
-import { Button } from '@/components/ui/button';
-import IconComponent from '@/app/components/iconComponent';
+
+import DescriptionShowMore from '@/app/components/descriptionShowMore';
 import GoogleMapComponent from '@/app/components/googleMap';
-import { Separator } from '@/components/ui/separator';
+import IconComponent from '@/app/components/iconComponent';
+import Share from '@/app/components/share';
 import PhotoGallery from '@/components/ui/PhotoGallery';
-import ExperienceOrganiser from '../components/experienceOrganiser';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { fetchExperience } from '@/services/experience';
+import { ApiResponse } from '@/types/apiResponse';
+import { Experience } from '@/types/experience';
+import { Photo } from '@/types/photo';
+
+import BookmarkExperience from '../components/bookmarkExperience';
 import ExperienceActions from '../components/experienceActions';
 import ExperienceDetails from '../components/experienceDetails';
-import BookmarkExperience from '../components/bookmarkExperience';
-import Share from '@/app/components/share';
+import ExperienceOrganiser from '../components/experienceOrganiser';
 
 export default async function ViewExperiencePage({ params }: { params: { experienceId: string } }) {
   const experienceResponse: ApiResponse = await fetchExperience(params.experienceId);
@@ -23,10 +25,21 @@ export default async function ViewExperiencePage({ params }: { params: { experie
 
   const experience: Experience = experienceResponse.data;
 
+  const closingDuration = experience?.ticketSalesClosingDuration;
+  const closingUnitRaw = experience?.ticketSalesClosingUnit ?? '';
+  const closingUnit =
+    closingDuration === 1 && closingUnitRaw.endsWith('s')
+      ? closingUnitRaw.slice(0, -1)
+      : closingUnitRaw;
+  const closingConditionText =
+    experience?.ticketSalesClosingCondition === 'before_start'
+      ? 'before the experience starts.'
+      : 'before the experience ends.';
+
   return (
     <>
       <main className="grid grid-cols-12 gap-4">
-        <div className="col-span-12 mx-4 mt-8 md:col-span-10 md:col-start-2 md:mx-0 lg:col-span-6 lg:col-start-4 lg:mx-0 2xl:col-span-4 2xl:col-start-5 2xl:mx-0">
+        <div className="col-span-12 mx-4 mt-8 md:col-span-6 md:col-start-4 md:mx-0 lg:col-span-8 lg:col-start-3 lg:mx-0 3xl:col-span-4 3xl:col-start-5">
           <div className="mb-3 inline-flex w-full justify-between">
             <div className="inline-flex">
               <div className="flex flex-col">
@@ -104,8 +117,8 @@ export default async function ViewExperiencePage({ params }: { params: { experie
 
             <div className="mb-4">
               <p className="text-base font-bold text-gray-700">Cancellation Policy</p>
-              <p className="text-sm font-normal text-gray-500">
-                Free cancellation before 2 PM on Feb 22.
+              <p className="text-sm font-medium text-gray-500">
+                Ticket sales close {closingDuration} {closingUnit} {closingConditionText}
               </p>
             </div>
 

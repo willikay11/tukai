@@ -1,65 +1,37 @@
 'use client';
 
-import { Cancel01Icon } from '@hugeicons/react-pro';
-import Image from 'next/image';
-import { Button } from '@/app/components/form';
 import { useEffect, useState } from 'react';
 
+import IconComponent from './iconComponent';
+import MobileStore from './mobileStore';
+
 export default function DownloadApp() {
-  const [closed, setClosed] = useState<boolean>(false);
-  const [device, setDevice] = useState<'ios' | 'android' | 'other'>('other');
-
-  const onDownloadApp = () => {
-    let url = 'https://play.google.com/store/apps/details?id=com.tukaitravels.app&hl=en';
-
-    if (device === 'ios') {
-      url = 'https://apps.apple.com/ke/app/tukai/idcom.tukaitravels.app';
-    }
-
-    window.open(url, '_blank');
-  };
+  const [showDownloadApp, setShowDownloadApp] = useState(true);
 
   useEffect(() => {
-    const ua = navigator.userAgent || navigator.vendor;
+    const timer = setTimeout(() => {
+      setShowDownloadApp(false);
+    }, 15000);
 
-    if (/android/i.test(ua)) {
-      setDevice('android');
-    } else if (/iPad|iPhone|iPod/.test(ua)) {
-      setDevice('ios');
-    } else {
-      setDevice('other');
-    }
+    return () => clearTimeout(timer);
   }, []);
 
-  if (closed) return null;
-
+  if (!showDownloadApp) {
+    return null;
+  }
   return (
-    <div className="w-full bg-green-100 px-4 py-4">
-      <div className="flex w-full items-center justify-between">
-        <div className="flex items-center">
-          <Cancel01Icon
-            size={16}
-            variant="twotone"
-            className="mr-2 cursor-pointer"
-            onClick={() => setClosed(true)}
-          />
-          <Image
-            src="/images/logo-small.svg"
-            alt="Oltukai logo"
-            width={30}
-            height={40}
-            className="mr-2"
-          />
-          <div className="flex flex-col">
-            <p className="text-sm font-medium">Download the app</p>
-            <p className="text-xs font-medium text-gray-500">
-              Enjoy the best experience on the app
-            </p>
+    <div className="fixed bottom-24 left-1 right-1 z-50 mx-4 rounded-[15px] bg-white shadow-md md:left-auto md:right-4 md:max-w-md">
+      <div className="p-4">
+        <div className="mb-2 inline-flex w-full items-center justify-between">
+          <p className="text-xl font-black text-gray-700">Tukai is better on the app</p>
+          <div onClick={() => setShowDownloadApp(false)}>
+            <IconComponent iconName="Cancel01Icon" size={24} color="gray" />
           </div>
         </div>
-        <Button onClick={onDownloadApp} size="small">
-          Use App
-        </Button>
+        <p className="mb-2 text-sm text-gray-700">
+          Download Tukai to buy tickets, discover more experiences and enjoy more features!{' '}
+        </p>
+        <MobileStore className="mt-2.5 !justify-start" />
       </div>
     </div>
   );

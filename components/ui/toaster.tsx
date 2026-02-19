@@ -1,6 +1,6 @@
 'use client';
 
-import { useToast } from '@/hooks/use-toast';
+import IconComponent from '@/app/components/iconComponent';
 import {
   Toast,
   ToastClose,
@@ -9,8 +9,8 @@ import {
   ToastTitle,
   ToastViewport,
 } from '@/components/ui/toast';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import IconComponent from '@/app/components/iconComponent';
 
 export function Toaster() {
   const { toasts } = useToast();
@@ -25,11 +25,17 @@ export function Toaster() {
                 <div
                   className={cn(
                     'mr-2 flex h-7 w-7 items-center justify-center rounded-full p-1',
-                    props.variant === 'success' ? 'bg-primary' : 'bg-destructive',
+                    props.variant === 'success' ? 'bg-primary' : props.variant === 'destructive' ? 'bg-red-500' : 'bg-blue-500',
                   )}
                 >
                   <IconComponent
-                    iconName={props.variant === 'success' ? 'TickDouble01Icon' : 'Cancel01Icon'}
+                    iconName={
+                      props.variant === 'success'
+                        ? 'TickDouble01Icon'
+                        : props.variant === 'destructive'
+                        ? 'Cancel01Icon'
+                        : 'AlertCircleIcon'
+                    }
                     size={20}
                     color="white"
                   />

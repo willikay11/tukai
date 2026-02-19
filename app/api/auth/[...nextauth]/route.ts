@@ -1,13 +1,75 @@
 import NextAuth from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
+import AppleProvider from 'next-auth/providers/apple';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
+
 import jwt from 'jsonwebtoken';
-import { socialSignIn, signIn, refreshToken, profile as getProfile } from '@/services/auth';
-import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
-import { JwtPayload } from '@/types/jwt';
-import { User } from '@/types/user';
+
+import {
+  profile as getProfile,
+  getUserInterests,
+  refreshToken,
+  signIn,
+  socialSignIn,
+} from '@/services/auth';
 import { Interest } from '@/types/interest';
+import { JwtPayload } from '@/types/jwt';
 import { Token } from '@/types/token';
+import { User } from '@/types/user';
+import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
+
+function generateAppleClientSecret() {
+  const privateKey = process.env.APPLE_PRIVATE_KEY?.replace(/\\n/g, '\n').trim();
+
+  if (!privateKey?.includes('BEGIN PRIVATE KEY')) {
+    throw new Error('Invalid Apple private key');
+  }
+
+  return jwt.sign(
+    {
+      iss: process.env.APPLE_TEAM_ID!,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 15777000,
+      aud: 'https://appleid.apple.com',
+      sub: process.env.APPLE_CLIENT_ID!,
+    },
+    privateKey,
+    {
+      algorithm: 'ES256',
+      keyid: process.env.APPLE_KEY_ID!,
+    },
+  );
+}
+
+function getAuthErrorMessage(error: any) {
+  if (typeof error === 'string') return error;
+
+  if (error?.detail && typeof error.detail === 'string') return error.detail;
+
+  if (Array.isArray(error?.errors) && error.errors.length > 0) {
+    const firstError = error.errors[0];
+
+    if (typeof firstError === 'string') return firstError;
+    if (firstError?.detail && typeof firstError.detail === 'string') return firstError.detail;
+  }
+
+  if (Array.isArray(error?.non_field_errors) && error.non_field_errors[0]) {
+    return error.non_field_errors[0];
+  }
+
+  if (Array.isArray(error?.email) && error.email[0]) {
+    return error.email[0];
+  }
+
+  if (Array.isArray(error?.password) && error.password[0]) {
+    return error.password[0];
+  }
+
+  if (error?.message && typeof error.message === 'string') return error.message;
+
+  return 'Invalid credentials, please check your email and password.';
+}
+
 
 // ✅ Extend NextAuth Session type
 declare module 'next-auth' {
@@ -42,7 +104,6 @@ async function refreshAccessToken(token: Token) {
       refresh: token.refreshToken,
     };
   } catch (error: any) {
-    console.error('❌ Refresh token failed:', error.data);
     return {
       ...token,
       accessToken: undefined,
@@ -54,11 +115,18 @@ async function refreshAccessToken(token: Token) {
 }
 
 export const authOptions = {
+  trustHost: true,
   providers: [
     // 🔹 Google OAuth
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+
+    // 🔹 Apple OAuth
+    AppleProvider({
+      clientId: process.env.APPLE_CLIENT_ID!,
+      clientSecret: (() => generateAppleClientSecret()) as unknown as string,
     }),
 
     // 🔹 Credentials login
@@ -69,26 +137,33 @@ export const authOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Missing email or password');
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error('Missing email or password');
+          }
+
+          const response = await signIn(credentials.email, credentials.password);
+
+          const decoded = parseSnakeToCamel(jwt.decode(response.access)) as JwtPayload;
+
+          if (!decoded) throw new Error('Invalid token');
+
+          const user: User = await getProfile(decoded.userId, response.access);
+
+          console.log('Authorized user:', decoded);
+
+          return {
+            ...user,
+            hasInterests: decoded?.hasInterests,
+            hasBillingDetails: decoded?.hasBillingDetails,
+            hasSubscribed: decoded?.hasSubscribed,
+            emailVerified: decoded?.emailVerified,
+            accessToken: response.access,
+            refreshToken: response.refresh,
+          };
+        } catch (error: any) {
+          throw new Error(getAuthErrorMessage(error));
         }
-
-        const response = await signIn(credentials.email, credentials.password);
-
-        const decoded = parseSnakeToCamel(jwt.decode(response.access)) as JwtPayload;
-
-        if (!decoded) throw new Error('Invalid token');
-
-        const user: User = await getProfile(decoded.userId, response.access);
-
-        return {
-          ...user,
-          hasInterests: decoded?.hasInterests,
-          hasBillingDetails: decoded?.hasBillingDetails,
-          hasSubscribed: decoded?.hasSubscribed,
-          accessToken: response.access,
-          refreshToken: response.refresh,
-        };
       },
     }),
   ],
@@ -100,6 +175,7 @@ export const authOptions = {
       if (account?.provider === 'google') {
         const response = await socialSignIn('google-oauth2', account.access_token);
         const decoded = parseSnakeToCamel(jwt.decode(response.access)) as JwtPayload;
+        const interests: Interest[] = await getUserInterests(decoded.userId, response.access);
 
         token.id = decoded?.userId;
         token.name = profile?.name;
@@ -108,9 +184,32 @@ export const authOptions = {
         token.accessToken = response.access;
         token.refreshToken = response.refresh;
         token.accessTokenExpires = decoded?.exp ? decoded.exp * 1000 : Date.now() + 3600 * 1000;
-        token.hasInterests = decoded?.hasInterests;
+        token.hasInterests = interests.length > 0;
         token.hasBillingDetails = decoded?.hasBillingDetails;
         token.hasSubscribed = decoded?.hasSubscribed;
+        token.emailVerified = decoded?.emailVerified;
+        token.interests = interests;
+        return token;
+      }
+
+      // --- Initial login: Apple ---
+      if (account?.provider === 'apple') {
+        const response = await socialSignIn('apple-id', account.id_token);
+        const decoded = parseSnakeToCamel(jwt.decode(response.access)) as JwtPayload;
+        const interests: Interest[] = await getUserInterests(decoded.userId, response.access);
+
+        token.id = decoded?.userId;
+        token.name = profile?.name || user?.name;
+        token.email = profile?.email || user?.email;
+        token.picture = profile?.picture;
+        token.accessToken = response.access;
+        token.refreshToken = response.refresh;
+        token.accessTokenExpires = decoded?.exp ? decoded.exp * 1000 : Date.now() + 3600 * 1000;
+        token.hasInterests = interests.length > 0;
+        token.hasBillingDetails = decoded?.hasBillingDetails;
+        token.hasSubscribed = decoded?.hasSubscribed;
+        token.emailVerified = decoded?.emailVerified;
+        token.interests = interests;
         return token;
       }
 
@@ -128,6 +227,7 @@ export const authOptions = {
         token.hasInterests = user.hasInterests;
         token.hasBillingDetails = user.hasBillingDetails;
         token.hasSubscribed = user.hasSubscribed;
+        token.emailVerified = user.emailVerified;
         return token;
       }
 
@@ -151,6 +251,7 @@ export const authOptions = {
         hasInterests: token.hasInterests,
         hasBillingDetails: token.hasBillingDetails,
         hasSubscribed: token.hasSubscribed,
+        emailVerified: token.emailVerified,
       };
       session.error = token.error;
       return session;

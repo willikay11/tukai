@@ -1,7 +1,7 @@
+import { Status } from '@/enums/status';
+import { Location } from '@/types/location';
 import { Photo } from '@/types/photo';
 import { PlaceCategory } from '@/types/placeCategory';
-import { Location } from '@/types/location';
-import { Status } from '@/enums/status';
 
 export type Place = {
   id: string;

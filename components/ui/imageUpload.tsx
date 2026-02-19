@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useRef, type ChangeEvent, type DragEvent, useEffect } from 'react';
+import { type ChangeEvent, type DragEvent, useEffect, useRef, useState } from 'react';
+
 import IconComponent from '@/app/components/iconComponent';
-import { Button } from './button';
 import { Photo } from '@/types/photo';
+
+import { Button } from './button';
 
 export default function ImageUpload({
   onImagesChange,

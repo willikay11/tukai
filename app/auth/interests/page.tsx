@@ -1,16 +1,19 @@
 // noinspection
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Button } from '@/app/components/form';
-import clsx from 'clsx';
-import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
-import Loader from '@/app/components/form/loader';
-import { removeUser } from '@/slices/userSlice';
-import { toast } from '@/hooks/use-toast';
-import IconComponent from '@/app/components/iconComponent';
-import moment from 'moment-timezone';
+
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+
+import clsx from 'clsx';
+import moment from 'moment-timezone';
+
+import { Button } from '@/app/components/form';
+import Loader from '@/app/components/form/loader';
+import IconComponent from '@/app/components/iconComponent';
+import { toast } from '@/hooks/use-toast';
+import { removeUser } from '@/slices/userSlice';
 
 export default function Page() {
   const timezone = moment.tz.guess();
@@ -57,6 +60,10 @@ export default function Page() {
         description: res.message,
         variant: 'destructive',
       });
+
+      if (res?.message.includes('already exists')) {
+        router.push('/auth/sign-in');
+      }
       return;
     }
 
@@ -69,10 +76,11 @@ export default function Page() {
     removeUser();
 
     if (session?.user) {
-      router.push('/auth/payments');
-    } else {
-      router.push('/auth/otp-confirmation');
+      router.push('/');
+      return;
     }
+
+    router.push('/auth/otp-confirmation');
   };
 
   const getInterests = async () => {
@@ -133,7 +141,7 @@ export default function Page() {
                 <div className="mr-2">
                   <IconComponent iconName={interest.icon} size={16} />
                 </div>
-                <span className="text-xs">{interest.name}</span>
+                <span className="text-xs font-medium">{interest.name}</span>
               </div>
             );
           })

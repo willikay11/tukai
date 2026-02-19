@@ -1,10 +1,13 @@
 'use client';
-import ListExperiences from '@/app/components/experiences/List';
-import { useExperiences } from '@/hooks/experiences';
-import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+
 import { useSession } from 'next-auth/react';
+
+import clsx from 'clsx';
+
+import ListExperiences from '@/app/components/experiences/List';
+import { useExperiences } from '@/hooks/experiences';
 
 type ListExperiencesProps = {
   skeletonCount?: number;
@@ -25,7 +28,7 @@ export default function Experiences({
       page,
       invited: true,
     },
-    true,
+    session?.user?.id ? true : false,
   );
 
   useEffect(() => {

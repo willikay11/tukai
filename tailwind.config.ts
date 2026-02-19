@@ -1,14 +1,24 @@
+import typography from '@tailwindcss/typography';
 import type { Config } from 'tailwindcss';
+import tailwindcssAnimate from 'tailwindcss-animate';
+import plugin from 'tailwindcss/plugin';
 
 const config: Config = {
   darkMode: ['class'],
   content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
+    './pages/**/*.{js,ts,jsx,tsx}',
+    './public/**/*.{js,ts,jsx,tsx}',
+    './src/**/*.{js,ts,jsx,tsx}',
+    './styles/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
+      screens: {
+        '3xl': '1920px',
+        '4xl': '2560px',
+      },
       colors: {
         primary: {
           DEFAULT: 'rgba(var(--color-primary) / <alpha-value>)',
@@ -58,6 +68,7 @@ const config: Config = {
       boxShadow: {
         'top-md': '0 -2px 10px -1px rgba(0, 0, 0, 0.1), 0 -2px 2px -1px rgba(0, 0, 0, 0.06)',
         'scroll-filters': '0 0px 8px 17px rgb(255 255 255), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+        'search-bar': '0 0px 15px 0px rgba(0, 0, 0, 0.15)',
       },
       keyframes: {
         shimmer: {
@@ -74,20 +85,20 @@ const config: Config = {
     },
   },
   plugins: [
-    require('tailwindcss-animate'),
-    function ({ addUtilities }: { addUtilities: any }) {
+    tailwindcssAnimate,
+    typography,
+    plugin(({ addUtilities }) => {
       addUtilities({
-        '.no-scrollbar': {
-          /* Hide scrollbar for Chrome, Safari and Opera */
+        '.scrollbar-hide': {
+          '-ms-overflow-style': 'none',
+          'scrollbar-width': 'none',
           '&::-webkit-scrollbar': {
             display: 'none',
           },
-          /* Hide scrollbar for IE, Edge and Firefox */
-          '-ms-overflow-style': 'none' /* IE and Edge */,
-          'scrollbar-width': 'none' /* Firefox */,
         },
       });
-    },
+    }),
   ],
 };
+
 export default config;

@@ -1,26 +1,35 @@
+import { getAuthSession } from '@/lib/auth';
+import { CommunityPostsQueryParams } from '@/types/community';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
-import { api } from './apiService';
-import { getSession } from 'next-auth/react';
+
+import { api, apiWithToken } from './apiService';
 
 export async function getInterestBasedCommunities(
-  category?: string,
+  category?: string[],
   page: number = 1,
-  perPage: number = 12,
+  perPage: number = 6,
   search?: string,
   showUpComingExperiences?: boolean,
   recommendedCommunities?: boolean,
   popularCommunities?: boolean,
+  following?: boolean,
 ) {
   try {
     const queryParams = new URLSearchParams();
     if (page) queryParams.append('page', page.toString());
     if (perPage) queryParams.append('page_size', perPage.toString());
     if (search) queryParams.append('search', search);
-    if (category) queryParams.append('category', category);
+    category?.forEach((cat) => queryParams.append('category', cat));
     if (showUpComingExperiences) queryParams.append('upcoming_experiences', 'true');
     if (recommendedCommunities) queryParams.append('recommended', 'true');
-    if (popularCommunities) queryParams.append('popular', 'true');
+    if (popularCommunities) queryParams.append('popular', '4');
+    if (following) queryParams.append('following', 'true');
+    queryParams.append('status', 'published');
+
+    const api = await apiWithToken();
+
     const response = await api.get(`/v1/communities/?${queryParams.toString()}`);
+
     return {
       status: response.status,
       success: true,
@@ -39,7 +48,8 @@ export async function getInterestBasedCommunities(
 
 export async function fetchCommunity(communityId: string) {
   try {
-    const session = await getSession();
+    const session: any = await getAuthSession();
+
     const response = await api.get(`/v1/communities/${communityId}`, {
       headers: {
         Authorization: `Bearer ${session?.user?.accessToken}`,
@@ -54,6 +64,84 @@ export async function fetchCommunity(communityId: string) {
     console.error('API Error:', error.response?.data || error.message);
 
     return {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+}
+
+export async function joinCommunity(communityId: string) {
+  try {
+    const api = await apiWithToken();
+
+    const response = await api.post(`/v1/communities/${communityId}/request-to-join/`, {
+      community_id: communityId,
+    });
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'An unexpected error occurred');
+  }
+}
+
+export async function joinCommunityWithToken(communityId: string, token?: string) {
+  try {
+    const api = await apiWithToken();
+
+    const response = await api.post(`/v1/communities/${communityId}/members/join-via-invite/`, {
+      token: token,
+    });
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.error || 'An unexpected error occurred');
+  }
+}
+
+export async function fetchCommunityPosts(params: CommunityPostsQueryParams) {
+  try {
+    const api = await apiWithToken();
+    const response = await api.get(`/v1/communities/posts/`, { params });
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+}
+
+export async function fetchCommunityPostPhotos(communityId: string) {
+  try {
+    const api = await apiWithToken();
+    const response = await api.get(`/v1/communities/${communityId}/post-photos/`);
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
       status: error.response?.status || 500,
       success: false,
       message: error.response?.data?.message || 'An unexpected error occurred',

@@ -1,21 +1,24 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
+import { useSession } from 'next-auth/react';
+
+import { FavouriteIcon, Message02Icon } from '@hugeicons/react-pro';
+import moment from 'moment';
+
+import IconComponent from '@/app/components/iconComponent';
 import Rating from '@/app/components/rating';
 import { Button } from '@/components/ui/button';
-import { FavouriteIcon, Message02Icon } from '@hugeicons/react-pro';
-import Image from 'next/image';
-import { Separator } from '@/components/ui/separator';
-import { Review as ReviewType } from '@/types/review';
-import moment from 'moment';
+import TukaiImage from '@/components/ui/image';
 import ImageCarousel from '@/components/ui/imageCarousel';
-import { Photo } from '@/types/photo';
-import IconComponent from '@/app/components/iconComponent';
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
+import { Photo } from '@/types/photo';
+import { Review as ReviewType } from '@/types/review';
+
 import AddReview from './AddReview';
 import AddReviewComment from './AddReviewComment';
-import TukaiImage from '@/components/ui/image';
 
 export default function Review({
   id,
@@ -148,10 +151,7 @@ export default function Review({
         </div>
         {review.photos.length > 0 && (
           <div className="mt-2 w-full">
-            <ImageCarousel
-              imageHeight="h-96"
-              images={review.photos.map((photo: Photo) => photo.photo)}
-            />
+            <ImageCarousel images={review.photos.map((photo: Photo) => photo.photo)} />
           </div>
         )}
         {review.title && (

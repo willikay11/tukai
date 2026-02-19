@@ -1,9 +1,10 @@
 'use client';
+import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
+
 import MobileStore from '@/app/components/mobileStore';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 type DownloadAppContextType = {
   onOpen: () => void;
@@ -21,7 +22,7 @@ export const DownloadAppProvider = ({ children }: { children: ReactNode }) => {
     let url = 'https://play.google.com/store/apps/details?id=com.tukaitravels.app&hl=en';
 
     if (device === 'ios') {
-      url = 'https://apps.apple.com/ke/app/tukai/idcom.tukaitravels.app';
+      url = 'https://apps.apple.com/us/app/tukai/id6751051486';
     }
 
     window.open(url, '_blank');

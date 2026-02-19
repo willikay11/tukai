@@ -1,6 +1,7 @@
-import clsx from 'clsx';
-import { Input as I } from '@headlessui/react';
 import { useEffect, useState } from 'react';
+
+import { Input as I } from '@headlessui/react';
+import clsx from 'clsx';
 
 const Input = ({
   fieldIndex,

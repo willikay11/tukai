@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export async function middleware(request: NextRequest) {
   const token: any = await getToken({ req: request });
@@ -13,6 +13,10 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/experiences') ||
     pathname.startsWith('/communities') ||
     pathname.startsWith('/place') ||
+    pathname.startsWith('/terms') ||
+    pathname.startsWith('/privacy') ||
+    pathname.startsWith('/help') ||
+    pathname.startsWith('/unsubscribe') ||
     (pathname === '/' && !token)
   ) {
     return NextResponse.next();
@@ -35,6 +39,9 @@ export async function middleware(request: NextRequest) {
   //   return NextResponse.redirect(new URL('/auth/subscribe', request.url));
   // }
 
+  if (!token.emailVerified) {
+    return NextResponse.redirect(new URL('/auth/otp-confirmation', request.url));
+  }
   return NextResponse.next();
 }
 

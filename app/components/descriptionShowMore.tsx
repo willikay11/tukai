@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
 import sanitizeHtml from 'sanitize-html';
+
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import Image from 'next/image';
-import IconComponent from './iconComponent';
 import Drawer from '@/components/ui/drawer';
 import TukaiImage from '@/components/ui/image';
+import { cn } from '@/lib/utils';
+
+import IconComponent from './iconComponent';
 
 const DescriptionShowMore = ({
   photo,
@@ -20,8 +22,49 @@ const DescriptionShowMore = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Sanitize text to prevent XSS (if content is dynamic)
-  const safeText = sanitizeHtml(text);
+  // Sanitize text to prevent XSS (if content is dynamic) and ensure any
+  // anchor tags receive the expected link classes.
+  const safeText = sanitizeHtml(text, {
+    // Ensure class (and optionally target/rel) are preserved on <a>
+    allowedAttributes: {
+      a: ['href', 'name', 'target', 'rel', 'class'],
+      ol: ['class'],
+      ul: ['class'],
+      li: ['class'],
+    },
+    transformTags: {
+      a: (tagName, attribs) => {
+        const existing = attribs.class ? attribs.class + ' ' : '';
+        return {
+          tagName: 'a',
+          attribs: {
+            ...attribs,
+            class: `${existing}text-primary underline underline-offset-2 hover:text-primary transition-colors`,
+          },
+        } as any;
+      },
+      ol: (tagName, attribs) => {
+        const existing = attribs.class ? attribs.class + ' ' : '';
+        return {
+          tagName: 'ol',
+          attribs: {
+            ...attribs,
+            class: `${existing}list-decimal list-inside`,
+          },
+        } as any;
+      },
+      ul: (tagName, attribs) => {
+        const existing = attribs.class ? attribs.class + ' ' : '';
+        return {
+          tagName: 'ul',
+          attribs: {
+            ...attribs,
+            class: `${existing}list-disc list-inside`,
+          },
+        } as any;
+      },
+    },
+  });
 
   // Determine whether to truncate text
   const shouldTruncate = text.length > maxLength;

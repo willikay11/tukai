@@ -1,11 +1,11 @@
-import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
-import { ApiResponse } from '@/types/apiResponse';
 import { api, apiWithToken } from '@/services/apiService';
+import { ApiResponse } from '@/types/apiResponse';
 import { PurchaserDetails } from '@/types/purchaser';
+import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 export type ExperiencesQueryParams = {
   search?: string;
-  bookmarked?: boolean;
+  bookmarked?: string;
   sold_out?: boolean;
   is_public?: boolean;
   is_paid?: boolean;
@@ -21,7 +21,13 @@ export type ExperiencesQueryParams = {
 
 export async function fetchExperiences(params: ExperiencesQueryParams): Promise<ApiResponse> {
   try {
-    const response = await api.get(`/v1/experiences/`, { params });
+    let response;
+    if (params.invited) {
+      const axiosInstance = await apiWithToken();
+      response = await axiosInstance.get(`/v1/experiences/`, { params });
+    } else {
+      response = await api.get(`/v1/experiences/`, { params });
+    }
 
     return {
       status: response.status,
@@ -41,11 +47,7 @@ export async function fetchExperiences(params: ExperiencesQueryParams): Promise<
 
 export async function fetchExperience(id: string): Promise<ApiResponse> {
   try {
-    // const session = await getServerSession(authOptions);
-
-    // const axiosInstance = await apiWithToken(session?.user?.accessToken);
     const response = await api.get(`/v1/experiences/${id}`);
-
     return {
       status: response.status,
       success: true,
@@ -95,7 +97,7 @@ export async function bookmarkExperience(id: string): Promise<ApiResponse> {
       data: parseSnakeToCamel(response.data),
     };
   } catch (error: any) {
-    console.error('API Error:', error.response?.data || error.message);
+    console.log('API Error:', error.response?.data || error.message);
 
     throw {
       status: error.response?.status || 500,

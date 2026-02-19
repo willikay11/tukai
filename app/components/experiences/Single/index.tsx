@@ -1,15 +1,20 @@
 'use client';
 import { useState } from 'react';
-import { Experience } from '@/types/experience';
-import ImageCarousel from '@/components/ui/imageCarousel';
-import numeral from 'numeral';
+
+import { useSession } from 'next-auth/react';
+
 import moment from 'moment';
-import { Button } from '@/components/ui/button';
+import numeral from 'numeral';
+
+import Pills from '@/app/components/pills';
 import { EventSkeleton } from '@/app/components/skeletons';
-import Bookmark from '../../bookmark';
+import { Button } from '@/components/ui/button';
+import ImageCarousel from '@/components/ui/imageCarousel';
 import { useBookmarkExperience } from '@/hooks/experiences';
 import { cn } from '@/lib/utils';
-import Pills from '@/app/components/pills';
+import { Experience } from '@/types/experience';
+
+import Bookmark from '../../bookmark';
 
 export default function SingleExperience({
   type,
@@ -18,9 +23,8 @@ export default function SingleExperience({
   type: 'discover' | 'invited';
   experience: Experience;
 }) {
-  const [bookmarked, setBookmarked] = useState<boolean>(experience.isBookmarked);
   const [hasError, setHasError] = useState(false);
-
+  const { data: session } = useSession();
   const { mutate: bookmarkExperience } = useBookmarkExperience();
 
   if (experience.id.startsWith('placeholder-')) {
@@ -30,8 +34,9 @@ export default function SingleExperience({
   const dateSlot = (
     <div className="inline-flex items-center">
       <span className="text-xs font-normal text-gray-500">
-        {moment(experience?.startDate).format('MMM D, YYYY')} -{' '}
-        {moment(experience?.endDate).format('MMM D, YYYY')}
+        {moment(experience?.startDate).isSame(moment(experience?.endDate), 'day')
+          ? `${moment(experience?.startDate).format('MMM D, h:mm A')} - ${moment(experience?.endDate).format('h:mm A')}`
+          : `${moment(experience?.startDate).format('MMM D, YYYY HH:mm A')} - ${moment(experience?.endDate).format('MMM D, YYYY HH:mm A')}`}
       </span>
     </div>
   );
@@ -47,7 +52,9 @@ export default function SingleExperience({
         >
           {!hasError ? (
             <ImageCarousel
-              images={experience.photos.map((photo) => photo.photo)}
+              images={experience.photos
+                .sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0))
+                .map((photo) => photo.photo)}
               aspectRatio={type === 'discover' ? 'aspect-square' : 'aspect-[16/9]'}
             />
           ) : (
@@ -62,7 +69,8 @@ export default function SingleExperience({
         </div>
         <div className="absolute right-2 top-2">
           <Bookmark
-            bookmarked={bookmarked}
+            bookmarked={experience.isBookmarked}
+            userId={session?.user?.id}
             onBookmark={() => bookmarkExperience(experience.id)}
             onUnbookmark={() => bookmarkExperience(experience.id)}
           />

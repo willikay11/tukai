@@ -1,9 +1,10 @@
 'use client';
 
-import { GoogleMap, LoadScript, OverlayView } from '@react-google-maps/api';
 import { useEffect, useState } from 'react';
-import { HugeiconsIcon } from '@hugeicons/react';
+
 import { MapPinpoint02Icon } from '@hugeicons-pro/core-twotone-rounded';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { GoogleMap, LoadScript, OverlayView } from '@react-google-maps/api';
 
 const containerStyle = {
   width: '100%',

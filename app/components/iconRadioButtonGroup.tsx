@@ -1,8 +1,9 @@
 'use client';
 
-import { GridViewIcon, hugeiconsLicense, MapPinpoint02Icon } from '@hugeicons/react-pro';
-import clsx from 'clsx';
 import { useState } from 'react';
+
+import { GridViewIcon, MapPinpoint02Icon, hugeiconsLicense } from '@hugeicons/react-pro';
+import clsx from 'clsx';
 
 hugeiconsLicense(
   '890e3333f427f30eb0b744e4d32392a6RT00NzkxODg2MzcwMDAwLFM9cHJvLFY9MSxQPUd1bXJvYWQsU1Q9QjVBMzQ1NzMsRVQ9MDIxMUY0RkM=',

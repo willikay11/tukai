@@ -2,14 +2,20 @@
 
 'use client';
 
-import { Anchor, Button, Input } from '@/app/components/form';
-import { LockKeyIcon, Mail02Icon, UserIcon } from '@hugeicons/react-pro';
-import { useRouter } from 'next/navigation';
-import MobileStore from '@/app/components/mobileStore';
+import { useCallback, useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
+
+import { useRouter } from 'next/navigation';
+
+import { LockKeyIcon, Mail02Icon, UserIcon } from '@hugeicons/react-pro';
+
+import { Anchor, Input } from '@/app/components/form';
+import MobileStore from '@/app/components/mobileStore';
+import { Button } from '@/components/ui/button';
+import { useUserExists } from '@/hooks/auth';
+import { toast } from '@/hooks/use-toast';
 import { addUser } from '@/slices/userSlice';
-import { useState } from 'react';
 
 type Inputs = {
   firstName: string;
@@ -19,17 +25,34 @@ type Inputs = {
   confirmPassword?: string;
 };
 
+const debounce = (func: (...args: any[]) => void, delay: number) => {
+  let timeoutId: NodeJS.Timeout;
+  return (...args: any[]) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
+
 export default function Page() {
-  // let password;
   const router = useRouter();
   const dispatch = useDispatch();
   const newUser = useSelector((state: any) => state.userReducer.newUser);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
+    setError,
+    clearErrors,
   } = useForm<Inputs>({ mode: 'onChange' });
+
+  const {
+    data: userExistsData,
+    isPending: isCheckingEmail,
+    mutate: checkUserExists,
+  } = useUserExists();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setIsSubmitting(true);
@@ -38,6 +61,18 @@ export default function Page() {
     router.push('/auth/interests');
     setIsSubmitting(false);
   };
+
+  // Update last checked email when we get results
+  useEffect(() => {
+    if (userExistsData?.exists === true) {
+      setError('email', {
+        type: 'manual',
+        message: 'This email already exists. Please login or use a different email.',
+      });
+    } else if (userExistsData?.exists === false) {
+      clearErrors('email');
+    }
+  }, [userExistsData, setError, clearErrors]);
 
   return (
     <>
@@ -85,9 +120,18 @@ export default function Page() {
                 value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
                 message: 'Invalid email address',
               },
+              onChange: (e) => {
+                const email = e.target.value;
+                if (/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(email)) {
+                  debounce(() => checkUserExists(email), 800)();
+                }
+              },
             })}
             error={errors.email?.message}
           />
+          {isCheckingEmail ? (
+            <div className="mt-1 text-xs text-blue-500">Checking email...</div>
+          ) : null}
         </div>
 
         <div className="mb-2">
@@ -99,7 +143,6 @@ export default function Page() {
             icon={<LockKeyIcon size={16} />}
             refs={register('password', {
               required: 'Please enter your password',
-              // onBlur: (e) => (password = e.target.value),
             })}
             error={errors.password?.message}
           />
@@ -124,22 +167,25 @@ export default function Page() {
         </div>
 
         <div className="mb-2.5">
-          <Button block htmlType="submit" loading={isSubmitting}>
-            Create a Free Account
+          <Button
+            className="h-[50px] w-full"
+            disabled={isCheckingEmail || isSubmitting || userExistsData?.exists === true}
+          >
+            {isSubmitting ? 'Creating Account...' : 'Create a Free Account'}
           </Button>
         </div>
       </form>
 
       <div className="mb-4 flex w-full items-center">
-        <span className="w-full text-center text-xs">
+        <span className="w-full text-center text-xs font-medium">
           Already have an account? <Anchor link="/auth/sign-in">Sign in</Anchor>
         </span>
       </div>
 
       <div className="mb-3">
-        <p className="text-xs">
-          By continuing to use Oltukai, you agree to our <Anchor link="">Terms of Use</Anchor>
-          &nbsp;and <Anchor link="">Privacy Policy</Anchor>
+        <p className="text-xs font-medium">
+          By continuing to use Tukai, you agree to our <Anchor link="/terms">Terms of Use</Anchor>
+          &nbsp;and <Anchor link="/privacy">Privacy Policy</Anchor>
         </p>
       </div>
 

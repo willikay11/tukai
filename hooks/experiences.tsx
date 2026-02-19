@@ -1,12 +1,12 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import {
+  ExperiencesQueryParams,
+  bookmarkExperience,
   fetchExperience,
   fetchExperiences,
   purchaseExperienceTicket,
-  bookmarkExperience,
-  ExperiencesQueryParams,
 } from '@/services/experience';
-import { useQueryClient } from '@tanstack/react-query';
 import { PurchaserDetails } from '@/types/purchaser';
 
 export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean) => {
@@ -19,6 +19,8 @@ export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean)
       params.category,
       params.invited,
       params.date,
+      params.bookmarked,
+      params.hosted_by,
     ],
     queryFn: async () => await fetchExperiences(params),
     enabled: enabled,

@@ -1,20 +1,20 @@
 'use client';
-import React from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
+
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
 
 const backgroundImages = [
   {
-    image: '/images/hill-decent.webp',
+    image: '/images/hill-descent.webp',
     path: '/auth/sign-in',
   },
   {
-    image: '/images/hill-decent.webp',
+    image: '/images/hill-descent.webp',
     path: '/auth/forgot-password',
   },
   {
-    image: '/images/hill-decent.webp',
+    image: '/images/hill-descent.webp',
     path: '/auth/reset-password',
   },
   {
@@ -41,10 +41,6 @@ const backgroundImages = [
     image: '/images/santorini.webp',
     path: '/auth/otp-confirmation',
   },
-  {
-    image: '/images/man-bridge-running.webp',
-    path: '/auth/terms-of-service',
-  },
 ];
 
 const options = [
@@ -62,7 +58,7 @@ const options = [
   },
 ];
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+function AuthLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const animationElement = useRef<any>();
   const [optionIndex, setOptionIndex] = useState<number>(0);
@@ -74,7 +70,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, [animationElement]);
 
   return (
-    <div className="h-screen">
+    <div className="h-full">
       <Image
         alt="Mountains"
         src={
@@ -89,7 +85,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         style={{
           position: 'absolute',
           width: '100%',
-          height: '115vh',
+          height: '100vh',
           objectFit: 'cover',
           backgroundPosition: 'center',
           zIndex: -1,
@@ -110,5 +106,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense
+      fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}
+    >
+      <AuthLayoutContent>{children}</AuthLayoutContent>
+    </Suspense>
   );
 }
