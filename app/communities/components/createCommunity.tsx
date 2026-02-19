@@ -3,44 +3,22 @@
 import { useId, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import CategoryPill from '@/components/ui/categoryPill';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
+import { useGetInterestCategories } from '@/hooks/auth';
+import { Interest } from '@/types/interest';
 
 import IconComponent from '../../components/iconComponent';
-
-const categories = [
-  'Hiking',
-  'Running',
-  'Camping',
-  'Cycling',
-  'Backpacking',
-  'Walking',
-  'Overlanding',
-  'Gym',
-  'Bird Watching',
-  'Sunset',
-  'Fishing',
-  'Safari',
-  'Parks & Museums',
-  'Horse Riding',
-  'Rock Climbing',
-  'Scenic Driving/Road Trip',
-  'Restaurants',
-  'Sports Activity',
-  'Worship',
-  'Shopping',
-  'Kids',
-  'Water Sports',
-  'Night Life',
-  'Other',
-];
 
 export default function CreateCommunity() {
   const uploadId = useId();
   const visibilityId = useId();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [visibility, setVisibility] = useState<'public' | 'private'>('public');
+
+  const { data: categories } = useGetInterestCategories();
 
   const toggleCategory = (category: string) => {
     setSelectedCategories((prev) =>
@@ -85,10 +63,10 @@ export default function CreateCommunity() {
       </div>
 
       <div className="mt-4 space-y-3">
-        <Input placeholder="Community Name" className='h-[55px]' />
+        <Input placeholder="Community Name" className="h-[55px]" />
         <Input
           placeholder="City e.g. Nairobi, Watamu..."
-          className='h-[55px]'
+          className="h-[55px]"
           icon={<IconComponent iconName="Search01Icon" color="#9CA3AF" size={18} />}
         />
         <div>
@@ -105,22 +83,9 @@ export default function CreateCommunity() {
           Select a category the community falls under, e.g. Hiking, Safari, etc.
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
-          {categories.map((category) => {
-            const selected = selectedCategories.includes(category);
-            return (
-              <button
-                key={category}
-                type="button"
-                onClick={() => toggleCategory(category)}
-                className={`rounded-full border px-3 py-1.5 text-[11px] font-medium transition-colors ${
-                  selected
-                    ? 'border-emerald-500 bg-emerald-100 text-emerald-700'
-                    : 'border-gray-200 bg-gray-50 text-gray-600'
-                }`}
-              >
-                {category}
-              </button>
-            );
+          {categories.map((category: Interest) => {
+            // const selected = selectedCategories.includes(category);
+            return <CategoryPill key={category.id} category={category} onClick={toggleCategory} />;
           })}
         </div>
       </div>
@@ -167,7 +132,10 @@ export default function CreateCommunity() {
           >
             Save &amp; Exit
           </Button>
-          <Button variant="gradient" className="h-9 rounded-full px-4 text-xs text-white hover:bg-emerald-800">
+          <Button
+            variant="gradient"
+            className="h-9 rounded-full px-4 text-xs text-white hover:bg-emerald-800"
+          >
             Create Community
           </Button>
         </div>
