@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 
-import { useSession } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { RefreshIcon } from '@hugeicons/react-pro';
@@ -11,8 +12,10 @@ import { RefreshIcon } from '@hugeicons/react-pro';
 import { Button } from '@/app/components/form';
 import OtpInput from '@/app/components/form/otpInput';
 import { toast } from '@/hooks/use-toast';
+import { removeUser } from '@/slices/userSlice';
 
 export default function OtpConfirmation() {
+  const dispatch = useDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
   const newUser = useSelector((state: any) => state.userReducer.newUser);
@@ -88,8 +91,30 @@ export default function OtpConfirmation() {
       description: 'Account verified successfully!',
       variant: 'success',
     });
+
+    const password = newUser?.payload?.password;
+
+    if (email && password) {
+      const signInRes = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (signInRes?.status === 200) {
+        dispatch(removeUser());
+        setIsSubmitting(false);
+        router.push('/');
+        return;
+      }
+    }
+
     setIsSubmitting(false);
-    router.push('/');
+    toast({
+      title: 'Sign in required',
+      description: 'Account verified successfully. Please sign in to continue.',
+    });
+    router.push('/auth/sign-in');
   };
 
   const resendCode = async () => {

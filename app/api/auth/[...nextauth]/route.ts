@@ -150,6 +150,8 @@ export const authOptions = {
 
           const user: User = await getProfile(decoded.userId, response.access);
 
+          console.log('Authorized user:', decoded);
+
           return {
             ...user,
             hasInterests: decoded?.hasInterests,
@@ -225,6 +227,7 @@ export const authOptions = {
         token.hasInterests = user.hasInterests;
         token.hasBillingDetails = user.hasBillingDetails;
         token.hasSubscribed = user.hasSubscribed;
+        token.emailVerified = user.emailVerified;
         return token;
       }
 
