@@ -35,11 +35,12 @@ export type CreateCommunity = {
   description: string;
   categoriesIds: string[];
   isPublic: boolean;
-  newPhotos?: string[];
+  newPhotos: File[];
   googleMapPlaceId: string;
   invitedMemberIds: string[];
   invitedCommunityIds: string[];
   invitedEmails: string[];
+  status?: string;
 };
 
 export type CommunityPostsQueryParams = {

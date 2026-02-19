@@ -82,6 +82,7 @@ export default function CreateCommunity() {
         categoriesIds: values.selectedCategories,
         isPublic: values.visibility === 'public',
         googleMapPlaceId: values.city,
+        newPhotos: uploadedFiles,
         invitedMemberIds: [],
         invitedCommunityIds: [],
         invitedEmails: [],
@@ -92,7 +93,7 @@ export default function CreateCommunity() {
 
           if (communityId && uploadedFiles.length > 0) {
             uploadPhotos(
-              { communityId, photos: uploadedFiles as any },
+              { communityId, photos: uploadedFiles },
               {
                 onSuccess: () => {
                   toast({

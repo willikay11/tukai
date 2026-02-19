@@ -149,12 +149,24 @@ export async function fetchCommunityPostPhotos(communityId: string) {
   }
 }
 
-export async function createCommunityPhotos(communityId: string, photos: string[]) {
+export async function createCommunityPhotos(communityId: string, photos: File[]) {
   try {
     const api = await apiWithToken();
-    const response = await api.post(`/v1/communities/${communityId}/photos/`, {
-      photos,
+    const formData = new FormData();
+    photos.forEach((photo) => {
+      formData.append('new_photos', photo);
     });
+    const response = await api.post(`/v1/communities/${communityId}/photos/`, formData, {
+      headers: {
+        'Content-Type': undefined,
+      },
+    });
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
 
@@ -169,7 +181,39 @@ export async function createCommunityPhotos(communityId: string, photos: string[
 export async function createCommunity(data: CreateCommunity) {
   try {
     const api = await apiWithToken();
-    const response = await api.post(`/v1/communities/`, parseCamelToSnake(data));
+    const formData = new FormData();
+    formData.append('title', data.title);
+    formData.append('description', data.description);
+    formData.append('google_map_place_id', data.googleMapPlaceId);
+    data.invitedMemberIds.forEach((memberId) => {
+      formData.append('invited_members_ids', memberId);
+    });
+    data.invitedCommunityIds.forEach((communityId) => {
+      formData.append('invited_communities_ids', communityId);
+    });
+    data.invitedEmails.forEach((email) => {
+      formData.append('invited_emails', email);
+    });
+    data.categoriesIds.forEach((categoryId) => {
+      formData.append('categories_ids', categoryId);
+    });
+    formData.append('is_public', data.isPublic.toString());
+    if (data.status) {
+      formData.append('status', data.status);
+    }
+
+    if (data.newPhotos && data.newPhotos.length > 0) {
+      data.newPhotos.forEach((photo, index) => {
+        const fileName = photo.name || `image_${Date.now()}_${index}`;
+        formData.append('new_photos', photo, fileName);
+      });
+    }
+    
+    const response = await api.post(`/v1/communities/`, formData, {
+      headers: {
+        'Content-Type': undefined,
+      },
+    });
 
     return {
       status: response.status,

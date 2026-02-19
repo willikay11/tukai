@@ -100,7 +100,7 @@ export const useCreateCommunity = () => {
 export const useCreateCommunityPhotos = () => {
   return useMutation({
     mutationKey: ['createCommunityPhotos'],
-    mutationFn: async ({ communityId, photos }: { communityId: string; photos: string[] }) =>
+    mutationFn: async ({ communityId, photos }: { communityId: string; photos: File[] }) =>
       await createCommunityPhotos(communityId, photos),
   });
 };
