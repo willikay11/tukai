@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useGetInterestCategories } from '@/hooks/auth';
 import { Interest } from '@/types/interest';
@@ -18,6 +19,7 @@ export default function CreateCommunity() {
   const visibilityId = useId();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [visibility, setVisibility] = useState<'public' | 'private'>('public');
+  const [city, setCity] = useState('');
 
   const { data: categories } = useGetInterestCategories();
 
@@ -59,11 +61,21 @@ export default function CreateCommunity() {
 
       <div className="mt-4 space-y-3">
         <Input placeholder="Community Name" className="h-[55px]" />
-        <Input
-          placeholder="City e.g. Nairobi, Watamu..."
-          className="h-[55px]"
-          icon={<IconComponent iconName="Search01Icon" color="#9CA3AF" size={18} />}
-        />
+        <Select value={city} onValueChange={setCity}>
+          <SelectTrigger
+            className="h-[55px]"
+            prefixIcon={<IconComponent iconName="Search01Icon" color="#9CA3AF" size={18} />}
+          >
+            <SelectValue placeholder="City e.g. Nairobi, Watamu..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Nairobi">Nairobi</SelectItem>
+            <SelectItem value="Watamu">Watamu</SelectItem>
+            <SelectItem value="Mombasa">Mombasa</SelectItem>
+            <SelectItem value="Nakuru">Nakuru</SelectItem>
+            <SelectItem value="Kisumu">Kisumu</SelectItem>
+          </SelectContent>
+        </Select>
         <div>
           <p className="mb-2 text-xs font-bold text-gray-800">Add your community description</p>
           <Textarea
