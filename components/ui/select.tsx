@@ -37,9 +37,9 @@ const SelectTrigger = React.forwardRef<
         <div className="mr-2">
           <IconComponent iconName={prefixIcon} size={18} color="#000" />
         </div>
-      ) : (
+      ) : prefixIcon ? (
         <div className="mr-2">{prefixIcon}</div>
-      )}
+      ) : null}
       {children}
     </div>
     <SelectPrimitive.Icon asChild>

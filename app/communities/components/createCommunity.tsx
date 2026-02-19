@@ -4,15 +4,18 @@ import { useId, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
+import TukaiImage from '@/components/ui/image';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useGetInterestCategories } from '@/hooks/auth';
 import { Interest } from '@/types/interest';
+import { PlaceCategory } from '@/types/placeCategory';
 
 import FileUploadField from '../../components/fileUploadField';
 import IconComponent from '../../components/iconComponent';
+import { usePlaceCategories } from '@/hooks/places';
 
 export default function CreateCommunity() {
   const uploadId = useId();
@@ -22,6 +25,7 @@ export default function CreateCommunity() {
   const [city, setCity] = useState('');
 
   const { data: categories } = useGetInterestCategories();
+  const { data: placeCategories } = usePlaceCategories({ pageSize: 100, group: 'cities' }, true);
 
   const toggleCategory = (category: string) => {
     setSelectedCategories((prev) =>
@@ -64,16 +68,25 @@ export default function CreateCommunity() {
         <Select value={city} onValueChange={setCity}>
           <SelectTrigger
             className="h-[55px]"
-            prefixIcon={<IconComponent iconName="Search01Icon" color="#9CA3AF" size={18} />}
           >
             <SelectValue placeholder="City e.g. Nairobi, Watamu..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Nairobi">Nairobi</SelectItem>
-            <SelectItem value="Watamu">Watamu</SelectItem>
-            <SelectItem value="Mombasa">Mombasa</SelectItem>
-            <SelectItem value="Nakuru">Nakuru</SelectItem>
-            <SelectItem value="Kisumu">Kisumu</SelectItem>
+            {placeCategories?.data?.results?.map((placeCategory: PlaceCategory) => (
+              <SelectItem key={placeCategory.id} value={placeCategory.id}>
+                <div className="flex items-center gap-2">
+                  <div className="relative h-6 w-6 shrink-0 overflow-hidden rounded-md">
+                    <TukaiImage
+                      src={placeCategory.image ?? ''}
+                      alt={placeCategory.name}
+                      className="rounded-md"
+                      showNotFoundText={false}
+                    />
+                  </div>
+                  <span>{placeCategory.name}</span>
+                </div>
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <div>
