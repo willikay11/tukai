@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useGetInterestCategories } from '@/hooks/auth';
 import { Interest } from '@/types/interest';
 
+import FileUploadField from '../../components/fileUploadField';
 import IconComponent from '../../components/iconComponent';
 
 export default function CreateCommunity() {
@@ -49,17 +50,11 @@ export default function CreateCommunity() {
       </div>
 
       <div className="mt-5">
-        <p className="text-xs font-medium text-gray-800">
-          Upload a community poster (Dimensions: 540*540, Max 15 Mbs)
-        </p>
-        <label
-          htmlFor={uploadId}
-          className="mt-2 inline-flex h-[105px] w-[155px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-emerald-500/50 bg-emerald-50/50 text-center"
-        >
-          <IconComponent iconName="ImageAdd02Icon" color="#10B981" size={20} />
-          <span className="mt-1 text-[10px] font-medium text-emerald-700">Add Photos</span>
-        </label>
-        <input id={uploadId} type="file" className="hidden" />
+        <FileUploadField
+          id={uploadId}
+          label="Upload a community poster (Dimensions: 540*540, Max 15 Mbs)"
+          multiple
+        />
       </div>
 
       <div className="mt-4 space-y-3">
@@ -83,7 +78,7 @@ export default function CreateCommunity() {
           Select a category the community falls under, e.g. Hiking, Safari, etc.
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
-          {categories.map((category: Interest) => {
+          {categories?.map((category: Interest) => {
             // const selected = selectedCategories.includes(category);
             return <CategoryPill key={category.id} category={category} onClick={toggleCategory} />;
           })}
