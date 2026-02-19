@@ -67,8 +67,9 @@ export default function CreateCommunity() {
         <div>
           <p className="mb-2 text-xs font-bold text-gray-800">Add your community description</p>
           <Textarea
+            rows={5}
             placeholder="Grab people's attention with a detailed description about the community..."
-            className="min-h-[110px] rounded-[10px] text-sm placeholder:text-gray-500"
+            className="rounded-[10px] text-sm placeholder:text-gray-400"
           />
         </div>
       </div>
