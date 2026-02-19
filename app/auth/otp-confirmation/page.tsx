@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { RefreshIcon } from '@hugeicons/react-pro';
 
@@ -14,6 +14,7 @@ import { toast } from '@/hooks/use-toast';
 
 export default function OtpConfirmation() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const newUser = useSelector((state: any) => state.userReducer.newUser);
   const [token, setToken] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -60,7 +61,7 @@ export default function OtpConfirmation() {
 
   const { data: session } = useSession();
 
-  const email = session?.user?.email || newUser?.payload?.email;
+  const email = session?.user?.email || newUser?.payload?.email || searchParams.get('email') || '';
 
   const onSubmit = async () => {
     setIsSubmitting(true);

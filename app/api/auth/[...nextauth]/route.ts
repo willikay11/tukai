@@ -41,6 +41,36 @@ function generateAppleClientSecret() {
   );
 }
 
+function getAuthErrorMessage(error: any) {
+  if (typeof error === 'string') return error;
+
+  if (error?.detail && typeof error.detail === 'string') return error.detail;
+
+  if (Array.isArray(error?.errors) && error.errors.length > 0) {
+    const firstError = error.errors[0];
+
+    if (typeof firstError === 'string') return firstError;
+    if (firstError?.detail && typeof firstError.detail === 'string') return firstError.detail;
+  }
+
+  if (Array.isArray(error?.non_field_errors) && error.non_field_errors[0]) {
+    return error.non_field_errors[0];
+  }
+
+  if (Array.isArray(error?.email) && error.email[0]) {
+    return error.email[0];
+  }
+
+  if (Array.isArray(error?.password) && error.password[0]) {
+    return error.password[0];
+  }
+
+  if (error?.message && typeof error.message === 'string') return error.message;
+
+  return 'Invalid credentials, please check your email and password.';
+}
+
+
 // ✅ Extend NextAuth Session type
 declare module 'next-auth' {
   interface Session {
@@ -107,27 +137,31 @@ export const authOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Missing email or password');
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error('Missing email or password');
+          }
+
+          const response = await signIn(credentials.email, credentials.password);
+
+          const decoded = parseSnakeToCamel(jwt.decode(response.access)) as JwtPayload;
+
+          if (!decoded) throw new Error('Invalid token');
+
+          const user: User = await getProfile(decoded.userId, response.access);
+
+          return {
+            ...user,
+            hasInterests: decoded?.hasInterests,
+            hasBillingDetails: decoded?.hasBillingDetails,
+            hasSubscribed: decoded?.hasSubscribed,
+            emailVerified: decoded?.emailVerified,
+            accessToken: response.access,
+            refreshToken: response.refresh,
+          };
+        } catch (error: any) {
+          throw new Error(getAuthErrorMessage(error));
         }
-
-        const response = await signIn(credentials.email, credentials.password);
-
-        const decoded = parseSnakeToCamel(jwt.decode(response.access)) as JwtPayload;
-
-        if (!decoded) throw new Error('Invalid token');
-
-        const user: User = await getProfile(decoded.userId, response.access);
-
-        return {
-          ...user,
-          hasInterests: decoded?.hasInterests,
-          hasBillingDetails: decoded?.hasBillingDetails,
-          hasSubscribed: decoded?.hasSubscribed,
-          emailVerified: decoded?.emailVerified,
-          accessToken: response.access,
-          refreshToken: response.refresh,
-        };
       },
     }),
   ],
