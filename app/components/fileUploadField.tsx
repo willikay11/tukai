@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, DragEvent, useEffect, useRef, useState } from 'react';
 
 import IconComponent from './iconComponent';
 
@@ -22,12 +22,18 @@ export default function FileUploadField({
   onChange,
 }: FileUploadFieldProps) {
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const latestPreviewUrlsRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    latestPreviewUrlsRef.current = previewUrls;
+  }, [previewUrls]);
 
   useEffect(() => {
     return () => {
-      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+      latestPreviewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [previewUrls]);
+  }, []);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files ? Array.from(event.target.files) : [];
@@ -53,17 +59,55 @@ export default function FileUploadField({
 
   const hasReachedMaxFiles = Boolean(maxFiles && previewUrls.length >= maxFiles);
 
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
+  const handleDrop = (targetIndex: number) => {
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null);
+      return;
+    }
+
+    setPreviewUrls((previous) => {
+      const updated = [...previous];
+      const [movedItem] = updated.splice(draggedIndex, 1);
+
+      if (!movedItem) {
+        return previous;
+      }
+
+      updated.splice(targetIndex, 0, movedItem);
+      return updated;
+    });
+
+    setDraggedIndex(null);
+  };
+
   return (
     <div>
       <p className="text-xs font-medium text-gray-800">{label}</p>
       <div className="mt-2 flex flex-wrap items-start gap-3">
         {previewUrls.map((previewUrl, index) => (
-          <img
-            key={`${previewUrl}-${index}`}
-            src={previewUrl}
-            alt={`Selected photo ${index + 1}`}
-            className="h-[105px] w-[155px] rounded-xl object-cover"
-          />
+          <div
+            key={previewUrl}
+            draggable
+            onDragStart={() => handleDragStart(index)}
+            onDragOver={handleDragOver}
+            onDrop={() => handleDrop(index)}
+            onDragEnd={() => setDraggedIndex(null)}
+            className="cursor-grab active:cursor-grabbing"
+          >
+            <img
+              src={previewUrl}
+              alt={`Selected photo ${index + 1}`}
+              className="h-[105px] w-[155px] rounded-xl object-cover"
+            />
+          </div>
         ))}
 
         {!hasReachedMaxFiles && (
