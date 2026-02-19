@@ -75,12 +75,12 @@ export default function Page() {
     setIsSubmitting(false);
     removeUser();
 
-    router.push('/');
-    // if (session?.user) {
-    //   router.push('/auth/payments');
-    // } else {
-    //   router.push('/auth/otp-confirmation');
-    // }
+    if (session?.user) {
+      router.push('/');
+      return;
+    }
+
+    router.push('/auth/otp-confirmation');
   };
 
   const getInterests = async () => {

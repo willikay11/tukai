@@ -6,9 +6,8 @@ export const signIn = async (email: string, password: string) => {
   try {
     const response = await api.post('/v1/accounts/login/', { email, password });
     return response.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (error: any) {
+    throw error?.response?.data || error;
   }
 };
 
