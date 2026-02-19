@@ -79,7 +79,7 @@ export default function CreateCommunity() {
       {
         title: values.communityName,
         description: values.description,
-        categoryIds: values.selectedCategories,
+        categoriesIds: values.selectedCategories,
         isPublic: values.visibility === 'public',
         googleMapPlaceId: values.city,
         invitedMemberIds: [],

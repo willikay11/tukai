@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth';
 import { CommunityPostsQueryParams, CreateCommunity } from '@/types/community';
-import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
+import { parseCamelToSnake, parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 import { api, apiWithToken } from './apiService';
 
@@ -169,7 +169,7 @@ export async function createCommunityPhotos(communityId: string, photos: string[
 export async function createCommunity(data: CreateCommunity) {
   try {
     const api = await apiWithToken();
-    const response = await api.post(`/v1/communities/`, data);
+    const response = await api.post(`/v1/communities/`, parseCamelToSnake(data));
 
     return {
       status: response.status,

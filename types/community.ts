@@ -33,7 +33,7 @@ export type Community = {
 export type CreateCommunity = {
   title: string;
   description: string;
-  categoryIds: string[];
+  categoriesIds: string[];
   isPublic: boolean;
   newPhotos?: string[];
   googleMapPlaceId: string;
