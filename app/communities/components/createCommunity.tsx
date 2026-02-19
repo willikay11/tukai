@@ -12,15 +12,23 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import TukaiImage from '@/components/ui/image';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useGetInterestCategories } from '@/hooks/auth';
+import { useCreateCommunity, useCreateCommunityPhotos } from '@/hooks/communities';
+import { usePlaceCategories } from '@/hooks/places';
+import { toast } from '@/hooks/use-toast';
 import { Interest } from '@/types/interest';
 import { PlaceCategory } from '@/types/placeCategory';
 
 import FileUploadField from '../../components/fileUploadField';
 import IconComponent from '../../components/iconComponent';
-import { usePlaceCategories } from '@/hooks/places';
 
 const createCommunitySchema = z.object({
   communityName: z.string().min(2, { message: 'Community name is required.' }),
@@ -36,9 +44,13 @@ export default function CreateCommunity() {
   const uploadId = useId();
   const visibilityId = useId();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   const { data: categories } = useGetInterestCategories();
   const { data: placeCategories } = usePlaceCategories({ pageSize: 100, group: 'cities' }, true);
+
+  const { mutate: createCommunity, isPending: isCreatingCommunity } = useCreateCommunity();
+  const { mutate: uploadPhotos, isPending: isUploadingPhotos } = useCreateCommunityPhotos();
 
   const form = useForm<CreateCommunityFormValues>({
     resolver: zodResolver(createCommunitySchema),
@@ -63,7 +75,63 @@ export default function CreateCommunity() {
   };
 
   const onSubmit = (values: CreateCommunityFormValues) => {
-    void values;
+    createCommunity(
+      {
+        title: values.communityName,
+        description: values.description,
+        categoryIds: values.selectedCategories,
+        isPublic: values.visibility === 'public',
+        googleMapPlaceId: values.city,
+        invitedMemberIds: [],
+        invitedCommunityIds: [],
+        invitedEmails: [],
+      },
+      {
+        onSuccess: (response: any) => {
+          const communityId = response?.data?.id;
+
+          if (communityId && uploadedFiles.length > 0) {
+            uploadPhotos(
+              { communityId, photos: uploadedFiles as any },
+              {
+                onSuccess: () => {
+                  toast({
+                    title: 'Success',
+                    description: 'Community created with photos successfully',
+                    variant: 'success',
+                  });
+                  form.reset();
+                  setSelectedCategories([]);
+                  setUploadedFiles([]);
+                },
+                onError: () => {
+                  toast({
+                    title: 'Warning',
+                    description: 'Community created, but failed to upload photos',
+                    variant: 'default',
+                  });
+                },
+              },
+            );
+          } else {
+            toast({
+              title: 'Success',
+              description: 'Community created successfully',
+              variant: 'success',
+            });
+            form.reset();
+            setSelectedCategories([]);
+          }
+        },
+        onError: () => {
+          toast({
+            title: 'Error',
+            description: 'Failed to create community',
+            variant: 'destructive',
+          });
+        },
+      },
+    );
   };
 
   return (
@@ -93,6 +161,7 @@ export default function CreateCommunity() {
           id={uploadId}
           label="Upload a community poster (Dimensions: 540*540, Max 15 Mbs)"
           multiple
+          onFilesChange={setUploadedFiles}
         />
       </div>
 
@@ -151,7 +220,9 @@ export default function CreateCommunity() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <p className="mb-2 text-xs font-bold text-gray-800">Add your community description</p>
+                  <p className="mb-2 text-xs font-bold text-gray-800">
+                    Add your community description
+                  </p>
                   <FormControl>
                     <Textarea
                       rows={5}
@@ -189,34 +260,35 @@ export default function CreateCommunity() {
             name="visibility"
             render={({ field }) => (
               <FormItem className="mt-4">
-                <p className="text-xs font-medium text-gray-600">What type of itinerary is this?</p>
+                <p className="text-xs font-medium text-gray-600">What type of community is this?</p>
                 <FormControl>
-                  <RadioGroup
-                    className="mt-2 space-y-2"
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
-                    <div className="flex items-start gap-2 text-xs text-gray-700">
+                  <RadioGroup className="mt-2" value={field.value} onValueChange={field.onChange}>
+                    <label
+                      htmlFor={`${visibilityId}-public`}
+                      className="flex cursor-pointer items-start gap-3 text-xs text-gray-700"
+                    >
                       <RadioGroupItem
                         value="public"
                         id={`${visibilityId}-public`}
-                        className="mt-0.5 h-3.5 w-3.5 border-emerald-500 text-emerald-600"
+                        className="mt-0.5 h-4 w-4 shrink-0 border-emerald-500 text-emerald-600"
                       />
-                      <label htmlFor={`${visibilityId}-public`}>
+                      <span className="leading-relaxed">
                         <span className="font-medium">Public</span> (Anyone can view the community and join)
-                      </label>
-                    </div>
-                    <div className="flex items-start gap-2 text-xs text-gray-700">
+                      </span>
+                    </label>
+                    <label
+                      htmlFor={`${visibilityId}-private`}
+                      className="flex cursor-pointer items-start gap-3 text-xs text-gray-700"
+                    >
                       <RadioGroupItem
                         value="private"
                         id={`${visibilityId}-private`}
-                        className="mt-0.5 h-3.5 w-3.5 border-emerald-500 text-emerald-600"
+                        className="mt-0.5 h-4 w-4 shrink-0 border-emerald-500 text-emerald-600"
                       />
-                      <label htmlFor={`${visibilityId}-private`}>
-                        <span className="font-medium">Private</span> (Only invited guests or members of a
-                        given communities can view and join)
-                      </label>
-                    </div>
+                      <span className="leading-relaxed">
+                        <span className="font-medium">Private</span> (Only invited guests or members of a given communities can view and join)
+                      </span>
+                    </label>
                   </RadioGroup>
                 </FormControl>
                 <FormMessage />
@@ -239,9 +311,10 @@ export default function CreateCommunity() {
               <Button
                 type="submit"
                 variant="gradient"
-                className="h-9 rounded-full px-4 text-xs text-white hover:bg-emerald-800"
+                disabled={isCreatingCommunity || isUploadingPhotos}
+                className="h-9 rounded-full px-4 text-xs text-white hover:bg-emerald-800 disabled:opacity-50"
               >
-                Create Community
+                {isCreatingCommunity || isUploadingPhotos ? 'Creating...' : 'Create Community'}
               </Button>
             </div>
           </div>

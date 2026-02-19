@@ -30,6 +30,18 @@ export type Community = {
   dateModified: string;
 };
 
+export type CreateCommunity = {
+  title: string;
+  description: string;
+  categoryIds: string[];
+  isPublic: boolean;
+  newPhotos?: string[];
+  googleMapPlaceId: string;
+  invitedMemberIds: string[];
+  invitedCommunityIds: string[];
+  invitedEmails: string[];
+};
+
 export type CommunityPostsQueryParams = {
   community?: string;
   community__is_public?: boolean;

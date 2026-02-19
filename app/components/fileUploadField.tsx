@@ -10,6 +10,7 @@ type FileUploadFieldProps = {
   multiple?: boolean;
   maxFiles?: number;
   onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
+  onFilesChange?: (files: File[]) => void;
 };
 
 export default function FileUploadField({
@@ -20,8 +21,10 @@ export default function FileUploadField({
   multiple = false,
   maxFiles,
   onChange,
+  onFilesChange,
 }: FileUploadFieldProps) {
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const latestPreviewUrlsRef = useRef<string[]>([]);
 
@@ -36,10 +39,10 @@ export default function FileUploadField({
   }, []);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files ? Array.from(event.target.files) : [];
+    const fileList = event.target.files ? Array.from(event.target.files) : [];
 
-    if (files.length > 0) {
-      const newUrls = files.map((file) => URL.createObjectURL(file));
+    if (fileList.length > 0) {
+      const newUrls = fileList.map((file) => URL.createObjectURL(file));
 
       setPreviewUrls((previous) => {
         const combined = [...previous, ...newUrls];
@@ -49,6 +52,17 @@ export default function FileUploadField({
           return combined.slice(0, maxFiles);
         }
 
+        return combined;
+      });
+
+      setFiles((previous) => {
+        const combined = [...previous, ...fileList];
+
+        if (maxFiles && combined.length > maxFiles) {
+          return combined.slice(0, maxFiles);
+        }
+
+        onFilesChange?.(combined);
         return combined;
       });
     }
@@ -87,6 +101,19 @@ export default function FileUploadField({
       return updated;
     });
 
+    setFiles((previous) => {
+      const updated = [...previous];
+      const [movedItem] = updated.splice(draggedIndex, 1);
+
+      if (!movedItem) {
+        return previous;
+      }
+
+      updated.splice(targetIndex, 0, movedItem);
+      onFilesChange?.(updated);
+      return updated;
+    });
+
     setDraggedIndex(null);
   };
 
@@ -108,7 +135,9 @@ export default function FileUploadField({
                 setDraggedIndex(null);
               }}
               className={`relative h-[105px] w-[155px] cursor-grab rounded-xl transition-transform active:cursor-grabbing ${
-                isDragging ? 'border-2 border-dashed border-emerald-500/50 bg-emerald-50/50 p-1' : ''
+                isDragging
+                  ? 'border-2 border-dashed border-emerald-500/50 bg-emerald-50/50 p-1'
+                  : ''
               } ${isDragging ? 'rotate-3' : ''}`}
             >
               <img

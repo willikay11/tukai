@@ -1,13 +1,15 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import {
+  createCommunity,
+  createCommunityPhotos,
   fetchCommunityPostPhotos,
   fetchCommunityPosts,
   getInterestBasedCommunities,
   joinCommunity,
   joinCommunityWithToken,
 } from '@/services/community';
-import { CommunityPostsQueryParams } from '@/types/community';
+import { CommunityPostsQueryParams, CreateCommunity } from '@/types/community';
 
 export const useGetCommunities = (
   {
@@ -87,3 +89,19 @@ export const useCommunityPostPhotos = (communityId: string, enabled: boolean) =>
     enabled: enabled,
   });
 };
+
+export const useCreateCommunity = () => {
+  return useMutation({
+    mutationKey: ['createCommunity'],
+    mutationFn: async (data: CreateCommunity) => await createCommunity(data),
+  });
+};
+
+export const useCreateCommunityPhotos = () => {
+  return useMutation({
+    mutationKey: ['createCommunityPhotos'],
+    mutationFn: async ({ communityId, photos }: { communityId: string; photos: string[] }) =>
+      await createCommunityPhotos(communityId, photos),
+  });
+};
+
