@@ -217,20 +217,20 @@ export default function CreateCommunity() {
                               <button
                                 key={place.place_id}
                                 type="button"
-                                className="flex w-full items-start gap-2 px-4 py-3 text-left text-sm hover:bg-gray-50"
+                                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-gray-50"
                                 onClick={() => {
                                   field.onChange(place.place_id);
                                   setCityInput(place.description);
                                   setShowCitySuggestions(false);
                                 }}
                               >
-                                <span className="mt-0.5 shrink-0">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
                                   <IconComponent
                                     iconName="Location01Icon"
-                                    color="#6B7280"
-                                    size={16}
+                                    color="#10B981"
+                                    size={20}
                                   />
-                                </span>
+                                </div>
                                 <span className="text-gray-700">{place.description}</span>
                               </button>
                             ))}
