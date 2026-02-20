@@ -321,7 +321,7 @@ export default function CreateCommunity() {
                 disabled={isCreatingCommunity || isUploadingPhotos}
                 className="h-9 rounded-full px-4 text-xs text-white hover:bg-emerald-800 disabled:opacity-50"
               >
-                {isCreatingCommunity || isUploadingPhotos ? 'Creating...' : 'Create Community'}
+                {isCreatingCommunity || isUploadingPhotos ? 'Creating Community...' : 'Create Community'}
               </Button>
             </div>
           </div>

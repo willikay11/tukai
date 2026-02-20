@@ -21,7 +21,8 @@ export function PillRadioGroup({ options, value, onChange, className = '' }: Pil
           type="button"
           onClick={() => onChange(option.value)}
           className={`
-            rounded-full px-4 py-2 text-xs font-medium transition-all duration-200
+            rounded-full px-4 py-2 text-xs font-medium 
+            transition-all duration-300 ease-in-out
             ${
               value === option.value
                 ? 'bg-gradient-to-b to-[#064E3B] from-[#047857] text-white shadow-sm'
