@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,23 +9,15 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
-import TukaiImage from '@/components/ui/image';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useGetInterestCategories } from '@/hooks/auth';
 import { useCreateCommunity, useCreateCommunityPhotos } from '@/hooks/communities';
-import { usePlaceCategories } from '@/hooks/places';
+import { useGoogleMapsAutocomplete } from '@/hooks/places';
 import { toast } from '@/hooks/use-toast';
+import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';
-import { PlaceCategory } from '@/types/placeCategory';
 
 import FileUploadField from '../../components/fileUploadField';
 import IconComponent from '../../components/iconComponent';
@@ -43,14 +35,29 @@ type CreateCommunityFormValues = z.infer<typeof createCommunitySchema>;
 export default function CreateCommunity() {
   const uploadId = useId();
   const visibilityId = useId();
+  const cityInputRef = useRef<HTMLDivElement>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [cityInput, setCityInput] = useState('');
+  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
 
   const { data: categories } = useGetInterestCategories();
-  const { data: placeCategories } = usePlaceCategories({ pageSize: 100, group: 'cities' }, true);
+  const { data: googlePlaces } = useGoogleMapsAutocomplete(cityInput, cityInput.length > 2);
 
   const { mutate: createCommunity, isPending: isCreatingCommunity } = useCreateCommunity();
   const { mutate: uploadPhotos, isPending: isUploadingPhotos } = useCreateCommunityPhotos();
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cityInputRef.current && !cityInputRef.current.contains(event.target as Node)) {
+        setShowCitySuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const form = useForm<CreateCommunityFormValues>({
     resolver: zodResolver(createCommunitySchema),
@@ -104,6 +111,7 @@ export default function CreateCommunity() {
                   form.reset();
                   setSelectedCategories([]);
                   setUploadedFiles([]);
+                  setCityInput('');
                 },
                 onError: () => {
                   toast({
@@ -122,6 +130,7 @@ export default function CreateCommunity() {
             });
             form.reset();
             setSelectedCategories([]);
+            setCityInput('');
           }
         },
         onError: () => {
@@ -188,28 +197,46 @@ export default function CreateCommunity() {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="h-[55px]">
-                        <SelectValue placeholder="City e.g. Nairobi, Watamu..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {placeCategories?.data?.results?.map((placeCategory: PlaceCategory) => (
-                          <SelectItem key={placeCategory.id} value={placeCategory.id}>
-                            <div className="flex items-center gap-2">
-                              <div className="relative h-6 w-6 shrink-0 overflow-hidden rounded-md">
-                                <TukaiImage
-                                  src={placeCategory.image ?? ''}
-                                  alt={placeCategory.name}
-                                  className="rounded-md"
-                                  showNotFoundText={false}
-                                />
-                              </div>
-                              <span>{placeCategory.name}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div ref={cityInputRef} className="relative">
+                      <Input
+                        placeholder="City e.g. Nairobi, Watamu..."
+                        className="h-[55px]"
+                        value={cityInput}
+                        onChange={(e) => {
+                          setCityInput(e.target.value);
+                          setShowCitySuggestions(true);
+                        }}
+                        onFocus={() => setShowCitySuggestions(true)}
+                      />
+                      {showCitySuggestions &&
+                        cityInput.length > 2 &&
+                        googlePlaces?.data &&
+                        googlePlaces.data.length > 0 && (
+                          <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
+                            {googlePlaces.data.map((place: GoogleMapsAutocompletePrediction) => (
+                              <button
+                                key={place.place_id}
+                                type="button"
+                                className="flex w-full items-start gap-2 px-4 py-3 text-left text-sm hover:bg-gray-50"
+                                onClick={() => {
+                                  field.onChange(place.place_id);
+                                  setCityInput(place.description);
+                                  setShowCitySuggestions(false);
+                                }}
+                              >
+                                <span className="mt-0.5 shrink-0">
+                                  <IconComponent
+                                    iconName="Location01Icon"
+                                    color="#6B7280"
+                                    size={16}
+                                  />
+                                </span>
+                                <span className="text-gray-700">{place.description}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
