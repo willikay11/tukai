@@ -8,6 +8,7 @@ import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
@@ -31,6 +32,23 @@ const createCommunitySchema = z.object({
 });
 
 type CreateCommunityFormValues = z.infer<typeof createCommunitySchema>;
+
+const invitedMembers = [
+  { id: 'm1', name: 'Brooklyn...', image: '/images/one.jpg' },
+  { id: 'm2', name: 'Kimberly...', image: '/images/two.jpg' },
+  { id: 'm3', name: 'Marvin...', image: '/images/three.jpg' },
+  { id: 'm4', name: 'gralak@gmail...', image: '' },
+  { id: 'm5', name: 'Marvin...', image: '/images/four.jpg' },
+  { id: 'm6', name: 'Eleanor...', image: '/images/five.jpg' },
+];
+
+const invitedCommunities = [
+  { id: 'c1', name: 'Let’s Drift', image: '/images/seven.jpg' },
+  { id: 'c2', name: 'The Mara Nomads', image: '/images/eight.jpg' },
+  { id: 'c3', name: 'A Longer Communities Name', image: '/images/santorini.webp' },
+  { id: 'c4', name: 'Let’s Drift', image: '/images/seven.jpg' },
+  { id: 'c5', name: 'The Mara Nomads', image: '/images/eight.jpg' },
+];
 
 export default function CreateCommunity() {
   const uploadId = useId();
@@ -192,6 +210,27 @@ export default function CreateCommunity() {
 
             <FormField
               control={form.control}
+              name="visibility"
+              render={({ field }) => (
+                <FormItem className="mt-4">
+                  <p className="text-xs font-medium text-gray-600">Community type (who can see or join the community)</p>
+                  <FormControl>
+                    <PillRadioGroup
+                      options={[
+                        { value: 'public', label: 'Public experience' },
+                        { value: 'private', label: 'Private experience' },
+                      ]}
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
               name="city"
               render={({ field }) => (
                 <FormItem>
@@ -282,26 +321,74 @@ export default function CreateCommunity() {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="visibility"
-            render={({ field }) => (
-              <FormItem className="mt-4">
-                <p className="mb-3 text-xs font-medium text-gray-600">What type of community is this?</p>
-                <FormControl>
-                  <PillRadioGroup
-                    options={[
-                      { value: 'public', label: 'Public experience' },
-                      { value: 'private', label: 'Private experience' },
-                    ]}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="mt-6">
+            <p className="text-xs font-semibold text-gray-800">
+              Invite your friends or members of other communities
+            </p>
+            <p className="mt-2 text-xs text-gray-700">
+              You can share invites individually or invite members of a given Communities that you
+              own or are a member of.
+            </p>
+
+            <div className="relative mt-3">
+              <Input
+                placeholder="Search by user name or add their email"
+                className="h-[56px] rounded-2xl border-gray-300 pr-12 placeholder:text-gray-500"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2">
+                <IconComponent iconName="Search01Icon" size={22} color="gray" />
+              </span>
+            </div>
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {invitedMembers.map((member) => (
+                <div
+                  key={member.id}
+                  className="inline-flex items-center gap-2 rounded-full bg-gray-100 py-1.5 pl-1.5 pr-2"
+                >
+                  <Avatar className="h-6 w-6">
+                    {member.image ? <AvatarImage src={member.image} alt={member.name} /> : null}
+                    <AvatarFallback className="bg-gray-200 text-gray-500">
+                      <IconComponent iconName="UserIcon" size={14} color="gray" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="max-w-[112px] truncate text-xs text-gray-700">{member.name}</span>
+                  <button
+                    type="button"
+                    className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-400"
+                  >
+                    <IconComponent iconName="Cancel01Icon" size={12} color="white" />
+                  </button>
+                </div>
+              ))}
+              <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-full bg-emerald-100 px-2 text-xs font-semibold text-emerald-700">
+                +34
+              </span>
+            </div>
+
+            <p className="mt-6 text-xs font-semibold text-gray-800">Your communities</p>
+            <p className="mt-2 text-xs text-gray-700">Select your communities you would like to invite:</p>
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {invitedCommunities.map((community) => (
+                <div
+                  key={community.id}
+                  className="inline-flex items-center gap-2 rounded-full bg-gray-100 py-1.5 pl-1.5 pr-3"
+                >
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={community.image} alt={community.name} />
+                    <AvatarFallback />
+                  </Avatar>
+                  <span className="max-w-[180px] truncate text-xs text-gray-700">{community.name}</span>
+                </div>
+              ))}
+              <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-full bg-emerald-100 px-2 text-xs font-semibold text-emerald-700">
+                +12
+              </span>
+            </div>
+          </div>
+
+          
 
           <div className="mt-6 flex items-center justify-between">
             <Button type="button" variant="text" className="text-xs text-red-500">
