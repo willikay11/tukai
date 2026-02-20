@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { Textarea } from '@/components/ui/textarea';
 import { useGetInterestCategories } from '@/hooks/auth';
 import { useCreateCommunity, useCreateCommunityPhotos } from '@/hooks/communities';
@@ -34,7 +34,6 @@ type CreateCommunityFormValues = z.infer<typeof createCommunitySchema>;
 
 export default function CreateCommunity() {
   const uploadId = useId();
-  const visibilityId = useId();
   const cityInputRef = useRef<HTMLDivElement>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -288,36 +287,16 @@ export default function CreateCommunity() {
             name="visibility"
             render={({ field }) => (
               <FormItem className="mt-4">
-                <p className="text-xs font-medium text-gray-600">What type of community is this?</p>
+                <p className="mb-3 text-xs font-medium text-gray-600">What type of community is this?</p>
                 <FormControl>
-                  <RadioGroup className="mt-2" value={field.value} onValueChange={field.onChange}>
-                    <label
-                      htmlFor={`${visibilityId}-public`}
-                      className="flex cursor-pointer items-start gap-3 text-xs text-gray-700"
-                    >
-                      <RadioGroupItem
-                        value="public"
-                        id={`${visibilityId}-public`}
-                        className="mt-0.5 h-4 w-4 shrink-0 border-emerald-500 text-emerald-600"
-                      />
-                      <span className="leading-relaxed">
-                        <span className="font-medium">Public</span> (Anyone can view the community and join)
-                      </span>
-                    </label>
-                    <label
-                      htmlFor={`${visibilityId}-private`}
-                      className="flex cursor-pointer items-start gap-3 text-xs text-gray-700"
-                    >
-                      <RadioGroupItem
-                        value="private"
-                        id={`${visibilityId}-private`}
-                        className="mt-0.5 h-4 w-4 shrink-0 border-emerald-500 text-emerald-600"
-                      />
-                      <span className="leading-relaxed">
-                        <span className="font-medium">Private</span> (Only invited guests or members of a given communities can view and join)
-                      </span>
-                    </label>
-                  </RadioGroup>
+                  <PillRadioGroup
+                    options={[
+                      { value: 'public', label: 'Public experience' },
+                      { value: 'private', label: 'Private experience' },
+                    ]}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
