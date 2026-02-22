@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { InviteMembers, InvitedMember } from '@/components/ui/invite-members';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { Textarea } from '@/components/ui/textarea';
 import { useGetInterestCategories } from '@/hooks/auth';
@@ -33,15 +34,6 @@ const createCommunitySchema = z.object({
 
 type CreateCommunityFormValues = z.infer<typeof createCommunitySchema>;
 
-const invitedMembers = [
-  { id: 'm1', name: 'Brooklyn...', image: '/images/one.jpg' },
-  { id: 'm2', name: 'Kimberly...', image: '/images/two.jpg' },
-  { id: 'm3', name: 'Marvin...', image: '/images/three.jpg' },
-  { id: 'm4', name: 'gralak@gmail...', image: '' },
-  { id: 'm5', name: 'Marvin...', image: '/images/four.jpg' },
-  { id: 'm6', name: 'Eleanor...', image: '/images/five.jpg' },
-];
-
 const invitedCommunities = [
   { id: 'c1', name: 'Let’s Drift', image: '/images/seven.jpg' },
   { id: 'c2', name: 'The Mara Nomads', image: '/images/eight.jpg' },
@@ -57,6 +49,8 @@ export default function CreateCommunity() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [cityInput, setCityInput] = useState('');
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+  const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>([]);
+  const [memberSearchResults, setMemberSearchResults] = useState<InvitedMember[]>([]);
 
   const { data: categories } = useGetInterestCategories();
   const { data: googlePlaces } = useGoogleMapsAutocomplete(cityInput, cityInput.length > 2);
@@ -99,6 +93,14 @@ export default function CreateCommunity() {
   };
 
   const onSubmit = (values: CreateCommunityFormValues) => {
+    const memberIds = invitedMembers
+      .filter((member) => !member.email?.includes('@') || member.id.startsWith('user-'))
+      .map((member) => member.id);
+    
+    const emails = invitedMembers
+      .filter((member) => member.email && member.id.startsWith('email-'))
+      .map((member) => member.email!);
+
     createCommunity(
       {
         title: values.communityName,
@@ -107,9 +109,9 @@ export default function CreateCommunity() {
         isPublic: values.visibility === 'public',
         googleMapPlaceId: values.city,
         newPhotos: uploadedFiles,
-        invitedMemberIds: [],
+        invitedMemberIds: memberIds,
         invitedCommunityIds: [],
-        invitedEmails: [],
+        invitedEmails: emails,
       },
       {
         onSuccess: (response: any) => {
@@ -332,43 +334,17 @@ export default function CreateCommunity() {
               own or are a member of.
             </p>
 
-            <div className="relative mt-3">
-              <Input
-                placeholder="Search by user name or add their email"
-                className="h-[56px] rounded-2xl border-gray-300 pr-12 placeholder:text-gray-500"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2">
-                <IconComponent iconName="Search01Icon" size={22} color="gray" />
-              </span>
-            </div>
-
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              {invitedMembers.map((member) => (
-                <div
-                  key={member.id}
-                  className="inline-flex items-center gap-2 rounded-full bg-gray-100 py-1.5 pl-1.5 pr-2"
-                >
-                  <Avatar className="h-6 w-6">
-                    {member.image ? <AvatarImage src={member.image} alt={member.name} /> : null}
-                    <AvatarFallback className="bg-gray-200 text-gray-500">
-                      <IconComponent iconName="UserIcon" size={14} color="gray" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="max-w-[112px] truncate text-xs text-gray-700">
-                    {member.name}
-                  </span>
-                  <button
-                    type="button"
-                    className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-400"
-                  >
-                    <IconComponent iconName="Cancel01Icon" size={12} color="white" />
-                  </button>
-                </div>
-              ))}
-              <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-full bg-emerald-100 px-2 text-xs font-semibold text-emerald-700">
-                +34
-              </span>
-            </div>
+            <InviteMembers
+              invitedMembers={invitedMembers}
+              onMembersChange={setInvitedMembers}
+              searchResults={memberSearchResults}
+              onSearch={(query) => {
+                // TODO: Implement user search API call
+                // For now, you can add mock search results
+                setMemberSearchResults([]);
+              }}
+              className="mt-3"
+            />
 
             <p className="mt-6 text-xs font-semibold text-gray-800">Your communities</p>
             <p className="mt-2 text-xs text-gray-700">
