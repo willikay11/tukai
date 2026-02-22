@@ -208,7 +208,7 @@ export async function createCommunity(data: CreateCommunity) {
         formData.append('new_photos', photo, fileName);
       });
     }
-    
+
     const response = await api.post(`/v1/communities/`, formData, {
       headers: {
         'Content-Type': undefined,

@@ -29,7 +29,8 @@ const premiumFeatures = [
   },
   {
     title: 'Get Paid',
-    description: '12 hours after the experience, receive the payment in your created and preferred account/wallet',
+    description:
+      '12 hours after the experience, receive the payment in your created and preferred account/wallet',
     iconName: 'Money03Icon',
     iconColor: '#059669',
   },
@@ -73,15 +74,22 @@ export default function JoinTukaiPremium({
       <div className="relative mb-3 overflow-hidden rounded-xl bg-[#B0E800] p-4 pr-28 md:p-5 md:pr-32">
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-base font-black text-[#013334]">{price}</p>
-          <span className="inline-flex items-center rounded-[40px] bg-primary px-3 py-1 text-xs font-semibold text-white h-[25px] text-[#B0E800]">
+          <span className="inline-flex h-[25px] items-center rounded-[40px] bg-primary px-3 py-1 text-xs font-semibold text-[#B0E800] text-white">
             <IconComponent iconName="GiftIcon" size={12} color="#B0E800" className="mr-1" />
             Special Offer
           </span>
         </div>
-        <p className="mt-1 text-xs font-medium text-[#013334]">Create unlimited experiences!! Earn money!!</p>
+        <p className="mt-1 text-xs font-medium text-[#013334]">
+          Create unlimited experiences!! Earn money!!
+        </p>
 
         <div className="absolute bottom-0 right-0 h-24 w-24 md:h-28 md:w-28">
-          <Image src="/images/medium-shot-smiley-man-holding-baggage 1.svg" alt="Premium plan" fill className="object-contain" />
+          <Image
+            src="/images/medium-shot-smiley-man-holding-baggage 1.svg"
+            alt="Premium plan"
+            fill
+            className="object-contain"
+          />
         </div>
       </div>
 
@@ -106,11 +114,17 @@ export default function JoinTukaiPremium({
 
       <Button
         variant="gradient"
-        className="w-full h-[55px] rounded-[40px]"
+        className="h-[55px] w-full rounded-[40px]"
         onClick={onUpgrade}
         disabled={isUpgrading}
       >
-        {isUpgrading ? 'Processing...' : <span>Upgrade to Premium <span className='text-white/50'>({price})</span></span>}
+        {isUpgrading ? (
+          'Processing...'
+        ) : (
+          <span>
+            Upgrade to Premium <span className="text-white/50">({price})</span>
+          </span>
+        )}
       </Button>
 
       <p className="mt-3 text-center text-xs italic text-gray-500">

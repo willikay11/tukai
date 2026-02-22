@@ -6,9 +6,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
@@ -213,7 +213,9 @@ export default function CreateCommunity() {
               name="visibility"
               render={({ field }) => (
                 <FormItem className="mt-4">
-                  <p className="text-xs font-medium text-gray-600">Community type (who can see or join the community)</p>
+                  <p className="text-xs font-medium text-gray-600">
+                    Community type (who can see or join the community)
+                  </p>
                   <FormControl>
                     <PillRadioGroup
                       options={[
@@ -228,7 +230,7 @@ export default function CreateCommunity() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="city"
@@ -352,7 +354,9 @@ export default function CreateCommunity() {
                       <IconComponent iconName="UserIcon" size={14} color="gray" />
                     </AvatarFallback>
                   </Avatar>
-                  <span className="max-w-[112px] truncate text-xs text-gray-700">{member.name}</span>
+                  <span className="max-w-[112px] truncate text-xs text-gray-700">
+                    {member.name}
+                  </span>
                   <button
                     type="button"
                     className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-400"
@@ -367,7 +371,9 @@ export default function CreateCommunity() {
             </div>
 
             <p className="mt-6 text-xs font-semibold text-gray-800">Your communities</p>
-            <p className="mt-2 text-xs text-gray-700">Select your communities you would like to invite:</p>
+            <p className="mt-2 text-xs text-gray-700">
+              Select your communities you would like to invite:
+            </p>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
               {invitedCommunities.map((community) => (
@@ -379,7 +385,9 @@ export default function CreateCommunity() {
                     <AvatarImage src={community.image} alt={community.name} />
                     <AvatarFallback />
                   </Avatar>
-                  <span className="max-w-[180px] truncate text-xs text-gray-700">{community.name}</span>
+                  <span className="max-w-[180px] truncate text-xs text-gray-700">
+                    {community.name}
+                  </span>
                 </div>
               ))}
               <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-full bg-emerald-100 px-2 text-xs font-semibold text-emerald-700">
@@ -387,8 +395,6 @@ export default function CreateCommunity() {
               </span>
             </div>
           </div>
-
-          
 
           <div className="mt-6 flex items-center justify-between">
             <Button type="button" variant="text" className="text-xs text-red-500">
@@ -408,7 +414,9 @@ export default function CreateCommunity() {
                 disabled={isCreatingCommunity || isUploadingPhotos}
                 className="h-9 rounded-full px-4 text-xs text-white hover:bg-emerald-800 disabled:opacity-50"
               >
-                {isCreatingCommunity || isUploadingPhotos ? 'Creating Community...' : 'Create Community'}
+                {isCreatingCommunity || isUploadingPhotos
+                  ? 'Creating Community...'
+                  : 'Create Community'}
               </Button>
             </div>
           </div>
