@@ -81,7 +81,7 @@ export default function UserLocation() {
         variant="link"
         className="h-fit p-0 hover:no-underline"
         onClick={requestLocation}
-        disabled={status === 'loading' || isLoadingAddress}
+        disabled={isLoadingAddress}
       >
         <IconComponent
           iconName="ReloadIcon"
