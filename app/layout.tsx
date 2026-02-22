@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { hugeiconsLicense } from '@hugeicons/react-pro';
-import { User } from 'lucide-react';
 
 import AuthActions from '@/app/components/authActions';
 import BottomNavigation from '@/app/components/bottomNavigation';
@@ -22,7 +21,6 @@ import { SelectedCategoryProvider } from '@/context/SelectedCategoryContext';
 import ReactQueryClientProvider from '@/providers/ReactQueryProvider';
 import SessionProvider from '@/providers/SessionProvider';
 
-import IconComponent from './components/iconComponent';
 import LocationPrompt from './components/locationPrompt';
 import Nav from './components/nav';
 import Search from './components/search';
