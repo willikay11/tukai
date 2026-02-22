@@ -35,7 +35,7 @@ const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(
           onChange={handleChange}
           disabled={disabled}
           className={cn(
-            'w-full rounded-lg border border-gray-200 px-3 py-2.5 pr-10 text-sm text-gray-700 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+            'w-full h-[55px] rounded-lg border border-gray-200 px-3 py-2.5 pr-10 text-sm text-gray-700 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
             !value && 'text-gray-400',
             className
           )}

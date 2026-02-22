@@ -106,7 +106,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
             type="button"
             disabled={disabled}
             className={cn(
-              'flex w-full items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5 text-left text-sm text-gray-700 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+              'flex h-[55px] w-full items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5 text-left text-sm text-gray-700 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
               !value && 'text-gray-400',
               className
             )}

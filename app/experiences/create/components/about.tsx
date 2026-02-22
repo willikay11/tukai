@@ -94,12 +94,11 @@ export default function CreateExperienceAbout() {
                     Experience Title
                   </label>
                   <FormControl>
-                    <input
+                    <Input
                       id="title"
                       type="text"
                       placeholder="Experience Title"
                       {...field}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
                     />
                   </FormControl>
                   <FormMessage />
@@ -216,7 +215,6 @@ export default function CreateExperienceAbout() {
                         type="text"
                         placeholder="Add location/name of the place..."
                         {...field}
-                        className="w-full rounded-lg border border-gray-200 px-3 py-2.5 pr-10 text-sm placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
                       />
                       <IconComponent
                         iconName="LocationIcon"
@@ -246,7 +244,6 @@ export default function CreateExperienceAbout() {
                           type="text"
                           placeholder="Meeting/Pick-up Point"
                           {...field}
-                          className="w-full rounded-lg border border-gray-200 px-3 py-2.5 pr-10 text-sm placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
                         />
                         <IconComponent
                           iconName="LocationIcon"
