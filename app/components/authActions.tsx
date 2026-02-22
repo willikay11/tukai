@@ -26,7 +26,7 @@ export default function AuthActions() {
   const { openSignInWithCallback } = useAuthDialog();
   const router = useRouter();
   const { data: session } = useSession();
-  const [showJoinPremium, setShowJoinPremium] = useState(true);
+  const [showJoinPremium, setShowJoinPremium] = useState(false);
   const [pendingCreateAfterLogin, setPendingCreateAfterLogin] = useState(false);
 
   const hasSubscribed = Boolean(session?.user?.hasSubscribed);
