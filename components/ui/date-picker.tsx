@@ -1,8 +1,16 @@
-'use client';
+"use client"
 
-import * as React from 'react';
-import { cn } from '@/lib/utils';
-import IconComponent from '@/app/components/iconComponent';
+import * as React from "react"
+import { format } from "date-fns"
+
+import { cn } from "@/lib/utils"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import IconComponent from "@/app/components/iconComponent"
 
 export interface DatePickerProps {
   value?: string;
@@ -12,44 +20,45 @@ export interface DatePickerProps {
   disabled?: boolean;
 }
 
-const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(
+const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
   ({ className, value, onChange, placeholder = 'Select Date', disabled }, ref) => {
-    const inputRef = React.useRef<HTMLInputElement>(null);
+    const [date, setDate] = React.useState<Date | undefined>(value ? new Date(value) : undefined);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (onChange) {
-        onChange(e.target.value);
+    React.useEffect(() => {
+      if (value) {
+        setDate(new Date(value));
+      }
+    }, [value]);
+
+    const handleSelect = (selectedDate: Date | undefined) => {
+      setDate(selectedDate);
+      if (selectedDate && onChange) {
+        onChange(format(selectedDate, 'yyyy-MM-dd'));
       }
     };
 
-    const handleClick = () => {
-      inputRef.current?.showPicker();
-    };
-
     return (
-      <div className="relative">
-        <input
-          ref={inputRef}
-          type="date"
-          value={value || ''}
-          onChange={handleChange}
-          disabled={disabled}
-          className={cn(
-            'w-full h-[55px] rounded-lg border border-gray-200 px-3 py-2.5 pr-10 text-sm text-gray-700 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
-            !value && 'text-gray-400',
-            className
-          )}
-          placeholder={placeholder}
-        />
-        <button
-          type="button"
-          onClick={handleClick}
-          disabled={disabled}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-        >
-          <IconComponent iconName="Calendar01Icon" size={18} />
-        </button>
-      </div>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            ref={ref}
+            type="button"
+            disabled={disabled}
+            className={cn(
+              'flex h-[55px] w-full items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5 text-left text-sm focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+              !date && 'text-gray-400',
+              date && 'text-gray-700',
+              className
+            )}
+          >
+            {date ? format(date, 'PPP') : <span>{placeholder}</span>}
+            <IconComponent iconName="Calendar01Icon" size={18} className="text-gray-400" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar mode="single" selected={date} onSelect={handleSelect} initialFocus />
+        </PopoverContent>
+      </Popover>
     );
   }
 );
