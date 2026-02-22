@@ -4,6 +4,7 @@ import IconComponent from '@/app/components/iconComponent';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import CreateExperienceAbout from './about';
 import ExperienceDates from './dates';
+import CreateExperienceInvites from './invites';
 
 const STEPS = [
   { id: 'about', label: 'About', icon: 'InformationCircleIcon' },
@@ -47,9 +48,7 @@ export default function CreateExperienceSteps({
       </TabsContent>
 
       <TabsContent value="guests" className="mt-6">
-        <div className="bg-white rounded-xl p-6">
-          <p className="text-gray-500">Invite Guests tab coming soon</p>
-        </div>
+        <CreateExperienceInvites />
       </TabsContent>
 
       <TabsContent value="wallet" className="mt-6">
