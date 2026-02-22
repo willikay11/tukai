@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -16,6 +15,7 @@ import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { TimePicker } from '@/components/ui/time-picker';
 import { useGetInterestCategories } from '@/hooks/auth';
 import { Interest } from '@/types/interest';
+import { Input } from '@/components/ui/input';
 
 const experienceSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
@@ -211,7 +211,7 @@ export default function CreateExperienceAbout() {
                   </label>
                   <FormControl>
                     <div className="relative">
-                      <input
+                      <Input
                         id="location"
                         type="text"
                         placeholder="Add location/name of the place..."
@@ -242,7 +242,7 @@ export default function CreateExperienceAbout() {
                   <FormItem className="mb-3">
                     <FormControl>
                       <div className="relative">
-                        <input
+                        <Input
                           type="text"
                           placeholder="Meeting/Pick-up Point"
                           {...field}
