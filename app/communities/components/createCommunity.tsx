@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { InviteCommunities, InvitedCommunity } from '@/components/ui/invite-communities';
 import { InviteMembers, InvitedMember } from '@/components/ui/invite-members';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { Textarea } from '@/components/ui/textarea';
@@ -34,13 +35,6 @@ const createCommunitySchema = z.object({
 
 type CreateCommunityFormValues = z.infer<typeof createCommunitySchema>;
 
-const invitedCommunities = [
-  { id: 'c1', name: 'Let’s Drift', image: '/images/seven.jpg' },
-  { id: 'c2', name: 'The Mara Nomads', image: '/images/eight.jpg' },
-  { id: 'c3', name: 'A Longer Communities Name', image: '/images/santorini.webp' },
-  { id: 'c4', name: 'Let’s Drift', image: '/images/seven.jpg' },
-  { id: 'c5', name: 'The Mara Nomads', image: '/images/eight.jpg' },
-];
 
 export default function CreateCommunity() {
   const uploadId = useId();
@@ -51,6 +45,15 @@ export default function CreateCommunity() {
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>([]);
   const [memberSearchResults, setMemberSearchResults] = useState<InvitedMember[]>([]);
+  const [invitedCommunities, setInvitedCommunities] = useState<InvitedCommunity[]>([]);
+  const [availableCommunities] = useState<InvitedCommunity[]>([
+    { id: 'c1', name: 'Let\'s Drift', image: '/images/seven.jpg', memberCount: 24 },
+    { id: 'c2', name: 'The Mara Nomads', image: '/images/eight.jpg', memberCount: 156 },
+    { id: 'c3', name: 'Safari Explorers', image: '/images/santorini.webp', memberCount: 89 },
+    { id: 'c4', name: 'Beach Lovers', image: '/images/seven.jpg', memberCount: 42 },
+    { id: 'c5', name: 'Mountain Hikers', image: '/images/eight.jpg', memberCount: 67 },
+    { id: 'c6', name: 'City Wanderers', image: '/images/santorini.webp', memberCount: 103 },
+  ]);
 
   const { data: categories } = useGetInterestCategories();
   const { data: googlePlaces } = useGoogleMapsAutocomplete(cityInput, cityInput.length > 2);
@@ -110,7 +113,7 @@ export default function CreateCommunity() {
         googleMapPlaceId: values.city,
         newPhotos: uploadedFiles,
         invitedMemberIds: memberIds,
-        invitedCommunityIds: [],
+        invitedCommunityIds: invitedCommunities.map((c) => c.id),
         invitedEmails: emails,
       },
       {
@@ -131,6 +134,8 @@ export default function CreateCommunity() {
                   setSelectedCategories([]);
                   setUploadedFiles([]);
                   setCityInput('');
+                  setInvitedMembers([]);
+                  setInvitedCommunities([]);
                 },
                 onError: () => {
                   toast({
@@ -150,6 +155,8 @@ export default function CreateCommunity() {
             form.reset();
             setSelectedCategories([]);
             setCityInput('');
+            setInvitedMembers([]);
+            setInvitedCommunities([]);
           }
         },
         onError: () => {
@@ -351,25 +358,11 @@ export default function CreateCommunity() {
               Select your communities you would like to invite:
             </p>
 
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              {invitedCommunities.map((community) => (
-                <div
-                  key={community.id}
-                  className="inline-flex items-center gap-2 rounded-full bg-gray-100 py-1.5 pl-1.5 pr-3"
-                >
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src={community.image} alt={community.name} />
-                    <AvatarFallback />
-                  </Avatar>
-                  <span className="max-w-[180px] truncate text-xs text-gray-700">
-                    {community.name}
-                  </span>
-                </div>
-              ))}
-              <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-full bg-emerald-100 px-2 text-xs font-semibold text-emerald-700">
-                +12
-              </span>
-            </div>
+            <InviteCommunities
+              invitedCommunities={invitedCommunities}
+              onCommunitiesChange={setInvitedCommunities}
+              availableCommunities={availableCommunities}
+            />
           </div>
 
           <div className="mt-6 flex items-center justify-between">
