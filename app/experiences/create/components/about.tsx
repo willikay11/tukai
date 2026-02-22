@@ -10,21 +10,13 @@ import FileUploadField from '@/app/components/fileUploadField';
 import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { useGetInterestCategories } from '@/hooks/auth';
 import { Interest } from '@/types/interest';
 
-const TABS = [
-  { id: 'about', label: 'About' },
-  { id: 'dates-tickets', label: 'Dates & Tickets' },
-  { id: 'guests', label: 'Invite Guests' },
-  { id: 'wallet', label: 'Wallet Details' },
-];
-
 export default function CreateExperienceAbout() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<string>('about');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [visibility, setVisibility] = useState<'public' | 'private'>('public');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -36,9 +28,10 @@ export default function CreateExperienceAbout() {
   });
 
   const { data: categories } = useGetInterestCategories();
-  const form = useForm<{ selectedCategories: string[] }>({
+  const form = useForm<{ selectedCategories: string[]; visibility: 'public' | 'private' }>({
     defaultValues: {
       selectedCategories: [],
+      visibility: 'public',
     },
   });
 
@@ -59,44 +52,14 @@ export default function CreateExperienceAbout() {
 
   return (
     <div className="w-full">
-      <button
-        type="button"
-        onClick={() => router.back()}
-        className="mb-6 inline-flex items-center text-sm font-medium text-emerald-700"
-      >
-        <IconComponent iconName="ArrowLeft02Icon" size={16} className="mr-1" />
-        Back
-      </button>
-
-      <div className="bg-white rounded-xl p-6">
+      <div className="bg-white">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900">Create Experience</h1>
         </div>
 
-        {/* Tabs */}
-        <div className="mb-6 flex gap-2 border-b border-gray-200">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-2 text-xs font-semibold transition-colors ${
-                activeTab === tab.id
-                  ? 'border-b-2 border-emerald-700 text-emerald-700'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {tab.id === 'dates-tickets' && <IconComponent iconName="Calendar02Icon" size={14} className="inline mr-1" />}
-              {tab.id === 'guests' && <IconComponent iconName="UserMultipleIcon" size={14} className="inline mr-1" />}
-              {tab.id === 'wallet' && <IconComponent iconName="Wallet02Icon" size={14} className="inline mr-1" />}
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
         <Form {...form}>
-          {activeTab === 'about' && (
-            <div className="space-y-6">
+          <div className="space-y-6">
             {/* Upload Photo */}
             <div>
               <p className="mb-2 text-sm font-semibold text-gray-900">Add details about the experience</p>
@@ -129,35 +92,28 @@ export default function CreateExperienceAbout() {
             </div>
 
             {/* Experience Visibility */}
-            <div>
-              <label htmlFor="visibility" className="block text-sm font-semibold text-gray-900 mb-3">
-                Experience visibility (who can see or access the experience)
-              </label>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setVisibility('public')}
-                  className={`rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
-                    visibility === 'public'
-                      ? 'bg-emerald-700 text-white'
-                      : 'border border-gray-200 bg-white text-gray-700'
-                  }`}
-                >
-                  Public (Everyone)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setVisibility('private')}
-                  className={`rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
-                    visibility === 'private'
-                      ? 'bg-emerald-700 text-white'
-                      : 'border border-gray-200 bg-white text-gray-700'
-                  }`}
-                >
-                  Private (Only invited people)
-                </button>
-              </div>
-            </div>
+            <FormField
+              control={form.control}
+              name="visibility"
+              render={({ field }) => (
+                <FormItem className="mt-4">
+                  <p className="text-xs font-medium text-gray-600">
+                    Experience type (who can see or access the experience)
+                  </p>
+                  <FormControl>
+                    <PillRadioGroup
+                      options={[
+                        { value: 'public', label: 'Public experience' },
+                        { value: 'private', label: 'Private experience' },
+                      ]}
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Description */}
             <div>
@@ -304,8 +260,7 @@ export default function CreateExperienceAbout() {
                 </Button>
               </div>
             </div>
-            </div>
-          )}
+          </div>
         </Form>
       </div>
     </div>
