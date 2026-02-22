@@ -25,6 +25,14 @@ export default function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/';
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
   const linkItems = (showIcon: boolean) =>
     links.map((link, index) => (
       <Link
@@ -32,7 +40,7 @@ export default function Nav() {
         key={link.name}
         className={clsx('inline-flex h-fit items-center md:pb-4', {
           'mr-6': index !== links.length - 1,
-          'text-primary md:border-b-[1px] md:border-primary': pathname.includes(link.href),
+          'text-primary md:border-b-[1px] md:border-primary': isActive(link.href),
         })}
         onClick={() => setOpen(false)}
       >
@@ -40,8 +48,8 @@ export default function Nav() {
           {showIcon && link.icon}
           <span
             className={clsx('ml-1 text-xs', {
-              'text-gray-800': !pathname.includes(link.href),
-              'font-semibold text-primary': pathname.includes(link.href),
+              'text-gray-800': !isActive(link.href),
+              'font-semibold text-primary': isActive(link.href),
             })}
           >
             {link.name}

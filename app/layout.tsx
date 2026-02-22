@@ -26,6 +26,7 @@ import Nav from './components/nav';
 import Search from './components/search';
 import Footer from './components/share/footer';
 import { PillsSkeleton } from './components/skeletons';
+import UserLocation from './components/userLocation';
 import './globals.css';
 import { ReduxProvider } from './redux-provider';
 
@@ -70,27 +71,29 @@ export default function RootLayout({
                                 />
                               </Link>
                             </div>
+                            <UserLocation />
                             <AuthActions />
                           </div>
                           {/* Browser */}
-                          <div className="col-span-12 mx-4 md:col-span-6 md:col-start-4 md:mx-0 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+                          <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
                             <div className="inline-flex grid w-full grid-cols-12 items-center justify-between md:mt-6 md:h-fit">
-                              <div className="flex hidden h-full items-center md:col-span-3 md:inline-flex lg:col-span-4 lg:inline-flex">
+                              <div className="flex hidden h-full items-start md:col-span-3 md:inline-flex lg:col-span-4 lg:inline-flex">
                                 <Link
                                   href="/"
-                                  className="hidden h-full items-start md:mr-6 md:flex lg:mr-3 xl:mr-6"
+                                  className="hidden h-full shrink-0 items-start md:mr-6 md:flex lg:mr-3 xl:mr-6"
                                 >
                                   <Image
                                     src="/images/logo.svg"
                                     alt="Tukai logo"
                                     width={100}
                                     height={40}
-                                    className="mt-2 h-10 w-auto"
+                                    className="mt-2 h-10 w-[100px] shrink-0"
                                   />
                                 </Link>
+                                <UserLocation />
                               </div>
                               <div className="col-span-12 md:col-span-6 lg:col-span-4">
-                                <div className="flex flex-col items-center space-y-4">
+                                <div className="flex flex-col items-center space-y-6">
                                   <div className="flex w-full items-center gap-2 md:max-w-sm">
                                     <div className="flex-1">
                                       <Suspense

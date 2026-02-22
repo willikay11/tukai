@@ -6,6 +6,7 @@ import {
   createPlaceReviewComment,
   deletePlaceReview,
   deletePlaceReviewImage,
+  fetchGoogleMapsAutocomplete,
   fetchPlaceCategories,
   fetchPlaceReviewComments,
   fetchPlaceReviews,
@@ -193,5 +194,14 @@ export const useDeletePlaceReviewImage = () => {
     onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({ queryKey: ['placeReviews', variables.placeId] });
     },
+  });
+};
+
+export const useGoogleMapsAutocomplete = (input: string, enabled: boolean = true) => {
+  return useQuery({
+    queryKey: ['googleMapsAutocomplete', input],
+    queryFn: async () => await fetchGoogleMapsAutocomplete(input),
+    enabled: enabled && input.length > 0,
+    staleTime: 60000, // 60 seconds
   });
 };

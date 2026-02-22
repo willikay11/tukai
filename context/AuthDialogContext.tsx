@@ -10,12 +10,14 @@ import { toast } from '@/hooks/use-toast';
 
 type AuthDialogType = {
   setOpenSignIn: (open: boolean) => void;
+  openSignInWithCallback: (onLoginSuccess: () => void) => void;
 };
 
 const AuthDialogContext = createContext<AuthDialogType | undefined>(undefined);
 
 export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
   const [openSignIn, setOpenSignIn] = useState(false);
+  const [onLoginSuccess, setOnLoginSuccess] = useState<(() => void) | null>(null);
   const router = useRouter();
 
   return (
@@ -23,6 +25,11 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
       value={{
         setOpenSignIn: (open: boolean) => {
           setOpenSignIn(open);
+          if (!open) setOnLoginSuccess(null);
+        },
+        openSignInWithCallback: (callback: () => void) => {
+          setOnLoginSuccess(() => callback);
+          setOpenSignIn(true);
         },
       }}
     >
@@ -37,6 +44,8 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
           <SignInForm
             onLogin={() => {
               setOpenSignIn(false);
+              onLoginSuccess?.();
+              setOnLoginSuccess(null);
               toast({
                 description: 'Welcome Back!',
                 variant: 'success',

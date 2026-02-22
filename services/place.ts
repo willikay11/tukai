@@ -380,3 +380,32 @@ export async function deletePlaceReviewImage(
     };
   }
 }
+
+export async function fetchGoogleMapsAutocomplete(input: string): Promise<ApiResponse> {
+  try {
+    const res = await fetch(`/api/places/autocomplete?input=${encodeURIComponent(input)}`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      return {
+        status: res.status,
+        success: false,
+        message: data.message || 'Failed to fetch autocomplete results',
+      };
+    }
+
+    return {
+      status: res.status,
+      success: true,
+      data: data.data,
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.message);
+
+    return {
+      status: 500,
+      success: false,
+      message: 'An unexpected error occurred',
+    };
+  }
+}

@@ -4,8 +4,6 @@ import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { UserAdd01Icon } from '@hugeicons/react-pro';
-
 import IconComponent from '@/app/components/iconComponent';
 import { Button } from '@/components/ui/button';
 import TukaiImage from '@/components/ui/image';
@@ -18,10 +16,12 @@ import {
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
 import { Separator } from '@/components/ui/separator';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 import { useDownloadApp } from '@/context/DownloadAppContext';
 
 export default function AuthActions() {
   const { onOpen } = useDownloadApp();
+  const { openSignInWithCallback } = useAuthDialog();
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -30,12 +30,23 @@ export default function AuthActions() {
     router.push('/');
   };
 
+  const handleCreateExperience = () => {
+    if (session?.user) {
+      router.push('/communities/create');
+      return;
+    }
+
+    openSignInWithCallback(() => {
+      router.push('/communities/create');
+    });
+  };
+
   return (
     <div className="flex items-center">
-      {/* <Link href="">
-        <span className="text-xs text-gray-800">Become A Tour Guide</span>
-      </Link>
-      <div className="mx-2 h-[10px] w-[1px] bg-secondary" /> */}
+      <Button variant="primary-light" className="hidden md:inline-flex rounded-[40px] mr-2" onClick={handleCreateExperience}>
+        <IconComponent iconName="PlusSignCircleIcon" size={15} color="emerald" />
+        Create Experience
+      </Button>
       {session?.user ? (
         <NavigationMenu>
           <NavigationMenuList>

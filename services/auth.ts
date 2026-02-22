@@ -93,3 +93,13 @@ export const refreshToken = async (refreshToken: string) => {
     throw error;
   }
 };
+
+export const getInterestCategories = async (page = 1, pageSize = 10) => {
+  try {
+    const response = await api.get(`/v1/accounts/interests/?page=${page}&page_size=${pageSize}`);
+    return parseSnakeToCamel(response.data?.results);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};

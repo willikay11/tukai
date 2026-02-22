@@ -1,0 +1,37 @@
+'use client';
+
+import React, { useState } from 'react';
+
+import clsx from 'clsx';
+
+import IconComponent from '@/app/components/iconComponent';
+import { Interest } from '@/types/interest';
+
+export default function CategoryPill({
+  category,
+  onClick,
+}: {
+  category: Interest;
+  onClick: (id: string) => void;
+}) {
+  const [active, setActive] = useState(false);
+
+  return (
+    <div
+      key={category.id}
+      onClick={() => {
+        onClick(category.id);
+        setActive((prev) => !prev);
+      }}
+      className={clsx('inline-flex w-fit cursor-pointer items-center rounded-full px-4 py-2', {
+        'bg-primary text-white': active,
+        'bg-gray-100': !active,
+      })}
+    >
+      <div className="mr-2">
+        {category?.icon && <IconComponent iconName={category.icon} size={16} />}
+      </div>
+      <span className="text-xs font-medium">{category.name}</span>
+    </div>
+  );
+}
