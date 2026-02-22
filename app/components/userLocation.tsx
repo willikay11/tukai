@@ -12,6 +12,15 @@ export default function UserLocation() {
   const [address, setAddress] = useState<string>('Embakasi, Nairobi');
   const [isLoadingAddress, setIsLoadingAddress] = useState<boolean>(false);
 
+  const locationText =
+    isLoadingAddress || status === 'loading'
+      ? 'Loading location ...'
+      : status === 'denied'
+        ? 'Location denied'
+        : status === 'unavailable'
+          ? 'Location unavailable'
+          : address;
+
   useEffect(() => {
     if (status === 'granted' && lat && lng) {
       const fetchAddress = async () => {
@@ -65,19 +74,19 @@ export default function UserLocation() {
     <div className="mt-2 flex h-fit items-center gap-1 rounded-[30px] bg-green-200 px-2 py-1 text-green-800 lg:mt-4 lg:px-3">
       <IconComponent iconName="LocationIcon" size={16} />
       <span className="max-w-[60px] truncate whitespace-nowrap p-0 text-xs font-semibold lg:max-w-[100px]">
-        {isLoadingAddress || status === 'idle' ? 'Loading location ...' : address}
+        {locationText}
       </span>
       <div className="mx-1 hidden h-1 w-1 rounded-full bg-green-600 md:block lg:mx-1" />
       <Button
         variant="link"
         className="h-fit p-0 hover:no-underline"
         onClick={requestLocation}
-        disabled={status === 'idle' || isLoadingAddress}
+        disabled={status === 'loading' || isLoadingAddress}
       >
         <IconComponent
           iconName="ReloadIcon"
           size={16}
-          className={isLoadingAddress || status === 'idle' ? 'animate-spin' : ''}
+          className={isLoadingAddress || status === 'loading' ? 'animate-spin' : ''}
         />
         {/* <span className='hidden md:block text-xs'>Update Location</span> */}
       </Button>

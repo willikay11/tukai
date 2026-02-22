@@ -5,7 +5,7 @@ import React, { ReactNode, createContext, useContext, useEffect, useState } from
 type LocationState = {
   lat?: number;
   lng?: number;
-  status: 'idle' | 'granted' | 'denied' | 'unavailable';
+  status: 'idle' | 'loading' | 'granted' | 'denied' | 'unavailable';
 };
 
 type LocationContextType = LocationState & {
@@ -46,7 +46,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    setStatus('idle');
+    setStatus('loading');
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
