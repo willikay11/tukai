@@ -2,11 +2,11 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
@@ -21,6 +21,7 @@ import { useGoogleMapsAutocomplete } from '@/hooks/places';
 import { toast } from '@/hooks/use-toast';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';
+import CommunityCreatedSuccessDialog from '@/components/ui/createSuccessDialog';
 
 import FileUploadField from '../../components/fileUploadField';
 import IconComponent from '../../components/iconComponent';
@@ -37,6 +38,7 @@ type CreateCommunityFormValues = z.infer<typeof createCommunitySchema>;
 
 
 export default function CreateCommunity() {
+  const router = useRouter();
   const uploadId = useId();
   const cityInputRef = useRef<HTMLDivElement>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -46,6 +48,8 @@ export default function CreateCommunity() {
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>([]);
   const [memberSearchResults, setMemberSearchResults] = useState<InvitedMember[]>([]);
   const [invitedCommunities, setInvitedCommunities] = useState<InvitedCommunity[]>([]);
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
+  const [createdCommunityId, setCreatedCommunityId] = useState<string | null>(null);
   const [availableCommunities] = useState<InvitedCommunity[]>([
     { id: 'c1', name: 'Let\'s Drift', image: '/images/seven.jpg', memberCount: 24 },
     { id: 'c2', name: 'The Mara Nomads', image: '/images/eight.jpg', memberCount: 156 },
@@ -118,46 +122,54 @@ export default function CreateCommunity() {
       },
       {
         onSuccess: (response: any) => {
-          const communityId = response?.data?.id;
+          const communityId = response?.data?.id || null;
 
-          if (communityId && uploadedFiles.length > 0) {
-            uploadPhotos(
-              { communityId, photos: uploadedFiles },
-              {
-                onSuccess: () => {
-                  toast({
-                    title: 'Success',
-                    description: 'Community created with photos successfully',
-                    variant: 'success',
-                  });
-                  form.reset();
-                  setSelectedCategories([]);
-                  setUploadedFiles([]);
-                  setCityInput('');
-                  setInvitedMembers([]);
-                  setInvitedCommunities([]);
-                },
-                onError: () => {
-                  toast({
-                    title: 'Warning',
-                    description: 'Community created, but failed to upload photos',
-                    variant: 'default',
-                  });
-                },
-              },
-            );
-          } else {
-            toast({
-              title: 'Success',
-              description: 'Community created successfully',
-              variant: 'success',
-            });
-            form.reset();
-            setSelectedCategories([]);
-            setCityInput('');
-            setInvitedMembers([]);
-            setInvitedCommunities([]);
-          }
+          setCreatedCommunityId(communityId);
+          setIsSuccessDialogOpen(true);
+          form.reset();
+          setSelectedCategories([]);
+          setCityInput('');
+          setUploadedFiles([]);
+          setInvitedMembers([]);
+          setInvitedCommunities([]);
+          // if (communityId && uploadedFiles.length > 0) {
+          //   uploadPhotos(
+          //     { communityId, photos: uploadedFiles },
+          //     {
+          //       onSuccess: () => {
+          //         toast({
+          //           title: 'Success',
+          //           description: 'Community created with photos successfully',
+          //           variant: 'success',
+          //         });
+          //         form.reset();
+          //         setSelectedCategories([]);
+          //         setUploadedFiles([]);
+          //         setCityInput('');
+          //         setInvitedMembers([]);
+          //         setInvitedCommunities([]);
+          //       },
+          //       onError: () => {
+          //         toast({
+          //           title: 'Warning',
+          //           description: 'Community created, but failed to upload photos',
+          //           variant: 'default',
+          //         });
+          //       },
+          //     },
+          //   );
+          // } else {
+          //   toast({
+          //     title: 'Success',
+          //     description: 'Community created successfully',
+          //     variant: 'success',
+          //   });
+          //   form.reset();
+          //   setSelectedCategories([]);
+          //   setCityInput('');
+          //   setInvitedMembers([]);
+          //   setInvitedCommunities([]);
+          // }
         },
         onError: () => {
           toast({
@@ -172,6 +184,23 @@ export default function CreateCommunity() {
 
   return (
     <div className="mx-auto w-full px-4 py-6">
+      <CommunityCreatedSuccessDialog
+        open={isSuccessDialogOpen}
+        onOpenChange={setIsSuccessDialogOpen}
+        onViewCommunity={() => {
+          setIsSuccessDialogOpen(false);
+          if (createdCommunityId) {
+            router.push(`/communities/${createdCommunityId}`);
+            return;
+          }
+          router.push('/communities');
+        }}
+        onCreateExperience={() => {
+          setIsSuccessDialogOpen(false);
+          router.push('/experiences/create');
+        }}
+      />
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-base font-semibold text-gray-900">Create Community</h1>
