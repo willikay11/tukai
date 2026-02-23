@@ -84,7 +84,6 @@ export default function ListExperiences({
   const [experienceList, setExperienceList] = useState<Experience[]>(initialPlaceholders);
   const [endPage, setEndPage] = useState<number | null>(null);
 
-  const prevPageRef = useRef(page);
   const hasAddedPlaceholdersRef = useRef<Set<number>>(new Set());
   const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -101,7 +100,6 @@ export default function ListExperiences({
     setExperienceList(initialPlaceholders);
     setEndPage(null);
     hasAddedPlaceholdersRef.current.clear();
-    prevPageRef.current = 1;
   }, [selectedCategoryId, setPage, initialPlaceholders]);
 
   // Handle experience updates
@@ -112,7 +110,7 @@ export default function ListExperiences({
 
     if (isLoading) {
       // Only add placeholders for subsequent pages if not already added
-      if (page > 1 && prevPageRef.current !== page && !hasAddedPlaceholdersRef.current.has(page)) {
+      if (page > 1 && !hasAddedPlaceholdersRef.current.has(page)) {
         hasAddedPlaceholdersRef.current.add(page);
         setExperienceList((prev) => [
           ...prev.filter((exp) => !exp.id.startsWith('placeholder-')),
@@ -124,20 +122,19 @@ export default function ListExperiences({
         if (isFirstPage) {
           setExperienceList(experiences);
           hasAddedPlaceholdersRef.current.clear();
-        } else if (prevPageRef.current !== page) {
-          // Only append if this is a new page
+        } else if (hasAddedPlaceholdersRef.current.has(page)) {
+          // Replace pending placeholders for this page with fetched data
           setExperienceList((prev) => [
             ...prev.filter((exp) => !exp.id.startsWith('placeholder-')),
             ...experiences,
           ]);
+          hasAddedPlaceholdersRef.current.delete(page);
         }
       } else if (isEmpty && isFirstPage) {
         setExperienceList([]);
         hasAddedPlaceholdersRef.current.clear();
       }
     }
-
-    prevPageRef.current = page;
   }, [experiences, isLoading, page, skeletonCount]);
 
   // Intersection observer for infinite scroll
