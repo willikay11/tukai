@@ -25,6 +25,7 @@ import CommunityCreatedSuccessDialog from '@/components/ui/createSuccessDialog';
 
 import FileUploadField from '../../components/fileUploadField';
 import IconComponent from '../../components/iconComponent';
+import LocationAutocompleteField from '../../components/locationAutocompleteField';
 
 const createCommunitySchema = z.object({
   communityName: z.string().min(2, { message: 'Community name is required.' }),
@@ -63,7 +64,10 @@ export default function CreateCommunity() {
   ]);
 
   const { data: categories } = useGetInterestCategories();
-  const { data: googlePlaces } = useGoogleMapsAutocomplete(cityInput, cityInput.length > 2);
+  const { data: googlePlaces, isFetching: isFetchingGooglePlaces } = useGoogleMapsAutocomplete(
+    cityInput,
+    cityInput.length > 2,
+  );
 
   const { mutate: createCommunity, isPending: isCreatingCommunity } = useCreateCommunity();
 
@@ -273,46 +277,23 @@ export default function CreateCommunity() {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <div ref={cityInputRef} className="relative">
-                      <Input
-                        placeholder="City e.g. Nairobi, Watamu..."
-                        className="h-[55px]"
-                        value={cityInput}
-                        onChange={(e) => {
-                          setCityInput(e.target.value);
-                          setShowCitySuggestions(true);
-                        }}
-                        onFocus={() => setShowCitySuggestions(true)}
-                      />
-                      {showCitySuggestions &&
-                        cityInput.length > 2 &&
-                        googlePlaces?.data &&
-                        googlePlaces.data.length > 0 && (
-                          <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
-                            {googlePlaces.data.map((place: GoogleMapsAutocompletePrediction) => (
-                              <button
-                                key={place.place_id}
-                                type="button"
-                                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-gray-50"
-                                onClick={() => {
-                                  field.onChange(place.place_id);
-                                  setCityInput(place.description);
-                                  setShowCitySuggestions(false);
-                                }}
-                              >
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
-                                  <IconComponent
-                                    iconName="Location01Icon"
-                                    color="#10B981"
-                                    size={20}
-                                  />
-                                </div>
-                                <span className="text-gray-700">{place.description}</span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                    </div>
+                    <LocationAutocompleteField
+                      containerRef={cityInputRef}
+                      value={cityInput}
+                      showSuggestions={showCitySuggestions}
+                      isLoading={isFetchingGooglePlaces}
+                      suggestions={googlePlaces?.data || []}
+                      onValueChange={(value) => {
+                        setCityInput(value);
+                        setShowCitySuggestions(true);
+                      }}
+                      onFocus={() => setShowCitySuggestions(true)}
+                      onSelectSuggestion={(place: GoogleMapsAutocompletePrediction) => {
+                        field.onChange(place.place_id);
+                        setCityInput(place.description);
+                        setShowCitySuggestions(false);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
