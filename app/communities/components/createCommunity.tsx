@@ -32,6 +32,9 @@ const createCommunitySchema = z.object({
   description: z.string().min(10, { message: 'Description must be at least 10 characters.' }),
   selectedCategories: z.array(z.string()).min(1, { message: 'Select at least one category.' }),
   visibility: z.enum(['public', 'private']),
+  uploadedFiles: z.array(z.instanceof(File)).min(1, {
+    message: 'Please upload at least one community poster.',
+  }),
 });
 
 type CreateCommunityFormValues = z.infer<typeof createCommunitySchema>;
@@ -63,7 +66,6 @@ export default function CreateCommunity() {
   const { data: googlePlaces } = useGoogleMapsAutocomplete(cityInput, cityInput.length > 2);
 
   const { mutate: createCommunity, isPending: isCreatingCommunity } = useCreateCommunity();
-  const { mutate: uploadPhotos, isPending: isUploadingPhotos } = useCreateCommunityPhotos();
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -85,6 +87,7 @@ export default function CreateCommunity() {
       description: '',
       selectedCategories: [],
       visibility: 'public',
+      uploadedFiles: [],
     },
   });
 
@@ -115,7 +118,7 @@ export default function CreateCommunity() {
         categoriesIds: values.selectedCategories,
         isPublic: values.visibility === 'public',
         googleMapPlaceId: values.city,
-        newPhotos: uploadedFiles,
+        newPhotos: values.uploadedFiles,
         invitedMemberIds: memberIds,
         invitedCommunityIds: invitedCommunities.map((c) => c.id),
         invitedEmails: emails,
@@ -123,7 +126,6 @@ export default function CreateCommunity() {
       {
         onSuccess: (response: any) => {
           const communityId = response?.data?.id || null;
-
           setCreatedCommunityId(communityId);
           setIsSuccessDialogOpen(true);
           form.reset();
@@ -132,44 +134,6 @@ export default function CreateCommunity() {
           setUploadedFiles([]);
           setInvitedMembers([]);
           setInvitedCommunities([]);
-          // if (communityId && uploadedFiles.length > 0) {
-          //   uploadPhotos(
-          //     { communityId, photos: uploadedFiles },
-          //     {
-          //       onSuccess: () => {
-          //         toast({
-          //           title: 'Success',
-          //           description: 'Community created with photos successfully',
-          //           variant: 'success',
-          //         });
-          //         form.reset();
-          //         setSelectedCategories([]);
-          //         setUploadedFiles([]);
-          //         setCityInput('');
-          //         setInvitedMembers([]);
-          //         setInvitedCommunities([]);
-          //       },
-          //       onError: () => {
-          //         toast({
-          //           title: 'Warning',
-          //           description: 'Community created, but failed to upload photos',
-          //           variant: 'default',
-          //         });
-          //       },
-          //     },
-          //   );
-          // } else {
-          //   toast({
-          //     title: 'Success',
-          //     description: 'Community created successfully',
-          //     variant: 'success',
-          //   });
-          //   form.reset();
-          //   setSelectedCategories([]);
-          //   setCityInput('');
-          //   setInvitedMembers([]);
-          //   setInvitedCommunities([]);
-          // }
         },
         onError: () => {
           toast({
@@ -221,17 +185,51 @@ export default function CreateCommunity() {
         </span>
       </div>
 
-      <div className="mt-5">
-        <FileUploadField
-          id={uploadId}
-          label="Upload a community poster (Dimensions: 540*540, Max 15 Mbs)"
-          multiple
-          onFilesChange={setUploadedFiles}
-        />
-      </div>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="mt-5">
+            <FormField
+              control={form.control}
+              name="uploadedFiles"
+              render={() => (
+                <FormItem>
+                  <FormControl>
+                    <FileUploadField
+                      id={uploadId}
+                      label="Upload a community poster (Dimensions: 540*540, Max 15 Mbs)"
+                      accept="image/*"
+                      excludedMimeTypes={['image/svg+xml']}
+                      multiple
+                      minImageWidth={540}
+                      minImageHeight={540}
+                      maxImageWidth={540}
+                      maxImageHeight={540}
+                      maxFileSizeMb={15}
+                      onValidationError={(errors) => {
+                        const message = errors[0] || 'Please upload a valid image file.';
+                        form.setError('uploadedFiles', {
+                          type: 'manual',
+                          message,
+                        });
+                        toast({
+                          title: 'Invalid image upload',
+                          description: message,
+                          variant: 'destructive',
+                        });
+                      }}
+                      onFilesChange={(files) => {
+                        setUploadedFiles(files);
+                        form.clearErrors('uploadedFiles');
+                        form.setValue('uploadedFiles', files, { shouldValidate: true });
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <div className="mt-4 space-y-3">
             <FormField
               control={form.control}
@@ -409,10 +407,10 @@ export default function CreateCommunity() {
               <Button
                 type="submit"
                 variant="gradient"
-                disabled={isCreatingCommunity || isUploadingPhotos}
+                disabled={isCreatingCommunity}
                 className="h-9 rounded-full px-4 text-xs text-white hover:bg-emerald-800 disabled:opacity-50"
               >
-                {isCreatingCommunity || isUploadingPhotos
+                {isCreatingCommunity
                   ? 'Creating Community...'
                   : 'Create Community'}
               </Button>
