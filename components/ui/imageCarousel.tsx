@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 
 import {
+  CarouselApi,
   Carousel,
   CarouselContent,
   CarouselItem,
@@ -24,6 +25,8 @@ const ImageCarousel = ({
 }) => {
   const [isScrolling, setIsScrolling] = useState(false);
   const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,9 +59,28 @@ const ImageCarousel = ({
     e.nativeEvent.stopImmediatePropagation();
   };
 
+  useEffect(() => {
+    if (!carouselApi) {
+      return;
+    }
+
+    const onSelect = () => {
+      setSelectedIndex(carouselApi.selectedScrollSnap());
+    };
+
+    onSelect();
+    carouselApi.on('select', onSelect);
+    carouselApi.on('reInit', onSelect);
+
+    return () => {
+      carouselApi.off('select', onSelect);
+      carouselApi.off('reInit', onSelect);
+    };
+  }, [carouselApi]);
+
   return (
     <div className={cn('group relative', width, className)}>
-      <Carousel className={cn(width)}>
+      <Carousel className={cn(width)} setApi={setCarouselApi}>
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index}>
@@ -94,6 +116,28 @@ const ImageCarousel = ({
             >
               <CarouselNext className={cn('right-0')} />
             </button>
+            <div className="pointer-events-auto absolute bottom-3 left-1/2 z-40 flex -translate-x-1/2 items-center gap-1.5">
+              {images.map((_, index) => {
+                const isActive = index === selectedIndex;
+
+                return (
+                  <button
+                    key={`dot-${index}`}
+                    type="button"
+                    className={cn(
+                      'h-1.5 w-1.5 rounded-full transition-all duration-200',
+                      isActive ? 'bg-white opacity-100' : 'bg-white/60 opacity-90 hover:opacity-100',
+                    )}
+                    onClick={(e) => {
+                      handleButtonClick(e);
+                      carouselApi?.scrollTo(index);
+                    }}
+                    aria-label={`Go to image ${index + 1}`}
+                    aria-current={isActive ? 'true' : undefined}
+                  />
+                );
+              })}
+            </div>
           </>
         )}
       </Carousel>
