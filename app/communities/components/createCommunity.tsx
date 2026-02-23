@@ -1,27 +1,32 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { InviteCommunities } from '@/components/ui/invite-communities';
+import { InviteMembers, InvitedMember } from '@/components/ui/invite-members';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { Textarea } from '@/components/ui/textarea';
-import { useGetInterestCategories } from '@/hooks/auth';
-import { useCreateCommunity, useCreateCommunityPhotos } from '@/hooks/communities';
+import { useGetInterestCategories, useGetUsers } from '@/hooks/auth';
+import { useCreateCommunity, useGetCommunities } from '@/hooks/communities';
 import { useGoogleMapsAutocomplete } from '@/hooks/places';
 import { toast } from '@/hooks/use-toast';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';
+import CommunityCreatedSuccessDialog from '@/components/ui/createSuccessDialog';
 
 import FileUploadField from '../../components/fileUploadField';
 import IconComponent from '../../components/iconComponent';
+import LocationAutocompleteField from '../../components/locationAutocompleteField';
+import { Community } from '@/types/community';
 
 const createCommunitySchema = z.object({
   communityName: z.string().min(2, { message: 'Community name is required.' }),
@@ -29,40 +34,83 @@ const createCommunitySchema = z.object({
   description: z.string().min(10, { message: 'Description must be at least 10 characters.' }),
   selectedCategories: z.array(z.string()).min(1, { message: 'Select at least one category.' }),
   visibility: z.enum(['public', 'private']),
+  uploadedFiles: z.array(z.instanceof(File)).min(1, {
+    message: 'Please upload at least one community poster.',
+  }),
 });
 
 type CreateCommunityFormValues = z.infer<typeof createCommunitySchema>;
 
-const invitedMembers = [
-  { id: 'm1', name: 'Brooklyn...', image: '/images/one.jpg' },
-  { id: 'm2', name: 'Kimberly...', image: '/images/two.jpg' },
-  { id: 'm3', name: 'Marvin...', image: '/images/three.jpg' },
-  { id: 'm4', name: 'gralak@gmail...', image: '' },
-  { id: 'm5', name: 'Marvin...', image: '/images/four.jpg' },
-  { id: 'm6', name: 'Eleanor...', image: '/images/five.jpg' },
-];
-
-const invitedCommunities = [
-  { id: 'c1', name: 'Let’s Drift', image: '/images/seven.jpg' },
-  { id: 'c2', name: 'The Mara Nomads', image: '/images/eight.jpg' },
-  { id: 'c3', name: 'A Longer Communities Name', image: '/images/santorini.webp' },
-  { id: 'c4', name: 'Let’s Drift', image: '/images/seven.jpg' },
-  { id: 'c5', name: 'The Mara Nomads', image: '/images/eight.jpg' },
-];
 
 export default function CreateCommunity() {
+  const router = useRouter();
   const uploadId = useId();
   const cityInputRef = useRef<HTMLDivElement>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [cityInput, setCityInput] = useState('');
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+  const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>([]);
+  const [memberSearchQuery, setMemberSearchQuery] = useState('');
+  const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
+  const [createdCommunityId, setCreatedCommunityId] = useState<string | null>(null);
 
   const { data: categories } = useGetInterestCategories();
-  const { data: googlePlaces } = useGoogleMapsAutocomplete(cityInput, cityInput.length > 2);
+  
+  const { data: userCommunities, isFetching: isFetchingCommunities } = useGetCommunities({
+    page: 1,
+    enabled: true,
+    following: true,
+  });
+
+  const availableCommunities = useMemo<Community[]>(() => {
+    if (!userCommunities?.data) {
+      return [];
+    }
+
+    return userCommunities?.data?.results?.map((community: any) => ({
+      id: community.id,
+      title: community.title,
+      photos: community.photos,
+      members: community.members,
+    }));
+  }, [userCommunities]);
+
+  const normalizedMemberQuery = memberSearchQuery.trim();
+  const { data: users = [], isFetching: isSearchingUsers } = useGetUsers(
+    1,
+    10,
+    normalizedMemberQuery.length > 0 ? normalizedMemberQuery : undefined,
+  );
+
+  const memberSearchResults = useMemo<InvitedMember[]>(() => {
+    if (!normalizedMemberQuery) {
+      return [];
+    }
+
+    return users
+      .map((user: any) => {
+        const firstName = user.firstName || '';
+        const lastName = user.lastName || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+
+        return {
+          id: user.id,
+          name: user.displayName || fullName || user.email || 'User',
+          email: user.email,
+          image: user.picture,
+        } as InvitedMember;
+      })
+      .filter((user: InvitedMember) => !invitedMembers.some((member) => member.id === user.id));
+  }, [users, invitedMembers, normalizedMemberQuery]);
+
+  const { data: googlePlaces, isFetching: isFetchingGooglePlaces } = useGoogleMapsAutocomplete(
+    cityInput,
+    cityInput.length > 2,
+  );
 
   const { mutate: createCommunity, isPending: isCreatingCommunity } = useCreateCommunity();
-  const { mutate: uploadPhotos, isPending: isUploadingPhotos } = useCreateCommunityPhotos();
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -84,6 +132,7 @@ export default function CreateCommunity() {
       description: '',
       selectedCategories: [],
       visibility: 'public',
+      uploadedFiles: [],
     },
   });
 
@@ -99,6 +148,14 @@ export default function CreateCommunity() {
   };
 
   const onSubmit = (values: CreateCommunityFormValues) => {
+    const memberIds = invitedMembers
+      .filter((member) => !member.email?.includes('@') || member.id.startsWith('user-'))
+      .map((member) => member.id);
+    
+    const emails = invitedMembers
+      .filter((member) => member.email && member.id.startsWith('email-'))
+      .map((member) => member.email!);
+
     createCommunity(
       {
         title: values.communityName,
@@ -106,49 +163,22 @@ export default function CreateCommunity() {
         categoriesIds: values.selectedCategories,
         isPublic: values.visibility === 'public',
         googleMapPlaceId: values.city,
-        newPhotos: uploadedFiles,
-        invitedMemberIds: [],
-        invitedCommunityIds: [],
-        invitedEmails: [],
+        newPhotos: values.uploadedFiles,
+        invitedMemberIds: memberIds,
+        invitedCommunityIds: invitedCommunities.map((c) => c.id),
+        invitedEmails: emails,
       },
       {
         onSuccess: (response: any) => {
-          const communityId = response?.data?.id;
-
-          if (communityId && uploadedFiles.length > 0) {
-            uploadPhotos(
-              { communityId, photos: uploadedFiles },
-              {
-                onSuccess: () => {
-                  toast({
-                    title: 'Success',
-                    description: 'Community created with photos successfully',
-                    variant: 'success',
-                  });
-                  form.reset();
-                  setSelectedCategories([]);
-                  setUploadedFiles([]);
-                  setCityInput('');
-                },
-                onError: () => {
-                  toast({
-                    title: 'Warning',
-                    description: 'Community created, but failed to upload photos',
-                    variant: 'default',
-                  });
-                },
-              },
-            );
-          } else {
-            toast({
-              title: 'Success',
-              description: 'Community created successfully',
-              variant: 'success',
-            });
-            form.reset();
-            setSelectedCategories([]);
-            setCityInput('');
-          }
+          const communityId = response?.data?.id || null;
+          setCreatedCommunityId(communityId);
+          setIsSuccessDialogOpen(true);
+          form.reset();
+          setSelectedCategories([]);
+          setCityInput('');
+          setUploadedFiles([]);
+          setInvitedMembers([]);
+          setInvitedCommunities([]);
         },
         onError: () => {
           toast({
@@ -163,6 +193,23 @@ export default function CreateCommunity() {
 
   return (
     <div className="mx-auto w-full px-4 py-6">
+      <CommunityCreatedSuccessDialog
+        open={isSuccessDialogOpen}
+        onOpenChange={setIsSuccessDialogOpen}
+        onViewCommunity={() => {
+          setIsSuccessDialogOpen(false);
+          if (createdCommunityId) {
+            router.push(`/communities/${createdCommunityId}`);
+            return;
+          }
+          router.push('/communities');
+        }}
+        onCreateExperience={() => {
+          setIsSuccessDialogOpen(false);
+          router.push('/experiences/create');
+        }}
+      />
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-base font-semibold text-gray-900">Create Community</h1>
@@ -183,17 +230,51 @@ export default function CreateCommunity() {
         </span>
       </div>
 
-      <div className="mt-5">
-        <FileUploadField
-          id={uploadId}
-          label="Upload a community poster (Dimensions: 540*540, Max 15 Mbs)"
-          multiple
-          onFilesChange={setUploadedFiles}
-        />
-      </div>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="mt-5">
+            <FormField
+              control={form.control}
+              name="uploadedFiles"
+              render={() => (
+                <FormItem>
+                  <FormControl>
+                    <FileUploadField
+                      id={uploadId}
+                      label="Upload a community poster (Dimensions: 1024*1024, Max 15 Mbs)"
+                      accept="image/*"
+                      excludedMimeTypes={['image/svg+xml']}
+                      multiple
+                      minImageWidth={1024}
+                      minImageHeight={1024}
+                      maxImageWidth={4096}
+                      maxImageHeight={4096}
+                      maxFileSizeMb={15}
+                      onValidationError={(errors) => {
+                        const message = errors[0] || 'Please upload a valid image file.';
+                        form.setError('uploadedFiles', {
+                          type: 'manual',
+                          message,
+                        });
+                        toast({
+                          title: 'Invalid image upload',
+                          description: message,
+                          variant: 'destructive',
+                        });
+                      }}
+                      onFilesChange={(files) => {
+                        setUploadedFiles(files);
+                        form.clearErrors('uploadedFiles');
+                        form.setValue('uploadedFiles', files, { shouldValidate: true });
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <div className="mt-4 space-y-3">
             <FormField
               control={form.control}
@@ -213,7 +294,9 @@ export default function CreateCommunity() {
               name="visibility"
               render={({ field }) => (
                 <FormItem className="mt-4">
-                  <p className="text-xs font-medium text-gray-600">Community type (who can see or join the community)</p>
+                  <p className="text-xs font-medium text-gray-600">
+                    Community type (who can see or join the community)
+                  </p>
                   <FormControl>
                     <PillRadioGroup
                       options={[
@@ -228,53 +311,30 @@ export default function CreateCommunity() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="city"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <div ref={cityInputRef} className="relative">
-                      <Input
-                        placeholder="City e.g. Nairobi, Watamu..."
-                        className="h-[55px]"
-                        value={cityInput}
-                        onChange={(e) => {
-                          setCityInput(e.target.value);
-                          setShowCitySuggestions(true);
-                        }}
-                        onFocus={() => setShowCitySuggestions(true)}
-                      />
-                      {showCitySuggestions &&
-                        cityInput.length > 2 &&
-                        googlePlaces?.data &&
-                        googlePlaces.data.length > 0 && (
-                          <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
-                            {googlePlaces.data.map((place: GoogleMapsAutocompletePrediction) => (
-                              <button
-                                key={place.place_id}
-                                type="button"
-                                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-gray-50"
-                                onClick={() => {
-                                  field.onChange(place.place_id);
-                                  setCityInput(place.description);
-                                  setShowCitySuggestions(false);
-                                }}
-                              >
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
-                                  <IconComponent
-                                    iconName="Location01Icon"
-                                    color="#10B981"
-                                    size={20}
-                                  />
-                                </div>
-                                <span className="text-gray-700">{place.description}</span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                    </div>
+                    <LocationAutocompleteField
+                      containerRef={cityInputRef}
+                      value={cityInput}
+                      showSuggestions={showCitySuggestions}
+                      isLoading={isFetchingGooglePlaces}
+                      suggestions={googlePlaces?.data || []}
+                      onValueChange={(value) => {
+                        setCityInput(value);
+                        setShowCitySuggestions(true);
+                      }}
+                      onFocus={() => setShowCitySuggestions(true)}
+                      onSelectSuggestion={(place: GoogleMapsAutocompletePrediction) => {
+                        field.onChange(place.place_id);
+                        setCityInput(place.description);
+                        setShowCitySuggestions(false);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -330,65 +390,30 @@ export default function CreateCommunity() {
               own or are a member of.
             </p>
 
-            <div className="relative mt-3">
-              <Input
-                placeholder="Search by user name or add their email"
-                className="h-[56px] rounded-2xl border-gray-300 pr-12 placeholder:text-gray-500"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2">
-                <IconComponent iconName="Search01Icon" size={22} color="gray" />
-              </span>
-            </div>
-
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              {invitedMembers.map((member) => (
-                <div
-                  key={member.id}
-                  className="inline-flex items-center gap-2 rounded-full bg-gray-100 py-1.5 pl-1.5 pr-2"
-                >
-                  <Avatar className="h-6 w-6">
-                    {member.image ? <AvatarImage src={member.image} alt={member.name} /> : null}
-                    <AvatarFallback className="bg-gray-200 text-gray-500">
-                      <IconComponent iconName="UserIcon" size={14} color="gray" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="max-w-[112px] truncate text-xs text-gray-700">{member.name}</span>
-                  <button
-                    type="button"
-                    className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-400"
-                  >
-                    <IconComponent iconName="Cancel01Icon" size={12} color="white" />
-                  </button>
-                </div>
-              ))}
-              <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-full bg-emerald-100 px-2 text-xs font-semibold text-emerald-700">
-                +34
-              </span>
-            </div>
+            <InviteMembers
+              invitedMembers={invitedMembers}
+              onMembersChange={setInvitedMembers}
+              searchResults={memberSearchResults}
+              isSearching={isSearchingUsers}
+              onSearch={(query) => {
+                setMemberSearchQuery(query);
+              }}
+              debounceMs={500}
+              className="mt-3"
+            />
 
             <p className="mt-6 text-xs font-semibold text-gray-800">Your communities</p>
-            <p className="mt-2 text-xs text-gray-700">Select your communities you would like to invite:</p>
+            <p className="mt-2 text-xs text-gray-700">
+              Select your communities you would like to invite:
+            </p>
 
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              {invitedCommunities.map((community) => (
-                <div
-                  key={community.id}
-                  className="inline-flex items-center gap-2 rounded-full bg-gray-100 py-1.5 pl-1.5 pr-3"
-                >
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src={community.image} alt={community.name} />
-                    <AvatarFallback />
-                  </Avatar>
-                  <span className="max-w-[180px] truncate text-xs text-gray-700">{community.name}</span>
-                </div>
-              ))}
-              <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-full bg-emerald-100 px-2 text-xs font-semibold text-emerald-700">
-                +12
-              </span>
-            </div>
+            <InviteCommunities
+              invitedCommunities={invitedCommunities}
+              onCommunitiesChange={setInvitedCommunities}
+              availableCommunities={availableCommunities}
+              isLoading={isFetchingCommunities}
+            />
           </div>
-
-          
 
           <div className="mt-6 flex items-center justify-between">
             <Button type="button" variant="text" className="text-xs text-red-500">
@@ -405,10 +430,12 @@ export default function CreateCommunity() {
               <Button
                 type="submit"
                 variant="gradient"
-                disabled={isCreatingCommunity || isUploadingPhotos}
+                disabled={isCreatingCommunity}
                 className="h-9 rounded-full px-4 text-xs text-white hover:bg-emerald-800 disabled:opacity-50"
               >
-                {isCreatingCommunity || isUploadingPhotos ? 'Creating Community...' : 'Create Community'}
+                {isCreatingCommunity
+                  ? 'Creating Community...'
+                  : 'Create Community'}
               </Button>
             </div>
           </div>

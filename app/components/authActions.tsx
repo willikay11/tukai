@@ -1,11 +1,15 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import IconComponent from '@/app/components/iconComponent';
+import JoinTukaiPremium from '@/app/components/joinTukaiPremium';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import TukaiImage from '@/components/ui/image';
 import {
   NavigationMenu,
@@ -17,13 +21,15 @@ import {
 } from '@/components/ui/navigation-menu';
 import { Separator } from '@/components/ui/separator';
 import { useAuthDialog } from '@/context/AuthDialogContext';
-import { useDownloadApp } from '@/context/DownloadAppContext';
 
 export default function AuthActions() {
-  const { onOpen } = useDownloadApp();
   const { openSignInWithCallback } = useAuthDialog();
   const router = useRouter();
   const { data: session } = useSession();
+  const [showJoinPremium, setShowJoinPremium] = useState(false);
+  const [pendingCreateAfterLogin, setPendingCreateAfterLogin] = useState(false);
+
+  const hasSubscribed = Boolean(session?.user?.hasSubscribed);
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
@@ -32,18 +38,39 @@ export default function AuthActions() {
 
   const handleCreateExperience = () => {
     if (session?.user) {
+      if (!hasSubscribed) {
+        setShowJoinPremium(true);
+        return;
+      }
+
       router.push('/communities/create');
       return;
     }
 
     openSignInWithCallback(() => {
-      router.push('/communities/create');
+      setPendingCreateAfterLogin(true);
     });
   };
 
+  useEffect(() => {
+    if (!pendingCreateAfterLogin || !session?.user) return;
+
+    if (hasSubscribed) {
+      router.push('/communities/create');
+    } else {
+      setShowJoinPremium(true);
+    }
+
+    setPendingCreateAfterLogin(false);
+  }, [pendingCreateAfterLogin, session?.user, hasSubscribed, router]);
+
   return (
     <div className="flex items-center">
-      <Button variant="primary-light" className="hidden md:inline-flex rounded-[40px] mr-2" onClick={handleCreateExperience}>
+      <Button
+        variant="primary-light"
+        className="mr-2 hidden rounded-[40px] md:inline-flex"
+        onClick={handleCreateExperience}
+      >
         <IconComponent iconName="PlusSignCircleIcon" size={15} color="emerald" />
         Create Experience
       </Button>
@@ -118,6 +145,17 @@ export default function AuthActions() {
           <Button className="h-[38px] rounded-[68px]">Sign In/Sign Up</Button>
         </Link>
       )}
+
+      <Dialog open={showJoinPremium} onOpenChange={setShowJoinPremium}>
+        <DialogContent className="w-[calc(100%-35px)] max-w-[620px] border-0 bg-transparent p-0 shadow-none">
+          <JoinTukaiPremium
+            onUpgrade={() => {
+              setShowJoinPremium(false);
+              router.push('/auth/subscribe');
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

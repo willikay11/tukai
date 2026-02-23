@@ -7,10 +7,17 @@ type FileUploadFieldProps = {
   label: string;
   buttonText?: string;
   accept?: string;
+  excludedMimeTypes?: string[];
   multiple?: boolean;
   maxFiles?: number;
+  maxFileSizeMb?: number;
+  minImageWidth?: number;
+  minImageHeight?: number;
+  maxImageWidth?: number;
+  maxImageHeight?: number;
   onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   onFilesChange?: (files: File[]) => void;
+  onValidationError?: (errors: string[]) => void;
 };
 
 export default function FileUploadField({
@@ -18,15 +25,122 @@ export default function FileUploadField({
   label,
   buttonText = 'Add Photo(s)',
   accept = 'image/*',
+  excludedMimeTypes = [],
   multiple = false,
   maxFiles,
+  maxFileSizeMb = 15,
+  minImageWidth,
+  minImageHeight,
+  maxImageWidth,
+  maxImageHeight,
   onChange,
   onFilesChange,
+  onValidationError,
 }: FileUploadFieldProps) {
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const latestPreviewUrlsRef = useRef<string[]>([]);
+
+  const isAcceptedFileType = (file: File) => {
+    if (!accept || accept === '*/*') {
+      return true;
+    }
+
+    const acceptedTypes = accept
+      .split(',')
+      .map((type) => type.trim().toLowerCase())
+      .filter(Boolean);
+
+    if (acceptedTypes.length === 0) {
+      return true;
+    }
+
+    const mimeType = file.type.toLowerCase();
+    const fileName = file.name.toLowerCase();
+
+    return acceptedTypes.some((type) => {
+      if (type.startsWith('.')) {
+        return fileName.endsWith(type);
+      }
+
+      if (type.endsWith('/*')) {
+        return mimeType.startsWith(type.replace('/*', '/'));
+      }
+
+      return mimeType === type;
+    });
+  };
+
+  const isExcludedFileType = (file: File) => {
+    if (!file.type) {
+      return false;
+    }
+
+    const mimeType = file.type.toLowerCase();
+    return excludedMimeTypes.map((type) => type.toLowerCase()).includes(mimeType);
+  };
+
+  const getImageDimensions = (file: File) =>
+    new Promise<{ width: number; height: number }>((resolve, reject) => {
+      const tempUrl = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const dimensions = { width: img.naturalWidth, height: img.naturalHeight };
+        URL.revokeObjectURL(tempUrl);
+        resolve(dimensions);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(tempUrl);
+        reject(new Error('Failed to decode image'));
+      };
+      img.src = tempUrl;
+    });
+
+  const validateFile = async (file: File) => {
+    if (isExcludedFileType(file)) {
+      return `${file.name}: this image type is not allowed.`;
+    }
+
+    if (!isAcceptedFileType(file)) {
+      return `${file.name}: unsupported file type.`;
+    }
+
+    if (file.size <= 0) {
+      return `${file.name}: empty file is not allowed.`;
+    }
+
+    if (maxFileSizeMb && file.size > maxFileSizeMb * 1024 * 1024) {
+      return `${file.name}: exceeds ${maxFileSizeMb}MB size limit.`;
+    }
+
+    if (file.type.startsWith('image/')) {
+      try {
+        const { width, height } = await getImageDimensions(file);
+
+        if (minImageWidth && width < minImageWidth) {
+          return `${file.name}: image width must be at least ${minImageWidth}px.`;
+        }
+
+        if (minImageHeight && height < minImageHeight) {
+          return `${file.name}: image height must be at least ${minImageHeight}px.`;
+        }
+
+        if (maxImageWidth && width > maxImageWidth) {
+          return `${file.name}: image width must be at most ${maxImageWidth}px.`;
+        }
+
+        if (maxImageHeight && height > maxImageHeight) {
+          return `${file.name}: image height must be at most ${maxImageHeight}px.`;
+        }
+      } catch {
+        return `${file.name}: invalid or corrupted image.`;
+      }
+    }
+
+    return null;
+  };
 
   useEffect(() => {
     latestPreviewUrlsRef.current = previewUrls;
@@ -38,33 +152,47 @@ export default function FileUploadField({
     };
   }, []);
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const fileList = event.target.files ? Array.from(event.target.files) : [];
 
     if (fileList.length > 0) {
-      const newUrls = fileList.map((file) => URL.createObjectURL(file));
+      const validationResults = await Promise.all(fileList.map((file) => validateFile(file)));
+      const currentErrors = validationResults.filter((result): result is string => Boolean(result));
+      const validFiles = fileList.filter((_, index) => !validationResults[index]);
 
-      setPreviewUrls((previous) => {
-        const combined = [...previous, ...newUrls];
-
-        if (maxFiles && combined.length > maxFiles) {
-          combined.slice(maxFiles).forEach((url) => URL.revokeObjectURL(url));
-          return combined.slice(0, maxFiles);
-        }
-
-        return combined;
-      });
+      const nextErrors = [...currentErrors];
 
       setFiles((previous) => {
-        const combined = [...previous, ...fileList];
+        const combinedFiles = [...previous, ...validFiles];
+        const cappedFiles = maxFiles ? combinedFiles.slice(0, maxFiles) : combinedFiles;
 
-        if (maxFiles && combined.length > maxFiles) {
-          return combined.slice(0, maxFiles);
+        if (maxFiles && combinedFiles.length > maxFiles) {
+          nextErrors.push(`You can only upload up to ${maxFiles} file${maxFiles > 1 ? 's' : ''}.`);
         }
 
-        onFilesChange?.(combined);
-        return combined;
+        setPreviewUrls((previousUrls) => {
+          const currentFileCount = previous.length;
+          const acceptedNewCount = Math.max(cappedFiles.length - currentFileCount, 0);
+          const acceptedNewFiles = validFiles.slice(0, acceptedNewCount);
+          const droppedNewFiles = validFiles.slice(acceptedNewCount);
+
+          const acceptedNewUrls = acceptedNewFiles.map((file) => URL.createObjectURL(file));
+          droppedNewFiles.forEach((file) => {
+            nextErrors.push(`${file.name}: skipped because max files limit is reached.`);
+          });
+
+          return [...previousUrls, ...acceptedNewUrls];
+        });
+
+        onFilesChange?.(cappedFiles);
+        return cappedFiles;
       });
+
+      setValidationErrors(nextErrors);
+
+      if (nextErrors.length > 0) {
+        onValidationError?.(nextErrors);
+      }
     }
 
     onChange?.(event);
@@ -177,6 +305,15 @@ export default function FileUploadField({
         multiple={multiple}
         onChange={handleFileChange}
       />
+      {validationErrors.length > 0 && (
+        <div className="mt-2 space-y-1">
+          {validationErrors.map((error) => (
+            <p key={error} className="text-xs text-red-500">
+              {error}
+            </p>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
