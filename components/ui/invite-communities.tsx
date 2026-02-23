@@ -1,18 +1,12 @@
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
-export interface InvitedCommunity {
-  id: string;
-  name: string;
-  image?: string;
-  memberCount?: number;
-}
+import { Community } from '@/types/community';
 
 interface InviteCommunitiesProps {
-  invitedCommunities: InvitedCommunity[];
-  onCommunitiesChange: (communities: InvitedCommunity[]) => void;
-  availableCommunities: InvitedCommunity[];
+  invitedCommunities: Community[];
+  onCommunitiesChange: (communities: Community[]) => void;
+  availableCommunities: Community[];
   isLoading?: boolean;
   className?: string;
 }
@@ -24,7 +18,7 @@ export function InviteCommunities({
   isLoading = false,
   className = '',
 }: InviteCommunitiesProps) {
-  const handleToggleCommunity = (community: InvitedCommunity) => {
+  const handleToggleCommunity = (community: Community) => {
     const isSelected = invitedCommunities.some((c) => c.id === community.id);
 
     if (isSelected) {
@@ -68,12 +62,12 @@ export function InviteCommunities({
               }`}
             >
               <Avatar className="h-6 w-6 shrink-0">
-                <AvatarImage src={community.image} alt={community.name} />
+                <AvatarImage src={community.photos?.find(photo => photo.isCover)?.photo} alt={community.title} />
                 <AvatarFallback className="bg-emerald-100 text-xs font-semibold text-emerald-700">
-                  {community.name.charAt(0).toUpperCase()}
+                  {community.title.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <span className="max-w-[180px] truncate">{community.name}</span>
+              <span className="max-w-[180px] truncate">{community.title}</span>
             </button>
           );
         })}

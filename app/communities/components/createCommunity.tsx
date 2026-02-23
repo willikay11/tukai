@@ -11,12 +11,12 @@ import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { InviteCommunities, InvitedCommunity } from '@/components/ui/invite-communities';
+import { InviteCommunities } from '@/components/ui/invite-communities';
 import { InviteMembers, InvitedMember } from '@/components/ui/invite-members';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { Textarea } from '@/components/ui/textarea';
 import { useGetInterestCategories, useGetUsers } from '@/hooks/auth';
-import { useCreateCommunity } from '@/hooks/communities';
+import { useCreateCommunity, useGetCommunities } from '@/hooks/communities';
 import { useGoogleMapsAutocomplete } from '@/hooks/places';
 import { toast } from '@/hooks/use-toast';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
@@ -26,6 +26,7 @@ import CommunityCreatedSuccessDialog from '@/components/ui/createSuccessDialog';
 import FileUploadField from '../../components/fileUploadField';
 import IconComponent from '../../components/iconComponent';
 import LocationAutocompleteField from '../../components/locationAutocompleteField';
+import { Community } from '@/types/community';
 
 const createCommunitySchema = z.object({
   communityName: z.string().min(2, { message: 'Community name is required.' }),
@@ -51,19 +52,31 @@ export default function CreateCommunity() {
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>([]);
   const [memberSearchQuery, setMemberSearchQuery] = useState('');
-  const [invitedCommunities, setInvitedCommunities] = useState<InvitedCommunity[]>([]);
+  const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   const [createdCommunityId, setCreatedCommunityId] = useState<string | null>(null);
-  const [availableCommunities] = useState<InvitedCommunity[]>([
-    { id: 'c1', name: 'Let\'s Drift', image: '/images/seven.jpg', memberCount: 24 },
-    { id: 'c2', name: 'The Mara Nomads', image: '/images/eight.jpg', memberCount: 156 },
-    { id: 'c3', name: 'Safari Explorers', image: '/images/santorini.webp', memberCount: 89 },
-    { id: 'c4', name: 'Beach Lovers', image: '/images/seven.jpg', memberCount: 42 },
-    { id: 'c5', name: 'Mountain Hikers', image: '/images/eight.jpg', memberCount: 67 },
-    { id: 'c6', name: 'City Wanderers', image: '/images/santorini.webp', memberCount: 103 },
-  ]);
 
   const { data: categories } = useGetInterestCategories();
+  
+  const { data: userCommunities, isFetching: isFetchingCommunities } = useGetCommunities({
+    page: 1,
+    enabled: true,
+    following: true,
+  });
+
+  const availableCommunities = useMemo<Community[]>(() => {
+    if (!userCommunities?.data) {
+      return [];
+    }
+
+    return userCommunities?.data?.results?.map((community: any) => ({
+      id: community.id,
+      title: community.title,
+      photos: community.photos,
+      members: community.members,
+    }));
+  }, [userCommunities]);
+
   const normalizedMemberQuery = memberSearchQuery.trim();
   const { data: users = [], isFetching: isSearchingUsers } = useGetUsers(
     1,
@@ -398,6 +411,7 @@ export default function CreateCommunity() {
               invitedCommunities={invitedCommunities}
               onCommunitiesChange={setInvitedCommunities}
               availableCommunities={availableCommunities}
+              isLoading={isFetchingCommunities}
             />
           </div>
 
