@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 
@@ -15,8 +15,8 @@ import { InviteCommunities, InvitedCommunity } from '@/components/ui/invite-comm
 import { InviteMembers, InvitedMember } from '@/components/ui/invite-members';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { Textarea } from '@/components/ui/textarea';
-import { useGetInterestCategories } from '@/hooks/auth';
-import { useCreateCommunity, useCreateCommunityPhotos } from '@/hooks/communities';
+import { useGetInterestCategories, useGetUsers } from '@/hooks/auth';
+import { useCreateCommunity } from '@/hooks/communities';
 import { useGoogleMapsAutocomplete } from '@/hooks/places';
 import { toast } from '@/hooks/use-toast';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
@@ -50,7 +50,7 @@ export default function CreateCommunity() {
   const [cityInput, setCityInput] = useState('');
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>([]);
-  const [memberSearchResults, setMemberSearchResults] = useState<InvitedMember[]>([]);
+  const [memberSearchQuery, setMemberSearchQuery] = useState('');
   const [invitedCommunities, setInvitedCommunities] = useState<InvitedCommunity[]>([]);
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   const [createdCommunityId, setCreatedCommunityId] = useState<string | null>(null);
@@ -64,6 +64,34 @@ export default function CreateCommunity() {
   ]);
 
   const { data: categories } = useGetInterestCategories();
+  const normalizedMemberQuery = memberSearchQuery.trim();
+  const { data: users = [], isFetching: isSearchingUsers } = useGetUsers(
+    1,
+    10,
+    normalizedMemberQuery.length > 0 ? normalizedMemberQuery : undefined,
+  );
+
+  const memberSearchResults = useMemo<InvitedMember[]>(() => {
+    if (!normalizedMemberQuery) {
+      return [];
+    }
+
+    return users
+      .map((user: any) => {
+        const firstName = user.firstName || '';
+        const lastName = user.lastName || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+
+        return {
+          id: user.id,
+          name: user.displayName || fullName || user.email || 'User',
+          email: user.email,
+          image: user.picture,
+        } as InvitedMember;
+      })
+      .filter((user: InvitedMember) => !invitedMembers.some((member) => member.id === user.id));
+  }, [users, invitedMembers, normalizedMemberQuery]);
+
   const { data: googlePlaces, isFetching: isFetchingGooglePlaces } = useGoogleMapsAutocomplete(
     cityInput,
     cityInput.length > 2,
@@ -353,11 +381,11 @@ export default function CreateCommunity() {
               invitedMembers={invitedMembers}
               onMembersChange={setInvitedMembers}
               searchResults={memberSearchResults}
+              isSearching={isSearchingUsers}
               onSearch={(query) => {
-                // TODO: Implement user search API call
-                // For now, you can add mock search results
-                setMemberSearchResults([]);
+                setMemberSearchQuery(query);
               }}
+              debounceMs={500}
               className="mt-3"
             />
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import IconComponent from '@/app/components/iconComponent';
@@ -19,6 +19,7 @@ interface InviteMembersProps {
   searchResults?: InvitedMember[];
   onSearch?: (query: string) => void;
   isSearching?: boolean;
+  debounceMs?: number;
   className?: string;
 }
 
@@ -29,10 +30,25 @@ export function InviteMembers({
   searchResults = [],
   onSearch,
   isSearching = false,
+  debounceMs = 300,
   className = '',
 }: InviteMembersProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
+
+  useEffect(() => {
+    if (!onSearch) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      onSearch(searchQuery.trim());
+    }, debounceMs);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [searchQuery, onSearch, debounceMs]);
 
   const isValidEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -41,9 +57,6 @@ export function InviteMembers({
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     setShowResults(value.length > 0);
-    if (onSearch) {
-      onSearch(value);
-    }
   };
 
   const handleAddEmail = (email: string) => {
