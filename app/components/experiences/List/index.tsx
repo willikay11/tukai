@@ -14,8 +14,8 @@ import { Experience } from '@/types/experience';
 type ListExperiencesProps = {
   className: string;
   isLoading: boolean;
-  count: number;
-  experiences: Experience[];
+  count?: number;
+  experiences?: Experience[];
   invitedExperiences?: Experience[];
   page: number;
   setPage: (page: number) => void;
@@ -79,6 +79,7 @@ export default function ListExperiences({
   noDataMessage,
 }: ListExperiencesProps) {
   const { selectedCategoryId } = useSelectedCategory();
+  const experienceResults = experiences ?? [];
 
   const initialPlaceholders = useMemo(() => createPlaceholders(skeletonCount), [skeletonCount]);
   const [experienceList, setExperienceList] = useState<Experience[]>(initialPlaceholders);
@@ -90,7 +91,7 @@ export default function ListExperiences({
 
   // Calculate end page when count changes
   useEffect(() => {
-    if (count > 0) {
+    if (typeof count === 'number' && count > 0) {
       setEndPage(Math.ceil(count / skeletonCount));
     }
   }, [count, skeletonCount]);
@@ -107,8 +108,7 @@ export default function ListExperiences({
   // Handle experience updates
   useEffect(() => {
     const isFirstPage = page === 1;
-    const hasExperiences = experiences && experiences.length > 0;
-    const isEmpty = experiences && experiences.length === 0;
+    const hasExperiences = experienceResults.length > 0;
 
     if (isLoading) {
       // Only add placeholders for subsequent pages if not already added
@@ -122,7 +122,7 @@ export default function ListExperiences({
     } else {
       if (hasExperiences) {
         if (isFirstPage) {
-          setExperienceList(experiences);
+          setExperienceList(experienceResults);
           hasAddedPlaceholdersRef.current.clear();
           appendedPagesRef.current.clear();
           appendedPagesRef.current.add(1);
@@ -130,23 +130,23 @@ export default function ListExperiences({
           // Replace pending placeholders and append fetched page data once
           setExperienceList((prev) => [
             ...prev.filter((exp) => !exp.id.startsWith('placeholder-')),
-            ...experiences,
+            ...experienceResults,
           ]);
           hasAddedPlaceholdersRef.current.delete(page);
           appendedPagesRef.current.add(page);
         }
-      } else if (isEmpty && isFirstPage) {
+      } else if (isFirstPage) {
         setExperienceList([]);
         hasAddedPlaceholdersRef.current.clear();
         appendedPagesRef.current.clear();
-      } else if (isEmpty && hasAddedPlaceholdersRef.current.has(page)) {
+      } else if (hasAddedPlaceholdersRef.current.has(page)) {
         // If a paginated page returns no results, remove pending placeholders
         setExperienceList((prev) => prev.filter((exp) => !exp.id.startsWith('placeholder-')));
         hasAddedPlaceholdersRef.current.delete(page);
         appendedPagesRef.current.add(page);
       }
     }
-  }, [experiences, isLoading, page, skeletonCount]);
+  }, [experienceResults, isLoading, page, skeletonCount]);
 
   // Intersection observer for infinite scroll
   const lastExperienceElementRef = useCallback(

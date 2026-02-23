@@ -37,7 +37,7 @@ export default function Experiences({
   const { data: session } = useSession();
   const [page, setPage] = useState(1);
   const [hasExperiences, setHasExperiences] = useState<boolean | null>(null);
-  const { data: experiences, isLoading } = useExperiences(
+  const { data: experiences, isLoading, isFetching } = useExperiences(
     {
       page,
       date,
@@ -88,7 +88,7 @@ export default function Experiences({
       <ListExperiences
         key={selectedCategoryId}
         experiences={experiences?.data?.results}
-        isLoading={isLoading}
+        isLoading={isLoading || isFetching}
         count={experiences?.data?.count}
         className={clsx(
           'grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-4 lg:grid-cols-4 2xl:grid-cols-6 3xl:grid-cols-6 4xl:grid-cols-6',
