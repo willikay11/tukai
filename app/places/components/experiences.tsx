@@ -10,7 +10,7 @@ type ListExperiencesProps = {
 
 export default function TabExperiences({ categories }: ListExperiencesProps) {
   const [page, setPage] = useState(1);
-  const { data: experiences, isLoading } = useExperiences(
+  const { data: experiences, isLoading, isFetching } = useExperiences(
     {
       page,
       category: categories.map((category) => `category=${category}`).join(','),
@@ -21,7 +21,7 @@ export default function TabExperiences({ categories }: ListExperiencesProps) {
   return (
     <ListExperiences
       experiences={experiences?.data?.results}
-      isLoading={isLoading}
+      isLoading={isLoading || isFetching}
       count={experiences?.data?.count}
       className="grid grid-cols-1 gap-x-4 gap-y-8 px-4"
       page={page}
