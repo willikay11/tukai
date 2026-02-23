@@ -30,7 +30,7 @@ export default function CommunityTabs({ communityId }: communityTabsProps) {
   );
 
   return (
-    <Tabs defaultValue="posts" className="w-full md:w-[75%]">
+    <Tabs defaultValue="posts" className="w-full md:w-[75%] lg:w-full">
       <TabsList className="sticky top-0 w-full justify-start rounded-none bg-white">
         <TabsTrigger value="posts">Posts</TabsTrigger>
         <TabsTrigger value="photos">Photos</TabsTrigger>
