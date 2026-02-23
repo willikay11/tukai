@@ -241,14 +241,14 @@ export default function CreateCommunity() {
                   <FormControl>
                     <FileUploadField
                       id={uploadId}
-                      label="Upload a community poster (Dimensions: 540*540, Max 15 Mbs)"
+                      label="Upload a community poster (Dimensions: 1024*1024, Max 15 Mbs)"
                       accept="image/*"
                       excludedMimeTypes={['image/svg+xml']}
                       multiple
-                      minImageWidth={540}
-                      minImageHeight={540}
-                      maxImageWidth={540}
-                      maxImageHeight={540}
+                      minImageWidth={1024}
+                      minImageHeight={1024}
+                      maxImageWidth={4096}
+                      maxImageHeight={4096}
                       maxFileSizeMb={15}
                       onValidationError={(errors) => {
                         const message = errors[0] || 'Please upload a valid image file.';
