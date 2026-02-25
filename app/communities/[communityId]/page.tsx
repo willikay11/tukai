@@ -85,15 +85,15 @@ export default async function ViewCommunityPage({
                 }
               />
             </div>
-            <div className="mb-3.5 inline-flex gap-2">
+            <div className="mb-3.5 flex w-full flex-wrap gap-2">
               {community.categories.map((category) => (
                 <div
-                  className="inline-flex w-fit flex-shrink-0 rounded-full bg-gray-100 px-4 py-2"
+                  className="inline-flex max-w-full rounded-full bg-gray-100 px-4 py-2"
                   key={category.id}
                 >
                   <div className="inline-flex items-center">
                     <IconComponent iconName={category.icon} size={18} />
-                    <p className="ml-2 whitespace-nowrap text-sm text-gray-700">{category.name}</p>
+                    <p className="ml-2 break-words text-sm text-gray-700">{category.name}</p>
                   </div>
                 </div>
               ))}
