@@ -44,6 +44,7 @@ export default function LocationAutocompleteField({
         value={value}
         onChange={(event) => onValueChange(event.target.value)}
         onFocus={onFocus}
+        suffixIcon={<IconComponent iconName="MapPinpoint01Icon" size={20} />}
       />
 
       {canShowDropdown && (

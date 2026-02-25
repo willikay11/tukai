@@ -18,6 +18,7 @@ export function InviteCommunities({
   isLoading = false,
   className = '',
 }: InviteCommunitiesProps) {
+  console.log('Available Communities:', availableCommunities);
   const handleToggleCommunity = (community: Community) => {
     const isSelected = invitedCommunities.some((c) => c.id === community.id);
 
@@ -62,7 +63,7 @@ export function InviteCommunities({
               }`}
             >
               <Avatar className="h-6 w-6 shrink-0">
-                <AvatarImage src={community.photos?.find(photo => photo.isCover)?.photo} alt={community.title} />
+                <AvatarImage src={community.photos?.find(photo => photo.isCover)?.photo || community?.photos?.[0]?.photo} alt={community.title} />
                 <AvatarFallback className="bg-emerald-100 text-xs font-semibold text-emerald-700">
                   {community.title.charAt(0).toUpperCase()}
                 </AvatarFallback>

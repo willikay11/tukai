@@ -353,7 +353,7 @@ export default function CreateCommunity() {
                     <Textarea
                       rows={5}
                       placeholder="Grab people's attention with a detailed description about the community..."
-                      className="rounded-[10px] text-sm placeholder:text-gray-400"
+                      className="rounded-[10px]"
                       {...field}
                     />
                   </FormControl>
