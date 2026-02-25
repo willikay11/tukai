@@ -77,15 +77,15 @@ export default async function ViewExperiencePage({ params }: { params: { experie
             </div>
           </div>
           <div className="flex flex-col">
-            <div className="mt-2.5 inline-flex flex-wrap gap-2">
+            <div className="mt-2.5 flex w-full flex-wrap gap-2">
               {experience.categories.map((category) => (
                 <div
-                  className="inline-flex w-fit rounded-full bg-gray-100 px-4 py-2"
+                  className="inline-flex max-w-full rounded-full bg-gray-100 px-4 py-2"
                   key={category.id}
                 >
                   <div className="inline-flex items-center gap-2">
                     <IconComponent iconName={category.icon as string} size={16} color="gray-700" />
-                    <p className="text-sm text-gray-700">{category.name}</p>
+                    <p className="break-words text-sm text-gray-700">{category.name}</p>
                   </div>
                 </div>
               ))}
