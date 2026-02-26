@@ -245,6 +245,25 @@ export default function FileUploadField({
     setDraggedIndex(null);
   };
 
+  const handleRemoveImage = (index: number) => {
+    setPreviewUrls((previous) => {
+      const updated = [...previous];
+      const urlToRevoke = updated[index];
+      if (urlToRevoke) {
+        URL.revokeObjectURL(urlToRevoke);
+      }
+      updated.splice(index, 1);
+      return updated;
+    });
+
+    setFiles((previous) => {
+      const updated = [...previous];
+      updated.splice(index, 1);
+      onFilesChange?.(updated);
+      return updated;
+    });
+  };
+
   return (
     <div>
       <p className="text-xs font-medium text-gray-800">{label}</p>
@@ -273,6 +292,15 @@ export default function FileUploadField({
                 alt={`Selected photo ${index + 1}`}
                 className={`h-full w-full rounded-xl object-cover ${isDragging ? 'opacity-0' : ''}`}
               />
+
+              <button
+                type="button"
+                onClick={() => handleRemoveImage(index)}
+                className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-700/70 text-white transition-colors hover:bg-gray-800/80"
+                aria-label="Remove image"
+              >
+                <IconComponent iconName="Cancel01Icon" color="#FFFFFF" size={18} />
+              </button>
 
               <span className="absolute bottom-2 left-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-700/70 text-base font-medium text-white">
                 {index + 1}

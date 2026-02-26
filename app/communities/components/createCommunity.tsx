@@ -2,7 +2,6 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -43,7 +42,6 @@ type CreateCommunityFormValues = z.infer<typeof createCommunitySchema>;
 
 
 export default function CreateCommunity() {
-  const router = useRouter();
   const uploadId = useId();
   const cityInputRef = useRef<HTMLDivElement>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -196,18 +194,8 @@ export default function CreateCommunity() {
       <CommunityCreatedSuccessDialog
         open={isSuccessDialogOpen}
         onOpenChange={setIsSuccessDialogOpen}
-        onViewCommunity={() => {
-          setIsSuccessDialogOpen(false);
-          if (createdCommunityId) {
-            router.push(`/communities/${createdCommunityId}`);
-            return;
-          }
-          router.push('/communities');
-        }}
-        onCreateExperience={() => {
-          setIsSuccessDialogOpen(false);
-          router.push('/experiences/create');
-        }}
+        viewCommunityHref={createdCommunityId ? `/communities/${createdCommunityId}` : '/communities'}
+        createExperienceHref="/experiences/create"
       />
 
       <div className="flex items-center justify-between">

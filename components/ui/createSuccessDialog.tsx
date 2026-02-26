@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
@@ -8,8 +9,8 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 type CreateSuccessDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onViewCommunity?: () => void;
-  onCreateExperience?: () => void;
+  viewCommunityHref?: string;
+  createExperienceHref?: string;
   title?: string;
   description?: string;
   viewCommunityLabel?: string;
@@ -20,8 +21,8 @@ type CreateSuccessDialogProps = {
 export default function CreateSuccessDialog({
   open,
   onOpenChange,
-  onViewCommunity,
-  onCreateExperience,
+  viewCommunityHref,
+  createExperienceHref,
   title = 'Community Created Successfully',
   description =
     'Your community was created successfully. You can now proceed to create your experience or view the community',
@@ -51,22 +52,30 @@ export default function CreateSuccessDialog({
           </DialogDescription>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Button
-              type="button"
-              variant="outline"
-              className="h-12 rounded-full border-primary px-6 text-primary"
-              onClick={onViewCommunity}
-            >
-              {viewCommunityLabel}
-            </Button>
-            <Button
-              type="button"
-              variant="gradient"
-              className="h-12 rounded-full px-6 text-white"
-              onClick={onCreateExperience}
-            >
-              {createExperienceLabel}
-            </Button>
+            {viewCommunityHref && (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 rounded-full border-primary px-6 text-primary"
+                asChild
+              >
+                <Link href={viewCommunityHref} onClick={() => onOpenChange(false)}>
+                  {viewCommunityLabel}
+                </Link>
+              </Button>
+            )}
+            {createExperienceHref && (
+              <Button
+                type="button"
+                variant="gradient"
+                className="h-12 rounded-full px-6 text-white"
+                asChild
+              >
+                <Link href={createExperienceHref} onClick={() => onOpenChange(false)}>
+                  {createExperienceLabel}
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>
