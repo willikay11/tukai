@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import moment from 'moment';
+import { RRule } from 'rrule';
 import * as z from 'zod';
 
 import IconComponent from '@/app/components/iconComponent';
@@ -84,15 +86,26 @@ export default function CreateExperienceAbout() {
   };
 
   const onSubmit = (values: z.infer<typeof experienceSchema>) => {
-    const today = new Date().toISOString();
+    const now = moment();
+    const today = now.toISOString();
+    const endOfDay = now.add(1, 'day').clone().endOf('day').toDate();
+
+    const rule = new RRule({
+      freq: RRule.WEEKLY,
+      interval: 5,
+      byweekday: [RRule.MO, RRule.FR],
+      dtstart: now.toDate(),
+      until: endOfDay,
+    });
+
     createExperience(
       {
         title: values.title,
         description: values.description,
         googleMapPlaceId: values.location,
         startDate: today,
-        endDate: today,
-        recurrence_rule: 'none',
+        endDate: '2026-02-27T18:39:20.886Z',
+        recurrence_rule: rule.toString(),
         categoriesIds: values.selectedCategories,
         isPublic: values.visibility === 'public',
         newPhotos: values.uploadedFiles,
@@ -203,8 +216,8 @@ export default function CreateExperienceAbout() {
                   <FormControl>
                     <PillRadioGroup
                       options={[
-                        { value: 'public', label: 'Public experience' },
-                        { value: 'private', label: 'Private experience' },
+                        { value: 'public', label: 'Public (Everyone)' },
+                        { value: 'private', label: 'Private (Only invited people)' },
                       ]}
                       value={field.value}
                       onChange={field.onChange}

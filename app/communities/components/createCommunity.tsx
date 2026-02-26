@@ -190,7 +190,7 @@ export default function CreateCommunity() {
   };
 
   return (
-    <div className="mx-auto w-full px-4 py-6">
+    <div className="mx-auto w-full py-6">
       <CommunityCreatedSuccessDialog
         open={isSuccessDialogOpen}
         onOpenChange={setIsSuccessDialogOpen}
@@ -288,8 +288,8 @@ export default function CreateCommunity() {
                   <FormControl>
                     <PillRadioGroup
                       options={[
-                        { value: 'public', label: 'Public experience' },
-                        { value: 'private', label: 'Private experience' },
+                        { value: 'public', label: 'Public (Everyone)' },
+                        { value: 'private', label: 'Private (Only invited people)' },
                       ]}
                       value={field.value}
                       onChange={field.onChange}
