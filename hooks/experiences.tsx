@@ -3,11 +3,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ExperiencesQueryParams,
   bookmarkExperience,
+  createExperience,
   fetchExperience,
   fetchExperiences,
   purchaseExperienceTicket,
 } from '@/services/experience';
 import { PurchaserDetails } from '@/types/purchaser';
+import { CreateExperience } from '@/types/experience';
 
 export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean) => {
   return useQuery({
@@ -52,5 +54,12 @@ export const useBookmarkExperience = () => {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['experience'] });
     },
+  });
+};
+
+export const useCreateExperience = () => {
+  return useMutation({
+    mutationKey: ['createExperience'],
+    mutationFn: async (data: CreateExperience) => await createExperience(data),
   });
 };

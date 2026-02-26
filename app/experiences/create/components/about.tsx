@@ -1,10 +1,9 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-
-import { useRouter } from 'next/navigation';
 
 import IconComponent from '@/app/components/iconComponent';
 import FileUploadField from '@/app/components/fileUploadField';
@@ -14,8 +13,13 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { TimePicker } from '@/components/ui/time-picker';
 import { useGetInterestCategories } from '@/hooks/auth';
+import { useCreateExperience } from '@/hooks/experiences';
+import { useGoogleMapsAutocomplete } from '@/hooks/places';
+import { toast } from '@/hooks/use-toast';
+import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';
 import { Input } from '@/components/ui/input';
+import LocationAutocompleteField from '@/app/components/locationAutocompleteField';
 
 const experienceSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
@@ -27,11 +31,33 @@ const experienceSchema = z.object({
   meetingTime: z.string().optional().default(''),
   visibility: z.enum(['public', 'private']),
   selectedCategories: z.array(z.string()).min(1, 'Select at least one category'),
+  uploadedFiles: z.array(z.instanceof(File)).min(1, {
+    message: 'Please upload at least one experience poster.',
+  }),
 });
 
 export default function CreateExperienceAbout() {
-  const router = useRouter();
   const { data: categories } = useGetInterestCategories();
+  const { mutate: createExperience, isPending: isCreatingExperience } = useCreateExperience();
+  const locationInputRef = useRef<HTMLDivElement>(null);
+  const [locationInput, setLocationInput] = useState('');
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+
+  const { data: googlePlaces, isFetching: isFetchingGooglePlaces } = useGoogleMapsAutocomplete(
+    locationInput,
+    locationInput.length > 2,
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (locationInputRef.current && !locationInputRef.current.contains(event.target as Node)) {
+        setShowLocationSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const form = useForm<z.infer<typeof experienceSchema>>({
     resolver: zodResolver(experienceSchema),
@@ -45,6 +71,7 @@ export default function CreateExperienceAbout() {
       meetingTime: '',
       visibility: 'public',
       selectedCategories: [],
+      uploadedFiles: [],
     },
   });
 
@@ -57,8 +84,37 @@ export default function CreateExperienceAbout() {
   };
 
   const onSubmit = (values: z.infer<typeof experienceSchema>) => {
-    console.log('Form submitted:', values);
-    // Handle form submission here
+    const today = new Date().toISOString();
+    createExperience(
+      {
+        title: values.title,
+        description: values.description,
+        googleMapPlaceId: values.location,
+        startDate: today,
+        endDate: today,
+        recurrence_rule: 'none',
+        categoriesIds: values.selectedCategories,
+        isPublic: values.visibility === 'public',
+        newPhotos: values.uploadedFiles,
+        invitedCommunityIds: [],
+        invitedGuestsEmails: [],
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: 'Success',
+            description: 'Experience created successfully.',
+          });
+        },
+        onError: (error: any) => {
+          toast({
+            title: 'Error',
+            description: error?.message || 'Failed to create experience.',
+            variant: 'destructive',
+          });
+        },
+      },
+    );
   };
 
   return (
@@ -74,13 +130,42 @@ export default function CreateExperienceAbout() {
             {/* Upload Photo */}
             <div>
               <p className="mb-2 text-sm font-semibold text-gray-800">Add details about the experience</p>
-              <FileUploadField
-                id="experience-poster"
-                label=" Upload a experience poster (Dimensions: 540*540, Max 15 Mbs)"
-                buttonText="Add Photo(s)"
-                accept="image/*"
-                maxFiles={1}
-                onFilesChange={() => {}}
+              <FormField
+                control={form.control}
+                name="uploadedFiles"
+                render={() => (
+                  <FormItem>
+                    <FormControl>
+                      <FileUploadField
+                        id="experience-poster"
+                        label=" Upload a experience poster (Dimensions: 540*540, Max 15 Mbs)"
+                        buttonText="Add Photo(s)"
+                        accept="image/*"
+                        excludedMimeTypes={['image/svg+xml']}
+                        maxFiles={1}
+                        minImageWidth={540}
+                        minImageHeight={540}
+                        onValidationError={(errors) => {
+                          const message = errors[0] || 'Please upload a valid image file.';
+                          form.setError('uploadedFiles', {
+                            type: 'manual',
+                            message,
+                          });
+                          toast({
+                            title: 'Invalid image upload',
+                            description: message,
+                            variant: 'destructive',
+                          });
+                        }}
+                        onFilesChange={(files) => {
+                          form.clearErrors('uploadedFiles');
+                          form.setValue('uploadedFiles', files, { shouldValidate: true });
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
 
@@ -209,20 +294,24 @@ export default function CreateExperienceAbout() {
                     Where will the experience take place?
                   </label>
                   <FormControl>
-                    <div className="relative">
-                      <Input
-                        id="location"
-                        type="text"
-                        placeholder="Add location/name of the place..."
-                        {...field}
-                      />
-                      <IconComponent
-                        iconName="LocationIcon"
-                        size={18}
-                        color="currentColor"
-                        className="absolute right-3 top-2.5 text-gray-400"
-                      />
-                    </div>
+                    <LocationAutocompleteField
+                      containerRef={locationInputRef}
+                      value={locationInput}
+                      placeholder="Add location/name of the place..."
+                      showSuggestions={showLocationSuggestions}
+                      isLoading={isFetchingGooglePlaces}
+                      suggestions={googlePlaces?.data || []}
+                      onValueChange={(value) => {
+                        setLocationInput(value);
+                        setShowLocationSuggestions(true);
+                      }}
+                      onFocus={() => setShowLocationSuggestions(true)}
+                      onSelectSuggestion={(place: GoogleMapsAutocompletePrediction) => {
+                        field.onChange(place.place_id);
+                        setLocationInput(place.description);
+                        setShowLocationSuggestions(false);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -311,8 +400,13 @@ export default function CreateExperienceAbout() {
                 <Button type="button" variant="outline" className="rounded-full text-xs font-semibold">
                   Save & Exit
                 </Button>
-                <Button type="submit" variant="gradient" className="rounded-full px-6 text-xs font-semibold text-white">
-                  Continue
+                <Button
+                  type="submit"
+                  variant="gradient"
+                  className="rounded-full px-6 text-xs font-semibold text-white"
+                  disabled={isCreatingExperience}
+                >
+                  {isCreatingExperience ? 'Creating...' : 'Continue'}
                 </Button>
               </div>
             </div>

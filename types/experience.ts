@@ -32,6 +32,20 @@ export type Experience = {
   dateCreated: string;
 };
 
+export type CreateExperience = {
+  title: string;
+  description: string;
+  googleMapPlaceId: string;
+  startDate: string;
+  endDate: string;
+  recurrence_rule: string;
+  categoriesIds: string[];
+  isPublic?: boolean;
+  newPhotos?: File[];
+  invitedCommunityIds: string[];
+  invitedGuestsEmails: string[];
+};
+
 export function isExperience(item: any): item is Experience {
   return 'ticketsAvailable' in item && 'isSoldOut' in item;
 }
