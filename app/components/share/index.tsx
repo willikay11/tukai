@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import TukaiImage from '@/components/ui/image';
+import { toast } from '@/hooks/use-toast';
 
 const shareOptions = [
   {
@@ -57,6 +58,11 @@ export default function Share({
   const handleShare = (option: string) => {
     if (option === 'Copy Link') {
       navigator.clipboard.writeText(link);
+      toast({
+        title: 'Link copied',
+        description: 'The share link has been copied.',
+        variant: 'success',
+      });
     }
 
     if (option === 'Email') {
