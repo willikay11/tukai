@@ -65,7 +65,7 @@ export function InviteCommunities({
               <Avatar className="h-6 w-6 shrink-0">
                 <AvatarImage src={community.photos?.find(photo => photo.isCover)?.photo || community?.photos?.[0]?.photo} alt={community.title} />
                 <AvatarFallback className="bg-emerald-100 text-xs font-semibold text-emerald-700">
-                  {community.title.charAt(0).toUpperCase()}
+                  {community.title?.charAt(0)?.toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <span className="max-w-[180px] truncate">{community.title}</span>

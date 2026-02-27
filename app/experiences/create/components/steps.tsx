@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import IconComponent from '@/app/components/iconComponent';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import CreateExperienceAbout from './about';
@@ -20,8 +22,15 @@ export default function CreateExperienceSteps({
   currentStep?: string;
   onStepChange?: (step: string) => void;
 }) {
+  const [activeStep, setActiveStep] = useState(currentStep);
+
+  const handleStepChange = (step: string) => {
+    setActiveStep(step);
+    onStepChange?.(step);
+  };
+
   return (
-    <Tabs defaultValue={currentStep} onValueChange={onStepChange} className="w-full">
+    <Tabs value={activeStep} onValueChange={handleStepChange} className="w-full">
       <TabsList className="flex w-full gap-2 bg-transparent h-auto p-0">
         {STEPS.map((step) => (
           <TabsTrigger
@@ -40,7 +49,7 @@ export default function CreateExperienceSteps({
 
       {/* Tab Content */}
       <TabsContent value="about" className="mt-6">
-        <CreateExperienceAbout />
+        <CreateExperienceAbout onSuccess={() => handleStepChange('dates-tickets')} />
       </TabsContent>
 
       <TabsContent value="dates-tickets" className="mt-6">

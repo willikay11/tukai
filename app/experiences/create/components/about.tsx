@@ -38,7 +38,11 @@ const experienceSchema = z.object({
   }),
 });
 
-export default function CreateExperienceAbout() {
+export default function CreateExperienceAbout({
+  onSuccess,
+}: {
+  onSuccess?: () => void;
+}) {
   const { data: categories } = useGetInterestCategories();
   const { mutate: createExperience, isPending: isCreatingExperience } = useCreateExperience();
   const locationInputRef = useRef<HTMLDivElement>(null);
@@ -118,6 +122,7 @@ export default function CreateExperienceAbout() {
             title: 'Success',
             description: 'Experience created successfully.',
           });
+          onSuccess?.();
         },
         onError: (error: any) => {
           toast({

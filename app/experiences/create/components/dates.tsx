@@ -100,7 +100,7 @@ export default function ExperienceDates() {
                           className="h-4 w-4 border-gray-300 accent-primary focus:ring-primary"
                         />
                         <span className="text-sm text-gray-900">
-                          Multi-Day Experience/Itinerary (e.g., 2 days straight)
+                          Multi-Day Experience (e.g., 2 days straight)
                         </span>
                       </label>
 
