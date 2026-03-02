@@ -334,13 +334,18 @@ export default function CreateTickets({ experienceId }: { experienceId?: string 
               return (
                 <div
                   key={field.id}
-                  className="rounded-[12px] border border-dashed border-primary bg-emerald-50 p-2"
+                  className="relative rounded-[12px] border border-dashed border-primary bg-emerald-50 p-2"
                 >
+                  {/* Top notch */}
+                  <div className="absolute -top-[1px] left-[102px] h-1.5 w-3 -translate-x-1/2 rounded-b-full border border-t-0 border-dashed border-primary bg-white" />
+                  {/* Bottom notch */}
+                  <div className="absolute -bottom-[1px] left-[102px] h-1.5 w-3 -translate-x-1/2 rounded-t-full border border-b-0 border-dashed border-primary bg-white" />
+
                   <div className="flex items-center gap-3">
                     <img
                       src="/images/lake.jpeg"
                       alt={savedTicket.name}
-                      className="h-20 w-20 rounded-2xl object-cover"
+                      className="h-20 w-20 flex-shrink-0 rounded-[12px] object-cover"
                     />
 
                     <div className="h-16 border-l border-dashed border-primary" />
