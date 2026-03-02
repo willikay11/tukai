@@ -104,7 +104,14 @@ export const getInterestCategories = async (page = 1, pageSize = 10) => {
   }
 };
 
-export const getUsers = async (page = 1, pageSize = 10, email?: string, followers?: string, following?: string, blocked?: string) => {
+export const getUsers = async (
+  page = 1,
+  pageSize = 10,
+  email?: string,
+  followers?: string,
+  following?: string,
+  blocked?: string,
+) => {
   try {
     let query = `/v1/accounts/users/?page=${page}&page_size=${pageSize}`;
     if (email) query += `&email=${email}`;
@@ -115,9 +122,8 @@ export const getUsers = async (page = 1, pageSize = 10, email?: string, follower
     const api = await apiWithToken();
     const response = await api.get(query);
     return parseSnakeToCamel(response.data?.results);
-    
   } catch (error) {
     console.error(error);
     throw error;
   }
-}
+};

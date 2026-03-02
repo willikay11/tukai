@@ -8,6 +8,7 @@ import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
+import CommunityCreatedSuccessDialog from '@/components/ui/createSuccessDialog';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { InviteCommunities } from '@/components/ui/invite-communities';
@@ -18,14 +19,13 @@ import { useGetInterestCategories, useGetUsers } from '@/hooks/auth';
 import { useCreateCommunity, useGetCommunities } from '@/hooks/communities';
 import { useGoogleMapsAutocomplete } from '@/hooks/places';
 import { toast } from '@/hooks/use-toast';
+import { Community } from '@/types/community';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';
-import CommunityCreatedSuccessDialog from '@/components/ui/createSuccessDialog';
 
 import FileUploadField from '../../components/fileUploadField';
 import IconComponent from '../../components/iconComponent';
 import LocationAutocompleteField from '../../components/locationAutocompleteField';
-import { Community } from '@/types/community';
 
 const createCommunitySchema = z.object({
   communityName: z.string().min(2, { message: 'Community name is required.' }),
@@ -39,7 +39,6 @@ const createCommunitySchema = z.object({
 });
 
 type CreateCommunityFormValues = z.infer<typeof createCommunitySchema>;
-
 
 export default function CreateCommunity() {
   const uploadId = useId();
@@ -55,7 +54,7 @@ export default function CreateCommunity() {
   const [createdCommunityId, setCreatedCommunityId] = useState<string | null>(null);
 
   const { data: categories } = useGetInterestCategories();
-  
+
   const { data: userCommunities, isFetching: isFetchingCommunities } = useGetCommunities({
     page: 1,
     enabled: true,
@@ -124,6 +123,8 @@ export default function CreateCommunity() {
 
   const form = useForm<CreateCommunityFormValues>({
     resolver: zodResolver(createCommunitySchema),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       communityName: '',
       city: '',
@@ -149,7 +150,7 @@ export default function CreateCommunity() {
     const memberIds = invitedMembers
       .filter((member) => !member.email?.includes('@') || member.id.startsWith('user-'))
       .map((member) => member.id);
-    
+
     const emails = invitedMembers
       .filter((member) => member.email && member.id.startsWith('email-'))
       .map((member) => member.email!);
@@ -194,7 +195,9 @@ export default function CreateCommunity() {
       <CommunityCreatedSuccessDialog
         open={isSuccessDialogOpen}
         onOpenChange={setIsSuccessDialogOpen}
-        viewCommunityHref={createdCommunityId ? `/communities/${createdCommunityId}` : '/communities'}
+        viewCommunityHref={
+          createdCommunityId ? `/communities/${createdCommunityId}` : '/communities'
+        }
         createExperienceHref="/experiences/create"
       />
 
@@ -212,9 +215,9 @@ export default function CreateCommunity() {
           <IconComponent iconName="UserMultipleIcon" color="#3B82F6" size={16} />
         </span>
         <span className="text-xs text-gray-800">
-          Think of Community as your website, business, social media page or even a WhatsApp group.
-          Having community will help you manage your experiences and keep members connected between
-          experiences.
+          Think of having a Community as your website, business, social media page or even a
+          WhatsApp group. Having community will help you manage your experiences and keep members
+          connected between experiences.
         </span>
       </div>
 
@@ -418,12 +421,10 @@ export default function CreateCommunity() {
               <Button
                 type="submit"
                 variant="gradient"
-                disabled={isCreatingCommunity}
+                disabled={!form.formState.isValid || isCreatingCommunity}
                 className="h-9 rounded-full px-4 text-xs text-white hover:bg-emerald-800 disabled:opacity-50"
               >
-                {isCreatingCommunity
-                  ? 'Creating Community...'
-                  : 'Create Community'}
+                {isCreatingCommunity ? 'Creating Community...' : 'Create Community'}
               </Button>
             </div>
           </div>

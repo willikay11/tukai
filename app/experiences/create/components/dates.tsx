@@ -1,14 +1,22 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { DatePicker } from '@/components/ui/date-picker';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { TimePicker } from '@/components/ui/time-picker';
-import { DatePicker } from '@/components/ui/date-picker';
 
 const experienceDatesSchema = z.object({
   experienceType: z.enum(['paid', 'free']),
@@ -77,10 +85,12 @@ export default function ExperienceDates() {
               name="dateType"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel className="text-sm font-medium text-gray-900">Experience Type</FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-900">
+                    Experience Type
+                  </FormLabel>
                   <FormControl>
                     <div className="space-y-3">
-                      <label className="flex items-center gap-3 cursor-pointer">
+                      <label className="flex cursor-pointer items-center gap-3">
                         <input
                           type="radio"
                           value="one-day"
@@ -88,10 +98,10 @@ export default function ExperienceDates() {
                           onChange={(e) => field.onChange(e.target.value)}
                           className="h-4 w-4 border-gray-300 accent-primary focus:ring-primary"
                         />
-                        <span className="text-sm text-gray-900">One-Day experience</span>
+                        <span className="text-xs text-gray-900">One-Day experience</span>
                       </label>
 
-                      <label className="flex items-center gap-3 cursor-pointer">
+                      <label className="flex cursor-pointer items-center gap-3">
                         <input
                           type="radio"
                           value="multi-day"
@@ -99,12 +109,12 @@ export default function ExperienceDates() {
                           onChange={(e) => field.onChange(e.target.value)}
                           className="h-4 w-4 border-gray-300 accent-primary focus:ring-primary"
                         />
-                        <span className="text-sm text-gray-900">
-                          Multi-Day Experience/Itinerary (e.g., 2 days straight)
+                        <span className="text-xs text-gray-900">
+                          Multi-Day Experience (e.g., 2 days straight)
                         </span>
                       </label>
 
-                      <label className="flex items-center gap-3 cursor-pointer">
+                      <label className="flex cursor-pointer items-center gap-3">
                         <input
                           type="radio"
                           value="itinerary"
@@ -112,7 +122,7 @@ export default function ExperienceDates() {
                           onChange={(e) => field.onChange(e.target.value)}
                           className="h-4 w-4 border-gray-300 accent-primary focus:ring-primary"
                         />
-                        <span className="text-sm text-gray-900">Itinerary</span>
+                        <span className="text-xs text-gray-900">Itinerary</span>
                       </label>
                     </div>
                   </FormControl>
@@ -136,7 +146,7 @@ export default function ExperienceDates() {
                         className="h-4 w-4 rounded border-gray-300 accent-primary focus:ring-primary"
                       />
                     </FormControl>
-                    <FormLabel className="text-sm font-normal text-gray-900 cursor-pointer">
+                    <FormLabel className="cursor-pointer text-xs font-normal text-gray-900">
                       Create a recurring experience
                     </FormLabel>
                   </div>
@@ -147,7 +157,7 @@ export default function ExperienceDates() {
 
             {/* Select Experience Date(s) */}
             <div className="space-y-4">
-              <FormLabel className="text-sm font-medium text-gray-900">
+              <FormLabel className="text-xs font-medium text-gray-900">
                 Select Experience date(s)
               </FormLabel>
 
@@ -207,11 +217,15 @@ export default function ExperienceDates() {
 
             {/* Actions */}
             <div className="flex items-center justify-between gap-3 pt-4">
-              <button type="button" className="text-sm text-red-500 hover:text-red-600">
+              <button type="button" className="text-xs text-red-500 hover:text-red-600">
                 Cancel
               </button>
               <div className="flex gap-3">
-                <Button type="button" variant="outline" className="rounded-full text-xs font-semibold">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-full text-xs font-semibold"
+                >
                   Save & Exit
                 </Button>
                 <Button

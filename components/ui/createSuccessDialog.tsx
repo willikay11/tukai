@@ -24,8 +24,7 @@ export default function CreateSuccessDialog({
   viewCommunityHref,
   createExperienceHref,
   title = 'Community Created Successfully',
-  description =
-    'Your community was created successfully. You can now proceed to create your experience or view the community',
+  description = 'Your community was created successfully. You can now proceed to create your experience or view the community',
   viewCommunityLabel = 'View Community',
   createExperienceLabel = 'Create Experience',
   illustrationSrc = '/images/friday-feeling.svg',
@@ -47,7 +46,7 @@ export default function CreateSuccessDialog({
           <DialogTitle className="mt-6 text-xl font-semibold leading-tight text-slate-800">
             {title}
           </DialogTitle>
-          <DialogDescription className="mt-4 text-xs max-w-[450px] leading-4 text-slate-600">
+          <DialogDescription className="mt-4 max-w-[450px] text-xs leading-4 text-slate-600">
             {description}
           </DialogDescription>
 

@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { getInterestCategories, userExists, getUsers } from '@/services/auth';
+import { getInterestCategories, getUsers, userExists } from '@/services/auth';
 
 export const useUserExists = () => {
   return useMutation({
@@ -15,9 +15,16 @@ export const useGetInterestCategories = () => {
   });
 };
 
-export const useGetUsers = (page = 1, pageSize = 10, email?: string, followers?: string, following?: string, blocked?: string) => {
+export const useGetUsers = (
+  page = 1,
+  pageSize = 10,
+  email?: string,
+  followers?: string,
+  following?: string,
+  blocked?: string,
+) => {
   return useQuery({
     queryKey: ['users', page, pageSize, email, followers, following, blocked],
     queryFn: async () => await getUsers(page, pageSize, email, followers, following, blocked),
   });
-}
+};

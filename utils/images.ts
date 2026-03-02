@@ -12,8 +12,7 @@ const hasImageSignature = (headerBytes: Uint8Array) => {
     headerBytes[10] === 0x42 &&
     headerBytes[11] === 0x50;
   const isBmp = startsWith([0x42, 0x4d]);
-  const isTiff =
-    startsWith([0x49, 0x49, 0x2a, 0x00]) || startsWith([0x4d, 0x4d, 0x00, 0x2a]);
+  const isTiff = startsWith([0x49, 0x49, 0x2a, 0x00]) || startsWith([0x4d, 0x4d, 0x00, 0x2a]);
 
   return isJpeg || isPng || isGif || isWebp || isBmp || isTiff;
 };
