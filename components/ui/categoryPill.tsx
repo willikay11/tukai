@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import clsx from 'clsx';
 
@@ -10,11 +10,19 @@ import { Interest } from '@/types/interest';
 export default function CategoryPill({
   category,
   onClick,
+  isSelected,
 }: {
   category: Interest;
   onClick: (id: string) => void;
+  isSelected?: boolean;
 }) {
-  const [active, setActive] = useState(false);
+  const [active, setActive] = useState(isSelected ?? false);
+
+  useEffect(() => {
+    if (isSelected !== undefined) {
+      setActive(isSelected);
+    }
+  }, [isSelected]);
 
   return (
     <div

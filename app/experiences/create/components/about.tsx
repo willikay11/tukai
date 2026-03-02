@@ -21,6 +21,7 @@ import { useGetInterestCategories } from '@/hooks/auth';
 import { useCreateExperience } from '@/hooks/experiences';
 import { useGoogleMapsAutocomplete } from '@/hooks/places';
 import { toast } from '@/hooks/use-toast';
+import { Experience } from '@/types/experience';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';
 
@@ -41,8 +42,10 @@ const experienceSchema = z.object({
 
 export default function CreateExperienceAbout({
   onSuccess,
+  experience,
 }: {
   onSuccess?: (experienceId: string) => void;
+  experience?: Experience;
 }) {
   const { data: categories } = useGetInterestCategories();
   const { mutate: createExperience, isPending: isCreatingExperience } = useCreateExperience();
@@ -81,6 +84,26 @@ export default function CreateExperienceAbout({
       uploadedFiles: [],
     },
   });
+
+  useEffect(() => {
+    if (experience) {
+      form.reset({
+        title: experience.title || '',
+        description: experience.description || '',
+        included: '',
+        notIncluded: '',
+        location: experience.location?.id || '',
+        meetingPoint: '',
+        meetingTime: '',
+        visibility: experience.isPublic ? 'public' : 'private',
+        selectedCategories: experience.categories?.map((cat) => cat.id) || [],
+        uploadedFiles: [],
+      });
+      if (experience.location?.formattedAddress) {
+        setLocationInput(experience.location.formattedAddress);
+      }
+    }
+  }, [experience, form]);
 
   const handleCategoryToggle = (categoryId: string) => {
     const current = form.getValues('selectedCategories');
@@ -172,6 +195,7 @@ export default function CreateExperienceAbout({
                         minImageHeight={1024}
                         maxImageWidth={4096}
                         maxImageHeight={4096}
+                        initialUrls={experience?.photos?.map((p) => p.photo) ?? []}
                         onValidationError={(errors) => {
                           const message = errors[0] || 'Please upload a valid image file.';
                           form.setError('uploadedFiles', {
@@ -406,6 +430,7 @@ export default function CreateExperienceAbout({
                         key={category.id}
                         category={category}
                         onClick={handleCategoryToggle}
+                        isSelected={form.watch('selectedCategories').includes(category.id)}
                       />
                     ))}
                   </div>

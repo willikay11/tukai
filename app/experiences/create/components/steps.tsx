@@ -15,9 +15,9 @@ const STEPS = [
     id: 'about',
     label: 'About',
     icon: 'InformationCircleIcon',
-    filledIcon: 'InformationSquareIcon',
+    filledIcon: 'InformationCircleIcon',
   },
-  { id: 'dates-tickets', label: 'Dates & Tickets', icon: 'Ticket02Icon', filledIcon: 'Ticket01Icon' },
+  { id: 'dates-tickets', label: 'Dates & Tickets', icon: 'Ticket02Icon', filledIcon: 'Ticket02Icon' },
   { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon', filledIcon: 'AddTeam02Icon' },
   { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon', filledIcon: 'WalletAdd01Icon' },
 ];
@@ -71,6 +71,7 @@ export default function CreateExperienceSteps({
       {/* Tab Content */}
       <TabsContent value="about" className="mt-6">
         <CreateExperienceAbout
+          experience={experience}
           onSuccess={(experienceId) => {
             onExperienceCreated?.(experienceId, 'dates-tickets');
           }}

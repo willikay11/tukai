@@ -15,6 +15,7 @@ type FileUploadFieldProps = {
   minImageHeight?: number;
   maxImageWidth?: number;
   maxImageHeight?: number;
+  initialUrls?: string[];
   onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   onFilesChange?: (files: File[]) => void;
   onValidationError?: (errors: string[]) => void;
@@ -33,11 +34,13 @@ export default function FileUploadField({
   minImageHeight,
   maxImageWidth,
   maxImageHeight,
+  initialUrls = [],
   onChange,
   onFilesChange,
   onValidationError,
 }: FileUploadFieldProps) {
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>(initialUrls);
+  const [existingUrls, setExistingUrls] = useState<string[]>(initialUrls);
   const [files, setFiles] = useState<File[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
