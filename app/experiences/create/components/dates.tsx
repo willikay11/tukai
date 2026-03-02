@@ -88,7 +88,7 @@ export default function ExperienceDates() {
                           onChange={(e) => field.onChange(e.target.value)}
                           className="h-4 w-4 border-gray-300 accent-primary focus:ring-primary"
                         />
-                        <span className="text-sm text-gray-900">One-Day experience</span>
+                        <span className="text-xs text-gray-900">One-Day experience</span>
                       </label>
 
                       <label className="flex items-center gap-3 cursor-pointer">
@@ -99,7 +99,7 @@ export default function ExperienceDates() {
                           onChange={(e) => field.onChange(e.target.value)}
                           className="h-4 w-4 border-gray-300 accent-primary focus:ring-primary"
                         />
-                        <span className="text-sm text-gray-900">
+                        <span className="text-xs text-gray-900">
                           Multi-Day Experience (e.g., 2 days straight)
                         </span>
                       </label>
@@ -112,7 +112,7 @@ export default function ExperienceDates() {
                           onChange={(e) => field.onChange(e.target.value)}
                           className="h-4 w-4 border-gray-300 accent-primary focus:ring-primary"
                         />
-                        <span className="text-sm text-gray-900">Itinerary</span>
+                        <span className="text-xs text-gray-900">Itinerary</span>
                       </label>
                     </div>
                   </FormControl>
@@ -136,7 +136,7 @@ export default function ExperienceDates() {
                         className="h-4 w-4 rounded border-gray-300 accent-primary focus:ring-primary"
                       />
                     </FormControl>
-                    <FormLabel className="text-sm font-normal text-gray-900 cursor-pointer">
+                    <FormLabel className="text-xs font-normal text-gray-900 cursor-pointer">
                       Create a recurring experience
                     </FormLabel>
                   </div>
@@ -147,7 +147,7 @@ export default function ExperienceDates() {
 
             {/* Select Experience Date(s) */}
             <div className="space-y-4">
-              <FormLabel className="text-sm font-medium text-gray-900">
+              <FormLabel className="text-xs font-medium text-gray-900">
                 Select Experience date(s)
               </FormLabel>
 
@@ -207,7 +207,7 @@ export default function ExperienceDates() {
 
             {/* Actions */}
             <div className="flex items-center justify-between gap-3 pt-4">
-              <button type="button" className="text-sm text-red-500 hover:text-red-600">
+              <button type="button" className="text-xs text-red-500 hover:text-red-600">
                 Cancel
               </button>
               <div className="flex gap-3">

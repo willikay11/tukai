@@ -169,12 +169,15 @@ export default function CreateTickets() {
 			</div>
 			<input type="hidden" {...register('selectedDateSummary')} />
 
-			<div className="mt-4 space-y-5">
-				{fields.map((field, index) => {
-					const ticketErrors = errors.tickets?.[index];
+			<div className="relative mt-4 pl-5">
+				<div className="absolute bottom-1 left-0 top-1 border-l border-dashed border-gray-300" />
 
-					return (
-						<div key={field.id} className="space-y-3">
+				<div className="space-y-5">
+					{fields.map((field, index) => {
+						const ticketErrors = errors.tickets?.[index];
+
+						return (
+							<div key={field.id} className="space-y-3">
 							<Input
 								placeholder="Ticket Name e.g. VIP, Early Bird, Locals etc..."
 								suffixIcon={<IconComponent iconName="Ticket01Icon" size={16} color="#9CA3AF" />}
@@ -205,6 +208,18 @@ export default function CreateTickets() {
 							{ticketErrors?.amount && (
 								<p className="text-xs text-red-500">{ticketErrors.amount.message}</p>
 							)}
+
+                            <div className="mt-3 flex items-center gap-2 rounded-full bg-blue-100 px-3 py-2 text-xs text-gray-700">
+                                <span className="italic">
+                                    Total Tickets Cost:{' '}
+                                    <span className="font-semibold text-gray-900">{formatKes(totals.totalTicketsCost)}</span>
+                                </span>
+                                <span>•</span>
+                                <span className="italic">
+                                    What the customer sees:{' '}
+                                    <span className="font-semibold text-gray-900">{formatKes(totals.customerSees)}</span>
+                                </span>
+                            </div>
 
 							<p className="mt-1 text-xs font-semibold text-gray-900">
 								Ticket Sales Validity{' '}
@@ -288,41 +303,30 @@ export default function CreateTickets() {
 									Remove ticket type
 								</button>
 							)}
-						</div>
-					);
-				})}
-			</div>
+							</div>
+						);
+					})}
+				</div>
 
-			<div className="mt-3 flex items-center gap-2 rounded-full bg-blue-100 px-3 py-2 text-xs text-gray-700">
-				<span className="italic">
-					Total Tickets Cost:{' '}
-					<span className="font-semibold text-gray-900">{formatKes(totals.totalTicketsCost)}</span>
-				</span>
-				<span>•</span>
-				<span className="italic">
-					What the customer sees:{' '}
-					<span className="font-semibold text-gray-900">{formatKes(totals.customerSees)}</span>
-				</span>
+				<Button
+					variant="ghost"
+					onClick={() =>
+						append({
+							ticketName: '',
+							quantity: '',
+							amount: '',
+							salesStartDate: '',
+							salesStartTime: '',
+							salesEndDate: '',
+							salesEndTime: '',
+						})
+					}
+					className="mt-2 px-0 hover:bg-transparent"
+				>
+					<IconComponent iconName="Ticket02Icon" size={16} color="#047857" />
+					Add another Ticket Type
+				</Button>
 			</div>
-
-			<button
-				type="button"
-				onClick={() =>
-					append({
-						ticketName: '',
-						quantity: '',
-						amount: '',
-						salesStartDate: '',
-						salesStartTime: '',
-						salesEndDate: '',
-						salesEndTime: '',
-					})
-				}
-				className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary"
-			>
-				<IconComponent iconName="PlusSignCircleIcon" size={16} color="#047857" />
-				Add another Ticket Type
-			</button>
 
 			<div className="mt-5">
 				<Button
