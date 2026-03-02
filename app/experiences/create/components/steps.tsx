@@ -49,14 +49,24 @@ export default function CreateExperienceSteps({
     >
       <TabsList className="flex h-auto w-full gap-2 bg-transparent p-0">
         {STEPS.map((step, index) => {
-          const isFilled = currentStepIndex > index;
+          const isAboutFilled = Boolean(experience?.id);
+          const isDatesTicketsFilled = Boolean(experience?.tickets?.length);
+          const stepFilledMap: Record<string, boolean> = {
+            about: isAboutFilled,
+            'dates-tickets': isDatesTicketsFilled,
+            guests: false,
+            wallet: false,
+          };
+          const isFilled = stepFilledMap[step.id] ?? false;
           const stepIcon = isFilled ? step.filledIcon : step.icon;
 
           return (
             <TabsTrigger
               key={step.id}
               value={step.id}
-              className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-xs text-gray-800 transition-colors data-[state=active]:border-b-[0px] data-[state=active]:border-emerald-600 data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700"
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs transition-colors data-[state=active]:border-b-[0px] data-[state=active]:border-emerald-600 data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 ${
+                isFilled ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-800'
+              }`}
             >
               <div className="flex-shrink-0">
                 <IconComponent iconName={stepIcon} size={20} />
