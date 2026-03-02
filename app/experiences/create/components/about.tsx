@@ -119,7 +119,6 @@ export default function CreateExperienceAbout({
       },
       {
         onSuccess: (response: any) => {
-          console.log('Experience created successfully:', response?.data?.id);
           const experienceId = response?.data?.id;
           toast({
             title: 'Success',

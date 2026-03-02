@@ -41,8 +41,6 @@ export default function CreateExperiencePage() {
   const replaceCreateUrlParams = (
     nextValues: Partial<{ experienceId: string | null; step: ExperienceStepId }>,
   ) => {
-    console.log('replaceCreateUrlParams called with:', nextValues);
-
     const mergedExperienceId =
       nextValues.experienceId !== undefined ? nextValues.experienceId : experienceId;
     const mergedStep = nextValues.step !== undefined ? nextValues.step : activeStep;
@@ -66,7 +64,6 @@ export default function CreateExperiencePage() {
   };
 
   const handleExperienceCreated = (createdExperienceId: string, step?: ExperienceStepId) => {
-    console.log('replaceCreateUrlParams:', createdExperienceId);
     setExperienceId(createdExperienceId);
 
     if (step) {

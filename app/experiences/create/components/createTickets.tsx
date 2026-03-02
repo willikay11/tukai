@@ -69,6 +69,14 @@ const createTicketsSchema = z.object({
 
 type CreateTicketsFormValues = z.input<typeof createTicketsSchema>;
 
+type SavedTicketCard = {
+  fieldId: string;
+  name: string;
+  quantity: number;
+  amount: number;
+  validity: string;
+};
+
 const currencyFormatter = new Intl.NumberFormat('en-KE', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
@@ -76,6 +84,54 @@ const currencyFormatter = new Intl.NumberFormat('en-KE', {
 
 function formatKes(value: number) {
   return `KES ${currencyFormatter.format(Number.isFinite(value) ? value : 0)}`;
+}
+
+function formatKsh(value: number) {
+  return `Ksh ${currencyFormatter.format(Number.isFinite(value) ? value : 0)}`;
+}
+
+function formatTicketValidity(
+  salesStartDate: string,
+  salesStartTime: string,
+  salesEndDate: string,
+  salesEndTime: string,
+) {
+  if (!salesStartDate || !salesStartTime || !salesEndDate || !salesEndTime) {
+    return '—';
+  }
+
+  const formatDate = (date: string) => {
+    const parsedDate = new Date(date);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return date;
+    }
+
+    return parsedDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const formatTime = (time: string) => {
+    const [hourRaw, minuteRaw] = time.split(':');
+    const hour = Number(hourRaw);
+    const minute = Number(minuteRaw);
+
+    if (Number.isNaN(hour) || Number.isNaN(minute)) {
+      return time;
+    }
+
+    const date = new Date();
+    date.setHours(hour, minute, 0, 0);
+
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  };
+
+  return `${formatDate(salesStartDate)}, ${formatTime(salesStartTime)} - ${formatDate(salesEndDate)} ${formatTime(salesEndTime)}`;
 }
 
 export default function CreateTickets({ experienceId }: { experienceId?: string | null }) {
@@ -102,6 +158,7 @@ export default function CreateTickets({ experienceId }: { experienceId?: string 
   const { register, control, watch, setValue, handleSubmit, formState } = form;
   const { errors, isValid, isSubmitting } = formState;
   const [submittedTicketIds, setSubmittedTicketIds] = useState<string[]>([]);
+  const [savedTickets, setSavedTickets] = useState<SavedTicketCard[]>([]);
   const { mutateAsync: createExperienceTicket, isPending: isCreatingTicket } =
     useCreateExperienceTicket();
 
@@ -144,6 +201,35 @@ export default function CreateTickets({ experienceId }: { experienceId?: string 
           }),
         ),
       );
+
+      setSavedTickets((prev) => {
+        const next = [...prev];
+
+        ticketEntries.forEach(({ fieldId, ticket }) => {
+          const normalizedFieldId = fieldId as string;
+          const nextCard: SavedTicketCard = {
+            fieldId: normalizedFieldId,
+            name: ticket.ticketName,
+            quantity: Number(ticket.quantity),
+            amount: Number(ticket.amount),
+            validity: formatTicketValidity(
+              ticket.salesStartDate,
+              ticket.salesStartTime,
+              ticket.salesEndDate,
+              ticket.salesEndTime,
+            ),
+          };
+
+          const existingIndex = next.findIndex((saved) => saved.fieldId === normalizedFieldId);
+          if (existingIndex >= 0) {
+            next[existingIndex] = nextCard;
+          } else {
+            next.push(nextCard);
+          }
+        });
+
+        return next;
+      });
 
       setSubmittedTicketIds((prev) => [
         ...prev,
@@ -242,6 +328,78 @@ export default function CreateTickets({ experienceId }: { experienceId?: string 
               commissionPayer === 'customer' ? 0.04 : commissionPayer === 'split' ? 0.02 : 0;
             const ticketTotalCost = ticketQuantity * ticketAmount;
             const customerSeesPerTicket = ticketAmount * (1 + customerCommissionRate);
+            const savedTicket = savedTickets.find((ticket) => ticket.fieldId === field.id);
+
+            if (savedTicket) {
+              return (
+                <div
+                  key={field.id}
+                  className="rounded-[12px] border border-dashed border-primary bg-emerald-50 p-2"
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src="/images/lake.jpeg"
+                      alt={savedTicket.name}
+                      className="h-20 w-20 rounded-2xl object-cover"
+                    />
+
+                    <div className="h-16 border-l border-dashed border-primary" />
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-base font-bold text-gray-800">{savedTicket.name}</p>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSubmittedTicketIds((prev) => prev.filter((id) => id !== field.id));
+                            }}
+                            className="text-primary"
+                          >
+                            <IconComponent iconName="Edit02Icon" size={16} color="#047857" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              remove(index);
+                              setSubmittedTicketIds((prev) => prev.filter((id) => id !== field.id));
+                              setSavedTickets((prev) =>
+                                prev.filter((ticket) => ticket.fieldId !== field.id),
+                              );
+                            }}
+                            className="text-red-500"
+                          >
+                            <IconComponent iconName="Delete02Icon" size={16} color="#EF4444" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-6 gap-2">
+                        <div className='col-span-1'>
+                          <p className="text-xs text-gray-500">Qty</p>
+                          <p className="text-xs font-semibold text-gray-800">{savedTicket.quantity}</p>
+                        </div>
+                        <div className='col-span-2'>
+                          <p className="text-xs text-gray-500">Price</p>
+                          <p className="text-xs font-semibold text-gray-800">
+                            {formatKsh(savedTicket.amount)}
+                          </p>
+                        </div>
+                        <div className='col-span-3'>
+                          <p className="text-xs text-gray-500">Validity</p>
+                          <p className="truncate text-xs font-semibold text-gray-800">
+                            {savedTicket.validity}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
 
             return (
               <div key={field.id} className="space-y-3">
