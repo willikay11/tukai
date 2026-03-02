@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { TimePicker } from '@/components/ui/time-picker';
 import { useCreateExperienceTicket } from '@/hooks/experiences';
 import { toast } from '@/hooks/use-toast';
+import { Experience } from '@/types/experience';
 
 const commissionOptions = [
   { value: 'organizer', label: 'I will fully pay the commission' },
@@ -134,7 +135,13 @@ function formatTicketValidity(
   return `${formatDate(salesStartDate)}, ${formatTime(salesStartTime)} - ${formatDate(salesEndDate)} ${formatTime(salesEndTime)}`;
 }
 
-export default function CreateTickets({ experienceId }: { experienceId?: string | null }) {
+export default function CreateTickets({
+  experienceId,
+  experience,
+}: {
+  experienceId?: string | null;
+  experience?: Experience;
+}) {
   const form = useForm<CreateTicketsFormValues>({
     resolver: zodResolver<CreateTicketsFormValues>(createTicketsSchema),
     mode: 'onChange',
@@ -170,6 +177,11 @@ export default function CreateTickets({ experienceId }: { experienceId?: string 
   const watchedTickets = watch('tickets');
   const commissionPayer = watch('commissionPayer');
   const selectedDateSummary = watch('selectedDateSummary');
+
+  const existingTickets = experience?.tickets ?? [];
+  const coverPhoto =
+    experience?.photos?.find((p) => p.isCover)?.photo ||
+    experience?.photos?.[0]?.photo;
 
   const submitNewTickets = async (values: CreateTicketsFormValues) => {
     if (!experienceId) {
@@ -320,6 +332,64 @@ export default function CreateTickets({ experienceId }: { experienceId?: string 
         <input type="hidden" {...register('selectedDateSummary')} />
 
         <div className="mt-4 space-y-5">
+          {/* Existing tickets from API */}
+          {existingTickets.map((ticket) => (
+            <div
+              key={ticket.id}
+              className="relative rounded-[12px] border border-dashed border-primary bg-emerald-50 p-2"
+            >
+              {/* Top notch */}
+              <div className="absolute -top-[1px] left-[102px] h-1.5 w-3 -translate-x-1/2 rounded-b-full border border-t-0 border-dashed border-primary bg-white" />
+              {/* Bottom notch */}
+              <div className="absolute -bottom-[1px] left-[102px] h-1.5 w-3 -translate-x-1/2 rounded-t-full border border-b-0 border-dashed border-primary bg-white" />
+
+              <div className="flex items-center gap-3">
+                <img
+                  src={coverPhoto}
+                  alt={ticket.name}
+                  className="h-20 w-20 flex-shrink-0 rounded-[12px] object-cover"
+                />
+
+                <div className="h-16 border-l border-dashed border-primary" />
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-bold text-gray-800">{ticket.name}</p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <button type="button" className="text-primary">
+                        <IconComponent iconName="Edit02Icon" size={16} color="#047857" />
+                      </button>
+                      <button type="button" className="text-red-500">
+                        <IconComponent iconName="Delete02Icon" size={16} color="#EF4444" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-6 gap-2">
+                    <div className="col-span-1">
+                      <p className="text-xs text-gray-500">Qty</p>
+                      <p className="text-xs font-semibold text-gray-800">{ticket.quantity}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-xs text-gray-500">Price</p>
+                      <p className="text-xs font-semibold text-gray-800">{formatKsh(ticket.price)}</p>
+                    </div>
+                    <div className="col-span-3">
+                      <p className="text-xs text-gray-500">Available</p>
+                      <p className="truncate text-xs font-semibold text-gray-800">
+                        {ticket.availableQuantity}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* New tickets being created */}
           {fields.map((field, index) => {
             const ticketErrors = errors.tickets?.[index];
             const ticketQuantity = Number(watchedTickets?.[index]?.quantity) || 0;
@@ -343,7 +413,7 @@ export default function CreateTickets({ experienceId }: { experienceId?: string 
 
                   <div className="flex items-center gap-3">
                     <img
-                      src="/images/lake.jpeg"
+                      src={coverPhoto}
                       alt={savedTicket.name}
                       className="h-20 w-20 flex-shrink-0 rounded-[12px] object-cover"
                     />

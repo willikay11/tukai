@@ -2,6 +2,7 @@
 
 import IconComponent from '@/app/components/iconComponent';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Experience } from '@/types/experience';
 
 import CreateExperienceAbout from './about';
 import ExperienceDates from './dates';
@@ -25,10 +26,14 @@ export default function CreateExperienceSteps({
   currentStep = 'about',
   onStepChange,
   onExperienceCreated,
+  experience,
+  isLoadingExperience,
 }: {
   currentStep?: ExperienceStepId;
   onStepChange?: (step: ExperienceStepId) => void;
   onExperienceCreated?: (experienceId: string, step?: ExperienceStepId) => void;
+  experience?: Experience;
+  isLoadingExperience?: boolean;
 }) {
   const currentStepIndex = STEPS.findIndex((step) => step.id === currentStep);
 

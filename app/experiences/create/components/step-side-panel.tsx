@@ -4,6 +4,8 @@ import { ReactNode } from 'react';
 
 import Image from 'next/image';
 
+import { Experience } from '@/types/experience';
+
 import CreateTickets from './createTickets';
 
 export type ExperienceStepId = 'about' | 'dates-tickets' | 'guests' | 'wallet';
@@ -11,15 +13,17 @@ export type ExperienceStepId = 'about' | 'dates-tickets' | 'guests' | 'wallet';
 export default function ExperienceStepSidePanel({
   step,
   experienceId,
+  experience,
 }: {
   step: ExperienceStepId;
   experienceId?: string | null;
+  experience?: Experience;
 }) {
   const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
     about: (
       <StepPlaceholderContent title="Create Dates" description="Please add details to create dates" />
     ),
-    'dates-tickets': <CreateTickets experienceId={experienceId} />,
+    'dates-tickets': <CreateTickets experienceId={experienceId} experience={experience} />,
     guests: (
       <StepPlaceholderContent
         title="Invite Guests"

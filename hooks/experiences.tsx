@@ -30,10 +30,10 @@ export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean)
   });
 };
 
-export const useFetchSingleExperience = (id: string) => {
+export const useFetchSingleExperience = (id: string, withAuth: boolean = false) => {
   return useQuery({
     queryKey: ['experience', id],
-    queryFn: async () => await fetchExperience(id),
+    queryFn: async () => await fetchExperience(id, withAuth),
     enabled: !!id,
   });
 };

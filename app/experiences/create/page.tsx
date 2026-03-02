@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import { useFetchSingleExperience } from '@/hooks/experiences';
+
 import ExperienceStepSidePanel from './components/step-side-panel';
 import CreateExperienceSteps, { type ExperienceStepId } from './components/steps';
 
@@ -27,6 +29,12 @@ export default function CreateExperiencePage() {
 
   const [activeStep, setActiveStep] = useState<ExperienceStepId>(stepFromUrl || 'about');
   const [experienceId, setExperienceId] = useState<string | null>(experienceIdFromUrl);
+
+  const { data: experienceResponse, isLoading: isLoadingExperience } = useFetchSingleExperience(
+    experienceId || '',
+    true,
+  );
+  const experience = experienceResponse?.data;
 
   useEffect(() => {
     setExperienceId(experienceIdFromUrl);
@@ -80,10 +88,16 @@ export default function CreateExperiencePage() {
           currentStep={activeStep}
           onStepChange={handleStepChange}
           onExperienceCreated={handleExperienceCreated}
+          experience={experience}
+          isLoadingExperience={isLoadingExperience}
         />
       </div>
       <div className="lg:col-span-4 lg:col-start-8">
-        <ExperienceStepSidePanel step={activeStep} experienceId={experienceId} />
+        <ExperienceStepSidePanel
+          step={activeStep}
+          experienceId={experienceId}
+          experience={experience}
+        />
       </div>
     </main>
   );
