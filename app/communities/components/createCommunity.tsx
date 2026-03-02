@@ -124,6 +124,8 @@ export default function CreateCommunity() {
 
   const form = useForm<CreateCommunityFormValues>({
     resolver: zodResolver(createCommunitySchema),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       communityName: '',
       city: '',
@@ -212,7 +214,7 @@ export default function CreateCommunity() {
           <IconComponent iconName="UserMultipleIcon" color="#3B82F6" size={16} />
         </span>
         <span className="text-xs text-gray-800">
-          Think of Community as your website, business, social media page or even a WhatsApp group.
+          Think of having a Community as your website, business, social media page or even a WhatsApp group.
           Having community will help you manage your experiences and keep members connected between
           experiences.
         </span>
@@ -418,7 +420,7 @@ export default function CreateCommunity() {
               <Button
                 type="submit"
                 variant="gradient"
-                disabled={isCreatingCommunity}
+                disabled={!form.formState.isValid || isCreatingCommunity}
                 className="h-9 rounded-full px-4 text-xs text-white hover:bg-emerald-800 disabled:opacity-50"
               >
                 {isCreatingCommunity

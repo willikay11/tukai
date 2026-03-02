@@ -108,7 +108,7 @@ export default function CreateExperienceAbout({
         description: values.description,
         googleMapPlaceId: values.location,
         startDate: today,
-        endDate: '2026-02-27T18:39:20.886Z',
+        endDate: '2026-03-27T18:39:20.886Z',
         recurrence_rule: rule.toString(),
         categoriesIds: values.selectedCategories,
         isPublic: values.visibility === 'public',

@@ -10,7 +10,7 @@ interface InputProps extends React.ComponentProps<'input'> {
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, icon, suffixIcon, ...props }, ref) => {
     return (
-      <div className="flex items-center rounded-[10px] border border-gray-700 border-input px-3 shadow-sm focus-within:border-primary focus-within:outline-none disabled:cursor-not-allowed disabled:opacity-50">
+      <div className="flex items-center rounded-[10px] border border-gray-700 border-input px-3 focus-within:border-primary focus-within:outline-none disabled:cursor-not-allowed disabled:opacity-50">
         {icon && <div className="mr-2">{icon}</div>}
         <input
           type={type}

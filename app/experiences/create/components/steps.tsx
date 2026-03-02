@@ -8,6 +8,8 @@ import CreateExperienceAbout from './about';
 import ExperienceDates from './dates';
 import CreateExperienceInvites from './invites';
 
+export type ExperienceStepId = 'about' | 'dates-tickets' | 'guests' | 'wallet';
+
 const STEPS = [
   { id: 'about', label: 'About', icon: 'InformationCircleIcon' },
   { id: 'dates-tickets', label: 'Dates & Tickets', icon: 'Ticket02Icon' },
@@ -19,18 +21,22 @@ export default function CreateExperienceSteps({
   currentStep = 'about',
   onStepChange,
 }: {
-  currentStep?: string;
-  onStepChange?: (step: string) => void;
+  currentStep?: ExperienceStepId;
+  onStepChange?: (step: ExperienceStepId) => void;
 }) {
   const [activeStep, setActiveStep] = useState(currentStep);
 
-  const handleStepChange = (step: string) => {
+  const handleStepChange = (step: ExperienceStepId) => {
     setActiveStep(step);
     onStepChange?.(step);
   };
 
   return (
-    <Tabs value={activeStep} onValueChange={handleStepChange} className="w-full">
+    <Tabs
+      value={activeStep}
+      onValueChange={(step) => handleStepChange(step as ExperienceStepId)}
+      className="w-full"
+    >
       <TabsList className="flex w-full gap-2 bg-transparent h-auto p-0">
         {STEPS.map((step) => (
           <TabsTrigger
