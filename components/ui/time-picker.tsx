@@ -1,10 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { cn } from '@/lib/utils';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
+
 import IconComponent from '@/app/components/iconComponent';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 export interface TimePickerProps {
   value?: string;
@@ -26,7 +27,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
         const [time] = value.split(' ');
         const [h, m] = time.split(':');
         const hour = parseInt(h, 10);
-        
+
         if (hour === 0) {
           setHours('12');
           setPeriod('AM');
@@ -60,10 +61,10 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
       const now = new Date();
       let hour = now.getHours();
       const minute = now.getMinutes();
-      
+
       const newPeriod = hour >= 12 ? 'PM' : 'AM';
       const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-      
+
       setHours(displayHour.toString());
       setMinutes(minute.toString().padStart(2, '0'));
       setPeriod(newPeriod);
@@ -94,7 +95,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
 
     // Generate hours array (1-12)
     const hoursArray = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
-    
+
     // Generate minutes array (00-59)
     const minutesArray = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
 
@@ -106,9 +107,9 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
             type="button"
             disabled={disabled}
             className={cn(
-              'flex h-[55px] w-full items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5 text-left text-xs placeholder:text-gray-400 text-gray-700 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+              'flex h-[55px] w-full items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5 text-left text-xs text-gray-700 placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
               !value && 'text-gray-400',
-              className
+              className,
             )}
           >
             <span>{getDisplayValue()}</span>
@@ -182,7 +183,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
         </PopoverContent>
       </Popover>
     );
-  }
+  },
 );
 
 TimePicker.displayName = 'TimePicker';

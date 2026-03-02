@@ -1,6 +1,6 @@
 import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
-import { CreateExperience } from '@/types/experience';
+import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
 import { PurchaserDetails } from '@/types/purchaser';
 import { assertValidImageFiles } from '@/utils/images';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
@@ -137,6 +137,27 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
         'Content-Type': undefined,
       },
     });
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+}
+
+export async function createExperienceTicket(data: CreateExperienceTicket): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.post(`/v1/experiences/tickets/`, data);
 
     return {
       status: response.status,

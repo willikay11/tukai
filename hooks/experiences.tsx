@@ -7,9 +7,10 @@ import {
   fetchExperience,
   fetchExperiences,
   purchaseExperienceTicket,
+  createExperienceTicket,
 } from '@/services/experience';
+import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
 import { PurchaserDetails } from '@/types/purchaser';
-import { CreateExperience } from '@/types/experience';
 
 export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean) => {
   return useQuery({
@@ -61,5 +62,17 @@ export const useCreateExperience = () => {
   return useMutation({
     mutationKey: ['createExperience'],
     mutationFn: async (data: CreateExperience) => await createExperience(data),
+  });
+};
+
+export const useCreateExperienceTicket = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['createExperienceTicket'],
+    mutationFn: async (data: CreateExperienceTicket) => await createExperienceTicket(data),
+    onSettled: () => {
+      // Invalidate experience query to refetch updated experience details
+      queryClient.invalidateQueries({ queryKey: ['experience'] });
+    }
   });
 };

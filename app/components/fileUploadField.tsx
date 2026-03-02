@@ -282,9 +282,7 @@ export default function FileUploadField({
                 setDraggedIndex(null);
               }}
               className={`relative h-[105px] w-[155px] cursor-grab rounded-xl transition-transform active:cursor-grabbing ${
-                isDragging
-                  ? 'border-[1px] border-dashed border-primary bg-emerald-50/50 p-1'
-                  : ''
+                isDragging ? 'border-[1px] border-dashed border-primary bg-emerald-50/50 p-1' : ''
               } ${isDragging ? 'rotate-3' : ''}`}
             >
               <img

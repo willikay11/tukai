@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
+import IconComponent from '@/app/components/iconComponent';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
-import IconComponent from '@/app/components/iconComponent';
 
 export interface InvitedMember {
   id: string;
@@ -133,22 +134,21 @@ export function InviteMembers({
               </button>
             ))}
 
-            {isValidEmail(searchQuery) &&
-              !invitedMembers.find((m) => m.email === searchQuery) && (
-                <button
-                  type="button"
-                  onClick={() => handleAddEmail(searchQuery)}
-                  className="flex w-full items-center gap-3 border-t border-gray-200 px-4 py-3 text-left hover:bg-gray-50"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
-                    <IconComponent iconName="Mail01Icon" size={18} color="#10B981" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Invite via email</p>
-                    <p className="text-xs text-gray-500">{searchQuery}</p>
-                  </div>
-                </button>
-              )}
+            {isValidEmail(searchQuery) && !invitedMembers.find((m) => m.email === searchQuery) && (
+              <button
+                type="button"
+                onClick={() => handleAddEmail(searchQuery)}
+                className="flex w-full items-center gap-3 border-t border-gray-200 px-4 py-3 text-left hover:bg-gray-50"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
+                  <IconComponent iconName="Mail01Icon" size={18} color="#10B981" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Invite via email</p>
+                  <p className="text-xs text-gray-500">{searchQuery}</p>
+                </div>
+              </button>
+            )}
 
             {searchResults.length === 0 && !isValidEmail(searchQuery) && !isSearching && (
               <div className="px-4 py-3 text-center text-sm text-gray-500">No results found</div>

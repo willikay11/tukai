@@ -2,16 +2,19 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import moment from 'moment';
 import { RRule } from 'rrule';
 import * as z from 'zod';
 
-import IconComponent from '@/app/components/iconComponent';
 import FileUploadField from '@/app/components/fileUploadField';
+import IconComponent from '@/app/components/iconComponent';
+import LocationAutocompleteField from '@/app/components/locationAutocompleteField';
 import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { TimePicker } from '@/components/ui/time-picker';
 import { useGetInterestCategories } from '@/hooks/auth';
@@ -20,8 +23,6 @@ import { useGoogleMapsAutocomplete } from '@/hooks/places';
 import { toast } from '@/hooks/use-toast';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';
-import { Input } from '@/components/ui/input';
-import LocationAutocompleteField from '@/app/components/locationAutocompleteField';
 
 const experienceSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
@@ -41,7 +42,7 @@ const experienceSchema = z.object({
 export default function CreateExperienceAbout({
   onSuccess,
 }: {
-  onSuccess?: () => void;
+  onSuccess?: (experienceId: string) => void;
 }) {
   const { data: categories } = useGetInterestCategories();
   const { mutate: createExperience, isPending: isCreatingExperience } = useCreateExperience();
@@ -117,12 +118,17 @@ export default function CreateExperienceAbout({
         invitedGuestsEmails: [],
       },
       {
-        onSuccess: () => {
+        onSuccess: (response: any) => {
+          console.log('Experience created successfully:', response?.data?.id);
+          const experienceId = response?.data?.id;
           toast({
             title: 'Success',
             description: 'Experience created successfully.',
+            variant: 'success',
           });
-          onSuccess?.();
+          if (experienceId) {
+            onSuccess?.(experienceId);
+          }
         },
         onError: (error: any) => {
           toast({
@@ -147,7 +153,9 @@ export default function CreateExperienceAbout({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Upload Photo */}
             <div>
-              <p className="mb-2 text-sm font-semibold text-gray-800">Add details about the experience</p>
+              <p className="mb-2 text-sm font-semibold text-gray-800">
+                Add details about the experience
+              </p>
               <FormField
                 control={form.control}
                 name="uploadedFiles"
@@ -156,13 +164,15 @@ export default function CreateExperienceAbout({
                     <FormControl>
                       <FileUploadField
                         id="experience-poster"
-                        label=" Upload a experience poster (Dimensions: 540*540, Max 15 Mbs)"
+                        label=" Upload a experience poster (Dimensions: 1024*1024, Max 15 Mbs)"
                         buttonText="Add Photo(s)"
                         accept="image/*"
                         excludedMimeTypes={['image/svg+xml']}
-                        maxFiles={1}
-                        minImageWidth={540}
-                        minImageHeight={540}
+                        multiple
+                        minImageWidth={1024}
+                        minImageHeight={1024}
+                        maxImageWidth={4096}
+                        maxImageHeight={4096}
                         onValidationError={(errors) => {
                           const message = errors[0] || 'Please upload a valid image file.';
                           form.setError('uploadedFiles', {
@@ -197,12 +207,7 @@ export default function CreateExperienceAbout({
                     Experience Title
                   </label>
                   <FormControl>
-                    <Input
-                      id="title"
-                      type="text"
-                      placeholder="Experience Title"
-                      {...field}
-                    />
+                    <Input id="title" type="text" placeholder="Experience Title" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -239,7 +244,10 @@ export default function CreateExperienceAbout({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <label htmlFor="description" className="block text-sm font-semibold text-gray-800">
+                  <label
+                    htmlFor="description"
+                    className="block text-sm font-semibold text-gray-800"
+                  >
                     Add your experience description
                   </label>
                   <FormControl>
@@ -285,7 +293,10 @@ export default function CreateExperienceAbout({
               name="notIncluded"
               render={({ field }) => (
                 <FormItem>
-                  <label htmlFor="notIncluded" className="block text-sm font-semibold text-gray-800">
+                  <label
+                    htmlFor="notIncluded"
+                    className="block text-sm font-semibold text-gray-800"
+                  >
                     What's NOT included
                   </label>
                   <FormControl>
@@ -338,7 +349,9 @@ export default function CreateExperienceAbout({
 
             {/* Meeting Details */}
             <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-2">Meeting Details (optional)</label>
+              <label className="mb-2 block text-sm font-semibold text-gray-800">
+                Meeting Details (optional)
+              </label>
 
               <FormField
                 control={form.control}
@@ -347,11 +360,7 @@ export default function CreateExperienceAbout({
                   <FormItem className="mb-3">
                     <FormControl>
                       <div className="relative">
-                        <Input
-                          type="text"
-                          placeholder="Meeting/Pick-up Point"
-                          {...field}
-                        />
+                        <Input type="text" placeholder="Meeting/Pick-up Point" {...field} />
                         <IconComponent
                           iconName="LocationIcon"
                           size={18}
@@ -408,14 +417,15 @@ export default function CreateExperienceAbout({
 
             {/* Actions */}
             <div className="flex items-center justify-between gap-3 pt-4">
-              <button
-                type="button"
-                className="text-sm text-red-500 hover:text-red-600"
-              >
+              <button type="button" className="text-sm text-red-500 hover:text-red-600">
                 Cancel
               </button>
               <div className="flex gap-3">
-                <Button type="button" variant="outline" className="rounded-full text-xs font-semibold">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-full text-xs font-semibold"
+                >
                   Save & Exit
                 </Button>
                 <Button

@@ -46,6 +46,14 @@ export type CreateExperience = {
   invitedGuestsEmails: string[];
 };
 
+export type CreateExperienceTicket = {
+  experience: string;
+  name: string;
+  quantity: number;
+  price: number;
+  availableQuantity: number;
+};
+
 export function isExperience(item: any): item is Experience {
   return 'ticketsAvailable' in item && 'isSoldOut' in item;
 }

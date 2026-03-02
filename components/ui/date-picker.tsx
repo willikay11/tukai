@@ -1,16 +1,13 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { format } from "date-fns"
+import * as React from 'react';
 
-import { cn } from "@/lib/utils"
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import IconComponent from "@/app/components/iconComponent"
+import { format } from 'date-fns';
+
+import IconComponent from '@/app/components/iconComponent';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 export interface DatePickerProps {
   value?: string;
@@ -48,7 +45,7 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
               'flex h-[55px] w-full items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5 text-left text-xs placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
               !date && 'text-gray-400',
               date && 'text-gray-700',
-              className
+              className,
             )}
           >
             {date ? format(date, 'PPP') : <span>{placeholder}</span>}
@@ -60,7 +57,7 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
         </PopoverContent>
       </Popover>
     );
-  }
+  },
 );
 
 DatePicker.displayName = 'DatePicker';

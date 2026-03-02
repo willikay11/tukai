@@ -1,9 +1,9 @@
 import { getAuthSession } from '@/lib/auth';
 import { CommunityPostsQueryParams, CreateCommunity } from '@/types/community';
+import { assertValidImageFiles } from '@/utils/images';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 import { api, apiWithToken } from './apiService';
-import { assertValidImageFiles } from '@/utils/images';
 
 export async function getInterestBasedCommunities(
   category?: string[],

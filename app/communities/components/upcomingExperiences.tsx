@@ -22,7 +22,7 @@ export default function UpcomingExperiences({ category }: { category: string }) 
 
   return (
     <div className="grid grid-cols-12 gap-4 bg-gray-50 py-4">
-      <div className="col-span-12 md:col-start-2 md:col-span-10 xl:col-start-4 xl:col-span-6 2xl:col-span-4 2xl:col-start-5">
+      <div className="col-span-12 md:col-span-10 md:col-start-2 xl:col-span-6 xl:col-start-4 2xl:col-span-4 2xl:col-start-5">
         <div className="mb-4 inline-flex items-center space-x-2">
           <p className="text-base font-bold text-gray-700">Upcoming Experiences</p>
           {upcomingExperiences?.data?.count != 0 && (
