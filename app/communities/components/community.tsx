@@ -36,7 +36,7 @@ export default function SingleCommunity({
           className={`relative ${aspectRatio || 'aspect-square'} w-full overflow-hidden rounded-[5px]`}
         >
           <div className="absolute left-0 top-0 z-[1] inline-flex p-3">
-            {community.categories?.slice(0, 2).map((category) => (
+            {community?.categories?.slice(0, 2).map((category) => (
               <div
                 className="mr-1 whitespace-nowrap rounded-[40px] bg-gray-700 px-3 py-2 text-xs font-medium text-white opacity-75"
                 key={category.id}
@@ -44,7 +44,7 @@ export default function SingleCommunity({
                 {category.name}
               </div>
             ))}
-            {community.categories && community.categories.length > 2 && (
+            {community?.categories && community?.categories.length > 2 && (
               <div className="mr-1 whitespace-nowrap rounded-[40px] bg-gray-700 px-3 py-2 text-xs font-medium text-white opacity-75">
                 +{community.categories.length - 2}
               </div>
@@ -52,7 +52,7 @@ export default function SingleCommunity({
           </div>
           {!hasError ? (
             <ImageCarousel
-              images={community.photos.map((photo) => photo.photo)}
+              images={community?.photos?.map((photo) => photo.photo) || []}
               aspectRatio={aspectRatio}
             />
           ) : (
@@ -70,7 +70,7 @@ export default function SingleCommunity({
             dangerouslySetInnerHTML={{ __html: displayedText }}
           />
         </div>
-        <CommunityMembers members={community.members} size="20px" />
+        <CommunityMembers members={community?.members || []} size="20px" />
       </div>
     </div>
   );
