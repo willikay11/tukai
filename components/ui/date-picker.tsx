@@ -52,7 +52,7 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             <IconComponent iconName="Calendar01Icon" size={18} className="text-gray-400" />
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto rounded-[12px] p-0" align="start">
           <Calendar mode="single" selected={date} onSelect={handleSelect} initialFocus />
         </PopoverContent>
       </Popover>
