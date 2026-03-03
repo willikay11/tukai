@@ -104,7 +104,7 @@ export default function CreateExperienceSteps({
       </TabsContent>
 
       <TabsContent value="guests" className="mt-6">
-        <CreateExperienceInvites />
+        <CreateExperienceInvites experienceId={experience?.id || null} />
       </TabsContent>
 
       <TabsContent value="wallet" className="mt-6">

@@ -7,9 +7,15 @@ import { InviteCommunities } from '@/components/ui/invite-communities';
 import { InviteMembers, InvitedMember } from '@/components/ui/invite-members';
 import { useGetUsers } from '@/hooks/auth';
 import { useGetCommunities } from '@/hooks/communities';
+import { useAddGuestToExperience } from '@/hooks/experiences';
+import { toast } from '@/hooks/use-toast';
 import { Community } from '@/types/community';
 
-export default function CreateExperienceInvites() {
+export default function CreateExperienceInvites({
+  experienceId,
+}: {
+  experienceId?: string | null;
+}) {
   const initialInvitedMembers: InvitedMember[] = [];
 
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>(initialInvitedMembers);
@@ -30,6 +36,36 @@ export default function CreateExperienceInvites() {
     enabled: true,
     following: true,
   });
+
+  const { mutateAsync: addGuestToExperience, isPending: isAddingGuest } = useAddGuestToExperience(
+    experienceId || '',
+  );
+
+  const handleMemberInvited = async (members: InvitedMember[]) => {
+    // Find newly added member (last one in the new array that's not in current state)
+    const newMember = members.find((m) => !invitedMembers.some((existing) => existing.id === m.id));
+
+    // Update local state first
+    setInvitedMembers(members);
+
+    // If there's a new member with an email, call the API
+    if (newMember?.email && experienceId) {
+      try {
+        await addGuestToExperience(newMember.email);
+        toast({
+          title: 'Guest invited',
+          description: `${newMember.name} has been invited to the experience.`,
+          variant: 'success',
+        });
+      } catch (error: any) {
+        toast({
+          title: 'Error',
+          description: error?.message || 'Failed to invite guest.',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
 
   const memberSearchResults = useMemo<InvitedMember[]>(() => {
     if (!normalizedMemberQuery) {
@@ -79,9 +115,9 @@ export default function CreateExperienceInvites() {
 
         <InviteMembers
           invitedMembers={invitedMembers}
-          onMembersChange={setInvitedMembers}
+          onMembersChange={handleMemberInvited}
           searchResults={memberSearchResults}
-          isSearching={isSearchingUsers}
+          isSearching={isSearchingUsers || isAddingGuest}
           onSearch={(query) => {
             setMemberSearchQuery(query);
           }}

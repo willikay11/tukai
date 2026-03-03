@@ -4,6 +4,7 @@ import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
 import { PurchaserDetails } from '@/types/purchaser';
 import { assertValidImageFiles } from '@/utils/images';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
+import { ca } from 'date-fns/locale';
 
 export type ExperiencesQueryParams = {
   search?: string;
@@ -269,3 +270,23 @@ export const deleteExperienceTicket = async (ticketId: string): Promise<ApiRespo
     };
   }
 };
+
+export const addGuestToExperience = async(id: string, email: string) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.post(`/v1/experiences/${id}/guests/`, { email });
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+}

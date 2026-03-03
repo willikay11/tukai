@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
   ExperiencesQueryParams,
+  addGuestToExperience,
   bookmarkExperience,
   createExperience,
   createExperienceTicket,
@@ -115,3 +116,14 @@ export const useDeleteExperienceTicket = (ticketId: string) => {
     },
   });
 };
+
+export const useAddGuestToExperience = (experienceId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['addGuestToExperience', experienceId],
+    mutationFn: async (guestEmail: string) => await addGuestToExperience(experienceId, guestEmail),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
+    },
+  });
+}
