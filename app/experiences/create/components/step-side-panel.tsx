@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { Experience } from '@/types/experience';
 
 import CreateTickets from './createTickets';
+import ExperienceReview from './experienceReview';
 
 export type ExperienceStepId = 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
@@ -36,18 +37,8 @@ export default function ExperienceStepSidePanel({
         description="Update and save experience date and time first to continue."
       />
     ),
-    guests: (
-      <StepPlaceholderContent
-        title="Invite Guests"
-        description="Please add invite details for your guests"
-      />
-    ),
-    wallet: (
-      <StepPlaceholderContent
-        title="Wallet Details"
-        description="Please complete wallet details to continue"
-      />
-    ),
+    guests: <ExperienceReview experience={experience} />,
+    wallet: <ExperienceReview experience={experience} />,
   };
   const content = stepPanelContent[step];
 
