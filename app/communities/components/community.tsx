@@ -23,7 +23,7 @@ export default function SingleCommunity({
 
   // Determine whether to truncate text
   const shouldTruncate = community.description.length > 100;
-  const displayedText = !shouldTruncate ? safeText : safeText.slice(0, 100) + '...';
+  const displayedText = !shouldTruncate ? safeText : safeText?.slice(0, 100) + '...';
 
   if (community.id.startsWith('placeholder-')) {
     return <EventSkeleton />;
