@@ -8,6 +8,7 @@ import {
   fetchExperiences,
   purchaseExperienceTicket,
   createExperienceTicket,
+  updateExperience,
 } from '@/services/experience';
 import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
 import { PurchaserDetails } from '@/types/purchaser';
@@ -64,6 +65,17 @@ export const useCreateExperience = () => {
     mutationFn: async (data: CreateExperience) => await createExperience(data),
   });
 };
+
+export const useUpdateExperience = (id: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['updateExperience', id],
+    mutationFn: async (data: CreateExperience) => await updateExperience(id, data),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['experience', id] });
+    }
+  });
+}
 
 export const useCreateExperienceTicket = () => {
   const queryClient = useQueryClient();

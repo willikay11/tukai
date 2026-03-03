@@ -89,7 +89,7 @@ export default function CreateExperienceSteps({
       </TabsContent>
 
       <TabsContent value="dates-tickets" className="mt-6">
-        <ExperienceDates />
+        <ExperienceDates experienceId={experience?.id || null} experience={experience} />
       </TabsContent>
 
       <TabsContent value="guests" className="mt-6">
