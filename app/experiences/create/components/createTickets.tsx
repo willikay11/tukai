@@ -203,6 +203,13 @@ export default function CreateTickets({
     experience?.photos?.find((p) => p.isCover)?.photo ||
     experience?.photos?.[0]?.photo;
 
+  // Max date for ticket sales date pickers (experience end date)
+  const experienceEndDate = useMemo(() => {
+    if (!experience?.endDate) return undefined;
+    const endMoment = moment(experience.endDate);
+    return endMoment.isValid() ? endMoment.toDate() : undefined;
+  }, [experience?.endDate]);
+
   const submitNewTickets = async (values: CreateTicketsFormValues) => {
     if (!experienceId) {
       toast({
@@ -564,6 +571,7 @@ export default function CreateTickets({
                         })
                       }
                       placeholder="Start Date"
+                      maxDate={experienceEndDate}
                     />
                     {ticketErrors?.salesStartDate && (
                       <p className="mt-1 text-xs text-red-500">
@@ -600,6 +608,7 @@ export default function CreateTickets({
                         })
                       }
                       placeholder="End Date"
+                      maxDate={experienceEndDate}
                     />
                     {ticketErrors?.salesEndDate && (
                       <p className="mt-1 text-xs text-red-500">

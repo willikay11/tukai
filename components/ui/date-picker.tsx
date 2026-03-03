@@ -15,10 +15,11 @@ export interface DatePickerProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  maxDate?: Date;
 }
 
 const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
-  ({ className, value, onChange, placeholder = 'Select Date', disabled }, ref) => {
+  ({ className, value, onChange, placeholder = 'Select Date', disabled, maxDate }, ref) => {
     const [date, setDate] = React.useState<Date | undefined>(value ? new Date(value) : undefined);
 
     React.useEffect(() => {
@@ -53,7 +54,13 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-auto rounded-[12px] p-0" align="start">
-          <Calendar mode="single" selected={date} onSelect={handleSelect} initialFocus />
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={handleSelect}
+            initialFocus
+            disabled={maxDate ? { after: maxDate } : undefined}
+          />
         </PopoverContent>
       </Popover>
     );
