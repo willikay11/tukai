@@ -48,6 +48,13 @@ export default function CreateExperiencePage() {
     }
   }, [stepFromUrl]);
 
+  // Auto-show tickets panel if experience already has dates filled
+  useEffect(() => {
+    if (experience?.startDate && experience?.endDate) {
+      setHasUpdatedDates(true);
+    }
+  }, [experience]);
+
   const replaceCreateUrlParams = (
     nextValues: Partial<{ experienceId: string | null; step: ExperienceStepId }>,
   ) => {

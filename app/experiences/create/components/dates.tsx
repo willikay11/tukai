@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -56,6 +57,23 @@ export default function ExperienceDates({
       endTime: '',
     },
   });
+
+  // Prefill form with existing experience data on load/reload
+  useEffect(() => {
+    if (experience) {
+      const startMoment = experience.startDate ? moment(experience.startDate) : null;
+      const endMoment = experience.endDate ? moment(experience.endDate) : null;
+
+      form.reset({
+        isPaid: experience.isPaid ? 'paid' : 'free',
+        dateType: 'one-day', // Default, as dateType isn't stored in experience
+        isRecurring: false, // Default, as isRecurring isn't stored in experience
+        selectedDate: startMoment?.isValid() ? startMoment.format('YYYY-MM-DD') : '',
+        startTime: startMoment?.isValid() ? startMoment.format('HH:mm') : '',
+        endTime: endMoment?.isValid() ? endMoment.format('HH:mm') : '',
+      });
+    }
+  }, [experience, form]);
 
   const toIsoDateTime = (date: string, time: string) => {
     const dateTime = moment(`${date} ${time}`, 'YYYY-MM-DD HH:mm', true);

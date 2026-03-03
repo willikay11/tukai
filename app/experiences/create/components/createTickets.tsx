@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import moment from 'moment';
 import { z } from 'zod';
 
 import IconComponent from '@/app/components/iconComponent';
@@ -142,12 +143,32 @@ export default function CreateTickets({
   experienceId?: string | null;
   experience?: Experience;
 }) {
+  // Compute selectedDateSummary from experience dates
+  const selectedDateSummary = useMemo(() => {
+    if (!experience?.startDate || !experience?.endDate) {
+      return '';
+    }
+
+    const startMoment = moment(experience.startDate);
+    const endMoment = moment(experience.endDate);
+
+    if (!startMoment.isValid() || !endMoment.isValid()) {
+      return '';
+    }
+
+    const dateStr = startMoment.format('DD/MM/YYYY');
+    const startTimeStr = startMoment.format('hh:mm A');
+    const endTimeStr = endMoment.format('hh:mm A');
+
+    return `${dateStr} - ${startTimeStr} - ${endTimeStr}`;
+  }, [experience?.startDate, experience?.endDate]);
+
   const form = useForm<CreateTicketsFormValues>({
     resolver: zodResolver<CreateTicketsFormValues>(createTicketsSchema),
     mode: 'onChange',
     defaultValues: {
       commissionPayer: 'organizer',
-      selectedDateSummary: '24/03/2026 - 06:00 AM - 09:00 PM',
+      selectedDateSummary: selectedDateSummary || '',
       tickets: [
         {
           ticketName: '',
@@ -176,7 +197,6 @@ export default function CreateTickets({
 
   const watchedTickets = watch('tickets');
   const commissionPayer = watch('commissionPayer');
-  const selectedDateSummary = watch('selectedDateSummary');
 
   const existingTickets = experience?.tickets ?? [];
   const coverPhoto =
@@ -326,10 +346,9 @@ export default function CreateTickets({
 
         <div className="inline-flex items-center gap-2 rounded-full border border-dashed border-primary bg-emerald-100 px-4 py-2 text-sm font-medium text-gray-900">
           <IconComponent iconName="Calendar03Icon" size={16} color="#064E3B" />
-          <span className="text-xs text-green-900">Date: {selectedDateSummary}</span>
+          <span className="text-xs text-green-900">Date: {selectedDateSummary || 'No date set'}</span>
           <IconComponent iconName="ArrowDown01Icon" size={16} color="#064E3B" />
         </div>
-        <input type="hidden" {...register('selectedDateSummary')} />
 
         <div className="mt-4 space-y-5">
           {/* Existing tickets from API */}
