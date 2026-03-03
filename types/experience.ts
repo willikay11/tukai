@@ -41,6 +41,7 @@ export type CreateExperience = {
   recurrence_rule: string;
   categoriesIds: string[];
   isPublic?: boolean;
+  isPaid?: boolean;
   newPhotos?: File[];
   invitedCommunityIds: string[];
   invitedGuestsEmails: string[];

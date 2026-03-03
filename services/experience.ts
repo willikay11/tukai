@@ -170,6 +170,10 @@ export async function updateExperience(id: string, data: CreateExperience): Prom
       formData.append('is_public', String(data.isPublic));
     }
 
+    if (data.isPaid !== undefined) {
+      formData.append('is_paid', String(data.isPaid));
+    }
+
     if (data.newPhotos && data.newPhotos.length > 0) {
       await assertValidImageFiles(data.newPhotos);
       data.newPhotos.forEach((photo, index) => {

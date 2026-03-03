@@ -29,6 +29,7 @@ export default function CreateExperiencePage() {
 
   const [activeStep, setActiveStep] = useState<ExperienceStepId>(stepFromUrl || 'about');
   const [experienceId, setExperienceId] = useState<string | null>(experienceIdFromUrl);
+  const [hasUpdatedDates, setHasUpdatedDates] = useState(false);
 
   const { data: experienceResponse, isLoading: isLoadingExperience } = useFetchSingleExperience(
     experienceId || '',
@@ -38,6 +39,7 @@ export default function CreateExperiencePage() {
 
   useEffect(() => {
     setExperienceId(experienceIdFromUrl);
+    setHasUpdatedDates(false);
   }, [experienceIdFromUrl]);
 
   useEffect(() => {
@@ -88,6 +90,7 @@ export default function CreateExperiencePage() {
           currentStep={activeStep}
           onStepChange={handleStepChange}
           onExperienceCreated={handleExperienceCreated}
+          onDatesUpdatedSuccess={() => setHasUpdatedDates(true)}
           experience={experience}
           isLoadingExperience={isLoadingExperience}
         />
@@ -97,6 +100,7 @@ export default function CreateExperiencePage() {
           step={activeStep}
           experienceId={experienceId}
           experience={experience}
+          canShowDateTickets={hasUpdatedDates}
         />
       </div>
     </main>

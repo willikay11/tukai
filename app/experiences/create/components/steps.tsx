@@ -26,12 +26,14 @@ export default function CreateExperienceSteps({
   currentStep = 'about',
   onStepChange,
   onExperienceCreated,
+  onDatesUpdatedSuccess,
   experience,
   isLoadingExperience,
 }: {
   currentStep?: ExperienceStepId;
   onStepChange?: (step: ExperienceStepId) => void;
   onExperienceCreated?: (experienceId: string, step?: ExperienceStepId) => void;
+  onDatesUpdatedSuccess?: () => void;
   experience?: Experience;
   isLoadingExperience?: boolean;
 }) {
@@ -89,7 +91,11 @@ export default function CreateExperienceSteps({
       </TabsContent>
 
       <TabsContent value="dates-tickets" className="mt-6">
-        <ExperienceDates experienceId={experience?.id || null} experience={experience} />
+        <ExperienceDates
+          experienceId={experience?.id || null}
+          experience={experience}
+          onDatesUpdatedSuccess={onDatesUpdatedSuccess}
+        />
       </TabsContent>
 
       <TabsContent value="guests" className="mt-6">

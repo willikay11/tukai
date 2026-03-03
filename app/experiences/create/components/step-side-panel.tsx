@@ -14,16 +14,25 @@ export default function ExperienceStepSidePanel({
   step,
   experienceId,
   experience,
+  canShowDateTickets,
 }: {
   step: ExperienceStepId;
   experienceId?: string | null;
   experience?: Experience;
+  canShowDateTickets?: boolean;
 }) {
   const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
     about: (
       <StepPlaceholderContent title="Create Dates" description="Please add details to create dates" />
     ),
-    'dates-tickets': <CreateTickets experienceId={experienceId} experience={experience} />,
+    'dates-tickets': canShowDateTickets ? (
+      <CreateTickets experienceId={experienceId} experience={experience} />
+    ) : (
+      <StepPlaceholderContent
+        title="Create Tickets"
+        description="Update and save experience date and time first to continue."
+      />
+    ),
     guests: (
       <StepPlaceholderContent
         title="Invite Guests"

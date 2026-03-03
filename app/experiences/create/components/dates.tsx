@@ -23,7 +23,7 @@ import { toast } from '@/hooks/use-toast';
 import { Experience } from '@/types/experience';
 
 const experienceDatesSchema = z.object({
-  experienceType: z.enum(['paid', 'free']),
+  isPaid: z.enum(['paid', 'free']),
   dateType: z.enum(['one-day', 'multi-day', 'itinerary']),
   isRecurring: z.boolean().default(false),
   selectedDate: z.string().min(1, 'Please select a date'),
@@ -34,9 +34,11 @@ const experienceDatesSchema = z.object({
 export default function ExperienceDates({
   experienceId,
   experience,
+  onDatesUpdatedSuccess,
 }: {
   experienceId?: string | null;
   experience?: Experience;
+  onDatesUpdatedSuccess?: () => void;
 }) {
   const { mutateAsync: updateExperience, isPending: isUpdatingExperience } = useUpdateExperience(
     experienceId || '',
@@ -44,8 +46,9 @@ export default function ExperienceDates({
 
   const form = useForm<z.infer<typeof experienceDatesSchema>>({
     resolver: zodResolver(experienceDatesSchema),
+    mode: 'onChange',
     defaultValues: {
-      experienceType: 'paid',
+      isPaid: 'paid',
       dateType: 'one-day',
       isRecurring: false,
       selectedDate: '',
@@ -99,13 +102,14 @@ export default function ExperienceDates({
       await updateExperience({
         title: experience.title,
         description: experience.description,
-        googleMapPlaceId: 'ChIJkYb7L8EXLxgRWogSMeTPg8M', // Placeholder, update as needed
+        googleMapPlaceId: 'ChIJkYb7L8EXLxgRWogSMeTPg8M', // Placeholder, as location is required by API but not part of this form
         startDate: startDateTime,
         endDate: endDateTime,
         recurrence_rule:
           (experience as any).recurrenceRule || (experience as any).recurrence_rule || '',
         categoriesIds: experience.categories?.map((category) => category.id) || [],
         isPublic: experience.isPublic,
+        isPaid: values.isPaid === 'paid',
         invitedCommunityIds: [],
         invitedGuestsEmails: [],
       });
@@ -115,6 +119,7 @@ export default function ExperienceDates({
         description: 'Experience dates updated successfully.',
         variant: 'success',
       });
+      onDatesUpdatedSuccess?.();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -137,7 +142,7 @@ export default function ExperienceDates({
             {/* Experience Type - Paid or Free */}
             <FormField
               control={form.control}
-              name="experienceType"
+              name="isPaid"
               render={({ field }) => (
                 <FormItem className="space-y-3">
                   <FormLabel className="block text-sm font-medium text-gray-900">
@@ -303,6 +308,7 @@ export default function ExperienceDates({
                 <Button
                   type="button"
                   variant="outline"
+                  disabled={isUpdatingExperience || !form.formState.isValid}
                   className="rounded-full text-xs font-semibold"
                 >
                   Save & Exit
@@ -310,7 +316,7 @@ export default function ExperienceDates({
                 <Button
                   type="submit"
                   variant="gradient"
-                  disabled={isUpdatingExperience}
+                  disabled={isUpdatingExperience || !form.formState.isValid}
                   className="rounded-full px-6 text-xs font-semibold text-white"
                 >
                   {isUpdatingExperience ? 'Saving...' : 'Create Tickets'}
