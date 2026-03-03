@@ -210,6 +210,9 @@ export default function CreateTickets({
     return endMoment.isValid() ? endMoment.toDate() : undefined;
   }, [experience?.endDate]);
 
+  // Min date for ticket sales date pickers (current date)
+  const currentDate = useMemo(() => new Date(), []);
+
   const submitNewTickets = async (values: CreateTicketsFormValues) => {
     if (!experienceId) {
       toast({
@@ -354,7 +357,7 @@ export default function CreateTickets({
         <div className="inline-flex items-center gap-2 rounded-full border border-dashed border-primary bg-emerald-100 px-4 py-2 text-sm font-medium text-gray-900">
           <IconComponent iconName="Calendar03Icon" size={16} color="#064E3B" />
           <span className="text-xs text-green-900">Date: {selectedDateSummary || 'No date set'}</span>
-          <IconComponent iconName="ArrowDown01Icon" size={16} color="#064E3B" />
+          {/* <IconComponent iconName="ArrowDown01Icon" size={16} color="#064E3B" /> */}
         </div>
 
         <div className="mt-4 space-y-5">
@@ -571,6 +574,7 @@ export default function CreateTickets({
                         })
                       }
                       placeholder="Start Date"
+                      minDate={currentDate}
                       maxDate={experienceEndDate}
                     />
                     {ticketErrors?.salesStartDate && (
@@ -608,6 +612,7 @@ export default function CreateTickets({
                         })
                       }
                       placeholder="End Date"
+                      minDate={currentDate}
                       maxDate={experienceEndDate}
                     />
                     {ticketErrors?.salesEndDate && (

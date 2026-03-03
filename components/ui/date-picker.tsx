@@ -15,11 +15,12 @@ export interface DatePickerProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  minDate?: Date;
   maxDate?: Date;
 }
 
 const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
-  ({ className, value, onChange, placeholder = 'Select Date', disabled, maxDate }, ref) => {
+  ({ className, value, onChange, placeholder = 'Select Date', disabled, minDate, maxDate }, ref) => {
     const [date, setDate] = React.useState<Date | undefined>(value ? new Date(value) : undefined);
 
     React.useEffect(() => {
@@ -59,7 +60,10 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             selected={date}
             onSelect={handleSelect}
             initialFocus
-            disabled={maxDate ? { after: maxDate } : undefined}
+            disabled={[
+              ...(minDate ? [{ before: minDate }] : []),
+              ...(maxDate ? [{ after: maxDate }] : []),
+            ]}
           />
         </PopoverContent>
       </Popover>
