@@ -85,7 +85,11 @@ export default function ExperienceDates({
     return dateTime.toISOString();
   };
 
-  const toIsoEndDateTime = (date: string, time: string, dateType: 'one-day' | 'multi-day' | 'itinerary') => {
+  const toIsoEndDateTime = (
+    date: string,
+    time: string,
+    dateType: 'one-day' | 'multi-day' | 'itinerary',
+  ) => {
     if (dateType === 'one-day') {
       const endOfDay = moment(date, 'YYYY-MM-DD', true).endOf('day');
       return endOfDay.isValid() ? endOfDay.toISOString() : null;

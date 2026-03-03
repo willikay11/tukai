@@ -224,3 +224,48 @@ export async function createExperienceTicket(data: CreateExperienceTicket): Prom
     };
   }
 }
+
+export async function updateExperienceTicket(
+  ticketId: string,
+  data: CreateExperienceTicket,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.put(`/v1/experiences/tickets/${ticketId}/`, data);
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+}
+
+export const deleteExperienceTicket = async (ticketId: string): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.delete(`/v1/experiences/tickets/${ticketId}/`);
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+};

@@ -20,7 +20,10 @@ export interface DatePickerProps {
 }
 
 const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
-  ({ className, value, onChange, placeholder = 'Select Date', disabled, minDate, maxDate }, ref) => {
+  (
+    { className, value, onChange, placeholder = 'Select Date', disabled, minDate, maxDate },
+    ref,
+  ) => {
     const [date, setDate] = React.useState<Date | undefined>(value ? new Date(value) : undefined);
 
     React.useEffect(() => {

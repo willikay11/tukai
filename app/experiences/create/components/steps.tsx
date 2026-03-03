@@ -17,7 +17,12 @@ const STEPS = [
     icon: 'InformationCircleIcon',
     filledIcon: 'InformationCircleIcon',
   },
-  { id: 'dates-tickets', label: 'Dates & Tickets', icon: 'Ticket02Icon', filledIcon: 'Ticket02Icon' },
+  {
+    id: 'dates-tickets',
+    label: 'Dates & Tickets',
+    icon: 'Ticket02Icon',
+    filledIcon: 'Ticket02Icon',
+  },
   { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon', filledIcon: 'AddTeam02Icon' },
   { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon', filledIcon: 'WalletAdd01Icon' },
 ];
