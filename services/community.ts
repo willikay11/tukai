@@ -15,6 +15,7 @@ export async function getInterestBasedCommunities(
   following?: boolean,
 ) {
   try {
+    let request = api;
     const queryParams = new URLSearchParams();
     if (page) queryParams.append('page', page.toString());
     if (perPage) queryParams.append('page_size', perPage.toString());
@@ -23,12 +24,13 @@ export async function getInterestBasedCommunities(
     if (showUpComingExperiences) queryParams.append('upcoming_experiences', 'true');
     if (recommendedCommunities) queryParams.append('recommended', 'true');
     if (popularCommunities) queryParams.append('popular', '4');
-    if (following) queryParams.append('following', 'true');
+    if (following) {
+      queryParams.append('following', 'true');
+      request = await apiWithToken();
+    }
     queryParams.append('status', 'published');
 
-    const api = await apiWithToken();
-
-    const response = await api.get(`/v1/communities/?${queryParams.toString()}`);
+    const response = await request.get(`/v1/communities/?${queryParams.toString()}`);
 
     return {
       status: response.status,
@@ -50,11 +52,7 @@ export async function fetchCommunity(communityId: string) {
   try {
     const session: any = await getAuthSession();
 
-    const response = await api.get(`/v1/communities/${communityId}`, {
-      headers: {
-        Authorization: `Bearer ${session?.user?.accessToken}`,
-      },
-    });
+    const response = await api.get(`/v1/communities/${communityId}`);
     return {
       status: response.status,
       success: true,
