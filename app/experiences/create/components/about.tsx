@@ -4,10 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { $generateHtmlFromNodes } from '@lexical/html';
+import { $getRoot, EditorState, SerializedEditorState } from 'lexical';
 import moment from 'moment';
 import { RRule } from 'rrule';
 import * as z from 'zod';
 
+import { Editor } from '@/components/blocks/editor-00/editor';
 import FileUploadField from '@/app/components/fileUploadField';
 import IconComponent from '@/app/components/iconComponent';
 import LocationAutocompleteField from '@/app/components/locationAutocompleteField';
@@ -40,6 +43,92 @@ const experienceSchema = z.object({
   }),
 });
 
+const toSerializedEditorState = (text: string): SerializedEditorState =>
+  ({
+    root: {
+      children: [
+        {
+          children: [
+            {
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text,
+              type: 'text',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+        },
+      ],
+      direction: 'ltr',
+      format: '',
+      indent: 0,
+      type: 'root',
+      version: 1,
+    },
+  }) as unknown as SerializedEditorState;
+
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const plainTextToHtml = (value: string) => {
+  const escaped = escapeHtml(value || '');
+  return `<p>${escaped.replace(/\n/g, '<br />')}</p>`;
+};
+
+const normalizeIncomingHtml = (value: string) => {
+  if (!value) return '';
+
+  const unescaped = value.replace(/\\"/g, '"').trim();
+  const withoutWrappingQuotes =
+    unescaped.startsWith('"') && unescaped.endsWith('"')
+      ? unescaped.slice(1, -1)
+      : unescaped;
+
+  if (
+    withoutWrappingQuotes.includes('&lt;') ||
+    withoutWrappingQuotes.includes('&gt;') ||
+    withoutWrappingQuotes.includes('&quot;')
+  ) {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = withoutWrappingQuotes;
+    return textarea.value;
+  }
+
+  return withoutWrappingQuotes;
+};
+
+const htmlToPlainText = (value: string) => {
+  if (!value) return '';
+  if (!value.includes('<')) return value;
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(value, 'text/html');
+  return (doc.body.textContent || '').trim();
+};
+
+const getRichTextValue = (source: Record<string, unknown>, keys: string[]) => {
+  for (const key of keys) {
+    const value = source[key];
+    if (typeof value === 'string') {
+      return value;
+    }
+  }
+
+  return '';
+};
+
 export default function CreateExperienceAbout({
   onSuccess,
   experience,
@@ -52,6 +141,12 @@ export default function CreateExperienceAbout({
   const locationInputRef = useRef<HTMLDivElement>(null);
   const [locationInput, setLocationInput] = useState('');
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [editorHydrationSeed, setEditorHydrationSeed] = useState(0);
+  const [editorHtmlValues, setEditorHtmlValues] = useState({
+    description: '',
+    included: '',
+    notIncluded: '',
+  });
 
   const { data: googlePlaces, isFetching: isFetchingGooglePlaces } = useGoogleMapsAutocomplete(
     locationInput,
@@ -87,11 +182,24 @@ export default function CreateExperienceAbout({
 
   useEffect(() => {
     if (experience) {
+      const experienceData = experience as unknown as Record<string, unknown>;
+      const pulledDescription = normalizeIncomingHtml(experience.description || '');
+      const pulledIncluded = normalizeIncomingHtml(
+        getRichTextValue(experienceData, ['included', 'whatsIncluded']),
+      );
+      const pulledNotIncluded = normalizeIncomingHtml(
+        getRichTextValue(experienceData, [
+        'notIncluded',
+        'not_included',
+        'whatsNotIncluded',
+      ]),
+      );
+
       form.reset({
         title: experience.title || '',
-        description: experience.description || '',
-        included: '',
-        notIncluded: '',
+        description: htmlToPlainText(pulledDescription),
+        included: htmlToPlainText(pulledIncluded),
+        notIncluded: htmlToPlainText(pulledNotIncluded),
         location: experience.location?.id || '',
         meetingPoint: '',
         meetingTime: '',
@@ -102,6 +210,26 @@ export default function CreateExperienceAbout({
       if (experience.location?.formattedAddress) {
         setLocationInput(experience.location.formattedAddress);
       }
+
+      setEditorHtmlValues({
+        description: pulledDescription
+          ? pulledDescription.includes('<')
+            ? pulledDescription
+            : plainTextToHtml(pulledDescription)
+          : '',
+        included: pulledIncluded
+          ? pulledIncluded.includes('<')
+            ? pulledIncluded
+            : plainTextToHtml(pulledIncluded)
+          : '',
+        notIncluded: pulledNotIncluded
+          ? pulledNotIncluded.includes('<')
+            ? pulledNotIncluded
+            : plainTextToHtml(pulledNotIncluded)
+          : '',
+      });
+
+      setEditorHydrationSeed((prev) => prev + 1);
     }
   }, [experience, form]);
 
@@ -129,7 +257,7 @@ export default function CreateExperienceAbout({
     createExperience(
       {
         title: values.title,
-        description: values.description,
+        description: editorHtmlValues.description || plainTextToHtml(values.description),
         googleMapPlaceId: values.location,
         startDate: today,
         endDate: '2026-03-27T18:39:20.886Z',
@@ -274,12 +402,16 @@ export default function CreateExperienceAbout({
                     Add your experience description
                   </label>
                   <FormControl>
-                    <textarea
-                      id="description"
-                      placeholder="Grab people's attention with a detailed description about the experience..."
-                      {...field}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
-                      rows={4}
+                    <Editor
+                      key={`description-${experience?.id || 'new'}-${editorHydrationSeed}`}
+                      editorSerializedState={toSerializedEditorState(field.value || '')}
+                      onChange={(editorState: EditorState, editor) => {
+                        editorState.read(() => {
+                          field.onChange($getRoot().getTextContent());
+                          const html = $generateHtmlFromNodes(editor, null);
+                          setEditorHtmlValues((prev) => ({ ...prev, description: html }));
+                        });
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -297,12 +429,16 @@ export default function CreateExperienceAbout({
                     What's included
                   </label>
                   <FormControl>
-                    <textarea
-                      id="included"
-                      placeholder="Add what is included in this experience..."
-                      {...field}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
-                      rows={3}
+                    <Editor
+                      key={`included-${experience?.id || 'new'}-${editorHydrationSeed}`}
+                      editorSerializedState={toSerializedEditorState(field.value || '')}
+                      onChange={(editorState: EditorState, editor) => {
+                        editorState.read(() => {
+                          field.onChange($getRoot().getTextContent());
+                          const html = $generateHtmlFromNodes(editor, null);
+                          setEditorHtmlValues((prev) => ({ ...prev, included: html }));
+                        });
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -323,12 +459,16 @@ export default function CreateExperienceAbout({
                     What's NOT included
                   </label>
                   <FormControl>
-                    <textarea
-                      id="notIncluded"
-                      placeholder="Add what is NOT included in this experience..."
-                      {...field}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
-                      rows={3}
+                    <Editor
+                      key={`notIncluded-${experience?.id || 'new'}-${editorHydrationSeed}`}
+                      editorSerializedState={toSerializedEditorState(field.value || '')}
+                      onChange={(editorState: EditorState, editor) => {
+                        editorState.read(() => {
+                          field.onChange($getRoot().getTextContent());
+                          const html = $generateHtmlFromNodes(editor, null);
+                          setEditorHtmlValues((prev) => ({ ...prev, notIncluded: html }));
+                        });
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
