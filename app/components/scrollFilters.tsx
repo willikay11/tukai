@@ -105,8 +105,24 @@ export default function ScrollFilters({
 
   // Handle filter change and update URL with categoryId
   const handleCategoryChange = (categoryId: string) => {
-    if (filters.find((filter) => filter.value === categoryId)?.shouldBeLoggedIn && !session) {
-      setOpenSignIn(true);
+    const isMyCommunities = categoryId === 'my-communities';
+    const requiresAuth =
+      isMyCommunities ||
+      filters.find((filter) => filter.value === categoryId)?.shouldBeLoggedIn;
+
+    if (requiresAuth && !session) {
+      if (isMyCommunities) {
+        setOpenSignIn(true, () => {
+          setSelectedOption(categoryId);
+          setSelectedCategoryId(categoryId);
+
+          const params = new URLSearchParams(searchParams.toString());
+          params.set('category', categoryId);
+          router.replace(`${pathname}?${params.toString()}`, { scroll: true });
+        });
+      } else {
+        setOpenSignIn(true);
+      }
       return;
     }
     setSelectedOption(categoryId);

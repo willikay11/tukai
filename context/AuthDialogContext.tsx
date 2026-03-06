@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, createContext, useContext, useState } from 'react';
+import { ReactNode, createContext, useContext, useRef, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -9,19 +9,21 @@ import SignInForm from '@/components/ui/form/sign-in';
 import { toast } from '@/hooks/use-toast';
 
 type AuthDialogType = {
-  setOpenSignIn: (open: boolean) => void;
+  setOpenSignIn: (open: boolean, onLoginSuccess?: () => void) => void;
 };
 
 const AuthDialogContext = createContext<AuthDialogType | undefined>(undefined);
 
 export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
   const [openSignIn, setOpenSignIn] = useState(false);
+  const onLoginSuccessRef = useRef<(() => void) | null>(null);
   const router = useRouter();
 
   return (
     <AuthDialogContext.Provider
       value={{
-        setOpenSignIn: (open: boolean) => {
+        setOpenSignIn: (open: boolean, onLoginSuccess?: () => void) => {
+          onLoginSuccessRef.current = onLoginSuccess || null;
           setOpenSignIn(open);
         },
       }}
@@ -30,12 +32,15 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
         open={openSignIn}
         onOpenChange={() => {
           setOpenSignIn(false);
+          onLoginSuccessRef.current = null;
           router.back();
         }}
       >
         <DialogContent className="gap-0 px-4 md:px-16">
           <SignInForm
             onLogin={() => {
+              onLoginSuccessRef.current?.();
+              onLoginSuccessRef.current = null;
               setOpenSignIn(false);
               toast({
                 description: 'Welcome Back!',
