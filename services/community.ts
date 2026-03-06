@@ -26,8 +26,6 @@ export async function getInterestBasedCommunities(
     if (following) queryParams.append('following', 'true');
     queryParams.append('status', 'published');
 
-    const api = await apiWithToken();
-
     const response = await api.get(`/v1/communities/?${queryParams.toString()}`);
 
     return {
@@ -50,11 +48,7 @@ export async function fetchCommunity(communityId: string) {
   try {
     const session: any = await getAuthSession();
 
-    const response = await api.get(`/v1/communities/${communityId}`, {
-      headers: {
-        Authorization: `Bearer ${session?.user?.accessToken}`,
-      },
-    });
+    const response = await api.get(`/v1/communities/${communityId}`);
     return {
       status: response.status,
       success: true,

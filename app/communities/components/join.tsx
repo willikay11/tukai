@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 import { useJoinCommunity, useJoinCommunityViaInvite } from '@/hooks/communities';
 import { toast } from '@/hooks/use-toast';
 import { CommunityMember } from '@/types/community';
@@ -12,15 +14,16 @@ import { CommunityMember } from '@/types/community';
 export default function Join({
   communityId,
   members,
-  currentUserId,
   token,
 }: {
   communityId: string;
   members: CommunityMember[];
-  currentUserId: string;
   token?: string;
 }) {
   const router = useRouter();
+  const { setOpenSignIn } = useAuthDialog();
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id;
   const [isRequested, setIsRequested] = useState(false);
   const {
     mutate: joinCommunityMutation,
@@ -80,9 +83,13 @@ export default function Join({
 
   useEffect(() => {
     if (token) {
+      if (!currentUserId) {
+        setOpenSignIn(true);
+        return;
+      }
       joinCommunityViaInviteMutation({ communityId, token });
     }
-  }, [token]);
+  }, [token, currentUserId, communityId, joinCommunityViaInviteMutation, setOpenSignIn]);
 
   if (member && member.inviteStatus === 'accepted') {
     return null;
@@ -90,7 +97,13 @@ export default function Join({
 
   return (
     <Button
-      onClick={() => joinCommunityMutation(communityId)}
+      onClick={() => {
+        if (!currentUserId) {
+          setOpenSignIn(true);
+          return;
+        }
+        joinCommunityMutation(communityId);
+      }}
       disabled={isPending || isInvitePending || isRequested}
       className="mr-2.5"
     >

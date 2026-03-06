@@ -6,7 +6,6 @@ import IconComponent from '@/app/components/iconComponent';
 import Share from '@/app/components/share';
 import PhotoGallery from '@/components/ui/PhotoGallery';
 import { Separator } from '@/components/ui/separator';
-import { getAuthSession } from '@/lib/auth';
 import { fetchCommunity } from '@/services/community';
 import { ApiResponse } from '@/types/apiResponse';
 import { Community, CommunityMember } from '@/types/community';
@@ -16,7 +15,6 @@ import CommunityAdministrator from '../components/communityAdministrator';
 import CommunityMembers from '../components/communityMembers';
 import Join from '../components/join';
 import UpcomingExperiences from '../components/upcomingExperiences';
-import AuthGuard from './components/authGuard';
 import CommunityTabs from './components/communityTabs';
 
 export default async function ViewCommunityPage({
@@ -27,13 +25,6 @@ export default async function ViewCommunityPage({
   searchParams: { token?: string };
 }) {
   const token = searchParams.token;
-  const session: Session | null = await getAuthSession();
-
-  if (!session) {
-    return <AuthGuard />;
-  }
-
-  const currentUserId = session?.user?.id || '';
 
   const communityResponse: ApiResponse = await fetchCommunity(params.communityId);
 
@@ -60,7 +51,6 @@ export default async function ViewCommunityPage({
                 <Join
                   communityId={community.id}
                   members={community.members}
-                  currentUserId={currentUserId}
                   token={token}
                 />
                 <Share
