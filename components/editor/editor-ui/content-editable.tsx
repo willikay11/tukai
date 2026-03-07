@@ -16,14 +16,14 @@ export function ContentEditable({
     <LexicalContentEditable
       className={
         className ??
-        `ContentEditable__root relative block min-h-72 min-h-full overflow-auto px-8 py-4 focus:outline-none`
+        `ContentEditable__root relative block min-h-72 min-h-full overflow-auto px-3 py-4 focus:outline-none`
       }
       aria-placeholder={placeholder}
       placeholder={
         <div
           className={
             placeholderClassName ??
-            `pointer-events-none absolute top-0 left-0 overflow-hidden px-8 py-[18px] text-ellipsis select-none text-sm text-gray-400`
+            `pointer-events-none absolute top-0 left-0 overflow-hidden px-3 py-[18px] text-ellipsis select-none text-sm text-gray-400`
           }
         >
           {placeholder}
