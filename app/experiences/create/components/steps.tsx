@@ -108,6 +108,7 @@ export default function CreateExperienceSteps({
         <CreateExperienceInvites
           experienceId={experience?.id || null}
           onInvitesChange={onInvitesChange}
+          onNext={() => handleStepChange('wallet')}
         />
       </TabsContent>
 

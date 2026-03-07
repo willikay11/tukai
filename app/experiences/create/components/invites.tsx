@@ -14,9 +14,11 @@ import { Community } from '@/types/community';
 export default function CreateExperienceInvites({
   experienceId,
   onInvitesChange,
+  onNext,
 }: {
   experienceId?: string | null;
   onInvitesChange?: (members: InvitedMember[], communities: Community[]) => void;
+  onNext?: () => void;
 }) {
   const initialInvitedMembers: InvitedMember[] = [];
 
@@ -159,6 +161,7 @@ export default function CreateExperienceInvites({
             <Button
               type="button"
               variant="gradient"
+              onClick={onNext}
               className="rounded-full px-6 text-xs font-semibold text-white"
             >
               Next
