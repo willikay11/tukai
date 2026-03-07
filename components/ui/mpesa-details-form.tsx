@@ -38,7 +38,7 @@ export function MpesaDetailsForm() {
       <div className="mt-3">
         <Select value={country} onValueChange={setCountry}>
           <SelectTrigger
-            className="h-[50px] text-sm shadow-none"
+            className="h-[50px] text-sm shadow-none data-[placeholder]:text-sm data-[placeholder]:text-gray-400"
             prefixIcon={<IconComponent iconName="Location01Icon" size={18} color="#374151" />}
           >
             <SelectValue placeholder="Country" />

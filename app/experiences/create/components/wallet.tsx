@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import IconComponent from '@/app/components/iconComponent';
+import { BankAccountDetailsForm } from '@/components/ui/bank-account-details-form';
 import { Button } from '@/components/ui/button';
 import { MpesaDetailsForm } from '@/components/ui/mpesa-details-form';
 
@@ -67,6 +68,7 @@ export default function CreateExperienceWallet() {
       </div>
 
       {paymentMethod === 'mpesa' ? <MpesaDetailsForm /> : null}
+      {paymentMethod === 'bank_account' ? <BankAccountDetailsForm /> : null}
 
       <div className="mt-8 flex items-center justify-between gap-3">
         <button type="button" className="text-sm text-red-500 hover:text-red-600">
