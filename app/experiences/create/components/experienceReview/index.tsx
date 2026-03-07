@@ -2,7 +2,11 @@
 
 import sanitizeHtml from 'sanitize-html';
 
+import IconComponent from '@/app/components/iconComponent';
+import { InvitedMember } from '@/components/ui/invite-members';
+import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
+import { User } from '@/types/user';
 
 import ReviewCategories from './reviewCategories';
 import ReviewCommunities from './reviewCommunities';
@@ -14,9 +18,15 @@ import ReviewTickets from './reviewTickets';
 
 export interface ExperienceReviewProps {
   experience?: Experience;
+  invitedMembers?: InvitedMember[];
+  invitedCommunities?: Community[];
 }
 
-export default function ExperienceReview({ experience }: ExperienceReviewProps) {
+export default function ExperienceReview({
+  experience,
+  invitedMembers = [],
+  invitedCommunities = [],
+}: ExperienceReviewProps) {
   if (!experience) {
     return (
       <div className="flex h-full items-center justify-center text-sm text-gray-500">
@@ -27,6 +37,27 @@ export default function ExperienceReview({ experience }: ExperienceReviewProps) 
 
   const coverPhoto =
     experience.photos?.find((p) => p.isCover)?.photo || experience.photos?.[0]?.photo;
+
+  const invitedMembersAsUsers: User[] = invitedMembers.map((member) => {
+    const [firstName = '', ...rest] = (member.name || '').trim().split(' ');
+    const lastName = rest.join(' ');
+
+    return {
+      id: member.id,
+      firstName,
+      lastName,
+      displayName: member.name,
+      picture: member.image || '',
+      email: member.email,
+    };
+  });
+
+  const mergedGuests = [...invitedMembersAsUsers];
+  for (const guest of experience.coHosts || []) {
+    if (!mergedGuests.some((member) => member.id === guest.id)) {
+      mergedGuests.push(guest);
+    }
+  }
 
   return (
     <div className="h-full overflow-y-auto">
@@ -81,11 +112,15 @@ export default function ExperienceReview({ experience }: ExperienceReviewProps) 
 
       {/* Experience Type */}
       <div className="mt-6">
-        <h3 className="text-sm font-semibold text-gray-900">Experience Type</h3>
-        <div className="mt-2 flex items-center gap-2 text-xs text-gray-700">
-          <span className="text-gray-400">🔒</span>
-          <span>{experience.isPublic ? 'Public' : 'Private'}</span>
-          <span className="text-gray-400">
+        <h3 className="text-base font-semibold text-gray-700">Experience Type</h3>
+        <div className="mt-3 flex items-center gap-2">
+          <div className="flex items-end gap-1">
+            <IconComponent iconName="UserRemoveIcon" size={18} color="#1F2937" />
+          </div>
+          <span className="text-xs font-medium text-gray-800">
+            {experience.isPublic ? 'Public' : 'Private'}
+          </span>
+          <span className="text-xs text-gray-500">
             {experience.isPublic ? '(Anyone can join)' : '(Only invited guests can join)'}
           </span>
         </div>
@@ -95,10 +130,10 @@ export default function ExperienceReview({ experience }: ExperienceReviewProps) 
       <ReviewTickets tickets={experience.tickets} coverPhoto={coverPhoto} />
 
       {/* Guests */}
-      <ReviewGuests guests={experience.coHosts} />
+      <ReviewGuests guests={mergedGuests} />
 
       {/* Invited Communities */}
-      <ReviewCommunities />
+      <ReviewCommunities communities={invitedCommunities} />
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import { InvitedMember } from '@/components/ui/invite-members';
+import { Community } from '@/types/community';
 import { useFetchSingleExperience } from '@/hooks/experiences';
 
 import ExperienceStepSidePanel from './components/step-side-panel';
@@ -30,6 +32,8 @@ export default function CreateExperiencePage() {
   const [activeStep, setActiveStep] = useState<ExperienceStepId>(stepFromUrl || 'about');
   const [experienceId, setExperienceId] = useState<string | null>(experienceIdFromUrl);
   const [hasUpdatedDates, setHasUpdatedDates] = useState(false);
+  const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>([]);
+  const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
 
   const { data: experienceResponse, isLoading: isLoadingExperience } = useFetchSingleExperience(
     experienceId || '',
@@ -105,6 +109,10 @@ export default function CreateExperiencePage() {
               replaceCreateUrlParams({ step: nextStep });
             }
           }}
+          onInvitesChange={(members, communities) => {
+            setInvitedMembers(members);
+            setInvitedCommunities(communities);
+          }}
           experience={experience}
           isLoadingExperience={isLoadingExperience}
         />
@@ -115,6 +123,8 @@ export default function CreateExperiencePage() {
           experienceId={experienceId}
           experience={experience}
           canShowDateTickets={hasUpdatedDates}
+          invitedMembers={invitedMembers}
+          invitedCommunities={invitedCommunities}
         />
       </div>
     </main>

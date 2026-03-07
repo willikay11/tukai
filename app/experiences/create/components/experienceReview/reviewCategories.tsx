@@ -1,5 +1,6 @@
 'use client';
 
+import CategoryPill from '@/components/ui/categoryPill';
 import { ExperienceCategory } from '@/types/experienceCategory';
 
 export interface ReviewCategoriesProps {
@@ -11,17 +12,19 @@ export default function ReviewCategories({ categories }: ReviewCategoriesProps) 
     return null;
   }
 
+  const handleCategoryToggle = () => {};
+
   return (
     <div className="mt-6">
       <h3 className="text-sm font-semibold text-gray-900">Categories</h3>
       <div className="mt-2 flex flex-wrap gap-2">
         {categories.map((category) => (
-          <span
+          <CategoryPill
             key={category.id}
-            className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-700"
-          >
-            {category.name}
-          </span>
+            category={category}
+            onClick={handleCategoryToggle}
+            isSelected={false}
+          />
         ))}
       </div>
     </div>

@@ -23,7 +23,7 @@ export default function ReviewTickets({ tickets, coverPhoto }: ReviewTicketsProp
 
   return (
     <div className="mt-6">
-      <h3 className="text-sm font-semibold text-gray-900">Tickets</h3>
+      <h3 className="text-base font-semibold text-gray-700">Tickets</h3>
       <div className="mt-2 space-y-3">
         {tickets.map((ticket) => (
           <ReviewTicketCard key={ticket.id} ticket={ticket} coverPhoto={coverPhoto} />

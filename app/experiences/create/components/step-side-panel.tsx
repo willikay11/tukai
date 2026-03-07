@@ -4,6 +4,8 @@ import { ReactNode } from 'react';
 
 import Image from 'next/image';
 
+import { InvitedMember } from '@/components/ui/invite-members';
+import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 
 import CreateTickets from './createTickets';
@@ -16,11 +18,15 @@ export default function ExperienceStepSidePanel({
   experienceId,
   experience,
   canShowDateTickets,
+  invitedMembers,
+  invitedCommunities,
 }: {
   step: ExperienceStepId;
   experienceId?: string | null;
   experience?: Experience;
   canShowDateTickets?: boolean;
+  invitedMembers?: InvitedMember[];
+  invitedCommunities?: Community[];
 }) {
   const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
     about: (
@@ -37,8 +43,20 @@ export default function ExperienceStepSidePanel({
         description="Update and save experience date and time first to continue."
       />
     ),
-    guests: <ExperienceReview experience={experience} />,
-    wallet: <ExperienceReview experience={experience} />,
+    guests: (
+      <ExperienceReview
+        experience={experience}
+        invitedMembers={invitedMembers}
+        invitedCommunities={invitedCommunities}
+      />
+    ),
+    wallet: (
+      <ExperienceReview
+        experience={experience}
+        invitedMembers={invitedMembers}
+        invitedCommunities={invitedCommunities}
+      />
+    ),
   };
   const content = stepPanelContent[step];
 

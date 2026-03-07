@@ -1,7 +1,9 @@
 'use client';
 
 import IconComponent from '@/app/components/iconComponent';
+import { InvitedMember } from '@/components/ui/invite-members';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 
 import CreateExperienceAbout from './about';
@@ -30,6 +32,7 @@ export default function CreateExperienceSteps({
   onStepChange,
   onExperienceCreated,
   onDatesUpdatedSuccess,
+  onInvitesChange,
   experience,
   isLoadingExperience,
 }: {
@@ -37,6 +40,7 @@ export default function CreateExperienceSteps({
   onStepChange?: (step: ExperienceStepId) => void;
   onExperienceCreated?: (experienceId: string, step?: ExperienceStepId) => void;
   onDatesUpdatedSuccess?: (nextStep?: 'guests') => void;
+  onInvitesChange?: (members: InvitedMember[], communities: Community[]) => void;
   experience?: Experience;
   isLoadingExperience?: boolean;
 }) {
@@ -101,7 +105,10 @@ export default function CreateExperienceSteps({
       </TabsContent>
 
       <TabsContent value="guests" className="mt-6">
-        <CreateExperienceInvites experienceId={experience?.id || null} />
+        <CreateExperienceInvites
+          experienceId={experience?.id || null}
+          onInvitesChange={onInvitesChange}
+        />
       </TabsContent>
 
       <TabsContent value="wallet" className="mt-6">

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import IconComponent from '@/app/components/iconComponent';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { GuestPill } from '@/components/ui/guest-pill';
 import { Input } from '@/components/ui/input';
 
 export interface InvitedMember {
@@ -165,25 +166,12 @@ export function InviteMembers({
       {invitedMembers.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {displayedMembers.map((member) => (
-            <div
+            <GuestPill
               key={member.id}
-              className="inline-flex items-center gap-2 rounded-full bg-gray-100 py-1.5 pl-1.5 pr-2"
-            >
-              <Avatar className="h-6 w-6">
-                {member.image ? <AvatarImage src={member.image} alt={member.name} /> : null}
-                <AvatarFallback className="bg-gray-200 text-gray-500">
-                  <IconComponent iconName="UserIcon" size={14} color="gray" />
-                </AvatarFallback>
-              </Avatar>
-              <span className="max-w-[112px] truncate text-xs text-gray-700">{member.name}</span>
-              <button
-                type="button"
-                onClick={() => handleRemoveMember(member.id)}
-                className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-400 hover:bg-gray-500"
-              >
-                <IconComponent iconName="Cancel01Icon" size={12} color="white" />
-              </button>
-            </div>
+              name={member.name}
+              image={member.image}
+              onRemove={() => handleRemoveMember(member.id)}
+            />
           ))}
 
           {remainingCount > 0 && (

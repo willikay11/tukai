@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { InviteCommunities } from '@/components/ui/invite-communities';
@@ -13,8 +13,10 @@ import { Community } from '@/types/community';
 
 export default function CreateExperienceInvites({
   experienceId,
+  onInvitesChange,
 }: {
   experienceId?: string | null;
+  onInvitesChange?: (members: InvitedMember[], communities: Community[]) => void;
 }) {
   const initialInvitedMembers: InvitedMember[] = [];
 
@@ -22,6 +24,10 @@ export default function CreateExperienceInvites({
   const [memberSearchQuery, setMemberSearchQuery] = useState('');
 
   const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
+
+  useEffect(() => {
+    onInvitesChange?.(invitedMembers, invitedCommunities);
+  }, [invitedMembers, invitedCommunities, onInvitesChange]);
 
   const normalizedMemberQuery = memberSearchQuery.trim();
 

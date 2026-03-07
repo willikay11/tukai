@@ -34,7 +34,7 @@ export default function ReviewCommunities({ communities }: ReviewCommunitiesProp
 
   return (
     <div className="mt-6">
-      <h3 className="text-sm font-semibold text-gray-900">My Invited Communities</h3>
+      <h3 className="text-xs font-semibold text-gray-700">My Invited Communities</h3>
       <div className="mt-2 flex flex-wrap gap-3">
         {communities.map((community) => (
           <div key={community.id} className="flex items-center gap-2">
