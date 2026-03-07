@@ -45,43 +45,36 @@ export default function ExperienceReview({ experience }: ExperienceReviewProps) 
       {/* What's Included */}
       <ReviewInfoSection
         title="What's included"
-        items={[
-          'Transportation in a 4X4 safari cruiser.',
-          'Services of a trained and experienced English-speaking driver/guide',
-          'Full Board accommodation in all lodges and luxury camps',
-          'Bottled drinking water for use during the safari',
-          'Game drives, as mentioned',
-          'All taxes plus Park entry fees',
-        ]}
+        description={'<ul><li>Transportation in a 4X4 safari cruiser.</li><li>Services of a trained and experienced English-speaking driver/guide</li><li>Full Board accommodation in all lodges and luxury camps</li><li>Bottled drinking water for use during the safari</li><li>Game drives, as mentioned</li><li>All taxes plus Park entry fees</li></ul>'}
         variant="included"
       />
 
       {/* What's NOT Included */}
       <ReviewInfoSection
         title="What's NOT included"
-        items={[
-          'International air transportation to and from Nairobi.',
-          'All other expenses of personal nature such as visas, travel/baggage insurance, laundry, beverages, tips, etc.',
-          'Any optional services listed as optional in the safari program.',
-        ]}
+        description={'<ul><li>International air transportation to and from Nairobi.</li><li>All other expenses of personal nature such as visas, travel/baggage insurance, laundry, beverages, tips, etc.</li><li>Any optional services listed as optional in the safari program.</li></ul>'}
         variant="excluded"
       />
 
-      {/* Location of the Experience */}
-      <ReviewLocationCard
-        title="Location of the Experience"
-        location={experience.location}
-        showTime={false}
-      />
+      <div className="mt-6 rounded-[12px] bg-gray-100 border-[1px] border-gray-200 p-5">
+        {/* Location of the Experience */}
+        <ReviewLocationCard
+          title="Location of the Experience"
+          location={experience.location}
+          showTime={false}
+        />
 
-      {/* Meeting/Pick-up Point & Time */}
-      <ReviewLocationCard
-        title="Meeting/Pick-up Point & Time"
-        location={experience.location}
-        startDate={experience.startDate}
-        endDate={experience.endDate}
-        showTime
-      />
+        {/* Meeting/Pick-up Point & Time */}
+        <div className="mt-6">
+          <ReviewLocationCard
+            title="Meeting/Pick-up Point & Time"
+            location={experience.location}
+            startDate={experience.startDate}
+            endDate={experience.endDate}
+            showTime
+          />
+        </div>
+      </div>
 
       {/* Categories */}
       <ReviewCategories categories={experience.categories} />

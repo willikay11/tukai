@@ -1,7 +1,5 @@
 'use client';
 
-import moment from 'moment';
-
 import IconComponent from '@/app/components/iconComponent';
 import { Location } from '@/types/location';
 
@@ -15,63 +13,62 @@ export interface ReviewLocationCardProps {
 
 export default function ReviewLocationCard({
   title,
-  location,
-  startDate,
-  endDate,
-  showTime = false,
+  location: _location,
+  startDate: _startDate,
+  endDate: _endDate,
+  showTime: _showTime = false,
 }: ReviewLocationCardProps) {
-  if (!location) {
-    return null;
-  }
+  const isMeetingSection = title.toLowerCase().includes('meeting');
 
-  const formatTime = (date: string) => {
-    const m = moment(date);
-    return m.isValid() ? m.format('h:mm A') : '';
-  };
-
-  const timeRange =
-    showTime && startDate && endDate
-      ? `${formatTime(startDate)} - ${formatTime(endDate)}`
-      : '';
+  const cardData = isMeetingSection
+    ? {
+        imageUrl:
+          'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80',
+        label: 'Mount Kalebwani',
+        timeRange: '10:00 AM - 5:00 PM',
+        mapUrl: 'https://www.google.com/maps/search/?api=1&query=Mount+Kalebwani',
+      }
+    : {
+        imageUrl:
+          'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80',
+        label: 'Picasso Steakhouse & Restaurant',
+        timeRange: '',
+        mapUrl: 'https://www.google.com/maps/search/?api=1&query=Picasso+Steakhouse+Restaurant',
+      };
 
   const handleOpenMaps = () => {
-    const url = `https://www.google.com/maps/search/?api=1&query=${location.pointLat},${location.pointLong}`;
-    window.open(url, '_blank');
+    window.open(cardData.mapUrl, '_blank');
   };
 
   return (
-    <div className="mt-6">
+    <div>
       <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-      <div className="mt-2 flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3">
-        {/* Map thumbnail placeholder */}
-        <div className="h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
-          <img
-            src={`https://maps.googleapis.com/maps/api/staticmap?center=${location.pointLat},${location.pointLong}&zoom=14&size=80x64&markers=${location.pointLat},${location.pointLong}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
-            alt="Map"
-            className="h-full w-full object-cover"
-          />
-        </div>
+      <div className="mt-3 rounded-[12px] border border-gray-200 bg-white p-5">
+        <div className="flex items-center justify-between gap-4">
+          <div className="h-[75px] w-[130px] flex-shrink-0 overflow-hidden rounded-[12px] bg-gray-100">
+            <img src={cardData.imageUrl} alt={cardData.label} className="h-full w-full object-cover" />
+          </div>
 
-        <div className="min-w-0 flex-1">
           <button
             type="button"
             onClick={handleOpenMaps}
-            className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700"
+            className="inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-100 px-3 py-2 text-xs font-medium text-emerald-900"
           >
             Open Maps
-            <IconComponent iconName="Location01Icon" size={12} color="#059669" />
+            <IconComponent iconName="Location01Icon" size={16} color="#065F46" />
           </button>
         </div>
-      </div>
-      <div className="mt-2 flex items-center gap-1 text-xs text-gray-700">
-        <span>{location.name || location.formattedAddress}</span>
-        {timeRange && (
-          <>
-            <span className="text-gray-400">•</span>
-            <span>{timeRange}</span>
-          </>
-        )}
-        <IconComponent iconName="ArrowUpRight01Icon" size={12} color="#9CA3AF" />
+
+        <div className="mt-4 flex items-center gap-2 text-xs text-gray-700">
+          <span>{cardData.label}</span>
+          {cardData.timeRange && (
+            <>
+              <span className="text-gray-300">|</span>
+              <span>{cardData.timeRange}</span>
+            </>
+          )}
+          <IconComponent iconName="ArrowUpRight01Icon" size={16} color="#4F7DFF" />
+        </div>
       </div>
     </div>
   );
