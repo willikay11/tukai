@@ -15,16 +15,14 @@ const STEPS = [
     id: 'about',
     label: 'About',
     icon: 'InformationCircleIcon',
-    filledIcon: 'InformationCircleIcon',
   },
   {
     id: 'dates-tickets',
     label: 'Dates & Tickets',
     icon: 'Ticket02Icon',
-    filledIcon: 'Ticket02Icon',
   },
-  { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon', filledIcon: 'AddTeam02Icon' },
-  { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon', filledIcon: 'WalletAdd01Icon' },
+  { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
+  { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
 ];
 
 export default function CreateExperienceSteps({
@@ -65,7 +63,6 @@ export default function CreateExperienceSteps({
             wallet: false,
           };
           const isFilled = stepFilledMap[step.id] ?? false;
-          const stepIcon = isFilled ? step.filledIcon : step.icon;
 
           return (
             <TabsTrigger
@@ -76,7 +73,7 @@ export default function CreateExperienceSteps({
               }`}
             >
               <div className="flex-shrink-0">
-                <IconComponent iconName={stepIcon} size={20} />
+                <IconComponent iconName={step.icon} size={20} variant={isFilled ? 'solid' : 'twotone'} />
               </div>
               <span className="hidden sm:inline">{step.label}</span>
               <span className="inline sm:hidden">{step.label.split(' ')[0]}</span>
