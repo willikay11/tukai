@@ -12,7 +12,6 @@ import * as z from 'zod';
 
 import { Editor } from '@/components/blocks/editor-00/editor';
 import FileUploadField from '@/app/components/fileUploadField';
-import IconComponent from '@/app/components/iconComponent';
 import LocationAutocompleteField from '@/app/components/locationAutocompleteField';
 import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
@@ -139,8 +138,11 @@ export default function CreateExperienceAbout({
   const { data: categories } = useGetInterestCategories();
   const { mutate: createExperience, isPending: isCreatingExperience } = useCreateExperience();
   const locationInputRef = useRef<HTMLDivElement>(null);
+  const meetingPointInputRef = useRef<HTMLDivElement>(null);
   const [locationInput, setLocationInput] = useState('');
+  const [meetingPointInput, setMeetingPointInput] = useState('');
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [showMeetingPointSuggestions, setShowMeetingPointSuggestions] = useState(false);
   const [editorHydrationSeed, setEditorHydrationSeed] = useState(0);
   const [editorHtmlValues, setEditorHtmlValues] = useState({
     description: '',
@@ -153,10 +155,20 @@ export default function CreateExperienceAbout({
     locationInput.length > 2,
   );
 
+  const { data: googleMeetingPointPlaces, isFetching: isFetchingMeetingPointPlaces } =
+    useGoogleMapsAutocomplete(meetingPointInput, meetingPointInput.length > 2);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (locationInputRef.current && !locationInputRef.current.contains(event.target as Node)) {
         setShowLocationSuggestions(false);
+      }
+
+      if (
+        meetingPointInputRef.current &&
+        !meetingPointInputRef.current.contains(event.target as Node)
+      ) {
+        setShowMeetingPointSuggestions(false);
       }
     };
 
@@ -210,6 +222,7 @@ export default function CreateExperienceAbout({
       if (experience.location?.formattedAddress) {
         setLocationInput(experience.location.formattedAddress);
       }
+      setMeetingPointInput('');
 
       setEditorHtmlValues({
         description: pulledDescription
@@ -522,15 +535,25 @@ export default function CreateExperienceAbout({
                 render={({ field }) => (
                   <FormItem className="mb-3">
                     <FormControl>
-                      <div className="relative">
-                        <Input type="text" placeholder="Meeting/Pick-up Point" {...field} />
-                        <IconComponent
-                          iconName="LocationIcon"
-                          size={18}
-                          color="currentColor"
-                          className="absolute right-3 top-2.5 text-gray-400"
-                        />
-                      </div>
+                      <LocationAutocompleteField
+                        containerRef={meetingPointInputRef}
+                        value={meetingPointInput}
+                        placeholder="Meeting/Pick-up Point"
+                        showSuggestions={showMeetingPointSuggestions}
+                        isLoading={isFetchingMeetingPointPlaces}
+                        suggestions={googleMeetingPointPlaces?.data || []}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          setMeetingPointInput(value);
+                          setShowMeetingPointSuggestions(true);
+                        }}
+                        onFocus={() => setShowMeetingPointSuggestions(true)}
+                        onSelectSuggestion={(place: GoogleMapsAutocompletePrediction) => {
+                          field.onChange(place.description);
+                          setMeetingPointInput(place.description);
+                          setShowMeetingPointSuggestions(false);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
