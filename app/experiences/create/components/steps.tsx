@@ -9,6 +9,7 @@ import { Experience } from '@/types/experience';
 import CreateExperienceAbout from './about';
 import ExperienceDates from './dates';
 import CreateExperienceInvites from './invites';
+import CreateExperienceWallet from './wallet';
 
 export type ExperienceStepId = 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
@@ -113,9 +114,7 @@ export default function CreateExperienceSteps({
       </TabsContent>
 
       <TabsContent value="wallet" className="mt-6">
-        <div className="rounded-xl bg-white p-6">
-          <p className="text-gray-500">Wallet Details tab coming soon</p>
-        </div>
+        <CreateExperienceWallet />
       </TabsContent>
     </Tabs>
   );
