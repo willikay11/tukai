@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CommunityPill } from '@/components/ui/community-pill';
 import { Community } from '@/types/community';
 
 interface InviteCommunitiesProps {
@@ -18,7 +18,6 @@ export function InviteCommunities({
   isLoading = false,
   className = '',
 }: InviteCommunitiesProps) {
-  console.log('Available Communities:', availableCommunities);
   const handleToggleCommunity = (community: Community) => {
     const isSelected = invitedCommunities.some((c) => c.id === community.id);
 
@@ -52,30 +51,12 @@ export function InviteCommunities({
           const isSelected = invitedCommunities.some((c) => c.id === community.id);
 
           return (
-            <button
+            <CommunityPill
               key={community.id}
-              type="button"
-              onClick={() => handleToggleCommunity(community)}
-              className={`inline-flex items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3 text-xs transition-colors ${
-                isSelected
-                  ? 'bg-green-100 text-primary'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <Avatar className="h-6 w-6 shrink-0">
-                <AvatarImage
-                  src={
-                    community.photos?.find((photo) => photo.isCover)?.photo ||
-                    community?.photos?.[0]?.photo
-                  }
-                  alt={community.title}
-                />
-                <AvatarFallback className="bg-emerald-100 text-xs font-semibold text-emerald-700">
-                  {community.title?.charAt(0)?.toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <span className="max-w-[180px] truncate">{community.title}</span>
-            </button>
+              community={community}
+              isSelected={isSelected}
+              onClick={handleToggleCommunity}
+            />
           );
         })}
       </div>
