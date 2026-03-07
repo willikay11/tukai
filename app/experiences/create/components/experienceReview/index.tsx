@@ -1,5 +1,7 @@
 'use client';
 
+import sanitizeHtml from 'sanitize-html';
+
 import { Experience } from '@/types/experience';
 
 import ReviewCategories from './reviewCategories';
@@ -35,7 +37,10 @@ export default function ExperienceReview({ experience }: ExperienceReviewProps) 
       <ReviewPhotoGallery photos={experience.photos} />
 
       {/* Description */}
-      <p className="mt-4 text-xs leading-relaxed text-gray-700">{experience.description}</p>
+      <div
+        className="mt-4 text-xs leading-relaxed text-gray-700"
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(experience.description || '') }}
+      />
 
       {/* What's Included */}
       <ReviewInfoSection

@@ -142,6 +142,11 @@ function formatTicketValidity(
   return `${formatDate(salesStartDate)}, ${formatTime(salesStartTime)} - ${formatDate(salesEndDate)} ${formatTime(salesEndTime)}`;
 }
 
+function getApiTicketValidity(ticket: Ticket): string {
+  const apiValidity = (ticket as unknown as { validity?: string | null }).validity;
+  return apiValidity?.trim() ? apiValidity : '-';
+}
+
 export default function CreateTickets({
   experienceId,
   experience,
@@ -480,79 +485,17 @@ export default function CreateTickets({
         <div className="mt-4 space-y-5">
           {/* Existing tickets from API */}
           {existingTickets.map((ticket) => (
-            <div
+            <SavedTicketCard
               key={ticket.id}
-              className="relative rounded-[12px] border border-dashed border-primary bg-emerald-50 p-2"
-            >
-              {/* Top notch */}
-              <div className="absolute -top-[1px] left-[102px] h-1.5 w-3 -translate-x-1/2 rounded-b-full border border-t-0 border-dashed border-primary bg-white" />
-              {/* Bottom notch */}
-              <div className="absolute -bottom-[1px] left-[102px] h-1.5 w-3 -translate-x-1/2 rounded-t-full border border-b-0 border-dashed border-primary bg-white" />
-
-              <div className="flex items-center gap-3">
-                <img
-                  src={coverPhoto}
-                  alt={ticket.name}
-                  className="h-20 w-20 flex-shrink-0 rounded-[12px] object-cover"
-                />
-
-                <div className="h-16 border-l border-dashed border-primary" />
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-base font-bold text-gray-800">{ticket.name}</p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => handleEditTicket(ticket)}
-                        className="text-primary"
-                      >
-                        <IconComponent iconName="Edit02Icon" size={16} color="#047857" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteTicket(ticket.id)}
-                        disabled={isDeletingTicket && deletingTicketId === ticket.id}
-                        className="text-red-500 disabled:opacity-50"
-                      >
-                        {isDeletingTicket && deletingTicketId === ticket.id ? (
-                          <IconComponent
-                            iconName="Loading03Icon"
-                            size={16}
-                            color="#EF4444"
-                            className="animate-spin"
-                          />
-                        ) : (
-                          <IconComponent iconName="Delete02Icon" size={16} color="#EF4444" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 grid grid-cols-6 gap-2">
-                    <div className="col-span-1">
-                      <p className="text-xs text-gray-500">Qty</p>
-                      <p className="text-xs font-semibold text-gray-800">{ticket.quantity}</p>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-xs text-gray-500">Price</p>
-                      <p className="text-xs font-semibold text-gray-800">
-                        {formatKsh(ticket.price)}
-                      </p>
-                    </div>
-                    <div className="col-span-3">
-                      <p className="text-xs text-gray-500">Available</p>
-                      <p className="truncate text-xs font-semibold text-gray-800">
-                        {ticket.availableQuantity}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+              name={ticket.name}
+              quantity={ticket.quantity}
+              amount={ticket.price}
+              validity={getApiTicketValidity(ticket)}
+              coverPhoto={coverPhoto}
+              onEdit={() => handleEditTicket(ticket)}
+              onDelete={() => handleDeleteTicket(ticket.id)}
+              isDeleting={isDeletingTicket && deletingTicketId === ticket.id}
+            />
           ))}
 
           {/* New tickets being created */}

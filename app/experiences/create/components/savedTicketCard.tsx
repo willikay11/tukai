@@ -19,6 +19,7 @@ export interface SavedTicketCardProps {
   coverPhoto?: string;
   onEdit?: () => void;
   onDelete?: () => void;
+  isDeleting?: boolean;
 }
 
 export default function SavedTicketCard({
@@ -29,6 +30,7 @@ export default function SavedTicketCard({
   coverPhoto,
   onEdit,
   onDelete,
+  isDeleting = false,
 }: SavedTicketCardProps) {
   return (
     <div className="relative rounded-[12px] border border-dashed border-primary bg-emerald-50 p-2">
@@ -59,8 +61,22 @@ export default function SavedTicketCard({
                 </button>
               )}
               {onDelete && (
-                <button type="button" onClick={onDelete} className="text-red-500">
-                  <IconComponent iconName="Delete02Icon" size={16} color="#EF4444" />
+                <button
+                  type="button"
+                  onClick={onDelete}
+                  disabled={isDeleting}
+                  className="text-red-500 disabled:opacity-50"
+                >
+                  {isDeleting ? (
+                    <IconComponent
+                      iconName="Loading03Icon"
+                      size={16}
+                      color="#EF4444"
+                      className="animate-spin"
+                    />
+                  ) : (
+                    <IconComponent iconName="Delete02Icon" size={16} color="#EF4444" />
+                  )}
                 </button>
               )}
             </div>
