@@ -39,7 +39,7 @@ export default function ExperienceDates({
 }: {
   experienceId?: string | null;
   experience?: Experience;
-  onDatesUpdatedSuccess?: () => void;
+  onDatesUpdatedSuccess?: (nextStep?: 'guests') => void;
 }) {
   const { mutateAsync: updateExperience, isPending: isUpdatingExperience } = useUpdateExperience(
     experienceId || '',
@@ -120,6 +120,8 @@ export default function ExperienceDates({
       return;
     }
 
+    const hasAtLeastOneTicket = Boolean(experience?.tickets?.length);
+
     try {
       await updateExperience({
         title: experience.title,
@@ -141,7 +143,7 @@ export default function ExperienceDates({
         description: 'Experience dates updated successfully.',
         variant: 'success',
       });
-      onDatesUpdatedSuccess?.();
+      onDatesUpdatedSuccess?.(hasAtLeastOneTicket ? 'guests' : undefined);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -341,7 +343,11 @@ export default function ExperienceDates({
                   disabled={isUpdatingExperience || !form.formState.isValid}
                   className="rounded-full px-6 text-xs font-semibold text-white"
                 >
-                  {isUpdatingExperience ? 'Saving...' : 'Create Tickets'}
+                  {isUpdatingExperience
+                    ? 'Saving...'
+                    : experience?.tickets?.length
+                      ? 'Continue'
+                      : 'Create Tickets'}
                 </Button>
               </div>
             </div>

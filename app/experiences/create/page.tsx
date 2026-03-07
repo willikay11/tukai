@@ -97,7 +97,14 @@ export default function CreateExperiencePage() {
           currentStep={activeStep}
           onStepChange={handleStepChange}
           onExperienceCreated={handleExperienceCreated}
-          onDatesUpdatedSuccess={() => setHasUpdatedDates(true)}
+          onDatesUpdatedSuccess={(nextStep) => {
+            setHasUpdatedDates(true);
+
+            if (nextStep) {
+              setActiveStep(nextStep);
+              replaceCreateUrlParams({ step: nextStep });
+            }
+          }}
           experience={experience}
           isLoadingExperience={isLoadingExperience}
         />

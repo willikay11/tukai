@@ -38,7 +38,7 @@ export default function CreateExperienceSteps({
   currentStep?: ExperienceStepId;
   onStepChange?: (step: ExperienceStepId) => void;
   onExperienceCreated?: (experienceId: string, step?: ExperienceStepId) => void;
-  onDatesUpdatedSuccess?: () => void;
+  onDatesUpdatedSuccess?: (nextStep?: 'guests') => void;
   experience?: Experience;
   isLoadingExperience?: boolean;
 }) {
