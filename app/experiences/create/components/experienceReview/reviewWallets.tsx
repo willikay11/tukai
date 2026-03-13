@@ -4,7 +4,7 @@ import IconComponent from '@/app/components/iconComponent';
 import { useGetWallets } from '@/hooks/payment';
 import { Wallet } from '@/types/payment';
 
-import { ReviewWalletsSkeleton } from '../loadingSkeletons';
+import { ReviewWalletsSkeleton } from '@/app/components/skeletons';
 
 interface ReviewWalletsProps {
   editable?: boolean;

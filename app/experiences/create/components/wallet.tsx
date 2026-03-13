@@ -20,8 +20,8 @@ import {
 } from '@/hooks/payment';
 import { useToast } from '@/hooks/use-toast';
 import { Wallet } from '@/types/payment';
+import { WalletListSkeleton } from '@/app/components/skeletons';
 
-import { WalletListSkeleton } from './loadingSkeletons';
 
 type PaymentMethod = 'mpesa' | 'bank_account';
 

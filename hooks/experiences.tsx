@@ -9,6 +9,7 @@ import {
   deleteExperienceTicket,
   fetchExperience,
   fetchExperiences,
+  publishExperience,
   purchaseExperienceTicket,
   updateExperience,
   updateExperienceTicket,
@@ -124,6 +125,17 @@ export const useAddGuestToExperience = (experienceId: string) => {
     mutationFn: async (guestEmail: string) => await addGuestToExperience(experienceId, guestEmail),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
+    },
+  });
+};
+
+export const usePublishExperience = (id: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['publishExperience', id],
+    mutationFn: async () => await publishExperience(id),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['experience', id] });
     },
   });
 };

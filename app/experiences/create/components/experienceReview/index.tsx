@@ -1,11 +1,16 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import sanitizeHtml from 'sanitize-html';
+import { useState } from 'react';
 
 import IconComponent from '@/app/components/iconComponent';
 import { Button } from '@/components/ui/button';
+import CreateSuccessDialog from '@/components/ui/createSuccessDialog';
 import ImageCarousel from '@/components/ui/imageCarousel';
 import { InvitedMember } from '@/components/ui/invite-members';
+import { usePublishExperience } from '@/hooks/experiences';
+import { toast } from '@/hooks/use-toast';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { User } from '@/types/user';
@@ -34,6 +39,9 @@ export default function ExperienceReview({
   invitedCommunities = [],
   onEditRequest,
 }: ExperienceReviewProps) {
+  const router = useRouter();
+  const [publishSuccessOpen, setPublishSuccessOpen] = useState(false);
+
   if (!experience) {
     return (
       <div className="flex h-full items-center justify-center text-sm text-gray-500">
@@ -76,6 +84,25 @@ export default function ExperienceReview({
       mergedGuests.push(guest);
     }
   }
+
+  const { mutate: publishExperience, isPending: isPublishing } = usePublishExperience(
+    experience.id,
+  );
+
+  const handlePublishExperience = () => {
+    publishExperience(undefined, {
+      onSuccess: () => {
+        setPublishSuccessOpen(true);
+      },
+      onError: (error: any) => {
+        toast({
+          title: 'Error',
+          description: error?.message || 'Failed to publish experience.',
+          variant: 'destructive',
+        });
+      },
+    });
+  };
 
   const openEditAbout = () => {
     if (onEditRequest) {
@@ -271,7 +298,7 @@ export default function ExperienceReview({
       <ReviewWallets editable={type === 'review'} onEdit={openEditWallet} />
 
       {type === 'review' && (
-        <div className="flex items-center justify-between mt-4">
+        <div className="mt-4 flex items-center justify-between">
           <Button
             variant="destructive"
             type="button"
@@ -285,12 +312,29 @@ export default function ExperienceReview({
               type="button"
               variant="gradient"
               className="rounded-full px-6 text-xs font-semibold text-white"
+              onClick={handlePublishExperience}
+              disabled={isPublishing}
             >
-              Publish Experience
+              {isPublishing ? 'Publishing...' : 'Publish Experience'}
             </Button>
           </div>
         </div>
       )}
+
+      <CreateSuccessDialog
+        open={publishSuccessOpen}
+        onOpenChange={setPublishSuccessOpen}
+        onViewCommunityClick={() => setPublishSuccessOpen(false)}
+        onCreateExperienceClick={() => {
+          setPublishSuccessOpen(false);
+          router.push(`/experiences/${experience.id}`);
+        }}
+        title="Experience Created Successfully"
+        description="Your experience was created successfully. You can view your created experiences from your profile"
+        viewCommunityLabel="Complete"
+        createExperienceLabel="View Experience"
+        illustrationSrc="/images/friday-feeling.svg"
+      />
     </div>
   );
 }

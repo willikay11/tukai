@@ -10,8 +10,8 @@ import { Experience } from '@/types/experience';
 import CreateExperienceAbout from './about';
 import ExperienceDates from './dates';
 import CreateExperienceInvites from './invites';
-import { CreateStepContentSkeleton } from './loadingSkeletons';
 import CreateExperienceWallet from './wallet';
+import { CreateStepContentSkeleton } from '@/app/components/skeletons';
 
 export type ExperienceStepId = 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
