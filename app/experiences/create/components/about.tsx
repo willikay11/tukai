@@ -10,9 +10,9 @@ import moment from 'moment';
 import { RRule } from 'rrule';
 import * as z from 'zod';
 
-import { Editor } from '@/components/blocks/editor-00/editor';
 import FileUploadField from '@/app/components/fileUploadField';
 import LocationAutocompleteField from '@/app/components/locationAutocompleteField';
+import { Editor } from '@/components/blocks/editor-00/editor';
 import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
@@ -91,9 +91,7 @@ const normalizeIncomingHtml = (value: string) => {
 
   const unescaped = value.replace(/\\"/g, '"').trim();
   const withoutWrappingQuotes =
-    unescaped.startsWith('"') && unescaped.endsWith('"')
-      ? unescaped.slice(1, -1)
-      : unescaped;
+    unescaped.startsWith('"') && unescaped.endsWith('"') ? unescaped.slice(1, -1) : unescaped;
 
   if (
     withoutWrappingQuotes.includes('&lt;') ||
@@ -200,11 +198,7 @@ export default function CreateExperienceAbout({
         getRichTextValue(experienceData, ['included', 'whatsIncluded']),
       );
       const pulledNotIncluded = normalizeIncomingHtml(
-        getRichTextValue(experienceData, [
-        'notIncluded',
-        'not_included',
-        'whatsNotIncluded',
-      ]),
+        getRichTextValue(experienceData, ['notIncluded', 'not_included', 'whatsNotIncluded']),
       );
 
       form.reset({

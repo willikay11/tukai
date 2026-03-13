@@ -46,7 +46,11 @@ export default function ReviewLocationCard({
       <div className="mt-3 rounded-[12px] border border-gray-200 bg-white p-5">
         <div className="flex items-center justify-between gap-4">
           <div className="h-[75px] w-[130px] flex-shrink-0 overflow-hidden rounded-[12px] bg-gray-100">
-            <img src={cardData.imageUrl} alt={cardData.label} className="h-full w-full object-cover" />
+            <img
+              src={cardData.imageUrl}
+              alt={cardData.label}
+              className="h-full w-full object-cover"
+            />
           </div>
 
           <button

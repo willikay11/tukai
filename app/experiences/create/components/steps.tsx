@@ -78,7 +78,11 @@ export default function CreateExperienceSteps({
               }`}
             >
               <div className="flex-shrink-0">
-                <IconComponent iconName={step.icon} size={20} variant={isFilled ? 'solid' : 'twotone'} />
+                <IconComponent
+                  iconName={step.icon}
+                  size={20}
+                  variant={isFilled ? 'solid' : 'twotone'}
+                />
               </div>
               <span className="hidden sm:inline">{step.label}</span>
               <span className="inline sm:hidden">{step.label.split(' ')[0]}</span>

@@ -5,7 +5,13 @@ import { useState } from 'react';
 import IconComponent from '@/app/components/iconComponent';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export function MpesaDetailsForm() {
   const [country, setCountry] = useState('');
@@ -14,10 +20,10 @@ export function MpesaDetailsForm() {
     <div className="mt-6">
       <h3 className="text-sm font-semibold text-gray-800">Add your MPesa details</h3>
 
-      <div className="mt-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-gray-700 mb-4">
+      <div className="mb-4 mt-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-gray-700">
         <span className="font-semibold">Kindly Note:</span> Amounts exceeding Ksh 500,000.00 may not
-        be sent via M-Pesa. For experiences with expected large amount of ticket sales, please use
-        a bank account.
+        be sent via M-Pesa. For experiences with expected large amount of ticket sales, please use a
+        bank account.
       </div>
 
       <Input

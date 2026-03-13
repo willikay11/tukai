@@ -10,11 +10,7 @@ export interface ReviewInfoSectionProps {
   variant: 'included' | 'excluded';
 }
 
-export default function ReviewInfoSection({
-  title,
-  description,
-  variant,
-}: ReviewInfoSectionProps) {
+export default function ReviewInfoSection({ title, description, variant }: ReviewInfoSectionProps) {
   if (!description?.trim()) {
     return null;
   }
@@ -35,7 +31,7 @@ export default function ReviewInfoSection({
         <h3 className="text-xs font-semibold text-gray-800">{title}</h3>
       </div>
       <div
-        className="mt-2 text-xs text-gray-700 [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-4 [&_ol]:space-y-1"
+        className="mt-2 text-xs text-gray-700 [&_ol]:list-decimal [&_ol]:space-y-1 [&_ol]:pl-4 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-4"
         dangerouslySetInnerHTML={{ __html: sanitizeHtml(description) }}
       />
     </div>

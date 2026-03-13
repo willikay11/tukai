@@ -19,7 +19,9 @@ export function GuestPill({
   nameClassName = 'max-w-[112px] truncate text-xs text-gray-700',
 }: GuestPillProps) {
   return (
-    <div className={`inline-flex items-center gap-2 rounded-full bg-gray-100 py-1.5 pl-1.5 pr-2 ${className}`}>
+    <div
+      className={`inline-flex items-center gap-2 rounded-full bg-gray-100 py-1.5 pl-1.5 pr-2 ${className}`}
+    >
       <Avatar className="h-6 w-6">
         {image ? <AvatarImage src={image} alt={name} /> : null}
         <AvatarFallback className="bg-gray-200 text-gray-500">

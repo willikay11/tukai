@@ -19,9 +19,7 @@ export default function ReviewGuests({ guests, maxDisplay = 6 }: ReviewGuestsPro
   return (
     <div className="mt-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold text-gray-700">
-          Guests ({guests.length})
-        </h3>
+        <h3 className="text-xs font-semibold text-gray-700">Guests ({guests.length})</h3>
         {guests.length > maxDisplay && (
           <button type="button" className="flex items-center gap-1 text-xs text-gray-500">
             See All <span className="text-gray-400">▼</span>
@@ -38,7 +36,7 @@ export default function ReviewGuests({ guests, maxDisplay = 6 }: ReviewGuestsPro
         ))}
         {remainingCount > 0 && (
           <div className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-gray-100 px-2 text-xs font-medium text-gray-600">
-              +{remainingCount}
+            +{remainingCount}
           </div>
         )}
       </div>

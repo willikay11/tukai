@@ -14,14 +14,18 @@ export default function CreateExperienceWallet() {
 
   return (
     <div className="w-full bg-white">
-      <h1 className="text-base font-semibold leading-tight text-gray-900">Set-up your account/wallet</h1>
+      <h1 className="text-base font-semibold leading-tight text-gray-900">
+        Set-up your account/wallet
+      </h1>
 
       <p className="mt-4 text-xs text-gray-800">
-        Add your preferred payment/account details. The money from the ticket sales will be sent
-        to this account.
+        Add your preferred payment/account details. The money from the ticket sales will be sent to
+        this account.
       </p>
 
-      <p className="mt-4 text-xs font-semibold text-gray-800">Select your preferred method of payment</p>
+      <p className="mt-4 text-xs font-semibold text-gray-800">
+        Select your preferred method of payment
+      </p>
 
       <div className="mt-3 flex flex-wrap gap-3">
         <button
@@ -38,7 +42,9 @@ export default function CreateExperienceWallet() {
               paymentMethod === 'mpesa' ? 'border-emerald-700' : 'border-gray-500'
             }`}
           >
-            {paymentMethod === 'mpesa' ? <span className="h-2 w-2 rounded-full bg-emerald-700" /> : null}
+            {paymentMethod === 'mpesa' ? (
+              <span className="h-2 w-2 rounded-full bg-emerald-700" />
+            ) : null}
           </span>
           <img src="/images/mpesa.png" alt="M-Pesa" className="h-5 w-auto" />
           <span>M-Pesa</span>

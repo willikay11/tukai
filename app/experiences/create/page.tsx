@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { InvitedMember } from '@/components/ui/invite-members';
-import { Community } from '@/types/community';
 import { useFetchSingleExperience } from '@/hooks/experiences';
+import { Community } from '@/types/community';
 
 import ExperienceStepSidePanel from './components/step-side-panel';
 import CreateExperienceSteps, { type ExperienceStepId } from './components/steps';

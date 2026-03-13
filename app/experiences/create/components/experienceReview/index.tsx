@@ -76,18 +76,22 @@ export default function ExperienceReview({
       {/* What's Included */}
       <ReviewInfoSection
         title="What's included"
-        description={'<ul><li>Transportation in a 4X4 safari cruiser.</li><li>Services of a trained and experienced English-speaking driver/guide</li><li>Full Board accommodation in all lodges and luxury camps</li><li>Bottled drinking water for use during the safari</li><li>Game drives, as mentioned</li><li>All taxes plus Park entry fees</li></ul>'}
+        description={
+          '<ul><li>Transportation in a 4X4 safari cruiser.</li><li>Services of a trained and experienced English-speaking driver/guide</li><li>Full Board accommodation in all lodges and luxury camps</li><li>Bottled drinking water for use during the safari</li><li>Game drives, as mentioned</li><li>All taxes plus Park entry fees</li></ul>'
+        }
         variant="included"
       />
 
       {/* What's NOT Included */}
       <ReviewInfoSection
         title="What's NOT included"
-        description={'<ul><li>International air transportation to and from Nairobi.</li><li>All other expenses of personal nature such as visas, travel/baggage insurance, laundry, beverages, tips, etc.</li><li>Any optional services listed as optional in the safari program.</li></ul>'}
+        description={
+          '<ul><li>International air transportation to and from Nairobi.</li><li>All other expenses of personal nature such as visas, travel/baggage insurance, laundry, beverages, tips, etc.</li><li>Any optional services listed as optional in the safari program.</li></ul>'
+        }
         variant="excluded"
       />
 
-      <div className="mt-6 rounded-[12px] bg-gray-100 border-[1px] border-gray-200 p-5">
+      <div className="mt-6 rounded-[12px] border-[1px] border-gray-200 bg-gray-100 p-5">
         {/* Location of the Experience */}
         <ReviewLocationCard
           title="Location of the Experience"

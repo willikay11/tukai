@@ -5,7 +5,13 @@ import { useState } from 'react';
 import IconComponent from '@/app/components/iconComponent';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export function BankAccountDetailsForm() {
   const [accountCountry, setAccountCountry] = useState('');

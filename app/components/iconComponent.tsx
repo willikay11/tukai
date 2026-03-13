@@ -2,9 +2,8 @@
 
 import React from 'react';
 
-import * as Icons from '@hugeicons-pro/core-twotone-rounded';
 import * as SolidIcons from '@hugeicons-pro/core-solid-rounded';
-
+import * as Icons from '@hugeicons-pro/core-twotone-rounded';
 import { HugeiconsIcon } from '@hugeicons/react';
 
 type TwotoneIconName = keyof typeof Icons;
@@ -33,11 +32,11 @@ export default function IconComponent({
 }) {
   if (variant === 'solid' && isValidSolidIconName(iconName)) {
     const iconComponent = SolidIcons[iconName];
-    return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className}/>;
+    return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className} />;
   }
   if (variant === 'twotone' && isValidTwotoneIconName(iconName)) {
     const iconComponent = Icons[iconName];
-    return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className}/>;
+    return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className} />;
   }
   return null;
 }

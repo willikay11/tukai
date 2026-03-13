@@ -17,10 +17,7 @@ export default function ReviewPhotoGallery({ photos }: ReviewPhotoGalleryProps) 
   return (
     <div className="mt-4 grid grid-cols-3 gap-2">
       {displayPhotos.map((photo, index) => (
-        <div
-          key={photo.id || index}
-          className="aspect-square overflow-hidden rounded-lg"
-        >
+        <div key={photo.id || index} className="aspect-square overflow-hidden rounded-lg">
           <img
             src={photo.photo}
             alt={`Experience photo ${index + 1}`}

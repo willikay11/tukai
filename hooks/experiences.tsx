@@ -126,4 +126,4 @@ export const useAddGuestToExperience = (experienceId: string) => {
       queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
     },
   });
-}
+};

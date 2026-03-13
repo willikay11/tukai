@@ -8,7 +8,6 @@ import moment from 'moment';
 import { z } from 'zod';
 
 import IconComponent from '@/app/components/iconComponent';
-import SavedTicketCard from './savedTicketCard';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
@@ -21,6 +20,8 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { Experience } from '@/types/experience';
 import { Ticket } from '@/types/ticket';
+
+import SavedTicketCard from './savedTicketCard';
 
 const commissionOptions = [
   { value: 'organizer', label: 'I will fully pay the commission' },
@@ -522,9 +523,7 @@ export default function CreateTickets({
                   onDelete={() => {
                     remove(index);
                     setSubmittedTicketIds((prev) => prev.filter((id) => id !== field.id));
-                    setSavedTickets((prev) =>
-                      prev.filter((ticket) => ticket.fieldId !== field.id),
-                    );
+                    setSavedTickets((prev) => prev.filter((ticket) => ticket.fieldId !== field.id));
                   }}
                 />
               );

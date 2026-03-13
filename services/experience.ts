@@ -1,10 +1,11 @@
+import { ca } from 'date-fns/locale';
+
 import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
 import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
 import { PurchaserDetails } from '@/types/purchaser';
 import { assertValidImageFiles } from '@/utils/images';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
-import { ca } from 'date-fns/locale';
 
 export type ExperiencesQueryParams = {
   search?: string;
@@ -271,7 +272,7 @@ export const deleteExperienceTicket = async (ticketId: string): Promise<ApiRespo
   }
 };
 
-export const addGuestToExperience = async(id: string, email: string) => {
+export const addGuestToExperience = async (id: string, email: string) => {
   try {
     const axiosInstance = await apiWithToken();
     const response = await axiosInstance.post(`/v1/experiences/${id}/guests/`, { email });
@@ -289,4 +290,4 @@ export const addGuestToExperience = async(id: string, email: string) => {
       message: error.response?.data?.message || 'An unexpected error occurred',
     };
   }
-}
+};
