@@ -3,6 +3,7 @@
 import IconComponent from '@/app/components/iconComponent';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useGetWallets } from '@/hooks/payment';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 
@@ -46,6 +47,8 @@ export default function CreateExperienceSteps({
   isLoadingExperience?: boolean;
 }) {
   const currentStepIndex = STEPS.findIndex((step) => step.id === currentStep);
+  const { data: walletsResponse } = useGetWallets();
+  const hasSavedWallets = (walletsResponse?.data?.results?.length ?? 0) > 0;
 
   const handleStepChange = (step: ExperienceStepId) => {
     onStepChange?.(step);
@@ -65,7 +68,7 @@ export default function CreateExperienceSteps({
             about: isAboutFilled,
             'dates-tickets': isDatesTicketsFilled,
             guests: false,
-            wallet: false,
+            wallet: hasSavedWallets,
           };
           const isFilled = stepFilledMap[step.id] ?? false;
 

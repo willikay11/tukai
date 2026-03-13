@@ -34,6 +34,7 @@ export default function CreateExperienceWallet() {
   const { mutate: patchPhoneWallet, isPending: isPatchingPhoneWallet } = usePatchPhoneWallet();
 
   const wallets: Wallet[] = walletsResponse?.data?.results ?? [];
+  const hasSavedWallets = wallets.length > 0;
   const existingPhoneWallet = wallets.find((wallet) => wallet.walletType === 'phone');
   const defaultWalletId = wallets.find((wallet) => wallet.isActive)?.id ?? null;
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(defaultWalletId);
@@ -174,6 +175,11 @@ export default function CreateExperienceWallet() {
       },
       { onSuccess, onError },
     );
+  };
+
+  const handleCancelForm = () => {
+    setShowForm(false);
+    setEditingWallet(null);
   };
 
   return (
@@ -320,6 +326,8 @@ export default function CreateExperienceWallet() {
               onPhoneChange={setMpesaPhoneNumber}
               onSaveDetails={handleSavePhoneWallet}
               isSaving={isCreatingPhoneWallet || isPatchingPhoneWallet}
+              onCancel={handleCancelForm}
+              showCancel={hasSavedWallets}
             />
           ) : null}
           {paymentMethod === 'bank_account' ? (
@@ -339,33 +347,37 @@ export default function CreateExperienceWallet() {
               }
               onSaveDetails={handleSaveBankWallet}
               isSaving={isCreatingBankWallet || isPatchingBankWallet}
+              onCancel={handleCancelForm}
+              showCancel={hasSavedWallets}
             />
           ) : null}
         </>
       )}
 
-      <div className="mt-8 flex items-center justify-between gap-3">
-        <button type="button" className="text-sm text-red-500 hover:text-red-600">
-          Cancel
-        </button>
+      {!isWalletsLoading && wallets.length > 0 && !showForm ? (
+        <div className="mt-8 flex items-center justify-between gap-3">
+          <Button variant="destructive" type="button" className="text-sm bg-white text-red-500 hover:bg-white hover:text-red-600 p-0">
+            Cancel
+          </Button>
 
-        <div className="flex gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-full border-primary px-6 text-xs font-semibold text-primary"
-          >
-            Save &amp; Exit
-          </Button>
-          <Button
-            type="button"
-            variant="gradient"
-            className="rounded-full px-6 text-xs font-semibold text-white"
-          >
-            Next
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full border-primary px-6 text-xs font-semibold text-primary"
+            >
+              Save &amp; Exit
+            </Button>
+            <Button
+              type="button"
+              variant="gradient"
+              className="rounded-full px-6 text-xs font-semibold text-white"
+            >
+              Preview &amp; Publish
+            </Button>
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

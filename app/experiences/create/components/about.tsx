@@ -598,9 +598,9 @@ export default function CreateExperienceAbout({
 
             {/* Actions */}
             <div className="flex items-center justify-between gap-3 pt-4">
-              <button type="button" className="text-sm text-red-500 hover:text-red-600">
+              <Button variant="destructive" type="button" className="text-sm bg-white text-red-500 hover:bg-white hover:text-red-600 p-0">
                 Cancel
-              </button>
+              </Button>
               <div className="flex gap-3">
                 <Button
                   type="button"

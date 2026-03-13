@@ -18,6 +18,8 @@ type MpesaDetailsFormProps = {
   onPhoneChange: (value: string) => void;
   onSaveDetails: () => void;
   isSaving?: boolean;
+  onCancel?: () => void;
+  showCancel?: boolean;
 };
 
 export function MpesaDetailsForm({
@@ -25,6 +27,8 @@ export function MpesaDetailsForm({
   onPhoneChange,
   onSaveDetails,
   isSaving = false,
+  onCancel,
+  showCancel = false,
 }: MpesaDetailsFormProps) {
   const [country, setCountry] = useState('');
   const [postcode, setPostcode] = useState('');
@@ -150,7 +154,12 @@ export function MpesaDetailsForm({
       </div>
       {errors.townCity ? <p className="mt-1 text-xs text-red-600">{errors.townCity}</p> : null}
 
-      <div className="mt-6 flex justify-end">
+      <div className={`mt-6 flex ${showCancel ? 'justify-between' : 'justify-end'}`}>
+        {showCancel ? (
+          <Button variant="destructive" type="button" onClick={onCancel} className="text-sm bg-white text-red-500 hover:bg-white hover:text-red-600 p-0">
+            Cancel
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant="gradient"

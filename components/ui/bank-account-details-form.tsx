@@ -37,12 +37,16 @@ type BankAccountDetailsFormProps = {
   };
   onSaveDetails: (values: BankAccountFormValues) => void;
   isSaving?: boolean;
+  onCancel?: () => void;
+  showCancel?: boolean;
 };
 
 export function BankAccountDetailsForm({
   defaultValues,
   onSaveDetails,
   isSaving = false,
+  onCancel,
+  showCancel = false,
 }: BankAccountDetailsFormProps) {
   const [accountCountry, setAccountCountry] = useState(defaultValues?.country ?? '');
   const [billingCountry, setBillingCountry] = useState(defaultValues?.country ?? '');
@@ -318,7 +322,12 @@ export function BankAccountDetailsForm({
         />
       </div>
 
-      <div className="mt-6 flex justify-end">
+      <div className={`mt-6 flex ${showCancel ? 'justify-between' : 'justify-end'}`}>
+        {showCancel ? (
+          <Button variant="destructive" type="button" onClick={onCancel} className="text-sm bg-white text-red-500 hover:bg-white hover:text-red-600 p-0">
+            Cancel
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant="gradient"
