@@ -3,6 +3,9 @@
 import { CommunityPill } from '@/components/ui/community-pill';
 import { Community } from '@/types/community';
 
+const shimmer =
+  'before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent';
+
 interface InviteCommunitiesProps {
   invitedCommunities: Community[];
   onCommunitiesChange: (communities: Community[]) => void;
@@ -31,7 +34,12 @@ export function InviteCommunities({
   if (isLoading) {
     return (
       <div className={`${className}`}>
-        <p className="text-xs text-gray-500">Loading communities...</p>
+        <div className={`${shimmer} relative mt-3 flex flex-wrap items-center gap-2`}>
+          <div className="h-8 w-24 rounded-full bg-gray-200" />
+          <div className="h-8 w-32 rounded-full bg-gray-200" />
+          <div className="h-8 w-28 rounded-full bg-gray-200" />
+          <div className="h-8 w-36 rounded-full bg-gray-200" />
+        </div>
       </div>
     );
   }

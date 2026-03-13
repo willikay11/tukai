@@ -10,6 +10,7 @@ import { Experience } from '@/types/experience';
 import CreateExperienceAbout from './about';
 import ExperienceDates from './dates';
 import CreateExperienceInvites from './invites';
+import { CreateStepContentSkeleton } from './loadingSkeletons';
 import CreateExperienceWallet from './wallet';
 
 export type ExperienceStepId = 'about' | 'dates-tickets' | 'guests' | 'wallet';
@@ -53,6 +54,29 @@ export default function CreateExperienceSteps({
   const handleStepChange = (step: ExperienceStepId) => {
     onStepChange?.(step);
   };
+
+  if (isLoadingExperience) {
+    return (
+      <Tabs value={currentStep} className="w-full">
+        <TabsList className="flex h-auto w-full gap-2 bg-transparent p-0">
+          {STEPS.map((step) => (
+            <TabsTrigger
+              key={step.id}
+              value={step.id}
+              className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-xs text-gray-800 data-[state=active]:border-b-[0px] data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700"
+            >
+              <div className="flex-shrink-0">
+                <IconComponent iconName={step.icon} size={20} variant="twotone" />
+              </div>
+              <span className="hidden sm:inline">{step.label}</span>
+              <span className="inline sm:hidden">{step.label.split(' ')[0]}</span>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <CreateStepContentSkeleton />
+      </Tabs>
+    );
+  }
 
   return (
     <Tabs

@@ -30,8 +30,28 @@ export default function ExperienceReviewPage() {
 
   if (isLoading) {
     return (
-      <main className="mx-auto mt-8 max-w-6xl px-4">
-        <p className="text-sm text-gray-500">Loading experience...</p>
+      <main className="mt-6 grid h-full grid-cols-12 gap-4 px-4 md:px-0">
+        <div className="col-span-12 mb-4 md:col-span-10 md:col-start-2 md:mx-0 lg:col-span-4 lg:col-start-3 xl:col-span-4 xl:col-start-3 3xl:col-span-2 3xl:col-start-4 4xl:col-span-2 4xl:col-start-5">
+          <div className="relative overflow-hidden">
+            <div className="h-6 w-40 rounded bg-gray-200" />
+            <div className="mt-4 h-[20.25rem] w-full rounded-xl bg-gray-200" />
+            <div className="mt-4 h-6 w-52 rounded bg-gray-200" />
+            <div className="mt-4 h-4 w-full rounded bg-gray-200" />
+            <div className="mt-2 h-4 w-10/12 rounded bg-gray-200" />
+            <div className="mt-6 h-36 w-full rounded-xl bg-gray-200" />
+            <div className="mt-6 h-24 w-full rounded-xl bg-gray-200" />
+            <div className="pointer-events-none absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+          </div>
+        </div>
+        <div className="lg:col-span-4 lg:col-start-8">
+          <div className="relative h-full rounded-t-xl border-x border-t border-gray-200 bg-white px-12 py-6 shadow-lg">
+            <div className="h-5 w-36 rounded bg-gray-200" />
+            <div className="mt-6 h-12 w-full rounded-xl bg-gray-200" />
+            <div className="mt-4 h-12 w-full rounded-xl bg-gray-200" />
+            <div className="mt-4 h-12 w-2/3 rounded-xl bg-gray-200" />
+            <div className="pointer-events-none absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+          </div>
+        </div>
       </main>
     );
   }

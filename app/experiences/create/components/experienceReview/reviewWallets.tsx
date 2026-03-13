@@ -4,6 +4,8 @@ import IconComponent from '@/app/components/iconComponent';
 import { useGetWallets } from '@/hooks/payment';
 import { Wallet } from '@/types/payment';
 
+import { ReviewWalletsSkeleton } from '../loadingSkeletons';
+
 interface ReviewWalletsProps {
   editable?: boolean;
   onEdit?: () => void;
@@ -21,11 +23,7 @@ export default function ReviewWallets({ editable = false, onEdit }: ReviewWallet
   const activeWallets = wallets.filter((wallet) => wallet.isActive);
 
   if (isLoading) {
-    return (
-      <div className="mt-6 rounded-[12px] border border-gray-200 bg-gray-100 p-5">
-        <p className="text-xs text-gray-600">Loading wallet details...</p>
-      </div>
-    );
+    return <ReviewWalletsSkeleton />;
   }
 
   if (activeWallets.length === 0) {

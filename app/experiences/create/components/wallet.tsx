@@ -21,6 +21,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Wallet } from '@/types/payment';
 
+import { WalletListSkeleton } from './loadingSkeletons';
+
 type PaymentMethod = 'mpesa' | 'bank_account';
 
 interface CreateExperienceWalletProps {
@@ -228,7 +230,7 @@ export default function CreateExperienceWallet({
       <div className="mt-4">
         <p className="text-xs font-semibold text-gray-800">Set up wallets</p>
         {isWalletsLoading ? (
-          <p className="mt-2 text-xs text-gray-600">Loading wallets...</p>
+          <WalletListSkeleton />
         ) : wallets.length > 0 ? (
           <div className="mt-2 grid grid-cols-2">
             <div className="space-y-2">
