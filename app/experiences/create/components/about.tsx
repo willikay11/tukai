@@ -126,17 +126,33 @@ const getRichTextValue = (source: Record<string, unknown>, keys: string[]) => {
   return '';
 };
 
+interface CreateExperienceAboutProps {
+  onSuccess?: (experienceId: string) => void;
+  onClose?: () => void;
+  experience?: Experience;
+  showTitle?: boolean;
+  cancelActionLabel?: string;
+  saveAndExitActionLabel?: string;
+  createSubmitActionLabel?: string;
+  editSubmitActionLabel?: string;
+  createPendingActionLabel?: string;
+  editPendingActionLabel?: string;
+  hideSaveAndExit?: boolean;
+}
+
 export default function CreateExperienceAbout({
   onSuccess,
   onClose,
   experience,
   showTitle = true,
-}: {
-  onSuccess?: (experienceId: string) => void;
-  onClose?: () => void;
-  experience?: Experience;
-  showTitle?: boolean;
-}) {
+  cancelActionLabel = 'Cancel',
+  saveAndExitActionLabel = 'Save & Exit',
+  createSubmitActionLabel = 'Continue',
+  editSubmitActionLabel = 'Save Changes',
+  createPendingActionLabel = 'Creating...',
+  editPendingActionLabel = 'Saving...',
+  hideSaveAndExit = false,
+}: CreateExperienceAboutProps) {
   const { data: categories } = useGetInterestCategories();
   const isEditMode = !!experience?.id;
   const { mutate: createExperience, isPending: isCreatingExperience } = useCreateExperience();
@@ -625,23 +641,31 @@ export default function CreateExperienceAbout({
                 onClick={onClose}
                 className="bg-white p-0 text-sm text-red-500 hover:bg-white hover:text-red-600"
               >
-                Cancel
+                {cancelActionLabel}
               </Button>
               <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-full text-xs font-semibold"
-                >
-                  Save & Exit
-                </Button>
+                {!hideSaveAndExit && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full text-xs font-semibold"
+                  >
+                    {saveAndExitActionLabel}
+                  </Button>
+                )}
                 <Button
                   type="submit"
                   variant="gradient"
                   className="rounded-full px-6 text-xs font-semibold text-white"
                   disabled={isSaving}
                 >
-                  {isSaving ? (isEditMode ? 'Saving...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Continue')}
+                  {isSaving
+                    ? isEditMode
+                      ? editPendingActionLabel
+                      : createPendingActionLabel
+                    : isEditMode
+                      ? editSubmitActionLabel
+                      : createSubmitActionLabel}
                 </Button>
               </div>
             </div>

@@ -24,7 +24,7 @@ export interface ExperienceReviewProps {
   experience?: Experience;
   invitedMembers?: InvitedMember[];
   invitedCommunities?: Community[];
-  onEditRequest?: (section: 'about' | 'tickets') => void;
+  onEditRequest?: (section: 'about' | 'dates' | 'tickets' | 'invites') => void;
 }
 
 export default function ExperienceReview({
@@ -75,6 +75,18 @@ export default function ExperienceReview({
   const openEditTickets = () => {
     if (onEditRequest) {
       onEditRequest('tickets');
+    }
+  };
+
+  const openEditDates = () => {
+    if (onEditRequest) {
+      onEditRequest('dates');
+    }
+  }
+
+  const openEditInvites = () => {
+    if (onEditRequest) {
+      onEditRequest('invites');
     }
   };
 
@@ -199,7 +211,7 @@ export default function ExperienceReview({
           <h3 className="text-base font-semibold text-gray-700">Experience Type</h3>
           <button
             type="button"
-            onClick={openEditAbout}
+            onClick={openEditDates}
             disabled={type !== 'review'}
             className="text-gray-400 transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Edit Experience Type"
@@ -229,13 +241,13 @@ export default function ExperienceReview({
       />
 
       {/* Guests */}
-      <ReviewGuests guests={mergedGuests} editable={type === 'review'} onEdit={() => {}} />
+      <ReviewGuests guests={mergedGuests} editable={type === 'review'} onEdit={openEditInvites} />
 
       {/* Invited Communities */}
       <ReviewCommunities
         communities={invitedCommunities}
         editable={type === 'review'}
-        onEdit={() => {}}
+        onEdit={openEditInvites}
       />
     </div>
   );

@@ -5,9 +5,11 @@ import { useState } from 'react';
 import { useParams } from 'next/navigation';
 
 import CreateExperienceAbout from '@/app/experiences/create/components/about';
-import ExperienceDates from '@/app/experiences/create/components/dates';
+import CreateTickets from '@/app/experiences/create/components/createTickets';
+import CreateExperienceInvites from '@/app/experiences/create/components/invites';
 import ExperienceReview from '@/app/experiences/create/components/experienceReview';
 import { useFetchSingleExperience } from '@/hooks/experiences';
+import ExperienceDates from '../../create/components/dates';
 
 export default function ExperienceReviewPage() {
   const params = useParams<{ experienceId: string | string[] }>();
@@ -19,7 +21,9 @@ export default function ExperienceReviewPage() {
   const { data: experienceResponse, isLoading } = useFetchSingleExperience(experienceId, true);
   const experience = experienceResponse?.data;
 
-  const [activeEditSection, setActiveEditSection] = useState<'about' | 'tickets' | null>(null);
+  const [activeEditSection, setActiveEditSection] = useState<
+    'about' | 'dates' | 'tickets' | 'invites' | null
+  >(null);
 
   if (isLoading) {
     return (
@@ -55,10 +59,25 @@ export default function ExperienceReviewPage() {
               experience={experience}
               onClose={() => setActiveEditSection(null)}
               showTitle={false}
+              hideSaveAndExit
+              editSubmitActionLabel="Save Changes"
+            />
+          )}
+          {activeEditSection === 'dates' && (
+            <ExperienceDates
+              experienceId={experienceId}
+              experience={experience}
+              onDatesUpdatedSuccess={() => setActiveEditSection(null)}
+              onCancel={() => setActiveEditSection(null)}
+              hideSaveAndExit
+              submitActionLabel="Save Changes"
             />
           )}
           {activeEditSection === 'tickets' && (
-            <ExperienceDates experienceId={experienceId} experience={experience} />
+            <CreateTickets experienceId={experienceId} experience={experience} />
+          )}
+          {activeEditSection === 'invites' && (
+            <CreateExperienceInvites experienceId={experienceId} hideSaveAndExit nextActionLabel="Save Changes" />
           )}
         </div>
       </div>

@@ -11,15 +11,25 @@ import { useAddGuestToExperience } from '@/hooks/experiences';
 import { toast } from '@/hooks/use-toast';
 import { Community } from '@/types/community';
 
+interface CreateExperienceInvitesProps {
+  experienceId?: string | null;
+  onInvitesChange?: (members: InvitedMember[], communities: Community[]) => void;
+  onNext?: () => void;
+  cancelActionLabel?: string;
+  saveAndExitActionLabel?: string;
+  nextActionLabel?: string;
+  hideSaveAndExit?: boolean;
+}
+
 export default function CreateExperienceInvites({
   experienceId,
   onInvitesChange,
   onNext,
-}: {
-  experienceId?: string | null;
-  onInvitesChange?: (members: InvitedMember[], communities: Community[]) => void;
-  onNext?: () => void;
-}) {
+  cancelActionLabel = 'Cancel',
+  saveAndExitActionLabel = 'Save & Exit',
+  nextActionLabel = 'Next',
+  hideSaveAndExit = false,
+}: CreateExperienceInvitesProps) {
   const initialInvitedMembers: InvitedMember[] = [];
 
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>(initialInvitedMembers);
@@ -151,24 +161,26 @@ export default function CreateExperienceInvites({
             type="button"
             className="bg-white p-0 text-sm text-red-500 hover:bg-white hover:text-red-600"
           >
-            Cancel
+            {cancelActionLabel}
           </Button>
 
           <div className="flex gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-full border-primary px-6 text-xs font-semibold text-primary"
-            >
-              Save &amp; Exit
-            </Button>
+            {!hideSaveAndExit && (
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-full border-primary px-6 text-xs font-semibold text-primary"
+              >
+                {saveAndExitActionLabel}
+              </Button>
+            )}
             <Button
               type="button"
               variant="gradient"
               onClick={onNext}
               className="rounded-full px-6 text-xs font-semibold text-white"
             >
-              Next
+              {nextActionLabel}
             </Button>
           </div>
         </div>

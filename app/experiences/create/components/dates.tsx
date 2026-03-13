@@ -32,15 +32,29 @@ const experienceDatesSchema = z.object({
   endTime: z.string().min(1, 'Please select end time'),
 });
 
+interface ExperienceDatesProps {
+  experienceId?: string | null;
+  experience?: Experience;
+  onDatesUpdatedSuccess?: (nextStep?: 'guests') => void;
+  onCancel?: () => void;
+  cancelActionLabel?: string;
+  saveAndExitActionLabel?: string;
+  submitActionLabel?: string;
+  pendingActionLabel?: string;
+  hideSaveAndExit?: boolean;
+}
+
 export default function ExperienceDates({
   experienceId,
   experience,
   onDatesUpdatedSuccess,
-}: {
-  experienceId?: string | null;
-  experience?: Experience;
-  onDatesUpdatedSuccess?: (nextStep?: 'guests') => void;
-}) {
+  onCancel,
+  cancelActionLabel = 'Cancel',
+  saveAndExitActionLabel = 'Save & Exit',
+  submitActionLabel,
+  pendingActionLabel = 'Saving...',
+  hideSaveAndExit = false,
+}: ExperienceDatesProps) {
   const { mutateAsync: updateExperience, isPending: isUpdatingExperience } = useUpdateExperience(
     experienceId || '',
   );
@@ -328,19 +342,22 @@ export default function ExperienceDates({
               <Button
                 variant="destructive"
                 type="button"
+                onClick={onCancel}
                 className="bg-white p-0 text-sm text-red-500 hover:bg-white hover:text-red-600"
               >
-                Cancel
+                {cancelActionLabel}
               </Button>
               <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={isUpdatingExperience || !form.formState.isValid}
-                  className="rounded-full text-xs font-semibold"
-                >
-                  Save & Exit
-                </Button>
+                {!hideSaveAndExit && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isUpdatingExperience || !form.formState.isValid}
+                    className="rounded-full text-xs font-semibold"
+                  >
+                    {saveAndExitActionLabel}
+                  </Button>
+                )}
                 <Button
                   type="submit"
                   variant="gradient"
@@ -348,10 +365,8 @@ export default function ExperienceDates({
                   className="rounded-full px-6 text-xs font-semibold text-white"
                 >
                   {isUpdatingExperience
-                    ? 'Saving...'
-                    : experience?.tickets?.length
-                      ? 'Continue'
-                      : 'Create Tickets'}
+                    ? pendingActionLabel
+                    : (submitActionLabel ?? (experience?.tickets?.length ? 'Continue' : 'Create Tickets'))}
                 </Button>
               </div>
             </div>
