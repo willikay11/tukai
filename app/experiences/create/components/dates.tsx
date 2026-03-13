@@ -366,7 +366,8 @@ export default function ExperienceDates({
                 >
                   {isUpdatingExperience
                     ? pendingActionLabel
-                    : (submitActionLabel ?? (experience?.tickets?.length ? 'Continue' : 'Create Tickets'))}
+                    : (submitActionLabel ??
+                      (experience?.tickets?.length ? 'Continue' : 'Create Tickets'))}
                 </Button>
               </div>
             </div>

@@ -11,7 +11,12 @@ export interface ReviewGuestsProps {
   onEdit?: () => void;
 }
 
-export default function ReviewGuests({ guests, maxDisplay = 6, editable = false, onEdit }: ReviewGuestsProps) {
+export default function ReviewGuests({
+  guests,
+  maxDisplay = 6,
+  editable = false,
+  onEdit,
+}: ReviewGuestsProps) {
   if (!guests || guests.length === 0) {
     return null;
   }

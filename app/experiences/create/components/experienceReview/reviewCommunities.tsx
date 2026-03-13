@@ -10,7 +10,11 @@ export interface ReviewCommunitiesProps {
   onEdit?: () => void;
 }
 
-export default function ReviewCommunities({ communities, editable = false, onEdit }: ReviewCommunitiesProps) {
+export default function ReviewCommunities({
+  communities,
+  editable = false,
+  onEdit,
+}: ReviewCommunitiesProps) {
   // Placeholder - communities invited to the experience would come from props
   // For now, showing a sample structure
   if (!communities || communities.length === 0) {
@@ -25,7 +29,7 @@ export default function ReviewCommunities({ communities, editable = false, onEdi
             className="text-gray-400 transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Edit Invited Communities"
           >
-            <IconComponent iconName="Edit02Icon" size={16} className='text-primary' />
+            <IconComponent iconName="Edit02Icon" size={16} className="text-primary" />
           </button>
         </div>
         <p className="mt-2 text-xs text-gray-500">No communities invited yet</p>

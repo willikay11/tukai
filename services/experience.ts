@@ -184,6 +184,10 @@ export async function updateExperience(id: string, data: CreateExperience): Prom
       });
     }
 
+    if (data.invitedCommunityIds) {
+      data.invitedCommunityIds.forEach((id) => formData.append('invited_community_ids', id));
+    }
+
     const response = await axiosInstance.patch(`/v1/experiences/${id}/`, formData, {
       headers: {
         'Content-Type': undefined,

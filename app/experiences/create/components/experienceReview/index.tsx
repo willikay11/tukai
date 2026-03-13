@@ -82,7 +82,7 @@ export default function ExperienceReview({
     if (onEditRequest) {
       onEditRequest('dates');
     }
-  }
+  };
 
   const openEditInvites = () => {
     if (onEditRequest) {
@@ -126,13 +126,13 @@ export default function ExperienceReview({
             <button
               type="button"
               onClick={openEditAbout}
-              className="absolute right-3 bottom-3"
+              className="absolute bottom-3 right-3"
               aria-label="Edit photos"
             >
               <IconComponent iconName="Edit02Icon" size={16} className="text-white" />
             </button>
           </div>
-          <div className="flex flex-row justify-between items-end">
+          <div className="flex flex-row items-end justify-between">
             <h2 className="mt-4 text-xl font-semibold text-gray-900">{experience.title}</h2>
             <button
               type="button"
@@ -216,7 +216,7 @@ export default function ExperienceReview({
             className="text-gray-400 transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Edit Experience Type"
           >
-            <IconComponent iconName="Edit02Icon" size={16} className='text-primary' />
+            <IconComponent iconName="Edit02Icon" size={16} className="text-primary" />
           </button>
         </div>
         <div className="mt-3 flex items-center gap-2">

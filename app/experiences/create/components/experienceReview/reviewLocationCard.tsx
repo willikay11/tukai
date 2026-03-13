@@ -55,7 +55,7 @@ export default function ReviewLocationCard({
           className="text-gray-400 transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
           aria-label={`Edit ${title}`}
         >
-          <IconComponent iconName="Edit02Icon" size={16} className='text-primary' />
+          <IconComponent iconName="Edit02Icon" size={16} className="text-primary" />
         </button>
       </div>
       <div className="mt-3 rounded-[12px] border border-gray-200 bg-white p-4">
@@ -74,7 +74,7 @@ export default function ReviewLocationCard({
             className="inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-100 px-3 py-2 text-xs font-medium text-emerald-900"
           >
             Open Maps
-            <IconComponent iconName="Location01Icon" size={16} className='text-primary' />
+            <IconComponent iconName="Location01Icon" size={16} className="text-primary" />
           </button>
         </div>
 

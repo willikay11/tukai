@@ -12,7 +12,12 @@ export interface ReviewTicketsProps {
   onEdit?: () => void;
 }
 
-export default function ReviewTickets({ tickets, coverPhoto, editable = false, onEdit }: ReviewTicketsProps) {
+export default function ReviewTickets({
+  tickets,
+  coverPhoto,
+  editable = false,
+  onEdit,
+}: ReviewTicketsProps) {
   if (!tickets || tickets.length === 0) {
     return null;
   }
@@ -33,7 +38,7 @@ export default function ReviewTickets({ tickets, coverPhoto, editable = false, o
           className="text-gray-400 transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
           aria-label="Edit Tickets"
         >
-          <IconComponent iconName="Edit02Icon" size={16} className='text-primary' />
+          <IconComponent iconName="Edit02Icon" size={16} className="text-primary" />
         </button>
       </div>
       <div className="mt-2 space-y-3">

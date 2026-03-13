@@ -10,7 +10,11 @@ export interface ReviewCategoriesProps {
   onEdit?: () => void;
 }
 
-export default function ReviewCategories({ categories, editable = false, onEdit }: ReviewCategoriesProps) {
+export default function ReviewCategories({
+  categories,
+  editable = false,
+  onEdit,
+}: ReviewCategoriesProps) {
   if (!categories || categories.length === 0) {
     return null;
   }
@@ -28,7 +32,7 @@ export default function ReviewCategories({ categories, editable = false, onEdit 
           className="text-gray-400 transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
           aria-label="Edit Categories"
         >
-          <IconComponent iconName="Edit02Icon" size={16} className='text-primary' />
+          <IconComponent iconName="Edit02Icon" size={16} className="text-primary" />
         </button>
       </div>
       <div className="mt-2 flex flex-wrap gap-2">

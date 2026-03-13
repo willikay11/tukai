@@ -6,9 +6,10 @@ import { useParams } from 'next/navigation';
 
 import CreateExperienceAbout from '@/app/experiences/create/components/about';
 import CreateTickets from '@/app/experiences/create/components/createTickets';
-import CreateExperienceInvites from '@/app/experiences/create/components/invites';
 import ExperienceReview from '@/app/experiences/create/components/experienceReview';
+import CreateExperienceInvites from '@/app/experiences/create/components/invites';
 import { useFetchSingleExperience } from '@/hooks/experiences';
+
 import ExperienceDates from '../../create/components/dates';
 
 export default function ExperienceReviewPage() {
@@ -77,7 +78,12 @@ export default function ExperienceReviewPage() {
             <CreateTickets experienceId={experienceId} experience={experience} />
           )}
           {activeEditSection === 'invites' && (
-            <CreateExperienceInvites experienceId={experienceId} hideSaveAndExit nextActionLabel="Save Changes" />
+            <CreateExperienceInvites
+              experienceId={experienceId}
+              experience={experience}
+              hideSaveAndExit
+              nextActionLabel="Save Changes"
+            />
           )}
         </div>
       </div>

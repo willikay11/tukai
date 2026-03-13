@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
@@ -22,6 +22,14 @@ function parseExperienceStepId(step: string | null): ExperienceStepId | null {
 }
 
 export default function CreateExperiencePage() {
+  return (
+    <Suspense fallback={null}>
+      <CreateExperiencePageContent />
+    </Suspense>
+  );
+}
+
+function CreateExperiencePageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

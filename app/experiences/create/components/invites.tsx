@@ -7,12 +7,14 @@ import { InviteCommunities } from '@/components/ui/invite-communities';
 import { InviteMembers, InvitedMember } from '@/components/ui/invite-members';
 import { useGetUsers } from '@/hooks/auth';
 import { useGetCommunities } from '@/hooks/communities';
-import { useAddGuestToExperience } from '@/hooks/experiences';
+import { useAddGuestToExperience, useUpdateExperience } from '@/hooks/experiences';
 import { toast } from '@/hooks/use-toast';
 import { Community } from '@/types/community';
+import { Experience } from '@/types/experience';
 
 interface CreateExperienceInvitesProps {
   experienceId?: string | null;
+  experience?: Experience;
   onInvitesChange?: (members: InvitedMember[], communities: Community[]) => void;
   onNext?: () => void;
   cancelActionLabel?: string;
@@ -23,6 +25,7 @@ interface CreateExperienceInvitesProps {
 
 export default function CreateExperienceInvites({
   experienceId,
+  experience,
   onInvitesChange,
   onNext,
   cancelActionLabel = 'Cancel',
@@ -30,12 +33,29 @@ export default function CreateExperienceInvites({
   nextActionLabel = 'Next',
   hideSaveAndExit = false,
 }: CreateExperienceInvitesProps) {
-  const initialInvitedMembers: InvitedMember[] = [];
+  const initialInvitedMembers = useMemo<InvitedMember[]>(() => {
+    if (!experience?.guests?.length) {
+      return [];
+    }
+
+    return experience.guests
+      .filter((guest) => !!guest.email)
+      .map((guest) => ({
+        id: guest.id,
+        name: guest.email,
+        email: guest.email,
+        image: '',
+      }));
+  }, [experience?.guests]);
 
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>(initialInvitedMembers);
   const [memberSearchQuery, setMemberSearchQuery] = useState('');
 
   const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
+
+  useEffect(() => {
+    setInvitedMembers(initialInvitedMembers);
+  }, [initialInvitedMembers]);
 
   useEffect(() => {
     onInvitesChange?.(invitedMembers, invitedCommunities);
@@ -58,6 +78,42 @@ export default function CreateExperienceInvites({
   const { mutateAsync: addGuestToExperience, isPending: isAddingGuest } = useAddGuestToExperience(
     experienceId || '',
   );
+  const { mutateAsync: updateExperience, isPending: isUpdatingCommunities } = useUpdateExperience(
+    experienceId || '',
+  );
+
+  const handleNext = async () => {
+    if (experienceId && experience) {
+      try {
+        await updateExperience({
+          title: experience.title,
+          description: experience.description || '',
+          googleMapPlaceId: 'ChIJkYb7L8EXLxgRWogSMeTPg8M', // Placeholder, as location is required by API but not part of this form
+          startDate: experience.startDate || '',
+          endDate: experience.endDate || '',
+          recurrence_rule:
+            (experience as any).recurrenceRule || (experience as any).recurrence_rule || '',
+          categoriesIds: experience.categories?.map((c) => c.id) || [],
+          isPublic: experience.isPublic,
+          invitedCommunityIds: invitedCommunities.map((c) => c.id),
+          invitedGuestsEmails: [],
+        });
+        toast({
+          title: 'Communities saved',
+          description: 'Invited communities have been updated.',
+          variant: 'success',
+        });
+      } catch (error: any) {
+        toast({
+          title: 'Error',
+          description: error?.message || 'Failed to update invited communities.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+    onNext?.();
+  };
 
   const handleMemberInvited = async (members: InvitedMember[]) => {
     // Find newly added member (last one in the new array that's not in current state)
@@ -177,10 +233,11 @@ export default function CreateExperienceInvites({
             <Button
               type="button"
               variant="gradient"
-              onClick={onNext}
+              onClick={handleNext}
+              disabled={isUpdatingCommunities}
               className="rounded-full px-6 text-xs font-semibold text-white"
             >
-              {nextActionLabel}
+              {isUpdatingCommunities ? 'Saving...' : nextActionLabel}
             </Button>
           </div>
         </div>

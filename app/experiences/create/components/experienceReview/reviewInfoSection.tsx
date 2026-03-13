@@ -12,7 +12,13 @@ export interface ReviewInfoSectionProps {
   onEdit?: () => void;
 }
 
-export default function ReviewInfoSection({ title, description, variant, editable = false, onEdit }: ReviewInfoSectionProps) {
+export default function ReviewInfoSection({
+  title,
+  description,
+  variant,
+  editable = false,
+  onEdit,
+}: ReviewInfoSectionProps) {
   if (!description?.trim()) {
     return null;
   }
@@ -40,7 +46,7 @@ export default function ReviewInfoSection({ title, description, variant, editabl
           className="text-gray-400 transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
           aria-label={`Edit ${title}`}
         >
-          <IconComponent iconName="Edit02Icon" size={16} className='text-primary' />
+          <IconComponent iconName="Edit02Icon" size={16} className="text-primary" />
         </button>
       </div>
       <div

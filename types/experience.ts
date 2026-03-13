@@ -30,6 +30,12 @@ export type Experience = {
   host: User;
   coHosts: User[];
   dateCreated: string;
+  guests: {
+    id: string;
+    email: string;
+    dateCreated: string;
+    status: 'invited' | 'accepted' | 'declined';
+  }[]
 };
 
 export type CreateExperience = {
@@ -43,8 +49,8 @@ export type CreateExperience = {
   isPublic?: boolean;
   isPaid?: boolean;
   newPhotos?: File[];
-  invitedCommunityIds: string[];
-  invitedGuestsEmails: string[];
+  invitedCommunityIds?: string[];
+  invitedGuestsEmails?: string[];
 };
 
 export type CreateExperienceTicket = {

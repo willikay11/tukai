@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,20 +27,25 @@ import { Experience } from '@/types/experience';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';
 
-const experienceSchema = z.object({
-  title: z.string().min(3, 'Title must be at least 3 characters'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  included: z.string().min(3, 'Please describe what is included'),
-  notIncluded: z.string().min(1, 'Please describe what is not included'),
-  location: z.string().min(3, 'Location is required'),
-  meetingPoint: z.string().optional().default(''),
-  meetingTime: z.string().optional().default(''),
-  visibility: z.enum(['public', 'private']),
-  selectedCategories: z.array(z.string()).min(1, 'Select at least one category'),
-  uploadedFiles: z.array(z.instanceof(File)).min(1, {
-    message: 'Please upload at least one experience poster.',
-  }),
-});
+const createExperienceSchema = (requirePhotos: boolean) =>
+  z.object({
+    title: z.string().min(3, 'Title must be at least 3 characters'),
+    description: z.string().min(10, 'Description must be at least 10 characters'),
+    included: z.string().min(3, 'Please describe what is included'),
+    notIncluded: z.string().min(1, 'Please describe what is not included'),
+    location: z.string().min(3, 'Location is required'),
+    meetingPoint: z.string().optional().default(''),
+    meetingTime: z.string().optional().default(''),
+    visibility: z.enum(['public', 'private']),
+    selectedCategories: z.array(z.string()).min(1, 'Select at least one category'),
+    uploadedFiles: requirePhotos
+      ? z.array(z.instanceof(File)).min(1, {
+          message: 'Please upload at least one experience poster.',
+        })
+      : z.array(z.instanceof(File)),
+  });
+
+type ExperienceFormValues = z.infer<ReturnType<typeof createExperienceSchema>>;
 
 const toSerializedEditorState = (text: string): SerializedEditorState =>
   ({
@@ -155,6 +160,11 @@ export default function CreateExperienceAbout({
 }: CreateExperienceAboutProps) {
   const { data: categories } = useGetInterestCategories();
   const isEditMode = !!experience?.id;
+  const hasExistingPhotos = (experience?.photos?.length ?? 0) > 0;
+  const experienceSchema = useMemo(
+    () => createExperienceSchema(!hasExistingPhotos),
+    [hasExistingPhotos],
+  );
   const { mutate: createExperience, isPending: isCreatingExperience } = useCreateExperience();
   const { mutate: updateExperience, isPending: isUpdatingExperience } = useUpdateExperience(
     experience?.id ?? '',
@@ -199,7 +209,7 @@ export default function CreateExperienceAbout({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const form = useForm<z.infer<typeof experienceSchema>>({
+  const form = useForm<ExperienceFormValues>({
     resolver: zodResolver(experienceSchema),
     defaultValues: {
       title: '',
@@ -289,7 +299,7 @@ export default function CreateExperienceAbout({
     const payload = {
       title: values.title,
       description: editorHtmlValues.description || plainTextToHtml(values.description),
-      googleMapPlaceId: values.location,
+      googleMapPlaceId: 'ChIJkYb7L8EXLxgRWogSMeTPg8M', // Placeholder, as location is required by API but not part of this form
       startDate: today,
       endDate: '2026-03-27T18:39:20.886Z',
       recurrence_rule: rule.toString(),
@@ -303,7 +313,9 @@ export default function CreateExperienceAbout({
     const handleSuccess = (experienceId?: string) => {
       toast({
         title: 'Success',
-        description: isEditMode ? 'Experience updated successfully.' : 'Experience created successfully.',
+        description: isEditMode
+          ? 'Experience updated successfully.'
+          : 'Experience created successfully.',
         variant: 'success',
       });
       if (experienceId) {
@@ -317,7 +329,9 @@ export default function CreateExperienceAbout({
     const handleError = (error: any) => {
       toast({
         title: 'Error',
-        description: error?.message || (isEditMode ? 'Failed to update experience.' : 'Failed to create experience.'),
+        description:
+          error?.message ||
+          (isEditMode ? 'Failed to update experience.' : 'Failed to create experience.'),
         variant: 'destructive',
       });
     };
