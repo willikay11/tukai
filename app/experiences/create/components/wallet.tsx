@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { useRouter, useSearchParams } from 'next/navigation';
+
 import IconComponent from '@/app/components/iconComponent';
 import {
   BankAccountDetailsForm,
@@ -22,6 +24,9 @@ import { Wallet } from '@/types/payment';
 type PaymentMethod = 'mpesa' | 'bank_account';
 
 export default function CreateExperienceWallet() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const experienceId = searchParams.get('experienceId');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mpesa');
   const [showForm, setShowForm] = useState(false);
   const [mpesaPhoneNumber, setMpesaPhoneNumber] = useState('');
@@ -180,6 +185,19 @@ export default function CreateExperienceWallet() {
   const handleCancelForm = () => {
     setShowForm(false);
     setEditingWallet(null);
+  };
+
+  const handlePreviewAndPublish = () => {
+    if (!experienceId) {
+      toast({
+        title: 'Experience missing',
+        description: 'Save your experience details before previewing.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    router.push(`/experiences/review/${experienceId}`);
   };
 
   return (
@@ -372,6 +390,7 @@ export default function CreateExperienceWallet() {
               type="button"
               variant="gradient"
               className="rounded-full px-6 text-xs font-semibold text-white"
+              onClick={handlePreviewAndPublish}
             >
               Preview &amp; Publish
             </Button>
