@@ -41,7 +41,7 @@ export default function ReviewGuests({
             className="text-gray-400 transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Edit Guests"
           >
-            <IconComponent iconName="Edit02Icon" size={16} className='text-primary' />
+            <IconComponent iconName="Edit02Icon" size={16} className="text-primary" />
           </button>
         </div>
       </div>

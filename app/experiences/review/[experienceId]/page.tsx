@@ -9,6 +9,7 @@ import CreateTickets from '@/app/experiences/create/components/createTickets';
 import ExperienceReview from '@/app/experiences/create/components/experienceReview';
 import CreateExperienceInvites from '@/app/experiences/create/components/invites';
 import CreateExperienceWallet from '@/app/experiences/create/components/wallet';
+import { Button } from '@/components/ui/button';
 import { useFetchSingleExperience } from '@/hooks/experiences';
 
 import ExperienceDates from '../../create/components/dates';
@@ -86,7 +87,13 @@ export default function ExperienceReviewPage() {
               nextActionLabel="Save Changes"
             />
           )}
-          {activeEditSection === 'wallet' && <CreateExperienceWallet hideSaveAndExit cancelActionLabel='Cancel' previewAndPublishActionLabel='Save Changes' />}
+          {activeEditSection === 'wallet' && (
+            <CreateExperienceWallet
+              hideSaveAndExit
+              cancelActionLabel="Cancel"
+              previewAndPublishActionLabel="Save Changes"
+            />
+          )}
         </div>
       </div>
     </main>

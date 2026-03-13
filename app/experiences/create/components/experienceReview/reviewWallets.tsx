@@ -55,7 +55,7 @@ export default function ReviewWallets({ editable = false, onEdit }: ReviewWallet
               <>
                 <div className="flex items-center gap-2">
                   <img src="/images/mpesa.png" alt="M-Pesa" className="h-5 w-auto" />
-                  <span className="text-xs text-base font-medium text-gray-700">M-Pesa</span>
+                  <span className="text-base text-xs font-medium text-gray-700">M-Pesa</span>
                 </div>
                 <p className="mt-4 text-xs font-semibold text-gray-800">
                   Phone Number: <span className="font-normal">{wallet.phone || 'N/A'}</span>

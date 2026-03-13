@@ -3,6 +3,7 @@
 import sanitizeHtml from 'sanitize-html';
 
 import IconComponent from '@/app/components/iconComponent';
+import { Button } from '@/components/ui/button';
 import ImageCarousel from '@/components/ui/imageCarousel';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Community } from '@/types/community';
@@ -268,6 +269,28 @@ export default function ExperienceReview({
 
       {/* Wallet Details */}
       <ReviewWallets editable={type === 'review'} onEdit={openEditWallet} />
+
+      {type === 'review' && (
+        <div className="flex items-center justify-between mt-4">
+          <Button
+            variant="destructive"
+            type="button"
+            className="bg-white p-0 text-sm text-red-500 hover:bg-white hover:text-red-600"
+          >
+            Cancel
+          </Button>
+
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="gradient"
+              className="rounded-full px-6 text-xs font-semibold text-white"
+            >
+              Publish Experience
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

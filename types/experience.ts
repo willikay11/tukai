@@ -35,7 +35,7 @@ export type Experience = {
     email: string;
     dateCreated: string;
     status: 'invited' | 'accepted' | 'declined';
-  }[]
+  }[];
 };
 
 export type CreateExperience = {
