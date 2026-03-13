@@ -1,7 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-
 import sanitizeHtml from 'sanitize-html';
 
 import IconComponent from '@/app/components/iconComponent';
@@ -59,9 +57,20 @@ export default function ExperienceReview({
     };
   });
 
-  const mergedGuests = [...invitedMembersAsUsers];
-  for (const guest of experience.coHosts || []) {
-    if (!mergedGuests.some((member) => member.id === guest.id)) {
+  const experienceGuestsAsUsers: User[] = (experience.guests || [])
+    .filter((guest) => !!guest.email)
+    .map((guest) => ({
+      id: guest.id,
+      firstName: '',
+      lastName: '',
+      displayName: guest.email,
+      picture: '',
+      email: guest.email,
+    }));
+
+  const mergedGuests = [...experienceGuestsAsUsers];
+  for (const guest of invitedMembersAsUsers) {
+    if (!mergedGuests.some((member) => member.id === guest.id || member.email === guest.email)) {
       mergedGuests.push(guest);
     }
   }

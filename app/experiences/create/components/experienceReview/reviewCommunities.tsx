@@ -21,7 +21,7 @@ export default function ReviewCommunities({
     return (
       <div className="mt-6">
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold text-gray-900">My Invited Communities</h3>
+          <h3 className="text-base font-semibold text-gray-700">My Invited Communities</h3>
           <button
             type="button"
             onClick={onEdit}

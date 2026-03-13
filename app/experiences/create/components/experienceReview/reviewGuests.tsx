@@ -27,7 +27,7 @@ export default function ReviewGuests({
   return (
     <div className="mt-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold text-gray-700">Guests ({guests.length})</h3>
+        <h3 className="text-base font-semibold text-gray-700">Guests ({guests.length})</h3>
         <div className="flex items-center gap-2">
           {guests.length > maxDisplay && (
             <button type="button" className="flex items-center gap-1 text-xs text-gray-500">
@@ -41,7 +41,7 @@ export default function ReviewGuests({
             className="text-gray-400 transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Edit Guests"
           >
-            <IconComponent iconName="Edit02Icon" size={16} />
+            <IconComponent iconName="Edit02Icon" size={16} className='text-primary' />
           </button>
         </div>
       </div>
