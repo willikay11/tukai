@@ -1,8 +1,10 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import moment from 'moment';
 import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -17,9 +19,12 @@ import {
 } from '@/components/ui/form';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { TimePicker } from '@/components/ui/time-picker';
+import { useUpdateExperience } from '@/hooks/experiences';
+import { toast } from '@/hooks/use-toast';
+import { Experience } from '@/types/experience';
 
 const experienceDatesSchema = z.object({
-  experienceType: z.enum(['paid', 'free']),
+  isPaid: z.enum(['paid', 'free']),
   dateType: z.enum(['one-day', 'multi-day', 'itinerary']),
   isRecurring: z.boolean().default(false),
   selectedDate: z.string().min(1, 'Please select a date'),
@@ -27,11 +32,38 @@ const experienceDatesSchema = z.object({
   endTime: z.string().min(1, 'Please select end time'),
 });
 
-export default function ExperienceDates() {
+interface ExperienceDatesProps {
+  experienceId?: string | null;
+  experience?: Experience;
+  onDatesUpdatedSuccess?: (nextStep?: 'guests') => void;
+  onCancel?: () => void;
+  cancelActionLabel?: string;
+  saveAndExitActionLabel?: string;
+  submitActionLabel?: string;
+  pendingActionLabel?: string;
+  hideSaveAndExit?: boolean;
+}
+
+export default function ExperienceDates({
+  experienceId,
+  experience,
+  onDatesUpdatedSuccess,
+  onCancel,
+  cancelActionLabel = 'Cancel',
+  saveAndExitActionLabel = 'Save & Exit',
+  submitActionLabel,
+  pendingActionLabel = 'Saving...',
+  hideSaveAndExit = false,
+}: ExperienceDatesProps) {
+  const { mutateAsync: updateExperience, isPending: isUpdatingExperience } = useUpdateExperience(
+    experienceId || '',
+  );
+
   const form = useForm<z.infer<typeof experienceDatesSchema>>({
     resolver: zodResolver(experienceDatesSchema),
+    mode: 'onChange',
     defaultValues: {
-      experienceType: 'paid',
+      isPaid: 'paid',
       dateType: 'one-day',
       isRecurring: false,
       selectedDate: '',
@@ -40,9 +72,99 @@ export default function ExperienceDates() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof experienceDatesSchema>) => {
-    console.log('Form submitted:', values);
-    // Handle form submission here
+  // Prefill form with existing experience data on load/reload
+  useEffect(() => {
+    if (experience) {
+      const startMoment = experience.startDate ? moment(experience.startDate) : null;
+      const endMoment = experience.endDate ? moment(experience.endDate) : null;
+
+      form.reset({
+        isPaid: experience.isPaid ? 'paid' : 'free',
+        dateType: 'one-day', // Default, as dateType isn't stored in experience
+        isRecurring: false, // Default, as isRecurring isn't stored in experience
+        selectedDate: startMoment?.isValid() ? startMoment.format('YYYY-MM-DD') : '',
+        startTime: startMoment?.isValid() ? startMoment.format('HH:mm') : '',
+        endTime: endMoment?.isValid() ? endMoment.format('HH:mm') : '',
+      });
+    }
+  }, [experience, form]);
+
+  const toIsoDateTime = (date: string, time: string) => {
+    const dateTime = moment(`${date} ${time}`, 'YYYY-MM-DD HH:mm', true);
+
+    if (!dateTime.isValid()) {
+      return null;
+    }
+
+    return dateTime.toISOString();
+  };
+
+  const toIsoEndDateTime = (
+    date: string,
+    time: string,
+    dateType: 'one-day' | 'multi-day' | 'itinerary',
+  ) => {
+    if (dateType === 'one-day') {
+      const endOfDay = moment(date, 'YYYY-MM-DD', true).endOf('day');
+      return endOfDay.isValid() ? endOfDay.toISOString() : null;
+    }
+
+    return toIsoDateTime(date, time);
+  };
+
+  const onSubmit = async (values: z.infer<typeof experienceDatesSchema>) => {
+    if (!experienceId || !experience) {
+      toast({
+        title: 'Missing experience',
+        description: 'Create experience details first before adding dates.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const startDateTime = toIsoDateTime(values.selectedDate, values.startTime);
+    const endDateTime = toIsoEndDateTime(values.selectedDate, values.endTime, values.dateType);
+
+    if (!startDateTime || !endDateTime) {
+      toast({
+        title: 'Invalid date or time',
+        description: 'Please choose a valid date and time range.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const hasAtLeastOneTicket = Boolean(experience?.tickets?.length);
+
+    try {
+      await updateExperience({
+        title: experience.title,
+        description: experience.description,
+        googleMapPlaceId: 'ChIJkYb7L8EXLxgRWogSMeTPg8M', // Placeholder, as location is required by API but not part of this form
+        startDate: startDateTime,
+        endDate: endDateTime,
+        recurrence_rule:
+          (experience as any).recurrenceRule || (experience as any).recurrence_rule || '',
+        categoriesIds: experience.categories?.map((category) => category.id) || [],
+        isPublic: experience.isPublic,
+        isPaid: values.isPaid === 'paid',
+        invitedCommunityIds: [],
+        invitedGuestsEmails: [],
+      });
+
+      toast({
+        title: 'Success',
+        description: 'Experience dates updated successfully.',
+        variant: 'success',
+      });
+      onDatesUpdatedSuccess?.(hasAtLeastOneTicket ? 'guests' : undefined);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error?.message || 'Failed to update experience dates.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -58,7 +180,7 @@ export default function ExperienceDates() {
             {/* Experience Type - Paid or Free */}
             <FormField
               control={form.control}
-              name="experienceType"
+              name="isPaid"
               render={({ field }) => (
                 <FormItem className="space-y-3">
                   <FormLabel className="block text-sm font-medium text-gray-900">
@@ -217,23 +339,35 @@ export default function ExperienceDates() {
 
             {/* Actions */}
             <div className="flex items-center justify-between gap-3 pt-4">
-              <button type="button" className="text-xs text-red-500 hover:text-red-600">
-                Cancel
-              </button>
+              <Button
+                variant="destructive"
+                type="button"
+                onClick={onCancel}
+                className="bg-white p-0 text-sm text-red-500 hover:bg-white hover:text-red-600"
+              >
+                {cancelActionLabel}
+              </Button>
               <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-full text-xs font-semibold"
-                >
-                  Save & Exit
-                </Button>
+                {!hideSaveAndExit && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isUpdatingExperience || !form.formState.isValid}
+                    className="rounded-full text-xs font-semibold"
+                  >
+                    {saveAndExitActionLabel}
+                  </Button>
+                )}
                 <Button
                   type="submit"
                   variant="gradient"
+                  disabled={isUpdatingExperience || !form.formState.isValid}
                   className="rounded-full px-6 text-xs font-semibold text-white"
                 >
-                  Create Tickets
+                  {isUpdatingExperience
+                    ? pendingActionLabel
+                    : (submitActionLabel ??
+                      (experience?.tickets?.length ? 'Continue' : 'Create Tickets'))}
                 </Button>
               </div>
             </div>

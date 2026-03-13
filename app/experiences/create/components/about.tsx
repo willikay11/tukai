@@ -1,16 +1,18 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { $generateHtmlFromNodes } from '@lexical/html';
+import { $getRoot, EditorState, SerializedEditorState } from 'lexical';
 import moment from 'moment';
 import { RRule } from 'rrule';
 import * as z from 'zod';
 
 import FileUploadField from '@/app/components/fileUploadField';
-import IconComponent from '@/app/components/iconComponent';
 import LocationAutocompleteField from '@/app/components/locationAutocompleteField';
+import { Editor } from '@/components/blocks/editor-00/editor';
 import { Button } from '@/components/ui/button';
 import CategoryPill from '@/components/ui/categoryPill';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
@@ -18,50 +20,188 @@ import { Input } from '@/components/ui/input';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { TimePicker } from '@/components/ui/time-picker';
 import { useGetInterestCategories } from '@/hooks/auth';
-import { useCreateExperience } from '@/hooks/experiences';
+import { useCreateExperience, useUpdateExperience } from '@/hooks/experiences';
 import { useGoogleMapsAutocomplete } from '@/hooks/places';
 import { toast } from '@/hooks/use-toast';
 import { Experience } from '@/types/experience';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';
 
-const experienceSchema = z.object({
-  title: z.string().min(3, 'Title must be at least 3 characters'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  included: z.string().min(3, 'Please describe what is included'),
-  notIncluded: z.string().min(1, 'Please describe what is not included'),
-  location: z.string().min(3, 'Location is required'),
-  meetingPoint: z.string().optional().default(''),
-  meetingTime: z.string().optional().default(''),
-  visibility: z.enum(['public', 'private']),
-  selectedCategories: z.array(z.string()).min(1, 'Select at least one category'),
-  uploadedFiles: z.array(z.instanceof(File)).min(1, {
-    message: 'Please upload at least one experience poster.',
-  }),
-});
+const createExperienceSchema = (requirePhotos: boolean) =>
+  z.object({
+    title: z.string().min(3, 'Title must be at least 3 characters'),
+    description: z.string().min(10, 'Description must be at least 10 characters'),
+    included: z.string().min(3, 'Please describe what is included'),
+    notIncluded: z.string().min(1, 'Please describe what is not included'),
+    location: z.string().min(3, 'Location is required'),
+    meetingPoint: z.string().optional().default(''),
+    meetingTime: z.string().optional().default(''),
+    visibility: z.enum(['public', 'private']),
+    selectedCategories: z.array(z.string()).min(1, 'Select at least one category'),
+    uploadedFiles: requirePhotos
+      ? z.array(z.instanceof(File)).min(1, {
+          message: 'Please upload at least one experience poster.',
+        })
+      : z.array(z.instanceof(File)),
+  });
+
+type ExperienceFormValues = z.infer<ReturnType<typeof createExperienceSchema>>;
+
+const toSerializedEditorState = (text: string): SerializedEditorState =>
+  ({
+    root: {
+      children: [
+        {
+          children: [
+            {
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text,
+              type: 'text',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+        },
+      ],
+      direction: 'ltr',
+      format: '',
+      indent: 0,
+      type: 'root',
+      version: 1,
+    },
+  }) as unknown as SerializedEditorState;
+
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const plainTextToHtml = (value: string) => {
+  const escaped = escapeHtml(value || '');
+  return `<p>${escaped.replace(/\n/g, '<br />')}</p>`;
+};
+
+const normalizeIncomingHtml = (value: string) => {
+  if (!value) return '';
+
+  const unescaped = value.replace(/\\"/g, '"').trim();
+  const withoutWrappingQuotes =
+    unescaped.startsWith('"') && unescaped.endsWith('"') ? unescaped.slice(1, -1) : unescaped;
+
+  if (
+    withoutWrappingQuotes.includes('&lt;') ||
+    withoutWrappingQuotes.includes('&gt;') ||
+    withoutWrappingQuotes.includes('&quot;')
+  ) {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = withoutWrappingQuotes;
+    return textarea.value;
+  }
+
+  return withoutWrappingQuotes;
+};
+
+const htmlToPlainText = (value: string) => {
+  if (!value) return '';
+  if (!value.includes('<')) return value;
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(value, 'text/html');
+  return (doc.body.textContent || '').trim();
+};
+
+const getRichTextValue = (source: Record<string, unknown>, keys: string[]) => {
+  for (const key of keys) {
+    const value = source[key];
+    if (typeof value === 'string') {
+      return value;
+    }
+  }
+
+  return '';
+};
+
+interface CreateExperienceAboutProps {
+  onSuccess?: (experienceId: string) => void;
+  onClose?: () => void;
+  experience?: Experience;
+  showTitle?: boolean;
+  cancelActionLabel?: string;
+  saveAndExitActionLabel?: string;
+  createSubmitActionLabel?: string;
+  editSubmitActionLabel?: string;
+  createPendingActionLabel?: string;
+  editPendingActionLabel?: string;
+  hideSaveAndExit?: boolean;
+}
 
 export default function CreateExperienceAbout({
   onSuccess,
+  onClose,
   experience,
-}: {
-  onSuccess?: (experienceId: string) => void;
-  experience?: Experience;
-}) {
+  showTitle = true,
+  cancelActionLabel = 'Cancel',
+  saveAndExitActionLabel = 'Save & Exit',
+  createSubmitActionLabel = 'Continue',
+  editSubmitActionLabel = 'Save Changes',
+  createPendingActionLabel = 'Creating...',
+  editPendingActionLabel = 'Saving...',
+  hideSaveAndExit = false,
+}: CreateExperienceAboutProps) {
   const { data: categories } = useGetInterestCategories();
+  const isEditMode = !!experience?.id;
+  const hasExistingPhotos = (experience?.photos?.length ?? 0) > 0;
+  const experienceSchema = useMemo(
+    () => createExperienceSchema(!hasExistingPhotos),
+    [hasExistingPhotos],
+  );
   const { mutate: createExperience, isPending: isCreatingExperience } = useCreateExperience();
+  const { mutate: updateExperience, isPending: isUpdatingExperience } = useUpdateExperience(
+    experience?.id ?? '',
+  );
+  const isSaving = isCreatingExperience || isUpdatingExperience;
   const locationInputRef = useRef<HTMLDivElement>(null);
+  const meetingPointInputRef = useRef<HTMLDivElement>(null);
   const [locationInput, setLocationInput] = useState('');
+  const [meetingPointInput, setMeetingPointInput] = useState('');
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [showMeetingPointSuggestions, setShowMeetingPointSuggestions] = useState(false);
+  const [editorHydrationSeed, setEditorHydrationSeed] = useState(0);
+  const [editorHtmlValues, setEditorHtmlValues] = useState({
+    description: '',
+    included: '',
+    notIncluded: '',
+  });
 
   const { data: googlePlaces, isFetching: isFetchingGooglePlaces } = useGoogleMapsAutocomplete(
     locationInput,
     locationInput.length > 2,
   );
 
+  const { data: googleMeetingPointPlaces, isFetching: isFetchingMeetingPointPlaces } =
+    useGoogleMapsAutocomplete(meetingPointInput, meetingPointInput.length > 2);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (locationInputRef.current && !locationInputRef.current.contains(event.target as Node)) {
         setShowLocationSuggestions(false);
+      }
+
+      if (
+        meetingPointInputRef.current &&
+        !meetingPointInputRef.current.contains(event.target as Node)
+      ) {
+        setShowMeetingPointSuggestions(false);
       }
     };
 
@@ -69,7 +209,7 @@ export default function CreateExperienceAbout({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const form = useForm<z.infer<typeof experienceSchema>>({
+  const form = useForm<ExperienceFormValues>({
     resolver: zodResolver(experienceSchema),
     defaultValues: {
       title: '',
@@ -87,11 +227,20 @@ export default function CreateExperienceAbout({
 
   useEffect(() => {
     if (experience) {
+      const experienceData = experience as unknown as Record<string, unknown>;
+      const pulledDescription = normalizeIncomingHtml(experience.description || '');
+      const pulledIncluded = normalizeIncomingHtml(
+        getRichTextValue(experienceData, ['included', 'whatsIncluded']),
+      );
+      const pulledNotIncluded = normalizeIncomingHtml(
+        getRichTextValue(experienceData, ['notIncluded', 'not_included', 'whatsNotIncluded']),
+      );
+
       form.reset({
         title: experience.title || '',
-        description: experience.description || '',
-        included: '',
-        notIncluded: '',
+        description: htmlToPlainText(pulledDescription),
+        included: htmlToPlainText(pulledIncluded),
+        notIncluded: htmlToPlainText(pulledNotIncluded),
         location: experience.location?.id || '',
         meetingPoint: '',
         meetingTime: '',
@@ -102,6 +251,27 @@ export default function CreateExperienceAbout({
       if (experience.location?.formattedAddress) {
         setLocationInput(experience.location.formattedAddress);
       }
+      setMeetingPointInput('');
+
+      setEditorHtmlValues({
+        description: pulledDescription
+          ? pulledDescription.includes('<')
+            ? pulledDescription
+            : plainTextToHtml(pulledDescription)
+          : '',
+        included: pulledIncluded
+          ? pulledIncluded.includes('<')
+            ? pulledIncluded
+            : plainTextToHtml(pulledIncluded)
+          : '',
+        notIncluded: pulledNotIncluded
+          ? pulledNotIncluded.includes('<')
+            ? pulledNotIncluded
+            : plainTextToHtml(pulledNotIncluded)
+          : '',
+      });
+
+      setEditorHydrationSeed((prev) => prev + 1);
     }
   }, [experience, form]);
 
@@ -126,41 +296,57 @@ export default function CreateExperienceAbout({
       until: endOfDay,
     });
 
-    createExperience(
-      {
-        title: values.title,
-        description: values.description,
-        googleMapPlaceId: values.location,
-        startDate: today,
-        endDate: '2026-03-27T18:39:20.886Z',
-        recurrence_rule: rule.toString(),
-        categoriesIds: values.selectedCategories,
-        isPublic: values.visibility === 'public',
-        newPhotos: values.uploadedFiles,
-        invitedCommunityIds: [],
-        invitedGuestsEmails: [],
-      },
-      {
-        onSuccess: (response: any) => {
-          const experienceId = response?.data?.id;
-          toast({
-            title: 'Success',
-            description: 'Experience created successfully.',
-            variant: 'success',
-          });
-          if (experienceId) {
-            onSuccess?.(experienceId);
-          }
-        },
-        onError: (error: any) => {
-          toast({
-            title: 'Error',
-            description: error?.message || 'Failed to create experience.',
-            variant: 'destructive',
-          });
-        },
-      },
-    );
+    const payload = {
+      title: values.title,
+      description: editorHtmlValues.description || plainTextToHtml(values.description),
+      googleMapPlaceId: 'ChIJkYb7L8EXLxgRWogSMeTPg8M', // Placeholder, as location is required by API but not part of this form
+      startDate: today,
+      endDate: '2026-03-27T18:39:20.886Z',
+      recurrence_rule: rule.toString(),
+      categoriesIds: values.selectedCategories,
+      isPublic: values.visibility === 'public',
+      newPhotos: values.uploadedFiles,
+      invitedCommunityIds: [],
+      invitedGuestsEmails: [],
+    };
+
+    const handleSuccess = (experienceId?: string) => {
+      toast({
+        title: 'Success',
+        description: isEditMode
+          ? 'Experience updated successfully.'
+          : 'Experience created successfully.',
+        variant: 'success',
+      });
+      if (experienceId) {
+        onSuccess?.(experienceId);
+      }
+      if (isEditMode) {
+        onClose?.();
+      }
+    };
+
+    const handleError = (error: any) => {
+      toast({
+        title: 'Error',
+        description:
+          error?.message ||
+          (isEditMode ? 'Failed to update experience.' : 'Failed to create experience.'),
+        variant: 'destructive',
+      });
+    };
+
+    if (isEditMode) {
+      updateExperience(payload, {
+        onSuccess: () => handleSuccess(experience?.id),
+        onError: handleError,
+      });
+    } else {
+      createExperience(payload, {
+        onSuccess: (response: any) => handleSuccess(response?.data?.id),
+        onError: handleError,
+      });
+    }
   };
 
   return (
@@ -168,7 +354,7 @@ export default function CreateExperienceAbout({
       <div className="bg-white">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Create Experience</h1>
+          {showTitle && <h1 className="text-xl font-bold text-gray-900">Create Experience</h1>}
         </div>
 
         <Form {...form}>
@@ -274,12 +460,16 @@ export default function CreateExperienceAbout({
                     Add your experience description
                   </label>
                   <FormControl>
-                    <textarea
-                      id="description"
-                      placeholder="Grab people's attention with a detailed description about the experience..."
-                      {...field}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
-                      rows={4}
+                    <Editor
+                      key={`description-${experience?.id || 'new'}-${editorHydrationSeed}`}
+                      editorSerializedState={toSerializedEditorState(field.value || '')}
+                      onChange={(editorState: EditorState, editor) => {
+                        editorState.read(() => {
+                          field.onChange($getRoot().getTextContent());
+                          const html = $generateHtmlFromNodes(editor, null);
+                          setEditorHtmlValues((prev) => ({ ...prev, description: html }));
+                        });
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -297,12 +487,16 @@ export default function CreateExperienceAbout({
                     What's included
                   </label>
                   <FormControl>
-                    <textarea
-                      id="included"
-                      placeholder="Add what is included in this experience..."
-                      {...field}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
-                      rows={3}
+                    <Editor
+                      key={`included-${experience?.id || 'new'}-${editorHydrationSeed}`}
+                      editorSerializedState={toSerializedEditorState(field.value || '')}
+                      onChange={(editorState: EditorState, editor) => {
+                        editorState.read(() => {
+                          field.onChange($getRoot().getTextContent());
+                          const html = $generateHtmlFromNodes(editor, null);
+                          setEditorHtmlValues((prev) => ({ ...prev, included: html }));
+                        });
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -323,12 +517,16 @@ export default function CreateExperienceAbout({
                     What's NOT included
                   </label>
                   <FormControl>
-                    <textarea
-                      id="notIncluded"
-                      placeholder="Add what is NOT included in this experience..."
-                      {...field}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm placeholder-gray-400 focus:border-emerald-500 focus:outline-none"
-                      rows={3}
+                    <Editor
+                      key={`notIncluded-${experience?.id || 'new'}-${editorHydrationSeed}`}
+                      editorSerializedState={toSerializedEditorState(field.value || '')}
+                      onChange={(editorState: EditorState, editor) => {
+                        editorState.read(() => {
+                          field.onChange($getRoot().getTextContent());
+                          const html = $generateHtmlFromNodes(editor, null);
+                          setEditorHtmlValues((prev) => ({ ...prev, notIncluded: html }));
+                        });
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -382,15 +580,25 @@ export default function CreateExperienceAbout({
                 render={({ field }) => (
                   <FormItem className="mb-3">
                     <FormControl>
-                      <div className="relative">
-                        <Input type="text" placeholder="Meeting/Pick-up Point" {...field} />
-                        <IconComponent
-                          iconName="LocationIcon"
-                          size={18}
-                          color="currentColor"
-                          className="absolute right-3 top-2.5 text-gray-400"
-                        />
-                      </div>
+                      <LocationAutocompleteField
+                        containerRef={meetingPointInputRef}
+                        value={meetingPointInput}
+                        placeholder="Meeting/Pick-up Point"
+                        showSuggestions={showMeetingPointSuggestions}
+                        isLoading={isFetchingMeetingPointPlaces}
+                        suggestions={googleMeetingPointPlaces?.data || []}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          setMeetingPointInput(value);
+                          setShowMeetingPointSuggestions(true);
+                        }}
+                        onFocus={() => setShowMeetingPointSuggestions(true)}
+                        onSelectSuggestion={(place: GoogleMapsAutocompletePrediction) => {
+                          field.onChange(place.description);
+                          setMeetingPointInput(place.description);
+                          setShowMeetingPointSuggestions(false);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -441,24 +649,37 @@ export default function CreateExperienceAbout({
 
             {/* Actions */}
             <div className="flex items-center justify-between gap-3 pt-4">
-              <button type="button" className="text-sm text-red-500 hover:text-red-600">
-                Cancel
-              </button>
+              <Button
+                variant="destructive"
+                type="button"
+                onClick={onClose}
+                className="bg-white p-0 text-sm text-red-500 hover:bg-white hover:text-red-600"
+              >
+                {cancelActionLabel}
+              </Button>
               <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-full text-xs font-semibold"
-                >
-                  Save & Exit
-                </Button>
+                {!hideSaveAndExit && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full text-xs font-semibold"
+                  >
+                    {saveAndExitActionLabel}
+                  </Button>
+                )}
                 <Button
                   type="submit"
                   variant="gradient"
                   className="rounded-full px-6 text-xs font-semibold text-white"
-                  disabled={isCreatingExperience}
+                  disabled={isSaving}
                 >
-                  {isCreatingExperience ? 'Creating...' : 'Continue'}
+                  {isSaving
+                    ? isEditMode
+                      ? editPendingActionLabel
+                      : createPendingActionLabel
+                    : isEditMode
+                      ? editSubmitActionLabel
+                      : createSubmitActionLabel}
                 </Button>
               </div>
             </div>

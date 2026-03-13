@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import { InvitedMember } from '@/components/ui/invite-members';
 import { useFetchSingleExperience } from '@/hooks/experiences';
+import { Community } from '@/types/community';
 
 import ExperienceStepSidePanel from './components/step-side-panel';
 import CreateExperienceSteps, { type ExperienceStepId } from './components/steps';
@@ -20,6 +22,14 @@ function parseExperienceStepId(step: string | null): ExperienceStepId | null {
 }
 
 export default function CreateExperiencePage() {
+  return (
+    <Suspense fallback={null}>
+      <CreateExperiencePageContent />
+    </Suspense>
+  );
+}
+
+function CreateExperiencePageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -29,6 +39,9 @@ export default function CreateExperiencePage() {
 
   const [activeStep, setActiveStep] = useState<ExperienceStepId>(stepFromUrl || 'about');
   const [experienceId, setExperienceId] = useState<string | null>(experienceIdFromUrl);
+  const [hasUpdatedDates, setHasUpdatedDates] = useState(false);
+  const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>([]);
+  const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
 
   const { data: experienceResponse, isLoading: isLoadingExperience } = useFetchSingleExperience(
     experienceId || '',
@@ -38,6 +51,7 @@ export default function CreateExperiencePage() {
 
   useEffect(() => {
     setExperienceId(experienceIdFromUrl);
+    setHasUpdatedDates(false);
   }, [experienceIdFromUrl]);
 
   useEffect(() => {
@@ -45,6 +59,13 @@ export default function CreateExperiencePage() {
       setActiveStep(stepFromUrl);
     }
   }, [stepFromUrl]);
+
+  // Auto-show tickets panel if experience already has dates filled
+  useEffect(() => {
+    if (experience?.startDate && experience?.endDate) {
+      setHasUpdatedDates(true);
+    }
+  }, [experience]);
 
   const replaceCreateUrlParams = (
     nextValues: Partial<{ experienceId: string | null; step: ExperienceStepId }>,
@@ -88,6 +109,18 @@ export default function CreateExperiencePage() {
           currentStep={activeStep}
           onStepChange={handleStepChange}
           onExperienceCreated={handleExperienceCreated}
+          onDatesUpdatedSuccess={(nextStep) => {
+            setHasUpdatedDates(true);
+
+            if (nextStep) {
+              setActiveStep(nextStep);
+              replaceCreateUrlParams({ step: nextStep });
+            }
+          }}
+          onInvitesChange={(members, communities) => {
+            setInvitedMembers(members);
+            setInvitedCommunities(communities);
+          }}
           experience={experience}
           isLoadingExperience={isLoadingExperience}
         />
@@ -97,6 +130,9 @@ export default function CreateExperiencePage() {
           step={activeStep}
           experienceId={experienceId}
           experience={experience}
+          canShowDateTickets={hasUpdatedDates}
+          invitedMembers={invitedMembers}
+          invitedCommunities={invitedCommunities}
         />
       </div>
     </main>

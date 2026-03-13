@@ -121,7 +121,7 @@ export default function RootLayout({
                           <PageFilters />
                         </Suspense>
                         <LocationPrompt />
-                        <div className="mb-20 flex-grow md:mb-4">{children}</div>
+                        <div className="mb-20 flex-grow md:mb-0">{children}</div>
                         <Footer />
                       </div>
                       <DownloadApp />

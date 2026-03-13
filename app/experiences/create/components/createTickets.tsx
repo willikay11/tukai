@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import moment from 'moment';
 import { z } from 'zod';
 
 import IconComponent from '@/app/components/iconComponent';
@@ -11,9 +12,16 @@ import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { TimePicker } from '@/components/ui/time-picker';
-import { useCreateExperienceTicket } from '@/hooks/experiences';
+import {
+  useCreateExperienceTicket,
+  useDeleteExperienceTicket,
+  useUpdateExperienceTicket,
+} from '@/hooks/experiences';
 import { toast } from '@/hooks/use-toast';
 import { Experience } from '@/types/experience';
+import { Ticket } from '@/types/ticket';
+
+import SavedTicketCard from './savedTicketCard';
 
 const commissionOptions = [
   { value: 'organizer', label: 'I will fully pay the commission' },
@@ -135,6 +143,11 @@ function formatTicketValidity(
   return `${formatDate(salesStartDate)}, ${formatTime(salesStartTime)} - ${formatDate(salesEndDate)} ${formatTime(salesEndTime)}`;
 }
 
+function getApiTicketValidity(ticket: Ticket): string {
+  const apiValidity = (ticket as unknown as { validity?: string | null }).validity;
+  return apiValidity?.trim() ? apiValidity : '-';
+}
+
 export default function CreateTickets({
   experienceId,
   experience,
@@ -142,12 +155,32 @@ export default function CreateTickets({
   experienceId?: string | null;
   experience?: Experience;
 }) {
+  // Compute selectedDateSummary from experience dates
+  const selectedDateSummary = useMemo(() => {
+    if (!experience?.startDate || !experience?.endDate) {
+      return '';
+    }
+
+    const startMoment = moment(experience.startDate);
+    const endMoment = moment(experience.endDate);
+
+    if (!startMoment.isValid() || !endMoment.isValid()) {
+      return '';
+    }
+
+    const dateStr = startMoment.format('DD/MM/YYYY');
+    const startTimeStr = startMoment.format('hh:mm A');
+    const endTimeStr = endMoment.format('hh:mm A');
+
+    return `${dateStr} - ${startTimeStr} - ${endTimeStr}`;
+  }, [experience?.startDate, experience?.endDate]);
+
   const form = useForm<CreateTicketsFormValues>({
     resolver: zodResolver<CreateTicketsFormValues>(createTicketsSchema),
     mode: 'onChange',
     defaultValues: {
       commissionPayer: 'organizer',
-      selectedDateSummary: '24/03/2026 - 06:00 AM - 09:00 PM',
+      selectedDateSummary: selectedDateSummary || '',
       tickets: [
         {
           ticketName: '',
@@ -166,8 +199,14 @@ export default function CreateTickets({
   const { errors, isValid, isSubmitting } = formState;
   const [submittedTicketIds, setSubmittedTicketIds] = useState<string[]>([]);
   const [savedTickets, setSavedTickets] = useState<SavedTicketCard[]>([]);
+  const [editingTicketId, setEditingTicketId] = useState<string | null>(null);
+  const [deletingTicketId, setDeletingTicketId] = useState<string | null>(null);
   const { mutateAsync: createExperienceTicket, isPending: isCreatingTicket } =
     useCreateExperienceTicket();
+  const { mutateAsync: updateExperienceTicket, isPending: isUpdatingTicket } =
+    useUpdateExperienceTicket(editingTicketId || '');
+  const { mutateAsync: deleteExperienceTicketMutation, isPending: isDeletingTicket } =
+    useDeleteExperienceTicket(deletingTicketId || '');
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -176,12 +215,90 @@ export default function CreateTickets({
 
   const watchedTickets = watch('tickets');
   const commissionPayer = watch('commissionPayer');
-  const selectedDateSummary = watch('selectedDateSummary');
 
   const existingTickets = experience?.tickets ?? [];
   const coverPhoto =
-    experience?.photos?.find((p) => p.isCover)?.photo ||
-    experience?.photos?.[0]?.photo;
+    experience?.photos?.find((p) => p.isCover)?.photo || experience?.photos?.[0]?.photo;
+
+  // Max date for ticket sales date pickers (experience end date)
+  const experienceEndDate = useMemo(() => {
+    if (!experience?.endDate) return undefined;
+    const endMoment = moment(experience.endDate);
+    return endMoment.isValid() ? endMoment.toDate() : undefined;
+  }, [experience?.endDate]);
+
+  // Min date for ticket sales date pickers (current date)
+  const currentDate = useMemo(() => new Date(), []);
+
+  const isEditing = Boolean(editingTicketId);
+
+  const handleEditTicket = (ticket: Ticket | SavedTicketCard, fieldId?: string) => {
+    // Determine if this is an API ticket or a locally saved ticket
+    const isApiTicket = 'id' in ticket && !('fieldId' in ticket);
+    const ticketId = isApiTicket ? (ticket as Ticket).id : editingTicketId;
+
+    if (isApiTicket) {
+      setEditingTicketId((ticket as Ticket).id);
+    } else if (fieldId) {
+      // For locally saved tickets, we need to find the original API ticket id if it exists
+      // For now, just re-enable editing the form field
+      setSubmittedTicketIds((prev) => prev.filter((id) => id !== fieldId));
+      return;
+    }
+
+    // Fill form with ticket data
+    const apiTicket = ticket as Ticket;
+    setValue('tickets.0.ticketName', apiTicket.name, { shouldValidate: true });
+    setValue('tickets.0.quantity', apiTicket.quantity.toString(), { shouldValidate: true });
+    setValue('tickets.0.amount', apiTicket.price.toString(), { shouldValidate: true });
+    // Note: API tickets may not have sales validity dates, so we leave them empty or prefill if available
+    setValue('tickets.0.salesStartDate', '', { shouldValidate: false });
+    setValue('tickets.0.salesStartTime', '', { shouldValidate: false });
+    setValue('tickets.0.salesEndDate', '', { shouldValidate: false });
+    setValue('tickets.0.salesEndTime', '', { shouldValidate: false });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTicketId(null);
+    // Reset the first ticket form
+    setValue('tickets.0.ticketName', '', { shouldValidate: false });
+    setValue('tickets.0.quantity', '', { shouldValidate: false });
+    setValue('tickets.0.amount', '', { shouldValidate: false });
+    setValue('tickets.0.salesStartDate', '', { shouldValidate: false });
+    setValue('tickets.0.salesStartTime', '', { shouldValidate: false });
+    setValue('tickets.0.salesEndDate', '', { shouldValidate: false });
+    setValue('tickets.0.salesEndTime', '', { shouldValidate: false });
+  };
+
+  // Effect to handle ticket deletion when deletingTicketId is set
+  useEffect(() => {
+    if (!deletingTicketId) return;
+
+    const performDelete = async () => {
+      try {
+        await deleteExperienceTicketMutation();
+        toast({
+          title: 'Ticket deleted',
+          description: 'Ticket has been deleted successfully.',
+          variant: 'success',
+        });
+      } catch (error: any) {
+        toast({
+          title: 'Error',
+          description: error?.message || 'Failed to delete ticket.',
+          variant: 'destructive',
+        });
+      } finally {
+        setDeletingTicketId(null);
+      }
+    };
+
+    performDelete();
+  }, [deletingTicketId, deleteExperienceTicketMutation]);
+
+  const handleDeleteTicket = (ticketId: string) => {
+    setDeletingTicketId(ticketId);
+  };
 
   const submitNewTickets = async (values: CreateTicketsFormValues) => {
     if (!experienceId) {
@@ -195,7 +312,9 @@ export default function CreateTickets({
 
     const ticketEntries = values.tickets
       .map((ticket, index) => ({ ticket, fieldId: fields[index]?.id }))
-      .filter((entry) => Boolean(entry.fieldId) && !submittedTicketIds.includes(entry.fieldId as string));
+      .filter(
+        (entry) => Boolean(entry.fieldId) && !submittedTicketIds.includes(entry.fieldId as string),
+      );
 
     if (!ticketEntries.length) {
       return true;
@@ -260,6 +379,37 @@ export default function CreateTickets({
   };
 
   const onSubmit = async (values: CreateTicketsFormValues) => {
+    // Handle update flow
+    if (isEditing && editingTicketId) {
+      const ticket = values.tickets[0];
+      try {
+        await updateExperienceTicket({
+          experience: experienceId!,
+          name: ticket.ticketName,
+          quantity: Number(ticket.quantity),
+          price: Number(ticket.amount),
+          availableQuantity: Number(ticket.quantity),
+        });
+
+        toast({
+          title: 'Ticket updated',
+          description: 'Ticket details have been updated successfully.',
+          variant: 'success',
+        });
+
+        // Reset editing state and form
+        handleCancelEdit();
+      } catch (error: any) {
+        toast({
+          title: 'Error',
+          description: error?.message || 'Failed to update ticket.',
+          variant: 'destructive',
+        });
+      }
+      return;
+    }
+
+    // Handle create flow
     const didSubmit = await submitNewTickets(values);
     if (!didSubmit) {
       return;
@@ -268,6 +418,7 @@ export default function CreateTickets({
     toast({
       title: 'Tickets saved',
       description: 'Ticket details have been saved successfully.',
+      variant: 'success',
     });
   };
 
@@ -326,67 +477,26 @@ export default function CreateTickets({
 
         <div className="inline-flex items-center gap-2 rounded-full border border-dashed border-primary bg-emerald-100 px-4 py-2 text-sm font-medium text-gray-900">
           <IconComponent iconName="Calendar03Icon" size={16} color="#064E3B" />
-          <span className="text-xs text-green-900">Date: {selectedDateSummary}</span>
-          <IconComponent iconName="ArrowDown01Icon" size={16} color="#064E3B" />
+          <span className="text-xs text-green-900">
+            Date: {selectedDateSummary || 'No date set'}
+          </span>
+          {/* <IconComponent iconName="ArrowDown01Icon" size={16} color="#064E3B" /> */}
         </div>
-        <input type="hidden" {...register('selectedDateSummary')} />
 
         <div className="mt-4 space-y-5">
           {/* Existing tickets from API */}
           {existingTickets.map((ticket) => (
-            <div
+            <SavedTicketCard
               key={ticket.id}
-              className="relative rounded-[12px] border border-dashed border-primary bg-emerald-50 p-2"
-            >
-              {/* Top notch */}
-              <div className="absolute -top-[1px] left-[102px] h-1.5 w-3 -translate-x-1/2 rounded-b-full border border-t-0 border-dashed border-primary bg-white" />
-              {/* Bottom notch */}
-              <div className="absolute -bottom-[1px] left-[102px] h-1.5 w-3 -translate-x-1/2 rounded-t-full border border-b-0 border-dashed border-primary bg-white" />
-
-              <div className="flex items-center gap-3">
-                <img
-                  src={coverPhoto}
-                  alt={ticket.name}
-                  className="h-20 w-20 flex-shrink-0 rounded-[12px] object-cover"
-                />
-
-                <div className="h-16 border-l border-dashed border-primary" />
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-base font-bold text-gray-800">{ticket.name}</p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <button type="button" className="text-primary">
-                        <IconComponent iconName="Edit02Icon" size={16} color="#047857" />
-                      </button>
-                      <button type="button" className="text-red-500">
-                        <IconComponent iconName="Delete02Icon" size={16} color="#EF4444" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 grid grid-cols-6 gap-2">
-                    <div className="col-span-1">
-                      <p className="text-xs text-gray-500">Qty</p>
-                      <p className="text-xs font-semibold text-gray-800">{ticket.quantity}</p>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-xs text-gray-500">Price</p>
-                      <p className="text-xs font-semibold text-gray-800">{formatKsh(ticket.price)}</p>
-                    </div>
-                    <div className="col-span-3">
-                      <p className="text-xs text-gray-500">Available</p>
-                      <p className="truncate text-xs font-semibold text-gray-800">
-                        {ticket.availableQuantity}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+              name={ticket.name}
+              quantity={ticket.quantity}
+              amount={ticket.price}
+              validity={getApiTicketValidity(ticket)}
+              coverPhoto={coverPhoto}
+              onEdit={() => handleEditTicket(ticket)}
+              onDelete={() => handleDeleteTicket(ticket.id)}
+              isDeleting={isDeletingTicket && deletingTicketId === ticket.id}
+            />
           ))}
 
           {/* New tickets being created */}
@@ -402,77 +512,20 @@ export default function CreateTickets({
 
             if (savedTicket) {
               return (
-                <div
+                <SavedTicketCard
                   key={field.id}
-                  className="relative rounded-[12px] border border-dashed border-primary bg-emerald-50 p-2"
-                >
-                  {/* Top notch */}
-                  <div className="absolute -top-[1px] left-[102px] h-1.5 w-3 -translate-x-1/2 rounded-b-full border border-t-0 border-dashed border-primary bg-white" />
-                  {/* Bottom notch */}
-                  <div className="absolute -bottom-[1px] left-[102px] h-1.5 w-3 -translate-x-1/2 rounded-t-full border border-b-0 border-dashed border-primary bg-white" />
-
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={coverPhoto}
-                      alt={savedTicket.name}
-                      className="h-20 w-20 flex-shrink-0 rounded-[12px] object-cover"
-                    />
-
-                    <div className="h-16 border-l border-dashed border-primary" />
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="truncate text-base font-bold text-gray-800">{savedTicket.name}</p>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSubmittedTicketIds((prev) => prev.filter((id) => id !== field.id));
-                            }}
-                            className="text-primary"
-                          >
-                            <IconComponent iconName="Edit02Icon" size={16} color="#047857" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              remove(index);
-                              setSubmittedTicketIds((prev) => prev.filter((id) => id !== field.id));
-                              setSavedTickets((prev) =>
-                                prev.filter((ticket) => ticket.fieldId !== field.id),
-                              );
-                            }}
-                            className="text-red-500"
-                          >
-                            <IconComponent iconName="Delete02Icon" size={16} color="#EF4444" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="mt-3 grid grid-cols-6 gap-2">
-                        <div className='col-span-1'>
-                          <p className="text-xs text-gray-500">Qty</p>
-                          <p className="text-xs font-semibold text-gray-800">{savedTicket.quantity}</p>
-                        </div>
-                        <div className='col-span-2'>
-                          <p className="text-xs text-gray-500">Price</p>
-                          <p className="text-xs font-semibold text-gray-800">
-                            {formatKsh(savedTicket.amount)}
-                          </p>
-                        </div>
-                        <div className='col-span-3'>
-                          <p className="text-xs text-gray-500">Validity</p>
-                          <p className="truncate text-xs font-semibold text-gray-800">
-                            {savedTicket.validity}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  name={savedTicket.name}
+                  quantity={savedTicket.quantity}
+                  amount={savedTicket.amount}
+                  validity={savedTicket.validity}
+                  coverPhoto={coverPhoto}
+                  onEdit={() => handleEditTicket(savedTicket, field.id)}
+                  onDelete={() => {
+                    remove(index);
+                    setSubmittedTicketIds((prev) => prev.filter((id) => id !== field.id));
+                    setSavedTickets((prev) => prev.filter((ticket) => ticket.fieldId !== field.id));
+                  }}
+                />
               );
             }
 
@@ -545,6 +598,8 @@ export default function CreateTickets({
                         })
                       }
                       placeholder="Start Date"
+                      minDate={currentDate}
+                      maxDate={experienceEndDate}
                     />
                     {ticketErrors?.salesStartDate && (
                       <p className="mt-1 text-xs text-red-500">
@@ -581,6 +636,8 @@ export default function CreateTickets({
                         })
                       }
                       placeholder="End Date"
+                      minDate={currentDate}
+                      maxDate={experienceEndDate}
                     />
                     {ticketErrors?.salesEndDate && (
                       <p className="mt-1 text-xs text-red-500">
@@ -608,7 +665,7 @@ export default function CreateTickets({
                   </div>
                 </div>
 
-                {fields.length > 1 && (
+                {fields.length > 1 && !isEditing && (
                   <button
                     type="button"
                     onClick={() => remove(index)}
@@ -617,31 +674,45 @@ export default function CreateTickets({
                     Remove ticket type
                   </button>
                 )}
+
+                {isEditing && (
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="text-xs font-medium text-gray-500"
+                  >
+                    Cancel Edit
+                  </button>
+                )}
               </div>
             );
           })}
         </div>
 
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={handleAddAnotherTicketType}
-          disabled={isCreatingTicket}
-          className="mt-2 px-0 hover:bg-transparent"
-        >
-          <IconComponent iconName="Ticket02Icon" size={16} color="#047857" />
-          Add another Ticket Type
-        </Button>
+        {!isEditing && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleAddAnotherTicketType}
+            disabled={isCreatingTicket}
+            className="mt-2 px-0 hover:bg-transparent"
+          >
+            <IconComponent iconName="Ticket02Icon" size={16} color="#047857" />
+            Add another Ticket Type
+          </Button>
+        )}
       </div>
 
       <div className="mt-5">
         <Button
           type="submit"
           variant="gradient"
-          disabled={!isValid || isSubmitting || isCreatingTicket || !experienceId}
+          disabled={
+            !isValid || isSubmitting || isCreatingTicket || isUpdatingTicket || !experienceId
+          }
           className="rounded-full px-5 text-xs text-white"
         >
-          Save Tickets
+          {isEditing ? 'Update Ticket' : 'Save Tickets'}
         </Button>
       </div>
     </form>

@@ -1,83 +1,179 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { InviteCommunities, InvitedCommunity } from '@/components/ui/invite-communities';
+import { InviteCommunities } from '@/components/ui/invite-communities';
 import { InviteMembers, InvitedMember } from '@/components/ui/invite-members';
+import { useGetUsers } from '@/hooks/auth';
+import { useGetCommunities } from '@/hooks/communities';
+import { useAddGuestToExperience, useUpdateExperience } from '@/hooks/experiences';
+import { toast } from '@/hooks/use-toast';
+import { Community } from '@/types/community';
+import { Experience } from '@/types/experience';
 
-export default function CreateExperienceInvites() {
-  const initialInvitedMembers: InvitedMember[] = [
-    { id: 'user-1', name: 'Brooklyn...', image: '/images/seven.jpg' },
-    { id: 'user-2', name: 'Kimberly...', image: '/images/eight.jpg' },
-    { id: 'user-3', name: 'Marvin...', image: '/images/santorini.webp' },
-    { id: 'email-1', name: 'gralak@gmail...', email: 'gralak@gmail.com' },
-    { id: 'user-4', name: 'Marvin...', image: '/images/eight.jpg' },
-    { id: 'user-5', name: 'Eleanor...', image: '/images/seven.jpg' },
-    ...Array.from({ length: 34 }, (_, index) => ({
-      id: `user-seed-${index + 1}`,
-      name: `Guest ${index + 1}`,
-      image: index % 2 === 0 ? '/images/seven.jpg' : '/images/eight.jpg',
-    })),
-  ];
+interface CreateExperienceInvitesProps {
+  experienceId?: string | null;
+  experience?: Experience;
+  onInvitesChange?: (members: InvitedMember[], communities: Community[]) => void;
+  onNext?: () => void;
+  cancelActionLabel?: string;
+  saveAndExitActionLabel?: string;
+  nextActionLabel?: string;
+  hideSaveAndExit?: boolean;
+}
+
+export default function CreateExperienceInvites({
+  experienceId,
+  experience,
+  onInvitesChange,
+  onNext,
+  cancelActionLabel = 'Cancel',
+  saveAndExitActionLabel = 'Save & Exit',
+  nextActionLabel = 'Next',
+  hideSaveAndExit = false,
+}: CreateExperienceInvitesProps) {
+  const initialInvitedMembers = useMemo<InvitedMember[]>(() => {
+    if (!experience?.guests?.length) {
+      return [];
+    }
+
+    return experience.guests
+      .filter((guest) => !!guest.email)
+      .map((guest) => ({
+        id: guest.id,
+        name: guest.email,
+        email: guest.email,
+        image: '',
+      }));
+  }, [experience?.guests]);
 
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>(initialInvitedMembers);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [memberSearchQuery, setMemberSearchQuery] = useState('');
 
-  const [availableCommunities] = useState<InvitedCommunity[]>([
-    { id: 'c1', name: 'Let’s Drift', image: '/images/seven.jpg' },
-    { id: 'c2', name: 'The Mara Nomads', image: '/images/eight.jpg' },
-    { id: 'c3', name: 'A Longer Communities Name', image: '/images/santorini.webp' },
-    { id: 'c4', name: 'Let’s Drift', image: '/images/seven.jpg' },
-    { id: 'c5', name: 'The Mara Nomads', image: '/images/eight.jpg' },
-    { id: 'c6', name: 'Nomad Cyclers', image: '/images/santorini.webp' },
-  ]);
+  const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
 
-  const [invitedCommunities, setInvitedCommunities] = useState<InvitedCommunity[]>([
-    availableCommunities[0],
-    availableCommunities[1],
-    availableCommunities[2],
-    availableCommunities[3],
-    availableCommunities[4],
-  ]);
+  useEffect(() => {
+    setInvitedMembers(initialInvitedMembers);
+  }, [initialInvitedMembers]);
 
-  const allUsers = useMemo<InvitedMember[]>(
-    () => [
-      {
-        id: 'user-101',
-        name: 'Brooklyn West',
-        email: 'brooklyn@example.com',
-        image: '/images/seven.jpg',
-      },
-      {
-        id: 'user-102',
-        name: 'Kimberly Rose',
-        email: 'kimberly@example.com',
-        image: '/images/eight.jpg',
-      },
-      {
-        id: 'user-103',
-        name: 'Marvin Cole',
-        email: 'marvin@example.com',
-        image: '/images/santorini.webp',
-      },
-      {
-        id: 'user-104',
-        name: 'Eleanor Lane',
-        email: 'eleanor@example.com',
-        image: '/images/seven.jpg',
-      },
-    ],
-    [],
+  useEffect(() => {
+    onInvitesChange?.(invitedMembers, invitedCommunities);
+  }, [invitedMembers, invitedCommunities, onInvitesChange]);
+
+  const normalizedMemberQuery = memberSearchQuery.trim();
+
+  const { data: users = [], isFetching: isSearchingUsers } = useGetUsers(
+    1,
+    10,
+    normalizedMemberQuery.length > 0 ? normalizedMemberQuery : undefined,
   );
 
-  const memberSearchResults = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    const q = searchQuery.toLowerCase();
-    return allUsers.filter(
-      (user) => user.name.toLowerCase().includes(q) || user.email?.toLowerCase().includes(q),
-    );
-  }, [allUsers, searchQuery]);
+  const { data: userCommunities, isFetching: isFetchingCommunities } = useGetCommunities({
+    page: 1,
+    enabled: true,
+    following: true,
+  });
+
+  const { mutateAsync: addGuestToExperience, isPending: isAddingGuest } = useAddGuestToExperience(
+    experienceId || '',
+  );
+  const { mutateAsync: updateExperience, isPending: isUpdatingCommunities } = useUpdateExperience(
+    experienceId || '',
+  );
+
+  const handleNext = async () => {
+    if (experienceId && experience) {
+      try {
+        await updateExperience({
+          title: experience.title,
+          description: experience.description || '',
+          googleMapPlaceId: 'ChIJkYb7L8EXLxgRWogSMeTPg8M', // Placeholder, as location is required by API but not part of this form
+          startDate: experience.startDate || '',
+          endDate: experience.endDate || '',
+          recurrence_rule:
+            (experience as any).recurrenceRule || (experience as any).recurrence_rule || '',
+          categoriesIds: experience.categories?.map((c) => c.id) || [],
+          isPublic: experience.isPublic,
+          invitedCommunityIds: invitedCommunities.map((c) => c.id),
+          invitedGuestsEmails: [],
+        });
+        toast({
+          title: 'Communities saved',
+          description: 'Invited communities have been updated.',
+          variant: 'success',
+        });
+      } catch (error: any) {
+        toast({
+          title: 'Error',
+          description: error?.message || 'Failed to update invited communities.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+    onNext?.();
+  };
+
+  const handleMemberInvited = async (members: InvitedMember[]) => {
+    // Find newly added member (last one in the new array that's not in current state)
+    const newMember = members.find((m) => !invitedMembers.some((existing) => existing.id === m.id));
+
+    // Update local state first
+    setInvitedMembers(members);
+
+    // If there's a new member with an email, call the API
+    if (newMember?.email && experienceId) {
+      try {
+        await addGuestToExperience(newMember.email);
+        toast({
+          title: 'Guest invited',
+          description: `${newMember.name} has been invited to the experience.`,
+          variant: 'success',
+        });
+      } catch (error: any) {
+        toast({
+          title: 'Error',
+          description: error?.message || 'Failed to invite guest.',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+
+  const memberSearchResults = useMemo<InvitedMember[]>(() => {
+    if (!normalizedMemberQuery) {
+      return [];
+    }
+
+    return users
+      .map((user: any) => {
+        const firstName = user.firstName || '';
+        const lastName = user.lastName || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+
+        return {
+          id: user.id,
+          name: user.displayName || fullName || user.email || 'User',
+          email: user.email,
+          image: user.picture,
+        } as InvitedMember;
+      })
+      .filter((user: InvitedMember) => !invitedMembers.some((member) => member.id === user.id));
+  }, [users, invitedMembers, normalizedMemberQuery]);
+
+  const availableCommunities = useMemo<Community[]>(() => {
+    if (!userCommunities?.data) {
+      return [];
+    }
+
+    return userCommunities?.data?.results?.map((community: any) => ({
+      id: community.id,
+      title: community.title,
+      photos: community.photos,
+      members: community.members,
+    }));
+  }, [userCommunities]);
 
   return (
     <div className="w-full">
@@ -93,10 +189,14 @@ export default function CreateExperienceInvites() {
 
         <InviteMembers
           invitedMembers={invitedMembers}
-          onMembersChange={setInvitedMembers}
+          onMembersChange={handleMemberInvited}
           searchResults={memberSearchResults}
-          onSearch={setSearchQuery}
-          className="mt-6"
+          isSearching={isSearchingUsers || isAddingGuest}
+          onSearch={(query) => {
+            setMemberSearchQuery(query);
+          }}
+          debounceMs={500}
+          className="mt-3"
         />
 
         <p className="mt-6 text-xs font-semibold text-gray-800">Your communities</p>
@@ -108,27 +208,36 @@ export default function CreateExperienceInvites() {
           invitedCommunities={invitedCommunities}
           onCommunitiesChange={setInvitedCommunities}
           availableCommunities={availableCommunities}
+          isLoading={isFetchingCommunities}
         />
 
         <div className="mt-8 flex items-center justify-between gap-3">
-          <button type="button" className="text-sm text-red-500 hover:text-red-600">
-            Cancel
-          </button>
+          <Button
+            variant="destructive"
+            type="button"
+            className="bg-white p-0 text-sm text-red-500 hover:bg-white hover:text-red-600"
+          >
+            {cancelActionLabel}
+          </Button>
 
           <div className="flex gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-full border-primary px-6 text-xs font-semibold text-primary"
-            >
-              Save &amp; Exit
-            </Button>
+            {!hideSaveAndExit && (
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-full border-primary px-6 text-xs font-semibold text-primary"
+              >
+                {saveAndExitActionLabel}
+              </Button>
+            )}
             <Button
               type="button"
               variant="gradient"
+              onClick={handleNext}
+              disabled={isUpdatingCommunities}
               className="rounded-full px-6 text-xs font-semibold text-white"
             >
-              Next
+              {isUpdatingCommunities ? 'Saving...' : nextActionLabel}
             </Button>
           </div>
         </div>

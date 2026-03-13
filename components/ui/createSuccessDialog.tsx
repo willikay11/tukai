@@ -11,6 +11,8 @@ type CreateSuccessDialogProps = {
   onOpenChange: (open: boolean) => void;
   viewCommunityHref?: string;
   createExperienceHref?: string;
+  onViewCommunityClick?: () => void;
+  onCreateExperienceClick?: () => void;
   title?: string;
   description?: string;
   viewCommunityLabel?: string;
@@ -23,6 +25,8 @@ export default function CreateSuccessDialog({
   onOpenChange,
   viewCommunityHref,
   createExperienceHref,
+  onViewCommunityClick,
+  onCreateExperienceClick,
   title = 'Community Created Successfully',
   description = 'Your community was created successfully. You can now proceed to create your experience or view the community',
   viewCommunityLabel = 'View Community',
@@ -51,29 +55,55 @@ export default function CreateSuccessDialog({
           </DialogDescription>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            {viewCommunityHref && (
-              <Button
-                type="button"
-                variant="outline"
-                className="h-12 rounded-full border-primary px-6 text-primary"
-                asChild
-              >
-                <Link href={viewCommunityHref} onClick={() => onOpenChange(false)}>
-                  {viewCommunityLabel}
-                </Link>
-              </Button>
+            {(viewCommunityHref || onViewCommunityClick) && (
+              <>
+                {viewCommunityHref ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-12 rounded-full border-primary px-6 text-primary"
+                    asChild
+                  >
+                    <Link href={viewCommunityHref} onClick={() => onOpenChange(false)}>
+                      {viewCommunityLabel}
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-12 rounded-full border-primary px-6 text-primary"
+                    onClick={onViewCommunityClick}
+                  >
+                    {viewCommunityLabel}
+                  </Button>
+                )}
+              </>
             )}
-            {createExperienceHref && (
-              <Button
-                type="button"
-                variant="gradient"
-                className="h-12 rounded-full px-6 text-white"
-                asChild
-              >
-                <Link href={createExperienceHref} onClick={() => onOpenChange(false)}>
-                  {createExperienceLabel}
-                </Link>
-              </Button>
+            {(createExperienceHref || onCreateExperienceClick) && (
+              <>
+                {createExperienceHref ? (
+                  <Button
+                    type="button"
+                    variant="gradient"
+                    className="h-12 rounded-full px-6 text-white"
+                    asChild
+                  >
+                    <Link href={createExperienceHref} onClick={() => onOpenChange(false)}>
+                      {createExperienceLabel}
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="gradient"
+                    className="h-12 rounded-full px-6 text-white"
+                    onClick={onCreateExperienceClick}
+                  >
+                    {createExperienceLabel}
+                  </Button>
+                )}
+              </>
             )}
           </div>
         </div>
