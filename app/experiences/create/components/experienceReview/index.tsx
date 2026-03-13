@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import sanitizeHtml from 'sanitize-html';
 
 import IconComponent from '@/app/components/iconComponent';
@@ -22,6 +24,7 @@ export interface ExperienceReviewProps {
   experience?: Experience;
   invitedMembers?: InvitedMember[];
   invitedCommunities?: Community[];
+  onEditRequest?: (section: 'about' | 'tickets') => void;
 }
 
 export default function ExperienceReview({
@@ -29,6 +32,7 @@ export default function ExperienceReview({
   experience,
   invitedMembers = [],
   invitedCommunities = [],
+  onEditRequest,
 }: ExperienceReviewProps) {
   if (!experience) {
     return (
@@ -62,6 +66,18 @@ export default function ExperienceReview({
     }
   }
 
+  const openEditAbout = () => {
+    if (onEditRequest) {
+      onEditRequest('about');
+    }
+  };
+
+  const openEditTickets = () => {
+    if (onEditRequest) {
+      onEditRequest('tickets');
+    }
+  };
+
   return (
     <div className="h-full overflow-y-auto">
       {type === 'create' ? (
@@ -88,17 +104,27 @@ export default function ExperienceReview({
         </>
       ) : (
         <>
-          <ImageCarousel
-            className="h-[20.25rem]"
-            images={experience.photos
-              .sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0))
-              .map((photo) => photo.photo)}
-          />
+          <div className="relative">
+            <ImageCarousel
+              className="h-[20.25rem]"
+              images={experience.photos
+                .sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0))
+                .map((photo) => photo.photo)}
+            />
+            <button
+              type="button"
+              onClick={openEditAbout}
+              className="absolute right-3 bottom-3"
+              aria-label="Edit photos"
+            >
+              <IconComponent iconName="Edit02Icon" size={16} className="text-white" />
+            </button>
+          </div>
           <div className="flex flex-row justify-between items-end">
             <h2 className="mt-4 text-xl font-semibold text-gray-900">{experience.title}</h2>
             <button
               type="button"
-              onClick={() => {}}
+              onClick={openEditAbout}
               className="text-gray-400 transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
               aria-label={`Edit ${experience.title}`}
             >
@@ -122,7 +148,7 @@ export default function ExperienceReview({
         }
         variant="included"
         editable={type === 'review'}
-        onEdit={() => {}}
+        onEdit={openEditAbout}
       />
 
       {/* What's NOT Included */}
@@ -133,7 +159,7 @@ export default function ExperienceReview({
         }
         variant="excluded"
         editable={type === 'review'}
-        onEdit={() => {}}
+        onEdit={openEditAbout}
       />
 
       <div className="mt-6 rounded-[12px] border-[1px] border-gray-200 bg-gray-100 p-5">
@@ -142,6 +168,8 @@ export default function ExperienceReview({
           title="Location of the Experience"
           location={experience.location}
           showTime={false}
+          editable={type === 'review'}
+          onEdit={openEditAbout}
         />
 
         {/* Meeting/Pick-up Point & Time */}
@@ -152,6 +180,8 @@ export default function ExperienceReview({
             startDate={experience.startDate}
             endDate={experience.endDate}
             showTime
+            editable={type === 'review'}
+            onEdit={openEditAbout}
           />
         </div>
       </div>
@@ -160,7 +190,7 @@ export default function ExperienceReview({
       <ReviewCategories
         categories={experience.categories}
         editable={type === 'review'}
-        onEdit={() => {}}
+        onEdit={openEditAbout}
       />
 
       {/* Experience Type */}
@@ -169,7 +199,7 @@ export default function ExperienceReview({
           <h3 className="text-base font-semibold text-gray-700">Experience Type</h3>
           <button
             type="button"
-            onClick={() => {}}
+            onClick={openEditAbout}
             disabled={type !== 'review'}
             className="text-gray-400 transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Edit Experience Type"
@@ -195,7 +225,7 @@ export default function ExperienceReview({
         tickets={experience.tickets}
         coverPhoto={coverPhoto}
         editable={type === 'review'}
-        onEdit={() => {}}
+        onEdit={openEditTickets}
       />
 
       {/* Guests */}

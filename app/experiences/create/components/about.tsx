@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { TimePicker } from '@/components/ui/time-picker';
 import { useGetInterestCategories } from '@/hooks/auth';
-import { useCreateExperience } from '@/hooks/experiences';
+import { useCreateExperience, useUpdateExperience } from '@/hooks/experiences';
 import { useGoogleMapsAutocomplete } from '@/hooks/places';
 import { toast } from '@/hooks/use-toast';
 import { Experience } from '@/types/experience';
@@ -128,13 +128,22 @@ const getRichTextValue = (source: Record<string, unknown>, keys: string[]) => {
 
 export default function CreateExperienceAbout({
   onSuccess,
+  onClose,
   experience,
+  showTitle = true,
 }: {
   onSuccess?: (experienceId: string) => void;
+  onClose?: () => void;
   experience?: Experience;
+  showTitle?: boolean;
 }) {
   const { data: categories } = useGetInterestCategories();
+  const isEditMode = !!experience?.id;
   const { mutate: createExperience, isPending: isCreatingExperience } = useCreateExperience();
+  const { mutate: updateExperience, isPending: isUpdatingExperience } = useUpdateExperience(
+    experience?.id ?? '',
+  );
+  const isSaving = isCreatingExperience || isUpdatingExperience;
   const locationInputRef = useRef<HTMLDivElement>(null);
   const meetingPointInputRef = useRef<HTMLDivElement>(null);
   const [locationInput, setLocationInput] = useState('');
@@ -261,41 +270,53 @@ export default function CreateExperienceAbout({
       until: endOfDay,
     });
 
-    createExperience(
-      {
-        title: values.title,
-        description: editorHtmlValues.description || plainTextToHtml(values.description),
-        googleMapPlaceId: values.location,
-        startDate: today,
-        endDate: '2026-03-27T18:39:20.886Z',
-        recurrence_rule: rule.toString(),
-        categoriesIds: values.selectedCategories,
-        isPublic: values.visibility === 'public',
-        newPhotos: values.uploadedFiles,
-        invitedCommunityIds: [],
-        invitedGuestsEmails: [],
-      },
-      {
-        onSuccess: (response: any) => {
-          const experienceId = response?.data?.id;
-          toast({
-            title: 'Success',
-            description: 'Experience created successfully.',
-            variant: 'success',
-          });
-          if (experienceId) {
-            onSuccess?.(experienceId);
-          }
-        },
-        onError: (error: any) => {
-          toast({
-            title: 'Error',
-            description: error?.message || 'Failed to create experience.',
-            variant: 'destructive',
-          });
-        },
-      },
-    );
+    const payload = {
+      title: values.title,
+      description: editorHtmlValues.description || plainTextToHtml(values.description),
+      googleMapPlaceId: values.location,
+      startDate: today,
+      endDate: '2026-03-27T18:39:20.886Z',
+      recurrence_rule: rule.toString(),
+      categoriesIds: values.selectedCategories,
+      isPublic: values.visibility === 'public',
+      newPhotos: values.uploadedFiles,
+      invitedCommunityIds: [],
+      invitedGuestsEmails: [],
+    };
+
+    const handleSuccess = (experienceId?: string) => {
+      toast({
+        title: 'Success',
+        description: isEditMode ? 'Experience updated successfully.' : 'Experience created successfully.',
+        variant: 'success',
+      });
+      if (experienceId) {
+        onSuccess?.(experienceId);
+      }
+      if (isEditMode) {
+        onClose?.();
+      }
+    };
+
+    const handleError = (error: any) => {
+      toast({
+        title: 'Error',
+        description: error?.message || (isEditMode ? 'Failed to update experience.' : 'Failed to create experience.'),
+        variant: 'destructive',
+      });
+    };
+
+    if (isEditMode) {
+      updateExperience(payload, {
+        onSuccess: () => handleSuccess(experience?.id),
+        onError: handleError,
+      });
+    } else {
+      createExperience(payload, {
+        onSuccess: (response: any) => handleSuccess(response?.data?.id),
+        onError: handleError,
+      });
+    }
   };
 
   return (
@@ -303,7 +324,7 @@ export default function CreateExperienceAbout({
       <div className="bg-white">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Create Experience</h1>
+          {showTitle && <h1 className="text-xl font-bold text-gray-900">Create Experience</h1>}
         </div>
 
         <Form {...form}>
@@ -601,6 +622,7 @@ export default function CreateExperienceAbout({
               <Button
                 variant="destructive"
                 type="button"
+                onClick={onClose}
                 className="bg-white p-0 text-sm text-red-500 hover:bg-white hover:text-red-600"
               >
                 Cancel
@@ -617,9 +639,9 @@ export default function CreateExperienceAbout({
                   type="submit"
                   variant="gradient"
                   className="rounded-full px-6 text-xs font-semibold text-white"
-                  disabled={isCreatingExperience}
+                  disabled={isSaving}
                 >
-                  {isCreatingExperience ? 'Creating...' : 'Continue'}
+                  {isSaving ? (isEditMode ? 'Saving...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Continue')}
                 </Button>
               </div>
             </div>

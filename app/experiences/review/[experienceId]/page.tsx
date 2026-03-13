@@ -1,7 +1,11 @@
 'use client';
 
+import { useState } from 'react';
+
 import { useParams } from 'next/navigation';
 
+import CreateExperienceAbout from '@/app/experiences/create/components/about';
+import ExperienceDates from '@/app/experiences/create/components/dates';
 import ExperienceReview from '@/app/experiences/create/components/experienceReview';
 import { useFetchSingleExperience } from '@/hooks/experiences';
 
@@ -14,6 +18,8 @@ export default function ExperienceReviewPage() {
 
   const { data: experienceResponse, isLoading } = useFetchSingleExperience(experienceId, true);
   const experience = experienceResponse?.data;
+
+  const [activeEditSection, setActiveEditSection] = useState<'about' | 'tickets' | null>(null);
 
   if (isLoading) {
     return (
@@ -39,9 +45,23 @@ export default function ExperienceReviewPage() {
           experience={experience}
           invitedMembers={[]}
           invitedCommunities={[]}
+          onEditRequest={(section) => setActiveEditSection(section)}
         />
       </div>
-      <div className="lg:col-span-4 lg:col-start-8"></div>
+      <div className="lg:col-span-4 lg:col-start-8">
+        <div className="h-full rounded-t-xl border-x border-t border-gray-200 bg-white px-12 py-6 shadow-lg">
+          {activeEditSection === 'about' && (
+            <CreateExperienceAbout
+              experience={experience}
+              onClose={() => setActiveEditSection(null)}
+              showTitle={false}
+            />
+          )}
+          {activeEditSection === 'tickets' && (
+            <ExperienceDates experienceId={experienceId} experience={experience} />
+          )}
+        </div>
+      </div>
     </main>
   );
 }
