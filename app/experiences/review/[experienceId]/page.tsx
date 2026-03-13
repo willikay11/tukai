@@ -8,6 +8,7 @@ import CreateExperienceAbout from '@/app/experiences/create/components/about';
 import CreateTickets from '@/app/experiences/create/components/createTickets';
 import ExperienceReview from '@/app/experiences/create/components/experienceReview';
 import CreateExperienceInvites from '@/app/experiences/create/components/invites';
+import CreateExperienceWallet from '@/app/experiences/create/components/wallet';
 import { useFetchSingleExperience } from '@/hooks/experiences';
 
 import ExperienceDates from '../../create/components/dates';
@@ -23,7 +24,7 @@ export default function ExperienceReviewPage() {
   const experience = experienceResponse?.data;
 
   const [activeEditSection, setActiveEditSection] = useState<
-    'about' | 'dates' | 'tickets' | 'invites' | null
+    'about' | 'dates' | 'tickets' | 'invites' | 'wallet' | null
   >(null);
 
   if (isLoading) {
@@ -85,6 +86,7 @@ export default function ExperienceReviewPage() {
               nextActionLabel="Save Changes"
             />
           )}
+          {activeEditSection === 'wallet' && <CreateExperienceWallet hideSaveAndExit cancelActionLabel='Cancel' previewAndPublishActionLabel='Save Changes' />}
         </div>
       </div>
     </main>

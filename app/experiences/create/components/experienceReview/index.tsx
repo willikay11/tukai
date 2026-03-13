@@ -16,13 +16,14 @@ import ReviewInfoSection from './reviewInfoSection';
 import ReviewLocationCard from './reviewLocationCard';
 import ReviewPhotoGallery from './reviewPhotoGallery';
 import ReviewTickets from './reviewTickets';
+import ReviewWallets from './reviewWallets';
 
 export interface ExperienceReviewProps {
   type?: 'create' | 'review';
   experience?: Experience;
   invitedMembers?: InvitedMember[];
   invitedCommunities?: Community[];
-  onEditRequest?: (section: 'about' | 'dates' | 'tickets' | 'invites') => void;
+  onEditRequest?: (section: 'about' | 'dates' | 'tickets' | 'invites' | 'wallet') => void;
 }
 
 export default function ExperienceReview({
@@ -96,6 +97,12 @@ export default function ExperienceReview({
   const openEditInvites = () => {
     if (onEditRequest) {
       onEditRequest('invites');
+    }
+  };
+
+  const openEditWallet = () => {
+    if (onEditRequest) {
+      onEditRequest('wallet');
     }
   };
 
@@ -258,6 +265,9 @@ export default function ExperienceReview({
         editable={type === 'review'}
         onEdit={openEditInvites}
       />
+
+      {/* Wallet Details */}
+      <ReviewWallets editable={type === 'review'} onEdit={openEditWallet} />
     </div>
   );
 }

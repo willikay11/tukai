@@ -23,7 +23,19 @@ import { Wallet } from '@/types/payment';
 
 type PaymentMethod = 'mpesa' | 'bank_account';
 
-export default function CreateExperienceWallet() {
+interface CreateExperienceWalletProps {
+  cancelActionLabel?: string;
+  saveAndExitActionLabel?: string;
+  previewAndPublishActionLabel?: string;
+  hideSaveAndExit?: boolean;
+}
+
+export default function CreateExperienceWallet({
+  cancelActionLabel = 'Cancel',
+  saveAndExitActionLabel = 'Save & Exit',
+  previewAndPublishActionLabel = 'Preview & Publish',
+  hideSaveAndExit = false,
+}: CreateExperienceWalletProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const experienceId = searchParams.get('experienceId');
@@ -379,24 +391,26 @@ export default function CreateExperienceWallet() {
             type="button"
             className="bg-white p-0 text-sm text-red-500 hover:bg-white hover:text-red-600"
           >
-            Cancel
+            {cancelActionLabel}
           </Button>
 
           <div className="flex gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-full border-primary px-6 text-xs font-semibold text-primary"
-            >
-              Save &amp; Exit
-            </Button>
+            {!hideSaveAndExit && (
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-full border-primary px-6 text-xs font-semibold text-primary"
+              >
+                {saveAndExitActionLabel}
+              </Button>
+            )}
             <Button
               type="button"
               variant="gradient"
               className="rounded-full px-6 text-xs font-semibold text-white"
               onClick={handlePreviewAndPublish}
             >
-              Preview &amp; Publish
+              {previewAndPublishActionLabel}
             </Button>
           </div>
         </div>
