@@ -156,7 +156,12 @@ export function MpesaDetailsForm({
 
       <div className={`mt-6 flex ${showCancel ? 'justify-between' : 'justify-end'}`}>
         {showCancel ? (
-          <Button variant="destructive" type="button" onClick={onCancel} className="text-sm bg-white text-red-500 hover:bg-white hover:text-red-600 p-0">
+          <Button
+            variant="destructive"
+            type="button"
+            onClick={onCancel}
+            className="bg-white p-0 text-sm text-red-500 hover:bg-white hover:text-red-600"
+          >
             Cancel
           </Button>
         ) : null}

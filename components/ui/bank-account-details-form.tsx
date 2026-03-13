@@ -53,7 +53,9 @@ export function BankAccountDetailsForm({
   const [bankName, setBankName] = useState(defaultValues?.bankName ?? '');
   const [bankBranch, setBankBranch] = useState(defaultValues?.bankBranch ?? '');
   const [branchCode, setBranchCode] = useState(defaultValues?.branchCode ?? '');
-  const [accountHolderName, setAccountHolderName] = useState(defaultValues?.accountHolderName ?? '');
+  const [accountHolderName, setAccountHolderName] = useState(
+    defaultValues?.accountHolderName ?? '',
+  );
   const [accountNumber, setAccountNumber] = useState(defaultValues?.accountNumber ?? '');
   const [swiftCode, setSwiftCode] = useState(defaultValues?.swiftCode ?? '');
   const [postcode, setPostcode] = useState('');
@@ -156,7 +158,9 @@ export function BankAccountDetailsForm({
           </SelectContent>
         </Select>
       </div>
-      {errors.accountCountry ? <p className="mt-1 text-xs text-red-600">{errors.accountCountry}</p> : null}
+      {errors.accountCountry ? (
+        <p className="mt-1 text-xs text-red-600">{errors.accountCountry}</p>
+      ) : null}
 
       <div className="mt-3">
         <Input
@@ -248,7 +252,9 @@ export function BankAccountDetailsForm({
           suffixIcon={<IconComponent iconName="WalletAdd02Icon" size={18} color="#374151" />}
         />
       </div>
-      {errors.accountNumber ? <p className="mt-1 text-xs text-red-600">{errors.accountNumber}</p> : null}
+      {errors.accountNumber ? (
+        <p className="mt-1 text-xs text-red-600">{errors.accountNumber}</p>
+      ) : null}
 
       <h4 className="mt-6 text-sm font-semibold text-gray-800">Billing Address</h4>
 
@@ -275,7 +281,9 @@ export function BankAccountDetailsForm({
           </SelectContent>
         </Select>
       </div>
-      {errors.billingCountry ? <p className="mt-1 text-xs text-red-600">{errors.billingCountry}</p> : null}
+      {errors.billingCountry ? (
+        <p className="mt-1 text-xs text-red-600">{errors.billingCountry}</p>
+      ) : null}
 
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Input
@@ -324,7 +332,12 @@ export function BankAccountDetailsForm({
 
       <div className={`mt-6 flex ${showCancel ? 'justify-between' : 'justify-end'}`}>
         {showCancel ? (
-          <Button variant="destructive" type="button" onClick={onCancel} className="text-sm bg-white text-red-500 hover:bg-white hover:text-red-600 p-0">
+          <Button
+            variant="destructive"
+            type="button"
+            onClick={onCancel}
+            className="bg-white p-0 text-sm text-red-500 hover:bg-white hover:text-red-600"
+          >
             Cancel
           </Button>
         ) : null}

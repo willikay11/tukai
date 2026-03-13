@@ -374,7 +374,11 @@ export default function CreateExperienceWallet() {
 
       {!isWalletsLoading && wallets.length > 0 && !showForm ? (
         <div className="mt-8 flex items-center justify-between gap-3">
-          <Button variant="destructive" type="button" className="text-sm bg-white text-red-500 hover:bg-white hover:text-red-600 p-0">
+          <Button
+            variant="destructive"
+            type="button"
+            className="bg-white p-0 text-sm text-red-500 hover:bg-white hover:text-red-600"
+          >
             Cancel
           </Button>
 

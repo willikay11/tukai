@@ -9,6 +9,8 @@ export interface ReviewLocationCardProps {
   startDate?: string;
   endDate?: string;
   showTime?: boolean;
+  editable?: boolean;
+  onEdit?: () => void;
 }
 
 export default function ReviewLocationCard({
@@ -17,6 +19,8 @@ export default function ReviewLocationCard({
   startDate: _startDate,
   endDate: _endDate,
   showTime: _showTime = false,
+  editable = false,
+  onEdit,
 }: ReviewLocationCardProps) {
   const isMeetingSection = title.toLowerCase().includes('meeting');
 
@@ -42,8 +46,19 @@ export default function ReviewLocationCard({
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-      <div className="mt-3 rounded-[12px] border border-gray-200 bg-white p-5">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+        <button
+          type="button"
+          onClick={onEdit}
+          disabled={editable === false}
+          className="text-gray-400 transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+          aria-label={`Edit ${title}`}
+        >
+          <IconComponent iconName="Edit02Icon" size={16} className='text-primary' />
+        </button>
+      </div>
+      <div className="mt-3 rounded-[12px] border border-gray-200 bg-white p-4">
         <div className="flex items-center justify-between gap-4">
           <div className="h-[75px] w-[130px] flex-shrink-0 overflow-hidden rounded-[12px] bg-gray-100">
             <img
@@ -59,7 +74,7 @@ export default function ReviewLocationCard({
             className="inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-100 px-3 py-2 text-xs font-medium text-emerald-900"
           >
             Open Maps
-            <IconComponent iconName="Location01Icon" size={16} color="#065F46" />
+            <IconComponent iconName="Location01Icon" size={16} className='text-primary' />
           </button>
         </div>
 
