@@ -13,7 +13,7 @@ import { Community } from '@/types/community';
 import ExperienceStepSidePanel from './components/step-side-panel';
 import CreateExperienceSteps, { type ExperienceStepId } from './components/steps';
 
-const EXPERIENCE_STEPS: ExperienceStepId[] = ['about', 'dates-tickets', 'guests', 'wallet'];
+const EXPERIENCE_STEPS: ExperienceStepId[] = ['community', 'about', 'dates-tickets', 'guests', 'wallet'];
 
 function parseExperienceStepId(step: string | null): ExperienceStepId | null {
   if (!step) {
@@ -40,7 +40,7 @@ function CreateExperiencePageContent() {
   const experienceIdFromUrl = searchParams.get('experienceId');
   const stepFromUrl = parseExperienceStepId(searchParams.get('step'));
 
-  const [activeStep, setActiveStep] = useState<ExperienceStepId>(stepFromUrl || 'about');
+  const [activeStep, setActiveStep] = useState<ExperienceStepId>(stepFromUrl || 'community');
   const [experienceId, setExperienceId] = useState<string | null>(experienceIdFromUrl);
   const [hasUpdatedDates, setHasUpdatedDates] = useState(false);
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>([]);
