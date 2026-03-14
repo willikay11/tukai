@@ -1,6 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 import IconComponent from '@/app/components/iconComponent';
+import { CreateStepContentSkeleton } from '@/app/components/skeletons';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGetWallets } from '@/hooks/payment';
@@ -8,14 +11,19 @@ import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 
 import CreateExperienceAbout from './about';
+import CreateExperienceCommunity from './community';
 import ExperienceDates from './dates';
 import CreateExperienceInvites from './invites';
 import CreateExperienceWallet from './wallet';
-import { CreateStepContentSkeleton } from '@/app/components/skeletons';
 
-export type ExperienceStepId = 'about' | 'dates-tickets' | 'guests' | 'wallet';
+export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
 const STEPS = [
+  {
+    id: 'community',
+    label: 'Community',
+    icon: 'AddTeamIcon',
+  },
   {
     id: 'about',
     label: 'About',
@@ -31,7 +39,7 @@ const STEPS = [
 ];
 
 export default function CreateExperienceSteps({
-  currentStep = 'about',
+  currentStep = 'community',
   onStepChange,
   onExperienceCreated,
   onDatesUpdatedSuccess,
@@ -47,11 +55,22 @@ export default function CreateExperienceSteps({
   experience?: Experience;
   isLoadingExperience?: boolean;
 }) {
-  const currentStepIndex = STEPS.findIndex((step) => step.id === currentStep);
+  const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const { data: walletsResponse } = useGetWallets();
   const hasSavedWallets = (walletsResponse?.data?.results?.length ?? 0) > 0;
+  const canAccessDetailsSteps = Boolean(experience?.id || selectedCommunityId);
+
+  useEffect(() => {
+    if (currentStep !== 'community' && !canAccessDetailsSteps) {
+      onStepChange?.('community');
+    }
+  }, [canAccessDetailsSteps, currentStep, onStepChange]);
 
   const handleStepChange = (step: ExperienceStepId) => {
+    if (step !== 'community' && !canAccessDetailsSteps) {
+      return;
+    }
+
     onStepChange?.(step);
   };
 
@@ -85,21 +104,24 @@ export default function CreateExperienceSteps({
       className="w-full"
     >
       <TabsList className="flex h-auto w-full gap-2 bg-transparent p-0">
-        {STEPS.map((step, index) => {
+        {STEPS.map((step) => {
           const isAboutFilled = Boolean(experience?.id);
           const isDatesTicketsFilled = Boolean(experience?.tickets?.length);
           const stepFilledMap: Record<string, boolean> = {
+            community: canAccessDetailsSteps,
             about: isAboutFilled,
             'dates-tickets': isDatesTicketsFilled,
             guests: false,
             wallet: hasSavedWallets,
           };
           const isFilled = stepFilledMap[step.id] ?? false;
+          const isDisabled = step.id !== 'community' && !canAccessDetailsSteps;
 
           return (
             <TabsTrigger
               key={step.id}
               value={step.id}
+              disabled={isDisabled}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs transition-colors data-[state=active]:border-b-[0px] data-[state=active]:border-emerald-600 data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 ${
                 isFilled ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-800'
               }`}
@@ -119,6 +141,14 @@ export default function CreateExperienceSteps({
       </TabsList>
 
       {/* Tab Content */}
+      <TabsContent value="community" className="mt-6">
+        <CreateExperienceCommunity
+          selectedCommunityId={selectedCommunityId}
+          onSelectCommunity={setSelectedCommunityId}
+          onContinue={() => handleStepChange('about')}
+        />
+      </TabsContent>
+
       <TabsContent value="about" className="mt-6">
         <CreateExperienceAbout
           experience={experience}

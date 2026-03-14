@@ -11,7 +11,7 @@ import { Experience } from '@/types/experience';
 import CreateTickets from './createTickets';
 import ExperienceReview from './experienceReview';
 
-export type ExperienceStepId = 'about' | 'dates-tickets' | 'guests' | 'wallet';
+export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
 export default function ExperienceStepSidePanel({
   step,
@@ -29,6 +29,12 @@ export default function ExperienceStepSidePanel({
   invitedCommunities?: Community[];
 }) {
   const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
+    community: (
+      <StepPlaceholderContent
+        title="Select a Community"
+        description="Choose the community where you want to host this experience."
+      />
+    ),
     about: (
       <StepPlaceholderContent
         title="Create Dates"

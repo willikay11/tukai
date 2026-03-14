@@ -5,13 +5,19 @@ import { NextResponse } from 'next/server';
 export async function middleware(request: NextRequest) {
   const token: any = await getToken({ req: request });
   const { pathname } = request.nextUrl;
+  const isExperienceCreateRoute =
+    pathname === '/experiences/create' || pathname.startsWith('/experiences/create/');
+  const isCommunityCreateRoute =
+    pathname === '/communities/create' || pathname.startsWith('/communities/create/');
+  const isExcludedExperienceRoute = pathname.startsWith('/experiences') && !isExperienceCreateRoute;
+  const isExcludedCommunityRoute = pathname.startsWith('/communities') && !isCommunityCreateRoute;
 
   // Exclude auth routes from middleware
   if (
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/auth') ||
-    pathname.startsWith('/experiences') ||
-    pathname.startsWith('/communities') ||
+    isExcludedExperienceRoute ||
+    isExcludedCommunityRoute ||
     pathname.startsWith('/place') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/privacy') ||

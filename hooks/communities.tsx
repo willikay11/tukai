@@ -5,7 +5,7 @@ import {
   createCommunityPhotos,
   fetchCommunityPostPhotos,
   fetchCommunityPosts,
-  getInterestBasedCommunities,
+  getCommunities,
   joinCommunity,
   joinCommunityWithToken,
 } from '@/services/community';
@@ -21,6 +21,7 @@ export const useGetCommunities = (
     recommendedCommunities,
     popularCommunities,
     following,
+    createdBy,
   }: {
     page: number;
     enabled: boolean;
@@ -30,15 +31,16 @@ export const useGetCommunities = (
     recommendedCommunities?: boolean;
     popularCommunities?: boolean;
     following?: boolean;
+    createdBy?: string;
   } = {
     page: 1,
     enabled: true,
   },
 ) => {
   return useQuery({
-    queryKey: ['communities', page, category, search],
+    queryKey: ['communities', page, category, search, createdBy],
     queryFn: async () =>
-      await getInterestBasedCommunities(
+      await getCommunities(
         category,
         page,
         12,
@@ -47,6 +49,7 @@ export const useGetCommunities = (
         recommendedCommunities,
         popularCommunities,
         following,
+        createdBy
       ),
     enabled: enabled,
   });

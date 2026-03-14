@@ -2,16 +2,18 @@
 
 import { Suspense, useEffect, useState } from 'react';
 
+import { useSession } from 'next-auth/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { InvitedMember } from '@/components/ui/invite-members';
+import { useGetCommunities } from '@/hooks/communities';
 import { useFetchSingleExperience } from '@/hooks/experiences';
 import { Community } from '@/types/community';
 
 import ExperienceStepSidePanel from './components/step-side-panel';
 import CreateExperienceSteps, { type ExperienceStepId } from './components/steps';
 
-const EXPERIENCE_STEPS: ExperienceStepId[] = ['about', 'dates-tickets', 'guests', 'wallet'];
+const EXPERIENCE_STEPS: ExperienceStepId[] = ['community', 'about', 'dates-tickets', 'guests', 'wallet'];
 
 function parseExperienceStepId(step: string | null): ExperienceStepId | null {
   if (!step) {
@@ -33,21 +35,33 @@ function CreateExperiencePageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
+  const { data: session, status: sessionStatus } = useSession();
+  const currentUserId = session?.user?.id ?? undefined;
   const experienceIdFromUrl = searchParams.get('experienceId');
   const stepFromUrl = parseExperienceStepId(searchParams.get('step'));
 
-  const [activeStep, setActiveStep] = useState<ExperienceStepId>(stepFromUrl || 'about');
+  const [activeStep, setActiveStep] = useState<ExperienceStepId>(stepFromUrl || 'community');
   const [experienceId, setExperienceId] = useState<string | null>(experienceIdFromUrl);
   const [hasUpdatedDates, setHasUpdatedDates] = useState(false);
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>([]);
   const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
+
+  const { data: createdCommunitiesResponse, isLoading: isLoadingCreatedCommunities } =
+    useGetCommunities({
+      page: 1,
+      enabled: sessionStatus === 'authenticated' && !!currentUserId,
+      createdBy: currentUserId,
+    });
 
   const { data: experienceResponse, isLoading: isLoadingExperience } = useFetchSingleExperience(
     experienceId || '',
     true,
   );
   const experience = experienceResponse?.data;
+  const hasCreatedCommunity = (createdCommunitiesResponse?.data?.results?.length ?? 0) > 0;
+  const isCheckingCommunityAccess =
+    sessionStatus === 'loading' ||
+    (sessionStatus === 'authenticated' && !!currentUserId && isLoadingCreatedCommunities);
 
   useEffect(() => {
     setExperienceId(experienceIdFromUrl);
@@ -66,6 +80,16 @@ function CreateExperiencePageContent() {
       setHasUpdatedDates(true);
     }
   }, [experience]);
+
+  useEffect(() => {
+    if (sessionStatus !== 'authenticated' || isLoadingCreatedCommunities) {
+      return;
+    }
+
+    if (!hasCreatedCommunity) {
+      router.replace('/communities/create');
+    }
+  }, [hasCreatedCommunity, isLoadingCreatedCommunities, router, sessionStatus]);
 
   const replaceCreateUrlParams = (
     nextValues: Partial<{ experienceId: string | null; step: ExperienceStepId }>,
@@ -101,6 +125,10 @@ function CreateExperiencePageContent() {
 
     replaceCreateUrlParams({ experienceId: createdExperienceId, step });
   };
+
+  if (isCheckingCommunityAccess || !hasCreatedCommunity) {
+    return null;
+  }
 
   return (
     <main className="mt-6 grid h-full grid-cols-12 gap-4 px-4 md:px-0">
