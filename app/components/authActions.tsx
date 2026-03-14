@@ -66,7 +66,7 @@ export default function AuthActions() {
 
   return (
     <div className="flex items-center">
-      <Link href="/communities/create" className="inline-flex">
+      <Link href="/experiences/create" className="inline-flex">
         <Button
           variant="primary-light"
           className="mr-2 hidden rounded-[40px] md:inline-flex"
