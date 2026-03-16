@@ -9,7 +9,8 @@ export async function middleware(request: NextRequest) {
     pathname === '/experiences/create' || pathname.startsWith('/experiences/create/');
   const isCommunityCreateRoute =
     pathname === '/communities/create' || pathname.startsWith('/communities/create/');
-  const isExcludedExperienceRoute = pathname.startsWith('/experiences') && !isExperienceCreateRoute;
+  const isExperienceTypeRoute = pathname === '/experiences/type' || pathname.startsWith('/experiences/type');
+  const isExcludedExperienceRoute = pathname.startsWith('/experiences') && !isExperienceCreateRoute && !isExperienceTypeRoute;
   const isExcludedCommunityRoute = pathname.startsWith('/communities') && !isCommunityCreateRoute;
 
   // Exclude auth routes from middleware
