@@ -5,6 +5,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import { CreateStepContentSkeleton, ReviewWalletsSkeleton } from '@/app/components/skeletons';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { useGetCommunities } from '@/hooks/communities';
 import { useFetchSingleExperience } from '@/hooks/experiences';
@@ -132,7 +133,20 @@ function CreateExperiencePageContent() {
     replaceCreateUrlParams({ experienceId: createdExperienceId, step });
   };
 
-  if (isCheckingCommunityAccess || !hasCreatedCommunity) {
+  if (isCheckingCommunityAccess) {
+    return (
+      <main className="mt-6 grid min-h-screen grid-cols-12 items-stretch gap-4 px-4 md:px-0">
+        <div className="col-span-12 mb-4 md:col-span-10 md:col-start-2 md:mx-0 lg:col-span-4 lg:col-start-3 xl:col-span-4 xl:col-start-3 3xl:col-span-3 3xl:col-start-4 4xl:col-span-2 4xl:col-start-5">
+          <CreateStepContentSkeleton />
+        </div>
+        <div className="h-full lg:col-span-4 lg:col-start-8 xl:col-span-4 xl:col-start-8 3xl:col-span-3 3xl:col-start-8 4xl:col-span-3 4xl:col-start-8">
+          <ReviewWalletsSkeleton />
+        </div>
+      </main>
+    );
+  }
+
+  if (!hasCreatedCommunity) {
     return null;
   }
 
