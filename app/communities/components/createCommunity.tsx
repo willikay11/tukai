@@ -215,7 +215,7 @@ export default function CreateCommunity() {
           <IconComponent iconName="UserMultipleIcon" color="#3B82F6" size={16} />
         </span>
         <span className="text-xs text-gray-800">
-          Think of having a Community as your website, business, social media page or even a
+          Think of a Community as your website, business, social media page or even a
           WhatsApp group. Having community will help you manage your experiences and keep members
           connected between experiences.
         </span>
@@ -411,13 +411,6 @@ export default function CreateCommunity() {
               Cancel
             </Button>
             <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-9 rounded-full border-primary px-4 text-xs text-primary"
-              >
-                Save &amp; Exit
-              </Button>
               <Button
                 type="submit"
                 variant="gradient"
