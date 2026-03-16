@@ -11,16 +11,8 @@ import { Button } from '@/components/ui/button';
 type ExperienceType = 'experience' | 'itinerary';
 
 export default function CreateExperienceType() {
-  const router = useRouter();
   const [selectedType, setSelectedType] = useState<ExperienceType>('experience');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-
-  const handleContinue = () => {
-    if (selectedType === 'experience') {
-      router.push('/communities/create');
-      return;
-    }
-  };
 
   return (
     <>
@@ -110,14 +102,15 @@ export default function CreateExperienceType() {
           </span>
         </label>
 
-        <Button
-          onClick={handleContinue}
-          variant="gradient"
-          className="mt-6 h-10 rounded-full px-6 text-xs text-white hover:bg-emerald-800"
-          disabled={!acceptedTerms}
-        >
-          Continue
-        </Button>
+        <Link href="/experiences/create" className="inline-flex">
+          <Button
+            variant="gradient"
+            className="mt-6 h-10 rounded-full px-6 text-xs text-white hover:bg-emerald-800"
+            disabled={!acceptedTerms}
+          >
+            Continue
+          </Button>
+        </Link>
       </div>
     </>
   );

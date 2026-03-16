@@ -14,7 +14,7 @@ export async function getCommunities(
   recommendedCommunities?: boolean,
   popularCommunities?: boolean,
   following?: boolean,
-  createdBy?: string
+  createdBy?: string,
 ) {
   try {
     const queryParams = new URLSearchParams();

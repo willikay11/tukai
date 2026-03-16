@@ -314,4 +314,4 @@ export const publishExperience = async (id: string): Promise<ApiResponse> => {
       message: error.response?.data?.message || 'An unexpected error occurred',
     };
   }
-}
+};

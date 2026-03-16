@@ -66,11 +66,8 @@ export default function AuthActions() {
 
   return (
     <div className="flex items-center">
-      <Link href="/experiences/create" className="inline-flex">
-        <Button
-          variant="primary-light"
-          className="mr-2 hidden rounded-[40px] md:inline-flex"
-        >
+      <Link href="/experiences/type" className="inline-flex">
+        <Button variant="primary-light" className="mr-2 hidden rounded-[40px] md:inline-flex">
           <IconComponent iconName="PlusSignCircleIcon" size={15} color="emerald" />
           Create Experience
         </Button>

@@ -13,7 +13,13 @@ import { Community } from '@/types/community';
 import ExperienceStepSidePanel from './components/step-side-panel';
 import CreateExperienceSteps, { type ExperienceStepId } from './components/steps';
 
-const EXPERIENCE_STEPS: ExperienceStepId[] = ['community', 'about', 'dates-tickets', 'guests', 'wallet'];
+const EXPERIENCE_STEPS: ExperienceStepId[] = [
+  'community',
+  'about',
+  'dates-tickets',
+  'guests',
+  'wallet',
+];
 
 function parseExperienceStepId(step: string | null): ExperienceStepId | null {
   if (!step) {

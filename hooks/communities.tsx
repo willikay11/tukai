@@ -49,7 +49,7 @@ export const useGetCommunities = (
         recommendedCommunities,
         popularCommunities,
         following,
-        createdBy
+        createdBy,
       ),
     enabled: enabled,
   });
