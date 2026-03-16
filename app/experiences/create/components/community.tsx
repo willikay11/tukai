@@ -86,7 +86,7 @@ export default function CreateExperienceCommunity({
       </p>
 
       <div className="mt-8">
-        <p className="text-xl font-semibold text-gray-900">Communities created by you</p>
+        <p className="text-xs font-semibold text-gray-900">Communities created by you</p>
 
         {isLoadingCreatedCommunities ? (
           <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -109,7 +109,7 @@ export default function CreateExperienceCommunity({
                   key={community.id}
                   type="button"
                   onClick={() => onSelectCommunity(community.id)}
-                  className={`flex items-center gap-3 rounded-[12px] border p-2.5 text-left transition-colors ${
+                  className={`flex items-center gap-3 rounded-[12px] border p-1.5 text-left transition-colors ${
                     isSelected
                       ? 'border-emerald-600 bg-emerald-50'
                       : 'border-gray-200 bg-white hover:border-gray-300'
