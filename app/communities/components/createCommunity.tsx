@@ -215,9 +215,9 @@ export default function CreateCommunity() {
           <IconComponent iconName="UserMultipleIcon" color="#3B82F6" size={16} />
         </span>
         <span className="text-xs text-gray-800">
-          Think of a Community as your website, business, social media page or even a
-          WhatsApp group. Having community will help you manage your experiences and keep members
-          connected between experiences.
+          Think of a Community as your website, business, social media page or even a WhatsApp
+          group. Having community will help you manage your experiences and keep members connected
+          between experiences.
         </span>
       </div>
 

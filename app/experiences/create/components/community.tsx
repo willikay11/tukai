@@ -85,7 +85,7 @@ export default function CreateExperienceCommunity({
         Select the community you would like to create this experience under
       </p>
 
-      <div className="mt-8">
+      <div className="mt-6">
         <p className="text-xs font-semibold text-gray-900">Communities created by you</p>
 
         {isLoadingCreatedCommunities ? (
@@ -151,11 +151,11 @@ export default function CreateExperienceCommunity({
           className="mt-5 rounded-full"
           onClick={() => router.push('/communities/create')}
         >
-          <IconComponent iconName="AddTeamIcon" size={18} color="white" />
+          <IconComponent iconName="UserMultipleIcon" variant='twotone' size={18} color="white" />
           Create New Community
         </Button>
 
-        <div className="mt-10">
+        <div className="mt-6">
           <p className="text-xs font-semibold text-gray-900">Communities where you are a co-host</p>
 
           {isLoadingFollowingCommunities ? (
