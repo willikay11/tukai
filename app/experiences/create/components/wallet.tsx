@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import IconComponent from '@/app/components/iconComponent';
+import { WalletListSkeleton } from '@/app/components/skeletons';
 import {
   BankAccountDetailsForm,
   BankAccountFormValues,
@@ -20,8 +21,6 @@ import {
 } from '@/hooks/payment';
 import { useToast } from '@/hooks/use-toast';
 import { Wallet } from '@/types/payment';
-import { WalletListSkeleton } from '@/app/components/skeletons';
-
 
 type PaymentMethod = 'mpesa' | 'bank_account';
 

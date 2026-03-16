@@ -1,10 +1,9 @@
 'use client';
 
 import IconComponent from '@/app/components/iconComponent';
+import { ReviewWalletsSkeleton } from '@/app/components/skeletons';
 import { useGetWallets } from '@/hooks/payment';
 import { Wallet } from '@/types/payment';
-
-import { ReviewWalletsSkeleton } from '@/app/components/skeletons';
 
 interface ReviewWalletsProps {
   editable?: boolean;

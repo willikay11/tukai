@@ -120,7 +120,9 @@ export function WalletListSkeleton() {
 
 export function ReviewWalletsSkeleton() {
   return (
-    <div className={`${shimmer} relative mt-6 rounded-[12px] border border-gray-200 bg-gray-100 p-5`}>
+    <div
+      className={`${shimmer} relative mt-6 rounded-[12px] border border-gray-200 bg-gray-100 p-5`}
+    >
       <div className="mb-3 h-5 w-36 rounded-md bg-gray-200" />
       <div className="mb-4 h-3 w-56 rounded-md bg-gray-200" />
       <div className="space-y-3">
