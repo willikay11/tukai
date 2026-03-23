@@ -48,6 +48,106 @@ const weekdayOptions: Array<{
   { label: 'Sun', value: 'SU', dayIndex: 0, rrule: RRule.SU },
 ];
 
+const parseRRuleDateToFormDate = (rawDate: string) => {
+  if (!rawDate) {
+    return '';
+  }
+
+  const parsedDate = moment.parseZone(
+    rawDate,
+    ['YYYYMMDD[T]HHmmssZ', 'YYYYMMDD[T]HHmmss[Z]', 'YYYYMMDD[T]HHmmss', 'YYYYMMDD'],
+    true,
+  );
+
+  return parsedDate.isValid() ? parsedDate.format('YYYY-MM-DD') : '';
+};
+
+const isRRuleWeekday = (value: unknown): value is { weekday: number } => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  if (!('weekday' in value)) {
+    return false;
+  }
+
+  return typeof (value as { weekday: unknown }).weekday === 'number';
+};
+
+const parseRecurrenceRule = (recurrenceRule: string) => {
+  if (!recurrenceRule?.trim()) {
+    return null;
+  }
+
+  const normalizedRule = recurrenceRule.trim();
+  const lines = normalizedRule
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const rruleLine = lines.find((line) => line.toUpperCase().startsWith('RRULE:')) || lines[0] || '';
+  const rruleBody = rruleLine.toUpperCase().startsWith('RRULE:')
+    ? rruleLine.slice('RRULE:'.length)
+    : rruleLine;
+
+  const bydayMatch = rruleBody.match(/(?:^|;)BYDAY=([A-Z,]+)(?:;|$)/i);
+  const bydayWeekdays = bydayMatch?.[1]
+    ? bydayMatch[1]
+        .split(',')
+        .map((day) => day.trim().toUpperCase())
+        .filter((day): day is z.infer<typeof weekdayValueSchema> =>
+          weekdayValueSchema.safeParse(day).success,
+        )
+    : [];
+
+  const dtstartMatch = normalizedRule.match(/DTSTART(?::|=)(\d{8}(?:T\d{6}Z?)?)/i);
+  const untilMatch = rruleBody.match(/(?:^|;)UNTIL=(\d{8}(?:T\d{6}Z?)?)(?:;|$)/i);
+
+  try {
+    const parsedRRule = RRule.fromString(rruleBody);
+    const rawByWeekday = parsedRRule.origOptions.byweekday ?? parsedRRule.options.byweekday;
+    const byweekdayValues = Array.isArray(rawByWeekday)
+      ? rawByWeekday
+      : rawByWeekday !== undefined
+        ? [rawByWeekday]
+        : [];
+
+    const recurrenceWeekdays = weekdayOptions
+      .filter((option) =>
+        byweekdayValues.some((weekday) => {
+          if (typeof weekday === 'number') {
+            return weekday === option.rrule.weekday;
+          }
+
+          if (isRRuleWeekday(weekday)) {
+            return weekday.weekday === option.rrule.weekday;
+          }
+
+          return false;
+        }),
+      )
+      .map((option) => option.value);
+
+    return {
+      recurrenceWeekdays:
+        recurrenceWeekdays.length > 0
+          ? recurrenceWeekdays
+          : weekdayOptions
+              .filter((option) => bydayWeekdays.includes(option.value))
+              .map((option) => option.value),
+      recurrenceStartDate: dtstartMatch?.[1] ? parseRRuleDateToFormDate(dtstartMatch[1]) : '',
+      recurrenceEndDate: untilMatch?.[1] ? parseRRuleDateToFormDate(untilMatch[1]) : '',
+    };
+  } catch {
+    return {
+      recurrenceWeekdays: weekdayOptions
+        .filter((option) => bydayWeekdays.includes(option.value))
+        .map((option) => option.value),
+      recurrenceStartDate: dtstartMatch?.[1] ? parseRRuleDateToFormDate(dtstartMatch[1]) : '',
+      recurrenceEndDate: untilMatch?.[1] ? parseRRuleDateToFormDate(untilMatch[1]) : '',
+    };
+  }
+};
+
 const getFirstRecurringOccurrence = (
   startDate: string,
   recurrenceWeekdays: Array<z.infer<typeof weekdayValueSchema>>,
@@ -284,17 +384,29 @@ export default function ExperienceDates({
     if (experience) {
       const startMoment = experience.startDate ? moment(experience.startDate) : null;
       const endMoment = experience.endDate ? moment(experience.endDate) : null;
+      const savedRecurrenceRule =
+        (experience as Experience & { recurrenceRule?: string; recurrence_rule?: string })
+          .recurrence_rule ||
+        (experience as Experience & { recurrenceRule?: string; recurrence_rule?: string })
+          .recurrenceRule ||
+        '';
+      const parsedRecurrence = parseRecurrenceRule(savedRecurrenceRule);
+      const hasRecurringSelection = Boolean(parsedRecurrence?.recurrenceWeekdays.length);
 
       form.reset({
         isPaid: experience.isPaid ? 'paid' : 'free',
         dateType: 'one-day', // Default, as dateType isn't stored in experience
-        isRecurring: false, // Default, as isRecurring isn't stored in experience
+        isRecurring: hasRecurringSelection,
         selectedDate: startMoment?.isValid() ? startMoment.format('YYYY-MM-DD') : '',
         startTime: startMoment?.isValid() ? startMoment.format('HH:mm') : '',
         endTime: endMoment?.isValid() ? endMoment.format('HH:mm') : '',
-        recurrenceStartDate: startMoment?.isValid() ? startMoment.format('YYYY-MM-DD') : '',
-        recurrenceEndDate: endMoment?.isValid() ? endMoment.format('YYYY-MM-DD') : '',
-        recurrenceWeekdays: [],
+        recurrenceStartDate:
+          parsedRecurrence?.recurrenceStartDate ||
+          (startMoment?.isValid() ? startMoment.format('YYYY-MM-DD') : ''),
+        recurrenceEndDate:
+          parsedRecurrence?.recurrenceEndDate ||
+          (endMoment?.isValid() ? endMoment.format('YYYY-MM-DD') : ''),
+        recurrenceWeekdays: parsedRecurrence?.recurrenceWeekdays || [],
         timeSlots: [
           {
             startTime: startMoment?.isValid() ? startMoment.format('HH:mm') : '',
