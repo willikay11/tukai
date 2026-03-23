@@ -31,6 +31,7 @@ const commissionOptions = [
 ] as const;
 
 const ticketSchema = z.object({
+  slotSectionId: z.string().default('slot-0'),
   ticketName: z.string().min(1, 'Ticket name is required'),
   quantity: z.preprocess(
     (value) => {
@@ -81,10 +82,23 @@ type CreateTicketsFormValues = z.input<typeof createTicketsSchema>;
 
 type SavedTicketCard = {
   fieldId: string;
+  slotSectionId: string;
   name: string;
   quantity: number;
   amount: number;
   validity: string;
+};
+
+type PersistedTicketSlotConfig = {
+  isRecurring: boolean;
+  recurrenceWeekdays: string[];
+  selectedDate: string;
+  timeSlots: Array<{ startTime: string; endTime: string }>;
+};
+
+type TicketSection = {
+  id: string;
+  title: string;
 };
 
 const currencyFormatter = new Intl.NumberFormat('en-KE', {
@@ -158,6 +172,59 @@ const weekdayLabelsByIndex: Record<number, string> = {
   5: 'Sat',
   6: 'Sun',
 };
+
+const weekdayLabelsByCode: Record<string, string> = {
+  MO: 'Mon',
+  TU: 'Tue',
+  WE: 'Wed',
+  TH: 'Thu',
+  FR: 'Fri',
+  SA: 'Sat',
+  SU: 'Sun',
+};
+
+function formatTimeLabel(time: string): string {
+  const timeMoment = moment(time, 'HH:mm', true);
+  return timeMoment.isValid() ? timeMoment.format('h:mm A') : time;
+}
+
+function buildTicketSectionsFromConfig(
+  config: PersistedTicketSlotConfig,
+  fallbackSummary: string,
+): TicketSection[] {
+  if (!config.timeSlots.length) {
+    return [{ id: 'slot-0', title: fallbackSummary || 'No date set' }];
+  }
+
+  const recurrenceDayLabels = config.recurrenceWeekdays
+    .map((day) => weekdayLabelsByCode[day])
+    .filter(Boolean);
+  const selectedDateMoment = moment(config.selectedDate, 'YYYY-MM-DD', true);
+
+  return config.timeSlots.map((slot, index) => {
+    const timeLabel = `${formatTimeLabel(slot.startTime)} - ${formatTimeLabel(slot.endTime)}`;
+
+    if (config.isRecurring) {
+      const recurringPrefix = recurrenceDayLabels.length
+        ? `Every ${recurrenceDayLabels.join(', ')}`
+        : `Recurring Slot ${index + 1}`;
+
+      return {
+        id: `slot-${index}`,
+        title: `${recurringPrefix}: ${timeLabel}`,
+      };
+    }
+
+    const datePrefix = selectedDateMoment.isValid()
+      ? selectedDateMoment.format('DD/MM/YYYY')
+      : `Slot ${index + 1}`;
+
+    return {
+      id: `slot-${index}`,
+      title: `${datePrefix}: ${timeLabel}`,
+    };
+  });
+}
 
 function parseRecurringWeekdayLabels(recurrenceRule: string): string[] {
   if (!recurrenceRule?.trim()) {
@@ -239,6 +306,9 @@ export default function CreateTickets({
     [savedRecurrenceRule],
   );
   const isRecurringExperience = recurringWeekdayLabels.length > 0;
+  const [ticketSections, setTicketSections] = useState<TicketSection[]>([
+    { id: 'slot-0', title: 'No date set' },
+  ]);
 
   // Compute selectedDateSummary from experience dates
   const selectedDateSummary = useMemo(() => {
@@ -273,6 +343,7 @@ export default function CreateTickets({
       selectedDateSummary: selectedDateSummary || '',
       tickets: [
         {
+          slotSectionId: 'slot-0',
           ticketName: '',
           quantity: '',
           amount: '',
@@ -322,6 +393,48 @@ export default function CreateTickets({
 
   const isEditing = Boolean(editingTicketId);
 
+  const defaultSectionId = ticketSections[0]?.id || 'slot-0';
+
+  useEffect(() => {
+    if (!experienceId || typeof window === 'undefined') {
+      setTicketSections([{ id: 'slot-0', title: selectedDateSummary || 'No date set' }]);
+      return;
+    }
+
+    const storedRaw = window.localStorage.getItem(`experience-ticket-slots:${experienceId}`);
+
+    if (!storedRaw) {
+      setTicketSections([{ id: 'slot-0', title: selectedDateSummary || 'No date set' }]);
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(storedRaw) as PersistedTicketSlotConfig;
+      const hasArraySlots = Array.isArray(parsed.timeSlots);
+
+      if (!hasArraySlots) {
+        setTicketSections([{ id: 'slot-0', title: selectedDateSummary || 'No date set' }]);
+        return;
+      }
+
+      const nextSections = buildTicketSectionsFromConfig(parsed, selectedDateSummary || 'No date set');
+      setTicketSections(nextSections.length ? nextSections : [{ id: 'slot-0', title: selectedDateSummary || 'No date set' }]);
+    } catch {
+      setTicketSections([{ id: 'slot-0', title: selectedDateSummary || 'No date set' }]);
+    }
+  }, [experienceId, selectedDateSummary]);
+
+  useEffect(() => {
+    watchedTickets?.forEach((ticket, index) => {
+      if (!ticket?.slotSectionId) {
+        setValue(`tickets.${index}.slotSectionId`, defaultSectionId, {
+          shouldValidate: false,
+          shouldDirty: false,
+        });
+      }
+    });
+  }, [watchedTickets, setValue, defaultSectionId]);
+
   const handleEditTicket = (ticket: Ticket | SavedTicketCard, fieldId?: string) => {
     // Determine if this is an API ticket or a locally saved ticket
     const isApiTicket = 'id' in ticket && !('fieldId' in ticket);
@@ -338,6 +451,7 @@ export default function CreateTickets({
 
     // Fill form with ticket data
     const apiTicket = ticket as Ticket;
+    setValue('tickets.0.slotSectionId', defaultSectionId, { shouldValidate: false });
     setValue('tickets.0.ticketName', apiTicket.name, { shouldValidate: true });
     setValue('tickets.0.quantity', apiTicket.quantity.toString(), { shouldValidate: true });
     setValue('tickets.0.amount', apiTicket.price.toString(), { shouldValidate: true });
@@ -430,6 +544,7 @@ export default function CreateTickets({
           const normalizedFieldId = fieldId as string;
           const nextCard: SavedTicketCard = {
             fieldId: normalizedFieldId,
+            slotSectionId: ticket.slotSectionId || defaultSectionId,
             name: ticket.ticketName,
             quantity: Number(ticket.quantity),
             amount: Number(ticket.amount),
@@ -512,24 +627,17 @@ export default function CreateTickets({
     });
   };
 
-  const handleAddAnotherTicketType = () => {
-    void handleSubmit(async (values) => {
-      const didSubmit = await submitNewTickets(values);
-
-      if (!didSubmit) {
-        return;
-      }
-
-      append({
-        ticketName: '',
-        quantity: '',
-        amount: '',
-        salesStartDate: '',
-        salesStartTime: '',
-        salesEndDate: '',
-        salesEndTime: '',
-      });
-    })();
+  const handleAddAnotherTicketType = (slotSectionId: string) => {
+    append({
+      slotSectionId,
+      ticketName: '',
+      quantity: '',
+      amount: '',
+      salesStartDate: '',
+      salesStartTime: '',
+      salesEndDate: '',
+      salesEndTime: '',
+    });
   };
 
   return (
@@ -562,237 +670,263 @@ export default function CreateTickets({
 
       <div className="relative mt-5 pl-5">
         <div className="absolute bottom-1 left-0 top-5 border-l border-dashed border-gray-300" />
-        <div className="absolute left-0 top-5 w-5 border-t border-dashed border-gray-300" />
         <div className="absolute left-[1px] top-5 z-10 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary" />
 
-        <div className="inline-flex items-center gap-2 rounded-full border border-dashed border-primary bg-emerald-100 px-4 py-2 text-sm font-medium text-gray-900">
-          <IconComponent iconName="Calendar03Icon" size={16} color="#064E3B" />
-          <span className="text-xs text-green-900">
-            {isRecurringExperience
-              ? selectedDateSummary || 'Recurring schedule not set'
-              : `Date: ${selectedDateSummary || 'No date set'}`}
-          </span>
-          {/* <IconComponent iconName="ArrowDown01Icon" size={16} color="#064E3B" /> */}
-        </div>
-
         <div className="mt-4 space-y-5">
-          {/* Existing tickets from API */}
-          {existingTickets.map((ticket) => (
-            <SavedTicketCard
-              key={ticket.id}
-              name={ticket.name}
-              quantity={ticket.quantity}
-              amount={ticket.price}
-              validity={getApiTicketValidity(ticket)}
-              coverPhoto={coverPhoto}
-              onEdit={() => handleEditTicket(ticket)}
-              onDelete={() => handleDeleteTicket(ticket.id)}
-              isDeleting={isDeletingTicket && deletingTicketId === ticket.id}
-            />
-          ))}
+          {(ticketSections.length ? ticketSections : [{ id: 'slot-0', title: 'No date set' }]).map(
+            (section, sectionIndex) => (
+              <div
+                key={section.id}
+                className="relative space-y-4"
+              >
+                <div className="relative inline-flex">
+                  <div className="absolute right-full top-1/2 w-5 -translate-y-1/2 border-t border-dashed border-gray-300" />
 
-          {/* New tickets being created */}
-          {fields.map((field, index) => {
-            const ticketErrors = errors.tickets?.[index];
-            const ticketQuantity = Number(watchedTickets?.[index]?.quantity) || 0;
-            const ticketAmount = Number(watchedTickets?.[index]?.amount) || 0;
-            const customerCommissionRate =
-              commissionPayer === 'customer' ? 0.04 : commissionPayer === 'split' ? 0.02 : 0;
-            const ticketTotalCost = ticketQuantity * ticketAmount;
-            const customerSeesPerTicket = ticketAmount * (1 + customerCommissionRate);
-            const savedTicket = savedTickets.find((ticket) => ticket.fieldId === field.id);
+                  <div className="inline-flex items-center gap-2 rounded-full border border-dashed border-primary bg-emerald-100 px-4 py-2 text-sm font-medium text-gray-900">
+                    <IconComponent iconName="Calendar03Icon" size={16} color="#064E3B" />
+                    <span className="text-xs font-semibold text-green-900">
+                      {ticketSections.length > 1
+                        ? section.title
+                        : isRecurringExperience
+                          ? selectedDateSummary || 'Recurring schedule not set'
+                          : `Date: ${selectedDateSummary || 'No date set'}`}
+                    </span>
+                    {/* <IconComponent iconName="ArrowDown01Icon" size={16} color="#064E3B" /> */}
+                  </div>
+                </div>
 
-            if (savedTicket) {
-              return (
-                <SavedTicketCard
-                  key={field.id}
-                  name={savedTicket.name}
-                  quantity={savedTicket.quantity}
-                  amount={savedTicket.amount}
-                  validity={savedTicket.validity}
-                  coverPhoto={coverPhoto}
-                  onEdit={() => handleEditTicket(savedTicket, field.id)}
-                  onDelete={() => {
-                    remove(index);
-                    setSubmittedTicketIds((prev) => prev.filter((id) => id !== field.id));
-                    setSavedTickets((prev) => prev.filter((ticket) => ticket.fieldId !== field.id));
-                  }}
-                />
-              );
-            }
+                {/* Existing tickets from API (shown in first section when slot mapping is unavailable) */}
+                {sectionIndex === 0 &&
+                  existingTickets.map((ticket) => (
+                    <SavedTicketCard
+                      key={ticket.id}
+                      name={ticket.name}
+                      quantity={ticket.quantity}
+                      amount={ticket.price}
+                      validity={getApiTicketValidity(ticket)}
+                      coverPhoto={coverPhoto}
+                      onEdit={() => handleEditTicket(ticket)}
+                      onDelete={() => handleDeleteTicket(ticket.id)}
+                      isDeleting={isDeletingTicket && deletingTicketId === ticket.id}
+                    />
+                  ))}
 
-            return (
-              <div key={field.id} className="space-y-3">
-                <Input
-                  placeholder="Ticket Name e.g. VIP, Early Bird, Locals etc..."
-                  suffixIcon={<IconComponent iconName="Ticket01Icon" size={16} color="#9CA3AF" />}
-                  {...register(`tickets.${index}.ticketName`)}
-                />
-                {ticketErrors?.ticketName && (
-                  <p className="text-xs text-red-500">{ticketErrors.ticketName.message}</p>
-                )}
+                {fields.map((field, index) => {
+                  const ticketErrors = errors.tickets?.[index];
+                  const ticketQuantity = Number(watchedTickets?.[index]?.quantity) || 0;
+                  const ticketAmount = Number(watchedTickets?.[index]?.amount) || 0;
+                  const customerCommissionRate =
+                    commissionPayer === 'customer' ? 0.04 : commissionPayer === 'split' ? 0.02 : 0;
+                  const ticketTotalCost = ticketQuantity * ticketAmount;
+                  const customerSeesPerTicket = ticketAmount * (1 + customerCommissionRate);
+                  const savedTicket = savedTickets.find((ticket) => ticket.fieldId === field.id);
+                  const ticketSlotSectionId =
+                    watchedTickets?.[index]?.slotSectionId ||
+                    (field as { slotSectionId?: string }).slotSectionId ||
+                    defaultSectionId;
 
-                <Input
-                  type="number"
-                  min={1}
-                  placeholder="Available Ticket Quantity"
-                  suffixIcon={
-                    <IconComponent iconName="ArrowUpDownIcon" size={16} color="#9CA3AF" />
+                  if (ticketSlotSectionId !== section.id) {
+                    return null;
                   }
-                  {...register(`tickets.${index}.quantity`)}
-                />
-                {ticketErrors?.quantity && (
-                  <p className="text-xs text-red-500">{ticketErrors.quantity.message}</p>
-                )}
 
-                <Input
-                  type="number"
-                  min={1}
-                  placeholder="Amount per ticket"
-                  suffixIcon={<IconComponent iconName="Money03Icon" size={16} color="#9CA3AF" />}
-                  {...register(`tickets.${index}.amount`)}
-                />
-                {ticketErrors?.amount && (
-                  <p className="text-xs text-red-500">{ticketErrors.amount.message}</p>
-                )}
+                  if (savedTicket) {
+                    return (
+                      <SavedTicketCard
+                        key={field.id}
+                        name={savedTicket.name}
+                        quantity={savedTicket.quantity}
+                        amount={savedTicket.amount}
+                        validity={savedTicket.validity}
+                        coverPhoto={coverPhoto}
+                        onEdit={() => handleEditTicket(savedTicket, field.id)}
+                        onDelete={() => {
+                          remove(index);
+                          setSubmittedTicketIds((prev) => prev.filter((id) => id !== field.id));
+                          setSavedTickets((prev) =>
+                            prev.filter((ticket) => ticket.fieldId !== field.id),
+                          );
+                        }}
+                      />
+                    );
+                  }
 
-                <div className="mt-3 flex items-center gap-2 rounded-full bg-blue-100 px-3 py-2 text-xs text-gray-700">
-                  <span className="italic">
-                    Total Tickets Cost:{' '}
-                    <span className="font-semibold text-gray-900">
-                      {formatKes(ticketTotalCost)}
-                    </span>
-                  </span>
-                  <span>•</span>
-                  <span className="italic">
-                    What the customer sees:{' '}
-                    <span className="font-semibold text-gray-900">
-                      {formatKes(customerSeesPerTicket)}
-                    </span>
-                  </span>
-                </div>
+                  return (
+                    <div key={field.id} className="space-y-3">
+                      <input type="hidden" {...register(`tickets.${index}.slotSectionId`)} />
 
-                <p className="mt-1 text-xs font-semibold text-gray-900">
-                  Ticket Sales Validity{' '}
-                  <span className="font-normal text-gray-600">
-                    (When should the sales of these tickets start and end)
-                  </span>
-                </p>
+                      <Input
+                        placeholder="Ticket Name e.g. VIP, Early Bird, Locals etc..."
+                        suffixIcon={<IconComponent iconName="Ticket01Icon" size={16} color="#9CA3AF" />}
+                        {...register(`tickets.${index}.ticketName`)}
+                      />
+                      {ticketErrors?.ticketName && (
+                        <p className="text-xs text-red-500">{ticketErrors.ticketName.message}</p>
+                      )}
 
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div>
-                    <DatePicker
-                      value={watch(`tickets.${index}.salesStartDate`) || ''}
-                      onChange={(value) =>
-                        setValue(`tickets.${index}.salesStartDate`, value, {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        })
-                      }
-                      placeholder="Start Date"
-                      minDate={currentDate}
-                      maxDate={experienceEndDate}
-                    />
-                    {ticketErrors?.salesStartDate && (
-                      <p className="mt-1 text-xs text-red-500">
-                        {ticketErrors.salesStartDate.message}
+                      <Input
+                        type="number"
+                        min={1}
+                        placeholder="Available Ticket Quantity"
+                        suffixIcon={
+                          <IconComponent iconName="ArrowUpDownIcon" size={16} color="#9CA3AF" />
+                        }
+                        {...register(`tickets.${index}.quantity`)}
+                      />
+                      {ticketErrors?.quantity && (
+                        <p className="text-xs text-red-500">{ticketErrors.quantity.message}</p>
+                      )}
+
+                      <Input
+                        type="number"
+                        min={1}
+                        placeholder="Amount per ticket"
+                        suffixIcon={<IconComponent iconName="Money03Icon" size={16} color="#9CA3AF" />}
+                        {...register(`tickets.${index}.amount`)}
+                      />
+                      {ticketErrors?.amount && (
+                        <p className="text-xs text-red-500">{ticketErrors.amount.message}</p>
+                      )}
+
+                      <div className="mt-3 flex items-center gap-2 rounded-full bg-blue-100 px-3 py-2 text-xs text-gray-700">
+                        <span className="italic">
+                          Total Tickets Cost:{' '}
+                          <span className="font-semibold text-gray-900">
+                            {formatKes(ticketTotalCost)}
+                          </span>
+                        </span>
+                        <span>•</span>
+                        <span className="italic">
+                          What the customer sees:{' '}
+                          <span className="font-semibold text-gray-900">
+                            {formatKes(customerSeesPerTicket)}
+                          </span>
+                        </span>
+                      </div>
+
+                      <p className="mt-1 text-xs font-semibold text-gray-900">
+                        Ticket Sales Validity{' '}
+                        <span className="font-normal text-gray-600">
+                          (When should the sales of these tickets start and end)
+                        </span>
                       </p>
-                    )}
-                  </div>
 
-                  <div>
-                    <TimePicker
-                      value={watch(`tickets.${index}.salesStartTime`) || ''}
-                      onChange={(value) =>
-                        setValue(`tickets.${index}.salesStartTime`, value, {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        })
-                      }
-                      placeholder="Start Time"
-                    />
-                    {ticketErrors?.salesStartTime && (
-                      <p className="mt-1 text-xs text-red-500">
-                        {ticketErrors.salesStartTime.message}
-                      </p>
-                    )}
-                  </div>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div>
+                          <DatePicker
+                            value={watch(`tickets.${index}.salesStartDate`) || ''}
+                            onChange={(value) =>
+                              setValue(`tickets.${index}.salesStartDate`, value, {
+                                shouldValidate: true,
+                                shouldDirty: true,
+                              })
+                            }
+                            placeholder="Start Date"
+                            minDate={currentDate}
+                            maxDate={experienceEndDate}
+                          />
+                          {ticketErrors?.salesStartDate && (
+                            <p className="mt-1 text-xs text-red-500">
+                              {ticketErrors.salesStartDate.message}
+                            </p>
+                          )}
+                        </div>
 
-                  <div>
-                    <DatePicker
-                      value={watch(`tickets.${index}.salesEndDate`) || ''}
-                      onChange={(value) =>
-                        setValue(`tickets.${index}.salesEndDate`, value, {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        })
-                      }
-                      placeholder="End Date"
-                      minDate={currentDate}
-                      maxDate={experienceEndDate}
-                    />
-                    {ticketErrors?.salesEndDate && (
-                      <p className="mt-1 text-xs text-red-500">
-                        {ticketErrors.salesEndDate.message}
-                      </p>
-                    )}
-                  </div>
+                        <div>
+                          <TimePicker
+                            value={watch(`tickets.${index}.salesStartTime`) || ''}
+                            onChange={(value) =>
+                              setValue(`tickets.${index}.salesStartTime`, value, {
+                                shouldValidate: true,
+                                shouldDirty: true,
+                              })
+                            }
+                            placeholder="Start Time"
+                          />
+                          {ticketErrors?.salesStartTime && (
+                            <p className="mt-1 text-xs text-red-500">
+                              {ticketErrors.salesStartTime.message}
+                            </p>
+                          )}
+                        </div>
 
-                  <div>
-                    <TimePicker
-                      value={watch(`tickets.${index}.salesEndTime`) || ''}
-                      onChange={(value) =>
-                        setValue(`tickets.${index}.salesEndTime`, value, {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        })
-                      }
-                      placeholder="End Time"
-                    />
-                    {ticketErrors?.salesEndTime && (
-                      <p className="mt-1 text-xs text-red-500">
-                        {ticketErrors.salesEndTime.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                        <div>
+                          <DatePicker
+                            value={watch(`tickets.${index}.salesEndDate`) || ''}
+                            onChange={(value) =>
+                              setValue(`tickets.${index}.salesEndDate`, value, {
+                                shouldValidate: true,
+                                shouldDirty: true,
+                              })
+                            }
+                            placeholder="End Date"
+                            minDate={currentDate}
+                            maxDate={experienceEndDate}
+                          />
+                          {ticketErrors?.salesEndDate && (
+                            <p className="mt-1 text-xs text-red-500">
+                              {ticketErrors.salesEndDate.message}
+                            </p>
+                          )}
+                        </div>
 
-                {fields.length > 1 && !isEditing && (
-                  <button
+                        <div>
+                          <TimePicker
+                            value={watch(`tickets.${index}.salesEndTime`) || ''}
+                            onChange={(value) =>
+                              setValue(`tickets.${index}.salesEndTime`, value, {
+                                shouldValidate: true,
+                                shouldDirty: true,
+                              })
+                            }
+                            placeholder="End Time"
+                          />
+                          {ticketErrors?.salesEndTime && (
+                            <p className="mt-1 text-xs text-red-500">
+                              {ticketErrors.salesEndTime.message}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {fields.length > 1 && !isEditing && (
+                        <button
+                          type="button"
+                          onClick={() => remove(index)}
+                          className="text-xs font-medium text-red-500"
+                        >
+                          Remove ticket type
+                        </button>
+                      )}
+
+                      {isEditing && (
+                        <button
+                          type="button"
+                          onClick={handleCancelEdit}
+                          className="text-xs font-medium text-gray-500"
+                        >
+                          Cancel Edit
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {!isEditing && (
+                  <Button
                     type="button"
-                    onClick={() => remove(index)}
-                    className="text-xs font-medium text-red-500"
+                    variant="ghost"
+                    onClick={() => handleAddAnotherTicketType(section.id)}
+                    disabled={isCreatingTicket}
+                    className="px-0 text-primary hover:bg-transparent"
                   >
-                    Remove ticket type
-                  </button>
-                )}
-
-                {isEditing && (
-                  <button
-                    type="button"
-                    onClick={handleCancelEdit}
-                    className="text-xs font-medium text-gray-500"
-                  >
-                    Cancel Edit
-                  </button>
+                    <IconComponent iconName="Ticket02Icon" size={16} color="#047857" />
+                    Add another Ticket Type
+                  </Button>
                 )}
               </div>
-            );
-          })}
+            ),
+          )}
         </div>
-
-        {!isEditing && (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={handleAddAnotherTicketType}
-            disabled={isCreatingTicket}
-            className="mt-2 px-0 hover:bg-transparent"
-          >
-            <IconComponent iconName="Ticket02Icon" size={16} color="#047857" />
-            Add another Ticket Type
-          </Button>
-        )}
       </div>
 
       <div className="mt-5">

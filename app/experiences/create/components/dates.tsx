@@ -322,6 +322,13 @@ const experienceDatesSchema = z
 
 type ExperienceDatesFormValues = z.infer<typeof experienceDatesSchema>;
 
+type PersistedTicketSlotConfig = {
+  isRecurring: boolean;
+  recurrenceWeekdays: Array<z.infer<typeof weekdayValueSchema>>;
+  selectedDate: string;
+  timeSlots: Array<{ startTime: string; endTime: string }>;
+};
+
 interface ExperienceDatesProps {
   experienceId?: string | null;
   experience?: Experience;
@@ -427,6 +434,20 @@ export default function ExperienceDates({
     return dateTime.toISOString();
   };
 
+  const persistTicketSlotConfig = (
+    targetExperienceId: string,
+    config: PersistedTicketSlotConfig,
+  ) => {
+    if (!targetExperienceId || typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem(
+      `experience-ticket-slots:${targetExperienceId}`,
+      JSON.stringify(config),
+    );
+  };
+
   const toIsoEndDateTime = (
     date: string,
     time: string,
@@ -495,6 +516,9 @@ export default function ExperienceDates({
       ? toIsoDateTime(primaryDate, primaryEndTime)
       : toIsoEndDateTime(primaryDate, primaryEndTime, values.dateType);
     const recurrenceRule = values.isRecurring ? buildRecurringRule(values) : '';
+    const slotsForTicketing = values.isRecurring
+      ? values.timeSlots
+      : [{ startTime: values.startTime, endTime: values.endTime }];
 
     if (!startDateTime || !endDateTime || (values.isRecurring && !recurrenceRule)) {
       toast({
@@ -520,6 +544,13 @@ export default function ExperienceDates({
         isPaid: values.isPaid === 'paid',
         invitedCommunityIds: [],
         invitedGuestsEmails: [],
+      });
+
+      persistTicketSlotConfig(experienceId, {
+        isRecurring: values.isRecurring,
+        recurrenceWeekdays: values.recurrenceWeekdays,
+        selectedDate: primaryDate,
+        timeSlots: slotsForTicketing,
       });
 
       toast({
