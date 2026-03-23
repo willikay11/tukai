@@ -61,10 +61,10 @@ export default function CreateExperienceSteps({
   const canAccessDetailsSteps = Boolean(experience?.id || selectedCommunityId);
 
   useEffect(() => {
-    if (currentStep !== 'community' && !canAccessDetailsSteps) {
+    if (!isLoadingExperience && currentStep !== 'community' && !canAccessDetailsSteps) {
       onStepChange?.('community');
     }
-  }, [canAccessDetailsSteps, currentStep, onStepChange]);
+  }, [canAccessDetailsSteps, currentStep, isLoadingExperience, onStepChange]);
 
   const handleStepChange = (step: ExperienceStepId) => {
     if (step !== 'community' && !canAccessDetailsSteps) {

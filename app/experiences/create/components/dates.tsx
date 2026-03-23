@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import moment from 'moment';
+import { RRule } from 'rrule';
 import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DatePicker } from '@/components/ui/date-picker';
 import {
   Form,
@@ -22,15 +24,310 @@ import { TimePicker } from '@/components/ui/time-picker';
 import { useUpdateExperience } from '@/hooks/experiences';
 import { toast } from '@/hooks/use-toast';
 import { Experience } from '@/types/experience';
+import IconComponent from '@/app/components/iconComponent';
 
-const experienceDatesSchema = z.object({
+const weekdayValueSchema = z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']);
+
+const timeSlotSchema = z.object({
+  startTime: z.string().default(''),
+  endTime: z.string().default(''),
+});
+
+const weekdayOptions: Array<{
+  label: string;
+  value: z.infer<typeof weekdayValueSchema>;
+  dayIndex: number;
+  rrule: (typeof RRule)['MO'];
+}> = [
+  { label: 'Mon', value: 'MO', dayIndex: 1, rrule: RRule.MO },
+  { label: 'Tue', value: 'TU', dayIndex: 2, rrule: RRule.TU },
+  { label: 'Wed', value: 'WE', dayIndex: 3, rrule: RRule.WE },
+  { label: 'Thur', value: 'TH', dayIndex: 4, rrule: RRule.TH },
+  { label: 'Fri', value: 'FR', dayIndex: 5, rrule: RRule.FR },
+  { label: 'Sat', value: 'SA', dayIndex: 6, rrule: RRule.SA },
+  { label: 'Sun', value: 'SU', dayIndex: 0, rrule: RRule.SU },
+];
+
+const parseRRuleDateToFormDate = (rawDate: string) => {
+  if (!rawDate) {
+    return '';
+  }
+
+  const parsedDate = moment.parseZone(
+    rawDate,
+    ['YYYYMMDD[T]HHmmssZ', 'YYYYMMDD[T]HHmmss[Z]', 'YYYYMMDD[T]HHmmss', 'YYYYMMDD'],
+    true,
+  );
+
+  return parsedDate.isValid() ? parsedDate.format('YYYY-MM-DD') : '';
+};
+
+const isRRuleWeekday = (value: unknown): value is { weekday: number } => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  if (!('weekday' in value)) {
+    return false;
+  }
+
+  return typeof (value as { weekday: unknown }).weekday === 'number';
+};
+
+const parseRecurrenceRule = (recurrenceRule: string) => {
+  if (!recurrenceRule?.trim()) {
+    return null;
+  }
+
+  const normalizedRule = recurrenceRule.trim();
+  const lines = normalizedRule
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const rruleLine = lines.find((line) => line.toUpperCase().startsWith('RRULE:')) || lines[0] || '';
+  const rruleBody = rruleLine.toUpperCase().startsWith('RRULE:')
+    ? rruleLine.slice('RRULE:'.length)
+    : rruleLine;
+
+  const bydayMatch = rruleBody.match(/(?:^|;)BYDAY=([A-Z,]+)(?:;|$)/i);
+  const bydayWeekdays = bydayMatch?.[1]
+    ? bydayMatch[1]
+        .split(',')
+        .map((day) => day.trim().toUpperCase())
+        .filter((day): day is z.infer<typeof weekdayValueSchema> =>
+          weekdayValueSchema.safeParse(day).success,
+        )
+    : [];
+
+  const dtstartMatch = normalizedRule.match(/DTSTART(?::|=)(\d{8}(?:T\d{6}Z?)?)/i);
+  const untilMatch = rruleBody.match(/(?:^|;)UNTIL=(\d{8}(?:T\d{6}Z?)?)(?:;|$)/i);
+
+  try {
+    const parsedRRule = RRule.fromString(rruleBody);
+    const rawByWeekday = parsedRRule.origOptions.byweekday ?? parsedRRule.options.byweekday;
+    const byweekdayValues = Array.isArray(rawByWeekday)
+      ? rawByWeekday
+      : rawByWeekday !== undefined
+        ? [rawByWeekday]
+        : [];
+
+    const recurrenceWeekdays = weekdayOptions
+      .filter((option) =>
+        byweekdayValues.some((weekday) => {
+          if (typeof weekday === 'number') {
+            return weekday === option.rrule.weekday;
+          }
+
+          if (isRRuleWeekday(weekday)) {
+            return weekday.weekday === option.rrule.weekday;
+          }
+
+          return false;
+        }),
+      )
+      .map((option) => option.value);
+
+    return {
+      recurrenceWeekdays:
+        recurrenceWeekdays.length > 0
+          ? recurrenceWeekdays
+          : weekdayOptions
+              .filter((option) => bydayWeekdays.includes(option.value))
+              .map((option) => option.value),
+      recurrenceStartDate: dtstartMatch?.[1] ? parseRRuleDateToFormDate(dtstartMatch[1]) : '',
+      recurrenceEndDate: untilMatch?.[1] ? parseRRuleDateToFormDate(untilMatch[1]) : '',
+    };
+  } catch {
+    return {
+      recurrenceWeekdays: weekdayOptions
+        .filter((option) => bydayWeekdays.includes(option.value))
+        .map((option) => option.value),
+      recurrenceStartDate: dtstartMatch?.[1] ? parseRRuleDateToFormDate(dtstartMatch[1]) : '',
+      recurrenceEndDate: untilMatch?.[1] ? parseRRuleDateToFormDate(untilMatch[1]) : '',
+    };
+  }
+};
+
+const getFirstRecurringOccurrence = (
+  startDate: string,
+  recurrenceWeekdays: Array<z.infer<typeof weekdayValueSchema>>,
+) => {
+  if (!startDate || recurrenceWeekdays.length === 0) {
+    return null;
+  }
+
+  const startMoment = moment(startDate, 'YYYY-MM-DD', true).startOf('day');
+
+  if (!startMoment.isValid()) {
+    return null;
+  }
+
+  for (let offset = 0; offset < 7; offset += 1) {
+    const candidate = startMoment.clone().add(offset, 'day');
+    const hasMatchingWeekday = weekdayOptions.some(
+      (option) => recurrenceWeekdays.includes(option.value) && option.dayIndex === candidate.day(),
+    );
+
+    if (hasMatchingWeekday) {
+      return candidate;
+    }
+  }
+
+  return null;
+};
+
+const hasValidTimeRange = (startTime: string, endTime: string) => {
+  const startMoment = moment(startTime, 'HH:mm', true);
+  const endMoment = moment(endTime, 'HH:mm', true);
+
+  if (!startMoment.isValid() || !endMoment.isValid()) {
+    return false;
+  }
+
+  return endMoment.isAfter(startMoment);
+};
+
+const experienceDatesSchema = z
+  .object({
   isPaid: z.enum(['paid', 'free']),
   dateType: z.enum(['one-day', 'multi-day', 'itinerary']),
   isRecurring: z.boolean().default(false),
-  selectedDate: z.string().min(1, 'Please select a date'),
-  startTime: z.string().min(1, 'Please select start time'),
-  endTime: z.string().min(1, 'Please select end time'),
-});
+  selectedDate: z.string().default(''),
+  startTime: z.string().default(''),
+  endTime: z.string().default(''),
+  recurrenceStartDate: z.string().default(''),
+  recurrenceEndDate: z.string().default(''),
+  recurrenceWeekdays: z.array(weekdayValueSchema).default([]),
+  timeSlots: z.array(timeSlotSchema).min(1).default([{ startTime: '', endTime: '' }]),
+  })
+  .superRefine((values, ctx) => {
+    if (values.isRecurring) {
+      if (!values.recurrenceStartDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Please select a start date',
+          path: ['recurrenceStartDate'],
+        });
+      }
+
+      if (!values.recurrenceEndDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Please select an end date',
+          path: ['recurrenceEndDate'],
+        });
+      }
+
+      if (values.recurrenceWeekdays.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Please select at least one day',
+          path: ['recurrenceWeekdays'],
+        });
+      }
+
+      const recurrenceStartMoment = moment(values.recurrenceStartDate, 'YYYY-MM-DD', true);
+      const recurrenceEndMoment = moment(values.recurrenceEndDate, 'YYYY-MM-DD', true);
+
+      if (
+        recurrenceStartMoment.isValid() &&
+        recurrenceEndMoment.isValid() &&
+        recurrenceEndMoment.isBefore(recurrenceStartMoment, 'day')
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'End date must be on or after the start date',
+          path: ['recurrenceEndDate'],
+        });
+      }
+
+      const firstOccurrence = getFirstRecurringOccurrence(
+        values.recurrenceStartDate,
+        values.recurrenceWeekdays,
+      );
+
+      if (
+        firstOccurrence &&
+        recurrenceEndMoment.isValid() &&
+        firstOccurrence.isAfter(recurrenceEndMoment, 'day')
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Select a date range that includes one of the chosen days',
+          path: ['recurrenceEndDate'],
+        });
+      }
+
+      values.timeSlots.forEach((slot, index) => {
+        if (!slot.startTime) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Please select start time',
+            path: ['timeSlots', index, 'startTime'],
+          });
+        }
+
+        if (!slot.endTime) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Please select end time',
+            path: ['timeSlots', index, 'endTime'],
+          });
+        }
+
+        if (slot.startTime && slot.endTime && !hasValidTimeRange(slot.startTime, slot.endTime)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'End time must be later than start time',
+            path: ['timeSlots', index, 'endTime'],
+          });
+        }
+      });
+
+      return;
+    }
+
+    if (!values.selectedDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Please select a date',
+        path: ['selectedDate'],
+      });
+    }
+
+    if (!values.startTime) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Please select start time',
+        path: ['startTime'],
+      });
+    }
+
+    if (!values.endTime) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Please select end time',
+        path: ['endTime'],
+      });
+    }
+
+    if (values.startTime && values.endTime && !hasValidTimeRange(values.startTime, values.endTime)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'End time must be later than start time',
+        path: ['endTime'],
+      });
+    }
+  });
+
+type ExperienceDatesFormValues = z.infer<typeof experienceDatesSchema>;
+
+type PersistedTicketSlotConfig = {
+  isRecurring: boolean;
+  recurrenceWeekdays: Array<z.infer<typeof weekdayValueSchema>>;
+  selectedDate: string;
+  timeSlots: Array<{ startTime: string; endTime: string }>;
+};
 
 interface ExperienceDatesProps {
   experienceId?: string | null;
@@ -59,7 +356,7 @@ export default function ExperienceDates({
     experienceId || '',
   );
 
-  const form = useForm<z.infer<typeof experienceDatesSchema>>({
+  const form = useForm<ExperienceDatesFormValues>({
     resolver: zodResolver(experienceDatesSchema),
     mode: 'onChange',
     defaultValues: {
@@ -69,22 +366,60 @@ export default function ExperienceDates({
       selectedDate: '',
       startTime: '',
       endTime: '',
+      recurrenceStartDate: '',
+      recurrenceEndDate: '',
+      recurrenceWeekdays: [],
+      timeSlots: [{ startTime: '', endTime: '' }],
     },
   });
+
+  const { fields: timeSlotFields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'timeSlots',
+  });
+
+  const isRecurring = form.watch('isRecurring');
+  const recurrenceStartDate = form.watch('recurrenceStartDate');
+  const recurrenceWeekdays = form.watch('recurrenceWeekdays');
+  const firstRecurringOccurrence = getFirstRecurringOccurrence(
+    recurrenceStartDate,
+    recurrenceWeekdays,
+  );
 
   // Prefill form with existing experience data on load/reload
   useEffect(() => {
     if (experience) {
       const startMoment = experience.startDate ? moment(experience.startDate) : null;
       const endMoment = experience.endDate ? moment(experience.endDate) : null;
+      const savedRecurrenceRule =
+        (experience as Experience & { recurrenceRule?: string; recurrence_rule?: string })
+          .recurrence_rule ||
+        (experience as Experience & { recurrenceRule?: string; recurrence_rule?: string })
+          .recurrenceRule ||
+        '';
+      const parsedRecurrence = parseRecurrenceRule(savedRecurrenceRule);
+      const hasRecurringSelection = Boolean(parsedRecurrence?.recurrenceWeekdays.length);
 
       form.reset({
         isPaid: experience.isPaid ? 'paid' : 'free',
         dateType: 'one-day', // Default, as dateType isn't stored in experience
-        isRecurring: false, // Default, as isRecurring isn't stored in experience
+        isRecurring: hasRecurringSelection,
         selectedDate: startMoment?.isValid() ? startMoment.format('YYYY-MM-DD') : '',
         startTime: startMoment?.isValid() ? startMoment.format('HH:mm') : '',
         endTime: endMoment?.isValid() ? endMoment.format('HH:mm') : '',
+        recurrenceStartDate:
+          parsedRecurrence?.recurrenceStartDate ||
+          (startMoment?.isValid() ? startMoment.format('YYYY-MM-DD') : ''),
+        recurrenceEndDate:
+          parsedRecurrence?.recurrenceEndDate ||
+          (endMoment?.isValid() ? endMoment.format('YYYY-MM-DD') : ''),
+        recurrenceWeekdays: parsedRecurrence?.recurrenceWeekdays || [],
+        timeSlots: [
+          {
+            startTime: startMoment?.isValid() ? startMoment.format('HH:mm') : '',
+            endTime: endMoment?.isValid() ? endMoment.format('HH:mm') : '',
+          },
+        ],
       });
     }
   }, [experience, form]);
@@ -97,6 +432,20 @@ export default function ExperienceDates({
     }
 
     return dateTime.toISOString();
+  };
+
+  const persistTicketSlotConfig = (
+    targetExperienceId: string,
+    config: PersistedTicketSlotConfig,
+  ) => {
+    if (!targetExperienceId || typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem(
+      `experience-ticket-slots:${targetExperienceId}`,
+      JSON.stringify(config),
+    );
   };
 
   const toIsoEndDateTime = (
@@ -112,7 +461,42 @@ export default function ExperienceDates({
     return toIsoDateTime(date, time);
   };
 
-  const onSubmit = async (values: z.infer<typeof experienceDatesSchema>) => {
+  const buildRecurringRule = (values: ExperienceDatesFormValues) => {
+    const firstOccurrence = getFirstRecurringOccurrence(
+      values.recurrenceStartDate,
+      values.recurrenceWeekdays,
+    );
+    const primaryTimeSlot = values.timeSlots[0];
+
+    if (!firstOccurrence || !primaryTimeSlot?.startTime) {
+      return '';
+    }
+
+    const startDateTime = moment(
+      `${firstOccurrence.format('YYYY-MM-DD')} ${primaryTimeSlot.startTime}`,
+      'YYYY-MM-DD HH:mm',
+      true,
+    );
+    const until = moment(values.recurrenceEndDate, 'YYYY-MM-DD', true).endOf('day');
+
+    if (!startDateTime.isValid() || !until.isValid()) {
+      return '';
+    }
+
+    const byweekday = weekdayOptions
+      .filter((option) => values.recurrenceWeekdays.includes(option.value))
+      .map((option) => option.rrule);
+
+    return new RRule({
+      freq: RRule.WEEKLY,
+      interval: 1,
+      byweekday,
+      dtstart: startDateTime.toDate(),
+      until: until.toDate(),
+    }).toString();
+  };
+
+  const onSubmit = async (values: ExperienceDatesFormValues) => {
     if (!experienceId || !experience) {
       toast({
         title: 'Missing experience',
@@ -122,10 +506,21 @@ export default function ExperienceDates({
       return;
     }
 
-    const startDateTime = toIsoDateTime(values.selectedDate, values.startTime);
-    const endDateTime = toIsoEndDateTime(values.selectedDate, values.endTime, values.dateType);
+    const primaryDate = values.isRecurring
+      ? firstRecurringOccurrence?.format('YYYY-MM-DD') || ''
+      : values.selectedDate;
+    const primaryStartTime = values.isRecurring ? values.timeSlots[0]?.startTime || '' : values.startTime;
+    const primaryEndTime = values.isRecurring ? values.timeSlots[0]?.endTime || '' : values.endTime;
+    const startDateTime = toIsoDateTime(primaryDate, primaryStartTime);
+    const endDateTime = values.isRecurring
+      ? toIsoDateTime(primaryDate, primaryEndTime)
+      : toIsoEndDateTime(primaryDate, primaryEndTime, values.dateType);
+    const recurrenceRule = values.isRecurring ? buildRecurringRule(values) : '';
+    const slotsForTicketing = values.isRecurring
+      ? values.timeSlots
+      : [{ startTime: values.startTime, endTime: values.endTime }];
 
-    if (!startDateTime || !endDateTime) {
+    if (!startDateTime || !endDateTime || (values.isRecurring && !recurrenceRule)) {
       toast({
         title: 'Invalid date or time',
         description: 'Please choose a valid date and time range.',
@@ -143,13 +538,19 @@ export default function ExperienceDates({
         googleMapPlaceId: 'ChIJkYb7L8EXLxgRWogSMeTPg8M', // Placeholder, as location is required by API but not part of this form
         startDate: startDateTime,
         endDate: endDateTime,
-        recurrence_rule:
-          (experience as any).recurrenceRule || (experience as any).recurrence_rule || '',
+        recurrence_rule: recurrenceRule,
         categoriesIds: experience.categories?.map((category) => category.id) || [],
         isPublic: experience.isPublic,
         isPaid: values.isPaid === 'paid',
         invitedCommunityIds: [],
         invitedGuestsEmails: [],
+      });
+
+      persistTicketSlotConfig(experienceId, {
+        isRecurring: values.isRecurring,
+        recurrenceWeekdays: values.recurrenceWeekdays,
+        selectedDate: primaryDate,
+        timeSlots: slotsForTicketing,
       });
 
       toast({
@@ -158,13 +559,35 @@ export default function ExperienceDates({
         variant: 'success',
       });
       onDatesUpdatedSuccess?.(hasAtLeastOneTicket ? 'guests' : undefined);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : typeof error === 'object' && error !== null && 'message' in error
+            ? String(error.message)
+            : 'Failed to update experience dates.';
+
       toast({
         title: 'Error',
-        description: error?.message || 'Failed to update experience dates.',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
+  };
+
+  const toggleRecurringWeekday = (weekday: z.infer<typeof weekdayValueSchema>) => {
+    const currentWeekdays = form.getValues('recurrenceWeekdays');
+    const nextWeekdays = currentWeekdays.includes(weekday)
+      ? currentWeekdays.filter((current) => current !== weekday)
+      : weekdayOptions
+          .filter((option) => [...currentWeekdays, weekday].includes(option.value))
+          .map((option) => option.value);
+
+    form.setValue('recurrenceWeekdays', nextWeekdays, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
   };
 
   return (
@@ -259,83 +682,239 @@ export default function ExperienceDates({
               name="isRecurring"
               render={({ field }) => (
                 <FormItem>
-                  <div className="flex items-center gap-3">
-                    <FormControl>
-                      <input
-                        type="checkbox"
+                  <FormControl>
+                    <label className="flex cursor-pointer items-center gap-3">
+                      <Checkbox
                         checked={field.value}
-                        onChange={field.onChange}
-                        className="h-4 w-4 rounded border-gray-300 accent-primary focus:ring-primary"
+                        onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                        className="h-4 w-4 rounded-[4px]"
                       />
-                    </FormControl>
-                    <FormLabel className="cursor-pointer text-xs font-normal text-gray-900">
-                      Create a recurring experience
-                    </FormLabel>
-                  </div>
+                      <FormLabel className="cursor-pointer text-xs font-normal text-gray-900">
+                        Create a recurring experience
+                      </FormLabel>
+                    </label>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Select Experience Date(s) */}
-            <div className="space-y-4">
-              <FormLabel className="text-xs font-medium text-gray-900">
-                Select Experience date(s)
-              </FormLabel>
-
-              <FormField
-                control={form.control}
-                name="selectedDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <DatePicker
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Select Date"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {isRecurring ? (
+              <div className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="startTime"
-                  render={({ field }) => (
-                    <FormItem>
+                  name="recurrenceWeekdays"
+                  render={() => (
+                    <FormItem className="space-y-3">
                       <FormControl>
-                        <TimePicker
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="Start Time"
-                        />
+                        <div className="flex flex-wrap gap-3 sm:gap-5">
+                          {weekdayOptions.map((option) => {
+                            const isSelected = recurrenceWeekdays.includes(option.value);
+
+                            return (
+                              <label
+                                key={option.value}
+                                className="flex cursor-pointer items-center gap-3"
+                              >
+                                <Checkbox
+                                  checked={isSelected}
+                                  onCheckedChange={() => toggleRecurringWeekday(option.value)}
+                                  className="h-4 w-4 rounded-[4px]"
+                                />
+                                <span className="text-xs font-medium text-gray-800">
+                                  {option.label}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="endTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <TimePicker
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="End Time"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                <div className="space-y-2">
+                  <FormLabel className="text-xs font-semibold text-gray-800">
+                    Recurrence start and end dates
+                  </FormLabel>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="recurrenceStartDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <DatePicker
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="Start Date"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="recurrenceEndDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <DatePicker
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="End Date"
+                              minDate={
+                                recurrenceStartDate
+                                  ? moment(recurrenceStartDate, 'YYYY-MM-DD', true).toDate()
+                                  : undefined
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {firstRecurringOccurrence && (
+                    <div className="inline-flex rounded-full border border-[#9CC3FF] bg-[#DCEBFF] px-4 py-2 text-xs italic font-medium text-[#65758B]">
+                      Your first experience will be on{' '}
+                      {firstRecurringOccurrence.format('dddd D, MMMM')}
+                    </div>
                   )}
-                />
+                </div>
+
+                <div className="space-y-2">
+                  <FormLabel className="text-xs font-semibold text-gray-800">
+                    Times/Time Slots
+                  </FormLabel>
+
+                  <div className="space-y-5">
+                    {timeSlotFields.map((timeSlot, index) => (
+                      <div key={timeSlot.id} className="space-y-2">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <FormField
+                            control={form.control}
+                            name={`timeSlots.${index}.startTime` as const}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <TimePicker
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    placeholder="Start Time"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name={`timeSlots.${index}.endTime` as const}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <TimePicker
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    placeholder="End Time"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {index > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => remove(index)}
+                            className="text-xs font-medium text-gray-500 hover:text-gray-700"
+                          >
+                            Remove time slot
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    onClick={() => append({ startTime: '', endTime: '' })}
+                    className="p-0 text-primary hover:bg-transparent hover:underline"
+                  >
+                    <IconComponent iconName="Clock05Icon" className="h-3 w-3" />
+                    Add another time slot
+                  </Button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-2">
+                <FormLabel className="text-xs font-medium text-gray-800">
+                  Select Experience date(s)
+                </FormLabel>
+
+                <FormField
+                  control={form.control}
+                  name="selectedDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <DatePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Select Date"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="startTime"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <TimePicker
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Start Time"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="endTime"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <TimePicker
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="End Time"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="flex items-center justify-between gap-3 pt-4">
