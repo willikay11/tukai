@@ -5,6 +5,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import moment from 'moment';
+import { RRule } from 'rrule';
 import { z } from 'zod';
 
 import IconComponent from '@/app/components/iconComponent';
@@ -148,6 +149,77 @@ function getApiTicketValidity(ticket: Ticket): string {
   return apiValidity?.trim() ? apiValidity : '-';
 }
 
+const weekdayLabelsByIndex: Record<number, string> = {
+  0: 'Mon',
+  1: 'Tue',
+  2: 'Wed',
+  3: 'Thu',
+  4: 'Fri',
+  5: 'Sat',
+  6: 'Sun',
+};
+
+function parseRecurringWeekdayLabels(recurrenceRule: string): string[] {
+  if (!recurrenceRule?.trim()) {
+    return [];
+  }
+
+  const normalizedRule = recurrenceRule.trim();
+  const lines = normalizedRule
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const rruleLine = lines.find((line) => line.toUpperCase().startsWith('RRULE:')) || lines[0] || '';
+  const rruleBody = rruleLine.toUpperCase().startsWith('RRULE:')
+    ? rruleLine.slice('RRULE:'.length)
+    : rruleLine;
+
+  try {
+    const parsedRule = RRule.fromString(rruleBody);
+    const rawByWeekday = parsedRule.origOptions.byweekday ?? parsedRule.options.byweekday;
+    const weekdays = Array.isArray(rawByWeekday)
+      ? rawByWeekday
+      : rawByWeekday !== undefined
+        ? [rawByWeekday]
+        : [];
+
+    const labels = weekdays
+      .map((weekday) => {
+        const weekdayIndex =
+          typeof weekday === 'number'
+            ? weekday
+            : typeof weekday === 'object' && weekday && 'weekday' in weekday
+              ? Number((weekday as { weekday: number }).weekday)
+              : -1;
+
+        return weekdayLabelsByIndex[weekdayIndex] || null;
+      })
+      .filter((label): label is string => Boolean(label));
+
+    return Array.from(new Set(labels));
+  } catch {
+    const byDayMatch = rruleBody.match(/(?:^|;)BYDAY=([A-Z,]+)(?:;|$)/i);
+    const fallbackMap: Record<string, string> = {
+      MO: 'Mon',
+      TU: 'Tue',
+      WE: 'Wed',
+      TH: 'Thu',
+      FR: 'Fri',
+      SA: 'Sat',
+      SU: 'Sun',
+    };
+
+    if (!byDayMatch?.[1]) {
+      return [];
+    }
+
+    return byDayMatch[1]
+      .split(',')
+      .map((day) => fallbackMap[day.trim().toUpperCase()])
+      .filter(Boolean);
+  }
+}
+
 export default function CreateTickets({
   experienceId,
   experience,
@@ -155,6 +227,19 @@ export default function CreateTickets({
   experienceId?: string | null;
   experience?: Experience;
 }) {
+  const savedRecurrenceRule =
+    (experience as Experience & { recurrenceRule?: string; recurrence_rule?: string })
+      ?.recurrence_rule ||
+    (experience as Experience & { recurrenceRule?: string; recurrence_rule?: string })
+      ?.recurrenceRule ||
+    '';
+
+  const recurringWeekdayLabels = useMemo(
+    () => parseRecurringWeekdayLabels(savedRecurrenceRule),
+    [savedRecurrenceRule],
+  );
+  const isRecurringExperience = recurringWeekdayLabels.length > 0;
+
   // Compute selectedDateSummary from experience dates
   const selectedDateSummary = useMemo(() => {
     if (!experience?.startDate || !experience?.endDate) {
@@ -168,12 +253,17 @@ export default function CreateTickets({
       return '';
     }
 
-    const dateStr = startMoment.format('DD/MM/YYYY');
     const startTimeStr = startMoment.format('hh:mm A');
     const endTimeStr = endMoment.format('hh:mm A');
 
+    if (isRecurringExperience) {
+      return `Every ${recurringWeekdayLabels.join(', ')}: ${startTimeStr} - ${endTimeStr}`;
+    }
+
+    const dateStr = startMoment.format('DD/MM/YYYY');
+
     return `${dateStr} - ${startTimeStr} - ${endTimeStr}`;
-  }, [experience?.startDate, experience?.endDate]);
+  }, [experience?.startDate, experience?.endDate, isRecurringExperience, recurringWeekdayLabels]);
 
   const form = useForm<CreateTicketsFormValues>({
     resolver: zodResolver<CreateTicketsFormValues>(createTicketsSchema),
@@ -478,7 +568,9 @@ export default function CreateTickets({
         <div className="inline-flex items-center gap-2 rounded-full border border-dashed border-primary bg-emerald-100 px-4 py-2 text-sm font-medium text-gray-900">
           <IconComponent iconName="Calendar03Icon" size={16} color="#064E3B" />
           <span className="text-xs text-green-900">
-            Date: {selectedDateSummary || 'No date set'}
+            {isRecurringExperience
+              ? selectedDateSummary || 'Recurring schedule not set'
+              : `Date: ${selectedDateSummary || 'No date set'}`}
           </span>
           {/* <IconComponent iconName="ArrowDown01Icon" size={16} color="#064E3B" /> */}
         </div>
