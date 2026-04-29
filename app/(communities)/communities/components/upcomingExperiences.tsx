@@ -5,7 +5,7 @@ import Link from 'next/link';
 import clsx from 'clsx';
 import { motion } from 'framer-motion';
 
-import { SingleExperience } from '@/app/components/experiences/Single';
+import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { NoData } from '@/components/ui/noData';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { Experience } from '@/types/experience';

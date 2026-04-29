@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 
-import { Bookmark } from '@/app/components/bookmark';
+import { Bookmark } from '@/app/shared/components/Bookmark';
 import { useBookmarkExperience } from '@/app/shared/hooks/useExperiences';
 import { Experience } from '@/types/experience';
 

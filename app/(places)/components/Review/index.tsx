@@ -8,7 +8,7 @@ import { FavouriteIcon, Message02Icon } from '@hugeicons/react-pro';
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { Rating } from '@/app/components/rating';
+import { Rating } from '@/app/shared/components/Rating/Rating';
 import { Button } from '@/components/ui/button';
 import { TukaiImage } from '@/components/ui/image';
 import { ImageCarousel } from '@/components/ui/imageCarousel';

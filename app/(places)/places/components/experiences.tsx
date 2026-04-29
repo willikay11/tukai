@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 
-import { ListExperiences } from '@/app/components/experiences/List';
+import { ListExperiences } from '@/app/shared/components/Experiences/List';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 
 type ListExperiencesProps = {

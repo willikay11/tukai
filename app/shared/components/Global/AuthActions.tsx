@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { JoinTukaiPremium } from '@/app/components/joinTukaiPremium';
+import { JoinTukaiPremium } from '@/app/shared/components/JoinTukaiPremium/JoinTukaiPremium';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { TukaiImage } from '@/components/ui/image';

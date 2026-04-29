@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 
 import clsx from 'clsx';
 
-import { ListExperiences } from '@/app/components/experiences/List';
+import { ListExperiences } from '@/app/shared/components/Experiences/List';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 

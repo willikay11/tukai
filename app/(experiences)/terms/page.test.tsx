@@ -8,7 +8,7 @@ jest.mock('@/hooks/pages', () => ({
   useTermsOfService: jest.fn(),
 }));
 
-jest.mock('@/app/components/pageLayoutContent', () => ({
+jest.mock('@/app/(experiences)/components/PageLayoutContent', () => ({
   PageLayoutContent: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="page-layout-content">{children}</div>
   ),

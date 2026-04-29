@@ -5,7 +5,7 @@ import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Button } from '@/app/shared/components/Forms';
-import { PageLayoutContent } from '@/app/components/pageLayoutContent';
+import { PageLayoutContent } from '@/app/(experiences)/components/PageLayoutContent';
 import { useUnsubscribe } from '@/app/(experiences)/hooks/useComms';
 
 function UnsubscribeContent() {

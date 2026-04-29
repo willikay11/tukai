@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { SendMessage } from '@/app/components/sendMessage';
+import { SendMessage } from '@/app/shared/components/SendMessage/SendMessage';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { CommunityMember } from '@/types/community';

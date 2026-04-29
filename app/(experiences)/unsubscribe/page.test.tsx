@@ -22,7 +22,7 @@ jest.mock('@/hooks/comms', () => ({
   useUnsubscribe: jest.fn(),
 }));
 
-jest.mock('@/app/components/pageLayoutContent', () => ({
+jest.mock('@/app/(experiences)/components/PageLayoutContent', () => ({
   PageLayoutContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 

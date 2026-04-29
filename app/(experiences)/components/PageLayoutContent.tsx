@@ -18,7 +18,7 @@ const options = [
   },
 ];
 
-export function PageLayoutContent({ children }: { children: React.ReactNode }) {
+export const PageLayoutContent = ({ children }: { children: React.ReactNode }) => {
   const animationElement = useRef<HTMLParagraphElement | null>(null);
   const [optionIndex, setOptionIndex] = useState<number>(0);
 
