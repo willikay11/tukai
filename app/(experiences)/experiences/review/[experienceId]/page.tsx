@@ -10,7 +10,7 @@ import { ExperienceReview } from '@/app/(experiences)/experiences/create/compone
 import { CreateExperienceInvites } from '@/app/(experiences)/experiences/create/components/invites';
 import { CreateExperienceWallet } from '@/app/(experiences)/experiences/create/components/wallet';
 import { Button } from '@/components/ui/button';
-import { useFetchSingleExperience } from '@/hooks/experiences';
+import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
 
 import { ExperienceDates } from '../../create/components/dates';
 

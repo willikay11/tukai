@@ -9,7 +9,7 @@ import {
   usePlaceReviews,
   useUpdatePlaceReview,
   useUploadPlaceReviewImages,
-} from '@/hooks/places';
+} from '@/app/shared/hooks/usePlaces';
 import { Review as ReviewType } from '@/types/review';
 
 type placeReviewsProps = {

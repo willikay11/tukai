@@ -7,7 +7,7 @@ import clsx from 'clsx';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/app/shared/hooks/useToast';
 import { SubscriptionPlan } from '@/types/subscription';
 
 export const Package = ({

@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { PaymentForm, paymentFormSchema } from '@/components/ui/paymentForm';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/app/shared/hooks/useToast';
 
 export const PaymentDetails = ({
   onSuccess,

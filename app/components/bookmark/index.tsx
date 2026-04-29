@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { SignInForm } from '@/components/ui/form/sign-in';
 import { useAuthDialog } from '@/context/AuthDialogContext';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/app/shared/hooks/useToast';
 
 export const Bookmark = ({
   bookmarked,

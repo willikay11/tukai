@@ -4,8 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import { usePurchaseExperienceTicket } from '@/hooks/experiences';
-import { toast } from '@/hooks/use-toast';
+import { usePurchaseExperienceTicket } from '@/app/shared/hooks/useExperiences';
+import { toast } from '@/app/shared/hooks/useToast';
 import { Experience } from '@/types/experience';
 
 import { Reserve } from './reserve';

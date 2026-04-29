@@ -10,7 +10,7 @@ import { RefreshIcon } from '@hugeicons/react-pro';
 
 import { Button } from '@/app/shared/components/Forms';
 import { OtpInput } from '@/app/shared/components/Forms/form/otpInput';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/app/shared/hooks/useToast';
 
 export default function OtpConfirmation() {
   const router = useRouter();

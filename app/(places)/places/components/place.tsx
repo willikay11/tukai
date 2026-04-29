@@ -9,7 +9,7 @@ import clsx from 'clsx';
 import { BookmarkPlace } from '@/app/components/bookmark';
 import { EventSkeleton } from '@/app/shared/components/Cards';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
-import { useBookmarkPlace } from '@/hooks/places';
+import { useBookmarkPlace } from '@/app/shared/hooks/usePlaces';
 import { Place } from '@/types/place';
 
 export const SinglePlace = ({ place }: { place: Place }) => {

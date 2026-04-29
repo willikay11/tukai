@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 
 import { Paystack } from '@/components/ui/paystack';
 import { StepIndicator } from '@/components/ui/stepIndicator';
-import { useSubscriptionPlans } from '@/hooks/subscriptions';
+import { useSubscriptionPlans } from '@/app/(auth)/hooks/useSubscriptions';
 
 import { Package } from './components/package';
 import { PaymentDetails } from './components/paymentDetails';

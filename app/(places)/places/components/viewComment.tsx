@@ -9,7 +9,7 @@ import moment from 'moment';
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { useLikePlaceReviewComment } from '@/hooks/places';
+import { useLikePlaceReviewComment } from '@/app/shared/hooks/usePlaces';
 import { Comment } from '@/types/comment';
 
 export const ViewComment = ({

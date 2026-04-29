@@ -14,7 +14,7 @@ import {
   useCreatePlaceReview,
   useDeletePlaceReviewImage,
   useUploadPlaceReviewImages,
-} from '@/hooks/places';
+} from '@/app/shared/hooks/usePlaces';
 
 export const PlaceActions = ({
   placeId,

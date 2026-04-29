@@ -19,10 +19,10 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { Input } from '@/components/ui/input';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { TimePicker } from '@/components/ui/time-picker';
-import { useGetInterestCategories } from '@/hooks/auth';
-import { useCreateExperience, useUpdateExperience } from '@/hooks/experiences';
-import { useGoogleMapsAutocomplete } from '@/hooks/places';
-import { toast } from '@/hooks/use-toast';
+import { useGetInterestCategories } from '@/app/shared/hooks/useAuth';
+import { useCreateExperience, useUpdateExperience } from '@/app/shared/hooks/useExperiences';
+import { useGoogleMapsAutocomplete } from '@/app/shared/hooks/usePlaces';
+import { toast } from '@/app/shared/hooks/useToast';
 import { Experience } from '@/types/experience';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';

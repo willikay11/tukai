@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 
 import { SingleExperience } from '@/app/components/experiences/Single';
 import { NoData } from '@/components/ui/noData';
-import { useExperiences } from '@/hooks/experiences';
+import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { Experience } from '@/types/experience';
 
 export const UpcomingExperiences = ({ category }: { category: string }) => {

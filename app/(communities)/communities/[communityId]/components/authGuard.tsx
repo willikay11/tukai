@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { SignInForm } from '@/components/ui/form/sign-in';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/app/shared/hooks/useToast';
 
 export const AuthGuard = () => {
   const [open, setOpen] = useState(true);

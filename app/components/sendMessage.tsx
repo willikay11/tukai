@@ -15,8 +15,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { useSendMessage } from '@/hooks/comms';
-import { toast } from '@/hooks/use-toast';
+import { useSendMessage } from '@/app/(experiences)/hooks/useComms';
+import { toast } from '@/app/shared/hooks/useToast';
 
 const formSchema = z.object({
   content: z.string().min(2, {

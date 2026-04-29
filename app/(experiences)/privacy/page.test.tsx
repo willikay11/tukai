@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import sanitizeHtml from 'sanitize-html';
 
-import { usePrivacyPolicy } from '@/hooks/pages';
+import { usePrivacyPolicy } from '@/app/(experiences)/hooks/usePages';
 
 import PrivacyPage from './page';
 

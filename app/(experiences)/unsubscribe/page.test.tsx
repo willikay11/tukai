@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import { useUnsubscribe } from '@/hooks/comms';
+import { useUnsubscribe } from '@/app/(experiences)/hooks/useComms';
 
 import UnsubscribePage from './page';
 

@@ -2,7 +2,7 @@
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { ReviewWalletsSkeleton } from '@/app/shared/components/Cards';
-import { useGetWallets } from '@/hooks/payment';
+import { useGetWallets } from '@/app/(experiences)/hooks/usePayment';
 import { Wallet } from '@/types/payment';
 
 interface ReviewWalletsProps {

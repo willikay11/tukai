@@ -21,8 +21,8 @@ import {
 } from '@/components/ui/form';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { TimePicker } from '@/components/ui/time-picker';
-import { useUpdateExperience } from '@/hooks/experiences';
-import { toast } from '@/hooks/use-toast';
+import { useUpdateExperience } from '@/app/shared/hooks/useExperiences';
+import { toast } from '@/app/shared/hooks/useToast';
 import { Experience } from '@/types/experience';
 import { IconComponent } from '@/app/shared/components/Icons';
 

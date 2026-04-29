@@ -7,7 +7,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { ScrollFilters } from '@/app/shared/components/Filters';
 import { PillsSkeleton } from '@/app/shared/components/Cards';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
-import { usePlaceCategories } from '@/hooks/places';
+import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { PlaceCategory } from '@/types/placeCategory';
 
 export const PageFilters = () => {

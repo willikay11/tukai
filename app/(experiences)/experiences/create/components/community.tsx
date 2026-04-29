@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
-import { useGetCommunities } from '@/hooks/communities';
+import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 
 type CommunityOption = {
   id: string;

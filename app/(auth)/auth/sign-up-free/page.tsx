@@ -13,8 +13,8 @@ import { LockKeyIcon, Mail02Icon, UserIcon } from '@hugeicons/react-pro';
 import { Anchor, Input } from '@/app/shared/components/Forms';
 import { MobileStore } from '@/app/shared/components/Download';
 import { Button } from '@/components/ui/button';
-import { useUserExists } from '@/hooks/auth';
-import { toast } from '@/hooks/use-toast';
+import { useUserExists } from '@/app/shared/hooks/useAuth';
+import { toast } from '@/app/shared/hooks/useToast';
 import { addUser } from '@/slices/userSlice';
 
 type Inputs = {

@@ -8,7 +8,7 @@ import clsx from 'clsx';
 
 import { ListExperiences } from '@/app/components/experiences/List';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
-import { useExperiences } from '@/hooks/experiences';
+import { useExperiences } from '@/app/shared/hooks/useExperiences';
 
 type ListExperiencesProps = {
   title?: string;

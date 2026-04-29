@@ -2,7 +2,7 @@
 import { useState } from 'react';
 
 import { ListExperiences } from '@/app/components/experiences/List';
-import { useExperiences } from '@/hooks/experiences';
+import { useExperiences } from '@/app/shared/hooks/useExperiences';
 
 type ListExperiencesProps = {
   categories: string[];

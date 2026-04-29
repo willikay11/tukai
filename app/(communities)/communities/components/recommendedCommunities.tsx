@@ -1,6 +1,6 @@
 'use client';
 
-import { useGetCommunities } from '@/hooks/communities';
+import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 
 export const RecommendedCommunities = () => {
   const {

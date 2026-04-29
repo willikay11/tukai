@@ -9,7 +9,7 @@ import { AppleIcon, GoogleIcon, LockKeyIcon, Mail02Icon } from '@hugeicons/react
 
 import { Anchor, Input } from '@/app/shared/components/Forms';
 import { MobileStore } from '@/app/shared/components/Download';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/app/shared/hooks/useToast';
 
 import { Button } from '../button';
 

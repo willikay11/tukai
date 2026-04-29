@@ -17,8 +17,8 @@ import {
   useCreateExperienceTicket,
   useDeleteExperienceTicket,
   useUpdateExperienceTicket,
-} from '@/hooks/experiences';
-import { toast } from '@/hooks/use-toast';
+} from '@/app/shared/hooks/useExperiences';
+import { toast } from '@/app/shared/hooks/useToast';
 import { Experience } from '@/types/experience';
 import { Ticket } from '@/types/ticket';
 

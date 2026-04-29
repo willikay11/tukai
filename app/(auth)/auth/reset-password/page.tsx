@@ -15,7 +15,7 @@ import { OtpInput } from '@/app/shared/components/Forms/form/otpInput';
 import { SuccessMessage } from '@/app/shared/components/Messages/messages/success';
 import { MobileStore } from '@/app/shared/components/Download';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/app/shared/hooks/useToast';
 
 type Inputs = {
   password: string;

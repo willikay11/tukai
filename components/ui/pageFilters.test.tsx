@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 
-import { usePlaceCategories } from '@/hooks/places';
+import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 
 import { PageFilters } from './pageFilters';
 

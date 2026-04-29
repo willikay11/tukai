@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Button } from '@/app/shared/components/Forms';
 import { PageLayoutContent } from '@/app/components/pageLayoutContent';
-import { useUnsubscribe } from '@/hooks/comms';
+import { useUnsubscribe } from '@/app/(experiences)/hooks/useComms';
 
 function UnsubscribeContent() {
   const router = useRouter();

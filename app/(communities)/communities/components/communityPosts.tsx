@@ -3,7 +3,7 @@
 import clsx from 'clsx';
 
 import { PostSkeleton } from '@/app/shared/components/Cards';
-import { useCommunityPosts } from '@/hooks/communities';
+import { useCommunityPosts } from '@/app/shared/hooks/useCommunities';
 import { CommunityPost } from '@/types/community';
 
 import { Post } from './post';

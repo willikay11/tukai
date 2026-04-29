@@ -3,7 +3,7 @@
 import sanitizeHtml from 'sanitize-html';
 
 import { PageLayoutContent } from '@/app/components/pageLayoutContent';
-import { usePrivacyPolicy } from '@/hooks/pages';
+import { usePrivacyPolicy } from '@/app/(experiences)/hooks/usePages';
 
 import { Loader } from '@/app/shared/components/Forms/form/loader';
 

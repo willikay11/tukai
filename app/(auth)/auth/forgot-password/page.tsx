@@ -13,7 +13,7 @@ import { Anchor, Input } from '@/app/shared/components/Forms';
 import { SuccessMessage } from '@/app/shared/components/Messages/messages/success';
 import { MobileStore } from '@/app/shared/components/Download';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/app/shared/hooks/useToast';
 import { addEmail } from '@/slices/resetSlice';
 
 type Inputs = {

@@ -7,8 +7,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { CreateStepContentSkeleton, ReviewWalletsSkeleton } from '@/app/shared/components/Cards';
 import { InvitedMember } from '@/components/ui/invite-members';
-import { useGetCommunities } from '@/hooks/communities';
-import { useFetchSingleExperience } from '@/hooks/experiences';
+import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
+import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
 import { Community } from '@/types/community';
 
 import { ExperienceStepSidePanel } from './components/step-side-panel';

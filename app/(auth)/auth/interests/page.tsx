@@ -12,7 +12,7 @@ import moment from 'moment-timezone';
 import { Button } from '@/app/shared/components/Forms';
 import { Loader } from '@/app/shared/components/Forms/form/loader';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/app/shared/hooks/useToast';
 import { removeUser } from '@/slices/userSlice';
 
 export default function Page() {

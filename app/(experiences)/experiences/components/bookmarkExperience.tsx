@@ -3,7 +3,7 @@
 import { useSession } from 'next-auth/react';
 
 import { Bookmark } from '@/app/components/bookmark';
-import { useBookmarkExperience } from '@/hooks/experiences';
+import { useBookmarkExperience } from '@/app/shared/hooks/useExperiences';
 import { Experience } from '@/types/experience';
 
 export const BookmarkExperience = ({ experience }: { experience: Experience }) => {

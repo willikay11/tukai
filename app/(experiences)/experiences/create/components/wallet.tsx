@@ -18,8 +18,8 @@ import {
   useGetWallets,
   usePatchBankWallet,
   usePatchPhoneWallet,
-} from '@/hooks/payment';
-import { useToast } from '@/hooks/use-toast';
+} from '@/app/(experiences)/hooks/usePayment';
+import { useToast } from '@/app/shared/hooks/useToast';
 import { Wallet } from '@/types/payment';
 
 type PaymentMethod = 'mpesa' | 'bank_account';

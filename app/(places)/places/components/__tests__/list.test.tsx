@@ -6,7 +6,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import { useLocation } from '@/context/LocationContext';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { Status } from '@/enums/status';
-import { usePlaces } from '@/hooks/places';
+import { usePlaces } from '@/app/shared/hooks/usePlaces';
 import { Place } from '@/types/place';
 
 import ListPlaces from '../list';

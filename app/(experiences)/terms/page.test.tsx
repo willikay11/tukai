@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 
-import { useTermsOfService } from '@/hooks/pages';
+import { useTermsOfService } from '@/app/(experiences)/hooks/usePages';
 
 import TermsPage from './page';
 

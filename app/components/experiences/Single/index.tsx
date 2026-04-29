@@ -10,7 +10,7 @@ import { Pills } from '@/app/shared/components/Filters';
 import { EventSkeleton } from '@/app/shared/components/Cards';
 import { Button } from '@/components/ui/button';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
-import { useBookmarkExperience } from '@/hooks/experiences';
+import { useBookmarkExperience } from '@/app/shared/hooks/useExperiences';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 

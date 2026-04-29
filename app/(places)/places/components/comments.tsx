@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { NoData } from '@/components/ui/noData';
 import { Textarea } from '@/components/ui/textarea';
-import { useCreatePlaceReviewComment, usePlaceReviewComments } from '@/hooks/places';
+import { useCreatePlaceReviewComment, usePlaceReviewComments } from '@/app/shared/hooks/usePlaces';
 import { Comment } from '@/types/comment';
 
 import { ViewComment } from './viewComment';

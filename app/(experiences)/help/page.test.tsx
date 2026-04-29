@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import sanitizeHtml from 'sanitize-html';
 
-import { useHelp } from '@/hooks/pages';
+import { useHelp } from '@/app/(experiences)/hooks/usePages';
 
 import HelpPage from './page';
 

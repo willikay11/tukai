@@ -8,7 +8,7 @@ import { ImageSkeleton, PostSkeleton } from '@/app/shared/components/Cards';
 import { TukaiImage } from '@/components/ui/image';
 import { NoData } from '@/components/ui/noData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCommunityPostPhotos, useCommunityPosts } from '@/hooks/communities';
+import { useCommunityPostPhotos, useCommunityPosts } from '@/app/shared/hooks/useCommunities';
 import { CommunityPost } from '@/types/community';
 import { Photo } from '@/types/photo';
 

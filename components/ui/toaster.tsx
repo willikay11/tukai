@@ -9,7 +9,7 @@ import {
   ToastTitle,
   ToastViewport,
 } from '@/components/ui/toast';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/app/shared/hooks/useToast';
 import { cn } from '@/lib/utils';
 
 export function Toaster() {

@@ -6,7 +6,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useGetWallets } from '@/hooks/payment';
+import { useGetWallets } from '@/app/(experiences)/hooks/usePayment';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 

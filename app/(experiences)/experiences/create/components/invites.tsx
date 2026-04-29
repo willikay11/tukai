@@ -5,10 +5,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { InviteCommunities } from '@/components/ui/invite-communities';
 import { InviteMembers, InvitedMember } from '@/components/ui/invite-members';
-import { useGetUsers } from '@/hooks/auth';
-import { useGetCommunities } from '@/hooks/communities';
-import { useAddGuestToExperience, useUpdateExperience } from '@/hooks/experiences';
-import { toast } from '@/hooks/use-toast';
+import { useGetUsers } from '@/app/shared/hooks/useAuth';
+import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
+import { useAddGuestToExperience, useUpdateExperience } from '@/app/shared/hooks/useExperiences';
+import { toast } from '@/app/shared/hooks/useToast';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 
