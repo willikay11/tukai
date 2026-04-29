@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Experience } from '@/types/experience';
 
-export default function ExperienceOrganiser({ experience }: { experience: Experience }) {
+export const ExperienceOrganiser = ({ experience }: { experience: Experience }) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -42,4 +42,4 @@ export default function ExperienceOrganiser({ experience }: { experience: Experi
       </div>
     </>
   );
-}
+};

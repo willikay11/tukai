@@ -10,7 +10,7 @@ import { NoData } from '@/components/ui/noData';
 import { useExperiences } from '@/hooks/experiences';
 import { Experience } from '@/types/experience';
 
-export default function UpcomingExperiences({ category }: { category: string }) {
+export const UpcomingExperiences = ({ category }: { category: string }) => {
   const { data: upcomingExperiences } = useExperiences(
     {
       page: 1,
@@ -57,4 +57,4 @@ export default function UpcomingExperiences({ category }: { category: string }) 
       </div>
     </div>
   );
-}
+};

@@ -9,13 +9,13 @@ import { Community } from '@/types/community';
 
 import CommunityMembers from './communityMembers';
 
-export default function SingleCommunity({
+export const SingleCommunity = ({
   community,
   aspectRatio,
 }: {
   community: Community;
   aspectRatio?: string;
-}) {
+}) => {
   const [hasError, setHasError] = useState(false);
 
   // Sanitize text to prevent XSS (if content is dynamic)
@@ -74,4 +74,4 @@ export default function SingleCommunity({
       </div>
     </div>
   );
-}
+};

@@ -12,7 +12,7 @@ import { ImageCarousel } from '@/components/ui/imageCarousel';
 import { useBookmarkPlace } from '@/hooks/places';
 import { Place } from '@/types/place';
 
-export default function SinglePlace({ place }: { place: Place }) {
+export const SinglePlace = ({ place }: { place: Place }) => {
   const [hasError, setHasError] = useState(false);
   const { data: session } = useSession();
   const { mutate: bookmarkPlace } = useBookmarkPlace(place.id, session?.user?.id || '');
@@ -71,4 +71,4 @@ export default function SinglePlace({ place }: { place: Place }) {
       </div>
     </>
   );
-}
+};

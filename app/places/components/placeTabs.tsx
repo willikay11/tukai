@@ -12,7 +12,7 @@ type placeTabsProps = {
   categories: PlaceCategory[];
 };
 
-export default function PlaceTabs({ placeId, categories }: placeTabsProps) {
+export const PlaceTabs = ({ placeId, categories }: placeTabsProps) => {
   return (
     <Tabs defaultValue="reviews" className="w-full md:w-1/2">
       <TabsList className="sticky top-0 w-full justify-start rounded-none bg-white">
@@ -39,4 +39,4 @@ export default function PlaceTabs({ placeId, categories }: placeTabsProps) {
       </TabsContent>
     </Tabs>
   );
-}
+};

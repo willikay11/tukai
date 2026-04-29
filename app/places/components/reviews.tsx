@@ -16,7 +16,7 @@ type placeReviewsProps = {
   placeId: string;
 };
 
-export default function Reviews({ placeId }: placeReviewsProps) {
+export const Reviews = ({ placeId }: placeReviewsProps) => {
   const { data: reviews, isLoading } = usePlaceReviews(placeId);
   const { mutate: likeReview } = useLikePlaceReview();
   const { mutate: deleteReview, isPending: isDeletingReview } = useDeletePlaceReview();
@@ -65,4 +65,4 @@ export default function Reviews({ placeId }: placeReviewsProps) {
       isUpdatePending={isUpdatePending}
     />
   ));
-}
+};

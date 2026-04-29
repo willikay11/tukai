@@ -16,7 +16,7 @@ import {
   useUploadPlaceReviewImages,
 } from '@/hooks/places';
 
-export default function PlaceActions({
+export const PlaceActions = ({
   placeId,
   bookmarked,
   placeTitle,
@@ -26,7 +26,7 @@ export default function PlaceActions({
   bookmarked: boolean;
   placeTitle: string;
   coverPhoto: string;
-}) {
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const { setOpenSignIn } = useAuthDialog();
   const { data: session } = useSession();
@@ -96,4 +96,4 @@ export default function PlaceActions({
       />
     </>
   );
-}
+};

@@ -6,13 +6,13 @@ import clsx from 'clsx';
 
 import { CommunityMember } from '@/types/community';
 
-export default function CommunityMembers({
+export const CommunityMembers = ({
   members,
   size = '20px',
 }: {
   members: CommunityMember[];
   size?: string;
-}) {
+}) => {
   return (
     <div className="relative flex items-center">
       {members.slice(0, 5).map((member: CommunityMember, index: number) => (
@@ -41,4 +41,4 @@ export default function CommunityMembers({
       )}
     </div>
   );
-}
+};

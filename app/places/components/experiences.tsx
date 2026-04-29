@@ -8,7 +8,7 @@ type ListExperiencesProps = {
   categories: string[];
 };
 
-export default function TabExperiences({ categories }: ListExperiencesProps) {
+export const TabExperiences = ({ categories }: ListExperiencesProps) => {
   const [page, setPage] = useState(1);
   const { data: experiences, isLoading } = useExperiences(
     {
@@ -30,4 +30,4 @@ export default function TabExperiences({ categories }: ListExperiencesProps) {
       type="discover"
     />
   );
-}
+};

@@ -8,7 +8,7 @@ import Communities from './Communities';
 import CommunityPosts from './communityPosts';
 import InterestBasedCommunities from './interestBasedCommunities';
 
-export default function List() {
+export const List = () => {
   const { data: session } = useSession();
   const { selectedCategoryId } = useSelectedCategory();
 
@@ -50,4 +50,4 @@ export default function List() {
       </div>
     );
   }
-}
+};

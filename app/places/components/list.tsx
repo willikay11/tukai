@@ -43,7 +43,7 @@ const placeholders: Place[] = Array.from({ length: ITEMS_PER_PAGE }, (_, index) 
   categories: [],
 }));
 
-export default function ListPlaces() {
+export const ListPlaces = () => {
   const { selectedCategoryId, selectedCitySearchId } = useSelectedCategory();
   const { lat, lng } = useLocation();
   const queryClient = useQueryClient();
@@ -214,4 +214,4 @@ export default function ListPlaces() {
       })}
     </motion.div>
   );
-}
+};

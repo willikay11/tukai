@@ -8,7 +8,7 @@ import { CommunityPost } from '@/types/community';
 
 import Post from './post';
 
-export default function CommunityPosts({}) {
+export const CommunityPosts = ({}) => {
   const { data: communityPosts, isLoading } = useCommunityPosts({ page: 1 }, true);
 
   return (
@@ -30,4 +30,4 @@ export default function CommunityPosts({}) {
       </div>
     </div>
   );
-}
+};

@@ -7,7 +7,7 @@ import { IconComponent } from '@/app/components/iconComponent';
 import { Button } from '@/components/ui/button';
 import { Experience } from '@/types/experience';
 
-export default function ExperienceDetails({ experience }: { experience: Experience }) {
+export const ExperienceDetails = ({ experience }: { experience: Experience }) => {
   return (
     <>
       <div className="flex flex-row">
@@ -80,4 +80,4 @@ export default function ExperienceDetails({ experience }: { experience: Experien
       </div> */}
     </>
   );
-}
+};

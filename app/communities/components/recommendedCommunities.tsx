@@ -2,7 +2,7 @@
 
 import { useGetCommunities } from '@/hooks/communities';
 
-export default function RecommendedCommunities() {
+export const RecommendedCommunities = () => {
   const {
     data: communities,
     isLoading,
@@ -10,4 +10,4 @@ export default function RecommendedCommunities() {
   } = useGetCommunities({ page: 1, enabled: true, recommendedCommunities: true });
 
   return <div>Recommended Communities</div>;
-}
+};

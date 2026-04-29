@@ -26,7 +26,7 @@ const placeholders: Community[] = Array.from({ length: ITEMS_PER_PAGE }, (_, ind
   isJoined: false,
 }));
 
-export default function InterestBasedCommunities({ category }: { category?: string[] }) {
+export const InterestBasedCommunities = ({ category }: { category?: string[] }) => {
   if (category === undefined || category.length === 0) return null;
 
   const {
@@ -83,4 +83,4 @@ export default function InterestBasedCommunities({ category }: { category?: stri
       </motion.div>
     </div>
   );
-}
+};

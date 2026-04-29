@@ -25,7 +25,7 @@ const placeholders: Community[] = Array.from({ length: ITEMS_PER_PAGE }, (_, ind
   isJoined: false,
 }));
 
-export default function Communities({
+export const Communities = ({
   aspectRatio,
   popularCommunities,
   following,
@@ -35,7 +35,7 @@ export default function Communities({
   popularCommunities?: boolean;
   following?: boolean;
   noDataText?: string;
-}) {
+}) => {
   const {
     data: communities,
     isLoading,
@@ -84,4 +84,4 @@ export default function Communities({
       ))}
     </motion.div>
   );
-}
+};

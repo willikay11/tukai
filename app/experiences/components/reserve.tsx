@@ -21,7 +21,7 @@ import { Photo } from '@/types/photo';
 import { PurchaserDetails } from '@/types/purchaser';
 import { Ticket } from '@/types/ticket';
 
-export default function Reserve({ experience }: { experience: Experience }) {
+export const Reserve = ({ experience }: { experience: Experience }) => {
   const [isPaystackOpen, setIsPaystackOpen] = useState<boolean>(false);
   const [isPaymentSuccessOpen, setIsPaymentSuccessOpen] = useState<boolean>(false);
   const [showInviteGuests, setShowInviteGuests] = useState<boolean>(false);
@@ -231,4 +231,4 @@ export default function Reserve({ experience }: { experience: Experience }) {
       </div>
     </div>
   );
-}
+};

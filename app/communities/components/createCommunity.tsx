@@ -40,7 +40,7 @@ const createCommunitySchema = z.object({
 
 type CreateCommunityFormValues = z.infer<typeof createCommunitySchema>;
 
-export default function CreateCommunity() {
+export const CreateCommunity = () => {
   const uploadId = useId();
   const cityInputRef = useRef<HTMLDivElement>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -425,4 +425,4 @@ export default function CreateCommunity() {
       </Form>
     </div>
   );
-}
+};

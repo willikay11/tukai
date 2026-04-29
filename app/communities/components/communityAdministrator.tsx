@@ -7,13 +7,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { CommunityMember } from '@/types/community';
 
-export default function CommunityAdministrator({
+export const CommunityAdministrator = ({
   member,
   size = '30px',
 }: {
   member: CommunityMember;
   size: string;
-}) {
+}) => {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -35,4 +35,4 @@ export default function CommunityAdministrator({
       </div>
     </>
   );
-}
+};

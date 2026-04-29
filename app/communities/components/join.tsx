@@ -9,7 +9,7 @@ import { useJoinCommunity, useJoinCommunityViaInvite } from '@/hooks/communities
 import { toast } from '@/hooks/use-toast';
 import { CommunityMember } from '@/types/community';
 
-export default function Join({
+export const Join = ({
   communityId,
   members,
   currentUserId,
@@ -19,7 +19,7 @@ export default function Join({
   members: CommunityMember[];
   currentUserId: string;
   token?: string;
-}) {
+}) => {
   const router = useRouter();
   const [isRequested, setIsRequested] = useState(false);
   const {
@@ -101,4 +101,4 @@ export default function Join({
           : 'Join Community'}
     </Button>
   );
-}
+};
