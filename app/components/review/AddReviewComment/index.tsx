@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 import { Drawer } from '@/components/ui/drawer';
 
-import Comments from '../Comments/Add';
+import { Comments } from '../Comments/Add';
 
 type addReviewCommentProps = {
   id: string;

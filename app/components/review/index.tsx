@@ -17,8 +17,8 @@ import { Separator } from '@/components/ui/separator';
 import { Photo } from '@/types/photo';
 import { Review as ReviewType } from '@/types/review';
 
-import AddReview from './AddReview';
-import AddReviewComment from './AddReviewComment';
+import { AddReview } from './AddReview';
+import { AddReviewComment } from './AddReviewComment';
 
 export const Review = ({
   id,

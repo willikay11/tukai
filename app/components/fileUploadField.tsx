@@ -1,6 +1,6 @@
 import { ChangeEvent, DragEvent, useEffect, useRef, useState } from 'react';
 
-import IconComponent from './iconComponent';
+import { IconComponent } from './iconComponent';
 
 type FileUploadFieldProps = {
   id: string;

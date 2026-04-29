@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 
-import Share from './index';
+import { Share } from './index';
 
 jest.mock('next/image', () => ({
   __esModule: true,

@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 import { AuthDialogProvider } from '@/context/AuthDialogContext';
 
-import Bookmark from './index';
+import { Bookmark } from './index';
 
 const renderWithProvider = (component: React.ReactElement) => {
   return render(<AuthDialogProvider>{component}</AuthDialogProvider>);

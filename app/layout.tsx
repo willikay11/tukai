@@ -40,11 +40,11 @@ export const metadata: Metadata = {
     "Tukai is your go-to app for discovering exciting events and experiences happening around you. Whether you're looking for live concerts, festivals, social gatherings, or cultural events, Tukai makes it easy to stay connected and find the best activities in your area. Explore and enjoy real-time updates on local experiences tailored to your interests, and never miss out on the fun again.",
 };
 
-export const RootLayout = ({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) => {
+}>) {
   return (
     <html lang="en">
       <body className={`${satoshi.className} flex min-h-screen flex-col`}>
@@ -136,4 +136,4 @@ export const RootLayout = ({
       </body>
     </html>
   );
-};
+}

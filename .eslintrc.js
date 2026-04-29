@@ -13,6 +13,14 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'warn',
     'import/no-default-export': ['error'],
   },
+  overrides: [
+    {
+      files: ['**/page.tsx', '**/layout.tsx', '**/route.ts'],
+      rules: {
+        'import/no-default-export': 'off',
+      },
+    },
+  ],
   env: {
     browser: true,
     node: true,

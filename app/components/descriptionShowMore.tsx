@@ -9,7 +9,7 @@ import { Drawer } from '@/components/ui/drawer';
 import { TukaiImage } from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 
-import IconComponent from './iconComponent';
+import { IconComponent } from './iconComponent';
 
 export const DescriptionShowMore = ({
   photo,

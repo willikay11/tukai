@@ -1,4 +1,4 @@
-import Pill from '@/components/ui/pill';
+import { Pill } from '@/components/ui/pill';
 
 export const Pills = ({ pills, showMax = 2 }: { pills: string[]; showMax?: number }) => {
   return (

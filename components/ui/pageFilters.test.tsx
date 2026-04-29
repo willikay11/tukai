@@ -8,7 +8,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 
 import { usePlaceCategories } from '@/hooks/places';
 
-import PageFilters from './pageFilters';
+import { PageFilters } from './pageFilters';
 
 // Mock dependencies
 jest.mock('next/navigation', () => ({

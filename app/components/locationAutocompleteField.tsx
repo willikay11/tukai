@@ -3,8 +3,8 @@ import { RefObject } from 'react';
 import { Input } from '@/components/ui/input';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 
-import Loader from './form/loader';
-import IconComponent from './iconComponent';
+import { Loader } from './form/loader';
+import { IconComponent } from './iconComponent';
 
 type LocationAutocompleteFieldProps = {
   containerRef?: RefObject<HTMLDivElement>;

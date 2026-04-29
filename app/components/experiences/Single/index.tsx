@@ -14,7 +14,7 @@ import { useBookmarkExperience } from '@/hooks/experiences';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 
-import Bookmark from '../../bookmark';
+import { Bookmark } from '../../bookmark';
 
 export const SingleExperience = ({
   type,

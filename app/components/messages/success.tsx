@@ -4,7 +4,7 @@ import * as HugeIcons from '@hugeicons/react-pro';
 
 import { Button } from '@/app/components/form';
 
-import IconComponent from '../iconComponent';
+import { IconComponent } from '../iconComponent';
 
 export const SuccessMessage = ({
   title,
