@@ -9,12 +9,12 @@ import { Status } from '@/enums/status';
 import { usePlaces } from '@/app/shared/hooks/usePlaces';
 import { Place } from '@/types/place';
 
-import ListPlaces from '../list';
+import { ListPlaces } from '../list';
 
 // Mock dependencies
 jest.mock('@/context/LocationContext');
 jest.mock('@/context/SelectedCategoryContext');
-jest.mock('@/hooks/places');
+jest.mock('@/app/shared/hooks/usePlaces');
 jest.mock('../place', () => {
   const MockComponent = React.forwardRef<HTMLDivElement, { place: Place }>(function MockSinglePlace(
     { place },
@@ -26,14 +26,14 @@ jest.mock('../place', () => {
       </div>
     );
   });
-  return MockComponent;
+  return { SinglePlace: MockComponent };
 });
 jest.mock('@/components/ui/noData', () => {
   function MockNoData({ message }: { message: string }) {
     return <div>{message}</div>;
   }
   MockNoData.displayName = 'MockNoData';
-  return MockNoData;
+  return { NoData: MockNoData };
 });
 jest.mock('next/link', () => {
   function MockLink({ children, href }: { children: React.ReactNode; href: string }) {

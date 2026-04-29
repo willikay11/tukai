@@ -20,8 +20,8 @@ jest.mock('next/image', () => ({
   },
 }));
 
-jest.mock('@/app/components/descriptionShowMore', () => {
-  return function MockDescriptionShowMore({ text, photo }: { text: string; photo: string }) {
+jest.mock('@/app/shared/components/Global', () => ({
+  DescriptionShowMore: function MockDescriptionShowMore({ text, photo }: { text: string; photo: string }) {
     return (
       <div data-testid="description-show-more">
         <p>{text}</p>
@@ -29,21 +29,18 @@ jest.mock('@/app/components/descriptionShowMore', () => {
         <img src={photo} alt="description" />
       </div>
     );
-  };
-});
-
-jest.mock('@/app/components/googleMap', () => {
-  return function MockGoogleMap({ lat, lng }: { lat: number; lng: number }) {
+  },
+  GoogleMapComponent: function MockGoogleMap({ lat, lng }: { lat: number; lng: number }) {
     return (
       <div data-testid="google-map">
         Map: {lat}, {lng}
       </div>
     );
-  };
-});
+  },
+}));
 
-jest.mock('@/app/components/iconComponent', () => {
-  return function MockIconComponent({
+jest.mock('@/app/shared/components/Icons', () => ({
+  IconComponent: function MockIconComponent({
     iconName,
   }: {
     iconName: string;
@@ -51,20 +48,21 @@ jest.mock('@/app/components/iconComponent', () => {
     color?: string;
   }) {
     return <span data-testid={`icon-${iconName}`}>{iconName}</span>;
-  };
-});
+  },
+}));
 
-jest.mock('@/app/components/share', () => {
-  return function MockShare() {
+jest.mock('@/app/shared/components/Share/share', () => {
+  function MockShare() {
     return <button data-testid="share-button">Share</button>;
-  };
+  }
+  return { Share: MockShare };
 });
 
-jest.mock('@/components/ui/PhotoGallery', () => {
-  return function MockPhotoGallery({ photos }: { photos: { id: string; photo: string }[] }) {
+jest.mock('@/components/ui/PhotoGallery', () => ({
+  PhotoGallery: function MockPhotoGallery({ photos }: { photos: { id: string; photo: string }[] }) {
     return <div data-testid="photo-gallery">{photos.length} photos</div>;
-  };
-});
+  },
+}));
 
 jest.mock('@/components/ui/button', () => ({
   Button: ({
@@ -85,29 +83,29 @@ jest.mock('@/components/ui/separator', () => ({
   Separator: () => <hr data-testid="separator" />,
 }));
 
-jest.mock('../components/bookmarkExperience', () => {
-  return function MockBookmarkExperience() {
+jest.mock('../components/bookmarkExperience', () => ({
+  BookmarkExperience: function MockBookmarkExperience() {
     return <button data-testid="bookmark-button">Bookmark</button>;
-  };
-});
+  },
+}));
 
-jest.mock('../components/experienceActions', () => {
-  return function MockExperienceActions() {
+jest.mock('../components/experienceActions', () => ({
+  ExperienceActions: function MockExperienceActions() {
     return <div data-testid="experience-actions">Actions</div>;
-  };
-});
+  },
+}));
 
-jest.mock('../components/experienceDetails', () => {
-  return function MockExperienceDetails() {
+jest.mock('../components/experienceDetails', () => ({
+  ExperienceDetails: function MockExperienceDetails() {
     return <div data-testid="experience-details">Details</div>;
-  };
-});
+  },
+}));
 
-jest.mock('../components/experienceOrganiser', () => {
-  return function MockExperienceOrganiser() {
+jest.mock('../components/experienceOrganiser', () => ({
+  ExperienceOrganiser: function MockExperienceOrganiser() {
     return <div data-testid="experience-organiser">Organiser</div>;
-  };
-});
+  },
+}));
 
 const mockExperienceData = {
   id: '123',

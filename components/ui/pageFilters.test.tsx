@@ -16,13 +16,12 @@ jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(),
 }));
 
-jest.mock('@/hooks/places', () => ({
+jest.mock('@/app/shared/hooks/usePlaces', () => ({
   usePlaceCategories: jest.fn(),
 }));
 
-jest.mock('@/app/components/scrollFilters', () => ({
-  __esModule: true,
-  default: ({ filters }: { filters: any[] }) => (
+jest.mock('@/app/shared/components/Filters/ScrollFilters', () => ({
+  ScrollFilters: ({ filters }: { filters: any[] }) => (
     <div data-testid="scroll-filters">
       {filters.map((filter) => (
         <div key={filter.value} data-testid={`filter-${filter.value}`}>
@@ -33,7 +32,7 @@ jest.mock('@/app/components/scrollFilters', () => ({
   ),
 }));
 
-jest.mock('@/app/components/skeletons', () => ({
+jest.mock('@/app/shared/components/Cards/Skeletons', () => ({
   PillsSkeleton: () => <div data-testid="pills-skeleton">Loading...</div>,
 }));
 

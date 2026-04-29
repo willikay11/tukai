@@ -5,6 +5,12 @@ import { AuthDialogProvider } from '@/context/AuthDialogContext';
 
 import { Bookmark } from './index';
 
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+}));
+
 const renderWithProvider = (component: React.ReactElement) => {
   return render(<AuthDialogProvider>{component}</AuthDialogProvider>);
 };

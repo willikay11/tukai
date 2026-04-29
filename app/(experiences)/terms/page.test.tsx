@@ -4,7 +4,7 @@ import { useTermsOfService } from '@/app/(experiences)/hooks/usePages';
 
 import TermsPage from './page';
 
-jest.mock('@/hooks/pages', () => ({
+jest.mock('@/app/(experiences)/hooks/usePages', () => ({
   useTermsOfService: jest.fn(),
 }));
 
@@ -14,9 +14,8 @@ jest.mock('@/app/(experiences)/components/PageLayoutContent', () => ({
   ),
 }));
 
-jest.mock('../components/form/loader', () => ({
-  __esModule: true,
-  default: ({ size }: { size: string }) => (
+jest.mock('@/app/shared/components/Forms/form/loader', () => ({
+  Loader: ({ size }: { size: string }) => (
     <div data-testid="loader" data-size={size}>
       Loading...
     </div>

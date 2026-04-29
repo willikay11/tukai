@@ -5,7 +5,7 @@ import { usePrivacyPolicy } from '@/app/(experiences)/hooks/usePages';
 
 import PrivacyPage from './page';
 
-jest.mock('@/hooks/pages', () => ({
+jest.mock('@/app/(experiences)/hooks/usePages', () => ({
   usePrivacyPolicy: jest.fn(),
 }));
 
@@ -14,9 +14,8 @@ jest.mock('sanitize-html', () => ({
   default: jest.fn((html) => html),
 }));
 
-jest.mock('../components/form/loader', () => ({
-  __esModule: true,
-  default: ({ size }: { size: string }) => <div data-testid="loader" data-size={size} />,
+jest.mock('@/app/shared/components/Forms/form/loader', () => ({
+  Loader: ({ size }: { size: string }) => <div data-testid="loader" data-size={size} />,
 }));
 
 describe('PrivacyPage', () => {

@@ -11,11 +11,11 @@ import { Experience } from '@/types/experience';
 import { Reserve } from './reserve';
 
 // Mock dependencies
-jest.mock('@/hooks/experiences', () => ({
+jest.mock('@/app/shared/hooks/useExperiences', () => ({
   usePurchaseExperienceTicket: jest.fn(),
 }));
 
-jest.mock('@/hooks/use-toast', () => ({
+jest.mock('@/app/shared/hooks/useToast', () => ({
   toast: jest.fn(),
 }));
 
@@ -106,14 +106,13 @@ jest.mock('@/components/ui/paymentForm', () => {
   );
   MockPaymentForm.displayName = 'MockPaymentForm';
   return {
-    __esModule: true,
-    default: MockPaymentForm,
+    PaymentForm: MockPaymentForm,
     paymentFormSchema: {},
   };
 });
 
 jest.mock('@/components/ui/paymentSuccess', () => {
-  return function MockPaymentSuccess({
+  function MockPaymentSuccess({
     isOpen,
     closeModal,
   }: {
@@ -127,11 +126,12 @@ jest.mock('@/components/ui/paymentSuccess', () => {
         <button onClick={() => closeModal(true)}>Invite Guests</button>
       </div>
     );
-  };
+  }
+  return { PaymentSuccess: MockPaymentSuccess };
 });
 
 jest.mock('@/components/ui/paystack', () => {
-  return function MockPaystack({
+  function MockPaystack({
     isOpen,
     closeModal,
     url,
@@ -148,11 +148,12 @@ jest.mock('@/components/ui/paystack', () => {
         <button onClick={() => closeModal(false)}>Cancel</button>
       </div>
     );
-  };
+  }
+  return { Paystack: MockPaystack };
 });
 
 jest.mock('@/components/ui/quantity', () => {
-  return function MockQuantity({
+  function MockQuantity({
     initialValue,
     min,
     max,
@@ -180,7 +181,8 @@ jest.mock('@/components/ui/quantity', () => {
         </button>
       </div>
     );
-  };
+  }
+  return { Quantity: MockQuantity };
 });
 
 jest.mock('@/components/ui/separator', () => ({

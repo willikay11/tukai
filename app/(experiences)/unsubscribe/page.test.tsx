@@ -18,7 +18,7 @@ jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(),
 }));
 
-jest.mock('@/hooks/comms', () => ({
+jest.mock('@/app/(experiences)/hooks/useComms', () => ({
   useUnsubscribe: jest.fn(),
 }));
 
@@ -26,7 +26,7 @@ jest.mock('@/app/(experiences)/components/PageLayoutContent', () => ({
   PageLayoutContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-jest.mock('@/app/components/form', () => ({
+jest.mock('@/app/shared/components/Forms/form/button', () => ({
   Button: ({ children, onClick }: { children: React.ReactNode; onClick: () => void }) => (
     <button onClick={onClick}>{children}</button>
   ),

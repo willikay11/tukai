@@ -10,16 +10,16 @@ jest.mock('@/services/experience', () => ({
   fetchExperience: jest.fn(),
 }));
 
-jest.mock('../../components/reserve', () => {
-  return function MockReserve({ experience }: { experience: { id: string; title: string } }) {
+jest.mock('../../components/reserve', () => ({
+  Reserve: function MockReserve({ experience }: { experience: { id: string; title: string } }) {
     return (
       <div data-testid="reserve-component">
         <h2>{experience.title}</h2>
         <p>Experience ID: {experience.id}</p>
       </div>
     );
-  };
-});
+  },
+}));
 
 const mockExperienceData = {
   id: '456',
