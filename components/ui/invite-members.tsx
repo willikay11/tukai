@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { IconComponent } from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GuestPill } from '@/components/ui/guest-pill';
 import { Input } from '@/components/ui/input';

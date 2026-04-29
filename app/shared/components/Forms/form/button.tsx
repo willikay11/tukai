@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 
 import clsx from 'clsx';
 
-import { Loader } from '@/app/components/form/loader';
+import { Loader } from '@/app/shared/components/Forms/form/loader';
 
 export const Button = ({
   children,

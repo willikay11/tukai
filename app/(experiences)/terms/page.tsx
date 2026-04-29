@@ -5,7 +5,7 @@ import sanitizeHtml from 'sanitize-html';
 import { PageLayoutContent } from '@/app/components/pageLayoutContent';
 import { useTermsOfService } from '@/hooks/pages';
 
-import { Loader } from '@/app/components/form/loader';
+import { Loader } from '@/app/shared/components/Forms/form/loader';
 
 export default function TermsPage() {
   const { data, isPending, isError } = useTermsOfService();

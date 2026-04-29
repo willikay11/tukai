@@ -1,6 +1,8 @@
+'use client';
+
 import { ChangeEvent, DragEvent, useEffect, useRef, useState } from 'react';
 
-import { IconComponent } from './iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
 
 type FileUploadFieldProps = {
   id: string;

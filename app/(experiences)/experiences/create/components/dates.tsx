@@ -24,7 +24,7 @@ import { TimePicker } from '@/components/ui/time-picker';
 import { useUpdateExperience } from '@/hooks/experiences';
 import { toast } from '@/hooks/use-toast';
 import { Experience } from '@/types/experience';
-import { IconComponent } from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
 
 const weekdayValueSchema = z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']);
 

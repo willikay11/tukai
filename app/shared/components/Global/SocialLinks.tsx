@@ -1,6 +1,6 @@
 'use client';
 
-import { IconComponent } from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { PlaceSocialLink } from '@/types/place';

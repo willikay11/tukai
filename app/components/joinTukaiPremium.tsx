@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 
-import { IconComponent } from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
 
 type JoinTukaiPremiumProps = {

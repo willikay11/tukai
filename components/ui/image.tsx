@@ -6,7 +6,7 @@ import Image, { ImageProps } from 'next/image';
 
 import clsx from 'clsx';
 
-import { ImageSkeleton } from '@/app/components/skeletons';
+import { ImageSkeleton } from '@/app/shared/components/Cards';
 
 export const TukaiImage = ({
   src,

@@ -5,7 +5,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { CreateStepContentSkeleton, ReviewWalletsSkeleton } from '@/app/components/skeletons';
+import { CreateStepContentSkeleton, ReviewWalletsSkeleton } from '@/app/shared/components/Cards';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { useGetCommunities } from '@/hooks/communities';
 import { useFetchSingleExperience } from '@/hooks/experiences';

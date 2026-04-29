@@ -5,7 +5,7 @@ import sanitizeHtml from 'sanitize-html';
 import { PageLayoutContent } from '@/app/components/pageLayoutContent';
 import { usePrivacyPolicy } from '@/hooks/pages';
 
-import { Loader } from '@/app/components/form/loader';
+import { Loader } from '@/app/shared/components/Forms/form/loader';
 
 export default function PrivacyPage() {
   const { data, isPending, isError } = usePrivacyPolicy();

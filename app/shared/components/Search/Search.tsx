@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 import { PlaceCategory } from '@/types/placeCategory';
 import { SearchResult } from '@/types/search';
 
-import { IconComponent } from './iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
 
 export const Search = () => {
   const pathname = usePathname();

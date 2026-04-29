@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 
 import { usePathname, useSearchParams } from 'next/navigation';
 
-import { ScrollFilters } from '@/app/components/scrollFilters';
-import { PillsSkeleton } from '@/app/components/skeletons';
+import { ScrollFilters } from '@/app/shared/components/Filters';
+import { PillsSkeleton } from '@/app/shared/components/Cards';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { usePlaceCategories } from '@/hooks/places';
 import { PlaceCategory } from '@/types/placeCategory';

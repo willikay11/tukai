@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
-import { IconComponent } from '@/app/components/iconComponent';
-import { CreateStepContentSkeleton } from '@/app/components/skeletons';
+import { IconComponent } from '@/app/shared/components/Icons';
+import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGetWallets } from '@/hooks/payment';

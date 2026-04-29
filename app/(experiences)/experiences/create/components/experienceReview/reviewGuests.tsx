@@ -1,6 +1,6 @@
 'use client';
 
-import { IconComponent } from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { GuestPill } from '@/components/ui/guest-pill';
 import { User } from '@/types/user';
 

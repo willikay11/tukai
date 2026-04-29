@@ -5,7 +5,7 @@ import sanitizeHtml from 'sanitize-html';
 import { PageLayoutContent } from '@/app/components/pageLayoutContent';
 import { useHelp } from '@/hooks/pages';
 
-import { Loader } from '@/app/components/form/loader';
+import { Loader } from '@/app/shared/components/Forms/form/loader';
 
 export default function HelpPage() {
   const { data, isPending, isError } = useHelp();

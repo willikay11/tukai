@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 
 import { Bookmark } from '@/app/components/bookmark';
 import { AddReview } from '@/app/components/review/AddReview';
-import { Share } from '@/app/components/share';
+import { Share } from '@/app/shared/components/Share';
 import { Button } from '@/components/ui/button';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import {

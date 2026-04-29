@@ -4,8 +4,8 @@ import { useState } from 'react';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import { IconComponent } from '@/app/components/iconComponent';
-import { WalletListSkeleton } from '@/app/components/skeletons';
+import { IconComponent } from '@/app/shared/components/Icons';
+import { WalletListSkeleton } from '@/app/shared/components/Cards';
 import {
   BankAccountDetailsForm,
   BankAccountFormValues,

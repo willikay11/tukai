@@ -2,7 +2,7 @@
 
 import sanitizeHtml from 'sanitize-html';
 
-import { IconComponent } from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
 
 export interface ReviewInfoSectionProps {
   title: string;

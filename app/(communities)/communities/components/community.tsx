@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 import sanitizeHtml from 'sanitize-html';
 
-import { EventSkeleton } from '@/app/components/skeletons';
+import { EventSkeleton } from '@/app/shared/components/Cards';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
 import { Community } from '@/types/community';
 

@@ -10,10 +10,10 @@ import { useRouter } from 'next/navigation';
 import { LockKeyIcon, RefreshIcon } from '@hugeicons/react-pro';
 import { set } from 'lodash';
 
-import { Input } from '@/app/components/form';
-import { OtpInput } from '@/app/components/form/otpInput';
-import { SuccessMessage } from '@/app/components/messages/success';
-import { MobileStore } from '@/app/components/mobileStore';
+import { Input } from '@/app/shared/components/Forms';
+import { OtpInput } from '@/app/shared/components/Forms/form/otpInput';
+import { SuccessMessage } from '@/app/shared/components/Messages/messages/success';
+import { MobileStore } from '@/app/shared/components/Download';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 

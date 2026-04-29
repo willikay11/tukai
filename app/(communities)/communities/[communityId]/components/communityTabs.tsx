@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 import { clsx } from 'clsx';
 
-import { ImageSkeleton, PostSkeleton } from '@/app/components/skeletons';
+import { ImageSkeleton, PostSkeleton } from '@/app/shared/components/Cards';
 import { TukaiImage } from '@/components/ui/image';
 import { NoData } from '@/components/ui/noData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

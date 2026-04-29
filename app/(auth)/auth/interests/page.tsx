@@ -9,9 +9,9 @@ import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import moment from 'moment-timezone';
 
-import { Button } from '@/app/components/form';
-import { Loader } from '@/app/components/form/loader';
-import { IconComponent } from '@/app/components/iconComponent';
+import { Button } from '@/app/shared/components/Forms';
+import { Loader } from '@/app/shared/components/Forms/form/loader';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { toast } from '@/hooks/use-toast';
 import { removeUser } from '@/slices/userSlice';
 

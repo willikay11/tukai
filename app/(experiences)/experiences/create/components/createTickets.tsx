@@ -8,7 +8,7 @@ import moment from 'moment';
 import { RRule } from 'rrule';
 import { z } from 'zod';
 
-import { IconComponent } from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';

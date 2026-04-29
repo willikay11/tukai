@@ -1,6 +1,6 @@
 'use client';
 
-import { IconComponent } from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
 
 import { Button } from './button';

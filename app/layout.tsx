@@ -6,12 +6,12 @@ import Link from 'next/link';
 
 import { hugeiconsLicense } from '@hugeicons/react-pro';
 
-import { AuthActions } from '@/app/components/authActions';
-import { BottomNavigation } from '@/app/components/bottomNavigation';
-import { DownloadApp } from '@/app/components/downloadApp';
-import { satoshi } from '@/app/components/fonts';
-import { GlobalLoading } from '@/app/components/globalLoading';
-import { IconRadioButtonGroup } from '@/app/components/iconRadioButtonGroup';
+import { AuthActions } from '@/app/shared/components/Global';
+import { BottomNavigation } from '@/app/shared/components/Navigation';
+import { DownloadApp } from '@/app/shared/components/Download';
+import { satoshi } from '@/app/shared/components/Global';
+import { GlobalLoading } from '@/app/shared/components/Global';
+import { IconRadioButtonGroup } from '@/app/shared/components/Icons';
 import { PageFilters } from '@/components/ui/pageFilters';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthDialogProvider } from '@/context/AuthDialogContext';
@@ -21,12 +21,12 @@ import { SelectedCategoryProvider } from '@/context/SelectedCategoryContext';
 import ReactQueryClientProvider from '@/providers/ReactQueryProvider';
 import SessionProvider from '@/providers/SessionProvider';
 
-import { LocationPrompt } from './components/locationPrompt';
-import { Nav } from './components/nav';
-import { Search } from './components/search';
-import { Footer } from './components/share/footer';
-import { PillsSkeleton } from './components/skeletons';
-import { UserLocation } from './components/userLocation';
+import { LocationPrompt } from '@/app/shared/components/LocationPicker';
+import { Nav } from '@/app/shared/components/Navigation';
+import { Search } from '@/app/shared/components/Search';
+import { Footer } from '@/app/shared/components/Share';
+import { PillsSkeleton } from '@/app/shared/components/Cards';
+import { UserLocation } from '@/app/shared/components/LocationPicker';
 import './globals.css';
 import { ReduxProvider } from './redux-provider';
 

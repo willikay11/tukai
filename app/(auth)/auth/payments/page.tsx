@@ -16,7 +16,7 @@ import {
   WorkoutRunIcon,
 } from '@hugeicons/react-pro';
 
-import { Anchor, Button } from '@/app/components/form';
+import { Anchor, Button } from '@/app/shared/components/Forms';
 
 const features = [
   {

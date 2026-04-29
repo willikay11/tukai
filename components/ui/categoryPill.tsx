@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 
 import clsx from 'clsx';
 
-import { IconComponent } from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { Interest } from '@/types/interest';
 
 export const CategoryPill = ({

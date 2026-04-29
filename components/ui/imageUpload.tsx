@@ -2,7 +2,7 @@
 
 import { type ChangeEvent, type DragEvent, useEffect, useRef, useState } from 'react';
 
-import { IconComponent } from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { Photo } from '@/types/photo';
 
 import { Button } from './button';

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
-import { IconComponent } from './iconComponent';
-import { MobileStore } from './mobileStore';
+import { IconComponent } from '@/app/shared/components/Icons';
+import { MobileStore } from './MobileStore';
 
 export const DownloadApp = () => {
   const [showDownloadApp, setShowDownloadApp] = useState(true);

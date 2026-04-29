@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 
 import { AppleIcon, GoogleIcon } from '@hugeicons/react-pro';
 
-import { Anchor } from '@/app/components/form';
-import { MobileStore } from '@/app/components/mobileStore';
+import { Anchor } from '@/app/shared/components/Forms';
+import { MobileStore } from '@/app/shared/components/Download';
 import { Button } from '@/components/ui/button';
 
 export default function Page() {

@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useState } from 'react';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import { Button } from '@/app/components/form';
+import { Button } from '@/app/shared/components/Forms';
 import { PageLayoutContent } from '@/app/components/pageLayoutContent';
 import { useUnsubscribe } from '@/hooks/comms';
 

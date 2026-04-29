@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import { FavouriteIcon, Message02Icon } from '@hugeicons/react-pro';
 import moment from 'moment';
 
-import { IconComponent } from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { Rating } from '@/app/components/rating';
 import { Button } from '@/components/ui/button';
 import { TukaiImage } from '@/components/ui/image';

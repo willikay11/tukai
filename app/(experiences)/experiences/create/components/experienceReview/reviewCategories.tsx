@@ -1,6 +1,6 @@
 'use client';
 
-import { IconComponent } from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { CategoryPill } from '@/components/ui/categoryPill';
 import { ExperienceCategory } from '@/types/experienceCategory';
 
