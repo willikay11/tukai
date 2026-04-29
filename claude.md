@@ -55,39 +55,24 @@ app/
     page.tsx
     layout.tsx
     hooks/                          # Feature-specific hooks
-      useExperiences.ts
-      useFetchSingleExperience.ts
-      usePurchaseExperienceTicket.ts
+      useComms.tsx
+      usePages.ts
+      usePayment.ts
       index.ts
     components/
-      ExperiencesList/
-        ExperiencesList.tsx
-        ExperiencesList.test.tsx
-        ExperiencesCard.tsx
-        ExperiencesCard.test.tsx
-      InvitedExperiencesList/
-      ExperienceFilters/
+      PageLayoutContent.tsx
       index.ts
-    types.ts                        # Feature types
     create/
       page.tsx
-      hooks/
-        useCreateExperienceFlow.ts
-        useExperienceValidation.ts
       components/
-        CreateExperienceStepper/
-        CommunityStep/
-        AboutStep/
-        DatesStep/
-        TicketsStep/
-        ReviewStep/
-      types.ts
+        steps.tsx, step-side-panel.tsx, dates.tsx
+        about.tsx, invites.tsx, createTickets.tsx
+        experienceReview/
+      types.ts                      # Form-scoped types only (enums, form state)
     [experienceId]/
       page.tsx
       components/
-        ExperienceDetailHeader.tsx
-        ExperienceTickets.tsx
-        ExperienceReviews.tsx
+        experienceDetails.tsx, experienceActions.tsx
       reserve/
         page.tsx
     review/
@@ -98,15 +83,14 @@ app/
     page.tsx
     layout.tsx
     hooks/
-      usePlaces.ts
-      usePlaceCategories.ts
+      usePlaces.ts (merged from root)
       index.ts
     components/
-      PlacesList/
-        PlacesList.tsx
-        PlaceCard.tsx
-      PlaceFilters/
-    types.ts
+      Review/                       # Moved from app/components
+        index.tsx, AddReview/, AddReviewComment/
+        Comments/
+      place.tsx, list.tsx, placeActions.tsx
+      index.ts
     [placeId]/
       page.tsx
       components/
@@ -115,24 +99,26 @@ app/
     page.tsx
     layout.tsx
     hooks/
-      useCommunities.ts
-      useJoinCommunity.ts
-      useCommunityPosts.ts
+      useCommunities.tsx (merged from root)
       index.ts
     components/
-      CommunitiesList/
-        CommunitiesList.tsx
-        CommunityCard.tsx
-      CommunitiesFilters/
-    types.ts
+      community.tsx, communityAdministrator.tsx
+      communityMembers.tsx, join.tsx
+      index.ts
     create/
       page.tsx
       components/
+        createCommunity.tsx
+      types.ts                      # Form-scoped types only
     [communityId]/
       page.tsx
       components/
+        communityTabs.tsx, communityPosts.tsx
 
   (auth)/
+    hooks/
+      useSubscriptions.tsx
+      index.ts
     layout.tsx
     sign-in/
       page.tsx
@@ -143,6 +129,9 @@ app/
 
   shared/                           # Truly cross-cutting code
     components/
+      Global/
+        AuthActions.tsx
+        SocialLinks.tsx
       Navigation/
         Nav.tsx + Nav.test.tsx
         BottomNavigation.tsx + test
@@ -150,40 +139,53 @@ app/
         LocationPicker.tsx
         LocationAutocompleteField.tsx
       Forms/
-        FormField.tsx
-        FormButton.tsx
-        FormInput.tsx
-        FormOTPInput.tsx
+        form/ (Input, Button, Anchor, Loader, OtpInput)
+        index.ts
       Cards/
-        FeatureCard.tsx             # Generic card base
-        CardSkeleton.tsx
+        EventSkeleton.tsx, CardSkeleton.tsx
+        CreateStepContentSkeleton.tsx
       Dialogs/
-        ModalBase.tsx               # Generic modal base
-        Drawer.tsx
+        ModalBase.tsx, Drawer.tsx
       Filters/
-        FilterBar.tsx
+        Pills.tsx, FilterBar.tsx
       Lists/
-        ListContainer.tsx           # Generic list (loading/empty/pagination)
+        ListContainer.tsx
       Search/
-        GlobalSearch.tsx
+        Search.tsx
       Images/
         TukaiImage.tsx
+      Icons/
+        IconComponent.tsx
       Ratings/
         Rating.tsx
-        RatingStars.tsx
       Download/
-        DownloadApp.tsx
-        MobileStore.tsx
+        DownloadApp.tsx, MobileStore.tsx
       Pagination/
         Pagination.tsx
+      Messages/
+        success.tsx
+      Bookmark/
+        index.tsx (Bookmark + BookmarkPlace)
+      Experiences/
+        List/index.tsx (ListExperiences)
+        Single/index.tsx (SingleExperience)
+      Rating/
+        Rating.tsx
+      JoinTukaiPremium/
+        JoinTukaiPremium.tsx
+      SendMessage/
+        SendMessage.tsx
+      Review/
+        (note: Places-specific, moved to app/(places)/components/Review/)
       index.ts
     hooks/                          # Cross-cutting hooks only
+      useAuth.ts
+      useCommunities.tsx
+      useExperiences.tsx
+      usePlaces.tsx
+      useSearch.ts
       useToast.ts
-      useMediaQuery.ts
-      useDebounce.ts
-      useInfiniteScroll.ts
       index.ts
-    types.ts                        # Shared types (ApiResponse, User, etc.)
 
   lib/
     auth.ts
@@ -192,6 +194,29 @@ app/
   layout.tsx
   globals.css
   page.tsx                          # Redirects to (experiences)
+
+types/                              # ALL types live here (root level)
+  experience.ts                     # Used in experiences + communities + shared
+  place.ts                          # Used in places + shared components
+  community.ts                      # Used in experiences + communities + shared
+  apiResponse.ts
+  user.ts
+  token.ts, jwt.ts
+  photo.ts
+  review.ts, comment.ts
+  ticket.ts, payment.ts
+  placeCategory.ts, experienceCategory.ts
+  location.ts, interest.ts
+  googleMaps.ts, networkParam.ts
+  search.ts, subscription.ts
+  purchaser.ts
+  
+  NOTE: All types stay at root. Core domain types (experience, place,
+  community) are used across 2+ features. New types should go here
+  even if only used in one feature today.
+  
+  Exception: Form-scoped types (step enums, form state shapes) tightly
+  bound to create/edit flows may live as types.ts in the flow folder.
 
 services/                           # REST API calls — no React, no hooks
   apiService.ts                     # Axios instance + interceptors
@@ -256,8 +281,20 @@ types/                              # Shared types only (feature types live in f
 - Cross-cutting (useToast, useMediaQuery, etc.) → `app/shared/hooks/`
 
 ### Types
-- Feature-specific → `app/(feature)/types.ts`
-- Shared (User, ApiResponse, Token) → `types/`
+- **All types** → `types/` (root level)
+- **Exception:** Form-scoped types (step enums, form state) → `app/(feature)/create/types.ts`
+- **Never** create feature-level `types.ts` in the route group root
+
+**Why?** Core domain types (experience, place, community) are each used across 2+ features. Even types that seem feature-specific today should go to root — they'll likely be referenced elsewhere as the product evolves.
+
+Import pattern:
+```ts
+import { Experience } from '@/types/experience'
+import { Place } from '@/types/place'
+import { User } from '@/types/user'
+```
+
+---
 
 ### State
 - Server data (lists, details) → **React Query** in feature hooks
@@ -337,12 +374,11 @@ import { Button } from '@/app/shared/components/Forms'
 import { useToast } from '@/app/shared/hooks'
 
 // 4. Feature-specific
-import { ExperiencesCard } from '@/app/(experiences)/components/ExperiencesList'
+import { ExperiencesCard } from '@/app/(experiences)/components'
 import { useExperiences } from '@/app/(experiences)/hooks'
-import type { Experience } from '@/app/(experiences)/types'
 
 // 5. Shared types & services
-import type { ApiResponse } from '@/types'
+import type { Experience, ApiResponse } from '@/types'
 import { fetchExperiences } from '@/services/experience'
 
 // 6. Local (same folder)
@@ -453,24 +489,27 @@ Layer 4 — Components:   app/                       (imports Layer 1–3)
 
 ---
 
-## Active Refactoring (Do Not Revert)
+## Refactoring Complete (Tier 1 & 2)
 
-The codebase is being migrated from a flat structure to the feature-based structure above. When adding new code, always use the **target structure**. When editing existing code, migrate it to the target structure as part of the same PR.
+The codebase has been restructured to the feature-based architecture above. When adding new code, always use the **target structure** documented here.
 
-### Migration status
-- [ ] **Tier 1:** Convert all exports to named exports + ESLint rule
-- [ ] **Tier 1:** Extract route groups `(experiences)`, `(places)`, `(communities)`
-- [ ] **Tier 1:** Consolidate shared components into `app/shared/components/`
-- [ ] **Tier 2:** Move feature hooks from `hooks/` → `app/(feature)/hooks/`
-- [ ] **Tier 2:** Move feature types from `types/` → `app/(feature)/types.ts`
-- [ ] **Tier 3:** Extract page-level logic into custom hooks
-- [ ] **Tier 3:** Add co-located tests for shared and feature components
+### Completed
+- ✅ **Tier 1:** Named exports + ESLint enforcement (import/no-default-export)
+- ✅ **Tier 1:** Route groups `(experiences)`, `(places)`, `(communities)`, `(auth)` extracted
+- ✅ **Tier 1:** Shared components consolidated into `app/shared/components/[Category]/`
+- ✅ **Tier 2:** Feature hooks moved to `app/(feature)/hooks/`
+- ✅ **Tier 2:** Types audit completed — all types remain at root (2+ feature usage rule)
 
-### Rules during migration
-- New code always follows the **target structure** above
-- Never add to `hooks/` (root) — use feature folders or `app/shared/hooks/`
-- Never add to `app/components/` (root) — use feature or `app/shared/components/`
-- Each refactor PR touches **structure only** — no logic changes
+### Remaining (Tier 3+)
+- [ ] Extract page-level logic into custom hooks
+- [ ] Add co-located tests for shared and feature components
+- [ ] Migrate remaining service files to follow pattern
+
+### Rules for new code
+- Always use **target structure** documented above
+- New code added to root `hooks/` or `app/components/` will be rejected
+- All types go to root `types/` (exception: form-scoped types in create flow folders)
+- Each PR touches **structure only** — no logic changes in refactor commits
 
 ---
 
