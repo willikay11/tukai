@@ -1,194 +1,54 @@
 'use client';
 
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-
+import { CreateSuccessDialog as CommunityCreatedSuccessDialog } from '@/components/ui/createSuccessDialog';
 import { Button } from '@/components/ui/button';
 import { CategoryPill } from '@/components/ui/categoryPill';
-import { CreateSuccessDialog as CommunityCreatedSuccessDialog } from '@/components/ui/createSuccessDialog';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { InviteCommunities } from '@/components/ui/invite-communities';
-import { InviteMembers, InvitedMember } from '@/components/ui/invite-members';
+import { InviteMembers } from '@/components/ui/invite-members';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { Textarea } from '@/components/ui/textarea';
-import { useGetInterestCategories, useGetUsers } from '@/app/shared/hooks/useAuth';
-import { useCreateCommunity, useGetCommunities } from '@/app/shared/hooks/useCommunities';
-import { useGoogleMapsAutocomplete } from '@/app/shared/hooks/usePlaces';
-import { toast } from '@/app/shared/hooks/useToast';
-import { Community } from '@/types/community';
-import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';
+import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 
 import { FileUploadField } from '@/app/shared/components/Forms';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { LocationAutocompleteField } from '@/app/shared/components/LocationPicker';
 
-const createCommunitySchema = z.object({
-  communityName: z.string().min(2, { message: 'Community name is required.' }),
-  city: z.string().min(1, { message: 'Please select a city.' }),
-  description: z.string().min(10, { message: 'Description must be at least 10 characters.' }),
-  selectedCategories: z.array(z.string()).min(1, { message: 'Select at least one category.' }),
-  visibility: z.enum(['public', 'private']),
-  uploadedFiles: z.array(z.instanceof(File)).min(1, {
-    message: 'Please upload at least one community poster.',
-  }),
-});
-
-type CreateCommunityFormValues = z.infer<typeof createCommunitySchema>;
+import { useCreateCommunityFlow } from './hooks/useCreateCommunityFlow';
 
 export const CreateCommunity = () => {
-  const uploadId = useId();
-  const cityInputRef = useRef<HTMLDivElement>(null);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [cityInput, setCityInput] = useState('');
-  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
-  const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>([]);
-  const [memberSearchQuery, setMemberSearchQuery] = useState('');
-  const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
-  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
-  const [createdCommunityId, setCreatedCommunityId] = useState<string | null>(null);
-
-  const { data: categories } = useGetInterestCategories();
-
-  const { data: userCommunities, isFetching: isFetchingCommunities } = useGetCommunities({
-    page: 1,
-    enabled: true,
-    following: true,
-  });
-
-  const availableCommunities = useMemo<Community[]>(() => {
-    if (!userCommunities?.data) {
-      return [];
-    }
-
-    return userCommunities?.data?.results?.map((community: any) => ({
-      id: community.id,
-      title: community.title,
-      photos: community.photos,
-      members: community.members,
-    }));
-  }, [userCommunities]);
-
-  const normalizedMemberQuery = memberSearchQuery.trim();
-  const { data: users = [], isFetching: isSearchingUsers } = useGetUsers(
-    1,
-    10,
-    normalizedMemberQuery.length > 0 ? normalizedMemberQuery : undefined,
-  );
-
-  const memberSearchResults = useMemo<InvitedMember[]>(() => {
-    if (!normalizedMemberQuery) {
-      return [];
-    }
-
-    return users
-      .map((user: any) => {
-        const firstName = user.firstName || '';
-        const lastName = user.lastName || '';
-        const fullName = `${firstName} ${lastName}`.trim();
-
-        return {
-          id: user.id,
-          name: user.displayName || fullName || user.email || 'User',
-          email: user.email,
-          image: user.picture,
-        } as InvitedMember;
-      })
-      .filter((user: InvitedMember) => !invitedMembers.some((member) => member.id === user.id));
-  }, [users, invitedMembers, normalizedMemberQuery]);
-
-  const { data: googlePlaces, isFetching: isFetchingGooglePlaces } = useGoogleMapsAutocomplete(
+  const {
+    uploadId,
+    cityInputRef,
+    form,
+    selectedCategories,
+    uploadedFiles,
     cityInput,
-    cityInput.length > 2,
-  );
-
-  const { mutate: createCommunity, isPending: isCreatingCommunity } = useCreateCommunity();
-
-  // Close suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (cityInputRef.current && !cityInputRef.current.contains(event.target as Node)) {
-        setShowCitySuggestions(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const form = useForm<CreateCommunityFormValues>({
-    resolver: zodResolver(createCommunitySchema),
-    mode: 'onChange',
-    reValidateMode: 'onChange',
-    defaultValues: {
-      communityName: '',
-      city: '',
-      description: '',
-      selectedCategories: [],
-      visibility: 'public',
-      uploadedFiles: [],
-    },
-  });
-
-  const toggleCategory = (category: string) => {
-    setSelectedCategories((prev) => {
-      const next = prev.includes(category)
-        ? prev.filter((item) => item !== category)
-        : [...prev, category];
-
-      form.setValue('selectedCategories', next, { shouldValidate: true });
-      return next;
-    });
-  };
-
-  const onSubmit = (values: CreateCommunityFormValues) => {
-    const memberIds = invitedMembers
-      .filter((member) => !member.email?.includes('@') || member.id.startsWith('user-'))
-      .map((member) => member.id);
-
-    const emails = invitedMembers
-      .filter((member) => member.email && member.id.startsWith('email-'))
-      .map((member) => member.email!);
-
-    createCommunity(
-      {
-        title: values.communityName,
-        description: values.description,
-        categoriesIds: values.selectedCategories,
-        isPublic: values.visibility === 'public',
-        googleMapPlaceId: values.city,
-        newPhotos: values.uploadedFiles,
-        invitedMemberIds: memberIds,
-        invitedCommunityIds: invitedCommunities.map((c) => c.id),
-        invitedEmails: emails,
-      },
-      {
-        onSuccess: (response: any) => {
-          const communityId = response?.data?.id || null;
-          setCreatedCommunityId(communityId);
-          setIsSuccessDialogOpen(true);
-          form.reset();
-          setSelectedCategories([]);
-          setCityInput('');
-          setUploadedFiles([]);
-          setInvitedMembers([]);
-          setInvitedCommunities([]);
-        },
-        onError: () => {
-          toast({
-            title: 'Error',
-            description: 'Failed to create community',
-            variant: 'destructive',
-          });
-        },
-      },
-    );
-  };
+    showCitySuggestions,
+    invitedMembers,
+    memberSearchQuery,
+    invitedCommunities,
+    isSuccessDialogOpen,
+    createdCommunityId,
+    setUploadedFiles,
+    setCityInput,
+    setShowCitySuggestions,
+    setInvitedMembers,
+    setMemberSearchQuery,
+    setInvitedCommunities,
+    setIsSuccessDialogOpen,
+    categories,
+    availableCommunities,
+    memberSearchResults,
+    googlePlaces,
+    isFetchingCommunities,
+    isSearchingUsers,
+    isFetchingGooglePlaces,
+    isCreatingCommunity,
+    handlers,
+  } = useCreateCommunityFlow();
 
   return (
     <div className="mx-auto w-full py-6">
@@ -222,7 +82,7 @@ export const CreateCommunity = () => {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(handlers.onSubmit)}>
           <div className="mt-5">
             <FormField
               control={form.control}
@@ -246,11 +106,6 @@ export const CreateCommunity = () => {
                         form.setError('uploadedFiles', {
                           type: 'manual',
                           message,
-                        });
-                        toast({
-                          title: 'Invalid image upload',
-                          description: message,
-                          variant: 'destructive',
                         });
                       }}
                       onFilesChange={(files) => {
@@ -314,7 +169,7 @@ export const CreateCommunity = () => {
                       value={cityInput}
                       showSuggestions={showCitySuggestions}
                       isLoading={isFetchingGooglePlaces}
-                      suggestions={googlePlaces?.data || []}
+                      suggestions={googlePlaces}
                       onValueChange={(value) => {
                         setCityInput(value);
                         setShowCitySuggestions(true);
@@ -364,7 +219,11 @@ export const CreateCommunity = () => {
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {categories?.map((category: Interest) => (
-                    <CategoryPill key={category.id} category={category} onClick={toggleCategory} />
+                    <CategoryPill
+                      key={category.id}
+                      category={category}
+                      onClick={handlers.toggleCategory}
+                    />
                   ))}
                 </div>
                 <FormMessage />
@@ -386,9 +245,7 @@ export const CreateCommunity = () => {
               onMembersChange={setInvitedMembers}
               searchResults={memberSearchResults}
               isSearching={isSearchingUsers}
-              onSearch={(query) => {
-                setMemberSearchQuery(query);
-              }}
+              onSearch={setMemberSearchQuery}
               debounceMs={500}
               className="mt-3"
             />
