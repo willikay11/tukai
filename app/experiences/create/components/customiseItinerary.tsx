@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import moment from 'moment';
 
-import IconComponent from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/components/iconComponent';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';

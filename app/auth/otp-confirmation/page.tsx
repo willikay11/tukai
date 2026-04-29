@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { RefreshIcon } from '@hugeicons/react-pro';
 
 import { Button } from '@/app/components/form';
-import OtpInput from '@/app/components/form/otpInput';
+import { OtpInput } from '@/app/components/form/otpInput';
 import { toast } from '@/hooks/use-toast';
 
 export default function OtpConfirmation() {

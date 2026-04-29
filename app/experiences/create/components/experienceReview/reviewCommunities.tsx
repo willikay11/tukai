@@ -1,6 +1,6 @@
 'use client';
 
-import IconComponent from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/components/iconComponent';
 import { CommunityPill } from '@/components/ui/community-pill';
 import { Community } from '@/types/community';
 

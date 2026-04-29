@@ -10,8 +10,8 @@ import { useRouter } from 'next/navigation';
 import { Mail02Icon } from '@hugeicons/react-pro';
 
 import { Anchor, Input } from '@/app/components/form';
-import SuccessMessage from '@/app/components/messages/success';
-import MobileStore from '@/app/components/mobileStore';
+import { SuccessMessage } from '@/app/components/messages/success';
+import { MobileStore } from '@/app/components/mobileStore';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { addEmail } from '@/slices/resetSlice';

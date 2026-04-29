@@ -1,9 +1,9 @@
 import moment from 'moment';
 
-import DescriptionShowMore from '@/app/components/descriptionShowMore';
-import GoogleMapComponent from '@/app/components/googleMap';
-import IconComponent from '@/app/components/iconComponent';
-import Share from '@/app/components/share';
+import { DescriptionShowMore } from '@/app/components/descriptionShowMore';
+import { GoogleMapComponent } from '@/app/components/googleMap';
+import { IconComponent } from '@/app/components/iconComponent';
+import { Share } from '@/app/components/share';
 import { PhotoGallery } from '@/components/ui/PhotoGallery';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';

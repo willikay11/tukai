@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 import { motion } from 'framer-motion';
 
-import SingleExperience from '@/app/components/experiences/Single';
+import { SingleExperience } from '@/app/components/experiences/Single';
 import { NoData } from '@/components/ui/noData';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { Status } from '@/enums/status';
@@ -67,7 +67,7 @@ const createPlaceholders = (count: number): Experience[] => {
   })) as unknown as Experience[];
 };
 
-export default function ListExperiences({
+export const ListExperiences = ({
   type,
   experiences,
   isLoading,
@@ -77,7 +77,7 @@ export default function ListExperiences({
   page,
   setPage,
   noDataMessage,
-}: ListExperiencesProps) {
+}: ListExperiencesProps) => {
   const { selectedCategoryId } = useSelectedCategory();
 
   const initialPlaceholders = useMemo(() => createPlaceholders(skeletonCount), [skeletonCount]);
@@ -216,4 +216,4 @@ export default function ListExperiences({
       })}
     </motion.div>
   );
-}
+};

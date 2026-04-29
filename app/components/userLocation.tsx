@@ -7,7 +7,7 @@ import { useLocation } from '@/context/LocationContext';
 
 import IconComponent from './iconComponent';
 
-export default function UserLocation() {
+export const UserLocation = () => {
   const { lat, lng, status, requestLocation } = useLocation();
   const [address, setAddress] = useState<string>('Embakasi, Nairobi');
   const [isLoadingAddress, setIsLoadingAddress] = useState<boolean>(false);
@@ -83,4 +83,4 @@ export default function UserLocation() {
       </Button>
     </div>
   );
-}
+};

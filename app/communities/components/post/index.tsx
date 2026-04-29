@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 import { FavouriteIcon, Message02Icon } from '@hugeicons/react-pro';
 
-import IconComponent from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/components/iconComponent';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { ImageCarousel } from '@/components/ui/imageCarousel';

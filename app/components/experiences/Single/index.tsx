@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import moment from 'moment';
 import numeral from 'numeral';
 
-import Pills from '@/app/components/pills';
+import { Pills } from '@/app/components/pills';
 import { EventSkeleton } from '@/app/components/skeletons';
 import { Button } from '@/components/ui/button';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
@@ -16,13 +16,13 @@ import { Experience } from '@/types/experience';
 
 import Bookmark from '../../bookmark';
 
-export default function SingleExperience({
+export const SingleExperience = ({
   type,
   experience,
 }: {
   type: 'discover' | 'invited';
   experience: Experience;
-}) {
+}) => {
   const [hasError, setHasError] = useState(false);
   const { data: session } = useSession();
   const { mutate: bookmarkExperience } = useBookmarkExperience();
@@ -100,4 +100,4 @@ export default function SingleExperience({
       </div>
     </>
   );
-}
+};

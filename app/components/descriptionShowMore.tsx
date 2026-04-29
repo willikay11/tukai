@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 
 import IconComponent from './iconComponent';
 
-const DescriptionShowMore = ({
+export const DescriptionShowMore = ({
   photo,
   text,
   maxLength = 100,
@@ -122,6 +122,4 @@ const DescriptionShowMore = ({
       </Drawer>
     </div>
   );
-};
-
-export default DescriptionShowMore;
+};;

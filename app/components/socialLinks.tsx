@@ -1,11 +1,11 @@
 'use client';
 
-import IconComponent from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/components/iconComponent';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { PlaceSocialLink } from '@/types/place';
 
-const SocialLinks = ({ links }: { links: PlaceSocialLink[] }) => {
+export const SocialLinks = ({ links }: { links: PlaceSocialLink[] }) => {
   return links?.map((link) => (
     <Button
       variant="primary"
@@ -29,6 +29,4 @@ const SocialLinks = ({ links }: { links: PlaceSocialLink[] }) => {
       {link?.platformName}
     </Button>
   ));
-};
-
-export default SocialLinks;
+};;

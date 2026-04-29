@@ -20,7 +20,7 @@ type LocationAutocompleteFieldProps = {
   onSelectSuggestion: (place: GoogleMapsAutocompletePrediction) => void;
 };
 
-export default function LocationAutocompleteField({
+export const LocationAutocompleteField = ({
   containerRef,
   value,
   placeholder = 'City e.g. Nairobi, Watamu...',
@@ -32,7 +32,7 @@ export default function LocationAutocompleteField({
   onValueChange,
   onFocus,
   onSelectSuggestion,
-}: LocationAutocompleteFieldProps) {
+}: LocationAutocompleteFieldProps) => {
   const canShowDropdown =
     showSuggestions && value.length >= minQueryLength && (isLoading || suggestions.length > 0);
 
@@ -73,4 +73,4 @@ export default function LocationAutocompleteField({
       )}
     </div>
   );
-}
+};

@@ -10,8 +10,8 @@ import moment from 'moment';
 import { RRule } from 'rrule';
 import * as z from 'zod';
 
-import FileUploadField from '@/app/components/fileUploadField';
-import LocationAutocompleteField from '@/app/components/locationAutocompleteField';
+import { FileUploadField } from '@/app/components/fileUploadField';
+import { LocationAutocompleteField } from '@/app/components/locationAutocompleteField';
 import { Editor } from '@/components/blocks/editor-00/editor';
 import { Button } from '@/components/ui/button';
 import { CategoryPill } from '@/components/ui/categoryPill';

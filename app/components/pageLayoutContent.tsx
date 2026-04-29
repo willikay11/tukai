@@ -69,4 +69,4 @@ export function PageLayoutContent({ children }: { children: React.ReactNode }) {
       </div>
     </div>
   );
-}
+};

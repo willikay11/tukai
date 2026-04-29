@@ -24,7 +24,7 @@ const formSchema = z.object({
   }),
 });
 
-export default function SendMessage({
+export const SendMessage = ({
   open,
   setOpen,
   recipientId,
@@ -32,7 +32,7 @@ export default function SendMessage({
   open: boolean;
   setOpen: (open: boolean) => void;
   recipientId: string;
-}) {
+}) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -100,4 +100,4 @@ export default function SendMessage({
       </DialogContent>
     </Dialog>
   );
-}
+};

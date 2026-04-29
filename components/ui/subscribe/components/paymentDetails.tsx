@@ -17,7 +17,7 @@ export const PaymentDetails = ({
     paymentOption: string;
     verificationResponse: string;
   }) => void;
-}) {
+}) => {
   const formRef = useRef<any>();
 
   async function onSubmit(values: z.infer<typeof paymentFormSchema>, paymentOption: string) {

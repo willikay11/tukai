@@ -78,13 +78,13 @@ const Input = ({
     </div>
   );
 };
-export default function OtpInput({
+export const OtpInput = ({
   onComplete,
   error,
 }: {
   onComplete: (token: string) => void;
   error?: string;
-}) {
+}) => {
   const [otp, setOtp] = useState<string | undefined>();
   const update = (index: number, val: string | undefined) => {
     if (typeof val === 'string') {
@@ -116,4 +116,4 @@ export default function OtpInput({
       {error ? <div className="mt-1 text-xs text-red-600">{error}</div> : null}
     </div>
   );
-}
+};

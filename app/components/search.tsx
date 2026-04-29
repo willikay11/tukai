@@ -21,7 +21,7 @@ import { SearchResult } from '@/types/search';
 
 import IconComponent from './iconComponent';
 
-export default function Search() {
+export const Search = () => {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -220,4 +220,4 @@ export default function Search() {
       </PopoverContent>
     </Popover>
   );
-}
+};

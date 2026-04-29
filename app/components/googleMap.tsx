@@ -12,7 +12,7 @@ const containerStyle = {
   borderRadius: '8px',
 };
 
-export default function GoogleMapComponent({ lat, lng }: { lat?: number; lng?: number }) {
+export const GoogleMapComponent = ({ lat, lng }: { lat?: number; lng?: number }) => {
   const [isReady, setIsReady] = useState(false);
   const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -39,4 +39,4 @@ export default function GoogleMapComponent({ lat, lng }: { lat?: number; lng?: n
       </GoogleMap>
     </LoadScript>
   );
-}
+};

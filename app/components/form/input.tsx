@@ -12,7 +12,7 @@ function ViewPassword({ visible, onClick }: { visible: boolean; onClick: () => v
   );
 }
 
-export default function Input({
+export const Input = ({
   placeholder,
   type,
   icon,
@@ -28,7 +28,7 @@ export default function Input({
   defaultValue?: string;
   error?: string;
   refs?: any;
-}) {
+}) => {
   const [viewPassword, setViewPassword] = useState<boolean>(false);
 
   return (
@@ -58,4 +58,4 @@ export default function Input({
       {error ? <div className="mt-1 text-xs text-red-600">{error}</div> : null}
     </div>
   );
-}
+};

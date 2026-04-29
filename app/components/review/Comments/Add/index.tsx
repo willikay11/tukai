@@ -23,7 +23,7 @@ const formSchema = z.object({
   }),
 });
 
-export default function Comments({ placeId, reviewId }: { placeId: string; reviewId: string }) {
+export const Comments = ({ placeId, reviewId }: { placeId: string; reviewId: string }) => {
   const { data: session } = useSession();
   const { data: comments } = usePlaceReviewComments(placeId, reviewId, true);
   const {
@@ -101,4 +101,4 @@ export default function Comments({ placeId, reviewId }: { placeId: string; revie
       </div>
     </div>
   );
-}
+};

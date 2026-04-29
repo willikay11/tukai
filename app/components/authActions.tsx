@@ -6,8 +6,8 @@ import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import IconComponent from '@/app/components/iconComponent';
-import JoinTukaiPremium from '@/app/components/joinTukaiPremium';
+import { IconComponent } from '@/app/components/iconComponent';
+import { JoinTukaiPremium } from '@/app/components/joinTukaiPremium';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { TukaiImage } from '@/components/ui/image';
@@ -22,7 +22,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 
-export default function AuthActions() {
+export const AuthActions = () => {
   const { openSignInWithCallback } = useAuthDialog();
   const router = useRouter();
   const { data: session } = useSession();
@@ -156,4 +156,4 @@ export default function AuthActions() {
       </Dialog>
     </div>
   );
-}
+};

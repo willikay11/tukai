@@ -8,7 +8,7 @@ import { signIn } from 'next-auth/react';
 import { AppleIcon, GoogleIcon, LockKeyIcon, Mail02Icon } from '@hugeicons/react-pro';
 
 import { Anchor, Input } from '@/app/components/form';
-import MobileStore from '@/app/components/mobileStore';
+import { MobileStore } from '@/app/components/mobileStore';
 import { toast } from '@/hooks/use-toast';
 
 import { Button } from '../button';

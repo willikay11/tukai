@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 
-import IconComponent from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/components/iconComponent';
 import { Button } from '@/components/ui/button';
 
 type JoinTukaiPremiumProps = {
@@ -42,12 +42,12 @@ const premiumFeatures = [
   },
 ];
 
-export default function JoinTukaiPremium({
+export const JoinTukaiPremium = ({
   onClose,
   onUpgrade,
   isUpgrading = false,
   price = 'KES 130.00/month',
-}: JoinTukaiPremiumProps) {
+}: JoinTukaiPremiumProps) => {
   return (
     <div className="w-full max-w-[560px] rounded-xl border border-gray-200 bg-white p-4 md:p-5">
       <div className="mb-3 flex items-start justify-between gap-3">
@@ -132,4 +132,4 @@ export default function JoinTukaiPremium({
       </p>
     </div>
   );
-}
+};

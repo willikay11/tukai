@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useLocation } from '@/context/LocationContext';
 
-export default function LocationPrompt() {
+export const LocationPrompt = () => {
   const { lat, lng, status, requestLocation } = useLocation();
   const [open, setOpen] = useState(false);
   const [dismissed, setDismissed] = useState<boolean>(false);
@@ -56,4 +56,4 @@ export default function LocationPrompt() {
       </DialogContent>
     </Dialog>
   );
-}
+};

@@ -8,7 +8,7 @@ import {
 } from '@hugeicons-pro/core-twotone-rounded';
 import useEmblaCarousel, { type UseEmblaCarouselType } from 'embla-carousel-react';
 
-import IconComponent from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/components/iconComponent';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 

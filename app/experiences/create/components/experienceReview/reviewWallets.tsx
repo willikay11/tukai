@@ -1,6 +1,6 @@
 'use client';
 
-import IconComponent from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/components/iconComponent';
 import { ReviewWalletsSkeleton } from '@/app/components/skeletons';
 import { useGetWallets } from '@/hooks/payment';
 import { Wallet } from '@/types/payment';

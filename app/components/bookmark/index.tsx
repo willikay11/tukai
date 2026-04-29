@@ -10,7 +10,7 @@ import { SignInForm } from '@/components/ui/form/sign-in';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { toast } from '@/hooks/use-toast';
 
-export default function Bookmark({
+export const Bookmark = ({
   bookmarked,
   onBookmark,
   onUnbookmark,
@@ -22,7 +22,7 @@ export default function Bookmark({
   onUnbookmark: () => void;
   userId?: string | null;
   className?: string;
-}) {
+}) => {
   const [isBookmarked, setIsBookmarked] = useState(bookmarked);
   const { setOpenSignIn } = useAuthDialog();
   return (
@@ -51,4 +51,4 @@ export default function Bookmark({
       </Button>
     </>
   );
-}
+};

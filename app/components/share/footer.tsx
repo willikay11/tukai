@@ -12,7 +12,7 @@ import { useLocation } from '@/context/LocationContext';
 
 import IconComponent from '../iconComponent';
 
-export default function Footer() {
+export const Footer = () => {
   return (
     <footer className="grid grid-cols-12 border-t border-gray-100 bg-gray-50 pb-6 pt-8 md:pt-10">
       <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
@@ -104,4 +104,4 @@ export default function Footer() {
       </div>
     </footer>
   );
-}
+};

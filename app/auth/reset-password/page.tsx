@@ -11,9 +11,9 @@ import { LockKeyIcon, RefreshIcon } from '@hugeicons/react-pro';
 import { set } from 'lodash';
 
 import { Input } from '@/app/components/form';
-import OtpInput from '@/app/components/form/otpInput';
-import SuccessMessage from '@/app/components/messages/success';
-import MobileStore from '@/app/components/mobileStore';
+import { OtpInput } from '@/app/components/form/otpInput';
+import { SuccessMessage } from '@/app/components/messages/success';
+import { MobileStore } from '@/app/components/mobileStore';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 

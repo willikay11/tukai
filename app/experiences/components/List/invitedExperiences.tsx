@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 
 import clsx from 'clsx';
 
-import ListExperiences from '@/app/components/experiences/List';
+import { ListExperiences } from '@/app/components/experiences/List';
 import { useExperiences } from '@/hooks/experiences';
 
 type ListExperiencesProps = {

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import clsx from 'clsx';
 
-import IconComponent from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/components/iconComponent';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { SubscriptionPlan } from '@/types/subscription';

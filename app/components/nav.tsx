@@ -21,7 +21,7 @@ const links = [
   },
 ];
 
-export default function Nav() {
+export const Nav = () => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -58,4 +58,4 @@ export default function Nav() {
       </Link>
     ));
   return <div className="hidden md:inline-flex md:h-full">{linkItems(true)}</div>;
-}
+};

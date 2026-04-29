@@ -7,8 +7,8 @@ import { useSession } from 'next-auth/react';
 import { FavouriteIcon, Message02Icon } from '@hugeicons/react-pro';
 import moment from 'moment';
 
-import IconComponent from '@/app/components/iconComponent';
-import Rating from '@/app/components/rating';
+import { IconComponent } from '@/app/components/iconComponent';
+import { Rating } from '@/app/components/rating';
 import { Button } from '@/components/ui/button';
 import { TukaiImage } from '@/components/ui/image';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
@@ -20,7 +20,7 @@ import { Review as ReviewType } from '@/types/review';
 import AddReview from './AddReview';
 import AddReviewComment from './AddReviewComment';
 
-export default function Review({
+export const Review = ({
   id,
   review,
   likeReview,
@@ -44,7 +44,7 @@ export default function Review({
   isUpdateSuccess: boolean;
   isUploadSuccess: boolean;
   isUpdatePending: boolean;
-}) {
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
@@ -180,4 +180,4 @@ export default function Review({
       </div>
     </>
   );
-}
+};

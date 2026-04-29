@@ -10,8 +10,8 @@ import clsx from 'clsx';
 import moment from 'moment-timezone';
 
 import { Button } from '@/app/components/form';
-import Loader from '@/app/components/form/loader';
-import IconComponent from '@/app/components/iconComponent';
+import { Loader } from '@/app/components/form/loader';
+import { IconComponent } from '@/app/components/iconComponent';
 import { toast } from '@/hooks/use-toast';
 import { removeUser } from '@/slices/userSlice';
 

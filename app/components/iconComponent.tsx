@@ -17,7 +17,7 @@ function isValidSolidIconName(name: string): name is SolidIconName {
   return name in SolidIcons;
 }
 
-export default function IconComponent({
+export const IconComponent = ({
   iconName,
   size = 20,
   color = 'bg-gray-700',
@@ -29,7 +29,7 @@ export default function IconComponent({
   color?: string;
   className?: string;
   variant?: 'solid' | 'twotone';
-}) {
+}) => {
   if (variant === 'solid' && isValidSolidIconName(iconName)) {
     const iconComponent = SolidIcons[iconName];
     return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className} />;
@@ -39,4 +39,4 @@ export default function IconComponent({
     return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className} />;
   }
   return null;
-}
+};

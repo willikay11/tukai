@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 
-export default function Loader({ size = 'normal' }: { size?: 'small' | 'normal' | 'large' }) {
+export const Loader = ({ size = 'normal' }: { size?: 'small' | 'normal' | 'large' }) => {
   return (
     <svg
       className={clsx('mr-2 animate-spin', {
@@ -20,4 +20,4 @@ export default function Loader({ size = 'normal' }: { size?: 'small' | 'normal' 
       ></path>
     </svg>
   );
-}
+};

@@ -73,7 +73,7 @@ const formSchema = z.object({
   images: z.array(z.instanceof(File)).optional(),
 });
 
-export default function AddReview({
+export const AddReview = ({
   type,
   isOpen,
   placeTitle,
@@ -89,7 +89,7 @@ export default function AddReview({
   isUploadSuccess,
   isSubmitting,
   isUpdatePending,
-}: addReviewProps) {
+}: addReviewProps) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const { data: session } = useSession();
 
@@ -273,4 +273,4 @@ export default function AddReview({
       </div>
     </Drawer>
   );
-}
+};

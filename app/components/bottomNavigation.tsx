@@ -38,7 +38,7 @@ const links = [
   // },
 ];
 
-export default function BottomNavigation() {
+export const BottomNavigation = () => {
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -108,4 +108,4 @@ export default function BottomNavigation() {
       {linkItems()}
     </div>
   );
-}
+};

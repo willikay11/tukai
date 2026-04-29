@@ -1,6 +1,6 @@
 'use client';
 
-import IconComponent from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/components/iconComponent';
 
 const currencyFormatter = new Intl.NumberFormat('en-KE', {
   minimumFractionDigits: 2,

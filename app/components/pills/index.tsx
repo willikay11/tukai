@@ -1,6 +1,6 @@
 import Pill from '@/components/ui/pill';
 
-export default function Pills({ pills, showMax = 2 }: { pills: string[]; showMax?: number }) {
+export const Pills = ({ pills, showMax = 2 }: { pills: string[]; showMax?: number }) => {
   return (
     <div className="flex flex-wrap gap-2">
       {pills.slice(0, showMax).map((pill, index) => (
@@ -15,4 +15,4 @@ export default function Pills({ pills, showMax = 2 }: { pills: string[]; showMax
       )}
     </div>
   );
-}
+};

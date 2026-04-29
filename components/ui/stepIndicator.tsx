@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 
-import IconComponent from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/components/iconComponent';
 
 export const StepIndicator = ({
   currentStep = 0,

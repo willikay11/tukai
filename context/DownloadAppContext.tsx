@@ -1,7 +1,7 @@
 'use client';
 import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
 
-import MobileStore from '@/app/components/mobileStore';
+import { MobileStore } from '@/app/components/mobileStore';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';

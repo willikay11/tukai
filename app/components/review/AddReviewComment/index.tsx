@@ -13,12 +13,12 @@ type addReviewCommentProps = {
   closeModal: (isOpen: boolean) => void;
 };
 
-export default function AddReviewComment({
+export const AddReviewComment = ({
   id,
   reviewId,
   isOpen,
   closeModal,
-}: addReviewCommentProps) {
+}: addReviewCommentProps) => {
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add('overflow-hidden');
@@ -34,4 +34,4 @@ export default function AddReviewComment({
       <Comments placeId={id} reviewId={reviewId} />
     </Drawer>
   );
-}
+};

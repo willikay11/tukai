@@ -6,12 +6,12 @@ import Link from 'next/link';
 
 import { hugeiconsLicense } from '@hugeicons/react-pro';
 
-import AuthActions from '@/app/components/authActions';
-import BottomNavigation from '@/app/components/bottomNavigation';
-import DownloadApp from '@/app/components/downloadApp';
+import { AuthActions } from '@/app/components/authActions';
+import { BottomNavigation } from '@/app/components/bottomNavigation';
+import { DownloadApp } from '@/app/components/downloadApp';
 import { satoshi } from '@/app/components/fonts';
-import GlobalLoading from '@/app/components/globalLoading';
-import IconRadioButtonGroup from '@/app/components/iconRadioButtonGroup';
+import { GlobalLoading } from '@/app/components/globalLoading';
+import { IconRadioButtonGroup } from '@/app/components/iconRadioButtonGroup';
 import { PageFilters } from '@/components/ui/pageFilters';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthDialogProvider } from '@/context/AuthDialogContext';

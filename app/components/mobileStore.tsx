@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 import clsx from 'clsx';
 
-export default function MobileStore({ className }: { className?: string }) {
+export const MobileStore = ({ className }: { className?: string }) => {
   const onDownloadApp = (url: string) => {
     window.open(url, '_blank');
   };
@@ -33,4 +33,4 @@ export default function MobileStore({ className }: { className?: string }) {
       />
     </div>
   );
-}
+};

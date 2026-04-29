@@ -21,7 +21,7 @@ type FileUploadFieldProps = {
   onValidationError?: (errors: string[]) => void;
 };
 
-export default function FileUploadField({
+export const FileUploadField = ({
   id,
   label,
   buttonText = 'Add Photo(s)',
@@ -38,7 +38,7 @@ export default function FileUploadField({
   onChange,
   onFilesChange,
   onValidationError,
-}: FileUploadFieldProps) {
+}: FileUploadFieldProps) => {
   const [previewUrls, setPreviewUrls] = useState<string[]>(initialUrls);
   const [existingUrls, setExistingUrls] = useState<string[]>(initialUrls);
   const [files, setFiles] = useState<File[]>([]);
@@ -345,4 +345,4 @@ export default function FileUploadField({
       )}
     </div>
   );
-}
+};

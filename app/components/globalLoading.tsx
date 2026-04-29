@@ -1,7 +1,7 @@
 'use client';
 import NextTopLoader from 'nextjs-toploader';
 
-export default function GlobalLoading() {
+export const GlobalLoading = () => {
   return (
     <NextTopLoader
       color="#047857"
@@ -15,4 +15,4 @@ export default function GlobalLoading() {
       shadow="0 0 10px #047857,0 0 5px #04785766"
     />
   );
-}
+};

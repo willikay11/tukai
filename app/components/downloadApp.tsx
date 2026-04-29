@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import IconComponent from './iconComponent';
 import MobileStore from './mobileStore';
 
-export default function DownloadApp() {
+export const DownloadApp = () => {
   const [showDownloadApp, setShowDownloadApp] = useState(true);
 
   useEffect(() => {
@@ -35,4 +35,4 @@ export default function DownloadApp() {
       </div>
     </div>
   );
-}
+};

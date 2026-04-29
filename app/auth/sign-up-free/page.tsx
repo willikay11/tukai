@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { LockKeyIcon, Mail02Icon, UserIcon } from '@hugeicons/react-pro';
 
 import { Anchor, Input } from '@/app/components/form';
-import MobileStore from '@/app/components/mobileStore';
+import { MobileStore } from '@/app/components/mobileStore';
 import { Button } from '@/components/ui/button';
 import { useUserExists } from '@/hooks/auth';
 import { toast } from '@/hooks/use-toast';

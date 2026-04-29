@@ -3,7 +3,7 @@
 import moment from 'moment';
 import numeral from 'numeral';
 
-import IconComponent from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/components/iconComponent';
 import { Button } from '@/components/ui/button';
 import { Experience } from '@/types/experience';
 

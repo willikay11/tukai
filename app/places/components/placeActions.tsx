@@ -4,9 +4,9 @@ import { useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 
-import Bookmark from '@/app/components/bookmark';
-import AddReview from '@/app/components/review/AddReview';
-import Share from '@/app/components/share';
+import { Bookmark } from '@/app/components/bookmark';
+import { AddReview } from '@/app/components/review/AddReview';
+import { Share } from '@/app/components/share';
 import { Button } from '@/components/ui/button';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import {

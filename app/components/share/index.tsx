@@ -43,7 +43,7 @@ const shareOptions = [
   },
 ];
 
-export default function Share({
+export const Share = ({
   coverPhoto,
   title,
   link,
@@ -51,7 +51,7 @@ export default function Share({
   coverPhoto: string;
   title: string;
   link: string;
-}) {
+}) => {
   const [open, setOpen] = useState(false);
 
   const handleShare = (option: string) => {
@@ -126,4 +126,4 @@ export default function Share({
       </Dialog>
     </>
   );
-}
+};

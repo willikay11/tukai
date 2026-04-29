@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { useLikePlaceReviewComment } from '@/hooks/places';
 import { Comment } from '@/types/comment';
 
-export default function ViewComment({
+export const ViewComment = ({
   comment,
   placeId,
   reviewId,
@@ -20,7 +20,7 @@ export default function ViewComment({
   comment: Comment;
   placeId: string;
   reviewId: string;
-}) {
+}) => {
   const { mutate: likeComment } = useLikePlaceReviewComment(placeId, reviewId, comment.id);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -83,4 +83,4 @@ export default function ViewComment({
       </div>
     </div>
   );
-}
+};

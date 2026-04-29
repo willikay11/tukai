@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import sanitizeHtml from 'sanitize-html';
 
-import IconComponent from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/components/iconComponent';
 import { Button } from '@/components/ui/button';
 import { CreateSuccessDialog } from '@/components/ui/createSuccessDialog';
 import { ImageCarousel } from '@/components/ui/imageCarousel';

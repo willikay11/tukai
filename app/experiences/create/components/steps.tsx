@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import IconComponent from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/components/iconComponent';
 import { CreateStepContentSkeleton } from '@/app/components/skeletons';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

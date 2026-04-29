@@ -6,7 +6,7 @@ import { Button } from '@/app/components/form';
 
 import IconComponent from '../iconComponent';
 
-export default function SuccessMessage({
+export const SuccessMessage = ({
   title,
   icon,
   description,
@@ -20,7 +20,7 @@ export default function SuccessMessage({
   onContinue: () => void;
   subDescription?: ReactNode;
   buttonTitle?: string;
-}) {
+}) => {
   return (
     <>
       <div className="mb-4">
@@ -52,4 +52,4 @@ export default function SuccessMessage({
       </Button>
     </>
   );
-}
+};

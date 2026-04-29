@@ -3,7 +3,7 @@
 import { StarIcon } from '@hugeicons/react-pro';
 import clsx from 'clsx';
 
-const Rating = ({
+export const Rating = ({
   rating,
   showCount = false,
   showMultiStar = false,
@@ -39,6 +39,4 @@ const Rating = ({
       {showCount && <span className="text-sm font-medium">{rating}</span>}
     </>
   );
-};
-
-export default Rating;
+};;

@@ -1,8 +1,8 @@
-import DescriptionShowMore from '@/app/components/descriptionShowMore';
-import GoogleMapComponent from '@/app/components/googleMap';
-import IconComponent from '@/app/components/iconComponent';
-import Rating from '@/app/components/rating';
-import SocialLinks from '@/app/components/socialLinks';
+import { DescriptionShowMore } from '@/app/components/descriptionShowMore';
+import { GoogleMapComponent } from '@/app/components/googleMap';
+import { IconComponent } from '@/app/components/iconComponent';
+import { Rating } from '@/app/components/rating';
+import { SocialLinks } from '@/app/components/socialLinks';
 import { PhotoGallery } from '@/components/ui/PhotoGallery';
 import { Separator } from '@/components/ui/separator';
 import { fetchPlace, fetchPlaceProperties, fetchPlaceSocialLinks } from '@/services/place';

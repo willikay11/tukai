@@ -2,9 +2,9 @@ import { ReactNode } from 'react';
 
 import clsx from 'clsx';
 
-import Loader from '@/app/components/form/loader';
+import { Loader } from '@/app/components/form/loader';
 
-export default function Button({
+export const Button = ({
   children,
   htmlType = 'button',
   onClick,
@@ -22,7 +22,7 @@ export default function Button({
   block?: boolean;
   loading?: boolean;
   disabled?: boolean;
-}) {
+}) => {
   let content = children;
 
   if (loading) {
@@ -55,4 +55,4 @@ export default function Button({
       {content}
     </button>
   );
-}
+};
