@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 
-export default function Drawer({
+export const Drawer = ({
   isOpen,
   setIsOpen,
   children,
@@ -8,7 +8,7 @@ export default function Drawer({
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   children: React.ReactNode;
-}) {
+}) => {
   return (
     <AnimatePresence initial={false} mode="wait">
       {isOpen && (
@@ -32,4 +32,5 @@ export default function Drawer({
       )}
     </AnimatePresence>
   );
-}
+};
+

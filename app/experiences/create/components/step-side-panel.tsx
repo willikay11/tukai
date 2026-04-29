@@ -9,6 +9,7 @@ import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 
 import CreateTickets from './createTickets';
+import CustomiseItinerary from './customiseItinerary';
 import ExperienceReview from './experienceReview';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
@@ -18,6 +19,7 @@ export default function ExperienceStepSidePanel({
   experienceId,
   experience,
   canShowDateTickets,
+  itineraryConfig,
   invitedMembers,
   invitedCommunities,
 }: {
@@ -25,6 +27,7 @@ export default function ExperienceStepSidePanel({
   experienceId?: string | null;
   experience?: Experience;
   canShowDateTickets?: boolean;
+  itineraryConfig?: { startDate: string; endDate: string } | null;
   invitedMembers?: InvitedMember[];
   invitedCommunities?: Community[];
 }) {
@@ -41,7 +44,9 @@ export default function ExperienceStepSidePanel({
         description="Please add details to create dates"
       />
     ),
-    'dates-tickets': canShowDateTickets ? (
+    'dates-tickets': itineraryConfig ? (
+      <CustomiseItinerary startDate={itineraryConfig.startDate} endDate={itineraryConfig.endDate} />
+    ) : canShowDateTickets ? (
       <CreateTickets experienceId={experienceId} experience={experience} />
     ) : (
       <StepPlaceholderContent

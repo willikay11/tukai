@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 
-import SignInForm from '@/components/ui/form/sign-in';
+import { SignInForm } from '@/components/ui/form/sign-in';
 import { toast } from '@/hooks/use-toast';
 
 export default function Page() {

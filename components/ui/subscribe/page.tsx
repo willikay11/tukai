@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 
-import Paystack from '@/components/ui/paystack';
-import StepIndicator from '@/components/ui/stepIndicator';
+import { Paystack } from '@/components/ui/paystack';
+import { StepIndicator } from '@/components/ui/stepIndicator';
 import { useSubscriptionPlans } from '@/hooks/subscriptions';
 
 import Package from './components/package';
@@ -84,4 +84,5 @@ export default function Page() {
       )}
     </>
   );
-}
+};
+

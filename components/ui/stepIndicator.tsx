@@ -2,13 +2,13 @@ import clsx from 'clsx';
 
 import IconComponent from '@/app/components/iconComponent';
 
-export default function StepIndicator({
+export const StepIndicator = ({
   currentStep = 0,
   steps,
 }: {
   currentStep: number;
   steps: { label: string; completed: boolean }[];
-}) {
+}) => {
   return (
     <div className="flex w-full items-center">
       {steps.map((step, idx) => (
@@ -39,4 +39,5 @@ export default function StepIndicator({
       ))}
     </div>
   );
-}
+};
+

@@ -7,7 +7,7 @@ import { Photo } from '@/types/photo';
 
 import { Button } from './button';
 
-export default function ImageUpload({
+export const ImageUpload = ({
   onImagesChange,
   currentImages,
   onDeleteImage,
@@ -15,7 +15,7 @@ export default function ImageUpload({
   onImagesChange: (images: File[]) => void;
   currentImages?: Photo[];
   onDeleteImage: (image: Photo) => void;
-}) {
+}) => {
   const [images, setImages] = useState<File[]>(
     currentImages ? currentImages.map((image) => new File([], image.photo)) : [],
   );
@@ -142,4 +142,5 @@ export default function ImageUpload({
       />
     </div>
   );
-}
+};
+

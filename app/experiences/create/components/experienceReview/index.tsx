@@ -8,8 +8,8 @@ import sanitizeHtml from 'sanitize-html';
 
 import IconComponent from '@/app/components/iconComponent';
 import { Button } from '@/components/ui/button';
-import CreateSuccessDialog from '@/components/ui/createSuccessDialog';
-import ImageCarousel from '@/components/ui/imageCarousel';
+import { CreateSuccessDialog } from '@/components/ui/createSuccessDialog';
+import { ImageCarousel } from '@/components/ui/imageCarousel';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { usePublishExperience } from '@/hooks/experiences';
 import { toast } from '@/hooks/use-toast';

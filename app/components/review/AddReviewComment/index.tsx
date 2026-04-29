@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-import Drawer from '@/components/ui/drawer';
+import { Drawer } from '@/components/ui/drawer';
 
 import Comments from '../Comments/Add';
 

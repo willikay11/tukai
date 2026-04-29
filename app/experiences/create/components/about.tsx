@@ -14,7 +14,7 @@ import FileUploadField from '@/app/components/fileUploadField';
 import LocationAutocompleteField from '@/app/components/locationAutocompleteField';
 import { Editor } from '@/components/blocks/editor-00/editor';
 import { Button } from '@/components/ui/button';
-import CategoryPill from '@/components/ui/categoryPill';
+import { CategoryPill } from '@/components/ui/categoryPill';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';

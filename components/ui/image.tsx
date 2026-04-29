@@ -8,12 +8,12 @@ import clsx from 'clsx';
 
 import { ImageSkeleton } from '@/app/components/skeletons';
 
-export default function TukaiImage({
+export const TukaiImage = ({
   src,
   alt,
   showNotFoundText = true,
   ...props
-}: ImageProps & { showNotFoundText?: boolean }) {
+}: ImageProps & { showNotFoundText?: boolean }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
@@ -55,4 +55,5 @@ export default function TukaiImage({
       )}
     </>
   );
-}
+};
+

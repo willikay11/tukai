@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
 import { toast } from '@/hooks/use-toast';
 
-export default function Paystack({
+export const Paystack = ({
   isOpen,
   closeModal,
   url,
@@ -13,7 +13,7 @@ export default function Paystack({
   isOpen: boolean;
   closeModal: (paymentSuccess: boolean) => void;
   url: string;
-}) {
+}) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
@@ -73,4 +73,5 @@ export default function Paystack({
       </AlertDialogContent>
     </AlertDialog>
   );
-}
+};
+

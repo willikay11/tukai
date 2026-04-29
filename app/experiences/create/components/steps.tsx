@@ -43,6 +43,7 @@ export default function CreateExperienceSteps({
   onStepChange,
   onExperienceCreated,
   onDatesUpdatedSuccess,
+  onItineraryCustomise,
   onInvitesChange,
   experience,
   isLoadingExperience,
@@ -51,6 +52,7 @@ export default function CreateExperienceSteps({
   onStepChange?: (step: ExperienceStepId) => void;
   onExperienceCreated?: (experienceId: string, step?: ExperienceStepId) => void;
   onDatesUpdatedSuccess?: (nextStep?: 'guests') => void;
+  onItineraryCustomise?: (config: { startDate: string; endDate: string }) => void;
   onInvitesChange?: (members: InvitedMember[], communities: Community[]) => void;
   experience?: Experience;
   isLoadingExperience?: boolean;
@@ -163,6 +165,7 @@ export default function CreateExperienceSteps({
           experienceId={experience?.id || null}
           experience={experience}
           onDatesUpdatedSuccess={onDatesUpdatedSuccess}
+          onItineraryCustomise={onItineraryCustomise}
         />
       </TabsContent>
 

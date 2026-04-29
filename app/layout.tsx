@@ -12,7 +12,7 @@ import DownloadApp from '@/app/components/downloadApp';
 import { satoshi } from '@/app/components/fonts';
 import GlobalLoading from '@/app/components/globalLoading';
 import IconRadioButtonGroup from '@/app/components/iconRadioButtonGroup';
-import PageFilters from '@/components/ui/pageFilters';
+import { PageFilters } from '@/components/ui/pageFilters';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthDialogProvider } from '@/context/AuthDialogContext';
 import { DownloadAppProvider } from '@/context/DownloadAppContext';

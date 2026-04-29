@@ -20,7 +20,7 @@ type CreateSuccessDialogProps = {
   illustrationSrc?: string;
 };
 
-export default function CreateSuccessDialog({
+export const CreateSuccessDialog = ({
   open,
   onOpenChange,
   viewCommunityHref,
@@ -32,7 +32,7 @@ export default function CreateSuccessDialog({
   viewCommunityLabel = 'View Community',
   createExperienceLabel = 'Create Experience',
   illustrationSrc = '/images/friday-feeling.svg',
-}: CreateSuccessDialogProps) {
+}: CreateSuccessDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[calc(100%-24px)] max-w-[560px] rounded-2xl p-6 sm:p-8">
@@ -110,4 +110,5 @@ export default function CreateSuccessDialog({
       </DialogContent>
     </Dialog>
   );
-}
+};
+

@@ -10,7 +10,7 @@ import IconComponent from '@/app/components/iconComponent';
 import JoinTukaiPremium from '@/app/components/joinTukaiPremium';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import TukaiImage from '@/components/ui/image';
+import { TukaiImage } from '@/components/ui/image';
 import {
   NavigationMenu,
   NavigationMenuContent,

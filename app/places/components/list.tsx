@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 
-import NoData from '@/components/ui/noData';
+import { NoData } from '@/components/ui/noData';
 import { useLocation } from '@/context/LocationContext';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { Status } from '@/enums/status';

@@ -18,7 +18,7 @@ type Inputs = {
   password: string;
 };
 
-export default function SignInForm({ onLogin }: { onLogin: () => void }) {
+export const SignInForm = ({ onLogin }: { onLogin: () => void }) => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const {
@@ -135,4 +135,5 @@ export default function SignInForm({ onLogin }: { onLogin: () => void }) {
       <MobileStore />
     </div>
   );
-}
+};
+

@@ -7,7 +7,7 @@ import clsx from 'clsx';
 import IconComponent from '@/app/components/iconComponent';
 import { Interest } from '@/types/interest';
 
-export default function CategoryPill({
+export const CategoryPill = ({
   category,
   onClick,
   isSelected,
@@ -15,7 +15,7 @@ export default function CategoryPill({
   category: Interest;
   onClick: (id: string) => void;
   isSelected?: boolean;
-}) {
+}) => {
   const [active, setActive] = useState(isSelected ?? false);
 
   useEffect(() => {
@@ -42,4 +42,4 @@ export default function CategoryPill({
       <span className="text-xs font-medium">{category.name}</span>
     </div>
   );
-}
+};

@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react';
 import sanitizeHtml from 'sanitize-html';
 
 import { Button } from '@/components/ui/button';
-import Drawer from '@/components/ui/drawer';
-import TukaiImage from '@/components/ui/image';
+import { Drawer } from '@/components/ui/drawer';
+import { TukaiImage } from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 
 import IconComponent from './iconComponent';

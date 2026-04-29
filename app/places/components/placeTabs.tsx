@@ -1,6 +1,6 @@
 'use client';
 
-import NoData from '@/components/ui/noData';
+import { NoData } from '@/components/ui/noData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PlaceCategory } from '@/types/placeCategory';
 

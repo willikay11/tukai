@@ -14,7 +14,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
-import TukaiImage from '@/components/ui/image';
+import { TukaiImage } from '@/components/ui/image';
 
 const shareOptions = [
   {

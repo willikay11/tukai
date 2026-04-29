@@ -10,7 +10,7 @@ import clsx from 'clsx';
 import { debounce } from 'lodash';
 
 import { Button } from '@/components/ui/button';
-import TukaiImage from '@/components/ui/image';
+import { TukaiImage } from '@/components/ui/image';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { usePlaceCategories } from '@/hooks/places';

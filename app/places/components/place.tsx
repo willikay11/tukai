@@ -8,7 +8,7 @@ import clsx from 'clsx';
 
 import BookmarkPlace from '@/app/components/bookmark';
 import { EventSkeleton } from '@/app/components/skeletons';
-import ImageCarousel from '@/components/ui/imageCarousel';
+import { ImageCarousel } from '@/components/ui/imageCarousel';
 import { useBookmarkPlace } from '@/hooks/places';
 import { Place } from '@/types/place';
 

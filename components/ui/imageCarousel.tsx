@@ -8,10 +8,10 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import TukaiImage from '@/components/ui/image';
+import { TukaiImage } from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 
-const ImageCarousel = ({
+export const ImageCarousel = ({
   images,
   width = 'w-full',
   aspectRatio = 'aspect-square',
@@ -100,5 +100,3 @@ const ImageCarousel = ({
     </div>
   );
 };
-
-export default ImageCarousel;

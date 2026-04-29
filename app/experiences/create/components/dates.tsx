@@ -199,8 +199,48 @@ const experienceDatesSchema = z
   recurrenceEndDate: z.string().default(''),
   recurrenceWeekdays: z.array(weekdayValueSchema).default([]),
   timeSlots: z.array(timeSlotSchema).min(1).default([{ startTime: '', endTime: '' }]),
+  itineraryDateType: z.enum(['specific', 'flexible']).default('specific'),
+  itineraryStartDate: z.string().default(''),
+  itineraryEndDate: z.string().default(''),
   })
   .superRefine((values, ctx) => {
+    if (values.dateType === 'itinerary') {
+      if (values.itineraryDateType === 'specific') {
+        if (!values.itineraryStartDate) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Please select a start date',
+            path: ['itineraryStartDate'],
+          });
+        }
+
+        if (!values.itineraryEndDate) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Please select an end date',
+            path: ['itineraryEndDate'],
+          });
+        }
+
+        const startMoment = moment(values.itineraryStartDate, 'YYYY-MM-DD', true);
+        const endMoment = moment(values.itineraryEndDate, 'YYYY-MM-DD', true);
+
+        if (
+          startMoment.isValid() &&
+          endMoment.isValid() &&
+          endMoment.isBefore(startMoment, 'day')
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'End date must be on or after the start date',
+            path: ['itineraryEndDate'],
+          });
+        }
+      }
+
+      return;
+    }
+
     if (values.isRecurring) {
       if (!values.recurrenceStartDate) {
         ctx.addIssue({
@@ -333,6 +373,7 @@ interface ExperienceDatesProps {
   experienceId?: string | null;
   experience?: Experience;
   onDatesUpdatedSuccess?: (nextStep?: 'guests') => void;
+  onItineraryCustomise?: (config: { startDate: string; endDate: string }) => void;
   onCancel?: () => void;
   cancelActionLabel?: string;
   saveAndExitActionLabel?: string;
@@ -345,6 +386,7 @@ export default function ExperienceDates({
   experienceId,
   experience,
   onDatesUpdatedSuccess,
+  onItineraryCustomise,
   onCancel,
   cancelActionLabel = 'Cancel',
   saveAndExitActionLabel = 'Save & Exit',
@@ -370,6 +412,9 @@ export default function ExperienceDates({
       recurrenceEndDate: '',
       recurrenceWeekdays: [],
       timeSlots: [{ startTime: '', endTime: '' }],
+      itineraryDateType: 'specific' as const,
+      itineraryStartDate: '',
+      itineraryEndDate: '',
     },
   });
 
@@ -378,9 +423,11 @@ export default function ExperienceDates({
     name: 'timeSlots',
   });
 
+  const dateType = form.watch('dateType');
   const isRecurring = form.watch('isRecurring');
   const recurrenceStartDate = form.watch('recurrenceStartDate');
   const recurrenceWeekdays = form.watch('recurrenceWeekdays');
+  const itineraryStartDate = form.watch('itineraryStartDate');
   const firstRecurringOccurrence = getFirstRecurringOccurrence(
     recurrenceStartDate,
     recurrenceWeekdays,
@@ -506,21 +553,34 @@ export default function ExperienceDates({
       return;
     }
 
-    const primaryDate = values.isRecurring
-      ? firstRecurringOccurrence?.format('YYYY-MM-DD') || ''
-      : values.selectedDate;
-    const primaryStartTime = values.isRecurring ? values.timeSlots[0]?.startTime || '' : values.startTime;
-    const primaryEndTime = values.isRecurring ? values.timeSlots[0]?.endTime || '' : values.endTime;
-    const startDateTime = toIsoDateTime(primaryDate, primaryStartTime);
-    const endDateTime = values.isRecurring
-      ? toIsoDateTime(primaryDate, primaryEndTime)
-      : toIsoEndDateTime(primaryDate, primaryEndTime, values.dateType);
-    const recurrenceRule = values.isRecurring ? buildRecurringRule(values) : '';
-    const slotsForTicketing = values.isRecurring
-      ? values.timeSlots
-      : [{ startTime: values.startTime, endTime: values.endTime }];
+    let startDateTime: string | null = null;
+    let endDateTime: string | null = null;
+    let recurrenceRule = '';
+    let slotsForTicketing: Array<{ startTime: string; endTime: string }> = [];
+    let primaryDate = '';
 
-    if (!startDateTime || !endDateTime || (values.isRecurring && !recurrenceRule)) {
+    if (values.dateType === 'itinerary') {
+      primaryDate = values.itineraryStartDate;
+      startDateTime = moment(values.itineraryStartDate, 'YYYY-MM-DD', true).startOf('day').toISOString();
+      endDateTime = moment(values.itineraryEndDate, 'YYYY-MM-DD', true).endOf('day').toISOString();
+      slotsForTicketing = [{ startTime: '00:00', endTime: '23:59' }];
+    } else {
+      primaryDate = values.isRecurring
+        ? firstRecurringOccurrence?.format('YYYY-MM-DD') || ''
+        : values.selectedDate;
+      const primaryStartTime = values.isRecurring ? values.timeSlots[0]?.startTime || '' : values.startTime;
+      const primaryEndTime = values.isRecurring ? values.timeSlots[0]?.endTime || '' : values.endTime;
+      startDateTime = toIsoDateTime(primaryDate, primaryStartTime);
+      endDateTime = values.isRecurring
+        ? toIsoDateTime(primaryDate, primaryEndTime)
+        : toIsoEndDateTime(primaryDate, primaryEndTime, values.dateType);
+      recurrenceRule = values.isRecurring ? buildRecurringRule(values) : '';
+      slotsForTicketing = values.isRecurring
+        ? values.timeSlots
+        : [{ startTime: values.startTime, endTime: values.endTime }];
+    }
+
+    if (!startDateTime || !endDateTime || (values.isRecurring && values.dateType !== 'itinerary' && !recurrenceRule)) {
       toast({
         title: 'Invalid date or time',
         description: 'Please choose a valid date and time range.',
@@ -558,7 +618,15 @@ export default function ExperienceDates({
         description: 'Experience dates updated successfully.',
         variant: 'success',
       });
-      onDatesUpdatedSuccess?.(hasAtLeastOneTicket ? 'guests' : undefined);
+      if (values.dateType === 'itinerary') {
+        onDatesUpdatedSuccess?.(undefined);
+        onItineraryCustomise?.({
+          startDate: values.itineraryStartDate,
+          endDate: values.itineraryEndDate,
+        });
+      } else {
+        onDatesUpdatedSuccess?.(hasAtLeastOneTicket ? 'guests' : undefined);
+      }
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error
@@ -676,7 +744,8 @@ export default function ExperienceDates({
               )}
             />
 
-            {/* Recurring Experience Checkbox */}
+            {/* Recurring Experience Checkbox - hidden for itinerary */}
+            {dateType !== 'itinerary' && (
             <FormField
               control={form.control}
               name="isRecurring"
@@ -698,8 +767,85 @@ export default function ExperienceDates({
                 </FormItem>
               )}
             />
+            )}
 
-            {isRecurring ? (
+            {dateType === 'itinerary' ? (
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="itineraryDateType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <PillRadioGroup
+                          options={[
+                            { value: 'specific', label: 'Specific Dates' },
+                            { value: 'flexible', label: 'Flexible Dates' },
+                          ]}
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="space-y-2">
+                  <FormLabel className="text-xs font-medium text-gray-800">
+                    Select itinerary date(s)
+                  </FormLabel>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="itineraryStartDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <DatePicker
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="Start Date"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="itineraryEndDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <DatePicker
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="End Date"
+                              minDate={
+                                itineraryStartDate
+                                  ? moment(itineraryStartDate, 'YYYY-MM-DD', true).toDate()
+                                  : undefined
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {itineraryStartDate && moment(itineraryStartDate, 'YYYY-MM-DD', true).isValid() && (
+                    <div className="inline-flex rounded-full border border-[#9CC3FF] bg-[#DCEBFF] px-4 py-2 text-xs italic font-medium text-[#65758B]">
+                      Your first experience will be on{' '}
+                      {moment(itineraryStartDate, 'YYYY-MM-DD', true).format('dddd D, MMMM')}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : isRecurring ? (
               <div className="space-y-4">
                 <FormField
                   control={form.control}
@@ -858,7 +1004,7 @@ export default function ExperienceDates({
             ) : (
               <div className="space-y-2">
                 <FormLabel className="text-xs font-medium text-gray-800">
-                  Select Experience date(s)
+                  Select experience date(s)
                 </FormLabel>
 
                 <FormField
@@ -946,7 +1092,11 @@ export default function ExperienceDates({
                   {isUpdatingExperience
                     ? pendingActionLabel
                     : (submitActionLabel ??
-                      (experience?.tickets?.length ? 'Continue' : 'Create Tickets'))}
+                      (dateType === 'itinerary'
+                        ? 'Customise Itinerary'
+                        : experience?.tickets?.length
+                          ? 'Continue'
+                          : 'Create Tickets'))}
                 </Button>
               </div>
             </div>

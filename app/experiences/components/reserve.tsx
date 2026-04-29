@@ -9,9 +9,9 @@ import numeral from 'numeral';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import PaymentForm, { paymentFormSchema } from '@/components/ui/paymentForm';
+import { PaymentForm, paymentFormSchema } from '@/components/ui/paymentForm';
 import PaymentSuccess from '@/components/ui/paymentSuccess';
-import Paystack from '@/components/ui/paystack';
+import { Paystack } from '@/components/ui/paystack';
 import Quantity from '@/components/ui/quantity';
 import { Separator } from '@/components/ui/separator';
 import { usePurchaseExperienceTicket } from '@/hooks/experiences';

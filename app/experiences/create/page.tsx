@@ -50,6 +50,7 @@ function CreateExperiencePageContent() {
   const [activeStep, setActiveStep] = useState<ExperienceStepId>(stepFromUrl || 'community');
   const [experienceId, setExperienceId] = useState<string | null>(experienceIdFromUrl);
   const [hasUpdatedDates, setHasUpdatedDates] = useState(false);
+  const [itineraryConfig, setItineraryConfig] = useState<{ startDate: string; endDate: string } | null>(null);
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>([]);
   const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
 
@@ -73,6 +74,7 @@ function CreateExperiencePageContent() {
   useEffect(() => {
     setExperienceId(experienceIdFromUrl);
     setHasUpdatedDates(false);
+    setItineraryConfig(null);
   }, [experienceIdFromUrl]);
 
   useEffect(() => {
@@ -165,6 +167,9 @@ function CreateExperiencePageContent() {
               replaceCreateUrlParams({ step: nextStep });
             }
           }}
+          onItineraryCustomise={(config) => {
+            setItineraryConfig(config);
+          }}
           onInvitesChange={(members, communities) => {
             setInvitedMembers(members);
             setInvitedCommunities(communities);
@@ -179,6 +184,7 @@ function CreateExperiencePageContent() {
           experienceId={experienceId}
           experience={experience}
           canShowDateTickets={hasUpdatedDates}
+          itineraryConfig={itineraryConfig}
           invitedMembers={invitedMembers}
           invitedCommunities={invitedCommunities}
         />

@@ -5,7 +5,7 @@ import { useRef } from 'react';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import PaymentForm, { paymentFormSchema } from '@/components/ui/paymentForm';
+import { PaymentForm, paymentFormSchema } from '@/components/ui/paymentForm';
 import { toast } from '@/hooks/use-toast';
 
 export default function PaymentDetails({

@@ -5,13 +5,13 @@ import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
 
 import { Button } from './button';
 
-export default function PaymentSuccess({
+export const PaymentSuccess = ({
   isOpen,
   closeModal,
 }: {
   isOpen: boolean;
   closeModal: (goToInviteGuests: boolean) => void;
-}) {
+}) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={() => closeModal(false)}>
       <AlertDialogContent className="flex h-auto w-[calc(100%-32px)] flex-col items-center justify-center gap-4 rounded-lg p-6 sm:h-[21rem] sm:w-[30rem] sm:max-w-none sm:p-0">
@@ -31,4 +31,5 @@ export default function PaymentSuccess({
       </AlertDialogContent>
     </AlertDialog>
   );
-}
+};
+

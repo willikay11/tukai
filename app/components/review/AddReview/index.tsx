@@ -10,7 +10,7 @@ import { StarIcon } from '@hugeicons/react-pro';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import Drawer from '@/components/ui/drawer';
+import { Drawer } from '@/components/ui/drawer';
 import {
   Form,
   FormControl,
@@ -19,7 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import ImageUpload from '@/components/ui/imageUpload';
+import { ImageUpload } from '@/components/ui/imageUpload';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Photo } from '@/types/photo';

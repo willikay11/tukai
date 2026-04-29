@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 import { motion } from 'framer-motion';
 
-import NoData from '@/components/ui/noData';
+import { NoData } from '@/components/ui/noData';
 import { Status } from '@/enums/status';
 import { useGetCommunities } from '@/hooks/communities';
 import { Community } from '@/types/community';

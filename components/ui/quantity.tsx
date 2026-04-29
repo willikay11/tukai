@@ -16,12 +16,12 @@ interface QuantitySelectorProps {
   onChange?: (value: number, type: 'increase' | 'decrease') => void;
 }
 
-export default function Quantity({
+export const Quantity = ({
   initialValue = 1,
   min = 1,
   max = 999,
   onChange,
-}: QuantitySelectorProps) {
+}: QuantitySelectorProps) => {
   const [quantity, setQuantity] = useState(initialValue);
 
   const handleDecrease = () => {
@@ -69,4 +69,5 @@ export default function Quantity({
       </button>
     </div>
   );
-}
+};
+

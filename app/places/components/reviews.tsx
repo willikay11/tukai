@@ -1,7 +1,7 @@
 'use client';
 
 import Review from '@/app/components/review';
-import NoData from '@/components/ui/noData';
+import { NoData } from '@/components/ui/noData';
 import {
   useDeletePlaceReview,
   useDeletePlaceReviewImage,

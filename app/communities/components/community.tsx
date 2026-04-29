@@ -4,7 +4,7 @@ import { useState } from 'react';
 import sanitizeHtml from 'sanitize-html';
 
 import { EventSkeleton } from '@/app/components/skeletons';
-import ImageCarousel from '@/components/ui/imageCarousel';
+import { ImageCarousel } from '@/components/ui/imageCarousel';
 import { Community } from '@/types/community';
 
 import CommunityMembers from './communityMembers';

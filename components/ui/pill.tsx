@@ -4,4 +4,5 @@ export default function Pill({ children }: { children: React.ReactNode }) {
       {children}
     </div>
   );
-}
+};
+

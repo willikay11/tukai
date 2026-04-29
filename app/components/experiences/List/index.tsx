@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 import SingleExperience from '@/app/components/experiences/Single';
-import NoData from '@/components/ui/noData';
+import { NoData } from '@/components/ui/noData';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { Status } from '@/enums/status';
 import { Experience } from '@/types/experience';
