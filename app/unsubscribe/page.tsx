@@ -117,7 +117,7 @@ function UnsubscribeContent() {
   );
 }
 
-export default function UnsubscribePage() {
+export const UnsubscribePage = () => {
   return (
     <Suspense
       fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}
@@ -127,4 +127,4 @@ export default function UnsubscribePage() {
       </PageLayoutContent>
     </Suspense>
   );
-}
+};

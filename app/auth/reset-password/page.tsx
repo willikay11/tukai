@@ -22,7 +22,7 @@ type Inputs = {
   confirmPassword: string;
 };
 
-export default function Page() {
+export const Page = () => {
   const router = useRouter();
   const account = useSelector((state: any) => state.resetReducer.account);
   const {
@@ -191,4 +191,4 @@ export default function Page() {
       <MobileStore />
     </>
   );
-}
+};

@@ -30,7 +30,7 @@ function parseExperienceStepId(step: string | null): ExperienceStepId | null {
   return EXPERIENCE_STEPS.includes(step as ExperienceStepId) ? (step as ExperienceStepId) : null;
 }
 
-export default function CreateExperiencePage() {
+export const CreateExperiencePage = () => {
   return (
     <Suspense fallback={null}>
       <CreateExperiencePageContent />
@@ -191,4 +191,4 @@ function CreateExperiencePageContent() {
       </div>
     </main>
   );
-}
+};

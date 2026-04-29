@@ -12,13 +12,13 @@ export interface ReviewInfoSectionProps {
   onEdit?: () => void;
 }
 
-export default function ReviewInfoSection({
+export const ReviewInfoSection = ({
   title,
   description,
   variant,
   editable = false,
   onEdit,
-}: ReviewInfoSectionProps) {
+}: ReviewInfoSectionProps) => {
   if (!description?.trim()) {
     return null;
   }
@@ -55,4 +55,4 @@ export default function ReviewInfoSection({
       />
     </div>
   );
-}
+};

@@ -22,7 +22,7 @@ export interface SavedTicketCardProps {
   isDeleting?: boolean;
 }
 
-export default function SavedTicketCard({
+export const SavedTicketCard = ({
   name,
   quantity,
   amount,
@@ -31,7 +31,7 @@ export default function SavedTicketCard({
   onEdit,
   onDelete,
   isDeleting = false,
-}: SavedTicketCardProps) {
+}: SavedTicketCardProps) => {
   return (
     <div className="relative rounded-[12px] border border-dashed border-primary bg-emerald-50 p-2">
       {/* Top notch */}
@@ -100,4 +100,4 @@ export default function SavedTicketCard({
       </div>
     </div>
   );
-}
+};

@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useCreatePlaceReviewComment, usePlaceReviewComments } from '@/hooks/places';
 import { Comment } from '@/types/comment';
 
-import ViewComment from './viewComment';
+import { ViewComment } from './viewComment';
 
 const formSchema = z.object({
   comment: z.string().min(2, {

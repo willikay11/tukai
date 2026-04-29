@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PlaceCategory } from '@/types/placeCategory';
 
 import TabExperiences from './experiences';
-import Reviews from './reviews';
+import { Reviews } from './reviews';
 
 type placeTabsProps = {
   placeId: string;

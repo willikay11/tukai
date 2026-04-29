@@ -15,7 +15,7 @@ import { IconComponent } from '@/app/components/iconComponent';
 import { toast } from '@/hooks/use-toast';
 import { removeUser } from '@/slices/userSlice';
 
-export default function Page() {
+export const Page = () => {
   const timezone = moment.tz.guess();
   const router = useRouter();
   const newUser = useSelector((state: any) => state.userReducer.newUser);
@@ -155,4 +155,4 @@ export default function Page() {
       </div>
     </>
   );
-}
+};

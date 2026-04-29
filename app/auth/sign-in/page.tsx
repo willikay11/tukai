@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { SignInForm } from '@/components/ui/form/sign-in';
 import { toast } from '@/hooks/use-toast';
 
-export default function Page() {
+export const Page = () => {
   const router = useRouter();
 
   return (
@@ -20,4 +20,4 @@ export default function Page() {
       }}
     />
   );
-}
+};

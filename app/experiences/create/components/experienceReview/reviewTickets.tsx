@@ -12,12 +12,12 @@ export interface ReviewTicketsProps {
   onEdit?: () => void;
 }
 
-export default function ReviewTickets({
+export const ReviewTickets = ({
   tickets,
   coverPhoto,
   editable = false,
   onEdit,
-}: ReviewTicketsProps) {
+}: ReviewTicketsProps) => {
   if (!tickets || tickets.length === 0) {
     return null;
   }
@@ -55,4 +55,4 @@ export default function ReviewTickets({
       </div>
     </div>
   );
-}
+};

@@ -38,7 +38,7 @@ const STEPS = [
   { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
 ];
 
-export default function CreateExperienceSteps({
+export const CreateExperienceSteps = ({
   currentStep = 'community',
   onStepChange,
   onExperienceCreated,
@@ -56,7 +56,7 @@ export default function CreateExperienceSteps({
   onInvitesChange?: (members: InvitedMember[], communities: Community[]) => void;
   experience?: Experience;
   isLoadingExperience?: boolean;
-}) {
+}) => {
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const { data: walletsResponse } = useGetWallets();
   const hasSavedWallets = (walletsResponse?.data?.results?.length ?? 0) > 0;
@@ -182,4 +182,4 @@ export default function CreateExperienceSteps({
       </TabsContent>
     </Tabs>
   );
-}
+};

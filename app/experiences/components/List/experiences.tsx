@@ -22,7 +22,7 @@ type ListExperiencesProps = {
   noDataMessage?: string;
 };
 
-export default function Experiences({
+export const Experiences = ({
   title,
   category,
   skeletonCount = 4,
@@ -32,7 +32,7 @@ export default function Experiences({
   isBookedmarked = false,
   isHosted = false,
   noDataMessage,
-}: ListExperiencesProps) {
+}: ListExperiencesProps) => {
   const { selectedCategoryId } = useSelectedCategory();
   const { data: session } = useSession();
   const [page, setPage] = useState(1);
@@ -120,4 +120,4 @@ export default function Experiences({
   document.body.appendChild(portalRoot);
 
   return createPortal(content, portalRoot);
-}
+};

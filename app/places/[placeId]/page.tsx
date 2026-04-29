@@ -13,7 +13,7 @@ import { Place, PlaceProperty, PlaceSocialLink } from '@/types/place';
 import PlaceActions from '../components/placeActions';
 import PlaceTabs from '../components/placeTabs';
 
-export default async function ViewPlacePage({ params }: { params: { placeId: string } }) {
+export const ViewPlacePage = async ({ params }: { params: { placeId: string } }) => {
   const placeResponse: ApiResponse = await fetchPlace(params.placeId);
   const placePropertyResponse: ApiResponse = await fetchPlaceProperties(params.placeId);
   const placeSocialLinksResponse: ApiResponse = await fetchPlaceSocialLinks(params.placeId);
@@ -155,4 +155,4 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
       </div>
     </main>
   );
-}
+};

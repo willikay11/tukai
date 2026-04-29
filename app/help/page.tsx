@@ -7,7 +7,7 @@ import { useHelp } from '@/hooks/pages';
 
 import Loader from '../components/form/loader';
 
-export default function HelpPage() {
+export const HelpPage = () => {
   const { data, isPending, isError } = useHelp();
 
   return (
@@ -34,4 +34,4 @@ export default function HelpPage() {
       </div>
     </PageLayoutContent>
   );
-}
+};

@@ -10,7 +10,7 @@ import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { usePlaceCategories } from '@/hooks/places';
 import { PlaceCategory } from '@/types/placeCategory';
 
-export default function PageFilters() {
+export const PageFilters = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { setSelectedCategoryId } = useSelectedCategory();

@@ -21,12 +21,12 @@ import { SelectedCategoryProvider } from '@/context/SelectedCategoryContext';
 import ReactQueryClientProvider from '@/providers/ReactQueryProvider';
 import SessionProvider from '@/providers/SessionProvider';
 
-import LocationPrompt from './components/locationPrompt';
-import Nav from './components/nav';
-import Search from './components/search';
-import Footer from './components/share/footer';
+import { LocationPrompt } from './components/locationPrompt';
+import { Nav } from './components/nav';
+import { Search } from './components/search';
+import { Footer } from './components/share/footer';
 import { PillsSkeleton } from './components/skeletons';
-import UserLocation from './components/userLocation';
+import { UserLocation } from './components/userLocation';
 import './globals.css';
 import { ReduxProvider } from './redux-provider';
 
@@ -40,11 +40,11 @@ export const metadata: Metadata = {
     "Tukai is your go-to app for discovering exciting events and experiences happening around you. Whether you're looking for live concerts, festivals, social gatherings, or cultural events, Tukai makes it easy to stay connected and find the best activities in your area. Explore and enjoy real-time updates on local experiences tailored to your interests, and never miss out on the fun again.",
 };
 
-export default function RootLayout({
+export const RootLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>) => {
   return (
     <html lang="en">
       <body className={`${satoshi.className} flex min-h-screen flex-col`}>
@@ -136,4 +136,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+};

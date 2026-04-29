@@ -17,13 +17,13 @@ type DayItem = {
   isExpanded: boolean;
 };
 
-export default function CustomiseItinerary({
+export const CustomiseItinerary = ({
   startDate,
   endDate,
 }: {
   startDate: string;
   endDate: string;
-}) {
+}) => {
   const startMoment = moment(startDate, 'YYYY-MM-DD', true);
   const endMoment = moment(endDate, 'YYYY-MM-DD', true);
   const numDays = endMoment.diff(startMoment, 'days') + 1;
@@ -188,4 +188,4 @@ export default function CustomiseItinerary({
       </Button>
     </div>
   );
-}
+};

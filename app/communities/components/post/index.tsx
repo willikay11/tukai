@@ -13,13 +13,13 @@ import { ImageCarousel } from '@/components/ui/imageCarousel';
 import { CommunityPost } from '@/types/community';
 import { Photo } from '@/types/photo';
 
-export default function Post({
+export const Post = ({
   post,
   showCommunityTitle = true,
 }: {
   post: CommunityPost;
   showCommunityTitle?: boolean;
-}) {
+}) => {
   const [isLiked, setIsLiked] = useState(post.isLiked);
   const [likesCount, setLikesCount] = useState(post.totalLikes ?? 0);
 
@@ -113,4 +113,4 @@ export default function Post({
       </div>
     </div>
   );
-}
+};

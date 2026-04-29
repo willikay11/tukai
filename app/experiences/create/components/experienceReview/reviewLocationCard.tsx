@@ -13,7 +13,7 @@ export interface ReviewLocationCardProps {
   onEdit?: () => void;
 }
 
-export default function ReviewLocationCard({
+export const ReviewLocationCard = ({
   title,
   location: _location,
   startDate: _startDate,
@@ -21,7 +21,7 @@ export default function ReviewLocationCard({
   showTime: _showTime = false,
   editable = false,
   onEdit,
-}: ReviewLocationCardProps) {
+}: ReviewLocationCardProps) => {
   const isMeetingSection = title.toLowerCase().includes('meeting');
 
   const cardData = isMeetingSection
@@ -91,4 +91,4 @@ export default function ReviewLocationCard({
       </div>
     </div>
   );
-}
+};

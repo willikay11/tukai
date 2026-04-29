@@ -5,9 +5,9 @@ import sanitizeHtml from 'sanitize-html';
 import { PageLayoutContent } from '@/app/components/pageLayoutContent';
 import { usePrivacyPolicy } from '@/hooks/pages';
 
-import Loader from '../components/form/loader';
+import { Loader } from '../components/form/loader';
 
-export default function PrivacyPage() {
+export const PrivacyPage = () => {
   const { data, isPending, isError } = usePrivacyPolicy();
 
   return (
@@ -36,4 +36,4 @@ export default function PrivacyPage() {
       </div>
     </PageLayoutContent>
   );
-}
+};

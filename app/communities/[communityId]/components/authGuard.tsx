@@ -8,7 +8,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { SignInForm } from '@/components/ui/form/sign-in';
 import { toast } from '@/hooks/use-toast';
 
-export default function AuthGuard() {
+export const AuthGuard = () => {
   const [open, setOpen] = useState(true);
   const router = useRouter();
 
@@ -34,4 +34,4 @@ export default function AuthGuard() {
       </DialogContent>
     </Dialog>
   );
-}
+};

@@ -10,11 +10,11 @@ export interface ReviewCommunitiesProps {
   onEdit?: () => void;
 }
 
-export default function ReviewCommunities({
+export const ReviewCommunities = ({
   communities,
   editable = false,
   onEdit,
-}: ReviewCommunitiesProps) {
+}: ReviewCommunitiesProps) => {
   // Placeholder - communities invited to the experience would come from props
   // For now, showing a sample structure
   if (!communities || communities.length === 0) {
@@ -58,4 +58,4 @@ export default function ReviewCommunities({
       </div>
     </div>
   );
-}
+};

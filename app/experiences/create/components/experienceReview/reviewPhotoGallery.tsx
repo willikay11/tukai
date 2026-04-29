@@ -6,7 +6,7 @@ export interface ReviewPhotoGalleryProps {
   photos?: Photo[];
 }
 
-export default function ReviewPhotoGallery({ photos }: ReviewPhotoGalleryProps) {
+export const ReviewPhotoGallery = ({ photos }: ReviewPhotoGalleryProps) => {
   if (!photos || photos.length === 0) {
     return null;
   }
@@ -27,4 +27,4 @@ export default function ReviewPhotoGallery({ photos }: ReviewPhotoGalleryProps) 
       ))}
     </div>
   );
-}
+};

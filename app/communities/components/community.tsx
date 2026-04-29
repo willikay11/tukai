@@ -7,7 +7,7 @@ import { EventSkeleton } from '@/app/components/skeletons';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
 import { Community } from '@/types/community';
 
-import CommunityMembers from './communityMembers';
+import { CommunityMembers } from './communityMembers';
 
 export const SingleCommunity = ({
   community,

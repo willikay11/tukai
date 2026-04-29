@@ -12,20 +12,20 @@ import { ApiResponse } from '@/types/apiResponse';
 import { Community, CommunityMember } from '@/types/community';
 import { Photo } from '@/types/photo';
 
-import CommunityAdministrator from '../components/communityAdministrator';
-import CommunityMembers from '../components/communityMembers';
-import Join from '../components/join';
-import UpcomingExperiences from '../components/upcomingExperiences';
-import AuthGuard from './components/authGuard';
-import CommunityTabs from './components/communityTabs';
+import { CommunityAdministrator } from '../components/communityAdministrator';
+import { CommunityMembers } from '../components/communityMembers';
+import { Join } from '../components/join';
+import { UpcomingExperiences } from '../components/upcomingExperiences';
+import { AuthGuard } from './components/authGuard';
+import { CommunityTabs } from './components/communityTabs';
 
-export default async function ViewCommunityPage({
+export const ViewCommunityPage = async ({
   params,
   searchParams,
 }: {
   params: { communityId: string };
   searchParams: { token?: string };
-}) {
+}) => {
   const token = searchParams.token;
   const session: Session | null = await getAuthSession();
 
@@ -147,4 +147,4 @@ export default async function ViewCommunityPage({
       </div>
     </>
   );
-}
+};

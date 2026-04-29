@@ -11,7 +11,7 @@ import { useSubscriptionPlans } from '@/hooks/subscriptions';
 import Package from './components/package';
 import PaymentDetails from './components/paymentDetails';
 
-export default function Page() {
+export const Page = () => {
   const [paymentMethod, setPaymentMethod] = useState<{
     paymentMethodId: string;
     phoneNumber: string;

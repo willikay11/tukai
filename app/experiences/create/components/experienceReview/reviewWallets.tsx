@@ -16,7 +16,7 @@ const maskAccountNumber = (value?: string) => {
   return `**** **** **** ${visible}`;
 };
 
-export default function ReviewWallets({ editable = false, onEdit }: ReviewWalletsProps) {
+export const ReviewWallets = ({ editable = false, onEdit }: ReviewWalletsProps) => {
   const { data: walletsResponse, isLoading } = useGetWallets();
   const wallets: Wallet[] = walletsResponse?.data?.results ?? [];
   const activeWallets = wallets.filter((wallet) => wallet.isActive);
@@ -76,4 +76,4 @@ export default function ReviewWallets({ editable = false, onEdit }: ReviewWallet
       </div>
     </div>
   );
-}
+};

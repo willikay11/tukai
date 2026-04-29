@@ -3,10 +3,10 @@ import { Session } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { getAuthSession } from '@/lib/auth';
 
-import AuthGuard from './[communityId]/components/authGuard';
+import { AuthGuard } from './[communityId]/components/authGuard';
 import List from './components/list';
 
-export default async function CommunitiesPage() {
+export const CommunitiesPage = async () => {
   const session: Session | null = await getAuthSession();
 
   if (!session) {
@@ -20,4 +20,4 @@ export default async function CommunitiesPage() {
       </div>
     </main>
   );
-}
+};

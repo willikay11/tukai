@@ -23,9 +23,9 @@ import { Community } from '@/types/community';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';
 
-import FileUploadField from '../../components/fileUploadField';
-import IconComponent from '../../components/iconComponent';
-import LocationAutocompleteField from '../../components/locationAutocompleteField';
+import { FileUploadField } from '../../components/fileUploadField';
+import { IconComponent } from '../../components/iconComponent';
+import { LocationAutocompleteField } from '../../components/locationAutocompleteField';
 
 const createCommunitySchema = z.object({
   communityName: z.string().min(2, { message: 'Community name is required.' }),

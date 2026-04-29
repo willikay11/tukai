@@ -31,12 +31,12 @@ interface CreateExperienceWalletProps {
   hideSaveAndExit?: boolean;
 }
 
-export default function CreateExperienceWallet({
+export const CreateExperienceWallet = ({
   cancelActionLabel = 'Cancel',
   saveAndExitActionLabel = 'Save & Exit',
   previewAndPublishActionLabel = 'Preview & Publish',
   hideSaveAndExit = false,
-}: CreateExperienceWalletProps) {
+}: CreateExperienceWalletProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const experienceId = searchParams.get('experienceId');
@@ -418,4 +418,4 @@ export default function CreateExperienceWallet({
       ) : null}
     </div>
   );
-}
+};

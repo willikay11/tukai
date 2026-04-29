@@ -15,11 +15,11 @@ type ListExperiencesProps = {
   isPortal?: boolean;
 };
 
-export default function Experiences({
+export const Experiences = ({
   category,
   skeletonCount = 12,
   isPortal = false,
-}: ListExperiencesProps) {
+}: ListExperiencesProps) => {
   const [page, setPage] = useState(1);
   const [hasExperiences, setHasExperiences] = useState<boolean | null>(null);
   const { data: session } = useSession();
@@ -102,4 +102,4 @@ export default function Experiences({
   document.body.appendChild(portalRoot);
 
   return createPortal(content, portalRoot);
-}
+};

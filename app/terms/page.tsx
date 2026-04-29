@@ -7,7 +7,7 @@ import { useTermsOfService } from '@/hooks/pages';
 
 import Loader from '../components/form/loader';
 
-export default function TermsPage() {
+export const TermsPage = () => {
   const { data, isPending, isError } = useTermsOfService();
 
   return (
@@ -36,4 +36,4 @@ export default function TermsPage() {
       </div>
     </PageLayoutContent>
   );
-}
+};

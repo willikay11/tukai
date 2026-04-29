@@ -14,7 +14,7 @@ import { useFetchSingleExperience } from '@/hooks/experiences';
 
 import ExperienceDates from '../../create/components/dates';
 
-export default function ExperienceReviewPage() {
+export const ExperienceReviewPage = () => {
   const params = useParams<{ experienceId: string | string[] }>();
   const experienceId =
     typeof params?.experienceId === 'string'
@@ -118,4 +118,4 @@ export default function ExperienceReviewPage() {
       </div>
     </main>
   );
-}
+};

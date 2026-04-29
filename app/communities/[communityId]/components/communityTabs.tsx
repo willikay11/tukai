@@ -12,13 +12,13 @@ import { useCommunityPostPhotos, useCommunityPosts } from '@/hooks/communities';
 import { CommunityPost } from '@/types/community';
 import { Photo } from '@/types/photo';
 
-import Post from '../../components/post';
+import { Post } from '../../components/post';
 
 type communityTabsProps = {
   communityId: string;
 };
 
-export default function CommunityTabs({ communityId }: communityTabsProps) {
+export const CommunityTabs = ({ communityId }: communityTabsProps) => {
   const { data: communityPosts, isLoading } = useCommunityPosts(
     { community: communityId, page: 1 },
     true,
@@ -85,4 +85,4 @@ export default function CommunityTabs({ communityId }: communityTabsProps) {
       </TabsContent>
     </Tabs>
   );
-}
+};

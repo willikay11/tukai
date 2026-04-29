@@ -287,13 +287,13 @@ function parseRecurringWeekdayLabels(recurrenceRule: string): string[] {
   }
 }
 
-export default function CreateTickets({
+export const CreateTickets = ({
   experienceId,
   experience,
 }: {
   experienceId?: string | null;
   experience?: Experience;
-}) {
+}) => {
   const savedRecurrenceRule =
     (experience as Experience & { recurrenceRule?: string; recurrence_rule?: string })
       ?.recurrence_rule ||
@@ -943,4 +943,4 @@ export default function CreateTickets({
       </div>
     </form>
   );
-}
+};

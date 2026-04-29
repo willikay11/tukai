@@ -4,11 +4,11 @@ import { Experience } from '@/types/experience';
 
 import Reserve from '../../components/reserve';
 
-export default async function ReserveExperiencePage({
+export const ReserveExperiencePage = async ({
   params,
 }: {
   params: { experienceId: string };
-}) {
+}) => {
   const experienceResponse: ApiResponse = await fetchExperience(params.experienceId);
   if (!experienceResponse.data) {
     return;
@@ -25,4 +25,4 @@ export default async function ReserveExperiencePage({
       </main>
     </>
   );
-}
+};

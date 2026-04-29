@@ -34,13 +34,13 @@ export interface ExperienceReviewProps {
   onEditRequest?: (section: 'about' | 'dates' | 'tickets' | 'invites' | 'wallet') => void;
 }
 
-export default function ExperienceReview({
+export const ExperienceReview = ({
   type = 'create',
   experience,
   invitedMembers = [],
   invitedCommunities = [],
   onEditRequest,
-}: ExperienceReviewProps) {
+}: ExperienceReviewProps) => {
   const router = useRouter();
   const [publishSuccessOpen, setPublishSuccessOpen] = useState(false);
 
@@ -339,4 +339,4 @@ export default function ExperienceReview({
       />
     </div>
   );
-}
+};

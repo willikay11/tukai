@@ -382,7 +382,7 @@ interface ExperienceDatesProps {
   hideSaveAndExit?: boolean;
 }
 
-export default function ExperienceDates({
+export const ExperienceDates = ({
   experienceId,
   experience,
   onDatesUpdatedSuccess,
@@ -393,7 +393,7 @@ export default function ExperienceDates({
   submitActionLabel,
   pendingActionLabel = 'Saving...',
   hideSaveAndExit = false,
-}: ExperienceDatesProps) {
+}: ExperienceDatesProps) => {
   const { mutateAsync: updateExperience, isPending: isUpdatingExperience } = useUpdateExperience(
     experienceId || '',
   );
@@ -1105,4 +1105,4 @@ export default function ExperienceDates({
       </div>
     </div>
   );
-}
+};

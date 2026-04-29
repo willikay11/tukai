@@ -14,7 +14,7 @@ import ExperienceReview from './experienceReview';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
-export default function ExperienceStepSidePanel({
+export const ExperienceStepSidePanel = ({
   step,
   experienceId,
   experience,
@@ -30,7 +30,7 @@ export default function ExperienceStepSidePanel({
   itineraryConfig?: { startDate: string; endDate: string } | null;
   invitedMembers?: InvitedMember[];
   invitedCommunities?: Community[];
-}) {
+}) => {
   const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
     community: (
       <StepPlaceholderContent
@@ -88,4 +88,4 @@ function StepPlaceholderContent({ title, description }: { title: string; descrip
       </div>
     </>
   );
-}
+};

@@ -11,12 +11,12 @@ export interface ReviewGuestsProps {
   onEdit?: () => void;
 }
 
-export default function ReviewGuests({
+export const ReviewGuests = ({
   guests,
   maxDisplay = 6,
   editable = false,
   onEdit,
-}: ReviewGuestsProps) {
+}: ReviewGuestsProps) => {
   if (!guests || guests.length === 0) {
     return null;
   }
@@ -61,4 +61,4 @@ export default function ReviewGuests({
       </div>
     </div>
   );
-}
+};

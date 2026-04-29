@@ -10,11 +10,11 @@ export interface ReviewCategoriesProps {
   onEdit?: () => void;
 }
 
-export default function ReviewCategories({
+export const ReviewCategories = ({
   categories,
   editable = false,
   onEdit,
-}: ReviewCategoriesProps) {
+}: ReviewCategoriesProps) => {
   if (!categories || categories.length === 0) {
     return null;
   }
@@ -47,4 +47,4 @@ export default function ReviewCategories({
       </div>
     </div>
   );
-}
+};

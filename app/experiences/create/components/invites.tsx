@@ -23,7 +23,7 @@ interface CreateExperienceInvitesProps {
   hideSaveAndExit?: boolean;
 }
 
-export default function CreateExperienceInvites({
+export const CreateExperienceInvites = ({
   experienceId,
   experience,
   onInvitesChange,
@@ -32,7 +32,7 @@ export default function CreateExperienceInvites({
   saveAndExitActionLabel = 'Save & Exit',
   nextActionLabel = 'Next',
   hideSaveAndExit = false,
-}: CreateExperienceInvitesProps) {
+}: CreateExperienceInvitesProps) => {
   const initialInvitedMembers = useMemo<InvitedMember[]>(() => {
     if (!experience?.guests?.length) {
       return [];
@@ -244,4 +244,4 @@ export default function CreateExperienceInvites({
       </div>
     </div>
   );
-}
+};

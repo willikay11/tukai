@@ -83,7 +83,7 @@ const features = [
     description: 'Yup, no adverts.',
   },
 ];
-export default function Page() {
+export const Page = () => {
   const router = useRouter();
 
   return (
@@ -134,4 +134,4 @@ export default function Page() {
       </div>
     </>
   );
-}
+};

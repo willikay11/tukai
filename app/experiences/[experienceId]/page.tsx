@@ -17,7 +17,7 @@ import ExperienceActions from '../components/experienceActions';
 import ExperienceDetails from '../components/experienceDetails';
 import ExperienceOrganiser from '../components/experienceOrganiser';
 
-export default async function ViewExperiencePage({ params }: { params: { experienceId: string } }) {
+export const ViewExperiencePage = async ({ params }: { params: { experienceId: string } }) => {
   const experienceResponse: ApiResponse = await fetchExperience(params.experienceId);
   if (!experienceResponse.data) {
     return;
@@ -135,4 +135,4 @@ export default async function ViewExperiencePage({ params }: { params: { experie
       </main>
     </>
   );
-}
+};

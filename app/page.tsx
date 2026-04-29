@@ -1,9 +1,9 @@
 import moment from 'moment';
 
-import Experiences from './experiences/components/List/experiences';
-import InvitedExperiences from './experiences/components/List/invitedExperiences';
+import { Experiences } from './experiences/components/List/experiences';
+import { InvitedExperiences } from './experiences/components/List/invitedExperiences';
 
-export default function ExperiencesPage({ searchParams }: { searchParams: { category?: string } }) {
+export const ExperiencesPage = ({ searchParams }: { searchParams: { category?: string } }) => {
   const categoryFromQuery = searchParams?.category;
 
   return (
@@ -74,4 +74,4 @@ export default function ExperiencesPage({ searchParams }: { searchParams: { cate
       )}
     </main>
   );
-}
+};

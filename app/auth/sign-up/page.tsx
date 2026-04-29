@@ -9,7 +9,7 @@ import { Anchor } from '@/app/components/form';
 import { MobileStore } from '@/app/components/mobileStore';
 import { Button } from '@/components/ui/button';
 
-export default function Page() {
+export const Page = () => {
   const router = useRouter();
 
   return (
@@ -83,4 +83,4 @@ export default function Page() {
       <MobileStore />
     </>
   );
-}
+};

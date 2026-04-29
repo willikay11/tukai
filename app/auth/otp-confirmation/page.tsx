@@ -12,7 +12,7 @@ import { Button } from '@/app/components/form';
 import { OtpInput } from '@/app/components/form/otpInput';
 import { toast } from '@/hooks/use-toast';
 
-export default function OtpConfirmation() {
+export const OtpConfirmation = () => {
   const router = useRouter();
   const newUser = useSelector((state: any) => state.userReducer.newUser);
   const [token, setToken] = useState<string | undefined>();
@@ -161,4 +161,4 @@ export default function OtpConfirmation() {
       </div>
     </>
   );
-}
+};

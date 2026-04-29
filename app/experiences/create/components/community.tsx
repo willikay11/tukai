@@ -22,11 +22,11 @@ interface CreateExperienceCommunityProps {
   onContinue: () => void;
 }
 
-export default function CreateExperienceCommunity({
+export const CreateExperienceCommunity = ({
   selectedCommunityId,
   onSelectCommunity,
   onContinue,
-}: CreateExperienceCommunityProps) {
+}: CreateExperienceCommunityProps) => {
   const router = useRouter();
   const { data: session, status: sessionStatus } = useSession();
   const currentUserId = session?.user?.id ?? undefined;
@@ -241,4 +241,4 @@ export default function CreateExperienceCommunity({
       </div>
     </div>
   );
-}
+};

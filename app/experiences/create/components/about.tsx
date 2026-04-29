@@ -145,7 +145,7 @@ interface CreateExperienceAboutProps {
   hideSaveAndExit?: boolean;
 }
 
-export default function CreateExperienceAbout({
+export const CreateExperienceAbout = ({
   onSuccess,
   onClose,
   experience,
@@ -157,7 +157,7 @@ export default function CreateExperienceAbout({
   createPendingActionLabel = 'Creating...',
   editPendingActionLabel = 'Saving...',
   hideSaveAndExit = false,
-}: CreateExperienceAboutProps) {
+}: CreateExperienceAboutProps) => {
   const { data: categories } = useGetInterestCategories();
   const isEditMode = !!experience?.id;
   const hasExistingPhotos = (experience?.photos?.length ?? 0) > 0;
@@ -688,4 +688,4 @@ export default function CreateExperienceAbout({
       </div>
     </div>
   );
-}
+};

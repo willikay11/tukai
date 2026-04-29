@@ -20,7 +20,7 @@ type Inputs = {
   email: string;
 };
 
-export default function Page() {
+export const Page = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const [email, setEmail] = useState<string>();
@@ -132,4 +132,4 @@ export default function Page() {
       <MobileStore />
     </>
   );
-}
+};

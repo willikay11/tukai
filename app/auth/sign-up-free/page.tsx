@@ -33,7 +33,7 @@ const debounce = (func: (...args: any[]) => void, delay: number) => {
   };
 };
 
-export default function Page() {
+export const Page = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const newUser = useSelector((state: any) => state.userReducer.newUser);
@@ -194,4 +194,4 @@ export default function Page() {
       <MobileStore />
     </>
   );
-}
+};
