@@ -3,7 +3,6 @@
 import * as React from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
@@ -15,15 +14,33 @@ export interface TimePickerProps {
   disabled?: boolean;
 }
 
+const ROW_HEIGHT = 32;
+const VISIBLE_ROWS = 5;
+const DRUM_HEIGHT = ROW_HEIGHT * VISIBLE_ROWS;
+const PADDING_ROWS = 2;
+
+const HOURS_ARRAY = Array.from({ length: 12 }, (_, i) => 
+  (i + 1).toString().padStart(2, '0')
+);
+const MINUTES_ARRAY = Array.from({ length: 60 }, (_, i) => 
+  i.toString().padStart(2, '0')
+);
+const PERIOD_ARRAY = ['AM', 'PM'];
+
 const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
   ({ className, value, onChange, placeholder = 'Select time', disabled }, ref) => {
     const [open, setOpen] = React.useState(false);
+    const hoursRef = React.useRef<HTMLDivElement>(null);
+    const minutesRef = React.useRef<HTMLDivElement>(null);
+    const periodRef = React.useRef<HTMLDivElement>(null);
+
     const [hours, setHours] = React.useState('12');
     const [minutes, setMinutes] = React.useState('00');
     const [period, setPeriod] = React.useState<'AM' | 'PM'>('AM');
 
+    // Initialize from value
     React.useEffect(() => {
-      if (value) {
+      if (value && open) {
         const [time] = value.split(' ');
         const [h, m] = time.split(':');
         const hour = parseInt(h, 10);
@@ -32,46 +49,132 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
           setHours('12');
           setPeriod('AM');
         } else if (hour < 12) {
-          setHours(hour.toString());
+          setHours(hour.toString().padStart(2, '0'));
           setPeriod('AM');
         } else if (hour === 12) {
           setHours('12');
           setPeriod('PM');
         } else {
-          setHours((hour - 12).toString());
+          setHours((hour - 12).toString().padStart(2, '0'));
           setPeriod('PM');
         }
         setMinutes(m || '00');
       }
-    }, [value]);
+    }, [value, open]);
 
-    const handleHoursChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setHours(e.target.value);
+    // Scroll to position on open
+    React.useEffect(() => {
+      if (open) {
+        const scrollToIndex = (ref: React.RefObject<HTMLDivElement>, index: number) => {
+          if (ref.current) {
+            const scrollPos = (index + PADDING_ROWS) * ROW_HEIGHT;
+            ref.current.scrollTop = scrollPos;
+          }
+        };
+
+        const hoursIndex = HOURS_ARRAY.indexOf(hours.padStart(2, '0'));
+        const minutesIndex = parseInt(minutes, 10);
+        const periodIndex = PERIOD_ARRAY.indexOf(period);
+
+        scrollToIndex(hoursRef, hoursIndex);
+        scrollToIndex(minutesRef, minutesIndex);
+        scrollToIndex(periodRef, periodIndex);
+      }
+    }, [open, hours, minutes, period]);
+
+    const getOpacity = (scrollTop: number, itemIndex: number) => {
+      const centerPos = scrollTop + DRUM_HEIGHT / 2;
+      const itemPos = (itemIndex + PADDING_ROWS) * ROW_HEIGHT + ROW_HEIGHT / 2;
+      const distance = Math.abs(centerPos - itemPos) / ROW_HEIGHT;
+
+      if (distance < 0.5) return 1;
+      if (distance < 1.5) return 0.6;
+      if (distance < 2.5) return 0.3;
+      return 0;
     };
 
-    const handleMinutesChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setMinutes(e.target.value);
+    const DrumColumn = ({
+      items,
+      ref,
+      onValueChange,
+    }: {
+      items: string[];
+      ref: React.RefObject<HTMLDivElement>;
+      onValueChange: (value: string) => void;
+    }) => {
+      const [scrollTop, setScrollTop] = React.useState(0);
+
+      const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const target = e.currentTarget;
+        setScrollTop(target.scrollTop);
+
+        const selectedIndex = Math.round(target.scrollTop / ROW_HEIGHT) - PADDING_ROWS;
+        if (selectedIndex >= 0 && selectedIndex < items.length) {
+          onValueChange(items[selectedIndex]);
+        }
+      };
+
+      const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        const target = e.currentTarget;
+        const clickY = e.clientY - target.getBoundingClientRect().top;
+        const clickedIndex = Math.round((scrollTop + clickY) / ROW_HEIGHT) - PADDING_ROWS;
+
+        if (clickedIndex >= 0 && clickedIndex < items.length) {
+          onValueChange(items[clickedIndex]);
+          const newScrollPos = (clickedIndex + PADDING_ROWS) * ROW_HEIGHT;
+          target.scrollTop = newScrollPos;
+          setScrollTop(newScrollPos);
+        }
+      };
+
+      return (
+        <div
+          ref={ref}
+          onScroll={handleScroll}
+          onClick={handleClick}
+          className="relative overflow-y-scroll"
+          style={{
+            height: DRUM_HEIGHT,
+            scrollSnapType: 'y mandatory',
+            scrollBehavior: 'smooth',
+          }}
+        >
+          {/* Top padding */}
+          <div style={{ height: PADDING_ROWS * ROW_HEIGHT }} />
+
+          {/* Items */}
+          {items.map((item, index) => (
+            <div
+              key={item}
+              style={{
+                height: ROW_HEIGHT,
+                scrollSnapAlign: 'center',
+                opacity: getOpacity(scrollTop, index),
+                transition: 'opacity 0.1s ease-out',
+              }}
+              className="flex items-center justify-center text-sm font-medium text-gray-900"
+            >
+              {item}
+            </div>
+          ))}
+
+          {/* Bottom padding */}
+          <div style={{ height: PADDING_ROWS * ROW_HEIGHT }} />
+
+          {/* Center highlight */}
+          <div
+            className="pointer-events-none absolute left-0 right-0 border-t border-b border-gray-200 bg-gray-50"
+            style={{
+              top: (DRUM_HEIGHT - ROW_HEIGHT) / 2,
+              height: ROW_HEIGHT,
+            }}
+          />
+        </div>
+      );
     };
 
-    const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setPeriod(e.target.value as 'AM' | 'PM');
-    };
-
-    const handleNow = () => {
-      const now = new Date();
-      let hour = now.getHours();
-      const minute = now.getMinutes();
-
-      const newPeriod = hour >= 12 ? 'PM' : 'AM';
-      const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-
-      setHours(displayHour.toString());
-      setMinutes(minute.toString().padStart(2, '0'));
-      setPeriod(newPeriod);
-    };
-
-    const handleOk = () => {
-      if (hours && minutes && onChange) {
+    const handleSave = () => {
+      if (onChange) {
         let hour24 = parseInt(hours, 10);
         if (period === 'PM' && hour24 !== 12) {
           hour24 += 12;
@@ -93,12 +196,6 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
       return `${displayHour}:${m} ${displayPeriod}`;
     };
 
-    // Generate hours array (1-12)
-    const hoursArray = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
-
-    // Generate minutes array (00-59)
-    const minutesArray = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
-
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -107,7 +204,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
             type="button"
             disabled={disabled}
             className={cn(
-              'flex h-[50px] w-full items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5 text-left text-xs text-gray-700 placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+              'flex h-[55px] w-full items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5 text-left text-xs text-gray-700 placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
               !value && 'text-gray-400',
               className,
             )}
@@ -117,68 +214,50 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
-          <div className="flex gap-2 p-3">
-            <div className="flex flex-col">
-              <select
-                value={hours}
-                onChange={handleHoursChange}
-                className="h-32 w-16 overflow-y-auto rounded border border-gray-200 px-2 py-1 text-center text-sm focus:border-emerald-500 focus:outline-none"
-                size={6}
-              >
-                {hoursArray.map((hour) => (
-                  <option key={hour} value={hour}>
-                    {hour}
-                  </option>
-                ))}
-              </select>
+          <div className="flex items-center gap-0">
+            {/* Hours */}
+            <DrumColumn
+              ref={hoursRef}
+              items={HOURS_ARRAY}
+              onValueChange={setHours}
+            />
+
+            {/* Separator */}
+            <div className="flex h-[160px] items-center px-1 text-sm font-medium text-gray-900">
+              :
             </div>
 
-            <div className="flex items-center text-gray-500">:</div>
+            {/* Minutes */}
+            <DrumColumn
+              ref={minutesRef}
+              items={MINUTES_ARRAY}
+              onValueChange={setMinutes}
+            />
 
-            <div className="flex flex-col">
-              <select
-                value={minutes}
-                onChange={handleMinutesChange}
-                className="h-32 w-16 overflow-y-auto rounded border border-gray-200 px-2 py-1 text-center text-sm focus:border-emerald-500 focus:outline-none"
-                size={6}
-              >
-                {minutesArray.map((minute) => (
-                  <option key={minute} value={minute}>
-                    {minute}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex flex-col">
-              <select
-                value={period}
-                onChange={handlePeriodChange}
-                className="h-32 w-16 overflow-y-auto rounded border border-gray-200 px-2 py-1 text-center text-sm focus:border-emerald-500 focus:outline-none"
-                size={2}
-              >
-                <option value="AM">AM</option>
-                <option value="PM">PM</option>
-              </select>
-            </div>
+            {/* Period */}
+            <DrumColumn
+              ref={periodRef}
+              items={PERIOD_ARRAY}
+              onValueChange={(p) => setPeriod(p as 'AM' | 'PM')}
+            />
           </div>
 
+          {/* Footer */}
           <div className="flex items-center justify-between border-t border-gray-200 px-3 py-2">
             <button
               type="button"
-              onClick={handleNow}
-              className="text-sm text-emerald-600 hover:text-emerald-700"
+              onClick={() => setOpen(false)}
+              className="text-sm font-medium text-red-600 hover:text-red-700"
             >
-              Now
+              Cancel
             </button>
-            <Button
+            <button
               type="button"
-              onClick={handleOk}
-              size="sm"
-              className="rounded bg-gray-200 px-4 text-sm text-gray-700 hover:bg-gray-300"
+              onClick={handleSave}
+              className="text-sm font-medium text-gray-900 hover:text-gray-700"
             >
-              OK
-            </Button>
+              Save
+            </button>
           </div>
         </PopoverContent>
       </Popover>
