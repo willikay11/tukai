@@ -105,7 +105,7 @@ export const DateTypeStep = ({
       />
 
       <div>
-        <label className="block text-sm font-medium text-gray-900 mb-2">
+        <label className="block text-xs font-medium text-gray-900 mb-2">
           Select Experience date(s)
         </label>
         <DatePicker value={formData.date || undefined} onChange={handleDateChange} />
@@ -114,7 +114,7 @@ export const DateTypeStep = ({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">Start Time</label>
+          <label className="block text-xs font-medium text-gray-900 mb-2">Start Time</label>
           <TimePicker
             value={formData.startTime || undefined}
             onChange={handleStartTimeChange}
@@ -124,7 +124,7 @@ export const DateTypeStep = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">End Time</label>
+          <label className="block text-xs font-medium text-gray-900 mb-2">End Time</label>
           <TimePicker
             value={formData.endTime || undefined}
             onChange={handleEndTimeChange}

@@ -28,26 +28,26 @@ export const ExperienceTypeRadio = ({
 
   return (
     <div className="space-y-4">
-      <label className="text-sm font-medium text-gray-900">Experience Type</label>
+      <label className="text-xs font-medium text-gray-900">Experience Type</label>
 
       <RadioGroup value={value} onValueChange={onChange}>
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="one-time" id="one-time" />
-          <label htmlFor="one-time" className="cursor-pointer text-sm font-medium text-gray-900">
+          <label htmlFor="one-time" className="cursor-pointer text-xs font-medium text-gray-900">
             One-Time/Day Experience
           </label>
         </div>
 
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="multi-day" id="multi-day" />
-          <label htmlFor="multi-day" className="cursor-pointer text-sm font-medium text-gray-900">
+          <label htmlFor="multi-day" className="cursor-pointer text-xs font-medium text-gray-900">
             Multi-Day Experience (e.g., 2 days straight)
           </label>
         </div>
 
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="itinerary" id="itinerary" />
-          <label htmlFor="itinerary" className="cursor-pointer text-sm font-medium text-gray-900">
+          <label htmlFor="itinerary" className="cursor-pointer text-xs font-medium text-gray-900">
             Itinerary
           </label>
         </div>
@@ -59,7 +59,7 @@ export const ExperienceTypeRadio = ({
           checked={isRecurring}
           onCheckedChange={handleRecurringChange}
         />
-        <label htmlFor="recurring" className="cursor-pointer text-sm font-medium text-gray-900">
+        <label htmlFor="recurring" className="cursor-pointer text-xs font-medium text-gray-900">
           Create a recurring experience
         </label>
       </div>

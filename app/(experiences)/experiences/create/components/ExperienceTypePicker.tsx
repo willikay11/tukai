@@ -15,7 +15,7 @@ export const ExperienceTypePicker = ({ value, onChange }: ExperienceTypePickerPr
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-900">
+      <label className="text-xs font-medium text-gray-900">
         Is this a free or a paid Experience?
       </label>
 
