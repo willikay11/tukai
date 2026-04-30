@@ -14,7 +14,7 @@ export interface TimePickerProps {
   disabled?: boolean;
 }
 
-const ROW_HEIGHT = 32;
+const ROW_HEIGHT = 28;
 const VISIBLE_ROWS = 5;
 const DRUM_HEIGHT = ROW_HEIGHT * VISIBLE_ROWS;
 const PADDING_ROWS = 2;
@@ -25,7 +25,182 @@ const HOURS_ARRAY = Array.from({ length: 12 }, (_, i) =>
 const MINUTES_ARRAY = Array.from({ length: 60 }, (_, i) => 
   i.toString().padStart(2, '0')
 );
-const PERIOD_ARRAY = ['AM', 'PM'];
+const PERIOD_ARRAY = ['AM', 'PM'] as const;
+
+type TimePeriod = (typeof PERIOD_ARRAY)[number];
+
+const getOpacity = (scrollTop: number, itemIndex: number) => {
+  const centerPos = scrollTop + DRUM_HEIGHT / 2;
+  const itemPos = (itemIndex + PADDING_ROWS) * ROW_HEIGHT + ROW_HEIGHT / 2;
+  const distance = Math.abs(centerPos - itemPos) / ROW_HEIGHT;
+
+  if (distance < 0.5) return 1;
+  if (distance < 1.5) return 0.6;
+  if (distance < 2.5) return 0.3;
+  return 0;
+};
+
+interface DrumColumnProps {
+  open: boolean;
+  items: readonly string[];
+  drumRef: React.RefObject<HTMLDivElement>;
+  onValueChange: (value: string) => void;
+  selectedValue: string;
+  columnWidth?: string;
+}
+
+const DrumColumn = React.memo(
+  ({ open, items, drumRef, onValueChange, selectedValue, columnWidth }: DrumColumnProps) => {
+    const [scrollTop, setScrollTop] = React.useState(0);
+    const lastSelectedIndexRef = React.useRef(-1);
+    const snapTimeoutRef = React.useRef<number | null>(null);
+
+    const clampIndex = React.useCallback(
+      (index: number) => Math.max(0, Math.min(items.length - 1, index)),
+      [items.length],
+    );
+
+    const snapToNearest = React.useCallback(
+      (target: HTMLDivElement, smooth = true) => {
+        const nearestIndex = clampIndex(Math.round(target.scrollTop / ROW_HEIGHT));
+        const nextScrollPos = nearestIndex * ROW_HEIGHT;
+
+        if (Math.abs(target.scrollTop - nextScrollPos) > 0.5) {
+          target.scrollTo({
+            top: nextScrollPos,
+            behavior: smooth ? 'smooth' : 'auto',
+          });
+        }
+
+        setScrollTop(nextScrollPos);
+        if (nearestIndex !== lastSelectedIndexRef.current) {
+          lastSelectedIndexRef.current = nearestIndex;
+          onValueChange(items[nearestIndex]);
+        }
+      },
+      [clampIndex, items, onValueChange],
+    );
+
+    React.useEffect(() => {
+      if (!open || !drumRef.current) return;
+
+      const selectedIndex = items.indexOf(selectedValue);
+      if (selectedIndex < 0) return;
+
+      const nextScrollPos = selectedIndex * ROW_HEIGHT;
+      if (Math.abs(drumRef.current.scrollTop - nextScrollPos) > 1) {
+        drumRef.current.scrollTop = nextScrollPos;
+        setScrollTop(nextScrollPos);
+      }
+
+      lastSelectedIndexRef.current = selectedIndex;
+    }, [open, drumRef, items, selectedValue]);
+
+    React.useEffect(() => {
+      return () => {
+        if (snapTimeoutRef.current !== null) {
+          window.clearTimeout(snapTimeoutRef.current);
+        }
+      };
+    }, []);
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+      const target = e.currentTarget;
+      setScrollTop(target.scrollTop);
+
+      const selectedIndex = Math.round(target.scrollTop / ROW_HEIGHT);
+      if (selectedIndex >= 0 && selectedIndex < items.length && selectedIndex !== lastSelectedIndexRef.current) {
+        lastSelectedIndexRef.current = selectedIndex;
+        onValueChange(items[selectedIndex]);
+      }
+
+      if (snapTimeoutRef.current !== null) {
+        window.clearTimeout(snapTimeoutRef.current);
+      }
+
+      snapTimeoutRef.current = window.setTimeout(() => {
+        snapToNearest(target);
+      }, 80);
+    };
+
+    const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      const target = e.currentTarget;
+      const clickY = e.clientY - target.getBoundingClientRect().top;
+      const clickedIndex = clampIndex(Math.round((scrollTop + clickY - DRUM_HEIGHT / 2) / ROW_HEIGHT));
+
+      if (clickedIndex >= 0 && clickedIndex < items.length) {
+        lastSelectedIndexRef.current = clickedIndex;
+        onValueChange(items[clickedIndex]);
+        const newScrollPos = clickedIndex * ROW_HEIGHT;
+        target.scrollTop = newScrollPos;
+        setScrollTop(newScrollPos);
+
+        if (snapTimeoutRef.current !== null) {
+          window.clearTimeout(snapTimeoutRef.current);
+          snapTimeoutRef.current = null;
+        }
+      }
+    };
+
+    const handleWheelCapture = (e: React.WheelEvent<HTMLDivElement>) => {
+      e.stopPropagation();
+    };
+
+    const handleTouchMoveCapture = (e: React.TouchEvent<HTMLDivElement>) => {
+      e.stopPropagation();
+    };
+
+    return (
+      <div
+        ref={drumRef}
+        onScroll={handleScroll}
+        onClick={handleClick}
+        onWheelCapture={handleWheelCapture}
+        onTouchMoveCapture={handleTouchMoveCapture}
+        className={cn('relative overflow-y-scroll scrollbar-hide', columnWidth)}
+        style={{
+          height: DRUM_HEIGHT,
+          scrollSnapType: 'y mandatory',
+          scrollBehavior: 'smooth',
+          overscrollBehavior: 'contain',
+          touchAction: 'pan-y',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        {/* Top padding */}
+        <div style={{ height: PADDING_ROWS * ROW_HEIGHT }} />
+
+        {/* Items */}
+        {items.map((item, index) => (
+          <div
+            key={item}
+            style={{
+              height: ROW_HEIGHT,
+              scrollSnapAlign: 'center',
+              opacity: getOpacity(scrollTop, index),
+              transition: 'opacity 0.1s ease-out',
+            }}
+            className={cn(
+              'flex items-center justify-center text-sm leading-none transition-colors',
+              item === selectedValue ? 'font-semibold text-foreground' : 'font-medium text-muted-foreground',
+            )}
+          >
+            {item}
+          </div>
+        ))}
+
+        {/* Bottom padding */}
+        <div style={{ height: PADDING_ROWS * ROW_HEIGHT }} />
+
+        {/* Vertical fade for wheel depth */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-7 bg-gradient-to-b from-background to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-7 bg-gradient-to-t from-background to-transparent" />
+      </div>
+    );
+  },
+);
+
+DrumColumn.displayName = 'DrumColumn';
 
 const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
   ({ className, value, onChange, placeholder = 'Select time', disabled }, ref) => {
@@ -36,7 +211,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
 
     const [hours, setHours] = React.useState('12');
     const [minutes, setMinutes] = React.useState('00');
-    const [period, setPeriod] = React.useState<'AM' | 'PM'>('AM');
+    const [period, setPeriod] = React.useState<TimePeriod>('AM');
 
     // Initialize from value
     React.useEffect(() => {
@@ -61,117 +236,6 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
         setMinutes(m || '00');
       }
     }, [value, open]);
-
-    // Scroll to position on open
-    React.useEffect(() => {
-      if (open) {
-        const scrollToIndex = (ref: React.RefObject<HTMLDivElement>, index: number) => {
-          if (ref.current) {
-            const scrollPos = (index + PADDING_ROWS) * ROW_HEIGHT;
-            ref.current.scrollTop = scrollPos;
-          }
-        };
-
-        const hoursIndex = HOURS_ARRAY.indexOf(hours.padStart(2, '0'));
-        const minutesIndex = parseInt(minutes, 10);
-        const periodIndex = PERIOD_ARRAY.indexOf(period);
-
-        scrollToIndex(hoursRef, hoursIndex);
-        scrollToIndex(minutesRef, minutesIndex);
-        scrollToIndex(periodRef, periodIndex);
-      }
-    }, [open, hours, minutes, period]);
-
-    const getOpacity = (scrollTop: number, itemIndex: number) => {
-      const centerPos = scrollTop + DRUM_HEIGHT / 2;
-      const itemPos = (itemIndex + PADDING_ROWS) * ROW_HEIGHT + ROW_HEIGHT / 2;
-      const distance = Math.abs(centerPos - itemPos) / ROW_HEIGHT;
-
-      if (distance < 0.5) return 1;
-      if (distance < 1.5) return 0.6;
-      if (distance < 2.5) return 0.3;
-      return 0;
-    };
-
-    const DrumColumn = ({
-      items,
-      ref,
-      onValueChange,
-    }: {
-      items: string[];
-      ref: React.RefObject<HTMLDivElement>;
-      onValueChange: (value: string) => void;
-    }) => {
-      const [scrollTop, setScrollTop] = React.useState(0);
-
-      const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        const target = e.currentTarget;
-        setScrollTop(target.scrollTop);
-
-        const selectedIndex = Math.round(target.scrollTop / ROW_HEIGHT) - PADDING_ROWS;
-        if (selectedIndex >= 0 && selectedIndex < items.length) {
-          onValueChange(items[selectedIndex]);
-        }
-      };
-
-      const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        const target = e.currentTarget;
-        const clickY = e.clientY - target.getBoundingClientRect().top;
-        const clickedIndex = Math.round((scrollTop + clickY) / ROW_HEIGHT) - PADDING_ROWS;
-
-        if (clickedIndex >= 0 && clickedIndex < items.length) {
-          onValueChange(items[clickedIndex]);
-          const newScrollPos = (clickedIndex + PADDING_ROWS) * ROW_HEIGHT;
-          target.scrollTop = newScrollPos;
-          setScrollTop(newScrollPos);
-        }
-      };
-
-      return (
-        <div
-          ref={ref}
-          onScroll={handleScroll}
-          onClick={handleClick}
-          className="relative overflow-y-scroll"
-          style={{
-            height: DRUM_HEIGHT,
-            scrollSnapType: 'y mandatory',
-            scrollBehavior: 'smooth',
-          }}
-        >
-          {/* Top padding */}
-          <div style={{ height: PADDING_ROWS * ROW_HEIGHT }} />
-
-          {/* Items */}
-          {items.map((item, index) => (
-            <div
-              key={item}
-              style={{
-                height: ROW_HEIGHT,
-                scrollSnapAlign: 'center',
-                opacity: getOpacity(scrollTop, index),
-                transition: 'opacity 0.1s ease-out',
-              }}
-              className="flex items-center justify-center text-sm font-medium text-gray-900"
-            >
-              {item}
-            </div>
-          ))}
-
-          {/* Bottom padding */}
-          <div style={{ height: PADDING_ROWS * ROW_HEIGHT }} />
-
-          {/* Center highlight */}
-          <div
-            className="pointer-events-none absolute left-0 right-0 border-t border-b border-gray-200 bg-gray-50"
-            style={{
-              top: (DRUM_HEIGHT - ROW_HEIGHT) / 2,
-              height: ROW_HEIGHT,
-            }}
-          />
-        </div>
-      );
-    };
 
     const handleSave = () => {
       if (onChange) {
@@ -213,48 +277,71 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
             <IconComponent iconName="Clock01Icon" size={18} className="text-gray-400" />
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <div className="flex items-center gap-0">
-            {/* Hours */}
-            <DrumColumn
-              ref={hoursRef}
-              items={HOURS_ARRAY}
-              onValueChange={setHours}
-            />
+        <PopoverContent className="w-auto rounded-xl border border-border bg-background p-0 shadow-lg" align="start">
+          <div className="relative px-3 pt-3">
+            <div className="relative">
+              <div className="flex items-center gap-1">
+                {/* Hours */}
+                <DrumColumn
+                  open={open}
+                  drumRef={hoursRef}
+                  items={HOURS_ARRAY}
+                  onValueChange={setHours}
+                  selectedValue={hours}
+                  columnWidth="w-9"
+                />
 
-            {/* Separator */}
-            <div className="flex h-[160px] items-center px-1 text-sm font-medium text-gray-900">
-              :
+                {/* Separator */}
+                <div className="flex h-[140px] items-center px-0.5 text-sm font-semibold text-foreground">
+                  :
+                </div>
+
+                {/* Minutes */}
+                <DrumColumn
+                  open={open}
+                  drumRef={minutesRef}
+                  items={MINUTES_ARRAY}
+                  onValueChange={setMinutes}
+                  selectedValue={minutes}
+                  columnWidth="w-9"
+                />
+
+                {/* Period */}
+                <DrumColumn
+                  open={open}
+                  drumRef={periodRef}
+                  items={PERIOD_ARRAY}
+                  onValueChange={(p) => setPeriod(p as TimePeriod)}
+                  selectedValue={period}
+                  columnWidth="w-10"
+                />
+              </div>
+
+              {/* Shared center indicator */}
+              <div
+                className="pointer-events-none absolute left-0 right-0 rounded-md border border-border/70 bg-muted/35"
+                style={{
+                  top: (DRUM_HEIGHT - ROW_HEIGHT) / 2,
+                  height: ROW_HEIGHT,
+                }}
+              />
             </div>
 
-            {/* Minutes */}
-            <DrumColumn
-              ref={minutesRef}
-              items={MINUTES_ARRAY}
-              onValueChange={setMinutes}
-            />
-
-            {/* Period */}
-            <DrumColumn
-              ref={periodRef}
-              items={PERIOD_ARRAY}
-              onValueChange={(p) => setPeriod(p as 'AM' | 'PM')}
-            />
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between border-t border-gray-200 px-3 py-2">
+          <div className="flex items-center justify-between border-t border-border px-3 py-2.5">
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="text-sm font-medium text-red-600 hover:text-red-700"
+              className="text-xs font-medium text-destructive hover:text-destructive/80"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleSave}
-              className="text-sm font-medium text-gray-900 hover:text-gray-700"
+              className="text-xs font-medium text-foreground hover:text-foreground/80"
             >
               Save
             </button>
