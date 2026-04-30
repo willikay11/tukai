@@ -2,8 +2,25 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ExperienceTypePicker } from './ExperienceTypePicker';
 
+jest.mock('@/components/ui/pillRadioGroup', () => ({
+  PillRadioGroup: ({ options, value, onChange }: any) => (
+    <div>
+      {options.map((opt: any) => (
+        <button
+          key={opt.value}
+          onClick={() => onChange(opt.value)}
+          data-testid={`pill-${opt.value}`}
+          className={value === opt.value ? 'selected' : ''}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  ),
+}));
+
 describe('ExperienceTypePicker', () => {
-  it('renders both paid and free buttons', () => {
+  it('renders both paid and free options', () => {
     const mockOnChange = jest.fn();
     render(<ExperienceTypePicker value="paid" onChange={mockOnChange} />);
 
@@ -17,8 +34,8 @@ describe('ExperienceTypePicker', () => {
       <ExperienceTypePicker value="paid" onChange={mockOnChange} />
     );
 
-    const paidButton = screen.getByRole('button', { name: 'Paid Experience' });
-    expect(paidButton).toHaveClass('bg-emerald-600');
+    const paidButton = screen.getByTestId('pill-paid');
+    expect(paidButton).toHaveClass('selected');
   });
 
   it('shows free as selected when value is free', () => {
@@ -27,8 +44,8 @@ describe('ExperienceTypePicker', () => {
       <ExperienceTypePicker value="free" onChange={mockOnChange} />
     );
 
-    const freeButton = screen.getByRole('button', { name: 'Free Experience' });
-    expect(freeButton).toHaveClass('bg-emerald-600');
+    const freeButton = screen.getByTestId('pill-free');
+    expect(freeButton).toHaveClass('selected');
   });
 
   it('calls onChange with paid when paid button is clicked', () => {
