@@ -1,2 +1,2 @@
-export { Bookmark } from './index.tsx';
-export { Bookmark as BookmarkPlace } from './index.tsx';
+export { Bookmark } from './Bookmark';
+export { Bookmark as BookmarkPlace } from './Bookmark';

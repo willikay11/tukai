@@ -1,1 +1,1 @@
-export { PillsSkeleton, PillSkeleton, EventsSkeleton, ImageSkeleton, ReviewWalletsSkeleton, PostSkeleton, WalletListSkeleton } from './Skeletons';
+export { PillsSkeleton, PillSkeleton, EventsSkeleton, EventSkeleton, ImageSkeleton, ReviewWalletsSkeleton, PostSkeleton, WalletListSkeleton, CreateStepContentSkeleton } from './Skeletons';

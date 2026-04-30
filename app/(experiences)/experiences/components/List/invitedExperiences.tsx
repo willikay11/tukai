@@ -15,7 +15,7 @@ type ListExperiencesProps = {
   isPortal?: boolean;
 };
 
-export const Experiences = ({
+export const InvitedExperiences = ({
   category,
   skeletonCount = 12,
   isPortal = false,
