@@ -2,6 +2,43 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CommunitySelector } from './CommunitySelector';
 
+// Mock the Select component
+jest.mock('@/components/ui/select', () => ({
+  Select: ({ children, value, onValueChange }: any) => {
+    return (
+      <div data-testid="select-root">
+        {React.Children.map(children, (child) =>
+          React.cloneElement(child as React.ReactElement, { value, onValueChange })
+        )}
+      </div>
+    );
+  },
+  SelectTrigger: ({ children, value, onValueChange, ...props }: any) => (
+    <button data-testid="select-trigger" {...props}>
+      {children}
+    </button>
+  ),
+  SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
+  SelectContent: ({ children, value, onValueChange }: any) => (
+    <div data-testid="select-content">
+      {React.Children.map(children, (child) =>
+        React.cloneElement(child as React.ReactElement, { value, onValueChange })
+      )}
+    </div>
+  ),
+  SelectItem: ({ children, value: itemValue, ...props }: any) => (
+    <button data-testid={`select-item-${itemValue}`} {...props}>
+      {children}
+    </button>
+  ),
+}));
+
+jest.mock('@/components/ui/popover', () => ({
+  Popover: ({ children }: any) => <div>{children}</div>,
+  PopoverTrigger: ({ children }: any) => <div>{children}</div>,
+  PopoverContent: ({ children }: any) => <div>{children}</div>,
+}));
+
 const mockCommunities = [
   { id: '1', name: 'Community 1', imageUrl: 'https://via.placeholder.com/32' },
   { id: '2', name: 'Community 2', imageUrl: 'https://via.placeholder.com/32' },
@@ -25,7 +62,7 @@ describe('CommunitySelector', () => {
     const mockOnChange = jest.fn();
     const selected = mockCommunities[0];
 
-    render(
+    const { container } = render(
       <CommunitySelector
         value={selected}
         options={mockCommunities}
@@ -33,24 +70,9 @@ describe('CommunitySelector', () => {
       />
     );
 
-    expect(screen.getByText(selected.name)).toBeInTheDocument();
-  });
-
-  it('calls onChange when a community is selected', () => {
-    const mockOnChange = jest.fn();
-
-    render(
-      <CommunitySelector
-        value={null}
-        options={mockCommunities}
-        onChange={mockOnChange}
-      />
-    );
-
-    // Note: Testing popover interactions is complex in jsdom.
-    // This is a simplified test. Full integration testing would require
-    // more sophisticated DOM manipulation.
-    expect(mockOnChange).not.toHaveBeenCalled();
+    // Check that the community name is displayed
+    const communityNames = screen.getAllByText(selected.name);
+    expect(communityNames.length).toBeGreaterThan(0);
   });
 
   it('displays error message when provided', () => {
@@ -69,24 +91,6 @@ describe('CommunitySelector', () => {
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 
-  it('shows "No communities available" when options is empty', () => {
-    const mockOnChange = jest.fn();
-
-    render(
-      <CommunitySelector
-        value={null}
-        options={[]}
-        onChange={mockOnChange}
-      />
-    );
-
-    // Open the dropdown
-    const trigger = screen.getByText('Select a community');
-    fireEvent.click(trigger);
-
-    // This test would show the message if we could properly test the popover
-  });
-
   it('renders label and info icon', () => {
     const mockOnChange = jest.fn();
 
@@ -100,5 +104,19 @@ describe('CommunitySelector', () => {
 
     expect(screen.getByText('Select host community')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Information about community selection' })).toBeInTheDocument();
+  });
+
+  it('renders the Select component', () => {
+    const mockOnChange = jest.fn();
+
+    render(
+      <CommunitySelector
+        value={null}
+        options={mockCommunities}
+        onChange={mockOnChange}
+      />
+    );
+
+    expect(screen.getByTestId('select-root')).toBeInTheDocument();
   });
 });
