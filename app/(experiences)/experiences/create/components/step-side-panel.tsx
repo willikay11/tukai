@@ -11,6 +11,8 @@ import { Experience } from '@/types/experience';
 import { CreateTickets } from './createTickets';
 import { CustomiseItinerary } from './customiseItinerary';
 import { ExperienceReview } from './experienceReview';
+import { PreviewDateSection } from './PreviewDateSection';
+import { PreviewCommunitySection } from './PreviewCommunitySection';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
@@ -22,6 +24,11 @@ export const ExperienceStepSidePanel = ({
   itineraryConfig,
   invitedMembers,
   invitedCommunities,
+  selectedCommunity,
+  selectedDate,
+  selectedStartTime,
+  selectedEndTime,
+  onEditStep,
 }: {
   step: ExperienceStepId;
   experienceId?: string | null;
@@ -30,6 +37,11 @@ export const ExperienceStepSidePanel = ({
   itineraryConfig?: { startDate: string; endDate: string } | null;
   invitedMembers?: InvitedMember[];
   invitedCommunities?: Community[];
+  selectedCommunity?: { name: string; imageUrl: string } | null;
+  selectedDate?: string | null;
+  selectedStartTime?: string | null;
+  selectedEndTime?: string | null;
+  onEditStep?: (step: ExperienceStepId) => void;
 }) => {
   const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
     community: (
@@ -39,10 +51,20 @@ export const ExperienceStepSidePanel = ({
       />
     ),
     about: (
-      <StepPlaceholderContent
-        title="Create Dates"
-        description="Please add details to create dates"
-      />
+      <div className="space-y-6">
+        <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2>
+        <PreviewDateSection
+          date={selectedDate || null}
+          startTime={selectedStartTime || null}
+          endTime={selectedEndTime || null}
+          onEdit={() => onEditStep?.('community')}
+        />
+        <PreviewCommunitySection
+          communityName={selectedCommunity?.name || null}
+          communityImageUrl={selectedCommunity?.imageUrl || null}
+          onEdit={() => onEditStep?.('community')}
+        />
+      </div>
     ),
     'dates-tickets': itineraryConfig ? (
       <CustomiseItinerary startDate={itineraryConfig.startDate} endDate={itineraryConfig.endDate} />

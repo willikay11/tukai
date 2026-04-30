@@ -71,7 +71,7 @@ export const CommunitySelector = ({
               <img
                 src={value.imageUrl}
                 alt={value.name}
-                className="h-6 w-6 rounded-full object-cover"
+                className="h-6 w-12 rounded-lg object-cover"
               />
               <span className="text-sm font-medium">{value.name}</span>
             </div>
@@ -89,7 +89,7 @@ export const CommunitySelector = ({
                   <img
                     src={community.imageUrl}
                     alt={community.name}
-                    className="h-6 w-6 rounded-full object-cover"
+                    className="h-6 w-12 rounded-lg object-cover"
                   />
                   <span className="text-sm font-medium">{community.name}</span>
                 </div>

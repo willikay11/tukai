@@ -8,6 +8,7 @@ import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
 import { Community } from '@/types/community';
 import type { Experience } from '@/types/experience';
+import { Photo } from '@/types/photo';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
@@ -26,6 +27,18 @@ export interface FormData {
     date: string | null;
     startTime: string | null;
     endTime: string | null;
+  };
+  about: {
+    photo: string | null;
+    title: string;
+    visibility: 'public' | 'private';
+    description: string;
+    whatsIncluded: string;
+    whatsNotIncluded: string;
+    location: string;
+    meetingPoint: string;
+    meetingTime: string | null;
+    categories: string[];
   };
 }
 
@@ -55,6 +68,18 @@ const initialFormData: FormData = {
     startTime: null,
     endTime: null,
   },
+  about: {
+    photo: null,
+    title: '',
+    visibility: 'public',
+    description: '',
+    whatsIncluded: '',
+    whatsNotIncluded: '',
+    location: '',
+    meetingPoint: '',
+    meetingTime: null,
+    categories: [],
+  },
 };
 
 export const useCreateExperienceFlow = () => {
@@ -78,6 +103,7 @@ export const useCreateExperienceFlow = () => {
   const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [dateTypeErrors, setDateTypeErrors] = useState<Record<string, string>>({});
+  const [aboutErrors, setAboutErrors] = useState<Record<string, string>>({});
 
   const { data: createdCommunitiesResponse, isLoading: isLoadingCreatedCommunities } =
     useGetCommunities({
@@ -171,6 +197,29 @@ export const useCreateExperienceFlow = () => {
     return Object.keys(errors).length === 0;
   }, [formData.dateType.community, formData.dateType.date]);
 
+  const validateAbout = useCallback((): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.about.title.trim()) {
+      errors.title = 'Title is required';
+    }
+
+    if (!formData.about.description.trim()) {
+      errors.description = 'Description is required';
+    }
+
+    if (!formData.about.location.trim()) {
+      errors.location = 'Location is required';
+    }
+
+    if (!formData.about.photo) {
+      errors.photo = 'At least one photo is required';
+    }
+
+    setAboutErrors(errors);
+    return Object.keys(errors).length === 0;
+  }, [formData.about.title, formData.about.description, formData.about.location, formData.about.photo]);
+
   const handleStepChange = (step: ExperienceStepId) => {
     setActiveStep(step);
     replaceCreateUrlParams({ step });
@@ -204,11 +253,18 @@ export const useCreateExperienceFlow = () => {
     setInvitedCommunities(communities);
   };
 
+  const resolveCommunityImageUrl = (community: Community): string => {
+    const preferredPhoto =
+      community?.photos?.find((photo: Photo) => photo.isCover) || community?.photos?.[0];
+
+    return preferredPhoto?.photo || 'https://via.placeholder.com/32';
+  };
+
   const communitiesForSelector = (createdCommunitiesResponse?.data?.results || []).map(
-    (community) => ({
+    (community: Community) => ({
       id: community.id,
-      name: community.name,
-      imageUrl: community.logo || 'https://via.placeholder.com/32',
+      name: community.title,
+      imageUrl: resolveCommunityImageUrl(community),
     }),
   );
 
@@ -224,6 +280,7 @@ export const useCreateExperienceFlow = () => {
     invitedCommunities,
     formData,
     dateTypeErrors,
+    aboutErrors,
     communitiesForSelector,
 
     // Computed
@@ -233,6 +290,7 @@ export const useCreateExperienceFlow = () => {
     // Functions
     updateFormData,
     validateDateType,
+    validateAbout,
 
     // Handlers
     handlers: {

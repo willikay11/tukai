@@ -32,8 +32,10 @@ function CreateExperiencePageContent() {
     formData,
     updateFormData,
     dateTypeErrors,
+    aboutErrors,
     communitiesForSelector,
     validateDateType,
+    validateAbout,
   } = useCreateExperienceFlow();
 
   if (isCheckingCommunityAccess) {
@@ -68,8 +70,12 @@ function CreateExperiencePageContent() {
           formData={formData.dateType}
           updateFormData={updateFormData}
           dateTypeErrors={dateTypeErrors}
+          aboutFormData={formData.about}
+          updateAboutFormData={(data) => updateFormData(data)}
+          aboutErrors={aboutErrors}
           communitiesForSelector={communitiesForSelector}
           validateDateType={validateDateType}
+          validateAbout={validateAbout}
         />
       </div>
       <div className="h-full lg:col-span-4 lg:col-start-8 xl:col-span-4 xl:col-start-8 3xl:col-span-3 3xl:col-start-8 4xl:col-span-3 4xl:col-start-8">
@@ -81,6 +87,11 @@ function CreateExperiencePageContent() {
           itineraryConfig={itineraryConfig}
           invitedMembers={invitedMembers}
           invitedCommunities={invitedCommunities}
+          selectedCommunity={formData.dateType.community}
+          selectedDate={formData.dateType.date}
+          selectedStartTime={formData.dateType.startTime}
+          selectedEndTime={formData.dateType.endTime}
+          onEditStep={handlers.handleStepChange}
         />
       </div>
     </main>

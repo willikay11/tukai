@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 
+import { AboutStep } from './AboutStep';
 import { CreateExperienceAbout } from './about';
 import { CreateExperienceCommunity } from './community';
 import { DateTypeStep, type DateTypeFormData } from './DateTypeStep';
@@ -52,8 +53,23 @@ interface CreateExperienceStepsProps {
   formData?: DateTypeFormData;
   updateFormData?: (data: Partial<DateTypeFormData>) => void;
   dateTypeErrors?: Record<string, string>;
+  aboutErrors?: Record<string, string>;
+  aboutFormData?: {
+    photo: string | null;
+    title: string;
+    visibility: 'public' | 'private';
+    description: string;
+    whatsIncluded: string;
+    whatsNotIncluded: string;
+    location: string;
+    meetingPoint: string;
+    meetingTime: string | null;
+    categories: string[];
+  };
+  updateAboutFormData?: (data: Partial<typeof aboutFormData>) => void;
   communitiesForSelector?: Array<{ id: string; name: string; imageUrl: string }>;
   validateDateType?: () => boolean;
+  validateAbout?: () => boolean;
 }
 
 export const CreateExperienceSteps = ({
@@ -68,8 +84,12 @@ export const CreateExperienceSteps = ({
   formData,
   updateFormData,
   dateTypeErrors = {},
+  aboutErrors = {},
+  aboutFormData,
+  updateAboutFormData,
   communitiesForSelector = [],
   validateDateType = () => true,
+  validateAbout = () => true,
 }: CreateExperienceStepsProps) => {
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const { data: walletsResponse } = useGetWallets();
@@ -200,12 +220,31 @@ export const CreateExperienceSteps = ({
       </TabsContent>
 
       <TabsContent value="about" className="col-span-1 mt-6">
-        <CreateExperienceAbout
-          experience={experience}
-          onSuccess={(experienceId) => {
-            onExperienceCreated?.(experienceId, 'dates-tickets');
-          }}
-        />
+        {aboutFormData && updateAboutFormData ? (
+          <AboutStep
+            formData={aboutFormData}
+            errors={aboutErrors}
+            onFormDataChange={updateAboutFormData}
+            onCancel={() => handleStepChange('community')}
+            onSaveEdit={() => {
+              if (validateAbout()) {
+                // Stay on about step
+              }
+            }}
+            onSaveContinue={() => {
+              if (validateAbout()) {
+                handleStepChange('dates-tickets');
+              }
+            }}
+          />
+        ) : (
+          <CreateExperienceAbout
+            experience={experience}
+            onSuccess={(experienceId) => {
+              onExperienceCreated?.(experienceId, 'dates-tickets');
+            }}
+          />
+        )}
       </TabsContent>
 
       <TabsContent value="dates-tickets" className="col-span-1 mt-6">
