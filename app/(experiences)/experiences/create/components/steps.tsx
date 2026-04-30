@@ -172,20 +172,22 @@ export const CreateExperienceSteps = ({
               onChange={updateFormData}
               errors={dateTypeErrors}
             />
-            <div className="flex gap-3">
-              <button
+            <div className="flex justify-between gap-4">
+              <Button
                 type="button"
-                className="text-sm font-medium text-gray-600 hover:text-gray-900"
+                variant="ghost"
+                className="text-sm font-medium text-red-600 hover:text-red-900"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={handleSaveContinue}
-                className="ml-auto flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+                variant="gradient"
+                className='rounded-[50px]'
               >
                 Save & Continue
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
