@@ -7,11 +7,13 @@ import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGetWallets } from '@/app/(experiences)/hooks/usePayment';
+import { Button } from '@/components/ui/button';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 
 import { CreateExperienceAbout } from './about';
 import { CreateExperienceCommunity } from './community';
+import { DateTypeStep, type DateTypeFormData } from './DateTypeStep';
 import { ExperienceDates } from './dates';
 import { CreateExperienceInvites } from './invites';
 import { CreateExperienceWallet } from './wallet';
@@ -38,6 +40,22 @@ const STEPS = [
   { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
 ];
 
+interface CreateExperienceStepsProps {
+  currentStep?: ExperienceStepId;
+  onStepChange?: (step: ExperienceStepId) => void;
+  onExperienceCreated?: (experienceId: string, step?: ExperienceStepId) => void;
+  onDatesUpdatedSuccess?: (nextStep?: 'guests') => void;
+  onItineraryCustomise?: (config: { startDate: string; endDate: string }) => void;
+  onInvitesChange?: (members: InvitedMember[], communities: Community[]) => void;
+  experience?: Experience;
+  isLoadingExperience?: boolean;
+  formData?: DateTypeFormData;
+  updateFormData?: (data: Partial<DateTypeFormData>) => void;
+  dateTypeErrors?: Record<string, string>;
+  communitiesForSelector?: Array<{ id: string; name: string; imageUrl: string }>;
+  validateDateType?: () => boolean;
+}
+
 export const CreateExperienceSteps = ({
   currentStep = 'community',
   onStepChange,
@@ -47,16 +65,12 @@ export const CreateExperienceSteps = ({
   onInvitesChange,
   experience,
   isLoadingExperience,
-}: {
-  currentStep?: ExperienceStepId;
-  onStepChange?: (step: ExperienceStepId) => void;
-  onExperienceCreated?: (experienceId: string, step?: ExperienceStepId) => void;
-  onDatesUpdatedSuccess?: (nextStep?: 'guests') => void;
-  onItineraryCustomise?: (config: { startDate: string; endDate: string }) => void;
-  onInvitesChange?: (members: InvitedMember[], communities: Community[]) => void;
-  experience?: Experience;
-  isLoadingExperience?: boolean;
-}) => {
+  formData,
+  updateFormData,
+  dateTypeErrors = {},
+  communitiesForSelector = [],
+  validateDateType = () => true,
+}: CreateExperienceStepsProps) => {
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const { data: walletsResponse } = useGetWallets();
   const hasSavedWallets = (walletsResponse?.data?.results?.length ?? 0) > 0;
@@ -74,6 +88,12 @@ export const CreateExperienceSteps = ({
     }
 
     onStepChange?.(step);
+  };
+
+  const handleSaveContinue = () => {
+    if (validateDateType()) {
+      onStepChange?.('about');
+    }
   };
 
   if (isLoadingExperience) {
@@ -144,11 +164,37 @@ export const CreateExperienceSteps = ({
 
       {/* Tab Content */}
       <TabsContent value="community" className="mt-6">
-        <CreateExperienceCommunity
-          selectedCommunityId={selectedCommunityId}
-          onSelectCommunity={setSelectedCommunityId}
-          onContinue={() => handleStepChange('about')}
-        />
+        {formData && updateFormData ? (
+          <div className="space-y-6">
+            <DateTypeStep
+              formData={formData}
+              communityOptions={communitiesForSelector}
+              onChange={updateFormData}
+              errors={dateTypeErrors}
+            />
+            <div className="flex gap-3">
+              <button
+                type="button"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveContinue}
+                className="ml-auto flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+              >
+                Save & Continue
+              </button>
+            </div>
+          </div>
+        ) : (
+          <CreateExperienceCommunity
+            selectedCommunityId={selectedCommunityId}
+            onSelectCommunity={setSelectedCommunityId}
+            onContinue={() => handleStepChange('about')}
+          />
+        )}
       </TabsContent>
 
       <TabsContent value="about" className="mt-6">

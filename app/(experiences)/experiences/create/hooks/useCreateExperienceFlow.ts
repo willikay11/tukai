@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -10,6 +10,24 @@ import { Community } from '@/types/community';
 import type { Experience } from '@/types/experience';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
+
+export interface CommunityOption {
+  id: string;
+  name: string;
+  imageUrl: string;
+}
+
+export interface FormData {
+  dateType: {
+    community: CommunityOption | null;
+    experiencePricing: 'paid' | 'free';
+    experienceType: 'one-time' | 'multi-day' | 'itinerary';
+    isRecurring: boolean;
+    date: string | null;
+    startTime: string | null;
+    endTime: string | null;
+  };
+}
 
 const EXPERIENCE_STEPS: ExperienceStepId[] = [
   'community',
@@ -26,6 +44,18 @@ function parseExperienceStepId(step: string | null): ExperienceStepId | null {
 
   return EXPERIENCE_STEPS.includes(step as ExperienceStepId) ? (step as ExperienceStepId) : null;
 }
+
+const initialFormData: FormData = {
+  dateType: {
+    community: null,
+    experiencePricing: 'paid',
+    experienceType: 'one-time',
+    isRecurring: false,
+    date: null,
+    startTime: null,
+    endTime: null,
+  },
+};
 
 export const useCreateExperienceFlow = () => {
   const router = useRouter();
@@ -46,6 +76,8 @@ export const useCreateExperienceFlow = () => {
   } | null>(null);
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>([]);
   const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
+  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [dateTypeErrors, setDateTypeErrors] = useState<Record<string, string>>({});
 
   const { data: createdCommunitiesResponse, isLoading: isLoadingCreatedCommunities } =
     useGetCommunities({
@@ -117,6 +149,28 @@ export const useCreateExperienceFlow = () => {
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
+  const updateFormData = useCallback((data: Partial<FormData['dateType']>) => {
+    setFormData((prev) => ({
+      ...prev,
+      dateType: { ...prev.dateType, ...data },
+    }));
+  }, []);
+
+  const validateDateType = useCallback((): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.dateType.community) {
+      errors.community = 'Community is required';
+    }
+
+    if (!formData.dateType.date) {
+      errors.date = 'Date is required';
+    }
+
+    setDateTypeErrors(errors);
+    return Object.keys(errors).length === 0;
+  }, [formData.dateType.community, formData.dateType.date]);
+
   const handleStepChange = (step: ExperienceStepId) => {
     setActiveStep(step);
     replaceCreateUrlParams({ step });
@@ -150,6 +204,14 @@ export const useCreateExperienceFlow = () => {
     setInvitedCommunities(communities);
   };
 
+  const communitiesForSelector = (createdCommunitiesResponse?.data?.results || []).map(
+    (community) => ({
+      id: community.id,
+      name: community.name,
+      imageUrl: community.logo || 'https://via.placeholder.com/32',
+    }),
+  );
+
   return {
     // State
     activeStep,
@@ -160,10 +222,17 @@ export const useCreateExperienceFlow = () => {
     itineraryConfig,
     invitedMembers,
     invitedCommunities,
+    formData,
+    dateTypeErrors,
+    communitiesForSelector,
 
     // Computed
     hasCreatedCommunity,
     isCheckingCommunityAccess,
+
+    // Functions
+    updateFormData,
+    validateDateType,
 
     // Handlers
     handlers: {

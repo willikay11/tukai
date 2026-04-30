@@ -29,6 +29,11 @@ function CreateExperiencePageContent() {
     isCheckingCommunityAccess,
     hasCreatedCommunity,
     handlers,
+    formData,
+    updateFormData,
+    dateTypeErrors,
+    communitiesForSelector,
+    validateDateType,
   } = useCreateExperienceFlow();
 
   if (isCheckingCommunityAccess) {
@@ -60,6 +65,11 @@ function CreateExperiencePageContent() {
           onInvitesChange={handlers.handleInvitesChange}
           experience={experience}
           isLoadingExperience={isLoadingExperience}
+          formData={formData.dateType}
+          updateFormData={updateFormData}
+          dateTypeErrors={dateTypeErrors}
+          communitiesForSelector={communitiesForSelector}
+          validateDateType={validateDateType}
         />
       </div>
       <div className="h-full lg:col-span-4 lg:col-start-8 xl:col-span-4 xl:col-start-8 3xl:col-span-3 3xl:col-start-8 4xl:col-span-3 4xl:col-start-8">
