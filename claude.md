@@ -513,6 +513,25 @@ The codebase has been restructured to the feature-based architecture above. When
 
 ---
 
+## Active feature work
+
+### Create experience flow
+Full brief: docs/CREATE_EXPERIENCE_FLOW.md
+Designs: docs/designs/create-experience/
+Route: app/(experiences)/experiences/create/
+Hook: app/(experiences)/experiences/create/hooks/useCreateExperienceFlow.ts
+Status: UI build complete with API integration
+
+Before working on any component in this flow:
+1. Read docs/CREATE_EXPERIENCE_FLOW.md
+2. Check the component audit tables (sections 4A and 4B) to confirm 
+   whether to reuse, adapt, or build
+3. Reference the correct screenshot for the step you are building
+4. All state goes through useCreateExperienceFlow — never local 
+   useState in page or step components
+
+---
+
 ## Figma-to-Code Process
 
 ### Handoff prompt format
