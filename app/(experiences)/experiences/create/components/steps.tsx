@@ -123,9 +123,9 @@ export const CreateExperienceSteps = ({
     <Tabs
       value={currentStep}
       onValueChange={(step) => handleStepChange(step as ExperienceStepId)}
-      className="w-full"
+      className="grid w-full grid-cols-1"
     >
-      <TabsList className="flex h-auto w-full gap-2 bg-transparent p-0">
+      <TabsList className="col-span-1 flex h-auto w-full gap-2 bg-transparent p-0">
         {STEPS.map((step) => {
           const isAboutFilled = Boolean(experience?.id);
           const isDatesTicketsFilled = Boolean(experience?.tickets?.length);
@@ -163,7 +163,7 @@ export const CreateExperienceSteps = ({
       </TabsList>
 
       {/* Tab Content */}
-      <TabsContent value="community" className="mt-6">
+      <TabsContent value="community" className="col-span-1 mt-6">
         {formData && updateFormData ? (
           <div className="space-y-6">
             <DateTypeStep
@@ -199,7 +199,7 @@ export const CreateExperienceSteps = ({
         )}
       </TabsContent>
 
-      <TabsContent value="about" className="mt-6">
+      <TabsContent value="about" className="col-span-1 mt-6">
         <CreateExperienceAbout
           experience={experience}
           onSuccess={(experienceId) => {
@@ -208,7 +208,7 @@ export const CreateExperienceSteps = ({
         />
       </TabsContent>
 
-      <TabsContent value="dates-tickets" className="mt-6">
+      <TabsContent value="dates-tickets" className="col-span-1 mt-6">
         <ExperienceDates
           experienceId={experience?.id || null}
           experience={experience}
@@ -217,7 +217,7 @@ export const CreateExperienceSteps = ({
         />
       </TabsContent>
 
-      <TabsContent value="guests" className="mt-6">
+      <TabsContent value="guests" className="col-span-1 mt-6">
         <CreateExperienceInvites
           experienceId={experience?.id || null}
           onInvitesChange={onInvitesChange}
@@ -225,7 +225,7 @@ export const CreateExperienceSteps = ({
         />
       </TabsContent>
 
-      <TabsContent value="wallet" className="mt-6">
+      <TabsContent value="wallet" className="col-span-1 mt-6">
         <CreateExperienceWallet />
       </TabsContent>
     </Tabs>
