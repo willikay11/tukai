@@ -5,7 +5,7 @@ import { Suspense } from 'react';
 import { CreateStepContentSkeleton, ReviewWalletsSkeleton } from '@/app/shared/components/Cards';
 
 import { ExperienceStepSidePanel } from './components/step-side-panel';
-import CreateExperienceSteps from './components/steps';
+import { CreateExperienceSteps } from './components/steps';
 import { useCreateExperienceFlow } from './hooks/useCreateExperienceFlow';
 
 export default function CreateExperiencePage() {
