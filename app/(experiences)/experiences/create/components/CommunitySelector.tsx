@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { IconComponent } from '@/app/shared/components/Icons';
+import clsx from 'clsx';
 
 export interface Community {
   id: string;
@@ -44,7 +45,7 @@ export const CommunitySelector = ({
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <label className="text-sm font-medium text-gray-900">Select host community</label>
+        <label className="text-xs font-medium text-gray-900">Select host community</label>
         <Popover>
           <PopoverTrigger asChild>
             <button
@@ -55,7 +56,7 @@ export const CommunitySelector = ({
               <IconComponent iconName="InformationCircleIcon" size={18} />
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-64 text-sm">
+          <PopoverContent className="w-64 text-xs">
             Select a community you created to host this experience
           </PopoverContent>
         </Popover>
@@ -63,7 +64,7 @@ export const CommunitySelector = ({
 
       <Select value={value?.id || ''} onValueChange={handleSelect}>
         <SelectTrigger
-          className={error ? 'border-red-500' : ''}
+          className={clsx(error && 'border-red-500', 'h-[50px]')}
         >
           {value ? (
             <div className="flex items-center gap-2">

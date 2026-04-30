@@ -99,7 +99,7 @@ export const CreateExperienceSteps = ({
   if (isLoadingExperience) {
     return (
       <Tabs value={currentStep} className="w-full">
-        <TabsList className="flex h-auto w-full gap-2 bg-transparent p-0">
+        <TabsList className="h-auto w-full gap-2 bg-transparent p-0">
           {STEPS.map((step) => (
             <TabsTrigger
               key={step.id}
