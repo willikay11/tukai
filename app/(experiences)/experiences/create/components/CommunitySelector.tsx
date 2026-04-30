@@ -76,7 +76,7 @@ export const CommunitySelector = ({
               <span className="text-sm font-medium">{value.name}</span>
             </div>
           ) : (
-            <SelectValue placeholder="Select a community" />
+            <SelectValue className='placeholder:text-xs' placeholder="Select a community" />
           )}
         </SelectTrigger>
         <SelectContent>
