@@ -6,7 +6,7 @@ jest.mock('@/app/shared/hooks/useAuth', () => ({
   useGetInterestCategories: jest.fn(),
 }));
 
-const mockCategories = {
+const mockCategoriesData = {
   data: {
     results: [
       { id: '1', name: 'Hiking' },
@@ -23,7 +23,7 @@ describe('CategoryPicker', () => {
     const useAuth = require('@/app/shared/hooks/useAuth');
     useGetInterestCategoriesMock = useAuth.useGetInterestCategories as jest.Mock;
     useGetInterestCategoriesMock.mockReturnValue({
-      data: mockCategories,
+      data: mockCategoriesData,
       isLoading: false,
     });
   });

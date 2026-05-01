@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from 'react';
 
 import { LocationAutocompleteField } from '@/app/shared/components/LocationPicker';
+import { useGoogleMapsAutocomplete } from '@/app/shared/hooks/usePlaces';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 
 interface ExperienceLocationInputProps {
@@ -13,22 +14,31 @@ interface ExperienceLocationInputProps {
 
 export const ExperienceLocationInput = ({ value, onChange, error }: ExperienceLocationInputProps) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState<GoogleMapsAutocompletePrediction[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [inputValue, setInputValue] = useState(value);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const { data: googlePlaces, isFetching: isFetchingGooglePlaces } = useGoogleMapsAutocomplete(
+    inputValue,
+    inputValue.length > 2,
+  );
 
   const handleFocus = useCallback(() => {
     setShowSuggestions(true);
   }, []);
 
-  const handleValueChange = useCallback((newValue: string) => {
-    onChange(newValue);
-  }, [onChange]);
+  const handleValueChange = useCallback(
+    (newValue: string) => {
+      setInputValue(newValue);
+      onChange(newValue);
+      setShowSuggestions(true);
+    },
+    [onChange],
+  );
 
   const handleSelectSuggestion = useCallback((place: GoogleMapsAutocompletePrediction) => {
     onChange(place.description);
+    setInputValue(place.description);
     setShowSuggestions(false);
-    setSuggestions([]);
   }, [onChange]);
 
   return (
@@ -38,11 +48,11 @@ export const ExperienceLocationInput = ({ value, onChange, error }: ExperienceLo
       </label>
       <LocationAutocompleteField
         containerRef={containerRef}
-        value={value}
-        placeholder="Add location/name of the place..."
+        value={inputValue}
+        placeholder="Add location(s) of the place..."
         showSuggestions={showSuggestions}
-        suggestions={suggestions}
-        isLoading={isLoading}
+        suggestions={googlePlaces?.data || []}
+        isLoading={isFetchingGooglePlaces}
         onValueChange={handleValueChange}
         onFocus={handleFocus}
         onSelectSuggestion={handleSelectSuggestion}

@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('lucide-react', () => ({
   __esModule: true,
@@ -14,8 +15,22 @@ jest.mock('@/components/blocks/editor-00/editor', () => ({
 
 jest.mock('@/app/shared/hooks/useAuth', () => ({
   useGetInterestCategories: jest.fn(() => ({
-    data: { data: { results: [] } },
+    data: {
+      data: {
+        results: [
+          { id: '1', name: 'Hiking' },
+          { id: '2', name: 'Running' },
+        ],
+      },
+    },
     isLoading: false,
+  })),
+}));
+
+jest.mock('@/app/shared/hooks/usePlaces', () => ({
+  useGoogleMapsAutocomplete: jest.fn(() => ({
+    data: { data: [] },
+    isFetching: false,
   })),
 }));
 
@@ -54,6 +69,19 @@ jest.mock('@/app/shared/components/Forms', () => ({
 
 import { AboutStep } from './AboutStep';
 
+const renderWithQueryClient = (component: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      {component}
+    </QueryClientProvider>,
+  );
+};
+
 describe('AboutStep', () => {
   const defaultFormData = {
     photo: null,
@@ -78,7 +106,7 @@ describe('AboutStep', () => {
   };
 
   it('renders all input sections', () => {
-    render(<AboutStep {...defaultProps} />);
+    renderWithQueryClient(<AboutStep {...defaultProps} />);
     expect(screen.getByText('Experience Title')).toBeInTheDocument();
     expect(screen.getByText(/Experience visibility/i)).toBeInTheDocument();
   });
@@ -88,7 +116,7 @@ describe('AboutStep', () => {
       title: 'Title is required',
       description: 'Description is required',
     };
-    render(<AboutStep {...defaultProps} errors={errors} />);
+    renderWithQueryClient(<AboutStep {...defaultProps} errors={errors} />);
     expect(screen.getByText('Title is required')).toBeInTheDocument();
     expect(screen.getByText('Description is required')).toBeInTheDocument();
   });
