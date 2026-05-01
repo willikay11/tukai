@@ -208,7 +208,16 @@ export const CreateExperienceSteps = ({
     >
       <TabsList className="col-span-1 flex h-auto w-full gap-2 bg-transparent p-0">
         {STEPS.map((step) => {
-          const isAboutFilled = Boolean(experience?.id);
+          // Check if about step is filled based on form data or experience
+          const isAboutFilled = aboutFormData ?
+            Boolean(
+              aboutFormData.title?.trim() &&
+              aboutFormData.description?.trim() &&
+              aboutFormData.location?.trim() &&
+              aboutFormData.photos?.length > 0
+            ) :
+            Boolean(experience?.id);
+
           const isDatesTicketsFilled = Boolean(experience?.tickets?.length);
           const stepFilledMap: Record<string, boolean> = {
             community: canAccessDetailsSteps,
