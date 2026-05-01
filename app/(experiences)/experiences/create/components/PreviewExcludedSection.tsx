@@ -22,13 +22,11 @@ export const PreviewExcludedSection = ({ items, onEdit }: PreviewExcludedSection
         <div className="rounded-lg bg-red-50 px-3 py-3">
           <div className="flex items-start gap-2">
             <IconComponent iconName="CancelCircleIcon" size={18} className="mt-0.5 flex-shrink-0 text-red-600" />
-            <ul className="space-y-1 text-xs text-gray-700">
+            <div className="flex-1 text-xs text-gray-700 prose prose-sm max-w-none">
               {items.map((item, index) => (
-                <li key={index} className="leading-relaxed">
-                  {item}
-                </li>
+                <div key={index} dangerouslySetInnerHTML={{ __html: item }} className="mb-1" />
               ))}
-            </ul>
+            </div>
           </div>
         </div>
       ) : (

@@ -8,6 +8,7 @@ interface PreviewIncludedSectionProps {
 }
 
 export const PreviewIncludedSection = ({ items, onEdit }: PreviewIncludedSectionProps) => {
+  console.log('PreviewIncludedSection - items:', items); // Debug log to check the items being passed
   return (
     <div className="space-y-3">
       <div className="flex items-start justify-between">
@@ -22,13 +23,11 @@ export const PreviewIncludedSection = ({ items, onEdit }: PreviewIncludedSection
         <div className="rounded-lg bg-emerald-50 px-3 py-3">
           <div className="flex items-start gap-2">
             <IconComponent iconName="FavouriteIcon" size={18} className="mt-0.5 flex-shrink-0 text-emerald-600" />
-            <ul className="space-y-1 text-xs text-gray-700">
+            <div className="flex-1 text-xs text-gray-700 prose prose-sm max-w-none">
               {items.map((item, index) => (
-                <li key={index} className="leading-relaxed">
-                  {item}
-                </li>
+                <div key={index} dangerouslySetInnerHTML={{ __html: item }} className="mb-1" />
               ))}
-            </ul>
+            </div>
           </div>
         </div>
       ) : (

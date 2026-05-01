@@ -87,11 +87,11 @@ export const ExperienceStepSidePanel = ({
           onEdit={() => onEditStep?.('about')}
         />
         <PreviewIncludedSection
-          items={aboutWhatsIncluded ? aboutWhatsIncluded.split('\n').filter(Boolean) : []}
+          items={aboutWhatsIncluded ? [aboutWhatsIncluded] : []}
           onEdit={() => onEditStep?.('about')}
         />
         <PreviewExcludedSection
-          items={aboutWhatsNotIncluded ? aboutWhatsNotIncluded.split('\n').filter(Boolean) : []}
+          items={aboutWhatsNotIncluded ? [aboutWhatsNotIncluded] : []}
           onEdit={() => onEditStep?.('about')}
         />
         <PreviewCategoriesSection
@@ -117,11 +117,11 @@ export const ExperienceStepSidePanel = ({
           onEdit={() => onEditStep?.('about')}
         />
         <PreviewIncludedSection
-          items={aboutWhatsIncluded ? aboutWhatsIncluded.split('\n').filter(Boolean) : []}
+          items={aboutWhatsIncluded ? [aboutWhatsIncluded] : []}
           onEdit={() => onEditStep?.('about')}
         />
         <PreviewExcludedSection
-          items={aboutWhatsNotIncluded ? aboutWhatsNotIncluded.split('\n').filter(Boolean) : []}
+          items={aboutWhatsNotIncluded ? [aboutWhatsNotIncluded] : []}
           onEdit={() => onEditStep?.('about')}
         />
         <PreviewCategoriesSection

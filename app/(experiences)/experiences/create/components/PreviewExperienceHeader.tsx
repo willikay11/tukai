@@ -27,7 +27,12 @@ export const PreviewExperienceHeader = ({ photo, title, description, onEdit }: P
           )}
           <div>
             <p className="text-sm font-bold text-gray-900">{title}</p>
-            <p className="line-clamp-2 text-xs text-gray-600">{description}</p>
+            {description && (
+              <div
+                className="line-clamp-2 text-xs text-gray-600 prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: description }}
+              />
+            )}
           </div>
         </div>
       ) : (
