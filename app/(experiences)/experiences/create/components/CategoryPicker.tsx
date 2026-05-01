@@ -10,8 +10,7 @@ interface CategoryPickerProps {
 }
 
 export const CategoryPicker = ({ selectedCategories, onChange }: CategoryPickerProps) => {
-  const { data: categoriesResponse, isLoading } = useGetInterestCategories();
-  const categories = categoriesResponse?.data?.results || [];
+  const { data: categories, isLoading } = useGetInterestCategories();
 
   const handleToggleCategory = (categoryId: string) => {
     const updated = selectedCategories.includes(categoryId)
