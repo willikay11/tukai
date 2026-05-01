@@ -91,7 +91,7 @@ function CreateExperiencePageContent() {
           step={activeStep}
           experienceId={experienceId}
           experience={experience}
-          canShowDateTickets={hasUpdatedDates}
+          canShowDateTickets={hasUpdatedDates || (formData.dateType.date && formData.dateType.startTime && formData.dateType.endTime)}
           itineraryConfig={itineraryConfig}
           invitedMembers={invitedMembers}
           invitedCommunities={invitedCommunities}
@@ -110,6 +110,8 @@ function CreateExperiencePageContent() {
           aboutMeetingPoint={formData.about.meetingPoint}
           aboutMeetingTime={formData.about.meetingTime}
           aboutCategories={formData.about.categories}
+          ticketsItems={formData.tickets.items}
+          ticketsCommissionPayer={formData.tickets.commission}
           onEditStep={handlers.handleStepChange}
         />
       </div>

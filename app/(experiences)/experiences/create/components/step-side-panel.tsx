@@ -20,6 +20,7 @@ import { PreviewCategoriesSection } from './PreviewCategoriesSection';
 import { PreviewItineraryTypeSection } from './PreviewItineraryTypeSection';
 import { PreviewLocationSection } from './PreviewLocationSection';
 import { PreviewMeetingSection } from './PreviewMeetingSection';
+import { PreviewTicketsSection } from './PreviewTicketsSection/PreviewTicketsSection';
 import { Interest } from '@/types/interest';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
@@ -47,6 +48,8 @@ export const ExperienceStepSidePanel = ({
   aboutMeetingPoint,
   aboutMeetingTime,
   aboutCategories,
+  ticketsItems,
+  ticketsCommissionPayer,
   onEditStep,
 }: {
   step: ExperienceStepId;
@@ -71,6 +74,17 @@ export const ExperienceStepSidePanel = ({
   aboutMeetingPoint?: string;
   aboutMeetingTime?: string | null;
   aboutCategories?: Interest[];
+  ticketsItems?: Array<{
+    id: string;
+    name: string;
+    quantity: number;
+    amount: number;
+    salesStartDate: string;
+    salesStartTime: string;
+    salesEndDate: string;
+    salesEndTime: string;
+  }>;
+  ticketsCommissionPayer?: 'host' | 'customer' | 'split';
   onEditStep?: (step: ExperienceStepId) => void;
 }) => {
   const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
@@ -170,6 +184,12 @@ export const ExperienceStepSidePanel = ({
           meetingPoint={aboutMeetingPoint || null}
           meetingTime={aboutMeetingTime || null}
           onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewTicketsSection
+          tickets={ticketsItems}
+          coverPhoto={aboutPhoto || undefined}
+          commissionPayer={ticketsCommissionPayer}
+          onEdit={() => onEditStep?.('dates-tickets')}
         />
       </div>
     ) : (

@@ -20,6 +20,12 @@ export interface SavedTicketCardProps {
   onEdit?: () => void;
   onDelete?: () => void;
   isDeleting?: boolean;
+  commissionPayer?: 'host' | 'customer' | 'split';
+}
+
+function getCommissionPercentage(commissionPayer?: 'host' | 'customer' | 'split'): number {
+  if (!commissionPayer) return 0;
+  return commissionPayer === 'host' ? 0 : commissionPayer === 'customer' ? 4 : 2;
 }
 
 export const SavedTicketCard = ({
@@ -31,7 +37,12 @@ export const SavedTicketCard = ({
   onEdit,
   onDelete,
   isDeleting = false,
+  commissionPayer,
 }: SavedTicketCardProps) => {
+  const commissionPercentage = getCommissionPercentage(commissionPayer);
+  const customerPrice = amount + (amount * commissionPercentage) / 100;
+  const showCommissionNote = commissionPercentage > 0;
+
   return (
     <div className="relative rounded-[12px] border border-dashed border-primary bg-emerald-50 p-2">
       {/* Top notch */}
@@ -82,16 +93,24 @@ export const SavedTicketCard = ({
             </div>
           </div>
 
-          <div className="mt-3 grid grid-cols-6 gap-2">
-            <div className="col-span-1">
-              <p className="text-xs text-gray-500">Qty</p>
-              <p className="text-xs font-semibold text-gray-800">{quantity}</p>
+          <div className="mt-3 space-y-2">
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <p className="text-xs text-gray-500">Qty</p>
+                <p className="text-xs font-semibold text-gray-800">{quantity}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Host Price</p>
+                <p className="text-xs font-semibold text-gray-800">{formatKsh(amount)}</p>
+              </div>
+              {showCommissionNote && (
+                <div>
+                  <p className="text-xs text-gray-500">Customer Pays</p>
+                  <p className="text-xs font-semibold text-emerald-600">{formatKsh(customerPrice)}</p>
+                </div>
+              )}
             </div>
-            <div className="col-span-2">
-              <p className="text-xs text-gray-500">Price</p>
-              <p className="text-xs font-semibold text-gray-800">{formatKsh(amount)}</p>
-            </div>
-            <div className="col-span-3">
+            <div>
               <p className="text-xs text-gray-500">Validity</p>
               <p className="truncate text-xs font-semibold text-gray-800">{validity}</p>
             </div>

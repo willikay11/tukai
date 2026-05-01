@@ -218,7 +218,7 @@ export const CreateExperienceSteps = ({
             ) :
             Boolean(experience?.id);
 
-          const isDatesTicketsFilled = Boolean(experience?.tickets?.length);
+          const isDatesTicketsFilled = Boolean(experience?.tickets?.length || ticketsFormData?.items?.length > 0);
           const stepFilledMap: Record<string, boolean> = {
             community: canAccessDetailsSteps,
             about: isAboutFilled,
