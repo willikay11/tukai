@@ -53,7 +53,7 @@ describe('TicketForm', () => {
   it('renders all form fields', () => {
     render(<TicketForm value={defaultValue} onChange={() => {}} errors={{}} onSave={() => {}} />);
     expect(screen.getByPlaceholderText('Ticket Name e.g. VIP, Early Bird, Locals etc...')).toBeInTheDocument();
-    expect(screen.getByText('Available Ticket Quantity')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Available Ticket Quantity')).toBeInTheDocument();
   });
 
   it('displays error messages', () => {
