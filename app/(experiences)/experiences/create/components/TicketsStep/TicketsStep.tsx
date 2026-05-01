@@ -184,12 +184,10 @@ export const TicketsStep = ({
 
         {formData.items.length === 0 && activeFormIndex === null ? (
           <TicketForm
-            value={emptyTicketForm}
+            value={draftTicket}
             onChange={handleDraftTicketChange}
             errors={formErrors}
-            onSave={() => {
-              setActiveFormIndex(0);
-            }}
+            onSave={handleSaveTicket}
             onCancel={onCancel}
             experiencePricing={experiencePricing}
             commissionPayer={formData.commission}
