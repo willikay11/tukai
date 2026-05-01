@@ -17,7 +17,7 @@ const customJestConfig = {
     '^.+\\.(js|jsx)$': 'babel-jest', // Add this line to handle JS/JSX transformation
   },
   transformIgnorePatterns: [
-    '/node_modules/(?!@hugeicons/)', // If you're using libraries in node_modules that need transformation, add them here
+    '/node_modules/(?!(@hugeicons|lucide-react)/)', // If you're using libraries in node_modules that need transformation, add them here
   ],
   collectCoverage: true,
   collectCoverageFrom: [

@@ -13,6 +13,13 @@ import { CustomiseItinerary } from './customiseItinerary';
 import { ExperienceReview } from './experienceReview';
 import { PreviewDateSection } from './PreviewDateSection';
 import { PreviewCommunitySection } from './PreviewCommunitySection';
+import { PreviewExperienceHeader } from './PreviewExperienceHeader';
+import { PreviewIncludedSection } from './PreviewIncludedSection';
+import { PreviewExcludedSection } from './PreviewExcludedSection';
+import { PreviewCategoriesSection } from './PreviewCategoriesSection';
+import { PreviewItineraryTypeSection } from './PreviewItineraryTypeSection';
+import { PreviewLocationSection } from './PreviewLocationSection';
+import { PreviewMeetingSection } from './PreviewMeetingSection';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
@@ -28,6 +35,16 @@ export const ExperienceStepSidePanel = ({
   selectedDate,
   selectedStartTime,
   selectedEndTime,
+  aboutPhoto,
+  aboutTitle,
+  aboutDescription,
+  aboutVisibility,
+  aboutWhatsIncluded,
+  aboutWhatsNotIncluded,
+  aboutLocation,
+  aboutMeetingPoint,
+  aboutMeetingTime,
+  aboutCategories,
   onEditStep,
 }: {
   step: ExperienceStepId;
@@ -41,6 +58,16 @@ export const ExperienceStepSidePanel = ({
   selectedDate?: string | null;
   selectedStartTime?: string | null;
   selectedEndTime?: string | null;
+  aboutPhoto?: string | null;
+  aboutTitle?: string;
+  aboutDescription?: string;
+  aboutVisibility?: 'public' | 'private';
+  aboutWhatsIncluded?: string;
+  aboutWhatsNotIncluded?: string;
+  aboutLocation?: string;
+  aboutMeetingPoint?: string;
+  aboutMeetingTime?: string | null;
+  aboutCategories?: string[];
   onEditStep?: (step: ExperienceStepId) => void;
 }) => {
   const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
@@ -53,11 +80,23 @@ export const ExperienceStepSidePanel = ({
     about: (
       <div className="space-y-6">
         <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2>
-        <PreviewDateSection
-          date={selectedDate || null}
-          startTime={selectedStartTime || null}
-          endTime={selectedEndTime || null}
-          onEdit={() => onEditStep?.('community')}
+        <PreviewExperienceHeader
+          photo={aboutPhoto || null}
+          title={aboutTitle || ''}
+          description={aboutDescription || ''}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewIncludedSection
+          items={aboutWhatsIncluded ? aboutWhatsIncluded.split('\n').filter(Boolean) : []}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewExcludedSection
+          items={aboutWhatsNotIncluded ? aboutWhatsNotIncluded.split('\n').filter(Boolean) : []}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewCategoriesSection
+          categories={aboutCategories || []}
+          onEdit={() => onEditStep?.('about')}
         />
         <PreviewCommunitySection
           communityName={selectedCommunity?.name || null}
@@ -69,7 +108,46 @@ export const ExperienceStepSidePanel = ({
     'dates-tickets': itineraryConfig ? (
       <CustomiseItinerary startDate={itineraryConfig.startDate} endDate={itineraryConfig.endDate} />
     ) : canShowDateTickets ? (
-      <CreateTickets experienceId={experienceId} experience={experience} />
+      <div className="space-y-6">
+        <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2>
+        <PreviewExperienceHeader
+          photo={aboutPhoto || null}
+          title={aboutTitle || ''}
+          description={aboutDescription || ''}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewIncludedSection
+          items={aboutWhatsIncluded ? aboutWhatsIncluded.split('\n').filter(Boolean) : []}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewExcludedSection
+          items={aboutWhatsNotIncluded ? aboutWhatsNotIncluded.split('\n').filter(Boolean) : []}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewCategoriesSection
+          categories={aboutCategories || []}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewDateSection
+          date={selectedDate || null}
+          startTime={selectedStartTime || null}
+          endTime={selectedEndTime || null}
+          onEdit={() => onEditStep?.('dates-tickets')}
+        />
+        <PreviewItineraryTypeSection
+          visibility={aboutVisibility || 'public'}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewLocationSection
+          location={aboutLocation || null}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewMeetingSection
+          meetingPoint={aboutMeetingPoint || null}
+          meetingTime={aboutMeetingTime || null}
+          onEdit={() => onEditStep?.('about')}
+        />
+      </div>
     ) : (
       <StepPlaceholderContent
         title="Create Tickets"

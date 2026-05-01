@@ -40,6 +40,20 @@ export interface FormData {
     meetingTime: string | null;
     categories: string[];
   };
+  tickets: {
+    commission: 'host' | 'customer' | 'split';
+    items: Array<{
+      id: string;
+      name: string;
+      quantity: number;
+      amount: number;
+      salesStartDate: string;
+      salesStartTime: string;
+      salesEndDate: string;
+      salesEndTime: string;
+      acceptPartialPayment: boolean;
+    }>;
+  };
 }
 
 const EXPERIENCE_STEPS: ExperienceStepId[] = [
@@ -80,6 +94,10 @@ const initialFormData: FormData = {
     meetingTime: null,
     categories: [],
   },
+  tickets: {
+    commission: 'host',
+    items: [],
+  },
 };
 
 export const useCreateExperienceFlow = () => {
@@ -104,6 +122,7 @@ export const useCreateExperienceFlow = () => {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [dateTypeErrors, setDateTypeErrors] = useState<Record<string, string>>({});
   const [aboutErrors, setAboutErrors] = useState<Record<string, string>>({});
+  const [ticketsErrors, setTicketsErrors] = useState<Record<string, string>>({});
 
   const { data: createdCommunitiesResponse, isLoading: isLoadingCreatedCommunities } =
     useGetCommunities({
@@ -209,6 +228,18 @@ export const useCreateExperienceFlow = () => {
     return Object.keys(errors).length === 0;
   }, [formData.dateType.community, formData.dateType.date]);
 
+  const updateTicketsFormData = useCallback((data: Partial<FormData['tickets']>) => {
+    console.log("[updateTicketsFormData] Updating tickets with data:", data);
+    setFormData((prev) => {
+      const updated = {
+        ...prev,
+        tickets: { ...prev.tickets, ...data },
+      };
+      console.log("[updateTicketsFormData] New formData.tickets:", updated.tickets);
+      return updated;
+    });
+  }, []);
+
   const validateAbout = useCallback((): boolean => {
     const errors: Record<string, string> = {};
     console.log("[validateAbout] Starting validation for about form");
@@ -235,6 +266,20 @@ export const useCreateExperienceFlow = () => {
     console.log("[validateAbout] Is valid:", Object.keys(errors).length === 0);
     return Object.keys(errors).length === 0;
   }, [formData.about.title, formData.about.description, formData.about.location, formData.about.photo]);
+
+  const validateTickets = useCallback((): boolean => {
+    const errors: Record<string, string> = {};
+    console.log("[validateTickets] Starting validation for tickets");
+
+    if (formData.tickets.items.length === 0) {
+      errors.items = 'At least one ticket is required';
+    }
+
+    setTicketsErrors(errors);
+    console.log("[validateTickets] Errors found:", errors);
+    console.log("[validateTickets] Is valid:", Object.keys(errors).length === 0);
+    return Object.keys(errors).length === 0;
+  }, [formData.tickets.items.length]);
 
   const handleStepChange = (step: ExperienceStepId) => {
     console.log("[handleStepChange] Changing step from", activeStep, "to", step);
@@ -298,6 +343,7 @@ export const useCreateExperienceFlow = () => {
     formData,
     dateTypeErrors,
     aboutErrors,
+    ticketsErrors,
     communitiesForSelector,
 
     // Computed
@@ -307,8 +353,10 @@ export const useCreateExperienceFlow = () => {
     // Functions
     updateFormData,
     updateAboutFormData,
+    updateTicketsFormData,
     validateDateType,
     validateAbout,
+    validateTickets,
 
     // Handlers
     handlers: {

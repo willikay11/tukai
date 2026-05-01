@@ -18,6 +18,7 @@ import { DateTypeStep, type DateTypeFormData } from './DateTypeStep';
 import { ExperienceDates } from './dates';
 import { CreateExperienceInvites } from './invites';
 import { CreateExperienceWallet } from './wallet';
+import { TicketsStep } from './TicketsStep/TicketsStep';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
@@ -67,9 +68,39 @@ interface CreateExperienceStepsProps {
     categories: string[];
   };
   updateAboutFormData?: (data: Partial<typeof aboutFormData>) => void;
+  ticketsFormData?: {
+    commission: 'host' | 'customer' | 'split';
+    items: Array<{
+      id: string;
+      name: string;
+      quantity: number;
+      amount: number;
+      salesStartDate: string;
+      salesStartTime: string;
+      salesEndDate: string;
+      salesEndTime: string;
+      acceptPartialPayment: boolean;
+    }>;
+  };
+  updateTicketsFormData?: (data: Partial<{
+    commission: 'host' | 'customer' | 'split';
+    items: Array<{
+      id: string;
+      name: string;
+      quantity: number;
+      amount: number;
+      salesStartDate: string;
+      salesStartTime: string;
+      salesEndDate: string;
+      salesEndTime: string;
+      acceptPartialPayment: boolean;
+    }>;
+  }>) => void;
+  ticketsErrors?: Record<string, string>;
   communitiesForSelector?: Array<{ id: string; name: string; imageUrl: string }>;
   validateDateType?: () => boolean;
   validateAbout?: () => boolean;
+  validateTickets?: () => boolean;
 }
 
 export const CreateExperienceSteps = ({
@@ -87,9 +118,13 @@ export const CreateExperienceSteps = ({
   aboutErrors = {},
   aboutFormData,
   updateAboutFormData,
+  ticketsFormData,
+  updateTicketsFormData,
+  ticketsErrors = {},
   communitiesForSelector = [],
   validateDateType = () => true,
   validateAbout = () => true,
+  validateTickets = () => true,
 }: CreateExperienceStepsProps) => {
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const { data: walletsResponse } = useGetWallets();
@@ -279,12 +314,28 @@ export const CreateExperienceSteps = ({
       </TabsContent>
 
       <TabsContent value="dates-tickets" className="col-span-1 mt-6">
-        <ExperienceDates
-          experienceId={experience?.id || null}
-          experience={experience}
-          onDatesUpdatedSuccess={onDatesUpdatedSuccess}
-          onItineraryCustomise={onItineraryCustomise}
-        />
+        {ticketsFormData && updateTicketsFormData ? (
+          <TicketsStep
+            formData={ticketsFormData}
+            dateTypeData={formData || { community: null, experiencePricing: 'paid', experienceType: 'one-time', isRecurring: false, date: null, startTime: null, endTime: null }}
+            experiencePricing={formData?.experiencePricing || 'paid'}
+            onChange={updateTicketsFormData}
+            errors={ticketsErrors}
+            onSaveContinue={() => {
+              if (validateTickets()) {
+                handleStepChange('guests');
+              }
+            }}
+            onCancel={() => handleStepChange('about')}
+          />
+        ) : (
+          <ExperienceDates
+            experienceId={experience?.id || null}
+            experience={experience}
+            onDatesUpdatedSuccess={onDatesUpdatedSuccess}
+            onItineraryCustomise={onItineraryCustomise}
+          />
+        )}
       </TabsContent>
 
       <TabsContent value="guests" className="col-span-1 mt-6">

@@ -32,11 +32,14 @@ function CreateExperiencePageContent() {
     formData,
     updateFormData,
     updateAboutFormData,
+    updateTicketsFormData,
     dateTypeErrors,
     aboutErrors,
+    ticketsErrors,
     communitiesForSelector,
     validateDateType,
     validateAbout,
+    validateTickets,
   } = useCreateExperienceFlow();
 
   if (isCheckingCommunityAccess) {
@@ -74,9 +77,13 @@ function CreateExperiencePageContent() {
           aboutFormData={formData.about}
           updateAboutFormData={updateAboutFormData}
           aboutErrors={aboutErrors}
+          ticketsFormData={formData.tickets}
+          updateTicketsFormData={updateTicketsFormData}
+          ticketsErrors={ticketsErrors}
           communitiesForSelector={communitiesForSelector}
           validateDateType={validateDateType}
           validateAbout={validateAbout}
+          validateTickets={validateTickets}
         />
       </div>
       <div className="h-full lg:col-span-4 lg:col-start-8 xl:col-span-4 xl:col-start-8 3xl:col-span-3 3xl:col-start-8 4xl:col-span-3 4xl:col-start-8">
@@ -92,6 +99,16 @@ function CreateExperiencePageContent() {
           selectedDate={formData.dateType.date}
           selectedStartTime={formData.dateType.startTime}
           selectedEndTime={formData.dateType.endTime}
+          aboutPhoto={formData.about.photo}
+          aboutTitle={formData.about.title}
+          aboutDescription={formData.about.description}
+          aboutVisibility={formData.about.visibility}
+          aboutWhatsIncluded={formData.about.whatsIncluded}
+          aboutWhatsNotIncluded={formData.about.whatsNotIncluded}
+          aboutLocation={formData.about.location}
+          aboutMeetingPoint={formData.about.meetingPoint}
+          aboutMeetingTime={formData.about.meetingTime}
+          aboutCategories={formData.about.categories}
           onEditStep={handlers.handleStepChange}
         />
       </div>
