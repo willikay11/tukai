@@ -24,7 +24,7 @@ export const PreviewExperienceHeader = ({ photo, photos, title, description, onE
           </button>
         )}
       </div>
-      {imagesToDisplay.length > 0 && title ? (
+      {imagesToDisplay.length > 0 ? (
         <div className="space-y-2">
           {imagesToDisplay.length > 1 ? (
             <ImageCarousel
@@ -34,17 +34,19 @@ export const PreviewExperienceHeader = ({ photo, photos, title, description, onE
               className="h-40"
             />
           ) : (
-            <img src={imagesToDisplay[0]} alt={title} className="h-40 w-full rounded-lg object-cover" />
+            <img src={imagesToDisplay[0]} alt={title || 'Experience'} className="h-40 w-full rounded-lg object-cover" />
           )}
-          <div>
-            <p className="text-sm font-bold text-gray-900">{title}</p>
-            {description && (
-              <div
-                className="line-clamp-2 text-xs text-gray-600 prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: description }}
-              />
-            )}
-          </div>
+          {(title || description) && (
+            <div>
+              {title && <p className="text-sm font-bold text-gray-900">{title}</p>}
+              {description && (
+                <div
+                  className="line-clamp-2 text-xs text-gray-600 prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: description }}
+                />
+              )}
+            </div>
+          )}
         </div>
       ) : (
         <p className="text-xs text-gray-500">Not set yet</p>
