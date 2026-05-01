@@ -10,10 +10,10 @@ export const AddTicketTypeButton = ({ onClick }: AddTicketTypeButtonProps) => {
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-2 text-sm text-emerald-700 hover:text-emerald-800"
+      className="flex items-center gap-2 text-base font-semibold text-emerald-800 hover:text-emerald-900"
     >
       <IconComponent iconName="Tag01Icon" size={16} />
-      <span>+ Add Another Ticket Type</span>
+      <span>Add Another Ticket Type</span>
     </button>
   );
 };

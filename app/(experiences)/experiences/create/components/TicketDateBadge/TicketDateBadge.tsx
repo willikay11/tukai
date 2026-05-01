@@ -27,12 +27,12 @@ export const TicketDateBadge = ({ date, startTime, endTime }: TicketDateBadgePro
   const timeRange = startTime && endTime ? `${formatTime(startTime)} – ${formatTime(endTime)}` : '';
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-dashed border-emerald-400 bg-emerald-50 px-3 py-2.5">
-      <IconComponent iconName="Calendar01Icon" size={18} className="text-emerald-600" />
-      <div className="text-xs text-gray-700">
-        <p className="font-medium">Date: {formatDate(date)} · {timeRange}</p>
-      </div>
-      <IconComponent iconName="CheckmarkBadge01Icon" size={18} className="ml-auto text-emerald-600" />
+    <div className="flex w-fit items-center gap-2 rounded-full border border-dashed border-emerald-500 bg-emerald-100 px-5 py-3">
+      <IconComponent iconName="Calendar04Icon" size={20} className="text-emerald-700" />
+      <p className="text-xs font-medium text-primary">
+        Date: {formatDate(date)} - {timeRange}
+      </p>
+      <IconComponent iconName="ArrowDown01Icon" size={20} className="ml-1 text-emerald-700" />
     </div>
   );
 };

@@ -76,6 +76,10 @@ export const TicketsStep = ({
   const [draftTicket, setDraftTicket] = useState<TicketFormValue>(emptyTicketForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
+  const handleDraftTicketChange = useCallback((data: Partial<TicketFormValue>) => {
+    setDraftTicket((prev) => ({ ...prev, ...data }));
+  }, []);
+
   const handleAddTicket = useCallback(() => {
     setActiveFormIndex(formData.items.length);
     setDraftTicket(emptyTicketForm);
@@ -152,60 +156,73 @@ export const TicketsStep = ({
     [formData.items, onChange],
   );
 
+  const hasTicketDateBadge =
+    Boolean(dateTypeData.date) && Boolean(dateTypeData.startTime) && Boolean(dateTypeData.endTime);
+
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-bold text-gray-900">Create Tickets</h2>
 
       <CommissionPicker value={formData.commission} onChange={(commission) => onChange({ commission })} />
 
-      {dateTypeData.date && dateTypeData.startTime && dateTypeData.endTime && (
+      {hasTicketDateBadge && (
         <TicketDateBadge
-          date={dateTypeData.date}
-          startTime={dateTypeData.startTime}
-          endTime={dateTypeData.endTime}
+          date={dateTypeData.date!}
+          startTime={dateTypeData.startTime!}
+          endTime={dateTypeData.endTime!}
         />
       )}
 
-      {formData.items.length === 0 && activeFormIndex === null ? (
-        <TicketForm
-          value={emptyTicketForm}
-          onChange={setDraftTicket}
-          errors={formErrors}
-          onSave={() => {
-            setActiveFormIndex(0);
-          }}
-          onCancel={onCancel}
-          experiencePricing={experiencePricing}
-          commissionPayer={formData.commission}
-        />
-      ) : (
-        <>
-          <div className="space-y-3">
-            {formData.items.map((ticket, index) => (
-              <TicketCard
-                key={ticket.id}
-                ticket={ticket}
-                onEdit={() => handleEditTicket(index)}
-                onDelete={() => handleDeleteTicket(ticket.id)}
+      <div className="relative">
+        {hasTicketDateBadge && (
+          <>
+            <span className="pointer-events-none absolute -left-[1.25rem] -top-[2.813rem] bottom-[5rem] border-l-[1px] border-dashed border-primary" />
+            <span className="pointer-events-none absolute -left-[1.25rem] -top-[2.813rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
+            <span className="pointer-events-none absolute -left-[1.563rem] -top-[3.125rem] h-2.5 w-2.5 rounded-full bg-emerald-900" />
+          </>
+        )}
+
+        {formData.items.length === 0 && activeFormIndex === null ? (
+          <TicketForm
+            value={emptyTicketForm}
+            onChange={handleDraftTicketChange}
+            errors={formErrors}
+            onSave={() => {
+              setActiveFormIndex(0);
+            }}
+            onCancel={onCancel}
+            experiencePricing={experiencePricing}
+            commissionPayer={formData.commission}
+          />
+        ) : (
+          <>
+            <div className="space-y-3">
+              {formData.items.map((ticket, index) => (
+                <TicketCard
+                  key={ticket.id}
+                  ticket={ticket}
+                  onEdit={() => handleEditTicket(index)}
+                  onDelete={() => handleDeleteTicket(ticket.id)}
+                />
+              ))}
+            </div>
+
+            {activeFormIndex !== null ? (
+              <TicketForm
+                value={draftTicket}
+                onChange={handleDraftTicketChange}
+                errors={formErrors}
+                onSave={handleSaveTicket}
+                onCancel={handleCancelForm}
+                experiencePricing={experiencePricing}
+                commissionPayer={formData.commission}
               />
-            ))}
-          </div>
-
-          {activeFormIndex !== null ? (
-            <TicketForm
-              value={draftTicket}
-              onChange={setDraftTicket}
-              errors={formErrors}
-              onSave={handleSaveTicket}
-              onCancel={handleCancelForm}
-              experiencePricing={experiencePricing}
-              commissionPayer={formData.commission}
-            />
-          ) : (
-            <AddTicketTypeButton onClick={handleAddTicket} />
-          )}
-        </>
-      )}
+            ) : (
+              <AddTicketTypeButton onClick={handleAddTicket} />
+            )}
+          </>
+        )}
+      </div>
 
       {errors.items && <p className="text-xs text-red-500">{errors.items}</p>}
 

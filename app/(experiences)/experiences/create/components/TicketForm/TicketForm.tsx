@@ -48,11 +48,9 @@ export const TicketForm = ({
   const customerTotalCost = (value.quantity ?? 0) * customerPayAmount;
 
   return (
-    <div className="space-y-6 border-l-2 border-dashed border-emerald-400 pl-4">
-      <div className="space-y-2">
-        <label htmlFor="ticket-name" className="text-xs font-medium text-gray-800">
-          Ticket Name
-        </label>
+    <div className="space-y-4">
+
+      <div className="space-y-1.5">
         <Input
           id="ticket-name"
           placeholder="Ticket Name e.g. VIP, Early Bird, Locals etc..."
@@ -63,20 +61,17 @@ export const TicketForm = ({
         {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="ticket-quantity" className="text-xs font-medium text-gray-800">
-          Available Ticket Quantity
-        </label>
+      <div className="space-y-1.5">
         <Input
           id="ticket-quantity"
           type="number"
-          placeholder="0"
+          placeholder="Available Ticket Quantity"
           value={value.quantity ?? ''}
           onChange={(e) => onChange({ quantity: e.target.value ? parseInt(e.target.value, 10) : null })}
           suffixIcon={
-            <div className="flex flex-col gap-0.5">
-              <IconComponent iconName="ArrowUp01Icon" size={12} />
-              <IconComponent iconName="ArrowDown01Icon" size={12} />
+            <div className="flex flex-col gap-0.5 text-gray-700">
+              <IconComponent iconName="ArrowUp01Icon" size={11} />
+              <IconComponent iconName="ArrowDown01Icon" size={11} />
             </div>
           }
         />
@@ -84,14 +79,11 @@ export const TicketForm = ({
       </div>
 
       {experiencePricing === 'paid' && (
-        <div className="space-y-2">
-          <label htmlFor="ticket-amount" className="text-xs font-medium text-gray-800">
-            Amount per ticket
-          </label>
+        <div className="space-y-1.5">
           <Input
             id="ticket-amount"
             type="number"
-            placeholder="0"
+            placeholder="Amount per ticket"
             value={value.amount ?? ''}
             onChange={(e) => onChange({ amount: e.target.value ? parseFloat(e.target.value) : null })}
             icon={<IconComponent iconName="Money03Icon" size={18} />}
@@ -101,59 +93,58 @@ export const TicketForm = ({
       )}
 
       {experiencePricing === 'paid' && value.quantity && value.amount && (
-        <div className="space-y-2 rounded-lg bg-gray-50 p-3">
-          <p className="text-xs text-gray-600">
-            Total Tickets Cost:{' '}
-            <span className="font-semibold text-gray-900">KES {totalCost.toLocaleString()}</span>
-          </p>
-          <p className="text-xs text-gray-600">
-            + What the customer sees:{' '}
-            <span className="font-semibold text-emerald-600">KES {customerTotalCost.toLocaleString()}</span>
+        <div className="rounded-full border border-blue-200 bg-blue-100/60 px-4 py-2">
+          <p className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
+            <span className="italic">Total Tickets Cost:</span>
+            <span className="font-semibold text-gray-900">KES {totalCost.toLocaleString()}.00</span>
+            <span className="text-blue-400">•</span>
+            <span className="italic">What the customer sees:</span>
+            <span className="font-semibold text-gray-900">KES {customerTotalCost.toLocaleString()}.00</span>
           </p>
         </div>
       )}
 
       <div className="space-y-2">
-        <label className="text-xs font-medium text-gray-800">
+        <label className="text-sm font-medium text-gray-800">
           Ticket Sales Validity{' '}
+          <span className="font-normal text-gray-700">(When should the sales of these tickets start and end)</span>{' '}
           <IconComponent
             iconName="InfoCircleIcon"
-            size={14}
-            className="inline text-gray-500"
-            title="When should the sales of these tickets start and end?"
+            size={16}
+            className="inline text-blue-500"
           />
         </label>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <DatePicker
             value={value.salesStartDate || undefined}
             onChange={(date) => onChange({ salesStartDate: date })}
-            placeholder="Start date"
+            placeholder="Start Date"
           />
           <TimePicker
             value={value.salesStartTime || undefined}
             onChange={(time) => onChange({ salesStartTime: time })}
-            placeholder="Start time"
+            placeholder="Start Time"
           />
         </div>
         {errors.salesStartDate && <p className="text-xs text-red-500">{errors.salesStartDate}</p>}
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <DatePicker
             value={value.salesEndDate || undefined}
             onChange={(date) => onChange({ salesEndDate: date })}
-            placeholder="End date"
+            placeholder="End Date"
           />
           <TimePicker
             value={value.salesEndTime || undefined}
             onChange={(time) => onChange({ salesEndTime: time })}
-            placeholder="End time"
+            placeholder="End Time"
           />
         </div>
         {errors.salesEndDate && <p className="text-xs text-red-500">{errors.salesEndDate}</p>}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 pt-1">
         <Checkbox
           id="accept-partial"
           checked={value.acceptPartialPayment}
@@ -161,10 +152,10 @@ export const TicketForm = ({
         />
         <label
           htmlFor="accept-partial"
-          className="flex cursor-pointer items-center gap-2 text-xs font-medium text-gray-800"
+          className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-900"
         >
           Accept partial payments on this ticket
-          <IconComponent iconName="InfoCircleIcon" size={14} className="text-gray-500" />
+          <IconComponent iconName="InfoCircleIcon" size={16} className="text-blue-500" />
         </label>
       </div>
 
@@ -179,7 +170,7 @@ export const TicketForm = ({
           </button>
         )}
         <div className="flex-1" />
-        <Button type="button" onClick={onSave} variant="gradient" className="text-xs font-medium">
+        <Button type="button" onClick={onSave} variant="gradient" className="rounded-[50px] text-xs font-medium">
           Save Ticket
         </Button>
       </div>

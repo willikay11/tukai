@@ -26,7 +26,7 @@ export const CommissionPicker = ({ value, onChange }: CommissionPickerProps) => 
               <RadioGroupItem value={option.value} id={`commission-${option.value}`} />
               <label
                 htmlFor={`commission-${option.value}`}
-                className="flex cursor-pointer items-center gap-2 text-sm text-gray-800"
+                className="flex cursor-pointer items-center gap-2 text-xs text-gray-800"
               >
                 {option.label}
               </label>
