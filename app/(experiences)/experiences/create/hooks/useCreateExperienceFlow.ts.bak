@@ -182,18 +182,6 @@ export const useCreateExperienceFlow = () => {
     }));
   }, []);
 
-  const updateAboutFormData = useCallback((data: Partial<FormData['about']>) => {
-    console.log("[updateAboutFormData] Updating about with data:", data);
-    setFormData((prev) => {
-      const updated = {
-        ...prev,
-        about: { ...prev.about, ...data },
-      };
-      console.log("[updateAboutFormData] New formData.about:", updated.about);
-      return updated;
-    });
-  }, []);
-
   const validateDateType = useCallback((): boolean => {
     const errors: Record<string, string> = {};
 
@@ -211,8 +199,6 @@ export const useCreateExperienceFlow = () => {
 
   const validateAbout = useCallback((): boolean => {
     const errors: Record<string, string> = {};
-    console.log("[validateAbout] Starting validation for about form");
-    console.log("[validateAbout] formData.about:", formData.about);
 
     if (!formData.about.title.trim()) {
       errors.title = 'Title is required';
@@ -231,13 +217,10 @@ export const useCreateExperienceFlow = () => {
     }
 
     setAboutErrors(errors);
-    console.log("[validateAbout] Errors found:", errors);
-    console.log("[validateAbout] Is valid:", Object.keys(errors).length === 0);
     return Object.keys(errors).length === 0;
   }, [formData.about.title, formData.about.description, formData.about.location, formData.about.photo]);
 
   const handleStepChange = (step: ExperienceStepId) => {
-    console.log("[handleStepChange] Changing step from", activeStep, "to", step);
     setActiveStep(step);
     replaceCreateUrlParams({ step });
   };
@@ -306,7 +289,6 @@ export const useCreateExperienceFlow = () => {
 
     // Functions
     updateFormData,
-    updateAboutFormData,
     validateDateType,
     validateAbout,
 

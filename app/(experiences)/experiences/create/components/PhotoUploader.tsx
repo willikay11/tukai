@@ -32,7 +32,7 @@ export const PhotoUploader = ({ photoUrl, onPhotoChange, error }: PhotoUploaderP
     <div className="space-y-2">
       <FileUploadField
         id="experience-photo"
-        label="Add details about the experience"
+        label="Upload a experience poster (Dimensions: 540*540, Max 15 Mbs)"
         buttonText="Add Photo(s)"
         accept="image/*"
         multiple={false}
@@ -43,7 +43,6 @@ export const PhotoUploader = ({ photoUrl, onPhotoChange, error }: PhotoUploaderP
         onFilesChange={handleFilesChange}
       />
       {error && <p className="text-xs text-red-500">{error}</p>}
-      <p className="text-xs text-gray-500">Upload experience poster (Dimensions: 540 x 540, 16:9 Ratio)</p>
     </div>
   );
 };

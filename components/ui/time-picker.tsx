@@ -268,13 +268,13 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
             type="button"
             disabled={disabled}
             className={cn(
-              'flex h-[55px] w-full items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5 text-left text-xs text-gray-700 placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+              'flex h-[50px] w-full items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5 text-left text-xs text-gray-700 placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
               !value && 'text-gray-400',
               className,
             )}
           >
             <span>{getDisplayValue()}</span>
-            <IconComponent iconName="Clock01Icon" size={18} className="text-gray-400" />
+            <IconComponent iconName="Clock01Icon" size={18} className="text-gray-800" />
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-auto rounded-xl border border-border bg-background p-0 shadow-lg" align="start">

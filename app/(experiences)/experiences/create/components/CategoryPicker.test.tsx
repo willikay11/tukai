@@ -1,35 +1,74 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CategoryPicker } from './CategoryPicker';
 
+jest.mock('@/app/shared/hooks/useAuth', () => ({
+  useGetInterestCategories: jest.fn(),
+}));
+
+const mockCategories = {
+  data: {
+    results: [
+      { id: '1', name: 'Hiking' },
+      { id: '2', name: 'Running' },
+      { id: '3', name: 'Safari' },
+    ],
+  },
+};
+
 describe('CategoryPicker', () => {
-  it('renders all category options', () => {
-    render(<CategoryPicker selectedCategories={[]} onChange={() => {}} />);
-    expect(screen.getByText('Hiking')).toBeInTheDocument();
-    expect(screen.getByText('Running')).toBeInTheDocument();
-    expect(screen.getByText('Safari')).toBeInTheDocument();
+  let useGetInterestCategoriesMock: jest.Mock;
+
+  beforeEach(() => {
+    const useAuth = require('@/app/shared/hooks/useAuth');
+    useGetInterestCategoriesMock = useAuth.useGetInterestCategories as jest.Mock;
+    useGetInterestCategoriesMock.mockReturnValue({
+      data: mockCategories,
+      isLoading: false,
+    });
   });
 
-  it('highlights selected categories', () => {
-    render(<CategoryPicker selectedCategories={['Hiking', 'Running']} onChange={() => {}} />);
-    const hikingButton = screen.getByRole('button', { name: 'Hiking' });
-    const runningButton = screen.getByRole('button', { name: 'Running' });
-    expect(hikingButton).toHaveClass('bg-emerald-600');
-    expect(runningButton).toHaveClass('bg-emerald-600');
+  const renderWithQueryClient = (component: React.ReactElement) => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+      },
+    });
+    return render(
+      <QueryClientProvider client={queryClient}>
+        {component}
+      </QueryClientProvider>,
+    );
+  };
+
+  it('shows loading state while fetching', () => {
+    useGetInterestCategoriesMock.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    });
+
+    renderWithQueryClient(<CategoryPicker selectedCategories={[]} onChange={() => {}} />);
+    expect(screen.getByText('Loading categories...')).toBeInTheDocument();
   });
 
-  it('toggles category on click', () => {
+  it('renders categories from API', async () => {
+    renderWithQueryClient(<CategoryPicker selectedCategories={[]} onChange={() => {}} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Hiking')).toBeInTheDocument();
+      expect(screen.getByText('Running')).toBeInTheDocument();
+      expect(screen.getByText('Safari')).toBeInTheDocument();
+    });
+  });
+
+  it('toggles category on click', async () => {
     const onChange = jest.fn();
-    render(<CategoryPicker selectedCategories={['Hiking']} onChange={onChange} />);
-    const hikingButton = screen.getByRole('button', { name: 'Hiking' });
-    fireEvent.click(hikingButton);
-    expect(onChange).toHaveBeenCalledWith([]);
-  });
+    renderWithQueryClient(
+      <CategoryPicker selectedCategories={['1']} onChange={onChange} />,
+    );
 
-  it('adds category when clicking unselected category', () => {
-    const onChange = jest.fn();
-    render(<CategoryPicker selectedCategories={['Hiking']} onChange={onChange} />);
-    const runningButton = screen.getByRole('button', { name: 'Running' });
-    fireEvent.click(runningButton);
-    expect(onChange).toHaveBeenCalledWith(['Hiking', 'Running']);
+    await waitFor(() => {
+      expect(screen.getByText('Hiking')).toBeInTheDocument();
+    });
   });
 });

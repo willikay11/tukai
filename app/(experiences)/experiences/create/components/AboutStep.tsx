@@ -113,6 +113,10 @@ export const AboutStep = ({
 
   return (
     <div className="space-y-6">
+      <p className="mb-2 text-sm font-semibold text-gray-800">
+        Add details about the experience
+      </p>
+
       <PhotoUploader photoUrl={formData.photo} onPhotoChange={handlePhotoChange} error={errors.photo} />
 
       <ExperienceTitleInput value={formData.title} onChange={handleTitleChange} error={errors.title} />
@@ -140,10 +144,13 @@ export const AboutStep = ({
 
       <CategoryPicker selectedCategories={formData.categories} onChange={handleCategoriesChange} />
 
-      <div className="flex gap-3 border-t border-gray-200 pt-6">
+      <div className="flex gap-3 pt-6">
         <button
           type="button"
-          onClick={onCancel}
+          onClick={() => {
+            console.log("[AboutStep] Cancel clicked");
+            onCancel();
+          }}
           className="text-xs font-medium text-destructive hover:text-destructive/80"
         >
           Cancel
@@ -151,14 +158,26 @@ export const AboutStep = ({
         <div className="flex-1" />
         <Button
           type="button"
-          onClick={onSaveEdit}
           variant="outline"
+          onClick={() => {
+            console.log("[AboutStep] Save & Edit clicked");
+            onSaveEdit();
+          }}
           disabled={isSaving}
-          className="text-xs font-medium"
+          className="text-xs font-medium rounded-[50px]"
         >
           Save & Edit
         </Button>
-        <Button type="button" onClick={onSaveContinue} disabled={isSaving} className="text-xs font-medium">
+        <Button
+          type="button"
+          onClick={() => {
+            console.log("[AboutStep] Save & Continue clicked", { formData, errors });
+            onSaveContinue();
+          }}
+          variant="gradient"
+          disabled={isSaving}
+          className="text-xs font-medium rounded-[50px]"
+        >
           Save & Continue
         </Button>
       </div>

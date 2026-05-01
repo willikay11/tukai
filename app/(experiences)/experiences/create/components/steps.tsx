@@ -94,13 +94,32 @@ export const CreateExperienceSteps = ({
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const { data: walletsResponse } = useGetWallets();
   const hasSavedWallets = (walletsResponse?.data?.results?.length ?? 0) > 0;
-  const canAccessDetailsSteps = Boolean(experience?.id || selectedCommunityId);
+  const canAccessDetailsSteps = Boolean(
+    experience?.id || 
+    selectedCommunityId || 
+    formData?.community?.id
+  );
+  
+  useEffect(() => {
+    console.log("[steps.tsx] canAccessDetailsSteps calculated:", {
+      canAccessDetailsSteps,
+      'experience?.id': experience?.id,
+      selectedCommunityId,
+    });
+  }, [experience?.id, selectedCommunityId]);
 
   useEffect(() => {
-    if (!isLoadingExperience && currentStep !== 'community' && !canAccessDetailsSteps) {
+    console.log("[steps.tsx guard] Checking access - currentStep:", currentStep, "canAccessDetailsSteps:", canAccessDetailsSteps, "isLoadingExperience:", isLoadingExperience);
+    // Allow 'about' step if community is selected, even without experience (will be created in about step)
+    const canAccessStep = currentStep === 'about' 
+      ? Boolean(formData?.community?.id) 
+      : canAccessDetailsSteps;
+    
+    if (!isLoadingExperience && currentStep !== 'community' && !canAccessStep) {
+      console.log("[steps.tsx guard] Access denied! Redirecting to community");
       onStepChange?.('community');
     }
-  }, [canAccessDetailsSteps, currentStep, isLoadingExperience, onStepChange]);
+  }, [canAccessDetailsSteps, currentStep, isLoadingExperience, onStepChange, formData?.community?.id]);
 
   const handleStepChange = (step: ExperienceStepId) => {
     if (step !== 'community' && !canAccessDetailsSteps) {
@@ -111,7 +130,11 @@ export const CreateExperienceSteps = ({
   };
 
   const handleSaveContinue = () => {
-    if (validateDateType()) {
+    console.log("[handleSaveContinue] Called, validateDateType...");
+    const isValid = validateDateType();
+    console.log("[handleSaveContinue] validateDateType returned:", isValid);
+    if (isValid) {
+      console.log("[handleSaveContinue] Validation passed, moving to about step");
       onStepChange?.('about');
     }
   };
@@ -232,8 +255,16 @@ export const CreateExperienceSteps = ({
               }
             }}
             onSaveContinue={() => {
-              if (validateAbout()) {
+              console.log("[steps.tsx] onSaveContinue called");
+              const isValid = validateAbout();
+              console.log("[steps.tsx] validateAbout returned:", isValid);
+              console.log("[steps.tsx] aboutFormData:", aboutFormData);
+              console.log("[steps.tsx] aboutErrors:", aboutErrors);
+              if (isValid) {
+                console.log("[steps.tsx] Validation passed, calling handleStepChange('dates-tickets')");
                 handleStepChange('dates-tickets');
+              } else {
+                console.log("[steps.tsx] Validation failed");
               }
             }}
           />

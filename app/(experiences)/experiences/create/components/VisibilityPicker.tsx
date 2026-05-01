@@ -1,6 +1,6 @@
 'use client';
 
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 
 interface VisibilityPickerProps {
   value: 'public' | 'private';
@@ -8,25 +8,22 @@ interface VisibilityPickerProps {
 }
 
 export const VisibilityPicker = ({ value, onChange }: VisibilityPickerProps) => {
+    const options = [
+    { value: 'public', label: 'Public (Everyone)' },
+    { value: 'private', label: 'Private (Only invited people)' },
+  ];
   return (
     <div className="space-y-2">
       <label className="text-xs font-medium text-gray-800">
         Experience visibility (who can see or access the experience)
       </label>
-      <RadioGroup value={value} onValueChange={(val) => onChange(val as 'public' | 'private')}>
-        <div className="flex items-center gap-3">
-          <RadioGroupItem value="public" id="visibility-public" />
-          <label htmlFor="visibility-public" className="flex cursor-pointer items-center gap-2 text-sm">
-            <span className="font-medium text-gray-900">Public (Everyone)</span>
-          </label>
-        </div>
-        <div className="flex items-center gap-3">
-          <RadioGroupItem value="private" id="visibility-private" />
-          <label htmlFor="visibility-private" className="flex cursor-pointer items-center gap-2 text-sm">
-            <span className="font-medium text-gray-900">Private (Only invited people)</span>
-          </label>
-        </div>
-      </RadioGroup>
+      <div className='w-fit'>
+        <PillRadioGroup
+          options={options}
+          value={value}
+          onChange={(selectedValue) => onChange(selectedValue as 'public' | 'private')}
+        />
+      </div>
     </div>
   );
 };

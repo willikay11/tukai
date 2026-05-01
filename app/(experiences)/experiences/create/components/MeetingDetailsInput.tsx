@@ -1,7 +1,9 @@
 'use client';
 
+import { IconComponent } from '@/app/shared/components';
 import { Input } from '@/components/ui/input';
 import { TimePicker } from '@/components/ui/time-picker';
+import { Icon } from 'lucide-react';
 
 interface MeetingDetailsInputProps {
   meetingPoint: string;
@@ -17,7 +19,7 @@ export const MeetingDetailsInput = ({
   onMeetingTimeChange,
 }: MeetingDetailsInputProps) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       <div className="space-y-2">
         <label htmlFor="meeting-point" className="text-xs font-medium text-gray-800">
           Meeting Details (Optional)
@@ -27,20 +29,16 @@ export const MeetingDetailsInput = ({
           placeholder="Meeting/Pick-up Point"
           value={meetingPoint}
           onChange={(e) => onMeetingPointChange(e.target.value)}
-          className="h-[55px]"
+          className="h-[50px]"
+          suffixIcon={<IconComponent iconName="Location06Icon" size={18} className="text-gray-800" />}
         />
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="meeting-time" className="text-xs font-medium text-gray-800">
-          Meeting Time
-        </label>
-        <TimePicker
-          value={meetingTime || undefined}
-          onChange={onMeetingTimeChange}
-          placeholder="Select time"
-        />
-      </div>
+      <TimePicker
+        value={meetingTime || undefined}
+        onChange={onMeetingTimeChange}
+        placeholder="Select time"
+      />
     </div>
   );
 };

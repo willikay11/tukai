@@ -39,7 +39,7 @@ export const ExperienceLocationInput = ({ value, onChange, error }: ExperienceLo
       <LocationAutocompleteField
         containerRef={containerRef}
         value={value}
-        placeholder="Add location(s) of the place..."
+        placeholder="Add location/name of the place..."
         showSuggestions={showSuggestions}
         suggestions={suggestions}
         isLoading={isLoading}

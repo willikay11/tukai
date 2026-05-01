@@ -24,7 +24,7 @@ export const LocationAutocompleteField = ({
   containerRef,
   value,
   placeholder = 'City e.g. Nairobi, Watamu...',
-  inputClassName = 'h-[55px]',
+  inputClassName = 'h-[50px]',
   showSuggestions,
   minQueryLength = 3,
   suggestions = [],
@@ -44,7 +44,7 @@ export const LocationAutocompleteField = ({
         value={value}
         onChange={(event) => onValueChange(event.target.value)}
         onFocus={onFocus}
-        suffixIcon={<IconComponent iconName="MapPinpoint01Icon" size={20} />}
+        suffixIcon={<IconComponent iconName="Location06Icon" size={18} className="text-gray-800" />}
       />
 
       {canShowDropdown && (

@@ -31,6 +31,7 @@ function CreateExperiencePageContent() {
     handlers,
     formData,
     updateFormData,
+    updateAboutFormData,
     dateTypeErrors,
     aboutErrors,
     communitiesForSelector,
@@ -71,7 +72,7 @@ function CreateExperiencePageContent() {
           updateFormData={updateFormData}
           dateTypeErrors={dateTypeErrors}
           aboutFormData={formData.about}
-          updateAboutFormData={(data) => updateFormData(data)}
+          updateAboutFormData={updateAboutFormData}
           aboutErrors={aboutErrors}
           communitiesForSelector={communitiesForSelector}
           validateDateType={validateDateType}

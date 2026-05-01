@@ -1,31 +1,8 @@
 'use client';
 
-const CATEGORY_OPTIONS = [
-  'Hiking',
-  'Running',
-  'Camping',
-  'Cooking',
-  'Backpacking',
-  'Walking',
-  'Overlooking',
-  'Gym',
-  'Bird Watching',
-  'Sunset',
-  'Fishing',
-  'Safari',
-  'Forts & Museums',
-  'Horse Riding',
-  'Rock Climbing',
-  'Scenic Driving/Road Trip',
-  'Restaurants',
-  'Sports Activity',
-  'Weekend',
-  'Shopping',
-  'Kids',
-  'Water Sports',
-  'Night Life',
-  'Other',
-];
+import { useGetInterestCategories } from '@/app/shared/hooks/useAuth';
+import { CategoryPill } from '@/components/ui/categoryPill';
+import { Interest } from '@/types/interest';
 
 interface CategoryPickerProps {
   selectedCategories: string[];
@@ -33,36 +10,33 @@ interface CategoryPickerProps {
 }
 
 export const CategoryPicker = ({ selectedCategories, onChange }: CategoryPickerProps) => {
-  const handleToggleCategory = (category: string) => {
-    const updated = selectedCategories.includes(category)
-      ? selectedCategories.filter((c) => c !== category)
-      : [...selectedCategories, category];
+  const { data: categories, isLoading } = useGetInterestCategories();
+
+  const handleToggleCategory = (categoryId: string) => {
+    const updated = selectedCategories.includes(categoryId)
+      ? selectedCategories.filter((id) => id !== categoryId)
+      : [...selectedCategories, categoryId];
     onChange(updated);
   };
+
+  if (isLoading) {
+    return <div className="text-xs text-gray-500">Loading categories...</div>;
+  }
 
   return (
     <div className="space-y-2">
       <label className="text-xs font-medium text-gray-800">
-        Select a category the experience falls under eg. Hiking, Safari, etc.
+        Select a category the experience falls under
       </label>
       <div className="flex flex-wrap gap-2">
-        {CATEGORY_OPTIONS.map((category) => {
-          const isSelected = selectedCategories.includes(category);
-          return (
-            <button
-              key={category}
-              type="button"
-              onClick={() => handleToggleCategory(category)}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                isSelected
-                  ? 'bg-emerald-600 text-white'
-                  : 'border border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-              }`}
-            >
-              {category}
-            </button>
-          );
-        })}
+        {categories.map((category: Interest) => (
+          <CategoryPill
+            key={category.id}
+            category={category}
+            isSelected={selectedCategories.includes(category.id)}
+            onClick={handleToggleCategory}
+          />
+        ))}
       </div>
     </div>
   );

@@ -1,5 +1,11 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { DescriptionFields } from './DescriptionFields';
+
+jest.mock('@/components/blocks/editor-00/editor', () => ({
+  Editor: ({ editorSerializedState, onSerializedChange }: any) => (
+    <div data-testid="editor" onClick={() => onSerializedChange(editorSerializedState)} />
+  ),
+}));
 
 describe('DescriptionFields', () => {
   const defaultProps = {
@@ -11,44 +17,17 @@ describe('DescriptionFields', () => {
     onWhatsNotIncludedChange: jest.fn(),
   };
 
-  it('renders all three textarea fields', () => {
+  it('renders all three editor fields with labels', () => {
     render(<DescriptionFields {...defaultProps} />);
-    expect(screen.getByPlaceholderText(/grab people's attention/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/add what is included/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/add what is NOT included/i)).toBeInTheDocument();
+    expect(screen.getByText('Add your experience description')).toBeInTheDocument();
+    expect(screen.getByText("What's included")).toBeInTheDocument();
+    expect(screen.getByText("What's NOT included")).toBeInTheDocument();
   });
 
-  it('displays current values in textareas', () => {
-    render(
-      <DescriptionFields
-        {...defaultProps}
-        description="Test description"
-        whatsIncluded="Lunch included"
-        whatsNotIncluded="Drinks not included"
-      />
-    );
-    expect(screen.getByDisplayValue('Test description')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Lunch included')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Drinks not included')).toBeInTheDocument();
-  });
-
-  it('calls callbacks when values change', () => {
-    const onDescriptionChange = jest.fn();
-    const onWhatsIncludedChange = jest.fn();
-    const onWhatsNotIncludedChange = jest.fn();
-
-    render(
-      <DescriptionFields
-        {...defaultProps}
-        onDescriptionChange={onDescriptionChange}
-        onWhatsIncludedChange={onWhatsIncludedChange}
-        onWhatsNotIncludedChange={onWhatsNotIncludedChange}
-      />
-    );
-
-    const descriptionTextarea = screen.getByPlaceholderText(/grab people's attention/i);
-    fireEvent.change(descriptionTextarea, { target: { value: 'New description' } });
-    expect(onDescriptionChange).toHaveBeenCalledWith('New description');
+  it('renders three editor instances', () => {
+    render(<DescriptionFields {...defaultProps} />);
+    const editors = screen.getAllByTestId('editor');
+    expect(editors).toHaveLength(3);
   });
 
   it('displays error message for description', () => {

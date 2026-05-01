@@ -47,14 +47,14 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             type="button"
             disabled={disabled}
             className={cn(
-              'flex h-[55px] w-full items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5 text-left text-xs placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+              'flex h-[50px] w-full items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5 text-left text-xs placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
               !date && 'text-gray-400',
               date && 'text-gray-700',
               className,
             )}
           >
             {date ? format(date, 'PPP') : <span>{placeholder}</span>}
-            <IconComponent iconName="Calendar01Icon" size={18} className="text-gray-400" />
+            <IconComponent iconName="Calendar01Icon" size={18} className="text-gray-800" />
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-auto rounded-[12px] p-0" align="start">
