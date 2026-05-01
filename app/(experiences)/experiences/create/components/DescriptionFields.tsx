@@ -209,10 +209,9 @@ export const DescriptionFields = ({
         <Editor
           editorSerializedState={toSerializedEditorState(whatsIncluded)}
           onSerializedChange={(state) => {
-            const root = state?.root;
-            if (root?.children?.[0]?.children?.[0]) {
-              const text = root.children[0].children[0].text || '';
-              onWhatsIncludedChange(text);
+            const html = serializeEditorStateToHtml(state);
+            if (html) {
+              onWhatsIncludedChange(html);
             }
           }}
         />
@@ -225,10 +224,9 @@ export const DescriptionFields = ({
         <Editor
           editorSerializedState={toSerializedEditorState(whatsNotIncluded)}
           onSerializedChange={(state) => {
-            const root = state?.root;
-            if (root?.children?.[0]?.children?.[0]) {
-              const text = root.children[0].children[0].text || '';
-              onWhatsNotIncludedChange(text);
+            const html = serializeEditorStateToHtml(state);
+            if (html) {
+              onWhatsNotIncludedChange(html);
             }
           }}
         />
