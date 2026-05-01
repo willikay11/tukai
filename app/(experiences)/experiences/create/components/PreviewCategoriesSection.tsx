@@ -21,12 +21,13 @@ export const PreviewCategoriesSection = ({ categories, onEdit }: PreviewCategori
       {categories.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {categories.map((category, index) => (
-            <span
+            <div
               key={index}
-              className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-700"
+              className="flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1.5 text-xs text-gray-700"
             >
-              {category}
-            </span>
+              <IconComponent iconName="Tag01Icon" size={14} className="flex-shrink-0" />
+              <span>{category}</span>
+            </div>
           ))}
         </div>
       ) : (
