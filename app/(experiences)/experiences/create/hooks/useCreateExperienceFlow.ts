@@ -55,6 +55,10 @@ export interface FormData {
       acceptPartialPayment: boolean;
     }>;
   };
+  invite: {
+    invitedGuests: InvitedMember[];
+    invitedCommunityIds: string[];
+  };
 }
 
 const EXPERIENCE_STEPS: ExperienceStepId[] = [
@@ -98,6 +102,10 @@ const initialFormData: FormData = {
   tickets: {
     commission: 'host',
     items: [],
+  },
+  invite: {
+    invitedGuests: [],
+    invitedCommunityIds: [],
   },
 };
 
@@ -282,6 +290,13 @@ export const useCreateExperienceFlow = () => {
     return Object.keys(errors).length === 0;
   }, [formData.tickets.items.length]);
 
+  const updateInviteFormData = useCallback((data: Partial<FormData['invite']>) => {
+    setFormData((prev) => ({
+      ...prev,
+      invite: { ...prev.invite, ...data },
+    }));
+  }, []);
+
   const handleStepChange = (step: ExperienceStepId) => {
     console.log("[handleStepChange] Changing step from", activeStep, "to", step);
     setActiveStep(step);
@@ -355,6 +370,7 @@ export const useCreateExperienceFlow = () => {
     updateFormData,
     updateAboutFormData,
     updateTicketsFormData,
+    updateInviteFormData,
     validateDateType,
     validateAbout,
     validateTickets,

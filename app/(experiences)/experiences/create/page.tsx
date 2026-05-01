@@ -33,6 +33,7 @@ function CreateExperiencePageContent() {
     updateFormData,
     updateAboutFormData,
     updateTicketsFormData,
+    updateInviteFormData,
     dateTypeErrors,
     aboutErrors,
     ticketsErrors,
@@ -84,6 +85,8 @@ function CreateExperiencePageContent() {
           validateDateType={validateDateType}
           validateAbout={validateAbout}
           validateTickets={validateTickets}
+          inviteFormData={formData.invite}
+          updateInviteFormData={updateInviteFormData}
         />
       </div>
       <div className="h-full lg:col-span-4 lg:col-start-8 xl:col-span-4 xl:col-start-8 3xl:col-span-3 3xl:col-start-8 4xl:col-span-3 4xl:col-start-8">

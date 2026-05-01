@@ -11,6 +11,9 @@ export { TicketCard } from './TicketCard/TicketCard';
 export { AddTicketTypeButton } from './AddTicketTypeButton/AddTicketTypeButton';
 export { TicketsStep } from './TicketsStep/TicketsStep';
 
+// Invite guests step
+export { InviteGuestsStep } from './InviteGuestsStep/InviteGuestsStep';
+
 // Preview section components
 export { PreviewExperienceHeader } from './PreviewExperienceHeader';
 export { PreviewIncludedSection } from './PreviewIncludedSection';
@@ -19,3 +22,4 @@ export { PreviewCategoriesSection } from './PreviewCategoriesSection';
 export { PreviewItineraryTypeSection } from './PreviewItineraryTypeSection';
 export { PreviewLocationSection } from './PreviewLocationSection';
 export { PreviewMeetingSection } from './PreviewMeetingSection';
+export { PreviewTicketsSection } from './PreviewTicketsSection/PreviewTicketsSection';

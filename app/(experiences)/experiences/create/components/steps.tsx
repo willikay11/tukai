@@ -17,6 +17,7 @@ import { CreateExperienceCommunity } from './community';
 import { DateTypeStep, type DateTypeFormData } from './DateTypeStep';
 import { ExperienceDates } from './dates';
 import { CreateExperienceInvites } from './invites';
+import { InviteGuestsStep } from './InviteGuestsStep/InviteGuestsStep';
 import { CreateExperienceWallet } from './wallet';
 import { TicketsStep } from './TicketsStep/TicketsStep';
 import { Interest } from '@/types/interest';
@@ -104,6 +105,14 @@ interface CreateExperienceStepsProps {
   validateDateType?: () => boolean;
   validateAbout?: () => boolean;
   validateTickets?: () => boolean;
+  inviteFormData?: {
+    invitedGuests: InvitedMember[];
+    invitedCommunityIds: string[];
+  };
+  updateInviteFormData?: (data: Partial<{
+    invitedGuests: InvitedMember[];
+    invitedCommunityIds: string[];
+  }>) => void;
 }
 
 export const CreateExperienceSteps = ({
@@ -128,6 +137,8 @@ export const CreateExperienceSteps = ({
   validateDateType = () => true,
   validateAbout = () => true,
   validateTickets = () => true,
+  inviteFormData,
+  updateInviteFormData,
 }: CreateExperienceStepsProps) => {
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const { data: walletsResponse } = useGetWallets();
@@ -352,11 +363,23 @@ export const CreateExperienceSteps = ({
       </TabsContent>
 
       <TabsContent value="guests" className="col-span-1 mt-6">
-        <CreateExperienceInvites
-          experienceId={experience?.id || null}
-          onInvitesChange={onInvitesChange}
-          onNext={() => handleStepChange('wallet')}
-        />
+        {inviteFormData && updateInviteFormData ? (
+          <InviteGuestsStep
+            formData={inviteFormData}
+            onChange={updateInviteFormData}
+            experienceId={experience?.id || null}
+            experience={experience}
+            onNext={() => handleStepChange('wallet')}
+            onCancel={() => handleStepChange('dates-tickets')}
+          />
+        ) : (
+          <CreateExperienceInvites
+            experienceId={experience?.id || null}
+            experience={experience}
+            onInvitesChange={onInvitesChange}
+            onNext={() => handleStepChange('wallet')}
+          />
+        )}
       </TabsContent>
 
       <TabsContent value="wallet" className="col-span-1 mt-6">

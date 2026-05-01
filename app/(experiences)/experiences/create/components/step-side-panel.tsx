@@ -199,18 +199,77 @@ export const ExperienceStepSidePanel = ({
       />
     ),
     guests: (
-      <ExperienceReview
-        experience={experience}
-        invitedMembers={invitedMembers}
-        invitedCommunities={invitedCommunities}
-      />
+      <div className="space-y-6">
+        <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2>
+        <PreviewExperienceHeader
+          photo={aboutPhoto || null}
+          photos={aboutPhotos}
+          title={aboutTitle || ''}
+          description={aboutDescription || ''}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewIncludedSection
+          items={aboutWhatsIncluded ? [aboutWhatsIncluded] : []}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewExcludedSection
+          items={aboutWhatsNotIncluded ? [aboutWhatsNotIncluded] : []}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewCategoriesSection
+          categories={aboutCategories || []}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewDateSection
+          date={selectedDate || null}
+          startTime={selectedStartTime || null}
+          endTime={selectedEndTime || null}
+          onEdit={() => onEditStep?.('dates-tickets')}
+        />
+        <PreviewItineraryTypeSection
+          visibility={aboutVisibility || 'public'}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewLocationSection
+          location={aboutLocation || null}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewMeetingSection
+          meetingPoint={aboutMeetingPoint || null}
+          meetingTime={aboutMeetingTime || null}
+          onEdit={() => onEditStep?.('about')}
+        />
+        {ticketsItems && ticketsItems.length > 0 && (
+          <div className="border-t border-gray-200 pt-6">
+            <PreviewTicketsSection
+              tickets={ticketsItems}
+              coverPhoto={aboutPhoto || undefined}
+              commissionPayer={ticketsCommissionPayer}
+              onEdit={() => onEditStep?.('dates-tickets')}
+            />
+          </div>
+        )}
+      </div>
     ),
     wallet: (
-      <ExperienceReview
-        experience={experience}
-        invitedMembers={invitedMembers}
-        invitedCommunities={invitedCommunities}
-      />
+      <div className="space-y-6">
+        <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2>
+        <ExperienceReview
+          experience={experience}
+          invitedMembers={invitedMembers}
+          invitedCommunities={invitedCommunities}
+        />
+        {ticketsItems && ticketsItems.length > 0 && (
+          <div className="border-t border-gray-200 pt-6">
+            <PreviewTicketsSection
+              tickets={ticketsItems}
+              coverPhoto={aboutPhoto || undefined}
+              commissionPayer={ticketsCommissionPayer}
+              onEdit={() => onEditStep?.('dates-tickets')}
+            />
+          </div>
+        )}
+      </div>
     ),
   };
   const content = stepPanelContent[step];
