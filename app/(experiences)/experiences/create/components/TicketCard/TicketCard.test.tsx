@@ -6,50 +6,46 @@ jest.mock('@/app/shared/components/Icons', () => ({
 }));
 
 describe('TicketCard', () => {
-  const mockTicket = {
-    id: '1',
+  const mockProps = {
     name: 'VIP Ticket',
-    imageUrl: 'https://example.com/ticket.jpg',
     quantity: 50,
     amount: 5000,
-    salesStartDate: 'Feb 23',
-    salesStartTime: '10:00 AM',
-    salesEndDate: 'Feb 23',
-    salesEndTime: '1:00 PM',
+    validity: 'Feb 23, 10:00 AM - 1:00 PM',
+    coverPhoto: 'https://example.com/ticket.jpg',
   };
 
   it('renders ticket name', () => {
-    render(<TicketCard ticket={mockTicket} onEdit={() => {}} onDelete={() => {}} />);
+    render(<TicketCard {...mockProps} onEdit={() => {}} onDelete={() => {}} />);
     expect(screen.getByText('VIP Ticket')).toBeInTheDocument();
   });
 
   it('displays ticket metadata', () => {
-    render(<TicketCard ticket={mockTicket} onEdit={() => {}} onDelete={() => {}} />);
-    expect(screen.getByText(/Qty: 50/)).toBeInTheDocument();
-    expect(screen.getByText(/Price: Ksh 5000/)).toBeInTheDocument();
+    render(<TicketCard {...mockProps} onEdit={() => {}} onDelete={() => {}} />);
+    expect(screen.getByText('50')).toBeInTheDocument();
+    expect(screen.getByText(/Ksh 5,000/)).toBeInTheDocument();
   });
 
   it('renders edit and delete buttons', () => {
     const onEdit = jest.fn();
     const onDelete = jest.fn();
-    render(<TicketCard ticket={mockTicket} onEdit={onEdit} onDelete={onDelete} />);
+    render(<TicketCard {...mockProps} onEdit={onEdit} onDelete={onDelete} />);
     const buttons = screen.getAllByRole('button');
     expect(buttons.length).toBe(2);
   });
 
   it('calls onEdit when edit button clicked', () => {
     const onEdit = jest.fn();
-    render(<TicketCard ticket={mockTicket} onEdit={onEdit} onDelete={() => {}} />);
-    const editButton = screen.getByTitle('Edit ticket');
-    editButton.click();
-    expect(onEdit).toHaveBeenCalledWith('1');
+    render(<TicketCard {...mockProps} onEdit={onEdit} onDelete={() => {}} />);
+    const editButtons = screen.getAllByRole('button');
+    editButtons[0].click();
+    expect(onEdit).toHaveBeenCalled();
   });
 
   it('calls onDelete when delete button clicked', () => {
     const onDelete = jest.fn();
-    render(<TicketCard ticket={mockTicket} onEdit={() => {}} onDelete={onDelete} />);
-    const deleteButton = screen.getByTitle('Delete ticket');
-    deleteButton.click();
-    expect(onDelete).toHaveBeenCalledWith('1');
+    render(<TicketCard {...mockProps} onEdit={() => {}} onDelete={onDelete} />);
+    const deleteButtons = screen.getAllByRole('button');
+    deleteButtons[1].click();
+    expect(onDelete).toHaveBeenCalled();
   });
 });

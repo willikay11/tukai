@@ -11,7 +11,7 @@ function formatKsh(value: number) {
   return `Ksh ${currencyFormatter.format(Number.isFinite(value) ? value : 0)}`;
 }
 
-export interface SavedTicketCardProps {
+export interface TicketCardProps {
   name: string;
   quantity: number;
   amount: number;
@@ -28,7 +28,7 @@ function getCommissionPercentage(commissionPayer?: 'host' | 'customer' | 'split'
   return commissionPayer === 'host' ? 0 : commissionPayer === 'customer' ? 4 : 2;
 }
 
-export const SavedTicketCard = ({
+export const TicketCard = ({
   name,
   quantity,
   amount,
@@ -38,7 +38,7 @@ export const SavedTicketCard = ({
   onDelete,
   isDeleting = false,
   commissionPayer,
-}: SavedTicketCardProps) => {
+}: TicketCardProps) => {
   const commissionPercentage = getCommissionPercentage(commissionPayer);
   const customerPrice = amount + (amount * commissionPercentage) / 100;
   const showCommissionNote = commissionPercentage > 0;
@@ -120,3 +120,6 @@ export const SavedTicketCard = ({
     </div>
   );
 };
+
+export const SavedTicketCard = TicketCard;
+export type SavedTicketCardProps = TicketCardProps;
