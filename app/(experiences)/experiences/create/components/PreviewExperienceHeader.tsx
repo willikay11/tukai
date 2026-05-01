@@ -41,7 +41,7 @@ export const PreviewExperienceHeader = ({ photo, photos, title, description, onE
               {title && <p className="text-sm font-bold text-gray-900">{title}</p>}
               {description && (
                 <div
-                  className="line-clamp-2 text-xs text-gray-600 prose prose-sm max-w-none"
+                  className="text-xs text-gray-600 prose prose-sm max-w-none"
                   dangerouslySetInnerHTML={{ __html: description }}
                 />
               )}
