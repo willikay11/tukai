@@ -7,6 +7,34 @@ interface PreviewCategoriesSectionProps {
   onEdit?: () => void;
 }
 
+// Mapping of category names to icon names
+const CATEGORY_ICON_MAP: Record<string, string> = {
+  'Hiking': 'Mountain02Icon',
+  'Cooking': 'ChefHat01Icon',
+  'Photography': 'Camera01Icon',
+  'Sports': 'Trophy01Icon',
+  'Art': 'Palette01Icon',
+  'Music': 'Music01Icon',
+  'Dance': 'Move01Icon',
+  'Yoga': 'Meditation01Icon',
+  'Fitness': 'Dumbbell01Icon',
+  'Swimming': 'Waves01Icon',
+  'Cycling': 'Bike01Icon',
+  'Running': 'Run01Icon',
+  'Gaming': 'Gamepad01Icon',
+  'Reading': 'BookOpen01Icon',
+  'Writing': 'Edit02Icon',
+  'Meditation': 'Meditation01Icon',
+  'Nature': 'Leaf01Icon',
+  'Beach': 'Sun02Icon',
+  'Mountain': 'Mountain02Icon',
+  'Urban': 'Building03Icon',
+};
+
+const getIconForCategory = (categoryName: string): string => {
+  return CATEGORY_ICON_MAP[categoryName] || 'Tag01Icon';
+};
+
 export const PreviewCategoriesSection = ({ categories, onEdit }: PreviewCategoriesSectionProps) => {
   return (
     <div className="space-y-3">
@@ -23,9 +51,9 @@ export const PreviewCategoriesSection = ({ categories, onEdit }: PreviewCategori
           {categories.map((category, index) => (
             <div
               key={index}
-              className="flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1.5 text-xs text-gray-700"
+              className="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs text-gray-700"
             >
-              <IconComponent iconName="Tag01Icon" size={14} className="flex-shrink-0" />
+              <IconComponent iconName={getIconForCategory(category)} size={14} className="flex-shrink-0" />
               <span>{category}</span>
             </div>
           ))}
