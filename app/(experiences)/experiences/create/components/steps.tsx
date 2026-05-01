@@ -339,6 +339,7 @@ export const CreateExperienceSteps = ({
               }
             }}
             onCancel={() => handleStepChange('about')}
+            photos={aboutFormData?.photos}
           />
         ) : (
           <ExperienceDates

@@ -3,11 +3,11 @@
 import { useCallback, useState } from 'react';
 
 import { v4 as uuidv4 } from 'uuid';
-
+import moment from 'moment';
 import { Button } from '@/components/ui/button';
 import { AddTicketTypeButton } from '../AddTicketTypeButton/AddTicketTypeButton';
 import { CommissionPicker } from '../CommissionPicker/CommissionPicker';
-import { TicketCard } from '../TicketCard/TicketCard';
+import { SavedTicketCard } from '../TicketCard/TicketCard';
 import { TicketDateBadge } from '../TicketDateBadge/TicketDateBadge';
 import { TicketForm, TicketFormValue } from '../TicketForm/TicketForm';
 import { FormData } from '../../hooks/useCreateExperienceFlow';
@@ -20,6 +20,7 @@ interface TicketsStepProps {
   errors: Record<string, string>;
   onSaveContinue: () => void;
   onCancel: () => void;
+  photos?: string[];
 }
 
 const emptyTicketForm: TicketFormValue = {
@@ -71,6 +72,7 @@ export const TicketsStep = ({
   errors,
   onSaveContinue,
   onCancel,
+  photos,
 }: TicketsStepProps) => {
   const [activeFormIndex, setActiveFormIndex] = useState<number | null>(null);
   const [draftTicket, setDraftTicket] = useState<TicketFormValue>(emptyTicketForm);
@@ -176,7 +178,7 @@ export const TicketsStep = ({
       <div className="relative">
         {hasTicketDateBadge && (
           <>
-            <span className="pointer-events-none absolute -left-[1.25rem] -top-[2.813rem] bottom-[5rem] border-l-[1px] border-dashed border-primary" />
+            <span className="pointer-events-none absolute -left-[1.25rem] -top-[2.813rem] bottom-0 border-l-[1px] border-dashed border-primary" />
             <span className="pointer-events-none absolute -left-[1.25rem] -top-[2.813rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
             <span className="pointer-events-none absolute -left-[1.563rem] -top-[3.125rem] h-2.5 w-2.5 rounded-full bg-emerald-900" />
           </>
@@ -194,11 +196,15 @@ export const TicketsStep = ({
           />
         ) : (
           <>
-            <div className="space-y-3">
+            <div className="space-y-3 mb-4">
               {formData.items.map((ticket, index) => (
-                <TicketCard
+                <SavedTicketCard
                   key={ticket.id}
-                  ticket={ticket}
+                  name={ticket.name}
+                  quantity={ticket.quantity}
+                  amount={ticket.amount}
+                  validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
+                  coverPhoto={photos?.[0]}
                   onEdit={() => handleEditTicket(index)}
                   onDelete={() => handleDeleteTicket(ticket.id)}
                 />
