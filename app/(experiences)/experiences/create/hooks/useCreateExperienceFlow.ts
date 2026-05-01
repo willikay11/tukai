@@ -29,7 +29,7 @@ export interface FormData {
     endTime: string | null;
   };
   about: {
-    photo: string | null;
+    photos: string[];
     title: string;
     visibility: 'public' | 'private';
     description: string;
@@ -83,7 +83,7 @@ const initialFormData: FormData = {
     endTime: null,
   },
   about: {
-    photo: null,
+    photos: [],
     title: '',
     visibility: 'public',
     description: '',
@@ -257,15 +257,15 @@ export const useCreateExperienceFlow = () => {
       errors.location = 'Location is required';
     }
 
-    if (!formData.about.photo) {
-      errors.photo = 'At least one photo is required';
+    if (formData.about.photos.length === 0) {
+      errors.photos = 'At least one photo is required';
     }
 
     setAboutErrors(errors);
     console.log("[validateAbout] Errors found:", errors);
     console.log("[validateAbout] Is valid:", Object.keys(errors).length === 0);
     return Object.keys(errors).length === 0;
-  }, [formData.about.title, formData.about.description, formData.about.location, formData.about.photo]);
+  }, [formData.about.title, formData.about.description, formData.about.location, formData.about.photos]);
 
   const validateTickets = useCallback((): boolean => {
     const errors: Record<string, string> = {};

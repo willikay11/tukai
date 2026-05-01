@@ -56,7 +56,7 @@ interface CreateExperienceStepsProps {
   dateTypeErrors?: Record<string, string>;
   aboutErrors?: Record<string, string>;
   aboutFormData?: {
-    photo: string | null;
+    photos: string[];
     title: string;
     visibility: 'public' | 'private';
     description: string;

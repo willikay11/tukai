@@ -51,6 +51,14 @@ jest.mock('@/components/ui/radio-group', () => ({
   RadioGroupItem: ({ value, id }: any) => <input type="radio" value={value} id={id} />,
 }));
 
+jest.mock('./CategoryPicker', () => ({
+  CategoryPicker: ({ selectedCategories, onChange }: any) => (
+    <div data-testid="category-picker">
+      Category Picker
+    </div>
+  ),
+}));
+
 jest.mock('@/components/ui/time-picker', () => ({
   TimePicker: ({ value, onChange, placeholder }: any) => (
     <input type="time" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
@@ -84,7 +92,7 @@ const renderWithQueryClient = (component: React.ReactElement) => {
 
 describe('AboutStep', () => {
   const defaultFormData = {
-    photo: null,
+    photos: [],
     title: '',
     visibility: 'public' as const,
     description: '',

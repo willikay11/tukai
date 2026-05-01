@@ -10,15 +10,9 @@ const customJestConfig = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
     '^@hugeicons/react-pro$': '<rootDir>/__mocks__/@hugeicons/react-pro.js', // Mock for HugeIcons
+    '^lucide-react$': '<rootDir>/__mocks__/lucide-react.js', // Mock for lucide-react
   },
   testEnvironment: 'jest-environment-jsdom',
-  transform: {
-    '^.+\\.(ts|tsx)$': 'babel-jest', // Add this line to handle TypeScript/JSX transformation
-    '^.+\\.(js|jsx)$': 'babel-jest', // Add this line to handle JS/JSX transformation
-  },
-  transformIgnorePatterns: [
-    '/node_modules/(?!(@hugeicons|lucide-react)/)', // If you're using libraries in node_modules that need transformation, add them here
-  ],
   collectCoverage: true,
   collectCoverageFrom: [
     'app/**/*.{js,jsx,ts,tsx}',

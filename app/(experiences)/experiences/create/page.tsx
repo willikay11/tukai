@@ -101,7 +101,8 @@ function CreateExperiencePageContent() {
           selectedDate={formData.dateType.date}
           selectedStartTime={formData.dateType.startTime}
           selectedEndTime={formData.dateType.endTime}
-          aboutPhoto={formData.about.photo}
+          aboutPhoto={formData.about.photos?.[0] || null}
+          aboutPhotos={formData.about.photos}
           aboutTitle={formData.about.title}
           aboutDescription={formData.about.description}
           aboutVisibility={formData.about.visibility}

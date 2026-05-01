@@ -36,6 +36,7 @@ export const ExperienceStepSidePanel = ({
   selectedStartTime,
   selectedEndTime,
   aboutPhoto,
+  aboutPhotos,
   aboutTitle,
   aboutDescription,
   aboutVisibility,
@@ -59,6 +60,7 @@ export const ExperienceStepSidePanel = ({
   selectedStartTime?: string | null;
   selectedEndTime?: string | null;
   aboutPhoto?: string | null;
+  aboutPhotos?: string[];
   aboutTitle?: string;
   aboutDescription?: string;
   aboutVisibility?: 'public' | 'private';
@@ -82,6 +84,7 @@ export const ExperienceStepSidePanel = ({
         <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2>
         <PreviewExperienceHeader
           photo={aboutPhoto || null}
+          photos={aboutPhotos}
           title={aboutTitle || ''}
           description={aboutDescription || ''}
           onEdit={() => onEditStep?.('about')}
@@ -112,6 +115,7 @@ export const ExperienceStepSidePanel = ({
         <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2>
         <PreviewExperienceHeader
           photo={aboutPhoto || null}
+          photos={aboutPhotos}
           title={aboutTitle || ''}
           description={aboutDescription || ''}
           onEdit={() => onEditStep?.('about')}

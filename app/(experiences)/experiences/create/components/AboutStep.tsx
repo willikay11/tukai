@@ -13,7 +13,7 @@ import { VisibilityPicker } from './VisibilityPicker';
 
 interface AboutStepProps {
   formData: {
-    photo: string | null;
+    photos: string[];
     title: string;
     visibility: 'public' | 'private';
     description: string;
@@ -43,9 +43,15 @@ export const AboutStep = ({
 }: AboutStepProps) => {
   const handlePhotoChange = useCallback(
     (photo: string | null) => {
-      onFormDataChange({ photo });
+      if (photo) {
+        // Add photo to the array if not already present
+        const photos = formData.photos.includes(photo)
+          ? formData.photos
+          : [...formData.photos, photo];
+        onFormDataChange({ photos });
+      }
     },
-    [onFormDataChange],
+    [onFormDataChange, formData.photos],
   );
 
   const handleTitleChange = useCallback(
@@ -117,7 +123,7 @@ export const AboutStep = ({
         Add details about the experience
       </p>
 
-      <PhotoUploader photoUrl={formData.photo} onPhotoChange={handlePhotoChange} error={errors.photo} />
+      <PhotoUploader photoUrl={formData.photos?.[0] || null} onPhotoChange={handlePhotoChange} error={errors.photos} />
 
       <ExperienceTitleInput value={formData.title} onChange={handleTitleChange} error={errors.title} />
 

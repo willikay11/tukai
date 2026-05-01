@@ -1,15 +1,19 @@
 'use client';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { ImageCarousel } from '@/components/ui/imageCarousel';
 
 interface PreviewExperienceHeaderProps {
   photo: string | null;
+  photos?: string[];
   title: string;
   description: string;
   onEdit?: () => void;
 }
 
-export const PreviewExperienceHeader = ({ photo, title, description, onEdit }: PreviewExperienceHeaderProps) => {
+export const PreviewExperienceHeader = ({ photo, photos, title, description, onEdit }: PreviewExperienceHeaderProps) => {
+  // Use photos array if provided, otherwise fall back to single photo
+  const imagesToDisplay = (photos && photos.length > 0) ? photos : (photo ? [photo] : []);
   return (
     <div className="space-y-3">
       <div className="flex items-start justify-between">
@@ -20,10 +24,17 @@ export const PreviewExperienceHeader = ({ photo, title, description, onEdit }: P
           </button>
         )}
       </div>
-      {photo && title ? (
+      {imagesToDisplay.length > 0 && title ? (
         <div className="space-y-2">
-          {photo && (
-            <img src={photo} alt={title} className="h-40 w-full rounded-lg object-cover" />
+          {imagesToDisplay.length > 1 ? (
+            <ImageCarousel
+              images={imagesToDisplay}
+              width="w-full"
+              aspectRatio="aspect-[4/3]"
+              className="h-40"
+            />
+          ) : (
+            <img src={imagesToDisplay[0]} alt={title} className="h-40 w-full rounded-lg object-cover" />
           )}
           <div>
             <p className="text-sm font-bold text-gray-900">{title}</p>
