@@ -48,7 +48,7 @@ export const TicketForm = ({
   const customerTotalCost = (value.quantity ?? 0) * customerPayAmount;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 border-l-2 border-dashed border-emerald-400 pl-4">
       <div className="space-y-2">
         <label htmlFor="ticket-name" className="text-xs font-medium text-gray-800">
           Ticket Name
