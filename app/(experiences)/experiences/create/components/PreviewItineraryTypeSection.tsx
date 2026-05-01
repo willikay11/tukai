@@ -16,13 +16,13 @@ export const PreviewItineraryTypeSection = ({ visibility, onEdit }: PreviewItine
         <h3 className="text-xs font-semibold text-gray-900">Visibility</h3>
         {onEdit && (
           <button onClick={onEdit} className="text-gray-400 hover:text-gray-600">
-            <IconComponent iconName="Edit02Icon" size={16} />
+            <IconComponent iconName="Edit02Icon" size={16} className='text-gray-800' />
           </button>
         )}
       </div>
-      <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2.5">
-        <IconComponent iconName="UserIcon" size={18} className="text-gray-600" />
-        <p className="text-xs text-gray-700">{visibilityLabel}</p>
+      <div className="flex items-center gap-2">
+        <IconComponent iconName="UserIcon" size={18} className="text-gray-800" />
+        <p className="text-xs font-medium text-gray-800">{visibilityLabel}</p>
       </div>
     </div>
   );

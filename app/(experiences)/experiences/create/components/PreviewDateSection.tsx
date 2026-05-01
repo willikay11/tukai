@@ -1,6 +1,7 @@
 'use client';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import moment from 'moment';
 
 interface PreviewDateSectionProps {
   date: string | null;
@@ -19,11 +20,6 @@ export const PreviewDateSection = ({ date, startTime, endTime, onEdit }: Preview
     return `${displayHour}:${minutes} ${period}`;
   };
 
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-  };
 
   const timeRange = startTime && endTime ? `${formatTime(startTime)} - ${formatTime(endTime)}` : '';
 
@@ -33,16 +29,18 @@ export const PreviewDateSection = ({ date, startTime, endTime, onEdit }: Preview
         <h3 className="text-xs font-semibold text-gray-900">Date of the Experience</h3>
         {onEdit && (
           <button onClick={onEdit} className="text-gray-400 hover:text-gray-600">
-            <IconComponent iconName="Edit02Icon" size={16} />
+            <IconComponent iconName="Edit02Icon" size={16} className='text-gray-800' />
           </button>
         )}
       </div>
       {date && timeRange ? (
-        <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2.5">
-          <IconComponent iconName="Calendar01Icon" size={18} className="text-emerald-600" />
+        <div className="flex items-center gap-2">
+          <div className='bg-lime rounded-[12px] p-4'>
+            <IconComponent iconName="CalendarAdd01Icon" size={28} className="text-emerald-600" />
+          </div>
           <div className="text-xs text-gray-700">
-            <p className="font-medium">{formatDate(date)}</p>
-            <p className="text-gray-600">{timeRange}</p>
+            <span className="font-medium text-gray-800">{moment(date).format('ddd, MMM D')}</span>
+            <span className="text-xs font-medium text-gray-800">&nbsp;{timeRange}</span>
           </div>
         </div>
       ) : (

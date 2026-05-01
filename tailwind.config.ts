@@ -28,6 +28,9 @@ const config: Config = {
           DEFAULT: 'rgba(var(--color-secondary) / <alpha-value>)',
           foreground: 'hsl(var(--secondary-foreground))',
         },
+        lime: {
+          DEFAULT: '#B0E800',
+        },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {

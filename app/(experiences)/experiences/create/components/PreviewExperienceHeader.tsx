@@ -17,15 +17,9 @@ export const PreviewExperienceHeader = ({ photo, photos, title, description, onE
   return (
     <div className="space-y-3">
       <div className="flex items-start justify-between">
-        <h3 className="text-xs font-semibold text-gray-900">Experience Title & Photo</h3>
-        {onEdit && (
-          <button onClick={onEdit} className="text-gray-400 hover:text-gray-600">
-            <IconComponent iconName="Edit02Icon" size={16} />
-          </button>
-        )}
       </div>
       {imagesToDisplay.length > 0 ? (
-        <div className="space-y-2">
+        <div className="space-y-4">
           {imagesToDisplay.length > 1 ? (
             <ImageCarousel
               images={imagesToDisplay}
@@ -38,10 +32,17 @@ export const PreviewExperienceHeader = ({ photo, photos, title, description, onE
           )}
           {(title || description) && (
             <div>
-              {title && <p className="text-sm font-bold text-gray-900">{title}</p>}
+              {title && <div className='flex flex-row justify-between'>
+                <p className="text-xl font-bold text-gray-900">{title}</p>
+                {onEdit && (
+                  <button onClick={onEdit} className="text-gray-400 hover:text-gray-600">
+                    <IconComponent iconName="Edit02Icon" size={16} className='text-gray-800' />
+                  </button>
+                )}
+                </div>}
               {description && (
                 <div
-                  className="text-xs text-gray-600 prose prose-sm max-w-none"
+                  className="text-xs text-gray-600 prose prose-sm max-w-none mt-4"
                   dangerouslySetInnerHTML={{ __html: description }}
                 />
               )}

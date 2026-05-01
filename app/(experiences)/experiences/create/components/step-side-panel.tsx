@@ -76,7 +76,7 @@ export const ExperienceStepSidePanel = ({
     community: (
       <StepPlaceholderContent
         title="Select a Community"
-        description="Choose the community where you want to host this experience."
+        description="Please add the details of the experience"
       />
     ),
     about: (
@@ -99,6 +99,25 @@ export const ExperienceStepSidePanel = ({
         />
         <PreviewCategoriesSection
           categories={aboutCategories || []}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewItineraryTypeSection
+          visibility={aboutVisibility || 'public'}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewDateSection
+          date={selectedDate || null}
+          startTime={selectedStartTime || null}
+          endTime={selectedEndTime || null}
+          onEdit={() => onEditStep?.('dates-tickets')}
+        />
+        <PreviewLocationSection
+          location={aboutLocation || null}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewMeetingSection
+          meetingPoint={aboutMeetingPoint || null}
+          meetingTime={aboutMeetingTime || null}
           onEdit={() => onEditStep?.('about')}
         />
         <PreviewCommunitySection
