@@ -19,6 +19,20 @@ import { ExperienceDates } from './dates';
 import { CreateExperienceInvites } from './invites';
 import { CreateExperienceWallet } from './wallet';
 import { TicketsStep } from './TicketsStep/TicketsStep';
+import { Interest } from '@/types/interest';
+
+type AboutFormData = {
+  photos: string[];
+  title: string;
+  visibility: 'public' | 'private';
+  description: string;
+  whatsIncluded: string;
+  whatsNotIncluded: string;
+  location: string;
+  meetingPoint: string;
+  meetingTime: string | null;
+  categories: Interest[];
+};
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
@@ -55,19 +69,8 @@ interface CreateExperienceStepsProps {
   updateFormData?: (data: Partial<DateTypeFormData>) => void;
   dateTypeErrors?: Record<string, string>;
   aboutErrors?: Record<string, string>;
-  aboutFormData?: {
-    photos: string[];
-    title: string;
-    visibility: 'public' | 'private';
-    description: string;
-    whatsIncluded: string;
-    whatsNotIncluded: string;
-    location: string;
-    meetingPoint: string;
-    meetingTime: string | null;
-    categories: string[];
-  };
-  updateAboutFormData?: (data: Partial<typeof aboutFormData>) => void;
+  aboutFormData?: AboutFormData;
+  updateAboutFormData?: (data: Partial<AboutFormData>) => void;
   ticketsFormData?: {
     commission: 'host' | 'customer' | 'split';
     items: Array<{

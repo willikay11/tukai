@@ -8,6 +8,7 @@ import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
 import { Community } from '@/types/community';
 import type { Experience } from '@/types/experience';
+import { Interest } from '@/types/interest';
 import { Photo } from '@/types/photo';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
@@ -38,7 +39,7 @@ export interface FormData {
     location: string;
     meetingPoint: string;
     meetingTime: string | null;
-    categories: string[];
+    categories: Interest[];
   };
   tickets: {
     commission: 'host' | 'customer' | 'split';

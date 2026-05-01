@@ -10,22 +10,25 @@ import { ExperienceTitleInput } from './ExperienceTitleInput';
 import { MeetingDetailsInput } from './MeetingDetailsInput';
 import { PhotoUploader } from './PhotoUploader';
 import { VisibilityPicker } from './VisibilityPicker';
+import { Interest } from '@/types/interest';
+
+type AboutFormData = {
+  photos: string[];
+  title: string;
+  visibility: 'public' | 'private';
+  description: string;
+  whatsIncluded: string;
+  whatsNotIncluded: string;
+  location: string;
+  meetingPoint: string;
+  meetingTime: string | null;
+  categories: Interest[];
+};
 
 interface AboutStepProps {
-  formData: {
-    photos: string[];
-    title: string;
-    visibility: 'public' | 'private';
-    description: string;
-    whatsIncluded: string;
-    whatsNotIncluded: string;
-    location: string;
-    meetingPoint: string;
-    meetingTime: string | null;
-    categories: string[];
-  };
+  formData: AboutFormData;
   errors: Record<string, string>;
-  onFormDataChange: (data: Partial<typeof formData>) => void;
+  onFormDataChange: (data: Partial<AboutFormData>) => void;
   onCancel: () => void;
   onSaveEdit: () => void;
   onSaveContinue: () => void;
@@ -111,7 +114,7 @@ export const AboutStep = ({
   );
 
   const handleCategoriesChange = useCallback(
-    (categories: string[]) => {
+    (categories: Interest[]) => {
       onFormDataChange({ categories });
     },
     [onFormDataChange],
@@ -172,7 +175,7 @@ export const AboutStep = ({
           disabled={isSaving}
           className="text-xs font-medium rounded-[50px]"
         >
-          Save & Edit
+          Save & Exit
         </Button>
         <Button
           type="button"

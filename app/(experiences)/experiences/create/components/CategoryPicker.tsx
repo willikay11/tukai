@@ -5,17 +5,17 @@ import { CategoryPill } from '@/components/ui/categoryPill';
 import { Interest } from '@/types/interest';
 
 interface CategoryPickerProps {
-  selectedCategories: string[];
-  onChange: (categories: string[]) => void;
+  selectedCategories: Interest[];
+  onChange: (categories: Interest[]) => void;
 }
 
 export const CategoryPicker = ({ selectedCategories, onChange }: CategoryPickerProps) => {
   const { data: categories, isLoading } = useGetInterestCategories();
 
-  const handleToggleCategory = (categoryId: string) => {
-    const updated = selectedCategories.includes(categoryId)
-      ? selectedCategories.filter((id) => id !== categoryId)
-      : [...selectedCategories, categoryId];
+  const handleToggleCategory = (category: Interest) => {
+    const updated = selectedCategories.includes(category)
+      ? selectedCategories.filter((c) => c !== category)
+      : [...selectedCategories, category];
     onChange(updated);
   };
 
@@ -33,8 +33,8 @@ export const CategoryPicker = ({ selectedCategories, onChange }: CategoryPickerP
           <CategoryPill
             key={category.id}
             category={category}
-            isSelected={selectedCategories.includes(category.id)}
-            onClick={handleToggleCategory}
+            isSelected={selectedCategories.includes(category)}
+            onClick={() => handleToggleCategory(category)}
           />
         ))}
       </div>

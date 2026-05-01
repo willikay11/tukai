@@ -20,6 +20,7 @@ import { PreviewCategoriesSection } from './PreviewCategoriesSection';
 import { PreviewItineraryTypeSection } from './PreviewItineraryTypeSection';
 import { PreviewLocationSection } from './PreviewLocationSection';
 import { PreviewMeetingSection } from './PreviewMeetingSection';
+import { Interest } from '@/types/interest';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
@@ -69,7 +70,7 @@ export const ExperienceStepSidePanel = ({
   aboutLocation?: string;
   aboutMeetingPoint?: string;
   aboutMeetingTime?: string | null;
-  aboutCategories?: string[];
+  aboutCategories?: Interest[];
   onEditStep?: (step: ExperienceStepId) => void;
 }) => {
   const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
