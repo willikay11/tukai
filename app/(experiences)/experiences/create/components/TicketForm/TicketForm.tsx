@@ -105,7 +105,7 @@ export const TicketForm = ({
       )}
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-800">
+        <label className="text-xs font-medium text-gray-800">
           Ticket Sales Validity{' '}
           <span className="font-normal text-gray-700">(When should the sales of these tickets start and end)</span>{' '}
           <IconComponent
@@ -152,7 +152,7 @@ export const TicketForm = ({
         />
         <label
           htmlFor="accept-partial"
-          className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-900"
+          className="flex cursor-pointer items-center gap-2 text-xs font-medium text-gray-900"
         >
           Accept partial payments on this ticket
           <IconComponent iconName="InfoCircleIcon" size={16} className="text-blue-500" />

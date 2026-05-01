@@ -160,6 +160,7 @@ export const TicketsStep = ({
 
   const hasTicketDateBadge =
     Boolean(dateTypeData.date) && Boolean(dateTypeData.startTime) && Boolean(dateTypeData.endTime);
+  const showTicketConnector = hasTicketDateBadge && formData.items.length > 0 && activeFormIndex === null;
 
   return (
     <div className="space-y-6">
@@ -176,13 +177,9 @@ export const TicketsStep = ({
       )}
 
       <div className="relative">
-        {hasTicketDateBadge && (
-          <>
-            <span className="pointer-events-none absolute -left-[1.25rem] -top-[2.813rem] bottom-0 border-l-[1px] border-dashed border-primary" />
-            <span className="pointer-events-none absolute -left-[1.25rem] -top-[2.813rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
-            <span className="pointer-events-none absolute -left-[1.563rem] -top-[3.125rem] h-2.5 w-2.5 rounded-full bg-emerald-900" />
-          </>
-        )}
+          <span className="pointer-events-none absolute -left-[1.25rem] -top-[2.813rem] bottom-0 border-l-[1px] border-dashed border-primary" />
+          <span className="pointer-events-none absolute -left-[1.25rem] -top-[2.813rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
+          <span className="pointer-events-none absolute -left-[1.563rem] -top-[3.125rem] h-2.5 w-2.5 rounded-full bg-emerald-900" />
 
         {formData.items.length === 0 && activeFormIndex === null ? (
           <TicketForm
@@ -230,19 +227,22 @@ export const TicketsStep = ({
 
       {errors.items && <p className="text-xs text-red-500">{errors.items}</p>}
 
-      <div className="flex justify-between gap-4 border-t border-gray-200 pt-6">
-        <Button type="button" variant="ghost" onClick={onCancel} className="text-sm font-medium text-red-600">
+    {showTicketConnector &&(
+      <div className="flex justify-between gap-4 pt-6">
+        <Button type="button" variant="ghost" onClick={onCancel} className="text-red-600">
           Cancel
         </Button>
         <Button
           type="button"
           onClick={onSaveContinue}
           variant="gradient"
-          className="rounded-[50px] text-sm font-medium"
+          className="rounded-[50px]"
         >
           Save & Continue
         </Button>
       </div>
+    )}
+
     </div>
   );
 };
