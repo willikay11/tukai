@@ -14,13 +14,15 @@ export const PhotoUploader = ({ photoUrl, onPhotoChange, error }: PhotoUploaderP
   const handleFilesChange = useCallback(
     (files: File[]) => {
       if (files.length > 0) {
-        const file = files[0];
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const dataUrl = e.target?.result as string;
-          onPhotoChange(dataUrl);
-        };
-        reader.readAsDataURL(file);
+        // Process only new files - compare with the single photoUrl we currently have
+        files.forEach((file) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const dataUrl = e.target?.result as string;
+            onPhotoChange(dataUrl);
+          };
+          reader.readAsDataURL(file);
+        });
       }
     },
     [onPhotoChange],
@@ -35,7 +37,7 @@ export const PhotoUploader = ({ photoUrl, onPhotoChange, error }: PhotoUploaderP
         label="Upload a experience poster (Dimensions: 540*540, Max 15 Mbs)"
         buttonText="Add Photo(s)"
         accept="image/*"
-        multiple={false}
+        multiple={true}
         maxFiles={6}
         minImageWidth={540}
         minImageHeight={540}
