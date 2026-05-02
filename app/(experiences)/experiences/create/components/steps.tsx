@@ -230,11 +230,14 @@ export const CreateExperienceSteps = ({
             Boolean(experience?.id);
 
           const isDatesTicketsFilled = Boolean(experience?.tickets?.length || ticketsFormData?.items?.length > 0);
+          const isGuestsFilled = inviteFormData ?
+            Boolean(inviteFormData.invitedGuests?.length > 0 || inviteFormData.invitedCommunityIds?.length > 0) :
+            false;
           const stepFilledMap: Record<string, boolean> = {
             community: canAccessDetailsSteps,
             about: isAboutFilled,
             'dates-tickets': isDatesTicketsFilled,
-            guests: false,
+            guests: isGuestsFilled,
             wallet: hasSavedWallets,
           };
           const isFilled = stepFilledMap[step.id] ?? false;
