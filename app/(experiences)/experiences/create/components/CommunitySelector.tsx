@@ -68,15 +68,15 @@ export const CommunitySelector = ({
         >
           {value ? (
             <div className="flex items-center gap-2">
-              <img
+              {/* <img
                 src={value.imageUrl}
                 alt={value.name}
                 className="h-6 w-12 rounded-lg object-cover"
-              />
+              /> */}
               <span className="text-sm font-medium">{value.name}</span>
             </div>
           ) : (
-            <SelectValue className='placeholder:text-xs' placeholder="Select a community" />
+            <SelectValue className='placeholder:text-xs text-xs' placeholder="Select a community" />
           )}
         </SelectTrigger>
         <SelectContent>
@@ -86,12 +86,12 @@ export const CommunitySelector = ({
             options.map((community) => (
               <SelectItem key={community.id} value={community.id}>
                 <div className="flex items-center gap-2">
-                  <img
+                  {/* <img
                     src={community.imageUrl}
                     alt={community.name}
                     className="h-6 w-12 rounded-lg object-cover"
-                  />
-                  <span className="text-sm font-medium">{community.name}</span>
+                  /> */}
+                  <span className="text-xs font-medium">{community.name}</span>
                 </div>
               </SelectItem>
             ))

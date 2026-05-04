@@ -266,7 +266,6 @@ export const CreateExperienceSteps = ({
         })}
       </TabsList>
 
-      {/* Tab Content */}
       <TabsContent value="community" className="col-span-1 mt-6">
         {formData && updateFormData ? (
           <div className="space-y-6">
