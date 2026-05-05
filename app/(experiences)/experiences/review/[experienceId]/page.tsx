@@ -1,21 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-
-import { useParams } from 'next/navigation';
-
-import { CreateExperienceAbout } from '@/app/(experiences)/experiences/create/components/about';
-import { CreateTickets } from '@/app/(experiences)/experiences/create/components/createTickets';
-import { ExperienceReview } from '@/app/(experiences)/experiences/create/components/experienceReview';
-import { CreateExperienceInvites } from '@/app/(experiences)/experiences/create/components/invites';
-import { CreateExperienceWallet } from '@/app/(experiences)/experiences/create/components/wallet';
+import { useParams, useRouter } from 'next/navigation';
+import { ExperienceReview, InlineEditPanel } from '@/app/(experiences)/experiences/create/components';
 import { Button } from '@/components/ui/button';
 import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
-
-import { ExperienceDates } from '../../create/components/dates';
+import { useToast } from '@/app/shared/hooks/useToast';
 
 export default function ExperienceReviewPage() {
   const params = useParams<{ experienceId: string | string[] }>();
+  const router = useRouter();
+  const { toast } = useToast();
+  
   const experienceId =
     typeof params?.experienceId === 'string'
       ? params.experienceId
@@ -25,8 +21,30 @@ export default function ExperienceReviewPage() {
   const experience = experienceResponse?.data;
 
   const [activeEditSection, setActiveEditSection] = useState<
-    'about' | 'dates' | 'tickets' | 'invites' | 'wallet' | null
+    'about' | 'dates' | 'tickets' | 'invites' | 'wallet' | 'photos' | null
   >(null);
+  const [isPublishing, setIsPublishing] = useState(false);
+
+  const handlePublish = async () => {
+    setIsPublishing(true);
+    try {
+      // TODO: Integrate with publish API when ready
+      toast({
+        title: 'Success',
+        description: 'Your experience has been published!',
+        variant: 'success',
+      });
+      router.push(`/experiences/${experienceId}`);
+    } catch {
+      toast({
+        title: 'Error',
+        description: 'Failed to publish experience. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsPublishing(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -72,47 +90,33 @@ export default function ExperienceReviewPage() {
           experience={experience}
           invitedMembers={[]}
           invitedCommunities={[]}
-          onEditRequest={(section) => setActiveEditSection(section)}
+          onEditRequest={setActiveEditSection}
         />
       </div>
       <div className="self-stretch lg:col-span-4 lg:col-start-8">
         <div className="min-h-full rounded-t-xl border-x border-t border-gray-200 bg-white px-12 py-6 shadow-lg">
-          {activeEditSection === 'about' && (
-            <CreateExperienceAbout
-              experience={experience}
+          {activeEditSection ? (
+            <InlineEditPanel
+              activeEditSection={activeEditSection}
               onClose={() => setActiveEditSection(null)}
-              showTitle={false}
-              hideSaveAndExit
-              editSubmitActionLabel="Save Changes"
-            />
-          )}
-          {activeEditSection === 'dates' && (
-            <ExperienceDates
               experienceId={experienceId}
               experience={experience}
-              onDatesUpdatedSuccess={() => setActiveEditSection(null)}
-              onCancel={() => setActiveEditSection(null)}
-              hideSaveAndExit
-              submitActionLabel="Save Changes"
             />
-          )}
-          {activeEditSection === 'tickets' && (
-            <CreateTickets experienceId={experienceId} experience={experience} />
-          )}
-          {activeEditSection === 'invites' && (
-            <CreateExperienceInvites
-              experienceId={experienceId}
-              experience={experience}
-              hideSaveAndExit
-              nextActionLabel="Save Changes"
-            />
-          )}
-          {activeEditSection === 'wallet' && (
-            <CreateExperienceWallet
-              hideSaveAndExit
-              cancelActionLabel="Cancel"
-              previewAndPublishActionLabel="Save Changes"
-            />
+          ) : (
+            <div className="space-y-4">
+              <h2 className="text-sm font-semibold text-gray-900">Ready to go live?</h2>
+              <p className="text-xs text-gray-600">
+                Review all the details and publish your experience when you&apos;re ready.
+              </p>
+              <Button
+                onClick={handlePublish}
+                disabled={isPublishing}
+                variant="gradient"
+                className="w-full"
+              >
+                {isPublishing ? 'Publishing...' : 'Publish Experience'}
+              </Button>
+            </div>
           )}
         </div>
       </div>

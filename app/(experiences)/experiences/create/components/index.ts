@@ -28,3 +28,9 @@ export { PreviewMeetingSection } from './PreviewMeetingSection';
 export { PreviewGuestsSection } from './PreviewGuestsSection';
 export { PreviewCommunitiesSection } from './PreviewCommunitiesSection';
 export { PreviewTicketsSection } from './PreviewTicketsSection/PreviewTicketsSection';
+
+// Review and edit panels
+export { ExperienceReview } from './experienceReview';
+export { PhotoEditPanel } from './PhotoEditPanel';
+export { InlineEditPanel } from './InlineEditPanel';
+export { PreviewWalletSection } from './PreviewWalletSection';
