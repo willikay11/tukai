@@ -29,12 +29,15 @@ import { CommunityOption } from '../hooks/useCreateExperienceFlow';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
+export type ExperienceType = 'one-time' | 'multi-day' | 'itinerary';
+
 export const ExperienceStepSidePanel = ({
   step,
   experienceId,
   experience,
   canShowDateTickets,
   isRecurring = false,
+  experienceType = 'one-time',
   itineraryConfig,
   invitedMembers,
   invitedCommunities,
@@ -46,6 +49,10 @@ export const ExperienceStepSidePanel = ({
   selectedTimeSlots,
   selectedRecurrenceStartDate,
   selectedRecurrenceEndDate,
+  multiDayStartDate,
+  multiDayStartTime,
+  multiDayEndDate,
+  multiDayEndTime,
   aboutPhoto,
   aboutPhotos,
   aboutTitle,
@@ -69,6 +76,7 @@ export const ExperienceStepSidePanel = ({
   experience?: Experience;
   canShowDateTickets?: boolean;
   isRecurring?: boolean;
+  experienceType?: ExperienceType;
   itineraryConfig?: { startDate: string; endDate: string } | null;
   invitedMembers?: InvitedMember[];
   invitedCommunities?: Community[];
@@ -80,6 +88,10 @@ export const ExperienceStepSidePanel = ({
   selectedTimeSlots?: { startTime: string | null; endTime: string | null }[];
   selectedRecurrenceStartDate?: string | null;
   selectedRecurrenceEndDate?: string | null;
+  multiDayStartDate?: string | null;
+  multiDayStartTime?: string | null;
+  multiDayEndDate?: string | null;
+  multiDayEndTime?: string | null;
   aboutPhoto?: string | null;
   aboutPhotos?: string[];
   aboutTitle?: string;
@@ -144,7 +156,16 @@ export const ExperienceStepSidePanel = ({
           visibility={aboutVisibility || 'public'}
           onEdit={() => onEditStep?.('about')}
         />
-        {isRecurring ? (
+        {experienceType === 'multi-day' ? (
+          <PreviewDateSection
+            mode="multi-day"
+            startDate={multiDayStartDate || null}
+            startTime={multiDayStartTime || null}
+            endDate={multiDayEndDate || null}
+            endTime={multiDayEndTime || null}
+            onEdit={() => onEditStep?.('dates-tickets')}
+          />
+        ) : isRecurring ? (
           <PreviewDateSection
             mode="recurring"
             days={selectedRecurringDays || []}
@@ -202,13 +223,24 @@ export const ExperienceStepSidePanel = ({
           categories={aboutCategories || []}
           onEdit={() => onEditStep?.('about')}
         />
-        <PreviewDateSection
-          mode="single"
-          date={selectedDate || null}
-          startTime={selectedStartTime || null}
-          endTime={selectedEndTime || null}
-          onEdit={() => onEditStep?.('dates-tickets')}
-        />
+        {experienceType === 'multi-day' ? (
+          <PreviewDateSection
+            mode="multi-day"
+            startDate={multiDayStartDate || null}
+            startTime={multiDayStartTime || null}
+            endDate={multiDayEndDate || null}
+            endTime={multiDayEndTime || null}
+            onEdit={() => onEditStep?.('dates-tickets')}
+          />
+        ) : (
+          <PreviewDateSection
+            mode="single"
+            date={selectedDate || null}
+            startTime={selectedStartTime || null}
+            endTime={selectedEndTime || null}
+            onEdit={() => onEditStep?.('dates-tickets')}
+          />
+        )}
         <PreviewItineraryTypeSection
           visibility={aboutVisibility || 'public'}
           onEdit={() => onEditStep?.('about')}
@@ -257,13 +289,24 @@ export const ExperienceStepSidePanel = ({
           categories={aboutCategories || []}
           onEdit={() => onEditStep?.('about')}
         />
-        <PreviewDateSection
-          mode="single"
-          date={selectedDate || null}
-          startTime={selectedStartTime || null}
-          endTime={selectedEndTime || null}
-          onEdit={() => onEditStep?.('dates-tickets')}
-        />
+        {experienceType === 'multi-day' ? (
+          <PreviewDateSection
+            mode="multi-day"
+            startDate={multiDayStartDate || null}
+            startTime={multiDayStartTime || null}
+            endDate={multiDayEndDate || null}
+            endTime={multiDayEndTime || null}
+            onEdit={() => onEditStep?.('dates-tickets')}
+          />
+        ) : (
+          <PreviewDateSection
+            mode="single"
+            date={selectedDate || null}
+            startTime={selectedStartTime || null}
+            endTime={selectedEndTime || null}
+            onEdit={() => onEditStep?.('dates-tickets')}
+          />
+        )}
         <PreviewItineraryTypeSection
           visibility={aboutVisibility || 'public'}
           onEdit={() => onEditStep?.('about')}

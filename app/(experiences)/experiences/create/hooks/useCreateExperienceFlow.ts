@@ -47,6 +47,10 @@ export interface FormData {
     recurrenceStartDate: string | null;
     recurrenceEndDate: string | null;
     timeSlots: { startTime: string | null; endTime: string | null }[];
+    multiDayStartDate: string | null;
+    multiDayStartTime: string | null;
+    multiDayEndDate: string | null;
+    multiDayEndTime: string | null;
   };
   about: {
     photos: string[];
@@ -101,6 +105,10 @@ const initialFormData: FormData = {
     recurrenceStartDate: null,
     recurrenceEndDate: null,
     timeSlots: [{ startTime: null, endTime: null }],
+    multiDayStartDate: null,
+    multiDayStartTime: null,
+    multiDayEndDate: null,
+    multiDayEndTime: null,
   },
   about: {
     photos: [],
@@ -267,7 +275,31 @@ export const useCreateExperienceFlow = () => {
       errors.community = 'Community is required';
     }
 
-    if (formData.dateType.isRecurring) {
+    if (formData.dateType.experienceType === 'multi-day') {
+      if (!formData.dateType.multiDayStartDate) {
+        errors.multiDayStartDate = 'Start date is required';
+      }
+
+      if (!formData.dateType.multiDayStartTime) {
+        errors.multiDayStartTime = 'Start time is required';
+      }
+
+      if (!formData.dateType.multiDayEndDate) {
+        errors.multiDayEndDate = 'End date is required';
+      }
+
+      if (!formData.dateType.multiDayEndTime) {
+        errors.multiDayEndTime = 'End time is required';
+      }
+
+      if (
+        formData.dateType.multiDayStartDate &&
+        formData.dateType.multiDayEndDate &&
+        formData.dateType.multiDayStartDate > formData.dateType.multiDayEndDate
+      ) {
+        errors.multiDayEndDate = 'End date must be after start date';
+      }
+    } else if (formData.dateType.isRecurring) {
       if (formData.dateType.recurringDays.length === 0) {
         errors.recurringDays = 'At least one day must be selected';
       }

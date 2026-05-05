@@ -24,4 +24,31 @@ describe('PreviewDateSection', () => {
     const editButton = screen.getByRole('button');
     expect(editButton).toBeInTheDocument();
   });
+
+  it('displays multi-day dates and times correctly', () => {
+    render(
+      <PreviewDateSection
+        mode="multi-day"
+        startDate="2026-05-15"
+        startTime="09:00"
+        endDate="2026-05-20"
+        endTime="17:00"
+      />
+    );
+    expect(screen.getByText(/May 15, 2026 – May 20, 2026/)).toBeInTheDocument();
+    expect(screen.getByText(/9:00 AM – 5:00 PM/)).toBeInTheDocument();
+  });
+
+  it('displays "Not selected yet" for multi-day when dates are missing', () => {
+    render(
+      <PreviewDateSection
+        mode="multi-day"
+        startDate={null}
+        startTime={null}
+        endDate={null}
+        endTime={null}
+      />
+    );
+    expect(screen.getByText('Not selected yet')).toBeInTheDocument();
+  });
 });

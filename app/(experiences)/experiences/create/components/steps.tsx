@@ -40,7 +40,7 @@ type AboutFormData = {
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
-const STEPS = [
+const STEPS_DEFAULT = [
   {
     id: 'community',
     label: 'Community',
@@ -59,6 +59,25 @@ const STEPS = [
   { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
   { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
 ];
+
+const STEPS_MULTI_DAY = [
+  {
+    id: 'community',
+    label: 'Community',
+    icon: 'AddTeamIcon',
+  },
+  {
+    id: 'dates-tickets',
+    label: 'Dates & Tickets',
+    icon: 'Ticket02Icon',
+  },
+  { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
+  { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
+];
+
+const getSteps = (experienceType: 'one-time' | 'multi-day' | 'itinerary'): typeof STEPS_DEFAULT => {
+  return experienceType === 'multi-day' ? STEPS_MULTI_DAY : STEPS_DEFAULT;
+};
 
 interface CreateExperienceStepsProps {
   currentStep?: ExperienceStepId;
@@ -215,16 +234,18 @@ const canAccessDetailsSteps = Boolean(
     const isValid = validateDateType();
     console.log("[handleSaveContinue] validateDateType returned:", isValid);
     if (isValid) {
-      console.log("[handleSaveContinue] Validation passed, moving to about step");
-      onStepChange?.('about');
+      const nextStep = formData?.experienceType === 'multi-day' ? 'dates-tickets' : 'about';
+      console.log("[handleSaveContinue] Validation passed, moving to", nextStep, "step");
+      onStepChange?.(nextStep);
     }
   };
 
   if (isLoadingExperience) {
+    const steps = getSteps(formData?.experienceType || 'one-time');
     return (
       <Tabs value={currentStep} className="w-full">
         <TabsList className="h-auto w-full gap-2 bg-transparent p-0">
-          {STEPS.map((step) => (
+          {steps.map((step) => (
             <TabsTrigger
               key={step.id}
               value={step.id}
@@ -243,6 +264,8 @@ const canAccessDetailsSteps = Boolean(
     );
   }
 
+  const steps = getSteps(formData?.experienceType || 'one-time');
+
   return (
     <Tabs
       value={currentStep}
@@ -250,7 +273,7 @@ const canAccessDetailsSteps = Boolean(
       className="grid w-full grid-cols-1"
     >
       <TabsList className="col-span-1 flex h-auto w-full gap-2 bg-transparent p-0">
-        {STEPS.map((step) => {
+        {steps.map((step) => {
           // Check if about step is filled based on form data or experience
           const isAboutFilled = aboutFormData ?
             Boolean(

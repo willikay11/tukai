@@ -117,6 +117,7 @@ function CreateExperiencePageContent() {
           experience={experience}
           canShowDateTickets={hasUpdatedDates || !!(formData.dateType.date && formData.dateType.startTime && formData.dateType.endTime)}
           isRecurring={formData.dateType.isRecurring}
+          experienceType={formData.dateType.experienceType}
           itineraryConfig={itineraryConfig}
           invitedMembers={invitedMembers}
           invitedCommunities={invitedCommunities}
@@ -128,6 +129,10 @@ function CreateExperiencePageContent() {
           selectedTimeSlots={formData.dateType.timeSlots}
           selectedRecurrenceStartDate={formData.dateType.recurrenceStartDate}
           selectedRecurrenceEndDate={formData.dateType.recurrenceEndDate}
+          multiDayStartDate={formData.dateType.multiDayStartDate}
+          multiDayStartTime={formData.dateType.multiDayStartTime}
+          multiDayEndDate={formData.dateType.multiDayEndDate}
+          multiDayEndTime={formData.dateType.multiDayEndTime}
           aboutPhoto={formData.about.photos?.[0] || null}
           aboutPhotos={formData.about.photos}
           aboutTitle={formData.about.title}
@@ -144,7 +149,8 @@ function CreateExperiencePageContent() {
 
           invitedGuests={formData.invite.invitedGuests}
           invitedCommunityIds={formData.invite.invitedCommunityIds}
-          allCommunities={communitiesForSelector}          onEditStep={handlers.handleStepChange}
+          allCommunities={communitiesForSelector}
+          onEditStep={handlers.handleStepChange}
         />
       </div>
     </main>

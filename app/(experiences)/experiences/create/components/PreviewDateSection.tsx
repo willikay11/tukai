@@ -19,6 +19,14 @@ type PreviewDateSectionProps =
       recurrenceStartDate: string | null;
       recurrenceEndDate: string | null;
       onEdit?: () => void;
+    }
+  | {
+      mode: 'multi-day';
+      startDate: string | null;
+      startTime: string | null;
+      endDate: string | null;
+      endTime: string | null;
+      onEdit?: () => void;
     };
 
 const formatTime = (time: string | null) => {
@@ -74,6 +82,43 @@ export const PreviewDateSection = (props: PreviewDateSectionProps) => {
             <div className="text-xs text-gray-700">
               <span className="font-medium text-gray-800">{moment(props.date).format('ddd, MMM D')}</span>
               <span className="text-xs font-medium text-gray-800">&nbsp;{timeRange}</span>
+            </div>
+          </div>
+        ) : (
+          <p className="text-xs text-gray-500">Not selected yet</p>
+        )}
+      </div>
+    );
+  }
+
+  if (props.mode === 'multi-day') {
+    const startTimeFormatted = formatTime(props.startTime);
+    const endTimeFormatted = formatTime(props.endTime);
+    const startDateFormatted = props.startDate ? moment(props.startDate).format('MMM D, YYYY') : '';
+    const endDateFormatted = props.endDate ? moment(props.endDate).format('MMM D, YYYY') : '';
+
+    return (
+      <div className="space-y-3">
+        <div className="flex items-start justify-between">
+          <h3 className="text-xs font-semibold text-gray-900">Date of the Experience</h3>
+          {props.onEdit && (
+            <button onClick={props.onEdit} className="text-gray-400 hover:text-gray-600">
+              <IconComponent iconName="Edit02Icon" size={16} className="text-gray-800" />
+            </button>
+          )}
+        </div>
+        {props.startDate && props.endDate && startTimeFormatted && endTimeFormatted ? (
+          <div className="flex items-center gap-2">
+            <div className="bg-lime rounded-[12px] p-4">
+              <IconComponent iconName="CalendarAdd01Icon" size={28} className="text-emerald-600" />
+            </div>
+            <div className="text-xs text-gray-700 space-y-1">
+              <div className="font-medium text-gray-800">
+                {startDateFormatted} – {endDateFormatted}
+              </div>
+              <div className="text-gray-600">
+                {startTimeFormatted} – {endTimeFormatted}
+              </div>
             </div>
           </div>
         ) : (

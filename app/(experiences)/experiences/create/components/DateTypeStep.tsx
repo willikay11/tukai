@@ -11,6 +11,7 @@ import { RecurringDayPicker } from './RecurringDayPicker/RecurringDayPicker';
 import { RecurrenceDateRange } from './RecurrenceDateRange/RecurrenceDateRange';
 import { RecurrencePreviewLabel } from './RecurrencePreviewLabel/RecurrencePreviewLabel';
 import { TimeSlotList, type TimeSlot } from './TimeSlotList/TimeSlotList';
+import { MultiDayDateSection } from './MultiDayDateSection/MultiDayDateSection';
 
 type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
@@ -26,6 +27,10 @@ export interface DateTypeFormData {
   recurrenceStartDate: string | null;
   recurrenceEndDate: string | null;
   timeSlots: TimeSlot[];
+  multiDayStartDate: string | null;
+  multiDayStartTime: string | null;
+  multiDayEndDate: string | null;
+  multiDayEndTime: string | null;
 }
 
 export interface DateTypeStepProps {
@@ -133,6 +138,34 @@ export const DateTypeStep = ({
     [onChange],
   );
 
+  const handleMultiDayStartDateChange = useCallback(
+    (date: string) => {
+      onChange({ multiDayStartDate: date });
+    },
+    [onChange],
+  );
+
+  const handleMultiDayStartTimeChange = useCallback(
+    (time: string) => {
+      onChange({ multiDayStartTime: time });
+    },
+    [onChange],
+  );
+
+  const handleMultiDayEndDateChange = useCallback(
+    (date: string) => {
+      onChange({ multiDayEndDate: date });
+    },
+    [onChange],
+  );
+
+  const handleMultiDayEndTimeChange = useCallback(
+    (time: string) => {
+      onChange({ multiDayEndTime: time });
+    },
+    [onChange],
+  );
+
   return (
     <div className="space-y-6">
       <div>
@@ -157,7 +190,19 @@ export const DateTypeStep = ({
         onRecurringChange={handleRecurringChange}
       />
 
-      {!formData.isRecurring ? (
+      {formData.experienceType === 'multi-day' ? (
+        <MultiDayDateSection
+          startDate={formData.multiDayStartDate}
+          startTime={formData.multiDayStartTime}
+          endDate={formData.multiDayEndDate}
+          endTime={formData.multiDayEndTime}
+          onStartDateChange={handleMultiDayStartDateChange}
+          onStartTimeChange={handleMultiDayStartTimeChange}
+          onEndDateChange={handleMultiDayEndDateChange}
+          onEndTimeChange={handleMultiDayEndTimeChange}
+          errors={errors}
+        />
+      ) : !formData.isRecurring ? (
         <>
           <div>
             <label className="block text-xs font-medium text-gray-900 mb-2">
