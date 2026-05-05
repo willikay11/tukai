@@ -43,6 +43,10 @@ export interface FormData {
     date: string | null;
     startTime: string | null;
     endTime: string | null;
+    recurringDays: ('mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun')[];
+    recurrenceStartDate: string | null;
+    recurrenceEndDate: string | null;
+    timeSlots: { startTime: string | null; endTime: string | null }[];
   };
   about: {
     photos: string[];
@@ -90,6 +94,10 @@ const initialFormData: FormData = {
     date: null,
     startTime: null,
     endTime: null,
+    recurringDays: [],
+    recurrenceStartDate: null,
+    recurrenceEndDate: null,
+    timeSlots: [{ startTime: null, endTime: null }],
   },
   about: {
     photos: [],
@@ -256,13 +264,63 @@ export const useCreateExperienceFlow = () => {
       errors.community = 'Community is required';
     }
 
-    if (!formData.dateType.date) {
-      errors.date = 'Date is required';
+    if (formData.dateType.isRecurring) {
+      if (formData.dateType.recurringDays.length === 0) {
+        errors.recurringDays = 'At least one day must be selected';
+      }
+
+      if (!formData.dateType.recurrenceStartDate) {
+        errors.recurrenceStartDate = 'Start date is required';
+      }
+
+      if (!formData.dateType.recurrenceEndDate) {
+        errors.recurrenceEndDate = 'End date is required';
+      }
+
+      if (
+        formData.dateType.recurrenceStartDate &&
+        formData.dateType.recurrenceEndDate &&
+        formData.dateType.recurrenceStartDate > formData.dateType.recurrenceEndDate
+      ) {
+        errors.recurrenceEndDate = 'End date must be after start date';
+      }
+
+      if (formData.dateType.timeSlots.length === 0) {
+        errors.timeSlots = 'At least one time slot is required';
+      }
+
+      formData.dateType.timeSlots.forEach((slot, index) => {
+        if (!slot.startTime) {
+          errors[`slots.${index}.startTime`] = 'Start time is required';
+        }
+        if (!slot.endTime) {
+          errors[`slots.${index}.endTime`] = 'End time is required';
+        }
+        if (slot.startTime && slot.endTime && slot.startTime >= slot.endTime) {
+          errors[`slots.${index}.endTime`] = 'End time must be after start time';
+        }
+      });
+    } else {
+      if (!formData.dateType.date) {
+        errors.date = 'Date is required';
+      }
+
+      if (!formData.dateType.startTime) {
+        errors.startTime = 'Start time is required';
+      }
+
+      if (!formData.dateType.endTime) {
+        errors.endTime = 'End time is required';
+      }
+
+      if (formData.dateType.startTime && formData.dateType.endTime && formData.dateType.startTime >= formData.dateType.endTime) {
+        errors.endTime = 'End time must be after start time';
+      }
     }
 
     setDateTypeErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [formData.dateType.community, formData.dateType.date]);
+  }, [formData.dateType]);
 
   const updateTicketsFormData = useCallback((data: Partial<FormData['tickets']>) => {
     console.log("[updateTicketsFormData] Updating tickets with data:", data);

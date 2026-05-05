@@ -1,12 +1,18 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 
 import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
 import { CommunitySelector, type Community } from './CommunitySelector';
 import { ExperienceTypePicker } from './ExperienceTypePicker';
 import { ExperienceTypeRadio } from './ExperienceTypeRadio';
+import { RecurringDayPicker } from './RecurringDayPicker/RecurringDayPicker';
+import { RecurrenceDateRange } from './RecurrenceDateRange/RecurrenceDateRange';
+import { RecurrencePreviewLabel } from './RecurrencePreviewLabel/RecurrencePreviewLabel';
+import { TimeSlotList, type TimeSlot } from './TimeSlotList/TimeSlotList';
+
+type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
 export interface DateTypeFormData {
   community: Community | null;
@@ -16,6 +22,10 @@ export interface DateTypeFormData {
   date: string | null;
   startTime: string | null;
   endTime: string | null;
+  recurringDays: DayOfWeek[];
+  recurrenceStartDate: string | null;
+  recurrenceEndDate: string | null;
+  timeSlots: TimeSlot[];
 }
 
 export interface DateTypeStepProps {
@@ -54,7 +64,22 @@ export const DateTypeStep = ({
 
   const handleRecurringChange = useCallback(
     (isRecurring: boolean) => {
-      onChange({ isRecurring });
+      if (isRecurring) {
+        onChange({
+          isRecurring: true,
+          date: null,
+          startTime: null,
+          endTime: null,
+        });
+      } else {
+        onChange({
+          isRecurring: false,
+          recurringDays: [],
+          recurrenceStartDate: null,
+          recurrenceEndDate: null,
+          timeSlots: [{ startTime: null, endTime: null }],
+        });
+      }
     },
     [onChange],
   );
@@ -76,6 +101,34 @@ export const DateTypeStep = ({
   const handleEndTimeChange = useCallback(
     (time: string) => {
       onChange({ endTime: time });
+    },
+    [onChange],
+  );
+
+  const handleRecurringDaysChange = useCallback(
+    (days: DayOfWeek[]) => {
+      onChange({ recurringDays: days });
+    },
+    [onChange],
+  );
+
+  const handleRecurrenceStartDateChange = useCallback(
+    (date: string) => {
+      onChange({ recurrenceStartDate: date });
+    },
+    [onChange],
+  );
+
+  const handleRecurrenceEndDateChange = useCallback(
+    (date: string) => {
+      onChange({ recurrenceEndDate: date });
+    },
+    [onChange],
+  );
+
+  const handleTimeSlotsChange = useCallback(
+    (slots: TimeSlot[]) => {
+      onChange({ timeSlots: slots });
     },
     [onChange],
   );
@@ -104,35 +157,68 @@ export const DateTypeStep = ({
         onRecurringChange={handleRecurringChange}
       />
 
-      <div>
-        <label className="block text-xs font-medium text-gray-900 mb-2">
-          Select Experience date(s)
-        </label>
-        <DatePicker value={formData.date || undefined} onChange={handleDateChange} />
-        {errors.date && <p className="text-xs text-red-500 mt-1">{errors.date}</p>}
-      </div>
+      {!formData.isRecurring ? (
+        <>
+          <div>
+            <label className="block text-xs font-medium text-gray-900 mb-2">
+              Select Experience date(s)
+            </label>
+            <DatePicker value={formData.date || undefined} onChange={handleDateChange} />
+            {errors.date && <p className="text-xs text-red-500 mt-1">{errors.date}</p>}
+          </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-medium text-gray-900 mb-2">Start Time</label>
-          <TimePicker
-            value={formData.startTime || undefined}
-            onChange={handleStartTimeChange}
-            placeholder="Select time"
-          />
-          {errors.startTime && <p className="text-xs text-red-500 mt-1">{errors.startTime}</p>}
-        </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-900 mb-2">Start Time</label>
+              <TimePicker
+                value={formData.startTime || undefined}
+                onChange={handleStartTimeChange}
+                placeholder="Select time"
+              />
+              {errors.startTime && <p className="text-xs text-red-500 mt-1">{errors.startTime}</p>}
+            </div>
 
-        <div>
-          <label className="block text-xs font-medium text-gray-900 mb-2">End Time</label>
-          <TimePicker
-            value={formData.endTime || undefined}
-            onChange={handleEndTimeChange}
-            placeholder="Select time"
+            <div>
+              <label className="block text-xs font-medium text-gray-900 mb-2">End Time</label>
+              <TimePicker
+                value={formData.endTime || undefined}
+                onChange={handleEndTimeChange}
+                placeholder="Select time"
+              />
+              {errors.endTime && <p className="text-xs text-red-500 mt-1">{errors.endTime}</p>}
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <RecurringDayPicker
+            value={formData.recurringDays}
+            onChange={handleRecurringDaysChange}
           />
-          {errors.endTime && <p className="text-xs text-red-500 mt-1">{errors.endTime}</p>}
-        </div>
-      </div>
+          {errors.recurringDays && (
+            <p className="text-xs text-red-500">{errors.recurringDays}</p>
+          )}
+
+          <RecurrenceDateRange
+            startDate={formData.recurrenceStartDate}
+            endDate={formData.recurrenceEndDate}
+            onStartDateChange={handleRecurrenceStartDateChange}
+            onEndDateChange={handleRecurrenceEndDateChange}
+            errors={errors}
+          />
+
+          <RecurrencePreviewLabel
+            selectedDays={formData.recurringDays}
+            startDate={formData.recurrenceStartDate}
+          />
+
+          <TimeSlotList
+            slots={formData.timeSlots}
+            onChange={handleTimeSlotsChange}
+            errors={errors}
+          />
+        </>
+      )}
     </div>
   );
 };

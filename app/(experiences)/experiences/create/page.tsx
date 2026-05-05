@@ -116,6 +116,7 @@ function CreateExperiencePageContent() {
           experienceId={experienceId}
           experience={experience}
           canShowDateTickets={hasUpdatedDates || !!(formData.dateType.date && formData.dateType.startTime && formData.dateType.endTime)}
+          isRecurring={formData.dateType.isRecurring}
           itineraryConfig={itineraryConfig}
           invitedMembers={invitedMembers}
           invitedCommunities={invitedCommunities}

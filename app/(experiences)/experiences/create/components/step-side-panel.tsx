@@ -33,6 +33,7 @@ export const ExperienceStepSidePanel = ({
   experienceId,
   experience,
   canShowDateTickets,
+  isRecurring = false,
   itineraryConfig,
   invitedMembers,
   invitedCommunities,
@@ -62,6 +63,7 @@ export const ExperienceStepSidePanel = ({
   experienceId?: string | null;
   experience?: Experience;
   canShowDateTickets?: boolean;
+  isRecurring?: boolean;
   itineraryConfig?: { startDate: string; endDate: string } | null;
   invitedMembers?: InvitedMember[];
   invitedCommunities?: Community[];
@@ -155,7 +157,7 @@ export const ExperienceStepSidePanel = ({
       <CustomiseItinerary startDate={itineraryConfig.startDate} endDate={itineraryConfig.endDate} />
     ) : canShowDateTickets ? (
       <div className="space-y-6">
-        <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2>
+        <h2 className="text-sm font-semibold text-gray-900">{isRecurring ? 'Create Tickets' : 'Preview Experience'}</h2>
         <PreviewExperienceHeader
           photo={aboutPhoto || null}
           photos={aboutPhotos}
