@@ -21,6 +21,9 @@ interface TicketsStepProps {
   onSaveContinue: () => void;
   onCancel: () => void;
   photos?: string[];
+  isRecurring?: boolean;
+  timeSlots?: { startTime: string | null; endTime: string | null }[];
+  recurringDays?: ('mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun')[];
 }
 
 const emptyTicketForm: TicketFormValue = {
@@ -73,6 +76,9 @@ export const TicketsStep = ({
   onSaveContinue,
   onCancel,
   photos,
+  isRecurring = false,
+  timeSlots = [],
+  recurringDays = [],
 }: TicketsStepProps) => {
   const [activeFormIndex, setActiveFormIndex] = useState<number | null>(null);
   const [draftTicket, setDraftTicket] = useState<TicketFormValue>(emptyTicketForm);
@@ -158,8 +164,9 @@ export const TicketsStep = ({
     [formData.items, onChange],
   );
 
-  const hasTicketDateBadge =
-    Boolean(dateTypeData.date) && Boolean(dateTypeData.startTime) && Boolean(dateTypeData.endTime);
+  const hasTicketDateBadge = isRecurring
+    ? Boolean(recurringDays.length > 0) && timeSlots.some((slot) => slot.startTime && slot.endTime)
+    : Boolean(dateTypeData.date) && Boolean(dateTypeData.startTime) && Boolean(dateTypeData.endTime);
   const showTicketConnector = hasTicketDateBadge && formData.items.length > 0 && activeFormIndex === null;
 
   return (
@@ -168,12 +175,27 @@ export const TicketsStep = ({
 
       <CommissionPicker value={formData.commission} onChange={(commission) => onChange({ commission })} />
 
-      {hasTicketDateBadge && (
+      {hasTicketDateBadge && !isRecurring && (
         <TicketDateBadge
+          mode="single"
           date={dateTypeData.date!}
           startTime={dateTypeData.startTime!}
           endTime={dateTypeData.endTime!}
         />
+      )}
+
+      {hasTicketDateBadge && isRecurring && (
+        <div className="space-y-2">
+          {timeSlots.map((slot, index) => (
+            <TicketDateBadge
+              key={index}
+              mode="recurring"
+              days={recurringDays}
+              startTime={slot.startTime!}
+              endTime={slot.endTime!}
+            />
+          ))}
+        </div>
       )}
 
       <div className="relative">
@@ -190,6 +212,7 @@ export const TicketsStep = ({
             onCancel={onCancel}
             experiencePricing={experiencePricing}
             commissionPayer={formData.commission}
+            isRecurring={isRecurring}
           />
         ) : (
           <>
@@ -217,6 +240,7 @@ export const TicketsStep = ({
                 onCancel={handleCancelForm}
                 experiencePricing={experiencePricing}
                 commissionPayer={formData.commission}
+                isRecurring={isRecurring}
               />
             ) : (
               <AddTicketTypeButton onClick={handleAddTicket} />

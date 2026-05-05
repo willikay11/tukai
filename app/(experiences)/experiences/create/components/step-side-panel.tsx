@@ -41,6 +41,10 @@ export const ExperienceStepSidePanel = ({
   selectedDate,
   selectedStartTime,
   selectedEndTime,
+  selectedRecurringDays,
+  selectedTimeSlots,
+  selectedRecurrenceStartDate,
+  selectedRecurrenceEndDate,
   aboutPhoto,
   aboutPhotos,
   aboutTitle,
@@ -71,6 +75,10 @@ export const ExperienceStepSidePanel = ({
   selectedDate?: string | null;
   selectedStartTime?: string | null;
   selectedEndTime?: string | null;
+  selectedRecurringDays?: ('mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun')[];
+  selectedTimeSlots?: { startTime: string | null; endTime: string | null }[];
+  selectedRecurrenceStartDate?: string | null;
+  selectedRecurrenceEndDate?: string | null;
   aboutPhoto?: string | null;
   aboutPhotos?: string[];
   aboutTitle?: string;
@@ -131,12 +139,24 @@ export const ExperienceStepSidePanel = ({
           visibility={aboutVisibility || 'public'}
           onEdit={() => onEditStep?.('about')}
         />
-        <PreviewDateSection
-          date={selectedDate || null}
-          startTime={selectedStartTime || null}
-          endTime={selectedEndTime || null}
-          onEdit={() => onEditStep?.('dates-tickets')}
-        />
+        {isRecurring ? (
+          <PreviewDateSection
+            mode="recurring"
+            days={selectedRecurringDays || []}
+            timeSlots={selectedTimeSlots || []}
+            recurrenceStartDate={selectedRecurrenceStartDate || null}
+            recurrenceEndDate={selectedRecurrenceEndDate || null}
+            onEdit={() => onEditStep?.('dates-tickets')}
+          />
+        ) : (
+          <PreviewDateSection
+            mode="single"
+            date={selectedDate || null}
+            startTime={selectedStartTime || null}
+            endTime={selectedEndTime || null}
+            onEdit={() => onEditStep?.('dates-tickets')}
+          />
+        )}
         <PreviewLocationSection
           location={aboutLocation || null}
           onEdit={() => onEditStep?.('about')}

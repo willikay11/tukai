@@ -34,8 +34,8 @@ describe('DuplicateTicketsCheckbox', () => {
     const onChange = jest.fn();
     render(<DuplicateTicketsCheckbox value={false} onChange={onChange} />);
 
-    const checkbox = screen.getByTestId('checkbox');
-    fireEvent.change(checkbox, { target: { checked: true } });
+    const checkbox = screen.getByTestId('checkbox') as HTMLInputElement;
+    fireEvent.click(checkbox);
 
     expect(onChange).toHaveBeenCalledWith(true);
   });

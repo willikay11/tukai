@@ -23,6 +23,7 @@ import { Interest } from '@/types/interest';
 import type { FormData } from '../hooks/useCreateExperienceFlow';
 import { Wallet } from '@/types/payment';
 import { WalletDetailsStep } from './WalletDetailsStep/WalletDetailsStep';
+import { type RelativeValidityValue } from './RelativeValidityPicker/RelativeValidityPicker';
 
 type AboutFormData = {
   photos: string[];
@@ -81,11 +82,14 @@ interface CreateExperienceStepsProps {
       name: string;
       quantity: number;
       amount: number;
-      salesStartDate: string;
-      salesStartTime: string;
-      salesEndDate: string;
-      salesEndTime: string;
+      salesStartDate: string | null;
+      salesStartTime: string | null;
+      salesEndDate: string | null;
+      salesEndTime: string | null;
       acceptPartialPayment: boolean;
+      salesStartRelative: RelativeValidityValue | null;
+      salesEndRelative: RelativeValidityValue | null;
+      duplicateForEntirePeriod: boolean;
     }>;
   };
   updateTicketsFormData?: (data: Partial<{
@@ -95,11 +99,14 @@ interface CreateExperienceStepsProps {
       name: string;
       quantity: number;
       amount: number;
-      salesStartDate: string;
-      salesStartTime: string;
-      salesEndDate: string;
-      salesEndTime: string;
+      salesStartDate: string | null;
+      salesStartTime: string | null;
+      salesEndDate: string | null;
+      salesEndTime: string | null;
       acceptPartialPayment: boolean;
+      salesStartRelative: RelativeValidityValue | null;
+      salesEndRelative: RelativeValidityValue | null;
+      duplicateForEntirePeriod: boolean;
     }>;
   }>) => void;
   ticketsErrors?: Record<string, string>;
@@ -378,6 +385,9 @@ const canAccessDetailsSteps = Boolean(
             }}
             onCancel={() => handleStepChange('about')}
             photos={aboutFormData?.photos}
+            isRecurring={formData?.isRecurring}
+            timeSlots={formData?.timeSlots}
+            recurringDays={formData?.recurringDays}
           />
         ) : (
           <ExperienceDates
