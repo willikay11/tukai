@@ -520,7 +520,30 @@ Full brief: docs/CREATE_EXPERIENCE_FLOW.md
 Designs: docs/designs/create-experience/
 Route: app/(experiences)/experiences/create/
 Hook: app/(experiences)/experiences/create/hooks/useCreateExperienceFlow.ts
-Status: UI build complete with API integration
+Status: UI build complete (single-day and recurring variants)
+         API integration pending for recurring flow
+
+**Completed:**
+- ✅ Step 1 (Community & Date Type) — single-day and recurring modes
+- ✅ Step 2 (About Experience)
+- ✅ Step 5 (Tickets) — single-day absolute validity + recurring relative validity
+- ✅ Step 4 (Invite Guests) — applies to both single and recurring
+- ✅ Step 6 (Wallet Details) — applies to both single and recurring
+- ✅ Review page with inline editing
+
+**Recurring flow components:**
+- Step 1: `RecurringDayPicker`, `RecurrenceDateRange`, `RecurrencePreviewLabel`, `TimeSlotList`
+- Step 5: `RelativeValidityPicker`, `DuplicateTicketsCheckbox`, `TicketDateBadge` (recurring mode), `TicketForm` (recurring mode)
+- Side panel: `PreviewDateSection` (recurring mode)
+
+**Key utilities:**
+- `getOrdinalDate(dateString)` — converts ISO date to ordinal format ("5th Jul, 2025")
+- Relative validity helpers in `RelativeValidityPicker` — parse/format amount+unit+anchor
+
+**Pending:**
+- API integration for creating recurring experiences
+- Submission of recurring experience data to backend
+- Testing recurring experience creation end-to-end
 
 Before working on any component in this flow:
 1. Read docs/CREATE_EXPERIENCE_FLOW.md
@@ -529,6 +552,8 @@ Before working on any component in this flow:
 3. Reference the correct screenshot for the step you are building
 4. All state goes through useCreateExperienceFlow — never local 
    useState in page or step components
+5. For recurring features, check step 1 date type props and step 5 
+   ticket form props to determine single vs recurring mode
 
 ---
 

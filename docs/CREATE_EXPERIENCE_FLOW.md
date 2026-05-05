@@ -62,25 +62,67 @@ Layout shifts to full-width summary on left, inline edit panel on right. This is
 
 ## 3. Step Inventory
 
-### Step 1: Community Selection (`community`)
+### Step 1: Community & Date Type (`community` → `dates-tickets`)
 
-**User action:** Select or confirm the community where this experience will be hosted.
+**User action:** Select a community, then choose experience type and date format (single or recurring).
 
-**Form inputs:**
+**Substeps:**
+1. **Select community:** Pick the community hosting this experience
+2. **Choose pricing:** Paid or Free experience
+3. **Choose type & dates:**
+   - **Single-day:** One date + start/end time
+   - **Recurring:** Multiple days of week + date range + multiple time slots
+
+**Form inputs (community):**
 - Community dropdown (read-only list of user's created communities)
+
+**Form inputs (single-day dates):**
+- Experience type radio: Paid, Free
+- Experience variant radio: One-Time, Multi-Day, Itinerary, Recurring
+- Date picker (single)
+- Start time picker
+- End time picker
+
+**Form inputs (recurring dates):**
+- Day picker (7 pills: Mon–Sun, multi-select)
+- Recurrence start date picker
+- Recurrence end date picker
+- Time slot list (min 1 slot, add/remove buttons)
+  - Each slot: start time picker, end time picker
 
 **Preview section:** Shows selected community name and logo.
 
-**Component:** `CreateExperienceCommunity`
-- File: `app/(experiences)/experiences/create/components/community.tsx`
-- Handles community selection and creates initial experience record
+**Components:**
+- `CreateExperienceCommunity`
+  - File: `app/(experiences)/experiences/create/components/community.tsx`
+  - Handles community selection and creates initial experience record
+- `DateTypeStep`
+  - File: `app/(experiences)/experiences/create/components/DateTypeStep.tsx`
+  - Controlled component, dispatches via `updateFormData`
+
+**Recurring-specific components:**
+- `RecurringDayPicker`
+  - File: `app/(experiences)/experiences/create/components/RecurringDayPicker/RecurringDayPicker.tsx`
+  - 7 pills (Mon–Sun), multi-select, green highlight when active
+- `RecurrenceDateRange`
+  - File: `app/(experiences)/experiences/create/components/RecurrenceDateRange/RecurrenceDateRange.tsx`
+  - Two date pickers side-by-side (start/end)
+- `RecurrencePreviewLabel`
+  - File: `app/(experiences)/experiences/create/components/RecurrencePreviewLabel/RecurrencePreviewLabel.tsx`
+  - Shows "Your first experience will be on [day], [date]" (computed from startDate + selected days)
+- `TimeSlotList`
+  - File: `app/(experiences)/experiences/create/components/TimeSlotList/TimeSlotList.tsx`
+  - List of time slot pairs, add button appends, delete (×) on non-first slots
 
 **Form data saved:**
 - Experience created with `communityId`
+- For non-recurring: `date`, `startTime`, `endTime`
+- For recurring: `recurringDays`, `recurrenceStartDate`, `recurrenceEndDate`, `timeSlots[]`
 
 **Design reference:**
-- No dedicated screenshot; shown as placeholder in step panel
-- Community selection is prerequisite to other steps
+- Community selection: embedded in flow (prerequisite to other steps)
+- `docs/designs/create-experience/01-date-and-type.png` (single-day variant)
+- `docs/designs/create-experience/08-recurring-date-type.png` (recurring variant — new)
 
 ---
 
@@ -131,50 +173,74 @@ z.object({
 
 ---
 
-### Step 3: Dates & Tickets (`dates-tickets`)
+### Step 5: Tickets (`dates-tickets` tab, shown after dates saved)
 
-**User action:** Set experience date(s) and create pricing tiers.
+**User action:** Create pricing tiers and define ticket validity periods.
 
-**Substeps:**
-1. **Select date(s):** Determines if single-day or multi-day experience
-2. **Create tickets:** Add ticket types (name, price, quantity limit)
-3. **Customize itinerary (optional):** For multi-day experiences, define daily itinerary
+**Mode variants:**
+- **Single-day:** Absolute date/time validity (sales start date/time → sales end date/time)
+- **Recurring:** Relative validity (sales start relative to experience start → sales end relative to experience start)
 
-**Form inputs (dates):**
-- Experience type radio: One-Time, Multi-Day (e.g. 2-3 days), Itinerary, Recurring
-- Start date + time (picker)
-- End date + time (picker)
-
-**Form inputs (tickets):**
+**Form inputs (single-day mode):**
+- Commission split picker: Host, Customer, Split (50/50)
 - Ticket name (text)
-- Price (currency input)
-- Available quantity (number)
+- Ticket price (currency input, required for paid experiences)
+- Available quantity (number, required)
+- Sales start date + time pickers (absolute)
+- Sales end date + time pickers (absolute)
+- Accept partial payment checkbox
 - Add/remove ticket buttons
 
-**Form inputs (itinerary, if applicable):**
-- Day-by-day breakdown (collapsible sections)
-- Each day: title, description, time window
+**Form inputs (recurring mode):**
+- Commission split picker: Host, Customer, Split
+- Ticket name (text)
+- Ticket price (currency input)
+- Available quantity (number)
+- Sales start relative validity picker:
+  - Amount + unit selector (1 hour, 2 hours, ..., 2 weeks)
+  - Anchor selector (before experience starts, after experience starts)
+- Sales end relative validity picker (same structure)
+- Duplicate ticket(s) for the entire period checkbox
+  - When checked: single ticket applies to all recurring instances
+  - When unchecked: separate tickets per time slot
+- Add/remove ticket buttons
 
 **Preview section:**
-- Initially: Placeholder ("Update and save experience date and time first")
-- After dates saved: `CreateTickets` panel shows ticket cards
-- If customizing itinerary: `CustomiseItinerary` panel with day breakdown
+- Date badge (shows single or recurring format)
+- Ticket cards (read-only list)
 
 **Components:**
-- `ExperienceDates`: Date & experience type selection
-- `CreateTickets`: Ticket creation and management
-- `CustomiseItinerary`: Multi-day itinerary editor
-- `CreateTickets` (preview): Renders ticket list read-only in side panel
+- `TicketsStep`
+  - File: `app/(experiences)/experiences/create/components/TicketsStep/TicketsStep.tsx`
+  - Controlled component, manages ticket creation/editing
+  - Props: `isRecurring`, `timeSlots`, `recurringDays` for recurring display
+- `CommissionPicker` (existing)
+- `TicketForm`
+  - File: `app/(experiences)/experiences/create/components/TicketForm/TicketForm.tsx`
+  - Conditional rendering: absolute pickers (single) vs relative picker (recurring)
+  - Prop: `isRecurring: boolean`
+- `TicketDateBadge`
+  - File: `app/(experiences)/experiences/create/components/TicketDateBadge/TicketDateBadge.tsx`
+  - Discriminated union with `mode: 'single' | 'recurring'`
+  - Single mode: shows date and time range
+  - Recurring mode: shows days and time range, one badge per time slot
+- `SavedTicketCard` (existing)
+- `AddTicketTypeButton` (existing)
 
-**Files:**
-- `app/(experiences)/experiences/create/components/dates.tsx`
-- `app/(experiences)/experiences/create/components/createTickets.tsx`
-- `app/(experiences)/experiences/create/components/customiseItinerary.tsx`
+**Recurring-specific components:**
+- `RelativeValidityPicker`
+  - File: `app/(experiences)/experiences/create/components/RelativeValidityPicker/RelativeValidityPicker.tsx`
+  - Two-row layout (start validity, end validity)
+  - Each row: amount dropdown (1 hour–2 weeks) + anchor dropdown (before/after)
+  - Helper functions: `parseAmount()`, `formatAmount()`
+- `DuplicateTicketsCheckbox`
+  - File: `app/(experiences)/experiences/create/components/DuplicateTicketsCheckbox/DuplicateTicketsCheckbox.tsx`
+  - Label: "Duplicate ticket(s) for the entire period"
 
 **Design reference:**
-- `docs/designs/create-experience/01-date-and-type.png` (dates)
-- `docs/designs/create-experience/03-tickets-empty.png` (empty state)
-- `docs/designs/create-experience/03b-tickets-filled.png` (with tickets)
+- `docs/designs/create-experience/03-tickets-empty.png` (single-day empty)
+- `docs/designs/create-experience/03b-tickets-filled.png` (single-day with tickets)
+- `docs/designs/create-experience/09-recurring-tickets.png` (recurring variant — new)
 
 ---
 
@@ -287,10 +353,18 @@ z.object({
 | **ReviewCommunities** | Review page | `app/(experiences)/experiences/create/components/experienceReview/reviewCommunities.tsx` | ✅ EXISTS — Host community info on review page |
 | **ReviewGuests** | Review page | `app/(experiences)/experiences/create/components/experienceReview/reviewGuests.tsx` | ✅ EXISTS — Invited members & communities on review page |
 | **ReviewWallets** | Review page | `app/(experiences)/experiences/create/components/experienceReview/reviewWallets.tsx` | ✅ EXISTS — Selected wallet(s) on review page |
+| **RecurringDayPicker** | Step 1 (recurring) | `app/(experiences)/experiences/create/components/RecurringDayPicker/RecurringDayPicker.tsx` | ✅ NEW — 7 pills (Mon–Sun), multi-select, green highlight when active |
+| **RecurrenceDateRange** | Step 1 (recurring) | `app/(experiences)/experiences/create/components/RecurrenceDateRange/RecurrenceDateRange.tsx` | ✅ NEW — Two DatePickers side-by-side for recurrence start/end dates |
+| **RecurrencePreviewLabel** | Step 1 (recurring) | `app/(experiences)/experiences/create/components/RecurrencePreviewLabel/RecurrencePreviewLabel.tsx` | ✅ NEW — Green pill showing "Your first experience will be on [day], [date]" |
+| **TimeSlotList** | Step 1 (recurring) | `app/(experiences)/experiences/create/components/TimeSlotList/TimeSlotList.tsx` | ✅ NEW — List of time slot pairs with add/remove buttons |
+| **RelativeValidityPicker** | Step 5 (recurring) | `app/(experiences)/experiences/create/components/RelativeValidityPicker/RelativeValidityPicker.tsx` | ✅ NEW — Dual-row picker for sales validity (amount + unit + anchor) |
+| **DuplicateTicketsCheckbox** | Step 5 (recurring) | `app/(experiences)/experiences/create/components/DuplicateTicketsCheckbox/DuplicateTicketsCheckbox.tsx` | ✅ NEW — Checkbox for "Duplicate ticket(s) for the entire period" |
+| **TicketDateBadge** | Step 5 | `app/(experiences)/experiences/create/components/TicketDateBadge/TicketDateBadge.tsx` | ✅ ADAPTED — Discriminated union: single date+time or recurring days+time range, one badge per time slot |
+| **PreviewDateSection** | Side panel | `app/(experiences)/experiences/create/components/PreviewDateSection.tsx` | ✅ ADAPTED — Discriminated union: single date+time or recurring days+date range |
 
 **Note:** All filenames use camelCase (e.g., `reviewInfoSection.tsx`) while component exports use PascalCase (e.g., `export const ReviewInfoSection`).
 
-**Summary:** All major components exist. The flow reuses existing UI components and form builders. Review page components are already implemented.
+**Summary:** All major components exist or are new. Flow reuses existing UI components and form builders. Recurring experience support added via 6 new components and 2 adapted components for mode switching (single vs recurring).
 
 ---
 
@@ -343,6 +417,57 @@ handlers: {
   handleInvitesChange(members: InvitedMember[], communities: Community[]): void
     // Updates invited members and communities lists
 }
+```
+
+**FormData type structure:**
+
+```typescript
+interface FormData {
+  dateType: {
+    community: Community | null;
+    experiencePricing: 'paid' | 'free';
+    experienceType: 'one-time' | 'multi-day' | 'itinerary';
+    isRecurring: boolean;
+    // Single-day fields
+    date: string | null;                    // ISO 8601 (YYYY-MM-DD)
+    startTime: string | null;               // HH:mm
+    endTime: string | null;                 // HH:mm
+    // Recurring fields
+    recurringDays: ('mon'|'tue'|'wed'|'thu'|'fri'|'sat'|'sun')[];
+    recurrenceStartDate: string | null;     // ISO 8601
+    recurrenceEndDate: string | null;       // ISO 8601
+    timeSlots: { startTime: string | null; endTime: string | null }[];
+  };
+  about: { /* ...existing fields... */ };
+  tickets: {
+    commission: 'host' | 'customer' | 'split';
+    items: Array<{
+      id: string;
+      name: string;
+      quantity: number;
+      amount: number;
+      // Single-day fields (absolute validity)
+      salesStartDate: string | null;
+      salesStartTime: string | null;
+      salesEndDate: string | null;
+      salesEndTime: string | null;
+      // Recurring fields (relative validity)
+      salesStartRelative: RelativeValidityValue | null;
+      salesEndRelative: RelativeValidityValue | null;
+      duplicateForEntirePeriod: boolean;
+      acceptPartialPayment: boolean;
+    }>;
+  };
+  invite: { /* ...existing fields... */ };
+  wallet: { /* ...existing fields... */ };
+}
+
+// Helper type for recurring validity
+type RelativeValidityValue = {
+  amount: number;
+  unit: 'hour' | 'day' | 'week';
+  anchor: 'start' | 'end';  // start = before experience, end = after
+};
 ```
 
 **URL synchronization:**
@@ -548,10 +673,10 @@ Every component in the create experience flow must follow these rules:
 
 ---
 
-### Step 3: Dates & Tickets
+### Step 1 & 5: Dates & Tickets (Single-day variant)
 
 **Screenshots:**
-- `docs/designs/create-experience/01-date-and-type.png` (date selection, experience type)
+- `docs/designs/create-experience/01-date-and-type.png` (single-day date selection)
 - `docs/designs/create-experience/03-tickets-empty.png` (no tickets yet)
 - `docs/designs/create-experience/03b-tickets-filled.png` (tickets added)
 
@@ -569,8 +694,52 @@ Every component in the create experience flow must follow these rules:
 - Ticket cards: `white` background, `gray-200` border
 - Price text: `emerald-600`
 
-**New components needed:**
-- None. Existing `TimePicker` and date picker handle UI. `CreateTickets` component exists.
+**Components:**
+- `RecurringDayPicker` — NOT used in single-day variant
+- `TimePicker` and `DatePicker` — used for single dates/times
+- `TicketForm` with `isRecurring=false` — shows absolute date/time pickers for ticket validity
+
+---
+
+### Step 1 & 5: Dates & Tickets (Recurring variant)
+
+**Screenshots:**
+- `docs/designs/create-experience/08-recurring-date-type.png` (recurring date selection with day picker, date range, time slots)
+- `docs/designs/create-experience/09-recurring-tickets.png` (recurring tickets with relative validity picker, duplicate checkbox)
+
+**Key measurements (Step 1 - Date selection):**
+- Experience type radio: Paid, Free (same as single-day)
+- Variant radio: One-Time, Multi-Day, Itinerary, **Recurring** (selected)
+- Day picker: 7 pills (Mon–Sun), 40px height, green fill when selected
+- Start date picker + End date picker (side-by-side or stacked)
+- Recurrence preview: "Your first experience will be on Saturday, 5 July" (green pill)
+- Time slot list: Starts with 1 slot, "Add Slot" button, each slot shows two time pickers, delete (×) button on non-first slots
+
+**Key measurements (Step 5 - Tickets):**
+- Ticket date badge: "Every Mon, Tue, 08:00 AM – 10:00 PM" (one badge per time slot when recurring)
+- Commission picker: same as single-day
+- Ticket form fields: name, price, quantity (same as single-day)
+- **Sales validity pickers (NEW):**
+  - Start validity: amount dropdown (1 hour–2 weeks) + anchor dropdown (before/after experience starts)
+  - End validity: same structure
+  - Example: "Sales start 1 hour before experience" + "Sales end 30 minutes after experience ends"
+- **Duplicate checkbox:** "Duplicate ticket(s) for the entire period" (checked = 1 ticket for all slots, unchecked = separate tickets per slot)
+- Add/remove ticket buttons
+
+**Colours:**
+- Day picker selected: `emerald-600` fill
+- Recurrence preview pill: `emerald-50` background, `emerald-700` text
+- Relative validity dropdowns: standard form styling
+- Duplicate checkbox: standard checkbox styling
+
+**Components:**
+- `RecurringDayPicker` — 7 pills with multi-select
+- `RecurrenceDateRange` — Two DatePickers for start/end of recurrence
+- `RecurrencePreviewLabel` — Shows computed first occurrence
+- `TimeSlotList` — Manages array of time slots
+- `TicketDateBadge` with `mode="recurring"` — One badge per slot
+- `RelativeValidityPicker` — Dual-row validity selector
+- `DuplicateTicketsCheckbox` — Toggle for ticket duplication strategy
 
 ---
 

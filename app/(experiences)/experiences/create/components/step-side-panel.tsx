@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
+import { type RelativeValidityValue } from './RelativeValidityPicker/RelativeValidityPicker';
 
 import { CreateTickets } from './createTickets';
 import { CustomiseItinerary } from './customiseItinerary';
@@ -95,10 +96,14 @@ export const ExperienceStepSidePanel = ({
     name: string;
     quantity: number;
     amount: number;
-    salesStartDate: string;
-    salesStartTime: string;
-    salesEndDate: string;
-    salesEndTime: string;
+    salesStartDate: string | null;
+    salesStartTime: string | null;
+    salesEndDate: string | null;
+    salesEndTime: string | null;
+    acceptPartialPayment: boolean;
+    salesStartRelative: RelativeValidityValue | null;
+    salesEndRelative: RelativeValidityValue | null;
+    duplicateForEntirePeriod: boolean;
   }>;
   ticketsCommissionPayer?: 'host' | 'customer' | 'split';
   onEditStep?: (step: ExperienceStepId) => void;
@@ -198,6 +203,7 @@ export const ExperienceStepSidePanel = ({
           onEdit={() => onEditStep?.('about')}
         />
         <PreviewDateSection
+          mode="single"
           date={selectedDate || null}
           startTime={selectedStartTime || null}
           endTime={selectedEndTime || null}
@@ -252,6 +258,7 @@ export const ExperienceStepSidePanel = ({
           onEdit={() => onEditStep?.('about')}
         />
         <PreviewDateSection
+          mode="single"
           date={selectedDate || null}
           startTime={selectedStartTime || null}
           endTime={selectedEndTime || null}
@@ -305,6 +312,7 @@ export const ExperienceStepSidePanel = ({
           onEdit={() => onEditStep?.('about')}
         />
         <PreviewDateSection
+          mode="single"
           date={selectedDate || null}
           startTime={selectedStartTime || null}
           endTime={selectedEndTime || null}

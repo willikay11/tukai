@@ -10,10 +10,14 @@ interface PreviewTicketsSectionProps {
     name: string;
     quantity: number;
     amount: number;
-    salesStartDate: string;
-    salesStartTime: string;
-    salesEndDate: string;
-    salesEndTime: string;
+    salesStartDate: string | null;
+    salesStartTime: string | null;
+    salesEndDate: string | null;
+    salesEndTime: string | null;
+    acceptPartialPayment?: boolean;
+    salesStartRelative?: { amount: number; unit: 'hour' | 'day' | 'week'; anchor: 'start' | 'end' } | null;
+    salesEndRelative?: { amount: number; unit: 'hour' | 'day' | 'week'; anchor: 'start' | 'end' } | null;
+    duplicateForEntirePeriod?: boolean;
   }>;
   coverPhoto?: string;
   commissionPayer?: 'host' | 'customer' | 'split';
@@ -50,17 +54,25 @@ export const PreviewTicketsSection = ({ tickets, coverPhoto, commissionPayer, on
 
       {hasTickets ? (
         <div className="space-y-3">
-          {tickets.map((ticket) => (
-            <SavedTicketCard
-              key={ticket.id}
-              name={ticket.name}
-              quantity={ticket.quantity}
-              amount={ticket.amount}
-              validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
-              coverPhoto={coverPhoto}
-              commissionPayer={commissionPayer}
-            />
-          ))}
+          {tickets.map((ticket) => {
+            const validity = ticket.salesStartDate && ticket.salesStartTime && ticket.salesEndDate && ticket.salesEndTime
+              ? `${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`
+              : ticket.salesStartRelative && ticket.salesEndRelative
+                ? `${ticket.salesStartRelative.amount} ${ticket.salesStartRelative.unit} ${ticket.salesStartRelative.anchor === 'start' ? 'before' : 'after'} – ${ticket.salesEndRelative.amount} ${ticket.salesEndRelative.unit} ${ticket.salesEndRelative.anchor === 'start' ? 'before' : 'after'}`
+                : 'Not set';
+
+            return (
+              <SavedTicketCard
+                key={ticket.id}
+                name={ticket.name}
+                quantity={ticket.quantity}
+                amount={ticket.amount}
+                validity={validity}
+                coverPhoto={coverPhoto}
+                commissionPayer={commissionPayer}
+              />
+            );
+          })}
         </div>
       ) : (
         <p className="text-xs text-gray-500">Not set yet</p>
