@@ -67,11 +67,14 @@ export interface FormData {
       name: string;
       quantity: number;
       amount: number;
-      salesStartDate: string;
-      salesStartTime: string;
-      salesEndDate: string;
-      salesEndTime: string;
+      salesStartDate: string | null;
+      salesStartTime: string | null;
+      salesEndDate: string | null;
+      salesEndTime: string | null;
       acceptPartialPayment: boolean;
+      salesStartRelative: { amount: number; unit: 'hour' | 'day' | 'week'; anchor: 'start' | 'end' } | null;
+      salesEndRelative: { amount: number; unit: 'hour' | 'day' | 'week'; anchor: 'start' | 'end' } | null;
+      duplicateForEntirePeriod: boolean;
     }>;
   };
   invite: {
@@ -364,17 +367,51 @@ export const useCreateExperienceFlow = () => {
 
   const validateTickets = useCallback((): boolean => {
     const errors: Record<string, string> = {};
-    console.log("[validateTickets] Starting validation for tickets");
 
     if (formData.tickets.items.length === 0) {
       errors.items = 'At least one ticket is required';
+      setTicketsErrors(errors);
+      return false;
     }
 
+    formData.tickets.items.forEach((ticket, index) => {
+      if (!ticket.name.trim()) {
+        errors[`tickets.${index}.name`] = 'Ticket name is required';
+      }
+
+      if (ticket.quantity === null || ticket.quantity === undefined || ticket.quantity <= 0) {
+        errors[`tickets.${index}.quantity`] = 'Quantity must be greater than 0';
+      }
+
+      if (formData.dateType.experiencePricing === 'paid') {
+        if (ticket.amount === null || ticket.amount === undefined || ticket.amount <= 0) {
+          errors[`tickets.${index}.amount`] = 'Amount must be greater than 0';
+        }
+      }
+
+      if (formData.dateType.isRecurring) {
+        if (!ticket.salesStartRelative) {
+          errors[`tickets.${index}.salesStartRelative`] = 'Sales start validity is required';
+        }
+        if (!ticket.salesEndRelative) {
+          errors[`tickets.${index}.salesEndRelative`] = 'Sales end validity is required';
+        }
+      } else {
+        if (!ticket.salesStartDate) {
+          errors[`tickets.${index}.salesStartDate`] = 'Start date is required';
+        }
+        if (!ticket.salesEndDate) {
+          errors[`tickets.${index}.salesEndDate`] = 'End date is required';
+        }
+        if (ticket.salesStartDate && ticket.salesEndDate && ticket.salesStartDate > ticket.salesEndDate) {
+          errors[`tickets.${index}.salesEndDate`] = 'End date must be after start date';
+        }
+      }
+    });
+
     setTicketsErrors(errors);
-    console.log("[validateTickets] Errors found:", errors);
-    console.log("[validateTickets] Is valid:", Object.keys(errors).length === 0);
     return Object.keys(errors).length === 0;
-  }, [formData.tickets.items.length]);
+  }, [formData.dateType.isRecurring, formData.dateType.experiencePricing, formData.tickets.items]);
 
   const validateWallet = useCallback((): boolean => {
     const errors: Record<string, string> = {};

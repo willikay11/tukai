@@ -6,6 +6,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { TimePicker } from '@/components/ui/time-picker';
+import { RelativeValidityPicker, RelativeValidityValue } from '../RelativeValidityPicker/RelativeValidityPicker';
+import { DuplicateTicketsCheckbox } from '../DuplicateTicketsCheckbox/DuplicateTicketsCheckbox';
 
 export interface TicketFormValue {
   name: string;
@@ -16,6 +18,9 @@ export interface TicketFormValue {
   salesEndDate: string | null;
   salesEndTime: string | null;
   acceptPartialPayment: boolean;
+  salesStartRelative?: RelativeValidityValue | null;
+  salesEndRelative?: RelativeValidityValue | null;
+  duplicateForEntirePeriod?: boolean;
 }
 
 interface TicketFormProps {
@@ -26,6 +31,7 @@ interface TicketFormProps {
   onCancel?: () => void;
   experiencePricing?: 'paid' | 'free';
   commissionPayer?: 'host' | 'customer' | 'split';
+  isRecurring?: boolean;
 }
 
 export const TicketForm = ({
@@ -36,6 +42,7 @@ export const TicketForm = ({
   onCancel,
   experiencePricing = 'paid',
   commissionPayer = 'host',
+  isRecurring = false,
 }: TicketFormProps) => {
   const getCommissionPercentage = () => {
     if (experiencePricing === 'free') return 0;
@@ -49,7 +56,6 @@ export const TicketForm = ({
 
   return (
     <div className="space-y-4">
-
       <div className="space-y-1.5">
         <Input
           id="ticket-name"
@@ -104,45 +110,64 @@ export const TicketForm = ({
         </div>
       )}
 
-      <div className="space-y-2">
-        <label className="text-xs font-medium text-gray-800">
-          Ticket Sales Validity{' '}
-          <span className="font-normal text-gray-700">(When should the sales of these tickets start and end)</span>{' '}
-          <IconComponent
-            iconName="InfoCircleIcon"
-            size={16}
-            className="inline text-blue-500"
-          />
-        </label>
+      {!isRecurring ? (
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-gray-800">
+            Ticket Sales Validity{' '}
+            <span className="font-normal text-gray-700">(When should the sales of these tickets start and end)</span>{' '}
+            <IconComponent
+              iconName="InfoCircleIcon"
+              size={16}
+              className="inline text-blue-500"
+            />
+          </label>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <DatePicker
-            value={value.salesStartDate || undefined}
-            onChange={(date) => onChange({ salesStartDate: date })}
-            placeholder="Start Date"
-          />
-          <TimePicker
-            value={value.salesStartTime || undefined}
-            onChange={(time) => onChange({ salesStartTime: time })}
-            placeholder="Start Time"
-          />
-        </div>
-        {errors.salesStartDate && <p className="text-xs text-red-500">{errors.salesStartDate}</p>}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <DatePicker
+              value={value.salesStartDate || undefined}
+              onChange={(date) => onChange({ salesStartDate: date })}
+              placeholder="Start Date"
+            />
+            <TimePicker
+              value={value.salesStartTime || undefined}
+              onChange={(time) => onChange({ salesStartTime: time })}
+              placeholder="Start Time"
+            />
+          </div>
+          {errors.salesStartDate && <p className="text-xs text-red-500">{errors.salesStartDate}</p>}
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <DatePicker
-            value={value.salesEndDate || undefined}
-            onChange={(date) => onChange({ salesEndDate: date })}
-            placeholder="End Date"
-          />
-          <TimePicker
-            value={value.salesEndTime || undefined}
-            onChange={(time) => onChange({ salesEndTime: time })}
-            placeholder="End Time"
-          />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <DatePicker
+              value={value.salesEndDate || undefined}
+              onChange={(date) => onChange({ salesEndDate: date })}
+              placeholder="End Date"
+            />
+            <TimePicker
+              value={value.salesEndTime || undefined}
+              onChange={(time) => onChange({ salesEndTime: time })}
+              placeholder="End Time"
+            />
+          </div>
+          {errors.salesEndDate && <p className="text-xs text-red-500">{errors.salesEndDate}</p>}
         </div>
-        {errors.salesEndDate && <p className="text-xs text-red-500">{errors.salesEndDate}</p>}
-      </div>
+      ) : (
+        <>
+          <RelativeValidityPicker
+            startValue={
+              value.salesStartRelative || { amount: 1, unit: 'hour', anchor: 'start' }
+            }
+            endValue={value.salesEndRelative || { amount: 1, unit: 'hour', anchor: 'end' }}
+            onStartChange={(val) => onChange({ salesStartRelative: val })}
+            onEndChange={(val) => onChange({ salesEndRelative: val })}
+            errors={errors}
+          />
+
+          <DuplicateTicketsCheckbox
+            value={value.duplicateForEntirePeriod ?? false}
+            onChange={(val) => onChange({ duplicateForEntirePeriod: val })}
+          />
+        </>
+      )}
 
       <div className="flex items-center gap-2 pt-1">
         <Checkbox

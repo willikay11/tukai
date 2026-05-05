@@ -2,11 +2,19 @@
 
 import { IconComponent } from '@/app/shared/components/Icons';
 
-interface TicketDateBadgeProps {
-  date: string;
-  startTime: string;
-  endTime: string;
-}
+type TicketDateBadgeProps =
+  | {
+      mode: 'single';
+      date: string;
+      startTime: string;
+      endTime: string;
+    }
+  | {
+      mode: 'recurring';
+      days: string[];
+      startTime: string;
+      endTime: string;
+    };
 
 const formatTime = (time: string) => {
   if (!time) return '';
@@ -23,14 +31,41 @@ const formatDate = (dateStr: string) => {
   return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
 };
 
-export const TicketDateBadge = ({ date, startTime, endTime }: TicketDateBadgeProps) => {
-  const timeRange = startTime && endTime ? `${formatTime(startTime)} – ${formatTime(endTime)}` : '';
+const formatDays = (days: string[]): string => {
+  const dayNames: Record<string, string> = {
+    mon: 'Mon',
+    tue: 'Tue',
+    wed: 'Wed',
+    thu: 'Thu',
+    fri: 'Fri',
+    sat: 'Sat',
+    sun: 'Sun',
+  };
+
+  const formattedDays = days.map((day) => dayNames[day] || day);
+  return formattedDays.join(', ');
+};
+
+export const TicketDateBadge = (props: TicketDateBadgeProps) => {
+  const timeRange = `${formatTime(props.startTime)} – ${formatTime(props.endTime)}`;
+
+  if (props.mode === 'single') {
+    return (
+      <div className="flex w-fit items-center gap-2 rounded-full border border-dashed border-emerald-500 bg-emerald-100 px-5 py-3">
+        <IconComponent iconName="Calendar04Icon" size={20} className="text-emerald-700" />
+        <p className="text-xs font-medium text-primary">
+          Date: {formatDate(props.date)} · {timeRange}
+        </p>
+        <IconComponent iconName="ArrowDown01Icon" size={20} className="ml-1 text-emerald-700" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex w-fit items-center gap-2 rounded-full border border-dashed border-emerald-500 bg-emerald-100 px-5 py-3">
       <IconComponent iconName="Calendar04Icon" size={20} className="text-emerald-700" />
       <p className="text-xs font-medium text-primary">
-        Date: {formatDate(date)} - {timeRange}
+        Every {formatDays(props.days)} {timeRange}
       </p>
       <IconComponent iconName="ArrowDown01Icon" size={20} className="ml-1 text-emerald-700" />
     </div>
