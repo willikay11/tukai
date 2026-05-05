@@ -6,7 +6,6 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useGetWallets } from '@/app/(experiences)/hooks/usePayment';
 import { Button } from '@/components/ui/button';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
@@ -21,6 +20,9 @@ import { InviteGuestsStep } from './InviteGuestsStep/InviteGuestsStep';
 import { CreateExperienceWallet } from './wallet';
 import { TicketsStep } from './TicketsStep/TicketsStep';
 import { Interest } from '@/types/interest';
+import type { FormData } from '../hooks/useCreateExperienceFlow';
+import { Wallet } from '@/types/payment';
+import { WalletDetailsStep } from './WalletDetailsStep/WalletDetailsStep';
 
 type AboutFormData = {
   photos: string[];
@@ -113,6 +115,23 @@ interface CreateExperienceStepsProps {
     invitedGuests: InvitedMember[];
     invitedCommunityIds: string[];
   }>) => void;
+  walletFormData?: FormData['wallet'];
+  updateWalletFormData?: (data: Partial<FormData['wallet']>) => void;
+  walletErrors?: Record<string, string>;
+  wallets?: Wallet[];
+  isWalletsLoading?: boolean;
+  hasSavedWallets?: boolean;
+  walletMutations?: {
+    createBankWallet: any;
+    isCreatingBankWallet: boolean;
+    createPhoneWallet: any;
+    isCreatingPhoneWallet: boolean;
+    patchBankWallet: any;
+    isPatchingBankWallet: boolean;
+    patchPhoneWallet: any;
+    isPatchingPhoneWallet: boolean;
+  };
+  onPreviewAndPublish?: () => void;
 }
 
 export const CreateExperienceSteps = ({
@@ -139,11 +158,17 @@ export const CreateExperienceSteps = ({
   validateTickets = () => true,
   inviteFormData,
   updateInviteFormData,
-}: CreateExperienceStepsProps) => {
+
+  walletFormData,
+  updateWalletFormData,
+  walletErrors = {},
+  wallets = [],
+  isWalletsLoading = false,
+  hasSavedWallets = false,
+  walletMutations,
+  onPreviewAndPublish,}: CreateExperienceStepsProps) => {
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
-  const { data: walletsResponse } = useGetWallets();
-  const hasSavedWallets = (walletsResponse?.data?.results?.length ?? 0) > 0;
-  const canAccessDetailsSteps = Boolean(
+const canAccessDetailsSteps = Boolean(
     experience?.id || 
     selectedCommunityId || 
     formData?.community?.id
@@ -385,7 +410,19 @@ export const CreateExperienceSteps = ({
       </TabsContent>
 
       <TabsContent value="wallet" className="col-span-1 mt-6">
-        <CreateExperienceWallet />
+        {walletFormData && updateWalletFormData ? (
+          <WalletDetailsStep
+            formData={walletFormData}
+            onChange={updateWalletFormData}
+            errors={walletErrors}
+            wallets={wallets}
+            isWalletsLoading={isWalletsLoading}
+            walletMutations={walletMutations || {}}
+            onPreviewAndPublish={onPreviewAndPublish || (() => {})}
+          />
+        ) : (
+          <CreateExperienceWallet />
+        )}
       </TabsContent>
     </Tabs>
   );

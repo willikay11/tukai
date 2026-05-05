@@ -7,11 +7,26 @@ import { InvitedMember } from '@/components/ui/invite-members';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
 import { Community } from '@/types/community';
-import type { Experience } from '@/types/experience';
 import { Interest } from '@/types/interest';
 import { Photo } from '@/types/photo';
 
+import {
+  useCreateBankWallet,
+  useCreatePhoneWallet,
+  useGetWallets,
+  usePatchBankWallet,
+  usePatchPhoneWallet,
+} from '@/app/(experiences)/hooks/usePayment';
+import { Wallet } from '@/types/payment';
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
+
+const parseExperienceStepId = (step: string | null): ExperienceStepId | null => {
+  const validSteps: ExperienceStepId[] = ['community', 'about', 'dates-tickets', 'guests', 'wallet'];
+  if (step && validSteps.includes(step as ExperienceStepId)) {
+    return step as ExperienceStepId;
+  }
+  return null;
+};
 
 export interface CommunityOption {
   id: string;
@@ -59,23 +74,12 @@ export interface FormData {
     invitedGuests: InvitedMember[];
     invitedCommunityIds: string[];
   };
-}
-
-const EXPERIENCE_STEPS: ExperienceStepId[] = [
-  'community',
-  'about',
-  'dates-tickets',
-  'guests',
-  'wallet',
-];
-
-function parseExperienceStepId(step: string | null): ExperienceStepId | null {
-  if (!step) {
-    return null;
-  }
-
-  return EXPERIENCE_STEPS.includes(step as ExperienceStepId) ? (step as ExperienceStepId) : null;
-}
+  wallet: {
+    selectedWalletId: string | null;
+    paymentMethod: 'mpesa' | 'bank_account';
+    mpesaPhoneNumber: string;
+  };
+};
 
 const initialFormData: FormData = {
   dateType: {
@@ -107,6 +111,11 @@ const initialFormData: FormData = {
     invitedGuests: [],
     invitedCommunityIds: [],
   },
+  wallet: {
+    selectedWalletId: null,
+    paymentMethod: 'mpesa',
+    mpesaPhoneNumber: '',
+  },
 };
 
 export const useCreateExperienceFlow = () => {
@@ -132,6 +141,7 @@ export const useCreateExperienceFlow = () => {
   const [dateTypeErrors, setDateTypeErrors] = useState<Record<string, string>>({});
   const [aboutErrors, setAboutErrors] = useState<Record<string, string>>({});
   const [ticketsErrors, setTicketsErrors] = useState<Record<string, string>>({});
+  const [walletErrors, setWalletErrors] = useState<Record<string, string>>({});
 
   const { data: createdCommunitiesResponse, isLoading: isLoadingCreatedCommunities } =
     useGetCommunities({
@@ -145,7 +155,16 @@ export const useCreateExperienceFlow = () => {
     true,
   );
 
+  // Wallet hooks
+  const { data: walletsResponse, isLoading: isWalletsLoading } = useGetWallets();
+  const { mutate: createBankWallet, isPending: isCreatingBankWallet } = useCreateBankWallet();
+  const { mutate: createPhoneWallet, isPending: isCreatingPhoneWallet } = useCreatePhoneWallet();
+  const { mutate: patchBankWallet, isPending: isPatchingBankWallet } = usePatchBankWallet();
+  const { mutate: patchPhoneWallet, isPending: isPatchingPhoneWallet } = usePatchPhoneWallet();
+
   const experience = experienceResponse?.data;
+  const wallets: Wallet[] = walletsResponse?.data?.results ?? [];
+  const hasSavedWallets = wallets.length > 0;
   const hasCreatedCommunity = (createdCommunitiesResponse?.data?.results?.length ?? 0) > 0;
   const isCheckingCommunityAccess =
     sessionStatus === 'loading' ||
@@ -222,6 +241,14 @@ export const useCreateExperienceFlow = () => {
     });
   }, []);
 
+
+  const updateWalletFormData = useCallback((data: Partial<FormData['wallet']>) => {
+    setFormData((prev) => ({
+      ...prev,
+      wallet: { ...prev.wallet, ...data },
+    }));
+  }, []);
+
   const validateDateType = useCallback((): boolean => {
     const errors: Record<string, string> = {};
 
@@ -274,6 +301,7 @@ export const useCreateExperienceFlow = () => {
     console.log("[validateAbout] Errors found:", errors);
     console.log("[validateAbout] Is valid:", Object.keys(errors).length === 0);
     return Object.keys(errors).length === 0;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.about.title, formData.about.description, formData.about.location, formData.about.photos]);
 
   const validateTickets = useCallback((): boolean => {
@@ -289,6 +317,15 @@ export const useCreateExperienceFlow = () => {
     console.log("[validateTickets] Is valid:", Object.keys(errors).length === 0);
     return Object.keys(errors).length === 0;
   }, [formData.tickets.items.length]);
+
+  const validateWallet = useCallback((): boolean => {
+    const errors: Record<string, string> = {};
+    if (!wallets.length && !formData.wallet.selectedWalletId && !formData.wallet.mpesaPhoneNumber) {
+      errors.wallet = 'Please set up a payment method before continuing.';
+    }
+    setWalletErrors(errors);
+    return Object.keys(errors).length === 0;
+  }, [wallets.length, formData.wallet.selectedWalletId, formData.wallet.mpesaPhoneNumber]);
 
   const updateInviteFormData = useCallback((data: Partial<FormData['invite']>) => {
     setFormData((prev) => ({
@@ -334,7 +371,6 @@ export const useCreateExperienceFlow = () => {
   const resolveCommunityImageUrl = (community: Community): string => {
     const preferredPhoto =
       community?.photos?.find((photo: Photo) => photo.isCover) || community?.photos?.[0];
-
     return preferredPhoto?.photo || 'https://via.placeholder.com/32';
   };
 
@@ -375,7 +411,27 @@ export const useCreateExperienceFlow = () => {
     validateAbout,
     validateTickets,
 
-    // Handlers
+    // Handl,
+
+    // Wallet state and mutations
+    wallets,
+    isWalletsLoading,
+    hasSavedWallets,
+    walletErrors,
+    validateWallet,
+    updateWalletFormData,
+
+    walletMutations: {
+      createBankWallet,
+      isCreatingBankWallet,
+      createPhoneWallet,
+      isCreatingPhoneWallet,
+      patchBankWallet,
+      isPatchingBankWallet,
+      patchPhoneWallet,
+      isPatchingPhoneWallet,
+    },
+
     handlers: {
       handleStepChange,
       handleExperienceCreated,

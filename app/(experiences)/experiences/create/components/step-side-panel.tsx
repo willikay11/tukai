@@ -22,6 +22,9 @@ import { PreviewLocationSection } from './PreviewLocationSection';
 import { PreviewMeetingSection } from './PreviewMeetingSection';
 import { PreviewTicketsSection } from './PreviewTicketsSection/PreviewTicketsSection';
 import { Interest } from '@/types/interest';
+import { PreviewGuestsSection } from './PreviewGuestsSection';
+import { PreviewCommunitiesSection } from './PreviewCommunitiesSection';
+import { CommunityOption } from '../hooks/useCreateExperienceFlow';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
@@ -51,6 +54,9 @@ export const ExperienceStepSidePanel = ({
   ticketsItems,
   ticketsCommissionPayer,
   onEditStep,
+  invitedGuests,
+  invitedCommunityIds,
+  allCommunities,
 }: {
   step: ExperienceStepId;
   experienceId?: string | null;
@@ -86,6 +92,9 @@ export const ExperienceStepSidePanel = ({
   }>;
   ticketsCommissionPayer?: 'host' | 'customer' | 'split';
   onEditStep?: (step: ExperienceStepId) => void;
+  invitedGuests?: InvitedMember[];
+  invitedCommunityIds?: string[];
+  allCommunities?: CommunityOption[];
 }) => {
   const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
     community: (
@@ -254,10 +263,52 @@ export const ExperienceStepSidePanel = ({
     wallet: (
       <div className="space-y-6">
         <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2>
-        <ExperienceReview
-          experience={experience}
-          invitedMembers={invitedMembers}
-          invitedCommunities={invitedCommunities}
+        <PreviewExperienceHeader
+          photo={aboutPhoto || null}
+          photos={aboutPhotos}
+          title={aboutTitle || ''}
+          description={aboutDescription || ''}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewIncludedSection
+          items={aboutWhatsIncluded ? [aboutWhatsIncluded] : []}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewExcludedSection
+          items={aboutWhatsNotIncluded ? [aboutWhatsNotIncluded] : []}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewCategoriesSection
+          categories={aboutCategories || []}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewDateSection
+          date={selectedDate || null}
+          startTime={selectedStartTime || null}
+          endTime={selectedEndTime || null}
+          onEdit={() => onEditStep?.('dates-tickets')}
+        />
+        <PreviewItineraryTypeSection
+          visibility={aboutVisibility || 'public'}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewLocationSection
+          location={aboutLocation || null}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewMeetingSection
+          meetingPoint={aboutMeetingPoint || null}
+          meetingTime={aboutMeetingTime || null}
+          onEdit={() => onEditStep?.('about')}
+        />
+        <PreviewGuestsSection
+          guests={invitedGuests || []}
+          onEdit={() => onEditStep?.('guests')}
+        />
+        <PreviewCommunitiesSection
+          communityIds={invitedCommunityIds || []}
+          allCommunities={allCommunities || []}
+          onEdit={() => onEditStep?.('guests')}
         />
         {ticketsItems && ticketsItems.length > 0 && (
           <div className="border-t border-gray-200 pt-6">

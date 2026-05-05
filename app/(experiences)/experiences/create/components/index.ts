@@ -14,6 +14,9 @@ export { TicketsStep } from './TicketsStep/TicketsStep';
 // Invite guests step
 export { InviteGuestsStep } from './InviteGuestsStep/InviteGuestsStep';
 
+// Wallet step
+export { WalletDetailsStep } from './WalletDetailsStep/WalletDetailsStep';
+
 // Preview section components
 export { PreviewExperienceHeader } from './PreviewExperienceHeader';
 export { PreviewIncludedSection } from './PreviewIncludedSection';
@@ -22,4 +25,6 @@ export { PreviewCategoriesSection } from './PreviewCategoriesSection';
 export { PreviewItineraryTypeSection } from './PreviewItineraryTypeSection';
 export { PreviewLocationSection } from './PreviewLocationSection';
 export { PreviewMeetingSection } from './PreviewMeetingSection';
+export { PreviewGuestsSection } from './PreviewGuestsSection';
+export { PreviewCommunitiesSection } from './PreviewCommunitiesSection';
 export { PreviewTicketsSection } from './PreviewTicketsSection/PreviewTicketsSection';

@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { CreateStepContentSkeleton, ReviewWalletsSkeleton } from '@/app/shared/components/Cards';
 
@@ -17,6 +18,7 @@ export default function CreateExperiencePage() {
 }
 
 function CreateExperiencePageContent() {
+  const router = useRouter();
   const {
     activeStep,
     experienceId,
@@ -41,6 +43,13 @@ function CreateExperiencePageContent() {
     validateDateType,
     validateAbout,
     validateTickets,
+    wallets,
+    isWalletsLoading,
+    hasSavedWallets,
+    walletErrors,
+    updateWalletFormData,
+    validateWallet,
+    walletMutations,
   } = useCreateExperienceFlow();
 
   if (isCheckingCommunityAccess) {
@@ -87,6 +96,18 @@ function CreateExperiencePageContent() {
           validateTickets={validateTickets}
           inviteFormData={formData.invite}
           updateInviteFormData={updateInviteFormData}
+          walletFormData={formData.wallet}
+          updateWalletFormData={updateWalletFormData}
+          walletErrors={walletErrors}
+          wallets={wallets}
+          isWalletsLoading={isWalletsLoading}
+          hasSavedWallets={hasSavedWallets}
+          walletMutations={walletMutations}
+          onPreviewAndPublish={() => {
+            if (validateWallet() && experienceId) {
+              router.push(`/experiences/review/${experienceId}`);
+            }
+          }}
         />
       </div>
       <div className="h-full lg:col-span-4 lg:col-start-8 xl:col-span-4 xl:col-start-8 3xl:col-span-3 3xl:col-start-8 4xl:col-span-3 4xl:col-start-8">
@@ -94,7 +115,7 @@ function CreateExperiencePageContent() {
           step={activeStep}
           experienceId={experienceId}
           experience={experience}
-          canShowDateTickets={hasUpdatedDates || (formData.dateType.date && formData.dateType.startTime && formData.dateType.endTime)}
+          canShowDateTickets={hasUpdatedDates || !!(formData.dateType.date && formData.dateType.startTime && formData.dateType.endTime)}
           itineraryConfig={itineraryConfig}
           invitedMembers={invitedMembers}
           invitedCommunities={invitedCommunities}
@@ -115,7 +136,10 @@ function CreateExperiencePageContent() {
           aboutCategories={formData.about.categories}
           ticketsItems={formData.tickets.items}
           ticketsCommissionPayer={formData.tickets.commission}
-          onEditStep={handlers.handleStepChange}
+
+          invitedGuests={formData.invite.invitedGuests}
+          invitedCommunityIds={formData.invite.invitedCommunityIds}
+          allCommunities={communitiesForSelector}          onEditStep={handlers.handleStepChange}
         />
       </div>
     </main>

@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-
 import { IconComponent } from '@/app/shared/components/Icons';
 import { WalletListSkeleton } from '@/app/shared/components/Cards';
 import {
@@ -12,23 +10,37 @@ import {
 } from '@/components/ui/bank-account-details-form';
 import { Button } from '@/components/ui/button';
 import { MpesaDetailsForm } from '@/components/ui/mpesa-details-form';
-import {
-  useCreateBankWallet,
-  useCreatePhoneWallet,
-  useGetWallets,
-  usePatchBankWallet,
-  usePatchPhoneWallet,
-} from '@/app/(experiences)/hooks/usePayment';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Wallet } from '@/types/payment';
-
-type PaymentMethod = 'mpesa' | 'bank_account';
 
 interface CreateExperienceWalletProps {
   cancelActionLabel?: string;
   saveAndExitActionLabel?: string;
   previewAndPublishActionLabel?: string;
   hideSaveAndExit?: boolean;
+
+  // Data props
+  wallets: Wallet[];
+  isWalletsLoading: boolean;
+  selectedWalletId: string | null;
+  onSelectedWalletIdChange: (id: string | null) => void;
+  paymentMethod: 'mpesa' | 'bank_account';
+  onPaymentMethodChange: (method: 'mpesa' | 'bank_account') => void;
+  mpesaPhoneNumber: string;
+  onMpesaPhoneNumberChange: (phone: string) => void;
+
+  // Mutations
+  onCreatePhoneWallet: (phone: string) => void;
+  isCreatingPhoneWallet: boolean;
+  onPatchPhoneWallet: (walletId: string, phone: string) => void;
+  isPatchingPhoneWallet: boolean;
+  onCreateBankWallet: (values: BankAccountFormValues) => void;
+  isCreatingBankWallet: boolean;
+  onPatchBankWallet: (walletId: string, values: BankAccountFormValues) => void;
+  isPatchingBankWallet: boolean;
+
+  // Navigation
+  onPreviewAndPublish: () => void;
 }
 
 export const CreateExperienceWallet = ({
@@ -36,36 +48,36 @@ export const CreateExperienceWallet = ({
   saveAndExitActionLabel = 'Save & Exit',
   previewAndPublishActionLabel = 'Preview & Publish',
   hideSaveAndExit = false,
+  wallets,
+  isWalletsLoading,
+  selectedWalletId,
+  onSelectedWalletIdChange,
+  paymentMethod,
+  onPaymentMethodChange,
+  mpesaPhoneNumber,
+  onMpesaPhoneNumberChange,
+  onCreatePhoneWallet,
+  isCreatingPhoneWallet,
+  onPatchPhoneWallet,
+  isPatchingPhoneWallet,
+  onCreateBankWallet,
+  isCreatingBankWallet,
+  onPatchBankWallet,
+  isPatchingBankWallet,
+  onPreviewAndPublish,
 }: CreateExperienceWalletProps) => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const experienceId = searchParams.get('experienceId');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mpesa');
   const [showForm, setShowForm] = useState(false);
-  const [mpesaPhoneNumber, setMpesaPhoneNumber] = useState('');
-  const { toast } = useToast();
-
-  const { data: walletsResponse, isLoading: isWalletsLoading } = useGetWallets();
-  const { mutate: createBankWallet, isPending: isCreatingBankWallet } = useCreateBankWallet();
-  const { mutate: createPhoneWallet, isPending: isCreatingPhoneWallet } = useCreatePhoneWallet();
-  const { mutate: patchBankWallet, isPending: isPatchingBankWallet } = usePatchBankWallet();
-  const { mutate: patchPhoneWallet, isPending: isPatchingPhoneWallet } = usePatchPhoneWallet();
-
-  const wallets: Wallet[] = walletsResponse?.data?.results ?? [];
-  const hasSavedWallets = wallets.length > 0;
-  const existingPhoneWallet = wallets.find((wallet) => wallet.walletType === 'phone');
-  const defaultWalletId = wallets.find((wallet) => wallet.isActive)?.id ?? null;
-  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(defaultWalletId);
   const [editingWallet, setEditingWallet] = useState<Wallet | null>(null);
+  const { toast } = useToast();
 
   const handleEditWallet = (wallet: Wallet) => {
     setEditingWallet(wallet);
     setShowForm(true);
     if (wallet.walletType === 'phone') {
-      setPaymentMethod('mpesa');
-      setMpesaPhoneNumber(wallet.phone ?? '');
+      onPaymentMethodChange('mpesa');
+      onMpesaPhoneNumberChange(wallet.phone ?? '');
     } else {
-      setPaymentMethod('bank_account');
+      onPaymentMethodChange('bank_account');
     }
   };
 
@@ -108,32 +120,18 @@ export const CreateExperienceWallet = ({
       return;
     }
 
-    const onSuccess = () => {
-      setMpesaPhoneNumber('');
-      toast({
-        title: 'Wallet saved',
-        description: 'Your M-Pesa wallet has been set up successfully.',
-        variant: 'success',
-      });
-    };
-
-    const onError = (error: Error) => {
-      toast({
-        title: 'Unable to save wallet',
-        description: error.message || 'Please try again.',
-        variant: 'destructive',
-      });
-    };
-
+    const existingPhoneWallet = wallets.find((wallet) => wallet.walletType === 'phone');
     if (existingPhoneWallet?.id) {
-      patchPhoneWallet(
-        { walletId: existingPhoneWallet.id, phone: formattedPhoneNumber },
-        { onSuccess, onError },
-      );
-      return;
+      onPatchPhoneWallet(existingPhoneWallet.id, formattedPhoneNumber);
+    } else {
+      onCreatePhoneWallet(formattedPhoneNumber);
     }
 
-    createPhoneWallet({ phone: formattedPhoneNumber }, { onSuccess, onError });
+    toast({
+      title: 'Wallet saved',
+      description: 'Your M-Pesa wallet has been set up successfully.',
+      variant: 'success',
+    });
   };
 
   const handleSaveBankWallet = (values: BankAccountFormValues) => {
@@ -146,53 +144,17 @@ export const CreateExperienceWallet = ({
       return;
     }
 
-    const onSuccess = () => {
-      toast({
-        title: 'Wallet saved',
-        description: 'Your bank wallet has been set up successfully.',
-        variant: 'success',
-      });
-    };
-
-    const onError = (error: Error) => {
-      toast({
-        title: 'Unable to save wallet',
-        description: error.message || 'Please try again.',
-        variant: 'destructive',
-      });
-    };
-
     if (editingWallet?.walletType === 'bank' && editingWallet.id) {
-      patchBankWallet(
-        {
-          walletId: editingWallet.id,
-          bankName: values.bankName,
-          accountNumber: values.accountNumber,
-          accountHolderName: values.accountHolderName,
-          bankBranch: values.bankBranch,
-          branchCode: values.branchCode,
-          country: values.country,
-          swiftCode: values.swiftCode,
-          address: values.address,
-        },
-        { onSuccess, onError },
-      );
-      return;
+      onPatchBankWallet(editingWallet.id, values);
+    } else {
+      onCreateBankWallet(values);
     }
 
-    createBankWallet(
-      {
-        bankName: values.bankName,
-        accountNumber: values.accountNumber,
-        accountHolderName: values.accountHolderName,
-        bankBranch: values.bankBranch,
-        branchCode: values.branchCode,
-        country: values.country,
-        swiftCode: values.swiftCode,
-        address: values.address,
-      },
-      { onSuccess, onError },
-    );
+    toast({
+      title: 'Wallet saved',
+      description: 'Your bank wallet has been set up successfully.',
+      variant: 'success',
+    });
   };
 
   const handleCancelForm = () => {
@@ -201,16 +163,7 @@ export const CreateExperienceWallet = ({
   };
 
   const handlePreviewAndPublish = () => {
-    if (!experienceId) {
-      toast({
-        title: 'Experience missing',
-        description: 'Save your experience details before previewing.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    router.push(`/experiences/review/${experienceId}`);
+    onPreviewAndPublish();
   };
 
   return (
@@ -237,7 +190,7 @@ export const CreateExperienceWallet = ({
                 <div key={w.id} className="flex items-start gap-3 py-2">
                   <button
                     type="button"
-                    onClick={() => setSelectedWalletId(w.id)}
+                    onClick={() => onSelectedWalletIdChange(w.id)}
                     className={`mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border-2 ${
                       selectedWalletId === w.id ? 'border-emerald-700' : 'border-gray-400'
                     }`}
@@ -308,7 +261,7 @@ export const CreateExperienceWallet = ({
           <div className="mt-3 flex flex-wrap gap-3">
             <button
               type="button"
-              onClick={() => setPaymentMethod('mpesa')}
+              onClick={() => onPaymentMethodChange('mpesa')}
               className={`inline-flex items-center gap-3 rounded-xl px-4 py-3 text-xs transition-colors ${
                 paymentMethod === 'mpesa'
                   ? 'bg-emerald-100 text-gray-900'
@@ -330,7 +283,7 @@ export const CreateExperienceWallet = ({
 
             <button
               type="button"
-              onClick={() => setPaymentMethod('bank_account')}
+              onClick={() => onPaymentMethodChange('bank_account')}
               className={`inline-flex items-center gap-3 rounded-xl px-4 py-3 text-xs transition-colors ${
                 paymentMethod === 'bank_account'
                   ? 'bg-emerald-100 text-gray-900'
@@ -354,11 +307,11 @@ export const CreateExperienceWallet = ({
           {paymentMethod === 'mpesa' ? (
             <MpesaDetailsForm
               phone={mpesaPhoneNumber}
-              onPhoneChange={setMpesaPhoneNumber}
+              onPhoneChange={onMpesaPhoneNumberChange}
               onSaveDetails={handleSavePhoneWallet}
               isSaving={isCreatingPhoneWallet || isPatchingPhoneWallet}
               onCancel={handleCancelForm}
-              showCancel={hasSavedWallets}
+              showCancel={wallets.length > 0}
             />
           ) : null}
           {paymentMethod === 'bank_account' ? (
@@ -379,7 +332,7 @@ export const CreateExperienceWallet = ({
               onSaveDetails={handleSaveBankWallet}
               isSaving={isCreatingBankWallet || isPatchingBankWallet}
               onCancel={handleCancelForm}
-              showCancel={hasSavedWallets}
+              showCancel={wallets.length > 0}
             />
           ) : null}
         </>
