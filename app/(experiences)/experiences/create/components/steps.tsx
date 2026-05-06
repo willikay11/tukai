@@ -303,7 +303,7 @@ const canAccessDetailsSteps = Boolean(
               key={step.id}
               value={step.id}
               disabled={isDisabled}
-              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs transition-colors data-[state=active]:border-b-[0px] data-[state=active]:border-emerald-600 data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 ${
+              className={`inline-flex gap-2 rounded-full px-4 py-2 text-xs transition-colors data-[state=active]:border-b-[0px] data-[state=active]:border-emerald-600 data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 ${
                 isFilled ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-800'
               }`}
             >

@@ -208,123 +208,165 @@ export const TicketsStep = ({
         />
       )}
 
-      {hasTicketDateBadge && isMultiDay && (
-        <div className="space-y-2">
-          {ticketMode === 'entire-period' ? (
-            <TicketDateBadge
-              mode="single"
-              date={multiDayDateRange}
-              startTime={multiDayStartTime!}
-              endTime={multiDayEndTime!}
-            />
-          ) : (
-            multiDayDays.map((day, index) => (
+      {hasTicketDateBadge && (isMultiDay || (!isRecurring && !isMultiDay)) && (
+        <div className="relative">
+          {isMultiDay && (
+            <div className="space-y-2">
+              {ticketMode === 'entire-period' ? (
+                <TicketDateBadge
+                  mode="single"
+                  date={multiDayDateRange}
+                  startTime={multiDayStartTime!}
+                  endTime={multiDayEndTime!}
+                />
+              ) : (
+                multiDayDays.map((day, index) => (
+                  <TicketDateBadge
+                    key={index}
+                    mode="single"
+                    date={day}
+                    startTime={multiDayStartTime!}
+                    endTime={multiDayEndTime!}
+                  />
+                ))
+              )}
+            </div>
+          )}
+
+          {!isRecurring && !isMultiDay && (
+            <>
               <TicketDateBadge
-                key={index}
                 mode="single"
-                date={day}
-                startTime={multiDayStartTime!}
-                endTime={multiDayEndTime!}
+                date={dateTypeData.date!}
+                startTime={dateTypeData.startTime!}
+                endTime={dateTypeData.endTime!}
               />
-            ))
+              <span className="pointer-events-none absolute -left-[1.25rem] top-0 bottom-0 border-l-[1px] border-dashed border-primary" />
+              <span className="pointer-events-none absolute -left-[1.25rem] top-0 h-0 w-5 border-t-[1px] border-dashed border-primary" />
+              <span className="pointer-events-none absolute -left-[1.563rem] -top-[0.3125rem] h-2.5 w-2.5 rounded-full bg-emerald-900" />
+            </>
+          )}
+
+          {isMultiDay && (
+            <>
+              <span className="pointer-events-none absolute -left-[1.25rem] top-0 bottom-0 border-l-[1px] border-dashed border-primary" />
+              <span className="pointer-events-none absolute -left-[1.25rem] top-0 h-0 w-5 border-t-[1px] border-dashed border-primary" />
+              <span className="pointer-events-none absolute -left-[1.563rem] -top-[0.3125rem] h-2.5 w-2.5 rounded-full bg-emerald-900" />
+            </>
           )}
         </div>
       )}
 
-      {hasTicketDateBadge && !isRecurring && !isMultiDay && (
-        <TicketDateBadge
-          mode="single"
-          date={dateTypeData.date!}
-          startTime={dateTypeData.startTime!}
-          endTime={dateTypeData.endTime!}
-        />
-      )}
+      {isRecurring && !isMultiDay && hasTicketDateBadge ? (
+        <div className="space-y-6">
+          {timeSlots.map((slot, slotIndex) => (
+            <div key={slotIndex} className="relative">
+              <TicketDateBadge
+                mode="recurring"
+                days={recurringDays}
+                startTime={slot.startTime!}
+                endTime={slot.endTime!}
+              />
+              <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] bottom-0 border-l-[1px] border-dashed border-primary" />
+              <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
+              <span className="pointer-events-none absolute -left-[1.563rem] top-[1.3125rem] h-2.5 w-2.5 rounded-full bg-primary-900" />
 
-      {hasTicketDateBadge && isRecurring && !isMultiDay && (
-        <div className="space-y-2">
-          {timeSlots.map((slot, index) => (
-            <TicketDateBadge
-              key={index}
-              mode="recurring"
-              days={recurringDays}
-              startTime={slot.startTime!}
-              endTime={slot.endTime!}
-            />
-          ))}
-        </div>
-      )}
-
-      <div className="relative">
-          <span className="pointer-events-none absolute -left-[1.25rem] -top-[2.813rem] bottom-0 border-l-[1px] border-dashed border-primary" />
-          <span className="pointer-events-none absolute -left-[1.25rem] -top-[2.813rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
-          <span className="pointer-events-none absolute -left-[1.563rem] -top-[3.125rem] h-2.5 w-2.5 rounded-full bg-emerald-900" />
-
-        {formData.items.length === 0 && activeFormIndex === null ? (
-          <TicketForm
-            value={draftTicket}
-            onChange={handleDraftTicketChange}
-            errors={formErrors}
-            onSave={handleSaveTicket}
-            onCancel={onCancel}
-            experiencePricing={experiencePricing}
-            commissionPayer={formData.commission}
-            isRecurring={isRecurring}
-            isMultiDay={isMultiDay}
-          />
-        ) : (
-          <>
-            <div className="space-y-3 mb-4">
-              {formData.items.map((ticket, index) => (
-                <SavedTicketCard
-                  key={ticket.id}
-                  name={ticket.name}
-                  quantity={ticket.quantity}
-                  amount={ticket.amount}
-                  validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
-                  coverPhoto={photos?.[0]}
-                  onEdit={() => handleEditTicket(index)}
-                  onDelete={() => handleDeleteTicket(ticket.id)}
-                />
-              ))}
-            </div>
-
-            {activeFormIndex !== null ? (
               <TicketForm
                 value={draftTicket}
                 onChange={handleDraftTicketChange}
                 errors={formErrors}
                 onSave={handleSaveTicket}
-                onCancel={handleCancelForm}
+                onCancel={onCancel}
                 experiencePricing={experiencePricing}
                 commissionPayer={formData.commission}
                 isRecurring={isRecurring}
                 isMultiDay={isMultiDay}
               />
-            ) : (
-              <AddTicketTypeButton onClick={handleAddTicket} />
-            )}
-          </>
-        )}
-      </div>
+            </div>
+          ))}
+
+          <div className="flex justify-between gap-4 pt-6">
+            {/* <Button type="button" variant="ghost" onClick={onCancel} className="text-red-600">
+              Cancel
+            </Button> */}
+            <Button
+              type="button"
+              onClick={onSaveContinue}
+              variant="gradient"
+              className="rounded-[50px]"
+            >
+              {saveContinueLabel}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="relative">
+          {formData.items.length === 0 && activeFormIndex === null ? (
+            <TicketForm
+              value={draftTicket}
+              onChange={handleDraftTicketChange}
+              errors={formErrors}
+              onSave={handleSaveTicket}
+              onCancel={onCancel}
+              experiencePricing={experiencePricing}
+              commissionPayer={formData.commission}
+              isRecurring={isRecurring}
+              isMultiDay={isMultiDay}
+            />
+          ) : (
+            <>
+              <div className="space-y-3 mb-4">
+                {formData.items.map((ticket, index) => (
+                  <SavedTicketCard
+                    key={ticket.id}
+                    name={ticket.name}
+                    quantity={ticket.quantity}
+                    amount={ticket.amount}
+                    validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
+                    coverPhoto={photos?.[0]}
+                    onEdit={() => handleEditTicket(index)}
+                    onDelete={() => handleDeleteTicket(ticket.id)}
+                  />
+                ))}
+              </div>
+
+              {activeFormIndex !== null ? (
+                <TicketForm
+                  value={draftTicket}
+                  onChange={handleDraftTicketChange}
+                  errors={formErrors}
+                  onSave={handleSaveTicket}
+                  onCancel={handleCancelForm}
+                  experiencePricing={experiencePricing}
+                  commissionPayer={formData.commission}
+                  isRecurring={isRecurring}
+                  isMultiDay={isMultiDay}
+                />
+              ) : (
+                <AddTicketTypeButton onClick={handleAddTicket} />
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       {errors.items && <p className="text-xs text-red-500">{errors.items}</p>}
 
-    {showTicketConnector &&(
-      <div className="flex justify-between gap-4 pt-6">
-        <Button type="button" variant="ghost" onClick={onCancel} className="text-red-600">
-          Cancel
-        </Button>
-        <Button
-          type="button"
-          onClick={onSaveContinue}
-          variant="gradient"
-          className="rounded-[50px]"
-        >
-          {saveContinueLabel}
-        </Button>
-      </div>
-    )}
-
+      {showTicketConnector &&(
+        <div className="flex justify-between gap-4 pt-6">
+          <Button type="button" variant="ghost" onClick={onCancel} className="text-red-600">
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={onSaveContinue}
+            variant="gradient"
+            className="rounded-[50px]"
+          >
+            {saveContinueLabel}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
