@@ -27,7 +27,7 @@ export const ExperienceTypeRadio = ({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <label className="text-xs font-medium text-gray-900">Experience Type</label>
 
       <RadioGroup value={value} onValueChange={onChange}>

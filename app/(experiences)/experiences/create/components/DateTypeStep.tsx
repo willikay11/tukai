@@ -167,7 +167,7 @@ export const DateTypeStep = ({
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
           Add date and type of the experience
@@ -235,7 +235,7 @@ export const DateTypeStep = ({
           </div>
         </>
       ) : (
-        <>
+        <div className="space-y-2">
           <RecurringDayPicker
             value={formData.recurringDays}
             onChange={handleRecurringDaysChange}
@@ -262,7 +262,7 @@ export const DateTypeStep = ({
             onChange={handleTimeSlotsChange}
             errors={errors}
           />
-        </>
+        </div>
       )}
     </div>
   );

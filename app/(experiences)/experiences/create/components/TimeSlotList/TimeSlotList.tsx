@@ -46,16 +46,13 @@ export const TimeSlotList = ({ slots, onChange, errors }: TimeSlotListProps) => 
   );
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <label className="block text-xs font-medium text-gray-900">Times/Time Slots</label>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {slots.map((slot, index) => (
-          <div key={index} className="flex items-end gap-3">
+          <div key={index} className="flex items-end gap-2">
             <div className="flex-1">
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Start Time
-              </label>
               <TimePicker
                 value={slot.startTime || undefined}
                 onChange={(time) => handleStartTimeChange(index, time)}
@@ -69,9 +66,6 @@ export const TimeSlotList = ({ slots, onChange, errors }: TimeSlotListProps) => 
             </div>
 
             <div className="flex-1">
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                End Time
-              </label>
               <TimePicker
                 value={slot.endTime || undefined}
                 onChange={(time) => handleEndTimeChange(index, time)}

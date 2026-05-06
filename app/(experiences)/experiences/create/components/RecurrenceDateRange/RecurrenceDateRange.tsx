@@ -18,12 +18,12 @@ export const RecurrenceDateRange = ({
   errors,
 }: RecurrenceDateRangeProps) => {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <label className="block text-xs font-medium text-gray-900">
         Recurrence start and end dates
       </label>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-2">
         <div>
           <DatePicker
             value={startDate || undefined}

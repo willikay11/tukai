@@ -28,45 +28,50 @@ export const MultiDayDateSection = ({
   errors,
 }: MultiDaySectionProps) => {
   return (
-    <div className="space-y-6">
-      <div>
-        <label className="block text-xs font-medium text-gray-900 mb-2">Start Date</label>
-        <DatePicker value={startDate || undefined} onChange={onStartDateChange} />
-        {errors.multiDayStartDate && (
-          <p className="text-xs text-red-500 mt-1">{errors.multiDayStartDate}</p>
-        )}
+    <div className="space-y-2">
+      <label className="block text-xs font-medium text-gray-900">Select Experience date(s)</label>
+      <div className='grid grid-cols-2 gap-2'>
+        <div>
+          {/* <label className="block text-xs font-medium text-gray-900 mb-2">Start Date</label> */}
+          <DatePicker value={startDate || undefined} onChange={onStartDateChange} />
+          {errors.multiDayStartDate && (
+            <p className="text-xs text-red-500 mt-1">{errors.multiDayStartDate}</p>
+          )}
+        </div>
+
+        <div>
+          {/* <label className="block text-xs font-medium text-gray-900 mb-2">Start Time</label> */}
+          <TimePicker
+            value={startTime || undefined}
+            onChange={onStartTimeChange}
+            placeholder="Select time"
+          />
+          {errors.multiDayStartTime && (
+            <p className="text-xs text-red-500 mt-1">{errors.multiDayStartTime}</p>
+          )}
+        </div>
       </div>
 
-      <div>
-        <label className="block text-xs font-medium text-gray-900 mb-2">Start Time</label>
-        <TimePicker
-          value={startTime || undefined}
-          onChange={onStartTimeChange}
-          placeholder="Select time"
-        />
-        {errors.multiDayStartTime && (
-          <p className="text-xs text-red-500 mt-1">{errors.multiDayStartTime}</p>
-        )}
-      </div>
+      <div className='grid grid-cols-2 gap-2'>
+        <div>
+          {/* <label className="block text-xs font-medium text-gray-900 mb-2">End Date</label> */}
+          <DatePicker value={endDate || undefined} onChange={onEndDateChange} />
+          {errors.multiDayEndDate && (
+            <p className="text-xs text-red-500 mt-1">{errors.multiDayEndDate}</p>
+          )}
+        </div>
 
-      <div>
-        <label className="block text-xs font-medium text-gray-900 mb-2">End Date</label>
-        <DatePicker value={endDate || undefined} onChange={onEndDateChange} />
-        {errors.multiDayEndDate && (
-          <p className="text-xs text-red-500 mt-1">{errors.multiDayEndDate}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="block text-xs font-medium text-gray-900 mb-2">End Time</label>
-        <TimePicker
-          value={endTime || undefined}
-          onChange={onEndTimeChange}
-          placeholder="Select time"
-        />
-        {errors.multiDayEndTime && (
-          <p className="text-xs text-red-500 mt-1">{errors.multiDayEndTime}</p>
-        )}
+        <div>
+          {/* <label className="block text-xs font-medium text-gray-900 mb-2">End Time</label> */}
+          <TimePicker
+            value={endTime || undefined}
+            onChange={onEndTimeChange}
+            placeholder="Select time"
+          />
+          {errors.multiDayEndTime && (
+            <p className="text-xs text-red-500 mt-1">{errors.multiDayEndTime}</p>
+          )}
+        </div>
       </div>
     </div>
   );

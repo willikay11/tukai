@@ -35,7 +35,6 @@ export const RecurringDayPicker = ({ value, onChange }: RecurringDayPickerProps)
 
   return (
     <div className="space-y-3">
-      <label className="block text-xs font-medium text-gray-900">Select Days</label>
       <div className="inline-flex space-x-2 justity-center items-center">
         {DAYS.map(({ key, label }) => (
           <div key={key} className="flex items-center gap-1">

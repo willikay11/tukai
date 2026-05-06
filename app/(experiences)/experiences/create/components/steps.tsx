@@ -325,7 +325,7 @@ const canAccessDetailsSteps = Boolean(
         <div className="col-span-8">
       <TabsContent value="community" className="col-span-1 mt-6">
         {formData && updateFormData ? (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <DateTypeStep
               formData={formData}
               communityOptions={communitiesForSelector}
