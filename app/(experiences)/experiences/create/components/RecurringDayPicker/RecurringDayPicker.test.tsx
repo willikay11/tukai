@@ -1,8 +1,21 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { RecurringDayPicker } from './RecurringDayPicker';
 
+jest.mock('@/components/ui/checkbox', () => ({
+  Checkbox: ({ checked, onCheckedChange, id }: any) => (
+    <input
+      type="checkbox"
+      id={id}
+      checked={checked}
+      onChange={(e) => onCheckedChange(e.target.checked)}
+      data-testid={`checkbox-${id}`}
+    />
+  ),
+}));
+
 describe('RecurringDayPicker', () => {
-  it('renders all day buttons', () => {
+  it('renders all day labels', () => {
     const onChange = jest.fn();
     render(<RecurringDayPicker value={[]} onChange={onChange} />);
 
@@ -15,35 +28,37 @@ describe('RecurringDayPicker', () => {
     expect(screen.getByText('Sun')).toBeInTheDocument();
   });
 
-  it('highlights selected days with green background', () => {
+  it('shows selected days as checked', () => {
     const onChange = jest.fn();
     render(<RecurringDayPicker value={['mon', 'wed']} onChange={onChange} />);
 
-    const monButton = screen.getByText('Mon').closest('button');
-    const wedButton = screen.getByText('Wed').closest('button');
-    const tueButton = screen.getByText('Tue').closest('button');
+    const monCheckbox = screen.getByTestId('checkbox-day-mon') as HTMLInputElement;
+    const wedCheckbox = screen.getByTestId('checkbox-day-wed') as HTMLInputElement;
+    const tueCheckbox = screen.getByTestId('checkbox-day-tue') as HTMLInputElement;
 
-    expect(monButton).toHaveClass('bg-emerald-700');
-    expect(wedButton).toHaveClass('bg-emerald-700');
-    expect(tueButton).toHaveClass('border-2');
+    expect(monCheckbox.checked).toBe(true);
+    expect(wedCheckbox.checked).toBe(true);
+    expect(tueCheckbox.checked).toBe(false);
   });
 
-  it('toggles day selection on click', () => {
+  it('removes a day when unchecked', async () => {
+    const user = userEvent.setup();
     const onChange = jest.fn();
     render(<RecurringDayPicker value={['mon']} onChange={onChange} />);
 
-    const monButton = screen.getByText('Mon').closest('button');
-    fireEvent.click(monButton!);
+    const monCheckbox = screen.getByTestId('checkbox-day-mon');
+    await user.click(monCheckbox);
 
     expect(onChange).toHaveBeenCalledWith([]);
   });
 
-  it('adds a day when clicked while unselected', () => {
+  it('adds a day when checked', async () => {
+    const user = userEvent.setup();
     const onChange = jest.fn();
     render(<RecurringDayPicker value={['mon']} onChange={onChange} />);
 
-    const tueButton = screen.getByText('Tue').closest('button');
-    fireEvent.click(tueButton!);
+    const tueCheckbox = screen.getByTestId('checkbox-day-tue');
+    await user.click(tueCheckbox);
 
     expect(onChange).toHaveBeenCalledWith(['mon', 'tue']);
   });

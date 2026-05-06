@@ -927,7 +927,7 @@ export const ExperienceDates = ({
                   </div>
 
                   {firstRecurringOccurrence && (
-                    <div className="inline-flex rounded-full border border-[#9CC3FF] bg-[#DCEBFF] px-4 py-2 text-xs italic font-medium text-[#65758B]">
+                    <div className="inline-flex w-fit rounded-full border border-blue-300 bg-blue-100 px-4 py-2 text-xs italic font-medium text-gray-500">
                       Your first experience will be on{' '}
                       {firstRecurringOccurrence.format('dddd D, MMMM')}
                     </div>

@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback } from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
@@ -34,20 +36,21 @@ export const RecurringDayPicker = ({ value, onChange }: RecurringDayPickerProps)
   return (
     <div className="space-y-3">
       <label className="block text-xs font-medium text-gray-900">Select Days</label>
-      <div className="flex flex-wrap gap-2">
+      <div className="inline-flex space-x-2 justity-center items-center">
         {DAYS.map(({ key, label }) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => handleDayToggle(key)}
-            className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
-              value.includes(key)
-                ? 'bg-emerald-700 text-white'
-                : 'border-2 border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-            }`}
-          >
-            {label}
-          </button>
+          <div key={key} className="flex items-center gap-1">
+            <Checkbox
+              id={`day-${key}`}
+              checked={value.includes(key)}
+              onCheckedChange={() => handleDayToggle(key)}
+            />
+            <Label
+              htmlFor={`day-${key}`}
+              className="cursor-pointer text-xs font-medium text-gray-900"
+            >
+              {label}
+            </Label>
+          </div>
         ))}
       </div>
     </div>
