@@ -22,7 +22,7 @@ export const MultiDayTicketModePicker = ({
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-semibold text-gray-900">
+      <label className="block text-xs text-gray-900">
         How would you like to create tickets for this experience?
       </label>
 
@@ -36,7 +36,7 @@ export const MultiDayTicketModePicker = ({
             />
             <Label
               htmlFor="entire-period"
-              className="cursor-pointer text-sm font-medium text-gray-900"
+              className="cursor-pointer text-xs text-gray-900"
             >
               Create one ticket setup for the entire period
             </Label>
@@ -50,7 +50,7 @@ export const MultiDayTicketModePicker = ({
             />
             <Label
               htmlFor="each-day"
-              className="cursor-pointer text-sm font-medium text-gray-900"
+              className="cursor-pointer text-xs text-gray-900"
             >
               Create tickets for each day separately
             </Label>

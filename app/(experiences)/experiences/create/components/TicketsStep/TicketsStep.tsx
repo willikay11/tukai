@@ -208,52 +208,17 @@ export const TicketsStep = ({
         />
       )}
 
-      {hasTicketDateBadge && (isMultiDay || (!isRecurring && !isMultiDay)) && (
+      {hasTicketDateBadge && !isRecurring && !isMultiDay && (
         <div className="relative">
-          {isMultiDay && (
-            <div className="space-y-2">
-              {ticketMode === 'entire-period' ? (
-                <TicketDateBadge
-                  mode="single"
-                  date={multiDayDateRange}
-                  startTime={multiDayStartTime!}
-                  endTime={multiDayEndTime!}
-                />
-              ) : (
-                multiDayDays.map((day, index) => (
-                  <TicketDateBadge
-                    key={index}
-                    mode="single"
-                    date={day}
-                    startTime={multiDayStartTime!}
-                    endTime={multiDayEndTime!}
-                  />
-                ))
-              )}
-            </div>
-          )}
-
-          {!isRecurring && !isMultiDay && (
-            <>
-              <TicketDateBadge
-                mode="single"
-                date={dateTypeData.date!}
-                startTime={dateTypeData.startTime!}
-                endTime={dateTypeData.endTime!}
-              />
-              <span className="pointer-events-none absolute -left-[1.25rem] top-0 bottom-0 border-l-[1px] border-dashed border-primary" />
-              <span className="pointer-events-none absolute -left-[1.25rem] top-0 h-0 w-5 border-t-[1px] border-dashed border-primary" />
-              <span className="pointer-events-none absolute -left-[1.563rem] -top-[0.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
-            </>
-          )}
-
-          {isMultiDay && (
-            <>
-              <span className="pointer-events-none absolute -left-[1.25rem] top-0 bottom-0 border-l-[1px] border-dashed border-primary" />
-              <span className="pointer-events-none absolute -left-[1.25rem] top-0 h-0 w-5 border-t-[1px] border-dashed border-primary" />
-              <span className="pointer-events-none absolute -left-[1.563rem] -top-[0.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
-            </>
-          )}
+          <TicketDateBadge
+            mode="single"
+            date={dateTypeData.date!}
+            startTime={dateTypeData.startTime!}
+            endTime={dateTypeData.endTime!}
+          />
+          <span className="pointer-events-none absolute -left-[1.25rem] top-0 bottom-0 border-l-[1px] border-dashed border-primary" />
+          <span className="pointer-events-none absolute -left-[1.25rem] top-0 h-0 w-5 border-t-[1px] border-dashed border-primary" />
+          <span className="pointer-events-none absolute -left-[1.563rem] -top-[0.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
         </div>
       )}
 
@@ -277,9 +242,7 @@ export const TicketsStep = ({
                 value={draftTicket}
                 onChange={handleDraftTicketChange}
                 errors={formErrors}
-                onSave={handleSaveTicket}
-                // onCancel={onCancel}
-                experiencePricing={experiencePricing}
+                onSave={handleSaveTicket}                experiencePricing={experiencePricing}
                 commissionPayer={formData.commission}
                 isRecurring={isRecurring}
                 isMultiDay={isMultiDay}
@@ -302,54 +265,124 @@ export const TicketsStep = ({
           </div>
         </div>
       ) : (
-        <div className="relative">
-          {formData.items.length === 0 && activeFormIndex === null ? (
-            <TicketForm
-              value={draftTicket}
-              onChange={handleDraftTicketChange}
-              errors={formErrors}
-              onSave={handleSaveTicket}
-              onCancel={onCancel}
-              experiencePricing={experiencePricing}
-              commissionPayer={formData.commission}
-              isRecurring={isRecurring}
-              isMultiDay={isMultiDay}
-            />
-          ) : (
-            <>
-              <div className="space-y-3 mb-4">
-                {formData.items.map((ticket, index) => (
-                  <SavedTicketCard
-                    key={ticket.id}
-                    name={ticket.name}
-                    quantity={ticket.quantity}
-                    amount={ticket.amount}
-                    validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
-                    coverPhoto={photos?.[0]}
-                    onEdit={() => handleEditTicket(index)}
-                    onDelete={() => handleDeleteTicket(ticket.id)}
-                  />
+        <>
+          {isMultiDay && hasTicketDateBadge ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                {multiDayDays.map((day, index) => (
+                  <div key={index} className='relative'>
+                    <div className='mb-3'>
+                      <TicketDateBadge
+                        mode="single"
+                        date={day}
+                        startTime={multiDayStartTime!}
+                        endTime={multiDayEndTime!}
+                      />
+                    </div>
+                    <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] bottom-0 border-l-[1px] border-dashed border-primary" />
+                    <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
+                    <span className="pointer-events-none absolute -left-[1.563rem] top-[1.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
+                    {formData.items.length === 0 && activeFormIndex === null ? (
+                      <TicketForm
+                        value={draftTicket}
+                        onChange={handleDraftTicketChange}
+                        errors={formErrors}
+                        onSave={handleSaveTicket}
+                        experiencePricing={experiencePricing}
+                        commissionPayer={formData.commission}
+                        isRecurring={isRecurring}
+                        isMultiDay={isMultiDay}
+                      />
+                    ) : (
+                      <>
+                        <div className="space-y-3 mb-4">
+                          {formData.items.map((ticket, index) => (
+                            <SavedTicketCard
+                              key={ticket.id}
+                              name={ticket.name}
+                              quantity={ticket.quantity}
+                              amount={ticket.amount}
+                              validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
+                              coverPhoto={photos?.[0]}
+                              onEdit={() => handleEditTicket(index)}
+                              onDelete={() => handleDeleteTicket(ticket.id)}
+                            />
+                          ))}
+                        </div>
+
+                        {activeFormIndex !== null ? (
+                          <TicketForm
+                            value={draftTicket}
+                            onChange={handleDraftTicketChange}
+                            errors={formErrors}
+                            onSave={handleSaveTicket}
+                            onCancel={handleCancelForm}
+                            experiencePricing={experiencePricing}
+                            commissionPayer={formData.commission}
+                            isRecurring={isRecurring}
+                            isMultiDay={isMultiDay}
+                          />
+                        ) : (
+                          <AddTicketTypeButton onClick={handleAddTicket} />
+                        )}
+                      </>
+                    )}
+                  </div>
+
                 ))}
               </div>
-
-              {activeFormIndex !== null ? (
+            </div>
+          ) : (
+            <div className="relative">
+              {formData.items.length === 0 && activeFormIndex === null ? (
                 <TicketForm
                   value={draftTicket}
                   onChange={handleDraftTicketChange}
                   errors={formErrors}
                   onSave={handleSaveTicket}
-                  onCancel={handleCancelForm}
+                  onCancel={onCancel}
                   experiencePricing={experiencePricing}
                   commissionPayer={formData.commission}
                   isRecurring={isRecurring}
                   isMultiDay={isMultiDay}
                 />
               ) : (
-                <AddTicketTypeButton onClick={handleAddTicket} />
+                <>
+                  <div className="space-y-3 mb-4">
+                    {formData.items.map((ticket, index) => (
+                      <SavedTicketCard
+                        key={ticket.id}
+                        name={ticket.name}
+                        quantity={ticket.quantity}
+                        amount={ticket.amount}
+                        validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
+                        coverPhoto={photos?.[0]}
+                        onEdit={() => handleEditTicket(index)}
+                        onDelete={() => handleDeleteTicket(ticket.id)}
+                      />
+                    ))}
+                  </div>
+
+                  {activeFormIndex !== null ? (
+                    <TicketForm
+                      value={draftTicket}
+                      onChange={handleDraftTicketChange}
+                      errors={formErrors}
+                      onSave={handleSaveTicket}
+                      onCancel={handleCancelForm}
+                      experiencePricing={experiencePricing}
+                      commissionPayer={formData.commission}
+                      isRecurring={isRecurring}
+                      isMultiDay={isMultiDay}
+                    />
+                  ) : (
+                    <AddTicketTypeButton onClick={handleAddTicket} />
+                  )}
+                </>
               )}
-            </>
+            </div>
           )}
-        </div>
+        </>
       )}
 
       {errors.items && <p className="text-xs text-red-500">{errors.items}</p>}

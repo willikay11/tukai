@@ -67,6 +67,11 @@ const STEPS_MULTI_DAY = [
     icon: 'AddTeamIcon',
   },
   {
+    id: 'about',
+    label: 'About',
+    icon: 'InformationCircleIcon',
+  },
+  {
     id: 'dates-tickets',
     label: 'Dates & Tickets',
     icon: 'Ticket02Icon',
@@ -234,7 +239,7 @@ const canAccessDetailsSteps = Boolean(
     const isValid = validateDateType();
     console.log("[handleSaveContinue] validateDateType returned:", isValid);
     if (isValid) {
-      const nextStep = formData?.experienceType === 'multi-day' ? 'dates-tickets' : 'about';
+      const nextStep = 'about';
       console.log("[handleSaveContinue] Validation passed, moving to", nextStep, "step");
       onStepChange?.(nextStep);
     }
@@ -323,148 +328,148 @@ const canAccessDetailsSteps = Boolean(
 
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-8">
-      <TabsContent value="community" className="col-span-1 mt-6">
-        {formData && updateFormData ? (
-          <div className="space-y-4">
-            <DateTypeStep
-              formData={formData}
-              communityOptions={communitiesForSelector}
-              onChange={updateFormData}
-              errors={dateTypeErrors}
-            />
-            <div className="flex justify-between gap-4">
-              <Button
-                type="button"
-                variant="ghost"
-                className="text-sm font-medium text-red-600 hover:text-red-900"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={handleSaveContinue}
-                variant="gradient"
-                className='rounded-[50px]'
-              >
-                Save & Continue
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <CreateExperienceCommunity
-            selectedCommunityId={selectedCommunityId}
-            onSelectCommunity={setSelectedCommunityId}
-            onContinue={() => handleStepChange('about')}
-          />
-        )}
-      </TabsContent>
+          <TabsContent value="community" className="col-span-1 mt-6">
+            {formData && updateFormData ? (
+              <div className="space-y-4">
+                <DateTypeStep
+                  formData={formData}
+                  communityOptions={communitiesForSelector}
+                  onChange={updateFormData}
+                  errors={dateTypeErrors}
+                />
+                <div className="flex justify-between gap-4">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="text-sm font-medium text-red-600 hover:text-red-900"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleSaveContinue}
+                    variant="gradient"
+                    className='rounded-[50px]'
+                  >
+                    Save & Continue
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <CreateExperienceCommunity
+                selectedCommunityId={selectedCommunityId}
+                onSelectCommunity={setSelectedCommunityId}
+                onContinue={() => handleStepChange('about')}
+              />
+            )}
+          </TabsContent>
 
-      <TabsContent value="about" className="col-span-1 mt-6">
-        {aboutFormData && updateAboutFormData ? (
-          <AboutStep
-            formData={aboutFormData}
-            errors={aboutErrors}
-            onFormDataChange={updateAboutFormData}
-            onCancel={() => handleStepChange('community')}
-            onSaveEdit={() => {
-              if (validateAbout()) {
-                // Stay on about step
-              }
-            }}
-            onSaveContinue={() => {
-              console.log("[steps.tsx] onSaveContinue called");
-              const isValid = validateAbout();
-              console.log("[steps.tsx] validateAbout returned:", isValid);
-              console.log("[steps.tsx] aboutFormData:", aboutFormData);
-              console.log("[steps.tsx] aboutErrors:", aboutErrors);
-              if (isValid) {
-                console.log("[steps.tsx] Validation passed, calling handleStepChange('dates-tickets')");
-                handleStepChange('dates-tickets');
-              } else {
-                console.log("[steps.tsx] Validation failed");
-              }
-            }}
-          />
-        ) : (
-          <CreateExperienceAbout
-            experience={experience}
-            onSuccess={(experienceId) => {
-              onExperienceCreated?.(experienceId, 'dates-tickets');
-            }}
-          />
-        )}
-      </TabsContent>
+          <TabsContent value="about" className="col-span-1 mt-6">
+            {aboutFormData && updateAboutFormData ? (
+              <AboutStep
+                formData={aboutFormData}
+                errors={aboutErrors}
+                onFormDataChange={updateAboutFormData}
+                onCancel={() => handleStepChange('community')}
+                onSaveEdit={() => {
+                  if (validateAbout()) {
+                    // Stay on about step
+                  }
+                }}
+                onSaveContinue={() => {
+                  console.log("[steps.tsx] onSaveContinue called");
+                  const isValid = validateAbout();
+                  console.log("[steps.tsx] validateAbout returned:", isValid);
+                  console.log("[steps.tsx] aboutFormData:", aboutFormData);
+                  console.log("[steps.tsx] aboutErrors:", aboutErrors);
+                  if (isValid) {
+                    console.log("[steps.tsx] Validation passed, calling handleStepChange('dates-tickets')");
+                    handleStepChange('dates-tickets');
+                  } else {
+                    console.log("[steps.tsx] Validation failed");
+                  }
+                }}
+              />
+            ) : (
+              <CreateExperienceAbout
+                experience={experience}
+                onSuccess={(experienceId) => {
+                  onExperienceCreated?.(experienceId, 'dates-tickets');
+                }}
+              />
+            )}
+          </TabsContent>
 
-      <TabsContent value="dates-tickets" className="col-span-1 mt-6">
-        {ticketsFormData && updateTicketsFormData ? (
-          <TicketsStep
-            formData={ticketsFormData}
-            dateTypeData={formData || { community: null, experiencePricing: 'paid', experienceType: 'one-time', isRecurring: false, date: null, startTime: null, endTime: null }}
-            experiencePricing={formData?.experiencePricing || 'paid'}
-            onChange={updateTicketsFormData}
-            errors={ticketsErrors}
-            onSaveContinue={() => {
-              if (validateTickets()) {
-                handleStepChange('guests');
-              }
-            }}
-            onCancel={() => formData?.experienceType === 'multi-day' ? handleStepChange('community') : handleStepChange('about')}
-            photos={aboutFormData?.photos}
-            isRecurring={formData?.isRecurring}
-            timeSlots={formData?.timeSlots}
-            recurringDays={formData?.recurringDays}
-            isMultiDay={formData?.experienceType === 'multi-day'}
-            multiDayStartDate={formData?.multiDayStartDate}
-            multiDayStartTime={formData?.multiDayStartTime}
-            multiDayEndDate={formData?.multiDayEndDate}
-            multiDayEndTime={formData?.multiDayEndTime}
-            saveContinueLabel={formData?.experienceType === 'multi-day' ? 'See Tickets' : undefined}
-          />
-        ) : (
-          <ExperienceDates
-            experienceId={experience?.id || null}
-            experience={experience}
-            onDatesUpdatedSuccess={onDatesUpdatedSuccess}
-            onItineraryCustomise={onItineraryCustomise}
-          />
-        )}
-      </TabsContent>
+          <TabsContent value="dates-tickets" className="col-span-1 mt-6">
+            {ticketsFormData && updateTicketsFormData ? (
+              <TicketsStep
+                formData={ticketsFormData}
+                dateTypeData={formData || { community: null, experiencePricing: 'paid', experienceType: 'one-time', isRecurring: false, date: null, startTime: null, endTime: null }}
+                experiencePricing={formData?.experiencePricing || 'paid'}
+                onChange={updateTicketsFormData}
+                errors={ticketsErrors}
+                onSaveContinue={() => {
+                  if (validateTickets()) {
+                    handleStepChange('guests');
+                  }
+                }}
+                onCancel={() => handleStepChange('about')}
+                photos={aboutFormData?.photos}
+                isRecurring={formData?.isRecurring}
+                timeSlots={formData?.timeSlots}
+                recurringDays={formData?.recurringDays}
+                isMultiDay={formData?.experienceType === 'multi-day'}
+                multiDayStartDate={formData?.multiDayStartDate}
+                multiDayStartTime={formData?.multiDayStartTime}
+                multiDayEndDate={formData?.multiDayEndDate}
+                multiDayEndTime={formData?.multiDayEndTime}
+                saveContinueLabel={formData?.experienceType === 'multi-day' ? 'See Tickets' : undefined}
+              />
+            ) : (
+              <ExperienceDates
+                experienceId={experience?.id || null}
+                experience={experience}
+                onDatesUpdatedSuccess={onDatesUpdatedSuccess}
+                onItineraryCustomise={onItineraryCustomise}
+              />
+            )}
+          </TabsContent>
 
-      <TabsContent value="guests" className="col-span-1 mt-6">
-        {inviteFormData && updateInviteFormData ? (
-          <InviteGuestsStep
-            formData={inviteFormData}
-            onChange={updateInviteFormData}
-            experienceId={experience?.id || null}
-            experience={experience}
-            onNext={() => handleStepChange('wallet')}
-            onCancel={() => handleStepChange('dates-tickets')}
-          />
-        ) : (
-          <CreateExperienceInvites
-            experienceId={experience?.id || null}
-            experience={experience}
-            onInvitesChange={onInvitesChange}
-            onNext={() => handleStepChange('wallet')}
-          />
-        )}
-      </TabsContent>
+          <TabsContent value="guests" className="col-span-1 mt-6">
+            {inviteFormData && updateInviteFormData ? (
+              <InviteGuestsStep
+                formData={inviteFormData}
+                onChange={updateInviteFormData}
+                experienceId={experience?.id || null}
+                experience={experience}
+                onNext={() => handleStepChange('wallet')}
+                onCancel={() => handleStepChange('dates-tickets')}
+              />
+            ) : (
+              <CreateExperienceInvites
+                experienceId={experience?.id || null}
+                experience={experience}
+                onInvitesChange={onInvitesChange}
+                onNext={() => handleStepChange('wallet')}
+              />
+            )}
+          </TabsContent>
 
-      <TabsContent value="wallet" className="col-span-1 mt-6">
-        {walletFormData && updateWalletFormData ? (
-          <WalletDetailsStep
-            formData={walletFormData}
-            onChange={updateWalletFormData}
-            errors={walletErrors}
-            wallets={wallets}
-            isWalletsLoading={isWalletsLoading}
-            walletMutations={walletMutations || {}}
-            onPreviewAndPublish={onPreviewAndPublish || (() => {})}
-          />
-        ) : (
-          <CreateExperienceWallet />
-        )}
-      </TabsContent>
+          <TabsContent value="wallet" className="col-span-1 mt-6">
+            {walletFormData && updateWalletFormData ? (
+              <WalletDetailsStep
+                formData={walletFormData}
+                onChange={updateWalletFormData}
+                errors={walletErrors}
+                wallets={wallets}
+                isWalletsLoading={isWalletsLoading}
+                walletMutations={walletMutations || {}}
+                onPreviewAndPublish={onPreviewAndPublish || (() => {})}
+              />
+            ) : (
+              <CreateExperienceWallet />
+            )}
+          </TabsContent>
         </div>
       </div>
     </Tabs>
