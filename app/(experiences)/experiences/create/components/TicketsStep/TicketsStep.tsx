@@ -243,7 +243,7 @@ export const TicketsStep = ({
               />
               <span className="pointer-events-none absolute -left-[1.25rem] top-0 bottom-0 border-l-[1px] border-dashed border-primary" />
               <span className="pointer-events-none absolute -left-[1.25rem] top-0 h-0 w-5 border-t-[1px] border-dashed border-primary" />
-              <span className="pointer-events-none absolute -left-[1.563rem] -top-[0.3125rem] h-2.5 w-2.5 rounded-full bg-emerald-900" />
+              <span className="pointer-events-none absolute -left-[1.563rem] -top-[0.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
             </>
           )}
 
@@ -251,32 +251,34 @@ export const TicketsStep = ({
             <>
               <span className="pointer-events-none absolute -left-[1.25rem] top-0 bottom-0 border-l-[1px] border-dashed border-primary" />
               <span className="pointer-events-none absolute -left-[1.25rem] top-0 h-0 w-5 border-t-[1px] border-dashed border-primary" />
-              <span className="pointer-events-none absolute -left-[1.563rem] -top-[0.3125rem] h-2.5 w-2.5 rounded-full bg-emerald-900" />
+              <span className="pointer-events-none absolute -left-[1.563rem] -top-[0.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
             </>
           )}
         </div>
       )}
 
       {isRecurring && !isMultiDay && hasTicketDateBadge ? (
-        <div className="space-y-6">
+        <div className="space-y-0">
           {timeSlots.map((slot, slotIndex) => (
             <div key={slotIndex} className="relative">
-              <TicketDateBadge
-                mode="recurring"
-                days={recurringDays}
-                startTime={slot.startTime!}
-                endTime={slot.endTime!}
-              />
-              <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] bottom-0 border-l-[1px] border-dashed border-primary" />
+              <div className='mb-3'>
+                <TicketDateBadge
+                  mode="recurring"
+                  days={recurringDays}
+                  startTime={slot.startTime!}
+                  endTime={slot.endTime!}
+                />
+              </div>
+              <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] -bottom-6 border-l-[1px] border-dashed border-primary" />
               <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
-              <span className="pointer-events-none absolute -left-[1.563rem] top-[1.3125rem] h-2.5 w-2.5 rounded-full bg-primary-900" />
+              <span className="pointer-events-none absolute -left-[1.563rem] top-[1.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
 
               <TicketForm
                 value={draftTicket}
                 onChange={handleDraftTicketChange}
                 errors={formErrors}
                 onSave={handleSaveTicket}
-                onCancel={onCancel}
+                // onCancel={onCancel}
                 experiencePricing={experiencePricing}
                 commissionPayer={formData.commission}
                 isRecurring={isRecurring}
@@ -286,9 +288,9 @@ export const TicketsStep = ({
           ))}
 
           <div className="flex justify-between gap-4 pt-6">
-            {/* <Button type="button" variant="ghost" onClick={onCancel} className="text-red-600">
+            <Button type="button" variant="ghost" onClick={onCancel} className="text-red-600">
               Cancel
-            </Button> */}
+            </Button>
             <Button
               type="button"
               onClick={onSaveContinue}

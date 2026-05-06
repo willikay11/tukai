@@ -178,7 +178,7 @@ export const TicketForm = ({
         </>
       )}
 
-      <div className="flex items-center gap-2 pt-1">
+      {/* <div className="flex items-center gap-2 pt-1">
         <Checkbox
           id="accept-partial"
           checked={value.acceptPartialPayment}
@@ -191,9 +191,9 @@ export const TicketForm = ({
           Accept partial payments on this ticket
           <IconComponent iconName="InfoCircleIcon" size={16} className="text-blue-500" />
         </label>
-      </div>
+      </div> */}
 
-      <div className="flex gap-3 border-t border-gray-200 pt-6">
+      <div className="flex gap-3 pt-3">
         {onCancel && (
           <button
             type="button"
