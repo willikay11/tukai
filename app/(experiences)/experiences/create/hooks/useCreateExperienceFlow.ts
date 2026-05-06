@@ -66,6 +66,7 @@ export interface FormData {
   };
   tickets: {
     commission: 'host' | 'customer' | 'split';
+    ticketMode: 'entire-period' | 'each-day' | null;
     items: Array<{
       id: string;
       name: string;
@@ -124,6 +125,7 @@ const initialFormData: FormData = {
   },
   tickets: {
     commission: 'host',
+    ticketMode: null,
     items: [],
   },
   invite: {
@@ -406,6 +408,12 @@ export const useCreateExperienceFlow = () => {
       return false;
     }
 
+    if (formData.dateType.experienceType === 'multi-day' && !formData.tickets.ticketMode) {
+      errors.ticketMode = 'Please select how you want to create tickets';
+      setTicketsErrors(errors);
+      return false;
+    }
+
     formData.tickets.items.forEach((ticket, index) => {
       if (!ticket.name.trim()) {
         errors[`tickets.${index}.name`] = 'Ticket name is required';
@@ -428,6 +436,16 @@ export const useCreateExperienceFlow = () => {
         if (!ticket.salesEndRelative) {
           errors[`tickets.${index}.salesEndRelative`] = 'Sales end validity is required';
         }
+      } else if (formData.dateType.experienceType === 'multi-day') {
+        if (!ticket.salesStartDate) {
+          errors[`tickets.${index}.salesStartDate`] = 'Start date is required';
+        }
+        if (!ticket.salesEndDate) {
+          errors[`tickets.${index}.salesEndDate`] = 'End date is required';
+        }
+        if (ticket.salesStartDate && ticket.salesEndDate && ticket.salesStartDate > ticket.salesEndDate) {
+          errors[`tickets.${index}.salesEndDate`] = 'End date must be after start date';
+        }
       } else {
         if (!ticket.salesStartDate) {
           errors[`tickets.${index}.salesStartDate`] = 'Start date is required';
@@ -443,7 +461,7 @@ export const useCreateExperienceFlow = () => {
 
     setTicketsErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [formData.dateType.isRecurring, formData.dateType.experiencePricing, formData.tickets.items]);
+  }, [formData.dateType.isRecurring, formData.dateType.experiencePricing, formData.dateType.experienceType, formData.tickets.items, formData.tickets.ticketMode]);
 
   const validateWallet = useCallback((): boolean => {
     const errors: Record<string, string> = {};

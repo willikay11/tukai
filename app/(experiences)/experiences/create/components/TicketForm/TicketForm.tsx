@@ -32,6 +32,7 @@ interface TicketFormProps {
   experiencePricing?: 'paid' | 'free';
   commissionPayer?: 'host' | 'customer' | 'split';
   isRecurring?: boolean;
+  isMultiDay?: boolean;
 }
 
 export const TicketForm = ({
@@ -43,6 +44,7 @@ export const TicketForm = ({
   experiencePricing = 'paid',
   commissionPayer = 'host',
   isRecurring = false,
+  isMultiDay = false,
 }: TicketFormProps) => {
   const getCommissionPercentage = () => {
     if (experiencePricing === 'free') return 0;
@@ -110,7 +112,7 @@ export const TicketForm = ({
         </div>
       )}
 
-      {!isRecurring ? (
+      {isMultiDay || !isRecurring ? (
         <div className="space-y-2">
           <label className="text-xs font-medium text-gray-800">
             Ticket Sales Validity{' '}
@@ -149,6 +151,13 @@ export const TicketForm = ({
             />
           </div>
           {errors.salesEndDate && <p className="text-xs text-red-500">{errors.salesEndDate}</p>}
+
+          {isMultiDay && (
+            <DuplicateTicketsCheckbox
+              value={value.duplicateForEntirePeriod ?? false}
+              onChange={(val) => onChange({ duplicateForEntirePeriod: val })}
+            />
+          )}
         </div>
       ) : (
         <>

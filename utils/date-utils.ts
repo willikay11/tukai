@@ -38,3 +38,44 @@ export const getOrdinalDate = (dateString: string): string => {
     return '';
   }
 };
+
+export const getDaysBetween = (
+  startDate: string,
+  endDate: string,
+): string[] => {
+  try {
+    const days: string[] = [];
+    const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
+    const [endYear, endMonth, endDay] = endDate.split('-').map(Number);
+
+    const current = new Date(startYear, startMonth - 1, startDay);
+    const end = new Date(endYear, endMonth - 1, endDay);
+
+    while (current <= end) {
+      const year = current.getFullYear();
+      const month = String(current.getMonth() + 1).padStart(2, '0');
+      const day = String(current.getDate()).padStart(2, '0');
+      days.push(`${year}-${month}-${day}`);
+      current.setDate(current.getDate() + 1);
+    }
+
+    return days;
+  } catch {
+    return [];
+  }
+};
+
+export const formatMultiDayRange = (
+  startDate: string | null,
+  endDate: string | null,
+): string => {
+  if (!startDate || !endDate) return '';
+
+  try {
+    const start = getOrdinalDate(startDate);
+    const end = getOrdinalDate(endDate);
+    return `${start} – ${end}`;
+  } catch {
+    return '';
+  }
+};

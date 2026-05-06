@@ -406,11 +406,17 @@ const canAccessDetailsSteps = Boolean(
                 handleStepChange('guests');
               }
             }}
-            onCancel={() => handleStepChange('about')}
+            onCancel={() => formData?.experienceType === 'multi-day' ? handleStepChange('community') : handleStepChange('about')}
             photos={aboutFormData?.photos}
             isRecurring={formData?.isRecurring}
             timeSlots={formData?.timeSlots}
             recurringDays={formData?.recurringDays}
+            isMultiDay={formData?.experienceType === 'multi-day'}
+            multiDayStartDate={formData?.multiDayStartDate}
+            multiDayStartTime={formData?.multiDayStartTime}
+            multiDayEndDate={formData?.multiDayEndDate}
+            multiDayEndTime={formData?.multiDayEndTime}
+            saveContinueLabel={formData?.experienceType === 'multi-day' ? 'See Tickets' : undefined}
           />
         ) : (
           <ExperienceDates

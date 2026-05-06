@@ -10,7 +10,9 @@ import { CommissionPicker } from '../CommissionPicker/CommissionPicker';
 import { SavedTicketCard } from '../TicketCard/TicketCard';
 import { TicketDateBadge } from '../TicketDateBadge/TicketDateBadge';
 import { TicketForm, TicketFormValue } from '../TicketForm/TicketForm';
+import { MultiDayTicketModePicker } from '../MultiDayTicketModePicker/MultiDayTicketModePicker';
 import { FormData } from '../../hooks/useCreateExperienceFlow';
+import { getDaysBetween, formatMultiDayRange } from '@/utils/date-utils';
 
 interface TicketsStepProps {
   formData: FormData['tickets'];
@@ -24,6 +26,12 @@ interface TicketsStepProps {
   isRecurring?: boolean;
   timeSlots?: { startTime: string | null; endTime: string | null }[];
   recurringDays?: ('mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun')[];
+  isMultiDay?: boolean;
+  multiDayStartDate?: string | null;
+  multiDayStartTime?: string | null;
+  multiDayEndDate?: string | null;
+  multiDayEndTime?: string | null;
+  saveContinueLabel?: string;
 }
 
 const emptyTicketForm: TicketFormValue = {
@@ -79,10 +87,17 @@ export const TicketsStep = ({
   isRecurring = false,
   timeSlots = [],
   recurringDays = [],
+  isMultiDay = false,
+  multiDayStartDate = null,
+  multiDayStartTime = null,
+  multiDayEndDate = null,
+  multiDayEndTime = null,
+  saveContinueLabel = 'Save & Continue',
 }: TicketsStepProps) => {
   const [activeFormIndex, setActiveFormIndex] = useState<number | null>(null);
   const [draftTicket, setDraftTicket] = useState<TicketFormValue>(emptyTicketForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [ticketMode, setTicketMode] = useState<'entire-period' | 'each-day'>('entire-period');
 
   const handleDraftTicketChange = useCallback((data: Partial<TicketFormValue>) => {
     setDraftTicket((prev) => ({ ...prev, ...data }));
@@ -130,6 +145,9 @@ export const TicketsStep = ({
         salesEndDate: draftTicket.salesEndDate!,
         salesEndTime: draftTicket.salesEndTime!,
         acceptPartialPayment: draftTicket.acceptPartialPayment,
+        salesStartRelative: draftTicket.salesStartRelative || null,
+        salesEndRelative: draftTicket.salesEndRelative || null,
+        duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
       };
     } else {
       items.push({
@@ -142,6 +160,9 @@ export const TicketsStep = ({
         salesEndDate: draftTicket.salesEndDate!,
         salesEndTime: draftTicket.salesEndTime!,
         acceptPartialPayment: draftTicket.acceptPartialPayment,
+        salesStartRelative: draftTicket.salesStartRelative || null,
+        salesEndRelative: draftTicket.salesEndRelative || null,
+        duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
       });
     }
 
@@ -164,10 +185,15 @@ export const TicketsStep = ({
     [formData.items, onChange],
   );
 
-  const hasTicketDateBadge = isRecurring
-    ? Boolean(recurringDays.length > 0) && timeSlots.some((slot) => slot.startTime && slot.endTime)
-    : Boolean(dateTypeData.date) && Boolean(dateTypeData.startTime) && Boolean(dateTypeData.endTime);
+  const hasTicketDateBadge = isMultiDay
+    ? Boolean(multiDayStartDate) && Boolean(multiDayStartTime) && Boolean(multiDayEndDate) && Boolean(multiDayEndTime)
+    : isRecurring
+      ? Boolean(recurringDays.length > 0) && timeSlots.some((slot) => slot.startTime && slot.endTime)
+      : Boolean(dateTypeData.date) && Boolean(dateTypeData.startTime) && Boolean(dateTypeData.endTime);
   const showTicketConnector = hasTicketDateBadge && formData.items.length > 0 && activeFormIndex === null;
+
+  const multiDayDateRange = formatMultiDayRange(multiDayStartDate || null, multiDayEndDate || null);
+  const multiDayDays = getDaysBetween(multiDayStartDate || '', multiDayEndDate || '');
 
   return (
     <div className="space-y-6">
@@ -175,7 +201,37 @@ export const TicketsStep = ({
 
       <CommissionPicker value={formData.commission} onChange={(commission) => onChange({ commission })} />
 
-      {hasTicketDateBadge && !isRecurring && (
+      {isMultiDay && (
+        <MultiDayTicketModePicker
+          value={ticketMode}
+          onChange={setTicketMode}
+        />
+      )}
+
+      {hasTicketDateBadge && isMultiDay && (
+        <div className="space-y-2">
+          {ticketMode === 'entire-period' ? (
+            <TicketDateBadge
+              mode="single"
+              date={multiDayDateRange}
+              startTime={multiDayStartTime!}
+              endTime={multiDayEndTime!}
+            />
+          ) : (
+            multiDayDays.map((day, index) => (
+              <TicketDateBadge
+                key={index}
+                mode="single"
+                date={day}
+                startTime={multiDayStartTime!}
+                endTime={multiDayEndTime!}
+              />
+            ))
+          )}
+        </div>
+      )}
+
+      {hasTicketDateBadge && !isRecurring && !isMultiDay && (
         <TicketDateBadge
           mode="single"
           date={dateTypeData.date!}
@@ -184,7 +240,7 @@ export const TicketsStep = ({
         />
       )}
 
-      {hasTicketDateBadge && isRecurring && (
+      {hasTicketDateBadge && isRecurring && !isMultiDay && (
         <div className="space-y-2">
           {timeSlots.map((slot, index) => (
             <TicketDateBadge
@@ -213,6 +269,7 @@ export const TicketsStep = ({
             experiencePricing={experiencePricing}
             commissionPayer={formData.commission}
             isRecurring={isRecurring}
+            isMultiDay={isMultiDay}
           />
         ) : (
           <>
@@ -241,6 +298,7 @@ export const TicketsStep = ({
                 experiencePricing={experiencePricing}
                 commissionPayer={formData.commission}
                 isRecurring={isRecurring}
+                isMultiDay={isMultiDay}
               />
             ) : (
               <AddTicketTypeButton onClick={handleAddTicket} />
@@ -262,7 +320,7 @@ export const TicketsStep = ({
           variant="gradient"
           className="rounded-[50px]"
         >
-          Save & Continue
+          {saveContinueLabel}
         </Button>
       </div>
     )}
