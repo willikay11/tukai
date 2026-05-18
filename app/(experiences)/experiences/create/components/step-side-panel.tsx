@@ -9,22 +9,9 @@ import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { type RelativeValidityValue } from './RelativeValidityPicker/RelativeValidityPicker';
 
-import { CreateTickets } from './createTickets';
 import { CustomiseItinerary } from './customiseItinerary';
-import { ExperienceReview } from './experienceReview';
-import { PreviewDateSection } from './PreviewDateSection';
-import { PreviewCommunitySection } from './PreviewCommunitySection';
-import { PreviewExperienceHeader } from './PreviewExperienceHeader';
-import { PreviewIncludedSection } from './PreviewIncludedSection';
-import { PreviewExcludedSection } from './PreviewExcludedSection';
-import { PreviewCategoriesSection } from './PreviewCategoriesSection';
-import { PreviewItineraryTypeSection } from './PreviewItineraryTypeSection';
-import { PreviewLocationSection } from './PreviewLocationSection';
-import { PreviewMeetingSection } from './PreviewMeetingSection';
-import { PreviewTicketsSection } from './PreviewTicketsSection/PreviewTicketsSection';
+import { SharedExperiencePreview } from './SharedExperiencePreview';
 import { Interest } from '@/types/interest';
-import { PreviewGuestsSection } from './PreviewGuestsSection';
-import { PreviewCommunitiesSection } from './PreviewCommunitiesSection';
 import { CommunityOption } from '../hooks/useCreateExperienceFlow';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
@@ -33,14 +20,14 @@ export type ExperienceType = 'one-time' | 'multi-day' | 'itinerary';
 
 export const ExperienceStepSidePanel = ({
   step,
-  experienceId,
-  experience,
+  _experienceId,
+  _experience,
   canShowDateTickets,
   isRecurring = false,
   experienceType = 'one-time',
   itineraryConfig,
-  invitedMembers,
-  invitedCommunities,
+  _invitedMembers,
+  _invitedCommunities,
   selectedCommunity,
   selectedDate,
   selectedStartTime,
@@ -72,14 +59,14 @@ export const ExperienceStepSidePanel = ({
   allCommunities,
 }: {
   step: ExperienceStepId;
-  experienceId?: string | null;
-  experience?: Experience;
+  _experienceId?: string | null;
+  _experience?: Experience;
   canShowDateTickets?: boolean;
   isRecurring?: boolean;
   experienceType?: ExperienceType;
   itineraryConfig?: { startDate: string; endDate: string } | null;
-  invitedMembers?: InvitedMember[];
-  invitedCommunities?: Community[];
+  _invitedMembers?: InvitedMember[];
+  _invitedCommunities?: Community[];
   selectedCommunity?: { name: string; imageUrl: string } | null;
   selectedDate?: string | null;
   selectedStartTime?: string | null;
@@ -131,136 +118,78 @@ export const ExperienceStepSidePanel = ({
       />
     ),
     about: (
-      <div className="space-y-6">
-        <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2>
-        <PreviewExperienceHeader
-          photo={aboutPhoto || null}
-          photos={aboutPhotos}
-          title={aboutTitle || ''}
-          description={aboutDescription || ''}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewIncludedSection
-          items={aboutWhatsIncluded ? [aboutWhatsIncluded] : []}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewExcludedSection
-          items={aboutWhatsNotIncluded ? [aboutWhatsNotIncluded] : []}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewCategoriesSection
-          categories={aboutCategories || []}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewItineraryTypeSection
-          visibility={aboutVisibility || 'public'}
-          onEdit={() => onEditStep?.('about')}
-        />
-        {experienceType === 'multi-day' ? (
-          <PreviewDateSection
-            mode="multi-day"
-            startDate={multiDayStartDate || null}
-            startTime={multiDayStartTime || null}
-            endDate={multiDayEndDate || null}
-            endTime={multiDayEndTime || null}
-            onEdit={() => onEditStep?.('dates-tickets')}
-          />
-        ) : isRecurring ? (
-          <PreviewDateSection
-            mode="recurring"
-            days={selectedRecurringDays || []}
-            timeSlots={selectedTimeSlots || []}
-            recurrenceStartDate={selectedRecurrenceStartDate || null}
-            recurrenceEndDate={selectedRecurrenceEndDate || null}
-            onEdit={() => onEditStep?.('dates-tickets')}
-          />
-        ) : (
-          <PreviewDateSection
-            mode="single"
-            date={selectedDate || null}
-            startTime={selectedStartTime || null}
-            endTime={selectedEndTime || null}
-            onEdit={() => onEditStep?.('dates-tickets')}
-          />
-        )}
-        <PreviewLocationSection
-          location={aboutLocation || null}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewMeetingSection
-          meetingPoint={aboutMeetingPoint || null}
-          meetingTime={aboutMeetingTime || null}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewCommunitySection
-          communityName={selectedCommunity?.name || null}
-          communityImageUrl={selectedCommunity?.imageUrl || null}
-          onEdit={() => onEditStep?.('community')}
-        />
-      </div>
+      <SharedExperiencePreview
+        step="about"
+        experienceType={experienceType}
+        isRecurring={isRecurring}
+        aboutPhoto={aboutPhoto}
+        aboutPhotos={aboutPhotos}
+        aboutTitle={aboutTitle}
+        aboutDescription={aboutDescription}
+        aboutVisibility={aboutVisibility}
+        aboutWhatsIncluded={aboutWhatsIncluded}
+        aboutWhatsNotIncluded={aboutWhatsNotIncluded}
+        aboutLocation={aboutLocation}
+        aboutMeetingPoint={aboutMeetingPoint}
+        aboutMeetingTime={aboutMeetingTime}
+        aboutCategories={aboutCategories}
+        selectedDate={selectedDate}
+        selectedStartTime={selectedStartTime}
+        selectedEndTime={selectedEndTime}
+        selectedRecurringDays={selectedRecurringDays}
+        selectedTimeSlots={selectedTimeSlots}
+        selectedRecurrenceStartDate={selectedRecurrenceStartDate}
+        selectedRecurrenceEndDate={selectedRecurrenceEndDate}
+        multiDayStartDate={multiDayStartDate}
+        multiDayStartTime={multiDayStartTime}
+        multiDayEndDate={multiDayEndDate}
+        multiDayEndTime={multiDayEndTime}
+        selectedCommunity={selectedCommunity}
+        ticketsItems={ticketsItems}
+        ticketsCommissionPayer={ticketsCommissionPayer}
+        invitedGuests={invitedGuests}
+        invitedCommunityIds={invitedCommunityIds}
+        allCommunities={allCommunities}
+        onEditStep={onEditStep}
+      />
     ),
     'dates-tickets': itineraryConfig ? (
       <CustomiseItinerary startDate={itineraryConfig.startDate} endDate={itineraryConfig.endDate} />
     ) : canShowDateTickets ? (
-      <div className="space-y-6">
-        <h2 className="text-sm font-semibold text-gray-900">{isRecurring ? 'Create Tickets' : 'Preview Experience'}</h2>
-        <PreviewExperienceHeader
-          photo={aboutPhoto || null}
-          photos={aboutPhotos}
-          title={aboutTitle || ''}
-          description={aboutDescription || ''}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewIncludedSection
-          items={aboutWhatsIncluded ? [aboutWhatsIncluded] : []}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewExcludedSection
-          items={aboutWhatsNotIncluded ? [aboutWhatsNotIncluded] : []}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewCategoriesSection
-          categories={aboutCategories || []}
-          onEdit={() => onEditStep?.('about')}
-        />
-        {experienceType === 'multi-day' ? (
-          <PreviewDateSection
-            mode="multi-day"
-            startDate={multiDayStartDate || null}
-            startTime={multiDayStartTime || null}
-            endDate={multiDayEndDate || null}
-            endTime={multiDayEndTime || null}
-            onEdit={() => onEditStep?.('dates-tickets')}
-          />
-        ) : (
-          <PreviewDateSection
-            mode="single"
-            date={selectedDate || null}
-            startTime={selectedStartTime || null}
-            endTime={selectedEndTime || null}
-            onEdit={() => onEditStep?.('dates-tickets')}
-          />
-        )}
-        <PreviewItineraryTypeSection
-          visibility={aboutVisibility || 'public'}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewLocationSection
-          location={aboutLocation || null}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewMeetingSection
-          meetingPoint={aboutMeetingPoint || null}
-          meetingTime={aboutMeetingTime || null}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewTicketsSection
-          tickets={ticketsItems}
-          coverPhoto={aboutPhoto || undefined}
-          commissionPayer={ticketsCommissionPayer}
-          onEdit={() => onEditStep?.('dates-tickets')}
-        />
-      </div>
+      <SharedExperiencePreview
+        step="dates-tickets"
+        experienceType={experienceType}
+        isRecurring={isRecurring}
+        aboutPhoto={aboutPhoto}
+        aboutPhotos={aboutPhotos}
+        aboutTitle={aboutTitle}
+        aboutDescription={aboutDescription}
+        aboutVisibility={aboutVisibility}
+        aboutWhatsIncluded={aboutWhatsIncluded}
+        aboutWhatsNotIncluded={aboutWhatsNotIncluded}
+        aboutLocation={aboutLocation}
+        aboutMeetingPoint={aboutMeetingPoint}
+        aboutMeetingTime={aboutMeetingTime}
+        aboutCategories={aboutCategories}
+        selectedDate={selectedDate}
+        selectedStartTime={selectedStartTime}
+        selectedEndTime={selectedEndTime}
+        selectedRecurringDays={selectedRecurringDays}
+        selectedTimeSlots={selectedTimeSlots}
+        selectedRecurrenceStartDate={selectedRecurrenceStartDate}
+        selectedRecurrenceEndDate={selectedRecurrenceEndDate}
+        multiDayStartDate={multiDayStartDate}
+        multiDayStartTime={multiDayStartTime}
+        multiDayEndDate={multiDayEndDate}
+        multiDayEndTime={multiDayEndTime}
+        selectedCommunity={selectedCommunity}
+        ticketsItems={ticketsItems}
+        ticketsCommissionPayer={ticketsCommissionPayer}
+        invitedGuests={invitedGuests}
+        invitedCommunityIds={invitedCommunityIds}
+        allCommunities={allCommunities}
+        onEditStep={onEditStep}
+      />
     ) : (
       <StepPlaceholderContent
         title="Create Tickets"
@@ -268,132 +197,76 @@ export const ExperienceStepSidePanel = ({
       />
     ),
     guests: (
-      <div className="space-y-6">
-        <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2>
-        <PreviewExperienceHeader
-          photo={aboutPhoto || null}
-          photos={aboutPhotos}
-          title={aboutTitle || ''}
-          description={aboutDescription || ''}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewIncludedSection
-          items={aboutWhatsIncluded ? [aboutWhatsIncluded] : []}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewExcludedSection
-          items={aboutWhatsNotIncluded ? [aboutWhatsNotIncluded] : []}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewCategoriesSection
-          categories={aboutCategories || []}
-          onEdit={() => onEditStep?.('about')}
-        />
-        {experienceType === 'multi-day' ? (
-          <PreviewDateSection
-            mode="multi-day"
-            startDate={multiDayStartDate || null}
-            startTime={multiDayStartTime || null}
-            endDate={multiDayEndDate || null}
-            endTime={multiDayEndTime || null}
-            onEdit={() => onEditStep?.('dates-tickets')}
-          />
-        ) : (
-          <PreviewDateSection
-            mode="single"
-            date={selectedDate || null}
-            startTime={selectedStartTime || null}
-            endTime={selectedEndTime || null}
-            onEdit={() => onEditStep?.('dates-tickets')}
-          />
-        )}
-        <PreviewItineraryTypeSection
-          visibility={aboutVisibility || 'public'}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewLocationSection
-          location={aboutLocation || null}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewMeetingSection
-          meetingPoint={aboutMeetingPoint || null}
-          meetingTime={aboutMeetingTime || null}
-          onEdit={() => onEditStep?.('about')}
-        />
-        {ticketsItems && ticketsItems.length > 0 && (
-          <div className="border-t border-gray-200 pt-6">
-            <PreviewTicketsSection
-              tickets={ticketsItems}
-              coverPhoto={aboutPhoto || undefined}
-              commissionPayer={ticketsCommissionPayer}
-              onEdit={() => onEditStep?.('dates-tickets')}
-            />
-          </div>
-        )}
-      </div>
+      <SharedExperiencePreview
+        step="guests"
+        experienceType={experienceType}
+        isRecurring={isRecurring}
+        aboutPhoto={aboutPhoto}
+        aboutPhotos={aboutPhotos}
+        aboutTitle={aboutTitle}
+        aboutDescription={aboutDescription}
+        aboutVisibility={aboutVisibility}
+        aboutWhatsIncluded={aboutWhatsIncluded}
+        aboutWhatsNotIncluded={aboutWhatsNotIncluded}
+        aboutLocation={aboutLocation}
+        aboutMeetingPoint={aboutMeetingPoint}
+        aboutMeetingTime={aboutMeetingTime}
+        aboutCategories={aboutCategories}
+        selectedDate={selectedDate}
+        selectedStartTime={selectedStartTime}
+        selectedEndTime={selectedEndTime}
+        selectedRecurringDays={selectedRecurringDays}
+        selectedTimeSlots={selectedTimeSlots}
+        selectedRecurrenceStartDate={selectedRecurrenceStartDate}
+        selectedRecurrenceEndDate={selectedRecurrenceEndDate}
+        multiDayStartDate={multiDayStartDate}
+        multiDayStartTime={multiDayStartTime}
+        multiDayEndDate={multiDayEndDate}
+        multiDayEndTime={multiDayEndTime}
+        selectedCommunity={selectedCommunity}
+        ticketsItems={ticketsItems}
+        ticketsCommissionPayer={ticketsCommissionPayer}
+        invitedGuests={invitedGuests}
+        invitedCommunityIds={invitedCommunityIds}
+        allCommunities={allCommunities}
+        onEditStep={onEditStep}
+      />
     ),
     wallet: (
-      <div className="space-y-6">
-        <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2>
-        <PreviewExperienceHeader
-          photo={aboutPhoto || null}
-          photos={aboutPhotos}
-          title={aboutTitle || ''}
-          description={aboutDescription || ''}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewIncludedSection
-          items={aboutWhatsIncluded ? [aboutWhatsIncluded] : []}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewExcludedSection
-          items={aboutWhatsNotIncluded ? [aboutWhatsNotIncluded] : []}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewCategoriesSection
-          categories={aboutCategories || []}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewDateSection
-          mode="single"
-          date={selectedDate || null}
-          startTime={selectedStartTime || null}
-          endTime={selectedEndTime || null}
-          onEdit={() => onEditStep?.('dates-tickets')}
-        />
-        <PreviewItineraryTypeSection
-          visibility={aboutVisibility || 'public'}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewLocationSection
-          location={aboutLocation || null}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewMeetingSection
-          meetingPoint={aboutMeetingPoint || null}
-          meetingTime={aboutMeetingTime || null}
-          onEdit={() => onEditStep?.('about')}
-        />
-        <PreviewGuestsSection
-          guests={invitedGuests || []}
-          onEdit={() => onEditStep?.('guests')}
-        />
-        <PreviewCommunitiesSection
-          communityIds={invitedCommunityIds || []}
-          allCommunities={allCommunities || []}
-          onEdit={() => onEditStep?.('guests')}
-        />
-        {ticketsItems && ticketsItems.length > 0 && (
-          <div className="border-t border-gray-200 pt-6">
-            <PreviewTicketsSection
-              tickets={ticketsItems}
-              coverPhoto={aboutPhoto || undefined}
-              commissionPayer={ticketsCommissionPayer}
-              onEdit={() => onEditStep?.('dates-tickets')}
-            />
-          </div>
-        )}
-      </div>
+      <SharedExperiencePreview
+        step="wallet"
+        experienceType={experienceType}
+        isRecurring={isRecurring}
+        aboutPhoto={aboutPhoto}
+        aboutPhotos={aboutPhotos}
+        aboutTitle={aboutTitle}
+        aboutDescription={aboutDescription}
+        aboutVisibility={aboutVisibility}
+        aboutWhatsIncluded={aboutWhatsIncluded}
+        aboutWhatsNotIncluded={aboutWhatsNotIncluded}
+        aboutLocation={aboutLocation}
+        aboutMeetingPoint={aboutMeetingPoint}
+        aboutMeetingTime={aboutMeetingTime}
+        aboutCategories={aboutCategories}
+        selectedDate={selectedDate}
+        selectedStartTime={selectedStartTime}
+        selectedEndTime={selectedEndTime}
+        selectedRecurringDays={selectedRecurringDays}
+        selectedTimeSlots={selectedTimeSlots}
+        selectedRecurrenceStartDate={selectedRecurrenceStartDate}
+        selectedRecurrenceEndDate={selectedRecurrenceEndDate}
+        multiDayStartDate={multiDayStartDate}
+        multiDayStartTime={multiDayStartTime}
+        multiDayEndDate={multiDayEndDate}
+        multiDayEndTime={multiDayEndTime}
+        selectedCommunity={selectedCommunity}
+        ticketsItems={ticketsItems}
+        ticketsCommissionPayer={ticketsCommissionPayer}
+        invitedGuests={invitedGuests}
+        invitedCommunityIds={invitedCommunityIds}
+        allCommunities={allCommunities}
+        onEditStep={onEditStep}
+      />
     ),
   };
   const content = stepPanelContent[step];

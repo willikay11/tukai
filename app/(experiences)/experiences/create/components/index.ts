@@ -35,3 +35,6 @@ export { ExperienceReview } from './experienceReview';
 export { PhotoEditPanel } from './PhotoEditPanel';
 export { InlineEditPanel } from './InlineEditPanel';
 export { PreviewWalletSection } from './PreviewWalletSection';
+
+// Shared components
+export { SharedExperiencePreview } from './SharedExperiencePreview';
