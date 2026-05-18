@@ -2,7 +2,6 @@
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { TimePicker } from '@/components/ui/time-picker';
@@ -33,6 +32,7 @@ interface TicketFormProps {
   commissionPayer?: 'host' | 'customer' | 'split';
   isRecurring?: boolean;
   isMultiDay?: boolean;
+  ticketMode?: 'entire-period' | 'each-day';
 }
 
 export const TicketForm = ({
@@ -45,6 +45,7 @@ export const TicketForm = ({
   commissionPayer = 'host',
   isRecurring = false,
   isMultiDay = false,
+  ticketMode = 'each-day',
 }: TicketFormProps) => {
   const getCommissionPercentage = () => {
     if (experiencePricing === 'free') return 0;
@@ -152,7 +153,7 @@ export const TicketForm = ({
           </div>
           {errors.salesEndDate && <p className="text-xs text-red-500">{errors.salesEndDate}</p>}
 
-          {isMultiDay && (
+          {isMultiDay && ticketMode === 'each-day' && (
             <DuplicateTicketsCheckbox
               value={value.duplicateForEntirePeriod ?? false}
               onChange={(val) => onChange({ duplicateForEntirePeriod: val })}
