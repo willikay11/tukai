@@ -9,6 +9,7 @@ export { TicketDateBadge } from './TicketDateBadge/TicketDateBadge';
 export { TicketForm, type TicketFormValue } from './TicketForm/TicketForm';
 export { TicketCard } from './TicketCard/TicketCard';
 export { AddTicketTypeButton } from './AddTicketTypeButton/AddTicketTypeButton';
+export { TimePill, type TimePillProps } from './TimePill/TimePill';
 export { TicketsStep } from './TicketsStep/TicketsStep';
 
 // Invite guests step
