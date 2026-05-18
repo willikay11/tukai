@@ -226,11 +226,10 @@ export const TicketsStep = ({
                 <DateBadgeWithTimes
                   startDate={multiDayStartDate}
                   endDate={multiDayEndDate}
-                  startTime={multiDayStartTime}
-                  endTime={multiDayEndTime}
-                  onStartTimeChange={() => {}}
-                  onEndTimeChange={() => {}}
-                  errors={{}}
+                  startTime={draftTicket.salesStartTime}
+                  endTime={draftTicket.salesEndTime}
+                  onStartTimeChange={(time) => handleDraftTicketChange({ salesStartTime: time })}
+                  onEndTimeChange={(time) => handleDraftTicketChange({ salesEndTime: time })}
                 />
               </div>
               <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] bottom-0 border-l-[1px] border-dashed border-primary" />

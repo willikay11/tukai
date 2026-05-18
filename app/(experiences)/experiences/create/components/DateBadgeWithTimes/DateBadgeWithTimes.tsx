@@ -10,7 +10,6 @@ interface DateBadgeWithTimesProps {
   endTime: string | null;
   onStartTimeChange: (value: string) => void;
   onEndTimeChange: (value: string) => void;
-  errors: Record<string, string>;
 }
 
 export const DateBadgeWithTimes = ({
@@ -20,11 +19,10 @@ export const DateBadgeWithTimes = ({
   endTime,
   onStartTimeChange,
   onEndTimeChange,
-  errors,
 }: DateBadgeWithTimesProps) => {
   return (
-    <div className="flex flex-col gap-2 lg:flex-row lg:justify-between">
-      <div className="w-full lg:w-fit">
+    <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-6">
+      <div className="w-full lg:w-3/5">
         {startDate && endDate ? (
           <TicketDateBadge
             mode="multi-day-range"
@@ -34,14 +32,13 @@ export const DateBadgeWithTimes = ({
         ) : null}
       </div>
 
-      <div className="flex w-full gap-2 lg:w-fit">
+      <div className="flex w-full gap-3 lg:w-2/5">
         <div className="flex-1">
           <TimePicker
             value={startTime || undefined}
             onChange={onStartTimeChange}
             placeholder="Start Time"
           />
-          {errors.startTime && <p className="mt-1 text-xs text-red-500">{errors.startTime}</p>}
         </div>
 
         <div className="flex-1">
@@ -50,7 +47,6 @@ export const DateBadgeWithTimes = ({
             onChange={onEndTimeChange}
             placeholder="End Time"
           />
-          {errors.endTime && <p className="mt-1 text-xs text-red-500">{errors.endTime}</p>}
         </div>
       </div>
     </div>
