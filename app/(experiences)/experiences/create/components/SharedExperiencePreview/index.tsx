@@ -1,23 +1,23 @@
 'use client';
 
 import { Interest } from '@/types/interest';
-import { type RelativeValidityValue } from './RelativeValidityPicker/RelativeValidityPicker';
+import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { InvitedMember } from '@/components/ui/invite-members';
-import { CommunityOption } from '../hooks/useCreateExperienceFlow';
+import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 
-import { PreviewDateSection } from './PreviewDateSection';
-import { PreviewExperienceHeader } from './PreviewExperienceHeader';
-import { PreviewIncludedSection } from './PreviewIncludedSection';
-import { PreviewExcludedSection } from './PreviewExcludedSection';
-import { PreviewCategoriesSection } from './PreviewCategoriesSection';
-import { PreviewItineraryTypeSection } from './PreviewItineraryTypeSection';
-import { PreviewLocationSection } from './PreviewLocationSection';
-import { PreviewMeetingSection } from './PreviewMeetingSection';
-import { PreviewTicketsSection } from './PreviewTicketsSection/PreviewTicketsSection';
-import { PreviewGuestsSection } from './PreviewGuestsSection';
-import { PreviewCommunitiesSection } from './PreviewCommunitiesSection';
-import { PreviewCommunitySection } from './PreviewCommunitySection';
-import { ExperienceStepId, ExperienceType } from './step-side-panel';
+import { PreviewDateSection } from '../PreviewDateSection';
+import { PreviewExperienceHeader } from '../PreviewExperienceHeader';
+import { PreviewIncludedSection } from '../PreviewIncludedSection';
+import { PreviewExcludedSection } from '../PreviewExcludedSection';
+import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
+import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
+import { PreviewLocationSection } from '../PreviewLocationSection';
+import { PreviewMeetingSection } from '../PreviewMeetingSection';
+import { PreviewTicketsSection } from '../PreviewTicketsSection';
+import { PreviewGuestsSection } from '../PreviewGuestsSection';
+import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
+import { PreviewCommunitySection } from '../PreviewCommunitySection';
+import { ExperienceStepId, ExperienceType } from '../step-side-panel';
 
 interface SharedExperiencePreviewProps {
   step: ExperienceStepId;

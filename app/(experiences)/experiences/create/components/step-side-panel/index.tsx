@@ -7,10 +7,10 @@ import Image from 'next/image';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
-import { type RelativeValidityValue } from './RelativeValidityPicker/RelativeValidityPicker';
+import { type RelativeValidityValue } from '../RelativeValidityPicker';
 
-import { CustomiseItinerary } from './customiseItinerary';
-import { SharedExperiencePreview } from './SharedExperiencePreview';
+import { CustomiseItinerary } from '../customiseItinerary';
+import { SharedExperiencePreview } from '../SharedExperiencePreview';
 import { Interest } from '@/types/interest';
 import { CommunityOption } from '../hooks/useCreateExperienceFlow';
 

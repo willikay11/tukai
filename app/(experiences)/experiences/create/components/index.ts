@@ -1,24 +1,41 @@
+// Community & Type Selection
 export { CommunitySelector, type CommunitySelectorProps, type Community } from './CommunitySelector';
 export { ExperienceTypePicker, type ExperienceTypePickerProps } from './ExperienceTypePicker';
 export { ExperienceTypeRadio, type ExperienceTypeRadioProps } from './ExperienceTypeRadio';
 export { DateTypeStep, type DateTypeFormData, type DateTypeStepProps } from './DateTypeStep';
 
-// Ticket components
-export { CommissionPicker } from './CommissionPicker/CommissionPicker';
-export { TicketDateBadge } from './TicketDateBadge/TicketDateBadge';
-export { TicketForm, type TicketFormValue } from './TicketForm/TicketForm';
-export { TicketCard } from './TicketCard/TicketCard';
-export { AddTicketTypeButton } from './AddTicketTypeButton/AddTicketTypeButton';
-export { TimePill, type TimePillProps } from './TimePill/TimePill';
-export { TicketsStep } from './TicketsStep/TicketsStep';
+// About Step Components
+export { ExperienceTitleInput } from './ExperienceTitleInput';
+export { DescriptionFields } from './DescriptionFields';
+export { ExperienceLocationInput } from './ExperienceLocationInput';
+export { MeetingDetailsInput } from './MeetingDetailsInput';
+export { CategoryPicker } from './CategoryPicker';
+export { VisibilityPicker } from './VisibilityPicker';
+export { PhotoUploader } from './PhotoUploader';
 
-// Invite guests step
-export { InviteGuestsStep } from './InviteGuestsStep/InviteGuestsStep';
+// Tickets Components
+export { CommissionPicker } from './CommissionPicker';
+export { TicketDateBadge } from './TicketDateBadge';
+export { TicketForm, type TicketFormValue } from './TicketForm';
+export { TicketCard } from './TicketCard';
+export { AddTicketTypeButton } from './AddTicketTypeButton';
+export { TimePill, type TimePillProps } from './TimePill';
+export { TicketsStep } from './TicketsStep';
+export { DateBadgeWithTimes } from './DateBadgeWithTimes';
+export { DuplicateTicketsCheckbox } from './DuplicateTicketsCheckbox';
+export { MultiDayDateSection } from './MultiDayDateSection';
+export { MultiDayTicketModePicker } from './MultiDayTicketModePicker';
+export { RelativeValidityPicker, type RelativeValidityValue } from './RelativeValidityPicker';
+export { RecurringDayPicker } from './RecurringDayPicker';
+export { RecurrenceDateRange } from './RecurrenceDateRange';
+export { RecurrencePreviewLabel } from './RecurrencePreviewLabel';
+export { TimeSlotList } from './TimeSlotList';
 
-// Wallet step
-export { WalletDetailsStep } from './WalletDetailsStep/WalletDetailsStep';
+// Step Components
+export { InviteGuestsStep } from './InviteGuestsStep';
+export { WalletDetailsStep } from './WalletDetailsStep';
 
-// Preview section components
+// Preview Section Components
 export { PreviewExperienceHeader } from './PreviewExperienceHeader';
 export { PreviewIncludedSection } from './PreviewIncludedSection';
 export { PreviewExcludedSection } from './PreviewExcludedSection';
@@ -28,13 +45,16 @@ export { PreviewLocationSection } from './PreviewLocationSection';
 export { PreviewMeetingSection } from './PreviewMeetingSection';
 export { PreviewGuestsSection } from './PreviewGuestsSection';
 export { PreviewCommunitiesSection } from './PreviewCommunitiesSection';
-export { PreviewTicketsSection } from './PreviewTicketsSection/PreviewTicketsSection';
+export { PreviewTicketsSection } from './PreviewTicketsSection';
+export { PreviewCommunitySection } from './PreviewCommunitySection';
+export { PreviewDateSection } from './PreviewDateSection';
+export { PreviewWalletSection } from './PreviewWalletSection';
 
-// Review and edit panels
+// Panels & Layout
 export { ExperienceReview } from './experienceReview';
 export { PhotoEditPanel } from './PhotoEditPanel';
 export { InlineEditPanel } from './InlineEditPanel';
-export { PreviewWalletSection } from './PreviewWalletSection';
-
-// Shared components
 export { SharedExperiencePreview } from './SharedExperiencePreview';
+
+// Internal Layout Components
+export { AboutStep } from './AboutStep';

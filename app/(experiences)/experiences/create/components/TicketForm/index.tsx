@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { TimePicker } from '@/components/ui/time-picker';
-import { RelativeValidityPicker, RelativeValidityValue } from '../RelativeValidityPicker/RelativeValidityPicker';
-import { DuplicateTicketsCheckbox } from '../DuplicateTicketsCheckbox/DuplicateTicketsCheckbox';
+import { RelativeValidityPicker, type RelativeValidityValue } from '../RelativeValidityPicker';
+import { DuplicateTicketsCheckbox } from '../DuplicateTicketsCheckbox';
 
 export interface TicketFormValue {
   name: string;

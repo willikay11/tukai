@@ -1,11 +1,11 @@
 'use client';
 
-import { CreateExperienceAbout } from './about';
-import { ExperienceDates } from './dates';
-import { CreateTickets } from './createTickets';
-import { CreateExperienceInvites } from './invites';
-import { CreateExperienceWallet } from './wallet';
-import { PhotoEditPanel } from './PhotoEditPanel';
+import { CreateExperienceAbout } from '../about';
+import { ExperienceDates } from '../dates';
+import { CreateTickets } from '../createTickets';
+import { CreateExperienceInvites } from '../invites';
+import { CreateExperienceWallet } from '../wallet';
+import { PhotoEditPanel } from '../PhotoEditPanel';
 import { Experience } from '@/types/experience';
 
 interface InlineEditPanelProps {

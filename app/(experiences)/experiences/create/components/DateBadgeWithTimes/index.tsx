@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { TimePicker } from '@/components/ui/time-picker';
-import { TicketDateBadge } from '../TicketDateBadge/TicketDateBadge';
-import { TimePill } from '../TimePill/TimePill';
+import { TicketDateBadge } from '../TicketDateBadge';
+import { TimePill } from '../TimePill';
 
 interface DateBadgeWithTimesProps {
   startDate: string | null;

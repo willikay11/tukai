@@ -22,7 +22,7 @@ import { toast } from '@/app/shared/hooks/useToast';
 import { Experience } from '@/types/experience';
 import { Ticket } from '@/types/ticket';
 
-import { SavedTicketCard } from './savedTicketCard';
+import { SavedTicketCard } from '../savedTicketCard';
 
 const commissionOptions = [
   { value: 'organizer', label: 'I will fully pay the commission' },

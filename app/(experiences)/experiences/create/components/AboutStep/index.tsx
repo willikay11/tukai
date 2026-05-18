@@ -3,13 +3,13 @@
 import { useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { CategoryPicker } from './CategoryPicker';
-import { DescriptionFields } from './DescriptionFields';
-import { ExperienceLocationInput } from './ExperienceLocationInput';
-import { ExperienceTitleInput } from './ExperienceTitleInput';
-import { MeetingDetailsInput } from './MeetingDetailsInput';
-import { PhotoUploader } from './PhotoUploader';
-import { VisibilityPicker } from './VisibilityPicker';
+import { CategoryPicker } from '../CategoryPicker';
+import { DescriptionFields } from '../DescriptionFields';
+import { ExperienceLocationInput } from '../ExperienceLocationInput';
+import { ExperienceTitleInput } from '../ExperienceTitleInput';
+import { MeetingDetailsInput } from '../MeetingDetailsInput';
+import { PhotoUploader } from '../PhotoUploader';
+import { VisibilityPicker } from '../VisibilityPicker';
 import { Interest } from '@/types/interest';
 
 type AboutFormData = {

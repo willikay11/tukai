@@ -10,20 +10,20 @@ import { Button } from '@/components/ui/button';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 
-import { AboutStep } from './AboutStep';
-import { CreateExperienceAbout } from './about';
-import { CreateExperienceCommunity } from './community';
-import { DateTypeStep, type DateTypeFormData } from './DateTypeStep';
-import { ExperienceDates } from './dates';
-import { CreateExperienceInvites } from './invites';
-import { InviteGuestsStep } from './InviteGuestsStep/InviteGuestsStep';
-import { CreateExperienceWallet } from './wallet';
-import { TicketsStep } from './TicketsStep/TicketsStep';
+import { AboutStep } from '../AboutStep';
+import { CreateExperienceAbout } from '../about';
+import { CreateExperienceCommunity } from '../community';
+import { DateTypeStep, type DateTypeFormData } from '../DateTypeStep';
+import { ExperienceDates } from '../dates';
+import { CreateExperienceInvites } from '../invites';
+import { InviteGuestsStep } from '../InviteGuestsStep';
+import { CreateExperienceWallet } from '../wallet';
+import { TicketsStep } from '../TicketsStep';
 import { Interest } from '@/types/interest';
-import type { FormData } from '../hooks/useCreateExperienceFlow';
+import type { FormData } from '../../hooks/useCreateExperienceFlow';
 import { Wallet } from '@/types/payment';
-import { WalletDetailsStep } from './WalletDetailsStep/WalletDetailsStep';
-import { type RelativeValidityValue } from './RelativeValidityPicker/RelativeValidityPicker';
+import { WalletDetailsStep } from '../WalletDetailsStep';
+import { type RelativeValidityValue } from '../RelativeValidityPicker';
 
 type AboutFormData = {
   photos: string[];

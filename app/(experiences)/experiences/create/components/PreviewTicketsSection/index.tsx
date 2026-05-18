@@ -2,7 +2,7 @@
 
 import moment from 'moment';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { SavedTicketCard } from '../TicketCard/TicketCard';
+import { SavedTicketCard } from '../TicketCard';
 
 interface PreviewTicketsSectionProps {
   tickets?: Array<{

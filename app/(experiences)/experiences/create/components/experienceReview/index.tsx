@@ -1,21 +1,21 @@
 'use client';
 
-import { PreviewExperienceHeader } from './PreviewExperienceHeader';
-import { PreviewIncludedSection } from './PreviewIncludedSection';
-import { PreviewExcludedSection } from './PreviewExcludedSection';
-import { PreviewCategoriesSection } from './PreviewCategoriesSection';
-import { PreviewDateSection } from './PreviewDateSection';
-import { PreviewItineraryTypeSection } from './PreviewItineraryTypeSection';
-import { PreviewLocationSection } from './PreviewLocationSection';
-import { PreviewMeetingSection } from './PreviewMeetingSection';
-import { PreviewGuestsSection } from './PreviewGuestsSection';
-import { PreviewCommunitiesSection } from './PreviewCommunitiesSection';
-import { PreviewTicketsSection } from './PreviewTicketsSection/PreviewTicketsSection';
-import { PreviewWalletSection } from './PreviewWalletSection';
+import { PreviewExperienceHeader } from '../PreviewExperienceHeader';
+import { PreviewIncludedSection } from '../PreviewIncludedSection';
+import { PreviewExcludedSection } from '../PreviewExcludedSection';
+import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
+import { PreviewDateSection } from '../PreviewDateSection';
+import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
+import { PreviewLocationSection } from '../PreviewLocationSection';
+import { PreviewMeetingSection } from '../PreviewMeetingSection';
+import { PreviewGuestsSection } from '../PreviewGuestsSection';
+import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
+import { PreviewTicketsSection } from '../PreviewTicketsSection';
+import { PreviewWalletSection } from '../PreviewWalletSection';
 import { Experience } from '@/types/experience';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Community } from '@/types/community';
-import { CommunityOption } from '../hooks/useCreateExperienceFlow';
+import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 
 interface ExperienceReviewProps {
   type: 'review' | 'create';

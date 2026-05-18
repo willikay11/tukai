@@ -4,14 +4,14 @@ import { useCallback } from 'react';
 
 import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
-import { CommunitySelector, type Community } from './CommunitySelector';
-import { ExperienceTypePicker } from './ExperienceTypePicker';
-import { ExperienceTypeRadio } from './ExperienceTypeRadio';
-import { RecurringDayPicker } from './RecurringDayPicker/RecurringDayPicker';
-import { RecurrenceDateRange } from './RecurrenceDateRange/RecurrenceDateRange';
-import { RecurrencePreviewLabel } from './RecurrencePreviewLabel/RecurrencePreviewLabel';
-import { TimeSlotList, type TimeSlot } from './TimeSlotList/TimeSlotList';
-import { MultiDayDateSection } from './MultiDayDateSection/MultiDayDateSection';
+import { CommunitySelector, type Community } from '../CommunitySelector';
+import { ExperienceTypePicker } from '../ExperienceTypePicker';
+import { ExperienceTypeRadio } from '../ExperienceTypeRadio';
+import { RecurringDayPicker } from '../RecurringDayPicker';
+import { RecurrenceDateRange } from '../RecurrenceDateRange';
+import { RecurrencePreviewLabel } from '../RecurrencePreviewLabel';
+import { TimeSlotList, type TimeSlot } from '../TimeSlotList';
+import { MultiDayDateSection } from '../MultiDayDateSection';
 
 type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
