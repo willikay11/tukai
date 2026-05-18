@@ -23,8 +23,8 @@ export const DateBadgeWithTimes = ({
   errors,
 }: DateBadgeWithTimesProps) => {
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
-      <div className="flex-1">
+    <div className="flex flex-col gap-2 lg:flex-row lg:justify-between">
+      <div className="w-full lg:w-fit">
         {startDate && endDate ? (
           <TicketDateBadge
             mode="multi-day-range"
@@ -34,8 +34,8 @@ export const DateBadgeWithTimes = ({
         ) : null}
       </div>
 
-      <div className="flex flex-1 gap-3 lg:flex-none lg:w-auto">
-        <div className="flex-1 lg:flex-none lg:min-w-[140px]">
+      <div className="flex w-full gap-2 lg:w-fit">
+        <div className="flex-1">
           <TimePicker
             value={startTime || undefined}
             onChange={onStartTimeChange}
@@ -44,7 +44,7 @@ export const DateBadgeWithTimes = ({
           {errors.startTime && <p className="mt-1 text-xs text-red-500">{errors.startTime}</p>}
         </div>
 
-        <div className="flex-1 lg:flex-none lg:min-w-[140px]">
+        <div className="flex-1">
           <TimePicker
             value={endTime || undefined}
             onChange={onEndTimeChange}
