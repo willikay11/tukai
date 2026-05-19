@@ -13,8 +13,9 @@ export const CategoryPicker = ({ selectedCategories, onChange }: CategoryPickerP
   const { data: categories, isLoading } = useGetInterestCategories();
 
   const handleToggleCategory = (category: Interest) => {
-    const updated = selectedCategories.includes(category)
-      ? selectedCategories.filter((c) => c !== category)
+    const isSelected = selectedCategories.some((c) => c.id === category.id);
+    const updated = isSelected
+      ? selectedCategories.filter((c) => c.id !== category.id)
       : [...selectedCategories, category];
     onChange(updated);
   };
@@ -33,7 +34,7 @@ export const CategoryPicker = ({ selectedCategories, onChange }: CategoryPickerP
           <CategoryPill
             key={category.id}
             category={category}
-            isSelected={selectedCategories.includes(category)}
+            isSelected={selectedCategories.some((c) => c.id === category.id)}
             onClick={() => handleToggleCategory(category)}
           />
         ))}
