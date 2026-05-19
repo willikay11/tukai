@@ -26,13 +26,14 @@ interface TicketFormProps {
   value: TicketFormValue;
   onChange: (data: Partial<TicketFormValue>) => void;
   errors: Record<string, string>;
-  onSave: () => void;
+  onSave: () => void | Promise<void>;
   onCancel?: () => void;
   experiencePricing?: 'paid' | 'free';
   commissionPayer?: 'host' | 'customer' | 'split';
   isRecurring?: boolean;
   isMultiDay?: boolean;
   ticketMode?: 'entire-period' | 'each-day';
+  isSaving?: boolean;
 }
 
 export const TicketForm = ({
@@ -46,6 +47,7 @@ export const TicketForm = ({
   isRecurring = false,
   isMultiDay = false,
   ticketMode = 'each-day',
+  isSaving = false,
 }: TicketFormProps) => {
   const getCommissionPercentage = () => {
     if (experiencePricing === 'free') return 0;
@@ -194,19 +196,30 @@ export const TicketForm = ({
         </label>
       </div> */}
 
+      {errors.api && (
+        <p className="text-sm text-destructive">{errors.api}</p>
+      )}
+
       <div className="flex gap-3 pt-3">
         {onCancel && (
           <button
             type="button"
             onClick={onCancel}
             className="text-xs font-medium text-destructive hover:text-destructive/80"
+            disabled={isSaving}
           >
             Cancel
           </button>
         )}
         <div className="flex-1" />
-        <Button type="button" onClick={onSave} variant="gradient" className="rounded-[50px] text-xs font-medium">
-          Save Ticket
+        <Button
+          type="button"
+          onClick={onSave}
+          disabled={isSaving}
+          variant="gradient"
+          className="rounded-[50px] text-xs font-medium"
+        >
+          {isSaving ? 'Saving...' : 'Save Ticket'}
         </Button>
       </div>
     </div>

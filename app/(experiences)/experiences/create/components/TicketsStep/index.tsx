@@ -14,6 +14,12 @@ import { MultiDayTicketModePicker } from '../MultiDayTicketModePicker';
 import { DateBadgeWithTimes } from '../DateBadgeWithTimes';
 import { FormData } from '../../hooks/useCreateExperienceFlow';
 import { getDaysBetween } from '@/utils/date-utils';
+import { useCreateExperienceTicket } from '@/app/shared/hooks/useExperiences';
+import { useToast } from '@/app/shared/hooks/useToast';
+import { parseApiError } from '@/utils/parseApiError';
+import { updateExperienceTicket, deleteExperienceTicket } from '@/services/experience';
+import type { CreateExperienceTicket } from '@/types/experience';
+import type { ApiResponse } from '@/types/apiResponse';
 
 interface TicketsStepProps {
   formData: FormData['tickets'];
@@ -25,6 +31,7 @@ interface TicketsStepProps {
   onCancel: () => void;
   photos?: string[];
   isRecurring?: boolean;
+  experienceId?: string | null;
   timeSlots?: { startTime: string | null; endTime: string | null }[];
   recurringDays?: ('mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun')[];
   isMultiDay?: boolean;
@@ -94,6 +101,7 @@ export const TicketsStep = ({
   multiDayEndDate = null,
   multiDayEndTime = null,
   saveContinueLabel = 'Save & Continue',
+  experienceId = null,
 }: TicketsStepProps) => {
   const [activeFormIndex, setActiveFormIndex] = useState<number | null>(null);
   const [draftTicket, setDraftTicket] = useState<TicketFormValue>(emptyTicketForm);
@@ -101,6 +109,11 @@ export const TicketsStep = ({
   const [ticketMode, setTicketMode] = useState<'entire-period' | 'each-day'>(
     (formData.ticketMode as 'entire-period' | 'each-day') || 'entire-period'
   );
+  const [isSavingLocal, setIsSavingLocal] = useState(false);
+
+  // API mutation hooks
+  const createTicketMutation = useCreateExperienceTicket(experienceId ?? '');
+  const { toast } = useToast();
 
   const handleTicketModeChange = (mode: 'entire-period' | 'each-day') => {
     setTicketMode(mode);
@@ -136,14 +149,8 @@ export const TicketsStep = ({
     setFormErrors({});
   }, [formData.items]);
 
-  const handleSaveTicket = useCallback(() => {
-    const newErrors = validateTicket(draftTicket, experiencePricing === 'paid');
-
-    if (Object.keys(newErrors).length > 0) {
-      setFormErrors(newErrors);
-      return;
-    }
-
+  // Save locally without API
+  const saveLocally = useCallback(() => {
     const items = [...formData.items];
     if (activeFormIndex !== null && activeFormIndex < items.length) {
       items[activeFormIndex] = {
@@ -181,7 +188,105 @@ export const TicketsStep = ({
     setActiveFormIndex(null);
     setDraftTicket(emptyTicketForm);
     setFormErrors({});
-  }, [draftTicket, formData.items, activeFormIndex, onChange, experiencePricing]);
+  }, [draftTicket, formData.items, activeFormIndex, onChange]);
+
+  const handleSaveTicket = useCallback(async () => {
+    const buildDateTime = (
+      date: string | null,
+      time: string | null
+    ): string | null => {
+      if (!date || !time) return null;
+      return `${date}T${time}:00`;
+    };
+
+    const newErrors = validateTicket(draftTicket, experiencePricing === 'paid');
+
+    if (Object.keys(newErrors).length > 0) {
+      setFormErrors(newErrors);
+      return;
+    }
+
+    // If no experienceId yet, save locally only
+    if (!experienceId) {
+      saveLocally();
+      return;
+    }
+
+    // Build API payload
+    const payload: CreateExperienceTicket = {
+      name: draftTicket.name,
+      experience: experienceId,
+      quantity: draftTicket.quantity!,
+      price: draftTicket.amount!.toString(),
+      sales_start_date: buildDateTime(draftTicket.salesStartDate, draftTicket.salesStartTime),
+      sales_end_date: buildDateTime(draftTicket.salesEndDate, draftTicket.salesEndTime),
+    };
+
+    const isEdit = activeFormIndex !== null && formData.items[activeFormIndex]?.apiId != null;
+    const existingApiId = isEdit ? formData.items[activeFormIndex].apiId : undefined;
+
+    try {
+      setIsSavingLocal(true);
+      let response: ApiResponse;
+      if (existingApiId) {
+        response = await updateExperienceTicket(experienceId, existingApiId, payload);
+      } else {
+        response = await createTicketMutation.mutateAsync(payload);
+      }
+
+      const apiId = response.data?.id;
+
+      const items = [...formData.items];
+      if (activeFormIndex !== null && activeFormIndex < items.length) {
+        items[activeFormIndex] = {
+          ...items[activeFormIndex],
+          apiId,
+          name: draftTicket.name,
+          quantity: draftTicket.quantity!,
+          amount: draftTicket.amount!,
+          salesStartDate: draftTicket.salesStartDate!,
+          salesStartTime: draftTicket.salesStartTime!,
+          salesEndDate: draftTicket.salesEndDate!,
+          salesEndTime: draftTicket.salesEndTime!,
+          acceptPartialPayment: draftTicket.acceptPartialPayment,
+          salesStartRelative: draftTicket.salesStartRelative || null,
+          salesEndRelative: draftTicket.salesEndRelative || null,
+          duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
+        };
+      } else {
+        items.push({
+          id: uuidv4(),
+          apiId,
+          name: draftTicket.name,
+          quantity: draftTicket.quantity!,
+          amount: draftTicket.amount!,
+          salesStartDate: draftTicket.salesStartDate!,
+          salesStartTime: draftTicket.salesStartTime!,
+          salesEndDate: draftTicket.salesEndDate!,
+          salesEndTime: draftTicket.salesEndTime!,
+          acceptPartialPayment: draftTicket.acceptPartialPayment,
+          salesStartRelative: draftTicket.salesStartRelative || null,
+          salesEndRelative: draftTicket.salesEndRelative || null,
+          duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
+        });
+      }
+
+      onChange({ items });
+      setActiveFormIndex(null);
+      setDraftTicket(emptyTicketForm);
+      setFormErrors({});
+    } catch (error) {
+      const message = parseApiError(error, 'Failed to save ticket');
+      setFormErrors({ api: message });
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSavingLocal(false);
+    }
+  }, [draftTicket, formData.items, activeFormIndex, onChange, experiencePricing, experienceId, createTicketMutation, saveLocally, toast]);
 
   const handleCancelForm = useCallback(() => {
     setActiveFormIndex(null);
@@ -190,10 +295,27 @@ export const TicketsStep = ({
   }, []);
 
   const handleDeleteTicket = useCallback(
-    (id: string) => {
-      onChange({ items: formData.items.filter((item) => item.id !== id) });
+    async (ticketId: string) => {
+      const ticket = formData.items.find((t) => t.id === ticketId);
+
+      if (ticket?.apiId && experienceId) {
+        try {
+          await deleteExperienceTicket(experienceId, ticket.apiId);
+        } catch (error) {
+          toast({
+            title: 'Error',
+            description: parseApiError(error, 'Failed to delete ticket'),
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
+      onChange({
+        items: formData.items.filter((item) => item.id !== ticketId),
+      });
     },
-    [formData.items, onChange],
+    [formData.items, experienceId, onChange, toast],
   );
 
   const hasTicketDateBadge = isMultiDay
@@ -247,7 +369,8 @@ export const TicketsStep = ({
                   isRecurring={isRecurring}
                   isMultiDay={isMultiDay}
                   ticketMode={ticketMode}
-                />
+                        isSaving={createTicketMutation.isPending || isSavingLocal}
+                      />
               ) : (
                 <>
                   <div className="space-y-3 mb-4 pt-4">
@@ -277,7 +400,8 @@ export const TicketsStep = ({
                       isRecurring={isRecurring}
                       isMultiDay={isMultiDay}
                       ticketMode={ticketMode}
-                    />
+                        isSaving={createTicketMutation.isPending || isSavingLocal}
+                      />
                   ) : (
                     <AddTicketTypeButton onClick={handleAddTicket} />
                   )}
@@ -311,6 +435,7 @@ export const TicketsStep = ({
                         isRecurring={isRecurring}
                         isMultiDay={isMultiDay}
                         ticketMode={ticketMode}
+                        isSaving={createTicketMutation.isPending || isSavingLocal}
                       />
                     ) : (
                       <>
@@ -341,7 +466,8 @@ export const TicketsStep = ({
                             isRecurring={isRecurring}
                             isMultiDay={isMultiDay}
                             ticketMode={ticketMode}
-                          />
+                        isSaving={createTicketMutation.isPending || isSavingLocal}
+                      />
                         ) : (
                           <AddTicketTypeButton onClick={handleAddTicket} />
                         )}
@@ -379,7 +505,8 @@ export const TicketsStep = ({
                 isRecurring={isRecurring}
                 isMultiDay={isMultiDay}
                 ticketMode={ticketMode}
-              />
+                        isSaving={createTicketMutation.isPending || isSavingLocal}
+                      />
             </div>
           ))}
 
@@ -425,7 +552,8 @@ export const TicketsStep = ({
               isRecurring={isRecurring}
               isMultiDay={isMultiDay}
               ticketMode={ticketMode}
-            />
+                        isSaving={createTicketMutation.isPending || isSavingLocal}
+                      />
           ) : (
             <>
               <div className="space-y-3 mb-4">
@@ -455,7 +583,8 @@ export const TicketsStep = ({
                   isRecurring={isRecurring}
                   isMultiDay={isMultiDay}
                   ticketMode={ticketMode}
-                />
+                        isSaving={createTicketMutation.isPending || isSavingLocal}
+                      />
               ) : (
                 <AddTicketTypeButton onClick={handleAddTicket} />
               )}

@@ -95,6 +95,7 @@ export interface FormData {
     ticketMode: 'entire-period' | 'each-day' | null;
     items: Array<{
       id: string;
+      apiId?: string;
       name: string;
       quantity: number;
       amount: number;

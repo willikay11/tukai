@@ -57,8 +57,10 @@ export type CreateExperienceTicket = {
   experience: string;
   name: string;
   quantity: number;
-  price: number;
-  availableQuantity: number;
+  price: string;
+  availableQuantity?: number;
+  sales_start_date?: string | null;
+  sales_end_date?: string | null;
 };
 
 export function isExperience(item: any): item is Experience {

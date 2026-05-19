@@ -439,6 +439,7 @@ const canAccessDetailsSteps = Boolean(
                 multiDayEndDate={formData?.multiDayEndDate}
                 multiDayEndTime={formData?.multiDayEndTime}
                 saveContinueLabel={formData?.experienceType === 'multi-day' ? 'Save Tickets' : undefined}
+                experienceId={experience?.id || null}
               />
             ) : (
               <ExperienceDates
