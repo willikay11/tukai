@@ -535,9 +535,9 @@ export const TicketsStep = ({
                 startTime={dateTypeData.startTime!}
                 endTime={dateTypeData.endTime!}
               />
-              <span className="pointer-events-none absolute -left-[1.25rem] top-0 bottom-0 border-l-[1px] border-dashed border-primary" />
-              <span className="pointer-events-none absolute -left-[1.25rem] top-0 h-0 w-5 border-t-[1px] border-dashed border-primary" />
-              <span className="pointer-events-none absolute -left-[1.563rem] -top-[0.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
+              <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] -bottom-6 border-l-[1px] border-dashed border-primary" />
+              <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
+              <span className="pointer-events-none absolute -left-[1.563rem] top-[1.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
             </div>
           )}
 
