@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { InvitedMember } from '@/components/ui/invite-members';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
+import { useToast } from '@/app/shared/hooks/useToast';
 import { parseApiError } from '@/utils/parseApiError';
 import {
   useFetchSingleExperience,
@@ -153,6 +154,7 @@ const initialFormData: FormData = {
 export const useCreateExperienceFlow = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const { toast } = useToast();
   const searchParams = useSearchParams();
   const { data: session, status: sessionStatus } = useSession();
 
@@ -565,11 +567,16 @@ export const useCreateExperienceFlow = () => {
     } catch (error: any) {
       const message = parseApiError(error, 'Failed to save experience');
       setApiError(message);
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
       console.error('[handleSaveAbout] Error:', error);
     } finally {
       setIsSavingExperience(false);
     }
-  }, [formData.about, formData.dateType, experienceId, createExperienceAsync, updateExperienceAsync]);
+  }, [formData.about, formData.dateType, experienceId, createExperienceAsync, updateExperienceAsync, toast]);
 
   const handleAddPhotos = useCallback(async (photos: File[]) => {
     setIsSavingExperience(true);
@@ -582,11 +589,16 @@ export const useCreateExperienceFlow = () => {
     } catch (error: any) {
       const message = parseApiError(error, 'Failed to add photos');
       setApiError(message);
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
       console.error('[handleAddPhotos] Error:', error);
     } finally {
       setIsSavingExperience(false);
     }
-  }, [experienceId, addPhotosAsync]);
+  }, [experienceId, addPhotosAsync, toast]);
 
   const handleDeletePhoto = useCallback(async (photoId: string) => {
     setIsSavingExperience(true);
@@ -599,11 +611,16 @@ export const useCreateExperienceFlow = () => {
     } catch (error: any) {
       const message = parseApiError(error, 'Failed to delete photo');
       setApiError(message);
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
       console.error('[handleDeletePhoto] Error:', error);
     } finally {
       setIsSavingExperience(false);
     }
-  }, [experienceId, deletePhotoAsync]);
+  }, [experienceId, deletePhotoAsync, toast]);
 
   const handleAddGuest = useCallback(async (guestEmail: string) => {
     setIsSavingExperience(true);
@@ -616,11 +633,16 @@ export const useCreateExperienceFlow = () => {
     } catch (error: any) {
       const message = parseApiError(error, 'Failed to add guest');
       setApiError(message);
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
       console.error('[handleAddGuest] Error:', error);
     } finally {
       setIsSavingExperience(false);
     }
-  }, [experienceId, addGuestAsync]);
+  }, [experienceId, addGuestAsync, toast]);
 
   const handlePublish = useCallback(async () => {
     setIsSavingExperience(true);
@@ -633,11 +655,16 @@ export const useCreateExperienceFlow = () => {
     } catch (error: any) {
       const message = parseApiError(error, 'Failed to publish experience');
       setApiError(message);
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
       console.error('[handlePublish] Error:', error);
     } finally {
       setIsSavingExperience(false);
     }
-  }, [experienceId, publishAsync]);
+  }, [experienceId, publishAsync, toast]);
 
   const resolveCommunityImageUrl = (community: Community): string => {
     const preferredPhoto =

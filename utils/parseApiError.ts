@@ -8,7 +8,12 @@ export const parseApiError = (error: unknown, defaultMessage: string = 'An error
   if (typeof error === 'object' && error !== null) {
     const err = error as any;
 
-    // Axios error with response
+    // API error format: { errors: [{ detail: "message" }, ...] }
+    if (Array.isArray(err.response?.data?.errors) && err.response.data.errors.length > 0) {
+      return err.response.data.errors[0].detail || defaultMessage;
+    }
+
+    // Axios error with response message
     if (err.response?.data?.message) {
       return err.response.data.message;
     }
