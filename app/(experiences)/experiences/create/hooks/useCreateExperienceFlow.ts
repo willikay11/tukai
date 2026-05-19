@@ -5,7 +5,15 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { InvitedMember } from '@/components/ui/invite-members';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
-import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
+import {
+  useFetchSingleExperience,
+  useCreateExperience,
+  useUpdateExperience,
+  useAddExperiencePhotos,
+  useDeleteExperiencePhoto,
+  useAddGuestToExperience,
+  usePublishExperience,
+} from '@/app/shared/hooks/useExperiences';
 import { Community } from '@/types/community';
 import { Interest } from '@/types/interest';
 import { Photo } from '@/types/photo';
@@ -60,6 +68,7 @@ export interface FormData {
     whatsIncluded: string;
     whatsNotIncluded: string;
     location: string;
+    locationPlaceId: string;
     meetingPoint: string;
     meetingTime: string | null;
     categories: Interest[];
@@ -119,6 +128,7 @@ const initialFormData: FormData = {
     whatsIncluded: '',
     whatsNotIncluded: '',
     location: '',
+    locationPlaceId: '',
     meetingPoint: '',
     meetingTime: null,
     categories: [],
@@ -182,6 +192,17 @@ export const useCreateExperienceFlow = () => {
   const { mutate: createPhoneWallet, isPending: isCreatingPhoneWallet } = useCreatePhoneWallet();
   const { mutate: patchBankWallet, isPending: isPatchingBankWallet } = usePatchBankWallet();
   const { mutate: patchPhoneWallet, isPending: isPatchingPhoneWallet } = usePatchPhoneWallet();
+
+  // Experience API hooks
+  const { mutateAsync: createExperienceAsync } = useCreateExperience();
+  const { mutateAsync: updateExperienceAsync } = useUpdateExperience(experienceId || '');
+  const { mutateAsync: addPhotosAsync } = useAddExperiencePhotos(experienceId || '');
+  const { mutateAsync: deletePhotoAsync } = useDeleteExperiencePhoto(experienceId || '');
+  const { mutateAsync: addGuestAsync } = useAddGuestToExperience(experienceId || '');
+  const { mutateAsync: publishAsync } = usePublishExperience(experienceId || '');
+
+  const [isSavingExperience, setIsSavingExperience] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const experience = experienceResponse?.data;
   const wallets: Wallet[] = walletsResponse?.data?.results ?? [];
@@ -513,6 +534,110 @@ export const useCreateExperienceFlow = () => {
     setInvitedCommunities(communities);
   };
 
+  const handleSaveAbout = useCallback(async () => {
+    setIsSavingExperience(true);
+    setApiError(null);
+    try {
+      const payload = {
+        title: formData.about.title,
+        description: formData.about.description,
+        googleMapPlaceId: formData.about.locationPlaceId || 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
+        startDate: formData.dateType.date || '',
+        endDate: formData.dateType.date || '',
+        recurrence_rule: '',
+        categoriesIds: formData.about.categories.map((c) => c.id),
+        isPublic: formData.about.visibility === 'public',
+        newPhotos: [],
+        invitedCommunityIds: [],
+        invitedGuestsEmails: [],
+      };
+
+      if (experienceId) {
+        await updateExperienceAsync(payload);
+      } else {
+        const response = await createExperienceAsync(payload);
+        handleExperienceCreated(response.data?.id || '');
+      }
+
+      setActiveStep('dates-tickets');
+      replaceCreateUrlParams({ step: 'dates-tickets' });
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || 'Failed to save experience';
+      setApiError(message);
+      console.error('[handleSaveAbout] Error:', error);
+    } finally {
+      setIsSavingExperience(false);
+    }
+  }, [formData.about, formData.dateType, experienceId, createExperienceAsync, updateExperienceAsync]);
+
+  const handleAddPhotos = useCallback(async (photos: File[]) => {
+    setIsSavingExperience(true);
+    setApiError(null);
+    try {
+      if (!experienceId) {
+        throw new Error('Experience ID is required to add photos');
+      }
+      await addPhotosAsync(photos);
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || 'Failed to add photos';
+      setApiError(message);
+      console.error('[handleAddPhotos] Error:', error);
+    } finally {
+      setIsSavingExperience(false);
+    }
+  }, [experienceId, addPhotosAsync]);
+
+  const handleDeletePhoto = useCallback(async (photoId: string) => {
+    setIsSavingExperience(true);
+    setApiError(null);
+    try {
+      if (!experienceId) {
+        throw new Error('Experience ID is required to delete photos');
+      }
+      await deletePhotoAsync(photoId);
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || 'Failed to delete photo';
+      setApiError(message);
+      console.error('[handleDeletePhoto] Error:', error);
+    } finally {
+      setIsSavingExperience(false);
+    }
+  }, [experienceId, deletePhotoAsync]);
+
+  const handleAddGuest = useCallback(async (guestEmail: string) => {
+    setIsSavingExperience(true);
+    setApiError(null);
+    try {
+      if (!experienceId) {
+        throw new Error('Experience ID is required to add guests');
+      }
+      await addGuestAsync(guestEmail);
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || 'Failed to add guest';
+      setApiError(message);
+      console.error('[handleAddGuest] Error:', error);
+    } finally {
+      setIsSavingExperience(false);
+    }
+  }, [experienceId, addGuestAsync]);
+
+  const handlePublish = useCallback(async () => {
+    setIsSavingExperience(true);
+    setApiError(null);
+    try {
+      if (!experienceId) {
+        throw new Error('Experience ID is required to publish');
+      }
+      await publishAsync();
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || 'Failed to publish experience';
+      setApiError(message);
+      console.error('[handlePublish] Error:', error);
+    } finally {
+      setIsSavingExperience(false);
+    }
+  }, [experienceId, publishAsync]);
+
   const resolveCommunityImageUrl = (community: Community): string => {
     const preferredPhoto =
       community?.photos?.find((photo: Photo) => photo.isCover) || community?.photos?.[0];
@@ -565,6 +690,8 @@ export const useCreateExperienceFlow = () => {
     walletErrors,
     validateWallet,
     updateWalletFormData,
+    isSavingExperience,
+    apiError,
 
     walletMutations: {
       createBankWallet,
@@ -583,6 +710,11 @@ export const useCreateExperienceFlow = () => {
       handleDatesUpdatedSuccess,
       handleItineraryCustomise,
       handleInvitesChange,
+      handleSaveAbout,
+      handleAddPhotos,
+      handleDeletePhoto,
+      handleAddGuest,
+      handlePublish,
     },
   };
 };

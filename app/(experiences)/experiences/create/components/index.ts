@@ -55,6 +55,8 @@ export { ExperienceReview } from './experienceReview';
 export { PhotoEditPanel } from './PhotoEditPanel';
 export { InlineEditPanel } from './InlineEditPanel';
 export { SharedExperiencePreview } from './SharedExperiencePreview';
+export { ReviewLayout } from './ReviewLayout';
+export { ExperienceCreatedModal } from './ExperienceCreatedModal';
 
 // Internal Layout Components
 export { AboutStep } from './AboutStep';

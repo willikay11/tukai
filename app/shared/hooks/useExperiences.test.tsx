@@ -282,14 +282,13 @@ describe('Experience Hooks', () => {
   describe('useCreateExperienceTicket', () => {
     it('creates ticket successfully', async () => {
       const ticketData = {
-        experienceId: 'exp-123',
         slot: '2024-05-01',
         quantity: 2,
       } as any;
 
       mockExperienceService.createExperienceTicket.mockResolvedValue({ id: 'ticket-123' });
 
-      const { result } = renderHook(() => useCreateExperienceTicket(), {
+      const { result } = renderHook(() => useCreateExperienceTicket('exp-123'), {
         wrapper: createWrapper(),
       });
 
@@ -301,7 +300,7 @@ describe('Experience Hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockExperienceService.createExperienceTicket).toHaveBeenCalledWith(ticketData);
+      expect(mockExperienceService.createExperienceTicket).toHaveBeenCalledWith('exp-123', ticketData);
     });
   });
 
@@ -313,7 +312,7 @@ describe('Experience Hooks', () => {
 
       mockExperienceService.updateExperienceTicket.mockResolvedValue({ id: 'ticket-123' });
 
-      const { result } = renderHook(() => useUpdateExperienceTicket('ticket-123'), {
+      const { result } = renderHook(() => useUpdateExperienceTicket('exp-123', 'ticket-123'), {
         wrapper: createWrapper(),
       });
 
@@ -326,6 +325,7 @@ describe('Experience Hooks', () => {
       });
 
       expect(mockExperienceService.updateExperienceTicket).toHaveBeenCalledWith(
+        'exp-123',
         'ticket-123',
         ticketData
       );
@@ -336,7 +336,7 @@ describe('Experience Hooks', () => {
     it('deletes ticket successfully', async () => {
       mockExperienceService.deleteExperienceTicket.mockResolvedValue({ success: true });
 
-      const { result } = renderHook(() => useDeleteExperienceTicket('ticket-123'), {
+      const { result } = renderHook(() => useDeleteExperienceTicket('exp-123', 'ticket-123'), {
         wrapper: createWrapper(),
       });
 
@@ -348,7 +348,7 @@ describe('Experience Hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockExperienceService.deleteExperienceTicket).toHaveBeenCalledWith('ticket-123');
+      expect(mockExperienceService.deleteExperienceTicket).toHaveBeenCalledWith('exp-123', 'ticket-123');
     });
   });
 

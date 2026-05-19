@@ -33,6 +33,7 @@ type AboutFormData = {
   whatsIncluded: string;
   whatsNotIncluded: string;
   location: string;
+  locationPlaceId: string;
   meetingPoint: string;
   meetingTime: string | null;
   categories: Interest[];
@@ -101,6 +102,7 @@ interface CreateExperienceStepsProps {
   updateAboutFormData?: (data: Partial<AboutFormData>) => void;
   ticketsFormData?: {
     commission: 'host' | 'customer' | 'split';
+    ticketMode: 'entire-period' | 'each-day' | null;
     items: Array<{
       id: string;
       name: string;
@@ -163,6 +165,12 @@ interface CreateExperienceStepsProps {
     isPatchingPhoneWallet: boolean;
   };
   onPreviewAndPublish?: () => void;
+  handlers?: {
+    handleSaveAbout?: () => Promise<void>;
+    handlePublish?: () => Promise<void>;
+  };
+  isSavingExperience?: boolean;
+  apiError?: string | null;
 }
 
 export const CreateExperienceSteps = ({
@@ -197,7 +205,11 @@ export const CreateExperienceSteps = ({
   isWalletsLoading = false,
   hasSavedWallets = false,
   walletMutations,
-  onPreviewAndPublish,}: CreateExperienceStepsProps) => {
+  onPreviewAndPublish,
+  handlers,
+  isSavingExperience = false,
+  apiError,
+}: CreateExperienceStepsProps) => {
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
 const canAccessDetailsSteps = Boolean(
     experience?.id || 
@@ -376,15 +388,17 @@ const canAccessDetailsSteps = Boolean(
                     // Stay on about step
                   }
                 }}
-                onSaveContinue={() => {
+                onSaveContinue={async () => {
                   console.log("[steps.tsx] onSaveContinue called");
                   const isValid = validateAbout();
                   console.log("[steps.tsx] validateAbout returned:", isValid);
-                  console.log("[steps.tsx] aboutFormData:", aboutFormData);
-                  console.log("[steps.tsx] aboutErrors:", aboutErrors);
                   if (isValid) {
-                    console.log("[steps.tsx] Validation passed, calling handleStepChange('dates-tickets')");
-                    handleStepChange('dates-tickets');
+                    console.log("[steps.tsx] Validation passed, calling handleSaveAbout");
+                    if (handlers?.handleSaveAbout) {
+                      await handlers.handleSaveAbout();
+                    } else {
+                      handleStepChange('dates-tickets');
+                    }
                   } else {
                     console.log("[steps.tsx] Validation failed");
                   }
@@ -429,6 +443,7 @@ const canAccessDetailsSteps = Boolean(
               <ExperienceDates
                 experienceId={experience?.id || null}
                 experience={experience}
+                locationPlaceId={aboutFormData?.locationPlaceId}
                 onDatesUpdatedSuccess={onDatesUpdatedSuccess}
                 onItineraryCustomise={onItineraryCustomise}
               />

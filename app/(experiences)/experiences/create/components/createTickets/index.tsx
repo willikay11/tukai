@@ -363,11 +363,11 @@ export const CreateTickets = ({
   const [editingTicketId, setEditingTicketId] = useState<string | null>(null);
   const [deletingTicketId, setDeletingTicketId] = useState<string | null>(null);
   const { mutateAsync: createExperienceTicket, isPending: isCreatingTicket } =
-    useCreateExperienceTicket();
+    useCreateExperienceTicket(experienceId || '');
   const { mutateAsync: updateExperienceTicket, isPending: isUpdatingTicket } =
-    useUpdateExperienceTicket(editingTicketId || '');
+    useUpdateExperienceTicket(experienceId || '', editingTicketId || '');
   const { mutateAsync: deleteExperienceTicketMutation, isPending: isDeletingTicket } =
-    useDeleteExperienceTicket(deletingTicketId || '');
+    useDeleteExperienceTicket(experienceId || '', deletingTicketId || '');
 
   const { fields, append, remove } = useFieldArray({
     control,

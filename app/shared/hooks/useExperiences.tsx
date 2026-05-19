@@ -3,14 +3,20 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ExperiencesQueryParams,
   addGuestToExperience,
+  addExperiencePhotos,
   bookmarkExperience,
   createExperience,
   createExperienceTicket,
+  createSlotTemplate,
+  CreateSlotTemplateData,
+  deleteExperiencePhoto,
   deleteExperienceTicket,
+  deleteSlotTemplate,
   fetchExperience,
   fetchExperiences,
   publishExperience,
   purchaseExperienceTicket,
+  searchUsers,
   updateExperience,
   updateExperienceTicket,
 } from '@/services/experience';
@@ -81,39 +87,40 @@ export const useUpdateExperience = (id: string) => {
   });
 };
 
-export const useCreateExperienceTicket = () => {
+export const useCreateExperienceTicket = (experienceId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationKey: ['createExperienceTicket'],
-    mutationFn: async (data: CreateExperienceTicket) => await createExperienceTicket(data),
-    onSettled: () => {
-      // Invalidate experience query to refetch updated experience details
-      queryClient.invalidateQueries({ queryKey: ['experience'] });
-    },
-  });
-};
-
-export const useUpdateExperienceTicket = (ticketId: string) => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationKey: ['updateExperienceTicket', ticketId],
+    mutationKey: ['createExperienceTicket', experienceId],
     mutationFn: async (data: CreateExperienceTicket) =>
-      await updateExperienceTicket(ticketId, data),
+      await createExperienceTicket(experienceId, data),
     onSettled: () => {
       // Invalidate experience query to refetch updated experience details
-      queryClient.invalidateQueries({ queryKey: ['experience'] });
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
     },
   });
 };
 
-export const useDeleteExperienceTicket = (ticketId: string) => {
+export const useUpdateExperienceTicket = (experienceId: string, ticketId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationKey: ['deleteExperienceTicket', ticketId],
-    mutationFn: async () => await deleteExperienceTicket(ticketId),
+    mutationKey: ['updateExperienceTicket', experienceId, ticketId],
+    mutationFn: async (data: CreateExperienceTicket) =>
+      await updateExperienceTicket(experienceId, ticketId, data),
     onSettled: () => {
       // Invalidate experience query to refetch updated experience details
-      queryClient.invalidateQueries({ queryKey: ['experience'] });
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
+    },
+  });
+};
+
+export const useDeleteExperienceTicket = (experienceId: string, ticketId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['deleteExperienceTicket', experienceId, ticketId],
+    mutationFn: async () => await deleteExperienceTicket(experienceId, ticketId),
+    onSettled: () => {
+      // Invalidate experience query to refetch updated experience details
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
     },
   });
 };
@@ -136,6 +143,67 @@ export const usePublishExperience = (id: string) => {
     mutationFn: async () => await publishExperience(id),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['experience', id] });
+    },
+  });
+};
+
+export const useAddExperiencePhotos = (experienceId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['addExperiencePhotos', experienceId],
+    mutationFn: async (photos: File[]) => await addExperiencePhotos(experienceId, photos),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
+    },
+  });
+};
+
+export const useDeleteExperiencePhoto = (experienceId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['deleteExperiencePhoto', experienceId],
+    mutationFn: async (photoId: string) => await deleteExperiencePhoto(experienceId, photoId),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
+    },
+  });
+};
+
+export const useSearchUsers = () => {
+  return useQuery({
+    queryKey: ['searchUsers'],
+    queryFn: async () => {
+      return { data: [] };
+    },
+    enabled: false,
+  });
+};
+
+export const useSearchUsersDebounced = () => {
+  return useMutation({
+    mutationFn: async (query: string) => await searchUsers(query),
+  });
+};
+
+export const useCreateSlotTemplate = (experienceId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['createSlotTemplate', experienceId],
+    mutationFn: async (data: CreateSlotTemplateData) =>
+      await createSlotTemplate(experienceId, data),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
+    },
+  });
+};
+
+export const useDeleteSlotTemplate = (experienceId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['deleteSlotTemplate', experienceId],
+    mutationFn: async (templateId: string) => await deleteSlotTemplate(experienceId, templateId),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
     },
   });
 };

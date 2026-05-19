@@ -7,14 +7,15 @@ import { CreateExperienceInvites } from '../invites';
 import { CreateExperienceWallet } from '../wallet';
 import { PhotoEditPanel } from '../PhotoEditPanel';
 import { Experience } from '@/types/experience';
+import { Photo } from '@/types/photo';
 
 interface InlineEditPanelProps {
   activeEditSection: 'about' | 'dates' | 'tickets' | 'invites' | 'wallet' | 'photos' | null;
   onClose: () => void;
   experienceId: string;
   experience: Experience;
-  aboutPhotos?: string[];
-  onPhotosChange?: (photos: string[]) => void;
+  aboutPhotos?: Photo[];
+  onPhotosChange?: (photos: Photo[]) => void;
 }
 
 export const InlineEditPanel = ({
@@ -70,7 +71,8 @@ export const InlineEditPanel = ({
       )}
       {activeEditSection === 'photos' && onPhotosChange && (
         <PhotoEditPanel
-          photos={aboutPhotos}
+          photos={aboutPhotos || []}
+          experienceId={experienceId}
           onPhotosChange={onPhotosChange}
           onClose={onClose}
         />

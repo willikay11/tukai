@@ -20,6 +20,7 @@ type AboutFormData = {
   whatsIncluded: string;
   whatsNotIncluded: string;
   location: string;
+  locationPlaceId: string;
   meetingPoint: string;
   meetingTime: string | null;
   categories: Interest[];
@@ -93,8 +94,8 @@ export const AboutStep = ({
   );
 
   const handleLocationChange = useCallback(
-    (location: string) => {
-      onFormDataChange({ location });
+    (location: string, placeId?: string) => {
+      onFormDataChange({ location, locationPlaceId: placeId || '' });
     },
     [onFormDataChange],
   );

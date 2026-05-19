@@ -50,6 +50,8 @@ function CreateExperiencePageContent() {
     updateWalletFormData,
     validateWallet,
     walletMutations,
+    isSavingExperience,
+    apiError,
   } = useCreateExperienceFlow();
 
   if (isCheckingCommunityAccess) {
@@ -103,10 +105,25 @@ function CreateExperiencePageContent() {
           isWalletsLoading={isWalletsLoading}
           hasSavedWallets={hasSavedWallets}
           walletMutations={walletMutations}
+          handlers={{
+            handleSaveAbout: handlers.handleSaveAbout,
+            handlePublish: handlers.handlePublish,
+          }}
+          isSavingExperience={isSavingExperience}
+          apiError={apiError}
           onPreviewAndPublish={() => {
-            if (validateWallet() && experienceId) {
-              router.push(`/experiences/review/${experienceId}`);
+            const isWalletValid = validateWallet();
+
+            // Try to get experience ID from state or from the experience object
+            const finalExperienceId = experienceId || experience?.id;
+
+            if (!isWalletValid) {
+              console.error('Wallet validation failed', walletErrors);
+              return;
             }
+
+            console.log('Navigating to review page:', finalExperienceId);
+            router.push(`/experiences/review/${finalExperienceId}`);
           }}
         />
       </div>

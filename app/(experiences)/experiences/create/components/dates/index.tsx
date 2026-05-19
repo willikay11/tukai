@@ -372,6 +372,7 @@ type PersistedTicketSlotConfig = {
 interface ExperienceDatesProps {
   experienceId?: string | null;
   experience?: Experience;
+  locationPlaceId?: string;
   onDatesUpdatedSuccess?: (nextStep?: 'guests') => void;
   onItineraryCustomise?: (config: { startDate: string; endDate: string }) => void;
   onCancel?: () => void;
@@ -385,6 +386,7 @@ interface ExperienceDatesProps {
 export const ExperienceDates = ({
   experienceId,
   experience,
+  locationPlaceId,
   onDatesUpdatedSuccess,
   onItineraryCustomise,
   onCancel,
@@ -595,7 +597,7 @@ export const ExperienceDates = ({
       await updateExperience({
         title: experience.title,
         description: experience.description,
-        googleMapPlaceId: 'ChIJkYb7L8EXLxgRWogSMeTPg8M', // Placeholder, as location is required by API but not part of this form
+        googleMapPlaceId: locationPlaceId || experience.googleMapPlaceId || 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
         startDate: startDateTime,
         endDate: endDateTime,
         recurrence_rule: recurrenceRule,

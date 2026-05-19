@@ -210,10 +210,16 @@ export async function updateExperience(id: string, data: CreateExperience): Prom
   }
 }
 
-export async function createExperienceTicket(data: CreateExperienceTicket): Promise<ApiResponse> {
+export async function createExperienceTicket(
+  experienceId: string,
+  data: CreateExperienceTicket,
+): Promise<ApiResponse> {
   try {
     const axiosInstance = await apiWithToken();
-    const response = await axiosInstance.post(`/v1/experiences/tickets/`, data);
+    const response = await axiosInstance.post(
+      `/v1/experiences/${experienceId}/tickets/`,
+      data,
+    );
 
     return {
       status: response.status,
@@ -232,12 +238,16 @@ export async function createExperienceTicket(data: CreateExperienceTicket): Prom
 }
 
 export async function updateExperienceTicket(
+  experienceId: string,
   ticketId: string,
   data: CreateExperienceTicket,
 ): Promise<ApiResponse> {
   try {
     const axiosInstance = await apiWithToken();
-    const response = await axiosInstance.put(`/v1/experiences/tickets/${ticketId}/`, data);
+    const response = await axiosInstance.patch(
+      `/v1/experiences/${experienceId}/tickets/${ticketId}/`,
+      data,
+    );
 
     return {
       status: response.status,
@@ -255,10 +265,15 @@ export async function updateExperienceTicket(
   }
 }
 
-export const deleteExperienceTicket = async (ticketId: string): Promise<ApiResponse> => {
+export const deleteExperienceTicket = async (
+  experienceId: string,
+  ticketId: string,
+): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();
-    const response = await axiosInstance.delete(`/v1/experiences/tickets/${ticketId}/`);
+    const response = await axiosInstance.delete(
+      `/v1/experiences/${experienceId}/tickets/${ticketId}/`,
+    );
 
     return {
       status: response.status,
@@ -300,6 +315,153 @@ export const publishExperience = async (id: string): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();
     const response = await axiosInstance.post(`/v1/experiences/${id}/publish/`);
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+};
+
+export const addExperiencePhotos = async (
+  experienceId: string,
+  photos: File[],
+): Promise<ApiResponse> => {
+  try {
+    await assertValidImageFiles(photos);
+    const axiosInstance = await apiWithToken();
+    const formData = new FormData();
+    photos.forEach((photo, index) => {
+      const fileName = photo.name || `image_${Date.now()}_${index}`;
+      formData.append('photos', photo, fileName);
+    });
+
+    const response = await axiosInstance.post(
+      `/v1/experiences/${experienceId}/photos/`,
+      formData,
+      {
+        headers: {
+          'Content-Type': undefined,
+        },
+      },
+    );
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+};
+
+export const deleteExperiencePhoto = async (
+  experienceId: string,
+  photoId: string,
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.delete(
+      `/v1/experiences/${experienceId}/photos/${photoId}/`,
+    );
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+};
+
+export const searchUsers = async (query: string): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.get(`/v1/users/search/`, {
+      params: { search: query },
+    });
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+};
+
+export interface CreateSlotTemplateData {
+  weekday: string;
+  startTime: string;
+  endTime: string;
+}
+
+export const createSlotTemplate = async (
+  experienceId: string,
+  data: CreateSlotTemplateData,
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.post(
+      `/v1/experiences/${experienceId}/slot-templates/`,
+      data,
+    );
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+};
+
+export const deleteSlotTemplate = async (
+  experienceId: string,
+  templateId: string,
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.delete(
+      `/v1/experiences/${experienceId}/slot-templates/${templateId}/`,
+    );
+
     return {
       status: response.status,
       success: true,

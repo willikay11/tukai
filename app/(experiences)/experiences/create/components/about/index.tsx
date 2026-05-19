@@ -299,7 +299,7 @@ export const CreateExperienceAbout = ({
     const payload = {
       title: values.title,
       description: editorHtmlValues.description || plainTextToHtml(values.description),
-      googleMapPlaceId: 'ChIJkYb7L8EXLxgRWogSMeTPg8M', // Placeholder, as location is required by API but not part of this form
+      googleMapPlaceId: values.location || 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
       startDate: today,
       endDate: '2026-03-27T18:39:20.886Z',
       recurrence_rule: rule.toString(),

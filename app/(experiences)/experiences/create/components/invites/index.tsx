@@ -1,13 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { InviteCommunities } from '@/components/ui/invite-communities';
 import { InviteMembers, InvitedMember } from '@/components/ui/invite-members';
-import { useGetUsers } from '@/app/shared/hooks/useAuth';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
-import { useAddGuestToExperience, useUpdateExperience } from '@/app/shared/hooks/useExperiences';
+import { useAddGuestToExperience, useUpdateExperience, useSearchUsersDebounced } from '@/app/shared/hooks/useExperiences';
 import { toast } from '@/app/shared/hooks/useToast';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
@@ -50,8 +49,39 @@ export const CreateExperienceInvites = ({
 
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>(initialInvitedMembers);
   const [memberSearchQuery, setMemberSearchQuery] = useState('');
+  const [searchUsers, setSearchUsers] = useState<any[]>([]);
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
 
   const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
+
+  // Search hook with mutation-based API call
+  const { mutateAsync: searchUsersAsync } = useSearchUsersDebounced();
+
+  // Debounced search implementation
+  useEffect(() => {
+    const debounceTimer = setTimeout(async () => {
+      const normalizedQuery = memberSearchQuery.trim();
+
+      if (normalizedQuery.length === 0) {
+        setSearchUsers([]);
+        setIsSearchingUsers(false);
+        return;
+      }
+
+      try {
+        setIsSearchingUsers(true);
+        const response = await searchUsersAsync(normalizedQuery);
+        setSearchUsers(response?.data || []);
+      } catch (error: any) {
+        console.error('[invites] User search error:', error);
+        setSearchUsers([]);
+      } finally {
+        setIsSearchingUsers(false);
+      }
+    }, 500); // 500ms debounce delay
+
+    return () => clearTimeout(debounceTimer);
+  }, [memberSearchQuery, searchUsersAsync]);
 
   useEffect(() => {
     setInvitedMembers(initialInvitedMembers);
@@ -60,14 +90,6 @@ export const CreateExperienceInvites = ({
   useEffect(() => {
     onInvitesChange?.(invitedMembers, invitedCommunities);
   }, [invitedMembers, invitedCommunities, onInvitesChange]);
-
-  const normalizedMemberQuery = memberSearchQuery.trim();
-
-  const { data: users = [], isFetching: isSearchingUsers } = useGetUsers(
-    1,
-    10,
-    normalizedMemberQuery.length > 0 ? normalizedMemberQuery : undefined,
-  );
 
   const { data: userCommunities, isFetching: isFetchingCommunities } = useGetCommunities({
     page: 1,
@@ -88,7 +110,7 @@ export const CreateExperienceInvites = ({
         await updateExperience({
           title: experience.title,
           description: experience.description || '',
-          googleMapPlaceId: 'ChIJkYb7L8EXLxgRWogSMeTPg8M', // Placeholder, as location is required by API but not part of this form
+          googleMapPlaceId: experience.googleMapPlaceId || 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
           startDate: experience.startDate || '',
           endDate: experience.endDate || '',
           recurrence_rule:
@@ -142,11 +164,12 @@ export const CreateExperienceInvites = ({
   };
 
   const memberSearchResults = useMemo<InvitedMember[]>(() => {
-    if (!normalizedMemberQuery) {
+    const normalizedQuery = memberSearchQuery.trim();
+    if (!normalizedQuery) {
       return [];
     }
 
-    return users
+    return searchUsers
       .map((user: any) => {
         const firstName = user.firstName || '';
         const lastName = user.lastName || '';
@@ -160,7 +183,7 @@ export const CreateExperienceInvites = ({
         } as InvitedMember;
       })
       .filter((user: InvitedMember) => !invitedMembers.some((member) => member.id === user.id));
-  }, [users, invitedMembers, normalizedMemberQuery]);
+  }, [searchUsers, invitedMembers, memberSearchQuery]);
 
   const availableCommunities = useMemo<Community[]>(() => {
     if (!userCommunities?.data) {

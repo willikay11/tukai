@@ -1,25 +1,47 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useToast } from '@/app/shared/hooks/useToast';
+import { useAddExperiencePhotos, useDeleteExperiencePhoto } from '@/app/shared/hooks/useExperiences';
+import { Photo } from '@/types/photo';
+
+interface LocalPhoto {
+  id?: string; // Present if it's an existing photo
+  photo: string; // URL or base64
+  file?: File; // Present if it's a new photo
+  isCover?: boolean;
+}
 
 interface PhotoEditPanelProps {
-  photos: string[];
-  onPhotosChange: (photos: string[]) => void;
+  photos: Photo[];
+  experienceId?: string;
+  onPhotosChange: (photos: Photo[]) => void;
   onClose: () => void;
+  onAddPhotos?: (files: File[]) => Promise<void>;
+  onDeletePhoto?: (photoId: string) => Promise<void>;
   maxPhotos?: number;
 }
 
 export const PhotoEditPanel = ({
   photos,
+  experienceId,
   onPhotosChange,
   onClose,
+  onAddPhotos,
+  onDeletePhoto,
   maxPhotos = 9,
 }: PhotoEditPanelProps) => {
-  const [localPhotos, setLocalPhotos] = useState<string[]>(photos);
+  const [localPhotos, setLocalPhotos] = useState<LocalPhoto[]>(
+    photos.map((p) => ({ id: p.id, photo: p.photo, isCover: p.isCover }))
+  );
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  // API hooks
+  const { mutateAsync: addPhotosAsync } = useAddExperiencePhotos(experienceId || '');
+  const { mutateAsync: deletePhotoAsync } = useDeleteExperiencePhoto(experienceId || '');
 
   const handleAddPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.currentTarget.files;
@@ -38,7 +60,7 @@ export const PhotoEditPanel = ({
       const reader = new FileReader();
       reader.onload = (event) => {
         const result = event.target?.result as string;
-        setLocalPhotos((prev) => [...prev, result]);
+        setLocalPhotos((prev) => [...prev, { photo: result, file }]);
       };
       reader.readAsDataURL(file);
     });
@@ -48,10 +70,63 @@ export const PhotoEditPanel = ({
     setLocalPhotos((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSave = () => {
-    onPhotosChange(localPhotos);
-    onClose();
-  };
+  const handleSave = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      // Collect new files to upload
+      const newFiles = localPhotos.filter((p) => p.file).map((p) => p.file!);
+
+      // Collect photos to delete (existing photos no longer in the list)
+      const originalPhotoIds = photos.map((p) => p.id);
+      const currentPhotoIds = localPhotos.filter((p) => p.id).map((p) => p.id!);
+      const photosToDelete = originalPhotoIds.filter((id) => !currentPhotoIds.includes(id));
+
+      // Upload new photos
+      if (newFiles.length > 0) {
+        if (onAddPhotos) {
+          await onAddPhotos(newFiles);
+        } else if (experienceId) {
+          await addPhotosAsync(newFiles);
+        }
+      }
+
+      // Delete removed photos
+      for (const photoId of photosToDelete) {
+        if (onDeletePhoto) {
+          await onDeletePhoto(photoId);
+        } else if (experienceId) {
+          await deletePhotoAsync(photoId);
+        }
+      }
+
+      // Update local state with the API response
+      const updatedPhotos: Photo[] = localPhotos
+        .filter((p) => !p.file) // Remove new files since they're uploaded
+        .map((p) => ({
+          id: p.id || `temp-${Date.now()}`,
+          photo: p.photo,
+          isCover: p.isCover,
+        }));
+
+      onPhotosChange(updatedPhotos);
+      toast({
+        title: 'Success',
+        description: 'Photos updated successfully.',
+        variant: 'success',
+      });
+      onClose();
+    } catch (error: any) {
+      const message = error?.message || 'Failed to update photos';
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+      console.error('[PhotoEditPanel] Error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [localPhotos, photos, experienceId, onPhotosChange, onClose, onAddPhotos, onDeletePhoto, addPhotosAsync, deletePhotoAsync, toast]);
 
   return (
     <div className="space-y-4">
@@ -102,6 +177,7 @@ export const PhotoEditPanel = ({
           type="button"
           variant="outline"
           onClick={onClose}
+          disabled={isLoading}
           className="flex-1"
         >
           Cancel
@@ -110,9 +186,10 @@ export const PhotoEditPanel = ({
           type="button"
           variant="gradient"
           onClick={handleSave}
+          disabled={isLoading}
           className="flex-1"
         >
-          Save Photos
+          {isLoading ? 'Saving...' : 'Save Photos'}
         </Button>
       </div>
     </div>

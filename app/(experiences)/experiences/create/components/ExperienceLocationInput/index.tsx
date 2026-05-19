@@ -6,9 +6,14 @@ import { LocationAutocompleteField } from '@/app/shared/components/LocationPicke
 import { useGoogleMapsAutocomplete } from '@/app/shared/hooks/usePlaces';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 
+interface LocationValue {
+  description: string;
+  placeId: string;
+}
+
 interface ExperienceLocationInputProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string, placeId?: string) => void;
   error?: string;
 }
 
@@ -36,7 +41,7 @@ export const ExperienceLocationInput = ({ value, onChange, error }: ExperienceLo
   );
 
   const handleSelectSuggestion = useCallback((place: GoogleMapsAutocompletePrediction) => {
-    onChange(place.description);
+    onChange(place.description, place.place_id);
     setInputValue(place.description);
     setShowSuggestions(false);
   }, [onChange]);
