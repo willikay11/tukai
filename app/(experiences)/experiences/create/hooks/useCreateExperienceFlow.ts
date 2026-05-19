@@ -616,6 +616,22 @@ export const useCreateExperienceFlow = () => {
         console.log('[handleSaveAbout] Calling updateExperienceAsync with payload:', payload);
         await updateExperienceAsync(payload);
         console.log('[handleSaveAbout] updateExperienceAsync completed');
+
+        // Upload photos separately if present
+        if (formData.about.photoFiles && formData.about.photoFiles.length > 0) {
+          try {
+            console.log('[handleSaveAbout] Uploading', formData.about.photoFiles.length, 'photos to experience', experienceId);
+            const photoResponse = await addExperiencePhotos(experienceId, formData.about.photoFiles);
+            console.log('[handleSaveAbout] Photos uploaded successfully, response:', photoResponse);
+          } catch (photoError: any) {
+            console.error('[handleSaveAbout] Photo upload failed:', photoError);
+            toast({
+              title: 'Warning',
+              description: 'Photos failed to upload. You can add them again from the review page.',
+              variant: 'default',
+            });
+          }
+        }
       } else {
         console.log('[handleSaveAbout] Calling createExperienceAsync with payload:', payload);
         const response = await createExperienceAsync(payload);
