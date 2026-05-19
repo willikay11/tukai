@@ -7,6 +7,7 @@ import { InvitedMember } from '@/components/ui/invite-members';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { parseApiError } from '@/utils/parseApiError';
+import { addExperiencePhotos } from '@/services/experience';
 import {
   useFetchSingleExperience,
   useCreateExperience,
@@ -624,8 +625,8 @@ export const useCreateExperienceFlow = () => {
         // Upload photos separately if present
         if (formData.about.photoFiles && formData.about.photoFiles.length > 0) {
           try {
-            console.log('[handleSaveAbout] Uploading', formData.about.photoFiles.length, 'photos');
-            await addPhotosAsync(formData.about.photoFiles);
+            console.log('[handleSaveAbout] Uploading', formData.about.photoFiles.length, 'photos to experience', newExperienceId);
+            await addExperiencePhotos(newExperienceId, formData.about.photoFiles);
             console.log('[handleSaveAbout] Photos uploaded successfully');
           } catch (photoError: any) {
             console.error('[handleSaveAbout] Photo upload failed:', photoError);
