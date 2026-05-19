@@ -110,7 +110,7 @@ export const ReviewLayout = ({
       {/* 7. Location */}
       {experience.location && (
         <PreviewLocationSection
-          location={experience.location}
+          location={experience.location?.formattedAddress || null}
           onEdit={() => handleEditClick('about')}
         />
       )}
