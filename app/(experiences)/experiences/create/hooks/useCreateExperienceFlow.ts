@@ -341,7 +341,27 @@ export const useCreateExperienceFlow = () => {
       startTime,
       endTime,
     });
-  }, [experience, experienceId, updateAboutFormData, updateFormData]);
+
+    // Load tickets from saved experience
+    if (experience.tickets && experience.tickets.length > 0) {
+      const savedTickets = experience.tickets.map((ticket) => ({
+        id: `ticket-${Date.now()}-${Math.random()}`,
+        apiId: ticket.id,
+        name: ticket.name,
+        quantity: ticket.availableQuantity || ticket.quantity,
+        amount: ticket.price,
+        salesStartDate: null,
+        salesStartTime: null,
+        salesEndDate: null,
+        salesEndTime: null,
+        acceptPartialPayment: false,
+        salesStartRelative: null,
+        salesEndRelative: null,
+        duplicateForEntirePeriod: false,
+      }));
+      updateTicketsFormData({ items: savedTickets });
+    }
+  }, [experience, experienceId, updateAboutFormData, updateFormData, updateTicketsFormData]);
 
   const updateWalletFormData = useCallback((data: Partial<FormData['wallet']>) => {
     setFormData((prev) => ({
