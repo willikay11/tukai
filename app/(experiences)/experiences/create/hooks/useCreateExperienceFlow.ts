@@ -621,13 +621,16 @@ export const useCreateExperienceFlow = () => {
         const response = await createExperienceAsync(payload);
         console.log('[handleSaveAbout] createExperienceAsync completed, response:', response);
         const newExperienceId = response.data?.id || '';
+        console.log('[handleSaveAbout] newExperienceId:', newExperienceId);
+        console.log('[handleSaveAbout] photoFiles:', formData.about.photoFiles);
+        console.log('[handleSaveAbout] photoFiles.length:', formData.about.photoFiles?.length);
 
         // Upload photos separately if present
         if (formData.about.photoFiles && formData.about.photoFiles.length > 0) {
           try {
             console.log('[handleSaveAbout] Uploading', formData.about.photoFiles.length, 'photos to experience', newExperienceId);
-            await addExperiencePhotos(newExperienceId, formData.about.photoFiles);
-            console.log('[handleSaveAbout] Photos uploaded successfully');
+            const photoResponse = await addExperiencePhotos(newExperienceId, formData.about.photoFiles);
+            console.log('[handleSaveAbout] Photos uploaded successfully, response:', photoResponse);
           } catch (photoError: any) {
             console.error('[handleSaveAbout] Photo upload failed:', photoError);
             toast({
@@ -637,6 +640,8 @@ export const useCreateExperienceFlow = () => {
             });
             // Don't block advancement - experience was already created
           }
+        } else {
+          console.log('[handleSaveAbout] No photos to upload or photoFiles is empty');
         }
 
         handleExperienceCreated(newExperienceId);
