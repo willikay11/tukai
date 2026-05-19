@@ -360,13 +360,12 @@ export const addExperiencePhotos = async (
 };
 
 export const deleteExperiencePhoto = async (
-  experienceId: string,
   photoId: string,
 ): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();
     const response = await axiosInstance.delete(
-      `/v1/experiences/${experienceId}/photos/${photoId}/`,
+      `/v1/experiences/photos/${photoId}/`,
     );
 
     return {

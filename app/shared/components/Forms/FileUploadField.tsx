@@ -18,9 +18,12 @@ type FileUploadFieldProps = {
   maxImageWidth?: number;
   maxImageHeight?: number;
   initialUrls?: string[];
+  existingPhotoIds?: string[];
   onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   onFilesChange?: (files: File[]) => void;
   onValidationError?: (errors: string[]) => void;
+  onDeleteExisting?: (photoId: string) => Promise<void>;
+  isDeletingPhoto?: boolean;
 };
 
 export const FileUploadField = ({
@@ -37,9 +40,12 @@ export const FileUploadField = ({
   maxImageWidth,
   maxImageHeight,
   initialUrls = [],
+  existingPhotoIds = [],
   onChange,
   onFilesChange,
   onValidationError,
+  onDeleteExisting,
+  isDeletingPhoto = false,
 }: FileUploadFieldProps) => {
   const [previewUrls, setPreviewUrls] = useState<string[]>(initialUrls);
   const [existingUrls, setExistingUrls] = useState<string[]>(initialUrls);
@@ -250,13 +256,34 @@ export const FileUploadField = ({
     setDraggedIndex(null);
   };
 
-  const handleRemoveImage = (index: number) => {
+  const handleRemoveImage = async (index: number) => {
+    const urlToRemove = previewUrls[index];
+    const isExisting = existingUrls.includes(urlToRemove);
+
+    // If it's an existing photo with an ID, call the delete API
+    if (isExisting && onDeleteExisting && existingPhotoIds[existingUrls.indexOf(urlToRemove)]) {
+      const photoId = existingPhotoIds[existingUrls.indexOf(urlToRemove)];
+      try {
+        await onDeleteExisting(photoId);
+      } catch (error) {
+        // Error already handled in the callback, don't remove from UI
+        return;
+      }
+    }
+
     setPreviewUrls((previous) => {
       const updated = [...previous];
       const urlToRevoke = updated[index];
-      if (urlToRevoke) {
+      if (urlToRevoke && !isExisting) {
+        // Only revoke object URLs created by FileReader, not external URLs
         URL.revokeObjectURL(urlToRevoke);
       }
+      updated.splice(index, 1);
+      return updated;
+    });
+
+    setExistingUrls((previous) => {
+      const updated = [...previous];
       updated.splice(index, 1);
       return updated;
     });
@@ -299,7 +326,8 @@ export const FileUploadField = ({
               <button
                 type="button"
                 onClick={() => handleRemoveImage(index)}
-                className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-700/70 text-white transition-colors hover:bg-gray-800/80"
+                disabled={isDeletingPhoto}
+                className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-700/70 text-white transition-colors hover:bg-gray-800/80 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Remove image"
               >
                 <IconComponent iconName="Cancel01Icon" color="#FFFFFF" size={18} />

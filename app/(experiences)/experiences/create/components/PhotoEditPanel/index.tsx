@@ -41,7 +41,7 @@ export const PhotoEditPanel = ({
 
   // API hooks
   const { mutateAsync: addPhotosAsync } = useAddExperiencePhotos(experienceId || '');
-  const { mutateAsync: deletePhotoAsync } = useDeleteExperiencePhoto(experienceId || '');
+  const { mutateAsync: deletePhotoAsync } = useDeleteExperiencePhoto();
 
   const handleAddPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.currentTarget.files;
@@ -66,7 +66,25 @@ export const PhotoEditPanel = ({
     });
   };
 
-  const handleRemovePhoto = (index: number) => {
+  const handleRemovePhoto = async (index: number) => {
+    const photoToRemove = localPhotos[index];
+
+    // If it's an existing photo, delete it immediately via API
+    if (photoToRemove.id) {
+      try {
+        await deletePhotoAsync(photoToRemove.id);
+      } catch (error: any) {
+        toast({
+          title: 'Error',
+          description: 'Failed to delete photo. Please try again.',
+          variant: 'destructive',
+        });
+        // Don't remove from UI if API failed
+        return;
+      }
+    }
+
+    // Remove from local state
     setLocalPhotos((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -76,12 +94,7 @@ export const PhotoEditPanel = ({
       // Collect new files to upload
       const newFiles = localPhotos.filter((p) => p.file).map((p) => p.file!);
 
-      // Collect photos to delete (existing photos no longer in the list)
-      const originalPhotoIds = photos.map((p) => p.id);
-      const currentPhotoIds = localPhotos.filter((p) => p.id).map((p) => p.id!);
-      const photosToDelete = originalPhotoIds.filter((id) => !currentPhotoIds.includes(id));
-
-      // Upload new photos
+      // Upload new photos if any
       if (newFiles.length > 0) {
         if (onAddPhotos) {
           await onAddPhotos(newFiles);
@@ -90,16 +103,7 @@ export const PhotoEditPanel = ({
         }
       }
 
-      // Delete removed photos
-      for (const photoId of photosToDelete) {
-        if (onDeletePhoto) {
-          await onDeletePhoto(photoId);
-        } else if (experienceId) {
-          await deletePhotoAsync(photoId);
-        }
-      }
-
-      // Update local state with the API response
+      // Update local state (photos are already deleted via immediate API call)
       const updatedPhotos: Photo[] = localPhotos
         .filter((p) => !p.file) // Remove new files since they're uploaded
         .map((p) => ({
@@ -126,7 +130,7 @@ export const PhotoEditPanel = ({
     } finally {
       setIsLoading(false);
     }
-  }, [localPhotos, photos, experienceId, onPhotosChange, onClose, onAddPhotos, onDeletePhoto, addPhotosAsync, deletePhotoAsync, toast]);
+  }, [localPhotos, experienceId, onPhotosChange, onClose, onAddPhotos, addPhotosAsync, toast]);
 
   return (
     <div className="space-y-4">
@@ -148,7 +152,8 @@ export const PhotoEditPanel = ({
             <button
               type="button"
               onClick={() => handleRemovePhoto(index)}
-              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600"
+              disabled={isLoading}
+              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="text-sm">×</span>
             </button>

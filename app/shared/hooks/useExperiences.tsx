@@ -158,13 +158,13 @@ export const useAddExperiencePhotos = (experienceId: string) => {
   });
 };
 
-export const useDeleteExperiencePhoto = (experienceId: string) => {
+export const useDeleteExperiencePhoto = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationKey: ['deleteExperiencePhoto', experienceId],
-    mutationFn: async (photoId: string) => await deleteExperiencePhoto(experienceId, photoId),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
+    mutationKey: ['deleteExperiencePhoto'],
+    mutationFn: async (photoId: string) => await deleteExperiencePhoto(photoId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['experience'] });
     },
   });
 };

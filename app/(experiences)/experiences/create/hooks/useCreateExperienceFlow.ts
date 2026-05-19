@@ -142,6 +142,7 @@ const initialFormData: FormData = {
   },
   about: {
     photos: [],
+    photoIds: [],
     photoFiles: [],
     title: '',
     visibility: 'public',
@@ -219,7 +220,7 @@ export const useCreateExperienceFlow = () => {
   const { mutateAsync: createExperienceAsync } = useCreateExperience();
   const { mutateAsync: updateExperienceAsync } = useUpdateExperience(experienceId || '');
   const { mutateAsync: addPhotosAsync } = useAddExperiencePhotos(experienceId || '');
-  const { mutateAsync: deletePhotoAsync } = useDeleteExperiencePhoto(experienceId || '');
+  const { mutateAsync: deletePhotoAsync } = useDeleteExperiencePhoto();
   const { mutateAsync: addGuestAsync } = useAddGuestToExperience(experienceId || '');
   const { mutateAsync: publishAsync } = usePublishExperience(experienceId || '');
 
@@ -323,6 +324,7 @@ export const useCreateExperienceFlow = () => {
       description: experience.description,
       visibility: experience.isPublic ? 'public' : 'private',
       photos: experience.photos?.map((photo: Photo) => photo.photo) || [],
+      photoIds: experience.photos?.map((photo: Photo) => photo.id) || [],
       categories: experience.categories || [],
       location: experience.location?.name || '',
       locationPlaceId: experience.location?.googleMapPlaceId || '',

@@ -1,18 +1,35 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import { FileUploadField } from '@/app/shared/components/Forms';
+import { useDeleteExperiencePhoto } from '@/app/shared/hooks/useExperiences';
+import { useToast } from '@/app/shared/hooks/useToast';
+import { PhotoItem } from '@/types/photo';
 
 interface PhotoUploaderProps {
   photoUrl?: string | null;
   photoUrls?: string[];
+  existingPhotoIds?: string[];
   onPhotoChange: (url: string | null) => void;
   onPhotoFilesChange?: (files: File[]) => void;
+  onPhotoDelete?: (photoId: string) => void;
   error?: string;
 }
 
-export const PhotoUploader = ({ photoUrl, photoUrls, onPhotoChange, onPhotoFilesChange, error }: PhotoUploaderProps) => {
+export const PhotoUploader = ({
+  photoUrl,
+  photoUrls,
+  existingPhotoIds,
+  onPhotoChange,
+  onPhotoFilesChange,
+  onPhotoDelete,
+  error,
+}: PhotoUploaderProps) => {
+  const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
+  const { mutateAsync: deletePhotoAsync } = useDeleteExperiencePhoto();
+  const { toast } = useToast();
+
   const handleFilesChange = useCallback(
     (files: File[]) => {
       if (files.length > 0) {
@@ -34,6 +51,30 @@ export const PhotoUploader = ({ photoUrl, photoUrls, onPhotoChange, onPhotoFiles
     [onPhotoChange, onPhotoFilesChange],
   );
 
+  const handleDeleteExistingPhoto = useCallback(
+    async (photoId: string) => {
+      setIsDeletingPhoto(true);
+      try {
+        console.log('[PhotoUploader] Deleting photo:', photoId);
+        await deletePhotoAsync(photoId);
+        console.log('[PhotoUploader] Photo deleted successfully');
+        if (onPhotoDelete) {
+          onPhotoDelete(photoId);
+        }
+      } catch (error: any) {
+        console.error('[PhotoUploader] Failed to delete photo:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to delete photo. Please try again.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsDeletingPhoto(false);
+      }
+    },
+    [deletePhotoAsync, onPhotoDelete, toast],
+  );
+
   const initialUrls = photoUrls || (photoUrl ? [photoUrl] : []);
 
   return (
@@ -48,7 +89,10 @@ export const PhotoUploader = ({ photoUrl, photoUrls, onPhotoChange, onPhotoFiles
         minImageWidth={540}
         minImageHeight={540}
         initialUrls={initialUrls}
+        existingPhotoIds={existingPhotoIds}
         onFilesChange={handleFilesChange}
+        onDeleteExisting={handleDeleteExistingPhoto}
+        isDeletingPhoto={isDeletingPhoto}
       />
       {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
