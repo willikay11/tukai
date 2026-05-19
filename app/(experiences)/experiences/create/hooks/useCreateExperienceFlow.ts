@@ -607,6 +607,7 @@ export const useCreateExperienceFlow = () => {
         recurrence_rule: '',
         categoriesIds: formData.about.categories.map((c) => c.id),
         isPublic: formData.about.visibility === 'public',
+        isPaid: formData.dateType.experiencePricing === 'paid',
         newPhotos: [],
         invitedCommunityIds: [],
         invitedGuestsEmails: [],
