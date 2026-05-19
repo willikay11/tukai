@@ -135,7 +135,7 @@ export const AboutStep = ({
         Add details about the experience
       </p>
 
-      <PhotoUploader photoUrl={formData.photos?.[0] || null} onPhotoChange={handlePhotoChange} onPhotoFilesChange={handlePhotoFilesChange} error={errors.photos} />
+      <PhotoUploader photoUrls={formData.photos} onPhotoChange={handlePhotoChange} onPhotoFilesChange={handlePhotoFilesChange} error={errors.photos} />
 
       <ExperienceTitleInput value={formData.title} onChange={handleTitleChange} error={errors.title} />
 

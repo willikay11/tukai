@@ -5,13 +5,14 @@ import { useCallback } from 'react';
 import { FileUploadField } from '@/app/shared/components/Forms';
 
 interface PhotoUploaderProps {
-  photoUrl: string | null;
+  photoUrl?: string | null;
+  photoUrls?: string[];
   onPhotoChange: (url: string | null) => void;
   onPhotoFilesChange?: (files: File[]) => void;
   error?: string;
 }
 
-export const PhotoUploader = ({ photoUrl, onPhotoChange, onPhotoFilesChange, error }: PhotoUploaderProps) => {
+export const PhotoUploader = ({ photoUrl, photoUrls, onPhotoChange, onPhotoFilesChange, error }: PhotoUploaderProps) => {
   const handleFilesChange = useCallback(
     (files: File[]) => {
       if (files.length > 0) {
@@ -33,7 +34,7 @@ export const PhotoUploader = ({ photoUrl, onPhotoChange, onPhotoFilesChange, err
     [onPhotoChange, onPhotoFilesChange],
   );
 
-  const initialUrls = photoUrl ? [photoUrl] : [];
+  const initialUrls = photoUrls || (photoUrl ? [photoUrl] : []);
 
   return (
     <div className="space-y-2">
