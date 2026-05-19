@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { LocationAutocompleteField } from '@/app/shared/components/LocationPicker';
 import { useGoogleMapsAutocomplete } from '@/app/shared/hooks/usePlaces';
@@ -21,6 +21,10 @@ export const ExperienceLocationInput = ({ value, onChange, error }: ExperienceLo
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [inputValue, setInputValue] = useState(value);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
 
   const { data: googlePlaces, isFetching: isFetchingGooglePlaces } = useGoogleMapsAutocomplete(
     inputValue,
