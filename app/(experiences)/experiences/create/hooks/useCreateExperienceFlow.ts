@@ -294,12 +294,13 @@ export const useCreateExperienceFlow = () => {
 
   const updateAboutFormData = useCallback((data: Partial<FormData['about']>) => {
     console.log("[updateAboutFormData] Updating about with data:", data);
+    console.log("[updateAboutFormData] photoFiles in data:", data.photoFiles?.length || 0);
     setFormData((prev) => {
       const updated = {
         ...prev,
         about: { ...prev.about, ...data },
       };
-      console.log("[updateAboutFormData] New formData.about:", updated.about);
+      console.log("[updateAboutFormData] New formData.about.photoFiles:", updated.about.photoFiles?.length || 0);
       return updated;
     });
   }, []);
@@ -600,6 +601,9 @@ export const useCreateExperienceFlow = () => {
     setIsSavingExperience(true);
     setApiError(null);
     try {
+      console.log('[handleSaveAbout] photoFiles count:', formData.about.photoFiles?.length || 0);
+      console.log('[handleSaveAbout] photoFiles:', formData.about.photoFiles);
+
       const payload = {
         title: formData.about.title,
         description: formData.about.description,
@@ -610,16 +614,38 @@ export const useCreateExperienceFlow = () => {
         categoriesIds: formData.about.categories.map((c) => c.id),
         isPublic: formData.about.visibility === 'public',
         isPaid: formData.dateType.experiencePricing === 'paid',
-        newPhotos: formData.about.photoFiles,
         invitedCommunityIds: [],
         invitedGuestsEmails: [],
       };
 
       if (experienceId) {
+        console.log('[handleSaveAbout] Calling updateExperienceAsync with payload:', payload);
         await updateExperienceAsync(payload);
+        console.log('[handleSaveAbout] updateExperienceAsync completed');
       } else {
+        console.log('[handleSaveAbout] Calling createExperienceAsync with payload:', payload);
         const response = await createExperienceAsync(payload);
-        handleExperienceCreated(response.data?.id || '');
+        console.log('[handleSaveAbout] createExperienceAsync completed, response:', response);
+        const newExperienceId = response.data?.id || '';
+
+        // Upload photos separately if present
+        if (formData.about.photoFiles && formData.about.photoFiles.length > 0) {
+          try {
+            console.log('[handleSaveAbout] Uploading', formData.about.photoFiles.length, 'photos');
+            await addPhotosAsync(formData.about.photoFiles);
+            console.log('[handleSaveAbout] Photos uploaded successfully');
+          } catch (photoError: any) {
+            console.error('[handleSaveAbout] Photo upload failed:', photoError);
+            toast({
+              title: 'Warning',
+              description: 'Experience saved but photos failed to upload. You can add them again from the review page.',
+              variant: 'default',
+            });
+            // Don't block advancement - experience was already created
+          }
+        }
+
+        handleExperienceCreated(newExperienceId);
       }
 
       setActiveStep('dates-tickets');

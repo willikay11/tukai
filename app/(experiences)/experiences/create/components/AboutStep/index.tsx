@@ -61,6 +61,7 @@ export const AboutStep = ({
 
   const handlePhotoFilesChange = useCallback(
     (files: File[]) => {
+      console.log('[AboutStep] handlePhotoFilesChange called with', files.length, 'files');
       onFormDataChange({ photoFiles: files });
     },
     [onFormDataChange],

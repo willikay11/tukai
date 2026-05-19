@@ -12,11 +12,15 @@ interface PhotoUploaderProps {
 }
 
 export const PhotoUploader = ({ photoUrl, onPhotoChange, onPhotoFilesChange, error }: PhotoUploaderProps) => {
+  console.log('[PhotoUploader] Rendering with onPhotoFilesChange:', !!onPhotoFilesChange);
+
   const handleFilesChange = useCallback(
     (files: File[]) => {
       if (files.length > 0) {
+        console.log('[PhotoUploader] Files selected:', files);
         // Pass the File objects to the parent
         if (onPhotoFilesChange) {
+          console.log('[PhotoUploader] Calling onPhotoFilesChange with', files.length, 'files');
           onPhotoFilesChange(files);
         }
         // Process only new files - compare with the single photoUrl we currently have

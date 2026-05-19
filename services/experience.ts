@@ -131,14 +131,6 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
       formData.append('is_paid', String(data.isPaid));
     }
 
-    if (data.newPhotos && data.newPhotos.length > 0) {
-      await assertValidImageFiles(data.newPhotos);
-      data.newPhotos.forEach((photo, index) => {
-        const fileName = photo.name || `image_${Date.now()}_${index}`;
-        formData.append('new_photos', photo, fileName);
-      });
-    }
-
     const response = await axiosInstance.post(`/v1/experiences/`, formData, {
       headers: {
         'Content-Type': undefined,
@@ -178,14 +170,6 @@ export async function updateExperience(id: string, data: CreateExperience): Prom
 
     if (data.isPaid !== undefined) {
       formData.append('is_paid', String(data.isPaid));
-    }
-
-    if (data.newPhotos && data.newPhotos.length > 0) {
-      await assertValidImageFiles(data.newPhotos);
-      data.newPhotos.forEach((photo, index) => {
-        const fileName = photo.name || `image_${Date.now()}_${index}`;
-        formData.append('new_photos', photo, fileName);
-      });
     }
 
     if (data.invitedCommunityIds) {
