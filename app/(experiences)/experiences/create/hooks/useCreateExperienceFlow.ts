@@ -30,6 +30,17 @@ import {
 import { Wallet } from '@/types/payment';
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
+
+const formatDateWithTime = (date: string, isEndOfDay: boolean = false): string => {
+  if (!date) return '';
+  // Date format is assumed to be ISO string (YYYY-MM-DD)
+  if (isEndOfDay) {
+    return `${date}T23:59:59`;
+  } else {
+    return `${date}T00:00:00`;
+  }
+};
+
 const parseExperienceStepId = (step: string | null): ExperienceStepId | null => {
   const validSteps: ExperienceStepId[] = ['community', 'about', 'dates-tickets', 'guests', 'wallet'];
   if (step && validSteps.includes(step as ExperienceStepId)) {
@@ -545,8 +556,8 @@ export const useCreateExperienceFlow = () => {
         title: formData.about.title,
         description: formData.about.description,
         googleMapPlaceId: formData.about.locationPlaceId || 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
-        startDate: formData.dateType.date || '',
-        endDate: formData.dateType.date || '',
+        startDate: formatDateWithTime(formData.dateType.date || '', false),
+        endDate: formatDateWithTime(formData.dateType.date || '', true),
         recurrence_rule: '',
         categoriesIds: formData.about.categories.map((c) => c.id),
         isPublic: formData.about.visibility === 'public',
