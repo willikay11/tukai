@@ -13,18 +13,24 @@ interface LocationValue {
 
 interface ExperienceLocationInputProps {
   value: string;
+  placeId?: string;
   onChange: (value: string, placeId?: string) => void;
   error?: string;
 }
 
-export const ExperienceLocationInput = ({ value, onChange, error }: ExperienceLocationInputProps) => {
+export const ExperienceLocationInput = ({ value, placeId, onChange, error }: ExperienceLocationInputProps) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [inputValue, setInputValue] = useState(value);
+  const [selectedPlaceId, setSelectedPlaceId] = useState(placeId);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setInputValue(value);
   }, [value]);
+
+  useEffect(() => {
+    setSelectedPlaceId(placeId);
+  }, [placeId]);
 
   const { data: googlePlaces, isFetching: isFetchingGooglePlaces } = useGoogleMapsAutocomplete(
     inputValue,
@@ -47,6 +53,7 @@ export const ExperienceLocationInput = ({ value, onChange, error }: ExperienceLo
   const handleSelectSuggestion = useCallback((place: GoogleMapsAutocompletePrediction) => {
     onChange(place.description, place.place_id);
     setInputValue(place.description);
+    setSelectedPlaceId(place.place_id);
     setShowSuggestions(false);
   }, [onChange]);
 

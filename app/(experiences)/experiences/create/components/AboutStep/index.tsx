@@ -164,7 +164,7 @@ export const AboutStep = ({
         descriptionError={errors.description}
       />
 
-      <ExperienceLocationInput value={formData.location} onChange={handleLocationChange} error={errors.location} />
+      <ExperienceLocationInput value={formData.location} placeId={formData.locationPlaceId} onChange={handleLocationChange} error={errors.location} />
 
       <MeetingDetailsInput
         meetingPoint={formData.meetingPoint}
