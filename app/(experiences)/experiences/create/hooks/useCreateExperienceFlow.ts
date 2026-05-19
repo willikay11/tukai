@@ -359,9 +359,12 @@ export const useCreateExperienceFlow = () => {
         salesEndRelative: null,
         duplicateForEntirePeriod: false,
       }));
-      updateTicketsFormData({ items: savedTickets });
+      setFormData((prev) => ({
+        ...prev,
+        tickets: { ...prev.tickets, items: savedTickets },
+      }));
     }
-  }, [experience, experienceId, updateAboutFormData, updateFormData, updateTicketsFormData]);
+  }, [experience, experienceId, updateAboutFormData, updateFormData]);
 
   const updateWalletFormData = useCallback((data: Partial<FormData['wallet']>) => {
     setFormData((prev) => ({
