@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { InvitedMember } from '@/components/ui/invite-members';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
+import { parseApiError } from '@/utils/parseApiError';
 import {
   useFetchSingleExperience,
   useCreateExperience,
@@ -562,7 +563,7 @@ export const useCreateExperienceFlow = () => {
       setActiveStep('dates-tickets');
       replaceCreateUrlParams({ step: 'dates-tickets' });
     } catch (error: any) {
-      const message = error?.response?.data?.message || error?.message || 'Failed to save experience';
+      const message = parseApiError(error, 'Failed to save experience');
       setApiError(message);
       console.error('[handleSaveAbout] Error:', error);
     } finally {
@@ -579,7 +580,7 @@ export const useCreateExperienceFlow = () => {
       }
       await addPhotosAsync(photos);
     } catch (error: any) {
-      const message = error?.response?.data?.message || error?.message || 'Failed to add photos';
+      const message = parseApiError(error, 'Failed to add photos');
       setApiError(message);
       console.error('[handleAddPhotos] Error:', error);
     } finally {
@@ -596,7 +597,7 @@ export const useCreateExperienceFlow = () => {
       }
       await deletePhotoAsync(photoId);
     } catch (error: any) {
-      const message = error?.response?.data?.message || error?.message || 'Failed to delete photo';
+      const message = parseApiError(error, 'Failed to delete photo');
       setApiError(message);
       console.error('[handleDeletePhoto] Error:', error);
     } finally {
@@ -613,7 +614,7 @@ export const useCreateExperienceFlow = () => {
       }
       await addGuestAsync(guestEmail);
     } catch (error: any) {
-      const message = error?.response?.data?.message || error?.message || 'Failed to add guest';
+      const message = parseApiError(error, 'Failed to add guest');
       setApiError(message);
       console.error('[handleAddGuest] Error:', error);
     } finally {
@@ -630,7 +631,7 @@ export const useCreateExperienceFlow = () => {
       }
       await publishAsync();
     } catch (error: any) {
-      const message = error?.response?.data?.message || error?.message || 'Failed to publish experience';
+      const message = parseApiError(error, 'Failed to publish experience');
       setApiError(message);
       console.error('[handlePublish] Error:', error);
     } finally {

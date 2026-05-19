@@ -388,6 +388,7 @@ const canAccessDetailsSteps = Boolean(
                     // Stay on about step
                   }
                 }}
+                isSaving={isSavingExperience}
                 onSaveContinue={async () => {
                   console.log("[steps.tsx] onSaveContinue called");
                   const isValid = validateAbout();
