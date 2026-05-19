@@ -158,9 +158,7 @@ export const FileUploadField = ({
   }, []);
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    console.log('[FileUploadField] handleFileChange called');
     const fileList = event.target.files ? Array.from(event.target.files) : [];
-    console.log('[FileUploadField] fileList.length:', fileList.length);
 
     if (fileList.length > 0) {
       const validationResults = await Promise.all(fileList.map((file) => validateFile(file)));
@@ -191,8 +189,6 @@ export const FileUploadField = ({
           return [...previousUrls, ...acceptedNewUrls];
         });
 
-        console.log('[FileUploadField] Calling onFilesChange with', cappedFiles.length, 'files');
-        console.log('[FileUploadField] onFilesChange callback:', onFilesChange);
         onFilesChange?.(cappedFiles);
         return cappedFiles;
       });

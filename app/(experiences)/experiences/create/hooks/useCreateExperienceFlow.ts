@@ -293,16 +293,10 @@ export const useCreateExperienceFlow = () => {
   }, []);
 
   const updateAboutFormData = useCallback((data: Partial<FormData['about']>) => {
-    console.log("[updateAboutFormData] Updating about with data:", data);
-    console.log("[updateAboutFormData] photoFiles in data:", data.photoFiles?.length || 0);
-    setFormData((prev) => {
-      const updated = {
-        ...prev,
-        about: { ...prev.about, ...data },
-      };
-      console.log("[updateAboutFormData] New formData.about.photoFiles:", updated.about.photoFiles?.length || 0);
-      return updated;
-    });
+    setFormData((prev) => ({
+      ...prev,
+      about: { ...prev.about, ...data },
+    }));
   }, []);
 
   // Populate form when experience is loaded
@@ -315,7 +309,6 @@ export const useCreateExperienceFlow = () => {
     const startDateTime = new Date(experience.startDate);
     const endDateTime = new Date(experience.endDate);
     const startDate = experience.startDate?.split('T')[0];
-    const endDate = experience.endDate?.split('T')[0];
     const startTime = experience.startDate
       ? `${String(startDateTime.getHours()).padStart(2, '0')}:${String(startDateTime.getMinutes()).padStart(2, '0')}`
       : null;
@@ -328,7 +321,7 @@ export const useCreateExperienceFlow = () => {
       title: experience.title,
       description: experience.description,
       visibility: experience.isPublic ? 'public' : 'private',
-      photos: experience.photos?.map((p) => p.url) || [],
+      photos: experience.photos?.map((photo: Photo) => photo.photo) || [],
       categories: experience.categories || [],
       location: experience.location?.name || '',
       locationPlaceId: experience.location?.googleMapPlaceId || '',
