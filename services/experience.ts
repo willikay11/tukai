@@ -327,13 +327,14 @@ export const addExperiencePhotos = async (
     await assertValidImageFiles(photos);
     const axiosInstance = await apiWithToken();
     const formData = new FormData();
+    formData.append('experience', experienceId);
     photos.forEach((photo, index) => {
       const fileName = photo.name || `image_${Date.now()}_${index}`;
-      formData.append('photos', photo, fileName);
+      formData.append('new_photos', photo, fileName);
     });
 
     const response = await axiosInstance.post(
-      `/v1/experiences/${experienceId}/photos/`,
+      `/v1/experiences/photos/`,
       formData,
       {
         headers: {
