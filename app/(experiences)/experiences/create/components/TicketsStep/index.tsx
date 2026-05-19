@@ -218,6 +218,7 @@ export const TicketsStep = ({
       experience: experienceId,
       quantity: draftTicket.quantity!,
       price: draftTicket.amount!.toString(),
+      is_paid: experiencePricing === 'paid',
       sales_start_date: buildDateTime(draftTicket.salesStartDate, draftTicket.salesStartTime),
       sales_end_date: buildDateTime(draftTicket.salesEndDate, draftTicket.salesEndTime),
     };

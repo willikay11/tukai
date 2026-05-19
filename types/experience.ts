@@ -58,6 +58,7 @@ export type CreateExperienceTicket = {
   name: string;
   quantity: number;
   price: string;
+  is_paid?: boolean;
   availableQuantity?: number;
   sales_start_date?: string | null;
   sales_end_date?: string | null;
