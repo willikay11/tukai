@@ -7,13 +7,18 @@ import { FileUploadField } from '@/app/shared/components/Forms';
 interface PhotoUploaderProps {
   photoUrl: string | null;
   onPhotoChange: (url: string | null) => void;
+  onPhotoFilesChange?: (files: File[]) => void;
   error?: string;
 }
 
-export const PhotoUploader = ({ photoUrl, onPhotoChange, error }: PhotoUploaderProps) => {
+export const PhotoUploader = ({ photoUrl, onPhotoChange, onPhotoFilesChange, error }: PhotoUploaderProps) => {
   const handleFilesChange = useCallback(
     (files: File[]) => {
       if (files.length > 0) {
+        // Pass the File objects to the parent
+        if (onPhotoFilesChange) {
+          onPhotoFilesChange(files);
+        }
         // Process only new files - compare with the single photoUrl we currently have
         files.forEach((file) => {
           const reader = new FileReader();
@@ -25,7 +30,7 @@ export const PhotoUploader = ({ photoUrl, onPhotoChange, error }: PhotoUploaderP
         });
       }
     },
-    [onPhotoChange],
+    [onPhotoChange, onPhotoFilesChange],
   );
 
   const initialUrls = photoUrl ? [photoUrl] : [];

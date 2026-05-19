@@ -79,6 +79,7 @@ export interface FormData {
   };
   about: {
     photos: string[];
+    photoFiles: File[];
     title: string;
     visibility: 'public' | 'private';
     description: string;
@@ -140,6 +141,7 @@ const initialFormData: FormData = {
   },
   about: {
     photos: [],
+    photoFiles: [],
     title: '',
     visibility: 'public',
     description: '',
@@ -608,7 +610,7 @@ export const useCreateExperienceFlow = () => {
         categoriesIds: formData.about.categories.map((c) => c.id),
         isPublic: formData.about.visibility === 'public',
         isPaid: formData.dateType.experiencePricing === 'paid',
-        newPhotos: [],
+        newPhotos: formData.about.photoFiles,
         invitedCommunityIds: [],
         invitedGuestsEmails: [],
       };

@@ -14,6 +14,7 @@ import { Interest } from '@/types/interest';
 
 type AboutFormData = {
   photos: string[];
+  photoFiles: File[];
   title: string;
   visibility: 'public' | 'private';
   description: string;
@@ -56,6 +57,13 @@ export const AboutStep = ({
       }
     },
     [onFormDataChange, formData.photos],
+  );
+
+  const handlePhotoFilesChange = useCallback(
+    (files: File[]) => {
+      onFormDataChange({ photoFiles: files });
+    },
+    [onFormDataChange],
   );
 
   const handleTitleChange = useCallback(
@@ -127,7 +135,7 @@ export const AboutStep = ({
         Add details about the experience
       </p>
 
-      <PhotoUploader photoUrl={formData.photos?.[0] || null} onPhotoChange={handlePhotoChange} error={errors.photos} />
+      <PhotoUploader photoUrl={formData.photos?.[0] || null} onPhotoChange={handlePhotoChange} onPhotoFilesChange={handlePhotoFilesChange} error={errors.photos} />
 
       <ExperienceTitleInput value={formData.title} onChange={handleTitleChange} error={errors.title} />
 
