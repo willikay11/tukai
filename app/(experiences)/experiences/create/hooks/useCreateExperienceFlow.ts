@@ -252,6 +252,48 @@ export const useCreateExperienceFlow = () => {
     }
   }, [experience]);
 
+  // Populate form when experience is loaded
+  useEffect(() => {
+    if (!experience || !experienceId) {
+      return;
+    }
+
+    // Parse dates from ISO format
+    const startDateTime = new Date(experience.startDate);
+    const endDateTime = new Date(experience.endDate);
+    const startDate = experience.startDate?.split('T')[0];
+    const endDate = experience.endDate?.split('T')[0];
+    const startTime = experience.startDate
+      ? `${String(startDateTime.getHours()).padStart(2, '0')}:${String(startDateTime.getMinutes()).padStart(2, '0')}`
+      : null;
+    const endTime = experience.endDate
+      ? `${String(endDateTime.getHours()).padStart(2, '0')}:${String(endDateTime.getMinutes()).padStart(2, '0')}`
+      : null;
+
+    // Update about form
+    updateAboutFormData({
+      title: experience.title,
+      description: experience.description,
+      visibility: experience.isPublic ? 'public' : 'private',
+      photos: experience.photos?.map((p) => p.url) || [],
+      categories: experience.categories || [],
+      location: experience.location?.name || '',
+      locationPlaceId: experience.location?.googleMapPlaceId || '',
+      meetingPoint: '',
+      meetingTime: null,
+      whatsIncluded: '',
+      whatsNotIncluded: '',
+    });
+
+    // Update date type form
+    updateFormData({
+      experiencePricing: experience.isPaid ? 'paid' : 'free',
+      date: startDate,
+      startTime,
+      endTime,
+    });
+  }, [experience, experienceId, updateAboutFormData, updateFormData]);
+
   // Guard: Redirect to communities/create if no community
   useEffect(() => {
     if (sessionStatus !== 'authenticated' || isLoadingCreatedCommunities) {
