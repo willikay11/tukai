@@ -128,6 +128,10 @@ export const PreviewDateSection = (props: PreviewDateSectionProps) => {
     );
   }
 
+  if (props.mode !== 'recurring') {
+    return null;
+  }
+
   const firstSlot = props.timeSlots[0];
   const firstTimeRange =
     firstSlot && firstSlot.startTime && firstSlot.endTime
