@@ -131,7 +131,19 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
       formData.append('is_paid', String(data.isPaid));
     }
 
-    const response = await axiosInstance.post(`/v1/experiences/`, formData, {
+    if (data.hostCommunityId) {
+      formData.append('host_community_id', data.hostCommunityId);
+    }
+
+    if (data.whatsIncluded) {
+      formData.append('whats_included', data.whatsIncluded);
+    }
+
+    if (data.whatsNotIncluded) {
+      formData.append('whats_not_included', data.whatsNotIncluded);
+    }
+
+    const response = await axiosInstance.post(`/v2/experiences/`, formData, {
       headers: {
         'Content-Type': undefined,
       },
@@ -172,11 +184,23 @@ export async function updateExperience(id: string, data: CreateExperience): Prom
       formData.append('is_paid', String(data.isPaid));
     }
 
+    if (data.hostCommunityId) {
+      formData.append('host_community_id', data.hostCommunityId);
+    }
+
+    if (data.whatsIncluded) {
+      formData.append('whats_included', data.whatsIncluded);
+    }
+
+    if (data.whatsNotIncluded) {
+      formData.append('whats_not_included', data.whatsNotIncluded);
+    }
+
     if (data.invitedCommunityIds) {
       data.invitedCommunityIds.forEach((id) => formData.append('invited_community_ids', id));
     }
 
-    const response = await axiosInstance.patch(`/v1/experiences/${id}/`, formData, {
+    const response = await axiosInstance.patch(`/v2/experiences/${id}/`, formData, {
       headers: {
         'Content-Type': undefined,
       },
@@ -204,7 +228,7 @@ export async function createExperienceTicket(
 ): Promise<ApiResponse> {
   try {
     const axiosInstance = await apiWithToken();
-    const response = await axiosInstance.post(`/v1/experiences/${experienceId}/tickets/`, data);
+    const response = await axiosInstance.post(`/v2/experiences/${experienceId}/tickets/`, data);
 
     return {
       status: response.status,
@@ -230,7 +254,7 @@ export async function updateExperienceTicket(
   try {
     const axiosInstance = await apiWithToken();
     const response = await axiosInstance.patch(
-      `/v1/experiences/${experienceId}/tickets/${ticketId}/`,
+      `/v2/experiences/${experienceId}/tickets/${ticketId}/`,
       data,
     );
 

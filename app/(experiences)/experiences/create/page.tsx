@@ -180,7 +180,6 @@ function CreateExperiencePageContent() {
           invitedGuests={formData.invite.invitedGuests}
           invitedCommunityIds={formData.invite.invitedCommunityIds}
           allCommunities={communitiesForSelector}
-          onEditStep={handlers.handleStepChange}
         />
       </div>
     </main>

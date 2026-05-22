@@ -194,12 +194,16 @@ export const SharedExperiencePreview = ({
       />
 
       <PreviewIncludedSection
-        items={aboutWhatsIncluded ? [aboutWhatsIncluded] : []}
+        items={aboutWhatsIncluded
+          ? aboutWhatsIncluded.split('\n').filter((item) => item.trim())
+          : []}
         onEdit={() => onEditStep?.('about')}
       />
 
       <PreviewExcludedSection
-        items={aboutWhatsNotIncluded ? [aboutWhatsNotIncluded] : []}
+        items={aboutWhatsNotIncluded
+          ? aboutWhatsNotIncluded.split('\n').filter((item) => item.trim())
+          : []}
         onEdit={() => onEditStep?.('about')}
       />
 

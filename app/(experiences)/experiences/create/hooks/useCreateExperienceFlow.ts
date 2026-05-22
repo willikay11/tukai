@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -214,6 +214,8 @@ export const useCreateExperienceFlow = () => {
   const [ticketsErrors, setTicketsErrors] = useState<Record<string, string>>({});
   const [walletErrors, setWalletErrors] = useState<Record<string, string>>({});
 
+  const hasHydrated = useRef(false);
+
   const { data: createdCommunitiesResponse, isLoading: isLoadingCreatedCommunities } =
     useGetCommunities({
       page: 1,
@@ -319,20 +321,20 @@ export const useCreateExperienceFlow = () => {
   }, []);
 
   // Populate form when experience is loaded
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (!experience || !experienceId) {
+    if (!experience || !experienceId || hasHydrated.current) {
       return;
     }
+    hasHydrated.current = true;
 
-    // Parse dates from ISO format
-    const startDateTime = new Date(experience.startDate);
-    const endDateTime = new Date(experience.endDate);
+    // Parse dates from ISO format (extract without timezone conversion)
     const startDate = experience.startDate?.split('T')[0];
     const startTime = experience.startDate
-      ? `${String(startDateTime.getHours()).padStart(2, '0')}:${String(startDateTime.getMinutes()).padStart(2, '0')}`
+      ? experience.startDate.split('T')[1]?.substring(0, 5) ?? null
       : null;
     const endTime = experience.endDate
-      ? `${String(endDateTime.getHours()).padStart(2, '0')}:${String(endDateTime.getMinutes()).padStart(2, '0')}`
+      ? experience.endDate.split('T')[1]?.substring(0, 5) ?? null
       : null;
 
     // Update about form
@@ -347,12 +349,19 @@ export const useCreateExperienceFlow = () => {
       locationPlaceId: experience.location?.id || '',
       meetingPoint: '',
       meetingTime: null,
-      whatsIncluded: '',
-      whatsNotIncluded: '',
+      whatsIncluded: experience.whatsIncluded ?? '',
+      whatsNotIncluded: experience.whatsNotIncluded ?? '',
     });
 
-    // Update date type form
+    // Update date type form with community
     updateFormData({
+      community: experience.hostCommunity
+        ? {
+            id: experience.hostCommunity.id,
+            name: experience.hostCommunity.title,
+            imageUrl: experience.hostCommunity.photos?.[0]?.photo ?? null,
+          }
+        : null,
       experiencePricing: experience.isPaid ? 'paid' : 'free',
       date: startDate,
       startTime,
@@ -361,27 +370,40 @@ export const useCreateExperienceFlow = () => {
 
     // Load tickets from saved experience
     if (experience.tickets && experience.tickets.length > 0) {
-      const savedTickets = experience.tickets.map((ticket) => ({
-        id: `ticket-${Date.now()}-${Math.random()}`,
-        apiId: ticket.id,
-        name: ticket.name,
-        quantity: ticket.availableQuantity || ticket.quantity,
-        amount: ticket.price,
-        salesStartDate: null,
-        salesStartTime: null,
-        salesEndDate: null,
-        salesEndTime: null,
-        acceptPartialPayment: false,
-        salesStartRelative: null,
-        salesEndRelative: null,
-        duplicateForEntirePeriod: false,
-      }));
+      const savedTickets = experience.tickets.map((ticket: any) => {
+        // Extract date and time from ISO datetime strings
+        const extractDateTime = (isoString: string | null) => {
+          if (!isoString) return { date: null, time: null };
+          const date = isoString.split('T')[0];
+          const time = isoString.split('T')[1]?.substring(0, 5) ?? null;
+          return { date, time };
+        };
+
+        const salesStartDateTime = extractDateTime(ticket.salesStartDate || ticket.sales_start_date);
+        const salesEndDateTime = extractDateTime(ticket.salesEndDate || ticket.sales_end_date);
+
+        return {
+          id: `ticket-${Date.now()}-${Math.random()}`,
+          apiId: ticket.id,
+          name: ticket.name,
+          quantity: ticket.availableQuantity || ticket.quantity,
+          amount: ticket.price,
+          salesStartDate: salesStartDateTime.date,
+          salesStartTime: salesStartDateTime.time,
+          salesEndDate: salesEndDateTime.date,
+          salesEndTime: salesEndDateTime.time,
+          acceptPartialPayment: false,
+          salesStartRelative: null,
+          salesEndRelative: null,
+          duplicateForEntirePeriod: false,
+        };
+      });
       setFormData((prev) => ({
         ...prev,
         tickets: { ...prev.tickets, items: savedTickets },
       }));
     }
-  }, [experience, experienceId, updateAboutFormData, updateFormData]);
+  }, [experience?.id, updateAboutFormData, updateFormData]);
 
   const updateWalletFormData = useCallback((data: Partial<FormData['wallet']>) => {
     setFormData((prev) => ({
@@ -682,6 +704,9 @@ export const useCreateExperienceFlow = () => {
         isPaid: formData.dateType.experiencePricing === 'paid',
         invitedCommunityIds: [],
         invitedGuestsEmails: [],
+        hostCommunityId: formData.dateType.community?.id ?? '',
+        whatsIncluded: formData.about.whatsIncluded?.trim() || '',
+        whatsNotIncluded: formData.about.whatsNotIncluded?.trim() || '',
       };
 
       if (experienceId) {

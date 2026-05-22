@@ -29,6 +29,9 @@ export type Experience = {
   status: Status;
   host: User;
   coHosts: User[];
+  hostCommunity?: { id: string; title: string; photos?: Photo[] };
+  whatsIncluded?: string;
+  whatsNotIncluded?: string;
   dateCreated: string;
   guests: {
     id: string;
@@ -51,6 +54,9 @@ export type CreateExperience = {
   newPhotos?: File[];
   invitedCommunityIds?: string[];
   invitedGuestsEmails?: string[];
+  hostCommunityId?: string;
+  whatsIncluded?: string;
+  whatsNotIncluded?: string;
 };
 
 export type CreateExperienceTicket = {

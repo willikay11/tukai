@@ -60,7 +60,6 @@ export const TicketForm = ({
   const customerPayAmount = value.amount
     ? value.amount + (value.amount * commissionPercentage) / 100
     : 0;
-  const customerTotalCost = (value.quantity ?? 0) * customerPayAmount;
 
   return (
     <div className="space-y-4">
@@ -112,13 +111,13 @@ export const TicketForm = ({
 
       {experiencePricing === 'paid' && value.quantity && value.amount && (
         <div className="rounded-full border border-blue-200 bg-blue-100/60 px-4 py-2">
-          <p className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
+          <p className="flex flex-wrap items-center gap-2 text-xs text-gray-600">
             <span className="italic">Total Tickets Cost:</span>
             <span className="font-semibold text-gray-900">KES {totalCost.toLocaleString()}.00</span>
             <span className="text-blue-400">•</span>
-            <span className="italic">What the customer sees:</span>
+            <span className="italic">Per ticket customer pays:</span>
             <span className="font-semibold text-gray-900">
-              KES {customerTotalCost.toLocaleString()}.00
+              KES {customerPayAmount.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </p>
         </div>
