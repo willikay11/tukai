@@ -3,32 +3,12 @@
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { Ticket } from '@/types/ticket';
 
 import { SavedTicketCard } from '../TicketCard';
 
 interface PreviewTicketsSectionProps {
-  tickets?: Array<{
-    id: string;
-    name: string;
-    quantity: number;
-    amount: number;
-    salesStartDate: string | null;
-    salesStartTime: string | null;
-    salesEndDate: string | null;
-    salesEndTime: string | null;
-    acceptPartialPayment?: boolean;
-    salesStartRelative?: {
-      amount: number;
-      unit: 'hour' | 'day' | 'week';
-      anchor: 'start' | 'end';
-    } | null;
-    salesEndRelative?: {
-      amount: number;
-      unit: 'hour' | 'day' | 'week';
-      anchor: 'start' | 'end';
-    } | null;
-    duplicateForEntirePeriod?: boolean;
-  }>;
+  tickets?: Ticket[];
   coverPhoto?: string;
   commissionPayer?: 'host' | 'customer' | 'split';
   onEdit?: () => void;
@@ -70,12 +50,13 @@ export const PreviewTicketsSection = ({
       {hasTickets ? (
         <div className="space-y-3">
           {tickets.map((ticket) => {
+            // Handle both camelCase and snake_case field names from API
+            const salesStartDateStr = ticket.salesStartDate || (ticket as any).sales_start_date;
+            const salesEndDateStr = ticket.salesEndDate || (ticket as any).sales_end_date;
+
             const validity =
-              ticket.salesStartDate &&
-              ticket.salesStartTime &&
-              ticket.salesEndDate &&
-              ticket.salesEndTime
-                ? `${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`
+              salesStartDateStr && salesEndDateStr
+                ? `${moment(salesStartDateStr).format('MMM D, YYYY,')} ${moment(salesStartDateStr).format('h:mm A')} – ${moment(salesEndDateStr).format('MMM D, YYYY,')} ${moment(salesEndDateStr).format('h:mm A')}`
                 : ticket.salesStartRelative && ticket.salesEndRelative
                   ? `${ticket.salesStartRelative.amount} ${ticket.salesStartRelative.unit} ${ticket.salesStartRelative.anchor === 'start' ? 'before' : 'after'} – ${ticket.salesEndRelative.amount} ${ticket.salesEndRelative.unit} ${ticket.salesEndRelative.anchor === 'start' ? 'before' : 'after'}`
                   : 'Not set';
@@ -85,7 +66,7 @@ export const PreviewTicketsSection = ({
                 key={ticket.id}
                 name={ticket.name}
                 quantity={ticket.quantity}
-                amount={ticket.amount}
+                amount={ticket.price}
                 validity={validity}
                 coverPhoto={coverPhoto}
                 commissionPayer={commissionPayer}

@@ -22,7 +22,10 @@ export const PreviewWalletSection = ({ walletType, onEdit }: PreviewWalletSectio
   return (
     <div className="space-y-3">
       <div className="flex items-start justify-between">
-        <h3 className="text-xs font-semibold text-gray-900">Payment Method</h3>
+        <div>
+          <h3 className="text-xs font-semibold text-gray-900">Wallet Details</h3>
+          <p className="mt-1 text-xs text-gray-500">*You&apos;re the only one who can see this</p>
+        </div>
         {onEdit && (
           <button type="button" onClick={onEdit} className="text-gray-400 hover:text-gray-600">
             <IconComponent iconName="Edit02Icon" size={16} />

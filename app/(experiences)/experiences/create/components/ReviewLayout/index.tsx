@@ -59,6 +59,12 @@ export const ReviewLayout = ({
 
   return (
     <div className="space-y-6 pb-24">
+      {/* Page Header */}
+      <div className="pt-6">
+        <h1 className="text-2xl font-semibold text-gray-900">Review Experience</h1>
+        <p className="mt-2 text-sm text-gray-600">Please review your experience details before publishing.</p>
+      </div>
+
       {/* 1. Experience Photo Header */}
       {experience && (
         <PreviewExperienceHeader
@@ -95,12 +101,10 @@ export const ReviewLayout = ({
       )}
 
       {/* 5. Itinerary Type */}
-      {experience.experienceType && (
-        <PreviewItineraryTypeSection
-          type={experience.experienceType}
-          onEdit={() => handleEditClick('dates')}
-        />
-      )}
+      <PreviewItineraryTypeSection
+        visibility={experience.isPublic ? 'public' : 'private'}
+        onEdit={() => handleEditClick('about')}
+      />
 
       {/* 6. Date of Experience */}
       {experience.startDate && (
@@ -153,6 +157,7 @@ export const ReviewLayout = ({
         <div className="border-t border-gray-200 pt-6">
           <PreviewTicketsSection
             tickets={experience.tickets}
+            coverPhoto={experience.photos?.[0]?.photo}
             commissionPayer={experience.commissionPayer}
             onEdit={() => handleEditClick('tickets')}
           />
@@ -167,43 +172,44 @@ export const ReviewLayout = ({
 
       {/* Action Bar */}
       {showActionBar && (
-        <div className="sticky bottom-0 left-0 right-0 z-40 flex gap-3 border-t border-gray-200 bg-white pb-4 pt-6 shadow-lg">
-          <Button
+        <div className="mt-8 flex items-center justify-between gap-3 pt-6">
+          <button
             type="button"
-            variant="outline"
             onClick={() => {
               console.log('Cancel clicked');
               onCancel?.();
             }}
             disabled={isPublishing}
-            className="flex-1"
+            className="text-xs font-medium text-destructive hover:text-destructive/80 disabled:opacity-50"
           >
             Cancel
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              console.log('Save & Exit clicked');
-              onCancel?.();
-            }}
-            disabled={isPublishing}
-            className="flex-1"
-          >
-            Save & Exit
-          </Button>
-          <Button
-            type="button"
-            variant="gradient"
-            onClick={() => {
-              console.log('Publish button clicked - calling onPublish');
-              onPublish?.();
-            }}
-            disabled={isPublishing}
-            className="flex-1"
-          >
-            {isPublishing ? 'Publishing...' : 'Publish'}
-          </Button>
+          </button>
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                console.log('Save & Exit clicked');
+                onCancel?.();
+              }}
+              disabled={isPublishing}
+              className="rounded-full"
+            >
+              Save & Exit
+            </Button>
+            <Button
+              type="button"
+              variant="gradient"
+              onClick={() => {
+                console.log('Publish button clicked - calling onPublish');
+                onPublish?.();
+              }}
+              disabled={isPublishing}
+              className="rounded-full"
+            >
+              {isPublishing ? 'Publishing...' : 'Publish Experience'}
+            </Button>
+          </div>
         </div>
       )}
     </div>

@@ -11,12 +11,12 @@ export const PreviewItineraryTypeSection = ({
   visibility,
   onEdit,
 }: PreviewItineraryTypeSectionProps) => {
-  const visibilityLabel = visibility === 'public' ? 'Public' : 'Private';
+  const visibilityLabel = visibility === 'public' ? 'Public (Everyone can join)' : 'Private (Only invited guests can join)';
 
   return (
     <div className="space-y-3">
       <div className="flex items-start justify-between">
-        <h3 className="text-xs font-semibold text-gray-900">Visibility</h3>
+        <h3 className="text-xs font-semibold text-gray-900">Itinerary Type</h3>
         {onEdit && (
           <button onClick={onEdit} className="text-gray-400 hover:text-gray-600">
             <IconComponent iconName="Edit02Icon" size={16} className="text-gray-800" />

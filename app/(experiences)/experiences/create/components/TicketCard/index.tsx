@@ -100,7 +100,7 @@ export const TicketCard = ({
                 <p className="text-xs font-semibold text-gray-800">{quantity}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Host Price</p>
+                <p className="text-xs text-gray-500">Price</p>
                 <p className="text-xs font-semibold text-gray-800">{formatKsh(amount)}</p>
               </div>
               {showCommissionNote && (
