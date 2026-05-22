@@ -63,6 +63,11 @@ const parseExperienceStepId = (step: string | null): ExperienceStepId | null => 
   return null;
 };
 
+const mapCommission = (value: 'host' | 'customer' | 'split'): 'host_pays' | 'customer_pays' | 'split' => {
+  const map = { host: 'host_pays', customer: 'customer_pays', split: 'split' } as const;
+  return map[value];
+};
+
 export interface CommunityOption {
   id: string;
   name: string;
@@ -707,6 +712,9 @@ export const useCreateExperienceFlow = () => {
         hostCommunityId: formData.dateType.community?.id ?? '',
         whatsIncluded: formData.about.whatsIncluded?.trim() || '',
         whatsNotIncluded: formData.about.whatsNotIncluded?.trim() || '',
+        feesAllocation: mapCommission(formData.tickets.commission),
+        meetingPlace: formData.about.meetingPoint?.trim() || null,
+        meetingTime: formData.about.meetingTime?.trim() || null,
       };
 
       if (experienceId) {
@@ -897,6 +905,38 @@ export const useCreateExperienceFlow = () => {
     }
   }, [experienceId, publishAsync, toast]);
 
+  const handleUpdateFeesAllocation = useCallback(async () => {
+    if (!experienceId || !experience) {
+      return;
+    }
+
+    try {
+      const payload = {
+        title: experience.title,
+        description: experience.description,
+        googleMapPlaceId: 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
+        startDate: experience.startDate,
+        endDate: experience.endDate,
+        recurrence_rule: '',
+        categoriesIds: experience.categories?.map((c) => c.id) || [],
+        isPublic: experience.isPublic,
+        isPaid: experience.isPaid,
+        invitedCommunityIds: [],
+        invitedGuestsEmails: [],
+        hostCommunityId: experience.hostCommunity?.id || '',
+        whatsIncluded: experience.whatsIncluded || '',
+        whatsNotIncluded: experience.whatsNotIncluded || '',
+        feesAllocation: mapCommission(formData.tickets.commission),
+        meetingPlace: experience.meetingPoint || null,
+        meetingTime: experience.meetingTime || null,
+      };
+
+      await updateExperienceAsync(payload);
+    } catch (error: any) {
+      console.warn('[handleUpdateFeesAllocation] Failed to update fees allocation:', error);
+    }
+  }, [experienceId, experience, formData.tickets.commission, updateExperienceAsync]);
+
   const resolveCommunityImageUrl = (community: Community): string => {
     const preferredPhoto =
       community?.photos?.find((photo: Photo) => photo.isCover) || community?.photos?.[0];
@@ -974,6 +1014,7 @@ export const useCreateExperienceFlow = () => {
       handleDeletePhoto,
       handleAddGuest,
       handlePublish,
+      handleUpdateFeesAllocation,
     },
   };
 };

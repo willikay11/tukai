@@ -2,7 +2,10 @@
 
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
+import { formatDateForPreview, formatTimeForPreview } from '@/utils/date-utils';
 
+import { PreviewCommunitySection } from '../PreviewCommunitySection';
+import { PreviewDateSection } from '../PreviewDateSection';
 import { PhotoEditPanel } from '../PhotoEditPanel';
 import { CreateExperienceAbout } from '../about';
 import { CreateTickets } from '../createTickets';
@@ -29,29 +32,49 @@ export const InlineEditPanel = ({
 }: InlineEditPanelProps) => {
   if (!activeEditSection) {
     return (
-      <div className="flex flex-col items-center justify-center space-y-4 py-12">
-        <svg
-          width="120"
-          height="120"
-          viewBox="0 0 120 120"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="text-gray-300"
-        >
-          <circle cx="60" cy="60" r="58" stroke="currentColor" strokeWidth="4" />
-          <path
-            d="M45 50C45 45.58 48.58 42 53 42C57.42 42 61 45.58 61 50C61 54.42 57.42 58 53 58C48.58 58 45 54.42 45 50Z"
-            fill="currentColor"
-          />
-          <path
-            d="M35 68C35 63.58 40.82 60 48 60H68C75.18 60 81 63.58 81 68V88C81 92.42 77.42 96 73 96H39C34.58 96 31 92.42 31 88V72C31 69.79 32.79 68 35 68Z"
-            fill="currentColor"
-          />
-        </svg>
-        <div className="text-center">
-          <p className="text-sm font-medium text-gray-900">Select any section</p>
-          <p className="text-xs text-gray-600">of the experience to edit here</p>
+      <div className="space-y-6 pb-24">
+        <div className="flex flex-col items-center justify-center space-y-4 py-6">
+          <svg
+            width="120"
+            height="120"
+            viewBox="0 0 120 120"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="text-gray-300"
+          >
+            <circle cx="60" cy="60" r="58" stroke="currentColor" strokeWidth="4" />
+            <path
+              d="M45 50C45 45.58 48.58 42 53 42C57.42 42 61 45.58 61 50C61 54.42 57.42 58 53 58C48.58 58 45 54.42 45 50Z"
+              fill="currentColor"
+            />
+            <path
+              d="M35 68C35 63.58 40.82 60 48 60H68C75.18 60 81 63.58 81 68V88C81 92.42 77.42 96 73 96H39C34.58 96 31 92.42 31 88V72C31 69.79 32.79 68 35 68Z"
+              fill="currentColor"
+            />
+          </svg>
+          <div className="text-center">
+            <p className="text-sm font-medium text-gray-900">Select any section</p>
+            <p className="text-xs text-gray-600">of the experience to edit here</p>
+          </div>
         </div>
+
+        {/* Host Community */}
+        {experience.hostCommunity && (
+          <PreviewCommunitySection
+            communityName={experience.hostCommunity.title}
+            communityImageUrl={experience.hostCommunity.photos?.[0]?.photo ?? null}
+          />
+        )}
+
+        {/* Date of Experience */}
+        {experience.startDate && (
+          <PreviewDateSection
+            mode="single"
+            date={formatDateForPreview(experience.startDate)}
+            startTime={formatTimeForPreview(experience.startDate)}
+            endTime={formatTimeForPreview(experience.endDate)}
+          />
+        )}
       </div>
     );
   }

@@ -32,6 +32,8 @@ export type Experience = {
   hostCommunity?: { id: string; title: string; photos?: Photo[] };
   whatsIncluded?: string;
   whatsNotIncluded?: string;
+  meetingPoint?: string;
+  meetingTime?: string;
   dateCreated: string;
   guests: {
     id: string;
@@ -57,6 +59,9 @@ export type CreateExperience = {
   hostCommunityId?: string;
   whatsIncluded?: string;
   whatsNotIncluded?: string;
+  feesAllocation?: 'host_pays' | 'customer_pays' | 'split';
+  meetingPlace?: string | null;
+  meetingTime?: string | null;
 };
 
 export type CreateExperienceTicket = {

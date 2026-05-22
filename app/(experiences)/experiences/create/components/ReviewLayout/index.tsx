@@ -24,7 +24,6 @@ interface ReviewLayoutProps {
   experience: Experience;
   invitedMembers: InvitedMember[];
   invitedCommunities: Community[];
-  selectedCommunity?: { name: string; imageUrl: string } | null;
   allCommunities?: CommunityOption[];
   isPublishing?: boolean;
   onEditSection?: (
@@ -39,7 +38,6 @@ export const ReviewLayout = ({
   experience,
   invitedMembers,
   invitedCommunities,
-  selectedCommunity,
   allCommunities = [],
   isPublishing = false,
   onEditSection,
@@ -109,9 +107,10 @@ export const ReviewLayout = ({
       {/* 6. Date of Experience */}
       {experience.startDate && (
         <PreviewDateSection
-          date={experience.startDate}
-          startTime={experience.startTime}
-          endTime={experience.endTime}
+          mode="single"
+          date={experience.startDate.split('T')[0]}
+          startTime={experience.startDate.split('T')[1]?.substring(0, 5) ?? null}
+          endTime={experience.endDate.split('T')[1]?.substring(0, 5) ?? null}
           onEdit={() => handleEditClick('dates')}
         />
       )}
@@ -134,10 +133,10 @@ export const ReviewLayout = ({
       )}
 
       {/* 9. Host Community */}
-      {selectedCommunity && (
+      {experience.hostCommunity && (
         <PreviewCommunitySection
-          communityName={selectedCommunity.name}
-          communityImageUrl={selectedCommunity.imageUrl}
+          communityName={experience.hostCommunity.title}
+          communityImageUrl={experience.hostCommunity.photos?.[0]?.photo ?? null}
           onEdit={() => handleEditClick('about')}
         />
       )}

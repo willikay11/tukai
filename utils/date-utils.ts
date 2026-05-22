@@ -97,3 +97,49 @@ export const formatTimeTo12Hour = (time: string): string => {
     return '';
   }
 };
+
+export const formatDateForPreview = (isoString: string | null): string | null => {
+  if (!isoString) return null;
+
+  try {
+    const date = new Date(isoString);
+    const monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    const day = date.getUTCDate();
+    const month = monthNames[date.getUTCMonth()];
+    return `${day} ${month}`;
+  } catch {
+    return null;
+  }
+};
+
+export const formatTimeForPreview = (isoString: string | null): string | null => {
+  if (!isoString) return null;
+
+  try {
+    const date = new Date(isoString);
+    const hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+
+    const displayHour = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const paddedMinutes = String(minutes).padStart(2, '0');
+
+    return `${displayHour}:${paddedMinutes} ${period}`;
+  } catch {
+    return null;
+  }
+};

@@ -452,8 +452,9 @@ export const CreateExperienceSteps = ({
                 experiencePricing={formData?.experiencePricing || 'paid'}
                 onChange={updateTicketsFormData}
                 errors={ticketsErrors}
-                onSaveContinue={() => {
+                onSaveContinue={async () => {
                   if (validateTickets()) {
+                    await handlers?.handleUpdateFeesAllocation?.();
                     handleStepChange('guests');
                   }
                 }}

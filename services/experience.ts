@@ -143,6 +143,18 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
       formData.append('whats_not_included', data.whatsNotIncluded);
     }
 
+    if (data.feesAllocation) {
+      formData.append('fees_allocation', data.feesAllocation);
+    }
+
+    if (data.meetingPlace !== undefined && data.meetingPlace !== null) {
+      formData.append('meeting_place', data.meetingPlace);
+    }
+
+    if (data.meetingTime !== undefined && data.meetingTime !== null) {
+      formData.append('meeting_time', data.meetingTime);
+    }
+
     const response = await axiosInstance.post(`/v2/experiences/`, formData, {
       headers: {
         'Content-Type': undefined,
@@ -198,6 +210,18 @@ export async function updateExperience(id: string, data: CreateExperience): Prom
 
     if (data.invitedCommunityIds) {
       data.invitedCommunityIds.forEach((id) => formData.append('invited_community_ids', id));
+    }
+
+    if (data.feesAllocation) {
+      formData.append('fees_allocation', data.feesAllocation);
+    }
+
+    if (data.meetingPlace !== undefined && data.meetingPlace !== null) {
+      formData.append('meeting_place', data.meetingPlace);
+    }
+
+    if (data.meetingTime !== undefined && data.meetingTime !== null) {
+      formData.append('meeting_time', data.meetingTime);
     }
 
     const response = await axiosInstance.patch(`/v2/experiences/${id}/`, formData, {
