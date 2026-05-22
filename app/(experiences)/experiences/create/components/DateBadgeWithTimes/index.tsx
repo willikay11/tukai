@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
 import { TimePicker } from '@/components/ui/time-picker';
+
 import { TicketDateBadge } from '../TicketDateBadge';
 import { TimePill } from '../TimePill';
 
@@ -36,11 +38,7 @@ export const DateBadgeWithTimes = ({
     <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-6">
       <div className="w-full lg:w-3/5">
         {startDate && endDate ? (
-          <TicketDateBadge
-            mode="multi-day-range"
-            startDate={startDate}
-            endDate={endDate}
-          />
+          <TicketDateBadge mode="multi-day-range" startDate={startDate} endDate={endDate} />
         ) : null}
       </div>
 
@@ -64,11 +62,7 @@ export const DateBadgeWithTimes = ({
         </div>
       ) : startTime && endTime ? (
         <div className="w-full lg:w-2/5">
-          <TimePill
-            startTime={startTime}
-            endTime={endTime}
-            onClick={() => setIsEditing(true)}
-          />
+          <TimePill startTime={startTime} endTime={endTime} onClick={() => setIsEditing(true)} />
         </div>
       ) : null}
     </div>

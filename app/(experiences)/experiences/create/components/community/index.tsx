@@ -7,8 +7,8 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { Button } from '@/components/ui/button';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
+import { Button } from '@/components/ui/button';
 
 type CommunityOption = {
   id: string;
@@ -151,7 +151,7 @@ export const CreateExperienceCommunity = ({
           className="mt-5 rounded-full"
           onClick={() => router.push('/communities/create')}
         >
-          <IconComponent iconName="UserMultipleIcon" variant='twotone' size={18} color="white" />
+          <IconComponent iconName="UserMultipleIcon" variant="twotone" size={18} color="white" />
           Create New Community
         </Button>
 

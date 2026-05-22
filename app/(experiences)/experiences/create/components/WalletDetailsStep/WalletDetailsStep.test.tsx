@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+
 import { WalletDetailsStep } from './WalletDetailsStep';
 
 jest.mock('../wallet', () => ({
@@ -75,7 +76,7 @@ describe('WalletDetailsStep', () => {
           paymentMethod: 'bank_account',
           mpesaPhoneNumber: '254712345678',
         }}
-      />
+      />,
     );
     expect(screen.getByTestId('wallet-step')).toBeInTheDocument();
   });

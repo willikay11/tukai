@@ -36,19 +36,19 @@ app/
     sign-in/
     sign-up/
     ...
-  
+
 hooks/                              # 10 feature hooks mixed together
   experiences.tsx
   places.tsx
   communities.tsx
   use-toast.ts
-  
+
 services/                           # API calls + feature logic
   experience.ts
   place.ts
   community.ts
   apiService.ts
-  
+
 types/                              # All types in one folder
   experience.ts
   place.ts
@@ -333,6 +333,7 @@ import { Nav } from '@/app/components/nav'
 ```
 
 **Affected files:**
+
 - All `page.tsx` (20 files)
 - All `layout.tsx` (5 files)
 - `app/components/*` (30+ files)
@@ -341,11 +342,13 @@ import { Nav } from '@/app/components/nav'
 - `app/communities/components/*` (15 files)
 
 **Testing before/after:**
+
 - Verify `npm run build` passes
 - Verify `npm run lint` passes
 - Run existing tests: `npm test`
 
 **Commit strategy:** Single commit with message:
+
 ```
 refactor: convert all exports to named exports
 
@@ -377,16 +380,19 @@ services/experience.ts           - stays at root (API calls only)
 ```
 
 **Before:**
+
 ```tsx
-import { useExperiences } from '@/hooks/experiences'
+import { useExperiences } from '@/hooks/experiences';
 ```
 
 **After:**
+
 ```tsx
-import { useExperiences } from '@/(experiences)/hooks/useExperiences'
+import { useExperiences } from '@/(experiences)/hooks/useExperiences';
 ```
 
 **Hooks to move (Experiences):**
+
 - `useExperiences` → `app/(experiences)/hooks/useExperiences.ts`
 - `useFetchSingleExperience` → `app/(experiences)/hooks/useFetchSingleExperience.ts`
 - `usePurchaseExperienceTicket` → `app/(experiences)/hooks/usePurchaseExperienceTicket.ts`
@@ -487,6 +493,7 @@ app/shared/components/
 ```
 
 **What NOT to move:**
+
 - Feature-specific components (ExperiencesCard is used ONLY in experiences, stays there)
 - Components living in `app/components/experiences/List/` → move to `app/(experiences)/components/`
 
@@ -526,6 +533,7 @@ types/networkParam.ts
 ```
 
 **Update imports:**
+
 ```tsx
 // Before
 import { Experience } from '@/types/experience'
@@ -554,10 +562,10 @@ export const useCreateExperienceFlow = () => {
   const [itineraryConfig, setItineraryConfig] = useState({ ... });
   const [invitedMembers, setInvitedMembers] = useState([]);
   const [invitedCommunities, setInvitedCommunities] = useState([]);
-  
+
   const handleStepComplete = (stepId: ExperienceStepId) => { ... };
   const handleExperienceSave = (data) => { ... };
-  
+
   return {
     activeStep,
     setActiveStep,
@@ -573,7 +581,7 @@ export const useCreateExperienceFlow = () => {
 export const CreateExperiencePage = () => {
   const flow = useCreateExperienceFlow();
   const searchParams = useSearchParams();
-  
+
   return (
     <CreateExperiencePageContent
       activeStep={flow.activeStep}
@@ -585,6 +593,7 @@ export const CreateExperiencePage = () => {
 ```
 
 **Extract for:**
+
 - Experiences create flow (currently 300+ lines in page.tsx)
 - Communities create flow
 - Auth multi-step flow (sign-up → interests → profile)
@@ -598,6 +607,7 @@ export const CreateExperiencePage = () => {
 **Risk:** Low (Tests don't affect production code)
 
 **Phase 1: Shared navigation components** (1 PR)
+
 ```
 app/shared/components/Navigation/
   Nav.test.tsx
@@ -605,6 +615,7 @@ app/shared/components/Navigation/
 ```
 
 **Phase 2: Feature card components** (1 PR per feature)
+
 ```
 app/(experiences)/components/
   ExperiencesCard.test.tsx
@@ -612,12 +623,14 @@ app/(experiences)/components/
 ```
 
 **Phase 3: Complex stateful components** (1 PR)
+
 ```
 app/shared/components/LocationPicker/
   LocationPicker.test.tsx
 ```
 
 **Test template:**
+
 ```tsx
 import { render, screen } from '@testing-library/react';
 import { ExperiencesCard } from './ExperiencesCard';
@@ -671,6 +684,7 @@ export const SocialLinks = ({ links }: { links: PlaceSocialLink[] }) => {
 ```
 
 **Candidates for removal:**
+
 - `locationAutocompleteField.tsx` — no hooks, only receives props
 - `socialLinks.tsx` — uses `window.open` but could be handled differently
 - `pageLayoutContent.tsx` — uses `useRef` for animation (actually needs 'use client', keep it)
@@ -743,6 +757,7 @@ export const ExperiencesCard = ({ experience, onBookmark, onReserve }: Experienc
 ```
 
 **Benefits:**
+
 - Shared styling and interaction patterns
 - Easier to A/B test UI changes
 - Reduces code duplication by ~200 lines
@@ -767,7 +782,14 @@ type ModalBaseProps = {
   actions?: { label: string; onClick: () => void }[];
 };
 
-export const ModalBase = ({ isOpen, onClose, title, children, size = 'md', actions }: ModalBaseProps) => {
+export const ModalBase = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  size = 'md',
+  actions,
+}: ModalBaseProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={`size-${size}`}>
@@ -804,6 +826,7 @@ export const SendMessageModal = ({ isOpen, onClose, recipientId }: SendMessageMo
 ### C. Consolidate Form Components
 
 **Current:**
+
 ```
 app/components/form/
   button.tsx
@@ -840,10 +863,11 @@ export const FormField = ({ label, error, required, children }: FormFieldProps) 
 // Usage:
 <FormField label="Email" error={errors.email?.message} required>
   <input {...register('email')} />
-</FormField>
+</FormField>;
 ```
 
 **Benefits:**
+
 - Consistent error display
 - Standardized spacing
 - Accessibility (label → input associations)
@@ -853,6 +877,7 @@ export const FormField = ({ label, error, required, children }: FormFieldProps) 
 ### D. Extract Data-Fetching Wrapper
 
 **Current:** Every list component (ExperiencesList, PlacesList, CommunitiesList) reimplements:
+
 - Loading state
 - Pagination
 - Empty state
@@ -913,7 +938,7 @@ export const ListContainer = <T,>({
   totalPages={Math.ceil(count / PAGE_SIZE)}
   onPageChange={setPage}
   renderItem={(exp) => <ExperiencesCard experience={exp} />}
-/>
+/>;
 ```
 
 **Reduces component code by ~150 lines per list**
@@ -975,6 +1000,7 @@ export const FilterBar = ({
 ### Confusion #1: "Where do I find the hook for [feature]?"
 
 **Problem:**
+
 ```
 They look in app/experiences/ → no hooks folder
 They then look in app/components/ → might find it elsewhere
@@ -984,6 +1010,7 @@ Takes 5-10 minutes for something that should be 30 seconds
 ```
 
 **Current state:**
+
 ```
 hooks/
   experiences.tsx        ← "useExperiences" is here
@@ -998,6 +1025,7 @@ hooks/
 ```
 
 **Solution:**
+
 ```
 ✅ Move feature hooks to feature folders
 ✅ Document: "Feature hooks live in app/[feature]/hooks/"
@@ -1006,23 +1034,26 @@ hooks/
 ```
 
 **Fix: Add to README.md or CONTRIBUTING.md**
+
 ```markdown
 ## Finding Hooks
 
 - **Feature-specific hooks** (useExperiences, usePlaces, etc.):
   → `app/[feature]/hooks/`
-  
+
   Example:
-  ```
-  app/(experiences)/hooks/useExperiences.ts
-  app/(places)/hooks/usePlaces.ts
-  ```
+```
+
+app/(experiences)/hooks/useExperiences.ts
+app/(places)/hooks/usePlaces.ts
+
+```
 
 - **Cross-cutting hooks** (useToast, useMediaQuery, etc.):
-  → `app/shared/hooks/`
+→ `app/shared/hooks/`
 
 - **Server/API hooks** (not React hooks):
-  → Import from `@/services/[feature].ts`
+→ Import from `@/services/[feature].ts`
 ```
 
 ---
@@ -1030,20 +1061,22 @@ hooks/
 ### Confusion #2: "Do I put logic in services/ or hooks/?"
 
 **Problem:**
+
 ```
 services/experience.ts:
   - fetchExperiences()  ← API call
   - createExperience()  ← API call
   - publishExperience() ← API call
-  
+
 hooks/experiences.tsx:
   - useExperiences()     ← wraps fetchExperiences with useQuery
   - useCreateExperience()← wraps createExperience with useMutation
-  
+
 They're confused about the boundary.
 ```
 
 **Current pain point:**
+
 ```
 "If I need to fetch data, which file do I add code to?"
 "Should I create a service function or a hook?"
@@ -1052,11 +1085,13 @@ They're confused about the boundary.
 
 **Solution: Clear separation**
 
-```markdown
+````markdown
 ## Services vs Hooks
 
 ### Services (`services/experience.ts`)
+
 Raw API calls + data transformation.
+
 - No React hooks
 - Reusable across server and client code
 - Responsibility: HTTP + serialization
@@ -1073,9 +1108,12 @@ export const createExperience = async (data: CreateExperience) => {
   return response.data;
 };
 ```
+````
 
 ### Hooks (`app/[feature]/hooks/`)
+
 React Query wrappers + state management
+
 - Uses React hooks (useQuery, useMutation, useState, etc.)
 - Client-side only
 - Responsibility: caching, loading state, error handling
@@ -1104,6 +1142,7 @@ export const useExperiences = (params: ExperiencesQueryParams) => {
 
 **Need to use the data server-side?**
 → Call the service function directly from a Server Component
+
 ```
 
 ---
@@ -1112,19 +1151,21 @@ export const useExperiences = (params: ExperiencesQueryParams) => {
 
 **Problem:**
 ```
+
 app/components/
-  experiences/              ← Feature-specific, but at root level
-    List/
-      experiences.tsx       ← The main one
-    Single/
-  bookmark/                 ← Feature? Or shared? (Unclear)
-  review/                   ← Feature? Or shared? (Unclear)
-  pills/                    ← What's a "pill"? (Naming)
-  share/                    ← Shared? Which feature?
-  form/                     ← Shared, but scattered
-  
+experiences/ ← Feature-specific, but at root level
+List/
+experiences.tsx ← The main one
+Single/
+bookmark/ ← Feature? Or shared? (Unclear)
+review/ ← Feature? Or shared? (Unclear)
+pills/ ← What's a "pill"? (Naming)
+share/ ← Shared? Which feature?
+form/ ← Shared, but scattered
+
 "Do I add my new card component here or in experiences/components/?"
-```
+
+````
 
 **Solution: Document and reorganize**
 
@@ -1152,19 +1193,22 @@ Examples:
 
 ### Subdirectory Naming
 Organize by UI concept or domain:
-```
+````
+
 app/shared/components/
-  Navigation/          ← Nav, BottomNav, Breadcrumbs
-  Cards/               ← Generic card, skeletons, variants
-  Forms/               ← FormField, FormButton, inputs
-  Dialogs/             ← Modal, Drawer, AlertDialog
-  Filters/             ← FilterBar, CategoryFilter
-  Lists/               ← ListContainer, Pagination
-  Images/              ← ImageUpload, Gallery, Lightbox
-  Ratings/             ← StarRating, ReviewStars
-  Moderation/          ← ReportButton, ReviewCard (review features)
-  Shared/              ← Utils like IconComponent (truly misc)
+Navigation/ ← Nav, BottomNav, Breadcrumbs
+Cards/ ← Generic card, skeletons, variants
+Forms/ ← FormField, FormButton, inputs
+Dialogs/ ← Modal, Drawer, AlertDialog
+Filters/ ← FilterBar, CategoryFilter
+Lists/ ← ListContainer, Pagination
+Images/ ← ImageUpload, Gallery, Lightbox
+Ratings/ ← StarRating, ReviewStars
+Moderation/ ← ReportButton, ReviewCard (review features)
+Shared/ ← Utils like IconComponent (truly misc)
+
 ```
+
 ```
 
 ---
@@ -1172,6 +1216,7 @@ app/shared/components/
 ### Confusion #4: "This component takes 10 props — what does each do?"
 
 **Problem:**
+
 ```tsx
 // Example from the codebase
 <Experiences
@@ -1200,34 +1245,34 @@ type ListExperiencesProps = {
   skeletonCount?: number;
   category?: string;
   date?: string;
-  isPortal?: boolean;         // ❓ What is a portal?
-  isReserved?: boolean;       // ❓ Filters or view mode?
-  isBookedmarked?: boolean;   // ❓ Also isPortal?
-  isHosted?: boolean;         // ❓ How does this relate to isPortal?
+  isPortal?: boolean; // ❓ What is a portal?
+  isReserved?: boolean; // ❓ Filters or view mode?
+  isBookedmarked?: boolean; // ❓ Also isPortal?
+  isHosted?: boolean; // ❓ How does this relate to isPortal?
   noDataMessage?: string;
 };
 
 // AFTER (clear intent)
 type ListExperiencesProps = {
   // Display
-  title?: string;             // Section title
-  layout?: 'grid' | 'list';   // Render mode
+  title?: string; // Section title
+  layout?: 'grid' | 'list'; // Render mode
 
   // Data filtering
   filter?: {
-    date?: string;            // Show only on this date
-    category?: string;        // Show only this category
+    date?: string; // Show only on this date
+    category?: string; // Show only this category
   };
 
   // View modes (mutually exclusive)
   viewMode: 'upcoming' | 'bookmarked' | 'hosted' | 'discover';
 
   // UI state
-  skeletonCount?: number;     // Loading placeholders
-  emptyMessage?: string;      // When no results
-  
+  skeletonCount?: number; // Loading placeholders
+  emptyMessage?: string; // When no results
+
   // Layout (internal)
-  renderAsPortal?: boolean;   // Render in portal? (use better name or remove)
+  renderAsPortal?: boolean; // Render in portal? (use better name or remove)
 };
 
 // And document the intent:
@@ -1250,10 +1295,11 @@ type ListExperiencesProps = {
 ### Confusion #5: "Why does the types file import from enums, but not vice versa?"
 
 **Problem:**
+
 ```
 types/experience.ts:
   import { Status } from '@/enums/status'    ← OK
-  
+
 enums/status.ts:
   export const status = { ... }               ← Not importing types
 
@@ -1266,24 +1312,25 @@ enums/status.ts:
 ## Dependency Layers
 
 Your codebase has implicit layers:
-
 ```
+
 Layer 1 (Primitives):
-  enums/
-  utils/
-  lib/
+enums/
+utils/
+lib/
 
 Layer 2 (Domain):
-  types/              ← imports Layer 1
-  services/           ← imports Layer 1, 2
+types/ ← imports Layer 1
+services/ ← imports Layer 1, 2
 
 Layer 3 (Features):
-  app/[feature]/      ← imports Layer 1, 2, 3
-  hooks/              ← imports Layer 1, 2, 3
-  context/            ← imports Layer 1, 2, 3
+app/[feature]/ ← imports Layer 1, 2, 3
+hooks/ ← imports Layer 1, 2, 3
+context/ ← imports Layer 1, 2, 3
 
 Layer 4 (Components):
-  app/[feature]/components/  ← imports Layer 1-4
+app/[feature]/components/ ← imports Layer 1-4
+
 ```
 
 **Rule:** Never import from a higher layer into a lower one.
@@ -1302,15 +1349,15 @@ Layer 4 (Components):
 ```tsx
 // In experiences/components/List/experiences.tsx
 if (isPortal && selectedCategoryId !== 'all') {
-  return null;  // Hide if in portal view but category selected
+  return null; // Hide if in portal view but category selected
 }
 
 if (hasExperiences === null && isPortal) {
-  return null;  // Hide if still loading
+  return null; // Hide if still loading
 }
 
 if (!hasExperiences && isPortal) {
-  return null;  // Hide if no experiences
+  return null; // Hide if no experiences
 }
 
 // ❓ Why is this component sometimes invisible?
@@ -1380,18 +1427,21 @@ Create a `ONBOARDING.md` file:
 ## Common Tasks
 
 ### Add a new feature page
+
 1. Create `app/(feature)/new-page/page.tsx`
 2. Export as named export: `export const FeatureName = () => { ... }`
 3. Add types to `app/(feature)/types.ts` if needed
 4. Add hooks to `app/(feature)/hooks/` if needed
 
 ### Add a new shared component
+
 1. Create folder: `app/shared/components/MyComponent/`
 2. Create file: `MyComponent.tsx` (named export)
 3. Create test: `MyComponent.test.tsx`
 4. Export from index.ts if needed
 
 ### Add API call
+
 1. Create service function: `services/[feature].ts`
 2. Wrap with hook: `app/[feature]/hooks/useXxx.ts`
 3. Use hook in component
@@ -1407,16 +1457,16 @@ Create a `ONBOARDING.md` file:
 
 ## Implementation Roadmap (Suggested Timeline)
 
-| Week | Task | Effort | Impact |
-|------|------|--------|--------|
-| 1 | #1: Named exports + ESLint | 16h | Critical (foundation) |
-| 1-2 | #2: Feature hooks (Experiences) | 4h | High (discoverability) |
-| 2 | #3: Route groups | 2h | High (clarity) |
-| 2 | #4: Shared components org | 8h | High (navigation) |
-| 3 | #5: Move types to features | 3h | Medium (co-location) |
-| 3 | #6: Extract hooks from pages | 4h | Medium (testability) |
-| 4 | #7: Add component tests | 10h | Medium (confidence) |
-| 4 | #8: Remove unnecessary 'use client' | 2h | Low (perf) |
+| Week | Task                                | Effort | Impact                 |
+| ---- | ----------------------------------- | ------ | ---------------------- |
+| 1    | #1: Named exports + ESLint          | 16h    | Critical (foundation)  |
+| 1-2  | #2: Feature hooks (Experiences)     | 4h     | High (discoverability) |
+| 2    | #3: Route groups                    | 2h     | High (clarity)         |
+| 2    | #4: Shared components org           | 8h     | High (navigation)      |
+| 3    | #5: Move types to features          | 3h     | Medium (co-location)   |
+| 3    | #6: Extract hooks from pages        | 4h     | Medium (testability)   |
+| 4    | #7: Add component tests             | 10h    | Medium (confidence)    |
+| 4    | #8: Remove unnecessary 'use client' | 2h     | Low (perf)             |
 
 **Total: ~6 weeks, spread across PRs**
 

@@ -1,4 +1,3 @@
-
 export const getOrdinalDate = (dateString: string): string => {
   try {
     const [year, month, day] = dateString.split('-').map(Number);
@@ -39,10 +38,7 @@ export const getOrdinalDate = (dateString: string): string => {
   }
 };
 
-export const getDaysBetween = (
-  startDate: string,
-  endDate: string,
-): string[] => {
+export const getDaysBetween = (startDate: string, endDate: string): string[] => {
   try {
     const days: string[] = [];
     const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
@@ -65,10 +61,7 @@ export const getDaysBetween = (
   }
 };
 
-export const formatMultiDayRange = (
-  startDate: string | null,
-  endDate: string | null,
-): string => {
+export const formatMultiDayRange = (startDate: string | null, endDate: string | null): string => {
   if (!startDate || !endDate) return '';
 
   try {

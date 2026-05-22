@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+
 import { PreviewExperienceHeader } from './PreviewExperienceHeader';
 
 jest.mock('@/app/shared/components/Icons', () => ({
@@ -22,7 +23,7 @@ describe('PreviewExperienceHeader', () => {
         photo="https://example.com/image.jpg"
         title="Test Experience"
         description="This is a test experience"
-      />
+      />,
     );
     expect(screen.getByText('Test Experience')).toBeInTheDocument();
     expect(screen.getByText('This is a test experience')).toBeInTheDocument();

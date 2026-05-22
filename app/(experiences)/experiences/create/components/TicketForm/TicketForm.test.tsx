@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+
 import { TicketForm, TicketFormValue } from './TicketForm';
 
 jest.mock('@/components/ui/date-picker', () => ({
@@ -9,7 +10,12 @@ jest.mock('@/components/ui/date-picker', () => ({
 
 jest.mock('@/components/ui/time-picker', () => ({
   TimePicker: ({ placeholder, value, onChange }: any) => (
-    <input type="time" placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} />
+    <input
+      type="time"
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
   ),
 }));
 
@@ -52,13 +58,17 @@ describe('TicketForm', () => {
 
   it('renders all form fields', () => {
     render(<TicketForm value={defaultValue} onChange={() => {}} errors={{}} onSave={() => {}} />);
-    expect(screen.getByPlaceholderText('Ticket Name e.g. VIP, Early Bird, Locals etc...')).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('Ticket Name e.g. VIP, Early Bird, Locals etc...'),
+    ).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Available Ticket Quantity')).toBeInTheDocument();
   });
 
   it('displays error messages', () => {
     const errors = { name: 'Name is required', quantity: 'Quantity must be > 0' };
-    render(<TicketForm value={defaultValue} onChange={() => {}} errors={errors} onSave={() => {}} />);
+    render(
+      <TicketForm value={defaultValue} onChange={() => {}} errors={errors} onSave={() => {}} />,
+    );
     expect(screen.getByText('Name is required')).toBeInTheDocument();
     expect(screen.getByText('Quantity must be > 0')).toBeInTheDocument();
   });
@@ -76,7 +86,7 @@ describe('TicketForm', () => {
         errors={{}}
         onSave={() => {}}
         experiencePricing="paid"
-      />
+      />,
     );
     expect(screen.getByText(/Total Tickets Cost/i)).toBeInTheDocument();
   });

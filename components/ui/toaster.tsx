@@ -1,6 +1,7 @@
 'use client';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { useToast } from '@/app/shared/hooks/useToast';
 import {
   Toast,
   ToastClose,
@@ -9,7 +10,6 @@ import {
   ToastTitle,
   ToastViewport,
 } from '@/components/ui/toast';
-import { useToast } from '@/app/shared/hooks/useToast';
 import { cn } from '@/lib/utils';
 
 export function Toaster() {

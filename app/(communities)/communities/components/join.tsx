@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { Button } from '@/components/ui/button';
 import { useJoinCommunity, useJoinCommunityViaInvite } from '@/app/shared/hooks/useCommunities';
 import { toast } from '@/app/shared/hooks/useToast';
+import { Button } from '@/components/ui/button';
 import { CommunityMember } from '@/types/community';
 
 export const Join = ({

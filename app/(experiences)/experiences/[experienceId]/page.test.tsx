@@ -21,7 +21,13 @@ jest.mock('next/image', () => ({
 }));
 
 jest.mock('@/app/shared/components/Global', () => ({
-  DescriptionShowMore: function MockDescriptionShowMore({ text, photo }: { text: string; photo: string }) {
+  DescriptionShowMore: function MockDescriptionShowMore({
+    text,
+    photo,
+  }: {
+    text: string;
+    photo: string;
+  }) {
     return (
       <div data-testid="description-show-more">
         <p>{text}</p>

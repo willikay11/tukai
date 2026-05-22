@@ -7,34 +7,29 @@ Quick reference for converting default exports to named exports.
 ## Pattern 1: Simple Function Component
 
 ### BEFORE
+
 ```tsx
 // app/components/nav.tsx
 export default function Nav() {
   const pathname = usePathname();
-  
-  return (
-    <nav>
-      {/* content */}
-    </nav>
-  );
+
+  return <nav>{/* content */}</nav>;
 }
 ```
 
 ### AFTER
+
 ```tsx
 // app/components/nav.tsx
 export const Nav = () => {
   const pathname = usePathname();
-  
-  return (
-    <nav>
-      {/* content */}
-    </nav>
-  );
+
+  return <nav>{/* content */}</nav>;
 };
 ```
 
 ### Import Changes
+
 ```tsx
 // BEFORE
 import Nav from '@/app/components/nav'
@@ -48,30 +43,25 @@ import { Nav } from '@/app/components/nav'
 ## Pattern 2: Page Component with Props
 
 ### BEFORE
+
 ```tsx
 // app/page.tsx
-export default function ExperiencesPage({ 
-  searchParams 
-}: { 
-  searchParams: { category?: string } 
-}) {
+export default function ExperiencesPage({ searchParams }: { searchParams: { category?: string } }) {
   return <main>...</main>;
 }
 ```
 
 ### AFTER
+
 ```tsx
 // app/page.tsx
-export const ExperiencesPage = ({ 
-  searchParams 
-}: { 
-  searchParams: { category?: string } 
-}) => {
+export const ExperiencesPage = ({ searchParams }: { searchParams: { category?: string } }) => {
   return <main>...</main>;
 };
 ```
 
 ### Import Changes
+
 ```tsx
 // BEFORE
 import ExperiencesPage from '@/app/page'
@@ -85,6 +75,7 @@ import { ExperiencesPage } from '@/app/page'
 ## Pattern 3: Arrow Function Component
 
 ### BEFORE
+
 ```tsx
 // app/components/rating.tsx
 const Rating = ({ value, size }: RatingProps) => {
@@ -95,6 +86,7 @@ export default Rating;
 ```
 
 ### AFTER
+
 ```tsx
 // app/components/rating.tsx
 export const Rating = ({ value, size }: RatingProps) => {
@@ -103,6 +95,7 @@ export const Rating = ({ value, size }: RatingProps) => {
 ```
 
 ### Import Changes
+
 ```tsx
 // BEFORE
 import Rating from '@/app/components/rating'
@@ -116,32 +109,27 @@ import { Rating } from '@/app/components/rating'
 ## Pattern 4: Async Server Component
 
 ### BEFORE
+
 ```tsx
 // app/communities/[communityId]/page.tsx
-export default async function ViewCommunityPage({
-  params,
-}: {
-  params: { communityId: string };
-}) {
+export default async function ViewCommunityPage({ params }: { params: { communityId: string } }) {
   const session = await getAuthSession();
   return <main>...</main>;
 }
 ```
 
 ### AFTER
+
 ```tsx
 // app/communities/[communityId]/page.tsx
-export const ViewCommunityPage = async ({
-  params,
-}: {
-  params: { communityId: string };
-}) => {
+export const ViewCommunityPage = async ({ params }: { params: { communityId: string } }) => {
   const session = await getAuthSession();
   return <main>...</main>;
 };
 ```
 
 ### Import Changes
+
 ```tsx
 // BEFORE
 import ViewCommunityPage from '@/app/communities/[communityId]/page'
@@ -155,6 +143,7 @@ import { ViewCommunityPage } from '@/app/communities/[communityId]/page'
 ## Pattern 5: Component with Generic Type
 
 ### BEFORE
+
 ```tsx
 // app/components/ListContainer.tsx
 export default function ListContainer<T>({
@@ -169,6 +158,7 @@ export default function ListContainer<T>({
 ```
 
 ### AFTER
+
 ```tsx
 // app/components/ListContainer.tsx
 export const ListContainer = <T,>({
@@ -183,6 +173,7 @@ export const ListContainer = <T,>({
 ```
 
 ### Import Changes
+
 ```tsx
 // BEFORE
 import ListContainer from '@/app/components/ListContainer'
@@ -198,13 +189,10 @@ import { ListContainer } from '@/app/components/ListContainer'
 ## Pattern 6: Layout Component
 
 ### BEFORE
+
 ```tsx
 // app/layout.tsx
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <body>{children}</body>
@@ -214,13 +202,10 @@ export default function RootLayout({
 ```
 
 ### AFTER
+
 ```tsx
 // app/layout.tsx
-export const RootLayout = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html>
       <body>{children}</body>
@@ -234,6 +219,7 @@ export const RootLayout = ({
 ## Pattern 7: Component with 'use client'
 
 ### BEFORE
+
 ```tsx
 // app/components/search.tsx
 'use client';
@@ -247,6 +233,7 @@ export default function Search() {
 ```
 
 ### AFTER
+
 ```tsx
 // app/components/search.tsx
 'use client';
@@ -266,6 +253,7 @@ export const Search = () => {
 ## Pattern 8: Component Re-exported from Index
 
 ### BEFORE
+
 ```tsx
 // app/components/form/button.tsx
 export default function Button({ label }: ButtonProps) {
@@ -277,6 +265,7 @@ export { default as Button } from './button';
 ```
 
 ### AFTER
+
 ```tsx
 // app/components/form/button.tsx
 export const Button = ({ label }: ButtonProps) => {
@@ -288,6 +277,7 @@ export { Button } from './button';
 ```
 
 ### Import Changes
+
 ```tsx
 // BEFORE
 import { Button } from '@/app/components/form'
@@ -301,6 +291,7 @@ import { Button } from '@/app/components/form'
 ## Pattern 9: Multiple Exports in One File
 
 ### BEFORE
+
 ```tsx
 // app/components/utils.tsx
 export const helperFunction = () => { ... };
@@ -312,6 +303,7 @@ export default function MainComponent() {
 ```
 
 ### AFTER
+
 ```tsx
 // app/components/utils.tsx
 export const helperFunction = () => { ... };
@@ -323,6 +315,7 @@ export const MainComponent = () => {
 ```
 
 ### Import Changes
+
 ```tsx
 // BEFORE
 import MainComponent, { helperFunction } from '@/app/components/utils'
@@ -336,26 +329,20 @@ import { MainComponent, helperFunction } from '@/app/components/utils'
 ## Pattern 10: Wrapper Component
 
 ### BEFORE
+
 ```tsx
 // app/components/wrapper.tsx
 export default function PageWrapper({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="page-wrapper">
-      {children}
-    </div>
-  );
+  return <div className="page-wrapper">{children}</div>;
 }
 ```
 
 ### AFTER
+
 ```tsx
 // app/components/wrapper.tsx
 export const PageWrapper = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <div className="page-wrapper">
-      {children}
-    </div>
-  );
+  return <div className="page-wrapper">{children}</div>;
 };
 ```
 
@@ -364,14 +351,16 @@ export const PageWrapper = ({ children }: { children: React.ReactNode }) => {
 ## Common Mistakes to Avoid
 
 ### ❌ WRONG: Forgetting the semicolon
+
 ```tsx
 // DON'T DO THIS
 export const Nav = () => {
-  return <nav></nav>
-}  // ← Missing semicolon (though optional, be consistent)
+  return <nav></nav>;
+}; // ← Missing semicolon (though optional, be consistent)
 ```
 
 ### ❌ WRONG: Mixing named and default exports
+
 ```tsx
 // DON'T DO THIS
 export const Component = () => { ... };
@@ -379,6 +368,7 @@ export default Component;  // ← Creates both
 ```
 
 ### ❌ WRONG: Incorrect arrow function syntax with generics
+
 ```tsx
 // DON'T DO THIS
 export const List<T> = ({ items }: { items: T[] }) => { ... };
@@ -390,6 +380,7 @@ export const List = <T,>({ items }: { items: T[] }) => { ... };
 ```
 
 ### ❌ WRONG: Forgetting to update imports
+
 ```tsx
 // Component file - CORRECT
 export const Nav = () => { ... };
@@ -408,18 +399,23 @@ import { Nav } from '@/app/components/nav'
 ### Using VSCode
 
 #### Step 1: Find default exports
+
 **Find regex:**
+
 ```
 ^export default (function|const) (\w+)
 ```
 
 #### Step 2: Replace with named export
+
 **Replace pattern:**
+
 ```
 export const $2
 ```
 
 **Steps:**
+
 1. Open Find & Replace (`Cmd+H`)
 2. Enable regex mode (click `.*` button)
 3. Enter find pattern
@@ -430,13 +426,17 @@ export const $2
 ### Updating Imports
 
 #### Find all default imports
+
 **Find regex:**
+
 ```
 import (\w+) from '(@/[^']+)'
 ```
 
 #### Replace with named imports
+
 **Replace pattern:**
+
 ```
 import { $1 } from '$2'
 ```
@@ -471,6 +471,7 @@ File: ./app/components/nav.tsx
 ## Batch Processing with Scripts
 
 ### Script to list all components needing conversion
+
 ```bash
 #!/bin/bash
 # Find all default exports
@@ -478,6 +479,7 @@ grep -r "^export default" app/ | grep -E "\.(tsx?|jsx?):"
 ```
 
 ### Script to verify all imports updated
+
 ```bash
 #!/bin/bash
 # Check for remaining default imports
@@ -505,6 +507,7 @@ npm test -- app/components/nav.test.tsx
 ```
 
 ### Whole-project verification:
+
 ```bash
 # After converting a batch of files
 npm run lint              # Should show fewer import/no-default-export errors

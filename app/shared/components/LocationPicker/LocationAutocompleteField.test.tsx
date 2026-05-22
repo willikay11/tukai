@@ -1,10 +1,20 @@
+import { createRef } from 'react';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createRef } from 'react';
+
 import { LocationAutocompleteField } from './LocationAutocompleteField';
 
 jest.mock('@/app/shared/components/Icons', () => ({
-  IconComponent: ({ iconName, size, color }: { iconName: string; size: number; color?: string }) => (
+  IconComponent: ({
+    iconName,
+    size,
+    color,
+  }: {
+    iconName: string;
+    size: number;
+    color?: string;
+  }) => (
     <span data-testid={`icon-${iconName}`} style={{ color }}>
       {iconName}
     </span>
@@ -64,12 +74,7 @@ describe('LocationAutocompleteField', () => {
     });
 
     it('renders with custom placeholder', () => {
-      render(
-        <LocationAutocompleteField
-          {...defaultProps}
-          placeholder="Enter your location"
-        />
-      );
+      render(<LocationAutocompleteField {...defaultProps} placeholder="Enter your location" />);
 
       const input = screen.getByRole('textbox') as HTMLInputElement;
       expect(input.placeholder).toBe('Enter your location');
@@ -126,12 +131,7 @@ describe('LocationAutocompleteField', () => {
     });
 
     it('applies custom input className', () => {
-      render(
-        <LocationAutocompleteField
-          {...defaultProps}
-          inputClassName="custom-class h-12"
-        />
-      );
+      render(<LocationAutocompleteField {...defaultProps} inputClassName="custom-class h-12" />);
 
       const input = screen.getByRole('textbox');
       expect(input).toHaveClass('custom-class');
@@ -146,7 +146,7 @@ describe('LocationAutocompleteField', () => {
           {...defaultProps}
           showSuggestions={false}
           suggestions={mockSuggestions}
-        />
+        />,
       );
 
       expect(screen.queryByText('Nairobi, Kenya')).not.toBeInTheDocument();
@@ -160,7 +160,7 @@ describe('LocationAutocompleteField', () => {
           showSuggestions={true}
           minQueryLength={3}
           suggestions={mockSuggestions}
-        />
+        />,
       );
 
       expect(screen.queryByText('Nairobi, Kenya')).not.toBeInTheDocument();
@@ -174,7 +174,7 @@ describe('LocationAutocompleteField', () => {
           showSuggestions={true}
           minQueryLength={3}
           suggestions={mockSuggestions}
-        />
+        />,
       );
 
       expect(screen.getByText('Nairobi, Kenya')).toBeInTheDocument();
@@ -189,7 +189,7 @@ describe('LocationAutocompleteField', () => {
           minQueryLength={3}
           isLoading={true}
           suggestions={[]}
-        />
+        />,
       );
 
       expect(screen.getByTestId('loader')).toBeInTheDocument();
@@ -203,7 +203,7 @@ describe('LocationAutocompleteField', () => {
           showSuggestions={true}
           minQueryLength={2}
           suggestions={mockSuggestions}
-        />
+        />,
       );
 
       expect(screen.getByText('Nairobi, Kenya')).toBeInTheDocument();
@@ -218,7 +218,7 @@ describe('LocationAutocompleteField', () => {
           value="Nairobi"
           showSuggestions={true}
           isLoading={true}
-        />
+        />,
       );
 
       expect(screen.getByTestId('loader')).toBeInTheDocument();
@@ -233,7 +233,7 @@ describe('LocationAutocompleteField', () => {
           showSuggestions={true}
           isLoading={true}
           suggestions={mockSuggestions}
-        />
+        />,
       );
 
       expect(screen.getByTestId('loader')).toBeInTheDocument();
@@ -249,7 +249,7 @@ describe('LocationAutocompleteField', () => {
           value="Nairobi"
           showSuggestions={true}
           suggestions={mockSuggestions}
-        />
+        />,
       );
 
       expect(screen.getByText('Nairobi, Kenya')).toBeInTheDocument();
@@ -264,7 +264,7 @@ describe('LocationAutocompleteField', () => {
           value="Nairobi"
           showSuggestions={true}
           suggestions={mockSuggestions}
-        />
+        />,
       );
 
       const icons = screen.getAllByTestId('icon-Location01Icon');
@@ -278,7 +278,7 @@ describe('LocationAutocompleteField', () => {
           value="Nairobi"
           showSuggestions={true}
           suggestions={mockSuggestions}
-        />
+        />,
       );
 
       const buttons = screen.getAllByRole('button');
@@ -293,7 +293,7 @@ describe('LocationAutocompleteField', () => {
           showSuggestions={true}
           suggestions={[]}
           isLoading={false}
-        />
+        />,
       );
 
       // Dropdown should still show but be empty
@@ -314,7 +314,7 @@ describe('LocationAutocompleteField', () => {
           showSuggestions={true}
           suggestions={mockSuggestions}
           onSelectSuggestion={onSelectSuggestion}
-        />
+        />,
       );
 
       const suggestionButton = screen.getByText('Nairobi, Kenya');
@@ -334,7 +334,7 @@ describe('LocationAutocompleteField', () => {
           showSuggestions={true}
           suggestions={mockSuggestions}
           onSelectSuggestion={onSelectSuggestion}
-        />
+        />,
       );
 
       const secondSuggestion = screen.getByText('Nairobi City Center, Kenya');
@@ -348,12 +348,7 @@ describe('LocationAutocompleteField', () => {
     it('forwards containerRef to div element', () => {
       const containerRef = createRef<HTMLDivElement>();
 
-      render(
-        <LocationAutocompleteField
-          {...defaultProps}
-          containerRef={containerRef}
-        />
-      );
+      render(<LocationAutocompleteField {...defaultProps} containerRef={containerRef} />);
 
       expect(containerRef.current).toBeInstanceOf(HTMLDivElement);
     });
@@ -361,12 +356,7 @@ describe('LocationAutocompleteField', () => {
     it('container div has relative positioning', () => {
       const containerRef = createRef<HTMLDivElement>();
 
-      render(
-        <LocationAutocompleteField
-          {...defaultProps}
-          containerRef={containerRef}
-        />
-      );
+      render(<LocationAutocompleteField {...defaultProps} containerRef={containerRef} />);
 
       expect(containerRef.current).toHaveClass('relative');
     });
@@ -387,11 +377,21 @@ describe('LocationAutocompleteField', () => {
           value="Nairobi"
           showSuggestions={true}
           suggestions={mockSuggestions}
-        />
+        />,
       );
 
       const dropdown = container.querySelector('.absolute');
-      expect(dropdown).toHaveClass('z-50', 'mt-1', 'max-h-60', 'w-full', 'overflow-auto', 'rounded-md', 'border', 'bg-white', 'shadow-lg');
+      expect(dropdown).toHaveClass(
+        'z-50',
+        'mt-1',
+        'max-h-60',
+        'w-full',
+        'overflow-auto',
+        'rounded-md',
+        'border',
+        'bg-white',
+        'shadow-lg',
+      );
     });
 
     it('suggestion items have hover state', () => {
@@ -401,7 +401,7 @@ describe('LocationAutocompleteField', () => {
           value="Nairobi"
           showSuggestions={true}
           suggestions={mockSuggestions}
-        />
+        />,
       );
 
       const suggestionButton = container.querySelector('button[type="button"]');
@@ -424,7 +424,7 @@ describe('LocationAutocompleteField', () => {
           value="Nairobi"
           showSuggestions={true}
           suggestions={mockSuggestions}
-        />
+        />,
       );
 
       const buttons = screen.getAllByRole('button');
@@ -438,7 +438,7 @@ describe('LocationAutocompleteField', () => {
           value="Nairobi"
           showSuggestions={true}
           suggestions={mockSuggestions}
-        />
+        />,
       );
 
       mockSuggestions.forEach((suggestion) => {

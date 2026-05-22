@@ -7,11 +7,11 @@ import Image from 'next/image';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
-import { type RelativeValidityValue } from '../RelativeValidityPicker';
-
-import { CustomiseItinerary } from '../customiseItinerary';
-import { SharedExperiencePreview } from '../SharedExperiencePreview';
 import { Interest } from '@/types/interest';
+
+import { type RelativeValidityValue } from '../RelativeValidityPicker';
+import { SharedExperiencePreview } from '../SharedExperiencePreview';
+import { CustomiseItinerary } from '../customiseItinerary';
 import { CommunityOption } from '../hooks/useCreateExperienceFlow';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
@@ -276,7 +276,7 @@ export const ExperienceStepSidePanel = ({
       {content}
     </div>
   );
-}
+};
 
 function StepPlaceholderContent({ title, description }: { title: string; description: string }) {
   return (
@@ -288,4 +288,4 @@ function StepPlaceholderContent({ title, description }: { title: string; descrip
       </div>
     </>
   );
-};
+}

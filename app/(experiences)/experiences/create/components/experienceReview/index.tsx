@@ -1,21 +1,22 @@
 'use client';
 
-import { PreviewExperienceHeader } from '../PreviewExperienceHeader';
-import { PreviewIncludedSection } from '../PreviewIncludedSection';
-import { PreviewExcludedSection } from '../PreviewExcludedSection';
+import { InvitedMember } from '@/components/ui/invite-members';
+import { Community } from '@/types/community';
+import { Experience } from '@/types/experience';
+
+import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
+import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
 import { PreviewDateSection } from '../PreviewDateSection';
+import { PreviewExcludedSection } from '../PreviewExcludedSection';
+import { PreviewExperienceHeader } from '../PreviewExperienceHeader';
+import { PreviewGuestsSection } from '../PreviewGuestsSection';
+import { PreviewIncludedSection } from '../PreviewIncludedSection';
 import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
 import { PreviewLocationSection } from '../PreviewLocationSection';
 import { PreviewMeetingSection } from '../PreviewMeetingSection';
-import { PreviewGuestsSection } from '../PreviewGuestsSection';
-import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
 import { PreviewTicketsSection } from '../PreviewTicketsSection';
 import { PreviewWalletSection } from '../PreviewWalletSection';
-import { Experience } from '@/types/experience';
-import { InvitedMember } from '@/components/ui/invite-members';
-import { Community } from '@/types/community';
-import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 
 interface ExperienceReviewProps {
   type: 'review' | 'create';
@@ -104,10 +105,7 @@ export const ExperienceReview = ({
         />
       )}
 
-      <PreviewGuestsSection
-        guests={invitedMembers}
-        onEdit={() => handleEditClick('invites')}
-      />
+      <PreviewGuestsSection guests={invitedMembers} onEdit={() => handleEditClick('invites')} />
 
       <PreviewCommunitiesSection
         communityIds={invitedCommunities.map((c) => c.id)}

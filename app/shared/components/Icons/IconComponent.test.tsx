@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+
 import { IconComponent } from './IconComponent';
 
 jest.mock('@hugeicons/react', () => ({
@@ -66,12 +67,7 @@ describe('IconComponent', () => {
     });
 
     it('applies custom className', () => {
-      render(
-        <IconComponent
-          iconName="MapPinpoint01Icon"
-          className="animate-spin text-red-500"
-        />
-      );
+      render(<IconComponent iconName="MapPinpoint01Icon" className="animate-spin text-red-500" />);
 
       const icon = screen.getByTestId('hugeicons-icon');
       expect(icon).toHaveClass('animate-spin', 'text-red-500');
@@ -103,13 +99,7 @@ describe('IconComponent', () => {
     });
 
     it('renders solid icon with custom color', () => {
-      render(
-        <IconComponent
-          iconName="MapPinpoint01Icon"
-          variant="solid"
-          color="primary"
-        />
-      );
+      render(<IconComponent iconName="MapPinpoint01Icon" variant="solid" color="primary" />);
 
       const icon = screen.getByTestId('hugeicons-icon');
       expect(icon).toHaveAttribute('data-color', 'primary');
@@ -118,17 +108,13 @@ describe('IconComponent', () => {
 
   describe('invalid icon names', () => {
     it('returns null for invalid twotone icon name', () => {
-      const { container } = render(
-        <IconComponent iconName="InvalidIconName" variant="twotone" />
-      );
+      const { container } = render(<IconComponent iconName="InvalidIconName" variant="twotone" />);
 
       expect(container.firstChild).toBeNull();
     });
 
     it('returns null for invalid solid icon name', () => {
-      const { container } = render(
-        <IconComponent iconName="InvalidIconName" variant="solid" />
-      );
+      const { container } = render(<IconComponent iconName="InvalidIconName" variant="solid" />);
 
       expect(container.firstChild).toBeNull();
     });
@@ -142,9 +128,7 @@ describe('IconComponent', () => {
 
   describe('variant switching', () => {
     it('switches from twotone to solid for same icon', () => {
-      const { rerender } = render(
-        <IconComponent iconName="MapPinpoint01Icon" variant="twotone" />
-      );
+      const { rerender } = render(<IconComponent iconName="MapPinpoint01Icon" variant="twotone" />);
 
       let icon = screen.getByTestId('hugeicons-icon');
       expect(icon).toBeInTheDocument();
@@ -158,7 +142,7 @@ describe('IconComponent', () => {
     it('returns null when switching to twotone variant for solid-only icon', () => {
       // Calendar01Icon is only in twotone mock
       const { rerender, container } = render(
-        <IconComponent iconName="Calendar01Icon" variant="twotone" />
+        <IconComponent iconName="Calendar01Icon" variant="twotone" />,
       );
 
       expect(screen.getByTestId('hugeicons-icon')).toBeInTheDocument();
@@ -179,7 +163,7 @@ describe('IconComponent', () => {
           size={18}
           color="red"
           className="animate-bounce"
-        />
+        />,
       );
 
       const icon = screen.getByTestId('hugeicons-icon');
@@ -199,14 +183,7 @@ describe('IconComponent', () => {
 
   describe('common icon usage patterns', () => {
     it('renders Location01Icon with custom styling', () => {
-      render(
-        <IconComponent
-          iconName="Location01Icon"
-          size={16}
-          color="white"
-          className="mr-2"
-        />
-      );
+      render(<IconComponent iconName="Location01Icon" size={16} color="white" className="mr-2" />);
 
       const icon = screen.getByTestId('hugeicons-icon');
       expect(icon).toHaveAttribute('data-size', '16');
@@ -215,14 +192,7 @@ describe('IconComponent', () => {
     });
 
     it('renders Calendar01Icon for date representation', () => {
-      render(
-        <IconComponent
-          iconName="Calendar01Icon"
-          size={12}
-          color="white"
-          className="mr-1"
-        />
-      );
+      render(<IconComponent iconName="Calendar01Icon" size={12} color="white" className="mr-1" />);
 
       const icon = screen.getByTestId('hugeicons-icon');
       expect(icon).toHaveAttribute('data-size', '12');
@@ -230,13 +200,7 @@ describe('IconComponent', () => {
     });
 
     it('renders Cancel01Icon', () => {
-      render(
-        <IconComponent
-          iconName="Cancel01Icon"
-          size={12}
-          color="white"
-        />
-      );
+      render(<IconComponent iconName="Cancel01Icon" size={12} color="white" />);
 
       const icon = screen.getByTestId('hugeicons-icon');
       expect(icon).toBeInTheDocument();

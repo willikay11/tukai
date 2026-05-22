@@ -11,7 +11,7 @@
                     ↑
         #1 Exports  │  #4 Shared Comp
         (10/10)     │  (7/10)
-        CRITICAL    │  
+        CRITICAL    │
                     │
                     │  #5 Types
   EFFORT→─────────┼─────────→
@@ -33,6 +33,7 @@
 These unblock everything else and affect developer experience daily.
 
 #### #1: Named Exports + ESLint Rule [12-16 hours]
+
 **Why First:** All files violate CLAUDE.md. Blocks refactoring tools, confuses new devs, can't safely rename.
 
 ```bash
@@ -49,6 +50,7 @@ npm run lint -- --fix
 ```
 
 **Acceptance criteria:**
+
 - ✅ ESLint rule in place
 - ✅ All files export named functions
 - ✅ `npm run build` passes
@@ -58,6 +60,7 @@ npm run lint -- --fix
 ---
 
 #### #2: Extract Route Groups [1-2 hours]
+
 **Why:** Makes folder hierarchy match feature structure. Zero implementation complexity.
 
 ```bash
@@ -75,6 +78,7 @@ mv app/page.tsx "app/(experiences)/page.tsx"
 **No import path changes** — Next.js handles transparently.
 
 **Acceptance criteria:**
+
 - ✅ Route groups created
 - ✅ Dev server works (`npm run dev`)
 - ✅ All routes still accessible (`/`, `/places`, `/communities`)
@@ -83,12 +87,13 @@ mv app/page.tsx "app/(experiences)/page.tsx"
 ---
 
 #### #3: Organize Shared Components [4-6 hours]
+
 **Why:** 30+ components scattered; new devs can't find things.
 
 ```
 Current:
   app/components/ (30+ flat files)
-  
+
 Target:
   app/shared/components/
     Navigation/     → Nav.tsx, BottomNavigation.tsx
@@ -101,6 +106,7 @@ Target:
 ```
 
 **Acceptance criteria:**
+
 - ✅ All shared components moved to `app/shared/components/`
 - ✅ All imports updated
 - ✅ Tests still pass
@@ -113,6 +119,7 @@ Target:
 These improve code organization and developer experience, but less urgent than Tier 1.
 
 #### #4: Extract Feature Hooks [4-6 hours]
+
 **Why:** Hooks buried in global `/hooks` folder; discoverability nightmare.
 
 **Template (do Experiences first, copy pattern for others):**
@@ -130,10 +137,12 @@ mv hooks/places.tsx "app/(places)/hooks/usePlaces.ts"
 ```
 
 **Keep at root:**
+
 - `hooks/use-toast.ts` (used everywhere)
 - `hooks/useMediaQuery.ts` (cross-cutting)
 
 **Update imports:**
+
 ```tsx
 // Before
 import { useExperiences } from '@/hooks/experiences'
@@ -143,6 +152,7 @@ import { useExperiences } from '@/(experiences)/hooks/useExperiences'
 ```
 
 **Acceptance criteria:**
+
 - ✅ Feature hooks moved to feature folders
 - ✅ All imports updated
 - ✅ `/hooks` folder only has cross-cutting hooks
@@ -151,6 +161,7 @@ import { useExperiences } from '@/(experiences)/hooks/useExperiences'
 ---
 
 #### #5: Move Types to Features [2-3 hours]
+
 **Why:** Co-locate types with their features for discoverability.
 
 ```bash
@@ -164,6 +175,7 @@ mv types/community.ts "app/(communities)/types.ts"
 ```
 
 **Acceptance criteria:**
+
 - ✅ Feature types moved
 - ✅ Shared types remain at root
 - ✅ All imports updated
@@ -172,16 +184,20 @@ mv types/community.ts "app/(communities)/types.ts"
 ---
 
 #### #6: Add ONBOARDING.md [1-2 hours]
+
 **Why:** New engineers get lost. Document the structure.
 
 Example sections:
+
 ```markdown
 ## Finding Code
+
 - Feature hooks: app/[feature]/hooks/
 - Shared components: app/shared/components/
 - API calls: services/[feature].ts
 
 ## Decision Tree
+
 - Is your component used in 1 feature? → app/[feature]/components/
 - Used in 2+ features? → app/shared/components/
 - Need to fetch data? → Create service + hook
@@ -194,9 +210,11 @@ Example sections:
 Lower priority but improve code quality and testability.
 
 #### #7: Extract Page Logic to Hooks [4-5 hours]
+
 **Why:** Pages become cleaner, logic becomes testable.
 
 **Example:**
+
 ```tsx
 // Before (300 lines in create/page.tsx)
 export const CreateExperiencePage = () => {
@@ -216,6 +234,7 @@ export const CreateExperiencePage = () => {
 ---
 
 #### #8: Add Component Tests [8-10 hours, phased]
+
 **Why:** Catch regressions, document component behavior.
 
 **Phase 1:** Shared components (Nav, BottomNav, LocationPicker)
@@ -225,6 +244,7 @@ export const CreateExperiencePage = () => {
 ---
 
 #### #9: Audit 'use client' Directives [2-3 hours]
+
 **Why:** Remove unnecessary ones for better tree-shaking.
 
 ---
@@ -232,12 +252,12 @@ export const CreateExperiencePage = () => {
 ## Implementation Checklist
 
 ### Week 1
+
 - [ ] #1: Convert to named exports
   - [ ] Add ESLint rule
   - [ ] Run --fix
   - [ ] Manual fixes (pages, layouts)
   - [ ] PR: "refactor: convert all exports to named exports"
-  
 - [ ] #2: Extract route groups
   - [ ] Create (experiences), (places), (communities) folders
   - [ ] Move pages
@@ -251,6 +271,7 @@ export const CreateExperiencePage = () => {
   - [ ] PR: "refactor: consolidate shared components for discoverability"
 
 ### Week 2
+
 - [ ] #4: Extract feature hooks
   - [ ] Move experiences hooks
   - [ ] Move places hooks
@@ -269,6 +290,7 @@ export const CreateExperiencePage = () => {
   - [ ] PR: "docs: add onboarding guide for new engineers"
 
 ### Week 3
+
 - [ ] #7: Extract page logic
   - [ ] Create useCreateExperienceFlow hook
   - [ ] Simplify create/page.tsx
@@ -276,6 +298,7 @@ export const CreateExperiencePage = () => {
   - [ ] PR: "refactor: extract create experience flow to hook"
 
 ### Week 4
+
 - [ ] #8: Add tests for shared components
   - [ ] Test Nav
   - [ ] Test BottomNavigation
@@ -306,6 +329,7 @@ Related: #[issue number if any]
 ```
 
 Example:
+
 ```
 refactor: convert all exports to named exports
 
@@ -361,21 +385,25 @@ Testing:
 After all refactors complete, you should see:
 
 ✅ **Consistency**
+
 - No ESLint errors about exports
 - All feature code in feature folders
 - Clear boundaries between shared/feature code
 
 ✅ **Discoverability**
+
 - New engineer can find useExperiences in 30 seconds
 - New engineer knows where to put a new component
 - New engineer understands Services vs Hooks
 
 ✅ **Testability**
+
 - Key components have tests
 - Page logic is extracted and testable
 - Tests co-locate with components
 
 ✅ **Maintainability**
+
 - No circular dependencies
 - No "mystery" imports from unclear locations
 - Clear dependency layers

@@ -4,14 +4,15 @@ import { useCallback } from 'react';
 
 import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
-import { CommunitySelector, type Community } from '../CommunitySelector';
+
+import { type Community, CommunitySelector } from '../CommunitySelector';
 import { ExperienceTypePicker } from '../ExperienceTypePicker';
 import { ExperienceTypeRadio } from '../ExperienceTypeRadio';
-import { RecurringDayPicker } from '../RecurringDayPicker';
+import { MultiDayDateSection } from '../MultiDayDateSection';
 import { RecurrenceDateRange } from '../RecurrenceDateRange';
 import { RecurrencePreviewLabel } from '../RecurrencePreviewLabel';
-import { TimeSlotList, type TimeSlot } from '../TimeSlotList';
-import { MultiDayDateSection } from '../MultiDayDateSection';
+import { RecurringDayPicker } from '../RecurringDayPicker';
+import { type TimeSlot, TimeSlotList } from '../TimeSlotList';
 
 type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
@@ -169,7 +170,7 @@ export const DateTypeStep = ({
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">
           Add date and type of the experience
         </h2>
       </div>
@@ -205,44 +206,39 @@ export const DateTypeStep = ({
       ) : !formData.isRecurring ? (
         <>
           <div>
-            <label className="block text-xs font-medium text-gray-900 mb-2">
+            <label className="mb-2 block text-xs font-medium text-gray-900">
               Select Experience date(s)
             </label>
             <DatePicker value={formData.date || undefined} onChange={handleDateChange} />
-            {errors.date && <p className="text-xs text-red-500 mt-1">{errors.date}</p>}
+            {errors.date && <p className="mt-1 text-xs text-red-500">{errors.date}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-900 mb-2">Start Time</label>
+              <label className="mb-2 block text-xs font-medium text-gray-900">Start Time</label>
               <TimePicker
                 value={formData.startTime || undefined}
                 onChange={handleStartTimeChange}
                 placeholder="Select time"
               />
-              {errors.startTime && <p className="text-xs text-red-500 mt-1">{errors.startTime}</p>}
+              {errors.startTime && <p className="mt-1 text-xs text-red-500">{errors.startTime}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-900 mb-2">End Time</label>
+              <label className="mb-2 block text-xs font-medium text-gray-900">End Time</label>
               <TimePicker
                 value={formData.endTime || undefined}
                 onChange={handleEndTimeChange}
                 placeholder="Select time"
               />
-              {errors.endTime && <p className="text-xs text-red-500 mt-1">{errors.endTime}</p>}
+              {errors.endTime && <p className="mt-1 text-xs text-red-500">{errors.endTime}</p>}
             </div>
           </div>
         </>
       ) : (
         <div className="space-y-2">
-          <RecurringDayPicker
-            value={formData.recurringDays}
-            onChange={handleRecurringDaysChange}
-          />
-          {errors.recurringDays && (
-            <p className="text-xs text-red-500">{errors.recurringDays}</p>
-          )}
+          <RecurringDayPicker value={formData.recurringDays} onChange={handleRecurringDaysChange} />
+          {errors.recurringDays && <p className="text-xs text-red-500">{errors.recurringDays}</p>}
 
           <RecurrenceDateRange
             startDate={formData.recurrenceStartDate}

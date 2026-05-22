@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense } from 'react';
+
 import { useRouter } from 'next/navigation';
 
 import { CreateStepContentSkeleton, ReviewWalletsSkeleton } from '@/app/shared/components/Cards';
@@ -134,8 +135,16 @@ function CreateExperiencePageContent() {
           _experience={experience}
           canShowDateTickets={
             hasUpdatedDates ||
-            !!(formData.dateType.experienceType === 'multi-day' && formData.dateType.multiDayStartDate && formData.dateType.multiDayEndDate) ||
-            !!(formData.dateType.isRecurring && formData.dateType.recurrenceStartDate && formData.dateType.recurrenceEndDate) ||
+            !!(
+              formData.dateType.experienceType === 'multi-day' &&
+              formData.dateType.multiDayStartDate &&
+              formData.dateType.multiDayEndDate
+            ) ||
+            !!(
+              formData.dateType.isRecurring &&
+              formData.dateType.recurrenceStartDate &&
+              formData.dateType.recurrenceEndDate
+            ) ||
             !!(formData.dateType.date && formData.dateType.startTime && formData.dateType.endTime)
           }
           isRecurring={formData.dateType.isRecurring}

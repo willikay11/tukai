@@ -106,7 +106,9 @@ export const TicketCard = ({
               {showCommissionNote && (
                 <div>
                   <p className="text-xs text-gray-500">Customer Pays</p>
-                  <p className="text-xs font-semibold text-emerald-600">{formatKsh(customerPrice)}</p>
+                  <p className="text-xs font-semibold text-emerald-600">
+                    {formatKsh(customerPrice)}
+                  </p>
                 </div>
               )}
             </div>

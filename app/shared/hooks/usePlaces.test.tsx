@@ -1,23 +1,26 @@
 import React from 'react';
-import { renderHook, act, waitFor } from '@testing-library/react';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, renderHook, waitFor } from '@testing-library/react';
+
+import * as placeService from '@/services/place';
+
 import {
-  usePlaces,
-  usePlaceCategories,
-  usePlaceReviews,
-  usePlaceReviewComments,
-  useCreatePlaceReviewComment,
-  useLikePlaceReviewComment,
-  useLikePlaceReview,
   useBookmarkPlace,
   useCreatePlaceReview,
-  useUpdatePlaceReview,
-  useUploadPlaceReviewImages,
+  useCreatePlaceReviewComment,
   useDeletePlaceReview,
   useDeletePlaceReviewImage,
   useGoogleMapsAutocomplete,
+  useLikePlaceReview,
+  useLikePlaceReviewComment,
+  usePlaceCategories,
+  usePlaceReviewComments,
+  usePlaceReviews,
+  usePlaces,
+  useUpdatePlaceReview,
+  useUploadPlaceReviewImages,
 } from './usePlaces';
-import * as placeService from '@/services/place';
 
 jest.mock('@/services/place');
 
@@ -65,7 +68,7 @@ describe('Place Hooks', () => {
             lat: -1.2,
             lng: 36.8,
           }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(result.current.isLoading).toBe(true);
@@ -81,7 +84,7 @@ describe('Place Hooks', () => {
         'cat-123',
         undefined,
         -1.2,
-        36.8
+        36.8,
       );
     });
 
@@ -94,7 +97,7 @@ describe('Place Hooks', () => {
             page: 1,
             enabled: false,
           }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(mockPlaceService.fetchPlaces).not.toHaveBeenCalled();
@@ -111,7 +114,7 @@ describe('Place Hooks', () => {
             enabled: true,
             categoryId: ['cat-1', 'cat-2', 'cat-3'],
           }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -121,7 +124,7 @@ describe('Place Hooks', () => {
           ['cat-1', 'cat-2', 'cat-3'],
           undefined,
           undefined,
-          undefined
+          undefined,
         );
       });
     });
@@ -132,10 +135,9 @@ describe('Place Hooks', () => {
       const mockCategories = { data: { results: [] } };
       mockPlaceService.fetchPlaceCategories.mockResolvedValue(mockCategories);
 
-      const { result } = renderHook(
-        () => usePlaceCategories({ pageSize: 100 }, true),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePlaceCategories({ pageSize: 100 }, true), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -147,10 +149,7 @@ describe('Place Hooks', () => {
     it('does not fetch when enabled is false', () => {
       mockPlaceService.fetchPlaceCategories.mockResolvedValue({ data: { results: [] } });
 
-      renderHook(
-        () => usePlaceCategories({ pageSize: 100 }, false),
-        { wrapper: createWrapper() }
-      );
+      renderHook(() => usePlaceCategories({ pageSize: 100 }, false), { wrapper: createWrapper() });
 
       expect(mockPlaceService.fetchPlaceCategories).not.toHaveBeenCalled();
     });
@@ -161,10 +160,9 @@ describe('Place Hooks', () => {
       const mockReviews = { data: { results: [] } };
       mockPlaceService.fetchPlaceReviews.mockResolvedValue(mockReviews);
 
-      const { result } = renderHook(
-        () => usePlaceReviews('place-123'),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePlaceReviews('place-123'), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -180,10 +178,9 @@ describe('Place Hooks', () => {
       const mockComments = { data: { results: [] } };
       mockPlaceService.fetchPlaceReviewComments.mockResolvedValue(mockComments);
 
-      const { result } = renderHook(
-        () => usePlaceReviewComments('place-123', 'review-456', true),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePlaceReviewComments('place-123', 'review-456', true), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -191,17 +188,16 @@ describe('Place Hooks', () => {
 
       expect(mockPlaceService.fetchPlaceReviewComments).toHaveBeenCalledWith(
         'place-123',
-        'review-456'
+        'review-456',
       );
     });
 
     it('does not fetch when disabled', () => {
       mockPlaceService.fetchPlaceReviewComments.mockResolvedValue({ data: { results: [] } });
 
-      renderHook(
-        () => usePlaceReviewComments('place-123', 'review-456', false),
-        { wrapper: createWrapper() }
-      );
+      renderHook(() => usePlaceReviewComments('place-123', 'review-456', false), {
+        wrapper: createWrapper(),
+      });
 
       expect(mockPlaceService.fetchPlaceReviewComments).not.toHaveBeenCalled();
     });
@@ -211,10 +207,9 @@ describe('Place Hooks', () => {
     it('creates review comment successfully', async () => {
       mockPlaceService.createPlaceReviewComment.mockResolvedValue({ id: 'comment-789' });
 
-      const { result } = renderHook(
-        () => useCreatePlaceReviewComment('place-123', 'review-456'),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useCreatePlaceReviewComment('place-123', 'review-456'), {
+        wrapper: createWrapper(),
+      });
 
       act(() => {
         result.current.mutate({ content: 'Great review!' } as any);
@@ -234,7 +229,7 @@ describe('Place Hooks', () => {
 
       const { result } = renderHook(
         () => useLikePlaceReviewComment('place-123', 'review-456', 'comment-789'),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       act(() => {
@@ -253,7 +248,7 @@ describe('Place Hooks', () => {
           place_id: 'place-123',
           review_id: 'review-456',
           comment_id: 'comment-789',
-        }
+        },
       );
     });
   });
@@ -282,10 +277,9 @@ describe('Place Hooks', () => {
     it('bookmarks place successfully', async () => {
       mockPlaceService.bookmarkPlace.mockResolvedValue({ bookmarked: true });
 
-      const { result } = renderHook(
-        () => useBookmarkPlace('place-123', 'user-456'),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useBookmarkPlace('place-123', 'user-456'), {
+        wrapper: createWrapper(),
+      });
 
       act(() => {
         result.current.mutate();
@@ -391,10 +385,7 @@ describe('Place Hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockPlaceService.deletePlaceReview).toHaveBeenCalledWith(
-        'place-123',
-        'review-456'
-      );
+      expect(mockPlaceService.deletePlaceReview).toHaveBeenCalledWith('place-123', 'review-456');
     });
   });
 
@@ -421,7 +412,7 @@ describe('Place Hooks', () => {
       expect(mockPlaceService.deletePlaceReviewImage).toHaveBeenCalledWith(
         'place-123',
         'review-456',
-        'image-789'
+        'image-789',
       );
     });
   });
@@ -431,10 +422,9 @@ describe('Place Hooks', () => {
       const mockSuggestions = { data: { predictions: [] } };
       mockPlaceService.fetchGoogleMapsAutocomplete.mockResolvedValue(mockSuggestions);
 
-      const { result } = renderHook(
-        () => useGoogleMapsAutocomplete('Nairobi', true),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useGoogleMapsAutocomplete('Nairobi', true), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -447,10 +437,7 @@ describe('Place Hooks', () => {
     it('does not fetch when input is empty', () => {
       mockPlaceService.fetchGoogleMapsAutocomplete.mockResolvedValue({ data: { predictions: [] } });
 
-      renderHook(
-        () => useGoogleMapsAutocomplete('', true),
-        { wrapper: createWrapper() }
-      );
+      renderHook(() => useGoogleMapsAutocomplete('', true), { wrapper: createWrapper() });
 
       expect(mockPlaceService.fetchGoogleMapsAutocomplete).not.toHaveBeenCalled();
     });
@@ -458,10 +445,7 @@ describe('Place Hooks', () => {
     it('respects enabled flag', () => {
       mockPlaceService.fetchGoogleMapsAutocomplete.mockResolvedValue({ data: { predictions: [] } });
 
-      renderHook(
-        () => useGoogleMapsAutocomplete('Nairobi', false),
-        { wrapper: createWrapper() }
-      );
+      renderHook(() => useGoogleMapsAutocomplete('Nairobi', false), { wrapper: createWrapper() });
 
       expect(mockPlaceService.fetchGoogleMapsAutocomplete).not.toHaveBeenCalled();
     });

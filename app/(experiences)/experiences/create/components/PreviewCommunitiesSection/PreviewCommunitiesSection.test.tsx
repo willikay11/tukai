@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+
 import { PreviewCommunitiesSection } from './PreviewCommunitiesSection';
 
 jest.mock('@/app/shared/components/Icons', () => ({
@@ -17,15 +18,13 @@ describe('PreviewCommunitiesSection', () => {
       <PreviewCommunitiesSection
         communityIds={['comm-1', 'comm-2']}
         allCommunities={mockCommunities}
-      />
+      />,
     );
     expect(screen.getByText('Invited Communities (2)')).toBeInTheDocument();
   });
 
   it('renders "No communities invited yet" when empty', () => {
-    render(
-      <PreviewCommunitiesSection communityIds={[]} allCommunities={mockCommunities} />
-    );
+    render(<PreviewCommunitiesSection communityIds={[]} allCommunities={mockCommunities} />);
     expect(screen.getByText('No communities invited yet')).toBeInTheDocument();
   });
 
@@ -34,7 +33,7 @@ describe('PreviewCommunitiesSection', () => {
       <PreviewCommunitiesSection
         communityIds={['comm-1', 'comm-3']}
         allCommunities={mockCommunities}
-      />
+      />,
     );
 
     expect(screen.getByText('Photography Club')).toBeInTheDocument();
@@ -44,10 +43,7 @@ describe('PreviewCommunitiesSection', () => {
 
   it('renders community images', () => {
     render(
-      <PreviewCommunitiesSection
-        communityIds={['comm-1']}
-        allCommunities={mockCommunities}
-      />
+      <PreviewCommunitiesSection communityIds={['comm-1']} allCommunities={mockCommunities} />,
     );
 
     const img = screen.getByAltText('Photography Club') as HTMLImageElement;
@@ -61,7 +57,7 @@ describe('PreviewCommunitiesSection', () => {
         communityIds={['comm-1']}
         allCommunities={mockCommunities}
         onEdit={onEdit}
-      />
+      />,
     );
 
     const editButton = screen.getByRole('button');
@@ -80,14 +76,11 @@ describe('PreviewCommunitiesSection', () => {
     ];
 
     render(
-      <PreviewCommunitiesSection
-        communityIds={['comm-long']}
-        allCommunities={longNameCommunity}
-      />
+      <PreviewCommunitiesSection communityIds={['comm-long']} allCommunities={longNameCommunity} />,
     );
 
     const nameElement = screen.getByText(
-      'This is a very long community name that should be truncated for display purposes'
+      'This is a very long community name that should be truncated for display purposes',
     );
     expect(nameElement).toHaveClass('truncate');
   });

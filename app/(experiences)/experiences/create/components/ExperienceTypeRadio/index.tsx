@@ -54,11 +54,7 @@ export const ExperienceTypeRadio = ({
       </RadioGroup>
 
       <div className="flex items-center space-x-2 pt-2">
-        <Checkbox
-          id="recurring"
-          checked={isRecurring}
-          onCheckedChange={handleRecurringChange}
-        />
+        <Checkbox id="recurring" checked={isRecurring} onCheckedChange={handleRecurringChange} />
         <label htmlFor="recurring" className="cursor-pointer text-xs font-medium text-gray-900">
           Create a recurring experience
         </label>

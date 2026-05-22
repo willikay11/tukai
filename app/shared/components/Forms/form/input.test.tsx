@@ -1,6 +1,8 @@
+import { createRef } from 'react';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createRef } from 'react';
+
 import { Input } from './input';
 
 jest.mock('@hugeicons/react-pro', () => ({
@@ -178,18 +180,14 @@ describe('Input', () => {
     });
 
     it('applies error styling to container', () => {
-      const { container } = render(
-        <Input {...defaultProps} error="Invalid input" />
-      );
+      const { container } = render(<Input {...defaultProps} error="Invalid input" />);
 
       const wrapper = container.querySelector('.inline-flex');
       expect(wrapper).toHaveClass('border-red-400');
     });
 
     it('removes focus styling when error exists', () => {
-      const { container } = render(
-        <Input {...defaultProps} error="Invalid input" />
-      );
+      const { container } = render(<Input {...defaultProps} error="Invalid input" />);
 
       const wrapper = container.querySelector('.inline-flex');
       expect(wrapper).not.toHaveClass('hover:border-primary', 'focus:border-primary');
@@ -203,9 +201,7 @@ describe('Input', () => {
     });
 
     it('error text has correct styling', () => {
-      const { container } = render(
-        <Input {...defaultProps} error="Field is required" />
-      );
+      const { container } = render(<Input {...defaultProps} error="Field is required" />);
 
       const errorDiv = container.querySelector('.text-red-600');
       expect(errorDiv).toHaveClass('mt-1', 'text-xs');
@@ -242,13 +238,7 @@ describe('Input', () => {
     it('allows ref manipulation', () => {
       const inputRef = createRef<HTMLInputElement>();
 
-      render(
-        <Input
-          {...defaultProps}
-          defaultValue="initial"
-          refs={{ ref: inputRef }}
-        />
-      );
+      render(<Input {...defaultProps} defaultValue="initial" refs={{ ref: inputRef }} />);
 
       expect(inputRef.current?.value).toBe('initial');
     });
@@ -314,7 +304,7 @@ describe('Input', () => {
           type="password"
           error="Password is too weak"
           defaultValue="secret123"
-        />
+        />,
       );
 
       const input = container.querySelector('input') as HTMLInputElement;
@@ -331,7 +321,7 @@ describe('Input', () => {
           icon={<span>📧</span>}
           name="emailField"
           defaultValue="test@example.com"
-        />
+        />,
       );
 
       const input = screen.getByRole('textbox') as HTMLInputElement;
@@ -348,7 +338,7 @@ describe('Input', () => {
           type="password"
           defaultValue="mypassword"
           icon={<span>🔐</span>}
-        />
+        />,
       );
 
       const input = container.querySelector('input') as HTMLInputElement;

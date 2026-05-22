@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 
+import { useSubscriptionPlans } from '@/app/(auth)/hooks/useSubscriptions';
 import { Paystack } from '@/components/ui/paystack';
 import { StepIndicator } from '@/components/ui/stepIndicator';
-import { useSubscriptionPlans } from '@/app/(auth)/hooks/useSubscriptions';
 
 import { Package } from './components/package';
 import { PaymentDetails } from './components/paymentDetails';
@@ -85,4 +85,3 @@ export default function Page() {
     </>
   );
 }
-

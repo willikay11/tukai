@@ -10,12 +10,12 @@ import { useRouter } from 'next/navigation';
 import { LockKeyIcon, RefreshIcon } from '@hugeicons/react-pro';
 import { set } from 'lodash';
 
+import { MobileStore } from '@/app/shared/components/Download';
 import { Input } from '@/app/shared/components/Forms';
 import { OtpInput } from '@/app/shared/components/Forms/form/otpInput';
 import { SuccessMessage } from '@/app/shared/components/Messages/messages/success';
-import { MobileStore } from '@/app/shared/components/Download';
-import { Button } from '@/components/ui/button';
 import { toast } from '@/app/shared/hooks/useToast';
+import { Button } from '@/components/ui/button';
 
 type Inputs = {
   password: string;

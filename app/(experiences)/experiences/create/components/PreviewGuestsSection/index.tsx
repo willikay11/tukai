@@ -25,15 +25,9 @@ export const PreviewGuestsSection = ({ guests, onEdit }: PreviewGuestsSectionPro
   return (
     <div className="space-y-3">
       <div className="flex items-start justify-between">
-        <h3 className="text-xs font-semibold text-gray-900">
-          Guests ({guests.length})
-        </h3>
+        <h3 className="text-xs font-semibold text-gray-900">Guests ({guests.length})</h3>
         {onEdit && (
-          <button
-            type="button"
-            onClick={onEdit}
-            className="text-gray-400 hover:text-gray-600"
-          >
+          <button type="button" onClick={onEdit} className="text-gray-400 hover:text-gray-600">
             <IconComponent iconName="Edit02Icon" size={16} />
           </button>
         )}

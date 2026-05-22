@@ -7,8 +7,8 @@ import { signIn } from 'next-auth/react';
 
 import { AppleIcon, GoogleIcon, LockKeyIcon, Mail02Icon } from '@hugeicons/react-pro';
 
-import { Anchor, Input } from '@/app/shared/components/Forms';
 import { MobileStore } from '@/app/shared/components/Download';
+import { Anchor, Input } from '@/app/shared/components/Forms';
 import { toast } from '@/app/shared/hooks/useToast';
 
 import { Button } from '../button';
@@ -136,4 +136,3 @@ export const SignInForm = ({ onLogin }: { onLogin: () => void }) => {
     </div>
   );
 };
-

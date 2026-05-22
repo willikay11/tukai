@@ -4,7 +4,6 @@ import sanitizeHtml from 'sanitize-html';
 
 import { PageLayoutContent } from '@/app/(experiences)/components/PageLayoutContent';
 import { useHelp } from '@/app/(experiences)/hooks/usePages';
-
 import { Loader } from '@/app/shared/components/Forms/form/loader';
 
 export default function HelpPage() {

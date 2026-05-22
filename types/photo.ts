@@ -6,6 +6,4 @@ export type Photo = {
   isCover?: boolean;
 };
 
-export type PhotoItem =
-  | { type: 'existing'; id: string; url: string }
-  | { type: 'new'; file: File };
+export type PhotoItem = { type: 'existing'; id: string; url: string } | { type: 'new'; file: File };

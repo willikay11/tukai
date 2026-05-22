@@ -2,6 +2,7 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { DescriptionShowMore } from './DescriptionShowMore';
 
 jest.mock('@/components/ui/drawer', () => ({
@@ -13,25 +14,18 @@ jest.mock('@/components/ui/drawer', () => ({
     isOpen: boolean;
     setIsOpen: (open: boolean) => void;
     children: React.ReactNode;
-  }) => (
+  }) =>
     isOpen && (
       <div data-testid="drawer" onClick={() => setIsOpen(false)}>
         {children}
       </div>
-    )
-  ),
+    ),
 }));
 
 jest.mock('@/components/ui/image', () => ({
-  TukaiImage: ({
-    src,
-    alt,
-    className,
-  }: {
-    src: string;
-    alt: string;
-    className?: string;
-  }) => <img data-testid="tukai-image" src={src} alt={alt} className={className} />,
+  TukaiImage: ({ src, alt, className }: { src: string; alt: string; className?: string }) => (
+    <img data-testid="tukai-image" src={src} alt={alt} className={className} />
+  ),
 }));
 
 jest.mock('@/components/ui/button', () => ({
@@ -117,7 +111,7 @@ describe('DescriptionShowMore', () => {
     it('truncates text longer than maxLength', () => {
       const longText = 'A'.repeat(120);
       const { container } = render(
-        <DescriptionShowMore {...defaultProps} text={longText} maxLength={100} />
+        <DescriptionShowMore {...defaultProps} text={longText} maxLength={100} />,
       );
 
       const textDiv = container.querySelector('.font-medium');
@@ -133,9 +127,7 @@ describe('DescriptionShowMore', () => {
 
     it('uses default maxLength of 100 when not provided', () => {
       const text = 'A'.repeat(150);
-      const { container } = render(
-        <DescriptionShowMore photo={defaultProps.photo} text={text} />
-      );
+      const { container } = render(<DescriptionShowMore photo={defaultProps.photo} text={text} />);
 
       const textDiv = container.querySelector('.font-medium');
       expect(textDiv?.textContent).toHaveLength(103);
@@ -144,7 +136,7 @@ describe('DescriptionShowMore', () => {
     it('adds ellipsis to truncated text', () => {
       const longText = 'A'.repeat(150);
       const { container } = render(
-        <DescriptionShowMore {...defaultProps} text={longText} maxLength={100} />
+        <DescriptionShowMore {...defaultProps} text={longText} maxLength={100} />,
       );
 
       const textDiv = container.querySelector('.font-medium');
@@ -154,7 +146,7 @@ describe('DescriptionShowMore', () => {
     it('respects custom maxLength', () => {
       const text = 'A'.repeat(50);
       const { container } = render(
-        <DescriptionShowMore {...defaultProps} text={text} maxLength={30} />
+        <DescriptionShowMore {...defaultProps} text={text} maxLength={30} />,
       );
 
       const textDiv = container.querySelector('.font-medium');
@@ -333,7 +325,7 @@ describe('DescriptionShowMore', () => {
       const user = userEvent.setup();
       const longText = 'A'.repeat(150);
       const { unmount } = render(
-        <DescriptionShowMore {...defaultProps} text={longText} maxLength={100} />
+        <DescriptionShowMore {...defaultProps} text={longText} maxLength={100} />,
       );
 
       await user.click(screen.getByRole('button', { name: /show more/i }));

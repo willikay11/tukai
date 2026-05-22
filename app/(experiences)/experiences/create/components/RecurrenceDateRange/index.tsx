@@ -31,7 +31,7 @@ export const RecurrenceDateRange = ({
             placeholder="Start Date"
           />
           {errors.recurrenceStartDate && (
-            <p className="text-xs text-red-500 mt-1">{errors.recurrenceStartDate}</p>
+            <p className="mt-1 text-xs text-red-500">{errors.recurrenceStartDate}</p>
           )}
         </div>
 
@@ -42,7 +42,7 @@ export const RecurrenceDateRange = ({
             placeholder="End Date"
           />
           {errors.recurrenceEndDate && (
-            <p className="text-xs text-red-500 mt-1">{errors.recurrenceEndDate}</p>
+            <p className="mt-1 text-xs text-red-500">{errors.recurrenceEndDate}</p>
           )}
         </div>
       </div>

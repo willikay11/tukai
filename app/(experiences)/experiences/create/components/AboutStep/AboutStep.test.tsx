@@ -1,5 +1,7 @@
-import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen } from '@testing-library/react';
+
+import { AboutStep } from './AboutStep';
 
 jest.mock('lucide-react', () => ({
   __esModule: true,
@@ -35,15 +37,11 @@ jest.mock('@/app/shared/hooks/usePlaces', () => ({
 }));
 
 jest.mock('@/components/ui/input', () => ({
-  Input: ({ placeholder, ...props }: any) => (
-    <input placeholder={placeholder} {...props} />
-  ),
+  Input: ({ placeholder, ...props }: any) => <input placeholder={placeholder} {...props} />,
 }));
 
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, ...props }: any) => (
-    <button {...props}>{children}</button>
-  ),
+  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
 }));
 
 jest.mock('@/components/ui/radio-group', () => ({
@@ -53,15 +51,18 @@ jest.mock('@/components/ui/radio-group', () => ({
 
 jest.mock('./CategoryPicker', () => ({
   CategoryPicker: ({ selectedCategories, onChange }: any) => (
-    <div data-testid="category-picker">
-      Category Picker
-    </div>
+    <div data-testid="category-picker">Category Picker</div>
   ),
 }));
 
 jest.mock('@/components/ui/time-picker', () => ({
   TimePicker: ({ value, onChange, placeholder }: any) => (
-    <input type="time" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
+    <input
+      type="time"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+    />
   ),
 }));
 
@@ -75,19 +76,13 @@ jest.mock('@/app/shared/components/Forms', () => ({
   FileUploadField: ({ id, label }: any) => <div>{label}</div>,
 }));
 
-import { AboutStep } from './AboutStep';
-
 const renderWithQueryClient = (component: React.ReactElement) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
     },
   });
-  return render(
-    <QueryClientProvider client={queryClient}>
-      {component}
-    </QueryClientProvider>,
-  );
+  return render(<QueryClientProvider client={queryClient}>{component}</QueryClientProvider>);
 };
 
 describe('AboutStep', () => {

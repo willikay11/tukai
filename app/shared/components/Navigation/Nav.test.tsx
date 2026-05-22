@@ -1,8 +1,10 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { usePathname } from 'next/navigation';
+
 import { Nav } from './Nav';
 
 jest.mock('next/navigation', () => ({
@@ -36,7 +38,7 @@ describe('Nav', () => {
       expect(screen.getByRole('link', { name: /explore/i })).toHaveAttribute('href', '/places');
       expect(screen.getByRole('link', { name: /communities/i })).toHaveAttribute(
         'href',
-        '/communities'
+        '/communities',
       );
     });
 

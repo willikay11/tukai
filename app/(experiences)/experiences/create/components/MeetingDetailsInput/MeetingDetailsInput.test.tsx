@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+
 import { MeetingDetailsInput } from './MeetingDetailsInput';
 
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
@@ -28,7 +29,7 @@ describe('MeetingDetailsInput', () => {
         meetingTime={null}
         onMeetingPointChange={() => {}}
         onMeetingTimeChange={() => {}}
-      />
+      />,
     );
     expect(screen.getByPlaceholderText('Meeting/Pick-up Point')).toBeInTheDocument();
   });
@@ -40,7 +41,7 @@ describe('MeetingDetailsInput', () => {
         meetingTime={null}
         onMeetingPointChange={() => {}}
         onMeetingTimeChange={() => {}}
-      />
+      />,
     );
     expect(screen.getByText('Meeting Time')).toBeInTheDocument();
   });
@@ -52,7 +53,7 @@ describe('MeetingDetailsInput', () => {
         meetingTime={null}
         onMeetingPointChange={() => {}}
         onMeetingTimeChange={() => {}}
-      />
+      />,
     );
     const input = screen.getByDisplayValue('Central Park');
     expect(input).toBeInTheDocument();

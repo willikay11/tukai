@@ -1,13 +1,14 @@
 'use client';
 
-import { CreateExperienceAbout } from '../about';
-import { ExperienceDates } from '../dates';
-import { CreateTickets } from '../createTickets';
-import { CreateExperienceInvites } from '../invites';
-import { CreateExperienceWallet } from '../wallet';
-import { PhotoEditPanel } from '../PhotoEditPanel';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
+
+import { PhotoEditPanel } from '../PhotoEditPanel';
+import { CreateExperienceAbout } from '../about';
+import { CreateTickets } from '../createTickets';
+import { ExperienceDates } from '../dates';
+import { CreateExperienceInvites } from '../invites';
+import { CreateExperienceWallet } from '../wallet';
 
 interface InlineEditPanelProps {
   activeEditSection: 'about' | 'dates' | 'tickets' | 'invites' | 'wallet' | 'photos' | null;

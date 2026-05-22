@@ -8,6 +8,9 @@ import moment from 'moment';
 import { RRule } from 'rrule';
 import * as z from 'zod';
 
+import { IconComponent } from '@/app/shared/components/Icons';
+import { useUpdateExperience } from '@/app/shared/hooks/useExperiences';
+import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DatePicker } from '@/components/ui/date-picker';
@@ -21,10 +24,7 @@ import {
 } from '@/components/ui/form';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { TimePicker } from '@/components/ui/time-picker';
-import { useUpdateExperience } from '@/app/shared/hooks/useExperiences';
-import { toast } from '@/app/shared/hooks/useToast';
 import { Experience } from '@/types/experience';
-import { IconComponent } from '@/app/shared/components/Icons';
 
 const weekdayValueSchema = z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']);
 
@@ -94,8 +94,9 @@ const parseRecurrenceRule = (recurrenceRule: string) => {
     ? bydayMatch[1]
         .split(',')
         .map((day) => day.trim().toUpperCase())
-        .filter((day): day is z.infer<typeof weekdayValueSchema> =>
-          weekdayValueSchema.safeParse(day).success,
+        .filter(
+          (day): day is z.infer<typeof weekdayValueSchema> =>
+            weekdayValueSchema.safeParse(day).success,
         )
     : [];
 
@@ -189,19 +190,22 @@ const hasValidTimeRange = (startTime: string, endTime: string) => {
 
 const experienceDatesSchema = z
   .object({
-  isPaid: z.enum(['paid', 'free']),
-  dateType: z.enum(['one-day', 'multi-day', 'itinerary']),
-  isRecurring: z.boolean().default(false),
-  selectedDate: z.string().default(''),
-  startTime: z.string().default(''),
-  endTime: z.string().default(''),
-  recurrenceStartDate: z.string().default(''),
-  recurrenceEndDate: z.string().default(''),
-  recurrenceWeekdays: z.array(weekdayValueSchema).default([]),
-  timeSlots: z.array(timeSlotSchema).min(1).default([{ startTime: '', endTime: '' }]),
-  itineraryDateType: z.enum(['specific', 'flexible']).default('specific'),
-  itineraryStartDate: z.string().default(''),
-  itineraryEndDate: z.string().default(''),
+    isPaid: z.enum(['paid', 'free']),
+    dateType: z.enum(['one-day', 'multi-day', 'itinerary']),
+    isRecurring: z.boolean().default(false),
+    selectedDate: z.string().default(''),
+    startTime: z.string().default(''),
+    endTime: z.string().default(''),
+    recurrenceStartDate: z.string().default(''),
+    recurrenceEndDate: z.string().default(''),
+    recurrenceWeekdays: z.array(weekdayValueSchema).default([]),
+    timeSlots: z
+      .array(timeSlotSchema)
+      .min(1)
+      .default([{ startTime: '', endTime: '' }]),
+    itineraryDateType: z.enum(['specific', 'flexible']).default('specific'),
+    itineraryStartDate: z.string().default(''),
+    itineraryEndDate: z.string().default(''),
   })
   .superRefine((values, ctx) => {
     if (values.dateType === 'itinerary') {
@@ -351,7 +355,11 @@ const experienceDatesSchema = z
       });
     }
 
-    if (values.startTime && values.endTime && !hasValidTimeRange(values.startTime, values.endTime)) {
+    if (
+      values.startTime &&
+      values.endTime &&
+      !hasValidTimeRange(values.startTime, values.endTime)
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'End time must be later than start time',
@@ -420,7 +428,11 @@ export const ExperienceDates = ({
     },
   });
 
-  const { fields: timeSlotFields, append, remove } = useFieldArray({
+  const {
+    fields: timeSlotFields,
+    append,
+    remove,
+  } = useFieldArray({
     control: form.control,
     name: 'timeSlots',
   });
@@ -563,15 +575,21 @@ export const ExperienceDates = ({
 
     if (values.dateType === 'itinerary') {
       primaryDate = values.itineraryStartDate;
-      startDateTime = moment(values.itineraryStartDate, 'YYYY-MM-DD', true).startOf('day').toISOString();
+      startDateTime = moment(values.itineraryStartDate, 'YYYY-MM-DD', true)
+        .startOf('day')
+        .toISOString();
       endDateTime = moment(values.itineraryEndDate, 'YYYY-MM-DD', true).endOf('day').toISOString();
       slotsForTicketing = [{ startTime: '00:00', endTime: '23:59' }];
     } else {
       primaryDate = values.isRecurring
         ? firstRecurringOccurrence?.format('YYYY-MM-DD') || ''
         : values.selectedDate;
-      const primaryStartTime = values.isRecurring ? values.timeSlots[0]?.startTime || '' : values.startTime;
-      const primaryEndTime = values.isRecurring ? values.timeSlots[0]?.endTime || '' : values.endTime;
+      const primaryStartTime = values.isRecurring
+        ? values.timeSlots[0]?.startTime || ''
+        : values.startTime;
+      const primaryEndTime = values.isRecurring
+        ? values.timeSlots[0]?.endTime || ''
+        : values.endTime;
       startDateTime = toIsoDateTime(primaryDate, primaryStartTime);
       endDateTime = values.isRecurring
         ? toIsoDateTime(primaryDate, primaryEndTime)
@@ -582,7 +600,11 @@ export const ExperienceDates = ({
         : [{ startTime: values.startTime, endTime: values.endTime }];
     }
 
-    if (!startDateTime || !endDateTime || (values.isRecurring && values.dateType !== 'itinerary' && !recurrenceRule)) {
+    if (
+      !startDateTime ||
+      !endDateTime ||
+      (values.isRecurring && values.dateType !== 'itinerary' && !recurrenceRule)
+    ) {
       toast({
         title: 'Invalid date or time',
         description: 'Please choose a valid date and time range.',
@@ -597,7 +619,8 @@ export const ExperienceDates = ({
       await updateExperience({
         title: experience.title,
         description: experience.description,
-        googleMapPlaceId: locationPlaceId || experience.googleMapPlaceId || 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
+        googleMapPlaceId:
+          locationPlaceId || experience.googleMapPlaceId || 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
         startDate: startDateTime,
         endDate: endDateTime,
         recurrence_rule: recurrenceRule,
@@ -748,27 +771,27 @@ export const ExperienceDates = ({
 
             {/* Recurring Experience Checkbox - hidden for itinerary */}
             {dateType !== 'itinerary' && (
-            <FormField
-              control={form.control}
-              name="isRecurring"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <label className="flex cursor-pointer items-center gap-3">
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={(checked) => field.onChange(Boolean(checked))}
-                        className="h-4 w-4 rounded-[4px]"
-                      />
-                      <FormLabel className="cursor-pointer text-xs font-normal text-gray-900">
-                        Create a recurring experience
-                      </FormLabel>
-                    </label>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="isRecurring"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <label className="flex cursor-pointer items-center gap-3">
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                          className="h-4 w-4 rounded-[4px]"
+                        />
+                        <FormLabel className="cursor-pointer text-xs font-normal text-gray-900">
+                          Create a recurring experience
+                        </FormLabel>
+                      </label>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
 
             {dateType === 'itinerary' ? (
@@ -839,12 +862,13 @@ export const ExperienceDates = ({
                     />
                   </div>
 
-                  {itineraryStartDate && moment(itineraryStartDate, 'YYYY-MM-DD', true).isValid() && (
-                    <div className="inline-flex rounded-full border border-[#9CC3FF] bg-[#DCEBFF] px-4 py-2 text-xs italic font-medium text-[#65758B]">
-                      Your first experience will be on{' '}
-                      {moment(itineraryStartDate, 'YYYY-MM-DD', true).format('dddd D, MMMM')}
-                    </div>
-                  )}
+                  {itineraryStartDate &&
+                    moment(itineraryStartDate, 'YYYY-MM-DD', true).isValid() && (
+                      <div className="inline-flex rounded-full border border-[#9CC3FF] bg-[#DCEBFF] px-4 py-2 text-xs font-medium italic text-[#65758B]">
+                        Your first experience will be on{' '}
+                        {moment(itineraryStartDate, 'YYYY-MM-DD', true).format('dddd D, MMMM')}
+                      </div>
+                    )}
                 </div>
               </div>
             ) : isRecurring ? (
@@ -929,7 +953,7 @@ export const ExperienceDates = ({
                   </div>
 
                   {firstRecurringOccurrence && (
-                    <div className="inline-flex w-fit rounded-full border border-blue-300 bg-blue-100 px-4 py-2 text-xs italic font-medium text-gray-500">
+                    <div className="inline-flex w-fit rounded-full border border-blue-300 bg-blue-100 px-4 py-2 text-xs font-medium italic text-gray-500">
                       Your first experience will be on{' '}
                       {firstRecurringOccurrence.format('dddd D, MMMM')}
                     </div>

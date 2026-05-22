@@ -57,11 +57,19 @@ export const TicketDateBadge = (props: TicketDateBadgeProps) => {
     const timeRange = `${formatTime(props.startTime)} – ${formatTime(props.endTime)}`;
     return (
       <div className="inline-flex items-center gap-2 rounded-full border border-dashed border-emerald-500 bg-emerald-100 px-5 py-3">
-        <IconComponent iconName="Calendar04Icon" size={20} className="flex-shrink-0 text-emerald-700" />
+        <IconComponent
+          iconName="Calendar04Icon"
+          size={20}
+          className="flex-shrink-0 text-emerald-700"
+        />
         <p className="whitespace-nowrap text-xs font-medium text-primary">
           Date: {formatDate(props.date)} · {timeRange}
         </p>
-        <IconComponent iconName="ArrowDown01Icon" size={20} className="flex-shrink-0 text-emerald-700" />
+        <IconComponent
+          iconName="ArrowDown01Icon"
+          size={20}
+          className="flex-shrink-0 text-emerald-700"
+        />
       </div>
     );
   }
@@ -70,22 +78,38 @@ export const TicketDateBadge = (props: TicketDateBadgeProps) => {
     const timeRange = `${formatTime(props.startTime)} – ${formatTime(props.endTime)}`;
     return (
       <div className="inline-flex items-center gap-2 rounded-full border border-dashed border-emerald-500 bg-emerald-100 px-5 py-3">
-        <IconComponent iconName="Calendar04Icon" size={20} className="flex-shrink-0 text-emerald-700" />
+        <IconComponent
+          iconName="Calendar04Icon"
+          size={20}
+          className="flex-shrink-0 text-emerald-700"
+        />
         <p className="whitespace-nowrap text-xs font-medium text-primary">
           Every {formatDays(props.days)} {timeRange}
         </p>
-        <IconComponent iconName="ArrowDown01Icon" size={20} className="flex-shrink-0 text-emerald-700" />
+        <IconComponent
+          iconName="ArrowDown01Icon"
+          size={20}
+          className="flex-shrink-0 text-emerald-700"
+        />
       </div>
     );
   }
 
   return (
     <div className="inline-flex items-center gap-2 rounded-full border border-dashed border-emerald-500 bg-emerald-100 px-5 py-3">
-      <IconComponent iconName="Calendar04Icon" size={20} className="flex-shrink-0 text-emerald-700" />
+      <IconComponent
+        iconName="Calendar04Icon"
+        size={20}
+        className="flex-shrink-0 text-emerald-700"
+      />
       <p className="whitespace-nowrap text-xs font-medium text-primary">
         Date: {formatDateDDMMYYYY(props.startDate)} – {formatDateDDMMYYYY(props.endDate)}
       </p>
-      <IconComponent iconName="CheckCircle2Icon" size={20} className="flex-shrink-0 text-emerald-700" />
+      <IconComponent
+        iconName="CheckCircle2Icon"
+        size={20}
+        className="flex-shrink-0 text-emerald-700"
+      />
     </div>
   );
 };

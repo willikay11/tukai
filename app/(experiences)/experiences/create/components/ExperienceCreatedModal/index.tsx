@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 
@@ -47,7 +48,7 @@ export const ExperienceCreatedModal = ({
             {description}
           </DialogDescription>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center justify-center">
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:items-center">
             {experienceId && onViewExperience ? (
               <Button
                 type="button"

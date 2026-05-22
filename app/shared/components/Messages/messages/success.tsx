@@ -3,7 +3,6 @@ import React, { ReactNode } from 'react';
 import * as HugeIcons from '@hugeicons/react-pro';
 
 import { Button } from '@/app/shared/components/Forms';
-
 import { IconComponent } from '@/app/shared/components/Icons';
 
 export const SuccessMessage = ({

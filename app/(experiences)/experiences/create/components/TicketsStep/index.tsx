@@ -2,24 +2,26 @@
 
 import { useCallback, useState } from 'react';
 
-import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
+
+import { useCreateExperienceTicket } from '@/app/shared/hooks/useExperiences';
+import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
+import { deleteExperienceTicket, updateExperienceTicket } from '@/services/experience';
+import type { ApiResponse } from '@/types/apiResponse';
+import type { CreateExperienceTicket } from '@/types/experience';
+import { getDaysBetween } from '@/utils/date-utils';
+import { parseApiError } from '@/utils/parseApiError';
+
+import { FormData } from '../../hooks/useCreateExperienceFlow';
 import { AddTicketTypeButton } from '../AddTicketTypeButton';
 import { CommissionPicker } from '../CommissionPicker';
+import { DateBadgeWithTimes } from '../DateBadgeWithTimes';
+import { MultiDayTicketModePicker } from '../MultiDayTicketModePicker';
 import { SavedTicketCard } from '../TicketCard';
 import { TicketDateBadge } from '../TicketDateBadge';
 import { TicketForm, type TicketFormValue } from '../TicketForm';
-import { MultiDayTicketModePicker } from '../MultiDayTicketModePicker';
-import { DateBadgeWithTimes } from '../DateBadgeWithTimes';
-import { FormData } from '../../hooks/useCreateExperienceFlow';
-import { getDaysBetween } from '@/utils/date-utils';
-import { useCreateExperienceTicket } from '@/app/shared/hooks/useExperiences';
-import { useToast } from '@/app/shared/hooks/useToast';
-import { parseApiError } from '@/utils/parseApiError';
-import { updateExperienceTicket, deleteExperienceTicket } from '@/services/experience';
-import type { CreateExperienceTicket } from '@/types/experience';
-import type { ApiResponse } from '@/types/apiResponse';
 
 interface TicketsStepProps {
   formData: FormData['tickets'];
@@ -107,7 +109,7 @@ export const TicketsStep = ({
   const [draftTicket, setDraftTicket] = useState<TicketFormValue>(emptyTicketForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [ticketMode, setTicketMode] = useState<'entire-period' | 'each-day'>(
-    (formData.ticketMode as 'entire-period' | 'each-day') || 'entire-period'
+    (formData.ticketMode as 'entire-period' | 'each-day') || 'entire-period',
   );
   const [isSavingLocal, setIsSavingLocal] = useState(false);
 
@@ -133,21 +135,24 @@ export const TicketsStep = ({
     setFormErrors({});
   }, [formData.items.length]);
 
-  const handleEditTicket = useCallback((index: number) => {
-    const ticket = formData.items[index];
-    setActiveFormIndex(index);
-    setDraftTicket({
-      name: ticket.name,
-      quantity: ticket.quantity,
-      amount: ticket.amount,
-      salesStartDate: ticket.salesStartDate,
-      salesStartTime: ticket.salesStartTime,
-      salesEndDate: ticket.salesEndDate,
-      salesEndTime: ticket.salesEndTime,
-      acceptPartialPayment: ticket.acceptPartialPayment,
-    });
-    setFormErrors({});
-  }, [formData.items]);
+  const handleEditTicket = useCallback(
+    (index: number) => {
+      const ticket = formData.items[index];
+      setActiveFormIndex(index);
+      setDraftTicket({
+        name: ticket.name,
+        quantity: ticket.quantity,
+        amount: ticket.amount,
+        salesStartDate: ticket.salesStartDate,
+        salesStartTime: ticket.salesStartTime,
+        salesEndDate: ticket.salesEndDate,
+        salesEndTime: ticket.salesEndTime,
+        acceptPartialPayment: ticket.acceptPartialPayment,
+      });
+      setFormErrors({});
+    },
+    [formData.items],
+  );
 
   // Save locally without API
   const saveLocally = useCallback(() => {
@@ -191,10 +196,7 @@ export const TicketsStep = ({
   }, [draftTicket, formData.items, activeFormIndex, onChange]);
 
   const handleSaveTicket = useCallback(async () => {
-    const buildDateTime = (
-      date: string | null,
-      time: string | null
-    ): string | null => {
+    const buildDateTime = (date: string | null, time: string | null): string | null => {
       if (!date || !time) return null;
       return `${date}T${time}:00`;
     };
@@ -287,7 +289,17 @@ export const TicketsStep = ({
     } finally {
       setIsSavingLocal(false);
     }
-  }, [draftTicket, formData.items, activeFormIndex, onChange, experiencePricing, experienceId, createTicketMutation, saveLocally, toast]);
+  }, [
+    draftTicket,
+    formData.items,
+    activeFormIndex,
+    onChange,
+    experiencePricing,
+    experienceId,
+    createTicketMutation,
+    saveLocally,
+    toast,
+  ]);
 
   const handleCancelForm = useCallback(() => {
     setActiveFormIndex(null);
@@ -320,11 +332,18 @@ export const TicketsStep = ({
   );
 
   const hasTicketDateBadge = isMultiDay
-    ? Boolean(multiDayStartDate) && Boolean(multiDayStartTime) && Boolean(multiDayEndDate) && Boolean(multiDayEndTime)
+    ? Boolean(multiDayStartDate) &&
+      Boolean(multiDayStartTime) &&
+      Boolean(multiDayEndDate) &&
+      Boolean(multiDayEndTime)
     : isRecurring
-      ? Boolean(recurringDays.length > 0) && timeSlots.some((slot) => slot.startTime && slot.endTime)
-      : Boolean(dateTypeData.date) && Boolean(dateTypeData.startTime) && Boolean(dateTypeData.endTime);
-  const showTicketConnector = hasTicketDateBadge && formData.items.length > 0 && activeFormIndex === null;
+      ? Boolean(recurringDays.length > 0) &&
+        timeSlots.some((slot) => slot.startTime && slot.endTime)
+      : Boolean(dateTypeData.date) &&
+        Boolean(dateTypeData.startTime) &&
+        Boolean(dateTypeData.endTime);
+  const showTicketConnector =
+    hasTicketDateBadge && formData.items.length > 0 && activeFormIndex === null;
 
   const multiDayDays = getDaysBetween(multiDayStartDate || '', multiDayEndDate || '');
 
@@ -332,20 +351,20 @@ export const TicketsStep = ({
     <div className="space-y-6">
       <h2 className="text-lg font-bold text-gray-900">Create Tickets</h2>
 
-      <CommissionPicker value={formData.commission} onChange={(commission) => onChange({ commission })} />
+      <CommissionPicker
+        value={formData.commission}
+        onChange={(commission) => onChange({ commission })}
+      />
 
       {isMultiDay && (
-        <MultiDayTicketModePicker
-          value={ticketMode}
-          onChange={handleTicketModeChange}
-        />
+        <MultiDayTicketModePicker value={ticketMode} onChange={handleTicketModeChange} />
       )}
 
       {isMultiDay ? (
         <>
           {ticketMode === 'entire-period' && hasTicketDateBadge ? (
             <div className="relative">
-              <div className='mb-2.5'>
+              <div className="mb-2.5">
                 <DateBadgeWithTimes
                   startDate={multiDayStartDate}
                   endDate={multiDayEndDate}
@@ -355,7 +374,7 @@ export const TicketsStep = ({
                   onEndTimeChange={(time) => handleDraftTicketChange({ salesEndTime: time })}
                 />
               </div>
-              <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] bottom-0 border-l-[1px] border-dashed border-primary" />
+              <span className="pointer-events-none absolute -left-[1.25rem] bottom-0 top-[1.5rem] border-l-[1px] border-dashed border-primary" />
               <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
               <span className="pointer-events-none absolute -left-[1.563rem] top-[1.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
 
@@ -370,11 +389,11 @@ export const TicketsStep = ({
                   isRecurring={isRecurring}
                   isMultiDay={isMultiDay}
                   ticketMode={ticketMode}
-                        isSaving={createTicketMutation.isPending || isSavingLocal}
-                      />
+                  isSaving={createTicketMutation.isPending || isSavingLocal}
+                />
               ) : (
                 <>
-                  <div className="space-y-3 mb-4 pt-4">
+                  <div className="mb-4 space-y-3 pt-4">
                     {formData.items.map((ticket, index) => (
                       <SavedTicketCard
                         key={ticket.id}
@@ -401,8 +420,8 @@ export const TicketsStep = ({
                       isRecurring={isRecurring}
                       isMultiDay={isMultiDay}
                       ticketMode={ticketMode}
-                        isSaving={createTicketMutation.isPending || isSavingLocal}
-                      />
+                      isSaving={createTicketMutation.isPending || isSavingLocal}
+                    />
                   ) : (
                     <AddTicketTypeButton onClick={handleAddTicket} />
                   )}
@@ -413,8 +432,8 @@ export const TicketsStep = ({
             <div className="space-y-4">
               <div className="space-y-2">
                 {multiDayDays.map((day, index) => (
-                  <div key={index} className='relative'>
-                    <div className='mb-3'>
+                  <div key={index} className="relative">
+                    <div className="mb-3">
                       <TicketDateBadge
                         mode="single"
                         date={day}
@@ -422,7 +441,7 @@ export const TicketsStep = ({
                         endTime={multiDayEndTime!}
                       />
                     </div>
-                    <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] -bottom-[1.875rem] border-l-[1px] border-dashed border-primary" />
+                    <span className="pointer-events-none absolute -bottom-[1.875rem] -left-[1.25rem] top-[1.5rem] border-l-[1px] border-dashed border-primary" />
                     <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
                     <span className="pointer-events-none absolute -left-[1.563rem] top-[1.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
                     {formData.items.length === 0 && activeFormIndex === null ? (
@@ -440,7 +459,7 @@ export const TicketsStep = ({
                       />
                     ) : (
                       <>
-                        <div className="space-y-3 mb-4">
+                        <div className="mb-4 space-y-3">
                           {formData.items.map((ticket, index) => (
                             <SavedTicketCard
                               key={ticket.id}
@@ -467,8 +486,8 @@ export const TicketsStep = ({
                             isRecurring={isRecurring}
                             isMultiDay={isMultiDay}
                             ticketMode={ticketMode}
-                        isSaving={createTicketMutation.isPending || isSavingLocal}
-                      />
+                            isSaving={createTicketMutation.isPending || isSavingLocal}
+                          />
                         ) : (
                           <AddTicketTypeButton onClick={handleAddTicket} />
                         )}
@@ -484,7 +503,7 @@ export const TicketsStep = ({
         <div className="space-y-0">
           {timeSlots.map((slot, slotIndex) => (
             <div key={slotIndex} className="relative">
-              <div className='mb-3'>
+              <div className="mb-3">
                 <TicketDateBadge
                   mode="recurring"
                   days={recurringDays}
@@ -492,7 +511,7 @@ export const TicketsStep = ({
                   endTime={slot.endTime!}
                 />
               </div>
-              <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] -bottom-6 border-l-[1px] border-dashed border-primary" />
+              <span className="pointer-events-none absolute -bottom-6 -left-[1.25rem] top-[1.5rem] border-l-[1px] border-dashed border-primary" />
               <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
               <span className="pointer-events-none absolute -left-[1.563rem] top-[1.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
 
@@ -506,8 +525,8 @@ export const TicketsStep = ({
                 isRecurring={isRecurring}
                 isMultiDay={isMultiDay}
                 ticketMode={ticketMode}
-                        isSaving={createTicketMutation.isPending || isSavingLocal}
-                      />
+                isSaving={createTicketMutation.isPending || isSavingLocal}
+              />
             </div>
           ))}
 
@@ -535,7 +554,7 @@ export const TicketsStep = ({
                 startTime={dateTypeData.startTime!}
                 endTime={dateTypeData.endTime!}
               />
-              <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] -bottom-6 border-l-[1px] border-dashed border-primary" />
+              <span className="pointer-events-none absolute -bottom-6 -left-[1.25rem] top-[1.5rem] border-l-[1px] border-dashed border-primary" />
               <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
               <span className="pointer-events-none absolute -left-[1.563rem] top-[1.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
             </div>
@@ -553,11 +572,11 @@ export const TicketsStep = ({
               isRecurring={isRecurring}
               isMultiDay={isMultiDay}
               ticketMode={ticketMode}
-                        isSaving={createTicketMutation.isPending || isSavingLocal}
-                      />
+              isSaving={createTicketMutation.isPending || isSavingLocal}
+            />
           ) : (
             <>
-              <div className="space-y-3 mb-4">
+              <div className="mb-4 space-y-3">
                 {formData.items.map((ticket, index) => (
                   <SavedTicketCard
                     key={ticket.id}
@@ -584,8 +603,8 @@ export const TicketsStep = ({
                   isRecurring={isRecurring}
                   isMultiDay={isMultiDay}
                   ticketMode={ticketMode}
-                        isSaving={createTicketMutation.isPending || isSavingLocal}
-                      />
+                  isSaving={createTicketMutation.isPending || isSavingLocal}
+                />
               ) : (
                 <AddTicketTypeButton onClick={handleAddTicket} />
               )}
@@ -596,7 +615,7 @@ export const TicketsStep = ({
 
       {errors.items && <p className="text-xs text-red-500">{errors.items}</p>}
 
-      {showTicketConnector &&(
+      {showTicketConnector && (
         <div className="flex justify-between gap-4 pt-6">
           <Button type="button" variant="ghost" onClick={onCancel} className="text-red-600">
             Cancel

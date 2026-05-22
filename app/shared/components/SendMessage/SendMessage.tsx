@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
+import { useSendMessage } from '@/app/(experiences)/hooks/useComms';
+import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import {
@@ -15,8 +17,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { useSendMessage } from '@/app/(experiences)/hooks/useComms';
-import { toast } from '@/app/shared/hooks/useToast';
 
 const formSchema = z.object({
   content: z.string().min(2, {

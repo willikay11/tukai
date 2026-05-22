@@ -1,8 +1,11 @@
 import { render, screen } from '@testing-library/react';
+
 import { RecurrenceDateRange } from './RecurrenceDateRange';
 
 jest.mock('@/components/ui/date-picker', () => ({
-  DatePicker: ({ placeholder }: { placeholder: string }) => <div data-testid={`date-picker-${placeholder}`} />,
+  DatePicker: ({ placeholder }: { placeholder: string }) => (
+    <div data-testid={`date-picker-${placeholder}`} />
+  ),
 }));
 
 describe('RecurrenceDateRange', () => {

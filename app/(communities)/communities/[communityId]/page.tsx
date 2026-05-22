@@ -1,5 +1,9 @@
 import { Session } from 'next-auth';
 
+import { CommunityAdministrator } from '@/app/(communities)/communities/components/communityAdministrator';
+import { CommunityMembers } from '@/app/(communities)/communities/components/communityMembers';
+import { Join } from '@/app/(communities)/communities/components/join';
+import { UpcomingExperiences } from '@/app/(communities)/communities/components/upcomingExperiences';
 import { DescriptionShowMore } from '@/app/shared/components/Global';
 import { GoogleMapComponent } from '@/app/shared/components/Global';
 import { IconComponent } from '@/app/shared/components/Icons';
@@ -12,10 +16,6 @@ import { ApiResponse } from '@/types/apiResponse';
 import { Community, CommunityMember } from '@/types/community';
 import { Photo } from '@/types/photo';
 
-import { CommunityAdministrator } from '@/app/(communities)/communities/components/communityAdministrator';
-import { CommunityMembers } from '@/app/(communities)/communities/components/communityMembers';
-import { Join } from '@/app/(communities)/communities/components/join';
-import { UpcomingExperiences } from '@/app/(communities)/communities/components/upcomingExperiences';
 import { AuthGuard } from './components/authGuard';
 import { CommunityTabs } from './components/communityTabs';
 

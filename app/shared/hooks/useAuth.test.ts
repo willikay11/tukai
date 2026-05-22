@@ -1,11 +1,9 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {
-  useUserExists,
-  useGetInterestCategories,
-  useGetUsers,
-} from './useAuth';
+import { act, renderHook, waitFor } from '@testing-library/react';
+
 import * as authService from '@/services/auth';
+
+import { useGetInterestCategories, useGetUsers, useUserExists } from './useAuth';
 
 jest.mock('@/services/auth');
 
@@ -127,9 +125,7 @@ describe('Auth Hooks', () => {
     it('uses cache for interest categories', async () => {
       const mockCategories = {
         data: {
-          results: [
-            { id: '1', name: 'Arts' },
-          ],
+          results: [{ id: '1', name: 'Arts' }],
         },
       };
       mockAuthService.getInterestCategories.mockResolvedValue(mockCategories);
@@ -147,9 +143,7 @@ describe('Auth Hooks', () => {
     });
 
     it('handles error when fetching categories', async () => {
-      mockAuthService.getInterestCategories.mockRejectedValue(
-        new Error('Failed to fetch')
-      );
+      mockAuthService.getInterestCategories.mockRejectedValue(new Error('Failed to fetch'));
 
       const { result } = renderHook(() => useGetInterestCategories(), {
         wrapper: createWrapper() as any,
@@ -204,7 +198,7 @@ describe('Auth Hooks', () => {
         undefined,
         undefined,
         undefined,
-        undefined
+        undefined,
       );
     });
 
@@ -223,7 +217,7 @@ describe('Auth Hooks', () => {
           undefined,
           undefined,
           undefined,
-          undefined
+          undefined,
         );
       });
     });
@@ -243,7 +237,7 @@ describe('Auth Hooks', () => {
           'test@example.com',
           undefined,
           undefined,
-          undefined
+          undefined,
         );
       });
     });
@@ -263,7 +257,7 @@ describe('Auth Hooks', () => {
           undefined,
           'user-123',
           undefined,
-          undefined
+          undefined,
         );
       });
     });
@@ -283,7 +277,7 @@ describe('Auth Hooks', () => {
           undefined,
           undefined,
           'user-456',
-          undefined
+          undefined,
         );
       });
     });
@@ -303,7 +297,7 @@ describe('Auth Hooks', () => {
           undefined,
           undefined,
           undefined,
-          'user-789'
+          'user-789',
         );
       });
     });
@@ -314,17 +308,10 @@ describe('Auth Hooks', () => {
 
       renderHook(
         () =>
-          useGetUsers(
-            2,
-            25,
-            'test@example.com',
-            'follower-123',
-            'following-456',
-            'blocked-789'
-          ),
+          useGetUsers(2, 25, 'test@example.com', 'follower-123', 'following-456', 'blocked-789'),
         {
           wrapper: createWrapper() as any,
-        }
+        },
       );
 
       await waitFor(() => {
@@ -334,7 +321,7 @@ describe('Auth Hooks', () => {
           'test@example.com',
           'follower-123',
           'following-456',
-          'blocked-789'
+          'blocked-789',
         );
       });
     });

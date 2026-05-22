@@ -28,11 +28,7 @@ export const PreviewCommunitiesSection = ({
           Invited Communities ({communities.length})
         </h3>
         {onEdit && (
-          <button
-            type="button"
-            onClick={onEdit}
-            className="text-gray-400 hover:text-gray-600"
-          >
+          <button type="button" onClick={onEdit} className="text-gray-400 hover:text-gray-600">
             <IconComponent iconName="Edit02Icon" size={16} />
           </button>
         )}
@@ -50,7 +46,7 @@ export const PreviewCommunitiesSection = ({
                 alt={community.name}
                 className="h-4 w-4 rounded-full object-cover"
               />
-              <span className="truncate max-w-xs">{community.name}</span>
+              <span className="max-w-xs truncate">{community.name}</span>
             </div>
           ))}
         </div>

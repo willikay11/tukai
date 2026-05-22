@@ -1,6 +1,19 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, renderHook, waitFor } from '@testing-library/react';
+
+import * as communityService from '@/services/community';
+
+import {
+  useCommunityPostPhotos,
+  useCommunityPosts,
+  useCreateCommunity,
+  useCreateCommunityPhotos,
+  useGetCommunities,
+  useJoinCommunity,
+  useJoinCommunityViaInvite,
+} from './useCommunities';
 
 jest.mock('@/services/community', () => ({
   getCommunities: jest.fn(),
@@ -11,17 +24,6 @@ jest.mock('@/services/community', () => ({
   createCommunity: jest.fn(),
   createCommunityPhotos: jest.fn(),
 }));
-
-import {
-  useGetCommunities,
-  useJoinCommunity,
-  useJoinCommunityViaInvite,
-  useCommunityPosts,
-  useCommunityPostPhotos,
-  useCreateCommunity,
-  useCreateCommunityPhotos,
-} from './useCommunities';
-import * as communityService from '@/services/community';
 
 const mockCommunityService = communityService as jest.Mocked<typeof communityService>;
 
@@ -61,7 +63,7 @@ describe('Communities Hooks', () => {
             page: 1,
             enabled: true,
           }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -78,7 +80,7 @@ describe('Communities Hooks', () => {
         undefined,
         undefined,
         undefined,
-        undefined
+        undefined,
       );
     });
 
@@ -93,7 +95,7 @@ describe('Communities Hooks', () => {
             page: 1,
             enabled: false,
           }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(mockCommunityService.getCommunities).not.toHaveBeenCalled();
@@ -110,7 +112,7 @@ describe('Communities Hooks', () => {
             enabled: true,
             category: ['cat-1', 'cat-2'],
           }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -123,7 +125,7 @@ describe('Communities Hooks', () => {
           undefined,
           undefined,
           undefined,
-          undefined
+          undefined,
         );
       });
     });
@@ -139,7 +141,7 @@ describe('Communities Hooks', () => {
             enabled: true,
             search: 'hiking',
           }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -152,7 +154,7 @@ describe('Communities Hooks', () => {
           undefined,
           undefined,
           undefined,
-          undefined
+          undefined,
         );
       });
     });
@@ -168,7 +170,7 @@ describe('Communities Hooks', () => {
             enabled: true,
             recommendedCommunities: true,
           }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -181,7 +183,7 @@ describe('Communities Hooks', () => {
           true,
           undefined,
           undefined,
-          undefined
+          undefined,
         );
       });
     });
@@ -197,7 +199,7 @@ describe('Communities Hooks', () => {
             enabled: true,
             popularCommunities: true,
           }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -210,7 +212,7 @@ describe('Communities Hooks', () => {
           undefined,
           true,
           undefined,
-          undefined
+          undefined,
         );
       });
     });
@@ -226,7 +228,7 @@ describe('Communities Hooks', () => {
             enabled: true,
             createdBy: 'user-456',
           }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -239,7 +241,7 @@ describe('Communities Hooks', () => {
           undefined,
           undefined,
           undefined,
-          'user-456'
+          'user-456',
         );
       });
     });
@@ -255,7 +257,7 @@ describe('Communities Hooks', () => {
             enabled: true,
             following: true,
           }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -268,7 +270,7 @@ describe('Communities Hooks', () => {
           undefined,
           undefined,
           true,
-          undefined
+          undefined,
         );
       });
     });
@@ -286,7 +288,7 @@ describe('Communities Hooks', () => {
             search: 'adventure',
             createdBy: 'user-123',
           }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -299,7 +301,7 @@ describe('Communities Hooks', () => {
           undefined,
           undefined,
           undefined,
-          'user-123'
+          'user-123',
         );
       });
     });
@@ -359,14 +361,12 @@ describe('Communities Hooks', () => {
 
       expect(mockCommunityService.joinCommunityWithToken).toHaveBeenCalledWith(
         'comm-123',
-        'invite-token-abc'
+        'invite-token-abc',
       );
     });
 
     it('handles invalid invite token', async () => {
-      mockCommunityService.joinCommunityWithToken.mockRejectedValue(
-        new Error('Invalid token')
-      );
+      mockCommunityService.joinCommunityWithToken.mockRejectedValue(new Error('Invalid token'));
 
       const { result } = renderHook(() => useJoinCommunityViaInvite(), {
         wrapper: createWrapper(),
@@ -524,9 +524,7 @@ describe('Communities Hooks', () => {
     });
 
     it('handles error when uploading photos', async () => {
-      mockCommunityService.createCommunityPhotos.mockRejectedValue(
-        new Error('Upload failed')
-      );
+      mockCommunityService.createCommunityPhotos.mockRejectedValue(new Error('Upload failed'));
 
       const { result } = renderHook(() => useCreateCommunityPhotos(), {
         wrapper: createWrapper(),
@@ -570,10 +568,7 @@ describe('Communities Hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockCommunityService.createCommunityPhotos).toHaveBeenCalledWith(
-        'comm-123',
-        files
-      );
+      expect(mockCommunityService.createCommunityPhotos).toHaveBeenCalledWith('comm-123', files);
     });
   });
 });

@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+
 import { DescriptionFields } from './DescriptionFields';
 
 jest.mock('@/components/blocks/editor-00/editor', () => ({

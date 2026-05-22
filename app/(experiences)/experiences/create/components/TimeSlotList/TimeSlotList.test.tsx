@@ -1,14 +1,10 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { TimeSlotList } from './TimeSlotList';
 
 jest.mock('@/components/ui/time-picker', () => ({
   TimePicker: ({ placeholder, value }: { placeholder: string; value?: string }) => (
-    <input
-      data-testid="time-picker"
-      placeholder={placeholder}
-      defaultValue={value}
-      type="text"
-    />
+    <input data-testid="time-picker" placeholder={placeholder} defaultValue={value} type="text" />
   ),
 }));
 
@@ -20,11 +16,7 @@ describe('TimeSlotList', () => {
   it('renders initial slot', () => {
     const onChange = jest.fn();
     render(
-      <TimeSlotList
-        slots={[{ startTime: null, endTime: null }]}
-        onChange={onChange}
-        errors={{}}
-      />,
+      <TimeSlotList slots={[{ startTime: null, endTime: null }]} onChange={onChange} errors={{}} />,
     );
 
     const timePickers = screen.getAllByTestId('time-picker');
@@ -34,11 +26,7 @@ describe('TimeSlotList', () => {
   it('renders add button', () => {
     const onChange = jest.fn();
     render(
-      <TimeSlotList
-        slots={[{ startTime: null, endTime: null }]}
-        onChange={onChange}
-        errors={{}}
-      />,
+      <TimeSlotList slots={[{ startTime: null, endTime: null }]} onChange={onChange} errors={{}} />,
     );
 
     expect(screen.getByText('+ Add another time slot')).toBeInTheDocument();
@@ -47,11 +35,7 @@ describe('TimeSlotList', () => {
   it('calls onChange when add button is clicked', () => {
     const onChange = jest.fn();
     render(
-      <TimeSlotList
-        slots={[{ startTime: null, endTime: null }]}
-        onChange={onChange}
-        errors={{}}
-      />,
+      <TimeSlotList slots={[{ startTime: null, endTime: null }]} onChange={onChange} errors={{}} />,
     );
 
     const addButton = screen.getByText('+ Add another time slot');
@@ -66,11 +50,7 @@ describe('TimeSlotList', () => {
   it('does not show delete button for single slot', () => {
     const onChange = jest.fn();
     render(
-      <TimeSlotList
-        slots={[{ startTime: null, endTime: null }]}
-        onChange={onChange}
-        errors={{}}
-      />,
+      <TimeSlotList slots={[{ startTime: null, endTime: null }]} onChange={onChange} errors={{}} />,
     );
 
     expect(screen.queryByTestId('trash-icon')).not.toBeInTheDocument();

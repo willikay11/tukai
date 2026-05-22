@@ -1,6 +1,7 @@
-import * as experienceService from './experience';
 import * as apiService from '@/services/apiService';
 import * as imageUtils from '@/utils/images';
+
+import * as experienceService from './experience';
 
 jest.mock('@/services/apiService');
 jest.mock('@/utils/images');
@@ -191,9 +192,7 @@ describe('Experience Service', () => {
       };
       mockApi.post.mockRejectedValue(error);
 
-      await expect(
-        experienceService.purchaseExperienceTicket({} as any)
-      ).rejects.toEqual({
+      await expect(experienceService.purchaseExperienceTicket({} as any)).rejects.toEqual({
         status: 402,
         success: false,
         message: 'Payment declined',
@@ -270,11 +269,9 @@ describe('Experience Service', () => {
       const result = await experienceService.createExperience(experienceData as any);
 
       expect(mockApiWithToken).toHaveBeenCalled();
-      expect(mockApi.post).toHaveBeenCalledWith(
-        '/v1/experiences/',
-        expect.any(FormData),
-        { headers: { 'Content-Type': undefined } }
-      );
+      expect(mockApi.post).toHaveBeenCalledWith('/v1/experiences/', expect.any(FormData), {
+        headers: { 'Content-Type': undefined },
+      });
       expect(result.success).toBe(true);
     });
 
@@ -317,9 +314,7 @@ describe('Experience Service', () => {
         newPhotos: [photoFile],
       };
 
-      await expect(
-        experienceService.createExperience(experienceData as any)
-      ).rejects.toEqual({
+      await expect(experienceService.createExperience(experienceData as any)).rejects.toEqual({
         status: 500,
         success: false,
         message: 'An unexpected error occurred',
@@ -345,9 +340,7 @@ describe('Experience Service', () => {
         categoriesIds: ['cat-1'],
       };
 
-      await expect(
-        experienceService.createExperience(experienceData as any)
-      ).rejects.toEqual({
+      await expect(experienceService.createExperience(experienceData as any)).rejects.toEqual({
         status: 400,
         success: false,
         message: 'Invalid experience data',
@@ -374,11 +367,9 @@ describe('Experience Service', () => {
       const result = await experienceService.updateExperience('exp-1', experienceData as any);
 
       expect(mockApiWithToken).toHaveBeenCalled();
-      expect(mockApi.patch).toHaveBeenCalledWith(
-        '/v1/experiences/exp-1/',
-        expect.any(FormData),
-        { headers: { 'Content-Type': undefined } }
-      );
+      expect(mockApi.patch).toHaveBeenCalledWith('/v1/experiences/exp-1/', expect.any(FormData), {
+        headers: { 'Content-Type': undefined },
+      });
       expect(result.success).toBe(true);
     });
 
@@ -430,9 +421,7 @@ describe('Experience Service', () => {
       };
       mockApi.post.mockRejectedValue(error);
 
-      await expect(
-        experienceService.createExperienceTicket({} as any)
-      ).rejects.toEqual({
+      await expect(experienceService.createExperienceTicket({} as any)).rejects.toEqual({
         status: 400,
         success: false,
         message: 'Invalid ticket slot',
@@ -508,7 +497,7 @@ describe('Experience Service', () => {
       mockApi.post.mockRejectedValue(error);
 
       await expect(
-        experienceService.addGuestToExperience('exp-1', 'invalid-email')
+        experienceService.addGuestToExperience('exp-1', 'invalid-email'),
       ).rejects.toEqual({
         status: 400,
         success: false,

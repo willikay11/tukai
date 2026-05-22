@@ -18,7 +18,7 @@ export const ExperienceTypePicker = ({ value, onChange }: ExperienceTypePickerPr
       <label className="text-xs font-medium text-gray-900">
         Is this a free or a paid Experience?
       </label>
-      <div className='w-fit'>
+      <div className="w-fit">
         <PillRadioGroup
           options={options}
           value={value}

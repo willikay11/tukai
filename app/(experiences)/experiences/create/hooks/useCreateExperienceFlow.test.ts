@@ -1,8 +1,11 @@
 import React from 'react';
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+
 import { useSession } from 'next-auth/react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, renderHook, waitFor } from '@testing-library/react';
+
 import { useCreateExperienceFlow } from './useCreateExperienceFlow';
 
 // Mock Next.js navigation

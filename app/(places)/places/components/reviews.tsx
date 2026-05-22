@@ -1,7 +1,6 @@
 'use client';
 
 import { Review } from '@/app/(places)/components/Review';
-import { NoData } from '@/components/ui/noData';
 import {
   useDeletePlaceReview,
   useDeletePlaceReviewImage,
@@ -10,6 +9,7 @@ import {
   useUpdatePlaceReview,
   useUploadPlaceReviewImages,
 } from '@/app/shared/hooks/usePlaces';
+import { NoData } from '@/components/ui/noData';
 import { Review as ReviewType } from '@/types/review';
 
 type placeReviewsProps = {

@@ -327,7 +327,7 @@ export const FileUploadField = ({
                 type="button"
                 onClick={() => handleRemoveImage(index)}
                 disabled={isDeletingPhoto}
-                className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-700/70 text-white transition-colors hover:bg-gray-800/80 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-700/70 text-white transition-colors hover:bg-gray-800/80 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Remove image"
               >
                 <IconComponent iconName="Cancel01Icon" color="#FFFFFF" size={18} />

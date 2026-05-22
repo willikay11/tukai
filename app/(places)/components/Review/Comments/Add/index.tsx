@@ -8,11 +8,11 @@ import { useSession } from 'next-auth/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
+import { useCreatePlaceReviewComment, usePlaceReviewComments } from '@/app/shared/hooks/usePlaces';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { NoData } from '@/components/ui/noData';
 import { Textarea } from '@/components/ui/textarea';
-import { useCreatePlaceReviewComment, usePlaceReviewComments } from '@/app/shared/hooks/usePlaces';
 import { Comment } from '@/types/comment';
 
 import { ViewComment } from '../View';

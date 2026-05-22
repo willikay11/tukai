@@ -1,8 +1,9 @@
 'use client';
 
-import { CreateExperienceInvites } from '../invites';
-import { FormData } from '../../hooks/useCreateExperienceFlow';
 import type { Experience } from '@/types/experience';
+
+import { FormData } from '../../hooks/useCreateExperienceFlow';
+import { CreateExperienceInvites } from '../invites';
 
 interface InviteGuestsStepProps {
   formData: FormData['invite'];

@@ -1,10 +1,11 @@
 'use client';
 
-import { BankAccountFormValues } from '@/components/ui/bank-account-details-form';
 import { useToast } from '@/app/shared/hooks/useToast';
-import { CreateExperienceWallet } from '../wallet';
-import type { FormData } from '../../hooks/useCreateExperienceFlow';
+import { BankAccountFormValues } from '@/components/ui/bank-account-details-form';
 import { Wallet } from '@/types/payment';
+
+import type { FormData } from '../../hooks/useCreateExperienceFlow';
+import { CreateExperienceWallet } from '../wallet';
 
 interface WalletDetailsStepProps {
   formData: FormData['wallet'];
@@ -55,7 +56,7 @@ export const WalletDetailsStep = ({
             variant: 'destructive',
           });
         },
-      }
+      },
     );
   };
 
@@ -78,7 +79,7 @@ export const WalletDetailsStep = ({
             variant: 'destructive',
           });
         },
-      }
+      },
     );
   };
 
@@ -109,7 +110,7 @@ export const WalletDetailsStep = ({
             variant: 'destructive',
           });
         },
-      }
+      },
     );
   };
 
@@ -141,7 +142,7 @@ export const WalletDetailsStep = ({
             variant: 'destructive',
           });
         },
-      }
+      },
     );
   };
 

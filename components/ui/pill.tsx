@@ -5,4 +5,3 @@ export const Pill = ({ children }: { children: React.ReactNode }) => {
     </div>
   );
 };
-

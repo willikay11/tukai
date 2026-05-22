@@ -13,12 +13,7 @@ type addReviewCommentProps = {
   closeModal: (isOpen: boolean) => void;
 };
 
-export const AddReviewComment = ({
-  id,
-  reviewId,
-  isOpen,
-  closeModal,
-}: addReviewCommentProps) => {
+export const AddReviewComment = ({ id, reviewId, isOpen, closeModal }: addReviewCommentProps) => {
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add('overflow-hidden');

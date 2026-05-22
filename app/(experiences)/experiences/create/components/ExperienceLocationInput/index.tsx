@@ -18,7 +18,12 @@ interface ExperienceLocationInputProps {
   error?: string;
 }
 
-export const ExperienceLocationInput = ({ value, placeId, onChange, error }: ExperienceLocationInputProps) => {
+export const ExperienceLocationInput = ({
+  value,
+  placeId,
+  onChange,
+  error,
+}: ExperienceLocationInputProps) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [inputValue, setInputValue] = useState(value);
   const [selectedPlaceId, setSelectedPlaceId] = useState(placeId);
@@ -50,12 +55,15 @@ export const ExperienceLocationInput = ({ value, placeId, onChange, error }: Exp
     [onChange],
   );
 
-  const handleSelectSuggestion = useCallback((place: GoogleMapsAutocompletePrediction) => {
-    onChange(place.description, place.place_id);
-    setInputValue(place.description);
-    setSelectedPlaceId(place.place_id);
-    setShowSuggestions(false);
-  }, [onChange]);
+  const handleSelectSuggestion = useCallback(
+    (place: GoogleMapsAutocompletePrediction) => {
+      onChange(place.description, place.place_id);
+      setInputValue(place.description);
+      setSelectedPlaceId(place.place_id);
+      setShowSuggestions(false);
+    },
+    [onChange],
+  );
 
   return (
     <div className="space-y-2">

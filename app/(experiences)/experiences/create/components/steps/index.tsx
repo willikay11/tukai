@@ -2,28 +2,28 @@
 
 import { useEffect, useState } from 'react';
 
-import { IconComponent } from '@/app/shared/components/Icons';
 import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
+import { IconComponent } from '@/app/shared/components/Icons';
+import { Button } from '@/components/ui/button';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
+import { Interest } from '@/types/interest';
+import { Wallet } from '@/types/payment';
 
+import type { FormData } from '../../hooks/useCreateExperienceFlow';
 import { AboutStep } from '../AboutStep';
+import { type DateTypeFormData, DateTypeStep } from '../DateTypeStep';
+import { InviteGuestsStep } from '../InviteGuestsStep';
+import { type RelativeValidityValue } from '../RelativeValidityPicker';
+import { TicketsStep } from '../TicketsStep';
+import { WalletDetailsStep } from '../WalletDetailsStep';
 import { CreateExperienceAbout } from '../about';
 import { CreateExperienceCommunity } from '../community';
-import { DateTypeStep, type DateTypeFormData } from '../DateTypeStep';
 import { ExperienceDates } from '../dates';
 import { CreateExperienceInvites } from '../invites';
-import { InviteGuestsStep } from '../InviteGuestsStep';
 import { CreateExperienceWallet } from '../wallet';
-import { TicketsStep } from '../TicketsStep';
-import { Interest } from '@/types/interest';
-import type { FormData } from '../../hooks/useCreateExperienceFlow';
-import { Wallet } from '@/types/payment';
-import { WalletDetailsStep } from '../WalletDetailsStep';
-import { type RelativeValidityValue } from '../RelativeValidityPicker';
 
 type AboutFormData = {
   photos: string[];
@@ -118,23 +118,25 @@ interface CreateExperienceStepsProps {
       duplicateForEntirePeriod: boolean;
     }>;
   };
-  updateTicketsFormData?: (data: Partial<{
-    commission: 'host' | 'customer' | 'split';
-    items: Array<{
-      id: string;
-      name: string;
-      quantity: number;
-      amount: number;
-      salesStartDate: string | null;
-      salesStartTime: string | null;
-      salesEndDate: string | null;
-      salesEndTime: string | null;
-      acceptPartialPayment: boolean;
-      salesStartRelative: RelativeValidityValue | null;
-      salesEndRelative: RelativeValidityValue | null;
-      duplicateForEntirePeriod: boolean;
-    }>;
-  }>) => void;
+  updateTicketsFormData?: (
+    data: Partial<{
+      commission: 'host' | 'customer' | 'split';
+      items: Array<{
+        id: string;
+        name: string;
+        quantity: number;
+        amount: number;
+        salesStartDate: string | null;
+        salesStartTime: string | null;
+        salesEndDate: string | null;
+        salesEndTime: string | null;
+        acceptPartialPayment: boolean;
+        salesStartRelative: RelativeValidityValue | null;
+        salesEndRelative: RelativeValidityValue | null;
+        duplicateForEntirePeriod: boolean;
+      }>;
+    }>,
+  ) => void;
   ticketsErrors?: Record<string, string>;
   communitiesForSelector?: Array<{ id: string; name: string; imageUrl: string }>;
   validateDateType?: () => boolean;
@@ -144,10 +146,12 @@ interface CreateExperienceStepsProps {
     invitedGuests: InvitedMember[];
     invitedCommunityIds: string[];
   };
-  updateInviteFormData?: (data: Partial<{
-    invitedGuests: InvitedMember[];
-    invitedCommunityIds: string[];
-  }>) => void;
+  updateInviteFormData?: (
+    data: Partial<{
+      invitedGuests: InvitedMember[];
+      invitedCommunityIds: string[];
+    }>,
+  ) => void;
   walletFormData?: FormData['wallet'];
   updateWalletFormData?: (data: Partial<FormData['wallet']>) => void;
   walletErrors?: Record<string, string>;
@@ -211,14 +215,12 @@ export const CreateExperienceSteps = ({
   apiError,
 }: CreateExperienceStepsProps) => {
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
-const canAccessDetailsSteps = Boolean(
-    experience?.id || 
-    selectedCommunityId || 
-    formData?.community?.id
+  const canAccessDetailsSteps = Boolean(
+    experience?.id || selectedCommunityId || formData?.community?.id,
   );
-  
+
   useEffect(() => {
-    console.log("[steps.tsx] canAccessDetailsSteps calculated:", {
+    console.log('[steps.tsx] canAccessDetailsSteps calculated:', {
       canAccessDetailsSteps,
       'experience?.id': experience?.id,
       selectedCommunityId,
@@ -226,17 +228,29 @@ const canAccessDetailsSteps = Boolean(
   }, [experience?.id, selectedCommunityId]);
 
   useEffect(() => {
-    console.log("[steps.tsx guard] Checking access - currentStep:", currentStep, "canAccessDetailsSteps:", canAccessDetailsSteps, "isLoadingExperience:", isLoadingExperience);
+    console.log(
+      '[steps.tsx guard] Checking access - currentStep:',
+      currentStep,
+      'canAccessDetailsSteps:',
+      canAccessDetailsSteps,
+      'isLoadingExperience:',
+      isLoadingExperience,
+    );
     // Allow 'about' step if community is selected, even without experience (will be created in about step)
-    const canAccessStep = currentStep === 'about' 
-      ? Boolean(formData?.community?.id) 
-      : canAccessDetailsSteps;
-    
+    const canAccessStep =
+      currentStep === 'about' ? Boolean(formData?.community?.id) : canAccessDetailsSteps;
+
     if (!isLoadingExperience && currentStep !== 'community' && !canAccessStep) {
-      console.log("[steps.tsx guard] Access denied! Redirecting to community");
+      console.log('[steps.tsx guard] Access denied! Redirecting to community');
       onStepChange?.('community');
     }
-  }, [canAccessDetailsSteps, currentStep, isLoadingExperience, onStepChange, formData?.community?.id]);
+  }, [
+    canAccessDetailsSteps,
+    currentStep,
+    isLoadingExperience,
+    onStepChange,
+    formData?.community?.id,
+  ]);
 
   const handleStepChange = (step: ExperienceStepId) => {
     if (step !== 'community' && !canAccessDetailsSteps) {
@@ -247,12 +261,12 @@ const canAccessDetailsSteps = Boolean(
   };
 
   const handleSaveContinue = () => {
-    console.log("[handleSaveContinue] Called, validateDateType...");
+    console.log('[handleSaveContinue] Called, validateDateType...');
     const isValid = validateDateType();
-    console.log("[handleSaveContinue] validateDateType returned:", isValid);
+    console.log('[handleSaveContinue] validateDateType returned:', isValid);
     if (isValid) {
       const nextStep = 'about';
-      console.log("[handleSaveContinue] Validation passed, moving to", nextStep, "step");
+      console.log('[handleSaveContinue] Validation passed, moving to', nextStep, 'step');
       onStepChange?.(nextStep);
     }
   };
@@ -289,22 +303,27 @@ const canAccessDetailsSteps = Boolean(
       onValueChange={(step) => handleStepChange(step as ExperienceStepId)}
       className="grid w-full grid-cols-1"
     >
-      <TabsList className="col-span-1 justify-start flex h-auto w-full gap-2 bg-transparent p-0">
+      <TabsList className="col-span-1 flex h-auto w-full justify-start gap-2 bg-transparent p-0">
         {steps.map((step) => {
           // Check if about step is filled based on form data or experience
-          const isAboutFilled = aboutFormData ?
-            Boolean(
-              aboutFormData.title?.trim() &&
-              aboutFormData.description?.trim() &&
-              aboutFormData.location?.trim() &&
-              aboutFormData.photos?.length > 0
-            ) :
-            Boolean(experience?.id);
+          const isAboutFilled = aboutFormData
+            ? Boolean(
+                aboutFormData.title?.trim() &&
+                aboutFormData.description?.trim() &&
+                aboutFormData.location?.trim() &&
+                aboutFormData.photos?.length > 0,
+              )
+            : Boolean(experience?.id);
 
-          const isDatesTicketsFilled = Boolean(experience?.tickets?.length || ticketsFormData?.items?.length > 0);
-          const isGuestsFilled = inviteFormData ?
-            Boolean(inviteFormData.invitedGuests?.length > 0 || inviteFormData.invitedCommunityIds?.length > 0) :
-            false;
+          const isDatesTicketsFilled = Boolean(
+            experience?.tickets?.length || ticketsFormData?.items?.length > 0,
+          );
+          const isGuestsFilled = inviteFormData
+            ? Boolean(
+                inviteFormData.invitedGuests?.length > 0 ||
+                inviteFormData.invitedCommunityIds?.length > 0,
+              )
+            : false;
           const stepFilledMap: Record<string, boolean> = {
             community: canAccessDetailsSteps,
             about: isAboutFilled,
@@ -361,7 +380,7 @@ const canAccessDetailsSteps = Boolean(
                     type="button"
                     onClick={handleSaveContinue}
                     variant="gradient"
-                    className='rounded-[50px]'
+                    className="rounded-[50px]"
                   >
                     Save & Continue
                   </Button>
@@ -390,18 +409,18 @@ const canAccessDetailsSteps = Boolean(
                 }}
                 isSaving={isSavingExperience}
                 onSaveContinue={async () => {
-                  console.log("[steps.tsx] onSaveContinue called");
+                  console.log('[steps.tsx] onSaveContinue called');
                   const isValid = validateAbout();
-                  console.log("[steps.tsx] validateAbout returned:", isValid);
+                  console.log('[steps.tsx] validateAbout returned:', isValid);
                   if (isValid) {
-                    console.log("[steps.tsx] Validation passed, calling handleSaveAbout");
+                    console.log('[steps.tsx] Validation passed, calling handleSaveAbout');
                     if (handlers?.handleSaveAbout) {
                       await handlers.handleSaveAbout();
                     } else {
                       handleStepChange('dates-tickets');
                     }
                   } else {
-                    console.log("[steps.tsx] Validation failed");
+                    console.log('[steps.tsx] Validation failed');
                   }
                 }}
               />
@@ -419,7 +438,17 @@ const canAccessDetailsSteps = Boolean(
             {ticketsFormData && updateTicketsFormData ? (
               <TicketsStep
                 formData={ticketsFormData}
-                dateTypeData={formData || { community: null, experiencePricing: 'paid', experienceType: 'one-time', isRecurring: false, date: null, startTime: null, endTime: null }}
+                dateTypeData={
+                  formData || {
+                    community: null,
+                    experiencePricing: 'paid',
+                    experienceType: 'one-time',
+                    isRecurring: false,
+                    date: null,
+                    startTime: null,
+                    endTime: null,
+                  }
+                }
                 experiencePricing={formData?.experiencePricing || 'paid'}
                 onChange={updateTicketsFormData}
                 errors={ticketsErrors}
@@ -438,7 +467,9 @@ const canAccessDetailsSteps = Boolean(
                 multiDayStartTime={formData?.multiDayStartTime}
                 multiDayEndDate={formData?.multiDayEndDate}
                 multiDayEndTime={formData?.multiDayEndTime}
-                saveContinueLabel={formData?.experienceType === 'multi-day' ? 'Save Tickets' : undefined}
+                saveContinueLabel={
+                  formData?.experienceType === 'multi-day' ? 'Save Tickets' : undefined
+                }
                 experienceId={experience?.id || null}
               />
             ) : (

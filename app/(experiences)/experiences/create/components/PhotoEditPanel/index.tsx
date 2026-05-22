@@ -1,10 +1,14 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
+import { useCallback, useState } from 'react';
+
 import { IconComponent } from '@/app/shared/components/Icons';
+import {
+  useAddExperiencePhotos,
+  useDeleteExperiencePhoto,
+} from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
-import { useAddExperiencePhotos, useDeleteExperiencePhoto } from '@/app/shared/hooks/useExperiences';
+import { Button } from '@/components/ui/button';
 import { Photo } from '@/types/photo';
 
 interface LocalPhoto {
@@ -34,7 +38,7 @@ export const PhotoEditPanel = ({
   maxPhotos = 9,
 }: PhotoEditPanelProps) => {
   const [localPhotos, setLocalPhotos] = useState<LocalPhoto[]>(
-    photos.map((p) => ({ id: p.id, photo: p.photo, isCover: p.isCover }))
+    photos.map((p) => ({ id: p.id, photo: p.photo, isCover: p.isCover })),
   );
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -136,9 +140,7 @@ export const PhotoEditPanel = ({
     <div className="space-y-4">
       <div>
         <h3 className="text-sm font-semibold text-gray-900">Edit Photos</h3>
-        <p className="mt-1 text-xs text-gray-600">
-          You can upload up to {maxPhotos} photos
-        </p>
+        <p className="mt-1 text-xs text-gray-600">You can upload up to {maxPhotos} photos</p>
       </div>
 
       <div className="grid grid-cols-3 gap-2">
@@ -153,7 +155,7 @@ export const PhotoEditPanel = ({
               type="button"
               onClick={() => handleRemovePhoto(index)}
               disabled={isLoading}
-              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <span className="text-sm">×</span>
             </button>

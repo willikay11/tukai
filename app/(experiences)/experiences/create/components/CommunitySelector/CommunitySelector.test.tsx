@@ -1,5 +1,7 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { CommunitySelector } from './CommunitySelector';
 
 // Mock the Select component
@@ -8,7 +10,7 @@ jest.mock('@/components/ui/select', () => ({
     return (
       <div data-testid="select-root">
         {React.Children.map(children, (child) =>
-          React.cloneElement(child as React.ReactElement, { value, onValueChange })
+          React.cloneElement(child as React.ReactElement, { value, onValueChange }),
         )}
       </div>
     );
@@ -22,7 +24,7 @@ jest.mock('@/components/ui/select', () => ({
   SelectContent: ({ children, value, onValueChange }: any) => (
     <div data-testid="select-content">
       {React.Children.map(children, (child) =>
-        React.cloneElement(child as React.ReactElement, { value, onValueChange })
+        React.cloneElement(child as React.ReactElement, { value, onValueChange }),
       )}
     </div>
   ),
@@ -47,13 +49,7 @@ const mockCommunities = [
 describe('CommunitySelector', () => {
   it('renders with placeholder when no value selected', () => {
     const mockOnChange = jest.fn();
-    render(
-      <CommunitySelector
-        value={null}
-        options={mockCommunities}
-        onChange={mockOnChange}
-      />
-    );
+    render(<CommunitySelector value={null} options={mockCommunities} onChange={mockOnChange} />);
 
     expect(screen.getByText('Select a community')).toBeInTheDocument();
   });
@@ -63,11 +59,7 @@ describe('CommunitySelector', () => {
     const selected = mockCommunities[0];
 
     const { container } = render(
-      <CommunitySelector
-        value={selected}
-        options={mockCommunities}
-        onChange={mockOnChange}
-      />
+      <CommunitySelector value={selected} options={mockCommunities} onChange={mockOnChange} />,
     );
 
     // Check that the community name is displayed
@@ -85,7 +77,7 @@ describe('CommunitySelector', () => {
         options={mockCommunities}
         onChange={mockOnChange}
         error={errorMessage}
-      />
+      />,
     );
 
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
@@ -94,28 +86,18 @@ describe('CommunitySelector', () => {
   it('renders label and info icon', () => {
     const mockOnChange = jest.fn();
 
-    render(
-      <CommunitySelector
-        value={null}
-        options={mockCommunities}
-        onChange={mockOnChange}
-      />
-    );
+    render(<CommunitySelector value={null} options={mockCommunities} onChange={mockOnChange} />);
 
     expect(screen.getByText('Select host community')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Information about community selection' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Information about community selection' }),
+    ).toBeInTheDocument();
   });
 
   it('renders the Select component', () => {
     const mockOnChange = jest.fn();
 
-    render(
-      <CommunitySelector
-        value={null}
-        options={mockCommunities}
-        onChange={mockOnChange}
-      />
-    );
+    render(<CommunitySelector value={null} options={mockCommunities} onChange={mockOnChange} />);
 
     expect(screen.getByTestId('select-root')).toBeInTheDocument();
   });

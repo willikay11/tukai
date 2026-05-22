@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { Button } from './button';
 
 jest.mock('@/app/shared/components/Forms/form/loader', () => ({
@@ -123,7 +124,11 @@ describe('Button', () => {
     });
 
     it('does not apply size classes to link buttons', () => {
-      render(<Button type="link" size="normal">Link</Button>);
+      render(
+        <Button type="link" size="normal">
+          Link
+        </Button>,
+      );
 
       const button = screen.getByRole('button');
       expect(button).not.toHaveClass('py-5', 'py-2');
@@ -153,7 +158,11 @@ describe('Button', () => {
     });
 
     it('applies padding-x when block is false and not link type', () => {
-      render(<Button block={false} type="primary">Normal</Button>);
+      render(
+        <Button block={false} type="primary">
+          Normal
+        </Button>,
+      );
 
       const button = screen.getByRole('button');
       expect(button).toHaveClass('px-3');
@@ -232,14 +241,22 @@ describe('Button', () => {
     });
 
     it('disables button when loading is true (loading takes precedence)', () => {
-      render(<Button loading={true} disabled={false}>Submit</Button>);
+      render(
+        <Button loading={true} disabled={false}>
+          Submit
+        </Button>,
+      );
 
       const button = screen.getByRole('button');
       expect(button).toBeDisabled();
     });
 
     it('disables button when both loading and disabled are true', () => {
-      render(<Button loading={true} disabled={true}>Submit</Button>);
+      render(
+        <Button loading={true} disabled={true}>
+          Submit
+        </Button>,
+      );
 
       const button = screen.getByRole('button');
       expect(button).toBeDisabled();
@@ -261,7 +278,11 @@ describe('Button', () => {
       const user = userEvent.setup();
       const handleClick = jest.fn();
 
-      render(<Button onClick={handleClick} disabled={true}>Click</Button>);
+      render(
+        <Button onClick={handleClick} disabled={true}>
+          Click
+        </Button>,
+      );
 
       await user.click(screen.getByRole('button'));
       expect(handleClick).not.toHaveBeenCalled();
@@ -271,7 +292,11 @@ describe('Button', () => {
       const user = userEvent.setup();
       const handleClick = jest.fn();
 
-      render(<Button onClick={handleClick} loading={true}>Click</Button>);
+      render(
+        <Button onClick={handleClick} loading={true}>
+          Click
+        </Button>,
+      );
 
       await user.click(screen.getByRole('button'));
       expect(handleClick).not.toHaveBeenCalled();
@@ -306,7 +331,7 @@ describe('Button', () => {
       render(
         <Button type="link" block={true}>
           Link Button
-        </Button>
+        </Button>,
       );
 
       const button = screen.getByRole('button');
@@ -318,7 +343,7 @@ describe('Button', () => {
       render(
         <Button type="blue" size="small">
           Small Blue
-        </Button>
+        </Button>,
       );
 
       const button = screen.getByRole('button');
@@ -329,7 +354,7 @@ describe('Button', () => {
       render(
         <Button htmlType="submit" loading={true}>
           Submitting
-        </Button>
+        </Button>,
       );
 
       const button = screen.getByRole('button');
@@ -345,7 +370,7 @@ describe('Button', () => {
       render(
         <Button type="primary" block={true} onClick={handleClick}>
           Full Width
-        </Button>
+        </Button>,
       );
 
       const button = screen.getByRole('button');

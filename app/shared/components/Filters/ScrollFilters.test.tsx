@@ -1,10 +1,13 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ScrollFilters } from './ScrollFilters';
-import * as SelectedCategoryContext from '@/context/SelectedCategoryContext';
+
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
 import * as AuthDialogContext from '@/context/AuthDialogContext';
+import * as SelectedCategoryContext from '@/context/SelectedCategoryContext';
+
+import { ScrollFilters } from './ScrollFilters';
 
 jest.mock('next-auth/react');
 jest.mock('next/navigation');
@@ -93,12 +96,10 @@ describe('ScrollFilters', () => {
 
   describe('active state styling', () => {
     it('applies active styling to selected filter', () => {
-      jest
-        .spyOn(SelectedCategoryContext, 'useSelectedCategory')
-        .mockReturnValue({
-          selectedCategoryId: 'sports',
-          setSelectedCategoryId: jest.fn(),
-        });
+      jest.spyOn(SelectedCategoryContext, 'useSelectedCategory').mockReturnValue({
+        selectedCategoryId: 'sports',
+        setSelectedCategoryId: jest.fn(),
+      });
 
       render(<ScrollFilters filters={defaultFilters} />);
 
@@ -107,12 +108,10 @@ describe('ScrollFilters', () => {
     });
 
     it('applies inactive styling to unselected filters', () => {
-      jest
-        .spyOn(SelectedCategoryContext, 'useSelectedCategory')
-        .mockReturnValue({
-          selectedCategoryId: 'sports',
-          setSelectedCategoryId: jest.fn(),
-        });
+      jest.spyOn(SelectedCategoryContext, 'useSelectedCategory').mockReturnValue({
+        selectedCategoryId: 'sports',
+        setSelectedCategoryId: jest.fn(),
+      });
 
       render(<ScrollFilters filters={defaultFilters} />);
 
@@ -123,12 +122,10 @@ describe('ScrollFilters', () => {
     it('changes styling when selected category changes', () => {
       const { rerender } = render(<ScrollFilters filters={defaultFilters} />);
 
-      jest
-        .spyOn(SelectedCategoryContext, 'useSelectedCategory')
-        .mockReturnValue({
-          selectedCategoryId: 'music',
-          setSelectedCategoryId: jest.fn(),
-        });
+      jest.spyOn(SelectedCategoryContext, 'useSelectedCategory').mockReturnValue({
+        selectedCategoryId: 'music',
+        setSelectedCategoryId: jest.fn(),
+      });
 
       rerender(<ScrollFilters filters={defaultFilters} />);
 
@@ -142,12 +139,10 @@ describe('ScrollFilters', () => {
       const user = userEvent.setup();
       const mockSetSelectedCategoryId = jest.fn();
 
-      jest
-        .spyOn(SelectedCategoryContext, 'useSelectedCategory')
-        .mockReturnValue({
-          selectedCategoryId: 'all',
-          setSelectedCategoryId: mockSetSelectedCategoryId,
-        });
+      jest.spyOn(SelectedCategoryContext, 'useSelectedCategory').mockReturnValue({
+        selectedCategoryId: 'all',
+        setSelectedCategoryId: mockSetSelectedCategoryId,
+      });
 
       render(<ScrollFilters filters={defaultFilters} />);
 
@@ -169,12 +164,10 @@ describe('ScrollFilters', () => {
         refresh: jest.fn(),
       } as any);
 
-      jest
-        .spyOn(SelectedCategoryContext, 'useSelectedCategory')
-        .mockReturnValue({
-          selectedCategoryId: 'all',
-          setSelectedCategoryId: jest.fn(),
-        });
+      jest.spyOn(SelectedCategoryContext, 'useSelectedCategory').mockReturnValue({
+        selectedCategoryId: 'all',
+        setSelectedCategoryId: jest.fn(),
+      });
 
       render(<ScrollFilters filters={defaultFilters} />);
 
@@ -220,12 +213,10 @@ describe('ScrollFilters', () => {
       });
 
       const mockSetSelectedCategoryId = jest.fn();
-      jest
-        .spyOn(SelectedCategoryContext, 'useSelectedCategory')
-        .mockReturnValue({
-          selectedCategoryId: 'all',
-          setSelectedCategoryId: mockSetSelectedCategoryId,
-        });
+      jest.spyOn(SelectedCategoryContext, 'useSelectedCategory').mockReturnValue({
+        selectedCategoryId: 'all',
+        setSelectedCategoryId: mockSetSelectedCategoryId,
+      });
 
       const filtersWithAuth = [
         { label: 'All', value: 'all', icon: 'Home01Icon' },
@@ -307,12 +298,10 @@ describe('ScrollFilters', () => {
     it('updates active filter when context value changes', async () => {
       const { rerender } = render(<ScrollFilters filters={defaultFilters} />);
 
-      jest
-        .spyOn(SelectedCategoryContext, 'useSelectedCategory')
-        .mockReturnValue({
-          selectedCategoryId: 'music',
-          setSelectedCategoryId: jest.fn(),
-        });
+      jest.spyOn(SelectedCategoryContext, 'useSelectedCategory').mockReturnValue({
+        selectedCategoryId: 'music',
+        setSelectedCategoryId: jest.fn(),
+      });
 
       rerender(<ScrollFilters filters={defaultFilters} />);
 

@@ -7,10 +7,9 @@ import Link from 'next/link';
 
 import moment from 'moment';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
 import { useLocation } from '@/context/LocationContext';
-
-import { IconComponent } from '@/app/shared/components/Icons';
 
 export const Footer = () => {
   return (

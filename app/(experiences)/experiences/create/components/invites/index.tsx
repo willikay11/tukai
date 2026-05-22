@@ -1,13 +1,17 @@
 'use client';
 
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
+import {
+  useAddGuestToExperience,
+  useSearchUsersDebounced,
+  useUpdateExperience,
+} from '@/app/shared/hooks/useExperiences';
+import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { InviteCommunities } from '@/components/ui/invite-communities';
 import { InviteMembers, InvitedMember } from '@/components/ui/invite-members';
-import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
-import { useAddGuestToExperience, useUpdateExperience, useSearchUsersDebounced } from '@/app/shared/hooks/useExperiences';
-import { toast } from '@/app/shared/hooks/useToast';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 

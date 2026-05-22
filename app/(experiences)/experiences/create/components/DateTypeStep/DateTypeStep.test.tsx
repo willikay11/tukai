@@ -1,6 +1,8 @@
 import React from 'react';
+
 import { render, screen } from '@testing-library/react';
-import { DateTypeStep, type DateTypeFormData } from './DateTypeStep';
+
+import { type DateTypeFormData, DateTypeStep } from './DateTypeStep';
 
 const mockCommunities = [
   { id: '1', name: 'Community 1', imageUrl: 'https://via.placeholder.com/32' },
@@ -27,7 +29,7 @@ describe('DateTypeStep', () => {
         communityOptions={mockCommunities}
         onChange={mockOnChange}
         errors={{}}
-      />
+      />,
     );
 
     expect(screen.getByText('Add date and type of the experience')).toBeInTheDocument();
@@ -42,7 +44,7 @@ describe('DateTypeStep', () => {
         communityOptions={mockCommunities}
         onChange={mockOnChange}
         errors={{}}
-      />
+      />,
     );
 
     expect(screen.getByText('Select host community')).toBeInTheDocument();
@@ -57,7 +59,7 @@ describe('DateTypeStep', () => {
         communityOptions={mockCommunities}
         onChange={mockOnChange}
         errors={{}}
-      />
+      />,
     );
 
     expect(screen.getByText('Is this a free or a paid Experience?')).toBeInTheDocument();
@@ -72,7 +74,7 @@ describe('DateTypeStep', () => {
         communityOptions={mockCommunities}
         onChange={mockOnChange}
         errors={{}}
-      />
+      />,
     );
 
     expect(screen.getByText('Experience Type')).toBeInTheDocument();
@@ -87,7 +89,7 @@ describe('DateTypeStep', () => {
         communityOptions={mockCommunities}
         onChange={mockOnChange}
         errors={{}}
-      />
+      />,
     );
 
     expect(screen.getByText('Select Experience date(s)')).toBeInTheDocument();
@@ -102,7 +104,7 @@ describe('DateTypeStep', () => {
         communityOptions={mockCommunities}
         onChange={mockOnChange}
         errors={{}}
-      />
+      />,
     );
 
     expect(screen.getByText('Start Time')).toBeInTheDocument();
@@ -122,7 +124,7 @@ describe('DateTypeStep', () => {
         communityOptions={mockCommunities}
         onChange={mockOnChange}
         errors={errors}
-      />
+      />,
     );
 
     expect(screen.getByText('Community is required')).toBeInTheDocument();

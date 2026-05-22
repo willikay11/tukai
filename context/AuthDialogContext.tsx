@@ -4,9 +4,9 @@ import { ReactNode, createContext, useContext, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
+import { toast } from '@/app/shared/hooks/useToast';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { SignInForm } from '@/components/ui/form/sign-in';
-import { toast } from '@/app/shared/hooks/useToast';
 
 type AuthDialogType = {
   setOpenSignIn: (open: boolean) => void;

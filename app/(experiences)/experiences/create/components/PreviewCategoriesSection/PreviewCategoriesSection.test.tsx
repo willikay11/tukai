@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+
 import { PreviewCategoriesSection } from './PreviewCategoriesSection';
 
 jest.mock('@/app/shared/components/Icons', () => ({

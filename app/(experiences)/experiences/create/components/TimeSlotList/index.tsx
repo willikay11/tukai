@@ -1,8 +1,9 @@
 'use client';
 
 import { useCallback } from 'react';
-import { TimePicker } from '@/components/ui/time-picker';
+
 import { IconComponent } from '@/app/shared/components/Icons';
+import { TimePicker } from '@/components/ui/time-picker';
 
 export interface TimeSlot {
   startTime: string | null;
@@ -59,9 +60,7 @@ export const TimeSlotList = ({ slots, onChange, errors }: TimeSlotListProps) => 
                 placeholder="Select time"
               />
               {errors[`slots.${index}.startTime`] && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors[`slots.${index}.startTime`]}
-                </p>
+                <p className="mt-1 text-xs text-red-500">{errors[`slots.${index}.startTime`]}</p>
               )}
             </div>
 
@@ -72,9 +71,7 @@ export const TimeSlotList = ({ slots, onChange, errors }: TimeSlotListProps) => 
                 placeholder="Select time"
               />
               {errors[`slots.${index}.endTime`] && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors[`slots.${index}.endTime`]}
-                </p>
+                <p className="mt-1 text-xs text-red-500">{errors[`slots.${index}.endTime`]}</p>
               )}
             </div>
 
@@ -100,7 +97,7 @@ export const TimeSlotList = ({ slots, onChange, errors }: TimeSlotListProps) => 
         + Add another time slot
       </button>
 
-      {errors.timeSlots && <p className="text-xs text-red-500 mt-2">{errors.timeSlots}</p>}
+      {errors.timeSlots && <p className="mt-2 text-xs text-red-500">{errors.timeSlots}</p>}
     </div>
   );
 };

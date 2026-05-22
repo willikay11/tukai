@@ -1,22 +1,22 @@
 'use client';
 
-import { Interest } from '@/types/interest';
-import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { InvitedMember } from '@/components/ui/invite-members';
-import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
+import { Interest } from '@/types/interest';
 
-import { PreviewDateSection } from '../PreviewDateSection';
-import { PreviewExperienceHeader } from '../PreviewExperienceHeader';
-import { PreviewIncludedSection } from '../PreviewIncludedSection';
-import { PreviewExcludedSection } from '../PreviewExcludedSection';
+import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
+import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
+import { PreviewCommunitySection } from '../PreviewCommunitySection';
+import { PreviewDateSection } from '../PreviewDateSection';
+import { PreviewExcludedSection } from '../PreviewExcludedSection';
+import { PreviewExperienceHeader } from '../PreviewExperienceHeader';
+import { PreviewGuestsSection } from '../PreviewGuestsSection';
+import { PreviewIncludedSection } from '../PreviewIncludedSection';
 import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
 import { PreviewLocationSection } from '../PreviewLocationSection';
 import { PreviewMeetingSection } from '../PreviewMeetingSection';
 import { PreviewTicketsSection } from '../PreviewTicketsSection';
-import { PreviewGuestsSection } from '../PreviewGuestsSection';
-import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
-import { PreviewCommunitySection } from '../PreviewCommunitySection';
+import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { ExperienceStepId, ExperienceType } from '../step-side-panel';
 
 interface SharedExperiencePreviewProps {

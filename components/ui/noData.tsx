@@ -10,4 +10,3 @@ export const NoData = ({ message = 'No data' }: { message?: string }) => {
     </div>
   );
 };
-

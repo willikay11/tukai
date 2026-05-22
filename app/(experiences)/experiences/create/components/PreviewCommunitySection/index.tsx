@@ -21,13 +21,17 @@ export const PreviewCommunitySection = ({
         <h3 className="text-xs font-semibold text-gray-900">Host Community</h3>
         {onEdit && (
           <button onClick={onEdit} className="text-gray-400 hover:text-gray-600">
-            <IconComponent iconName="Edit02Icon" size={16} className='text-gray-800' />
+            <IconComponent iconName="Edit02Icon" size={16} className="text-gray-800" />
           </button>
         )}
       </div>
       {communityName && communityImageUrl ? (
         <div className="flex items-center gap-3">
-          <img src={communityImageUrl} alt={communityName} className="h-12 w-12 rounded-lg object-cover" />
+          <img
+            src={communityImageUrl}
+            alt={communityName}
+            className="h-12 w-12 rounded-lg object-cover"
+          />
           <div className="flex-1">
             <p className="text-xs font-medium text-gray-800">{communityName}</p>
             {communityMembersCount > 0 && (

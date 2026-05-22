@@ -1,7 +1,8 @@
 'use client';
 
-import { IconComponent } from '@/app/shared/components/Icons';
 import moment from 'moment';
+
+import { IconComponent } from '@/app/shared/components/Icons';
 import { getOrdinalDate } from '@/utils/date-utils';
 
 type PreviewDateSectionProps =
@@ -62,7 +63,9 @@ const formatDays = (days: string[]): string => {
 export const PreviewDateSection = (props: PreviewDateSectionProps) => {
   if (props.mode === 'single') {
     const timeRange =
-      props.startTime && props.endTime ? `${formatTime(props.startTime)} - ${formatTime(props.endTime)}` : '';
+      props.startTime && props.endTime
+        ? `${formatTime(props.startTime)} - ${formatTime(props.endTime)}`
+        : '';
 
     return (
       <div className="space-y-3">
@@ -76,11 +79,13 @@ export const PreviewDateSection = (props: PreviewDateSectionProps) => {
         </div>
         {props.date && timeRange ? (
           <div className="flex items-center gap-2">
-            <div className="bg-lime rounded-[12px] p-4">
+            <div className="rounded-[12px] bg-lime p-4">
               <IconComponent iconName="CalendarAdd01Icon" size={28} className="text-emerald-600" />
             </div>
             <div className="text-xs text-gray-700">
-              <span className="font-medium text-gray-800">{moment(props.date).format('ddd, MMM D')}</span>
+              <span className="font-medium text-gray-800">
+                {moment(props.date).format('ddd, MMM D')}
+              </span>
               <span className="text-xs font-medium text-gray-800">&nbsp;{timeRange}</span>
             </div>
           </div>
@@ -109,10 +114,10 @@ export const PreviewDateSection = (props: PreviewDateSectionProps) => {
         </div>
         {props.startDate && props.endDate && startTimeFormatted && endTimeFormatted ? (
           <div className="flex items-center gap-2">
-            <div className="bg-lime rounded-[12px] p-4">
+            <div className="rounded-[12px] bg-lime p-4">
               <IconComponent iconName="CalendarAdd01Icon" size={28} className="text-emerald-600" />
             </div>
-            <div className="text-xs text-gray-700 space-y-1">
+            <div className="space-y-1 text-xs text-gray-700">
               <div className="font-medium text-gray-800">
                 {startDateFormatted} – {endDateFormatted}
               </div>
@@ -156,10 +161,10 @@ export const PreviewDateSection = (props: PreviewDateSectionProps) => {
       </div>
       {daysLabel && firstTimeRange ? (
         <div className="flex items-center gap-2">
-          <div className="bg-lime rounded-[12px] p-4">
+          <div className="rounded-[12px] bg-lime p-4">
             <IconComponent iconName="CalendarAdd01Icon" size={28} className="text-emerald-600" />
           </div>
-          <div className="text-xs text-gray-700 space-y-1">
+          <div className="space-y-1 text-xs text-gray-700">
             <div>
               <span className="font-medium text-gray-800">Every {daysLabel},</span>
               <span className="font-medium text-gray-800">&nbsp;{firstTimeRange}</span>

@@ -19,7 +19,10 @@ export const CommissionPicker = ({ value, onChange }: CommissionPickerProps) => 
       <label className="text-xs font-medium text-gray-800">
         Fees allocation (Tukai charges a 4% commission, who should pay this commission?)
       </label>
-      <RadioGroup value={value} onValueChange={(val) => onChange(val as 'host' | 'customer' | 'split')}>
+      <RadioGroup
+        value={value}
+        onValueChange={(val) => onChange(val as 'host' | 'customer' | 'split')}
+      >
         <div className="space-y-2">
           {commissionOptions.map((option) => (
             <div key={option.value} className="flex items-center gap-3">

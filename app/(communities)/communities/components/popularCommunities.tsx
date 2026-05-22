@@ -5,9 +5,9 @@ import Link from 'next/link';
 
 import { motion } from 'framer-motion';
 
+import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { NoData } from '@/components/ui/noData';
 import { Status } from '@/enums/status';
-import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { Community } from '@/types/community';
 
 import { SingleCommunity } from './community';

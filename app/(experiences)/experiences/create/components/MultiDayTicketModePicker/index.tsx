@@ -1,18 +1,16 @@
 'use client';
 
 import { useCallback } from 'react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface MultiDayTicketModePickerProps {
   value: 'entire-period' | 'each-day';
   onChange: (value: 'entire-period' | 'each-day') => void;
 }
 
-export const MultiDayTicketModePicker = ({
-  value,
-  onChange,
-}: MultiDayTicketModePickerProps) => {
+export const MultiDayTicketModePicker = ({ value, onChange }: MultiDayTicketModePickerProps) => {
   const handleChange = useCallback(
     (newValue: string) => {
       onChange(newValue as 'entire-period' | 'each-day');
@@ -29,29 +27,15 @@ export const MultiDayTicketModePicker = ({
       <RadioGroup value={value} onValueChange={handleChange}>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <RadioGroupItem
-              value="entire-period"
-              id="entire-period"
-              className="h-4 w-4"
-            />
-            <Label
-              htmlFor="entire-period"
-              className="cursor-pointer text-xs text-gray-900"
-            >
+            <RadioGroupItem value="entire-period" id="entire-period" className="h-4 w-4" />
+            <Label htmlFor="entire-period" className="cursor-pointer text-xs text-gray-900">
               Create one ticket setup for the entire period
             </Label>
           </div>
 
           <div className="flex items-center gap-3">
-            <RadioGroupItem
-              value="each-day"
-              id="each-day"
-              className="h-4 w-4"
-            />
-            <Label
-              htmlFor="each-day"
-              className="cursor-pointer text-xs text-gray-900"
-            >
+            <RadioGroupItem value="each-day" id="each-day" className="h-4 w-4" />
+            <Label htmlFor="each-day" className="cursor-pointer text-xs text-gray-900">
               Create tickets for each day separately
             </Label>
           </div>

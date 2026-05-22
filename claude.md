@@ -8,39 +8,40 @@ This file provides context and conventions for Claude Code when working on this 
 
 **Tukai** is a location-based discovery platform that helps users find and book experiences, explore places, and connect with communities near them. It targets users in Kenya (currently centred around Nairobi) and has a companion mobile app (iOS & Android). The web app is the primary focus of this codebase.
 
-**Tagline:** *"What's The Plan?"*
+**Tagline:** _"What's The Plan?"_
 
 ---
 
 ## Tech Stack
 
-| Layer | Tool |
-|---|---|
-| Framework | Next.js (App Router) |
-| Language | TypeScript |
-| Styling | Tailwind CSS |
-| Components | shadcn/ui |
-| Data fetching | React Query (TanStack Query) |
-| State (global UI) | React Context API |
-| State (user session) | Redux + redux-persist |
-| Auth | NextAuth.js |
-| Backend | Separate REST API (Axios via `services/`) |
+| Layer                | Tool                                      |
+| -------------------- | ----------------------------------------- |
+| Framework            | Next.js (App Router)                      |
+| Language             | TypeScript                                |
+| Styling              | Tailwind CSS                              |
+| Components           | shadcn/ui                                 |
+| Data fetching        | React Query (TanStack Query)              |
+| State (global UI)    | React Context API                         |
+| State (user session) | Redux + redux-persist                     |
+| Auth                 | NextAuth.js                               |
+| Backend              | Separate REST API (Axios via `services/`) |
 
 ---
 
 ## Routes & Features
 
-| Route | Purpose |
-|---|---|
-| `/` | Experiences — browse and book activities near the user |
-| `/places` | Explore — venue and location discovery |
-| `/communities` | Discover and join interest-based communities |
-| `/auth/sign-in` | Sign in |
-| `/auth/sign-up` | Sign up |
-| `/terms` | Terms & Conditions |
-| `/privacy` | Privacy Policy |
+| Route           | Purpose                                                |
+| --------------- | ------------------------------------------------------ |
+| `/`             | Experiences — browse and book activities near the user |
+| `/places`       | Explore — venue and location discovery                 |
+| `/communities`  | Discover and join interest-based communities           |
+| `/auth/sign-in` | Sign in                                                |
+| `/auth/sign-up` | Sign up                                                |
+| `/terms`        | Terms & Conditions                                     |
+| `/privacy`      | Privacy Policy                                         |
 
 ### Location awareness
+
 The app is location-aware. Users set their location (e.g. "Parkwood Villas, Syokimau") which drives content across all three main features. Location is stored in `LocationContext` and is a core piece of global UI state.
 
 ---
@@ -210,11 +211,11 @@ types/                              # ALL types live here (root level)
   googleMaps.ts, networkParam.ts
   search.ts, subscription.ts
   purchaser.ts
-  
+
   NOTE: All types stay at root. Core domain types (experience, place,
   community) are used across 2+ features. New types should go here
   even if only used in one feature today.
-  
+
   Exception: Form-scoped types (step enums, form state shapes) tightly
   bound to create/edit flows may live as types.ts in the flow folder.
 
@@ -273,14 +274,17 @@ types/                              # Shared types only (feature types live in f
 ## Where Does Code Go?
 
 ### Components
+
 - Used in **1 feature only** → `app/(feature)/components/`
 - Used in **2+ features** → `app/shared/components/[Category]/`
 
 ### Hooks
+
 - Feature-specific → `app/(feature)/hooks/`
 - Cross-cutting (useToast, useMediaQuery, etc.) → `app/shared/hooks/`
 
 ### Types
+
 - **All types** → `types/` (root level)
 - **Exception:** Form-scoped types (step enums, form state) → `app/(feature)/create/types.ts`
 - **Never** create feature-level `types.ts` in the route group root
@@ -288,15 +292,17 @@ types/                              # Shared types only (feature types live in f
 **Why?** Core domain types (experience, place, community) are each used across 2+ features. Even types that seem feature-specific today should go to root — they'll likely be referenced elsewhere as the product evolves.
 
 Import pattern:
+
 ```ts
-import { Experience } from '@/types/experience'
-import { Place } from '@/types/place'
-import { User } from '@/types/user'
+import { Experience } from '@/types/experience';
+import { Place } from '@/types/place';
+import { User } from '@/types/user';
 ```
 
 ---
 
 ### State
+
 - Server data (lists, details) → **React Query** in feature hooks
 - Global UI state (location, category, dialogs) → **Context API**
 - User session + persistent data → **Redux**
@@ -309,6 +315,7 @@ import { User } from '@/types/user'
 This is the most important architectural boundary.
 
 **Services** (`services/feature.ts`) — raw API calls, no React:
+
 ```ts
 // services/experience.ts
 export const fetchExperiences = async (params: ExperiencesParams): Promise<Experience[]> => {
@@ -318,6 +325,7 @@ export const fetchExperiences = async (params: ExperiencesParams): Promise<Exper
 ```
 
 **Hooks** (`app/(feature)/hooks/`) — React Query wrappers, component state:
+
 ```ts
 // app/(experiences)/hooks/useExperiences.ts
 export const useExperiences = (params: ExperiencesParams) => {
@@ -329,6 +337,7 @@ export const useExperiences = (params: ExperiencesParams) => {
 ```
 
 **Decision tree:**
+
 - Need to call the API? → Add a function to `services/[feature].ts`
 - Need that data in a component? → Wrap it in a hook in `app/(feature)/hooks/`
 - Need data server-side? → Call the service directly from a Server Component
@@ -338,6 +347,7 @@ export const useExperiences = (params: ExperiencesParams) => {
 ## Coding Conventions
 
 ### Exports
+
 Always use **named exports**. The only exception is Next.js `page.tsx` and `layout.tsx` which require default exports.
 
 ```ts
@@ -350,7 +360,9 @@ export default function ExperienceCard() { ... }
 ```
 
 ### Imports
+
 Always use **absolute imports** via `@/`:
+
 ```ts
 // ✅ correct
 import { ExperienceCard } from '@/app/(experiences)/components/ExperiencesList'
@@ -361,37 +373,40 @@ import { ExperienceCard } from '../../../components/ExperiencesList'
 ```
 
 ### Import order (per file)
+
 ```ts
 // 1. React / Next.js
-import { useState } from 'react'
-import Link from 'next/link'
+import { useState } from 'react';
+
+import Link from 'next/link';
 
 // 2. External packages
-import { useQuery } from '@tanstack/react-query'
-
-// 3. Shared components & hooks
-import { Button } from '@/app/shared/components/Forms'
-import { useToast } from '@/app/shared/hooks'
+import { useQuery } from '@tanstack/react-query';
 
 // 4. Feature-specific
-import { ExperiencesCard } from '@/app/(experiences)/components'
-import { useExperiences } from '@/app/(experiences)/hooks'
-
+import { ExperiencesCard } from '@/app/(experiences)/components';
+import { useExperiences } from '@/app/(experiences)/hooks';
+// 3. Shared components & hooks
+import { Button } from '@/app/shared/components/Forms';
+import { useToast } from '@/app/shared/hooks';
+import { fetchExperiences } from '@/services/experience';
 // 5. Shared types & services
-import type { Experience, ApiResponse } from '@/types'
-import { fetchExperiences } from '@/services/experience'
+import type { ApiResponse, Experience } from '@/types';
 
 // 6. Local (same folder)
-import { ExperiencesListSkeleton } from './ExperiencesListSkeleton'
+import { ExperiencesListSkeleton } from './ExperiencesListSkeleton';
 ```
 
 ### Components
+
 - **Prefer React Server Components by default.** Only add `'use client'` when the component needs interactivity, browser APIs, or React hooks.
 - One component per file, named identically to the file.
 - Use `index.ts` barrel files to re-export from component folders.
 
 ### Tests
+
 Co-locate tests with the file they cover:
+
 ```
 ExperiencesCard.tsx
 ExperiencesCard.test.tsx
@@ -400,16 +415,17 @@ useExperiences.test.ts
 ```
 
 ### File naming
-| Type | Convention | Example |
-|---|---|---|
-| Components | PascalCase | `ExperiencesCard.tsx` |
-| Hooks | camelCase | `useExperiences.ts` |
-| Services | camelCase | `experience.ts` |
-| Utilities | camelCase | `date-utils.ts` |
-| Tests | same name + `.test` | `ExperiencesCard.test.tsx` |
-| Folders | camelCase | `hooks/`, `components/` |
-| Route groups | `(groupName)` | `(experiences)` |
-| Dynamic routes | `[paramName]` | `[experienceId]` |
+
+| Type           | Convention          | Example                    |
+| -------------- | ------------------- | -------------------------- |
+| Components     | PascalCase          | `ExperiencesCard.tsx`      |
+| Hooks          | camelCase           | `useExperiences.ts`        |
+| Services       | camelCase           | `experience.ts`            |
+| Utilities      | camelCase           | `date-utils.ts`            |
+| Tests          | same name + `.test` | `ExperiencesCard.test.tsx` |
+| Folders        | camelCase           | `hooks/`, `components/`    |
+| Route groups   | `(groupName)`       | `(experiences)`            |
+| Dynamic routes | `[paramName]`       | `[experienceId]`           |
 
 ---
 
@@ -442,23 +458,26 @@ Layer 4 — Components:   app/                       (imports Layer 1–3)
 - Avoid inline `style` props unless absolutely necessary.
 
 ### Colour tokens — never hardcode hex/rgb values
-| Token | Usage |
-|---|---|
-| `bg-primary` / `text-primary` | Brand primary (RGB CSS var) |
-| `bg-secondary` / `text-secondary` | Brand secondary (RGB CSS var) |
-| `bg-background` / `text-foreground` | Page background / default text |
-| `bg-card` / `text-card-foreground` | Card surfaces |
-| `bg-muted` / `text-muted-foreground` | Subtle backgrounds / secondary text |
-| `bg-accent` / `text-accent-foreground` | Accent highlights |
-| `bg-destructive` / `text-destructive-foreground` | Errors / destructive actions |
-| `border` / `ring` / `input` | Form and border colours |
+
+| Token                                            | Usage                               |
+| ------------------------------------------------ | ----------------------------------- |
+| `bg-primary` / `text-primary`                    | Brand primary (RGB CSS var)         |
+| `bg-secondary` / `text-secondary`                | Brand secondary (RGB CSS var)       |
+| `bg-background` / `text-foreground`              | Page background / default text      |
+| `bg-card` / `text-card-foreground`               | Card surfaces                       |
+| `bg-muted` / `text-muted-foreground`             | Subtle backgrounds / secondary text |
+| `bg-accent` / `text-accent-foreground`           | Accent highlights                   |
+| `bg-destructive` / `text-destructive-foreground` | Errors / destructive actions        |
+| `border` / `ring` / `input`                      | Form and border colours             |
 
 ### Border radius — use semantic tokens
+
 - `rounded-lg` → `var(--radius)`
 - `rounded-md` → `calc(var(--radius) - 2px)`
 - `rounded-sm` → `calc(var(--radius) - 4px)`
 
 ### Custom utilities
+
 - `shadow-top-md` — upward shadow for bottom sheets / sticky footers
 - `shadow-scroll-filters` — fading edge on horizontally scrollable filter bars
 - `shadow-search-bar` — elevated search bar
@@ -470,21 +489,21 @@ Layer 4 — Components:   app/                       (imports Layer 1–3)
 
 ## Domain Concepts (Glossary)
 
-| Term | Meaning |
-|---|---|
-| **Experience** | A ticketed or bookable activity/event (e.g. hike, concert, workshop) |
-| **Place** | A physical venue users can explore (restaurant, park, etc.) |
-| **Community** | An interest-based group users can discover and join |
-| **Location** | The user's set location — drives content filtering across all features |
-| **Portal view** | An inline experience list that hides itself when a category filter is active |
-| **Invited experience** | An experience shared directly with the user via invite |
+| Term                   | Meaning                                                                      |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| **Experience**         | A ticketed or bookable activity/event (e.g. hike, concert, workshop)         |
+| **Place**              | A physical venue users can explore (restaurant, park, etc.)                  |
+| **Community**          | An interest-based group users can discover and join                          |
+| **Location**           | The user's set location — drives content filtering across all features       |
+| **Portal view**        | An inline experience list that hides itself when a category filter is active |
+| **Invited experience** | An experience shared directly with the user via invite                       |
 
 ---
 
 ## Environment Variables
 
-| Variable | Purpose |
-|---|---|
+| Variable              | Purpose                   |
+| --------------------- | ------------------------- |
 | `NEXT_PUBLIC_API_URL` | Base URL for the REST API |
 
 ---
@@ -494,6 +513,7 @@ Layer 4 — Components:   app/                       (imports Layer 1–3)
 The codebase has been restructured to the feature-based architecture above. When adding new code, always use the **target structure** documented here.
 
 ### Completed
+
 - ✅ **Tier 1:** Named exports + ESLint enforcement (import/no-default-export)
 - ✅ **Tier 1:** Route groups `(experiences)`, `(places)`, `(communities)`, `(auth)` extracted
 - ✅ **Tier 1:** Shared components consolidated into `app/shared/components/[Category]/`
@@ -501,11 +521,13 @@ The codebase has been restructured to the feature-based architecture above. When
 - ✅ **Tier 2:** Types audit completed — all types remain at root (2+ feature usage rule)
 
 ### Remaining (Tier 3+)
+
 - [ ] Extract page-level logic into custom hooks
 - [ ] Add co-located tests for shared and feature components
 - [ ] Migrate remaining service files to follow pattern
 
 ### Rules for new code
+
 - Always use **target structure** documented above
 - New code added to root `hooks/` or `app/components/` will be rejected
 - All types go to root `types/` (exception: form-scoped types in create flow folders)
@@ -516,14 +538,16 @@ The codebase has been restructured to the feature-based architecture above. When
 ## Active feature work
 
 ### Create experience flow
+
 Full brief: docs/CREATE_EXPERIENCE_FLOW.md
 Designs: docs/designs/create-experience/
 Route: app/(experiences)/experiences/create/
 Hook: app/(experiences)/experiences/create/hooks/useCreateExperienceFlow.ts
 Status: UI build complete (single-day and recurring variants)
-         API integration pending for recurring flow
+API integration pending for recurring flow
 
 **Completed:**
+
 - ✅ Step 1 (Community & Date Type) — single-day and recurring modes
 - ✅ Step 2 (About Experience)
 - ✅ Step 5 (Tickets) — single-day absolute validity + recurring relative validity
@@ -532,27 +556,31 @@ Status: UI build complete (single-day and recurring variants)
 - ✅ Review page with inline editing
 
 **Recurring flow components:**
+
 - Step 1: `RecurringDayPicker`, `RecurrenceDateRange`, `RecurrencePreviewLabel`, `TimeSlotList`
 - Step 5: `RelativeValidityPicker`, `DuplicateTicketsCheckbox`, `TicketDateBadge` (recurring mode), `TicketForm` (recurring mode)
 - Side panel: `PreviewDateSection` (recurring mode)
 
 **Key utilities:**
+
 - `getOrdinalDate(dateString)` — converts ISO date to ordinal format ("5th Jul, 2025")
 - Relative validity helpers in `RelativeValidityPicker` — parse/format amount+unit+anchor
 
 **Pending:**
+
 - API integration for creating recurring experiences
 - Submission of recurring experience data to backend
 - Testing recurring experience creation end-to-end
 
 Before working on any component in this flow:
+
 1. Read docs/CREATE_EXPERIENCE_FLOW.md
-2. Check the component audit tables (sections 4A and 4B) to confirm 
+2. Check the component audit tables (sections 4A and 4B) to confirm
    whether to reuse, adapt, or build
 3. Reference the correct screenshot for the step you are building
-4. All state goes through useCreateExperienceFlow — never local 
+4. All state goes through useCreateExperienceFlow — never local
    useState in page or step components
-5. For recurring features, check step 1 date type props and step 5 
+5. For recurring features, check step 1 date type props and step 5
    ticket form props to determine single vs recurring mode
 
 ---
@@ -560,6 +588,7 @@ Before working on any component in this flow:
 ## Figma-to-Code Process
 
 ### Handoff prompt format
+
 ```
 DESIGN: [Figma link or attached screenshot]
 COMPONENT: [e.g. ExperiencesCard]
@@ -571,6 +600,7 @@ NOTES: [states, edge cases, interactions]
 ```
 
 ### Implementation rules
+
 - One Figma frame = one task.
 - Match spacing/typography/colours using Tailwind tokens — never hardcode.
 - Implement all visible states: default, hover, loading (skeleton), empty, error.
@@ -579,6 +609,7 @@ NOTES: [states, edge cases, interactions]
 - Flag inconsistencies or missing tokens rather than guessing.
 
 ### Output checklist
+
 - [ ] Named export used
 - [ ] Absolute imports via `@/`
 - [ ] No hardcoded colour values

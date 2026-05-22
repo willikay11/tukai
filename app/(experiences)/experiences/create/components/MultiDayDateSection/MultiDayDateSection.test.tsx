@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { MultiDayDateSection } from './MultiDayDateSection';
 
 jest.mock('@/components/ui/date-picker', () => ({
@@ -46,7 +47,7 @@ describe('MultiDayDateSection', () => {
         endTime={null}
         errors={{}}
         {...mockHandlers}
-      />
+      />,
     );
 
     expect(screen.getByText('Start Date')).toBeInTheDocument();
@@ -65,7 +66,7 @@ describe('MultiDayDateSection', () => {
         endTime={null}
         errors={{}}
         {...mockHandlers}
-      />
+      />,
     );
 
     const datePickers = screen.getAllByTestId('date-picker');
@@ -94,7 +95,7 @@ describe('MultiDayDateSection', () => {
         endTime={null}
         errors={errors}
         {...mockHandlers}
-      />
+      />,
     );
 
     expect(screen.getByText('Start date is required')).toBeInTheDocument();
@@ -110,7 +111,7 @@ describe('MultiDayDateSection', () => {
         endTime="17:00"
         errors={{}}
         {...mockHandlers}
-      />
+      />,
     );
 
     const datePickers = screen.getAllByTestId('date-picker') as HTMLInputElement[];

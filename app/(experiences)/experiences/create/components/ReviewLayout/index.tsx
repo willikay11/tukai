@@ -1,23 +1,24 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { PreviewExperienceHeader } from '../PreviewExperienceHeader';
-import { PreviewIncludedSection } from '../PreviewIncludedSection';
-import { PreviewExcludedSection } from '../PreviewExcludedSection';
-import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
-import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
-import { PreviewDateSection } from '../PreviewDateSection';
-import { PreviewLocationSection } from '../PreviewLocationSection';
-import { PreviewMeetingSection } from '../PreviewMeetingSection';
-import { PreviewGuestsSection } from '../PreviewGuestsSection';
-import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
-import { PreviewCommunitySection } from '../PreviewCommunitySection';
-import { PreviewTicketsSection } from '../PreviewTicketsSection';
-import { PreviewWalletSection } from '../PreviewWalletSection';
-import { Experience } from '@/types/experience';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Community } from '@/types/community';
+import { Experience } from '@/types/experience';
+
 import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
+import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
+import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
+import { PreviewCommunitySection } from '../PreviewCommunitySection';
+import { PreviewDateSection } from '../PreviewDateSection';
+import { PreviewExcludedSection } from '../PreviewExcludedSection';
+import { PreviewExperienceHeader } from '../PreviewExperienceHeader';
+import { PreviewGuestsSection } from '../PreviewGuestsSection';
+import { PreviewIncludedSection } from '../PreviewIncludedSection';
+import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
+import { PreviewLocationSection } from '../PreviewLocationSection';
+import { PreviewMeetingSection } from '../PreviewMeetingSection';
+import { PreviewTicketsSection } from '../PreviewTicketsSection';
+import { PreviewWalletSection } from '../PreviewWalletSection';
 
 interface ReviewLayoutProps {
   experience: Experience;
@@ -26,7 +27,9 @@ interface ReviewLayoutProps {
   selectedCommunity?: { name: string; imageUrl: string } | null;
   allCommunities?: CommunityOption[];
   isPublishing?: boolean;
-  onEditSection?: (section: 'about' | 'dates' | 'tickets' | 'invites' | 'wallet' | 'photos') => void;
+  onEditSection?: (
+    section: 'about' | 'dates' | 'tickets' | 'invites' | 'wallet' | 'photos',
+  ) => void;
   onCancel?: () => void;
   onPublish?: () => void;
   showActionBar?: boolean;
@@ -46,7 +49,9 @@ export const ReviewLayout = ({
 }: ReviewLayoutProps) => {
   console.log('ReviewLayout rendered:', { showActionBar, isPublishing, hasOnPublish: !!onPublish });
 
-  const handleEditClick = (section: 'about' | 'dates' | 'tickets' | 'invites' | 'wallet' | 'photos') => {
+  const handleEditClick = (
+    section: 'about' | 'dates' | 'tickets' | 'invites' | 'wallet' | 'photos',
+  ) => {
     if (onEditSection) {
       onEditSection(section);
     }
@@ -134,10 +139,7 @@ export const ReviewLayout = ({
       )}
 
       {/* 10. Guests */}
-      <PreviewGuestsSection
-        guests={invitedMembers}
-        onEdit={() => handleEditClick('invites')}
-      />
+      <PreviewGuestsSection guests={invitedMembers} onEdit={() => handleEditClick('invites')} />
 
       {/* 11. Invited Communities */}
       <PreviewCommunitiesSection
@@ -165,7 +167,7 @@ export const ReviewLayout = ({
 
       {/* Action Bar */}
       {showActionBar && (
-        <div className="sticky bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white pt-6 pb-4 flex gap-3 shadow-lg">
+        <div className="sticky bottom-0 left-0 right-0 z-40 flex gap-3 border-t border-gray-200 bg-white pb-4 pt-6 shadow-lg">
           <Button
             type="button"
             variant="outline"

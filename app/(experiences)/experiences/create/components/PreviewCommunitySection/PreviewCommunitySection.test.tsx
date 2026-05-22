@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+
 import { PreviewCommunitySection } from './PreviewCommunitySection';
 
 describe('PreviewCommunitySection', () => {
@@ -17,7 +18,7 @@ describe('PreviewCommunitySection', () => {
       <PreviewCommunitySection
         communityName="Adventure Club"
         communityImageUrl="https://example.com/image.jpg"
-      />
+      />,
     );
     expect(screen.getByText('Adventure Club')).toBeInTheDocument();
   });
@@ -28,7 +29,7 @@ describe('PreviewCommunitySection', () => {
         communityName="Adventure Club"
         communityImageUrl="https://example.com/image.jpg"
         communityMembersCount={5}
-      />
+      />,
     );
     expect(screen.getByText('5 Experience hosted')).toBeInTheDocument();
   });
@@ -36,11 +37,7 @@ describe('PreviewCommunitySection', () => {
   it('renders edit button when onEdit is provided', () => {
     const onEdit = jest.fn();
     render(
-      <PreviewCommunitySection
-        communityName={null}
-        communityImageUrl={null}
-        onEdit={onEdit}
-      />
+      <PreviewCommunitySection communityName={null} communityImageUrl={null} onEdit={onEdit} />,
     );
     const editButton = screen.getByRole('button');
     expect(editButton).toBeInTheDocument();

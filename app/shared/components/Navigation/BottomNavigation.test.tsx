@@ -1,7 +1,9 @@
 'use client';
 
-import { render, screen, waitFor } from '@testing-library/react';
 import { usePathname } from 'next/navigation';
+
+import { render, screen, waitFor } from '@testing-library/react';
+
 import { BottomNavigation } from './BottomNavigation';
 
 jest.mock('next/navigation', () => ({
@@ -180,9 +182,9 @@ describe('BottomNavigation', () => {
 
       render(<BottomNavigation />);
 
-      const activeLinks = screen.getAllByRole('link').filter((link) =>
-        link.className.includes('bg-[#D4F1E8]')
-      );
+      const activeLinks = screen
+        .getAllByRole('link')
+        .filter((link) => link.className.includes('bg-[#D4F1E8]'));
 
       expect(activeLinks).toHaveLength(1);
       expect(activeLinks[0]).toHaveTextContent('Explore');

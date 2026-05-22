@@ -4,11 +4,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-import { InvitedMember } from '@/components/ui/invite-members';
 import { useGetInterestCategories, useGetUsers } from '@/app/shared/hooks/useAuth';
 import { useCreateCommunity, useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useGoogleMapsAutocomplete } from '@/app/shared/hooks/usePlaces';
 import { toast } from '@/app/shared/hooks/useToast';
+import { InvitedMember } from '@/components/ui/invite-members';
 import { Community } from '@/types/community';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';

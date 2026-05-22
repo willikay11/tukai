@@ -1,20 +1,19 @@
 'use client';
 
-import { CreateSuccessDialog as CommunityCreatedSuccessDialog } from '@/components/ui/createSuccessDialog';
+import { FileUploadField } from '@/app/shared/components/Forms';
+import { IconComponent } from '@/app/shared/components/Icons';
+import { LocationAutocompleteField } from '@/app/shared/components/LocationPicker';
 import { Button } from '@/components/ui/button';
 import { CategoryPill } from '@/components/ui/categoryPill';
+import { CreateSuccessDialog as CommunityCreatedSuccessDialog } from '@/components/ui/createSuccessDialog';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { InviteCommunities } from '@/components/ui/invite-communities';
 import { InviteMembers } from '@/components/ui/invite-members';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { Textarea } from '@/components/ui/textarea';
-import { Interest } from '@/types/interest';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
-
-import { FileUploadField } from '@/app/shared/components/Forms';
-import { IconComponent } from '@/app/shared/components/Icons';
-import { LocationAutocompleteField } from '@/app/shared/components/LocationPicker';
+import { Interest } from '@/types/interest';
 
 import { useCreateCommunityFlow } from './hooks/useCreateCommunityFlow';
 

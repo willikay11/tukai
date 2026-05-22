@@ -8,7 +8,7 @@ interface VisibilityPickerProps {
 }
 
 export const VisibilityPicker = ({ value, onChange }: VisibilityPickerProps) => {
-    const options = [
+  const options = [
     { value: 'public', label: 'Public (Everyone)' },
     { value: 'private', label: 'Private (Only invited people)' },
   ];
@@ -17,7 +17,7 @@ export const VisibilityPicker = ({ value, onChange }: VisibilityPickerProps) => 
       <label className="text-xs font-medium text-gray-800">
         Experience visibility (who can see or access the experience)
       </label>
-      <div className='w-fit'>
+      <div className="w-fit">
         <PillRadioGroup
           options={options}
           value={value}

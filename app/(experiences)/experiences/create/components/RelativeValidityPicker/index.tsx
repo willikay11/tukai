@@ -63,14 +63,10 @@ export const RelativeValidityPicker = ({
   errors,
 }: RelativeValidityPickerProps) => {
   const startAnchorLabel =
-    startValue.anchor === 'start'
-      ? 'Before the experience starts'
-      : 'After the experience starts';
+    startValue.anchor === 'start' ? 'Before the experience starts' : 'After the experience starts';
 
   const endAnchorLabel =
-    endValue.anchor === 'start'
-      ? 'Before the experience ends'
-      : 'After the experience ends';
+    endValue.anchor === 'start' ? 'Before the experience ends' : 'After the experience ends';
 
   return (
     <div className="space-y-2">
@@ -79,11 +75,7 @@ export const RelativeValidityPicker = ({
         <span className="font-normal text-gray-700">
           (When should the sales of these tickets start and end)
         </span>{' '}
-        <IconComponent
-          iconName="InfoCircleIcon"
-          size={16}
-          className="inline text-blue-500"
-        />
+        <IconComponent iconName="InfoCircleIcon" size={16} className="inline text-blue-500" />
       </label>
 
       <div className="space-y-3">

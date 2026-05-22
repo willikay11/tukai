@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 
-import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
 import { toast } from '@/app/shared/hooks/useToast';
+import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
 
 export const Paystack = ({
   isOpen,
@@ -74,4 +74,3 @@ export const Paystack = ({
     </AlertDialog>
   );
 };
-

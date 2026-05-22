@@ -7,9 +7,9 @@ import Image from 'next/image';
 import { FavouriteIcon } from '@hugeicons/react-pro';
 import moment from 'moment';
 
+import { useLikePlaceReviewComment } from '@/app/shared/hooks/usePlaces';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { useLikePlaceReviewComment } from '@/app/shared/hooks/usePlaces';
 import { Comment } from '@/types/comment';
 
 export const ViewComment = ({

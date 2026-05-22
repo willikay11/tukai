@@ -1,6 +1,7 @@
 'use client';
 
 import { SerializedEditorState } from 'lexical';
+
 import { Editor } from '@/components/blocks/editor-00/editor';
 
 interface DescriptionFieldsProps {
@@ -15,9 +16,10 @@ interface DescriptionFieldsProps {
 
 const toSerializedEditorState = (content: string): SerializedEditorState => {
   // If content is HTML, extract text; otherwise use as-is
-  const textContent = content.includes('<') && content.includes('>')
-    ? content.replace(/<[^>]*>/g, '').trim()
-    : content;
+  const textContent =
+    content.includes('<') && content.includes('>')
+      ? content.replace(/<[^>]*>/g, '').trim()
+      : content;
 
   return {
     root: {
@@ -187,9 +189,7 @@ export const DescriptionFields = ({
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <label className="text-xs font-medium text-gray-800">
-          Add your experience description
-        </label>
+        <label className="text-xs font-medium text-gray-800">Add your experience description</label>
         <Editor
           editorSerializedState={toSerializedEditorState(description)}
           onSerializedChange={(state) => {
@@ -203,9 +203,7 @@ export const DescriptionFields = ({
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-medium text-gray-800">
-          What's included
-        </label>
+        <label className="text-xs font-medium text-gray-800">What's included</label>
         <Editor
           editorSerializedState={toSerializedEditorState(whatsIncluded)}
           onSerializedChange={(state) => {
@@ -218,9 +216,7 @@ export const DescriptionFields = ({
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-medium text-gray-800">
-          What's NOT included
-        </label>
+        <label className="text-xs font-medium text-gray-800">What's NOT included</label>
         <Editor
           editorSerializedState={toSerializedEditorState(whatsNotIncluded)}
           onSerializedChange={(state) => {

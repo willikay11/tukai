@@ -1,8 +1,9 @@
 'use client';
 
+import { ca } from 'date-fns/locale';
+
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Interest } from '@/types/interest';
-import { ca } from 'date-fns/locale';
 
 interface PreviewCategoriesSectionProps {
   categories: Interest[];
@@ -16,7 +17,7 @@ export const PreviewCategoriesSection = ({ categories, onEdit }: PreviewCategori
         <h3 className="text-xs font-semibold text-gray-900">Categories</h3>
         {onEdit && (
           <button onClick={onEdit} className="text-gray-400 hover:text-gray-600">
-            <IconComponent iconName="Edit02Icon" size={16} className='text-gray-800' />
+            <IconComponent iconName="Edit02Icon" size={16} className="text-gray-800" />
           </button>
         )}
       </div>
@@ -27,7 +28,9 @@ export const PreviewCategoriesSection = ({ categories, onEdit }: PreviewCategori
               key={index}
               className="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs text-gray-700"
             >
-              {category.icon && <IconComponent iconName={category.icon} size={14} className="flex-shrink-0" />}
+              {category.icon && (
+                <IconComponent iconName={category.icon} size={14} className="flex-shrink-0" />
+              )}
               <span>{category.name}</span>
             </div>
           ))}

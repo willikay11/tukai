@@ -9,11 +9,11 @@ import { useRouter } from 'next/navigation';
 
 import { Mail02Icon } from '@hugeicons/react-pro';
 
+import { MobileStore } from '@/app/shared/components/Download';
 import { Anchor, Input } from '@/app/shared/components/Forms';
 import { SuccessMessage } from '@/app/shared/components/Messages/messages/success';
-import { MobileStore } from '@/app/shared/components/Download';
-import { Button } from '@/components/ui/button';
 import { toast } from '@/app/shared/hooks/useToast';
+import { Button } from '@/components/ui/button';
 import { addEmail } from '@/slices/resetSlice';
 
 type Inputs = {

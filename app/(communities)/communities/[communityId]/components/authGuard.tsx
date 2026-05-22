@@ -4,9 +4,9 @@ import { useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
+import { toast } from '@/app/shared/hooks/useToast';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { SignInForm } from '@/components/ui/form/sign-in';
-import { toast } from '@/app/shared/hooks/useToast';
 
 export const AuthGuard = () => {
   const [open, setOpen] = useState(true);

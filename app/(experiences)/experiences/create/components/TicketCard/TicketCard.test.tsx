@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+
 import { TicketCard } from './TicketCard';
 
 jest.mock('@/app/shared/components/Icons', () => ({

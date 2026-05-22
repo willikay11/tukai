@@ -479,29 +479,32 @@ Maintainability: Huge improvement (fix once, works everywhere)
 
 ```tsx
 // Which imports are services? Which are hooks?
-import { experience } from '@/services/experience';
-import { fetchExperience } from '@/services/experience';
+import { SearchComponent } from '@/app/components/search';
+import { ExperiencesCard } from '@/app/experiences/components/List';
 import { useExperiences } from '@/hooks/experiences';
 import { useFetchSingleExperience } from '@/hooks/experiences';
+import { experience } from '@/services/experience';
+import { fetchExperience } from '@/services/experience';
 import { Experience } from '@/types/experience';
-import { ExperiencesCard } from '@/app/experiences/components/List';
-import { SearchComponent } from '@/app/components/search';
 ```
 
 ### Proposed (Clear)
 
 ```tsx
 // Clear patterns: services → raw API, hooks → React wrappers, types → types
-import { fetchExperiences } from '@/services/experience';
+import { ExperiencesCard } from '@/(experiences)/components/ExperiencesList';
 import { useExperiences, useFetchSingleExperience } from '@/(experiences)/hooks';
 import { Experience } from '@/(experiences)/types';
-import { ExperiencesCard } from '@/(experiences)/components/ExperiencesList';
+import { fetchExperiences } from '@/services/experience';
 import { GlobalSearch } from '@/shared/components/Search';
 import { useToast } from '@/shared/hooks';
-import { User } from '@/types';  // shared
+import { User } from '@/types';
+
+// shared
 ```
 
 **Pattern Recognition:**
+
 - `@/services/*` → API call functions (no React)
 - `@/(feature)/hooks/*` → Feature-specific React hooks
 - `@/shared/hooks/*` → Cross-cutting React hooks
@@ -556,6 +559,7 @@ __tests__/                                     ← Integration tests
 ## Migration Checklist (By Category)
 
 ### ✅ Exports
+
 ```
 app/page.tsx                          → export const ExperiencesPage
 app/experiences/page.tsx              → export const ExperiencesPage
@@ -564,6 +568,7 @@ app/experiences/components/*/tsx      → export const ComponentName
 ```
 
 ### ✅ Hooks
+
 ```
 hooks/experiences.tsx                 → app/(experiences)/hooks/useExperiences.ts
 hooks/places.tsx                      → app/(places)/hooks/usePlaces.ts
@@ -573,6 +578,7 @@ hooks/useMediaQuery.ts                → app/shared/hooks/useMediaQuery.ts (sta
 ```
 
 ### ✅ Types
+
 ```
 types/experience.ts                   → app/(experiences)/types.ts
 types/place.ts                        → app/(places)/types.ts
@@ -582,6 +588,7 @@ types/user.ts                         → types/user.ts (stays, shared)
 ```
 
 ### ✅ Components
+
 ```
 app/components/nav.tsx                → app/shared/components/Navigation/Nav.tsx
 app/components/userLocation.tsx       → app/shared/components/LocationPicker/LocationPicker.tsx
@@ -612,7 +619,8 @@ Optional routes:     [[paramName]]    [[locale]]
 
 ```tsx
 // 1. External libraries (React, Next.js)
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -620,24 +628,21 @@ import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 
+// 6. Internal: services
+import { fetchExperiences } from '@/services/experience';
 // 3. Internal: shared components & hooks
 import { Button } from '@/shared/components/Forms';
 import { useToast } from '@/shared/hooks';
+// 5. Internal: types
+import { ApiResponse } from '@/types';
 
 // 4. Internal: feature-specific
 import { ExperiencesCard } from './(experiences)/components/ExperiencesList';
 import { useExperiences } from './(experiences)/hooks';
 import { Experience } from './(experiences)/types';
-
-// 5. Internal: types
-import { ApiResponse } from '@/types';
-
-// 6. Internal: services
-import { fetchExperiences } from '@/services/experience';
-
+import './ExperiencesList.css';
 // 7. Local (same folder)
 import { ExperiencesListSkeleton } from './ExperiencesListSkeleton';
-import './ExperiencesList.css';
 ```
 
 ---

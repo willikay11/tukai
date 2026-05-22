@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+
 import { CommissionPicker } from './CommissionPicker';
 
 jest.mock('@/components/ui/radio-group', () => ({

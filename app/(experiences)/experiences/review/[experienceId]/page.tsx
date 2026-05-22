@@ -1,8 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+
 import { useParams, useRouter } from 'next/navigation';
-import { ReviewLayout, ExperienceCreatedModal, InlineEditPanel } from '@/app/(experiences)/experiences/create/components';
+
+import {
+  ExperienceCreatedModal,
+  InlineEditPanel,
+  ReviewLayout,
+} from '@/app/(experiences)/experiences/create/components';
 import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 
@@ -10,7 +16,7 @@ export default function ExperienceReviewPage() {
   const params = useParams<{ experienceId: string | string[] }>();
   const router = useRouter();
   const { toast } = useToast();
-  
+
   const experienceId =
     typeof params?.experienceId === 'string'
       ? params.experienceId

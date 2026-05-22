@@ -4,12 +4,11 @@ import { useEffect, useState } from 'react';
 
 import sanitizeHtml from 'sanitize-html';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
 import { TukaiImage } from '@/components/ui/image';
 import { cn } from '@/lib/utils';
-
-import { IconComponent } from '@/app/shared/components/Icons';
 
 export const DescriptionShowMore = ({
   photo,
@@ -122,4 +121,4 @@ export const DescriptionShowMore = ({
       </Drawer>
     </div>
   );
-};;
+};

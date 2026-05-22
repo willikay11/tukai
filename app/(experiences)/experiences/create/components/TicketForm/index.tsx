@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { TimePicker } from '@/components/ui/time-picker';
-import { RelativeValidityPicker, type RelativeValidityValue } from '../RelativeValidityPicker';
+
 import { DuplicateTicketsCheckbox } from '../DuplicateTicketsCheckbox';
+import { RelativeValidityPicker, type RelativeValidityValue } from '../RelativeValidityPicker';
 
 export interface TicketFormValue {
   name: string;
@@ -56,7 +57,9 @@ export const TicketForm = ({
 
   const totalCost = (value.quantity ?? 0) * (value.amount ?? 0);
   const commissionPercentage = getCommissionPercentage();
-  const customerPayAmount = value.amount ? value.amount + (value.amount * commissionPercentage) / 100 : 0;
+  const customerPayAmount = value.amount
+    ? value.amount + (value.amount * commissionPercentage) / 100
+    : 0;
   const customerTotalCost = (value.quantity ?? 0) * customerPayAmount;
 
   return (
@@ -78,7 +81,9 @@ export const TicketForm = ({
           type="number"
           placeholder="Available Ticket Quantity"
           value={value.quantity ?? ''}
-          onChange={(e) => onChange({ quantity: e.target.value ? parseInt(e.target.value, 10) : null })}
+          onChange={(e) =>
+            onChange({ quantity: e.target.value ? parseInt(e.target.value, 10) : null })
+          }
           suffixIcon={
             <div className="flex flex-col gap-0.5 text-gray-700">
               <IconComponent iconName="ArrowUp01Icon" size={11} />
@@ -96,7 +101,9 @@ export const TicketForm = ({
             type="number"
             placeholder="Amount per ticket"
             value={value.amount ?? ''}
-            onChange={(e) => onChange({ amount: e.target.value ? parseFloat(e.target.value) : null })}
+            onChange={(e) =>
+              onChange({ amount: e.target.value ? parseFloat(e.target.value) : null })
+            }
             icon={<IconComponent iconName="Money03Icon" size={18} />}
           />
           {errors.amount && <p className="text-xs text-red-500">{errors.amount}</p>}
@@ -110,7 +117,9 @@ export const TicketForm = ({
             <span className="font-semibold text-gray-900">KES {totalCost.toLocaleString()}.00</span>
             <span className="text-blue-400">•</span>
             <span className="italic">What the customer sees:</span>
-            <span className="font-semibold text-gray-900">KES {customerTotalCost.toLocaleString()}.00</span>
+            <span className="font-semibold text-gray-900">
+              KES {customerTotalCost.toLocaleString()}.00
+            </span>
           </p>
         </div>
       )}
@@ -119,12 +128,10 @@ export const TicketForm = ({
         <div className="space-y-2">
           <label className="text-xs font-medium text-gray-800">
             Ticket Sales Validity{' '}
-            <span className="font-normal text-gray-700">(When should the sales of these tickets start and end)</span>{' '}
-            <IconComponent
-              iconName="InfoCircleIcon"
-              size={16}
-              className="inline text-blue-500"
-            />
+            <span className="font-normal text-gray-700">
+              (When should the sales of these tickets start and end)
+            </span>{' '}
+            <IconComponent iconName="InfoCircleIcon" size={16} className="inline text-blue-500" />
           </label>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -165,9 +172,7 @@ export const TicketForm = ({
       ) : (
         <>
           <RelativeValidityPicker
-            startValue={
-              value.salesStartRelative || { amount: 1, unit: 'hour', anchor: 'start' }
-            }
+            startValue={value.salesStartRelative || { amount: 1, unit: 'hour', anchor: 'start' }}
             endValue={value.salesEndRelative || { amount: 1, unit: 'hour', anchor: 'end' }}
             onStartChange={(val) => onChange({ salesStartRelative: val })}
             onEndChange={(val) => onChange({ salesEndRelative: val })}
@@ -196,9 +201,7 @@ export const TicketForm = ({
         </label>
       </div> */}
 
-      {errors.api && (
-        <p className="text-sm text-destructive">{errors.api}</p>
-      )}
+      {errors.api && <p className="text-sm text-destructive">{errors.api}</p>}
 
       <div className="flex gap-3 pt-3">
         {onCancel && (

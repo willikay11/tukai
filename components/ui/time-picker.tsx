@@ -19,12 +19,8 @@ const VISIBLE_ROWS = 5;
 const DRUM_HEIGHT = ROW_HEIGHT * VISIBLE_ROWS;
 const PADDING_ROWS = 2;
 
-const HOURS_ARRAY = Array.from({ length: 12 }, (_, i) => 
-  (i + 1).toString().padStart(2, '0')
-);
-const MINUTES_ARRAY = Array.from({ length: 60 }, (_, i) => 
-  i.toString().padStart(2, '0')
-);
+const HOURS_ARRAY = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+const MINUTES_ARRAY = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
 const PERIOD_ARRAY = ['AM', 'PM'] as const;
 
 type TimePeriod = (typeof PERIOD_ARRAY)[number];
@@ -109,7 +105,11 @@ const DrumColumn = React.memo(
       setScrollTop(target.scrollTop);
 
       const selectedIndex = Math.round(target.scrollTop / ROW_HEIGHT);
-      if (selectedIndex >= 0 && selectedIndex < items.length && selectedIndex !== lastSelectedIndexRef.current) {
+      if (
+        selectedIndex >= 0 &&
+        selectedIndex < items.length &&
+        selectedIndex !== lastSelectedIndexRef.current
+      ) {
         lastSelectedIndexRef.current = selectedIndex;
         onValueChange(items[selectedIndex]);
       }
@@ -126,7 +126,9 @@ const DrumColumn = React.memo(
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
       const target = e.currentTarget;
       const clickY = e.clientY - target.getBoundingClientRect().top;
-      const clickedIndex = clampIndex(Math.round((scrollTop + clickY - DRUM_HEIGHT / 2) / ROW_HEIGHT));
+      const clickedIndex = clampIndex(
+        Math.round((scrollTop + clickY - DRUM_HEIGHT / 2) / ROW_HEIGHT),
+      );
 
       if (clickedIndex >= 0 && clickedIndex < items.length) {
         lastSelectedIndexRef.current = clickedIndex;
@@ -182,7 +184,9 @@ const DrumColumn = React.memo(
             }}
             className={cn(
               'flex items-center justify-center text-sm leading-none transition-colors',
-              item === selectedValue ? 'font-semibold text-foreground' : 'font-medium text-muted-foreground',
+              item === selectedValue
+                ? 'font-semibold text-foreground'
+                : 'font-medium text-muted-foreground',
             )}
           >
             {item}
@@ -277,7 +281,10 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
             <IconComponent iconName="Clock01Icon" size={18} className="text-gray-800" />
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto rounded-xl border border-border bg-background p-0 shadow-lg" align="start">
+        <PopoverContent
+          className="w-auto rounded-xl border border-border bg-background p-0 shadow-lg"
+          align="start"
+        >
           <div className="relative px-3 pt-3">
             <div className="relative">
               <div className="flex items-center gap-1">
@@ -326,7 +333,6 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
                 }}
               />
             </div>
-
           </div>
 
           {/* Footer */}

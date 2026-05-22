@@ -9,17 +9,16 @@ import { Search01Icon } from '@hugeicons/react-pro';
 import clsx from 'clsx';
 import { debounce } from 'lodash';
 
+import { IconComponent } from '@/app/shared/components/Icons';
+import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
+import { useSearch } from '@/app/shared/hooks/useSearch';
 import { Button } from '@/components/ui/button';
 import { TukaiImage } from '@/components/ui/image';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
-import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
-import { useSearch } from '@/app/shared/hooks/useSearch';
 import { cn } from '@/lib/utils';
 import { PlaceCategory } from '@/types/placeCategory';
 import { SearchResult } from '@/types/search';
-
-import { IconComponent } from '@/app/shared/components/Icons';
 
 export const Search = () => {
   const pathname = usePathname();

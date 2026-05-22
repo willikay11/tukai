@@ -89,7 +89,7 @@ export const RecurrencePreviewLabel = ({
   }
 
   return (
-    <div className="w-fit rounded-full bg-blue-100 px-4 py-2 text-xs font-normal italic border-[1px] border-blue-300 text-gray-500">
+    <div className="w-fit rounded-full border-[1px] border-blue-300 bg-blue-100 px-4 py-2 text-xs font-normal italic text-gray-500">
       Your first experience will be on {firstOccurrence.dayName}, {firstOccurrence.day}{' '}
       {firstOccurrence.month}
     </div>

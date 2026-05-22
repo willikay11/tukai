@@ -2,15 +2,15 @@
 
 import { useState } from 'react';
 
-import { IconComponent } from '@/app/shared/components/Icons';
 import { WalletListSkeleton } from '@/app/shared/components/Cards';
+import { IconComponent } from '@/app/shared/components/Icons';
+import { useToast } from '@/app/shared/hooks/useToast';
 import {
   BankAccountDetailsForm,
   BankAccountFormValues,
 } from '@/components/ui/bank-account-details-form';
 import { Button } from '@/components/ui/button';
 import { MpesaDetailsForm } from '@/components/ui/mpesa-details-form';
-import { useToast } from '@/app/shared/hooks/useToast';
 import { Wallet } from '@/types/payment';
 
 interface CreateExperienceWalletProps {

@@ -71,9 +71,7 @@ export const CustomiseItinerary = ({
     <div className="space-y-4">
       <div>
         <h2 className="text-base font-bold text-gray-900">Customise Your Itinerary</h2>
-        <p className="mt-1 text-xs text-gray-500">
-          Add the days and the places you plan to visit
-        </p>
+        <p className="mt-1 text-xs text-gray-500">Add the days and the places you plan to visit</p>
       </div>
 
       <div className="relative">
@@ -96,9 +94,7 @@ export const CustomiseItinerary = ({
                       className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5"
                     >
                       <IconComponent iconName="Calendar01Icon" size={14} color="#6B7280" />
-                      <span className="text-xs font-medium text-gray-700">
-                        Day {day.dayNumber}
-                      </span>
+                      <span className="text-xs font-medium text-gray-700">Day {day.dayNumber}</span>
                       <IconComponent iconName="ArrowUp01Icon" size={14} color="#6B7280" />
                     </button>
 

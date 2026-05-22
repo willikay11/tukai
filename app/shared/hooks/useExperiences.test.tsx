@@ -1,20 +1,23 @@
 import React from 'react';
-import { renderHook, act, waitFor } from '@testing-library/react';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, renderHook, waitFor } from '@testing-library/react';
+
+import * as experienceService from '@/services/experience';
+
 import {
-  useExperiences,
-  useFetchSingleExperience,
-  usePurchaseExperienceTicket,
+  useAddGuestToExperience,
   useBookmarkExperience,
   useCreateExperience,
-  useUpdateExperience,
   useCreateExperienceTicket,
-  useUpdateExperienceTicket,
   useDeleteExperienceTicket,
-  useAddGuestToExperience,
+  useExperiences,
+  useFetchSingleExperience,
   usePublishExperience,
+  usePurchaseExperienceTicket,
+  useUpdateExperience,
+  useUpdateExperienceTicket,
 } from './useExperiences';
-import * as experienceService from '@/services/experience';
 
 jest.mock('@/services/experience');
 
@@ -72,9 +75,9 @@ describe('Experience Hooks', () => {
               page: 1,
               page_size: 10,
             },
-            true
+            true,
           ),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(result.current.isLoading).toBe(true);
@@ -96,9 +99,9 @@ describe('Experience Hooks', () => {
               page: 1,
               page_size: 10,
             },
-            false
+            false,
           ),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(mockExperienceService.fetchExperiences).not.toHaveBeenCalled();
@@ -114,9 +117,9 @@ describe('Experience Hooks', () => {
               page: 1,
               page_size: 10,
             },
-            true
+            true,
           ),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -192,9 +195,7 @@ describe('Experience Hooks', () => {
     });
 
     it('handles purchase errors', async () => {
-      mockExperienceService.purchaseExperienceTicket.mockRejectedValue(
-        new Error('Payment failed')
-      );
+      mockExperienceService.purchaseExperienceTicket.mockRejectedValue(new Error('Payment failed'));
 
       const { result } = renderHook(() => usePurchaseExperienceTicket(), {
         wrapper: createWrapper(),
@@ -300,7 +301,10 @@ describe('Experience Hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockExperienceService.createExperienceTicket).toHaveBeenCalledWith('exp-123', ticketData);
+      expect(mockExperienceService.createExperienceTicket).toHaveBeenCalledWith(
+        'exp-123',
+        ticketData,
+      );
     });
   });
 
@@ -327,7 +331,7 @@ describe('Experience Hooks', () => {
       expect(mockExperienceService.updateExperienceTicket).toHaveBeenCalledWith(
         'exp-123',
         'ticket-123',
-        ticketData
+        ticketData,
       );
     });
   });
@@ -348,7 +352,10 @@ describe('Experience Hooks', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockExperienceService.deleteExperienceTicket).toHaveBeenCalledWith('exp-123', 'ticket-123');
+      expect(mockExperienceService.deleteExperienceTicket).toHaveBeenCalledWith(
+        'exp-123',
+        'ticket-123',
+      );
     });
   });
 
@@ -370,7 +377,7 @@ describe('Experience Hooks', () => {
 
       expect(mockExperienceService.addGuestToExperience).toHaveBeenCalledWith(
         'exp-123',
-        'guest@example.com'
+        'guest@example.com',
       );
     });
   });

@@ -1,10 +1,9 @@
 import { render, screen } from '@testing-library/react';
+
 import { Pills } from './index';
 
 jest.mock('@/components/ui/pill', () => ({
-  Pill: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="pill">{children}</div>
-  ),
+  Pill: ({ children }: { children: React.ReactNode }) => <div data-testid="pill">{children}</div>,
 }));
 
 describe('Pills', () => {

@@ -10,11 +10,11 @@ import { useRouter } from 'next/navigation';
 
 import { LockKeyIcon, Mail02Icon, UserIcon } from '@hugeicons/react-pro';
 
-import { Anchor, Input } from '@/app/shared/components/Forms';
 import { MobileStore } from '@/app/shared/components/Download';
-import { Button } from '@/components/ui/button';
+import { Anchor, Input } from '@/app/shared/components/Forms';
 import { useUserExists } from '@/app/shared/hooks/useAuth';
 import { toast } from '@/app/shared/hooks/useToast';
+import { Button } from '@/components/ui/button';
 import { addUser } from '@/slices/userSlice';
 
 type Inputs = {

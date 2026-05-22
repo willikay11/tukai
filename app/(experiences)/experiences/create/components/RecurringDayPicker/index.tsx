@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 
@@ -35,7 +36,7 @@ export const RecurringDayPicker = ({ value, onChange }: RecurringDayPickerProps)
 
   return (
     <div className="space-y-3">
-      <div className="inline-flex space-x-2 justity-center items-center">
+      <div className="justity-center inline-flex items-center space-x-2">
         {DAYS.map(({ key, label }) => (
           <div key={key} className="flex items-center gap-1">
             <Checkbox

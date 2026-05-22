@@ -204,10 +204,7 @@ export async function createExperienceTicket(
 ): Promise<ApiResponse> {
   try {
     const axiosInstance = await apiWithToken();
-    const response = await axiosInstance.post(
-      `/v1/experiences/${experienceId}/tickets/`,
-      data,
-    );
+    const response = await axiosInstance.post(`/v1/experiences/${experienceId}/tickets/`, data);
 
     return {
       status: response.status,
@@ -333,15 +330,11 @@ export const addExperiencePhotos = async (
       formData.append('new_photos', photo, fileName);
     });
 
-    const response = await axiosInstance.post(
-      `/v1/experiences/photos/`,
-      formData,
-      {
-        headers: {
-          'Content-Type': undefined,
-        },
+    const response = await axiosInstance.post(`/v1/experiences/photos/`, formData, {
+      headers: {
+        'Content-Type': undefined,
       },
-    );
+    });
 
     return {
       status: response.status,
@@ -359,14 +352,10 @@ export const addExperiencePhotos = async (
   }
 };
 
-export const deleteExperiencePhoto = async (
-  photoId: string,
-): Promise<ApiResponse> => {
+export const deleteExperiencePhoto = async (photoId: string): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();
-    const response = await axiosInstance.delete(
-      `/v1/experiences/photos/${photoId}/`,
-    );
+    const response = await axiosInstance.delete(`/v1/experiences/photos/${photoId}/`);
 
     return {
       status: response.status,

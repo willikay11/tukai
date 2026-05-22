@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+
 import { MobileStore } from './MobileStore';
 
 export const DownloadApp = () => {

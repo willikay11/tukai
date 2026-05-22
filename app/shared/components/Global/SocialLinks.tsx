@@ -29,4 +29,4 @@ export const SocialLinks = ({ links }: { links: PlaceSocialLink[] }) => {
       {link?.platformName}
     </Button>
   ));
-};;
+};

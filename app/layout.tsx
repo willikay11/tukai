@@ -6,12 +6,18 @@ import Link from 'next/link';
 
 import { hugeiconsLicense } from '@hugeicons/react-pro';
 
-import { AuthActions } from '@/app/shared/components/Global';
-import { BottomNavigation } from '@/app/shared/components/Navigation';
+import { PillsSkeleton } from '@/app/shared/components/Cards';
 import { DownloadApp } from '@/app/shared/components/Download';
+import { AuthActions } from '@/app/shared/components/Global';
 import { satoshi } from '@/app/shared/components/Global';
 import { GlobalLoading } from '@/app/shared/components/Global';
 import { IconRadioButtonGroup } from '@/app/shared/components/Icons';
+import { LocationPrompt } from '@/app/shared/components/LocationPicker';
+import { UserLocation } from '@/app/shared/components/LocationPicker';
+import { BottomNavigation } from '@/app/shared/components/Navigation';
+import { Nav } from '@/app/shared/components/Navigation';
+import { Search } from '@/app/shared/components/Search';
+import { Footer } from '@/app/shared/components/Share';
 import { PageFilters } from '@/components/ui/pageFilters';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthDialogProvider } from '@/context/AuthDialogContext';
@@ -21,12 +27,6 @@ import { SelectedCategoryProvider } from '@/context/SelectedCategoryContext';
 import ReactQueryClientProvider from '@/providers/ReactQueryProvider';
 import SessionProvider from '@/providers/SessionProvider';
 
-import { LocationPrompt } from '@/app/shared/components/LocationPicker';
-import { Nav } from '@/app/shared/components/Navigation';
-import { Search } from '@/app/shared/components/Search';
-import { Footer } from '@/app/shared/components/Share';
-import { PillsSkeleton } from '@/app/shared/components/Cards';
-import { UserLocation } from '@/app/shared/components/LocationPicker';
 import './globals.css';
 import { ReduxProvider } from './redux-provider';
 

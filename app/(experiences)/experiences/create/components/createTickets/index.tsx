@@ -9,16 +9,16 @@ import { RRule } from 'rrule';
 import { z } from 'zod';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { Button } from '@/components/ui/button';
-import { DatePicker } from '@/components/ui/date-picker';
-import { Input } from '@/components/ui/input';
-import { TimePicker } from '@/components/ui/time-picker';
 import {
   useCreateExperienceTicket,
   useDeleteExperienceTicket,
   useUpdateExperienceTicket,
 } from '@/app/shared/hooks/useExperiences';
 import { toast } from '@/app/shared/hooks/useToast';
+import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Input } from '@/components/ui/input';
+import { TimePicker } from '@/components/ui/time-picker';
 import { Experience } from '@/types/experience';
 import { Ticket } from '@/types/ticket';
 
@@ -417,8 +417,15 @@ export const CreateTickets = ({
         return;
       }
 
-      const nextSections = buildTicketSectionsFromConfig(parsed, selectedDateSummary || 'No date set');
-      setTicketSections(nextSections.length ? nextSections : [{ id: 'slot-0', title: selectedDateSummary || 'No date set' }]);
+      const nextSections = buildTicketSectionsFromConfig(
+        parsed,
+        selectedDateSummary || 'No date set',
+      );
+      setTicketSections(
+        nextSections.length
+          ? nextSections
+          : [{ id: 'slot-0', title: selectedDateSummary || 'No date set' }],
+      );
     } catch {
       setTicketSections([{ id: 'slot-0', title: selectedDateSummary || 'No date set' }]);
     }
@@ -675,10 +682,7 @@ export const CreateTickets = ({
         <div className="mt-4 space-y-5">
           {(ticketSections.length ? ticketSections : [{ id: 'slot-0', title: 'No date set' }]).map(
             (section, sectionIndex) => (
-              <div
-                key={section.id}
-                className="relative space-y-4"
-              >
+              <div key={section.id} className="relative space-y-4">
                 <div className="relative inline-flex">
                   <div className="absolute right-full top-1/2 w-5 -translate-y-1/2 border-t border-dashed border-gray-300" />
 
@@ -756,7 +760,9 @@ export const CreateTickets = ({
 
                       <Input
                         placeholder="Ticket Name e.g. VIP, Early Bird, Locals etc..."
-                        suffixIcon={<IconComponent iconName="Ticket01Icon" size={16} color="#9CA3AF" />}
+                        suffixIcon={
+                          <IconComponent iconName="Ticket01Icon" size={16} color="#9CA3AF" />
+                        }
                         {...register(`tickets.${index}.ticketName`)}
                       />
                       {ticketErrors?.ticketName && (
@@ -780,7 +786,9 @@ export const CreateTickets = ({
                         type="number"
                         min={1}
                         placeholder="Amount per ticket"
-                        suffixIcon={<IconComponent iconName="Money03Icon" size={16} color="#9CA3AF" />}
+                        suffixIcon={
+                          <IconComponent iconName="Money03Icon" size={16} color="#9CA3AF" />
+                        }
                         {...register(`tickets.${index}.amount`)}
                       />
                       {ticketErrors?.amount && (

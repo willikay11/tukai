@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+
 import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
 
@@ -30,12 +31,12 @@ export const MultiDayDateSection = ({
   return (
     <div className="space-y-2">
       <label className="block text-xs font-medium text-gray-900">Select Experience date(s)</label>
-      <div className='grid grid-cols-2 gap-2'>
+      <div className="grid grid-cols-2 gap-2">
         <div>
           {/* <label className="block text-xs font-medium text-gray-900 mb-2">Start Date</label> */}
           <DatePicker value={startDate || undefined} onChange={onStartDateChange} />
           {errors.multiDayStartDate && (
-            <p className="text-xs text-red-500 mt-1">{errors.multiDayStartDate}</p>
+            <p className="mt-1 text-xs text-red-500">{errors.multiDayStartDate}</p>
           )}
         </div>
 
@@ -47,17 +48,17 @@ export const MultiDayDateSection = ({
             placeholder="Select time"
           />
           {errors.multiDayStartTime && (
-            <p className="text-xs text-red-500 mt-1">{errors.multiDayStartTime}</p>
+            <p className="mt-1 text-xs text-red-500">{errors.multiDayStartTime}</p>
           )}
         </div>
       </div>
 
-      <div className='grid grid-cols-2 gap-2'>
+      <div className="grid grid-cols-2 gap-2">
         <div>
           {/* <label className="block text-xs font-medium text-gray-900 mb-2">End Date</label> */}
           <DatePicker value={endDate || undefined} onChange={onEndDateChange} />
           {errors.multiDayEndDate && (
-            <p className="text-xs text-red-500 mt-1">{errors.multiDayEndDate}</p>
+            <p className="mt-1 text-xs text-red-500">{errors.multiDayEndDate}</p>
           )}
         </div>
 
@@ -69,7 +70,7 @@ export const MultiDayDateSection = ({
             placeholder="Select time"
           />
           {errors.multiDayEndTime && (
-            <p className="text-xs text-red-500 mt-1">{errors.multiDayEndTime}</p>
+            <p className="mt-1 text-xs text-red-500">{errors.multiDayEndTime}</p>
           )}
         </div>
       </div>

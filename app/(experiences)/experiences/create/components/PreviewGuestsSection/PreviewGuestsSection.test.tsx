@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+
 import { PreviewGuestsSection } from './PreviewGuestsSection';
 
 jest.mock('@/app/shared/components/Icons', () => ({
@@ -8,7 +9,12 @@ jest.mock('@/app/shared/components/Icons', () => ({
 describe('PreviewGuestsSection', () => {
   const mockGuests = [
     { id: '1', name: 'Alice Johnson', email: 'alice@example.com', avatarUrl: null },
-    { id: '2', name: 'Bob Smith', email: 'bob@example.com', avatarUrl: 'https://example.com/bob.jpg' },
+    {
+      id: '2',
+      name: 'Bob Smith',
+      email: 'bob@example.com',
+      avatarUrl: 'https://example.com/bob.jpg',
+    },
   ];
 
   it('renders guest count in title', () => {

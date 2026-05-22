@@ -1,7 +1,9 @@
 'use client';
 
 import moment from 'moment';
+
 import { IconComponent } from '@/app/shared/components/Icons';
+
 import { SavedTicketCard } from '../TicketCard';
 
 interface PreviewTicketsSectionProps {
@@ -15,8 +17,16 @@ interface PreviewTicketsSectionProps {
     salesEndDate: string | null;
     salesEndTime: string | null;
     acceptPartialPayment?: boolean;
-    salesStartRelative?: { amount: number; unit: 'hour' | 'day' | 'week'; anchor: 'start' | 'end' } | null;
-    salesEndRelative?: { amount: number; unit: 'hour' | 'day' | 'week'; anchor: 'start' | 'end' } | null;
+    salesStartRelative?: {
+      amount: number;
+      unit: 'hour' | 'day' | 'week';
+      anchor: 'start' | 'end';
+    } | null;
+    salesEndRelative?: {
+      amount: number;
+      unit: 'hour' | 'day' | 'week';
+      anchor: 'start' | 'end';
+    } | null;
     duplicateForEntirePeriod?: boolean;
   }>;
   coverPhoto?: string;
@@ -38,7 +48,12 @@ function getCommissionPercentage(commissionPayer?: 'host' | 'customer' | 'split'
   return commissionPayer === 'host' ? 0 : commissionPayer === 'customer' ? 4 : 2;
 }
 
-export const PreviewTicketsSection = ({ tickets, coverPhoto, commissionPayer, onEdit }: PreviewTicketsSectionProps) => {
+export const PreviewTicketsSection = ({
+  tickets,
+  coverPhoto,
+  commissionPayer,
+  onEdit,
+}: PreviewTicketsSectionProps) => {
   const hasTickets = tickets && tickets.length > 0;
 
   return (
@@ -55,11 +70,15 @@ export const PreviewTicketsSection = ({ tickets, coverPhoto, commissionPayer, on
       {hasTickets ? (
         <div className="space-y-3">
           {tickets.map((ticket) => {
-            const validity = ticket.salesStartDate && ticket.salesStartTime && ticket.salesEndDate && ticket.salesEndTime
-              ? `${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`
-              : ticket.salesStartRelative && ticket.salesEndRelative
-                ? `${ticket.salesStartRelative.amount} ${ticket.salesStartRelative.unit} ${ticket.salesStartRelative.anchor === 'start' ? 'before' : 'after'} – ${ticket.salesEndRelative.amount} ${ticket.salesEndRelative.unit} ${ticket.salesEndRelative.anchor === 'start' ? 'before' : 'after'}`
-                : 'Not set';
+            const validity =
+              ticket.salesStartDate &&
+              ticket.salesStartTime &&
+              ticket.salesEndDate &&
+              ticket.salesEndTime
+                ? `${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`
+                : ticket.salesStartRelative && ticket.salesEndRelative
+                  ? `${ticket.salesStartRelative.amount} ${ticket.salesStartRelative.unit} ${ticket.salesStartRelative.anchor === 'start' ? 'before' : 'after'} – ${ticket.salesEndRelative.amount} ${ticket.salesEndRelative.unit} ${ticket.salesEndRelative.anchor === 'start' ? 'before' : 'after'}`
+                  : 'Not set';
 
             return (
               <SavedTicketCard

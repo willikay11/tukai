@@ -1,7 +1,10 @@
 /**
  * Parses API errors and returns a user-friendly error message
  */
-export const parseApiError = (error: unknown, defaultMessage: string = 'An error occurred'): string => {
+export const parseApiError = (
+  error: unknown,
+  defaultMessage: string = 'An error occurred',
+): string => {
   if (!error) return defaultMessage;
 
   // Handle Axios-style errors with response data

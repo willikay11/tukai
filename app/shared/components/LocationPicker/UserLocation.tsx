@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from 'react';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
 import { useLocation } from '@/context/LocationContext';
-
-import { IconComponent } from '@/app/shared/components/Icons';
 
 export const UserLocation = () => {
   const { lat, lng, status, requestLocation } = useLocation();

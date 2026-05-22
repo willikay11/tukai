@@ -4,9 +4,9 @@ import React, { useRef } from 'react';
 
 import { z } from 'zod';
 
+import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { PaymentForm, paymentFormSchema } from '@/components/ui/paymentForm';
-import { toast } from '@/app/shared/hooks/useToast';
 
 export const PaymentDetails = ({
   onSuccess,
@@ -88,4 +88,3 @@ export const PaymentDetails = ({
     </>
   );
 };
-

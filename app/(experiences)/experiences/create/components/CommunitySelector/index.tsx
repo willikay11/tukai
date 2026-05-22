@@ -2,6 +2,10 @@
 
 import { useCallback } from 'react';
 
+import clsx from 'clsx';
+
+import { IconComponent } from '@/app/shared/components/Icons';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -9,9 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { IconComponent } from '@/app/shared/components/Icons';
-import clsx from 'clsx';
 
 export interface Community {
   id: string;
@@ -26,12 +27,7 @@ export interface CommunitySelectorProps {
   error?: string;
 }
 
-export const CommunitySelector = ({
-  value,
-  options,
-  onChange,
-  error,
-}: CommunitySelectorProps) => {
+export const CommunitySelector = ({ value, options, onChange, error }: CommunitySelectorProps) => {
   const handleSelect = useCallback(
     (communityId: string) => {
       const selected = options.find((c) => c.id === communityId);
@@ -63,9 +59,7 @@ export const CommunitySelector = ({
       </div>
 
       <Select value={value?.id || ''} onValueChange={handleSelect}>
-        <SelectTrigger
-          className={clsx(error && 'border-red-500', 'h-[50px]')}
-        >
+        <SelectTrigger className={clsx(error && 'border-red-500', 'h-[50px]')}>
           {value ? (
             <div className="flex items-center gap-2">
               {/* <img
@@ -76,7 +70,7 @@ export const CommunitySelector = ({
               <span className="text-sm font-medium">{value.name}</span>
             </div>
           ) : (
-            <SelectValue className='placeholder:text-xs text-xs' placeholder="Select a community" />
+            <SelectValue className="text-xs placeholder:text-xs" placeholder="Select a community" />
           )}
         </SelectTrigger>
         <SelectContent>

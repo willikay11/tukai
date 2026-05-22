@@ -1,5 +1,7 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { ExperienceTypeRadio } from './ExperienceTypeRadio';
 
 describe('ExperienceTypeRadio', () => {
@@ -13,11 +15,13 @@ describe('ExperienceTypeRadio', () => {
         onChange={mockOnChange}
         isRecurring={false}
         onRecurringChange={mockOnRecurringChange}
-      />
+      />,
     );
 
     expect(screen.getByLabelText('One-Time/Day Experience')).toBeInTheDocument();
-    expect(screen.getByLabelText('Multi-Day Experience (e.g., 2 days straight)')).toBeInTheDocument();
+    expect(
+      screen.getByLabelText('Multi-Day Experience (e.g., 2 days straight)'),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText('Itinerary')).toBeInTheDocument();
   });
 
@@ -31,7 +35,7 @@ describe('ExperienceTypeRadio', () => {
         onChange={mockOnChange}
         isRecurring={false}
         onRecurringChange={mockOnRecurringChange}
-      />
+      />,
     );
 
     expect(screen.getByLabelText('Create a recurring experience')).toBeInTheDocument();
@@ -47,7 +51,7 @@ describe('ExperienceTypeRadio', () => {
         onChange={mockOnChange}
         isRecurring={false}
         onRecurringChange={mockOnRecurringChange}
-      />
+      />,
     );
 
     const multiDayOption = screen.getByRole('radio', { hidden: true });
@@ -65,7 +69,7 @@ describe('ExperienceTypeRadio', () => {
         onChange={mockOnChange}
         isRecurring={false}
         onRecurringChange={mockOnRecurringChange}
-      />
+      />,
     );
 
     expect(screen.getByText('Experience Type')).toBeInTheDocument();
@@ -81,7 +85,7 @@ describe('ExperienceTypeRadio', () => {
         onChange={mockOnChange}
         isRecurring={true}
         onRecurringChange={mockOnRecurringChange}
-      />
+      />,
     );
 
     const checkbox = container.querySelector('input[type="checkbox"]');
@@ -98,7 +102,7 @@ describe('ExperienceTypeRadio', () => {
         onChange={mockOnChange}
         isRecurring={false}
         onRecurringChange={mockOnRecurringChange}
-      />
+      />,
     );
 
     const checkbox = container.querySelector('input[type="checkbox"]');

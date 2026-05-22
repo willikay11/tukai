@@ -7,10 +7,7 @@ interface DuplicateTicketsCheckboxProps {
   onChange: (value: boolean) => void;
 }
 
-export const DuplicateTicketsCheckbox = ({
-  value,
-  onChange,
-}: DuplicateTicketsCheckboxProps) => {
+export const DuplicateTicketsCheckbox = ({ value, onChange }: DuplicateTicketsCheckboxProps) => {
   return (
     <div className="flex items-center gap-2 pt-1">
       <Checkbox

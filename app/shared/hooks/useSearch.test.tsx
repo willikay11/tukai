@@ -1,7 +1,9 @@
-import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useSearch } from './useSearch';
+import { renderHook, waitFor } from '@testing-library/react';
+
 import * as searchService from '@/services/search';
+
+import { useSearch } from './useSearch';
 
 jest.mock('@/services/search');
 
@@ -169,7 +171,7 @@ describe('useSearch', () => {
         {
           wrapper: createWrapper() as any,
           initialProps: { query: 'hiking', categoryId: undefined },
-        }
+        },
       );
 
       await waitFor(() => {
@@ -193,7 +195,7 @@ describe('useSearch', () => {
         {
           wrapper: createWrapper() as any,
           initialProps: { query: 'activity', categoryId: 'cat-1' },
-        }
+        },
       );
 
       await waitFor(() => {
@@ -265,37 +267,27 @@ describe('useSearch', () => {
     it('transitions from disabled to enabled', async () => {
       mockSearchService.searchPlaces.mockResolvedValue(mockSearchResults);
 
-      const { rerender } = renderHook(
-        ({ query }: { query?: string }) => useSearch(query),
-        {
-          wrapper: createWrapper() as any,
-          initialProps: { query: undefined },
-        }
-      );
+      const { rerender } = renderHook(({ query }: { query?: string }) => useSearch(query), {
+        wrapper: createWrapper() as any,
+        initialProps: { query: undefined },
+      });
 
       expect(mockSearchService.searchPlaces).not.toHaveBeenCalled();
 
       rerender({ query: 'now-active' });
 
       await waitFor(() => {
-        expect(mockSearchService.searchPlaces).toHaveBeenCalledWith(
-          'now-active',
-          undefined,
-          5
-        );
+        expect(mockSearchService.searchPlaces).toHaveBeenCalledWith('now-active', undefined, 5);
       });
     });
 
     it('transitions from enabled to disabled', async () => {
       mockSearchService.searchPlaces.mockResolvedValue(mockSearchResults);
 
-      const { rerender } = renderHook(
-        ({ query }: { query?: string }) => useSearch(query),
-        {
-          wrapper: createWrapper() as any,
-          initialProps: { query: 'search term' },
-        }
-      );
+      const { rerender } = renderHook(({ query }: { query?: string }) => useSearch(query), {
+        wrapper: createWrapper() as any,
+        initialProps: { query: 'search term' },
+      });
 
       await waitFor(() => {
         expect(mockSearchService.searchPlaces).toHaveBeenCalledTimes(1);
@@ -317,11 +309,7 @@ describe('useSearch', () => {
       });
 
       await waitFor(() => {
-        expect(mockSearchService.searchPlaces).toHaveBeenCalledWith(
-          'adventure',
-          'outdoor',
-          5
-        );
+        expect(mockSearchService.searchPlaces).toHaveBeenCalledWith('adventure', 'outdoor', 5);
       });
     });
 
@@ -334,25 +322,17 @@ describe('useSearch', () => {
         {
           wrapper: createWrapper() as any,
           initialProps: { query: 'adventure', categoryId: 'outdoor' },
-        }
+        },
       );
 
       await waitFor(() => {
-        expect(mockSearchService.searchPlaces).toHaveBeenCalledWith(
-          'adventure',
-          'outdoor',
-          5
-        );
+        expect(mockSearchService.searchPlaces).toHaveBeenCalledWith('adventure', 'outdoor', 5);
       });
 
       rerender({ query: 'adventure', categoryId: undefined });
 
       await waitFor(() => {
-        expect(mockSearchService.searchPlaces).toHaveBeenCalledWith(
-          'adventure',
-          undefined,
-          5
-        );
+        expect(mockSearchService.searchPlaces).toHaveBeenCalledWith('adventure', undefined, 5);
       });
     });
   });

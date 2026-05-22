@@ -1,5 +1,7 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { ExperienceTypePicker } from './ExperienceTypePicker';
 
 jest.mock('@/components/ui/pillRadioGroup', () => ({
@@ -30,9 +32,7 @@ describe('ExperienceTypePicker', () => {
 
   it('shows paid as selected when value is paid', () => {
     const mockOnChange = jest.fn();
-    const { container } = render(
-      <ExperienceTypePicker value="paid" onChange={mockOnChange} />
-    );
+    const { container } = render(<ExperienceTypePicker value="paid" onChange={mockOnChange} />);
 
     const paidButton = screen.getByTestId('pill-paid');
     expect(paidButton).toHaveClass('selected');
@@ -40,9 +40,7 @@ describe('ExperienceTypePicker', () => {
 
   it('shows free as selected when value is free', () => {
     const mockOnChange = jest.fn();
-    const { container } = render(
-      <ExperienceTypePicker value="free" onChange={mockOnChange} />
-    );
+    const { container } = render(<ExperienceTypePicker value="free" onChange={mockOnChange} />);
 
     const freeButton = screen.getByTestId('pill-free');
     expect(freeButton).toHaveClass('selected');

@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 
 import { usePathname, useSearchParams } from 'next/navigation';
 
-import { ScrollFilters } from '@/app/shared/components/Filters';
 import { PillsSkeleton } from '@/app/shared/components/Cards';
-import { useSelectedCategory } from '@/context/SelectedCategoryContext';
+import { ScrollFilters } from '@/app/shared/components/Filters';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
+import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { PlaceCategory } from '@/types/placeCategory';
 
 export const PageFilters = () => {
@@ -112,4 +112,3 @@ export const PageFilters = () => {
     </div>
   );
 };
-

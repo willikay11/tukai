@@ -14,6 +14,7 @@
 ⚠️ **134 files need manual conversion**
 
 The rule cannot be auto-fixed because:
+
 1. Export statement must be rewritten (`export default` → `export const`)
 2. All imports must be updated (`import X` → `import { X }`)
 3. This requires semantic understanding of the codebase that ESLint doesn't have
@@ -23,9 +24,11 @@ The rule cannot be auto-fixed because:
 ## Files by Category
 
 ### 🔴 Route Pages (23 files)
+
 These should export named constants with clear component names.
 
 **Pattern to fix:**
+
 ```tsx
 // Before
 export default function HomePage() { ... }
@@ -35,6 +38,7 @@ export const ExperiencesPage = () => { ... }
 ```
 
 **Files:**
+
 1. `./app/page.tsx` — Root experiences listing
 2. `./app/layout.tsx` — Root layout
 3. `./app/help/page.tsx`
@@ -62,9 +66,11 @@ export const ExperiencesPage = () => { ... }
 25. `./app/places/[placeId]/page.tsx`
 
 ### 🟡 Shared App Components (55 files)
+
 Components in `app/components/`, shared across features. These are the foundation of the UI system.
 
 **Pattern:**
+
 ```tsx
 // Before
 export default function Nav() { ... }
@@ -76,6 +82,7 @@ export const Nav = () => { ... }
 **Subcategories:**
 
 **Navigation & Layout (5):**
+
 - `./app/components/nav.tsx`
 - `./app/components/scrollFilters.tsx`
 - `./app/components/downloadApp.tsx`
@@ -83,6 +90,7 @@ export const Nav = () => { ... }
 - `./app/components/mobileStore.tsx`
 
 **Forms & Inputs (5):**
+
 - `./app/components/form/button.tsx`
 - `./app/components/form/input.tsx`
 - `./app/components/form/loader.tsx`
@@ -90,11 +98,13 @@ export const Nav = () => { ... }
 - `./app/components/fileUploadField.tsx`
 
 **User & Location (3):**
+
 - `./app/components/userLocation.tsx`
 - `./app/components/locationAutocompleteField.tsx`
 - `./app/components/iconComponent.tsx`
 
 **Cards & UI Elements (7):**
+
 - `./app/components/rating.tsx`
 - `./app/components/pills/index.tsx`
 - `./app/components/socialLinks.tsx`
@@ -104,32 +114,39 @@ export const Nav = () => { ... }
 - `./app/components/googleMap.tsx`
 
 **Search, Share, Messages (4):**
+
 - `./app/components/search.tsx`
 - `./app/components/share/index.tsx`
 - `./app/components/sendMessage.tsx`
 - `./app/components/pageLayoutContent.tsx` (not listed above but mentioned in error)
 
 **Experiences Sub-components (6):**
+
 - `./app/components/experiences/List/index.tsx`
 - `./app/components/experiences/Single/index.tsx`
 
 **Reviews & Comments (5):**
+
 - `./app/components/review/index.tsx`
 - `./app/components/review/AddReviewComment/index.tsx`
 - `./app/components/review/Comments/Add/index.tsx`
 - `./app/components/review/Comments/View/index.tsx`
 
 **Bookmark (1):**
+
 - `./app/components/bookmark/index.tsx` (not listed above but mentioned in error)
 
 **Descriptions & UI (3):**
+
 - `./app/components/descriptionShowMore.tsx` (not listed above but mentioned in error)
 - `./app/components/authActions.tsx` (not listed above but mentioned in error)
 
 ### 🟡 Experiences Feature Components (18 files)
+
 Feature-specific experience components.
 
 **Pattern:**
+
 ```tsx
 // Before
 export default function ExperiencesList() { ... }
@@ -139,10 +156,12 @@ export const ExperiencesList = () => { ... }
 ```
 
 **List & Cards (2):**
+
 - `./app/experiences/components/List/experiences.tsx`
 - `./app/experiences/components/List/invitedExperiences.tsx`
 
 **Detail View (6):**
+
 - `./app/experiences/components/experienceDetails.tsx`
 - `./app/experiences/components/experienceOrganiser.tsx`
 - `./app/experiences/components/experienceActions.tsx`
@@ -150,6 +169,7 @@ export const ExperiencesList = () => { ... }
 - `./app/experiences/components/reserve.tsx`
 
 **Create Experience (10):**
+
 - `./app/experiences/create/components/about.tsx`
 - `./app/experiences/create/components/community.tsx`
 - `./app/experiences/create/components/dates.tsx`
@@ -162,6 +182,7 @@ export const ExperiencesList = () => { ... }
 - `./app/experiences/create/components/createTickets.tsx` (not listed above but mentioned in error)
 
 **Review Components (7):**
+
 - `./app/experiences/create/components/experienceReview/index.tsx`
 - `./app/experiences/create/components/experienceReview/reviewCategories.tsx`
 - `./app/experiences/create/components/experienceReview/reviewCommunities.tsx`
@@ -173,6 +194,7 @@ export const ExperiencesList = () => { ... }
 - `./app/experiences/create/components/experienceReview/reviewWallets.tsx` (not listed above but mentioned in error)
 
 ### 🟡 Places Feature Components (11 files)
+
 Feature-specific place components.
 
 - `./app/places/components/list.tsx`
@@ -185,13 +207,16 @@ Feature-specific place components.
 - `./app/places/components/placeActions.tsx`
 
 ### 🟡 Communities Feature Components (16 files)
+
 Feature-specific community components.
 
 **List & Cards (2):**
+
 - `./app/communities/components/list.tsx`
 - `./app/communities/components/community.tsx`
 
 **Community Details (5):**
+
 - `./app/communities/components/communityAdministrator.tsx`
 - `./app/communities/components/communityMembers.tsx`
 - `./app/communities/components/upcomingExperiences.tsx`
@@ -199,6 +224,7 @@ Feature-specific community components.
 - `./app/communities/[communityId]/components/communityTabs.tsx`
 
 **Discovery & Creation (9):**
+
 - `./app/communities/components/Communities.tsx`
 - `./app/communities/components/createCommunity.tsx`
 - `./app/communities/components/join.tsx`
@@ -207,17 +233,21 @@ Feature-specific community components.
 - `./app/communities/components/post/index.tsx`
 
 ### 🔵 Components/UI Folder (21 files)
+
 UI library components (separate from `app/components/`).
 
 **Auth Forms (2):**
+
 - `./components/ui/form/sign-in.tsx`
 
 **Images & Media (3):**
+
 - `./components/ui/image.tsx`
 - `./components/ui/imageCarousel.tsx`
 - `./components/ui/imageUpload.tsx`
 
 **Dialogs & Notifications (5):**
+
 - `./components/ui/createSuccessDialog.tsx`
 - `./components/ui/drawer.tsx`
 - `./components/ui/noData.tsx`
@@ -225,6 +255,7 @@ UI library components (separate from `app/components/`).
 - `./components/ui/paystack.tsx`
 
 **Filters & Display (6):**
+
 - `./components/ui/categoryPill.tsx`
 - `./components/ui/pageFilters.tsx`
 - `./components/ui/pill.tsx`
@@ -232,11 +263,13 @@ UI library components (separate from `app/components/`).
 - `./components/ui/quantity.tsx`
 
 **Subscription (5):**
+
 - `./components/ui/subscribe/page.tsx`
 - `./components/ui/subscribe/components/package.tsx`
 - `./components/ui/subscribe/components/paymentDetails.tsx`
 
 **Auth Pages (2):**
+
 - `./app/auth/subscribe/components/package.tsx`
 - `./app/auth/subscribe/components/paymentDetails.tsx`
 
@@ -245,16 +278,19 @@ UI library components (separate from `app/components/`).
 ## Conversion Strategy
 
 ### Phase 1: Foundation (Route Pages) — 23 files
+
 **Why first:** Routes are imported fewer places; lower risk of cascade failures  
 **Time:** ~1-2 hours  
 **Files:** All page.tsx and layout.tsx files
 
 **Process:**
+
 1. Change `export default function PageName` → `export const PageName`
 2. Update function signature if needed: `function PageName()` → `const PageName = ()`
 3. Update any dynamic imports or special routing patterns
 
 **Example:**
+
 ```tsx
 // BEFORE
 export default function Home() {
@@ -270,11 +306,13 @@ export const Home = () => {
 ---
 
 ### Phase 2: Shared Components (55 files)
+
 **Why second:** High reuse; fixing these unblocks feature components  
 **Time:** ~3-4 hours  
 **Batch approach:** By folder
 
 **Batch 2a: Form Components (5 files)**
+
 ```
 ./app/components/form/button.tsx
 ./app/components/form/input.tsx
@@ -284,11 +322,13 @@ export const Home = () => {
 ```
 
 After fixing:
+
 1. Update imports in `app/components/form/index.ts` (if it exists)
 2. Verify `npm run build` still works
 3. Run tests
 
 **Batch 2b: Navigation & Layout (5 files)**
+
 ```
 ./app/components/nav.tsx
 ./app/components/scrollFilters.tsx
@@ -304,8 +344,9 @@ Continue this pattern for remaining subcategories.
 ---
 
 ### Phase 3: Feature Components (45 files)
+
 **Why third:** Safe once core patterns are established  
-**Time:** ~4-5 hours  
+**Time:** ~4-5 hours
 
 **Batch 3a: Experiences (18 files)** — Start with create components
 **Batch 3b: Places (11 files)**
@@ -314,8 +355,9 @@ Continue this pattern for remaining subcategories.
 ---
 
 ### Phase 4: UI Library (21 files)
+
 **Why last:** Lowest priority; isolated from main app  
-**Time:** ~2 hours  
+**Time:** ~2 hours
 
 ---
 
@@ -401,6 +443,7 @@ npm run lint
 ## Testing Strategy
 
 After each phase, verify:
+
 ```bash
 # 1. Check for lint errors
 npm run lint
@@ -419,13 +462,13 @@ npm run build -- --analyze=true
 
 ## Estimated Timeline
 
-| Phase | Files | Time | Risk |
-|-------|-------|------|------|
-| Phase 1: Routes | 23 | 1-2h | Low |
-| Phase 2: Shared | 55 | 3-4h | Low-Medium |
-| Phase 3: Features | 45 | 4-5h | Medium |
-| Phase 4: UI Lib | 21 | 2h | Low |
-| **Total** | **144** | **10-15h** | **Medium** |
+| Phase             | Files   | Time       | Risk       |
+| ----------------- | ------- | ---------- | ---------- |
+| Phase 1: Routes   | 23      | 1-2h       | Low        |
+| Phase 2: Shared   | 55      | 3-4h       | Low-Medium |
+| Phase 3: Features | 45      | 4-5h       | Medium     |
+| Phase 4: UI Lib   | 21      | 2h         | Low        |
+| **Total**         | **144** | **10-15h** | **Medium** |
 
 ---
 
@@ -438,12 +481,14 @@ npm run build -- --analyze=true
 3. ✅ **Branch strategy** — Use feature branches per phase
 
 ### Recommended Order:
+
 1. **Start with Phase 1** (routes) — Simplest, lowest risk
 2. **Then Phase 2a** (forms) — High-value, small scope
 3. **Then Phase 2b-2d** (shared components) — Build momentum
 4. **Finally features** (experiences, places, communities)
 
 ### Risk Mitigation:
+
 - Test after each phase, not at the end
 - Use `npm run build` after each PR to catch import errors
 - Keep PRs focused (one phase per PR)

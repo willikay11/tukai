@@ -3,24 +3,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { InvitedMember } from '@/components/ui/invite-members';
-import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
-import { useToast } from '@/app/shared/hooks/useToast';
-import { parseApiError } from '@/utils/parseApiError';
-import { addExperiencePhotos } from '@/services/experience';
-import {
-  useFetchSingleExperience,
-  useCreateExperience,
-  useUpdateExperience,
-  useAddExperiencePhotos,
-  useDeleteExperiencePhoto,
-  useAddGuestToExperience,
-  usePublishExperience,
-} from '@/app/shared/hooks/useExperiences';
-import { Community } from '@/types/community';
-import { Interest } from '@/types/interest';
-import { Photo } from '@/types/photo';
-
 import {
   useCreateBankWallet,
   useCreatePhoneWallet,
@@ -28,11 +10,32 @@ import {
   usePatchBankWallet,
   usePatchPhoneWallet,
 } from '@/app/(experiences)/hooks/usePayment';
+import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
+import {
+  useAddExperiencePhotos,
+  useAddGuestToExperience,
+  useCreateExperience,
+  useDeleteExperiencePhoto,
+  useFetchSingleExperience,
+  usePublishExperience,
+  useUpdateExperience,
+} from '@/app/shared/hooks/useExperiences';
+import { useToast } from '@/app/shared/hooks/useToast';
+import { InvitedMember } from '@/components/ui/invite-members';
+import { addExperiencePhotos } from '@/services/experience';
+import { Community } from '@/types/community';
+import { Interest } from '@/types/interest';
 import { Wallet } from '@/types/payment';
+import { Photo } from '@/types/photo';
+import { parseApiError } from '@/utils/parseApiError';
+
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
-
-const formatDateWithTime = (date: string, time: string | null = null, isEndOfDay: boolean = false): string => {
+const formatDateWithTime = (
+  date: string,
+  time: string | null = null,
+  isEndOfDay: boolean = false,
+): string => {
   if (!date) return '';
   // Date format is assumed to be ISO string (YYYY-MM-DD)
   // Time format is assumed to be HH:mm (24-hour format)
@@ -47,7 +50,13 @@ const formatDateWithTime = (date: string, time: string | null = null, isEndOfDay
 };
 
 const parseExperienceStepId = (step: string | null): ExperienceStepId | null => {
-  const validSteps: ExperienceStepId[] = ['community', 'about', 'dates-tickets', 'guests', 'wallet'];
+  const validSteps: ExperienceStepId[] = [
+    'community',
+    'about',
+    'dates-tickets',
+    'guests',
+    'wallet',
+  ];
   if (step && validSteps.includes(step as ExperienceStepId)) {
     return step as ExperienceStepId;
   }
@@ -106,8 +115,16 @@ export interface FormData {
       salesEndDate: string | null;
       salesEndTime: string | null;
       acceptPartialPayment: boolean;
-      salesStartRelative: { amount: number; unit: 'hour' | 'day' | 'week'; anchor: 'start' | 'end' } | null;
-      salesEndRelative: { amount: number; unit: 'hour' | 'day' | 'week'; anchor: 'start' | 'end' } | null;
+      salesStartRelative: {
+        amount: number;
+        unit: 'hour' | 'day' | 'week';
+        anchor: 'start' | 'end';
+      } | null;
+      salesEndRelative: {
+        amount: number;
+        unit: 'hour' | 'day' | 'week';
+        anchor: 'start' | 'end';
+      } | null;
       duplicateForEntirePeriod: boolean;
     }>;
   };
@@ -120,7 +137,7 @@ export interface FormData {
     paymentMethod: 'mpesa' | 'bank_account';
     mpesaPhoneNumber: string;
   };
-};
+}
 
 const initialFormData: FormData = {
   dateType: {
@@ -453,7 +470,11 @@ export const useCreateExperienceFlow = () => {
         errors.endTime = 'End time is required';
       }
 
-      if (formData.dateType.startTime && formData.dateType.endTime && formData.dateType.startTime >= formData.dateType.endTime) {
+      if (
+        formData.dateType.startTime &&
+        formData.dateType.endTime &&
+        formData.dateType.startTime >= formData.dateType.endTime
+      ) {
         errors.endTime = 'End time must be after start time';
       }
     }
@@ -463,21 +484,21 @@ export const useCreateExperienceFlow = () => {
   }, [formData.dateType]);
 
   const updateTicketsFormData = useCallback((data: Partial<FormData['tickets']>) => {
-    console.log("[updateTicketsFormData] Updating tickets with data:", data);
+    console.log('[updateTicketsFormData] Updating tickets with data:', data);
     setFormData((prev) => {
       const updated = {
         ...prev,
         tickets: { ...prev.tickets, ...data },
       };
-      console.log("[updateTicketsFormData] New formData.tickets:", updated.tickets);
+      console.log('[updateTicketsFormData] New formData.tickets:', updated.tickets);
       return updated;
     });
   }, []);
 
   const validateAbout = useCallback((): boolean => {
     const errors: Record<string, string> = {};
-    console.log("[validateAbout] Starting validation for about form");
-    console.log("[validateAbout] formData.about:", formData.about);
+    console.log('[validateAbout] Starting validation for about form');
+    console.log('[validateAbout] formData.about:', formData.about);
 
     if (!formData.about.title.trim()) {
       errors.title = 'Title is required';
@@ -496,11 +517,16 @@ export const useCreateExperienceFlow = () => {
     }
 
     setAboutErrors(errors);
-    console.log("[validateAbout] Errors found:", errors);
-    console.log("[validateAbout] Is valid:", Object.keys(errors).length === 0);
+    console.log('[validateAbout] Errors found:', errors);
+    console.log('[validateAbout] Is valid:', Object.keys(errors).length === 0);
     return Object.keys(errors).length === 0;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.about.title, formData.about.description, formData.about.location, formData.about.photos]);
+  }, [
+    formData.about.title,
+    formData.about.description,
+    formData.about.location,
+    formData.about.photos,
+  ]);
 
   const validateTickets = useCallback((): boolean => {
     const errors: Record<string, string> = {};
@@ -546,7 +572,11 @@ export const useCreateExperienceFlow = () => {
         if (!ticket.salesEndDate) {
           errors[`tickets.${index}.salesEndDate`] = 'End date is required';
         }
-        if (ticket.salesStartDate && ticket.salesEndDate && ticket.salesStartDate > ticket.salesEndDate) {
+        if (
+          ticket.salesStartDate &&
+          ticket.salesEndDate &&
+          ticket.salesStartDate > ticket.salesEndDate
+        ) {
           errors[`tickets.${index}.salesEndDate`] = 'End date must be after start date';
         }
       } else {
@@ -556,7 +586,11 @@ export const useCreateExperienceFlow = () => {
         if (!ticket.salesEndDate) {
           errors[`tickets.${index}.salesEndDate`] = 'End date is required';
         }
-        if (ticket.salesStartDate && ticket.salesEndDate && ticket.salesStartDate > ticket.salesEndDate) {
+        if (
+          ticket.salesStartDate &&
+          ticket.salesEndDate &&
+          ticket.salesStartDate > ticket.salesEndDate
+        ) {
           errors[`tickets.${index}.salesEndDate`] = 'End date must be after start date';
         }
       }
@@ -564,7 +598,13 @@ export const useCreateExperienceFlow = () => {
 
     setTicketsErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [formData.dateType.isRecurring, formData.dateType.experiencePricing, formData.dateType.experienceType, formData.tickets.items, formData.tickets.ticketMode]);
+  }, [
+    formData.dateType.isRecurring,
+    formData.dateType.experiencePricing,
+    formData.dateType.experienceType,
+    formData.tickets.items,
+    formData.tickets.ticketMode,
+  ]);
 
   const validateWallet = useCallback((): boolean => {
     const errors: Record<string, string> = {};
@@ -583,7 +623,7 @@ export const useCreateExperienceFlow = () => {
   }, []);
 
   const handleStepChange = (step: ExperienceStepId) => {
-    console.log("[handleStepChange] Changing step from", activeStep, "to", step);
+    console.log('[handleStepChange] Changing step from', activeStep, 'to', step);
     setActiveStep(step);
     replaceCreateUrlParams({ step });
   };
@@ -627,8 +667,15 @@ export const useCreateExperienceFlow = () => {
         title: formData.about.title,
         description: formData.about.description,
         googleMapPlaceId: formData.about.locationPlaceId || 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
-        startDate: formatDateWithTime(formData.dateType.date || '', formData.dateType.startTime || null),
-        endDate: formatDateWithTime(formData.dateType.date || '', formData.dateType.endTime || null, true),
+        startDate: formatDateWithTime(
+          formData.dateType.date || '',
+          formData.dateType.startTime || null,
+        ),
+        endDate: formatDateWithTime(
+          formData.dateType.date || '',
+          formData.dateType.endTime || null,
+          true,
+        ),
         recurrence_rule: '',
         categoriesIds: formData.about.categories.map((c) => c.id),
         isPublic: formData.about.visibility === 'public',
@@ -645,8 +692,16 @@ export const useCreateExperienceFlow = () => {
         // Upload photos separately if present
         if (formData.about.photoFiles && formData.about.photoFiles.length > 0) {
           try {
-            console.log('[handleSaveAbout] Uploading', formData.about.photoFiles.length, 'photos to experience', experienceId);
-            const photoResponse = await addExperiencePhotos(experienceId, formData.about.photoFiles);
+            console.log(
+              '[handleSaveAbout] Uploading',
+              formData.about.photoFiles.length,
+              'photos to experience',
+              experienceId,
+            );
+            const photoResponse = await addExperiencePhotos(
+              experienceId,
+              formData.about.photoFiles,
+            );
             console.log('[handleSaveAbout] Photos uploaded successfully, response:', photoResponse);
           } catch (photoError: any) {
             console.error('[handleSaveAbout] Photo upload failed:', photoError);
@@ -669,14 +724,23 @@ export const useCreateExperienceFlow = () => {
         // Upload photos separately if present
         if (formData.about.photoFiles && formData.about.photoFiles.length > 0) {
           try {
-            console.log('[handleSaveAbout] Uploading', formData.about.photoFiles.length, 'photos to experience', newExperienceId);
-            const photoResponse = await addExperiencePhotos(newExperienceId, formData.about.photoFiles);
+            console.log(
+              '[handleSaveAbout] Uploading',
+              formData.about.photoFiles.length,
+              'photos to experience',
+              newExperienceId,
+            );
+            const photoResponse = await addExperiencePhotos(
+              newExperienceId,
+              formData.about.photoFiles,
+            );
             console.log('[handleSaveAbout] Photos uploaded successfully, response:', photoResponse);
           } catch (photoError: any) {
             console.error('[handleSaveAbout] Photo upload failed:', photoError);
             toast({
               title: 'Warning',
-              description: 'Experience saved but photos failed to upload. You can add them again from the review page.',
+              description:
+                'Experience saved but photos failed to upload. You can add them again from the review page.',
               variant: 'default',
             });
             // Don't block advancement - experience was already created
@@ -702,73 +766,89 @@ export const useCreateExperienceFlow = () => {
     } finally {
       setIsSavingExperience(false);
     }
-  }, [formData.about, formData.dateType, experienceId, createExperienceAsync, updateExperienceAsync, toast]);
+  }, [
+    formData.about,
+    formData.dateType,
+    experienceId,
+    createExperienceAsync,
+    updateExperienceAsync,
+    toast,
+  ]);
 
-  const handleAddPhotos = useCallback(async (photos: File[]) => {
-    setIsSavingExperience(true);
-    setApiError(null);
-    try {
-      if (!experienceId) {
-        throw new Error('Experience ID is required to add photos');
+  const handleAddPhotos = useCallback(
+    async (photos: File[]) => {
+      setIsSavingExperience(true);
+      setApiError(null);
+      try {
+        if (!experienceId) {
+          throw new Error('Experience ID is required to add photos');
+        }
+        await addPhotosAsync(photos);
+      } catch (error: any) {
+        const message = parseApiError(error, 'Failed to add photos');
+        setApiError(message);
+        toast({
+          title: 'Error',
+          description: message,
+          variant: 'destructive',
+        });
+        console.error('[handleAddPhotos] Error:', error);
+      } finally {
+        setIsSavingExperience(false);
       }
-      await addPhotosAsync(photos);
-    } catch (error: any) {
-      const message = parseApiError(error, 'Failed to add photos');
-      setApiError(message);
-      toast({
-        title: 'Error',
-        description: message,
-        variant: 'destructive',
-      });
-      console.error('[handleAddPhotos] Error:', error);
-    } finally {
-      setIsSavingExperience(false);
-    }
-  }, [experienceId, addPhotosAsync, toast]);
+    },
+    [experienceId, addPhotosAsync, toast],
+  );
 
-  const handleDeletePhoto = useCallback(async (photoId: string) => {
-    setIsSavingExperience(true);
-    setApiError(null);
-    try {
-      if (!experienceId) {
-        throw new Error('Experience ID is required to delete photos');
+  const handleDeletePhoto = useCallback(
+    async (photoId: string) => {
+      setIsSavingExperience(true);
+      setApiError(null);
+      try {
+        if (!experienceId) {
+          throw new Error('Experience ID is required to delete photos');
+        }
+        await deletePhotoAsync(photoId);
+      } catch (error: any) {
+        const message = parseApiError(error, 'Failed to delete photo');
+        setApiError(message);
+        toast({
+          title: 'Error',
+          description: message,
+          variant: 'destructive',
+        });
+        console.error('[handleDeletePhoto] Error:', error);
+      } finally {
+        setIsSavingExperience(false);
       }
-      await deletePhotoAsync(photoId);
-    } catch (error: any) {
-      const message = parseApiError(error, 'Failed to delete photo');
-      setApiError(message);
-      toast({
-        title: 'Error',
-        description: message,
-        variant: 'destructive',
-      });
-      console.error('[handleDeletePhoto] Error:', error);
-    } finally {
-      setIsSavingExperience(false);
-    }
-  }, [experienceId, deletePhotoAsync, toast]);
+    },
+    [experienceId, deletePhotoAsync, toast],
+  );
 
-  const handleAddGuest = useCallback(async (guestEmail: string) => {
-    setIsSavingExperience(true);
-    setApiError(null);
-    try {
-      if (!experienceId) {
-        throw new Error('Experience ID is required to add guests');
+  const handleAddGuest = useCallback(
+    async (guestEmail: string) => {
+      setIsSavingExperience(true);
+      setApiError(null);
+      try {
+        if (!experienceId) {
+          throw new Error('Experience ID is required to add guests');
+        }
+        await addGuestAsync(guestEmail);
+      } catch (error: any) {
+        const message = parseApiError(error, 'Failed to add guest');
+        setApiError(message);
+        toast({
+          title: 'Error',
+          description: message,
+          variant: 'destructive',
+        });
+        console.error('[handleAddGuest] Error:', error);
+      } finally {
+        setIsSavingExperience(false);
       }
-      await addGuestAsync(guestEmail);
-    } catch (error: any) {
-      const message = parseApiError(error, 'Failed to add guest');
-      setApiError(message);
-      toast({
-        title: 'Error',
-        description: message,
-        variant: 'destructive',
-      });
-      console.error('[handleAddGuest] Error:', error);
-    } finally {
-      setIsSavingExperience(false);
-    }
-  }, [experienceId, addGuestAsync, toast]);
+    },
+    [experienceId, addGuestAsync, toast],
+  );
 
   const handlePublish = useCallback(async () => {
     setIsSavingExperience(true);

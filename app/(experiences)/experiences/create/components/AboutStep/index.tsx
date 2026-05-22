@@ -3,6 +3,8 @@
 import { useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Interest } from '@/types/interest';
+
 import { CategoryPicker } from '../CategoryPicker';
 import { DescriptionFields } from '../DescriptionFields';
 import { ExperienceLocationInput } from '../ExperienceLocationInput';
@@ -10,7 +12,6 @@ import { ExperienceTitleInput } from '../ExperienceTitleInput';
 import { MeetingDetailsInput } from '../MeetingDetailsInput';
 import { PhotoUploader } from '../PhotoUploader';
 import { VisibilityPicker } from '../VisibilityPicker';
-import { Interest } from '@/types/interest';
 
 type AboutFormData = {
   photos: string[];
@@ -132,9 +133,7 @@ export const AboutStep = ({
 
   return (
     <div className="space-y-6">
-      <p className="mb-2 text-sm font-semibold text-gray-800">
-        Add details about the experience
-      </p>
+      <p className="mb-2 text-sm font-semibold text-gray-800">Add details about the experience</p>
 
       <PhotoUploader
         photoUrls={formData.photos}
@@ -150,7 +149,11 @@ export const AboutStep = ({
         error={errors.photos}
       />
 
-      <ExperienceTitleInput value={formData.title} onChange={handleTitleChange} error={errors.title} />
+      <ExperienceTitleInput
+        value={formData.title}
+        onChange={handleTitleChange}
+        error={errors.title}
+      />
 
       <VisibilityPicker value={formData.visibility} onChange={handleVisibilityChange} />
 
@@ -164,7 +167,12 @@ export const AboutStep = ({
         descriptionError={errors.description}
       />
 
-      <ExperienceLocationInput value={formData.location} placeId={formData.locationPlaceId} onChange={handleLocationChange} error={errors.location} />
+      <ExperienceLocationInput
+        value={formData.location}
+        placeId={formData.locationPlaceId}
+        onChange={handleLocationChange}
+        error={errors.location}
+      />
 
       <MeetingDetailsInput
         meetingPoint={formData.meetingPoint}
@@ -179,7 +187,7 @@ export const AboutStep = ({
         <button
           type="button"
           onClick={() => {
-            console.log("[AboutStep] Cancel clicked");
+            console.log('[AboutStep] Cancel clicked');
             onCancel();
           }}
           className="text-xs font-medium text-destructive hover:text-destructive/80"
@@ -191,23 +199,23 @@ export const AboutStep = ({
           type="button"
           variant="outline"
           onClick={() => {
-            console.log("[AboutStep] Save & Edit clicked");
+            console.log('[AboutStep] Save & Edit clicked');
             onSaveEdit();
           }}
           disabled={isSaving}
-          className="text-xs font-medium rounded-[50px]"
+          className="rounded-[50px] text-xs font-medium"
         >
           Save & Exit
         </Button>
         <Button
           type="button"
           onClick={() => {
-            console.log("[AboutStep] Save & Continue clicked", { formData, errors });
+            console.log('[AboutStep] Save & Continue clicked', { formData, errors });
             onSaveContinue();
           }}
           variant="gradient"
           disabled={isSaving}
-          className="text-xs font-medium rounded-[50px]"
+          className="rounded-[50px] text-xs font-medium"
         >
           Save & Continue
         </Button>

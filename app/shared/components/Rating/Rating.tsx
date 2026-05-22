@@ -39,4 +39,4 @@ export const Rating = ({
       {showCount && <span className="text-sm font-medium">{rating}</span>}
     </>
   );
-};;
+};

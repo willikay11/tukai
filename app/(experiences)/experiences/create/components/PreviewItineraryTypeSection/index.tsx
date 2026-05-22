@@ -7,7 +7,10 @@ interface PreviewItineraryTypeSectionProps {
   onEdit?: () => void;
 }
 
-export const PreviewItineraryTypeSection = ({ visibility, onEdit }: PreviewItineraryTypeSectionProps) => {
+export const PreviewItineraryTypeSection = ({
+  visibility,
+  onEdit,
+}: PreviewItineraryTypeSectionProps) => {
   const visibilityLabel = visibility === 'public' ? 'Public' : 'Private';
 
   return (
@@ -16,7 +19,7 @@ export const PreviewItineraryTypeSection = ({ visibility, onEdit }: PreviewItine
         <h3 className="text-xs font-semibold text-gray-900">Visibility</h3>
         {onEdit && (
           <button onClick={onEdit} className="text-gray-400 hover:text-gray-600">
-            <IconComponent iconName="Edit02Icon" size={16} className='text-gray-800' />
+            <IconComponent iconName="Edit02Icon" size={16} className="text-gray-800" />
           </button>
         )}
       </div>

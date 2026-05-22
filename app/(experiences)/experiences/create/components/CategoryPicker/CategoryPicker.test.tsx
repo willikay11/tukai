@@ -1,5 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen, waitFor } from '@testing-library/react';
+
 import { CategoryPicker } from './CategoryPicker';
 
 jest.mock('@/app/shared/hooks/useAuth', () => ({
@@ -34,11 +35,7 @@ describe('CategoryPicker', () => {
         queries: { retry: false },
       },
     });
-    return render(
-      <QueryClientProvider client={queryClient}>
-        {component}
-      </QueryClientProvider>,
-    );
+    return render(<QueryClientProvider client={queryClient}>{component}</QueryClientProvider>);
   };
 
   it('shows loading state while fetching', () => {
@@ -63,9 +60,7 @@ describe('CategoryPicker', () => {
 
   it('toggles category on click', async () => {
     const onChange = jest.fn();
-    renderWithQueryClient(
-      <CategoryPicker selectedCategories={['1']} onChange={onChange} />,
-    );
+    renderWithQueryClient(<CategoryPicker selectedCategories={['1']} onChange={onChange} />);
 
     await waitFor(() => {
       expect(screen.getByText('Hiking')).toBeInTheDocument();
