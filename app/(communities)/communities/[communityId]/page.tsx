@@ -46,7 +46,7 @@ export default async function ViewCommunityPage({
   return (
     <>
       <main className="grid grid-cols-12 gap-4">
-        <div className="col-span-12 mx-4 mt-8 md:col-span-10 md:col-start-2 md:mx-0 xl:col-span-6 xl:col-start-4 xl:mx-0 3xl:col-span-4 3xl:col-start-5">
+        <div className="col-span-12 mx-4 mt-8 md:col-span-6 md:col-start-4 md:mx-0 lg:col-span-8 lg:col-start-3 lg:mx-0 3xl:col-span-4 3xl:col-start-5">
           <div className="mb-3 inline-flex w-full justify-between">
             <div className="inline-flex">
               <div className="flex flex-col">
