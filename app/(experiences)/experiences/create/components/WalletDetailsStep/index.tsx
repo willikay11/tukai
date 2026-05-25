@@ -150,8 +150,8 @@ export const WalletDetailsStep = ({
     <CreateExperienceWallet
       wallets={wallets}
       isWalletsLoading={isWalletsLoading}
-      selectedWalletId={formData.selectedWalletId}
-      onSelectedWalletIdChange={(id) => onChange({ selectedWalletId: id })}
+      selectedWallet={formData.selectedWallet}
+      onSelectedWalletChange={(selectedWallet: Wallet) => onChange({ selectedWallet })}
       paymentMethod={formData.paymentMethod}
       onPaymentMethodChange={(method) => onChange({ paymentMethod: method })}
       phoneNumber={formData.phoneNumber}

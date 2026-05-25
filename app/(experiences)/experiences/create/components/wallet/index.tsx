@@ -23,8 +23,8 @@ interface CreateExperienceWalletProps {
   // Data props
   wallets: Wallet[];
   isWalletsLoading: boolean;
-  selectedWalletId: string | null;
-  onSelectedWalletIdChange: (id: string | null) => void;
+  selectedWallet?: Wallet;
+  onSelectedWalletChange: (wallet: Wallet) => void;
   paymentMethod: 'phone' | 'bank';
   onPaymentMethodChange: (method: 'phone' | 'bank') => void;
   phoneNumber: string;
@@ -51,8 +51,8 @@ export const CreateExperienceWallet = ({
   hideSaveAndExit = false,
   wallets,
   isWalletsLoading,
-  selectedWalletId,
-  onSelectedWalletIdChange,
+  selectedWallet,
+  onSelectedWalletChange,
   paymentMethod,
   onPaymentMethodChange,
   phoneNumber,
@@ -186,17 +186,17 @@ export const CreateExperienceWallet = ({
           onClick={() => onPaymentMethodChange('phone')}
           className={`inline-flex items-center gap-3 rounded-xl px-4 py-3 text-xs transition-colors ${
             paymentMethod === 'phone'
-              ? 'bg-emerald-100 text-gray-900'
+              ? 'bg-green-100 border-[0.5px] border-green-600 text-gray-900'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
           <span
             className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
-              paymentMethod === 'phone' ? 'border-emerald-700' : 'border-gray-500'
+              paymentMethod === 'phone' ? 'border-green-700' : 'border-gray-500'
             }`}
           >
             {paymentMethod === 'phone' ? (
-              <span className="h-2 w-2 rounded-full bg-emerald-700" />
+              <span className="h-2 w-2 rounded-full bg-green-700" />
             ) : null}
           </span>
           <img src="/images/mpesa.png" alt="M-Pesa" className="h-5 w-auto" />
@@ -208,7 +208,7 @@ export const CreateExperienceWallet = ({
           onClick={() => onPaymentMethodChange('bank')}
           className={`inline-flex items-center gap-3 rounded-xl px-4 py-3 text-xs transition-colors ${
             paymentMethod === 'bank'
-              ? 'bg-emerald-100 text-gray-900'
+              ? 'bg-green-100 text-gray-900 border-[0.5px] border-green-600'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
@@ -234,8 +234,13 @@ export const CreateExperienceWallet = ({
           <div className="mt-2 grid grid-cols-2">
             <div className="space-y-4">
               <RadioGroup
-                value={selectedWalletId}
-                onValueChange={onSelectedWalletIdChange}
+                value={selectedWallet?.id}
+                onValueChange={(id) => {
+                  const wallet = wallets.find((w) => w.id === id);
+                  if (wallet) {
+                    onSelectedWalletChange(wallet);
+                  }
+                }}
                 className="gap-4"
               >
                 {wallets
@@ -254,9 +259,7 @@ export const CreateExperienceWallet = ({
                               {w.walletType === 'phone' ? (
                                 <>
                                   {/* <p className="font-normal">M-Pesa</p> */}
-                                  <p className="text-gray-600">
-                                    {maskPhoneNumber(w.phone ?? '')}
-                                  </p>
+                                  <p className="text-gray-600">{maskPhoneNumber(w.phone ?? '')}</p>
                                   {w.country ? (
                                     <p className="mt-0.5 text-gray-600">{w.country}</p>
                                   ) : null}

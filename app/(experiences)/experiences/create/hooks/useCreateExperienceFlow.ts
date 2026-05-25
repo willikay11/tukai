@@ -140,8 +140,8 @@ export interface FormData {
     invitedCommunityIds: string[];
   };
   wallet: {
-    selectedWalletId: string | null;
     paymentMethod: 'phone' | 'bank';
+    selectedWallet?: Wallet;
     phoneNumber: string;
   };
 }
@@ -189,7 +189,7 @@ const initialFormData: FormData = {
     invitedCommunityIds: [],
   },
   wallet: {
-    selectedWalletId: null,
+    selectedWallet: undefined,
     paymentMethod: 'phone',
     phoneNumber: '',
   },
@@ -413,7 +413,7 @@ export const useCreateExperienceFlow = () => {
       }));
     }
   }, [experience?.id, updateAboutFormData, updateFormData]);
-  
+
   const updateWalletFormData = useCallback((data: Partial<FormData['wallet']>) => {
     setFormData((prev) => ({
       ...prev,
@@ -421,9 +421,9 @@ export const useCreateExperienceFlow = () => {
     }));
   }, []);
 
-  useEffect(() => {  
+  useEffect(() => {
     updateWalletFormData({
-      selectedWalletId: wallets.find((w) => w.isActive)?.id,
+      selectedWallet: wallets.find((w) => w.isActive),
       paymentMethod: wallets.find((w) => w.isActive)?.walletType,
     });
   }, [wallets.length]);
@@ -646,12 +646,12 @@ export const useCreateExperienceFlow = () => {
 
   const validateWallet = useCallback((): boolean => {
     const errors: Record<string, string> = {};
-    if (!wallets.length && !formData.wallet.selectedWalletId && !formData.wallet.phoneNumber) {
+    if (!wallets.length && !formData.wallet.selectedWallet && !formData.wallet.phoneNumber) {
       errors.wallet = 'Please set up a payment method before continuing.';
     }
     setWalletErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [wallets.length, formData.wallet.selectedWalletId, formData.wallet.phoneNumber]);
+  }, [wallets.length, formData.wallet.selectedWallet, formData.wallet.phoneNumber]);
 
   const updateInviteFormData = useCallback((data: Partial<FormData['invite']>) => {
     setFormData((prev) => ({

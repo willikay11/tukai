@@ -2,6 +2,7 @@
 
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Interest } from '@/types/interest';
+import { Wallet } from '@/types/payment';
 
 import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
@@ -16,9 +17,9 @@ import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
 import { PreviewLocationSection } from '../PreviewLocationSection';
 import { PreviewMeetingSection } from '../PreviewMeetingSection';
 import { PreviewTicketsSection } from '../PreviewTicketsSection';
+import { PreviewWalletSection } from '../PreviewWalletSection';
 import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { ExperienceStepId, ExperienceType } from '../step-side-panel';
-import { PreviewWalletSection } from '../PreviewWalletSection';
 
 interface SharedExperiencePreviewProps {
   step: ExperienceStepId;
@@ -76,6 +77,9 @@ interface SharedExperiencePreviewProps {
   invitedCommunityIds?: string[];
   allCommunities?: CommunityOption[];
 
+  // Wallet
+  selectedWallet?: Wallet;
+
   onEditStep?: (step: ExperienceStepId) => void;
 }
 
@@ -111,6 +115,7 @@ export const SharedExperiencePreview = ({
   invitedGuests,
   invitedCommunityIds,
   allCommunities,
+  selectedWallet,
   onEditStep,
 }: SharedExperiencePreviewProps) => {
   // Determine heading based on step and experience type
@@ -235,10 +240,7 @@ export const SharedExperiencePreview = ({
       )}
 
       <>
-        <PreviewGuestsSection
-          guests={invitedGuests || []}
-          onEdit={() => onEditStep?.('guests')}
-        />
+        <PreviewGuestsSection guests={invitedGuests || []} onEdit={() => onEditStep?.('guests')} />
         <PreviewCommunitiesSection
           communityIds={invitedCommunityIds || []}
           allCommunities={allCommunities || []}
@@ -246,9 +248,7 @@ export const SharedExperiencePreview = ({
         />
       </>
 
-      <PreviewWalletSection
-        walletType="phone"
-      />
+      <PreviewWalletSection wallet={selectedWallet} />
     </div>
   );
 };
