@@ -180,14 +180,12 @@ export const SharedExperiencePreview = ({
         photos={aboutPhotos}
         title={aboutTitle || ''}
         description={aboutDescription || ''}
-        onEdit={() => onEditStep?.('about')}
       />
 
       <PreviewIncludedSection
         items={
           aboutWhatsIncluded ? aboutWhatsIncluded.split('\n').filter((item) => item.trim()) : []
         }
-        onEdit={() => onEditStep?.('about')}
       />
 
       <PreviewExcludedSection
@@ -196,37 +194,31 @@ export const SharedExperiencePreview = ({
             ? aboutWhatsNotIncluded.split('\n').filter((item) => item.trim())
             : []
         }
-        onEdit={() => onEditStep?.('about')}
       />
 
       <PreviewCategoriesSection
         categories={aboutCategories || []}
-        onEdit={() => onEditStep?.('about')}
       />
 
       {renderDateSection()}
 
       <PreviewItineraryTypeSection
         visibility={aboutVisibility || 'public'}
-        onEdit={() => onEditStep?.('about')}
       />
 
       <PreviewLocationSection
         location={aboutLocation || null}
-        onEdit={() => onEditStep?.('about')}
       />
 
       <PreviewMeetingSection
         meetingPoint={aboutMeetingPoint || null}
         meetingTime={aboutMeetingTime || null}
-        onEdit={() => onEditStep?.('about')}
       />
 
       {shouldShowCommunitySection && (
         <PreviewCommunitySection
           communityName={selectedCommunity?.name || null}
           communityImageUrl={selectedCommunity?.imageUrl || null}
-          onEdit={() => onEditStep?.('community')}
         />
       )}
 
@@ -235,16 +227,14 @@ export const SharedExperiencePreview = ({
           tickets={ticketsItems}
           coverPhoto={aboutPhoto || undefined}
           commissionPayer={ticketsCommissionPayer}
-          onEdit={() => onEditStep?.('dates-tickets')}
         />
       )}
 
       <>
-        <PreviewGuestsSection guests={invitedGuests || []} onEdit={() => onEditStep?.('guests')} />
+        <PreviewGuestsSection guests={invitedGuests || []} />
         <PreviewCommunitiesSection
           communityIds={invitedCommunityIds || []}
           allCommunities={allCommunities || []}
-          onEdit={() => onEditStep?.('guests')}
         />
       </>
 
