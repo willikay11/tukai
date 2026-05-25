@@ -352,8 +352,8 @@ export const useCreateExperienceFlow = () => {
       categories: experience.categories || [],
       location: experience.location?.formattedAddress || '',
       locationPlaceId: experience.location?.id || '',
-      meetingPoint: '',
-      meetingTime: null,
+      meetingPoint: experience.meetingPoint || '',
+      meetingTime: experience.meetingTime || null,
       whatsIncluded: experience.whatsIncluded ?? '',
       whatsNotIncluded: experience.whatsNotIncluded ?? '',
     });
