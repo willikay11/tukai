@@ -649,13 +649,12 @@ export const useCreateExperienceFlow = () => {
     }));
   }, []);
 
-  const handleStepChange = (step: ExperienceStepId) => {
-    console.log('[handleStepChange] Changing step from', activeStep, 'to', step);
+  const handleStepChange = useCallback((step: ExperienceStepId) => {
     setActiveStep(step);
     replaceCreateUrlParams({ step });
-  };
+  }, []);
 
-  const handleExperienceCreated = (createdExperienceId: string, step?: ExperienceStepId) => {
+  const handleExperienceCreated = useCallback((createdExperienceId: string, step?: ExperienceStepId) => {
     setExperienceId(createdExperienceId);
 
     if (step) {
@@ -663,25 +662,25 @@ export const useCreateExperienceFlow = () => {
     }
 
     replaceCreateUrlParams({ experienceId: createdExperienceId, step });
-  };
+  }, []);
 
-  const handleDatesUpdatedSuccess = (nextStep?: ExperienceStepId) => {
+  const handleDatesUpdatedSuccess = useCallback((nextStep?: ExperienceStepId) => {
     setHasUpdatedDates(true);
 
     if (nextStep) {
       setActiveStep(nextStep);
       replaceCreateUrlParams({ step: nextStep });
     }
-  };
+  }, []);
 
-  const handleItineraryCustomise = (config: { startDate: string; endDate: string }) => {
+  const handleItineraryCustomise = useCallback((config: { startDate: string; endDate: string }) => {
     setItineraryConfig(config);
-  };
+  }, []);
 
-  const handleInvitesChange = (members: InvitedMember[], communities: Community[]) => {
+  const handleInvitesChange = useCallback((members: InvitedMember[], communities: Community[]) => {
     setInvitedMembers(members);
     setInvitedCommunities(communities);
-  };
+  }, []);
 
   const handleSaveAbout = useCallback(async () => {
     setIsSavingExperience(true);
