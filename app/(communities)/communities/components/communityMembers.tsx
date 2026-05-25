@@ -15,7 +15,7 @@ export const CommunityMembers = ({
 }) => {
   return (
     <div className="relative flex items-center">
-      {members.slice(0, 5).map((member: CommunityMember, index: number) => (
+      {members?.slice(0, 5).map((member: CommunityMember, index: number) => (
         <div
           key={member.id}
           className={clsx(
@@ -36,7 +36,7 @@ export const CommunityMembers = ({
           </div>
         </div>
       ))}
-      {members.length > 5 && (
+      {members?.length > 5 && (
         <span className="ml-1 text-xs font-medium text-gray-700">{`+${members.length - 5}`}</span>
       )}
     </div>
