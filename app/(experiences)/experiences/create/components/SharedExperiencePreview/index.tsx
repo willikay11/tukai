@@ -136,7 +136,6 @@ export const SharedExperiencePreview = ({
           startTime={multiDayStartTime || null}
           endDate={multiDayEndDate || null}
           endTime={multiDayEndTime || null}
-          onEdit={() => onEditStep?.('dates-tickets')}
         />
       );
     }
@@ -149,7 +148,6 @@ export const SharedExperiencePreview = ({
           timeSlots={selectedTimeSlots || []}
           recurrenceStartDate={selectedRecurrenceStartDate || null}
           recurrenceEndDate={selectedRecurrenceEndDate || null}
-          onEdit={() => onEditStep?.('dates-tickets')}
         />
       );
     }
@@ -160,7 +158,6 @@ export const SharedExperiencePreview = ({
         date={selectedDate || null}
         startTime={selectedStartTime || null}
         endTime={selectedEndTime || null}
-        onEdit={() => onEditStep?.('dates-tickets')}
       />
     );
   };

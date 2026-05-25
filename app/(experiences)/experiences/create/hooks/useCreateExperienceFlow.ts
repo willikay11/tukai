@@ -660,10 +660,13 @@ export const useCreateExperienceFlow = () => {
     }));
   }, []);
 
-  const handleStepChange = useCallback((step: ExperienceStepId) => {
-    setActiveStep(step);
-    replaceCreateUrlParams({ step });
-  }, []);
+  const handleStepChange = useCallback(
+    (step: ExperienceStepId) => {
+      setActiveStep(step);
+      replaceCreateUrlParams({ experienceId, step });
+    },
+    [experienceId],
+  );
 
   const handleExperienceCreated = useCallback(
     (createdExperienceId: string, step?: ExperienceStepId) => {
@@ -759,28 +762,20 @@ export const useCreateExperienceFlow = () => {
           }
         }
       } else {
-        console.log('[handleSaveAbout] Calling createExperienceAsync with payload:', payload);
         const response = await createExperienceAsync(payload);
-        console.log('[handleSaveAbout] createExperienceAsync completed, response:', response);
         const newExperienceId = response.data?.id || '';
-        console.log('[handleSaveAbout] newExperienceId:', newExperienceId);
-        console.log('[handleSaveAbout] photoFiles:', formData.about.photoFiles);
-        console.log('[handleSaveAbout] photoFiles.length:', formData.about.photoFiles?.length);
+
+        if (!newExperienceId) {
+          throw new Error('Failed to create experience: No ID returned from server');
+        }
 
         // Upload photos separately if present
         if (formData.about.photoFiles && formData.about.photoFiles.length > 0) {
           try {
-            console.log(
-              '[handleSaveAbout] Uploading',
-              formData.about.photoFiles.length,
-              'photos to experience',
-              newExperienceId,
-            );
-            const photoResponse = await addExperiencePhotos(
+            await addExperiencePhotos(
               newExperienceId,
               formData.about.photoFiles,
             );
-            console.log('[handleSaveAbout] Photos uploaded successfully, response:', photoResponse);
           } catch (photoError: any) {
             console.error('[handleSaveAbout] Photo upload failed:', photoError);
             toast({
@@ -791,15 +786,12 @@ export const useCreateExperienceFlow = () => {
             });
             // Don't block advancement - experience was already created
           }
-        } else {
-          console.log('[handleSaveAbout] No photos to upload or photoFiles is empty');
         }
 
-        handleExperienceCreated(newExperienceId);
+        handleExperienceCreated(newExperienceId, 'dates-tickets');
       }
 
       setActiveStep('dates-tickets');
-      replaceCreateUrlParams({ step: 'dates-tickets' });
     } catch (error: any) {
       const message = parseApiError(error, 'Failed to save experience');
       setApiError(message);
