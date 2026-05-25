@@ -18,6 +18,7 @@ import { PreviewMeetingSection } from '../PreviewMeetingSection';
 import { PreviewTicketsSection } from '../PreviewTicketsSection';
 import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { ExperienceStepId, ExperienceType } from '../step-side-panel';
+import { PreviewWalletSection } from '../PreviewWalletSection';
 
 interface SharedExperiencePreviewProps {
   step: ExperienceStepId;
@@ -120,21 +121,8 @@ export const SharedExperiencePreview = ({
     return 'Preview Experience';
   };
 
-  // Render date section based on experience type (wallet step always uses single)
+  // Render date section based on experience type
   const renderDateSection = () => {
-    // Wallet step always shows single date regardless of experienceType
-    if (step === 'wallet') {
-      return (
-        <PreviewDateSection
-          mode="single"
-          date={selectedDate || null}
-          startTime={selectedStartTime || null}
-          endTime={selectedEndTime || null}
-          onEdit={() => onEditStep?.('dates-tickets')}
-        />
-      );
-    }
-
     if (experienceType === 'multi-day') {
       return (
         <PreviewDateSection
@@ -177,9 +165,6 @@ export const SharedExperiencePreview = ({
 
   // Determine if we should show community section (only on about step)
   const shouldShowCommunitySection = step === 'about';
-
-  // Determine if we should show guests and communities (on wallet step)
-  const shouldShowGuestsAndCommunities = step === 'wallet';
 
   return (
     <div className="space-y-6">
@@ -241,29 +226,29 @@ export const SharedExperiencePreview = ({
       )}
 
       {shouldShowTickets && (
-        <div className="border-t border-gray-200 pt-6">
-          <PreviewTicketsSection
-            tickets={ticketsItems}
-            coverPhoto={aboutPhoto || undefined}
-            commissionPayer={ticketsCommissionPayer}
-            onEdit={() => onEditStep?.('dates-tickets')}
-          />
-        </div>
+        <PreviewTicketsSection
+          tickets={ticketsItems}
+          coverPhoto={aboutPhoto || undefined}
+          commissionPayer={ticketsCommissionPayer}
+          onEdit={() => onEditStep?.('dates-tickets')}
+        />
       )}
 
-      {shouldShowGuestsAndCommunities && (
-        <>
-          <PreviewGuestsSection
-            guests={invitedGuests || []}
-            onEdit={() => onEditStep?.('guests')}
-          />
-          <PreviewCommunitiesSection
-            communityIds={invitedCommunityIds || []}
-            allCommunities={allCommunities || []}
-            onEdit={() => onEditStep?.('guests')}
-          />
-        </>
-      )}
+      <>
+        <PreviewGuestsSection
+          guests={invitedGuests || []}
+          onEdit={() => onEditStep?.('guests')}
+        />
+        <PreviewCommunitiesSection
+          communityIds={invitedCommunityIds || []}
+          allCommunities={allCommunities || []}
+          onEdit={() => onEditStep?.('guests')}
+        />
+      </>
+
+      <PreviewWalletSection
+        walletType="phone"
+      />
     </div>
   );
 };
