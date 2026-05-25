@@ -9,9 +9,9 @@ import { useRouter } from 'next/navigation';
 
 import { AppleIcon, GoogleIcon, LockKeyIcon, Mail02Icon } from '@hugeicons/react-pro';
 
-import { Anchor, Input } from '@/app/components/form';
-import MobileStore from '@/app/components/mobileStore';
-import { toast } from '@/hooks/use-toast';
+import { Anchor, Input } from '@/app/shared/components/Forms';
+import { MobileStore } from '@/app/shared/components/Download';
+import { toast } from '@/app/shared/hooks/useToast';
 import { addUser } from '@/slices/userSlice';
 
 import { Button } from '../button';
@@ -21,7 +21,7 @@ type Inputs = {
   password: string;
 };
 
-export default function SignInForm({ onLogin }: { onLogin: () => void }) {
+export const SignInForm = ({ onLogin }: { onLogin: () => void }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);

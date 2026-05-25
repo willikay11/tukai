@@ -9,9 +9,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { RefreshIcon } from '@hugeicons/react-pro';
 
-import { Button } from '@/app/components/form';
-import OtpInput from '@/app/components/form/otpInput';
-import { toast } from '@/hooks/use-toast';
+import { Button, OtpInput } from '@/app/shared/components/Forms';
+import { toast } from '@/app/shared/hooks/useToast';
 import { removeUser } from '@/slices/userSlice';
 
 export default function OtpConfirmation() {

@@ -7,4 +7,4 @@ export {
 } from './useExperiences';
 export { usePlaces, usePlaceCategories, usePlaceReviews } from './usePlaces';
 export { useSearch } from './useSearch';
-export { useToast } from './useToast';
+export { useToast, toast } from './useToast';
