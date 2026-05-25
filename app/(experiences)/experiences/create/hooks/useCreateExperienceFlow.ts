@@ -63,7 +63,9 @@ const parseExperienceStepId = (step: string | null): ExperienceStepId | null => 
   return null;
 };
 
-const mapCommission = (value: 'host' | 'customer' | 'split'): 'host_pays' | 'customer_pays' | 'split' => {
+const mapCommission = (
+  value: 'host' | 'customer' | 'split',
+): 'host_pays' | 'customer_pays' | 'split' => {
   const map = { host: 'host_pays', customer: 'customer_pays', split: 'split' } as const;
   return map[value];
 };
@@ -139,8 +141,8 @@ export interface FormData {
   };
   wallet: {
     selectedWalletId: string | null;
-    paymentMethod: 'mpesa' | 'bank_account';
-    mpesaPhoneNumber: string;
+    paymentMethod: 'phone' | 'bank';
+    phoneNumber: string;
   };
 }
 
@@ -188,8 +190,8 @@ const initialFormData: FormData = {
   },
   wallet: {
     selectedWalletId: null,
-    paymentMethod: 'mpesa',
-    mpesaPhoneNumber: '',
+    paymentMethod: 'phone',
+    phoneNumber: '',
   },
 };
 
@@ -336,10 +338,10 @@ export const useCreateExperienceFlow = () => {
     // Parse dates from ISO format (extract without timezone conversion)
     const startDate = experience.startDate?.split('T')[0];
     const startTime = experience.startDate
-      ? experience.startDate.split('T')[1]?.substring(0, 5) ?? null
+      ? (experience.startDate.split('T')[1]?.substring(0, 5) ?? null)
       : null;
     const endTime = experience.endDate
-      ? experience.endDate.split('T')[1]?.substring(0, 5) ?? null
+      ? (experience.endDate.split('T')[1]?.substring(0, 5) ?? null)
       : null;
 
     // Update about form
@@ -384,7 +386,9 @@ export const useCreateExperienceFlow = () => {
           return { date, time };
         };
 
-        const salesStartDateTime = extractDateTime(ticket.salesStartDate || ticket.sales_start_date);
+        const salesStartDateTime = extractDateTime(
+          ticket.salesStartDate || ticket.sales_start_date,
+        );
         const salesEndDateTime = extractDateTime(ticket.salesEndDate || ticket.sales_end_date);
 
         return {
@@ -409,13 +413,20 @@ export const useCreateExperienceFlow = () => {
       }));
     }
   }, [experience?.id, updateAboutFormData, updateFormData]);
-
+  
   const updateWalletFormData = useCallback((data: Partial<FormData['wallet']>) => {
     setFormData((prev) => ({
       ...prev,
       wallet: { ...prev.wallet, ...data },
     }));
   }, []);
+
+  useEffect(() => {  
+    updateWalletFormData({
+      selectedWalletId: wallets.find((w) => w.isActive)?.id,
+      paymentMethod: wallets.find((w) => w.isActive)?.walletType,
+    });
+  }, [wallets.length]);
 
   const validateDateType = useCallback((): boolean => {
     const errors: Record<string, string> = {};
@@ -635,12 +646,12 @@ export const useCreateExperienceFlow = () => {
 
   const validateWallet = useCallback((): boolean => {
     const errors: Record<string, string> = {};
-    if (!wallets.length && !formData.wallet.selectedWalletId && !formData.wallet.mpesaPhoneNumber) {
+    if (!wallets.length && !formData.wallet.selectedWalletId && !formData.wallet.phoneNumber) {
       errors.wallet = 'Please set up a payment method before continuing.';
     }
     setWalletErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [wallets.length, formData.wallet.selectedWalletId, formData.wallet.mpesaPhoneNumber]);
+  }, [wallets.length, formData.wallet.selectedWalletId, formData.wallet.phoneNumber]);
 
   const updateInviteFormData = useCallback((data: Partial<FormData['invite']>) => {
     setFormData((prev) => ({
@@ -654,15 +665,18 @@ export const useCreateExperienceFlow = () => {
     replaceCreateUrlParams({ step });
   }, []);
 
-  const handleExperienceCreated = useCallback((createdExperienceId: string, step?: ExperienceStepId) => {
-    setExperienceId(createdExperienceId);
+  const handleExperienceCreated = useCallback(
+    (createdExperienceId: string, step?: ExperienceStepId) => {
+      setExperienceId(createdExperienceId);
 
-    if (step) {
-      setActiveStep(step);
-    }
+      if (step) {
+        setActiveStep(step);
+      }
 
-    replaceCreateUrlParams({ experienceId: createdExperienceId, step });
-  }, []);
+      replaceCreateUrlParams({ experienceId: createdExperienceId, step });
+    },
+    [],
+  );
 
   const handleDatesUpdatedSuccess = useCallback((nextStep?: ExperienceStepId) => {
     setHasUpdatedDates(true);
@@ -917,7 +931,7 @@ export const useCreateExperienceFlow = () => {
         startDate: experience.startDate,
         endDate: experience.endDate,
         recurrence_rule: '',
-        categoriesIds: experience.categories?.map((c) => c.id) || [],
+        categoriesIds: experience.categories?.map((c: any) => c.id) || [],
         isPublic: experience.isPublic,
         isPaid: experience.isPaid,
         invitedCommunityIds: [],

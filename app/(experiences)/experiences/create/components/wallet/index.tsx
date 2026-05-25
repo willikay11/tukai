@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/bank-account-details-form';
 import { Button } from '@/components/ui/button';
 import { MpesaDetailsForm } from '@/components/ui/mpesa-details-form';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Wallet } from '@/types/payment';
 
 interface CreateExperienceWalletProps {
@@ -24,10 +25,10 @@ interface CreateExperienceWalletProps {
   isWalletsLoading: boolean;
   selectedWalletId: string | null;
   onSelectedWalletIdChange: (id: string | null) => void;
-  paymentMethod: 'mpesa' | 'bank_account';
-  onPaymentMethodChange: (method: 'mpesa' | 'bank_account') => void;
-  mpesaPhoneNumber: string;
-  onMpesaPhoneNumberChange: (phone: string) => void;
+  paymentMethod: 'phone' | 'bank';
+  onPaymentMethodChange: (method: 'phone' | 'bank') => void;
+  phoneNumber: string;
+  onPhoneNumberChange: (phone: string) => void;
 
   // Mutations
   onCreatePhoneWallet: (phone: string) => void;
@@ -54,8 +55,8 @@ export const CreateExperienceWallet = ({
   onSelectedWalletIdChange,
   paymentMethod,
   onPaymentMethodChange,
-  mpesaPhoneNumber,
-  onMpesaPhoneNumberChange,
+  phoneNumber,
+  onPhoneNumberChange,
   onCreatePhoneWallet,
   isCreatingPhoneWallet,
   onPatchPhoneWallet,
@@ -74,10 +75,10 @@ export const CreateExperienceWallet = ({
     setEditingWallet(wallet);
     setShowForm(true);
     if (wallet.walletType === 'phone') {
-      onPaymentMethodChange('mpesa');
-      onMpesaPhoneNumberChange(wallet.phone ?? '');
+      onPaymentMethodChange('phone');
+      onPhoneNumberChange(wallet.phone ?? '');
     } else {
-      onPaymentMethodChange('bank_account');
+      onPaymentMethodChange('bank');
     }
   };
 
@@ -109,7 +110,7 @@ export const CreateExperienceWallet = ({
   };
 
   const handleSavePhoneWallet = () => {
-    const formattedPhoneNumber = formatKenyanPhoneNumber(mpesaPhoneNumber);
+    const formattedPhoneNumber = formatKenyanPhoneNumber(phoneNumber);
 
     if (!formattedPhoneNumber) {
       toast({
@@ -179,64 +180,123 @@ export const CreateExperienceWallet = ({
 
       <p className="mt-4 text-xs text-gray-800">Select your preferred method of payment</p>
 
+      <div className="mt-3 flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={() => onPaymentMethodChange('phone')}
+          className={`inline-flex items-center gap-3 rounded-xl px-4 py-3 text-xs transition-colors ${
+            paymentMethod === 'phone'
+              ? 'bg-emerald-100 text-gray-900'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          <span
+            className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
+              paymentMethod === 'phone' ? 'border-emerald-700' : 'border-gray-500'
+            }`}
+          >
+            {paymentMethod === 'phone' ? (
+              <span className="h-2 w-2 rounded-full bg-emerald-700" />
+            ) : null}
+          </span>
+          <img src="/images/mpesa.png" alt="M-Pesa" className="h-5 w-auto" />
+          <span>M-Pesa</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onPaymentMethodChange('bank')}
+          className={`inline-flex items-center gap-3 rounded-xl px-4 py-3 text-xs transition-colors ${
+            paymentMethod === 'bank'
+              ? 'bg-emerald-100 text-gray-900'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          <span
+            className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
+              paymentMethod === 'bank' ? 'border-emerald-700' : 'border-gray-500'
+            }`}
+          >
+            {paymentMethod === 'bank' ? (
+              <span className="h-2 w-2 rounded-full bg-emerald-700" />
+            ) : null}
+          </span>
+          <IconComponent iconName="Money03Icon" size={18} color="#1F2937" />
+          <span>Bank Account</span>
+        </button>
+      </div>
+
       <div className="mt-4">
-        <p className="text-xs font-semibold text-gray-800">Set up wallets</p>
+        {/* <p className="text-xs font-semibold text-gray-800">Set up wallets</p> */}
         {isWalletsLoading ? (
           <WalletListSkeleton />
         ) : wallets.length > 0 ? (
           <div className="mt-2 grid grid-cols-2">
-            <div className="space-y-2">
-              {wallets.map((w) => (
-                <div key={w.id} className="flex items-start gap-3 py-2">
-                  <button
-                    type="button"
-                    onClick={() => onSelectedWalletIdChange(w.id)}
-                    className={`mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border-2 ${
-                      selectedWalletId === w.id ? 'border-emerald-700' : 'border-gray-400'
-                    }`}
-                  >
-                    {selectedWalletId === w.id && (
-                      <span className="h-2 w-2 rounded-full bg-emerald-700" />
-                    )}
-                  </button>
+            <div className="space-y-4">
+              <RadioGroup
+                value={selectedWalletId}
+                onValueChange={onSelectedWalletIdChange}
+                className="gap-4"
+              >
+                {wallets
+                  .filter((w) => w.walletType === paymentMethod)
+                  .sort((a, b) => (b.isActive ? 1 : 0) - (a.isActive ? 1 : 0))
+                  .map((w) => (
+                    <div className="space-x-2" key={w.id}>
+                      <div className="flex flex-row justify-between gap-x-2">
+                        <div className="flex flex-row gap-x-2">
+                          <RadioGroupItem value={w.id} id={w.id} />
+                          <label
+                            htmlFor={w.id}
+                            className="cursor-pointer text-xs font-medium text-gray-900"
+                          >
+                            <div className="flex flex-col">
+                              {w.walletType === 'phone' ? (
+                                <>
+                                  {/* <p className="font-normal">M-Pesa</p> */}
+                                  <p className="text-gray-600">
+                                    {maskPhoneNumber(w.phone ?? '')}
+                                  </p>
+                                  {w.country ? (
+                                    <p className="mt-0.5 text-gray-600">{w.country}</p>
+                                  ) : null}
+                                </>
+                              ) : (
+                                <>
+                                  {w.accountHolderName ? (
+                                    <p className="font-normal">{w.accountHolderName}</p>
+                                  ) : null}
+                                  {w.bankName ? (
+                                    <p className="mt-0.5 text-gray-600">
+                                      {w.bankName}
+                                      {w.bankBranch ? `, ${w.bankBranch}` : ''}
+                                    </p>
+                                  ) : null}
+                                  {w.accountNumber ? (
+                                    <p className="mt-0.5 text-gray-600">
+                                      {'**** **** **** ' + w.accountNumber.slice(-4)}
+                                    </p>
+                                  ) : null}
+                                  {w.country ? (
+                                    <p className="mt-0.5 text-gray-600">{w.country}</p>
+                                  ) : null}
+                                </>
+                              )}
+                            </div>
+                          </label>
+                        </div>
 
-                  <div className="flex-1 text-xs text-gray-800">
-                    {w.walletType === 'phone' ? (
-                      <>
-                        <p className="font-normal">M-Pesa</p>
-                        <p className="mt-0.5 text-gray-600">{maskPhoneNumber(w.phone ?? '')}</p>
-                        {w.country ? <p className="mt-0.5 text-gray-600">{w.country}</p> : null}
-                      </>
-                    ) : (
-                      <>
-                        {w.accountHolderName ? (
-                          <p className="font-normal">{w.accountHolderName}</p>
-                        ) : null}
-                        {w.bankName ? (
-                          <p className="mt-0.5 text-gray-600">
-                            {w.bankName}
-                            {w.bankBranch ? `, ${w.bankBranch}` : ''}
-                          </p>
-                        ) : null}
-                        {w.accountNumber ? (
-                          <p className="mt-0.5 text-gray-600">
-                            {'**** **** **** ' + w.accountNumber.slice(-4)}
-                          </p>
-                        ) : null}
-                        {w.country ? <p className="mt-0.5 text-gray-600">{w.country}</p> : null}
-                      </>
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleEditWallet(w)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <IconComponent iconName="Edit02Icon" size={16} className="text-primary" />
-                  </button>
-                </div>
-              ))}
+                        <button
+                          type="button"
+                          onClick={() => handleEditWallet(w)}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          <IconComponent iconName="Edit02Icon" size={16} className="text-primary" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </RadioGroup>
 
               <Button
                 variant="outline"
@@ -258,63 +318,17 @@ export const CreateExperienceWallet = ({
 
       {!isWalletsLoading && (wallets.length === 0 || showForm) && (
         <>
-          <div className="mt-3 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => onPaymentMethodChange('mpesa')}
-              className={`inline-flex items-center gap-3 rounded-xl px-4 py-3 text-xs transition-colors ${
-                paymentMethod === 'mpesa'
-                  ? 'bg-emerald-100 text-gray-900'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <span
-                className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
-                  paymentMethod === 'mpesa' ? 'border-emerald-700' : 'border-gray-500'
-                }`}
-              >
-                {paymentMethod === 'mpesa' ? (
-                  <span className="h-2 w-2 rounded-full bg-emerald-700" />
-                ) : null}
-              </span>
-              <img src="/images/mpesa.png" alt="M-Pesa" className="h-5 w-auto" />
-              <span>M-Pesa</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onPaymentMethodChange('bank_account')}
-              className={`inline-flex items-center gap-3 rounded-xl px-4 py-3 text-xs transition-colors ${
-                paymentMethod === 'bank_account'
-                  ? 'bg-emerald-100 text-gray-900'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <span
-                className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
-                  paymentMethod === 'bank_account' ? 'border-emerald-700' : 'border-gray-500'
-                }`}
-              >
-                {paymentMethod === 'bank_account' ? (
-                  <span className="h-2 w-2 rounded-full bg-emerald-700" />
-                ) : null}
-              </span>
-              <IconComponent iconName="Money03Icon" size={18} color="#1F2937" />
-              <span>Bank Account</span>
-            </button>
-          </div>
-
-          {paymentMethod === 'mpesa' ? (
+          {paymentMethod === 'phone' ? (
             <MpesaDetailsForm
-              phone={mpesaPhoneNumber}
-              onPhoneChange={onMpesaPhoneNumberChange}
+              phone={phoneNumber}
+              onPhoneChange={onPhoneNumberChange}
               onSaveDetails={handleSavePhoneWallet}
               isSaving={isCreatingPhoneWallet || isPatchingPhoneWallet}
               onCancel={handleCancelForm}
               showCancel={wallets.length > 0}
             />
           ) : null}
-          {paymentMethod === 'bank_account' ? (
+          {paymentMethod === 'bank' ? (
             <BankAccountDetailsForm
               defaultValues={
                 editingWallet?.walletType === 'bank'

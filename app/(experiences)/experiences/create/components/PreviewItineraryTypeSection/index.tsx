@@ -11,7 +11,10 @@ export const PreviewItineraryTypeSection = ({
   visibility,
   onEdit,
 }: PreviewItineraryTypeSectionProps) => {
-  const visibilityLabel = visibility === 'public' ? 'Public (Everyone can join)' : 'Private (Only invited guests can join)';
+  const visibilityLabel =
+    visibility === 'public'
+      ? 'Public (Everyone can join)'
+      : 'Private (Only invited guests can join)';
 
   return (
     <div className="space-y-3">

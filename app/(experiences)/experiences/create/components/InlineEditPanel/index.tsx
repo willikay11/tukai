@@ -4,9 +4,9 @@ import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 import { formatDateForPreview, formatTimeForPreview } from '@/utils/date-utils';
 
+import { PhotoEditPanel } from '../PhotoEditPanel';
 import { PreviewCommunitySection } from '../PreviewCommunitySection';
 import { PreviewDateSection } from '../PreviewDateSection';
-import { PhotoEditPanel } from '../PhotoEditPanel';
 import { CreateExperienceAbout } from '../about';
 import { CreateTickets } from '../createTickets';
 import { ExperienceDates } from '../dates';

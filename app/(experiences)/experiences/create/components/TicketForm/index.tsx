@@ -117,7 +117,11 @@ export const TicketForm = ({
             <span className="text-blue-400">•</span>
             <span className="italic">Per ticket customer pays:</span>
             <span className="font-semibold text-gray-900">
-              KES {customerPayAmount.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              KES{' '}
+              {customerPayAmount.toLocaleString('en', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </span>
           </p>
         </div>

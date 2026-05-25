@@ -9,10 +9,10 @@ import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Interest } from '@/types/interest';
 
+import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { SharedExperiencePreview } from '../SharedExperiencePreview';
 import { CustomiseItinerary } from '../customiseItinerary';
-import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
