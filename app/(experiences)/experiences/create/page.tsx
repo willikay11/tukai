@@ -180,6 +180,7 @@ function CreateExperiencePageContent() {
           invitedGuests={formData.invite.invitedGuests}
           invitedCommunityIds={formData.invite.invitedCommunityIds}
           allCommunities={communitiesForSelector}
+          selectedWallet={formData.wallet.selectedWallet}
         />
       </div>
     </main>

@@ -2,6 +2,7 @@
 
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Interest } from '@/types/interest';
+import { Wallet } from '@/types/payment';
 
 import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
@@ -16,6 +17,7 @@ import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
 import { PreviewLocationSection } from '../PreviewLocationSection';
 import { PreviewMeetingSection } from '../PreviewMeetingSection';
 import { PreviewTicketsSection } from '../PreviewTicketsSection';
+import { PreviewWalletSection } from '../PreviewWalletSection';
 import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { ExperienceStepId, ExperienceType } from '../step-side-panel';
 
@@ -75,6 +77,9 @@ interface SharedExperiencePreviewProps {
   invitedCommunityIds?: string[];
   allCommunities?: CommunityOption[];
 
+  // Wallet
+  selectedWallet?: Wallet;
+
   onEditStep?: (step: ExperienceStepId) => void;
 }
 
@@ -110,6 +115,7 @@ export const SharedExperiencePreview = ({
   invitedGuests,
   invitedCommunityIds,
   allCommunities,
+  selectedWallet,
   onEditStep,
 }: SharedExperiencePreviewProps) => {
   // Determine heading based on step and experience type
@@ -120,21 +126,8 @@ export const SharedExperiencePreview = ({
     return 'Preview Experience';
   };
 
-  // Render date section based on experience type (wallet step always uses single)
+  // Render date section based on experience type
   const renderDateSection = () => {
-    // Wallet step always shows single date regardless of experienceType
-    if (step === 'wallet') {
-      return (
-        <PreviewDateSection
-          mode="single"
-          date={selectedDate || null}
-          startTime={selectedStartTime || null}
-          endTime={selectedEndTime || null}
-          onEdit={() => onEditStep?.('dates-tickets')}
-        />
-      );
-    }
-
     if (experienceType === 'multi-day') {
       return (
         <PreviewDateSection
@@ -143,7 +136,6 @@ export const SharedExperiencePreview = ({
           startTime={multiDayStartTime || null}
           endDate={multiDayEndDate || null}
           endTime={multiDayEndTime || null}
-          onEdit={() => onEditStep?.('dates-tickets')}
         />
       );
     }
@@ -156,7 +148,6 @@ export const SharedExperiencePreview = ({
           timeSlots={selectedTimeSlots || []}
           recurrenceStartDate={selectedRecurrenceStartDate || null}
           recurrenceEndDate={selectedRecurrenceEndDate || null}
-          onEdit={() => onEditStep?.('dates-tickets')}
         />
       );
     }
@@ -167,7 +158,6 @@ export const SharedExperiencePreview = ({
         date={selectedDate || null}
         startTime={selectedStartTime || null}
         endTime={selectedEndTime || null}
-        onEdit={() => onEditStep?.('dates-tickets')}
       />
     );
   };
@@ -178,9 +168,6 @@ export const SharedExperiencePreview = ({
   // Determine if we should show community section (only on about step)
   const shouldShowCommunitySection = step === 'about';
 
-  // Determine if we should show guests and communities (on wallet step)
-  const shouldShowGuestsAndCommunities = step === 'wallet';
-
   return (
     <div className="space-y-6">
       <h2 className="text-sm font-semibold text-gray-900">{getHeading()}</h2>
@@ -190,78 +177,65 @@ export const SharedExperiencePreview = ({
         photos={aboutPhotos}
         title={aboutTitle || ''}
         description={aboutDescription || ''}
-        onEdit={() => onEditStep?.('about')}
       />
 
       <PreviewIncludedSection
-        items={aboutWhatsIncluded
-          ? aboutWhatsIncluded.split('\n').filter((item) => item.trim())
-          : []}
-        onEdit={() => onEditStep?.('about')}
+        items={
+          aboutWhatsIncluded ? aboutWhatsIncluded.split('\n').filter((item) => item.trim()) : []
+        }
       />
 
       <PreviewExcludedSection
-        items={aboutWhatsNotIncluded
-          ? aboutWhatsNotIncluded.split('\n').filter((item) => item.trim())
-          : []}
-        onEdit={() => onEditStep?.('about')}
+        items={
+          aboutWhatsNotIncluded
+            ? aboutWhatsNotIncluded.split('\n').filter((item) => item.trim())
+            : []
+        }
       />
 
       <PreviewCategoriesSection
         categories={aboutCategories || []}
-        onEdit={() => onEditStep?.('about')}
       />
 
       {renderDateSection()}
 
       <PreviewItineraryTypeSection
         visibility={aboutVisibility || 'public'}
-        onEdit={() => onEditStep?.('about')}
       />
 
       <PreviewLocationSection
         location={aboutLocation || null}
-        onEdit={() => onEditStep?.('about')}
       />
 
       <PreviewMeetingSection
         meetingPoint={aboutMeetingPoint || null}
         meetingTime={aboutMeetingTime || null}
-        onEdit={() => onEditStep?.('about')}
       />
 
       {shouldShowCommunitySection && (
         <PreviewCommunitySection
           communityName={selectedCommunity?.name || null}
           communityImageUrl={selectedCommunity?.imageUrl || null}
-          onEdit={() => onEditStep?.('community')}
         />
       )}
 
       {shouldShowTickets && (
-        <div className="border-t border-gray-200 pt-6">
-          <PreviewTicketsSection
-            tickets={ticketsItems}
-            coverPhoto={aboutPhoto || undefined}
-            commissionPayer={ticketsCommissionPayer}
-            onEdit={() => onEditStep?.('dates-tickets')}
-          />
-        </div>
+        <PreviewTicketsSection
+          tickets={ticketsItems}
+          coverPhoto={aboutPhoto || undefined}
+          commissionPayer={ticketsCommissionPayer}
+        />
       )}
 
-      {shouldShowGuestsAndCommunities && (
-        <>
-          <PreviewGuestsSection
-            guests={invitedGuests || []}
-            onEdit={() => onEditStep?.('guests')}
-          />
-          <PreviewCommunitiesSection
-            communityIds={invitedCommunityIds || []}
-            allCommunities={allCommunities || []}
-            onEdit={() => onEditStep?.('guests')}
-          />
-        </>
-      )}
+      <>
+        <PreviewGuestsSection guests={invitedGuests || []} />
+        <PreviewCommunitiesSection
+          communityIds={invitedCommunityIds || []}
+          allCommunities={allCommunities || []}
+        />
+      </>
+
+      <PreviewWalletSection wallet={selectedWallet} />
     </div>
   );
 };

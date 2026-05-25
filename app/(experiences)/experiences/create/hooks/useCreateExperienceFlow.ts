@@ -63,7 +63,9 @@ const parseExperienceStepId = (step: string | null): ExperienceStepId | null => 
   return null;
 };
 
-const mapCommission = (value: 'host' | 'customer' | 'split'): 'host_pays' | 'customer_pays' | 'split' => {
+const mapCommission = (
+  value: 'host' | 'customer' | 'split',
+): 'host_pays' | 'customer_pays' | 'split' => {
   const map = { host: 'host_pays', customer: 'customer_pays', split: 'split' } as const;
   return map[value];
 };
@@ -138,9 +140,9 @@ export interface FormData {
     invitedCommunityIds: string[];
   };
   wallet: {
-    selectedWalletId: string | null;
-    paymentMethod: 'mpesa' | 'bank_account';
-    mpesaPhoneNumber: string;
+    paymentMethod: 'phone' | 'bank';
+    selectedWallet?: Wallet;
+    phoneNumber: string;
   };
 }
 
@@ -187,9 +189,9 @@ const initialFormData: FormData = {
     invitedCommunityIds: [],
   },
   wallet: {
-    selectedWalletId: null,
-    paymentMethod: 'mpesa',
-    mpesaPhoneNumber: '',
+    selectedWallet: undefined,
+    paymentMethod: 'phone',
+    phoneNumber: '',
   },
 };
 
@@ -336,10 +338,10 @@ export const useCreateExperienceFlow = () => {
     // Parse dates from ISO format (extract without timezone conversion)
     const startDate = experience.startDate?.split('T')[0];
     const startTime = experience.startDate
-      ? experience.startDate.split('T')[1]?.substring(0, 5) ?? null
+      ? (experience.startDate.split('T')[1]?.substring(0, 5) ?? null)
       : null;
     const endTime = experience.endDate
-      ? experience.endDate.split('T')[1]?.substring(0, 5) ?? null
+      ? (experience.endDate.split('T')[1]?.substring(0, 5) ?? null)
       : null;
 
     // Update about form
@@ -352,7 +354,7 @@ export const useCreateExperienceFlow = () => {
       categories: experience.categories || [],
       location: experience.location?.formattedAddress || '',
       locationPlaceId: experience.location?.id || '',
-      meetingPoint: experience.meetingPoint || '',
+      meetingPoint: experience.meetingPlace || '',
       meetingTime: experience.meetingTime || null,
       whatsIncluded: experience.whatsIncluded ?? '',
       whatsNotIncluded: experience.whatsNotIncluded ?? '',
@@ -384,7 +386,9 @@ export const useCreateExperienceFlow = () => {
           return { date, time };
         };
 
-        const salesStartDateTime = extractDateTime(ticket.salesStartDate || ticket.sales_start_date);
+        const salesStartDateTime = extractDateTime(
+          ticket.salesStartDate || ticket.sales_start_date,
+        );
         const salesEndDateTime = extractDateTime(ticket.salesEndDate || ticket.sales_end_date);
 
         return {
@@ -416,6 +420,13 @@ export const useCreateExperienceFlow = () => {
       wallet: { ...prev.wallet, ...data },
     }));
   }, []);
+
+  useEffect(() => {
+    updateWalletFormData({
+      selectedWallet: wallets.find((w) => w.isActive),
+      paymentMethod: wallets.find((w) => w.isActive)?.walletType,
+    });
+  }, [wallets.length]);
 
   const validateDateType = useCallback((): boolean => {
     const errors: Record<string, string> = {};
@@ -635,12 +646,12 @@ export const useCreateExperienceFlow = () => {
 
   const validateWallet = useCallback((): boolean => {
     const errors: Record<string, string> = {};
-    if (!wallets.length && !formData.wallet.selectedWalletId && !formData.wallet.mpesaPhoneNumber) {
+    if (!wallets.length && !formData.wallet.selectedWallet && !formData.wallet.phoneNumber) {
       errors.wallet = 'Please set up a payment method before continuing.';
     }
     setWalletErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [wallets.length, formData.wallet.selectedWalletId, formData.wallet.mpesaPhoneNumber]);
+  }, [wallets.length, formData.wallet.selectedWallet, formData.wallet.phoneNumber]);
 
   const updateInviteFormData = useCallback((data: Partial<FormData['invite']>) => {
     setFormData((prev) => ({
@@ -649,39 +660,44 @@ export const useCreateExperienceFlow = () => {
     }));
   }, []);
 
-  const handleStepChange = (step: ExperienceStepId) => {
-    console.log('[handleStepChange] Changing step from', activeStep, 'to', step);
-    setActiveStep(step);
-    replaceCreateUrlParams({ step });
-  };
-
-  const handleExperienceCreated = (createdExperienceId: string, step?: ExperienceStepId) => {
-    setExperienceId(createdExperienceId);
-
-    if (step) {
+  const handleStepChange = useCallback(
+    (step: ExperienceStepId) => {
       setActiveStep(step);
-    }
+      replaceCreateUrlParams({ experienceId, step });
+    },
+    [experienceId],
+  );
 
-    replaceCreateUrlParams({ experienceId: createdExperienceId, step });
-  };
+  const handleExperienceCreated = useCallback(
+    (createdExperienceId: string, step?: ExperienceStepId) => {
+      setExperienceId(createdExperienceId);
 
-  const handleDatesUpdatedSuccess = (nextStep?: ExperienceStepId) => {
+      if (step) {
+        setActiveStep(step);
+      }
+
+      replaceCreateUrlParams({ experienceId: createdExperienceId, step });
+    },
+    [],
+  );
+
+  const handleDatesUpdatedSuccess = useCallback((nextStep?: ExperienceStepId) => {
     setHasUpdatedDates(true);
 
     if (nextStep) {
       setActiveStep(nextStep);
       replaceCreateUrlParams({ step: nextStep });
     }
-  };
+  }, []);
 
-  const handleItineraryCustomise = (config: { startDate: string; endDate: string }) => {
+  const handleItineraryCustomise = useCallback((config: { startDate: string; endDate: string }) => {
     setItineraryConfig(config);
-  };
+  }, []);
 
-  const handleInvitesChange = (members: InvitedMember[], communities: Community[]) => {
+  const handleInvitesChange = useCallback((members: InvitedMember[], communities: Community[]) => {
     setInvitedMembers(members);
     setInvitedCommunities(communities);
-  };
+  }, []);
 
   const handleSaveAbout = useCallback(async () => {
     setIsSavingExperience(true);
@@ -746,28 +762,20 @@ export const useCreateExperienceFlow = () => {
           }
         }
       } else {
-        console.log('[handleSaveAbout] Calling createExperienceAsync with payload:', payload);
         const response = await createExperienceAsync(payload);
-        console.log('[handleSaveAbout] createExperienceAsync completed, response:', response);
         const newExperienceId = response.data?.id || '';
-        console.log('[handleSaveAbout] newExperienceId:', newExperienceId);
-        console.log('[handleSaveAbout] photoFiles:', formData.about.photoFiles);
-        console.log('[handleSaveAbout] photoFiles.length:', formData.about.photoFiles?.length);
+
+        if (!newExperienceId) {
+          throw new Error('Failed to create experience: No ID returned from server');
+        }
 
         // Upload photos separately if present
         if (formData.about.photoFiles && formData.about.photoFiles.length > 0) {
           try {
-            console.log(
-              '[handleSaveAbout] Uploading',
-              formData.about.photoFiles.length,
-              'photos to experience',
-              newExperienceId,
-            );
-            const photoResponse = await addExperiencePhotos(
+            await addExperiencePhotos(
               newExperienceId,
               formData.about.photoFiles,
             );
-            console.log('[handleSaveAbout] Photos uploaded successfully, response:', photoResponse);
           } catch (photoError: any) {
             console.error('[handleSaveAbout] Photo upload failed:', photoError);
             toast({
@@ -778,15 +786,12 @@ export const useCreateExperienceFlow = () => {
             });
             // Don't block advancement - experience was already created
           }
-        } else {
-          console.log('[handleSaveAbout] No photos to upload or photoFiles is empty');
         }
 
-        handleExperienceCreated(newExperienceId);
+        handleExperienceCreated(newExperienceId, 'dates-tickets');
       }
 
       setActiveStep('dates-tickets');
-      replaceCreateUrlParams({ step: 'dates-tickets' });
     } catch (error: any) {
       const message = parseApiError(error, 'Failed to save experience');
       setApiError(message);
@@ -918,7 +923,7 @@ export const useCreateExperienceFlow = () => {
         startDate: experience.startDate,
         endDate: experience.endDate,
         recurrence_rule: '',
-        categoriesIds: experience.categories?.map((c) => c.id) || [],
+        categoriesIds: experience.categories?.map((c: any) => c.id) || [],
         isPublic: experience.isPublic,
         isPaid: experience.isPaid,
         invitedCommunityIds: [],

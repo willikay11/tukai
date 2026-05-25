@@ -28,7 +28,7 @@ export const PreviewGuestsSection = ({ guests, onEdit }: PreviewGuestsSectionPro
         <h3 className="text-xs font-semibold text-gray-900">Guests ({guests.length})</h3>
         {onEdit && (
           <button type="button" onClick={onEdit} className="text-gray-400 hover:text-gray-600">
-            <IconComponent iconName="Edit02Icon" size={16} />
+            <IconComponent iconName="Edit02Icon" size={16} className='text-gray-800'  />
           </button>
         )}
       </div>

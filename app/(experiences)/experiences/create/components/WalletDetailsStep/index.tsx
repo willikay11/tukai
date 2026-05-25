@@ -47,7 +47,7 @@ export const WalletDetailsStep = ({
             description: 'Your M-Pesa wallet has been set up successfully.',
             variant: 'success',
           });
-          onChange({ mpesaPhoneNumber: '' });
+          onChange({ phoneNumber: '' });
         },
         onError: (error: Error) => {
           toast({
@@ -70,7 +70,7 @@ export const WalletDetailsStep = ({
             description: 'Your M-Pesa wallet has been updated successfully.',
             variant: 'success',
           });
-          onChange({ mpesaPhoneNumber: '' });
+          onChange({ phoneNumber: '' });
         },
         onError: (error: Error) => {
           toast({
@@ -150,12 +150,12 @@ export const WalletDetailsStep = ({
     <CreateExperienceWallet
       wallets={wallets}
       isWalletsLoading={isWalletsLoading}
-      selectedWalletId={formData.selectedWalletId}
-      onSelectedWalletIdChange={(id) => onChange({ selectedWalletId: id })}
+      selectedWallet={formData.selectedWallet}
+      onSelectedWalletChange={(selectedWallet: Wallet) => onChange({ selectedWallet })}
       paymentMethod={formData.paymentMethod}
       onPaymentMethodChange={(method) => onChange({ paymentMethod: method })}
-      mpesaPhoneNumber={formData.mpesaPhoneNumber}
-      onMpesaPhoneNumberChange={(phone) => onChange({ mpesaPhoneNumber: phone })}
+      phoneNumber={formData.phoneNumber}
+      onPhoneNumberChange={(phone: string) => onChange({ phoneNumber: phone })}
       onCreatePhoneWallet={handleCreatePhoneWallet}
       isCreatingPhoneWallet={walletMutations.isCreatingPhoneWallet}
       onPatchPhoneWallet={handlePatchPhoneWallet}

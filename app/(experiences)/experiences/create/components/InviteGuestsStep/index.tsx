@@ -1,5 +1,7 @@
 'use client';
 
+import { useCallback } from 'react';
+
 import type { Experience } from '@/types/experience';
 
 import { FormData } from '../../hooks/useCreateExperienceFlow';
@@ -22,16 +24,21 @@ export const InviteGuestsStep = ({
   onNext,
   onCancel,
 }: InviteGuestsStepProps) => {
+  const handleInvitesChange = useCallback(
+    (members, communities) => {
+      onChange({
+        invitedGuests: members,
+        invitedCommunityIds: communities.map((c) => c.id),
+      });
+    },
+    [onChange],
+  );
+
   return (
     <CreateExperienceInvites
       experienceId={experienceId}
       experience={experience}
-      onInvitesChange={(members, communities) => {
-        onChange({
-          invitedGuests: members,
-          invitedCommunityIds: communities.map((c) => c.id),
-        });
-      }}
+      onInvitesChange={handleInvitesChange}
       onNext={onNext}
       cancelActionLabel="Cancel"
       saveAndExitActionLabel="Save & Exit"

@@ -220,28 +220,11 @@ export const CreateExperienceSteps = ({
   );
 
   useEffect(() => {
-    console.log('[steps.tsx] canAccessDetailsSteps calculated:', {
-      canAccessDetailsSteps,
-      'experience?.id': experience?.id,
-      selectedCommunityId,
-    });
-  }, [experience?.id, selectedCommunityId]);
-
-  useEffect(() => {
-    console.log(
-      '[steps.tsx guard] Checking access - currentStep:',
-      currentStep,
-      'canAccessDetailsSteps:',
-      canAccessDetailsSteps,
-      'isLoadingExperience:',
-      isLoadingExperience,
-    );
     // Allow 'about' step if community is selected, even without experience (will be created in about step)
     const canAccessStep =
       currentStep === 'about' ? Boolean(formData?.community?.id) : canAccessDetailsSteps;
 
     if (!isLoadingExperience && currentStep !== 'community' && !canAccessStep) {
-      console.log('[steps.tsx guard] Access denied! Redirecting to community');
       onStepChange?.('community');
     }
   }, [
@@ -261,13 +244,9 @@ export const CreateExperienceSteps = ({
   };
 
   const handleSaveContinue = () => {
-    console.log('[handleSaveContinue] Called, validateDateType...');
     const isValid = validateDateType();
-    console.log('[handleSaveContinue] validateDateType returned:', isValid);
     if (isValid) {
-      const nextStep = 'about';
-      console.log('[handleSaveContinue] Validation passed, moving to', nextStep, 'step');
-      onStepChange?.(nextStep);
+      onStepChange?.('about');
     }
   };
 

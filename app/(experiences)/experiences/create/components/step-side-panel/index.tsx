@@ -8,11 +8,12 @@ import { InvitedMember } from '@/components/ui/invite-members';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Interest } from '@/types/interest';
+import { Wallet } from '@/types/payment';
 
+import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { SharedExperiencePreview } from '../SharedExperiencePreview';
 import { CustomiseItinerary } from '../customiseItinerary';
-import { CommunityOption } from '../hooks/useCreateExperienceFlow';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
@@ -57,6 +58,7 @@ export const ExperienceStepSidePanel = ({
   invitedGuests,
   invitedCommunityIds,
   allCommunities,
+  selectedWallet,
 }: {
   step: ExperienceStepId;
   _experienceId?: string | null;
@@ -109,6 +111,7 @@ export const ExperienceStepSidePanel = ({
   invitedGuests?: InvitedMember[];
   invitedCommunityIds?: string[];
   allCommunities?: CommunityOption[];
+  selectedWallet?: Wallet;
 }) => {
   const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
     community: (
@@ -151,6 +154,7 @@ export const ExperienceStepSidePanel = ({
         invitedCommunityIds={invitedCommunityIds}
         allCommunities={allCommunities}
         onEditStep={onEditStep}
+        selectedWallet={selectedWallet}
       />
     ),
     'dates-tickets': itineraryConfig ? (
@@ -188,6 +192,7 @@ export const ExperienceStepSidePanel = ({
         invitedGuests={invitedGuests}
         invitedCommunityIds={invitedCommunityIds}
         allCommunities={allCommunities}
+        selectedWallet={selectedWallet}
         onEditStep={onEditStep}
       />
     ) : (
@@ -229,6 +234,7 @@ export const ExperienceStepSidePanel = ({
         invitedGuests={invitedGuests}
         invitedCommunityIds={invitedCommunityIds}
         allCommunities={allCommunities}
+        selectedWallet={selectedWallet}
         onEditStep={onEditStep}
       />
     ),
@@ -265,6 +271,7 @@ export const ExperienceStepSidePanel = ({
         invitedGuests={invitedGuests}
         invitedCommunityIds={invitedCommunityIds}
         allCommunities={allCommunities}
+        selectedWallet={selectedWallet}
         onEditStep={onEditStep}
       />
     ),

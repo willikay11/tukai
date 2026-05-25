@@ -8,7 +8,6 @@ interface PreviewIncludedSectionProps {
 }
 
 export const PreviewIncludedSection = ({ items, onEdit }: PreviewIncludedSectionProps) => {
-  console.log('PreviewIncludedSection - items:', items); // Debug log to check the items being passed
   return (
     <div className="space-y-3">
       {items.length > 0 ? (
