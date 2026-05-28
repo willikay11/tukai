@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { InvitedMember } from '@/components/ui/invite-members';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 
@@ -22,7 +21,6 @@ import { PreviewWalletSection } from '../PreviewWalletSection';
 
 interface ReviewLayoutProps {
   experience: Experience;
-  invitedMembers: InvitedMember[];
   invitedCommunities: Community[];
   allCommunities?: CommunityOption[];
   isPublishing?: boolean;
@@ -36,7 +34,6 @@ interface ReviewLayoutProps {
 
 export const ReviewLayout = ({
   experience,
-  invitedMembers,
   invitedCommunities,
   allCommunities = [],
   isPublishing = false,
@@ -144,7 +141,10 @@ export const ReviewLayout = ({
       )}
 
       {/* 10. Guests */}
-      <PreviewGuestsSection guests={invitedMembers} onEdit={() => handleEditClick('invites')} />
+      <PreviewGuestsSection
+        guests={experience?.guests || []}
+        onEdit={() => handleEditClick('invites')}
+      />
 
       {/* 11. Invited Communities */}
       <PreviewCommunitiesSection
@@ -155,14 +155,12 @@ export const ReviewLayout = ({
 
       {/* 12. Tickets */}
       {experience.tickets && experience.tickets.length > 0 && (
-        <div className="border-t border-gray-200 pt-6">
-          <PreviewTicketsSection
-            tickets={experience.tickets}
-            coverPhoto={experience.photos?.[0]?.photo}
-            commissionPayer={experience.commissionPayer}
-            onEdit={() => handleEditClick('tickets')}
-          />
-        </div>
+        <PreviewTicketsSection
+          tickets={experience.tickets}
+          coverPhoto={experience.photos?.[0]?.photo}
+          commissionPayer={experience.commissionPayer}
+          onEdit={() => handleEditClick('tickets')}
+        />
       )}
 
       {/* 13. Wallet Details */}

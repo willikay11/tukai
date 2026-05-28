@@ -5,7 +5,6 @@ import { Suspense, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { CreateStepContentSkeleton, ReviewWalletsSkeleton } from '@/app/shared/components/Cards';
-import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
 
 import { ExperienceStepSidePanel } from './components/step-side-panel';

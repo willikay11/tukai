@@ -2,13 +2,12 @@
 
 import Image from 'next/image';
 
-import { gu } from 'date-fns/locale';
-
 import { IconComponent } from '@/app/shared/components/Icons';
 import { InvitedMember } from '@/components/ui/invite-members';
+import { Experience } from '@/types/experience';
 
 interface PreviewGuestsSectionProps {
-  guests: InvitedMember[];
+  guests: Experience['guests'];
   onEdit?: () => void;
 }
 
@@ -40,28 +39,28 @@ export const PreviewGuestsSection = ({ guests, onEdit }: PreviewGuestsSectionPro
       {guests.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2">
           {visibleGuests.map((guest) => (
-            <div key={guest.id} className="flex items-center gap-2 bg-gray-50 rounded-[40px] p-2">
+            <div key={guest.id} className="flex items-center gap-2 rounded-[40px] bg-gray-50 p-2">
               <div className="relative h-8 w-8 flex-shrink-0">
                 {guest.avatarUrl ? (
                   <Image
                     src={guest.avatarUrl}
-                    alt={guest.name}
+                    alt={guest.email}
                     width={32}
                     height={32}
                     sizes="32px"
                     className="rounded-full object-cover"
-                    title={guest.name}
+                    title={guest.email}
                   />
                 ) : (
                   <div
                     className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-700"
-                    title={guest.name}
+                    title={guest.email}
                   >
-                    {getInitials(guest.name)}
+                    {getInitials(guest.email.split('@')[0])}
                   </div>
                 )}
               </div>
-              <span className="text-xs text-gray-500 w-24 truncate">{guest.email}</span>
+              <span className="w-24 truncate text-xs text-gray-500">{guest.email}</span>
             </div>
           ))}
           {overflowCount > 0 && (

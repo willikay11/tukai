@@ -28,6 +28,7 @@ import { Interest } from '@/types/interest';
 import { Wallet } from '@/types/payment';
 import { Photo } from '@/types/photo';
 import { parseApiError } from '@/utils/parseApiError';
+import { Experience } from '@/types/experience';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
@@ -136,7 +137,7 @@ export interface FormData {
     }>;
   };
   invite: {
-    invitedGuests: InvitedMember[];
+    invitedGuests: Experience['guests'];
     invitedCommunityIds: string[];
   };
   wallet: {

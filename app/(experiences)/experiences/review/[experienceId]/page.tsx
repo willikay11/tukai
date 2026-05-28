@@ -89,7 +89,6 @@ export default function ExperienceReviewPage() {
           <div>
             <ReviewLayout
               experience={experience}
-              invitedMembers={[]}
               invitedCommunities={[]}
               onEditSection={setActiveEditSection}
               onCancel={() => router.back()}
