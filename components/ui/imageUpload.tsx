@@ -1,7 +1,8 @@
 'use client';
 
-import Image from 'next/image';
 import { type ChangeEvent, type DragEvent, useEffect, useRef, useState } from 'react';
+
+import Image from 'next/image';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Photo } from '@/types/photo';
@@ -25,8 +26,7 @@ export const ImageUpload = ({
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const isExternalUrl = (src: string) =>
-    src.startsWith('https://') || src.startsWith('http://');
+  const isExternalUrl = (src: string) => src.startsWith('https://') || src.startsWith('http://');
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;

@@ -1,7 +1,8 @@
 'use client';
 
-import Image from 'next/image';
 import { ChangeEvent, DragEvent, useEffect, useRef, useState } from 'react';
+
+import Image from 'next/image';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 
@@ -48,8 +49,7 @@ export const FileUploadField = ({
   onDeleteExisting,
   isDeletingPhoto = false,
 }: FileUploadFieldProps) => {
-  const isExternalUrl = (src: string) =>
-    src.startsWith('https://') || src.startsWith('http://');
+  const isExternalUrl = (src: string) => src.startsWith('https://') || src.startsWith('http://');
 
   const [previewUrls, setPreviewUrls] = useState<string[]>(initialUrls);
   const [existingUrls, setExistingUrls] = useState<string[]>(initialUrls);

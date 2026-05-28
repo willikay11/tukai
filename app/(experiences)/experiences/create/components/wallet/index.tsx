@@ -47,7 +47,7 @@ interface CreateExperienceWalletProps {
 export const CreateExperienceWallet = ({
   cancelActionLabel = 'Cancel',
   saveAndExitActionLabel = 'Save & Exit',
-  previewAndPublishActionLabel = 'Preview & Publish',
+  previewAndPublishActionLabel = 'Preview',
   hideSaveAndExit = false,
   wallets,
   isWalletsLoading,

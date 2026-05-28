@@ -55,13 +55,7 @@ export const TicketCard = ({
       <div className="flex items-center gap-3">
         {coverPhoto && (
           <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-[12px]">
-            <Image
-              src={coverPhoto}
-              alt={name}
-              fill
-              sizes="80px"
-              className="object-cover"
-            />
+            <Image src={coverPhoto} alt={name} fill sizes="80px" className="object-cover" />
           </div>
         )}
 

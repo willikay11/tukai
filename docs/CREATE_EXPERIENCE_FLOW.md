@@ -824,7 +824,7 @@ Every component in the create experience flow must follow these rules:
 - Right panel: full experience preview (photo, title, date, description, tickets, etc.)
 - Invite members input: search field with avatar list of selected members below
 - Invite communities input: search field with community pill list
-- Buttons: "Cancel", "Save & Edit", "Preview & Publish"
+- Buttons: "Cancel", "Save & Edit", "Preview"
 
 **Colours:**
 

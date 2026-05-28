@@ -3,6 +3,7 @@
 import { useCallback } from 'react';
 
 import Image from 'next/image';
+
 import clsx from 'clsx';
 
 import { IconComponent } from '@/app/shared/components/Icons';

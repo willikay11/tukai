@@ -1,7 +1,8 @@
 'use client';
 
-import Image from 'next/image';
 import { useCallback, useState } from 'react';
+
+import Image from 'next/image';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import {
@@ -12,8 +13,7 @@ import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Photo } from '@/types/photo';
 
-const isExternalUrl = (src: string) =>
-  src.startsWith('https://') || src.startsWith('http://');
+const isExternalUrl = (src: string) => src.startsWith('https://') || src.startsWith('http://');
 
 interface LocalPhoto {
   id?: string; // Present if it's an existing photo
