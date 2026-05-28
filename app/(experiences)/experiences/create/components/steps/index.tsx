@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
+import { useRouter } from 'next/navigation';
+
 import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
@@ -220,7 +222,9 @@ export const CreateExperienceSteps = ({
   isPreviewDrawerOpen = false,
   setIsPreviewDrawerOpen,
 }: CreateExperienceStepsProps) => {
+  const router = useRouter();
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const canAccessDetailsSteps = Boolean(
     experience?.id || selectedCommunityId || formData?.community?.id,
   );
@@ -254,6 +258,13 @@ export const CreateExperienceSteps = ({
     if (isValid) {
       onStepChange?.('about');
     }
+  };
+
+  const handlePreviewClick = () => {
+    setIsPreviewLoading(true);
+    router.push(window.location.href);
+    setIsPreviewDrawerOpen?.(true);
+    setTimeout(() => setIsPreviewLoading(false), 1000);
   };
 
   if (isLoadingExperience) {
@@ -365,11 +376,16 @@ export const CreateExperienceSteps = ({
                   <div className="flex-1" />
                   <Button
                     type="button"
-                    onClick={() => setIsPreviewDrawerOpen?.(true)}
+                    onClick={handlePreviewClick}
+                    disabled={isPreviewLoading}
                     variant="outline"
                     className="lg:hidden"
                   >
-                    Preview
+                    {isPreviewLoading ? (
+                      <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
+                    ) : (
+                      'Preview'
+                    )}
                   </Button>
                   <Button
                     type="button"
@@ -418,7 +434,7 @@ export const CreateExperienceSteps = ({
                     console.log('[steps.tsx] Validation failed');
                   }
                 }}
-                onPreview={() => setIsPreviewDrawerOpen?.(true)}
+                onPreview={handlePreviewClick}
               />
             ) : (
               <CreateExperienceAbout
@@ -476,7 +492,7 @@ export const CreateExperienceSteps = ({
                   formData?.experienceType === 'multi-day' ? 'Save Tickets' : undefined
                 }
                 experienceId={experience?.id || null}
-                onPreview={() => setIsPreviewDrawerOpen?.(true)}
+                onPreview={handlePreviewClick}
               />
             ) : (
               <ExperienceDates
@@ -498,7 +514,7 @@ export const CreateExperienceSteps = ({
                 experience={experience}
                 onNext={() => handleStepChange('wallet')}
                 onCancel={() => handleStepChange('dates-tickets')}
-                onPreview={() => setIsPreviewDrawerOpen?.(true)}
+                onPreview={handlePreviewClick}
               />
             ) : (
               <CreateExperienceInvites
