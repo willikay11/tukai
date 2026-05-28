@@ -10,7 +10,7 @@ import {
   ReviewLayout,
 } from '@/app/(experiences)/experiences/create/components';
 import { useGetWallets } from '@/app/(experiences)/hooks/usePayment';
-import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
+import { useFetchSingleExperience, usePublishExperience } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 
 export default function ExperienceReviewPage() {
@@ -27,8 +27,8 @@ export default function ExperienceReviewPage() {
   const experience = experienceResponse?.data;
 
   const { data: walletsResponse } = useGetWallets();
-  const wallets = walletsResponse?.data?.results;
-  const activeWallet = Array.isArray(wallets) ? wallets.find((w: any) => w.isActive) : undefined;
+  const wallets: any[] = walletsResponse?.data?.results ?? [];
+  const activeWallet = wallets.find((w: any) => w.isActive);
 
   const [activeEditSection, setActiveEditSection] = useState<
     | 'about-title'
@@ -48,17 +48,23 @@ export default function ExperienceReviewPage() {
     | 'wallet'
     | null
   >(null);
-  const [isPublishing, setIsPublishing] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);
 
+  const { mutate: publishExperience, isPending: isPublishing } = usePublishExperience(experienceId);
+
   const handlePublish = () => {
-    setIsPublishing(true);
-    // TODO: Integrate with publish API when ready
-    // For now, just show the success modal
-    setTimeout(() => {
-      setPublishSuccess(true);
-      setIsPublishing(false);
-    }, 500);
+    publishExperience(undefined, {
+      onSuccess: () => {
+        setPublishSuccess(true);
+      },
+      onError: (error: any) => {
+        toast({
+          title: 'Error',
+          description: error?.message || 'Failed to publish experience',
+          variant: 'destructive',
+        });
+      },
+    });
   };
 
   const handlePublishComplete = () => {

@@ -230,7 +230,7 @@ export const CreateExperienceWallet = ({
         {/* <p className="text-xs font-semibold text-gray-800">Set up wallets</p> */}
         {isWalletsLoading ? (
           <WalletListSkeleton />
-        ) : wallets.length > 0 ? (
+        ) : wallets?.length > 0 ? (
           <div className="mt-2 grid grid-cols-2">
             <div className="space-y-4">
               <RadioGroup
@@ -319,7 +319,7 @@ export const CreateExperienceWallet = ({
         )}
       </div>
 
-      {!isWalletsLoading && (wallets.length === 0 || showForm) && (
+      {!isWalletsLoading && (wallets?.length === 0 || showForm) && (
         <>
           {paymentMethod === 'phone' ? (
             <MpesaDetailsForm
