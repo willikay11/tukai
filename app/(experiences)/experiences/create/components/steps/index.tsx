@@ -288,7 +288,7 @@ export const CreateExperienceSteps = ({
       onValueChange={(step) => handleStepChange(step as ExperienceStepId)}
       className="grid w-full grid-cols-1"
     >
-      <TabsList className="col-span-1 flex h-auto w-full justify-start gap-1 overflow-x-auto bg-transparent p-0 scrollbar-hide sm:gap-2">
+      <TabsList className="col-span-1 flex h-auto w-full justify-start gap-2 overflow-x-auto bg-transparent p-0 scrollbar-hide">
         {steps.map((step) => {
           // Check if about step is filled based on form data or experience
           const isAboutFilled = aboutFormData

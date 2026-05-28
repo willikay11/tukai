@@ -279,7 +279,7 @@ export const ExperienceStepSidePanel = ({
   const content = stepPanelContent[step];
 
   return (
-    <div className="h-full rounded-t-xl bg-white px-4 pb-4 pt-0 shadow-lg sm:px-8 sm:py-6 md:border-x md:px-12">
+    <div className="h-full rounded-t-xl md:border-x md:border-t-[1px] md:border-gray-200 bg-white xs:px-4 xs:py-4 md:px-12 md:py-6 md:shadow-lg">
       {content}
     </div>
   );
