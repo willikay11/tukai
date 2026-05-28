@@ -1,7 +1,8 @@
 export type Photo = {
   id: string;
+  mediaType: 'image' | 'video';
   experience?: string;
-  photo: string;
+  photo?: string;
   caption?: string;
   isCover?: boolean;
 };
