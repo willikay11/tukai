@@ -73,7 +73,7 @@ function ListFormatButtons() {
   );
 }
 
-export function Plugins() {
+export function Plugins({ placeholderClassName }: { placeholderClassName?: string }) {
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null);
 
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -111,7 +111,10 @@ export function Plugins() {
           contentEditable={
             <div className="">
               <div className="" ref={onRef}>
-                <ContentEditable placeholder={'Start typing ...'} />
+                <ContentEditable
+                  placeholder={'Start typing ...'}
+                  placeholderClassName={placeholderClassName}
+                />
               </div>
             </div>
           }

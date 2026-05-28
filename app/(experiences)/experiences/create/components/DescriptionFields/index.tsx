@@ -191,6 +191,8 @@ export const DescriptionFields = ({
       <div className="space-y-2">
         <label className="text-xs font-medium text-gray-800">Add your experience description</label>
         <Editor
+          className="text-xs"
+          placeholderClassName="pointer-events-none absolute left-0 top-0 select-none overflow-hidden text-ellipsis px-3 py-[18px] text-xs text-gray-400"
           editorSerializedState={toSerializedEditorState(description)}
           onSerializedChange={(state) => {
             const html = serializeEditorStateToHtml(state);
@@ -205,6 +207,8 @@ export const DescriptionFields = ({
       <div className="space-y-2">
         <label className="text-xs font-medium text-gray-800">What's included</label>
         <Editor
+          className="text-xs"
+          placeholderClassName="pointer-events-none absolute left-0 top-0 select-none overflow-hidden text-ellipsis px-3 py-[18px] text-xs text-gray-400"
           editorSerializedState={toSerializedEditorState(whatsIncluded)}
           onSerializedChange={(state) => {
             const html = serializeEditorStateToHtml(state);
@@ -218,6 +222,8 @@ export const DescriptionFields = ({
       <div className="space-y-2">
         <label className="text-xs font-medium text-gray-800">What's NOT included</label>
         <Editor
+          className="text-xs"
+          placeholderClassName="pointer-events-none absolute left-0 top-0 select-none overflow-hidden text-ellipsis px-3 py-[18px] text-xs text-gray-400"
           editorSerializedState={toSerializedEditorState(whatsNotIncluded)}
           onSerializedChange={(state) => {
             const html = serializeEditorStateToHtml(state);
