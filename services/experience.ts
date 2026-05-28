@@ -179,15 +179,30 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
 
 export async function updateExperience(id: string, data: CreateExperience): Promise<ApiResponse> {
   try {
+    console.error('[updateExperience] Update called with data:', data);
     const axiosInstance = await apiWithToken();
     const formData = new FormData();
-    formData.append('title', data.title);
-    formData.append('description', data.description);
-    formData.append('google_map_place_id', data.googleMapPlaceId);
-    formData.append('start_date', data.startDate);
-    formData.append('end_date', data.endDate);
-    formData.append('recurrence_rule', data.recurrence_rule);
-    data.categoriesIds.forEach((id) => formData.append('categories_ids', id));
+    if (data.description !== undefined) {
+      formData.append('description', data.description);
+    }
+    if (data.title !== undefined) {
+      formData.append('title', data.title);
+    }
+    if (data.googleMapPlaceId !== undefined) {
+      formData.append('google_map_place_id', data.googleMapPlaceId);
+    }
+    if (data.startDate !== undefined) {
+      formData.append('start_date', data.startDate);
+    }
+    if (data.endDate !== undefined) {
+      formData.append('end_date', data.endDate);
+    }
+    if (data.recurrence_rule !== undefined) {
+      formData.append('recurrence_rule', data.recurrence_rule);
+    }
+    if (data.categoriesIds !== undefined) {
+      data.categoriesIds.forEach((id) => formData.append('categories_ids', id));
+    }
     if (data.isPublic !== undefined) {
       formData.append('is_public', String(data.isPublic));
     }
@@ -196,23 +211,23 @@ export async function updateExperience(id: string, data: CreateExperience): Prom
       formData.append('is_paid', String(data.isPaid));
     }
 
-    if (data.hostCommunityId) {
+    if (data.hostCommunityId !== undefined) {
       formData.append('host_community_id', data.hostCommunityId);
     }
 
-    if (data.whatsIncluded) {
+    if (data.whatsIncluded !== undefined) {
       formData.append('whats_included', data.whatsIncluded);
     }
 
-    if (data.whatsNotIncluded) {
+    if (data.whatsNotIncluded !== undefined) {
       formData.append('whats_not_included', data.whatsNotIncluded);
     }
 
-    if (data.invitedCommunityIds) {
+    if (data.invitedCommunityIds !== undefined) {
       data.invitedCommunityIds.forEach((id) => formData.append('invited_community_ids', id));
     }
 
-    if (data.feesAllocation) {
+    if (data.feesAllocation !== undefined) {
       formData.append('fees_allocation', data.feesAllocation);
     }
 

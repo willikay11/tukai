@@ -1,5 +1,10 @@
 'use client';
 
+import { useCallback, useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { useUpdateExperience } from '@/app/shared/hooks/useExperiences';
+import { useToast } from '@/app/shared/hooks/useToast';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 import { formatDateForPreview, formatTimeForPreview } from '@/utils/date-utils';
@@ -23,6 +28,809 @@ import { CreateTickets } from '../createTickets';
 import { ExperienceDates } from '../dates';
 import { CreateExperienceInvites } from '../invites';
 import { CreateExperienceWallet } from '../wallet';
+
+// Wrapper component for Title editing
+interface EditTitleFieldWithSaveProps {
+  experienceId: string;
+  currentTitle: string;
+  onClose: () => void;
+}
+
+const EditTitleFieldWithSave = ({
+  experienceId,
+  currentTitle,
+  onClose,
+}: EditTitleFieldWithSaveProps) => {
+  const [title, setTitle] = useState(currentTitle);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { mutateAsync: updateExperienceAsync } = useUpdateExperience(experienceId);
+  const { toast } = useToast();
+
+  const handleSave = useCallback(async () => {
+    if (!title.trim()) {
+      setError('Title is required');
+      return;
+    }
+
+    if (title.trim().length < 5) {
+      setError('Title must be at least 5 characters');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      await updateExperienceAsync({
+        title,
+      } as any);
+
+      toast({
+        title: 'Success',
+        description: 'Title updated successfully',
+        variant: 'success',
+      });
+      onClose();
+    } catch (err: any) {
+      const message = err?.message || 'Failed to update title';
+      setError(message);
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [title, experienceId, updateExperienceAsync, onClose, toast]);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900">Edit Title</h3>
+        <p className="mt-1 text-xs text-gray-600">Give your experience a compelling name</p>
+      </div>
+
+      <EditTitleField
+        value={title}
+        onChange={setTitle}
+        error={error || undefined}
+      />
+
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          variant="gradient"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          {isSaving ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// Wrapper component for Description editing
+interface EditDescriptionFieldWithSaveProps {
+  experienceId: string;
+  currentDescription: string;
+  onClose: () => void;
+}
+
+const EditDescriptionFieldWithSave = ({
+  experienceId,
+  currentDescription,
+  onClose,
+}: EditDescriptionFieldWithSaveProps) => {
+  const [description, setDescription] = useState(currentDescription);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { mutateAsync: updateExperienceAsync } = useUpdateExperience(experienceId);
+  const { toast } = useToast();
+
+  const handleSave = useCallback(async () => {
+    if (!description.trim()) {
+      setError('Description is required');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      await updateExperienceAsync({
+        description,
+      } as any);
+
+      toast({
+        title: 'Success',
+        description: 'Experience details updated successfully',
+        variant: 'success',
+      });
+      onClose();
+    } catch (err: any) {
+      console.error('[EditDescriptionFieldWithSave] Update failed:', err);
+      const message = err?.message || 'Failed to update experience details';
+      setError(message);
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [description, experienceId, updateExperienceAsync, onClose, toast]);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900">Edit Description</h3>
+        <p className="mt-1 text-xs text-gray-600">Update your experience details</p>
+      </div>
+
+      <div className="space-y-6">
+        <EditDescriptionField
+          value={description}
+          onChange={setDescription}
+          error={error || undefined}
+        />
+
+      </div>
+
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          variant="gradient"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          {isSaving ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// Wrapper component for Location editing
+interface EditLocationFieldWithSaveProps {
+  experienceId: string;
+  currentLocation: string;
+  currentPlaceId: string;
+  onClose: () => void;
+}
+
+const EditLocationFieldWithSave = ({
+  experienceId,
+  currentLocation,
+  currentPlaceId,
+  onClose,
+}: EditLocationFieldWithSaveProps) => {
+  const [location, setLocation] = useState(currentLocation);
+  const [placeId, setPlaceId] = useState(currentPlaceId);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { mutateAsync: updateExperienceAsync } = useUpdateExperience(experienceId);
+  const { toast } = useToast();
+
+  const handleLocationChange = useCallback((newLocation: string, newPlaceId?: string) => {
+    setLocation(newLocation);
+    setPlaceId(newPlaceId || '');
+    setError(null);
+  }, []);
+
+  const handleSave = useCallback(async () => {
+    if (!location.trim()) {
+      setError('Location is required');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      await updateExperienceAsync({
+        location: {
+          formattedAddress: location,
+          placeId,
+        },
+      } as any);
+
+      toast({
+        title: 'Success',
+        description: 'Location updated successfully',
+        variant: 'success',
+      });
+      onClose();
+    } catch (err: any) {
+      const message = err?.message || 'Failed to update location';
+      setError(message);
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [location, placeId, experienceId, updateExperienceAsync, onClose, toast]);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900">Edit Location</h3>
+        <p className="mt-1 text-xs text-gray-600">Update the experience location</p>
+      </div>
+
+      <EditLocationField
+        value={location}
+        placeId={placeId}
+        onChange={handleLocationChange}
+        error={error || undefined}
+      />
+
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          variant="gradient"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          {isSaving ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// Wrapper component for Meeting Point editing
+interface EditMeetingPointFieldWithSaveProps {
+  experienceId: string;
+  currentMeetingPoint: string;
+  onClose: () => void;
+}
+
+const EditMeetingPointFieldWithSave = ({
+  experienceId,
+  currentMeetingPoint,
+  onClose,
+}: EditMeetingPointFieldWithSaveProps) => {
+  const [meetingPoint, setMeetingPoint] = useState(currentMeetingPoint);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { mutateAsync: updateExperienceAsync } = useUpdateExperience(experienceId);
+  const { toast } = useToast();
+
+  const handleSave = useCallback(async () => {
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      await updateExperienceAsync({
+        meetingPoint,
+      } as any);
+
+      toast({
+        title: 'Success',
+        description: 'Meeting point updated successfully',
+        variant: 'success',
+      });
+      onClose();
+    } catch (err: any) {
+      const message = err?.message || 'Failed to update meeting point';
+      setError(message);
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [meetingPoint, experienceId, updateExperienceAsync, onClose, toast]);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900">Edit Meeting Point</h3>
+        <p className="mt-1 text-xs text-gray-600">Update the meeting location</p>
+      </div>
+
+      <EditMeetingPointField
+        value={meetingPoint}
+        onChange={setMeetingPoint}
+        error={error || undefined}
+      />
+
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          variant="gradient"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          {isSaving ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// Wrapper component for Meeting Time editing
+interface EditMeetingTimeFieldWithSaveProps {
+  experienceId: string;
+  currentMeetingTime: string | null;
+  onClose: () => void;
+}
+
+const EditMeetingTimeFieldWithSave = ({
+  experienceId,
+  currentMeetingTime,
+  onClose,
+}: EditMeetingTimeFieldWithSaveProps) => {
+  const [meetingTime, setMeetingTime] = useState(currentMeetingTime || '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { mutateAsync: updateExperienceAsync } = useUpdateExperience(experienceId);
+  const { toast } = useToast();
+
+  const handleSave = useCallback(async () => {
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      await updateExperienceAsync({
+        meetingTime,
+      } as any);
+
+      toast({
+        title: 'Success',
+        description: 'Meeting time updated successfully',
+        variant: 'success',
+      });
+      onClose();
+    } catch (err: any) {
+      const message = err?.message || 'Failed to update meeting time';
+      setError(message);
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [meetingTime, experienceId, updateExperienceAsync, onClose, toast]);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900">Edit Meeting Time</h3>
+        <p className="mt-1 text-xs text-gray-600">Update the meeting time</p>
+      </div>
+
+      <EditMeetingTimeField
+        value={meetingTime}
+        onChange={setMeetingTime}
+        error={error || undefined}
+      />
+
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          variant="gradient"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          {isSaving ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// Wrapper component for Visibility editing
+interface EditVisibilityFieldWithSaveProps {
+  experienceId: string;
+  currentVisibility: 'public' | 'private';
+  onClose: () => void;
+}
+
+const EditVisibilityFieldWithSave = ({
+  experienceId,
+  currentVisibility,
+  onClose,
+}: EditVisibilityFieldWithSaveProps) => {
+  const [visibility, setVisibility] = useState(currentVisibility);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { mutateAsync: updateExperienceAsync } = useUpdateExperience(experienceId);
+  const { toast } = useToast();
+
+  const handleSave = useCallback(async () => {
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      await updateExperienceAsync({
+        isPublic: visibility === 'public',
+      } as any);
+
+      toast({
+        title: 'Success',
+        description: 'Visibility updated successfully',
+        variant: 'success',
+      });
+      onClose();
+    } catch (err: any) {
+      const message = err?.message || 'Failed to update visibility';
+      setError(message);
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [visibility, experienceId, updateExperienceAsync, onClose, toast]);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900">Edit Visibility</h3>
+        <p className="mt-1 text-xs text-gray-600">Make your experience public or private</p>
+      </div>
+
+      <EditVisibilityField
+        value={visibility}
+        onChange={setVisibility}
+        error={error || undefined}
+      />
+
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          variant="gradient"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          {isSaving ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// Wrapper component for Categories editing
+interface EditCategoriesFieldWithSaveProps {
+  experienceId: string;
+  currentCategories: any[];
+  onClose: () => void;
+}
+
+const EditCategoriesFieldWithSave = ({
+  experienceId,
+  currentCategories,
+  onClose,
+}: EditCategoriesFieldWithSaveProps) => {
+  const [categories, setCategories] = useState(currentCategories);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { mutateAsync: updateExperienceAsync } = useUpdateExperience(experienceId);
+  const { toast } = useToast();
+
+  const handleSave = useCallback(async () => {
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      await updateExperienceAsync({
+        categories,
+      } as any);
+
+      toast({
+        title: 'Success',
+        description: 'Categories updated successfully',
+        variant: 'success',
+      });
+      onClose();
+    } catch (err: any) {
+      const message = err?.message || 'Failed to update categories';
+      setError(message);
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [categories, experienceId, updateExperienceAsync, onClose, toast]);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900">Edit Categories</h3>
+        <p className="mt-1 text-xs text-gray-600">Update experience categories</p>
+      </div>
+
+      <EditCategoriesField
+        value={categories}
+        onChange={setCategories}
+        error={error || undefined}
+      />
+
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          variant="gradient"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          {isSaving ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// Wrapper component for Included editing
+interface EditIncludedFieldWithSaveProps {
+  experienceId: string;
+  currentIncluded: string;
+  onClose: () => void;
+}
+
+const EditIncludedFieldWithSave = ({
+  experienceId,
+  currentIncluded,
+  onClose,
+}: EditIncludedFieldWithSaveProps) => {
+  const [included, setIncluded] = useState(currentIncluded);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { mutateAsync: updateExperienceAsync } = useUpdateExperience(experienceId);
+  const { toast } = useToast();
+
+  const handleSave = useCallback(async () => {
+    if (!included.trim()) {
+      setError('At least one item is required');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      await updateExperienceAsync({
+        whatsIncluded: included,
+      } as any);
+
+      toast({
+        title: 'Success',
+        description: 'Included items updated successfully',
+        variant: 'success',
+      });
+      onClose();
+    } catch (err: any) {
+      const message = err?.message || 'Failed to update included items';
+      setError(message);
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [included, experienceId, updateExperienceAsync, onClose, toast]);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900">Edit What's Included</h3>
+        <p className="mt-1 text-xs text-gray-600">Update what's included in this experience</p>
+      </div>
+
+      <EditIncludedField
+        value={included}
+        onChange={setIncluded}
+        error={error || undefined}
+      />
+
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          variant="gradient"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          {isSaving ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// Wrapper component for Excluded editing
+interface EditExcludedFieldWithSaveProps {
+  experienceId: string;
+  currentExcluded: string;
+  onClose: () => void;
+}
+
+const EditExcludedFieldWithSave = ({
+  experienceId,
+  currentExcluded,
+  onClose,
+}: EditExcludedFieldWithSaveProps) => {
+  const [excluded, setExcluded] = useState(currentExcluded);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { mutateAsync: updateExperienceAsync } = useUpdateExperience(experienceId);
+  const { toast } = useToast();
+
+  const handleSave = useCallback(async () => {
+    if (!excluded.trim()) {
+      setError('At least one item is required');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      setError(null);
+
+      await updateExperienceAsync({
+        whatsNotIncluded: excluded,
+      } as any);
+
+      toast({
+        title: 'Success',
+        description: 'Excluded items updated successfully',
+        variant: 'success',
+      });
+      onClose();
+    } catch (err: any) {
+      const message = err?.message || 'Failed to update excluded items';
+      setError(message);
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [excluded, experienceId, updateExperienceAsync, onClose, toast]);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900">Edit What's NOT Included</h3>
+        <p className="mt-1 text-xs text-gray-600">Update what's not included in this experience</p>
+      </div>
+
+      <EditExcludedField
+        value={excluded}
+        onChange={setExcluded}
+        error={error || undefined}
+      />
+
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          variant="gradient"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="rounded-[50px]"
+        >
+          {isSaving ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 interface InlineEditPanelProps {
   activeEditSection:
@@ -128,76 +936,69 @@ export const InlineEditPanel = ({
     <>
       {/* About sub-sections - focused editors */}
       {activeEditSection === 'about-title' && (
-        <EditTitleField
+        <EditTitleFieldWithSave
           experienceId={experienceId}
           currentTitle={experience.title}
-          onSave={onClose}
-          onCancel={onClose}
+          onClose={onClose}
         />
       )}
       {activeEditSection === 'about-description' && (
-        <EditDescriptionField
+        <EditDescriptionFieldWithSave
           experienceId={experienceId}
           currentDescription={experience.description}
-          onSave={onClose}
-          onCancel={onClose}
+          currentIncluded={experience.whatsIncluded || ''}
+          currentExcluded={experience.whatsNotIncluded || ''}
+          onClose={onClose}
         />
       )}
       {activeEditSection === 'about-location' && (
-        <EditLocationField
+        <EditLocationFieldWithSave
           experienceId={experienceId}
-          currentLocation={experience.location?.formattedAddress}
-          currentPlaceId={experience.location?.placeId}
-          onSave={onClose}
-          onCancel={onClose}
+          currentLocation={experience.location?.formattedAddress || ''}
+          currentPlaceId={experience.location?.placeId || ''}
+          onClose={onClose}
         />
       )}
       {activeEditSection === 'about-meeting-point' && (
-        <EditMeetingPointField
+        <EditMeetingPointFieldWithSave
           experienceId={experienceId}
-          currentMeetingPoint={experience.meetingPoint}
-          onSave={onClose}
-          onCancel={onClose}
+          currentMeetingPoint={experience.meetingPoint || ''}
+          onClose={onClose}
         />
       )}
       {activeEditSection === 'about-meeting-time' && (
-        <EditMeetingTimeField
+        <EditMeetingTimeFieldWithSave
           experienceId={experienceId}
           currentMeetingTime={experience.meetingTime}
-          onSave={onClose}
-          onCancel={onClose}
+          onClose={onClose}
         />
       )}
       {activeEditSection === 'about-categories' && (
-        <EditCategoriesField
+        <EditCategoriesFieldWithSave
           experienceId={experienceId}
-          currentCategories={experience.categories}
-          onSave={onClose}
-          onCancel={onClose}
+          currentCategories={experience.categories || []}
+          onClose={onClose}
         />
       )}
       {activeEditSection === 'about-visibility' && (
-        <EditVisibilityField
+        <EditVisibilityFieldWithSave
           experienceId={experienceId}
           currentVisibility={experience.isPublic ? 'public' : 'private'}
-          onSave={onClose}
-          onCancel={onClose}
+          onClose={onClose}
         />
       )}
       {activeEditSection === 'about-included' && (
-        <EditIncludedField
+        <EditIncludedFieldWithSave
           experienceId={experienceId}
-          currentIncluded={experience.whatsIncluded}
-          onSave={onClose}
-          onCancel={onClose}
+          currentIncluded={experience.whatsIncluded || ''}
+          onClose={onClose}
         />
       )}
       {activeEditSection === 'about-excluded' && (
-        <EditExcludedField
+        <EditExcludedFieldWithSave
           experienceId={experienceId}
-          currentExcluded={experience.whatsNotIncluded}
-          onSave={onClose}
-          onCancel={onClose}
+          currentExcluded={experience.whatsNotIncluded || ''}
+          onClose={onClose}
         />
       )}
       {activeEditSection === 'about-community' && (

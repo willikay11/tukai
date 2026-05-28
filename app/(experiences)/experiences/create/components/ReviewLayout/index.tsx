@@ -88,7 +88,7 @@ export const ReviewLayout = ({
       {/* Page Header */}
       <div className="pt-6">
         <h1 className="text-2xl font-semibold text-gray-900">Review Experience</h1>
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-xs text-gray-600">
           Please review your experience details before publishing.
         </p>
       </div>
