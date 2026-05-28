@@ -34,7 +34,11 @@ export const MultiDayDateSection = ({
       <div className="grid grid-cols-2 gap-2">
         <div>
           {/* <label className="block text-xs font-medium text-gray-900 mb-2">Start Date</label> */}
-          <DatePicker value={startDate || undefined} onChange={onStartDateChange} minDate={new Date()} />
+          <DatePicker
+            value={startDate || undefined}
+            onChange={onStartDateChange}
+            minDate={new Date()}
+          />
           {errors.multiDayStartDate && (
             <p className="mt-1 text-xs text-red-500">{errors.multiDayStartDate}</p>
           )}
@@ -56,7 +60,11 @@ export const MultiDayDateSection = ({
       <div className="grid grid-cols-2 gap-2">
         <div>
           {/* <label className="block text-xs font-medium text-gray-900 mb-2">End Date</label> */}
-          <DatePicker value={endDate || undefined} onChange={onEndDateChange} minDate={new Date()} />
+          <DatePicker
+            value={endDate || undefined}
+            onChange={onEndDateChange}
+            minDate={new Date()}
+          />
           {errors.multiDayEndDate && (
             <p className="mt-1 text-xs text-red-500">{errors.multiDayEndDate}</p>
           )}

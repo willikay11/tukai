@@ -37,6 +37,7 @@ interface AboutStepProps {
   onSaveEdit: () => void;
   onSaveContinue: () => void;
   isSaving?: boolean;
+  onPreview?: () => void;
 }
 
 export const AboutStep = ({
@@ -47,6 +48,7 @@ export const AboutStep = ({
   onSaveEdit,
   onSaveContinue,
   isSaving = false,
+  onPreview,
 }: AboutStepProps) => {
   const handlePhotoChange = useCallback(
     (photo: string | null) => {
@@ -183,7 +185,7 @@ export const AboutStep = ({
 
       <CategoryPicker selectedCategories={formData.categories} onChange={handleCategoriesChange} />
 
-      <div className="flex gap-3 pt-6">
+      <div className="flex gap-2 pt-6 lg:gap-3">
         <button
           type="button"
           onClick={() => {
@@ -206,6 +208,14 @@ export const AboutStep = ({
           className="rounded-[50px] text-xs font-medium"
         >
           Save & Exit
+        </Button>
+        <Button
+          type="button"
+          onClick={onPreview}
+          variant="outline"
+          className="text-xs font-medium lg:hidden"
+        >
+          Preview
         </Button>
         <Button
           type="button"

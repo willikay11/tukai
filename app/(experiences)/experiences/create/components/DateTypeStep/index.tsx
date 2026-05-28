@@ -209,7 +209,11 @@ export const DateTypeStep = ({
             <label className="mb-2 block text-xs font-medium text-gray-900">
               Select Experience date(s)
             </label>
-            <DatePicker value={formData.date || undefined} onChange={handleDateChange} minDate={new Date()} />
+            <DatePicker
+              value={formData.date || undefined}
+              onChange={handleDateChange}
+              minDate={new Date()}
+            />
             {errors.date && <p className="mt-1 text-xs text-red-500">{errors.date}</p>}
           </div>
 

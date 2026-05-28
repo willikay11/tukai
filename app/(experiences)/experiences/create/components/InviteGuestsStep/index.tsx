@@ -14,6 +14,7 @@ interface InviteGuestsStepProps {
   experience?: Experience;
   onNext?: () => void;
   onCancel?: () => void;
+  onPreview?: () => void;
 }
 
 export const InviteGuestsStep = ({
@@ -23,6 +24,7 @@ export const InviteGuestsStep = ({
   experience,
   onNext,
   onCancel,
+  onPreview,
 }: InviteGuestsStepProps) => {
   const handleInvitesChange = useCallback(
     (members, communities) => {
@@ -40,6 +42,7 @@ export const InviteGuestsStep = ({
       experience={experience}
       onInvitesChange={handleInvitesChange}
       onNext={onNext}
+      onPreview={onPreview}
       cancelActionLabel="Cancel"
       saveAndExitActionLabel="Save & Exit"
       nextActionLabel="Next"

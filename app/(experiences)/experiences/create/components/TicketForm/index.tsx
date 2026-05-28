@@ -100,9 +100,7 @@ export const TicketForm = ({
               </button>
               <button
                 type="button"
-                onClick={() =>
-                  onChange({ quantity: Math.max(0, (value.quantity ?? 0) - 1) })
-                }
+                onClick={() => onChange({ quantity: Math.max(0, (value.quantity ?? 0) - 1) })}
                 className="text-gray-700 hover:text-gray-900"
               >
                 <IconComponent iconName="ArrowDown01Icon" size={16} />

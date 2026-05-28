@@ -101,6 +101,8 @@ interface CreateExperienceStepsProps {
   aboutErrors?: Record<string, string>;
   aboutFormData?: AboutFormData;
   updateAboutFormData?: (data: Partial<AboutFormData>) => void;
+  isPreviewDrawerOpen?: boolean;
+  setIsPreviewDrawerOpen?: (isOpen: boolean) => void;
   ticketsFormData?: {
     commission: 'host' | 'customer' | 'split';
     ticketMode: 'entire-period' | 'each-day' | null;
@@ -215,6 +217,8 @@ export const CreateExperienceSteps = ({
   handlers,
   isSavingExperience = false,
   apiError,
+  isPreviewDrawerOpen = false,
+  setIsPreviewDrawerOpen,
 }: CreateExperienceStepsProps) => {
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const canAccessDetailsSteps = Boolean(
@@ -284,7 +288,7 @@ export const CreateExperienceSteps = ({
       onValueChange={(step) => handleStepChange(step as ExperienceStepId)}
       className="grid w-full grid-cols-1"
     >
-      <TabsList className="col-span-1 flex h-auto w-full justify-start gap-2 bg-transparent p-0">
+      <TabsList className="col-span-1 flex h-auto w-full justify-start gap-1 overflow-x-auto bg-transparent p-0 scrollbar-hide sm:gap-2">
         {steps.map((step) => {
           // Check if about step is filled based on form data or experience
           const isAboutFilled = aboutFormData
@@ -320,19 +324,20 @@ export const CreateExperienceSteps = ({
               key={step.id}
               value={step.id}
               disabled={isDisabled}
-              className={`inline-flex gap-2 rounded-full px-4 py-2 text-xs transition-colors data-[state=active]:border-b-[0px] data-[state=active]:border-emerald-600 data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 ${
+              className={`inline-flex flex-shrink-0 gap-1 rounded-full px-2 py-1.5 text-xs transition-colors data-[state=active]:border-b-[0px] data-[state=active]:border-emerald-600 data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 sm:gap-2 sm:px-4 sm:py-2 ${
                 isFilled ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-800'
               }`}
             >
               <div className="flex-shrink-0">
                 <IconComponent
                   iconName={step.icon}
-                  size={20}
+                  size={16}
                   variant={isFilled ? 'solid' : 'twotone'}
+                  className="sm:w-5"
                 />
               </div>
-              <span className="hidden sm:inline">{step.label}</span>
-              <span className="inline sm:hidden">{step.label.split(' ')[0]}</span>
+              <span className="hidden text-xs sm:inline">{step.label}</span>
+              <span className="inline text-xs sm:hidden">{step.label.split(' ')[0]}</span>
             </TabsTrigger>
           );
         })}
@@ -349,13 +354,22 @@ export const CreateExperienceSteps = ({
                   onChange={updateFormData}
                   errors={dateTypeErrors}
                 />
-                <div className="flex justify-between gap-4">
+                <div className="flex gap-2 lg:gap-4">
                   <Button
                     type="button"
                     variant="ghost"
                     className="text-sm font-medium text-red-600 hover:text-red-900"
                   >
                     Cancel
+                  </Button>
+                  <div className="flex-1" />
+                  <Button
+                    type="button"
+                    onClick={() => setIsPreviewDrawerOpen?.(true)}
+                    variant="outline"
+                    className="lg:hidden"
+                  >
+                    Preview
                   </Button>
                   <Button
                     type="button"
@@ -404,6 +418,7 @@ export const CreateExperienceSteps = ({
                     console.log('[steps.tsx] Validation failed');
                   }
                 }}
+                onPreview={() => setIsPreviewDrawerOpen?.(true)}
               />
             ) : (
               <CreateExperienceAbout
@@ -461,6 +476,7 @@ export const CreateExperienceSteps = ({
                   formData?.experienceType === 'multi-day' ? 'Save Tickets' : undefined
                 }
                 experienceId={experience?.id || null}
+                onPreview={() => setIsPreviewDrawerOpen?.(true)}
               />
             ) : (
               <ExperienceDates
@@ -482,6 +498,7 @@ export const CreateExperienceSteps = ({
                 experience={experience}
                 onNext={() => handleStepChange('wallet')}
                 onCancel={() => handleStepChange('dates-tickets')}
+                onPreview={() => setIsPreviewDrawerOpen?.(true)}
               />
             ) : (
               <CreateExperienceInvites
@@ -501,16 +518,18 @@ export const CreateExperienceSteps = ({
                 errors={walletErrors}
                 wallets={wallets}
                 isWalletsLoading={isWalletsLoading}
-                walletMutations={walletMutations || {
-                  createBankWallet: () => {},
-                  isCreatingBankWallet: false,
-                  createPhoneWallet: () => {},
-                  isCreatingPhoneWallet: false,
-                  patchBankWallet: () => {},
-                  isPatchingBankWallet: false,
-                  patchPhoneWallet: () => {},
-                  isPatchingPhoneWallet: false,
-                }}
+                walletMutations={
+                  walletMutations || {
+                    createBankWallet: () => {},
+                    isCreatingBankWallet: false,
+                    createPhoneWallet: () => {},
+                    isCreatingPhoneWallet: false,
+                    patchBankWallet: () => {},
+                    isPatchingBankWallet: false,
+                    patchPhoneWallet: () => {},
+                    isPatchingPhoneWallet: false,
+                  }
+                }
                 onPreviewAndPublish={onPreviewAndPublish || (() => {})}
               />
             ) : (

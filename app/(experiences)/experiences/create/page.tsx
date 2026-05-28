@@ -77,74 +77,68 @@ function CreateExperiencePageContent() {
 
   return (
     <main className="mt-6 grid min-h-screen grid-cols-12 items-stretch gap-4 px-4 md:px-0">
-      {/* Mobile preview button */}
-      <div className="col-span-12 mb-4 flex lg:hidden">
-        <Button
-          onClick={() => setIsPreviewDrawerOpen(true)}
-          variant="outline"
-          className="w-full"
-        >
-          Preview Experience
-        </Button>
-      </div>
-
       {/* Mobile preview drawer */}
       <Drawer isOpen={isPreviewDrawerOpen} setIsOpen={setIsPreviewDrawerOpen}>
-        <div className="space-y-4 overflow-y-auto p-4">
-          <h2 className="text-lg font-semibold">Experience Preview</h2>
-          <ExperienceStepSidePanel
-            step={activeStep}
-            _experienceId={experienceId}
-            _experience={experience}
-            canShowDateTickets={
-              hasUpdatedDates ||
-              !!(
-                formData.dateType.experienceType === 'multi-day' &&
-                formData.dateType.multiDayStartDate &&
-                formData.dateType.multiDayEndDate
-              ) ||
-              !!(
-                formData.dateType.isRecurring &&
-                formData.dateType.recurrenceStartDate &&
-                formData.dateType.recurrenceEndDate
-              ) ||
-              !!(formData.dateType.date && formData.dateType.startTime && formData.dateType.endTime)
-            }
-            isRecurring={formData.dateType.isRecurring}
-            experienceType={formData.dateType.experienceType}
-            itineraryConfig={itineraryConfig}
-            _invitedMembers={invitedMembers}
-            _invitedCommunities={invitedCommunities}
-            selectedCommunity={formData.dateType.community}
-            selectedDate={formData.dateType.date}
-            selectedStartTime={formData.dateType.startTime}
-            selectedEndTime={formData.dateType.endTime}
-            selectedRecurringDays={formData.dateType.recurringDays}
-            selectedTimeSlots={formData.dateType.timeSlots}
-            selectedRecurrenceStartDate={formData.dateType.recurrenceStartDate}
-            selectedRecurrenceEndDate={formData.dateType.recurrenceEndDate}
-            multiDayStartDate={formData.dateType.multiDayStartDate}
-            multiDayStartTime={formData.dateType.multiDayStartTime}
-            multiDayEndDate={formData.dateType.multiDayEndDate}
-            multiDayEndTime={formData.dateType.multiDayEndTime}
-            aboutPhoto={formData.about.photos?.[0] || null}
-            aboutPhotos={formData.about.photos}
-            aboutTitle={formData.about.title}
-            aboutDescription={formData.about.description}
-            aboutVisibility={formData.about.visibility}
-            aboutWhatsIncluded={formData.about.whatsIncluded}
-            aboutWhatsNotIncluded={formData.about.whatsNotIncluded}
-            aboutLocation={formData.about.location}
-            aboutMeetingPoint={formData.about.meetingPoint}
-            aboutMeetingTime={formData.about.meetingTime}
-            aboutCategories={formData.about.categories}
-            ticketsItems={formData.tickets.items}
-            ticketsCommissionPayer={formData.tickets.commission}
-            invitedGuests={formData.invite.invitedGuests}
-            invitedCommunityIds={formData.invite.invitedCommunityIds}
-            allCommunities={communitiesForSelector}
-            selectedWallet={formData.wallet.selectedWallet}
-          />
+        <div className="w-full max-w-full space-y-4 overflow-hidden overflow-y-auto p-4">
+          <div className="w-full max-w-full overflow-hidden">
+            <ExperienceStepSidePanel
+              step={activeStep}
+              _experienceId={experienceId}
+              _experience={experience}
+              canShowDateTickets={
+                hasUpdatedDates ||
+                !!(
+                  formData.dateType.experienceType === 'multi-day' &&
+                  formData.dateType.multiDayStartDate &&
+                  formData.dateType.multiDayEndDate
+                ) ||
+                !!(
+                  formData.dateType.isRecurring &&
+                  formData.dateType.recurrenceStartDate &&
+                  formData.dateType.recurrenceEndDate
+                ) ||
+                !!(
+                  formData.dateType.date &&
+                  formData.dateType.startTime &&
+                  formData.dateType.endTime
+                )
+              }
+              isRecurring={formData.dateType.isRecurring}
+              experienceType={formData.dateType.experienceType}
+              itineraryConfig={itineraryConfig}
+              _invitedMembers={invitedMembers}
+              _invitedCommunities={invitedCommunities}
+              selectedCommunity={formData.dateType.community}
+              selectedDate={formData.dateType.date}
+              selectedStartTime={formData.dateType.startTime}
+              selectedEndTime={formData.dateType.endTime}
+              selectedRecurringDays={formData.dateType.recurringDays}
+              selectedTimeSlots={formData.dateType.timeSlots}
+              selectedRecurrenceStartDate={formData.dateType.recurrenceStartDate}
+              selectedRecurrenceEndDate={formData.dateType.recurrenceEndDate}
+              multiDayStartDate={formData.dateType.multiDayStartDate}
+              multiDayStartTime={formData.dateType.multiDayStartTime}
+              multiDayEndDate={formData.dateType.multiDayEndDate}
+              multiDayEndTime={formData.dateType.multiDayEndTime}
+              aboutPhoto={formData.about.photos?.[0] || null}
+              aboutPhotos={formData.about.photos}
+              aboutTitle={formData.about.title}
+              aboutDescription={formData.about.description}
+              aboutVisibility={formData.about.visibility}
+              aboutWhatsIncluded={formData.about.whatsIncluded}
+              aboutWhatsNotIncluded={formData.about.whatsNotIncluded}
+              aboutLocation={formData.about.location}
+              aboutMeetingPoint={formData.about.meetingPoint}
+              aboutMeetingTime={formData.about.meetingTime}
+              aboutCategories={formData.about.categories}
+              ticketsItems={formData.tickets.items}
+              ticketsCommissionPayer={formData.tickets.commission}
+              invitedGuests={formData.invite.invitedGuests}
+              invitedCommunityIds={formData.invite.invitedCommunityIds}
+              allCommunities={communitiesForSelector}
+              selectedWallet={formData.wallet.selectedWallet}
+            />
+          </div>
         </div>
       </Drawer>
 
@@ -186,6 +180,8 @@ function CreateExperiencePageContent() {
           }}
           isSavingExperience={isSavingExperience}
           apiError={apiError}
+          isPreviewDrawerOpen={isPreviewDrawerOpen}
+          setIsPreviewDrawerOpen={setIsPreviewDrawerOpen}
           onPreviewAndPublish={() => {
             const isWalletValid = validateWallet();
 
@@ -202,7 +198,7 @@ function CreateExperiencePageContent() {
           }}
         />
       </div>
-      <div className="hidden h-full lg:block lg:col-span-4 lg:col-start-8 xl:col-span-4 xl:col-start-8 3xl:col-span-3 3xl:col-start-8 4xl:col-span-2 4xl:col-start-8">
+      <div className="hidden h-full lg:col-span-4 lg:col-start-8 lg:block xl:col-span-4 xl:col-start-8 3xl:col-span-3 3xl:col-start-8 4xl:col-span-2 4xl:col-start-8">
         <ExperienceStepSidePanel
           step={activeStep}
           _experienceId={experienceId}
