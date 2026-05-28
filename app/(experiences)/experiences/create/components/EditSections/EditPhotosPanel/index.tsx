@@ -9,7 +9,7 @@ import {
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Photo } from '@/types/photo';
-import { PhotoUploader } from '../PhotoUploader';
+import { PhotoUploader } from '../../PhotoUploader';
 
 interface LocalPhoto {
   id?: string; // Present if it's an existing photo
@@ -18,7 +18,7 @@ interface LocalPhoto {
   isCover?: boolean;
 }
 
-interface PhotoEditPanelProps {
+interface EditPhotosPanelProps {
   photos: Photo[];
   experienceId?: string;
   onPhotosChange: (photos: Photo[]) => void;
@@ -27,14 +27,14 @@ interface PhotoEditPanelProps {
   maxPhotos?: number;
 }
 
-export const PhotoEditPanel = ({
+export const EditPhotosPanel = ({
   photos,
   experienceId,
   onPhotosChange,
   onClose,
   onAddPhotos,
   maxPhotos = 9,
-}: PhotoEditPanelProps) => {
+}: EditPhotosPanelProps) => {
   const [localPhotos, setLocalPhotos] = useState<LocalPhoto[]>(
     photos.map((p) => ({ id: p.id, photo: p.photo, isCover: p.isCover })),
   );
@@ -131,7 +131,7 @@ export const PhotoEditPanel = ({
         description: message,
         variant: 'destructive',
       });
-      console.error('[PhotoEditPanel] Error:', error);
+      console.error('[EditPhotosPanel] Error:', error);
     } finally {
       setIsLoading(false);
     }

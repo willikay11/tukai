@@ -14,8 +14,8 @@ import {
   EditMeetingTimeField,
   EditTitleField,
   EditVisibilityField,
+  EditPhotosPanel,
 } from '../EditSections';
-import { PhotoEditPanel } from '../PhotoEditPanel';
 import { PreviewCommunitySection } from '../PreviewCommunitySection';
 import { PreviewDateSection } from '../PreviewDateSection';
 import { CreateExperienceAbout } from '../about';
@@ -66,7 +66,7 @@ export const InlineEditPanel = ({
             <h3 className="text-sm font-semibold text-gray-900">Add Photos</h3>
             <p className="mt-1 text-xs text-gray-600">Upload photos to preview your experience</p>
           </div>
-          <PhotoEditPanel
+          <EditPhotosPanel
             photos={[]}
             experienceId={experienceId}
             onPhotosChange={onPhotosChange}
@@ -211,7 +211,7 @@ export const InlineEditPanel = ({
 
       {/* Full form sections for complex edits */}
       {activeEditSection === 'photos' && onPhotosChange && (
-        <PhotoEditPanel
+        <EditPhotosPanel
           photos={aboutPhotos || []}
           experienceId={experienceId}
           onPhotosChange={onPhotosChange}

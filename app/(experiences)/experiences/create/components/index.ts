@@ -56,7 +56,7 @@ export { PreviewWalletSection } from './PreviewWalletSection';
 
 // Panels & Layout
 export { ExperienceReview } from './experienceReview';
-export { PhotoEditPanel } from './PhotoEditPanel';
+export { EditPhotosPanel } from './EditSections/EditPhotosPanel';
 export { InlineEditPanel } from './InlineEditPanel';
 export { SharedExperiencePreview } from './SharedExperiencePreview';
 export { ReviewLayout } from './ReviewLayout';

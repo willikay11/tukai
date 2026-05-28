@@ -7,3 +7,4 @@ export { EditCategoriesField } from './EditCategoriesField';
 export { EditVisibilityField } from './EditVisibilityField';
 export { EditIncludedField } from './EditIncludedField';
 export { EditExcludedField } from './EditExcludedField';
+export { EditPhotosPanel } from './EditPhotosPanel';
