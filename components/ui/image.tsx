@@ -12,6 +12,7 @@ export const TukaiImage = ({
   src,
   alt,
   showNotFoundText = true,
+  className: passedClassName,
   ...props
 }: ImageProps & { showNotFoundText?: boolean }) => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -28,7 +29,7 @@ export const TukaiImage = ({
           fill
           className={clsx(
             'carousel-image object-cover opacity-0 transition-opacity duration-300',
-            props?.className,
+            passedClassName,
           )}
           onLoad={(e) => {
             e.currentTarget.classList.remove('opacity-0');

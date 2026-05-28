@@ -62,7 +62,7 @@ export const ImageCarousel = ({
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index}>
-              <div className={cn('relative', width, className, aspectRatio)}>
+              <div className={cn('relative h-full overflow-hidden', width, className, aspectRatio)}>
                 <TukaiImage src={image} alt={`Image ${index + 1}`} className="rounded-[8px]" />
               </div>
             </CarouselItem>

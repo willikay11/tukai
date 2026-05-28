@@ -2,9 +2,6 @@
 
 import { useCallback, useState } from 'react';
 
-import Image from 'next/image';
-
-import { IconComponent } from '@/app/shared/components/Icons';
 import {
   useAddExperiencePhotos,
   useDeleteExperiencePhoto,
@@ -12,8 +9,7 @@ import {
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Photo } from '@/types/photo';
-
-const isExternalUrl = (src: string) => src.startsWith('https://') || src.startsWith('http://');
+import { PhotoUploader } from '../PhotoUploader';
 
 interface LocalPhoto {
   id?: string; // Present if it's an existing photo
@@ -28,7 +24,6 @@ interface PhotoEditPanelProps {
   onPhotosChange: (photos: Photo[]) => void;
   onClose: () => void;
   onAddPhotos?: (files: File[]) => Promise<void>;
-  onDeletePhoto?: (photoId: string) => Promise<void>;
   maxPhotos?: number;
 }
 
@@ -38,7 +33,6 @@ export const PhotoEditPanel = ({
   onPhotosChange,
   onClose,
   onAddPhotos,
-  onDeletePhoto,
   maxPhotos = 9,
 }: PhotoEditPanelProps) => {
   const [localPhotos, setLocalPhotos] = useState<LocalPhoto[]>(
@@ -51,30 +45,33 @@ export const PhotoEditPanel = ({
   const { mutateAsync: addPhotosAsync } = useAddExperiencePhotos(experienceId || '');
   const { mutateAsync: deletePhotoAsync } = useDeleteExperiencePhoto();
 
-  const handleAddPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.currentTarget.files;
-    if (!files) return;
+  const handleAddPhotos = useCallback(
+    (files: File[]) => {
+      if (localPhotos.length + files.length > maxPhotos) {
+        toast({
+          title: 'Too many photos',
+          description: `You can upload a maximum of ${maxPhotos} photos.`,
+          variant: 'destructive',
+        });
+        return;
+      }
 
-    if (localPhotos.length + files.length > maxPhotos) {
-      toast({
-        title: 'Too many photos',
-        description: `You can upload a maximum of ${maxPhotos} photos.`,
-        variant: 'destructive',
+      files.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const result = event.target?.result as string;
+          setLocalPhotos((prev) => [...prev, { photo: result, file }]);
+        };
+        reader.readAsDataURL(file);
       });
-      return;
-    }
+    },
+    [localPhotos.length, maxPhotos, toast],
+  );
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
-        setLocalPhotos((prev) => [...prev, { photo: result, file }]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
+  const handleRemovePhoto = async (photoId: string) => {
+    const index = localPhotos.findIndex((p) => (p.id || '') === photoId);
+    if (index === -1) return;
 
-  const handleRemovePhoto = async (index: number) => {
     const photoToRemove = localPhotos[index];
 
     // If it's an existing photo, delete it immediately via API
@@ -147,52 +144,13 @@ export const PhotoEditPanel = ({
         <p className="mt-1 text-xs text-gray-600">You can upload up to {maxPhotos} photos</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        {localPhotos.map((photo, index) => (
-          <div key={index} className="relative aspect-square rounded-lg bg-gray-100">
-            {isExternalUrl(photo.photo) ? (
-              <Image
-                src={photo.photo}
-                alt={`Photo ${index + 1}`}
-                fill
-                sizes="(max-width: 640px) 100px, 100px"
-                className="rounded-lg object-cover"
-              />
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={photo.photo}
-                alt={`Photo ${index + 1}`}
-                className="h-full w-full rounded-lg object-cover"
-              />
-            )}
-            <button
-              type="button"
-              onClick={() => handleRemovePhoto(index)}
-              disabled={isLoading}
-              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <span className="text-sm">×</span>
-            </button>
-          </div>
-        ))}
-
-        {localPhotos.length < maxPhotos && (
-          <label className="flex aspect-square cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100">
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleAddPhoto}
-              className="hidden"
-            />
-            <div className="text-center">
-              <IconComponent iconName="Upload01Icon" size={24} className="mx-auto text-gray-400" />
-              <p className="mt-1 text-xs text-gray-600">Add photos</p>
-            </div>
-          </label>
-        )}
-      </div>
+      <PhotoUploader
+        photoUrls={localPhotos.map((p) => p.photo)}
+        existingPhotoIds={localPhotos.map((p) => p.id || '')}
+        onPhotoChange={() => {}} // Not used in edit context
+        onPhotoFilesChange={handleAddPhotos}
+        onPhotoDelete={handleRemovePhoto}
+      />
 
       <div className="flex gap-3">
         <Button

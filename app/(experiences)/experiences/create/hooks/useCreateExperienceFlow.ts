@@ -24,11 +24,11 @@ import { useToast } from '@/app/shared/hooks/useToast';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { addExperiencePhotos } from '@/services/experience';
 import { Community } from '@/types/community';
+import { Experience } from '@/types/experience';
 import { Interest } from '@/types/interest';
 import { Wallet } from '@/types/payment';
 import { Photo } from '@/types/photo';
 import { parseApiError } from '@/utils/parseApiError';
-import { Experience } from '@/types/experience';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
@@ -167,7 +167,6 @@ const initialFormData: FormData = {
   },
   about: {
     photos: [],
-    photoIds: [],
     photoFiles: [],
     title: '',
     visibility: 'public',
@@ -351,7 +350,6 @@ export const useCreateExperienceFlow = () => {
       description: experience.description,
       visibility: experience.isPublic ? 'public' : 'private',
       photos: experience.photos?.map((photo: Photo) => photo.photo) || [],
-      photoIds: experience.photos?.map((photo: Photo) => photo.id) || [],
       categories: experience.categories || [],
       location: experience.location?.formattedAddress || '',
       locationPlaceId: experience.location?.id || '',

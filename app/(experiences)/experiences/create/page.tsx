@@ -132,7 +132,7 @@ function CreateExperiencePageContent() {
               aboutCategories={formData.about.categories}
               ticketsItems={formData.tickets.items}
               ticketsCommissionPayer={formData.tickets.commission}
-              invitedGuests={formData.invite.invitedGuests}
+              invitedGuests={formData.invite.invitedGuests.map(guest => ({ ...guest, name: guest.email.split('@')[0] }))}
               invitedCommunityIds={formData.invite.invitedCommunityIds}
               allCommunities={communitiesForSelector}
               selectedWallet={formData.wallet.selectedWallet}
@@ -246,7 +246,7 @@ function CreateExperiencePageContent() {
           aboutCategories={formData.about.categories}
           ticketsItems={formData.tickets.items}
           ticketsCommissionPayer={formData.tickets.commission}
-          invitedGuests={formData.invite.invitedGuests}
+          invitedGuests={formData.invite.invitedGuests.map(guest => ({ ...guest, name: guest.email.split('@')[0] }))}
           invitedCommunityIds={formData.invite.invitedCommunityIds}
           allCommunities={communitiesForSelector}
           selectedWallet={formData.wallet.selectedWallet}

@@ -148,12 +148,22 @@ interface CreateExperienceStepsProps {
   validateAbout?: () => boolean;
   validateTickets?: () => boolean;
   inviteFormData?: {
-    invitedGuests: InvitedMember[];
+    invitedGuests: {
+      id: string;
+      email: string;
+      dateCreated: string;
+      status: 'invited' | 'accepted' | 'declined';
+    }[];
     invitedCommunityIds: string[];
   };
   updateInviteFormData?: (
     data: Partial<{
-      invitedGuests: InvitedMember[];
+      invitedGuests: {
+        id: string;
+        email: string;
+        dateCreated: string;
+        status: 'invited' | 'accepted' | 'declined';
+      }[];
       invitedCommunityIds: string[];
     }>,
   ) => void;
