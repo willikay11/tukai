@@ -772,10 +772,7 @@ export const useCreateExperienceFlow = () => {
         // Upload photos separately if present
         if (formData.about.photoFiles && formData.about.photoFiles.length > 0) {
           try {
-            await addExperiencePhotos(
-              newExperienceId,
-              formData.about.photoFiles,
-            );
+            await addExperiencePhotos(newExperienceId, formData.about.photoFiles);
           } catch (photoError: any) {
             console.error('[handleSaveAbout] Photo upload failed:', photoError);
             toast({

@@ -252,7 +252,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
         const formattedTime = `${hour24.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}`;
         onChange(formattedTime);
       }
-      setOpen(false);
+      // setOpen(false);
     };
 
     const getDisplayValue = () => {
@@ -293,7 +293,10 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
                   open={open}
                   drumRef={hoursRef}
                   items={HOURS_ARRAY}
-                  onValueChange={setHours}
+                  onValueChange={(h) => {
+                    setHours(h);
+                    handleSave();
+                  }}
                   selectedValue={hours}
                   columnWidth="w-9"
                 />
@@ -308,7 +311,10 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
                   open={open}
                   drumRef={minutesRef}
                   items={MINUTES_ARRAY}
-                  onValueChange={setMinutes}
+                  onValueChange={(m) => {
+                    setMinutes(m);
+                    handleSave();
+                  }}
                   selectedValue={minutes}
                   columnWidth="w-9"
                 />
@@ -318,7 +324,10 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
                   open={open}
                   drumRef={periodRef}
                   items={PERIOD_ARRAY}
-                  onValueChange={(p) => setPeriod(p as TimePeriod)}
+                  onValueChange={(p) => {
+                    setPeriod(p as TimePeriod);
+                    handleSave();
+                  }}
                   selectedValue={period}
                   columnWidth="w-10"
                 />
@@ -336,7 +345,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between border-t border-border px-3 py-2.5">
+          {/* <div className="flex items-center justify-between border-t border-border px-3 py-2.5">
             <button
               type="button"
               onClick={() => setOpen(false)}
@@ -351,7 +360,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
             >
               Save
             </button>
-          </div>
+          </div> */}
         </PopoverContent>
       </Popover>
     );

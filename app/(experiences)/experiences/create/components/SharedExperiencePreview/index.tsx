@@ -193,19 +193,13 @@ export const SharedExperiencePreview = ({
         }
       />
 
-      <PreviewCategoriesSection
-        categories={aboutCategories || []}
-      />
+      <PreviewCategoriesSection categories={aboutCategories || []} />
 
       {renderDateSection()}
 
-      <PreviewItineraryTypeSection
-        visibility={aboutVisibility || 'public'}
-      />
+      <PreviewItineraryTypeSection visibility={aboutVisibility || 'public'} />
 
-      <PreviewLocationSection
-        location={aboutLocation || null}
-      />
+      <PreviewLocationSection location={aboutLocation || null} />
 
       <PreviewMeetingSection
         meetingPoint={aboutMeetingPoint || null}

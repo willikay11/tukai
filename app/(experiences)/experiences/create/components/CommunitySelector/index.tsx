@@ -59,7 +59,7 @@ export const CommunitySelector = ({ value, options, onChange, error }: Community
       </div>
 
       <Select value={value?.id || ''} onValueChange={handleSelect}>
-        <SelectTrigger className={clsx(error && 'border-red-500', 'h-[50px]')}>
+        <SelectTrigger className={clsx(error && 'border-red-500', 'h-[50px] text-xs')}>
           {value ? (
             <div className="flex items-center gap-2">
               {/* <img
@@ -67,10 +67,10 @@ export const CommunitySelector = ({ value, options, onChange, error }: Community
                 alt={value.name}
                 className="h-6 w-12 rounded-lg object-cover"
               /> */}
-              <span className="text-sm font-medium">{value.name}</span>
+              <span className="text-xs font-medium">{value.name}</span>
             </div>
           ) : (
-            <SelectValue className="text-xs placeholder:text-xs" placeholder="Select a community" />
+            <SelectValue placeholder="Select a community" />
           )}
         </SelectTrigger>
         <SelectContent>

@@ -29,6 +29,7 @@ export const RecurrenceDateRange = ({
             value={startDate || undefined}
             onChange={onStartDateChange}
             placeholder="Start Date"
+            minDate={new Date()}
           />
           {errors.recurrenceStartDate && (
             <p className="mt-1 text-xs text-red-500">{errors.recurrenceStartDate}</p>
@@ -40,6 +41,7 @@ export const RecurrenceDateRange = ({
             value={endDate || undefined}
             onChange={onEndDateChange}
             placeholder="End Date"
+            minDate={new Date()}
           />
           {errors.recurrenceEndDate && (
             <p className="mt-1 text-xs text-red-500">{errors.recurrenceEndDate}</p>

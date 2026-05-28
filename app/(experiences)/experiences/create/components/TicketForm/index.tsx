@@ -142,6 +142,7 @@ export const TicketForm = ({
               value={value.salesStartDate || undefined}
               onChange={(date) => onChange({ salesStartDate: date })}
               placeholder="Start Date"
+              minDate={new Date()}
             />
             <TimePicker
               value={value.salesStartTime || undefined}
@@ -156,6 +157,7 @@ export const TicketForm = ({
               value={value.salesEndDate || undefined}
               onChange={(date) => onChange({ salesEndDate: date })}
               placeholder="End Date"
+              minDate={new Date()}
             />
             <TimePicker
               value={value.salesEndTime || undefined}
