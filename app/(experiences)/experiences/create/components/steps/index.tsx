@@ -339,7 +339,7 @@ export const CreateExperienceSteps = ({
       </TabsList>
 
       <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-8">
+        <div className="col-span-8 3xl:col-span-10 4xl:col-span-12">
           <TabsContent value="community" className="col-span-1 mt-6">
             {formData && updateFormData ? (
               <div className="space-y-4">

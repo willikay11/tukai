@@ -424,8 +424,8 @@ export const deleteExperiencePhoto = async (photoId: string): Promise<ApiRespons
 export const searchUsers = async (query: string): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();
-    const response = await axiosInstance.get(`/v1/users/search/`, {
-      params: { search: query },
+    const response = await axiosInstance.get(`/v1/accounts/users/`, {
+      params: { email: query },
     });
 
     return {

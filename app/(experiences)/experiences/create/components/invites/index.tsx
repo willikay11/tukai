@@ -75,7 +75,7 @@ export const CreateExperienceInvites = ({
       try {
         setIsSearchingUsers(true);
         const response = await searchUsersAsync(normalizedQuery);
-        setSearchUsers(response?.data || []);
+        setSearchUsers(response?.data?.results || []);
       } catch (error: any) {
         console.error('[invites] User search error:', error);
         setSearchUsers([]);
@@ -114,7 +114,7 @@ export const CreateExperienceInvites = ({
         await updateExperience({
           title: experience.title,
           description: experience.description || '',
-          googleMapPlaceId: experience.googleMapPlaceId || 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
+          googleMapPlaceId: (experience as any).googleMapPlaceId || 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
           startDate: experience.startDate || '',
           endDate: experience.endDate || '',
           recurrence_rule:
@@ -174,7 +174,7 @@ export const CreateExperienceInvites = ({
     }
 
     return searchUsers
-      .map((user: any) => {
+      ?.map((user: any) => {
         const firstName = user.firstName || '';
         const lastName = user.lastName || '';
         const fullName = `${firstName} ${lastName}`.trim();

@@ -35,6 +35,8 @@ interface TicketFormProps {
   isMultiDay?: boolean;
   ticketMode?: 'entire-period' | 'each-day';
   isSaving?: boolean;
+  experienceStartDate?: string | null;
+  experienceEndDate?: string | null;
 }
 
 export const TicketForm = ({
@@ -49,6 +51,8 @@ export const TicketForm = ({
   isMultiDay = false,
   ticketMode = 'each-day',
   isSaving = false,
+  experienceStartDate,
+  experienceEndDate,
 }: TicketFormProps) => {
   const getCommissionPercentage = () => {
     if (experiencePricing === 'free') return 0;
@@ -69,7 +73,8 @@ export const TicketForm = ({
           placeholder="Ticket Name e.g. VIP, Early Bird, Locals etc..."
           value={value.name}
           onChange={(e) => onChange({ name: e.target.value })}
-          suffixIcon={<IconComponent iconName="Tag01Icon" size={18} />}
+          suffixIcon={<IconComponent iconName="Ticket02Icon" size={18} />}
+          className="text-xs"
         />
         {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
       </div>
@@ -80,13 +85,28 @@ export const TicketForm = ({
           type="number"
           placeholder="Available Ticket Quantity"
           value={value.quantity ?? ''}
+          className="text-xs"
           onChange={(e) =>
             onChange({ quantity: e.target.value ? parseInt(e.target.value, 10) : null })
           }
           suffixIcon={
-            <div className="flex flex-col gap-0.5 text-gray-700">
-              <IconComponent iconName="ArrowUp01Icon" size={11} />
-              <IconComponent iconName="ArrowDown01Icon" size={11} />
+            <div className="flex flex-col gap-0.5">
+              <button
+                type="button"
+                onClick={() => onChange({ quantity: (value.quantity ?? 0) + 1 })}
+                className="text-gray-700 hover:text-gray-900"
+              >
+                <IconComponent iconName="ArrowUp01Icon" size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  onChange({ quantity: Math.max(0, (value.quantity ?? 0) - 1) })
+                }
+                className="text-gray-700 hover:text-gray-900"
+              >
+                <IconComponent iconName="ArrowDown01Icon" size={16} />
+              </button>
             </div>
           }
         />
@@ -103,7 +123,8 @@ export const TicketForm = ({
             onChange={(e) =>
               onChange({ amount: e.target.value ? parseFloat(e.target.value) : null })
             }
-            icon={<IconComponent iconName="Money03Icon" size={18} />}
+            suffixIcon={<IconComponent iconName="Money02Icon" size={18} />}
+            className="text-xs"
           />
           {errors.amount && <p className="text-xs text-red-500">{errors.amount}</p>}
         </div>
@@ -143,6 +164,7 @@ export const TicketForm = ({
               onChange={(date) => onChange({ salesStartDate: date })}
               placeholder="Start Date"
               minDate={new Date()}
+              maxDate={experienceEndDate ? new Date(experienceEndDate) : undefined}
             />
             <TimePicker
               value={value.salesStartTime || undefined}
@@ -158,6 +180,7 @@ export const TicketForm = ({
               onChange={(date) => onChange({ salesEndDate: date })}
               placeholder="End Date"
               minDate={new Date()}
+              maxDate={experienceEndDate ? new Date(experienceEndDate) : undefined}
             />
             <TimePicker
               value={value.salesEndTime || undefined}
