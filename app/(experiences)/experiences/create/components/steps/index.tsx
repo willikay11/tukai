@@ -428,6 +428,14 @@ export const CreateExperienceSteps = ({
                     date: null,
                     startTime: null,
                     endTime: null,
+                    recurringDays: [],
+                    recurrenceStartDate: null,
+                    recurrenceEndDate: null,
+                    timeSlots: [],
+                    multiDayStartDate: null,
+                    multiDayStartTime: null,
+                    multiDayEndDate: null,
+                    multiDayEndTime: null,
                   }
                 }
                 experiencePricing={formData?.experiencePricing || 'paid'}
@@ -493,11 +501,38 @@ export const CreateExperienceSteps = ({
                 errors={walletErrors}
                 wallets={wallets}
                 isWalletsLoading={isWalletsLoading}
-                walletMutations={walletMutations || {}}
+                walletMutations={walletMutations || {
+                  createBankWallet: () => {},
+                  isCreatingBankWallet: false,
+                  createPhoneWallet: () => {},
+                  isCreatingPhoneWallet: false,
+                  patchBankWallet: () => {},
+                  isPatchingBankWallet: false,
+                  patchPhoneWallet: () => {},
+                  isPatchingPhoneWallet: false,
+                }}
                 onPreviewAndPublish={onPreviewAndPublish || (() => {})}
               />
             ) : (
-              <CreateExperienceWallet />
+              <CreateExperienceWallet
+                wallets={wallets}
+                isWalletsLoading={isWalletsLoading}
+                selectedWallet={undefined}
+                onSelectedWalletChange={() => {}}
+                paymentMethod="phone"
+                onPaymentMethodChange={() => {}}
+                phoneNumber=""
+                onPhoneNumberChange={() => {}}
+                onCreatePhoneWallet={() => {}}
+                isCreatingPhoneWallet={false}
+                onPatchPhoneWallet={() => {}}
+                isPatchingPhoneWallet={false}
+                onCreateBankWallet={() => {}}
+                isCreatingBankWallet={false}
+                onPatchBankWallet={() => {}}
+                isPatchingBankWallet={false}
+                onPreviewAndPublish={onPreviewAndPublish || (() => {})}
+              />
             )}
           </TabsContent>
         </div>
