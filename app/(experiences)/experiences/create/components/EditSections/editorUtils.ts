@@ -1,14 +1,89 @@
 import type { SerializedEditorState } from 'lexical';
 
-export const toSerializedEditorState = (content: string = ''): SerializedEditorState => {
-  const textContent =
-    content && content.includes('<') && content.includes('>')
-      ? content.replace(/<[^>]*>/g, '').trim()
-      : content || '';
+const parseHtmlToChildren = (html: string): any[] => {
+  const children: any[] = [];
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const nodes = Array.from(doc.body.childNodes);
 
-  return {
-    root: {
-      children: [
+  nodes.forEach((node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent?.trim();
+      if (text) {
+        children.push({
+          children: [
+            {
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text,
+              type: 'text',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+        });
+      }
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const element = node as HTMLElement;
+      const tagName = element.tagName.toLowerCase();
+
+      if (tagName === 'p' || tagName === 'div') {
+        const textNodes: any[] = [];
+        parseNodeContent(element, textNodes);
+        if (textNodes.length > 0) {
+          children.push({
+            children: textNodes,
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            type: 'paragraph',
+            version: 1,
+          });
+        }
+      } else if (tagName === 'ul' || tagName === 'ol') {
+        const listItems = Array.from(element.querySelectorAll(':scope > li'));
+        const listChildren: any[] = [];
+
+        listItems.forEach((li) => {
+          const textNodes: any[] = [];
+          parseNodeContent(li as HTMLElement, textNodes);
+          if (textNodes.length > 0) {
+            listChildren.push({
+              children: textNodes,
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              type: 'listitem',
+              version: 1,
+            });
+          }
+        });
+
+        if (listChildren.length > 0) {
+          children.push({
+            children: listChildren,
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            listType: tagName === 'ol' ? 'number' : 'bullet',
+            tag: tagName,
+            type: 'list',
+            version: 1,
+          });
+        }
+      }
+    }
+  });
+
+  return children.length > 0
+    ? children
+    : [
         {
           children: [
             {
@@ -16,7 +91,7 @@ export const toSerializedEditorState = (content: string = ''): SerializedEditorS
               format: 0,
               mode: 'normal',
               style: '',
-              text: textContent,
+              text: html ? html.replace(/<[^>]*>/g, '') : '',
               type: 'text',
               version: 1,
             },
@@ -27,7 +102,109 @@ export const toSerializedEditorState = (content: string = ''): SerializedEditorS
           type: 'paragraph',
           version: 1,
         },
+      ];
+};
+
+const parseNodeContent = (element: HTMLElement, textNodes: any[]): void => {
+  Array.from(element.childNodes).forEach((node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent?.trim();
+      if (text) {
+        textNodes.push({
+          detail: 0,
+          format: 0,
+          mode: 'normal',
+          style: '',
+          text,
+          type: 'text',
+          version: 1,
+        });
+      }
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const elem = node as HTMLElement;
+      const tag = elem.tagName.toLowerCase();
+
+      const text = elem.textContent?.trim() || '';
+      if (text) {
+        let format = 0;
+        if (tag === 'strong' || tag === 'b') format |= 1;
+        if (tag === 'em' || tag === 'i') format |= 2;
+        if (tag === 'u') format |= 8;
+        if (tag === 's' || tag === 'del') format |= 16;
+        if (tag === 'code') format |= 32;
+
+        textNodes.push({
+          detail: 0,
+          format,
+          mode: 'normal',
+          style: '',
+          text,
+          type: 'text',
+          version: 1,
+        });
+      }
+    }
+  });
+};
+
+export const toSerializedEditorState = (content: string = ''): SerializedEditorState => {
+  if (!content) {
+    return {
+      root: {
+        children: [
+          {
+            children: [
+              {
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: '',
+                type: 'text',
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            type: 'paragraph',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'root',
+        version: 1,
+      },
+    } as unknown as SerializedEditorState;
+  }
+
+  const hasHtml = content.includes('<') && content.includes('>');
+  const children = hasHtml ? parseHtmlToChildren(content) : [
+    {
+      children: [
+        {
+          detail: 0,
+          format: 0,
+          mode: 'normal',
+          style: '',
+          text: content,
+          type: 'text',
+          version: 1,
+        },
       ],
+      direction: 'ltr',
+      format: '',
+      indent: 0,
+      type: 'paragraph',
+      version: 1,
+    },
+  ];
+
+  return {
+    root: {
+      children,
       direction: 'ltr',
       format: '',
       indent: 0,

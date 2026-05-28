@@ -595,7 +595,7 @@ const EditCategoriesFieldWithSave = ({
       setError(null);
 
       await updateExperienceAsync({
-        categories,
+        categoriesIds: categories.map((c: any) => c.id),
       } as any);
 
       toast({
