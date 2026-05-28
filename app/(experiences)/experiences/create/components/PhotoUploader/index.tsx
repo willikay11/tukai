@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { ImageCropDialog } from '@/app/shared/components/Images';
 import { useDeleteExperiencePhoto } from '@/app/shared/hooks/useExperiences';
@@ -10,54 +10,34 @@ import { validateExperienceImage } from '@/utils/image-utils';
 
 import { PreviewGrid } from './PreviewGrid';
 
+export interface FormPhoto {
+  id: string; // Either 'temp-{timestamp}' or real ID from DB
+  url: string; // Photo URL or data URI
+  file?: File; // Optional, only for new photos
+  isTempId?: boolean; // Flag to know if we need to replace ID after save
+}
+
 interface PhotoUploaderProps {
-  photoUrl?: string | null;
-  photoUrls?: string[];
-  existingPhotoIds?: string[];
-  onPhotoChange: (url: string | null) => void;
-  onPhotoFilesChange?: (files: File[]) => void;
+  photos: FormPhoto[];
+  onPhotoChange: (photo: FormPhoto | null) => void;
+  onPhotoFilesChange?: (photos: FormPhoto[]) => void;
   onPhotoDelete?: (photoId: string) => void;
   error?: string;
 }
 
 export const PhotoUploader = ({
-  photoUrl,
-  photoUrls,
-  existingPhotoIds,
+  photos,
   onPhotoChange,
   onPhotoFilesChange,
   onPhotoDelete,
   error,
 }: PhotoUploaderProps) => {
-  console.log('[PhotoUploader] Rendering:', { existingPhotoIds, photoUrl, photoUrlsCount: photoUrls?.length || 0 });
   const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
-  const [existingPreviews, setExistingPreviews] = useState<Array<{ url: string; fileId: string }>>(
-    photoUrls
-      ? photoUrls.map((url, idx) => ({ url, fileId: `existing-${idx}` }))
-      : photoUrl
-        ? [{ url: photoUrl, fileId: 'existing-0' }]
-        : [],
-  );
-  const [uploadPreviews, setUploadPreviews] = useState<Array<{ url: string; fileId: string }>>([]);
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [cropQueue, setCropQueue] = useState<Array<{ file: File; objectUrl: string; fileId: string }>>([]);
-  const [currentCrop, setCurrentCrop] = useState<{ file: File; objectUrl: string; fileId: string } | null>(null);
+  const [cropQueue, setCropQueue] = useState<Array<{ photo: FormPhoto; objectUrl: string }>>([]);
+  const [currentCrop, setCurrentCrop] = useState<{ photo: FormPhoto; objectUrl: string } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { mutateAsync: deletePhotoAsync } = useDeleteExperiencePhoto();
   const { toast } = useToast();
-
-  // Sync existingPreviews when photoUrls prop changes
-  useEffect(() => {
-    console.log('[PhotoUploader] Syncing photoUrls:', photoUrls);
-    if (photoUrls && photoUrls.length > 0) {
-      const newExistingPreviews = photoUrls.map((url, idx) => ({ url, fileId: `existing-${idx}` }));
-      setExistingPreviews(newExistingPreviews);
-    } else if (photoUrl) {
-      setExistingPreviews([{ url: photoUrl, fileId: 'existing-0' }]);
-    } else {
-      setExistingPreviews([]);
-    }
-  }, [photoUrl, photoUrls]);
 
   const handleFilesSelected = useCallback(
     async (files: File[]) => {
@@ -95,88 +75,116 @@ export const PhotoUploader = ({
       if (validFiles.length === 0) return;
 
       // Separate files that need cropping from those that don't
-      const toAdd: File[] = [];
-      const toCrop: Array<{ file: File; objectUrl: string; fileId: string }> = [];
+      const toCrop: Array<{ file: File; objectUrl: string; tempId: string }> = [];
 
       for (const file of validFiles) {
         try {
           const { width, height, objectUrl } = await getImageDimensions(file);
 
+          // Create temp ID
+          const tempId = `temp-${Date.now()}-${Math.random()}`;
+
           if (imageNeedsCrop(width, height)) {
-            // Queue for cropping — will add to preview immediately
-            const fileId = `portrait-${Date.now()}-${Math.random()}`;
-            toCrop.push({ file, objectUrl, fileId });
+            // Queue for cropping — will convert to data URL after adding to preview
+            toCrop.push({ file, objectUrl, tempId });
           } else {
-            // Already landscape — add directly
+            // Already landscape — add directly with data URL
             URL.revokeObjectURL(objectUrl);
-            toAdd.push(file);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const dataUrl = e.target?.result as string;
+              const landscapePhoto: FormPhoto = {
+                id: tempId,
+                url: dataUrl,
+                file,
+                isTempId: true,
+              };
+              const updatedPhotos = [...photos, landscapePhoto];
+              onPhotoFilesChange?.(updatedPhotos);
+              onPhotoChange?.(landscapePhoto);
+            };
+            reader.readAsDataURL(file);
           }
         } catch {
-          // If dimension check fails, add file anyway
-          toAdd.push(file);
-        }
-      }
-
-      // Add landscape images immediately to both preview and files
-      if (toAdd.length > 0) {
-        const newUploadedFiles = [...uploadedFiles, ...toAdd];
-        setUploadedFiles(newUploadedFiles);
-
-        if (onPhotoFilesChange) {
-          onPhotoFilesChange(newUploadedFiles);
-        }
-
-        // Create previews for landscape images
-        toAdd.forEach((file) => {
+          // If dimension check fails, add file anyway with temp ID
+          const tempId = `temp-${Date.now()}-${Math.random()}`;
           const reader = new FileReader();
           reader.onload = (e) => {
             const dataUrl = e.target?.result as string;
-            const fileId = `landscape-${Date.now()}-${Math.random()}`;
-            setUploadPreviews((prev) => [...prev, { url: dataUrl, fileId }]);
-            onPhotoChange(dataUrl);
+            const fallbackPhoto: FormPhoto = {
+              id: tempId,
+              url: dataUrl,
+              file,
+              isTempId: true,
+            };
+            const updatedPhotos = [...photos, fallbackPhoto];
+            onPhotoFilesChange?.(updatedPhotos);
+            onPhotoChange?.(fallbackPhoto);
           };
           reader.readAsDataURL(file);
-        });
+        }
       }
 
-      // Queue portrait images for crop — add to preview so user can see them
+      // Process portrait images — convert to data URLs and add to preview
       if (toCrop.length > 0) {
-        setUploadPreviews((prev) => [
-          ...prev,
-          ...toCrop.map((item) => ({ url: item.objectUrl, fileId: item.fileId })),
-        ]);
+        const portraitPhotos: FormPhoto[] = [];
 
-        setCropQueue(toCrop);
-        setCurrentCrop(toCrop[0]);
+        for (const { file, objectUrl, tempId } of toCrop) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const dataUrl = e.target?.result as string;
+            const portraitPhoto: FormPhoto = {
+              id: tempId,
+              url: dataUrl,
+              file,
+              isTempId: true,
+            };
+            portraitPhotos.push(portraitPhoto);
+
+            // When all portraits are converted, add to preview and queue for crop
+            if (portraitPhotos.length === toCrop.length) {
+              const updatedPhotos = [...photos, ...portraitPhotos];
+              onPhotoFilesChange?.(updatedPhotos);
+
+              // Queue for crop with the data URLs now available
+              const cropQueue = portraitPhotos.map((p) => ({ photo: p, objectUrl: p.url }));
+              setCropQueue(cropQueue);
+              setCurrentCrop(cropQueue[0]);
+            }
+          };
+          // Revoke the object URL since we're converting to data URL
+          URL.revokeObjectURL(objectUrl);
+          reader.readAsDataURL(file);
+        }
       }
     },
-    [uploadedFiles, onPhotoChange, onPhotoFilesChange, toast],
+    [photos, onPhotoChange, onPhotoFilesChange, toast],
   );
 
   const handleCropComplete = useCallback(
     (croppedFile: File) => {
-      // Clean up original object URL
-      if (currentCrop) URL.revokeObjectURL(currentCrop.objectUrl);
+      if (!currentCrop) return;
 
-      // Add cropped file to uploaded files and update parent
-      const newUploadedFiles = [...uploadedFiles, croppedFile];
-      setUploadedFiles(newUploadedFiles);
+      // Note: currentCrop.objectUrl is now a data URL, no need to revoke
 
-      if (onPhotoFilesChange) {
-        onPhotoFilesChange(newUploadedFiles);
-      }
-
-      // Replace preview with cropped image
+      // Create preview for cropped image
       const reader = new FileReader();
       reader.onload = (e) => {
         const dataUrl = e.target?.result as string;
-        // Replace the portrait preview with cropped preview by fileId
-        setUploadPreviews((prev) =>
-          prev.map((item) =>
-            item.fileId === currentCrop?.fileId ? { ...item, url: dataUrl } : item,
-          ),
+        // Replace the portrait with cropped version, keeping same temp ID
+        const croppedPhoto: FormPhoto = {
+          id: currentCrop.photo.id,
+          url: dataUrl,
+          file: croppedFile,
+          isTempId: true,
+        };
+
+        // Replace in photos array
+        const updatedPhotos = photos.map((p) =>
+          p.id === currentCrop.photo.id ? croppedPhoto : p,
         );
-        onPhotoChange(dataUrl);
+        onPhotoFilesChange?.(updatedPhotos);
+        onPhotoChange?.(croppedPhoto);
       };
       reader.readAsDataURL(croppedFile);
 
@@ -185,124 +193,68 @@ export const PhotoUploader = ({
       setCropQueue(remaining);
       setCurrentCrop(remaining.length > 0 ? remaining[0] : null);
     },
-    [currentCrop, cropQueue, uploadedFiles, onPhotoChange, onPhotoFilesChange],
+    [currentCrop, cropQueue, photos, onPhotoChange, onPhotoFilesChange],
   );
 
   const handleCropCancel = useCallback(() => {
-    // Remove from preview and discard this photo
-    if (currentCrop) {
-      URL.revokeObjectURL(currentCrop.objectUrl);
+    if (!currentCrop) return;
 
-      // Remove from upload previews by fileId
-      setUploadPreviews((prev) => prev.filter((item) => item.fileId !== currentCrop.fileId));
-    }
+    // Remove from preview and discard this photo
+    URL.revokeObjectURL(currentCrop.objectUrl);
+
+    // Remove from photos array
+    const updatedPhotos = photos.filter((p) => p.id !== currentCrop.photo.id);
+    onPhotoFilesChange?.(updatedPhotos);
 
     const remaining = cropQueue.slice(1);
     setCropQueue(remaining);
     setCurrentCrop(remaining.length > 0 ? remaining[0] : null);
-  }, [currentCrop, cropQueue]);
+  }, [currentCrop, cropQueue, photos, onPhotoFilesChange]);
 
   const handleRemovePreview = useCallback(
     async (index: number) => {
-      console.log('[PhotoUploader] Remove clicked:', { index, existingPreviews: existingPreviews.length, uploadPreviews: uploadPreviews.length });
+      const itemToRemove = photos[index];
+      if (!itemToRemove) return;
 
-      const allPreviews = [
-        ...existingPreviews.map((item, idx) => ({ ...item, isExisting: true, originalIndex: idx })),
-        ...uploadPreviews.map((item, idx) => ({ ...item, isExisting: false, uploadIndex: idx })),
-      ];
-
-      console.log('[PhotoUploader] All previews:', { total: allPreviews.length, allPreviews });
-
-      const itemToRemove = allPreviews[index];
-      console.log('[PhotoUploader] Item to remove:', { itemToRemove });
-
-      if (!itemToRemove) {
-        console.warn('[PhotoUploader] Item not found at index', index);
-        return;
+      // Check if it's an existing photo (real ID from DB) vs new photo (temp ID)
+      if (!itemToRemove.isTempId) {
+        // It's an existing photo with real ID - call delete API
+        setIsDeletingPhoto(true);
+        try {
+          await deletePhotoAsync(itemToRemove.id);
+          onPhotoDelete?.(itemToRemove.id);
+        } catch (error: any) {
+          toast({
+            title: 'Error',
+            description: 'Failed to delete photo. Please try again.',
+            variant: 'destructive',
+          });
+          setIsDeletingPhoto(false);
+          return;
+        }
+        setIsDeletingPhoto(false);
       }
 
-      if (itemToRemove.isExisting) {
-        console.log('[PhotoUploader] Removing existing photo:', itemToRemove.originalIndex);
-        const existingPhotoId = existingPhotoIds?.[itemToRemove.originalIndex];
+      // Remove from preview URLs
+      const updatedPhotos = photos.filter((_, i) => i !== index);
+      onPhotoFilesChange?.(updatedPhotos);
 
-        if (existingPhotoId) {
-          setIsDeletingPhoto(true);
-          try {
-            await deletePhotoAsync(existingPhotoId);
-            if (onPhotoDelete) {
-              onPhotoDelete(existingPhotoId);
-            }
-          } catch (error: any) {
-            toast({
-              title: 'Error',
-              description: 'Failed to delete photo. Please try again.',
-              variant: 'destructive',
-            });
-            setIsDeletingPhoto(false);
-            return;
-          }
-          setIsDeletingPhoto(false);
-        }
-
-        console.log('[PhotoUploader] Filtering existing previews:', itemToRemove.originalIndex);
-        setExistingPreviews((prev) => {
-          const newPrev = prev.filter((_, i) => i !== itemToRemove.originalIndex);
-          console.log('[PhotoUploader] Existing previews after filter:', { before: prev.length, after: newPrev.length });
-          return newPrev;
-        });
-      } else {
-        // Remove uploaded photo
-        const uploadIndex = itemToRemove.uploadIndex;
-        console.log('[PhotoUploader] Removing uploaded photo:', uploadIndex);
-
-        // Revoke object URL if it's not an external URL
-        if (
-          !itemToRemove.url.startsWith('https://') &&
-          !itemToRemove.url.startsWith('http://')
-        ) {
-          console.log('[PhotoUploader] Revoking object URL:', itemToRemove.url);
-          URL.revokeObjectURL(itemToRemove.url);
-        }
-
-        console.log('[PhotoUploader] Filtering upload previews:', uploadIndex);
-        setUploadPreviews((prev) => {
-          const newPrev = prev.filter((_, i) => i !== uploadIndex);
-          console.log('[PhotoUploader] Upload previews after filter:', { before: prev.length, after: newPrev.length });
-          return newPrev;
-        });
-
-        const newUploadedFiles = uploadedFiles.filter((_, i) => i !== uploadIndex);
-        console.log('[PhotoUploader] Updated uploaded files:', { before: uploadedFiles.length, after: newUploadedFiles.length });
-        setUploadedFiles(newUploadedFiles);
-
-        if (onPhotoFilesChange) {
-          console.log('[PhotoUploader] Calling onPhotoFilesChange with', newUploadedFiles.length, 'files');
-          onPhotoFilesChange(newUploadedFiles);
-        }
+      // Revoke object URL if it's not an external URL
+      if (
+        !itemToRemove.url.startsWith('https://') &&
+        !itemToRemove.url.startsWith('http://')
+      ) {
+        URL.revokeObjectURL(itemToRemove.url);
       }
     },
-    [existingPreviews, uploadPreviews, existingPhotoIds, uploadedFiles, deletePhotoAsync, onPhotoDelete, onPhotoFilesChange, toast],
+    [photos, deletePhotoAsync, onPhotoDelete, onPhotoFilesChange, toast],
   );
 
-  const previews = [
-    ...existingPreviews.map((item, index) => ({
-      url: item.url,
-      index,
-      fileId: item.fileId,
-    })),
-    ...uploadPreviews.map((item, index) => ({
-      url: item.url,
-      index: existingPreviews.length + index,
-      fileId: item.fileId,
-    })),
-  ];
-
-  console.log('[PhotoUploader] Previews updated:', {
-    existingCount: existingPreviews.length,
-    uploadCount: uploadPreviews.length,
-    totalPreviews: previews.length,
-    previews,
-  });
+  const previews = photos.map((photo, index) => ({
+    url: photo.url,
+    id: photo.id,
+    index,
+  }));
 
   return (
     <>
@@ -338,8 +290,8 @@ export const PhotoUploader = ({
       {currentCrop && (
         <ImageCropDialog
           imageSrc={currentCrop.objectUrl}
-          fileName={currentCrop.file.name}
-          fileType={currentCrop.file.type}
+          fileName={currentCrop.photo.file?.name || 'photo'}
+          fileType={currentCrop.photo.file?.type || 'image/jpeg'}
           onCropComplete={handleCropComplete}
           onCancel={handleCropCancel}
         />

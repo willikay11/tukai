@@ -6,7 +6,6 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
 
 interface PreviewExperienceHeaderProps {
-  photo: string | null;
   photos?: string[];
   title: string;
   description: string;
@@ -14,14 +13,14 @@ interface PreviewExperienceHeaderProps {
 }
 
 export const PreviewExperienceHeader = ({
-  photo,
   photos,
   title,
   description,
   onEdit,
 }: PreviewExperienceHeaderProps) => {
   // Use photos array if provided, otherwise fall back to single photo
-  const imagesToDisplay = photos && photos.length > 0 ? photos : photo ? [photo] : [];
+  const imagesToDisplay = photos && photos.length > 0 ? photos : [];
+
   return (
     <div className="space-y-3">
       <div className="flex items-start justify-between"></div>

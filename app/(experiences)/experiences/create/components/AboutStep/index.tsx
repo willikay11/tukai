@@ -13,10 +13,15 @@ import { MeetingDetailsInput } from '../MeetingDetailsInput';
 import { PhotoUploader } from '../PhotoUploader';
 import { VisibilityPicker } from '../VisibilityPicker';
 
+type FormPhoto = {
+  id: string;
+  url: string;
+  file?: File;
+  isTempId?: boolean;
+};
+
 type AboutFormData = {
-  photos: string[];
-  photoIds?: string[];
-  photoFiles: File[];
+  photos: FormPhoto[];
   title: string;
   visibility: 'public' | 'private';
   description: string;
@@ -51,10 +56,10 @@ export const AboutStep = ({
   onPreview,
 }: AboutStepProps) => {
   const handlePhotoChange = useCallback(
-    (photo: string | null) => {
+    (photo: FormPhoto | null) => {
       if (photo) {
         // Add photo to the array if not already present
-        const photos = formData.photos.includes(photo)
+        const photos = formData.photos.find(p => p.id === photo.id)
           ? formData.photos
           : [...formData.photos, photo];
         onFormDataChange({ photos });
@@ -64,8 +69,8 @@ export const AboutStep = ({
   );
 
   const handlePhotoFilesChange = useCallback(
-    (files: File[]) => {
-      onFormDataChange({ photoFiles: files });
+    (photos: FormPhoto[]) => {
+      onFormDataChange({ photos });
     },
     [onFormDataChange],
   );
@@ -138,14 +143,13 @@ export const AboutStep = ({
       <p className="mb-2 text-sm font-semibold text-gray-800">Add details about the experience</p>
 
       <PhotoUploader
-        photoUrls={formData.photos}
-        existingPhotoIds={formData.photoIds || []}
+        photos={formData.photos}
         onPhotoChange={handlePhotoChange}
         onPhotoFilesChange={handlePhotoFilesChange}
-        onPhotoDelete={(photoId) => {
+        onPhotoDelete={(photoId: string) => {
           // Remove from form data when deleted
           onFormDataChange({
-            photoIds: (formData.photoIds || []).filter((id) => id !== photoId),
+            photos: formData.photos.filter((p) => p.id !== photoId),
           });
         }}
         error={errors.photos}

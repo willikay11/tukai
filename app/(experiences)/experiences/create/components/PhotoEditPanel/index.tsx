@@ -145,10 +145,15 @@ export const PhotoEditPanel = ({
       </div>
 
       <PhotoUploader
-        photoUrls={localPhotos.map((p) => p.photo)}
-        existingPhotoIds={localPhotos.map((p) => p.id || '')}
+        photos={localPhotos.map((p) => ({
+          id: p.id || `temp-${Date.now()}-${Math.random()}`,
+          url: p.photo,
+          isTempId: !p.id,
+        }))}
         onPhotoChange={() => {}} // Not used in edit context
-        onPhotoFilesChange={handleAddPhotos}
+        onPhotoFilesChange={(photos) => {
+          handleAddPhotos(photos.filter((p) => p.file).map((p) => p.file!));
+        }}
         onPhotoDelete={handleRemovePhoto}
       />
 

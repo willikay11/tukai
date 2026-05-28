@@ -77,6 +77,13 @@ export interface CommunityOption {
   imageUrl: string;
 }
 
+export interface FormPhoto {
+  id: string; // Either 'temp-{timestamp}' or real ID from DB
+  url: string; // Photo URL or data URI
+  file?: File; // Optional, only for new photos
+  isTempId?: boolean; // Flag to know if we need to replace ID after save
+}
+
 export interface FormData {
   dateType: {
     community: CommunityOption | null;
@@ -96,8 +103,7 @@ export interface FormData {
     multiDayEndTime: string | null;
   };
   about: {
-    photos: string[];
-    photoFiles: File[];
+    photos: FormPhoto[];
     title: string;
     visibility: 'public' | 'private';
     description: string;
@@ -167,7 +173,6 @@ const initialFormData: FormData = {
   },
   about: {
     photos: [],
-    photoFiles: [],
     title: '',
     visibility: 'public',
     description: '',
@@ -349,7 +354,12 @@ export const useCreateExperienceFlow = () => {
       title: experience.title,
       description: experience.description,
       visibility: experience.isPublic ? 'public' : 'private',
-      photos: experience.photos?.map((photo: Photo) => photo.photo) || [],
+      photos:
+        experience.photos?.map((photo: Photo) => ({
+          id: photo.id,
+          url: photo.photo,
+          isTempId: false,
+        })) || [],
       categories: experience.categories || [],
       location: experience.location?.formattedAddress || '',
       locationPlaceId: experience.location?.id || '',
@@ -412,6 +422,40 @@ export const useCreateExperienceFlow = () => {
       }));
     }
   }, [experience?.id, updateAboutFormData, updateFormData]);
+
+  // Sync photo IDs after photos are uploaded (replace temp IDs with real IDs)
+  useEffect(() => {
+    if (!experience?.photos || formData.about.photos.length === 0) {
+      return;
+    }
+
+    // Check if there are any temp IDs that need to be replaced
+    const hasTempIds = formData.about.photos.some((p) => p.isTempId);
+    if (!hasTempIds) {
+      return;
+    }
+
+    // Replace temp IDs with real IDs from the experience photos
+    const updatedPhotos = formData.about.photos.map((photo, index) => {
+      if (photo.isTempId) {
+        // Find the corresponding photo in the experience by order
+        const serverPhoto = experience.photos?.find((p: any) => p.order === index);
+        if (serverPhoto) {
+          return {
+            ...photo,
+            id: serverPhoto.id,
+            isTempId: false,
+          };
+        }
+      }
+      return photo;
+    });
+
+    // Only update if IDs actually changed
+    if (updatedPhotos.some((p, i) => p.id !== formData.about.photos[i].id)) {
+      updateAboutFormData({ photos: updatedPhotos });
+    }
+  }, [experience?.photos, formData.about.photos, updateAboutFormData]);
 
   const updateWalletFormData = useCallback((data: Partial<FormData['wallet']>) => {
     setFormData((prev) => ({
@@ -702,8 +746,9 @@ export const useCreateExperienceFlow = () => {
     setIsSavingExperience(true);
     setApiError(null);
     try {
-      console.log('[handleSaveAbout] photoFiles count:', formData.about.photoFiles?.length || 0);
-      console.log('[handleSaveAbout] photoFiles:', formData.about.photoFiles);
+      const photoFiles = formData.about.photos.filter((p) => p.file).map((p) => p.file!);
+      console.log('[handleSaveAbout] photoFiles count:', photoFiles.length || 0);
+      console.log('[handleSaveAbout] photoFiles:', photoFiles);
 
       const payload = {
         title: formData.about.title,
@@ -738,17 +783,17 @@ export const useCreateExperienceFlow = () => {
         console.log('[handleSaveAbout] updateExperienceAsync completed');
 
         // Upload photos separately if present
-        if (formData.about.photoFiles && formData.about.photoFiles.length > 0) {
+        if (photoFiles && photoFiles.length > 0) {
           try {
             console.log(
               '[handleSaveAbout] Uploading',
-              formData.about.photoFiles.length,
+              photoFiles.length,
               'photos to experience',
               experienceId,
             );
             const photoResponse = await addExperiencePhotos(
               experienceId,
-              formData.about.photoFiles,
+              photoFiles,
             );
             console.log('[handleSaveAbout] Photos uploaded successfully, response:', photoResponse);
           } catch (photoError: any) {
@@ -769,9 +814,9 @@ export const useCreateExperienceFlow = () => {
         }
 
         // Upload photos separately if present
-        if (formData.about.photoFiles && formData.about.photoFiles.length > 0) {
+        if (photoFiles && photoFiles.length > 0) {
           try {
-            await addExperiencePhotos(newExperienceId, formData.about.photoFiles);
+            await addExperiencePhotos(newExperienceId, photoFiles);
           } catch (photoError: any) {
             console.error('[handleSaveAbout] Photo upload failed:', photoError);
             toast({

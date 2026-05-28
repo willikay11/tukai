@@ -27,8 +27,7 @@ interface SharedExperiencePreviewProps {
   isRecurring?: boolean;
 
   // About section data
-  aboutPhoto?: string | null;
-  aboutPhotos?: string[];
+  aboutPhotos?: Array<{ id: string; url: string; isTempId?: boolean }>;
   aboutTitle?: string;
   aboutDescription?: string;
   aboutVisibility?: 'public' | 'private';
@@ -87,7 +86,6 @@ export const SharedExperiencePreview = ({
   step,
   experienceType = 'one-time',
   isRecurring = false,
-  aboutPhoto,
   aboutPhotos,
   aboutTitle,
   aboutDescription,
@@ -173,8 +171,7 @@ export const SharedExperiencePreview = ({
       <h2 className="text-sm font-semibold text-gray-900">{getHeading()}</h2>
 
       <PreviewExperienceHeader
-        photo={aboutPhoto || null}
-        photos={aboutPhotos}
+        photos={aboutPhotos?.map((p) => p.url) || []}
         title={aboutTitle || ''}
         description={aboutDescription || ''}
       />
@@ -216,7 +213,7 @@ export const SharedExperiencePreview = ({
       {shouldShowTickets && (
         <PreviewTicketsSection
           tickets={ticketsItems}
-          coverPhoto={aboutPhoto || undefined}
+          coverPhoto={aboutPhotos?.[0]?.url || undefined}
           commissionPayer={ticketsCommissionPayer}
         />
       )}

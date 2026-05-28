@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { IconComponent } from '@/app/shared/components/Icons';
 
 interface PreviewGridProps {
-  previews: Array<{ url: string; index: number; fileId: string }>;
+  previews: Array<{ url: string; index: number; id: string }>;
   onRemove: (index: number) => void;
   onAddClick: () => void;
   maxFiles?: number;
@@ -24,9 +24,9 @@ export const PreviewGrid = ({
 
   return (
     <div className="flex flex-wrap items-start gap-3">
-      {previews.map(({ url, index, fileId }) => (
+      {previews.map(({ url, index, id }) => (
         <div
-          key={fileId}
+          key={id}
           className="relative h-[105px] w-[155px] rounded-xl"
         >
           {isExternalUrl(url) ? (
@@ -49,7 +49,6 @@ export const PreviewGrid = ({
           <button
             type="button"
             onClick={() => {
-              console.log('[PreviewGrid] Remove button clicked for index:', index);
               onRemove(index);
             }}
             disabled={isDeletingPhoto}

@@ -82,8 +82,6 @@ function CreateExperiencePageContent() {
           <div className="w-full max-w-full overflow-hidden">
             <ExperienceStepSidePanel
               step={activeStep}
-              _experienceId={experienceId}
-              _experience={experience}
               canShowDateTickets={
                 hasUpdatedDates ||
                 !!(
@@ -105,8 +103,6 @@ function CreateExperiencePageContent() {
               isRecurring={formData.dateType.isRecurring}
               experienceType={formData.dateType.experienceType}
               itineraryConfig={itineraryConfig}
-              _invitedMembers={invitedMembers}
-              _invitedCommunities={invitedCommunities}
               selectedCommunity={formData.dateType.community}
               selectedDate={formData.dateType.date}
               selectedStartTime={formData.dateType.startTime}
@@ -200,8 +196,6 @@ function CreateExperiencePageContent() {
       <div className="hidden h-full lg:col-span-4 lg:col-start-8 lg:block xl:col-span-4 xl:col-start-8 3xl:col-span-3 3xl:col-start-8 4xl:col-span-2 4xl:col-start-8">
         <ExperienceStepSidePanel
           step={activeStep}
-          _experienceId={experienceId}
-          _experience={experience}
           canShowDateTickets={
             hasUpdatedDates ||
             !!(
@@ -219,8 +213,6 @@ function CreateExperiencePageContent() {
           isRecurring={formData.dateType.isRecurring}
           experienceType={formData.dateType.experienceType}
           itineraryConfig={itineraryConfig}
-          _invitedMembers={invitedMembers}
-          _invitedCommunities={invitedCommunities}
           selectedCommunity={formData.dateType.community}
           selectedDate={formData.dateType.date}
           selectedStartTime={formData.dateType.startTime}
