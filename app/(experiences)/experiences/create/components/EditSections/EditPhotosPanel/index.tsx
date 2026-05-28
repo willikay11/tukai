@@ -2,7 +2,6 @@
 
 import { useCallback, useState } from 'react';
 
-import { IconComponent } from '@/app/shared/components/Icons';
 import {
   useAddExperiencePhotos,
   useDeleteExperiencePhoto,
@@ -10,6 +9,7 @@ import {
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Photo } from '@/types/photo';
+import { PhotoUploader } from '../../PhotoUploader';
 
 interface LocalPhoto {
   id?: string; // Present if it's an existing photo
@@ -18,25 +18,23 @@ interface LocalPhoto {
   isCover?: boolean;
 }
 
-interface PhotoEditPanelProps {
+interface EditPhotosPanelProps {
   photos: Photo[];
   experienceId?: string;
   onPhotosChange: (photos: Photo[]) => void;
   onClose: () => void;
   onAddPhotos?: (files: File[]) => Promise<void>;
-  onDeletePhoto?: (photoId: string) => Promise<void>;
   maxPhotos?: number;
 }
 
-export const PhotoEditPanel = ({
+export const EditPhotosPanel = ({
   photos,
   experienceId,
   onPhotosChange,
   onClose,
   onAddPhotos,
-  onDeletePhoto,
   maxPhotos = 9,
-}: PhotoEditPanelProps) => {
+}: EditPhotosPanelProps) => {
   const [localPhotos, setLocalPhotos] = useState<LocalPhoto[]>(
     photos.map((p) => ({ id: p.id, photo: p.photo, isCover: p.isCover })),
   );
@@ -47,30 +45,33 @@ export const PhotoEditPanel = ({
   const { mutateAsync: addPhotosAsync } = useAddExperiencePhotos(experienceId || '');
   const { mutateAsync: deletePhotoAsync } = useDeleteExperiencePhoto();
 
-  const handleAddPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.currentTarget.files;
-    if (!files) return;
+  const handleAddPhotos = useCallback(
+    (files: File[]) => {
+      if (localPhotos.length + files.length > maxPhotos) {
+        toast({
+          title: 'Too many photos',
+          description: `You can upload a maximum of ${maxPhotos} photos.`,
+          variant: 'destructive',
+        });
+        return;
+      }
 
-    if (localPhotos.length + files.length > maxPhotos) {
-      toast({
-        title: 'Too many photos',
-        description: `You can upload a maximum of ${maxPhotos} photos.`,
-        variant: 'destructive',
+      files.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const result = event.target?.result as string;
+          setLocalPhotos((prev) => [...prev, { photo: result, file }]);
+        };
+        reader.readAsDataURL(file);
       });
-      return;
-    }
+    },
+    [localPhotos.length, maxPhotos, toast],
+  );
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
-        setLocalPhotos((prev) => [...prev, { photo: result, file }]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
+  const handleRemovePhoto = async (photoId: string) => {
+    const index = localPhotos.findIndex((p) => (p.id || '') === photoId);
+    if (index === -1) return;
 
-  const handleRemovePhoto = async (index: number) => {
     const photoToRemove = localPhotos[index];
 
     // If it's an existing photo, delete it immediately via API
@@ -130,7 +131,7 @@ export const PhotoEditPanel = ({
         description: message,
         variant: 'destructive',
       });
-      console.error('[PhotoEditPanel] Error:', error);
+      console.error('[EditPhotosPanel] Error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -143,49 +144,26 @@ export const PhotoEditPanel = ({
         <p className="mt-1 text-xs text-gray-600">You can upload up to {maxPhotos} photos</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        {localPhotos.map((photo, index) => (
-          <div key={index} className="relative aspect-square rounded-lg bg-gray-100">
-            <img
-              src={photo}
-              alt={`Photo ${index + 1}`}
-              className="h-full w-full rounded-lg object-cover"
-            />
-            <button
-              type="button"
-              onClick={() => handleRemovePhoto(index)}
-              disabled={isLoading}
-              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <span className="text-sm">×</span>
-            </button>
-          </div>
-        ))}
+      <PhotoUploader
+        photos={localPhotos.map((p) => ({
+          id: p.id || `temp-${Date.now()}-${Math.random()}`,
+          url: p.photo,
+          isTempId: !p.id,
+        }))}
+        onPhotoChange={() => {}} // Not used in edit context
+        onPhotoFilesChange={(photos) => {
+          handleAddPhotos(photos.filter((p) => p.file).map((p) => p.file!));
+        }}
+        onPhotoDelete={handleRemovePhoto}
+      />
 
-        {localPhotos.length < maxPhotos && (
-          <label className="flex aspect-square cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100">
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleAddPhoto}
-              className="hidden"
-            />
-            <div className="text-center">
-              <IconComponent iconName="Upload01Icon" size={24} className="mx-auto text-gray-400" />
-              <p className="mt-1 text-xs text-gray-600">Add photos</p>
-            </div>
-          </label>
-        )}
-      </div>
-
-      <div className="flex gap-3">
+      <div className="flex gap-2">
         <Button
           type="button"
           variant="outline"
           onClick={onClose}
           disabled={isLoading}
-          className="flex-1"
+          className="rounded-[50px]"
         >
           Cancel
         </Button>
@@ -194,9 +172,9 @@ export const PhotoEditPanel = ({
           variant="gradient"
           onClick={handleSave}
           disabled={isLoading}
-          className="flex-1"
+          className="rounded-[50px]"
         >
-          {isLoading ? 'Saving...' : 'Save Photos'}
+          {isLoading ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
     </div>

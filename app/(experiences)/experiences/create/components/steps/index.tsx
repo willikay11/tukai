@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
+import { useRouter } from 'next/navigation';
+
 import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
@@ -27,6 +29,7 @@ import { CreateExperienceWallet } from '../wallet';
 
 type AboutFormData = {
   photos: string[];
+  photoFiles: File[];
   title: string;
   visibility: 'public' | 'private';
   description: string;
@@ -100,6 +103,8 @@ interface CreateExperienceStepsProps {
   aboutErrors?: Record<string, string>;
   aboutFormData?: AboutFormData;
   updateAboutFormData?: (data: Partial<AboutFormData>) => void;
+  isPreviewDrawerOpen?: boolean;
+  setIsPreviewDrawerOpen?: (isOpen: boolean) => void;
   ticketsFormData?: {
     commission: 'host' | 'customer' | 'split';
     ticketMode: 'entire-period' | 'each-day' | null;
@@ -143,12 +148,22 @@ interface CreateExperienceStepsProps {
   validateAbout?: () => boolean;
   validateTickets?: () => boolean;
   inviteFormData?: {
-    invitedGuests: InvitedMember[];
+    invitedGuests: {
+      id: string;
+      email: string;
+      dateCreated: string;
+      status: 'invited' | 'accepted' | 'declined';
+    }[];
     invitedCommunityIds: string[];
   };
   updateInviteFormData?: (
     data: Partial<{
-      invitedGuests: InvitedMember[];
+      invitedGuests: {
+        id: string;
+        email: string;
+        dateCreated: string;
+        status: 'invited' | 'accepted' | 'declined';
+      }[];
       invitedCommunityIds: string[];
     }>,
   ) => void;
@@ -172,6 +187,7 @@ interface CreateExperienceStepsProps {
   handlers?: {
     handleSaveAbout?: () => Promise<void>;
     handlePublish?: () => Promise<void>;
+    handleUpdateFeesAllocation?: () => Promise<void>;
   };
   isSavingExperience?: boolean;
   apiError?: string | null;
@@ -213,8 +229,12 @@ export const CreateExperienceSteps = ({
   handlers,
   isSavingExperience = false,
   apiError,
+  isPreviewDrawerOpen = false,
+  setIsPreviewDrawerOpen,
 }: CreateExperienceStepsProps) => {
+  const router = useRouter();
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const canAccessDetailsSteps = Boolean(
     experience?.id || selectedCommunityId || formData?.community?.id,
   );
@@ -250,6 +270,13 @@ export const CreateExperienceSteps = ({
     }
   };
 
+  const handlePreviewClick = () => {
+    setIsPreviewLoading(true);
+    router.push(window.location.href);
+    setIsPreviewDrawerOpen?.(true);
+    setTimeout(() => setIsPreviewLoading(false), 1000);
+  };
+
   if (isLoadingExperience) {
     const steps = getSteps(formData?.experienceType || 'one-time');
     return (
@@ -282,7 +309,7 @@ export const CreateExperienceSteps = ({
       onValueChange={(step) => handleStepChange(step as ExperienceStepId)}
       className="grid w-full grid-cols-1"
     >
-      <TabsList className="col-span-1 flex h-auto w-full justify-start gap-2 bg-transparent p-0">
+      <TabsList className="col-span-1 flex h-auto w-full justify-start gap-2 overflow-x-auto bg-transparent p-0 scrollbar-hide">
         {steps.map((step) => {
           // Check if about step is filled based on form data or experience
           const isAboutFilled = aboutFormData
@@ -295,7 +322,7 @@ export const CreateExperienceSteps = ({
             : Boolean(experience?.id);
 
           const isDatesTicketsFilled = Boolean(
-            experience?.tickets?.length || ticketsFormData?.items?.length > 0,
+            experience?.tickets?.length || (ticketsFormData?.items?.length ?? 0) > 0,
           );
           const isGuestsFilled = inviteFormData
             ? Boolean(
@@ -318,26 +345,27 @@ export const CreateExperienceSteps = ({
               key={step.id}
               value={step.id}
               disabled={isDisabled}
-              className={`inline-flex gap-2 rounded-full px-4 py-2 text-xs transition-colors data-[state=active]:border-b-[0px] data-[state=active]:border-emerald-600 data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 ${
+              className={`inline-flex flex-shrink-0 gap-1 rounded-full px-2 py-1.5 text-xs transition-colors data-[state=active]:border-b-[0px] data-[state=active]:border-emerald-600 data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 sm:gap-2 sm:px-4 sm:py-2 ${
                 isFilled ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-800'
               }`}
             >
               <div className="flex-shrink-0">
                 <IconComponent
                   iconName={step.icon}
-                  size={20}
+                  size={16}
                   variant={isFilled ? 'solid' : 'twotone'}
+                  className="sm:w-5"
                 />
               </div>
-              <span className="hidden sm:inline">{step.label}</span>
-              <span className="inline sm:hidden">{step.label.split(' ')[0]}</span>
+              <span className="hidden text-xs sm:inline">{step.label}</span>
+              <span className="inline text-xs sm:hidden">{step.label.split(' ')[0]}</span>
             </TabsTrigger>
           );
         })}
       </TabsList>
 
       <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-8">
+        <div className="col-span-12 md:col-span-8 3xl:col-span-10 4xl:col-span-12">
           <TabsContent value="community" className="col-span-1 mt-6">
             {formData && updateFormData ? (
               <div className="space-y-4">
@@ -347,13 +375,27 @@ export const CreateExperienceSteps = ({
                   onChange={updateFormData}
                   errors={dateTypeErrors}
                 />
-                <div className="flex justify-between gap-4">
+                <div className="flex gap-2 lg:gap-4">
                   <Button
                     type="button"
                     variant="ghost"
                     className="text-sm font-medium text-red-600 hover:text-red-900"
                   >
                     Cancel
+                  </Button>
+                  <div className="flex-1" />
+                  <Button
+                    type="button"
+                    onClick={handlePreviewClick}
+                    disabled={isPreviewLoading}
+                    variant="outline"
+                    className="lg:hidden"
+                  >
+                    {isPreviewLoading ? (
+                      <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
+                    ) : (
+                      'Preview'
+                    )}
                   </Button>
                   <Button
                     type="button"
@@ -402,6 +444,7 @@ export const CreateExperienceSteps = ({
                     console.log('[steps.tsx] Validation failed');
                   }
                 }}
+                onPreview={handlePreviewClick}
               />
             ) : (
               <CreateExperienceAbout
@@ -426,6 +469,14 @@ export const CreateExperienceSteps = ({
                     date: null,
                     startTime: null,
                     endTime: null,
+                    recurringDays: [],
+                    recurrenceStartDate: null,
+                    recurrenceEndDate: null,
+                    timeSlots: [],
+                    multiDayStartDate: null,
+                    multiDayStartTime: null,
+                    multiDayEndDate: null,
+                    multiDayEndTime: null,
                   }
                 }
                 experiencePricing={formData?.experiencePricing || 'paid'}
@@ -451,6 +502,7 @@ export const CreateExperienceSteps = ({
                   formData?.experienceType === 'multi-day' ? 'Save Tickets' : undefined
                 }
                 experienceId={experience?.id || null}
+                onPreview={handlePreviewClick}
               />
             ) : (
               <ExperienceDates
@@ -472,6 +524,7 @@ export const CreateExperienceSteps = ({
                 experience={experience}
                 onNext={() => handleStepChange('wallet')}
                 onCancel={() => handleStepChange('dates-tickets')}
+                onPreview={handlePreviewClick}
               />
             ) : (
               <CreateExperienceInvites
@@ -491,11 +544,40 @@ export const CreateExperienceSteps = ({
                 errors={walletErrors}
                 wallets={wallets}
                 isWalletsLoading={isWalletsLoading}
-                walletMutations={walletMutations || {}}
+                walletMutations={
+                  walletMutations || {
+                    createBankWallet: () => {},
+                    isCreatingBankWallet: false,
+                    createPhoneWallet: () => {},
+                    isCreatingPhoneWallet: false,
+                    patchBankWallet: () => {},
+                    isPatchingBankWallet: false,
+                    patchPhoneWallet: () => {},
+                    isPatchingPhoneWallet: false,
+                  }
+                }
                 onPreviewAndPublish={onPreviewAndPublish || (() => {})}
               />
             ) : (
-              <CreateExperienceWallet />
+              <CreateExperienceWallet
+                wallets={wallets}
+                isWalletsLoading={isWalletsLoading}
+                selectedWallet={undefined}
+                onSelectedWalletChange={() => {}}
+                paymentMethod="phone"
+                onPaymentMethodChange={() => {}}
+                phoneNumber=""
+                onPhoneNumberChange={() => {}}
+                onCreatePhoneWallet={() => {}}
+                isCreatingPhoneWallet={false}
+                onPatchPhoneWallet={() => {}}
+                isPatchingPhoneWallet={false}
+                onCreateBankWallet={() => {}}
+                isCreatingBankWallet={false}
+                onPatchBankWallet={() => {}}
+                isPatchingBankWallet={false}
+                onPreviewAndPublish={onPreviewAndPublish || (() => {})}
+              />
             )}
           </TabsContent>
         </div>

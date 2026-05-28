@@ -1,10 +1,13 @@
 'use client';
 
+import Image from 'next/image';
+
 import { IconComponent } from '@/app/shared/components/Icons';
 import { InvitedMember } from '@/components/ui/invite-members';
+import { Experience } from '@/types/experience';
 
 interface PreviewGuestsSectionProps {
-  guests: InvitedMember[];
+  guests: Experience['guests'];
   onEdit?: () => void;
 }
 
@@ -28,7 +31,7 @@ export const PreviewGuestsSection = ({ guests, onEdit }: PreviewGuestsSectionPro
         <h3 className="text-xs font-semibold text-gray-900">Guests ({guests.length})</h3>
         {onEdit && (
           <button type="button" onClick={onEdit} className="text-gray-400 hover:text-gray-600">
-            <IconComponent iconName="Edit02Icon" size={16} className='text-gray-800'  />
+            <IconComponent iconName="Edit02Icon" size={16} className="text-gray-800" />
           </button>
         )}
       </div>
@@ -36,22 +39,16 @@ export const PreviewGuestsSection = ({ guests, onEdit }: PreviewGuestsSectionPro
       {guests.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2">
           {visibleGuests.map((guest) => (
-            <div key={guest.id} className="relative h-8 w-8 flex-shrink-0">
-              {guest.avatarUrl ? (
-                <img
-                  src={guest.avatarUrl}
-                  alt={guest.name}
-                  className="h-8 w-8 rounded-full object-cover"
-                  title={guest.name}
-                />
-              ) : (
-                <div
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-700"
-                  title={guest.name}
-                >
-                  {getInitials(guest.name)}
-                </div>
-              )}
+            <div key={guest.id} className="flex items-center gap-2 rounded-[40px] bg-gray-50 p-2">
+              <div className="relative h-8 w-8 flex-shrink-0">
+                  <div
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-700"
+                    title={guest.email}
+                  >
+                    {getInitials(guest.email.split('@')[0])}
+                  </div>
+              </div>
+              <span className="w-24 truncate text-xs text-gray-500">{guest.email}</span>
             </div>
           ))}
           {overflowCount > 0 && (

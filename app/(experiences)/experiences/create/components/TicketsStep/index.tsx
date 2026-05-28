@@ -42,6 +42,7 @@ interface TicketsStepProps {
   multiDayEndDate?: string | null;
   multiDayEndTime?: string | null;
   saveContinueLabel?: string;
+  onPreview?: () => void;
 }
 
 const emptyTicketForm: TicketFormValue = {
@@ -104,6 +105,7 @@ export const TicketsStep = ({
   multiDayEndTime = null,
   saveContinueLabel = 'Save & Continue',
   experienceId = null,
+  onPreview,
 }: TicketsStepProps) => {
   const [activeFormIndex, setActiveFormIndex] = useState<number | null>(null);
   const [draftTicket, setDraftTicket] = useState<TicketFormValue>(emptyTicketForm);
@@ -616,9 +618,13 @@ export const TicketsStep = ({
       {errors.items && <p className="text-xs text-red-500">{errors.items}</p>}
 
       {showTicketConnector && (
-        <div className="flex justify-between gap-4 pt-6">
+        <div className="flex gap-2 pt-6 lg:gap-4">
           <Button type="button" variant="ghost" onClick={onCancel} className="text-red-600">
             Cancel
+          </Button>
+          <div className="flex-1" />
+          <Button type="button" onClick={onPreview} variant="outline" className="lg:hidden">
+            Preview
           </Button>
           <Button
             type="button"

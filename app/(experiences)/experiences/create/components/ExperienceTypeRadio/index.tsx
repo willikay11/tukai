@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -19,6 +19,9 @@ export const ExperienceTypeRadio = ({
   isRecurring,
   onRecurringChange,
 }: ExperienceTypeRadioProps) => {
+  const [experienceType, setExperienceType] = useState<'one-time' | 'multi-day' | 'itinerary'>(
+    value,
+  );
   const handleRecurringChange = useCallback(
     (checked: boolean) => {
       onRecurringChange(checked);
@@ -30,7 +33,13 @@ export const ExperienceTypeRadio = ({
     <div className="space-y-2">
       <label className="text-xs font-medium text-gray-900">Experience Type</label>
 
-      <RadioGroup value={value} onValueChange={onChange}>
+      <RadioGroup
+        value={experienceType}
+        onValueChange={(value: 'one-time' | 'multi-day' | 'itinerary') => {
+          setExperienceType(value);
+          onChange(value);
+        }}
+      >
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="one-time" id="one-time" />
           <label htmlFor="one-time" className="cursor-pointer text-xs font-medium text-gray-900">
@@ -53,12 +62,14 @@ export const ExperienceTypeRadio = ({
         </div>
       </RadioGroup>
 
-      <div className="flex items-center space-x-2 pt-2">
-        <Checkbox id="recurring" checked={isRecurring} onCheckedChange={handleRecurringChange} />
-        <label htmlFor="recurring" className="cursor-pointer text-xs font-medium text-gray-900">
-          Create a recurring experience
-        </label>
-      </div>
+      {experienceType === 'one-time' && (
+        <div className="flex items-center space-x-2 pt-2">
+          <Checkbox id="recurring" checked={isRecurring} onCheckedChange={handleRecurringChange} />
+          <label htmlFor="recurring" className="cursor-pointer text-xs font-medium text-gray-900">
+            Create a recurring experience
+          </label>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import { IconComponent } from '@/app/shared/components/Icons';
 
 const currencyFormatter = new Intl.NumberFormat('en-KE', {
@@ -51,11 +53,11 @@ export const TicketCard = ({
       <div className="absolute -bottom-[1px] left-[102px] h-1.5 w-3 -translate-x-1/2 rounded-t-full border border-b-0 border-dashed border-primary bg-white" />
 
       <div className="flex items-center gap-3">
-        <img
-          src={coverPhoto}
-          alt={name}
-          className="h-20 w-20 flex-shrink-0 rounded-[12px] object-cover"
-        />
+        {coverPhoto && (
+          <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-[12px]">
+            <Image src={coverPhoto} alt={name} fill sizes="80px" className="object-cover" />
+          </div>
+        )}
 
         <div className="h-16 border-l border-dashed border-primary" />
 

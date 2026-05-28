@@ -9,7 +9,8 @@ import {
   InlineEditPanel,
   ReviewLayout,
 } from '@/app/(experiences)/experiences/create/components';
-import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
+import { useGetWallets } from '@/app/(experiences)/hooks/usePayment';
+import { useFetchSingleExperience, usePublishExperience } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 
 export default function ExperienceReviewPage() {
@@ -25,20 +26,45 @@ export default function ExperienceReviewPage() {
   const { data: experienceResponse, isLoading } = useFetchSingleExperience(experienceId, true);
   const experience = experienceResponse?.data;
 
+  const { data: walletsResponse } = useGetWallets();
+  const wallets: any[] = walletsResponse?.data?.results ?? [];
+  const activeWallet = wallets.find((w: any) => w.isActive);
+
   const [activeEditSection, setActiveEditSection] = useState<
-    'about' | 'dates' | 'tickets' | 'invites' | 'wallet' | 'photos' | null
+    | 'about-title'
+    | 'about-description'
+    | 'about-location'
+    | 'about-meeting-point'
+    | 'about-meeting-time'
+    | 'about-categories'
+    | 'about-visibility'
+    | 'about-included'
+    | 'about-excluded'
+    | 'about-community'
+    | 'photos'
+    | 'dates'
+    | 'tickets'
+    | 'invites'
+    | 'wallet'
+    | null
   >(null);
-  const [isPublishing, setIsPublishing] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);
 
+  const { mutate: publishExperience, isPending: isPublishing } = usePublishExperience(experienceId);
+
   const handlePublish = () => {
-    setIsPublishing(true);
-    // TODO: Integrate with publish API when ready
-    // For now, just show the success modal
-    setTimeout(() => {
-      setPublishSuccess(true);
-      setIsPublishing(false);
-    }, 500);
+    publishExperience(undefined, {
+      onSuccess: () => {
+        setPublishSuccess(true);
+      },
+      onError: (error: any) => {
+        toast({
+          title: 'Error',
+          description: error?.message || 'Failed to publish experience',
+          variant: 'destructive',
+        });
+      },
+    });
   };
 
   const handlePublishComplete = () => {
@@ -89,8 +115,8 @@ export default function ExperienceReviewPage() {
           <div>
             <ReviewLayout
               experience={experience}
-              invitedMembers={[]}
               invitedCommunities={[]}
+              wallet={activeWallet}
               onEditSection={setActiveEditSection}
               onCancel={() => router.back()}
               onPublish={handlePublish}

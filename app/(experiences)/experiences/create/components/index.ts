@@ -40,7 +40,9 @@ export { InviteGuestsStep } from './InviteGuestsStep';
 export { WalletDetailsStep } from './WalletDetailsStep';
 
 // Preview Section Components
-export { PreviewExperienceHeader } from './PreviewExperienceHeader';
+export { PreviewPhotoSection } from './PreviewPhotoSection';
+export { PreviewTitleSection } from './PreviewTitleSection';
+export { PreviewDescriptionSection } from './PreviewDescriptionSection';
 export { PreviewIncludedSection } from './PreviewIncludedSection';
 export { PreviewExcludedSection } from './PreviewExcludedSection';
 export { PreviewCategoriesSection } from './PreviewCategoriesSection';
@@ -56,7 +58,7 @@ export { PreviewWalletSection } from './PreviewWalletSection';
 
 // Panels & Layout
 export { ExperienceReview } from './experienceReview';
-export { PhotoEditPanel } from './PhotoEditPanel';
+export { EditPhotosPanel } from './EditSections/EditPhotosPanel';
 export { InlineEditPanel } from './InlineEditPanel';
 export { SharedExperiencePreview } from './SharedExperiencePreview';
 export { ReviewLayout } from './ReviewLayout';

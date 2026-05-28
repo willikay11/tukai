@@ -9,14 +9,16 @@ import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
 import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
 import { PreviewCommunitySection } from '../PreviewCommunitySection';
 import { PreviewDateSection } from '../PreviewDateSection';
+import { PreviewDescriptionSection } from '../PreviewDescriptionSection';
 import { PreviewExcludedSection } from '../PreviewExcludedSection';
-import { PreviewExperienceHeader } from '../PreviewExperienceHeader';
 import { PreviewGuestsSection } from '../PreviewGuestsSection';
 import { PreviewIncludedSection } from '../PreviewIncludedSection';
 import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
 import { PreviewLocationSection } from '../PreviewLocationSection';
 import { PreviewMeetingSection } from '../PreviewMeetingSection';
+import { PreviewPhotoSection } from '../PreviewPhotoSection';
 import { PreviewTicketsSection } from '../PreviewTicketsSection';
+import { PreviewTitleSection } from '../PreviewTitleSection';
 import { PreviewWalletSection } from '../PreviewWalletSection';
 import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { ExperienceStepId, ExperienceType } from '../step-side-panel';
@@ -27,8 +29,7 @@ interface SharedExperiencePreviewProps {
   isRecurring?: boolean;
 
   // About section data
-  aboutPhoto?: string | null;
-  aboutPhotos?: string[];
+  aboutPhotos?: Array<{ id: string; url: string; isTempId?: boolean }>;
   aboutTitle?: string;
   aboutDescription?: string;
   aboutVisibility?: 'public' | 'private';
@@ -87,7 +88,6 @@ export const SharedExperiencePreview = ({
   step,
   experienceType = 'one-time',
   isRecurring = false,
-  aboutPhoto,
   aboutPhotos,
   aboutTitle,
   aboutDescription,
@@ -172,12 +172,11 @@ export const SharedExperiencePreview = ({
     <div className="space-y-6">
       <h2 className="text-sm font-semibold text-gray-900">{getHeading()}</h2>
 
-      <PreviewExperienceHeader
-        photo={aboutPhoto || null}
-        photos={aboutPhotos}
-        title={aboutTitle || ''}
-        description={aboutDescription || ''}
-      />
+      <PreviewPhotoSection photos={aboutPhotos?.map((p) => p.url) || []} />
+
+      {aboutTitle && <PreviewTitleSection title={aboutTitle} />}
+
+      {aboutDescription && <PreviewDescriptionSection description={aboutDescription} />}
 
       <PreviewIncludedSection
         items={
@@ -193,19 +192,13 @@ export const SharedExperiencePreview = ({
         }
       />
 
-      <PreviewCategoriesSection
-        categories={aboutCategories || []}
-      />
+      <PreviewCategoriesSection categories={aboutCategories || []} />
 
       {renderDateSection()}
 
-      <PreviewItineraryTypeSection
-        visibility={aboutVisibility || 'public'}
-      />
+      <PreviewItineraryTypeSection visibility={aboutVisibility || 'public'} />
 
-      <PreviewLocationSection
-        location={aboutLocation || null}
-      />
+      <PreviewLocationSection location={aboutLocation || null} />
 
       <PreviewMeetingSection
         meetingPoint={aboutMeetingPoint || null}
@@ -222,7 +215,7 @@ export const SharedExperiencePreview = ({
       {shouldShowTickets && (
         <PreviewTicketsSection
           tickets={ticketsItems}
-          coverPhoto={aboutPhoto || undefined}
+          coverPhoto={aboutPhotos?.[0]?.url || undefined}
           commissionPayer={ticketsCommissionPayer}
         />
       )}

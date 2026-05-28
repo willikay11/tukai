@@ -5,8 +5,6 @@ import { ReactNode } from 'react';
 import Image from 'next/image';
 
 import { InvitedMember } from '@/components/ui/invite-members';
-import { Community } from '@/types/community';
-import { Experience } from '@/types/experience';
 import { Interest } from '@/types/interest';
 import { Wallet } from '@/types/payment';
 
@@ -21,14 +19,10 @@ export type ExperienceType = 'one-time' | 'multi-day' | 'itinerary';
 
 export const ExperienceStepSidePanel = ({
   step,
-  _experienceId,
-  _experience,
   canShowDateTickets,
   isRecurring = false,
   experienceType = 'one-time',
   itineraryConfig,
-  _invitedMembers,
-  _invitedCommunities,
   selectedCommunity,
   selectedDate,
   selectedStartTime,
@@ -41,7 +35,6 @@ export const ExperienceStepSidePanel = ({
   multiDayStartTime,
   multiDayEndDate,
   multiDayEndTime,
-  aboutPhoto,
   aboutPhotos,
   aboutTitle,
   aboutDescription,
@@ -61,14 +54,10 @@ export const ExperienceStepSidePanel = ({
   selectedWallet,
 }: {
   step: ExperienceStepId;
-  _experienceId?: string | null;
-  _experience?: Experience;
   canShowDateTickets?: boolean;
   isRecurring?: boolean;
   experienceType?: ExperienceType;
   itineraryConfig?: { startDate: string; endDate: string } | null;
-  _invitedMembers?: InvitedMember[];
-  _invitedCommunities?: Community[];
   selectedCommunity?: { name: string; imageUrl: string } | null;
   selectedDate?: string | null;
   selectedStartTime?: string | null;
@@ -81,8 +70,7 @@ export const ExperienceStepSidePanel = ({
   multiDayStartTime?: string | null;
   multiDayEndDate?: string | null;
   multiDayEndTime?: string | null;
-  aboutPhoto?: string | null;
-  aboutPhotos?: string[];
+  aboutPhotos?: Array<{ id: string; url: string; isTempId?: boolean }>;
   aboutTitle?: string;
   aboutDescription?: string;
   aboutVisibility?: 'public' | 'private';
@@ -125,7 +113,6 @@ export const ExperienceStepSidePanel = ({
         step="about"
         experienceType={experienceType}
         isRecurring={isRecurring}
-        aboutPhoto={aboutPhoto}
         aboutPhotos={aboutPhotos}
         aboutTitle={aboutTitle}
         aboutDescription={aboutDescription}
@@ -164,7 +151,6 @@ export const ExperienceStepSidePanel = ({
         step="dates-tickets"
         experienceType={experienceType}
         isRecurring={isRecurring}
-        aboutPhoto={aboutPhoto}
         aboutPhotos={aboutPhotos}
         aboutTitle={aboutTitle}
         aboutDescription={aboutDescription}
@@ -206,7 +192,6 @@ export const ExperienceStepSidePanel = ({
         step="guests"
         experienceType={experienceType}
         isRecurring={isRecurring}
-        aboutPhoto={aboutPhoto}
         aboutPhotos={aboutPhotos}
         aboutTitle={aboutTitle}
         aboutDescription={aboutDescription}
@@ -243,7 +228,6 @@ export const ExperienceStepSidePanel = ({
         step="wallet"
         experienceType={experienceType}
         isRecurring={isRecurring}
-        aboutPhoto={aboutPhoto}
         aboutPhotos={aboutPhotos}
         aboutTitle={aboutTitle}
         aboutDescription={aboutDescription}
@@ -279,7 +263,7 @@ export const ExperienceStepSidePanel = ({
   const content = stepPanelContent[step];
 
   return (
-    <div className="h-full rounded-t-xl border-x border-t border-gray-200 bg-white px-12 py-6 shadow-lg">
+    <div className="xs:px-4 xs:py-4 h-full rounded-t-xl bg-white md:border-x md:border-t-[1px] md:border-gray-200 md:px-12 md:py-6 md:shadow-lg">
       {content}
     </div>
   );

@@ -12,6 +12,7 @@ export const TukaiImage = ({
   src,
   alt,
   showNotFoundText = true,
+  className: passedClassName,
   ...props
 }: ImageProps & { showNotFoundText?: boolean }) => {
   const [isLoaded, setIsLoaded] = useState(false);

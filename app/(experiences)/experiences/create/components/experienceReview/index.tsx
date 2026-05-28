@@ -8,9 +8,11 @@ import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
 import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
 import { PreviewDateSection } from '../PreviewDateSection';
+import { PreviewDescriptionSection } from '../PreviewDescriptionSection';
 import { PreviewExcludedSection } from '../PreviewExcludedSection';
-import { PreviewExperienceHeader } from '../PreviewExperienceHeader';
 import { PreviewGuestsSection } from '../PreviewGuestsSection';
+import { PreviewPhotoSection } from '../PreviewPhotoSection';
+import { PreviewTitleSection } from '../PreviewTitleSection';
 import { PreviewIncludedSection } from '../PreviewIncludedSection';
 import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
 import { PreviewLocationSection } from '../PreviewLocationSection';
@@ -47,11 +49,24 @@ export const ExperienceReview = ({
         {type === 'review' ? 'Review Your Experience' : 'Experience Preview'}
       </h2>
 
-      <PreviewExperienceHeader
-        photo={experience.photos?.[0]?.photo || null}
-        title={experience.title}
+      <PreviewPhotoSection
+        photos={experience.photos?.map((p) => p.photo) || []}
         onEdit={() => handleEditClick('about')}
       />
+
+      {experience.title && (
+        <PreviewTitleSection
+          title={experience.title}
+          onEdit={() => handleEditClick('about')}
+        />
+      )}
+
+      {experience.description && (
+        <PreviewDescriptionSection
+          description={experience.description}
+          onEdit={() => handleEditClick('about')}
+        />
+      )}
 
       {experience.whatsIncluded && (
         <PreviewIncludedSection

@@ -47,7 +47,7 @@ interface CreateExperienceWalletProps {
 export const CreateExperienceWallet = ({
   cancelActionLabel = 'Cancel',
   saveAndExitActionLabel = 'Save & Exit',
-  previewAndPublishActionLabel = 'Preview & Publish',
+  previewAndPublishActionLabel = 'Preview',
   hideSaveAndExit = false,
   wallets,
   isWalletsLoading,
@@ -186,7 +186,7 @@ export const CreateExperienceWallet = ({
           onClick={() => onPaymentMethodChange('phone')}
           className={`inline-flex items-center gap-3 rounded-xl px-4 py-3 text-xs transition-colors ${
             paymentMethod === 'phone'
-              ? 'bg-green-100 border-[0.5px] border-green-600 text-gray-900'
+              ? 'border-[0.5px] border-green-600 bg-green-100 text-gray-900'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
@@ -208,7 +208,7 @@ export const CreateExperienceWallet = ({
           onClick={() => onPaymentMethodChange('bank')}
           className={`inline-flex items-center gap-3 rounded-xl px-4 py-3 text-xs transition-colors ${
             paymentMethod === 'bank'
-              ? 'bg-green-100 text-gray-900 border-[0.5px] border-green-600'
+              ? 'border-[0.5px] border-green-600 bg-green-100 text-gray-900'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
@@ -230,7 +230,7 @@ export const CreateExperienceWallet = ({
         {/* <p className="text-xs font-semibold text-gray-800">Set up wallets</p> */}
         {isWalletsLoading ? (
           <WalletListSkeleton />
-        ) : wallets.length > 0 ? (
+        ) : wallets?.length > 0 ? (
           <div className="mt-2 grid grid-cols-2">
             <div className="space-y-4">
               <RadioGroup
@@ -319,7 +319,7 @@ export const CreateExperienceWallet = ({
         )}
       </div>
 
-      {!isWalletsLoading && (wallets.length === 0 || showForm) && (
+      {!isWalletsLoading && (wallets?.length === 0 || showForm) && (
         <>
           {paymentMethod === 'phone' ? (
             <MpesaDetailsForm

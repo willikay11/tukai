@@ -2,6 +2,8 @@
 
 import { ChangeEvent, DragEvent, useEffect, useRef, useState } from 'react';
 
+import Image from 'next/image';
+
 import { IconComponent } from '@/app/shared/components/Icons';
 
 type FileUploadFieldProps = {
@@ -47,6 +49,8 @@ export const FileUploadField = ({
   onDeleteExisting,
   isDeletingPhoto = false,
 }: FileUploadFieldProps) => {
+  const isExternalUrl = (src: string) => src.startsWith('https://') || src.startsWith('http://');
+
   const [previewUrls, setPreviewUrls] = useState<string[]>(initialUrls);
   const [existingUrls, setExistingUrls] = useState<string[]>(initialUrls);
   const [files, setFiles] = useState<File[]>([]);
@@ -96,7 +100,7 @@ export const FileUploadField = ({
   const getImageDimensions = (file: File) =>
     new Promise<{ width: number; height: number }>((resolve, reject) => {
       const tempUrl = URL.createObjectURL(file);
-      const img = new Image();
+      const img = new window.Image();
       img.onload = () => {
         const dimensions = { width: img.naturalWidth, height: img.naturalHeight };
         URL.revokeObjectURL(tempUrl);
@@ -145,8 +149,9 @@ export const FileUploadField = ({
         if (maxImageHeight && height > maxImageHeight) {
           return `${file.name}: image height must be at most ${maxImageHeight}px.`;
         }
-      } catch {
-        return `${file.name}: invalid or corrupted image.`;
+      } catch (error) {
+        console.error('Error validating image dimensions:', error);
+        return `${file.name} is invalid or corrupted image.`;
       }
     }
 
@@ -172,38 +177,42 @@ export const FileUploadField = ({
       const validFiles = fileList.filter((_, index) => !validationResults[index]);
 
       const nextErrors = [...currentErrors];
+      let cappedFiles: File[] = [];
 
       setFiles((previous) => {
         const combinedFiles = [...previous, ...validFiles];
-        const cappedFiles = maxFiles ? combinedFiles.slice(0, maxFiles) : combinedFiles;
+        cappedFiles = maxFiles ? combinedFiles.slice(0, maxFiles) : combinedFiles;
 
         if (maxFiles && combinedFiles.length > maxFiles) {
           nextErrors.push(`You can only upload up to ${maxFiles} file${maxFiles > 1 ? 's' : ''}.`);
         }
 
-        setPreviewUrls((previousUrls) => {
-          const currentFileCount = previous.length;
-          const acceptedNewCount = Math.max(cappedFiles.length - currentFileCount, 0);
-          const acceptedNewFiles = validFiles.slice(0, acceptedNewCount);
-          const droppedNewFiles = validFiles.slice(acceptedNewCount);
+        return cappedFiles;
+      });
 
-          const acceptedNewUrls = acceptedNewFiles.map((file) => URL.createObjectURL(file));
-          droppedNewFiles.forEach((file) => {
-            nextErrors.push(`${file.name}: skipped because max files limit is reached.`);
-          });
+      setPreviewUrls((previousUrls) => {
+        const currentFileCount = files.length;
+        const acceptedNewCount = Math.max(cappedFiles.length - currentFileCount, 0);
+        const acceptedNewFiles = validFiles.slice(0, acceptedNewCount);
+        const droppedNewFiles = validFiles.slice(acceptedNewCount);
 
-          return [...previousUrls, ...acceptedNewUrls];
+        const acceptedNewUrls = acceptedNewFiles.map((file) => URL.createObjectURL(file));
+        droppedNewFiles.forEach((file) => {
+          nextErrors.push(`${file.name}: skipped because max files limit is reached.`);
         });
 
-        onFilesChange?.(cappedFiles);
-        return cappedFiles;
+        return [...previousUrls, ...acceptedNewUrls];
       });
 
       setValidationErrors(nextErrors);
 
-      if (nextErrors.length > 0) {
-        onValidationError?.(nextErrors);
-      }
+      // Queue callbacks after state updates
+      Promise.resolve().then(() => {
+        onFilesChange?.(cappedFiles);
+        if (nextErrors.length > 0) {
+          onValidationError?.(nextErrors);
+        }
+      });
     }
 
     onChange?.(event);
@@ -317,11 +326,22 @@ export const FileUploadField = ({
                 isDragging ? 'border-[1px] border-dashed border-primary bg-emerald-50/50 p-1' : ''
               } ${isDragging ? 'rotate-3' : ''}`}
             >
-              <img
-                src={previewUrl}
-                alt={`Selected photo ${index + 1}`}
-                className={`h-full w-full rounded-xl object-cover ${isDragging ? 'opacity-0' : ''}`}
-              />
+              {isExternalUrl(previewUrl) ? (
+                <Image
+                  src={previewUrl}
+                  alt={`Selected photo ${index + 1}`}
+                  fill
+                  sizes="(max-width: 640px) 155px, 155px"
+                  className={`rounded-xl object-cover ${isDragging ? 'opacity-0' : ''}`}
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={previewUrl}
+                  alt={`Selected photo ${index + 1}`}
+                  className={`h-full w-full rounded-xl object-cover ${isDragging ? 'opacity-0' : ''}`}
+                />
+              )}
 
               <button
                 type="button"

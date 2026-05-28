@@ -1,33 +1,50 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { InvitedMember } from '@/components/ui/invite-members';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
+import { Wallet } from '@/types/payment';
 
 import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
 import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
 import { PreviewCommunitySection } from '../PreviewCommunitySection';
 import { PreviewDateSection } from '../PreviewDateSection';
+import { PreviewDescriptionSection } from '../PreviewDescriptionSection';
 import { PreviewExcludedSection } from '../PreviewExcludedSection';
-import { PreviewExperienceHeader } from '../PreviewExperienceHeader';
 import { PreviewGuestsSection } from '../PreviewGuestsSection';
 import { PreviewIncludedSection } from '../PreviewIncludedSection';
 import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
 import { PreviewLocationSection } from '../PreviewLocationSection';
 import { PreviewMeetingSection } from '../PreviewMeetingSection';
+import { PreviewPhotoSection } from '../PreviewPhotoSection';
 import { PreviewTicketsSection } from '../PreviewTicketsSection';
+import { PreviewTitleSection } from '../PreviewTitleSection';
 import { PreviewWalletSection } from '../PreviewWalletSection';
 
 interface ReviewLayoutProps {
   experience: Experience;
-  invitedMembers: InvitedMember[];
   invitedCommunities: Community[];
+  wallet?: Wallet;
   allCommunities?: CommunityOption[];
   isPublishing?: boolean;
   onEditSection?: (
-    section: 'about' | 'dates' | 'tickets' | 'invites' | 'wallet' | 'photos',
+    section:
+      | 'about-title'
+      | 'about-description'
+      | 'about-location'
+      | 'about-meeting-point'
+      | 'about-meeting-time'
+      | 'about-categories'
+      | 'about-visibility'
+      | 'about-included'
+      | 'about-excluded'
+      | 'about-community'
+      | 'photos'
+      | 'dates'
+      | 'tickets'
+      | 'invites'
+      | 'wallet',
   ) => void;
   onCancel?: () => void;
   onPublish?: () => void;
@@ -36,8 +53,8 @@ interface ReviewLayoutProps {
 
 export const ReviewLayout = ({
   experience,
-  invitedMembers,
   invitedCommunities,
+  wallet,
   allCommunities = [],
   isPublishing = false,
   onEditSection,
@@ -45,10 +62,24 @@ export const ReviewLayout = ({
   onPublish,
   showActionBar = true,
 }: ReviewLayoutProps) => {
-  console.log('ReviewLayout rendered:', { showActionBar, isPublishing, hasOnPublish: !!onPublish });
 
   const handleEditClick = (
-    section: 'about' | 'dates' | 'tickets' | 'invites' | 'wallet' | 'photos',
+    section:
+      | 'about-title'
+      | 'about-description'
+      | 'about-location'
+      | 'about-meeting-point'
+      | 'about-meeting-time'
+      | 'about-categories'
+      | 'about-visibility'
+      | 'about-included'
+      | 'about-excluded'
+      | 'about-community'
+      | 'photos'
+      | 'dates'
+      | 'tickets'
+      | 'invites'
+      | 'wallet',
   ) => {
     if (onEditSection) {
       onEditSection(section);
@@ -60,19 +91,32 @@ export const ReviewLayout = ({
       {/* Page Header */}
       <div className="pt-6">
         <h1 className="text-2xl font-semibold text-gray-900">Review Experience</h1>
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-xs text-gray-600">
           Please review your experience details before publishing.
         </p>
       </div>
 
-      {/* 1. Experience Photo Header */}
+      {/* 1. Experience Photos */}
       {experience && (
-        <PreviewExperienceHeader
-          photo={experience.photos?.[0]?.photo || null}
+        <PreviewPhotoSection
           photos={experience.photos?.map((p) => p.photo) || []}
-          title={experience.title || ''}
-          description={experience.description || ''}
           onEdit={() => handleEditClick('photos')}
+        />
+      )}
+
+      {/* 1b. Experience Title */}
+      {experience && experience.title && (
+        <PreviewTitleSection
+          title={experience.title}
+          onEdit={() => handleEditClick('about-title')}
+        />
+      )}
+
+      {/* 1c. Experience Description */}
+      {experience && experience.description && (
+        <PreviewDescriptionSection
+          description={experience.description}
+          onEdit={() => handleEditClick('about-description')}
         />
       )}
 
@@ -80,7 +124,7 @@ export const ReviewLayout = ({
       {experience.whatsIncluded && (
         <PreviewIncludedSection
           items={experience.whatsIncluded.split('\n').filter((item) => item.trim())}
-          onEdit={() => handleEditClick('about')}
+          onEdit={() => handleEditClick('about-included')}
         />
       )}
 
@@ -88,7 +132,7 @@ export const ReviewLayout = ({
       {experience.whatsNotIncluded && (
         <PreviewExcludedSection
           items={experience.whatsNotIncluded.split('\n').filter((item) => item.trim())}
-          onEdit={() => handleEditClick('about')}
+          onEdit={() => handleEditClick('about-excluded')}
         />
       )}
 
@@ -96,14 +140,14 @@ export const ReviewLayout = ({
       {experience.categories && experience.categories.length > 0 && (
         <PreviewCategoriesSection
           categories={experience.categories}
-          onEdit={() => handleEditClick('about')}
+          onEdit={() => handleEditClick('about-categories')}
         />
       )}
 
       {/* 5. Itinerary Type */}
       <PreviewItineraryTypeSection
         visibility={experience.isPublic ? 'public' : 'private'}
-        onEdit={() => handleEditClick('about')}
+        onEdit={() => handleEditClick('about-visibility')}
       />
 
       {/* 6. Date of Experience */}
@@ -121,7 +165,7 @@ export const ReviewLayout = ({
       {experience.location && (
         <PreviewLocationSection
           location={experience.location?.formattedAddress || null}
-          onEdit={() => handleEditClick('about')}
+          onEdit={() => handleEditClick('about-location')}
         />
       )}
 
@@ -130,7 +174,7 @@ export const ReviewLayout = ({
         <PreviewMeetingSection
           meetingPoint={experience.meetingPoint}
           meetingTime={experience.meetingTime}
-          onEdit={() => handleEditClick('about')}
+          onEdit={() => handleEditClick('about-meeting-point')}
         />
       )}
 
@@ -139,12 +183,15 @@ export const ReviewLayout = ({
         <PreviewCommunitySection
           communityName={experience.hostCommunity.title}
           communityImageUrl={experience.hostCommunity.photos?.[0]?.photo ?? null}
-          onEdit={() => handleEditClick('about')}
+          onEdit={() => handleEditClick('about-community')}
         />
       )}
 
       {/* 10. Guests */}
-      <PreviewGuestsSection guests={invitedMembers} onEdit={() => handleEditClick('invites')} />
+      <PreviewGuestsSection
+        guests={experience?.guests || []}
+        onEdit={() => handleEditClick('invites')}
+      />
 
       {/* 11. Invited Communities */}
       <PreviewCommunitiesSection
@@ -155,19 +202,17 @@ export const ReviewLayout = ({
 
       {/* 12. Tickets */}
       {experience.tickets && experience.tickets.length > 0 && (
-        <div className="border-t border-gray-200 pt-6">
-          <PreviewTicketsSection
-            tickets={experience.tickets}
-            coverPhoto={experience.photos?.[0]?.photo}
-            commissionPayer={experience.commissionPayer}
-            onEdit={() => handleEditClick('tickets')}
-          />
-        </div>
+        <PreviewTicketsSection
+          tickets={experience.tickets}
+          coverPhoto={experience.photos?.[0]?.photo}
+          commissionPayer={experience.commissionPayer}
+          onEdit={() => handleEditClick('tickets')}
+        />
       )}
 
       {/* 13. Wallet Details */}
       <PreviewWalletSection
-        walletType={experience.walletType}
+        wallet={wallet}
         onEdit={() => handleEditClick('wallet')}
       />
 

@@ -24,14 +24,18 @@ export function Editor({
   editorSerializedState,
   onChange,
   onSerializedChange,
+  className,
+  placeholderClassName,
 }: {
   editorState?: EditorState;
   editorSerializedState?: SerializedEditorState;
   onChange?: (editorState: EditorState, editor: LexicalEditor) => void;
   onSerializedChange?: (editorSerializedState: SerializedEditorState) => void;
+  className?: string;
+  placeholderClassName?: string;
 }) {
   return (
-    <div className="overflow-hidden rounded-lg border bg-background">
+    <div className={`overflow-hidden rounded-lg border bg-background ${className || ''}`}>
       <LexicalComposer
         initialConfig={{
           ...editorConfig,
@@ -40,7 +44,7 @@ export function Editor({
         }}
       >
         <TooltipProvider>
-          <Plugins />
+          <Plugins placeholderClassName={placeholderClassName} />
 
           <OnChangePlugin
             ignoreSelectionChange={true}

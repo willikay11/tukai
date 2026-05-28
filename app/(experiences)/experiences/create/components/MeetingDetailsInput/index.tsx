@@ -64,12 +64,6 @@ export const MeetingDetailsInput = ({
           onFocus={() => setShowSuggestions(true)}
           onSelectSuggestion={handleSelectSuggestion}
         />
-      </div>
-
-      <div className="space-y-2">
-        <label htmlFor="meeting-time" className="text-xs font-medium text-gray-800">
-          Meeting Time
-        </label>
         <TimePicker
           value={meetingTime || undefined}
           onChange={onMeetingTimeChange}

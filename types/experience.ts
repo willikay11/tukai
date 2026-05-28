@@ -43,6 +43,13 @@ export type Experience = {
   }[];
 };
 
+export interface InvitedMember {
+  id: string;
+  name: string;
+  email?: string;
+  image?: string;
+}
+
 export type CreateExperience = {
   title: string;
   description: string;

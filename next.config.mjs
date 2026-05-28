@@ -7,8 +7,20 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['tukai-storage.s3.amazonaws.com'],
-    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'staging-tukai-storage.s3.amazonaws.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'tukai-storage.s3.amazonaws.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.amazonaws.com',
+      },
+    ],
   },
 };
 
