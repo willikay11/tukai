@@ -157,13 +157,12 @@ export const PhotoEditPanel = ({
         onPhotoDelete={handleRemovePhoto}
       />
 
-      <div className="flex gap-3">
+      <div className="flex gap-2">
         <Button
           type="button"
           variant="outline"
           onClick={onClose}
           disabled={isLoading}
-          className="flex-1"
         >
           Cancel
         </Button>
@@ -172,9 +171,8 @@ export const PhotoEditPanel = ({
           variant="gradient"
           onClick={handleSave}
           disabled={isLoading}
-          className="flex-1"
         >
-          {isLoading ? 'Saving...' : 'Save Photos'}
+          {isLoading ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
     </div>

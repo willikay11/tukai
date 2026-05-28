@@ -105,7 +105,7 @@ export const EditTitleField = ({
           disabled={isSaving}
           className="rounded-[50px]"
         >
-          {isSaving ? 'Saving...' : 'Save'}
+          {isSaving ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
     </div>

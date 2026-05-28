@@ -4,6 +4,7 @@ import Image from 'next/image';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
+import { Button } from '@/components/ui/button';
 
 interface PreviewExperienceHeaderProps {
   photos?: string[];
@@ -67,7 +68,18 @@ export const PreviewExperienceHeader = ({
           )}
         </div>
       ) : (
-        <p className="text-xs text-gray-500">Not set yet</p>
+        <div className="flex flex-col items-center justify-center rounded-lg bg-gray-50 py-12">
+          <p className="text-xs font-normal text-gray-900">No image available</p>
+          {onEdit && (
+            <Button
+              variant="link"
+              onClick={onEdit}
+              className="mt-3"
+            >
+              Add photos
+            </Button>
+          )}
+        </div>
       )}
     </div>
   );
