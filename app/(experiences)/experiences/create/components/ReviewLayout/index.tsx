@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
+import { Wallet } from '@/types/payment';
 
 import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
@@ -24,6 +25,7 @@ import { PreviewWalletSection } from '../PreviewWalletSection';
 interface ReviewLayoutProps {
   experience: Experience;
   invitedCommunities: Community[];
+  wallet?: Wallet;
   allCommunities?: CommunityOption[];
   isPublishing?: boolean;
   onEditSection?: (
@@ -52,6 +54,7 @@ interface ReviewLayoutProps {
 export const ReviewLayout = ({
   experience,
   invitedCommunities,
+  wallet,
   allCommunities = [],
   isPublishing = false,
   onEditSection,
@@ -209,7 +212,7 @@ export const ReviewLayout = ({
 
       {/* 13. Wallet Details */}
       <PreviewWalletSection
-        walletType={experience.walletType}
+        wallet={wallet}
         onEdit={() => handleEditClick('wallet')}
       />
 

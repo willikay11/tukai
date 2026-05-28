@@ -9,6 +9,7 @@ import {
   InlineEditPanel,
   ReviewLayout,
 } from '@/app/(experiences)/experiences/create/components';
+import { useGetWallets } from '@/app/(experiences)/hooks/usePayment';
 import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 
@@ -24,6 +25,10 @@ export default function ExperienceReviewPage() {
 
   const { data: experienceResponse, isLoading } = useFetchSingleExperience(experienceId, true);
   const experience = experienceResponse?.data;
+
+  const { data: walletsResponse } = useGetWallets();
+  const wallets = walletsResponse?.data?.results;
+  const activeWallet = Array.isArray(wallets) ? wallets.find((w: any) => w.isActive) : undefined;
 
   const [activeEditSection, setActiveEditSection] = useState<
     | 'about-title'
@@ -105,6 +110,7 @@ export default function ExperienceReviewPage() {
             <ReviewLayout
               experience={experience}
               invitedCommunities={[]}
+              wallet={activeWallet}
               onEditSection={setActiveEditSection}
               onCancel={() => router.back()}
               onPublish={handlePublish}
