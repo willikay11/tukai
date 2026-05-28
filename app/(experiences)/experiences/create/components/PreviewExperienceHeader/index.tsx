@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import { IconComponent } from '@/app/shared/components/Icons';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
 
@@ -33,11 +35,16 @@ export const PreviewExperienceHeader = ({
               className="h-40"
             />
           ) : (
-            <img
-              src={imagesToDisplay[0]}
-              alt={title || 'Experience'}
-              className="h-40 w-full rounded-lg object-cover"
-            />
+            <div className="relative h-40 w-full overflow-hidden rounded-lg">
+              <Image
+                src={imagesToDisplay[0]}
+                alt={title || 'Experience'}
+                fill
+                sizes="(max-width: 768px) 100vw, 560px"
+                className="object-cover"
+                priority
+              />
+            </div>
           )}
           {(title || description) && (
             <div>

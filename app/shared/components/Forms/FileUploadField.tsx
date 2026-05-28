@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { ChangeEvent, DragEvent, useEffect, useRef, useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
@@ -47,6 +48,9 @@ export const FileUploadField = ({
   onDeleteExisting,
   isDeletingPhoto = false,
 }: FileUploadFieldProps) => {
+  const isExternalUrl = (src: string) =>
+    src.startsWith('https://') || src.startsWith('http://');
+
   const [previewUrls, setPreviewUrls] = useState<string[]>(initialUrls);
   const [existingUrls, setExistingUrls] = useState<string[]>(initialUrls);
   const [files, setFiles] = useState<File[]>([]);
@@ -317,11 +321,22 @@ export const FileUploadField = ({
                 isDragging ? 'border-[1px] border-dashed border-primary bg-emerald-50/50 p-1' : ''
               } ${isDragging ? 'rotate-3' : ''}`}
             >
-              <img
-                src={previewUrl}
-                alt={`Selected photo ${index + 1}`}
-                className={`h-full w-full rounded-xl object-cover ${isDragging ? 'opacity-0' : ''}`}
-              />
+              {isExternalUrl(previewUrl) ? (
+                <Image
+                  src={previewUrl}
+                  alt={`Selected photo ${index + 1}`}
+                  fill
+                  sizes="(max-width: 640px) 155px, 155px"
+                  className={`rounded-xl object-cover ${isDragging ? 'opacity-0' : ''}`}
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={previewUrl}
+                  alt={`Selected photo ${index + 1}`}
+                  className={`h-full w-full rounded-xl object-cover ${isDragging ? 'opacity-0' : ''}`}
+                />
+              )}
 
               <button
                 type="button"

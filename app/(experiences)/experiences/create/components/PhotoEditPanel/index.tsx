@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useCallback, useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
@@ -10,6 +11,9 @@ import {
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Photo } from '@/types/photo';
+
+const isExternalUrl = (src: string) =>
+  src.startsWith('https://') || src.startsWith('http://');
 
 interface LocalPhoto {
   id?: string; // Present if it's an existing photo
@@ -146,11 +150,22 @@ export const PhotoEditPanel = ({
       <div className="grid grid-cols-3 gap-2">
         {localPhotos.map((photo, index) => (
           <div key={index} className="relative aspect-square rounded-lg bg-gray-100">
-            <img
-              src={photo}
-              alt={`Photo ${index + 1}`}
-              className="h-full w-full rounded-lg object-cover"
-            />
+            {isExternalUrl(photo.photo) ? (
+              <Image
+                src={photo.photo}
+                alt={`Photo ${index + 1}`}
+                fill
+                sizes="(max-width: 640px) 100px, 100px"
+                className="rounded-lg object-cover"
+              />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={photo.photo}
+                alt={`Photo ${index + 1}`}
+                className="h-full w-full rounded-lg object-cover"
+              />
+            )}
             <button
               type="button"
               onClick={() => handleRemovePhoto(index)}

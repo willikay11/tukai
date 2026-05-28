@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import { IconComponent } from '@/app/shared/components/Icons';
 import { InvitedMember } from '@/components/ui/invite-members';
 
@@ -38,10 +40,13 @@ export const PreviewGuestsSection = ({ guests, onEdit }: PreviewGuestsSectionPro
           {visibleGuests.map((guest) => (
             <div key={guest.id} className="relative h-8 w-8 flex-shrink-0">
               {guest.avatarUrl ? (
-                <img
+                <Image
                   src={guest.avatarUrl}
                   alt={guest.name}
-                  className="h-8 w-8 rounded-full object-cover"
+                  width={32}
+                  height={32}
+                  sizes="32px"
+                  className="rounded-full object-cover"
                   title={guest.name}
                 />
               ) : (

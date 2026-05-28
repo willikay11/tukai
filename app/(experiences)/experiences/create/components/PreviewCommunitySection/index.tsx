@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import { IconComponent } from '@/app/shared/components/Icons';
 
 interface PreviewCommunitySectionProps {
@@ -27,10 +29,13 @@ export const PreviewCommunitySection = ({
       </div>
       {communityName && communityImageUrl ? (
         <div className="flex items-center gap-3">
-          <img
+          <Image
             src={communityImageUrl}
-            alt={communityName}
-            className="h-12 w-12 rounded-lg object-cover"
+            alt={communityName ?? ''}
+            width={48}
+            height={48}
+            sizes="48px"
+            className="rounded-full object-cover"
           />
           <div className="flex-1">
             <p className="text-xs font-medium text-gray-800">{communityName}</p>

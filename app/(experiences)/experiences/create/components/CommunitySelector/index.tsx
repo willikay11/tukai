@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react';
 
+import Image from 'next/image';
 import clsx from 'clsx';
 
 import { IconComponent } from '@/app/shared/components/Icons';
@@ -62,11 +63,16 @@ export const CommunitySelector = ({ value, options, onChange, error }: Community
         <SelectTrigger className={clsx(error && 'border-red-500', 'h-[50px] text-xs')}>
           {value ? (
             <div className="flex items-center gap-2">
-              {/* <img
-                src={value.imageUrl}
-                alt={value.name}
-                className="h-6 w-12 rounded-lg object-cover"
-              /> */}
+              {value.imageUrl && (
+                <Image
+                  src={value.imageUrl}
+                  alt={value.name}
+                  width={40}
+                  height={40}
+                  sizes="40px"
+                  className="rounded-full object-cover"
+                />
+              )}
               <span className="text-xs font-medium">{value.name}</span>
             </div>
           ) : (
@@ -80,11 +86,16 @@ export const CommunitySelector = ({ value, options, onChange, error }: Community
             options.map((community) => (
               <SelectItem key={community.id} value={community.id}>
                 <div className="flex items-center gap-2">
-                  {/* <img
-                    src={community.imageUrl}
-                    alt={community.name}
-                    className="h-6 w-12 rounded-lg object-cover"
-                  /> */}
+                  {community.imageUrl && (
+                    <Image
+                      src={community.imageUrl}
+                      alt={community.name}
+                      width={40}
+                      height={40}
+                      sizes="40px"
+                      className="rounded-full object-cover"
+                    />
+                  )}
                   <span className="text-xs font-medium">{community.name}</span>
                 </div>
               </SelectItem>
