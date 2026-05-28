@@ -26,7 +26,22 @@ export default function ExperienceReviewPage() {
   const experience = experienceResponse?.data;
 
   const [activeEditSection, setActiveEditSection] = useState<
-    'about' | 'dates' | 'tickets' | 'invites' | 'wallet' | 'photos' | null
+    | 'about-title'
+    | 'about-description'
+    | 'about-location'
+    | 'about-meeting-point'
+    | 'about-meeting-time'
+    | 'about-categories'
+    | 'about-visibility'
+    | 'about-included'
+    | 'about-excluded'
+    | 'about-community'
+    | 'photos'
+    | 'dates'
+    | 'tickets'
+    | 'invites'
+    | 'wallet'
+    | null
   >(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);

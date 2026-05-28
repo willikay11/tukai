@@ -25,7 +25,22 @@ interface ReviewLayoutProps {
   allCommunities?: CommunityOption[];
   isPublishing?: boolean;
   onEditSection?: (
-    section: 'about' | 'dates' | 'tickets' | 'invites' | 'wallet' | 'photos',
+    section:
+      | 'about-title'
+      | 'about-description'
+      | 'about-location'
+      | 'about-meeting-point'
+      | 'about-meeting-time'
+      | 'about-categories'
+      | 'about-visibility'
+      | 'about-included'
+      | 'about-excluded'
+      | 'about-community'
+      | 'photos'
+      | 'dates'
+      | 'tickets'
+      | 'invites'
+      | 'wallet',
   ) => void;
   onCancel?: () => void;
   onPublish?: () => void;
@@ -45,7 +60,22 @@ export const ReviewLayout = ({
   console.log('ReviewLayout rendered:', { showActionBar, isPublishing, hasOnPublish: !!onPublish });
 
   const handleEditClick = (
-    section: 'about' | 'dates' | 'tickets' | 'invites' | 'wallet' | 'photos',
+    section:
+      | 'about-title'
+      | 'about-description'
+      | 'about-location'
+      | 'about-meeting-point'
+      | 'about-meeting-time'
+      | 'about-categories'
+      | 'about-visibility'
+      | 'about-included'
+      | 'about-excluded'
+      | 'about-community'
+      | 'photos'
+      | 'dates'
+      | 'tickets'
+      | 'invites'
+      | 'wallet',
   ) => {
     if (onEditSection) {
       onEditSection(section);
@@ -77,7 +107,7 @@ export const ReviewLayout = ({
       {experience.whatsIncluded && (
         <PreviewIncludedSection
           items={experience.whatsIncluded.split('\n').filter((item) => item.trim())}
-          onEdit={() => handleEditClick('about')}
+          onEdit={() => handleEditClick('about-included')}
         />
       )}
 
@@ -85,7 +115,7 @@ export const ReviewLayout = ({
       {experience.whatsNotIncluded && (
         <PreviewExcludedSection
           items={experience.whatsNotIncluded.split('\n').filter((item) => item.trim())}
-          onEdit={() => handleEditClick('about')}
+          onEdit={() => handleEditClick('about-excluded')}
         />
       )}
 
@@ -93,14 +123,14 @@ export const ReviewLayout = ({
       {experience.categories && experience.categories.length > 0 && (
         <PreviewCategoriesSection
           categories={experience.categories}
-          onEdit={() => handleEditClick('about')}
+          onEdit={() => handleEditClick('about-categories')}
         />
       )}
 
       {/* 5. Itinerary Type */}
       <PreviewItineraryTypeSection
         visibility={experience.isPublic ? 'public' : 'private'}
-        onEdit={() => handleEditClick('about')}
+        onEdit={() => handleEditClick('about-visibility')}
       />
 
       {/* 6. Date of Experience */}
@@ -118,7 +148,7 @@ export const ReviewLayout = ({
       {experience.location && (
         <PreviewLocationSection
           location={experience.location?.formattedAddress || null}
-          onEdit={() => handleEditClick('about')}
+          onEdit={() => handleEditClick('about-location')}
         />
       )}
 
@@ -127,7 +157,7 @@ export const ReviewLayout = ({
         <PreviewMeetingSection
           meetingPoint={experience.meetingPoint}
           meetingTime={experience.meetingTime}
-          onEdit={() => handleEditClick('about')}
+          onEdit={() => handleEditClick('about-meeting-point')}
         />
       )}
 
@@ -136,7 +166,7 @@ export const ReviewLayout = ({
         <PreviewCommunitySection
           communityName={experience.hostCommunity.title}
           communityImageUrl={experience.hostCommunity.photos?.[0]?.photo ?? null}
-          onEdit={() => handleEditClick('about')}
+          onEdit={() => handleEditClick('about-community')}
         />
       )}
 
