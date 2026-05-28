@@ -27,6 +27,7 @@ import { CreateExperienceWallet } from '../wallet';
 
 type AboutFormData = {
   photos: string[];
+  photoFiles: File[];
   title: string;
   visibility: 'public' | 'private';
   description: string;
@@ -172,6 +173,7 @@ interface CreateExperienceStepsProps {
   handlers?: {
     handleSaveAbout?: () => Promise<void>;
     handlePublish?: () => Promise<void>;
+    handleUpdateFeesAllocation?: () => Promise<void>;
   };
   isSavingExperience?: boolean;
   apiError?: string | null;
@@ -295,7 +297,7 @@ export const CreateExperienceSteps = ({
             : Boolean(experience?.id);
 
           const isDatesTicketsFilled = Boolean(
-            experience?.tickets?.length || ticketsFormData?.items?.length > 0,
+            experience?.tickets?.length || (ticketsFormData?.items?.length ?? 0) > 0,
           );
           const isGuestsFilled = inviteFormData
             ? Boolean(
