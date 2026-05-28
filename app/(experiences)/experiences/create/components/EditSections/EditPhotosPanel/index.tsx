@@ -163,6 +163,7 @@ export const EditPhotosPanel = ({
           variant="outline"
           onClick={onClose}
           disabled={isLoading}
+          className="rounded-[50px]"
         >
           Cancel
         </Button>
@@ -171,6 +172,7 @@ export const EditPhotosPanel = ({
           variant="gradient"
           onClick={handleSave}
           disabled={isLoading}
+          className="rounded-[50px]"
         >
           {isLoading ? 'Saving...' : 'Save Changes'}
         </Button>

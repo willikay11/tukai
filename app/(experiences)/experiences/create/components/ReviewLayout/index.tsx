@@ -9,14 +9,16 @@ import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
 import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
 import { PreviewCommunitySection } from '../PreviewCommunitySection';
 import { PreviewDateSection } from '../PreviewDateSection';
+import { PreviewDescriptionSection } from '../PreviewDescriptionSection';
 import { PreviewExcludedSection } from '../PreviewExcludedSection';
-import { PreviewExperienceHeader } from '../PreviewExperienceHeader';
 import { PreviewGuestsSection } from '../PreviewGuestsSection';
 import { PreviewIncludedSection } from '../PreviewIncludedSection';
 import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
 import { PreviewLocationSection } from '../PreviewLocationSection';
 import { PreviewMeetingSection } from '../PreviewMeetingSection';
+import { PreviewPhotoSection } from '../PreviewPhotoSection';
 import { PreviewTicketsSection } from '../PreviewTicketsSection';
+import { PreviewTitleSection } from '../PreviewTitleSection';
 import { PreviewWalletSection } from '../PreviewWalletSection';
 
 interface ReviewLayoutProps {
@@ -57,7 +59,6 @@ export const ReviewLayout = ({
   onPublish,
   showActionBar = true,
 }: ReviewLayoutProps) => {
-  console.log('ReviewLayout rendered:', { showActionBar, isPublishing, hasOnPublish: !!onPublish });
 
   const handleEditClick = (
     section:
@@ -92,14 +93,27 @@ export const ReviewLayout = ({
         </p>
       </div>
 
-      {/* 1. Experience Photo Header */}
+      {/* 1. Experience Photos */}
       {experience && (
-        <PreviewExperienceHeader
-          photo={experience.photos?.[0]?.photo || null}
+        <PreviewPhotoSection
           photos={experience.photos?.map((p) => p.photo) || []}
-          title={experience.title || ''}
-          description={experience.description || ''}
           onEdit={() => handleEditClick('photos')}
+        />
+      )}
+
+      {/* 1b. Experience Title */}
+      {experience && experience.title && (
+        <PreviewTitleSection
+          title={experience.title}
+          onEdit={() => handleEditClick('about-title')}
+        />
+      )}
+
+      {/* 1c. Experience Description */}
+      {experience && experience.description && (
+        <PreviewDescriptionSection
+          description={experience.description}
+          onEdit={() => handleEditClick('about-description')}
         />
       )}
 

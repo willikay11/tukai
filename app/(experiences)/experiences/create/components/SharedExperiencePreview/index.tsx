@@ -9,14 +9,16 @@ import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
 import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
 import { PreviewCommunitySection } from '../PreviewCommunitySection';
 import { PreviewDateSection } from '../PreviewDateSection';
+import { PreviewDescriptionSection } from '../PreviewDescriptionSection';
 import { PreviewExcludedSection } from '../PreviewExcludedSection';
-import { PreviewExperienceHeader } from '../PreviewExperienceHeader';
 import { PreviewGuestsSection } from '../PreviewGuestsSection';
 import { PreviewIncludedSection } from '../PreviewIncludedSection';
 import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
 import { PreviewLocationSection } from '../PreviewLocationSection';
 import { PreviewMeetingSection } from '../PreviewMeetingSection';
+import { PreviewPhotoSection } from '../PreviewPhotoSection';
 import { PreviewTicketsSection } from '../PreviewTicketsSection';
+import { PreviewTitleSection } from '../PreviewTitleSection';
 import { PreviewWalletSection } from '../PreviewWalletSection';
 import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { ExperienceStepId, ExperienceType } from '../step-side-panel';
@@ -170,11 +172,11 @@ export const SharedExperiencePreview = ({
     <div className="space-y-6">
       <h2 className="text-sm font-semibold text-gray-900">{getHeading()}</h2>
 
-      <PreviewExperienceHeader
-        photos={aboutPhotos?.map((p) => p.url) || []}
-        title={aboutTitle || ''}
-        description={aboutDescription || ''}
-      />
+      <PreviewPhotoSection photos={aboutPhotos?.map((p) => p.url) || []} />
+
+      {aboutTitle && <PreviewTitleSection title={aboutTitle} />}
+
+      {aboutDescription && <PreviewDescriptionSection description={aboutDescription} />}
 
       <PreviewIncludedSection
         items={

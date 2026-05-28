@@ -40,7 +40,9 @@ export { InviteGuestsStep } from './InviteGuestsStep';
 export { WalletDetailsStep } from './WalletDetailsStep';
 
 // Preview Section Components
-export { PreviewExperienceHeader } from './PreviewExperienceHeader';
+export { PreviewPhotoSection } from './PreviewPhotoSection';
+export { PreviewTitleSection } from './PreviewTitleSection';
+export { PreviewDescriptionSection } from './PreviewDescriptionSection';
 export { PreviewIncludedSection } from './PreviewIncludedSection';
 export { PreviewExcludedSection } from './PreviewExcludedSection';
 export { PreviewCategoriesSection } from './PreviewCategoriesSection';
