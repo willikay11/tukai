@@ -27,7 +27,13 @@ import {
 } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { InvitedMember } from '@/components/ui/invite-members';
-import { addExperiencePhotos, createSlotTemplate, fetchSlotTemplates } from '@/services/experience';
+import {
+  addExperiencePhotos,
+  createSlotTemplate,
+  deleteSlotTemplate,
+  fetchSlotTemplates,
+  updateSlotTemplate,
+} from '@/services/experience';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Interest } from '@/types/interest';
@@ -38,6 +44,7 @@ import {
   SlotTemplateRecord,
   buildSlotTemplatePayload,
   calculateEndTime,
+  diffSlotTemplates,
 } from '@/utils/slot-template-utils';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
@@ -235,6 +242,7 @@ export const useCreateExperienceFlow = () => {
   const [aboutErrors, setAboutErrors] = useState<Record<string, string>>({});
   const [ticketsErrors, setTicketsErrors] = useState<Record<string, string>>({});
   const [walletErrors, setWalletErrors] = useState<Record<string, string>>({});
+  const [slotTemplateRecords, setSlotTemplateRecords] = useState<SlotTemplateRecord[]>([]);
 
   const hasHydrated = useRef(false);
 
@@ -406,6 +414,16 @@ export const useCreateExperienceFlow = () => {
       try {
         const records: {id: string, name?: string, startTime: string, durationMinutes: number}[] = slotTemplatesResponse?.data?.results ?? [];
 
+        // Store slot template records for sync operations
+        const recordsForState: SlotTemplateRecord[] = records.map((record, index) => ({
+          uiId: `slot-${index}`,
+          templateId: record.id,
+          startTime: record.startTime,
+          endTime: calculateEndTime(record.startTime, record.durationMinutes),
+          name: record.name,
+        }));
+        setSlotTemplateRecords(recordsForState);
+
         dateTypeUpdate = {
           ...dateTypeUpdate,
           isRecurring: true,
@@ -418,7 +436,7 @@ export const useCreateExperienceFlow = () => {
           // date: null,
           timeSlots: records.map((record) => ({
             startTime: record.startTime,
-            endTime: moment(record.startTime, 'HH:mm').add(record.durationMinutes, 'minutes').format('HH:mm'),
+            endTime: calculateEndTime(record.startTime, record.durationMinutes),
           })),
         };
       } catch (error) {
@@ -815,6 +833,64 @@ export const useCreateExperienceFlow = () => {
     setInvitedCommunities(communities);
   }, []);
 
+  const syncSlotTemplates = async (
+    experienceId: string,
+    currentSlots: { startTime: string; endTime: string }[],
+    recurrenceRule: string | null,
+  ): Promise<void> => {
+    const { toCreate, toUpdate, toDelete } = diffSlotTemplates(currentSlots, slotTemplateRecords);
+
+    const newRecords = [...slotTemplateRecords];
+
+    // Delete removed slots
+    await Promise.all(
+      toDelete.map(async (record) => {
+        await deleteSlotTemplate(experienceId, record.templateId);
+        // Remove from local records
+        const idx = newRecords.findIndex((r) => r.templateId === record.templateId);
+        if (idx !== -1) newRecords.splice(idx, 1);
+      }),
+    );
+
+    // Update changed slots
+    await Promise.all(
+      toUpdate.map(async ({ record, startTime, endTime }) => {
+        await updateSlotTemplate(
+          experienceId,
+          record.templateId,
+          buildSlotTemplatePayload({ startTime, endTime }, recurrenceRule),
+        );
+        // Update local record
+        const idx = newRecords.findIndex((r) => r.templateId === record.templateId);
+        if (idx !== -1) {
+          newRecords[idx] = {
+            ...newRecords[idx],
+            startTime,
+            endTime,
+          };
+        }
+      }),
+    );
+
+    // Create new slots
+    await Promise.all(
+      toCreate.map(async (slot) => {
+        const response = await createSlotTemplate(
+          experienceId,
+          buildSlotTemplatePayload(slot, recurrenceRule),
+        );
+        newRecords.push({
+          uiId: `slot-${Date.now()}-${Math.random()}`,
+          templateId: response.data.id,
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+        });
+      }),
+    );
+
+    setSlotTemplateRecords(newRecords);
+  };
+
   const handleSaveAbout = useCallback(async () => {
     setIsSavingExperience(true);
     setApiError(null);
@@ -881,6 +957,31 @@ export const useCreateExperienceFlow = () => {
               description: 'Photos failed to upload. You can add them again from the review page.',
               variant: 'default',
             });
+          }
+        }
+
+        // Sync slot templates for recurring experiences
+        if (formData.dateType.isRecurring) {
+          const validSlots = (formData.dateType.timeSlots ?? []).filter(
+            (s) => s.startTime && s.endTime,
+          ) as { startTime: string; endTime: string }[];
+
+          if (validSlots.length > 0 || slotTemplateRecords.length > 0) {
+            try {
+              await syncSlotTemplates(
+                experienceId,
+                validSlots,
+                buildRecurrenceRule(formData.dateType),
+              );
+            } catch (slotError) {
+              console.error('[handleSaveAbout] Slot sync failed:', slotError);
+              toast({
+                description:
+                  'Experience saved but time slots failed to update. Please try editing them again.',
+                variant: 'default',
+              });
+              // Non-blocking — experience was already saved
+            }
           }
         }
       } else {

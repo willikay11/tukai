@@ -54,3 +54,42 @@ export const slotTemplateToTimeSlot = (template: {
   endTime: calculateEndTime(template.startTime, template.durationMinutes),
   name: template.name,
 });
+
+export const diffSlotTemplates = (
+  currentSlots: { startTime: string; endTime: string }[],
+  existingRecords: SlotTemplateRecord[],
+): {
+  toCreate: { startTime: string; endTime: string }[];
+  toUpdate: { record: SlotTemplateRecord; startTime: string; endTime: string }[];
+  toDelete: SlotTemplateRecord[];
+} => {
+  const toCreate: { startTime: string; endTime: string }[] = [];
+  const toUpdate: {
+    record: SlotTemplateRecord;
+    startTime: string;
+    endTime: string;
+  }[] = [];
+  const toDelete: SlotTemplateRecord[] = [];
+
+  // Find slots that need creating or updating
+  currentSlots.forEach((slot, index) => {
+    const existing = existingRecords[index];
+    if (!existing) {
+      // New slot — create
+      toCreate.push(slot);
+    } else if (existing.startTime !== slot.startTime || existing.endTime !== slot.endTime) {
+      // Changed slot — update
+      toUpdate.push({ record: existing, ...slot });
+    }
+    // else: unchanged — skip
+  });
+
+  // Find records that no longer have a matching slot
+  existingRecords.forEach((record, index) => {
+    if (index >= currentSlots.length) {
+      toDelete.push(record);
+    }
+  });
+
+  return { toCreate, toUpdate, toDelete };
+};

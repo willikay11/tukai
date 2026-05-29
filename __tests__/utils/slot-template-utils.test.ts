@@ -2,6 +2,8 @@ import {
   buildSlotTemplatePayload,
   calculateDurationMinutes,
   calculateEndTime,
+  diffSlotTemplates,
+  SlotTemplateRecord,
 } from '@/utils/slot-template-utils';
 
 describe('calculateDurationMinutes', () => {
@@ -103,5 +105,121 @@ describe('buildSlotTemplatePayload', () => {
       endTime: '10:45',
     });
     expect(result.duration_minutes).toBe(45);
+  });
+});
+
+describe('diffSlotTemplates', () => {
+  const makeRecord = (
+    id: string,
+    startTime: string,
+    endTime: string,
+  ): SlotTemplateRecord => ({
+    uiId: id,
+    templateId: id,
+    startTime,
+    endTime,
+  });
+
+  it('returns empty arrays when slots are unchanged', () => {
+    const current = [
+      { startTime: '09:00', endTime: '11:00' },
+      { startTime: '14:00', endTime: '16:00' },
+    ];
+    const existing = [
+      makeRecord('t1', '09:00', '11:00'),
+      makeRecord('t2', '14:00', '16:00'),
+    ];
+    const result = diffSlotTemplates(current, existing);
+    expect(result.toCreate).toHaveLength(0);
+    expect(result.toUpdate).toHaveLength(0);
+    expect(result.toDelete).toHaveLength(0);
+  });
+
+  it('detects a new slot to create', () => {
+    const current = [
+      { startTime: '09:00', endTime: '11:00' },
+      { startTime: '14:00', endTime: '16:00' },
+    ];
+    const existing = [makeRecord('t1', '09:00', '11:00')];
+    const result = diffSlotTemplates(current, existing);
+    expect(result.toCreate).toHaveLength(1);
+    expect(result.toCreate[0]).toEqual({
+      startTime: '14:00',
+      endTime: '16:00',
+    });
+    expect(result.toUpdate).toHaveLength(0);
+    expect(result.toDelete).toHaveLength(0);
+  });
+
+  it('detects a deleted slot', () => {
+    const current = [{ startTime: '09:00', endTime: '11:00' }];
+    const existing = [
+      makeRecord('t1', '09:00', '11:00'),
+      makeRecord('t2', '14:00', '16:00'),
+    ];
+    const result = diffSlotTemplates(current, existing);
+    expect(result.toCreate).toHaveLength(0);
+    expect(result.toUpdate).toHaveLength(0);
+    expect(result.toDelete).toHaveLength(1);
+    expect(result.toDelete[0].templateId).toBe('t2');
+  });
+
+  it('detects an updated slot start time', () => {
+    const current = [{ startTime: '10:00', endTime: '11:00' }];
+    const existing = [makeRecord('t1', '09:00', '11:00')];
+    const result = diffSlotTemplates(current, existing);
+    expect(result.toUpdate).toHaveLength(1);
+    expect(result.toUpdate[0].startTime).toBe('10:00');
+    expect(result.toUpdate[0].record.templateId).toBe('t1');
+    expect(result.toCreate).toHaveLength(0);
+    expect(result.toDelete).toHaveLength(0);
+  });
+
+  it('detects an updated slot end time', () => {
+    const current = [{ startTime: '09:00', endTime: '12:00' }];
+    const existing = [makeRecord('t1', '09:00', '11:00')];
+    const result = diffSlotTemplates(current, existing);
+    expect(result.toUpdate).toHaveLength(1);
+    expect(result.toUpdate[0].endTime).toBe('12:00');
+  });
+
+  it('handles all three operations at once', () => {
+    const current = [
+      { startTime: '09:00', endTime: '11:00' }, // unchanged (index 0)
+      { startTime: '13:00', endTime: '15:00' }, // updated (index 1, was 14:00)
+      { startTime: '18:00', endTime: '20:00' }, // updated (index 2, was 16:00)
+    ];
+    const existing = [
+      makeRecord('t1', '09:00', '11:00'),
+      makeRecord('t2', '14:00', '15:00'),
+      makeRecord('t3', '16:00', '17:00'),
+      makeRecord('t4', '21:00', '22:00'), // deleted (index 3 >= current.length(3))
+    ];
+    const result = diffSlotTemplates(current, existing);
+    expect(result.toCreate).toHaveLength(0); // all indices 0-2 have existing
+    expect(result.toUpdate).toHaveLength(2); // indices 1 and 2 changed
+    expect(result.toDelete).toHaveLength(1); // index 3 is beyond length
+  });
+
+  it('handles no existing records (first time creation)', () => {
+    const current = [
+      { startTime: '09:00', endTime: '11:00' },
+      { startTime: '14:00', endTime: '16:00' },
+    ];
+    const result = diffSlotTemplates(current, []);
+    expect(result.toCreate).toHaveLength(2);
+    expect(result.toUpdate).toHaveLength(0);
+    expect(result.toDelete).toHaveLength(0);
+  });
+
+  it('handles all slots deleted', () => {
+    const existing = [
+      makeRecord('t1', '09:00', '11:00'),
+      makeRecord('t2', '14:00', '16:00'),
+    ];
+    const result = diffSlotTemplates([], existing);
+    expect(result.toCreate).toHaveLength(0);
+    expect(result.toUpdate).toHaveLength(0);
+    expect(result.toDelete).toHaveLength(2);
   });
 });
