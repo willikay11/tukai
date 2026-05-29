@@ -459,37 +459,59 @@ export const searchUsers = async (query: string): Promise<ApiResponse> => {
   }
 };
 
-export interface CreateSlotTemplateData {
-  weekday: string;
-  startTime: string;
-  endTime: string;
+export interface SlotTemplatePayload {
+  start_time: string;
+  duration_minutes: number;
+  recurrence_rule?: string | null;
+  name?: string;
 }
 
 export const createSlotTemplate = async (
   experienceId: string,
-  data: CreateSlotTemplateData,
+  data: SlotTemplatePayload,
 ): Promise<ApiResponse> => {
-  try {
-    const axiosInstance = await apiWithToken();
-    const response = await axiosInstance.post(
-      `/v1/experiences/${experienceId}/slot-templates/`,
-      data,
-    );
+  const axiosInstance = await apiWithToken();
+  const response = await axiosInstance.post(
+    `/v1/experiences/${experienceId}/slot-templates/`,
+    data,
+  );
 
-    return {
-      status: response.status,
-      success: true,
-      data: parseSnakeToCamel(response.data),
-    };
-  } catch (error: any) {
-    console.error('API Error:', error.response?.data || error.message);
+  return {
+    status: response.status,
+    success: true,
+    data: parseSnakeToCamel(response.data),
+  };
+};
 
-    throw {
-      status: error.response?.status || 500,
-      success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
-    };
-  }
+export const fetchSlotTemplates = async (experienceId: string): Promise<ApiResponse> => {
+  const axiosInstance = await apiWithToken();
+  const response = await axiosInstance.get(
+    `/v1/experiences/${experienceId}/slot-templates/`,
+  );
+
+  return {
+    status: response.status,
+    success: true,
+    data: parseSnakeToCamel(response.data),
+  };
+};
+
+export const updateSlotTemplate = async (
+  experienceId: string,
+  templateId: string,
+  data: Partial<SlotTemplatePayload>,
+): Promise<ApiResponse> => {
+  const axiosInstance = await apiWithToken();
+  const response = await axiosInstance.patch(
+    `/v1/experiences/${experienceId}/slot-templates/${templateId}/`,
+    data,
+  );
+
+  return {
+    status: response.status,
+    success: true,
+    data: parseSnakeToCamel(response.data),
+  };
 };
 
 export const deleteSlotTemplate = async (

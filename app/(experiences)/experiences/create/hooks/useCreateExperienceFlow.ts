@@ -8,6 +8,11 @@ import { RRule } from 'rrule';
 
 import { buildRecurrenceRule } from '@/app/(experiences)/experiences/create/utils/buildRecurrenceRule';
 import {
+  buildSlotTemplatePayload,
+  SlotTemplateRecord,
+  calculateEndTime,
+} from '@/utils/slot-template-utils';
+import {
   useCreateBankWallet,
   useCreatePhoneWallet,
   useGetWallets,
@@ -26,7 +31,7 @@ import {
 } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { InvitedMember } from '@/components/ui/invite-members';
-import { addExperiencePhotos } from '@/services/experience';
+import { addExperiencePhotos, createSlotTemplate, fetchSlotTemplates } from '@/services/experience';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Interest } from '@/types/interest';
@@ -229,6 +234,7 @@ export const useCreateExperienceFlow = () => {
   const [aboutErrors, setAboutErrors] = useState<Record<string, string>>({});
   const [ticketsErrors, setTicketsErrors] = useState<Record<string, string>>({});
   const [walletErrors, setWalletErrors] = useState<Record<string, string>>({});
+  const [slotTemplateRecords, setSlotTemplateRecords] = useState<SlotTemplateRecord[]>([]);
 
   const hasHydrated = useRef(false);
 
@@ -486,7 +492,40 @@ export const useCreateExperienceFlow = () => {
         tickets: { ...prev.tickets, items: savedTickets },
       }));
     }
-  }, [experience?.id, updateAboutFormData, updateFormData]);
+
+    // Fetch and populate slot templates for recurring experiences
+    if (experience?.isRecurring && experienceId) {
+      (async () => {
+        try {
+          const response = await fetchSlotTemplates(experienceId);
+          const templates = response.data?.results ?? [];
+
+          if (templates.length > 0) {
+            const records: SlotTemplateRecord[] = templates.map((t: any) => ({
+              uiId: t.id,
+              templateId: t.id,
+              startTime: t.startTime,
+              endTime: calculateEndTime(t.startTime, t.durationMinutes),
+            }));
+            setSlotTemplateRecords(records);
+
+            // Also populate the UI time slots in formData
+            updateFormData({
+              dateType: {
+                timeSlots: records.map((r) => ({
+                  startTime: r.startTime,
+                  endTime: r.endTime,
+                })),
+              },
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching slot templates:', error);
+          // Non-blocking — slots just won't be pre-filled
+        }
+      })();
+    }
+  }, [experience?.id, experienceId, updateAboutFormData, updateFormData]);
 
   // Sync photo IDs after photos are uploaded (replace temp IDs with real IDs)
   useEffect(() => {
@@ -897,6 +936,46 @@ export const useCreateExperienceFlow = () => {
           }
         }
 
+        // Create slot templates for recurring experiences
+        if (formData.dateType.isRecurring) {
+          const timeSlots = (formData.dateType.timeSlots ?? []).filter(
+            (slot) => slot.startTime !== null && slot.endTime !== null,
+          ) as { startTime: string; endTime: string }[];
+
+          if (timeSlots.length > 0) {
+            try {
+              const slotResults = await Promise.all(
+                timeSlots.map((slot, index) =>
+                  createSlotTemplate(
+                    newExperienceId,
+                    buildSlotTemplatePayload(
+                      slot,
+                      formData.dateType.recurrenceRule ?? null,
+                    ),
+                  ),
+                ),
+              );
+
+              const records: SlotTemplateRecord[] = timeSlots.map((slot, i) => ({
+                uiId: `slot-${i}`,
+                templateId: slotResults[i].data.id,
+                startTime: slot.startTime,
+                endTime: slot.endTime,
+              }));
+
+              setSlotTemplateRecords(records);
+            } catch (slotError) {
+              console.error('[handleSaveAbout] Slot template creation failed:', slotError);
+              toast({
+                description:
+                  'Experience saved but time slots failed to save. You can re-add them later.',
+                variant: 'default',
+              });
+              // Non-blocking — experience was already created
+            }
+          }
+        }
+
         handleExperienceCreated(newExperienceId, 'dates-tickets');
       }
 
@@ -1079,6 +1158,8 @@ export const useCreateExperienceFlow = () => {
     dateTypeErrors,
     aboutErrors,
     ticketsErrors,
+    slotTemplateRecords,
+    setSlotTemplateRecords,
     communitiesForSelector,
 
     // Computed

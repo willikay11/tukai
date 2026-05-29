@@ -198,17 +198,15 @@ export const TicketForm = ({
       ) : (
         <>
           <RelativeValidityPicker
-            startValue={value.salesStartRelative || { amount: 1, unit: 'hour', anchor: 'start' }}
-            endValue={value.salesEndRelative || { amount: 1, unit: 'hour', anchor: 'end' }}
-            onStartChange={(val) => onChange({ salesStartRelative: val })}
-            onEndChange={(val) => onChange({ salesEndRelative: val })}
+            value={value.salesEndRelative ?? null}
+            onChange={(val) => onChange({ salesEndRelative: val })}
             errors={errors}
           />
 
-          <DuplicateTicketsCheckbox
+          {/* <DuplicateTicketsCheckbox
             value={value.duplicateForEntirePeriod ?? false}
             onChange={(val) => onChange({ duplicateForEntirePeriod: val })}
-          />
+          /> */}
         </>
       )}
 

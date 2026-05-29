@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
-  CreateSlotTemplateData,
+  SlotTemplatePayload,
   ExperiencesQueryParams,
   addExperiencePhotos,
   addGuestToExperience,
@@ -14,11 +14,13 @@ import {
   deleteSlotTemplate,
   fetchExperience,
   fetchExperiences,
+  fetchSlotTemplates,
   publishExperience,
   purchaseExperienceTicket,
   searchUsers,
   updateExperience,
   updateExperienceTicket,
+  updateSlotTemplate,
 } from '@/services/experience';
 import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
 import { PurchaserDetails } from '@/types/purchaser';
@@ -185,25 +187,65 @@ export const useSearchUsersDebounced = () => {
   });
 };
 
-export const useCreateSlotTemplate = (experienceId: string) => {
+export const useCreateSlotTemplate = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationKey: ['createSlotTemplate', experienceId],
-    mutationFn: async (data: CreateSlotTemplateData) =>
-      await createSlotTemplate(experienceId, data),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
+    mutationFn: ({
+      experienceId,
+      data,
+    }: {
+      experienceId: string;
+      data: SlotTemplatePayload;
+    }) => createSlotTemplate(experienceId, data),
+    onSuccess: (_, { experienceId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ['slot-templates', experienceId],
+      });
     },
   });
 };
 
-export const useDeleteSlotTemplate = (experienceId: string) => {
+export const useFetchSlotTemplates = (experienceId: string | null) =>
+  useQuery({
+    queryKey: ['slot-templates', experienceId],
+    queryFn: () => fetchSlotTemplates(experienceId!),
+    enabled: !!experienceId,
+  });
+
+export const useUpdateSlotTemplate = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationKey: ['deleteSlotTemplate', experienceId],
-    mutationFn: async (templateId: string) => await deleteSlotTemplate(experienceId, templateId),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
+    mutationFn: ({
+      experienceId,
+      templateId,
+      data,
+    }: {
+      experienceId: string;
+      templateId: string;
+      data: Partial<SlotTemplatePayload>;
+    }) => updateSlotTemplate(experienceId, templateId, data),
+    onSuccess: (_, { experienceId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ['slot-templates', experienceId],
+      });
+    },
+  });
+};
+
+export const useDeleteSlotTemplate = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      experienceId,
+      templateId,
+    }: {
+      experienceId: string;
+      templateId: string;
+    }) => deleteSlotTemplate(experienceId, templateId),
+    onSuccess: (_, { experienceId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ['slot-templates', experienceId],
+      });
     },
   });
 };
