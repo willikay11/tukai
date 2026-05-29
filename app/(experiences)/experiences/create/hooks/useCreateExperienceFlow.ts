@@ -465,6 +465,14 @@ export const useCreateExperienceFlow = () => {
 
         // Map API relative validity fields to form format
         let salesEndRelative = null;
+
+        console.log('[Hydration] Ticket:', {
+          name: ticket.name,
+          ticket_sales_closing_duration: ticket.ticket_sales_closing_duration,
+          ticket_sales_closing_unit: ticket.ticket_sales_closing_unit,
+          ticket_sales_closing_condition: ticket.ticket_sales_closing_condition,
+        });
+
         if (
           ticket.ticket_sales_closing_duration &&
           ticket.ticket_sales_closing_unit &&
@@ -491,6 +499,17 @@ export const useCreateExperienceFlow = () => {
             unit,
             anchor,
           };
+
+          console.log('[Hydration] Converted to salesEndRelative:', salesEndRelative);
+        }
+
+        // For recurring experiences, find the slot index from the slot_template ID
+        let slotIndex: number | undefined;
+        if (hasRecurrenceRule && (ticket.slot_template || ticket.slotTemplate)) {
+          const slotTemplateId = ticket.slot_template || ticket.slotTemplate;
+          const records: {id: string, name?: string, startTime: string, durationMinutes: number}[] = slotTemplatesResponse?.data?.results ?? [];
+          slotIndex = records.findIndex((r) => r.id === slotTemplateId);
+          if (slotIndex === -1) slotIndex = undefined; // Not found, leave as undefined
         }
 
         return {
@@ -498,7 +517,7 @@ export const useCreateExperienceFlow = () => {
           apiId: ticket.id,
           name: ticket.name,
           quantity: ticket.availableQuantity || ticket.quantity,
-          amount: ticket.price,
+          amount: Number(ticket.price),
           salesStartDate: salesStartDateTime.date,
           salesStartTime: salesStartDateTime.time,
           salesEndDate: salesEndDateTime.date,
@@ -507,6 +526,7 @@ export const useCreateExperienceFlow = () => {
           salesStartRelative: null,
           salesEndRelative,
           duplicateForEntirePeriod: false,
+          ...(slotIndex !== undefined ? { slotIndex } : {}),
         };
       });
       setFormData((prev) => ({

@@ -54,6 +54,8 @@ export const TicketForm = ({
   experienceStartDate,
   experienceEndDate,
 }: TicketFormProps) => {
+  console.log('[TicketForm] Rendered with:', { isRecurring, isMultiDay, salesEndRelative: value.salesEndRelative });
+
   const getCommissionPercentage = () => {
     if (experiencePricing === 'free') return 0;
     return commissionPayer === 'host' ? 0 : commissionPayer === 'customer' ? 4 : 2;

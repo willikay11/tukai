@@ -126,7 +126,10 @@ function CreateExperiencePageContent() {
               aboutMeetingPoint={formData.about.meetingPoint}
               aboutMeetingTime={formData.about.meetingTime}
               aboutCategories={formData.about.categories}
-              ticketsItems={formData.tickets.items}
+              ticketsItems={(() => {
+                console.log('[Page] formData.tickets.items:', formData.tickets.items);
+                return formData.tickets.items;
+              })()}
               ticketsCommissionPayer={formData.tickets.commission}
               invitedGuests={formData.invite.invitedGuests.map((guest) => ({
                 ...guest,

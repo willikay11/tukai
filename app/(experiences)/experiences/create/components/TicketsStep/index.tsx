@@ -57,6 +57,9 @@ const emptyTicketForm: TicketFormValue = {
   salesEndDate: null,
   salesEndTime: null,
   acceptPartialPayment: false,
+  salesStartRelative: null,
+  salesEndRelative: null,
+  duplicateForEntirePeriod: false,
 };
 
 const validateTicket = (
@@ -167,6 +170,9 @@ export const TicketsStep = ({
         salesEndDate: ticket.salesEndDate,
         salesEndTime: ticket.salesEndTime,
         acceptPartialPayment: ticket.acceptPartialPayment,
+        salesStartRelative: ticket.salesStartRelative,
+        salesEndRelative: ticket.salesEndRelative,
+        duplicateForEntirePeriod: ticket.duplicateForEntirePeriod,
       });
       setFormErrors({});
     },
@@ -304,7 +310,7 @@ export const TicketsStep = ({
           salesStartRelative: draftTicket.salesStartRelative || null,
           salesEndRelative: draftTicket.salesEndRelative || null,
           duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
-          ...(isRecurringExperience && activeSlotIndex !== null ? { slotIndex: activeSlotIndex } : {}),
+          ...(isRecurringExperience && slotIndex !== undefined ? { slotIndex } : {}),
         };
       } else {
         items.push({
@@ -321,10 +327,11 @@ export const TicketsStep = ({
           salesStartRelative: draftTicket.salesStartRelative || null,
           salesEndRelative: draftTicket.salesEndRelative || null,
           duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
-          ...(isRecurringExperience && activeSlotIndex !== null ? { slotIndex: activeSlotIndex } : {}),
+          ...(isRecurringExperience && slotIndex !== undefined ? { slotIndex } : {}),
         });
       }
 
+      console.log('[TicketsStep] Calling onChange with items:', items);
       onChange({ items });
       setActiveFormIndex(null);
       setActiveSlotIndex(null);
@@ -570,11 +577,11 @@ export const TicketsStep = ({
           ) : null}
         </>
       ) : isRecurring && hasTicketDateBadge ? (
-        <div className="space-y-0">
+        <div className="space-y-2">
           {validSlots.map((slot, slotIndex) => {
             const slotTicket = formData.items.find((t) => t.slotIndex === slotIndex && t.apiId != null);
             return (
-              <div key={slotIndex} className="relative">
+              <div key={slotIndex} className="relative pt-2">
                 <div className="mb-3">
                   <TicketDateBadge
                     mode="recurring"
@@ -593,7 +600,7 @@ export const TicketsStep = ({
                     quantity={slotTicket.quantity}
                     amount={slotTicket.amount}
                     validity={`${slotTicket.salesEndRelative?.amount ?? 1} ${slotTicket.salesEndRelative?.unit ?? 'hour'} before the experience ${slotTicket.salesEndRelative?.anchor === 'start' ? 'starts' : 'ends'}`}
-                    coverPhoto={photos?.[0]}
+                    coverPhoto={photos?.[0]?.url}
                     onEdit={() => {
                       setActiveFormIndex(formData.items.indexOf(slotTicket));
                       setActiveSlotIndex(slotIndex);
@@ -727,7 +734,7 @@ export const TicketsStep = ({
 
       {errors.items && <p className="text-xs text-red-500">{errors.items}</p>}
 
-      {showTicketConnector && (
+      {showTicketConnector && !(isRecurring && allSlotsHaveTickets) && (
         <div className="flex gap-2 pt-6 lg:gap-4">
           <Button type="button" variant="ghost" onClick={onCancel} className="text-red-600">
             Cancel
