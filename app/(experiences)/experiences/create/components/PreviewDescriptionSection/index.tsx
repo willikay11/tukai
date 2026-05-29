@@ -15,7 +15,7 @@ export const PreviewDescriptionSection = ({
     <div className="relative">
       <div className="flex flex-row items-start justify-between gap-2">
         <div
-          className="prose prose-sm mt-4 max-w-none flex-1 text-xs text-gray-600"
+          className="prose prose-sm max-w-none flex-1 text-xs text-gray-600"
           dangerouslySetInnerHTML={{ __html: description }}
         />
         {onEdit && (
