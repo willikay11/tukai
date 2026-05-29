@@ -32,11 +32,7 @@ const AMOUNT_OPTIONS = [
   '3 hours',
   '6 hours',
   '12 hours',
-  '1 day',
-  '2 days',
-  '3 days',
-  '1 week',
-  '2 weeks',
+  '24 hours',
 ];
 
 const parseAmount = (str: string): { amount: number; unit: RelativeUnit } => {
@@ -79,7 +75,7 @@ export const RelativeValidityPicker = ({
       </label>
 
       <div className="space-y-3">
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <label className="text-xs font-medium text-gray-700">Sales Start</label>
           <div className="grid grid-cols-2 gap-3">
             <Select
@@ -119,10 +115,10 @@ export const RelativeValidityPicker = ({
           {errors.salesStartRelative && (
             <p className="text-xs text-red-500">{errors.salesStartRelative}</p>
           )}
-        </div>
+        </div> */}
 
         <div className="space-y-2">
-          <label className="text-xs font-medium text-gray-700">Sales End</label>
+          {/* <label className="text-xs font-medium text-gray-700">Sales End</label> */}
           <div className="grid grid-cols-2 gap-3">
             <Select
               value={formatAmount(endValue.amount, endValue.unit)}
