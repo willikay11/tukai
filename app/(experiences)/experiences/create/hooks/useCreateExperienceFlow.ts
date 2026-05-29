@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import { buildRecurrenceRule } from '@/app/(experiences)/experiences/create/utils/buildRecurrenceRule';
 import {
   useCreateBankWallet,
   useCreatePhoneWallet,
@@ -747,8 +748,6 @@ export const useCreateExperienceFlow = () => {
     setApiError(null);
     try {
       const photoFiles = formData.about.photos.filter((p) => p.file).map((p) => p.file!);
-      console.log('[handleSaveAbout] photoFiles count:', photoFiles.length || 0);
-      console.log('[handleSaveAbout] photoFiles:', photoFiles);
 
       const payload = {
         title: formData.about.title,
@@ -763,7 +762,7 @@ export const useCreateExperienceFlow = () => {
           formData.dateType.endTime || null,
           true,
         ),
-        recurrence_rule: '',
+        recurrence_rule: buildRecurrenceRule(formData.dateType),
         categoriesIds: formData.about.categories.map((c) => c.id),
         isPublic: formData.about.visibility === 'public',
         isPaid: formData.dateType.experiencePricing === 'paid',
