@@ -13,6 +13,7 @@ import type { ApiResponse } from '@/types/apiResponse';
 import type { CreateExperienceTicket } from '@/types/experience';
 import { getDaysBetween } from '@/utils/date-utils';
 import { parseApiError } from '@/utils/parseApiError';
+import { buildAbsoluteTicketValidity, buildRecurringTicketValidity } from '@/utils/ticket-utils';
 
 import { FormData } from '../../hooks/useCreateExperienceFlow';
 import { AddTicketTypeButton } from '../AddTicketTypeButton';
@@ -198,11 +199,6 @@ export const TicketsStep = ({
   }, [draftTicket, formData.items, activeFormIndex, onChange]);
 
   const handleSaveTicket = useCallback(async () => {
-    const buildDateTime = (date: string | null, time: string | null): string | null => {
-      if (!date || !time) return null;
-      return `${date}T${time}:00`;
-    };
-
     const newErrors = validateTicket(draftTicket, experiencePricing === 'paid');
 
     if (Object.keys(newErrors).length > 0) {
@@ -216,6 +212,19 @@ export const TicketsStep = ({
       return;
     }
 
+    // Determine if this is a recurring experience
+    const isRecurringExperience = dateTypeData?.isRecurring ?? false;
+
+    // Build validity fields based on experience type
+    const validityFields = isRecurringExperience
+      ? buildRecurringTicketValidity(draftTicket.salesEndRelative ?? null)
+      : buildAbsoluteTicketValidity(
+          draftTicket.salesStartDate,
+          draftTicket.salesStartTime,
+          draftTicket.salesEndDate,
+          draftTicket.salesEndTime,
+        );
+
     // Build API payload
     const payload: CreateExperienceTicket = {
       name: draftTicket.name,
@@ -223,8 +232,7 @@ export const TicketsStep = ({
       quantity: draftTicket.quantity!,
       price: draftTicket.amount!.toString(),
       is_paid: experiencePricing === 'paid',
-      sales_start_date: buildDateTime(draftTicket.salesStartDate, draftTicket.salesStartTime),
-      sales_end_date: buildDateTime(draftTicket.salesEndDate, draftTicket.salesEndTime),
+      ...validityFields,
     };
 
     const isEdit = activeFormIndex !== null && formData.items[activeFormIndex]?.apiId != null;
@@ -301,6 +309,7 @@ export const TicketsStep = ({
     createTicketMutation,
     saveLocally,
     toast,
+    dateTypeData,
   ]);
 
   const handleCancelForm = useCallback(() => {

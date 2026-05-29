@@ -11,6 +11,7 @@ import {
   usePatchBankWallet,
   usePatchPhoneWallet,
 } from '@/app/(experiences)/hooks/usePayment';
+import { RRule } from 'rrule';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import {
   useAddExperiencePhotos,
@@ -30,6 +31,7 @@ import { Interest } from '@/types/interest';
 import { Wallet } from '@/types/payment';
 import { Photo } from '@/types/photo';
 import { parseApiError } from '@/utils/parseApiError';
+import moment from 'moment';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
@@ -370,8 +372,9 @@ export const useCreateExperienceFlow = () => {
       whatsNotIncluded: experience.whatsNotIncluded ?? '',
     });
 
-    // Update date type form with community
-    updateFormData({
+    // Check if experience is recurring and parse recurrence rule
+    const hasRecurrenceRule = !!experience.recurrenceRule;
+    let dateTypeUpdate: any = {
       community: experience.hostCommunity
         ? {
             id: experience.hostCommunity.id,
@@ -383,7 +386,35 @@ export const useCreateExperienceFlow = () => {
       date: startDate,
       startTime,
       endTime,
-    });
+    };
+
+    // If recurring, parse the recurrence rule using RRule
+    if (hasRecurrenceRule) {
+      const options = RRule.parseString(experience.recurrenceRule);
+      const rule = new RRule(options);
+      try {
+          dateTypeUpdate = {
+            ...dateTypeUpdate,
+            isRecurring: true,
+            recurringDays: rule.options.byweekday?.map((day) => {
+              const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+              return days[day];
+            }) as any,
+            recurrenceStartDate: moment(rule.options.dtstart).format('YYYY-MM-DD'),
+            recurrenceEndDate: moment(rule.options.until).format('YYYY-MM-DD'),
+            // date: null,
+            timeSlots: [{
+              startTime: moment(rule.options.dtstart).format('HH:mm'),
+              endTime: moment(rule.options.until).format('HH:mm'),
+            }],
+          };
+      } catch (error) {
+        console.error('Error parsing recurrence rule:', error);
+      }
+    }
+
+    // Update date type form with community
+    updateFormData(dateTypeUpdate);
 
     // Load tickets from saved experience
     if (experience.tickets && experience.tickets.length > 0) {
@@ -401,6 +432,36 @@ export const useCreateExperienceFlow = () => {
         );
         const salesEndDateTime = extractDateTime(ticket.salesEndDate || ticket.sales_end_date);
 
+        // Map API relative validity fields to form format
+        let salesEndRelative = null;
+        if (
+          ticket.ticket_sales_closing_duration &&
+          ticket.ticket_sales_closing_unit &&
+          ticket.ticket_sales_closing_condition
+        ) {
+          // Convert API format to form format
+          let unit: 'hour' | 'day' | 'week' = 'day';
+          if (ticket.ticket_sales_closing_unit === 'hours') unit = 'hour';
+          else if (ticket.ticket_sales_closing_unit === 'days')
+            unit = ticket.ticket_sales_closing_duration > 7 ? 'week' : 'day';
+          else if (ticket.ticket_sales_closing_unit === 'minutes') unit = 'hour';
+
+          // Convert days to weeks if divisible by 7
+          let amount = ticket.ticket_sales_closing_duration;
+          if (unit === 'day' && amount % 7 === 0 && amount > 7) {
+            unit = 'week';
+            amount = amount / 7;
+          }
+
+          const anchor = ticket.ticket_sales_closing_condition === 'before_start' ? 'start' : 'end';
+
+          salesEndRelative = {
+            amount,
+            unit,
+            anchor,
+          };
+        }
+
         return {
           id: `ticket-${Date.now()}-${Math.random()}`,
           apiId: ticket.id,
@@ -413,7 +474,7 @@ export const useCreateExperienceFlow = () => {
           salesEndTime: salesEndDateTime.time,
           acceptPartialPayment: false,
           salesStartRelative: null,
-          salesEndRelative: null,
+          salesEndRelative,
           duplicateForEntirePeriod: false,
         };
       });
