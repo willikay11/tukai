@@ -41,12 +41,12 @@ export const PreviewGuestsSection = ({ guests, onEdit }: PreviewGuestsSectionPro
           {visibleGuests.map((guest) => (
             <div key={guest.id} className="flex items-center gap-2 rounded-[40px] bg-gray-50 p-2">
               <div className="relative h-8 w-8 flex-shrink-0">
-                  <div
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-700"
-                    title={guest.email}
-                  >
-                    {getInitials(guest.email.split('@')[0])}
-                  </div>
+                <div
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-700"
+                  title={guest.email}
+                >
+                  {getInitials(guest.email.split('@')[0])}
+                </div>
               </div>
               <span className="w-24 truncate text-xs text-gray-500">{guest.email}</span>
             </div>

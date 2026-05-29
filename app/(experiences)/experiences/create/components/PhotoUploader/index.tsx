@@ -34,7 +34,9 @@ export const PhotoUploader = ({
 }: PhotoUploaderProps) => {
   const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
   const [cropQueue, setCropQueue] = useState<Array<{ photo: FormPhoto; objectUrl: string }>>([]);
-  const [currentCrop, setCurrentCrop] = useState<{ photo: FormPhoto; objectUrl: string } | null>(null);
+  const [currentCrop, setCurrentCrop] = useState<{ photo: FormPhoto; objectUrl: string } | null>(
+    null,
+  );
   const inputRef = useRef<HTMLInputElement>(null);
   const { mutateAsync: deletePhotoAsync } = useDeleteExperiencePhoto();
   const { toast } = useToast();
@@ -180,9 +182,7 @@ export const PhotoUploader = ({
         };
 
         // Replace in photos array
-        const updatedPhotos = photos.map((p) =>
-          p.id === currentCrop.photo.id ? croppedPhoto : p,
-        );
+        const updatedPhotos = photos.map((p) => (p.id === currentCrop.photo.id ? croppedPhoto : p));
         onPhotoFilesChange?.(updatedPhotos);
         onPhotoChange?.(croppedPhoto);
       };
@@ -240,10 +240,7 @@ export const PhotoUploader = ({
       onPhotoFilesChange?.(updatedPhotos);
 
       // Revoke object URL if it's not an external URL
-      if (
-        !itemToRemove.url.startsWith('https://') &&
-        !itemToRemove.url.startsWith('http://')
-      ) {
+      if (!itemToRemove.url.startsWith('https://') && !itemToRemove.url.startsWith('http://')) {
         URL.revokeObjectURL(itemToRemove.url);
       }
     },

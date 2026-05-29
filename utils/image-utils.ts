@@ -4,9 +4,7 @@ export interface ImageValidationResult {
   warning?: string;
 }
 
-export const validateExperienceImage = (
-  file: File,
-): Promise<ImageValidationResult> => {
+export const validateExperienceImage = (file: File): Promise<ImageValidationResult> => {
   return new Promise((resolve) => {
     // Check file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];

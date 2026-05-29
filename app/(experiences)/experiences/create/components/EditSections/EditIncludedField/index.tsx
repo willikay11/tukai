@@ -1,7 +1,8 @@
 'use client';
 
 import { Editor } from '@/components/blocks/editor-00/editor';
-import { toSerializedEditorState, serializeEditorStateToHtml } from '../editorUtils';
+
+import { serializeEditorStateToHtml, toSerializedEditorState } from '../editorUtils';
 
 interface EditIncludedFieldProps {
   value: string;

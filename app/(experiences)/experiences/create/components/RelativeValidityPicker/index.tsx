@@ -26,14 +26,7 @@ interface RelativeValidityPickerProps {
   errors: Record<string, string>;
 }
 
-const AMOUNT_OPTIONS = [
-  '1 hour',
-  '2 hours',
-  '3 hours',
-  '6 hours',
-  '12 hours',
-  '24 hours',
-];
+const AMOUNT_OPTIONS = ['1 hour', '2 hours', '3 hours', '6 hours', '12 hours', '24 hours'];
 
 const parseAmount = (str: string): { amount: number; unit: RelativeUnit } => {
   const match = str.match(/^(\d+)\s+(hour|day|week)s?$/);

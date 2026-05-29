@@ -70,7 +70,6 @@ function getAuthErrorMessage(error: any) {
   return 'Invalid credentials, please check your email and password.';
 }
 
-
 // ✅ Extend NextAuth Session type
 declare module 'next-auth' {
   interface Session {

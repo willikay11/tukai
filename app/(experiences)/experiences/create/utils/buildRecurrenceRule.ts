@@ -1,6 +1,9 @@
 import { RRule } from 'rrule';
 
-const dayNameToRRuleMapping: Record<'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun', typeof RRule.MO> = {
+const dayNameToRRuleMapping: Record<
+  'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun',
+  typeof RRule.MO
+> = {
   mon: RRule.MO,
   tue: RRule.TU,
   wed: RRule.WE,
@@ -24,7 +27,12 @@ export const buildRecurrenceRule = (dateTypeData: DateTypeData): string => {
     return '';
   }
 
-  const { recurringDays = [], recurrenceStartDate, recurrenceEndDate, timeSlots = [] } = dateTypeData;
+  const {
+    recurringDays = [],
+    recurrenceStartDate,
+    recurrenceEndDate,
+    timeSlots = [],
+  } = dateTypeData;
 
   // Validate required data for recurring experiences
   if (!recurrenceStartDate || !recurrenceEndDate || recurringDays.length === 0) {

@@ -3,6 +3,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import moment from 'moment';
+import { RRule } from 'rrule';
+
 import { buildRecurrenceRule } from '@/app/(experiences)/experiences/create/utils/buildRecurrenceRule';
 import {
   useCreateBankWallet,
@@ -11,7 +14,6 @@ import {
   usePatchBankWallet,
   usePatchPhoneWallet,
 } from '@/app/(experiences)/hooks/usePayment';
-import { RRule } from 'rrule';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import {
   useAddExperiencePhotos,
@@ -31,7 +33,6 @@ import { Interest } from '@/types/interest';
 import { Wallet } from '@/types/payment';
 import { Photo } from '@/types/photo';
 import { parseApiError } from '@/utils/parseApiError';
-import moment from 'moment';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
@@ -393,21 +394,23 @@ export const useCreateExperienceFlow = () => {
       const options = RRule.parseString(experience.recurrenceRule);
       const rule = new RRule(options);
       try {
-          dateTypeUpdate = {
-            ...dateTypeUpdate,
-            isRecurring: true,
-            recurringDays: rule.options.byweekday?.map((day) => {
-              const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-              return days[day];
-            }) as any,
-            recurrenceStartDate: moment(rule.options.dtstart).format('YYYY-MM-DD'),
-            recurrenceEndDate: moment(rule.options.until).format('YYYY-MM-DD'),
-            // date: null,
-            timeSlots: [{
+        dateTypeUpdate = {
+          ...dateTypeUpdate,
+          isRecurring: true,
+          recurringDays: rule.options.byweekday?.map((day) => {
+            const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+            return days[day];
+          }) as any,
+          recurrenceStartDate: moment(rule.options.dtstart).format('YYYY-MM-DD'),
+          recurrenceEndDate: moment(rule.options.until).format('YYYY-MM-DD'),
+          // date: null,
+          timeSlots: [
+            {
               startTime: moment(rule.options.dtstart).format('HH:mm'),
               endTime: moment(rule.options.until).format('HH:mm'),
-            }],
-          };
+            },
+          ],
+        };
       } catch (error) {
         console.error('Error parsing recurrence rule:', error);
       }
@@ -818,8 +821,12 @@ export const useCreateExperienceFlow = () => {
       const endDateValue = isRecurring
         ? formData.dateType.recurrenceEndDate || ''
         : formData.dateType.date || '';
-      const startTime = isRecurring ? formData.dateType.timeSlots?.[0]?.startTime || null : formData.dateType.startTime || null;
-      const endTime = isRecurring ? formData.dateType.timeSlots?.[0]?.endTime || null : formData.dateType.endTime || null;
+      const startTime = isRecurring
+        ? formData.dateType.timeSlots?.[0]?.startTime || null
+        : formData.dateType.startTime || null;
+      const endTime = isRecurring
+        ? formData.dateType.timeSlots?.[0]?.endTime || null
+        : formData.dateType.endTime || null;
 
       const payload = {
         title: formData.about.title,
@@ -855,10 +862,7 @@ export const useCreateExperienceFlow = () => {
               'photos to experience',
               experienceId,
             );
-            const photoResponse = await addExperiencePhotos(
-              experienceId,
-              photoFiles,
-            );
+            const photoResponse = await addExperiencePhotos(experienceId, photoFiles);
             console.log('[handleSaveAbout] Photos uploaded successfully, response:', photoResponse);
           } catch (photoError: any) {
             console.error('[handleSaveAbout] Photo upload failed:', photoError);
