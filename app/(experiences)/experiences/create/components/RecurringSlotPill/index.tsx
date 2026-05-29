@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import type { CreateExperienceTicketItem } from '@/types/ticket';
+import type { Ticket } from '@/types/ticket';
 
 import { SavedTicketCard } from '../TicketCard';
 import { TicketForm, type TicketFormValue } from '../TicketForm';
@@ -14,7 +14,7 @@ interface RecurringSlotPillProps {
   endTime: string;
   dayLabel: string;
   templateId?: string;
-  ticket: CreateExperienceTicketItem | null;
+  ticket: Ticket | null;
   experiencePricing: 'paid' | 'free';
   commissionPayer: 'host' | 'customer' | 'split';
   errors: Record<string, string>;
@@ -96,7 +96,7 @@ export const RecurringSlotPill = ({
               <SavedTicketCard
                 name={ticket.name}
                 quantity={ticket.quantity}
-                amount={ticket.amount}
+                amount={isNaN(Number(ticket.price)) ? 0 : Number(ticket.price)}
                 validity={`${ticket.salesEndRelative?.amount ?? 1} ${ticket.salesEndRelative?.unit ?? 'hour'} before the experience ${ticket.salesEndRelative?.anchor === 'start' ? 'starts' : 'ends'}`}
                 coverPhoto={undefined}
                 onEdit={onEditTicket}
