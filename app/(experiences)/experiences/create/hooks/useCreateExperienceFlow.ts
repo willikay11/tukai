@@ -374,8 +374,8 @@ export const useCreateExperienceFlow = () => {
           isTempId: false,
         })) || [],
       categories: experience.categories || [],
-      location: experience.location?.formattedAddress || '',
-      locationPlaceId: experience.location?.id || '',
+      location: experience.location?.formattedAddress || experience.location?.city || '',
+      locationPlaceId: experience.location?.googleMapPlaceId ?? '',
       meetingPoint: experience.meetingPlace || '',
       meetingTime: experience.meetingTime || null,
       whatsIncluded: experience.whatsIncluded ?? '',
@@ -496,7 +496,7 @@ export const useCreateExperienceFlow = () => {
         tickets: { ...prev.tickets, items: savedTickets },
       }));
     }
-  }, [experience?.id, experienceId, updateAboutFormData, updateFormData]);
+  }, [experience?.id, experienceId, slotTemplatesResponse, updateAboutFormData, updateFormData]);
 
   // Sync photo IDs after photos are uploaded (replace temp IDs with real IDs)
   useEffect(() => {
@@ -640,13 +640,11 @@ export const useCreateExperienceFlow = () => {
   }, [formData.dateType]);
 
   const updateTicketsFormData = useCallback((data: Partial<FormData['tickets']>) => {
-    console.log('[updateTicketsFormData] Updating tickets with data:', data);
     setFormData((prev) => {
       const updated = {
         ...prev,
         tickets: { ...prev.tickets, ...data },
       };
-      console.log('[updateTicketsFormData] New formData.tickets:', updated.tickets);
       return updated;
     });
   }, []);
@@ -841,7 +839,9 @@ export const useCreateExperienceFlow = () => {
       const payload = {
         title: formData.about.title,
         description: formData.about.description,
-        googleMapPlaceId: formData.about.locationPlaceId || 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
+        ...(formData.about.locationPlaceId
+          ? { googleMapPlaceId: formData.about.locationPlaceId }
+          : {}),
         startDate: formatDateWithTime(startDateValue, startTime),
         endDate: formatDateWithTime(endDateValue, endTime, true),
         recurrence_rule: buildRecurrenceRule(formData.dateType),
@@ -1073,7 +1073,9 @@ export const useCreateExperienceFlow = () => {
       const payload = {
         title: experience.title,
         description: experience.description,
-        googleMapPlaceId: 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
+        ...(experience.location?.googleMapPlaceId
+          ? { googleMapPlaceId: experience.location.googleMapPlaceId }
+          : {}),
         startDate: experience.startDate,
         endDate: experience.endDate,
         recurrence_rule: '',
