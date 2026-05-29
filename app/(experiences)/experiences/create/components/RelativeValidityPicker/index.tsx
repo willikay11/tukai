@@ -30,9 +30,7 @@ const formatOptionLabel = (option: RelativeValidityValue): string => {
         : `${option.amount} ${option.amount === 1 ? 'week' : 'weeks'}`;
 
   const anchorLabel =
-    option.anchor === 'start'
-      ? 'before the experience starts'
-      : 'before the experience ends';
+    option.anchor === 'start' ? 'before the experience starts' : 'before the experience ends';
 
   return `${unitLabel} ${anchorLabel}`;
 };
@@ -46,7 +44,11 @@ const isSelected = (
   option.unit === selected.unit &&
   option.anchor === selected.anchor;
 
-export const RelativeValidityPicker = ({ value, onChange, errors }: RelativeValidityPickerProps) => {
+export const RelativeValidityPicker = ({
+  value,
+  onChange,
+  errors,
+}: RelativeValidityPickerProps) => {
   return (
     <div className="space-y-2">
       <label className="text-xs font-medium text-gray-800">
@@ -64,15 +66,11 @@ export const RelativeValidityPicker = ({ value, onChange, errors }: RelativeVali
               key={index}
               type="button"
               onClick={() => onChange(option)}
-              className={`
-                px-4 py-3 rounded-full text-xs font-medium
-                transition-colors
-                ${
-                  selected
-                    ? 'bg-gradient-to-b to-[#064E3B] from-[#047857] text-white border-primary'
-                    : 'bg-gray-100 text-gray-700 hover:border-gray-400'
-                }
-              `}
+              className={`rounded-full px-4 py-3 text-xs font-medium transition-colors ${
+                selected
+                  ? 'border-primary bg-gradient-to-b from-[#047857] to-[#064E3B] text-white'
+                  : 'bg-gray-100 text-gray-700 hover:border-gray-400'
+              } `}
             >
               {formatOptionLabel(option)}
             </button>
@@ -80,9 +78,7 @@ export const RelativeValidityPicker = ({ value, onChange, errors }: RelativeVali
         })}
       </div>
 
-      {errors.salesEndRelative && (
-        <p className="text-xs text-red-500">{errors.salesEndRelative}</p>
-      )}
+      {errors.salesEndRelative && <p className="text-xs text-red-500">{errors.salesEndRelative}</p>}
     </div>
   );
 };

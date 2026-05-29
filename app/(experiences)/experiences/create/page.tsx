@@ -115,7 +115,6 @@ function CreateExperiencePageContent() {
               multiDayStartTime={formData.dateType.multiDayStartTime}
               multiDayEndDate={formData.dateType.multiDayEndDate}
               multiDayEndTime={formData.dateType.multiDayEndTime}
-              aboutPhoto={formData.about.photos?.[0] || null}
               aboutPhotos={formData.about.photos}
               aboutTitle={formData.about.title}
               aboutDescription={formData.about.description}
@@ -228,7 +227,6 @@ function CreateExperiencePageContent() {
           multiDayStartTime={formData.dateType.multiDayStartTime}
           multiDayEndDate={formData.dateType.multiDayEndDate}
           multiDayEndTime={formData.dateType.multiDayEndTime}
-          aboutPhoto={formData.about.photos?.[0] || null}
           aboutPhotos={formData.about.photos}
           aboutTitle={formData.about.title}
           aboutDescription={formData.about.description}

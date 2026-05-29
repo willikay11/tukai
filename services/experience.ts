@@ -485,9 +485,7 @@ export const createSlotTemplate = async (
 
 export const fetchSlotTemplates = async (experienceId: string): Promise<ApiResponse> => {
   const axiosInstance = await apiWithToken();
-  const response = await axiosInstance.get(
-    `/v1/experiences/${experienceId}/slot-templates/`,
-  );
+  const response = await axiosInstance.get(`/v1/experiences/${experienceId}/slot-templates/`);
 
   return {
     status: response.status,

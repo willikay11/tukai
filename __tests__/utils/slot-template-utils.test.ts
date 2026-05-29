@@ -1,7 +1,7 @@
 import {
+  buildSlotTemplatePayload,
   calculateDurationMinutes,
   calculateEndTime,
-  buildSlotTemplatePayload,
 } from '@/utils/slot-template-utils';
 
 describe('calculateDurationMinutes', () => {
@@ -85,10 +85,7 @@ describe('buildSlotTemplatePayload', () => {
 
   it('includes recurrence_rule when provided', () => {
     const rrule = 'FREQ=WEEKLY;BYDAY=MO,WE';
-    const result = buildSlotTemplatePayload(
-      { startTime: '09:00', endTime: '11:00' },
-      rrule,
-    );
+    const result = buildSlotTemplatePayload({ startTime: '09:00', endTime: '11:00' }, rrule);
     expect(result.recurrence_rule).toBe(rrule);
   });
 

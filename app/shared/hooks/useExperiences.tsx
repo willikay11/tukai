@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
-  SlotTemplatePayload,
   ExperiencesQueryParams,
+  SlotTemplatePayload,
   addExperiencePhotos,
   addGuestToExperience,
   bookmarkExperience,
@@ -190,13 +190,8 @@ export const useSearchUsersDebounced = () => {
 export const useCreateSlotTemplate = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      experienceId,
-      data,
-    }: {
-      experienceId: string;
-      data: SlotTemplatePayload;
-    }) => createSlotTemplate(experienceId, data),
+    mutationFn: ({ experienceId, data }: { experienceId: string; data: SlotTemplatePayload }) =>
+      createSlotTemplate(experienceId, data),
     onSuccess: (_, { experienceId }) => {
       queryClient.invalidateQueries({
         queryKey: ['slot-templates', experienceId],
@@ -235,13 +230,8 @@ export const useUpdateSlotTemplate = () => {
 export const useDeleteSlotTemplate = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      experienceId,
-      templateId,
-    }: {
-      experienceId: string;
-      templateId: string;
-    }) => deleteSlotTemplate(experienceId, templateId),
+    mutationFn: ({ experienceId, templateId }: { experienceId: string; templateId: string }) =>
+      deleteSlotTemplate(experienceId, templateId),
     onSuccess: (_, { experienceId }) => {
       queryClient.invalidateQueries({
         queryKey: ['slot-templates', experienceId],
