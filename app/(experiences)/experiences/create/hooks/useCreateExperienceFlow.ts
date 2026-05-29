@@ -749,19 +749,23 @@ export const useCreateExperienceFlow = () => {
     try {
       const photoFiles = formData.about.photos.filter((p) => p.file).map((p) => p.file!);
 
+      // Use recurrence dates if recurring, otherwise use single date
+      const isRecurring = formData.dateType.isRecurring;
+      const startDateValue = isRecurring
+        ? formData.dateType.recurrenceStartDate || ''
+        : formData.dateType.date || '';
+      const endDateValue = isRecurring
+        ? formData.dateType.recurrenceEndDate || ''
+        : formData.dateType.date || '';
+      const startTime = isRecurring ? formData.dateType.timeSlots?.[0]?.startTime || null : formData.dateType.startTime || null;
+      const endTime = isRecurring ? formData.dateType.timeSlots?.[0]?.endTime || null : formData.dateType.endTime || null;
+
       const payload = {
         title: formData.about.title,
         description: formData.about.description,
         googleMapPlaceId: formData.about.locationPlaceId || 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
-        startDate: formatDateWithTime(
-          formData.dateType.date || '',
-          formData.dateType.startTime || null,
-        ),
-        endDate: formatDateWithTime(
-          formData.dateType.date || '',
-          formData.dateType.endTime || null,
-          true,
-        ),
+        startDate: formatDateWithTime(startDateValue, startTime),
+        endDate: formatDateWithTime(endDateValue, endTime, true),
         recurrence_rule: buildRecurrenceRule(formData.dateType),
         categoriesIds: formData.about.categories.map((c) => c.id),
         isPublic: formData.about.visibility === 'public',
