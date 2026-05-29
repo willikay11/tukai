@@ -49,24 +49,28 @@ describe('PhotoUploader', () => {
       expect(container).toBeInTheDocument();
     });
 
-    it('renders preview grid', () => {
-      rtlRender(
+    it('renders photo grid container', () => {
+      const { container } = rtlRender(
         <PhotoUploader
           photos={mockFormPhotos}
           onPhotoChange={jest.fn()}
         />
       );
-      expect(screen.getByTestId('preview-grid')).toBeInTheDocument();
+      // Check that the grid div with flex layout exists
+      const grid = container.querySelector('div.flex.flex-wrap');
+      expect(grid).toBeInTheDocument();
     });
 
     it('renders with empty photos', () => {
-      rtlRender(
+      const { container } = rtlRender(
         <PhotoUploader
           photos={[]}
           onPhotoChange={jest.fn()}
         />
       );
-      expect(screen.getByTestId('preview-grid')).toBeInTheDocument();
+      // Check that the grid container exists even with no photos
+      const grid = container.querySelector('div.flex.flex-wrap');
+      expect(grid).toBeInTheDocument();
     });
 
     it('renders upload instructions', () => {
@@ -103,13 +107,14 @@ describe('PhotoUploader', () => {
     });
 
     it('updates when photos prop changes', () => {
-      const { rerender } = rtlRender(
+      const { rerender, container } = rtlRender(
         <PhotoUploader
           photos={[mockFormPhotos[0]]}
           onPhotoChange={jest.fn()}
         />
       );
-      expect(screen.getByTestId('preview-grid')).toBeInTheDocument();
+      let grid = container.querySelector('div.flex.flex-wrap');
+      expect(grid).toBeInTheDocument();
 
       rerender(
         <PhotoUploader
@@ -117,7 +122,8 @@ describe('PhotoUploader', () => {
           onPhotoChange={jest.fn()}
         />
       );
-      expect(screen.getByTestId('preview-grid')).toBeInTheDocument();
+      grid = container.querySelector('div.flex.flex-wrap');
+      expect(grid).toBeInTheDocument();
     });
   });
 
