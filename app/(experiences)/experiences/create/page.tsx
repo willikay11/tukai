@@ -55,6 +55,7 @@ function CreateExperiencePageContent() {
     walletMutations,
     isSavingExperience,
     apiError,
+    slotTemplateRecords,
   } = useCreateExperienceFlow();
 
   if (isCheckingCommunityAccess) {
@@ -179,6 +180,7 @@ function CreateExperiencePageContent() {
           apiError={apiError}
           isPreviewDrawerOpen={isPreviewDrawerOpen}
           setIsPreviewDrawerOpen={setIsPreviewDrawerOpen}
+          slotTemplateRecords={slotTemplateRecords}
           onPreviewAndPublish={() => {
             const isWalletValid = validateWallet();
 

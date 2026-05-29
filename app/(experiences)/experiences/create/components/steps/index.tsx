@@ -511,6 +511,7 @@ export const CreateExperienceSteps = ({
                 }
                 experienceId={experience?.id || null}
                 onPreview={handlePreviewClick}
+                slotTemplateRecords={slotTemplateRecords}
               />
             ) : (
               <ExperienceDates

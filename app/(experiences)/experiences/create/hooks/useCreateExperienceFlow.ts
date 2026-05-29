@@ -1265,6 +1265,8 @@ export const useCreateExperienceFlow = () => {
       isPatchingPhoneWallet,
     },
 
+    slotTemplateRecords,
+
     handlers: {
       handleStepChange,
       handleExperienceCreated,
