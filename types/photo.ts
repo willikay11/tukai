@@ -1,6 +1,6 @@
 export type Photo = {
   id: string;
-  mediaType: 'image' | 'video';
+  mediaType: 'photo' | 'video';
   experience?: string;
   photo?: string;
   caption?: string;

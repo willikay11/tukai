@@ -53,7 +53,7 @@ export const SingleExperience = ({
           {!hasError ? (
             <ImageCarousel
               images={experience.photos
-                .filter((photo: Photo) => photo.mediaType === 'image' && photo.photo)
+                .filter((photo: Photo) => photo.mediaType === 'photo' && photo.photo)
                 .sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0))
                 .map((photo) => photo.photo!)}
               aspectRatio={type === 'discover' ? 'aspect-square' : 'aspect-[16/9]'}

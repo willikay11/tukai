@@ -19,7 +19,7 @@ export const PreviewDescriptionSection = ({
           dangerouslySetInnerHTML={{ __html: description }}
         />
         {onEdit && (
-          <button onClick={onEdit} className="mt-4 flex-shrink-0 text-gray-400 hover:text-gray-600">
+          <button onClick={onEdit} className="flex-shrink-0 text-gray-400 hover:text-gray-600">
             <IconComponent iconName="Edit02Icon" size={16} className="text-gray-800" />
           </button>
         )}
