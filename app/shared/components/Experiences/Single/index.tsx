@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
+import { Photo } from '@/types/photo';
 
 export const SingleExperience = ({
   type,
@@ -52,8 +53,9 @@ export const SingleExperience = ({
           {!hasError ? (
             <ImageCarousel
               images={experience.photos
+                .filter((photo: Photo) => photo.mediaType === 'image' && photo.photo)
                 .sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0))
-                .map((photo) => photo.photo)}
+                .map((photo) => photo.photo!)}
               aspectRatio={type === 'discover' ? 'aspect-square' : 'aspect-[16/9]'}
             />
           ) : (

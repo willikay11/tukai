@@ -1,19 +1,22 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { RefreshIcon } from '@hugeicons/react-pro';
 
-import { Button } from '@/app/shared/components/Forms';
-import { OtpInput } from '@/app/shared/components/Forms/form/otpInput';
+import { Button, OtpInput } from '@/app/shared/components/Forms';
 import { toast } from '@/app/shared/hooks/useToast';
+import { removeUser } from '@/slices/userSlice';
 
 export default function OtpConfirmation() {
+  const dispatch = useDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const newUser = useSelector((state: any) => state.userReducer.newUser);
   const [token, setToken] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -60,7 +63,7 @@ export default function OtpConfirmation() {
 
   const { data: session } = useSession();
 
-  const email = session?.user?.email || newUser?.payload?.email;
+  const email = session?.user?.email || newUser?.payload?.email || searchParams.get('email') || '';
 
   const onSubmit = async () => {
     setIsSubmitting(true);
@@ -87,8 +90,30 @@ export default function OtpConfirmation() {
       description: 'Account verified successfully!',
       variant: 'success',
     });
+
+    const password = newUser?.payload?.password;
+
+    if (email && password) {
+      const signInRes = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (signInRes?.status === 200) {
+        dispatch(removeUser());
+        setIsSubmitting(false);
+        router.push('/');
+        return;
+      }
+    }
+
     setIsSubmitting(false);
-    router.push('/');
+    toast({
+      title: 'Sign in required',
+      description: 'Account verified successfully. Please sign in to continue.',
+    });
+    router.push('/auth/sign-in');
   };
 
   const resendCode = async () => {

@@ -2,14 +2,17 @@
 
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
 
 import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 import { AppleIcon, GoogleIcon, LockKeyIcon, Mail02Icon } from '@hugeicons/react-pro';
 
-import { MobileStore } from '@/app/shared/components/Download';
 import { Anchor, Input } from '@/app/shared/components/Forms';
+import { MobileStore } from '@/app/shared/components/Download';
 import { toast } from '@/app/shared/hooks/useToast';
+import { addUser } from '@/slices/userSlice';
 
 import { Button } from '../button';
 
@@ -19,13 +22,43 @@ type Inputs = {
 };
 
 export const SignInForm = ({ onLogin }: { onLogin: () => void }) => {
+  const dispatch = useDispatch();
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const pendingVerificationMessage =
+    'User account is pending verification. Please check your email for a verification link.';
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<Inputs>({ mode: 'onChange' });
+
+  const getAuthErrorMessage = (res: Awaited<ReturnType<typeof signIn>>) => {
+    const fallback =
+      'Invalid credentials, please check your email and password or sign up if you do not have an account.';
+
+    if (!res) return fallback;
+
+    let message: string | undefined = res.error ?? undefined;
+
+    if (!message && res.url) {
+      try {
+        const url = new URL(res.url, window.location.origin);
+        message = url.searchParams.get('error') || undefined;
+      } catch {
+        message = undefined;
+      }
+    }
+
+    if (!message || message === 'CredentialsSignin') return fallback;
+
+    try {
+      return decodeURIComponent(message);
+    } catch {
+      return message;
+    }
+  };
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setIsSubmitting(true);
@@ -39,9 +72,20 @@ export const SignInForm = ({ onLogin }: { onLogin: () => void }) => {
     if (res?.status === 200) {
       onLogin();
     } else {
+      const errorMessage = getAuthErrorMessage(res);
+
+      if (errorMessage === pendingVerificationMessage) {
+        dispatch(addUser(data));
+        toast({
+          title: 'Info',
+          description: errorMessage,
+        });
+        router.push(`/auth/otp-confirmation?email=${encodeURIComponent(data.email)}`);
+        return;
+      }
+
       toast({
-        description:
-          'Invalid credentials, please check your email and password or sign up if you do not have an account.',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
