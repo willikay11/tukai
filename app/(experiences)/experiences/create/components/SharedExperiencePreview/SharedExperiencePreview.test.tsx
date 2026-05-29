@@ -1,8 +1,9 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
-import { SharedExperiencePreview } from './index';
 import type { Interest } from '@/types/interest';
 import type { Wallet } from '@/types/payment';
+
+import { SharedExperiencePreview } from './index';
 
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: any) => <span>{iconName}</span>,
@@ -69,16 +70,16 @@ describe('SharedExperiencePreview', () => {
     });
 
     it('displays about section for about step', () => {
-      render(
-        <SharedExperiencePreview {...defaultProps} step="about" />
-      );
+      render(<SharedExperiencePreview {...defaultProps} step="about" />);
       expect(screen.getByText('Amazing Hiking Adventure')).toBeInTheDocument();
-      expect(screen.getByText('A wonderful hiking experience in the mountains')).toBeInTheDocument();
+      expect(
+        screen.getByText('A wonderful hiking experience in the mountains'),
+      ).toBeInTheDocument();
     });
 
     it('displays dates-tickets section when step is dates-tickets', () => {
       const { container } = render(
-        <SharedExperiencePreview {...defaultProps} step="dates-tickets" />
+        <SharedExperiencePreview {...defaultProps} step="dates-tickets" />,
       );
       expect(container.textContent).toContain('2026');
       expect(container.textContent).toContain('15');
@@ -93,12 +94,7 @@ describe('SharedExperiencePreview', () => {
     });
 
     it('handles missing photos gracefully', () => {
-      render(
-        <SharedExperiencePreview
-          {...defaultProps}
-          aboutPhotos={undefined}
-        />
-      );
+      render(<SharedExperiencePreview {...defaultProps} aboutPhotos={undefined} />);
       expect(screen.getByText('Amazing Hiking Adventure')).toBeInTheDocument();
     });
   });
@@ -111,29 +107,26 @@ describe('SharedExperiencePreview', () => {
 
     it('displays experience description', () => {
       render(<SharedExperiencePreview {...defaultProps} />);
-      expect(screen.getByText('A wonderful hiking experience in the mountains')).toBeInTheDocument();
+      expect(
+        screen.getByText('A wonderful hiking experience in the mountains'),
+      ).toBeInTheDocument();
     });
 
     it('hides title when not provided', () => {
-      render(
-        <SharedExperiencePreview
-          {...defaultProps}
-          aboutTitle={undefined}
-        />
-      );
+      render(<SharedExperiencePreview {...defaultProps} aboutTitle={undefined} />);
       expect(screen.queryByText('Amazing Hiking Adventure')).not.toBeInTheDocument();
     });
   });
 
-  describe('What\'s Included/Excluded', () => {
-    it('displays what\'s included section', () => {
+  describe("What's Included/Excluded", () => {
+    it("displays what's included section", () => {
       render(<SharedExperiencePreview {...defaultProps} />);
       expect(screen.getByText('Guide')).toBeInTheDocument();
       expect(screen.getByText('Snacks')).toBeInTheDocument();
       expect(screen.getByText('Transport')).toBeInTheDocument();
     });
 
-    it('displays what\'s excluded section', () => {
+    it("displays what's excluded section", () => {
       render(<SharedExperiencePreview {...defaultProps} />);
       expect(screen.getByText('Accommodation')).toBeInTheDocument();
       expect(screen.getByText('Meals')).toBeInTheDocument();
@@ -148,12 +141,7 @@ describe('SharedExperiencePreview', () => {
     });
 
     it('handles empty categories', () => {
-      render(
-        <SharedExperiencePreview
-          {...defaultProps}
-          aboutCategories={[]}
-        />
-      );
+      render(<SharedExperiencePreview {...defaultProps} aboutCategories={[]} />);
       expect(screen.queryByText('Hiking')).not.toBeInTheDocument();
     });
   });
@@ -196,7 +184,7 @@ describe('SharedExperiencePreview', () => {
           multiDayStartTime="09:00"
           multiDayEndDate="2026-06-17"
           multiDayEndTime="17:00"
-        />
+        />,
       );
       const text = container.textContent;
       expect(text).toContain('Jun');
@@ -215,7 +203,7 @@ describe('SharedExperiencePreview', () => {
           selectedRecurringDays={['mon', 'wed', 'fri']}
           selectedRecurrenceStartDate="2026-06-01"
           selectedRecurrenceEndDate="2026-08-31"
-        />
+        />,
       );
       const text = container.textContent;
       expect(text).toContain('2026');
@@ -224,50 +212,30 @@ describe('SharedExperiencePreview', () => {
 
   describe('Tickets Section', () => {
     it('displays tickets when on dates-tickets step', () => {
-      render(
-        <SharedExperiencePreview {...defaultProps} step="dates-tickets" />
-      );
+      render(<SharedExperiencePreview {...defaultProps} step="dates-tickets" />);
       expect(screen.getByText('Tickets')).toBeInTheDocument();
       expect(screen.getByText('Regular')).toBeInTheDocument();
     });
 
     it('does not display tickets on other steps', () => {
-      render(
-        <SharedExperiencePreview {...defaultProps} step="about" />
-      );
+      render(<SharedExperiencePreview {...defaultProps} step="about" />);
       expect(screen.queryByText('Regular')).not.toBeInTheDocument();
     });
 
     it('hides tickets section when no tickets provided', () => {
-      render(
-        <SharedExperiencePreview
-          {...defaultProps}
-          ticketsItems={[]}
-          step="dates-tickets"
-        />
-      );
+      render(<SharedExperiencePreview {...defaultProps} ticketsItems={[]} step="dates-tickets" />);
       expect(screen.queryByText('Regular')).not.toBeInTheDocument();
     });
   });
 
   describe('Visibility Setting', () => {
     it('displays visibility as public', () => {
-      render(
-        <SharedExperiencePreview
-          {...defaultProps}
-          aboutVisibility="public"
-        />
-      );
+      render(<SharedExperiencePreview {...defaultProps} aboutVisibility="public" />);
       expect(screen.getByText(/Public/i)).toBeInTheDocument();
     });
 
     it('displays visibility as private', () => {
-      render(
-        <SharedExperiencePreview
-          {...defaultProps}
-          aboutVisibility="private"
-        />
-      );
+      render(<SharedExperiencePreview {...defaultProps} aboutVisibility="private" />);
       expect(screen.getByText(/Private/i)).toBeInTheDocument();
     });
   });
@@ -291,7 +259,7 @@ describe('SharedExperiencePreview', () => {
               image: undefined,
             },
           ]}
-        />
+        />,
       );
       expect(screen.getByText(/Guests/i)).toBeInTheDocument();
       expect(screen.getByText(/john@example.com/)).toBeInTheDocument();
@@ -299,12 +267,7 @@ describe('SharedExperiencePreview', () => {
     });
 
     it('hides guests section when no guests', () => {
-      render(
-        <SharedExperiencePreview
-          {...defaultProps}
-          invitedGuests={[]}
-        />
-      );
+      render(<SharedExperiencePreview {...defaultProps} invitedGuests={[]} />);
       expect(screen.queryByText(/john@example.com/)).not.toBeInTheDocument();
     });
   });
@@ -322,7 +285,7 @@ describe('SharedExperiencePreview', () => {
               imageUrl: 'https://example.com/comm.jpg',
             },
           ]}
-        />
+        />,
       );
       expect(screen.getByText('Hiking Enthusiasts')).toBeInTheDocument();
     });
@@ -336,10 +299,7 @@ describe('SharedExperiencePreview', () => {
 
     it('renders component without wallet', () => {
       const { container } = render(
-        <SharedExperiencePreview
-          {...defaultProps}
-          selectedWallet={undefined}
-        />
+        <SharedExperiencePreview {...defaultProps} selectedWallet={undefined} />,
       );
       expect(container).toBeInTheDocument();
     });
@@ -349,11 +309,7 @@ describe('SharedExperiencePreview', () => {
     it('component renders with edit callback available', () => {
       const onEditStep = jest.fn();
       const { container } = render(
-        <SharedExperiencePreview
-          {...defaultProps}
-          onEditStep={onEditStep}
-          step="about"
-        />
+        <SharedExperiencePreview {...defaultProps} onEditStep={onEditStep} step="about" />,
       );
       expect(container).toBeInTheDocument();
       expect(onEditStep).toBeDefined();
@@ -362,20 +318,18 @@ describe('SharedExperiencePreview', () => {
 
   describe('Component Rendering', () => {
     it('renders about section when on about step', () => {
-      render(
-        <SharedExperiencePreview {...defaultProps} step="about" />
-      );
+      render(<SharedExperiencePreview {...defaultProps} step="about" />);
       expect(screen.getByText('Amazing Hiking Adventure')).toBeInTheDocument();
     });
 
     it('renders component on different steps', () => {
       const { container: container1 } = render(
-        <SharedExperiencePreview {...defaultProps} step="about" />
+        <SharedExperiencePreview {...defaultProps} step="about" />,
       );
       expect(container1).toBeInTheDocument();
 
       const { container: container2 } = render(
-        <SharedExperiencePreview {...defaultProps} step="dates-tickets" />
+        <SharedExperiencePreview {...defaultProps} step="dates-tickets" />,
       );
       expect(container2).toBeInTheDocument();
     });

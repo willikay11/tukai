@@ -1,5 +1,7 @@
 import { render, screen } from '@testing-library/react';
 
+import { CreateExperienceSteps } from './index';
+
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn(),
@@ -85,8 +87,6 @@ jest.mock('../wallet', () => ({
   CreateExperienceWallet: () => <div>create-experience-wallet</div>,
 }));
 
-import { CreateExperienceSteps } from './index';
-
 describe('CreateExperienceSteps', () => {
   const defaultProps = {
     currentStep: 'community' as const,
@@ -113,9 +113,7 @@ describe('CreateExperienceSteps', () => {
 
   describe('Rendering', () => {
     it('renders the component', () => {
-      const { container } = render(
-        <CreateExperienceSteps {...defaultProps} />
-      );
+      const { container } = render(<CreateExperienceSteps {...defaultProps} />);
       expect(container).toBeInTheDocument();
     });
 
@@ -135,22 +133,12 @@ describe('CreateExperienceSteps', () => {
 
   describe('Loading State', () => {
     it('shows skeleton when loading experience', () => {
-      render(
-        <CreateExperienceSteps
-          {...defaultProps}
-          isLoadingExperience={true}
-        />
-      );
+      render(<CreateExperienceSteps {...defaultProps} isLoadingExperience={true} />);
       expect(screen.getByText('loading-skeleton')).toBeInTheDocument();
     });
 
     it('renders all step tabs in loading state', () => {
-      render(
-        <CreateExperienceSteps
-          {...defaultProps}
-          isLoadingExperience={true}
-        />
-      );
+      render(<CreateExperienceSteps {...defaultProps} isLoadingExperience={true} />);
       const tabsList = screen.getByTestId('tabs-list');
       expect(tabsList.textContent).toContain('Community');
       expect(tabsList.textContent).toContain('About');
@@ -159,33 +147,18 @@ describe('CreateExperienceSteps', () => {
 
   describe('Community Step', () => {
     it('renders community step content', () => {
-      render(
-        <CreateExperienceSteps
-          {...defaultProps}
-          currentStep="community"
-        />
-      );
+      render(<CreateExperienceSteps {...defaultProps} currentStep="community" />);
       expect(screen.getByText('date-type-step')).toBeInTheDocument();
     });
 
     it('renders cancel and save continue buttons', () => {
-      render(
-        <CreateExperienceSteps
-          {...defaultProps}
-          currentStep="community"
-        />
-      );
+      render(<CreateExperienceSteps {...defaultProps} currentStep="community" />);
       expect(screen.getByText('Cancel')).toBeInTheDocument();
       expect(screen.getByText('Save & Continue')).toBeInTheDocument();
     });
 
     it('shows preview button on mobile', () => {
-      render(
-        <CreateExperienceSteps
-          {...defaultProps}
-          currentStep="community"
-        />
-      );
+      render(<CreateExperienceSteps {...defaultProps} currentStep="community" />);
       expect(screen.getByText('Preview')).toBeInTheDocument();
     });
   });
@@ -211,7 +184,7 @@ describe('CreateExperienceSteps', () => {
             categories: [],
           }}
           updateAboutFormData={jest.fn()}
-        />
+        />,
       );
       expect(screen.getByText('about-step')).toBeInTheDocument();
     });
@@ -229,7 +202,7 @@ describe('CreateExperienceSteps', () => {
             items: [],
           }}
           updateTicketsFormData={jest.fn()}
-        />
+        />,
       );
       expect(screen.getByText('tickets-step')).toBeInTheDocument();
     });
@@ -246,7 +219,7 @@ describe('CreateExperienceSteps', () => {
             invitedCommunityIds: [],
           }}
           updateInviteFormData={jest.fn()}
-        />
+        />,
       );
       expect(screen.getByText('invite-guests-step')).toBeInTheDocument();
     });
@@ -263,7 +236,7 @@ describe('CreateExperienceSteps', () => {
             walletType: 'phone',
           }}
           updateWalletFormData={jest.fn()}
-        />
+        />,
       );
       expect(screen.getByText('wallet-details-step')).toBeInTheDocument();
     });
@@ -277,7 +250,7 @@ describe('CreateExperienceSteps', () => {
           {...defaultProps}
           onStepChange={onStepChange}
           currentStep="community"
-        />
+        />,
       );
       const tabs = screen.getAllByRole('button');
       const aboutTab = tabs.find((btn) => btn.textContent?.includes('About'));
@@ -295,7 +268,7 @@ describe('CreateExperienceSteps', () => {
             ...defaultProps.formData,
             experienceType: 'one-time',
           }}
-        />
+        />,
       );
       const tabsList = screen.getByTestId('tabs-list');
       expect(tabsList.textContent).toContain('Community');
@@ -310,7 +283,7 @@ describe('CreateExperienceSteps', () => {
             ...defaultProps.formData,
             experienceType: 'multi-day',
           }}
-        />
+        />,
       );
       const tabsList = screen.getByTestId('tabs-list');
       expect(tabsList.textContent).toContain('Community');
@@ -338,7 +311,7 @@ describe('CreateExperienceSteps', () => {
             meetingTime: null,
             categories: [],
           }}
-        />
+        />,
       );
       expect(container).toBeInTheDocument();
     });
@@ -347,24 +320,26 @@ describe('CreateExperienceSteps', () => {
       render(
         <CreateExperienceSteps
           {...defaultProps}
-          formData={{
-            community: null,
-            experienceType: 'one-time',
-            experiencePricing: 'paid',
-            isRecurring: false,
-            date: null,
-            startTime: null,
-            endTime: null,
-            recurringDays: [],
-            recurrenceStartDate: null,
-            recurrenceEndDate: null,
-            timeSlots: [],
-            multiDayStartDate: null,
-            multiDayStartTime: null,
-            multiDayEndDate: null,
-            multiDayEndTime: null,
-          } as any}
-        />
+          formData={
+            {
+              community: null,
+              experienceType: 'one-time',
+              experiencePricing: 'paid',
+              isRecurring: false,
+              date: null,
+              startTime: null,
+              endTime: null,
+              recurringDays: [],
+              recurrenceStartDate: null,
+              recurrenceEndDate: null,
+              timeSlots: [],
+              multiDayStartDate: null,
+              multiDayStartTime: null,
+              multiDayEndDate: null,
+              multiDayEndTime: null,
+            } as any
+          }
+        />,
       );
       expect(screen.getByTestId('tabs-list')).toBeInTheDocument();
     });
@@ -382,7 +357,7 @@ describe('CreateExperienceSteps', () => {
             recurrenceStartDate: '2026-06-01',
             recurrenceEndDate: '2026-08-31',
           }}
-        />
+        />,
       );
       expect(screen.getByTestId('tabs')).toBeInTheDocument();
     });
@@ -390,12 +365,7 @@ describe('CreateExperienceSteps', () => {
 
   describe('Error Handling', () => {
     it('displays API error when present', () => {
-      render(
-        <CreateExperienceSteps
-          {...defaultProps}
-          apiError="Failed to create experience"
-        />
-      );
+      render(<CreateExperienceSteps {...defaultProps} apiError="Failed to create experience" />);
       // Error handling would be in the specific step component
       expect(screen.getByTestId('tabs')).toBeInTheDocument();
     });

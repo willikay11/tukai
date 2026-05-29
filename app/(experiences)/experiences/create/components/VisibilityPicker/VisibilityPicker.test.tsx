@@ -1,5 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+import { VisibilityPicker } from './index';
 
 jest.mock('@/components/ui/pillRadioGroup', () => ({
   PillRadioGroup: ({ options, value, onChange }: any) => (
@@ -17,15 +19,11 @@ jest.mock('@/components/ui/pillRadioGroup', () => ({
   ),
 }));
 
-import { VisibilityPicker } from './index';
-
 describe('VisibilityPicker', () => {
   describe('Rendering', () => {
     it('renders the component', () => {
       const onChange = jest.fn();
-      const { container } = render(
-        <VisibilityPicker value="public" onChange={onChange} />
-      );
+      const { container } = render(<VisibilityPicker value="public" onChange={onChange} />);
       expect(container).toBeInTheDocument();
     });
 
@@ -97,9 +95,7 @@ describe('VisibilityPicker', () => {
     it('can switch from public to private', async () => {
       const onChange = jest.fn();
       const user = userEvent.setup();
-      const { rerender } = render(
-        <VisibilityPicker value="public" onChange={onChange} />
-      );
+      const { rerender } = render(<VisibilityPicker value="public" onChange={onChange} />);
 
       const privateButton = screen.getByText(/Private \(Only invited people\)/);
       await user.click(privateButton);
@@ -112,9 +108,7 @@ describe('VisibilityPicker', () => {
     it('can switch from private to public', async () => {
       const onChange = jest.fn();
       const user = userEvent.setup();
-      const { rerender } = render(
-        <VisibilityPicker value="private" onChange={onChange} />
-      );
+      const { rerender } = render(<VisibilityPicker value="private" onChange={onChange} />);
 
       const publicButton = screen.getByText(/Public \(Everyone\)/);
       await user.click(publicButton);
@@ -128,31 +122,21 @@ describe('VisibilityPicker', () => {
   describe('Prop Updates', () => {
     it('updates selection when value prop changes', () => {
       const onChange = jest.fn();
-      const { rerender } = render(
-        <VisibilityPicker value="public" onChange={onChange} />
-      );
+      const { rerender } = render(<VisibilityPicker value="public" onChange={onChange} />);
       const publicButton = screen.getByText(/Public \(Everyone\)/);
       expect(publicButton.getAttribute('data-selected')).toBe('true');
 
-      rerender(
-        <VisibilityPicker value="private" onChange={onChange} />
-      );
+      rerender(<VisibilityPicker value="private" onChange={onChange} />);
       const privateButton = screen.getByText(/Private \(Only invited people\)/);
       expect(privateButton.getAttribute('data-selected')).toBe('true');
     });
 
     it('maintains state through multiple rerenders', () => {
       const onChange = jest.fn();
-      const { rerender } = render(
-        <VisibilityPicker value="public" onChange={onChange} />
-      );
+      const { rerender } = render(<VisibilityPicker value="public" onChange={onChange} />);
 
-      rerender(
-        <VisibilityPicker value="public" onChange={onChange} />
-      );
-      rerender(
-        <VisibilityPicker value="public" onChange={onChange} />
-      );
+      rerender(<VisibilityPicker value="public" onChange={onChange} />);
+      rerender(<VisibilityPicker value="public" onChange={onChange} />);
 
       const publicButton = screen.getByText(/Public \(Everyone\)/);
       expect(publicButton.getAttribute('data-selected')).toBe('true');

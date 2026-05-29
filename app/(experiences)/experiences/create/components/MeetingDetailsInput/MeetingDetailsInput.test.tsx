@@ -1,4 +1,7 @@
 import { render, screen } from '@testing-library/react';
+import { render as rtlRender } from '@testing-library/react';
+
+import { MeetingDetailsInput } from './index';
 
 jest.mock('@/app/shared/components/LocationPicker', () => ({
   LocationAutocompleteField: () => <div data-testid="location-field">meeting point input</div>,
@@ -15,9 +18,6 @@ jest.mock('@/components/ui/time-picker', () => ({
   TimePicker: () => <div data-testid="time-picker">time picker</div>,
 }));
 
-import { render as rtlRender } from '@testing-library/react';
-import { MeetingDetailsInput } from './index';
-
 describe('MeetingDetailsInput', () => {
   describe('Rendering', () => {
     it('renders the component', () => {
@@ -27,7 +27,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime={null}
           onMeetingPointChange={jest.fn()}
           onMeetingTimeChange={jest.fn()}
-        />
+        />,
       );
       expect(container).toBeInTheDocument();
     });
@@ -39,7 +39,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime={null}
           onMeetingPointChange={jest.fn()}
           onMeetingTimeChange={jest.fn()}
-        />
+        />,
       );
       expect(screen.getByText(/Meeting Details/i)).toBeInTheDocument();
     });
@@ -51,7 +51,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime={null}
           onMeetingPointChange={jest.fn()}
           onMeetingTimeChange={jest.fn()}
-        />
+        />,
       );
       expect(screen.getByTestId('location-field')).toBeInTheDocument();
     });
@@ -63,7 +63,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime={null}
           onMeetingPointChange={jest.fn()}
           onMeetingTimeChange={jest.fn()}
-        />
+        />,
       );
       expect(screen.getByTestId('time-picker')).toBeInTheDocument();
     });
@@ -75,7 +75,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime={null}
           onMeetingPointChange={jest.fn()}
           onMeetingTimeChange={jest.fn()}
-        />
+        />,
       );
       expect(screen.getByText(/Optional/i)).toBeInTheDocument();
     });
@@ -89,7 +89,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime={null}
           onMeetingPointChange={jest.fn()}
           onMeetingTimeChange={jest.fn()}
-        />
+        />,
       );
       expect(container).toBeInTheDocument();
     });
@@ -101,7 +101,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime="08:00"
           onMeetingPointChange={jest.fn()}
           onMeetingTimeChange={jest.fn()}
-        />
+        />,
       );
       expect(container).toBeInTheDocument();
     });
@@ -113,7 +113,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime={null}
           onMeetingPointChange={jest.fn()}
           onMeetingTimeChange={jest.fn()}
-        />
+        />,
       );
       expect(container).toBeInTheDocument();
     });
@@ -125,7 +125,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime="08:00"
           onMeetingPointChange={jest.fn()}
           onMeetingTimeChange={jest.fn()}
-        />
+        />,
       );
 
       rerender(
@@ -134,7 +134,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime="09:00"
           onMeetingPointChange={jest.fn()}
           onMeetingTimeChange={jest.fn()}
-        />
+        />,
       );
 
       expect(screen.getByTestId('location-field')).toBeInTheDocument();
@@ -149,7 +149,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime={null}
           onMeetingPointChange={jest.fn()}
           onMeetingTimeChange={jest.fn()}
-        />
+        />,
       );
       expect(container).toBeInTheDocument();
     });
@@ -161,7 +161,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime={null}
           onMeetingPointChange={jest.fn()}
           onMeetingTimeChange={jest.fn()}
-        />
+        />,
       );
       expect(container).toBeInTheDocument();
     });
@@ -173,7 +173,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime={null}
           onMeetingPointChange={jest.fn()}
           onMeetingTimeChange={jest.fn()}
-        />
+        />,
       );
       expect(container).toBeInTheDocument();
     });
@@ -185,7 +185,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime="07:30"
           onMeetingPointChange={jest.fn()}
           onMeetingTimeChange={jest.fn()}
-        />
+        />,
       );
       expect(container).toBeInTheDocument();
     });
@@ -200,7 +200,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime={null}
           onMeetingPointChange={onMeetingPointChange}
           onMeetingTimeChange={jest.fn()}
-        />
+        />,
       );
       expect(onMeetingPointChange).toBeDefined();
     });
@@ -213,7 +213,7 @@ describe('MeetingDetailsInput', () => {
           meetingTime={null}
           onMeetingPointChange={jest.fn()}
           onMeetingTimeChange={onMeetingTimeChange}
-        />
+        />,
       );
       expect(onMeetingTimeChange).toBeDefined();
     });

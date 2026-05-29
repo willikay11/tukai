@@ -1,4 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { render as rtlRender } from '@testing-library/react';
+
+import { ExperienceCreatedModal } from './index';
 
 jest.mock('next/image', () => ({
   __esModule: true,
@@ -32,21 +35,18 @@ jest.mock('@/components/ui/dialog', () => ({
   DialogDescription: ({ children }: any) => <p>{children}</p>,
 }));
 
-import { render as rtlRender } from '@testing-library/react';
-import { ExperienceCreatedModal } from './index';
-
 describe('ExperienceCreatedModal', () => {
   describe('Rendering', () => {
     it('renders when open is true', () => {
       const { container } = rtlRender(
-        <ExperienceCreatedModal open={true} onOpenChange={jest.fn()} />
+        <ExperienceCreatedModal open={true} onOpenChange={jest.fn()} />,
       );
       expect(container).toBeInTheDocument();
     });
 
     it('does not render when open is false', () => {
       const { container } = rtlRender(
-        <ExperienceCreatedModal open={false} onOpenChange={jest.fn()} />
+        <ExperienceCreatedModal open={false} onOpenChange={jest.fn()} />,
       );
       expect(container.textContent).toBe('');
     });
@@ -63,9 +63,7 @@ describe('ExperienceCreatedModal', () => {
 
     it('renders default description', () => {
       rtlRender(<ExperienceCreatedModal open={true} onOpenChange={jest.fn()} />);
-      expect(
-        screen.getByText(/Your experience has been created/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Your experience has been created/i)).toBeInTheDocument();
     });
 
     it('renders illustration image', () => {
@@ -78,11 +76,7 @@ describe('ExperienceCreatedModal', () => {
   describe('Custom Props', () => {
     it('renders custom title', () => {
       rtlRender(
-        <ExperienceCreatedModal
-          open={true}
-          onOpenChange={jest.fn()}
-          title="Custom Title"
-        />
+        <ExperienceCreatedModal open={true} onOpenChange={jest.fn()} title="Custom Title" />,
       );
       expect(screen.getByText('Custom Title')).toBeInTheDocument();
     });
@@ -93,7 +87,7 @@ describe('ExperienceCreatedModal', () => {
           open={true}
           onOpenChange={jest.fn()}
           description="Custom description text"
-        />
+        />,
       );
       expect(screen.getByText('Custom description text')).toBeInTheDocument();
     });
@@ -104,7 +98,7 @@ describe('ExperienceCreatedModal', () => {
           open={true}
           onOpenChange={jest.fn()}
           illustrationSrc="/images/custom.svg"
-        />
+        />,
       );
       const img = screen.getByAltText('Experience created');
       expect(img.getAttribute('src')).toBe('/images/custom.svg');
@@ -119,18 +113,14 @@ describe('ExperienceCreatedModal', () => {
           onOpenChange={jest.fn()}
           experienceId="exp-123"
           onViewExperience={jest.fn()}
-        />
+        />,
       );
       expect(screen.getByText('View Experience')).toBeInTheDocument();
     });
 
     it('renders link button when only experienceId provided', () => {
       rtlRender(
-        <ExperienceCreatedModal
-          open={true}
-          onOpenChange={jest.fn()}
-          experienceId="exp-123"
-        />
+        <ExperienceCreatedModal open={true} onOpenChange={jest.fn()} experienceId="exp-123" />,
       );
       const link = screen.getByRole('link');
       expect(link).toBeInTheDocument();
@@ -150,7 +140,7 @@ describe('ExperienceCreatedModal', () => {
           experienceId="exp-123"
           onViewExperience={jest.fn()}
           viewExperienceLabel="Go to Experience"
-        />
+        />,
       );
       expect(screen.getByText('Go to Experience')).toBeInTheDocument();
     });
@@ -165,7 +155,7 @@ describe('ExperienceCreatedModal', () => {
           onOpenChange={jest.fn()}
           experienceId="exp-123"
           onViewExperience={onViewExperience}
-        />
+        />,
       );
       const button = screen.getByText('View Experience');
       fireEvent.click(button);
@@ -181,7 +171,7 @@ describe('ExperienceCreatedModal', () => {
           onOpenChange={onOpenChange}
           experienceId="exp-123"
           onViewExperience={onViewExperience}
-        />
+        />,
       );
       const button = screen.getByText('View Experience');
       fireEvent.click(button);
@@ -191,11 +181,7 @@ describe('ExperienceCreatedModal', () => {
     it('closes dialog when link clicked', () => {
       const onOpenChange = jest.fn();
       rtlRender(
-        <ExperienceCreatedModal
-          open={true}
-          onOpenChange={onOpenChange}
-          experienceId="exp-123"
-        />
+        <ExperienceCreatedModal open={true} onOpenChange={onOpenChange} experienceId="exp-123" />,
       );
       const link = screen.getByRole('link');
       fireEvent.click(link);
@@ -206,13 +192,9 @@ describe('ExperienceCreatedModal', () => {
   describe('Dialog State', () => {
     it('calls onOpenChange when modal is closed externally', () => {
       const onOpenChange = jest.fn();
-      rtlRender(
-        <ExperienceCreatedModal open={true} onOpenChange={onOpenChange} />
-      );
+      rtlRender(<ExperienceCreatedModal open={true} onOpenChange={onOpenChange} />);
       // Simulate external close
-      rtlRender(
-        <ExperienceCreatedModal open={false} onOpenChange={onOpenChange} />
-      );
+      rtlRender(<ExperienceCreatedModal open={false} onOpenChange={onOpenChange} />);
       // onOpenChange would be called by parent when close button is clicked
     });
   });

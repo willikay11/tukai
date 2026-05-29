@@ -11,7 +11,12 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { SortableContext, arrayMove, rectSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
 
 import { ImageCropDialog } from '@/app/shared/components/Images';
 import { useDeleteExperiencePhoto } from '@/app/shared/hooks/useExperiences';
@@ -319,11 +324,7 @@ export const PhotoUploader = ({
         <p className="text-xs font-medium text-gray-800">Upload experience poster</p>
 
         {/* Draggable photo grid */}
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={photoIds} strategy={rectSortingStrategy}>
             <div className="flex flex-wrap items-start gap-3">
               {photos.map((photo, index) => (
@@ -359,7 +360,9 @@ export const PhotoUploader = ({
                       d="M12 4v16m8-8H4"
                     />
                   </svg>
-                  <span className="mt-1 text-[10px] font-medium text-emerald-700">Add Photo(s)</span>
+                  <span className="mt-1 text-[10px] font-medium text-emerald-700">
+                    Add Photo(s)
+                  </span>
                 </button>
               )}
             </div>

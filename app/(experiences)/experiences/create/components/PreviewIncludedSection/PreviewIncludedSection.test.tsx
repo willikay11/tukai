@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 
+import { PreviewIncludedSection } from './index';
+
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: any) => <span>{iconName}</span>,
 }));
-
-import { PreviewIncludedSection } from './index';
 
 describe('PreviewIncludedSection', () => {
   describe('Rendering', () => {
@@ -85,9 +85,7 @@ describe('PreviewIncludedSection', () => {
   describe('Edit Functionality', () => {
     it('calls onEdit when edit button clicked', () => {
       const onEdit = jest.fn();
-      render(
-        <PreviewIncludedSection items={['Item']} onEdit={onEdit} />
-      );
+      render(<PreviewIncludedSection items={['Item']} onEdit={onEdit} />);
       const editButton = screen.getByText('Edit02Icon').closest('button');
       editButton?.click();
       expect(onEdit).toHaveBeenCalled();
@@ -96,14 +94,10 @@ describe('PreviewIncludedSection', () => {
 
   describe('Props Updates', () => {
     it('updates items when prop changes', () => {
-      const { rerender } = render(
-        <PreviewIncludedSection items={['Old Item']} />
-      );
+      const { rerender } = render(<PreviewIncludedSection items={['Old Item']} />);
       expect(screen.getByText('Old Item')).toBeInTheDocument();
 
-      rerender(
-        <PreviewIncludedSection items={['New Item 1', 'New Item 2']} />
-      );
+      rerender(<PreviewIncludedSection items={['New Item 1', 'New Item 2']} />);
       expect(screen.queryByText('Old Item')).not.toBeInTheDocument();
       expect(screen.getByText('New Item 1')).toBeInTheDocument();
       expect(screen.getByText('New Item 2')).toBeInTheDocument();
@@ -113,39 +107,29 @@ describe('PreviewIncludedSection', () => {
       const { rerender } = render(<PreviewIncludedSection items={[]} />);
       expect(screen.getByText('Not set yet')).toBeInTheDocument();
 
-      rerender(
-        <PreviewIncludedSection items={['Item 1']} />
-      );
+      rerender(<PreviewIncludedSection items={['Item 1']} />);
       expect(screen.queryByText('Not set yet')).not.toBeInTheDocument();
       expect(screen.getByText('Item 1')).toBeInTheDocument();
     });
 
     it('transitions from filled to empty state', () => {
-      const { rerender } = render(
-        <PreviewIncludedSection items={['Item']} />
-      );
+      const { rerender } = render(<PreviewIncludedSection items={['Item']} />);
       expect(screen.getByText('Item')).toBeInTheDocument();
 
-      rerender(
-        <PreviewIncludedSection items={[]} />
-      );
+      rerender(<PreviewIncludedSection items={[]} />);
       expect(screen.getByText('Not set yet')).toBeInTheDocument();
     });
   });
 
   describe('Styling', () => {
     it('applies emerald background when items present', () => {
-      const { container } = render(
-        <PreviewIncludedSection items={['Item']} />
-      );
+      const { container } = render(<PreviewIncludedSection items={['Item']} />);
       const section = container.querySelector('.bg-emerald-50');
       expect(section).toBeInTheDocument();
     });
 
     it('does not apply emerald background when empty', () => {
-      const { container } = render(
-        <PreviewIncludedSection items={[]} />
-      );
+      const { container } = render(<PreviewIncludedSection items={[]} />);
       const section = container.querySelector('.bg-emerald-50');
       expect(section).not.toBeInTheDocument();
     });

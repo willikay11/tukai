@@ -1,5 +1,9 @@
 import { render, screen } from '@testing-library/react';
 
+import type { Experience } from '@/types/experience';
+
+import { PreviewGuestsSection } from './index';
+
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: any) => <img {...props} />,
@@ -9,15 +13,10 @@ jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: any) => <span>{iconName}</span>,
 }));
 
-import { PreviewGuestsSection } from './index';
-import type { Experience } from '@/types/experience';
-
 describe('PreviewGuestsSection', () => {
   describe('Rendering', () => {
     it('renders the component', () => {
-      const { container } = render(
-        <PreviewGuestsSection guests={[]} />
-      );
+      const { container } = render(<PreviewGuestsSection guests={[]} />);
       expect(container).toBeInTheDocument();
     });
 
@@ -28,9 +27,7 @@ describe('PreviewGuestsSection', () => {
 
     it('renders edit button when onEdit provided', () => {
       const onEdit = jest.fn();
-      render(
-        <PreviewGuestsSection guests={[]} onEdit={onEdit} />
-      );
+      render(<PreviewGuestsSection guests={[]} onEdit={onEdit} />);
       expect(screen.getByText('Edit02Icon')).toBeInTheDocument();
     });
 
@@ -123,9 +120,7 @@ describe('PreviewGuestsSection', () => {
     it('calls onEdit when edit button clicked', () => {
       const onEdit = jest.fn();
       const mockGuests = [{ id: '1', email: 'test@example.com' }];
-      render(
-        <PreviewGuestsSection guests={mockGuests} onEdit={onEdit} />
-      );
+      render(<PreviewGuestsSection guests={mockGuests} onEdit={onEdit} />);
       const editButton = screen.getByText('Edit02Icon').closest('button');
       editButton?.click();
       expect(onEdit).toHaveBeenCalled();
@@ -151,11 +146,7 @@ describe('PreviewGuestsSection', () => {
       const { rerender } = render(<PreviewGuestsSection guests={[]} />);
       expect(screen.getByText('No guests invited yet')).toBeInTheDocument();
 
-      rerender(
-        <PreviewGuestsSection
-          guests={[{ id: '1', email: 'guest@example.com' }]}
-        />
-      );
+      rerender(<PreviewGuestsSection guests={[{ id: '1', email: 'guest@example.com' }]} />);
       expect(screen.queryByText('No guests invited yet')).not.toBeInTheDocument();
       expect(screen.getByText('guest@example.com')).toBeInTheDocument();
     });
@@ -164,21 +155,21 @@ describe('PreviewGuestsSection', () => {
   describe('Email Initials', () => {
     it('handles single character email', () => {
       const { container } = render(
-        <PreviewGuestsSection guests={[{ id: '1', email: 'a@example.com' }]} />
+        <PreviewGuestsSection guests={[{ id: '1', email: 'a@example.com' }]} />,
       );
       expect(container.textContent).toContain('a@example.com');
     });
 
     it('handles email with numbers', () => {
       const { container } = render(
-        <PreviewGuestsSection guests={[{ id: '1', email: 'john123@example.com' }]} />
+        <PreviewGuestsSection guests={[{ id: '1', email: 'john123@example.com' }]} />,
       );
       expect(container.textContent).toContain('john123@example.com');
     });
 
     it('handles email with special characters', () => {
       const { container } = render(
-        <PreviewGuestsSection guests={[{ id: '1', email: 'john.doe@example.com' }]} />
+        <PreviewGuestsSection guests={[{ id: '1', email: 'john.doe@example.com' }]} />,
       );
       expect(container.textContent).toContain('john.doe@example.com');
     });

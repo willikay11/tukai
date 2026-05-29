@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 
+import { PreviewExcludedSection } from './index';
+
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: any) => <span>{iconName}</span>,
 }));
-
-import { PreviewExcludedSection } from './index';
 
 describe('PreviewExcludedSection', () => {
   describe('Rendering', () => {
@@ -79,9 +79,7 @@ describe('PreviewExcludedSection', () => {
   describe('Edit Functionality', () => {
     it('calls onEdit when edit button clicked', () => {
       const onEdit = jest.fn();
-      render(
-        <PreviewExcludedSection items={['Item']} onEdit={onEdit} />
-      );
+      render(<PreviewExcludedSection items={['Item']} onEdit={onEdit} />);
       const editButton = screen.getByText('Edit02Icon').closest('button');
       editButton?.click();
       expect(onEdit).toHaveBeenCalled();
@@ -90,14 +88,10 @@ describe('PreviewExcludedSection', () => {
 
   describe('Props Updates', () => {
     it('updates items when prop changes', () => {
-      const { rerender } = render(
-        <PreviewExcludedSection items={['Old Item']} />
-      );
+      const { rerender } = render(<PreviewExcludedSection items={['Old Item']} />);
       expect(screen.getByText('Old Item')).toBeInTheDocument();
 
-      rerender(
-        <PreviewExcludedSection items={['New Item 1', 'New Item 2']} />
-      );
+      rerender(<PreviewExcludedSection items={['New Item 1', 'New Item 2']} />);
       expect(screen.queryByText('Old Item')).not.toBeInTheDocument();
       expect(screen.getByText('New Item 1')).toBeInTheDocument();
       expect(screen.getByText('New Item 2')).toBeInTheDocument();
@@ -106,17 +100,13 @@ describe('PreviewExcludedSection', () => {
 
   describe('Styling', () => {
     it('applies red background when items present', () => {
-      const { container } = render(
-        <PreviewExcludedSection items={['Item']} />
-      );
+      const { container } = render(<PreviewExcludedSection items={['Item']} />);
       const section = container.querySelector('.bg-red-50');
       expect(section).toBeInTheDocument();
     });
 
     it('does not apply red background when empty', () => {
-      const { container } = render(
-        <PreviewExcludedSection items={[]} />
-      );
+      const { container } = render(<PreviewExcludedSection items={[]} />);
       const section = container.querySelector('.bg-red-50');
       expect(section).not.toBeInTheDocument();
     });

@@ -1,4 +1,7 @@
 import { render, screen } from '@testing-library/react';
+import { render as rtlRender } from '@testing-library/react';
+
+import { type Community, CommunitySelector } from './index';
 
 jest.mock('next/image', () => ({
   __esModule: true,
@@ -29,9 +32,6 @@ jest.mock('@/components/ui/select', () => ({
   ),
 }));
 
-import { render as rtlRender } from '@testing-library/react';
-import { CommunitySelector, type Community } from './index';
-
 const mockCommunities: Community[] = [
   {
     id: 'comm-1',
@@ -55,42 +55,34 @@ describe('CommunitySelector', () => {
     it('renders the component', () => {
       const onChange = jest.fn();
       const { container } = rtlRender(
-        <CommunitySelector value={null} options={mockCommunities} onChange={onChange} />
+        <CommunitySelector value={null} options={mockCommunities} onChange={onChange} />,
       );
       expect(container).toBeInTheDocument();
     });
 
     it('renders the label', () => {
       const onChange = jest.fn();
-      rtlRender(
-        <CommunitySelector value={null} options={mockCommunities} onChange={onChange} />
-      );
+      rtlRender(<CommunitySelector value={null} options={mockCommunities} onChange={onChange} />);
       expect(screen.getByText('Select host community')).toBeInTheDocument();
     });
 
     it('renders info button', () => {
       const onChange = jest.fn();
-      rtlRender(
-        <CommunitySelector value={null} options={mockCommunities} onChange={onChange} />
-      );
+      rtlRender(<CommunitySelector value={null} options={mockCommunities} onChange={onChange} />);
       expect(screen.getByText('InformationCircleIcon')).toBeInTheDocument();
     });
 
     it('renders info popover content', () => {
       const onChange = jest.fn();
-      rtlRender(
-        <CommunitySelector value={null} options={mockCommunities} onChange={onChange} />
-      );
+      rtlRender(<CommunitySelector value={null} options={mockCommunities} onChange={onChange} />);
       expect(
-        screen.getByText('Select a community you created to host this experience')
+        screen.getByText('Select a community you created to host this experience'),
       ).toBeInTheDocument();
     });
 
     it('renders select trigger', () => {
       const onChange = jest.fn();
-      rtlRender(
-        <CommunitySelector value={null} options={mockCommunities} onChange={onChange} />
-      );
+      rtlRender(<CommunitySelector value={null} options={mockCommunities} onChange={onChange} />);
       expect(screen.getByTestId('select-trigger')).toBeInTheDocument();
     });
   });
@@ -98,17 +90,13 @@ describe('CommunitySelector', () => {
   describe('No Selection State', () => {
     it('displays placeholder when no community selected', () => {
       const onChange = jest.fn();
-      rtlRender(
-        <CommunitySelector value={null} options={mockCommunities} onChange={onChange} />
-      );
+      rtlRender(<CommunitySelector value={null} options={mockCommunities} onChange={onChange} />);
       expect(screen.getByText('Select a community')).toBeInTheDocument();
     });
 
     it('displays select content with options', () => {
       const onChange = jest.fn();
-      rtlRender(
-        <CommunitySelector value={null} options={mockCommunities} onChange={onChange} />
-      );
+      rtlRender(<CommunitySelector value={null} options={mockCommunities} onChange={onChange} />);
       expect(screen.getByTestId('select-content')).toBeInTheDocument();
     });
   });
@@ -121,7 +109,7 @@ describe('CommunitySelector', () => {
           value={mockCommunities[0]}
           options={mockCommunities}
           onChange={onChange}
-        />
+        />,
       );
       const trigger = screen.getByTestId('select-trigger');
       expect(trigger.textContent).toContain('Hiking Community');
@@ -134,7 +122,7 @@ describe('CommunitySelector', () => {
           value={mockCommunities[0]}
           options={mockCommunities}
           onChange={onChange}
-        />
+        />,
       );
       const images = container.querySelectorAll('img');
       expect(images.length).toBeGreaterThan(0);
@@ -142,9 +130,7 @@ describe('CommunitySelector', () => {
 
     it('displays all available communities in options', () => {
       const onChange = jest.fn();
-      rtlRender(
-        <CommunitySelector value={null} options={mockCommunities} onChange={onChange} />
-      );
+      rtlRender(<CommunitySelector value={null} options={mockCommunities} onChange={onChange} />);
 
       mockCommunities.forEach((community) => {
         expect(screen.getByTestId(`select-item-${community.id}`)).toBeInTheDocument();
@@ -170,7 +156,7 @@ describe('CommunitySelector', () => {
     it('updates selected community when value prop changes', () => {
       const onChange = jest.fn();
       const { rerender } = rtlRender(
-        <CommunitySelector value={null} options={mockCommunities} onChange={onChange} />
+        <CommunitySelector value={null} options={mockCommunities} onChange={onChange} />,
       );
 
       expect(screen.getByText('Select a community')).toBeInTheDocument();
@@ -180,7 +166,7 @@ describe('CommunitySelector', () => {
           value={mockCommunities[0]}
           options={mockCommunities}
           onChange={onChange}
-        />
+        />,
       );
 
       const trigger = screen.getByTestId('select-trigger');
@@ -194,7 +180,7 @@ describe('CommunitySelector', () => {
           value={mockCommunities[0]}
           options={mockCommunities}
           onChange={onChange}
-        />
+        />,
       );
 
       let trigger = screen.getByTestId('select-trigger');
@@ -205,7 +191,7 @@ describe('CommunitySelector', () => {
           value={mockCommunities[1]}
           options={mockCommunities}
           onChange={onChange}
-        />
+        />,
       );
 
       trigger = screen.getByTestId('select-trigger');
@@ -222,7 +208,7 @@ describe('CommunitySelector', () => {
           options={mockCommunities}
           onChange={onChange}
           error="Please select a community"
-        />
+        />,
       );
       expect(screen.getByText('Please select a community')).toBeInTheDocument();
     });
@@ -235,7 +221,7 @@ describe('CommunitySelector', () => {
           options={mockCommunities}
           onChange={onChange}
           error="Error"
-        />
+        />,
       );
       const trigger = container.querySelector('[data-testid="select-trigger"]');
       expect(trigger?.className).toContain('border-red-500');
@@ -249,19 +235,13 @@ describe('CommunitySelector', () => {
           options={mockCommunities}
           onChange={onChange}
           error="Error"
-        />
+        />,
       );
 
       let trigger = container.querySelector('[data-testid="select-trigger"]');
       expect(trigger?.className).toContain('border-red-500');
 
-      rerender(
-        <CommunitySelector
-          value={null}
-          options={mockCommunities}
-          onChange={onChange}
-        />
-      );
+      rerender(<CommunitySelector value={null} options={mockCommunities} onChange={onChange} />);
 
       trigger = container.querySelector('[data-testid="select-trigger"]');
       expect(trigger?.className).not.toContain('border-red-500');
@@ -271,18 +251,14 @@ describe('CommunitySelector', () => {
   describe('Accessibility', () => {
     it('has accessible label', () => {
       const onChange = jest.fn();
-      rtlRender(
-        <CommunitySelector value={null} options={mockCommunities} onChange={onChange} />
-      );
+      rtlRender(<CommunitySelector value={null} options={mockCommunities} onChange={onChange} />);
       const label = screen.getByText('Select host community');
       expect(label).toBeInTheDocument();
     });
 
     it('info button has aria label', () => {
       const onChange = jest.fn();
-      rtlRender(
-        <CommunitySelector value={null} options={mockCommunities} onChange={onChange} />
-      );
+      rtlRender(<CommunitySelector value={null} options={mockCommunities} onChange={onChange} />);
       const infoButton = screen.getByRole('button');
       expect(infoButton.getAttribute('aria-label')).toBe('Information about community selection');
     });
@@ -302,7 +278,7 @@ describe('CommunitySelector', () => {
           value={communityNoImage}
           options={[communityNoImage]}
           onChange={onChange}
-        />
+        />,
       );
 
       const trigger = screen.getByTestId('select-trigger');

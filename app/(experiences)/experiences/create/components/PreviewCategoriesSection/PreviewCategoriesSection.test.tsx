@@ -1,11 +1,12 @@
 import { render, screen } from '@testing-library/react';
 
+import type { Interest } from '@/types/interest';
+
+import { PreviewCategoriesSection } from './index';
+
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: any) => <span>{iconName}</span>,
 }));
-
-import { PreviewCategoriesSection } from './index';
-import type { Interest } from '@/types/interest';
 
 describe('PreviewCategoriesSection', () => {
   describe('Rendering', () => {
@@ -62,17 +63,13 @@ describe('PreviewCategoriesSection', () => {
     });
 
     it('displays category without icon when icon is not provided', () => {
-      const categories: Interest[] = [
-        { id: '1', name: 'Hiking', slug: 'hiking' },
-      ];
+      const categories: Interest[] = [{ id: '1', name: 'Hiking', slug: 'hiking' }];
       render(<PreviewCategoriesSection categories={categories} />);
       expect(screen.getByText('Hiking')).toBeInTheDocument();
     });
 
     it('handles single category', () => {
-      const singleCategory: Interest[] = [
-        { id: '1', name: 'Hiking', slug: 'hiking' },
-      ];
+      const singleCategory: Interest[] = [{ id: '1', name: 'Hiking', slug: 'hiking' }];
       render(<PreviewCategoriesSection categories={singleCategory} />);
       expect(screen.getByText('Hiking')).toBeInTheDocument();
     });
@@ -96,7 +93,7 @@ describe('PreviewCategoriesSection', () => {
         <PreviewCategoriesSection
           categories={[{ id: '1', name: 'Hiking', slug: 'hiking' }]}
           onEdit={onEdit}
-        />
+        />,
       );
       const editButton = screen.getByText('Edit02Icon').closest('button');
       editButton?.click();
@@ -107,9 +104,7 @@ describe('PreviewCategoriesSection', () => {
   describe('Props Updates', () => {
     it('updates categories when prop changes', () => {
       const { rerender } = render(
-        <PreviewCategoriesSection
-          categories={[{ id: '1', name: 'Hiking', slug: 'hiking' }]}
-        />
+        <PreviewCategoriesSection categories={[{ id: '1', name: 'Hiking', slug: 'hiking' }]} />,
       );
       expect(screen.getByText('Hiking')).toBeInTheDocument();
 
@@ -119,7 +114,7 @@ describe('PreviewCategoriesSection', () => {
             { id: '2', name: 'Photography', slug: 'photography' },
             { id: '3', name: 'Cooking', slug: 'cooking' },
           ]}
-        />
+        />,
       );
       expect(screen.queryByText('Hiking')).not.toBeInTheDocument();
       expect(screen.getByText('Photography')).toBeInTheDocument();
@@ -131,9 +126,7 @@ describe('PreviewCategoriesSection', () => {
       expect(screen.getByText('Not set yet')).toBeInTheDocument();
 
       rerender(
-        <PreviewCategoriesSection
-          categories={[{ id: '1', name: 'Hiking', slug: 'hiking' }]}
-        />
+        <PreviewCategoriesSection categories={[{ id: '1', name: 'Hiking', slug: 'hiking' }]} />,
       );
       expect(screen.queryByText('Not set yet')).not.toBeInTheDocument();
       expect(screen.getByText('Hiking')).toBeInTheDocument();
@@ -141,9 +134,7 @@ describe('PreviewCategoriesSection', () => {
 
     it('transitions from filled to empty state', () => {
       const { rerender } = render(
-        <PreviewCategoriesSection
-          categories={[{ id: '1', name: 'Hiking', slug: 'hiking' }]}
-        />
+        <PreviewCategoriesSection categories={[{ id: '1', name: 'Hiking', slug: 'hiking' }]} />,
       );
       expect(screen.getByText('Hiking')).toBeInTheDocument();
 
@@ -165,7 +156,7 @@ describe('PreviewCategoriesSection', () => {
         <PreviewCategoriesSection
           categories={[{ id: '1', name: 'Hiking', slug: 'hiking' }]}
           onEdit={onEdit}
-        />
+        />,
       );
       const editButton = screen.getByText('Edit02Icon').closest('button');
       expect(editButton).toBeInTheDocument();

@@ -1,17 +1,15 @@
 import { render, screen } from '@testing-library/react';
 
+import { PreviewLocationSection } from './index';
+
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: any) => <span>{iconName}</span>,
 }));
 
-import { PreviewLocationSection } from './index';
-
 describe('PreviewLocationSection', () => {
   describe('Rendering', () => {
     it('renders the component', () => {
-      const { container } = render(
-        <PreviewLocationSection location={null} />
-      );
+      const { container } = render(<PreviewLocationSection location={null} />);
       expect(container).toBeInTheDocument();
     });
 
@@ -22,9 +20,7 @@ describe('PreviewLocationSection', () => {
 
     it('renders edit button when onEdit provided', () => {
       const onEdit = jest.fn();
-      render(
-        <PreviewLocationSection location={null} onEdit={onEdit} />
-      );
+      render(<PreviewLocationSection location={null} onEdit={onEdit} />);
       expect(screen.getByText('Edit02Icon')).toBeInTheDocument();
     });
 
@@ -77,9 +73,7 @@ describe('PreviewLocationSection', () => {
   describe('Edit Functionality', () => {
     it('calls onEdit when edit button clicked', () => {
       const onEdit = jest.fn();
-      render(
-        <PreviewLocationSection location="Nairobi" onEdit={onEdit} />
-      );
+      render(<PreviewLocationSection location="Nairobi" onEdit={onEdit} />);
       const editButton = screen.getByText('Edit02Icon').closest('button');
       editButton?.click();
       expect(onEdit).toHaveBeenCalled();
@@ -88,57 +82,41 @@ describe('PreviewLocationSection', () => {
 
   describe('Props Updates', () => {
     it('updates location when prop changes', () => {
-      const { rerender } = render(
-        <PreviewLocationSection location="Old Location" />
-      );
+      const { rerender } = render(<PreviewLocationSection location="Old Location" />);
       expect(screen.getByText('Old Location')).toBeInTheDocument();
 
-      rerender(
-        <PreviewLocationSection location="New Location" />
-      );
+      rerender(<PreviewLocationSection location="New Location" />);
       expect(screen.queryByText('Old Location')).not.toBeInTheDocument();
       expect(screen.getByText('New Location')).toBeInTheDocument();
     });
 
     it('transitions from empty to filled state', () => {
-      const { rerender } = render(
-        <PreviewLocationSection location={null} />
-      );
+      const { rerender } = render(<PreviewLocationSection location={null} />);
       expect(screen.getByText('Not set yet')).toBeInTheDocument();
 
-      rerender(
-        <PreviewLocationSection location="Nairobi" />
-      );
+      rerender(<PreviewLocationSection location="Nairobi" />);
       expect(screen.queryByText('Not set yet')).not.toBeInTheDocument();
       expect(screen.getByText('Nairobi')).toBeInTheDocument();
     });
 
     it('transitions from filled to empty state', () => {
-      const { rerender } = render(
-        <PreviewLocationSection location="Nairobi" />
-      );
+      const { rerender } = render(<PreviewLocationSection location="Nairobi" />);
       expect(screen.getByText('Nairobi')).toBeInTheDocument();
 
-      rerender(
-        <PreviewLocationSection location={null} />
-      );
+      rerender(<PreviewLocationSection location={null} />);
       expect(screen.getByText('Not set yet')).toBeInTheDocument();
     });
   });
 
   describe('Styling', () => {
     it('displays location in gray box with icon background', () => {
-      const { container } = render(
-        <PreviewLocationSection location="Nairobi" />
-      );
+      const { container } = render(<PreviewLocationSection location="Nairobi" />);
       const iconContainer = container.querySelector('.bg-gray-100');
       expect(iconContainer).toBeInTheDocument();
     });
 
     it('applies gray background only when location is set', () => {
-      const { container } = render(
-        <PreviewLocationSection location="Nairobi" />
-      );
+      const { container } = render(<PreviewLocationSection location="Nairobi" />);
       const grayBox = container.querySelector('.bg-gray-100');
       expect(grayBox).toBeInTheDocument();
     });
