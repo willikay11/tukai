@@ -191,6 +191,13 @@ interface CreateExperienceStepsProps {
   };
   isSavingExperience?: boolean;
   apiError?: string | null;
+  slotTemplateRecords?: Array<{
+    uiId: string;
+    templateId: string;
+    startTime: string;
+    endTime: string;
+    name?: string;
+  }>;
 }
 
 export const CreateExperienceSteps = ({
@@ -231,6 +238,7 @@ export const CreateExperienceSteps = ({
   apiError,
   isPreviewDrawerOpen = false,
   setIsPreviewDrawerOpen,
+  slotTemplateRecords = [],
 }: CreateExperienceStepsProps) => {
   const router = useRouter();
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
@@ -503,6 +511,7 @@ export const CreateExperienceSteps = ({
                 }
                 experienceId={experience?.id || null}
                 onPreview={handlePreviewClick}
+                slotTemplateRecords={slotTemplateRecords}
               />
             ) : (
               <ExperienceDates

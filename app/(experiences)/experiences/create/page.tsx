@@ -55,6 +55,7 @@ function CreateExperiencePageContent() {
     walletMutations,
     isSavingExperience,
     apiError,
+    slotTemplateRecords,
   } = useCreateExperienceFlow();
 
   if (isCheckingCommunityAccess) {
@@ -115,7 +116,6 @@ function CreateExperiencePageContent() {
               multiDayStartTime={formData.dateType.multiDayStartTime}
               multiDayEndDate={formData.dateType.multiDayEndDate}
               multiDayEndTime={formData.dateType.multiDayEndTime}
-              aboutPhoto={formData.about.photos?.[0] || null}
               aboutPhotos={formData.about.photos}
               aboutTitle={formData.about.title}
               aboutDescription={formData.about.description}
@@ -126,9 +126,15 @@ function CreateExperiencePageContent() {
               aboutMeetingPoint={formData.about.meetingPoint}
               aboutMeetingTime={formData.about.meetingTime}
               aboutCategories={formData.about.categories}
-              ticketsItems={formData.tickets.items}
+              ticketsItems={(() => {
+                console.log('[Page] formData.tickets.items:', formData.tickets.items);
+                return formData.tickets.items;
+              })()}
               ticketsCommissionPayer={formData.tickets.commission}
-              invitedGuests={formData.invite.invitedGuests.map(guest => ({ ...guest, name: guest.email.split('@')[0] }))}
+              invitedGuests={formData.invite.invitedGuests.map((guest) => ({
+                ...guest,
+                name: guest.email.split('@')[0],
+              }))}
               invitedCommunityIds={formData.invite.invitedCommunityIds}
               allCommunities={communitiesForSelector}
               selectedWallet={formData.wallet.selectedWallet}
@@ -177,6 +183,7 @@ function CreateExperiencePageContent() {
           apiError={apiError}
           isPreviewDrawerOpen={isPreviewDrawerOpen}
           setIsPreviewDrawerOpen={setIsPreviewDrawerOpen}
+          slotTemplateRecords={slotTemplateRecords}
           onPreviewAndPublish={() => {
             const isWalletValid = validateWallet();
 
@@ -225,7 +232,6 @@ function CreateExperiencePageContent() {
           multiDayStartTime={formData.dateType.multiDayStartTime}
           multiDayEndDate={formData.dateType.multiDayEndDate}
           multiDayEndTime={formData.dateType.multiDayEndTime}
-          aboutPhoto={formData.about.photos?.[0] || null}
           aboutPhotos={formData.about.photos}
           aboutTitle={formData.about.title}
           aboutDescription={formData.about.description}
@@ -238,7 +244,10 @@ function CreateExperiencePageContent() {
           aboutCategories={formData.about.categories}
           ticketsItems={formData.tickets.items}
           ticketsCommissionPayer={formData.tickets.commission}
-          invitedGuests={formData.invite.invitedGuests.map(guest => ({ ...guest, name: guest.email.split('@')[0] }))}
+          invitedGuests={formData.invite.invitedGuests.map((guest) => ({
+            ...guest,
+            name: guest.email.split('@')[0],
+          }))}
           invitedCommunityIds={formData.invite.invitedCommunityIds}
           allCommunities={communitiesForSelector}
           selectedWallet={formData.wallet.selectedWallet}

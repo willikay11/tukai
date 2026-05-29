@@ -80,6 +80,10 @@ export type CreateExperienceTicket = {
   availableQuantity?: number;
   sales_start_date?: string | null;
   sales_end_date?: string | null;
+  ticket_sales_closing_duration?: number | null;
+  ticket_sales_closing_unit?: 'days' | 'hours' | 'minutes' | null;
+  ticket_sales_closing_condition?: 'before_start' | 'before_end' | null;
+  slot_template?: string | null;
 };
 
 export function isExperience(item: any): item is Experience {

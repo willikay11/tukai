@@ -11,13 +11,13 @@ import { PreviewDateSection } from '../PreviewDateSection';
 import { PreviewDescriptionSection } from '../PreviewDescriptionSection';
 import { PreviewExcludedSection } from '../PreviewExcludedSection';
 import { PreviewGuestsSection } from '../PreviewGuestsSection';
-import { PreviewPhotoSection } from '../PreviewPhotoSection';
-import { PreviewTitleSection } from '../PreviewTitleSection';
 import { PreviewIncludedSection } from '../PreviewIncludedSection';
 import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
 import { PreviewLocationSection } from '../PreviewLocationSection';
 import { PreviewMeetingSection } from '../PreviewMeetingSection';
+import { PreviewPhotoSection } from '../PreviewPhotoSection';
 import { PreviewTicketsSection } from '../PreviewTicketsSection';
+import { PreviewTitleSection } from '../PreviewTitleSection';
 import { PreviewWalletSection } from '../PreviewWalletSection';
 
 interface ExperienceReviewProps {
@@ -55,10 +55,7 @@ export const ExperienceReview = ({
       />
 
       {experience.title && (
-        <PreviewTitleSection
-          title={experience.title}
-          onEdit={() => handleEditClick('about')}
-        />
+        <PreviewTitleSection title={experience.title} onEdit={() => handleEditClick('about')} />
       )}
 
       {experience.description && (

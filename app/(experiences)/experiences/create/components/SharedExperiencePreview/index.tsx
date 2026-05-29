@@ -118,14 +118,6 @@ export const SharedExperiencePreview = ({
   selectedWallet,
   onEditStep,
 }: SharedExperiencePreviewProps) => {
-  // Determine heading based on step and experience type
-  const getHeading = () => {
-    if (step === 'dates-tickets' && isRecurring) {
-      return 'Create Tickets';
-    }
-    return 'Preview Experience';
-  };
-
   // Render date section based on experience type
   const renderDateSection = () => {
     if (experienceType === 'multi-day') {
@@ -169,8 +161,8 @@ export const SharedExperiencePreview = ({
   const shouldShowCommunitySection = step === 'about';
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-sm font-semibold text-gray-900">{getHeading()}</h2>
+    <div className="space-y-5">
+      <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2>
 
       <PreviewPhotoSection photos={aboutPhotos?.map((p) => p.url) || []} />
 

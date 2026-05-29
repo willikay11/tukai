@@ -54,6 +54,8 @@ export const TicketForm = ({
   experienceStartDate,
   experienceEndDate,
 }: TicketFormProps) => {
+  console.log('[TicketForm] Rendered with:', { isRecurring, isMultiDay, salesEndRelative: value.salesEndRelative });
+
   const getCommissionPercentage = () => {
     if (experiencePricing === 'free') return 0;
     return commissionPayer === 'host' ? 0 : commissionPayer === 'customer' ? 4 : 2;
@@ -198,17 +200,15 @@ export const TicketForm = ({
       ) : (
         <>
           <RelativeValidityPicker
-            startValue={value.salesStartRelative || { amount: 1, unit: 'hour', anchor: 'start' }}
-            endValue={value.salesEndRelative || { amount: 1, unit: 'hour', anchor: 'end' }}
-            onStartChange={(val) => onChange({ salesStartRelative: val })}
-            onEndChange={(val) => onChange({ salesEndRelative: val })}
+            value={value.salesEndRelative ?? null}
+            onChange={(val) => onChange({ salesEndRelative: val })}
             errors={errors}
           />
 
-          <DuplicateTicketsCheckbox
+          {/* <DuplicateTicketsCheckbox
             value={value.duplicateForEntirePeriod ?? false}
             onChange={(val) => onChange({ duplicateForEntirePeriod: val })}
-          />
+          /> */}
         </>
       )}
 

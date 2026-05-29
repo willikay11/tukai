@@ -59,7 +59,7 @@ export const AboutStep = ({
     (photo: FormPhoto | null) => {
       if (photo) {
         // Add photo to the array if not already present
-        const photos = formData.photos.find(p => p.id === photo.id)
+        const photos = formData.photos.find((p) => p.id === photo.id)
           ? formData.photos
           : [...formData.photos, photo];
         onFormDataChange({ photos });

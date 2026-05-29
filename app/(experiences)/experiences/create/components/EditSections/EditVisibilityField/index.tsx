@@ -8,11 +8,7 @@ interface EditVisibilityFieldProps {
   error?: string;
 }
 
-export const EditVisibilityField = ({
-  value,
-  onChange,
-  error,
-}: EditVisibilityFieldProps) => {
+export const EditVisibilityField = ({ value, onChange, error }: EditVisibilityFieldProps) => {
   const options = [
     { value: 'public', label: 'Public (Everyone)' },
     { value: 'private', label: 'Private (Only invited people)' },

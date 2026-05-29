@@ -9,6 +9,7 @@ import {
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Photo } from '@/types/photo';
+
 import { PhotoUploader } from '../../PhotoUploader';
 
 interface LocalPhoto {

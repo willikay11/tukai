@@ -62,7 +62,6 @@ export const ReviewLayout = ({
   onPublish,
   showActionBar = true,
 }: ReviewLayoutProps) => {
-
   const handleEditClick = (
     section:
       | 'about-title'
@@ -211,10 +210,7 @@ export const ReviewLayout = ({
       )}
 
       {/* 13. Wallet Details */}
-      <PreviewWalletSection
-        wallet={wallet}
-        onEdit={() => handleEditClick('wallet')}
-      />
+      <PreviewWalletSection wallet={wallet} onEdit={() => handleEditClick('wallet')} />
 
       {/* Action Bar */}
       {showActionBar && (

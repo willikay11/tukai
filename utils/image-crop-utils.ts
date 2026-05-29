@@ -42,10 +42,7 @@ export const getCroppedImageFile = async (
   });
 };
 
-export const imageNeedsCrop = (
-  width: number,
-  height: number,
-): boolean => {
+export const imageNeedsCrop = (width: number, height: number): boolean => {
   const ratio = width / height;
   return ratio < 1.2;
 };

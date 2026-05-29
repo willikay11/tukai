@@ -3,6 +3,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import moment from 'moment';
+import { RRule } from 'rrule';
+
+import { buildRecurrenceRule } from '@/app/(experiences)/experiences/create/utils/buildRecurrenceRule';
 import {
   useCreateBankWallet,
   useCreatePhoneWallet,
@@ -17,18 +21,31 @@ import {
   useCreateExperience,
   useDeleteExperiencePhoto,
   useFetchSingleExperience,
+  useFetchSlotTemplates,
   usePublishExperience,
   useUpdateExperience,
 } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { InvitedMember } from '@/components/ui/invite-members';
-import { addExperiencePhotos } from '@/services/experience';
+import {
+  addExperiencePhotos,
+  createSlotTemplate,
+  deleteSlotTemplate,
+  fetchSlotTemplates,
+  updateSlotTemplate,
+} from '@/services/experience';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Interest } from '@/types/interest';
 import { Wallet } from '@/types/payment';
 import { Photo } from '@/types/photo';
 import { parseApiError } from '@/utils/parseApiError';
+import {
+  SlotTemplateRecord,
+  buildSlotTemplatePayload,
+  calculateEndTime,
+  diffSlotTemplates,
+} from '@/utils/slot-template-utils';
 
 export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
 
@@ -225,6 +242,7 @@ export const useCreateExperienceFlow = () => {
   const [aboutErrors, setAboutErrors] = useState<Record<string, string>>({});
   const [ticketsErrors, setTicketsErrors] = useState<Record<string, string>>({});
   const [walletErrors, setWalletErrors] = useState<Record<string, string>>({});
+  const [slotTemplateRecords, setSlotTemplateRecords] = useState<SlotTemplateRecord[]>([]);
 
   const hasHydrated = useRef(false);
 
@@ -239,6 +257,9 @@ export const useCreateExperienceFlow = () => {
     experienceId || '',
     true,
   );
+
+  // Slot template hooks
+  const { data: slotTemplatesResponse, isLoading: isLoadingSlotTemplates } = useFetchSlotTemplates(experienceId);
 
   // Wallet hooks
   const { data: walletsResponse, isLoading: isWalletsLoading } = useGetWallets();
@@ -361,16 +382,17 @@ export const useCreateExperienceFlow = () => {
           isTempId: false,
         })) || [],
       categories: experience.categories || [],
-      location: experience.location?.formattedAddress || '',
-      locationPlaceId: experience.location?.id || '',
+      location: experience.location?.formattedAddress || experience.location?.city || '',
+      locationPlaceId: experience.location?.googleMapPlaceId ?? '',
       meetingPoint: experience.meetingPlace || '',
       meetingTime: experience.meetingTime || null,
       whatsIncluded: experience.whatsIncluded ?? '',
       whatsNotIncluded: experience.whatsNotIncluded ?? '',
     });
 
-    // Update date type form with community
-    updateFormData({
+    // Check if experience is recurring and parse recurrence rule
+    const hasRecurrenceRule = !!experience.recurrenceRule;
+    let dateTypeUpdate: any = {
       community: experience.hostCommunity
         ? {
             id: experience.hostCommunity.id,
@@ -382,7 +404,48 @@ export const useCreateExperienceFlow = () => {
       date: startDate,
       startTime,
       endTime,
-    });
+    };
+
+    // If recurring, parse the recurrence rule using RRule
+    if (hasRecurrenceRule) {
+      const options = RRule.parseString(experience.recurrenceRule);
+      const rule = new RRule(options);
+
+      try {
+        const records: {id: string, name?: string, startTime: string, durationMinutes: number}[] = slotTemplatesResponse?.data?.results ?? [];
+
+        // Store slot template records for sync operations
+        const recordsForState: SlotTemplateRecord[] = records.map((record, index) => ({
+          uiId: `slot-${index}`,
+          templateId: record.id,
+          startTime: record.startTime,
+          endTime: calculateEndTime(record.startTime, record.durationMinutes),
+          name: record.name,
+        }));
+        setSlotTemplateRecords(recordsForState);
+
+        dateTypeUpdate = {
+          ...dateTypeUpdate,
+          isRecurring: true,
+          recurringDays: rule.options.byweekday?.map((day) => {
+            const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+            return days[day];
+          }) as any,
+          recurrenceStartDate: moment(rule.options.dtstart).format('YYYY-MM-DD'),
+          recurrenceEndDate: moment(rule.options.until).format('YYYY-MM-DD'),
+          // date: null,
+          timeSlots: records.map((record) => ({
+            startTime: record.startTime,
+            endTime: calculateEndTime(record.startTime, record.durationMinutes),
+          })),
+        };
+      } catch (error) {
+        console.error('Error parsing recurrence rule:', error);
+      }
+    }
+
+    // Update date type form with community
+    updateFormData(dateTypeUpdate);
 
     // Load tickets from saved experience
     if (experience.tickets && experience.tickets.length > 0) {
@@ -400,20 +463,70 @@ export const useCreateExperienceFlow = () => {
         );
         const salesEndDateTime = extractDateTime(ticket.salesEndDate || ticket.sales_end_date);
 
+        // Map API relative validity fields to form format
+        let salesEndRelative = null;
+
+        console.log('[Hydration] Ticket:', {
+          name: ticket.name,
+          ticket_sales_closing_duration: ticket.ticket_sales_closing_duration,
+          ticket_sales_closing_unit: ticket.ticket_sales_closing_unit,
+          ticket_sales_closing_condition: ticket.ticket_sales_closing_condition,
+        });
+
+        if (
+          ticket.ticket_sales_closing_duration &&
+          ticket.ticket_sales_closing_unit &&
+          ticket.ticket_sales_closing_condition
+        ) {
+          // Convert API format to form format
+          let unit: 'hour' | 'day' | 'week' = 'day';
+          if (ticket.ticket_sales_closing_unit === 'hours') unit = 'hour';
+          else if (ticket.ticket_sales_closing_unit === 'days')
+            unit = ticket.ticket_sales_closing_duration > 7 ? 'week' : 'day';
+          else if (ticket.ticket_sales_closing_unit === 'minutes') unit = 'hour';
+
+          // Convert days to weeks if divisible by 7
+          let amount = ticket.ticket_sales_closing_duration;
+          if (unit === 'day' && amount % 7 === 0 && amount > 7) {
+            unit = 'week';
+            amount = amount / 7;
+          }
+
+          const anchor = ticket.ticket_sales_closing_condition === 'before_start' ? 'start' : 'end';
+
+          salesEndRelative = {
+            amount,
+            unit,
+            anchor,
+          };
+
+          console.log('[Hydration] Converted to salesEndRelative:', salesEndRelative);
+        }
+
+        // For recurring experiences, find the slot index from the slot_template ID
+        let slotIndex: number | undefined;
+        if (hasRecurrenceRule && (ticket.slot_template || ticket.slotTemplate)) {
+          const slotTemplateId = ticket.slot_template || ticket.slotTemplate;
+          const records: {id: string, name?: string, startTime: string, durationMinutes: number}[] = slotTemplatesResponse?.data?.results ?? [];
+          slotIndex = records.findIndex((r) => r.id === slotTemplateId);
+          if (slotIndex === -1) slotIndex = undefined; // Not found, leave as undefined
+        }
+
         return {
           id: `ticket-${Date.now()}-${Math.random()}`,
           apiId: ticket.id,
           name: ticket.name,
           quantity: ticket.availableQuantity || ticket.quantity,
-          amount: ticket.price,
+          amount: Number(ticket.price),
           salesStartDate: salesStartDateTime.date,
           salesStartTime: salesStartDateTime.time,
           salesEndDate: salesEndDateTime.date,
           salesEndTime: salesEndDateTime.time,
           acceptPartialPayment: false,
           salesStartRelative: null,
-          salesEndRelative: null,
+          salesEndRelative,
           duplicateForEntirePeriod: false,
+          ...(slotIndex !== undefined ? { slotIndex } : {}),
         };
       });
       setFormData((prev) => ({
@@ -421,7 +534,7 @@ export const useCreateExperienceFlow = () => {
         tickets: { ...prev.tickets, items: savedTickets },
       }));
     }
-  }, [experience?.id, updateAboutFormData, updateFormData]);
+  }, [experience?.id, experienceId, slotTemplatesResponse, updateAboutFormData, updateFormData]);
 
   // Sync photo IDs after photos are uploaded (replace temp IDs with real IDs)
   useEffect(() => {
@@ -565,13 +678,11 @@ export const useCreateExperienceFlow = () => {
   }, [formData.dateType]);
 
   const updateTicketsFormData = useCallback((data: Partial<FormData['tickets']>) => {
-    console.log('[updateTicketsFormData] Updating tickets with data:', data);
     setFormData((prev) => {
       const updated = {
         ...prev,
         tickets: { ...prev.tickets, ...data },
       };
-      console.log('[updateTicketsFormData] New formData.tickets:', updated.tickets);
       return updated;
     });
   }, []);
@@ -742,28 +853,94 @@ export const useCreateExperienceFlow = () => {
     setInvitedCommunities(communities);
   }, []);
 
+  const syncSlotTemplates = async (
+    experienceId: string,
+    currentSlots: { startTime: string; endTime: string }[],
+    recurrenceRule: string | null,
+  ): Promise<void> => {
+    const { toCreate, toUpdate, toDelete } = diffSlotTemplates(currentSlots, slotTemplateRecords);
+
+    const newRecords = [...slotTemplateRecords];
+
+    // Delete removed slots
+    await Promise.all(
+      toDelete.map(async (record) => {
+        await deleteSlotTemplate(experienceId, record.templateId);
+        // Remove from local records
+        const idx = newRecords.findIndex((r) => r.templateId === record.templateId);
+        if (idx !== -1) newRecords.splice(idx, 1);
+      }),
+    );
+
+    // Update changed slots
+    await Promise.all(
+      toUpdate.map(async ({ record, startTime, endTime }) => {
+        await updateSlotTemplate(
+          experienceId,
+          record.templateId,
+          buildSlotTemplatePayload({ startTime, endTime }, recurrenceRule),
+        );
+        // Update local record
+        const idx = newRecords.findIndex((r) => r.templateId === record.templateId);
+        if (idx !== -1) {
+          newRecords[idx] = {
+            ...newRecords[idx],
+            startTime,
+            endTime,
+          };
+        }
+      }),
+    );
+
+    // Create new slots
+    await Promise.all(
+      toCreate.map(async (slot) => {
+        const response = await createSlotTemplate(
+          experienceId,
+          buildSlotTemplatePayload(slot, recurrenceRule),
+        );
+        newRecords.push({
+          uiId: `slot-${Date.now()}-${Math.random()}`,
+          templateId: response.data.id,
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+        });
+      }),
+    );
+
+    setSlotTemplateRecords(newRecords);
+  };
+
   const handleSaveAbout = useCallback(async () => {
     setIsSavingExperience(true);
     setApiError(null);
     try {
       const photoFiles = formData.about.photos.filter((p) => p.file).map((p) => p.file!);
-      console.log('[handleSaveAbout] photoFiles count:', photoFiles.length || 0);
-      console.log('[handleSaveAbout] photoFiles:', photoFiles);
+
+      // Use recurrence dates if recurring, otherwise use single date
+      const isRecurring = formData.dateType.isRecurring;
+      const startDateValue = isRecurring
+        ? formData.dateType.recurrenceStartDate || ''
+        : formData.dateType.date || '';
+      const endDateValue = isRecurring
+        ? formData.dateType.recurrenceEndDate || ''
+        : formData.dateType.date || '';
+      const startTime = isRecurring
+        ? formData.dateType.timeSlots?.[0]?.startTime || null
+        : formData.dateType.startTime || null;
+      const endTime = isRecurring
+        ? formData.dateType.timeSlots?.[0]?.endTime || null
+        : formData.dateType.endTime || null;
 
       const payload = {
         title: formData.about.title,
         description: formData.about.description,
-        googleMapPlaceId: formData.about.locationPlaceId || 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
-        startDate: formatDateWithTime(
-          formData.dateType.date || '',
-          formData.dateType.startTime || null,
-        ),
-        endDate: formatDateWithTime(
-          formData.dateType.date || '',
-          formData.dateType.endTime || null,
-          true,
-        ),
-        recurrence_rule: '',
+        ...(formData.about.locationPlaceId
+          ? { googleMapPlaceId: formData.about.locationPlaceId }
+          : {}),
+        startDate: formatDateWithTime(startDateValue, startTime),
+        endDate: formatDateWithTime(endDateValue, endTime, true),
+        recurrence_rule: buildRecurrenceRule(formData.dateType),
         categoriesIds: formData.about.categories.map((c) => c.id),
         isPublic: formData.about.visibility === 'public',
         isPaid: formData.dateType.experiencePricing === 'paid',
@@ -791,10 +968,7 @@ export const useCreateExperienceFlow = () => {
               'photos to experience',
               experienceId,
             );
-            const photoResponse = await addExperiencePhotos(
-              experienceId,
-              photoFiles,
-            );
+            const photoResponse = await addExperiencePhotos(experienceId, photoFiles);
             console.log('[handleSaveAbout] Photos uploaded successfully, response:', photoResponse);
           } catch (photoError: any) {
             console.error('[handleSaveAbout] Photo upload failed:', photoError);
@@ -803,6 +977,31 @@ export const useCreateExperienceFlow = () => {
               description: 'Photos failed to upload. You can add them again from the review page.',
               variant: 'default',
             });
+          }
+        }
+
+        // Sync slot templates for recurring experiences
+        if (formData.dateType.isRecurring) {
+          const validSlots = (formData.dateType.timeSlots ?? []).filter(
+            (s) => s.startTime && s.endTime,
+          ) as { startTime: string; endTime: string }[];
+
+          if (validSlots.length > 0 || slotTemplateRecords.length > 0) {
+            try {
+              await syncSlotTemplates(
+                experienceId,
+                validSlots,
+                buildRecurrenceRule(formData.dateType),
+              );
+            } catch (slotError) {
+              console.error('[handleSaveAbout] Slot sync failed:', slotError);
+              toast({
+                description:
+                  'Experience saved but time slots failed to update. Please try editing them again.',
+                variant: 'default',
+              });
+              // Non-blocking — experience was already saved
+            }
           }
         }
       } else {
@@ -826,6 +1025,41 @@ export const useCreateExperienceFlow = () => {
               variant: 'default',
             });
             // Don't block advancement - experience was already created
+          }
+        }
+
+        // Create slot templates for recurring experiences
+        if (formData.dateType.isRecurring) {
+          const timeSlots = (formData.dateType.timeSlots ?? []).filter(
+            (slot) => slot.startTime !== null && slot.endTime !== null,
+          ) as { startTime: string; endTime: string }[];
+
+          if (timeSlots.length > 0) {
+            try {
+              const slotResults = await Promise.all(
+                timeSlots.map((slot, index) =>
+                  createSlotTemplate(
+                    newExperienceId,
+                    buildSlotTemplatePayload(slot, formData.dateType.recurrenceRule ?? null),
+                  ),
+                ),
+              );
+
+              const records: SlotTemplateRecord[] = timeSlots.map((slot, i) => ({
+                uiId: `slot-${i}`,
+                templateId: slotResults[i].data.id,
+                startTime: slot.startTime,
+                endTime: slot.endTime,
+              }));
+            } catch (slotError) {
+              console.error('[handleSaveAbout] Slot template creation failed:', slotError);
+              toast({
+                description:
+                  'Experience saved but time slots failed to save. You can re-add them later.',
+                variant: 'default',
+              });
+              // Non-blocking — experience was already created
+            }
           }
         }
 
@@ -960,7 +1194,9 @@ export const useCreateExperienceFlow = () => {
       const payload = {
         title: experience.title,
         description: experience.description,
-        googleMapPlaceId: 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
+        ...(experience.location?.googleMapPlaceId
+          ? { googleMapPlaceId: experience.location.googleMapPlaceId }
+          : {}),
         startDate: experience.startDate,
         endDate: experience.endDate,
         recurrence_rule: '',
@@ -1048,6 +1284,8 @@ export const useCreateExperienceFlow = () => {
       patchPhoneWallet,
       isPatchingPhoneWallet,
     },
+
+    slotTemplateRecords,
 
     handlers: {
       handleStepChange,

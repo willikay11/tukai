@@ -10,7 +10,7 @@ interface PreviewTitleSectionProps {
 export const PreviewTitleSection = ({ title, onEdit }: PreviewTitleSectionProps) => {
   return (
     <div className="relative">
-      <div className="flex flex-row justify-between items-start">
+      <div className="flex flex-row items-start justify-between">
         <p className="text-xl font-bold text-gray-900">{title}</p>
         {onEdit && (
           <button onClick={onEdit} className="text-gray-400 hover:text-gray-600">

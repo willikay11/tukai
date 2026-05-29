@@ -1,6 +1,17 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+import {
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { SortableContext, arrayMove, rectSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
 import { ImageCropDialog } from '@/app/shared/components/Images';
 import { useDeleteExperiencePhoto } from '@/app/shared/hooks/useExperiences';
@@ -8,7 +19,7 @@ import { useToast } from '@/app/shared/hooks/useToast';
 import { getImageDimensions, imageNeedsCrop } from '@/utils/image-crop-utils';
 import { validateExperienceImage } from '@/utils/image-utils';
 
-import { PreviewGrid } from './PreviewGrid';
+import { SortablePhotoItem } from './SortablePhotoItem';
 
 export interface FormPhoto {
   id: string; // Either 'temp-{timestamp}' or real ID from DB
@@ -34,10 +45,60 @@ export const PhotoUploader = ({
 }: PhotoUploaderProps) => {
   const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
   const [cropQueue, setCropQueue] = useState<Array<{ photo: FormPhoto; objectUrl: string }>>([]);
-  const [currentCrop, setCurrentCrop] = useState<{ photo: FormPhoto; objectUrl: string } | null>(null);
+  const [currentCrop, setCurrentCrop] = useState<{ photo: FormPhoto; objectUrl: string } | null>(
+    null,
+  );
   const inputRef = useRef<HTMLInputElement>(null);
+  const blobUrlMap = useRef<Map<File, string>>(new Map());
   const { mutateAsync: deletePhotoAsync } = useDeleteExperiencePhoto();
   const { toast } = useToast();
+
+  // Drag sensors — 8px threshold prevents accidental drag on tap
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  // Get or create blob URL for a file
+  const getBlobUrl = useCallback((file: File): string => {
+    if (!blobUrlMap.current.has(file)) {
+      blobUrlMap.current.set(file, URL.createObjectURL(file));
+    }
+    return blobUrlMap.current.get(file)!;
+  }, []);
+
+  // Clean up blob URLs on unmount
+  useEffect(() => {
+    const urlMap = blobUrlMap.current;
+    return () => {
+      urlMap.forEach((url) => URL.revokeObjectURL(url));
+      urlMap.clear();
+    };
+  }, []);
+
+  // Handle drag end — reorder the array
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const photoIds = photos.map((photo, index) =>
+      photo.file ? `new-${index}-${photo.id}` : photo.id,
+    );
+
+    const oldIndex = photoIds.indexOf(active.id as string);
+    const newIndex = photoIds.indexOf(over.id as string);
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      const reorderedPhotos = arrayMove(photos, oldIndex, newIndex);
+      onPhotoFilesChange?.(reorderedPhotos);
+    }
+  };
 
   const handleFilesSelected = useCallback(
     async (files: File[]) => {
@@ -180,9 +241,7 @@ export const PhotoUploader = ({
         };
 
         // Replace in photos array
-        const updatedPhotos = photos.map((p) =>
-          p.id === currentCrop.photo.id ? croppedPhoto : p,
-        );
+        const updatedPhotos = photos.map((p) => (p.id === currentCrop.photo.id ? croppedPhoto : p));
         onPhotoFilesChange?.(updatedPhotos);
         onPhotoChange?.(croppedPhoto);
       };
@@ -223,7 +282,7 @@ export const PhotoUploader = ({
         try {
           await deletePhotoAsync(itemToRemove.id);
           onPhotoDelete?.(itemToRemove.id);
-        } catch (error: any) {
+        } catch {
           toast({
             title: 'Error',
             description: 'Failed to delete photo. Please try again.',
@@ -240,33 +299,73 @@ export const PhotoUploader = ({
       onPhotoFilesChange?.(updatedPhotos);
 
       // Revoke object URL if it's not an external URL
-      if (
-        !itemToRemove.url.startsWith('https://') &&
-        !itemToRemove.url.startsWith('http://')
-      ) {
+      if (!itemToRemove.url.startsWith('https://') && !itemToRemove.url.startsWith('http://')) {
         URL.revokeObjectURL(itemToRemove.url);
       }
     },
     [photos, deletePhotoAsync, onPhotoDelete, onPhotoFilesChange, toast],
   );
 
-  const previews = photos.map((photo, index) => ({
-    url: photo.url,
-    id: photo.id,
-    index,
-  }));
+  // Generate stable IDs for dnd-kit
+  const photoIds = photos.map((photo, index) =>
+    photo.file ? `new-${index}-${photo.id}` : photo.id,
+  );
+
+  const hasReachedMax = photos.length >= 6;
 
   return (
     <>
       <div className="space-y-2">
         <p className="text-xs font-medium text-gray-800">Upload experience poster</p>
-        <PreviewGrid
-          previews={previews}
-          onRemove={handleRemovePreview}
-          onAddClick={() => inputRef.current?.click()}
-          maxFiles={6}
-          isDeletingPhoto={isDeletingPhoto}
-        />
+
+        {/* Draggable photo grid */}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={photoIds} strategy={rectSortingStrategy}>
+            <div className="flex flex-wrap items-start gap-3">
+              {photos.map((photo, index) => (
+                <SortablePhotoItem
+                  key={photoIds[index]}
+                  id={photoIds[index]}
+                  photo={photo}
+                  index={index}
+                  onRemove={handleRemovePreview}
+                  isDeletingPhoto={isDeletingPhoto}
+                  getBlobUrl={getBlobUrl}
+                />
+              ))}
+
+              {/* Add more photos button */}
+              {!hasReachedMax && (
+                <button
+                  type="button"
+                  onClick={() => inputRef.current?.click()}
+                  className="inline-flex h-[105px] w-[155px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-emerald-500/50 bg-emerald-50/50 text-center hover:border-emerald-600 hover:bg-emerald-100/50"
+                >
+                  {/* Icon */}
+                  <svg
+                    className="h-5 w-5 text-emerald-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  <span className="mt-1 text-[10px] font-medium text-emerald-700">Add Photo(s)</span>
+                </button>
+              )}
+            </div>
+          </SortableContext>
+        </DndContext>
+
         <input
           ref={inputRef}
           type="file"
@@ -279,10 +378,20 @@ export const PhotoUploader = ({
           }}
           className="hidden"
         />
+
+        {/* Info text and hint */}
         <div className="space-y-1 text-xs text-muted-foreground">
           <p>JPEG, PNG or WebP · Minimum 800×450px · Max 10MB</p>
           <p>Best results with landscape photos (16:9 or 4:3)</p>
         </div>
+
+        {/* Drag hint — only show if 2+ photos */}
+        {photos.length > 1 && (
+          <p className="text-xs text-muted-foreground">
+            Drag photos to reorder · First photo is the cover
+          </p>
+        )}
+
         {error && <p className="text-xs text-red-500">{error}</p>}
       </div>
 

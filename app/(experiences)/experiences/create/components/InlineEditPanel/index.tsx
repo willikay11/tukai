@@ -2,9 +2,9 @@
 
 import { useCallback, useState } from 'react';
 
-import { Button } from '@/components/ui/button';
 import { useUpdateExperience } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
+import { Button } from '@/components/ui/button';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 import { formatDateForPreview, formatTimeForPreview } from '@/utils/date-utils';
@@ -17,9 +17,9 @@ import {
   EditLocationField,
   EditMeetingPointField,
   EditMeetingTimeField,
+  EditPhotosPanel,
   EditTitleField,
   EditVisibilityField,
-  EditPhotosPanel,
 } from '../EditSections';
 import { PreviewCommunitySection } from '../PreviewCommunitySection';
 import { PreviewDateSection } from '../PreviewDateSection';
@@ -93,11 +93,7 @@ const EditTitleFieldWithSave = ({
         <p className="mt-1 text-xs text-gray-600">Give your experience a compelling name</p>
       </div>
 
-      <EditTitleField
-        value={title}
-        onChange={setTitle}
-        error={error || undefined}
-      />
+      <EditTitleField value={title} onChange={setTitle} error={error || undefined} />
 
       <div className="flex gap-2">
         <Button
@@ -189,7 +185,6 @@ const EditDescriptionFieldWithSave = ({
           onChange={setDescription}
           error={error || undefined}
         />
-
       </div>
 
       <div className="flex gap-2">
@@ -540,11 +535,7 @@ const EditVisibilityFieldWithSave = ({
         <p className="mt-1 text-xs text-gray-600">Make your experience public or private</p>
       </div>
 
-      <EditVisibilityField
-        value={visibility}
-        onChange={setVisibility}
-        error={error || undefined}
-      />
+      <EditVisibilityField value={visibility} onChange={setVisibility} error={error || undefined} />
 
       <div className="flex gap-2">
         <Button
@@ -624,11 +615,7 @@ const EditCategoriesFieldWithSave = ({
         <p className="mt-1 text-xs text-gray-600">Update experience categories</p>
       </div>
 
-      <EditCategoriesField
-        value={categories}
-        onChange={setCategories}
-        error={error || undefined}
-      />
+      <EditCategoriesField value={categories} onChange={setCategories} error={error || undefined} />
 
       <div className="flex gap-2">
         <Button
@@ -713,11 +700,7 @@ const EditIncludedFieldWithSave = ({
         <p className="mt-1 text-xs text-gray-600">Update what's included in this experience</p>
       </div>
 
-      <EditIncludedField
-        value={included}
-        onChange={setIncluded}
-        error={error || undefined}
-      />
+      <EditIncludedField value={included} onChange={setIncluded} error={error || undefined} />
 
       <div className="flex gap-2">
         <Button
@@ -802,11 +785,7 @@ const EditExcludedFieldWithSave = ({
         <p className="mt-1 text-xs text-gray-600">Update what's not included in this experience</p>
       </div>
 
-      <EditExcludedField
-        value={excluded}
-        onChange={setExcluded}
-        error={error || undefined}
-      />
+      <EditExcludedField value={excluded} onChange={setExcluded} error={error || undefined} />
 
       <div className="flex gap-2">
         <Button

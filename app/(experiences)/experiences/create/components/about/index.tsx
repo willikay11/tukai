@@ -7,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { $generateHtmlFromNodes } from '@lexical/html';
 import { $getRoot, EditorState, SerializedEditorState } from 'lexical';
 import moment from 'moment';
-import { RRule } from 'rrule';
 import * as z from 'zod';
 
 import { FileUploadField } from '@/app/shared/components/Forms';
@@ -288,21 +287,13 @@ export const CreateExperienceAbout = ({
     const today = now.toISOString();
     const endOfDay = now.add(1, 'day').clone().endOf('day').toDate();
 
-    const rule = new RRule({
-      freq: RRule.WEEKLY,
-      interval: 5,
-      byweekday: [RRule.MO, RRule.FR],
-      dtstart: now.toDate(),
-      until: endOfDay,
-    });
-
     const payload = {
       title: values.title,
       description: editorHtmlValues.description || plainTextToHtml(values.description),
       googleMapPlaceId: values.location || 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
       startDate: today,
-      endDate: '2026-03-27T18:39:20.886Z',
-      recurrence_rule: rule.toString(),
+      endDate: endOfDay.toISOString(),
+      recurrence_rule: '',
       categoriesIds: values.selectedCategories,
       isPublic: values.visibility === 'public',
       newPhotos: values.uploadedFiles,

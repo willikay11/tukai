@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-
 import Cropper from 'react-easy-crop';
 import { Area } from 'react-easy-crop';
 
@@ -28,19 +27,13 @@ export const ImageCropDialog = ({
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const onCropChange = useCallback(
-    (crop: { x: number; y: number }) => setCrop(crop),
-    [],
-  );
+  const onCropChange = useCallback((crop: { x: number; y: number }) => setCrop(crop), []);
 
   const onZoomChange = useCallback((zoom: number) => setZoom(zoom), []);
 
-  const onCropCompleteHandler = useCallback(
-    (_: Area, croppedAreaPixels: Area) => {
-      setCroppedAreaPixels(croppedAreaPixels);
-    },
-    [],
-  );
+  const onCropCompleteHandler = useCallback((_: Area, croppedAreaPixels: Area) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
 
   const handleSave = async () => {
     if (!croppedAreaPixels) return;
@@ -62,11 +55,7 @@ export const ImageCropDialog = ({
     <div className="fixed inset-0 z-50 flex flex-col bg-black">
       {/* Header */}
       <div className="flex items-center justify-between bg-black px-4 py-3">
-        <button
-          onClick={onCancel}
-          className="text-sm font-medium text-white"
-          type="button"
-        >
+        <button onClick={onCancel} className="text-sm font-medium text-white" type="button">
           Cancel
         </button>
         <p className="text-sm font-semibold text-white">Crop Photo</p>

@@ -25,10 +25,7 @@ export const PreviewGrid = ({
   return (
     <div className="flex flex-wrap items-start gap-3">
       {previews.map(({ url, index, id }) => (
-        <div
-          key={id}
-          className="relative h-[105px] w-[155px] rounded-xl"
-        >
+        <div key={id} className="relative h-[105px] w-[155px] rounded-xl">
           {isExternalUrl(url) ? (
             <Image
               src={url}

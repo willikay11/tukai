@@ -54,19 +54,31 @@ export const PreviewTicketsSection = ({
             const salesStartDateStr = ticket.salesStartDate || (ticket as any).sales_start_date;
             const salesEndDateStr = ticket.salesEndDate || (ticket as any).sales_end_date;
 
-            const validity =
-              salesStartDateStr && salesEndDateStr
-                ? `${moment(salesStartDateStr).format('MMM D, YYYY,')} ${moment(salesStartDateStr).format('h:mm A')} – ${moment(salesEndDateStr).format('MMM D, YYYY,')} ${moment(salesEndDateStr).format('h:mm A')}`
-                : ticket.salesStartRelative && ticket.salesEndRelative
-                  ? `${ticket.salesStartRelative.amount} ${ticket.salesStartRelative.unit} ${ticket.salesStartRelative.anchor === 'start' ? 'before' : 'after'} – ${ticket.salesEndRelative.amount} ${ticket.salesEndRelative.unit} ${ticket.salesEndRelative.anchor === 'start' ? 'before' : 'after'}`
-                  : 'Not set';
+            console.log('[PreviewTicketsSection] Full ticket object:', ticket);
+
+            let validity = 'Not set';
+
+            if (salesStartDateStr && salesEndDateStr) {
+              validity = `${moment(salesStartDateStr).format('MMM D, YYYY,')} ${moment(salesStartDateStr).format('h:mm A')} – ${moment(salesEndDateStr).format('MMM D, YYYY,')} ${moment(salesEndDateStr).format('h:mm A')}`;
+            } else if (ticket.salesEndRelative) {
+              const { amount, unit, anchor } = ticket.salesEndRelative;
+              validity = `${amount} ${unit} before the experience ${anchor === 'start' ? 'starts' : 'ends'}`;
+            } else if (ticket.salesStartRelative) {
+              const { amount, unit, anchor } = ticket.salesStartRelative;
+              validity = `${amount} ${unit} ${anchor === 'start' ? 'before' : 'after'} experience`;
+            }
+
+            console.log(`[PreviewTicketsSection] Ticket ${ticket.id}: validity = "${validity}"`);
+
+            // Handle both 'amount' (from form) and 'price' (from API)
+            const price = (ticket as any).amount || (ticket as any).price;
 
             return (
               <SavedTicketCard
                 key={ticket.id}
                 name={ticket.name}
                 quantity={ticket.quantity}
-                amount={ticket.price}
+                amount={Number(price)}
                 validity={validity}
                 coverPhoto={coverPhoto}
                 commissionPayer={commissionPayer}

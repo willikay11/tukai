@@ -181,26 +181,28 @@ export const toSerializedEditorState = (content: string = ''): SerializedEditorS
   }
 
   const hasHtml = content.includes('<') && content.includes('>');
-  const children = hasHtml ? parseHtmlToChildren(content) : [
-    {
-      children: [
+  const children = hasHtml
+    ? parseHtmlToChildren(content)
+    : [
         {
-          detail: 0,
-          format: 0,
-          mode: 'normal',
-          style: '',
-          text: content,
-          type: 'text',
+          children: [
+            {
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: content,
+              type: 'text',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          type: 'paragraph',
           version: 1,
         },
-      ],
-      direction: 'ltr',
-      format: '',
-      indent: 0,
-      type: 'paragraph',
-      version: 1,
-    },
-  ];
+      ];
 
   return {
     root: {

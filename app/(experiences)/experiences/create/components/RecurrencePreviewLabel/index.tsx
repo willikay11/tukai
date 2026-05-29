@@ -50,7 +50,7 @@ const getFirstOccurrence = (
 ): { dayName: string; day: number; month: string } | null => {
   try {
     const [year, month, day] = startDate.split('-').map(Number);
-    let checkDate = new Date(year, month - 1, day);
+    const checkDate = new Date(year, month - 1, day);
 
     for (let i = 0; i < 7; i++) {
       const dayOfWeek = checkDate.getDay();

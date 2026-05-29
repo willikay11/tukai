@@ -9,20 +9,10 @@ interface EditLocationFieldProps {
   error?: string;
 }
 
-export const EditLocationField = ({
-  value,
-  placeId,
-  onChange,
-  error,
-}: EditLocationFieldProps) => {
+export const EditLocationField = ({ value, placeId, onChange, error }: EditLocationFieldProps) => {
   return (
     <div>
-      <ExperienceLocationInput
-        value={value}
-        placeId={placeId}
-        onChange={onChange}
-        error={error}
-      />
+      <ExperienceLocationInput value={value} placeId={placeId} onChange={onChange} error={error} />
     </div>
   );
 };

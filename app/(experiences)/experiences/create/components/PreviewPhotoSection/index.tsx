@@ -14,7 +14,7 @@ export const PreviewPhotoSection = ({ photos, onEdit }: PreviewPhotoSectionProps
   const imagesToDisplay = photos && photos.length > 0 ? photos : [];
 
   return (
-    <div className="space-y-3 relative">
+    <div className="relative space-y-3">
       {imagesToDisplay.length > 0 ? (
         <div className="space-y-4">
           {imagesToDisplay.length > 1 ? (
@@ -38,14 +38,14 @@ export const PreviewPhotoSection = ({ photos, onEdit }: PreviewPhotoSectionProps
           )}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-lg bg-gray-50 py-12 relative">
+        <div className="relative flex flex-col items-center justify-center rounded-lg bg-gray-50 py-12">
           <svg
             width="64"
             height="64"
             viewBox="0 0 120 120"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="text-gray-400 mb-3"
+            className="mb-3 text-gray-400"
           >
             <circle cx="60" cy="60" r="58" stroke="currentColor" strokeWidth="4" />
             <path
@@ -61,7 +61,7 @@ export const PreviewPhotoSection = ({ photos, onEdit }: PreviewPhotoSectionProps
           {onEdit && (
             <button
               onClick={onEdit}
-              className="mt-3 rounded-[50px] bg-emerald-500 px-6 py-2 text-xs font-medium text-white hover:bg-emerald-600 transition-colors"
+              className="mt-3 rounded-[50px] bg-emerald-500 px-6 py-2 text-xs font-medium text-white transition-colors hover:bg-emerald-600"
             >
               Add photos
             </button>

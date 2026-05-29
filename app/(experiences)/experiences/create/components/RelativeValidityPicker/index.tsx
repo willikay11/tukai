@@ -1,14 +1,5 @@
 'use client';
 
-import { IconComponent } from '@/app/shared/components/Icons';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
 export type RelativeUnit = 'hour' | 'day' | 'week';
 export type RelativeAnchor = 'start' | 'end';
 
@@ -19,150 +10,75 @@ export interface RelativeValidityValue {
 }
 
 interface RelativeValidityPickerProps {
-  startValue: RelativeValidityValue;
-  endValue: RelativeValidityValue;
-  onStartChange: (value: RelativeValidityValue) => void;
-  onEndChange: (value: RelativeValidityValue) => void;
+  value: RelativeValidityValue | null;
+  onChange: (value: RelativeValidityValue) => void;
   errors: Record<string, string>;
 }
 
-const AMOUNT_OPTIONS = [
-  '1 hour',
-  '2 hours',
-  '3 hours',
-  '6 hours',
-  '12 hours',
-  '1 day',
-  '2 days',
-  '3 days',
-  '1 week',
-  '2 weeks',
+const OPTIONS: RelativeValidityValue[] = [
+  { amount: 1, unit: 'hour', anchor: 'start' },
+  { amount: 1, unit: 'hour', anchor: 'end' },
+  { amount: 1, unit: 'day', anchor: 'start' },
 ];
 
-const parseAmount = (str: string): { amount: number; unit: RelativeUnit } => {
-  const match = str.match(/^(\d+)\s+(hour|day|week)s?$/);
-  if (match) {
-    return {
-      amount: parseInt(match[1], 10),
-      unit: (match[2] + (parseInt(match[1], 10) === 1 ? '' : 's')) as any as RelativeUnit,
-    };
-  }
-  return { amount: 1, unit: 'hour' };
+const formatOptionLabel = (option: RelativeValidityValue): string => {
+  const unitLabel =
+    option.unit === 'hour'
+      ? `${option.amount} ${option.amount === 1 ? 'hour' : 'hours'}`
+      : option.unit === 'day'
+        ? `${option.amount} ${option.amount === 1 ? 'day' : 'days'}`
+        : `${option.amount} ${option.amount === 1 ? 'week' : 'weeks'}`;
+
+  const anchorLabel =
+    option.anchor === 'start' ? 'before the experience starts' : 'before the experience ends';
+
+  return `${unitLabel} ${anchorLabel}`;
 };
 
-const formatAmount = (amount: number, unit: RelativeUnit): string => {
-  const unitName = unit === 'hour' ? 'hour' : unit === 'day' ? 'day' : 'week';
-  return `${amount} ${unitName}${amount > 1 ? 's' : ''}`;
-};
+const isSelected = (
+  option: RelativeValidityValue,
+  selected: RelativeValidityValue | null,
+): boolean =>
+  selected !== null &&
+  option.amount === selected.amount &&
+  option.unit === selected.unit &&
+  option.anchor === selected.anchor;
 
 export const RelativeValidityPicker = ({
-  startValue,
-  endValue,
-  onStartChange,
-  onEndChange,
+  value,
+  onChange,
   errors,
 }: RelativeValidityPickerProps) => {
-  const startAnchorLabel =
-    startValue.anchor === 'start' ? 'Before the experience starts' : 'After the experience starts';
-
-  const endAnchorLabel =
-    endValue.anchor === 'start' ? 'Before the experience ends' : 'After the experience ends';
-
   return (
     <div className="space-y-2">
       <label className="text-xs font-medium text-gray-800">
         Ticket Sales Validity{' '}
         <span className="font-normal text-gray-700">
-          (When should the sales of these tickets start and end)
-        </span>{' '}
-        <IconComponent iconName="InfoCircleIcon" size={16} className="inline text-blue-500" />
+          (When should the sales of these tickets end?)
+        </span>
       </label>
 
-      <div className="space-y-3">
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-gray-700">Sales Start</label>
-          <div className="grid grid-cols-2 gap-3">
-            <Select
-              value={formatAmount(startValue.amount, startValue.unit)}
-              onValueChange={(val) => {
-                const { amount, unit } = parseAmount(val);
-                onStartChange({ amount, unit, anchor: startValue.anchor });
-              }}
+      <div className="flex flex-wrap gap-2">
+        {OPTIONS.map((option, index) => {
+          const selected = isSelected(option, value);
+          return (
+            <button
+              key={index}
+              type="button"
+              onClick={() => onChange(option)}
+              className={`rounded-full px-4 py-3 text-xs font-medium transition-colors ${
+                selected
+                  ? 'border-primary bg-gradient-to-b from-[#047857] to-[#064E3B] text-white'
+                  : 'bg-gray-100 text-gray-700 hover:border-gray-400'
+              } `}
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {AMOUNT_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={startValue.anchor}
-              onValueChange={(anchor) => {
-                onStartChange({ ...startValue, anchor: anchor as RelativeAnchor });
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="start">Before the experience starts</SelectItem>
-                <SelectItem value="start-after">After the experience starts</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {errors.salesStartRelative && (
-            <p className="text-xs text-red-500">{errors.salesStartRelative}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-gray-700">Sales End</label>
-          <div className="grid grid-cols-2 gap-3">
-            <Select
-              value={formatAmount(endValue.amount, endValue.unit)}
-              onValueChange={(val) => {
-                const { amount, unit } = parseAmount(val);
-                onEndChange({ amount, unit, anchor: endValue.anchor });
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {AMOUNT_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={endValue.anchor}
-              onValueChange={(anchor) => {
-                onEndChange({ ...endValue, anchor: anchor as RelativeAnchor });
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="end">Before the experience ends</SelectItem>
-                <SelectItem value="end-after">After the experience ends</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {errors.salesEndRelative && (
-            <p className="text-xs text-red-500">{errors.salesEndRelative}</p>
-          )}
-        </div>
+              {formatOptionLabel(option)}
+            </button>
+          );
+        })}
       </div>
+
+      {errors.salesEndRelative && <p className="text-xs text-red-500">{errors.salesEndRelative}</p>}
     </div>
   );
 };

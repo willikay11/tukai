@@ -1,7 +1,8 @@
 'use client';
 
-import { CategoryPicker } from '../../CategoryPicker';
 import { Interest } from '@/types/interest';
+
+import { CategoryPicker } from '../../CategoryPicker';
 
 interface EditCategoriesFieldProps {
   value: Interest[];
@@ -9,11 +10,7 @@ interface EditCategoriesFieldProps {
   error?: string;
 }
 
-export const EditCategoriesField = ({
-  value,
-  onChange,
-  error,
-}: EditCategoriesFieldProps) => {
+export const EditCategoriesField = ({ value, onChange, error }: EditCategoriesFieldProps) => {
   return (
     <div className="space-y-2">
       <label className="text-xs font-medium text-gray-800">Categories</label>
