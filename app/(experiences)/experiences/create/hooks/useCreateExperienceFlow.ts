@@ -259,7 +259,8 @@ export const useCreateExperienceFlow = () => {
   );
 
   // Slot template hooks
-  const { data: slotTemplatesResponse, isLoading: isLoadingSlotTemplates } = useFetchSlotTemplates(experienceId);
+  const { data: slotTemplatesResponse, isLoading: isLoadingSlotTemplates } =
+    useFetchSlotTemplates(experienceId);
 
   // Wallet hooks
   const { data: walletsResponse, isLoading: isWalletsLoading } = useGetWallets();
@@ -412,7 +413,8 @@ export const useCreateExperienceFlow = () => {
       const rule = new RRule(options);
 
       try {
-        const records: {id: string, name?: string, startTime: string, durationMinutes: number}[] = slotTemplatesResponse?.data?.results ?? [];
+        const records: { id: string; name?: string; startTime: string; durationMinutes: number }[] =
+          slotTemplatesResponse?.data?.results ?? [];
 
         // Store slot template records for sync operations
         const recordsForState: SlotTemplateRecord[] = records.map((record, index) => ({
@@ -507,7 +509,12 @@ export const useCreateExperienceFlow = () => {
         let slotIndex: number | undefined;
         if (hasRecurrenceRule && (ticket.slot_template || ticket.slotTemplate)) {
           const slotTemplateId = ticket.slot_template || ticket.slotTemplate;
-          const records: {id: string, name?: string, startTime: string, durationMinutes: number}[] = slotTemplatesResponse?.data?.results ?? [];
+          const records: {
+            id: string;
+            name?: string;
+            startTime: string;
+            durationMinutes: number;
+          }[] = slotTemplatesResponse?.data?.results ?? [];
           slotIndex = records.findIndex((r) => r.id === slotTemplateId);
           if (slotIndex === -1) slotIndex = undefined; // Not found, leave as undefined
         }

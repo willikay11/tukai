@@ -1,5 +1,11 @@
 import { render, screen } from '@testing-library/react';
+import { render as rtlRender } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+import { useGetInterestCategories } from '@/app/shared/hooks/useAuth';
+import type { Interest } from '@/types/interest';
+
+import { CategoryPicker } from './index';
 
 jest.mock('@/app/shared/hooks/useAuth', () => ({
   useGetInterestCategories: jest.fn(),
@@ -7,20 +13,11 @@ jest.mock('@/app/shared/hooks/useAuth', () => ({
 
 jest.mock('@/components/ui/categoryPill', () => ({
   CategoryPill: ({ category, isSelected, onClick }: any) => (
-    <button
-      onClick={onClick}
-      data-testid={`category-${category.id}`}
-      data-selected={isSelected}
-    >
+    <button onClick={onClick} data-testid={`category-${category.id}`} data-selected={isSelected}>
       {category.name}
     </button>
   ),
 }));
-
-import { render as rtlRender } from '@testing-library/react';
-import { useGetInterestCategories } from '@/app/shared/hooks/useAuth';
-import { CategoryPicker } from './index';
-import type { Interest } from '@/types/interest';
 
 const mockCategories: Interest[] = [
   { id: '1', name: 'Hiking', slug: 'hiking' },
@@ -42,16 +39,14 @@ describe('CategoryPicker', () => {
     it('renders the component', () => {
       const onChange = jest.fn();
       const { container } = rtlRender(
-        <CategoryPicker selectedCategories={[]} onChange={onChange} />
+        <CategoryPicker selectedCategories={[]} onChange={onChange} />,
       );
       expect(container).toBeInTheDocument();
     });
 
     it('renders the label', () => {
       const onChange = jest.fn();
-      rtlRender(
-        <CategoryPicker selectedCategories={[]} onChange={onChange} />
-      );
+      rtlRender(<CategoryPicker selectedCategories={[]} onChange={onChange} />);
       expect(screen.getByText(/Select a category/i)).toBeInTheDocument();
     });
 
@@ -62,17 +57,13 @@ describe('CategoryPicker', () => {
       });
 
       const onChange = jest.fn();
-      rtlRender(
-        <CategoryPicker selectedCategories={[]} onChange={onChange} />
-      );
+      rtlRender(<CategoryPicker selectedCategories={[]} onChange={onChange} />);
       expect(screen.getByText('Loading categories...')).toBeInTheDocument();
     });
 
     it('renders all categories', () => {
       const onChange = jest.fn();
-      rtlRender(
-        <CategoryPicker selectedCategories={[]} onChange={onChange} />
-      );
+      rtlRender(<CategoryPicker selectedCategories={[]} onChange={onChange} />);
 
       expect(screen.getByText('Hiking')).toBeInTheDocument();
       expect(screen.getByText('Photography')).toBeInTheDocument();
@@ -85,9 +76,7 @@ describe('CategoryPicker', () => {
     it('marks selected categories as selected', () => {
       const selectedCategories = [mockCategories[0]];
       const onChange = jest.fn();
-      rtlRender(
-        <CategoryPicker selectedCategories={selectedCategories} onChange={onChange} />
-      );
+      rtlRender(<CategoryPicker selectedCategories={selectedCategories} onChange={onChange} />);
 
       const hikingButton = screen.getByTestId('category-1');
       expect(hikingButton.getAttribute('data-selected')).toBe('true');
@@ -96,9 +85,7 @@ describe('CategoryPicker', () => {
     it('marks unselected categories as not selected', () => {
       const selectedCategories = [mockCategories[0]];
       const onChange = jest.fn();
-      rtlRender(
-        <CategoryPicker selectedCategories={selectedCategories} onChange={onChange} />
-      );
+      rtlRender(<CategoryPicker selectedCategories={selectedCategories} onChange={onChange} />);
 
       const photoButton = screen.getByTestId('category-2');
       expect(photoButton.getAttribute('data-selected')).toBe('false');
@@ -107,9 +94,7 @@ describe('CategoryPicker', () => {
     it('handles multiple selected categories', () => {
       const selectedCategories = [mockCategories[0], mockCategories[2]];
       const onChange = jest.fn();
-      rtlRender(
-        <CategoryPicker selectedCategories={selectedCategories} onChange={onChange} />
-      );
+      rtlRender(<CategoryPicker selectedCategories={selectedCategories} onChange={onChange} />);
 
       expect(screen.getByTestId('category-1').getAttribute('data-selected')).toBe('true');
       expect(screen.getByTestId('category-3').getAttribute('data-selected')).toBe('true');
@@ -118,13 +103,11 @@ describe('CategoryPicker', () => {
 
     it('handles empty selected categories', () => {
       const onChange = jest.fn();
-      rtlRender(
-        <CategoryPicker selectedCategories={[]} onChange={onChange} />
-      );
+      rtlRender(<CategoryPicker selectedCategories={[]} onChange={onChange} />);
 
       mockCategories.forEach((cat) => {
         expect(screen.getByTestId(`category-${cat.id}`).getAttribute('data-selected')).toBe(
-          'false'
+          'false',
         );
       });
     });
@@ -134,9 +117,7 @@ describe('CategoryPicker', () => {
     it('adds category when unselected category is clicked', async () => {
       const onChange = jest.fn();
       const user = userEvent.setup();
-      rtlRender(
-        <CategoryPicker selectedCategories={[]} onChange={onChange} />
-      );
+      rtlRender(<CategoryPicker selectedCategories={[]} onChange={onChange} />);
 
       const hikingButton = screen.getByTestId('category-1');
       await user.click(hikingButton);
@@ -147,9 +128,7 @@ describe('CategoryPicker', () => {
     it('removes category when selected category is clicked', async () => {
       const onChange = jest.fn();
       const user = userEvent.setup();
-      rtlRender(
-        <CategoryPicker selectedCategories={[mockCategories[0]]} onChange={onChange} />
-      );
+      rtlRender(<CategoryPicker selectedCategories={[mockCategories[0]]} onChange={onChange} />);
 
       const hikingButton = screen.getByTestId('category-1');
       await user.click(hikingButton);
@@ -161,16 +140,14 @@ describe('CategoryPicker', () => {
       const onChange = jest.fn();
       const user = userEvent.setup();
       const { rerender } = rtlRender(
-        <CategoryPicker selectedCategories={[]} onChange={onChange} />
+        <CategoryPicker selectedCategories={[]} onChange={onChange} />,
       );
 
       const hikingButton = screen.getByTestId('category-1');
       await user.click(hikingButton);
       expect(onChange).toHaveBeenLastCalledWith([mockCategories[0]]);
 
-      rerender(
-        <CategoryPicker selectedCategories={[mockCategories[0]]} onChange={onChange} />
-      );
+      rerender(<CategoryPicker selectedCategories={[mockCategories[0]]} onChange={onChange} />);
 
       const photoButton = screen.getByTestId('category-2');
       await user.click(photoButton);
@@ -183,7 +160,7 @@ describe('CategoryPicker', () => {
       let selectedCategories = [mockCategories[0]];
 
       const { rerender } = rtlRender(
-        <CategoryPicker selectedCategories={selectedCategories} onChange={onChange} />
+        <CategoryPicker selectedCategories={selectedCategories} onChange={onChange} />,
       );
 
       const hikingButton = screen.getByTestId('category-1');
@@ -197,14 +174,12 @@ describe('CategoryPicker', () => {
     it('updates when selectedCategories prop changes', () => {
       const onChange = jest.fn();
       const { rerender } = rtlRender(
-        <CategoryPicker selectedCategories={[]} onChange={onChange} />
+        <CategoryPicker selectedCategories={[]} onChange={onChange} />,
       );
 
       expect(screen.getByTestId('category-1').getAttribute('data-selected')).toBe('false');
 
-      rerender(
-        <CategoryPicker selectedCategories={[mockCategories[0]]} onChange={onChange} />
-      );
+      rerender(<CategoryPicker selectedCategories={[mockCategories[0]]} onChange={onChange} />);
 
       expect(screen.getByTestId('category-1').getAttribute('data-selected')).toBe('true');
     });
@@ -212,7 +187,7 @@ describe('CategoryPicker', () => {
     it('displays new categories when hook data updates', () => {
       const onChange = jest.fn();
       const { rerender } = rtlRender(
-        <CategoryPicker selectedCategories={[]} onChange={onChange} />
+        <CategoryPicker selectedCategories={[]} onChange={onChange} />,
       );
 
       expect(screen.getByText('Hiking')).toBeInTheDocument();
@@ -227,9 +202,7 @@ describe('CategoryPicker', () => {
         isLoading: false,
       });
 
-      rerender(
-        <CategoryPicker selectedCategories={[]} onChange={onChange} />
-      );
+      rerender(<CategoryPicker selectedCategories={[]} onChange={onChange} />);
 
       expect(screen.queryByText('Hiking')).not.toBeInTheDocument();
       expect(screen.getByText('Dance')).toBeInTheDocument();
@@ -246,7 +219,7 @@ describe('CategoryPicker', () => {
 
       const onChange = jest.fn();
       const { container } = rtlRender(
-        <CategoryPicker selectedCategories={[]} onChange={onChange} />
+        <CategoryPicker selectedCategories={[]} onChange={onChange} />,
       );
 
       expect(container).toBeInTheDocument();
@@ -266,9 +239,7 @@ describe('CategoryPicker', () => {
       });
 
       const onChange = jest.fn();
-      rtlRender(
-        <CategoryPicker selectedCategories={[]} onChange={onChange} />
-      );
+      rtlRender(<CategoryPicker selectedCategories={[]} onChange={onChange} />);
 
       expect(screen.getByText('Category 0')).toBeInTheDocument();
       expect(screen.getByText('Category 49')).toBeInTheDocument();

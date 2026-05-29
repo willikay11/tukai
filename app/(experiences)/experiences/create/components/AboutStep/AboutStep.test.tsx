@@ -1,8 +1,13 @@
 import { render, screen } from '@testing-library/react';
+import { render as rtlRender } from '@testing-library/react';
+
+import { AboutStep } from './index';
 
 jest.mock('@/app/shared/components/Forms', () => ({
   Button: ({ children, onClick, disabled }: any) => (
-    <button onClick={onClick} disabled={disabled}>{children}</button>
+    <button onClick={onClick} disabled={disabled}>
+      {children}
+    </button>
   ),
 }));
 
@@ -60,14 +65,9 @@ jest.mock('../PhotoUploader', () => ({
 
 jest.mock('../VisibilityPicker', () => ({
   VisibilityPicker: ({ value, onChange }: any) => (
-    <div data-testid="visibility-picker">
-      Visibility: {value}
-    </div>
+    <div data-testid="visibility-picker">Visibility: {value}</div>
   ),
 }));
-
-import { render as rtlRender } from '@testing-library/react';
-import { AboutStep } from './index';
 
 describe('AboutStep', () => {
   const defaultFormData = {
@@ -130,22 +130,12 @@ describe('AboutStep', () => {
     });
 
     it('renders save exit button when onSaveEdit provided', () => {
-      rtlRender(
-        <AboutStep
-          {...defaultProps}
-          onSaveEdit={jest.fn()}
-        />
-      );
+      rtlRender(<AboutStep {...defaultProps} onSaveEdit={jest.fn()} />);
       expect(screen.getByText('Save & Exit')).toBeInTheDocument();
     });
 
     it('renders preview button when onPreview provided', () => {
-      rtlRender(
-        <AboutStep
-          {...defaultProps}
-          onPreview={jest.fn()}
-        />
-      );
+      rtlRender(<AboutStep {...defaultProps} onPreview={jest.fn()} />);
       expect(screen.getByText('Preview')).toBeInTheDocument();
     });
   });
@@ -153,30 +143,21 @@ describe('AboutStep', () => {
   describe('Form Data Display', () => {
     it('displays title input component', () => {
       rtlRender(
-        <AboutStep
-          {...defaultProps}
-          formData={{ ...defaultFormData, title: 'Test Experience' }}
-        />
+        <AboutStep {...defaultProps} formData={{ ...defaultFormData, title: 'Test Experience' }} />,
       );
       expect(screen.getByTestId('title-input')).toBeInTheDocument();
     });
 
     it('renders visibility picker component', () => {
       rtlRender(
-        <AboutStep
-          {...defaultProps}
-          formData={{ ...defaultFormData, visibility: 'private' }}
-        />
+        <AboutStep {...defaultProps} formData={{ ...defaultFormData, visibility: 'private' }} />,
       );
       expect(screen.getByTestId('visibility-picker')).toBeInTheDocument();
     });
 
     it('renders location input component', () => {
       rtlRender(
-        <AboutStep
-          {...defaultProps}
-          formData={{ ...defaultFormData, location: 'Nairobi' }}
-        />
+        <AboutStep {...defaultProps} formData={{ ...defaultFormData, location: 'Nairobi' }} />,
       );
       expect(screen.getByTestId('location-input')).toBeInTheDocument();
     });
@@ -187,10 +168,7 @@ describe('AboutStep', () => {
         { id: '2', url: 'https://example.com/photo2.jpg' },
       ];
       rtlRender(
-        <AboutStep
-          {...defaultProps}
-          formData={{ ...defaultFormData, photos: photoWithData }}
-        />
+        <AboutStep {...defaultProps} formData={{ ...defaultFormData, photos: photoWithData }} />,
       );
       expect(screen.getByTestId('photo-uploader')).toBeInTheDocument();
     });
@@ -200,12 +178,7 @@ describe('AboutStep', () => {
         { id: '1', name: 'Hiking', slug: 'hiking' },
         { id: '2', name: 'Photography', slug: 'photography' },
       ];
-      rtlRender(
-        <AboutStep
-          {...defaultProps}
-          formData={{ ...defaultFormData, categories }}
-        />
-      );
+      rtlRender(<AboutStep {...defaultProps} formData={{ ...defaultFormData, categories }} />);
       expect(screen.getByTestId('category-picker')).toBeInTheDocument();
     });
 
@@ -218,7 +191,7 @@ describe('AboutStep', () => {
             meetingPoint: 'Park Entrance',
             meetingTime: '10:00',
           }}
-        />
+        />,
       );
       expect(screen.getByTestId('meeting-input')).toBeInTheDocument();
     });
@@ -226,41 +199,25 @@ describe('AboutStep', () => {
 
   describe('Error Display', () => {
     it('displays title error when present', () => {
-      rtlRender(
-        <AboutStep
-          {...defaultProps}
-          errors={{ title: 'Title is required' }}
-        />
-      );
+      rtlRender(<AboutStep {...defaultProps} errors={{ title: 'Title is required' }} />);
       expect(screen.getByText('Title is required')).toBeInTheDocument();
     });
 
     it('displays location error when present', () => {
-      rtlRender(
-        <AboutStep
-          {...defaultProps}
-          errors={{ location: 'Location is required' }}
-        />
-      );
+      rtlRender(<AboutStep {...defaultProps} errors={{ location: 'Location is required' }} />);
       expect(screen.getByText('Location is required')).toBeInTheDocument();
     });
 
     it('accepts description error prop', () => {
       const { container } = rtlRender(
-        <AboutStep
-          {...defaultProps}
-          errors={{ description: 'Description is required' }}
-        />
+        <AboutStep {...defaultProps} errors={{ description: 'Description is required' }} />,
       );
       expect(container).toBeInTheDocument();
     });
 
     it('accepts photo error prop', () => {
       const { container } = rtlRender(
-        <AboutStep
-          {...defaultProps}
-          errors={{ photos: 'At least one photo is required' }}
-        />
+        <AboutStep {...defaultProps} errors={{ photos: 'At least one photo is required' }} />,
       );
       expect(container).toBeInTheDocument();
     });
@@ -274,7 +231,7 @@ describe('AboutStep', () => {
             location: 'Location required',
             description: 'Description required',
           }}
-        />
+        />,
       );
       expect(container).toBeInTheDocument();
     });
@@ -283,86 +240,66 @@ describe('AboutStep', () => {
   describe('Callbacks', () => {
     it('calls onCancel when cancel button clicked', () => {
       const onCancel = jest.fn();
-      rtlRender(
-        <AboutStep {...defaultProps} onCancel={onCancel} />
-      );
+      rtlRender(<AboutStep {...defaultProps} onCancel={onCancel} />);
       screen.getByText('Cancel').click();
       expect(onCancel).toHaveBeenCalled();
     });
 
     it('calls onSaveContinue when save continue button clicked', () => {
       const onSaveContinue = jest.fn();
-      rtlRender(
-        <AboutStep {...defaultProps} onSaveContinue={onSaveContinue} />
-      );
+      rtlRender(<AboutStep {...defaultProps} onSaveContinue={onSaveContinue} />);
       screen.getByText('Save & Continue').click();
       expect(onSaveContinue).toHaveBeenCalled();
     });
 
     it('calls onSaveEdit when save exit button clicked', () => {
       const onSaveEdit = jest.fn();
-      rtlRender(
-        <AboutStep {...defaultProps} onSaveEdit={onSaveEdit} />
-      );
+      rtlRender(<AboutStep {...defaultProps} onSaveEdit={onSaveEdit} />);
       screen.getByText('Save & Exit').click();
       expect(onSaveEdit).toHaveBeenCalled();
     });
 
     it('calls onPreview when preview button clicked', () => {
       const onPreview = jest.fn();
-      rtlRender(
-        <AboutStep {...defaultProps} onPreview={onPreview} />
-      );
+      rtlRender(<AboutStep {...defaultProps} onPreview={onPreview} />);
       screen.getByText('Preview').click();
       expect(onPreview).toHaveBeenCalled();
     });
 
     it('calls onFormDataChange when photo changes', () => {
       const onFormDataChange = jest.fn();
-      rtlRender(
-        <AboutStep {...defaultProps} onFormDataChange={onFormDataChange} />
-      );
+      rtlRender(<AboutStep {...defaultProps} onFormDataChange={onFormDataChange} />);
       expect(onFormDataChange).toBeDefined();
     });
 
     it('calls onFormDataChange when title changes', () => {
       const onFormDataChange = jest.fn();
-      rtlRender(
-        <AboutStep {...defaultProps} onFormDataChange={onFormDataChange} />
-      );
+      rtlRender(<AboutStep {...defaultProps} onFormDataChange={onFormDataChange} />);
       expect(onFormDataChange).toBeDefined();
     });
 
     it('calls onFormDataChange when visibility changes', () => {
       const onFormDataChange = jest.fn();
-      rtlRender(
-        <AboutStep {...defaultProps} onFormDataChange={onFormDataChange} />
-      );
+      rtlRender(<AboutStep {...defaultProps} onFormDataChange={onFormDataChange} />);
       expect(onFormDataChange).toBeDefined();
     });
   });
 
   describe('Loading State', () => {
     it('disables save button when isSaving is true', () => {
-      rtlRender(
-        <AboutStep {...defaultProps} isSaving={true} />
-      );
+      rtlRender(<AboutStep {...defaultProps} isSaving={true} />);
       const saveButton = screen.getByText('Save & Continue');
       expect(saveButton).toBeDisabled();
     });
 
     it('enables save button when isSaving is false', () => {
-      rtlRender(
-        <AboutStep {...defaultProps} isSaving={false} />
-      );
+      rtlRender(<AboutStep {...defaultProps} isSaving={false} />);
       const saveButton = screen.getByText('Save & Continue');
       expect(saveButton).not.toBeDisabled();
     });
 
     it('displays loading state in save button', () => {
-      rtlRender(
-        <AboutStep {...defaultProps} isSaving={true} />
-      );
+      rtlRender(<AboutStep {...defaultProps} isSaving={true} />);
       expect(screen.getByText('Save & Continue')).toBeInTheDocument();
     });
   });
@@ -370,34 +307,21 @@ describe('AboutStep', () => {
   describe('Props Updates', () => {
     it('updates form data when props change', () => {
       const { rerender } = rtlRender(
-        <AboutStep
-          {...defaultProps}
-          formData={{ ...defaultFormData, title: 'Old Title' }}
-        />
+        <AboutStep {...defaultProps} formData={{ ...defaultFormData, title: 'Old Title' }} />,
       );
       expect(screen.getByText(/Old Title/)).toBeInTheDocument();
 
       rerender(
-        <AboutStep
-          {...defaultProps}
-          formData={{ ...defaultFormData, title: 'New Title' }}
-        />
+        <AboutStep {...defaultProps} formData={{ ...defaultFormData, title: 'New Title' }} />,
       );
       expect(screen.getByText(/New Title/)).toBeInTheDocument();
     });
 
     it('updates errors when props change', () => {
-      const { rerender } = rtlRender(
-        <AboutStep {...defaultProps} errors={{}} />
-      );
+      const { rerender } = rtlRender(<AboutStep {...defaultProps} errors={{}} />);
       expect(screen.queryByText('Title is required')).not.toBeInTheDocument();
 
-      rerender(
-        <AboutStep
-          {...defaultProps}
-          errors={{ title: 'Title is required' }}
-        />
-      );
+      rerender(<AboutStep {...defaultProps} errors={{ title: 'Title is required' }} />);
       expect(screen.getByText('Title is required')).toBeInTheDocument();
     });
   });
@@ -421,12 +345,7 @@ describe('AboutStep', () => {
         ],
       };
 
-      rtlRender(
-        <AboutStep
-          {...defaultProps}
-          formData={completeData}
-        />
-      );
+      rtlRender(<AboutStep {...defaultProps} formData={completeData} />);
 
       expect(screen.getByTestId('title-input')).toBeInTheDocument();
       expect(screen.getByTestId('location-input')).toBeInTheDocument();
@@ -438,42 +357,26 @@ describe('AboutStep', () => {
 
   describe('Edge Cases', () => {
     it('handles empty form data', () => {
-      rtlRender(
-        <AboutStep
-          {...defaultProps}
-          formData={defaultFormData}
-        />
-      );
+      rtlRender(<AboutStep {...defaultProps} formData={defaultFormData} />);
       expect(screen.getByTestId('title-input')).toBeInTheDocument();
     });
 
     it('handles null meetingTime', () => {
       rtlRender(
-        <AboutStep
-          {...defaultProps}
-          formData={{ ...defaultFormData, meetingTime: null }}
-        />
+        <AboutStep {...defaultProps} formData={{ ...defaultFormData, meetingTime: null }} />,
       );
       expect(screen.getByTestId('meeting-input')).toBeInTheDocument();
     });
 
     it('handles empty categories', () => {
-      rtlRender(
-        <AboutStep
-          {...defaultProps}
-          formData={{ ...defaultFormData, categories: [] }}
-        />
-      );
+      rtlRender(<AboutStep {...defaultProps} formData={{ ...defaultFormData, categories: [] }} />);
       expect(screen.getByTestId('category-picker')).toBeInTheDocument();
     });
 
     it('handles long title', () => {
       const longTitle = 'A'.repeat(200);
       rtlRender(
-        <AboutStep
-          {...defaultProps}
-          formData={{ ...defaultFormData, title: longTitle }}
-        />
+        <AboutStep {...defaultProps} formData={{ ...defaultFormData, title: longTitle }} />,
       );
       expect(screen.getByText(new RegExp(longTitle))).toBeInTheDocument();
     });

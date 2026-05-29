@@ -1,8 +1,9 @@
 'use client';
 
-import { CSS } from '@dnd-kit/utilities';
-import { useSortable } from '@dnd-kit/sortable';
 import Image from 'next/image';
+
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 
@@ -50,7 +51,7 @@ export const SortablePhotoItem = ({
       <div
         {...attributes}
         {...listeners}
-        className="absolute left-1 top-1 z-10 rounded bg-black/40 p-1 cursor-grab opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
+        className="absolute left-1 top-1 z-10 cursor-grab rounded bg-black/40 p-1 opacity-0 transition-opacity active:cursor-grabbing group-hover:opacity-100"
       >
         <IconComponent iconName="DragDropVerticalIcon" size={14} className="text-white" />
       </div>

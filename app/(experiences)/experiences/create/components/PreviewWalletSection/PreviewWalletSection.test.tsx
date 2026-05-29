@@ -1,11 +1,12 @@
 import { render, screen } from '@testing-library/react';
 
+import type { Wallet } from '@/types/payment';
+
+import { PreviewWalletSection } from './index';
+
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: any) => <span>{iconName}</span>,
 }));
-
-import { PreviewWalletSection } from './index';
-import type { Wallet } from '@/types/payment';
 
 describe('PreviewWalletSection', () => {
   describe('Rendering', () => {
@@ -153,14 +154,16 @@ describe('PreviewWalletSection', () => {
       const onEdit = jest.fn();
       render(
         <PreviewWalletSection
-          wallet={{
-            id: 'wallet-1',
-            type: 'phone' as const,
-            phone_number: '0712345678',
-            is_primary: true,
-          } as Wallet}
+          wallet={
+            {
+              id: 'wallet-1',
+              type: 'phone' as const,
+              phone_number: '0712345678',
+              is_primary: true,
+            } as Wallet
+          }
           onEdit={onEdit}
-        />
+        />,
       );
       const editButton = screen.getByText('Edit02Icon').closest('button');
       editButton?.click();

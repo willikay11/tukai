@@ -13,6 +13,7 @@ import type { ApiResponse } from '@/types/apiResponse';
 import type { CreateExperienceTicket } from '@/types/experience';
 import { getDaysBetween } from '@/utils/date-utils';
 import { parseApiError } from '@/utils/parseApiError';
+import type { SlotTemplateRecord } from '@/utils/slot-template-utils';
 import { buildAbsoluteTicketValidity, buildRecurringTicketValidity } from '@/utils/ticket-utils';
 
 import { FormData } from '../../hooks/useCreateExperienceFlow';
@@ -23,7 +24,6 @@ import { MultiDayTicketModePicker } from '../MultiDayTicketModePicker';
 import { SavedTicketCard } from '../TicketCard';
 import { TicketDateBadge } from '../TicketDateBadge';
 import { TicketForm, type TicketFormValue } from '../TicketForm';
-import type { SlotTemplateRecord } from '@/utils/slot-template-utils';
 
 interface TicketsStepProps {
   formData: FormData['tickets'];
@@ -197,7 +197,9 @@ export const TicketsStep = ({
         salesStartRelative: draftTicket.salesStartRelative || null,
         salesEndRelative: draftTicket.salesEndRelative || null,
         duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
-        ...(isRecurringExperience && activeSlotIndex !== null ? { slotIndex: activeSlotIndex } : {}),
+        ...(isRecurringExperience && activeSlotIndex !== null
+          ? { slotIndex: activeSlotIndex }
+          : {}),
       };
     } else {
       items.push({
@@ -213,7 +215,9 @@ export const TicketsStep = ({
         salesStartRelative: draftTicket.salesStartRelative || null,
         salesEndRelative: draftTicket.salesEndRelative || null,
         duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
-        ...(isRecurringExperience && activeSlotIndex !== null ? { slotIndex: activeSlotIndex } : {}),
+        ...(isRecurringExperience && activeSlotIndex !== null
+          ? { slotIndex: activeSlotIndex }
+          : {}),
       });
     }
 
@@ -233,16 +237,16 @@ export const TicketsStep = ({
         isRecurringExperience,
       );
 
-    if (Object.keys(newErrors).length > 0) {
-      setFormErrors(newErrors);
-      return;
-    }
+      if (Object.keys(newErrors).length > 0) {
+        setFormErrors(newErrors);
+        return;
+      }
 
-    // If no experienceId yet, save locally only
-    if (!experienceId) {
-      saveLocally();
-      return;
-    }
+      // If no experienceId yet, save locally only
+      if (!experienceId) {
+        saveLocally();
+        return;
+      }
 
       // Build validity fields based on experience type
       const validityFields = isRecurringExperience
@@ -279,75 +283,75 @@ export const TicketsStep = ({
 
       console.log('[TicketsStep] Final payload:', payload);
 
-    const isEdit = activeFormIndex !== null && formData.items[activeFormIndex]?.apiId != null;
-    const existingApiId = isEdit ? formData.items[activeFormIndex].apiId : undefined;
+      const isEdit = activeFormIndex !== null && formData.items[activeFormIndex]?.apiId != null;
+      const existingApiId = isEdit ? formData.items[activeFormIndex].apiId : undefined;
 
-    try {
-      setIsSavingLocal(true);
-      let response: ApiResponse;
-      if (existingApiId) {
-        response = await updateExperienceTicket(experienceId, existingApiId, payload);
-      } else {
-        response = await createTicketMutation.mutateAsync(payload);
-      }
+      try {
+        setIsSavingLocal(true);
+        let response: ApiResponse;
+        if (existingApiId) {
+          response = await updateExperienceTicket(experienceId, existingApiId, payload);
+        } else {
+          response = await createTicketMutation.mutateAsync(payload);
+        }
 
-      const apiId = response.data?.id;
+        const apiId = response.data?.id;
 
-      const items = [...formData.items];
-      const isRecurringExperience = dateTypeData?.isRecurring ?? false;
-      if (activeFormIndex !== null && activeFormIndex < items.length) {
-        items[activeFormIndex] = {
-          ...items[activeFormIndex],
-          apiId,
-          name: draftTicket.name,
-          quantity: draftTicket.quantity!,
-          amount: draftTicket.amount!,
-          salesStartDate: draftTicket.salesStartDate!,
-          salesStartTime: draftTicket.salesStartTime!,
-          salesEndDate: draftTicket.salesEndDate!,
-          salesEndTime: draftTicket.salesEndTime!,
-          acceptPartialPayment: draftTicket.acceptPartialPayment,
-          salesStartRelative: draftTicket.salesStartRelative || null,
-          salesEndRelative: draftTicket.salesEndRelative || null,
-          duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
-          ...(isRecurringExperience && slotIndex !== undefined ? { slotIndex } : {}),
-        };
-      } else {
-        items.push({
-          id: uuidv4(),
-          apiId,
-          name: draftTicket.name,
-          quantity: draftTicket.quantity!,
-          amount: draftTicket.amount!,
-          salesStartDate: draftTicket.salesStartDate!,
-          salesStartTime: draftTicket.salesStartTime!,
-          salesEndDate: draftTicket.salesEndDate!,
-          salesEndTime: draftTicket.salesEndTime!,
-          acceptPartialPayment: draftTicket.acceptPartialPayment,
-          salesStartRelative: draftTicket.salesStartRelative || null,
-          salesEndRelative: draftTicket.salesEndRelative || null,
-          duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
-          ...(isRecurringExperience && slotIndex !== undefined ? { slotIndex } : {}),
+        const items = [...formData.items];
+        const isRecurringExperience = dateTypeData?.isRecurring ?? false;
+        if (activeFormIndex !== null && activeFormIndex < items.length) {
+          items[activeFormIndex] = {
+            ...items[activeFormIndex],
+            apiId,
+            name: draftTicket.name,
+            quantity: draftTicket.quantity!,
+            amount: draftTicket.amount!,
+            salesStartDate: draftTicket.salesStartDate!,
+            salesStartTime: draftTicket.salesStartTime!,
+            salesEndDate: draftTicket.salesEndDate!,
+            salesEndTime: draftTicket.salesEndTime!,
+            acceptPartialPayment: draftTicket.acceptPartialPayment,
+            salesStartRelative: draftTicket.salesStartRelative || null,
+            salesEndRelative: draftTicket.salesEndRelative || null,
+            duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
+            ...(isRecurringExperience && slotIndex !== undefined ? { slotIndex } : {}),
+          };
+        } else {
+          items.push({
+            id: uuidv4(),
+            apiId,
+            name: draftTicket.name,
+            quantity: draftTicket.quantity!,
+            amount: draftTicket.amount!,
+            salesStartDate: draftTicket.salesStartDate!,
+            salesStartTime: draftTicket.salesStartTime!,
+            salesEndDate: draftTicket.salesEndDate!,
+            salesEndTime: draftTicket.salesEndTime!,
+            acceptPartialPayment: draftTicket.acceptPartialPayment,
+            salesStartRelative: draftTicket.salesStartRelative || null,
+            salesEndRelative: draftTicket.salesEndRelative || null,
+            duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
+            ...(isRecurringExperience && slotIndex !== undefined ? { slotIndex } : {}),
+          });
+        }
+
+        console.log('[TicketsStep] Calling onChange with items:', items);
+        onChange({ items });
+        setActiveFormIndex(null);
+        setActiveSlotIndex(null);
+        setDraftTicket(emptyTicketForm);
+        setFormErrors({});
+      } catch (error) {
+        const message = parseApiError(error, 'Failed to save ticket');
+        setFormErrors({ api: message });
+        toast({
+          title: 'Error',
+          description: message,
+          variant: 'destructive',
         });
+      } finally {
+        setIsSavingLocal(false);
       }
-
-      console.log('[TicketsStep] Calling onChange with items:', items);
-      onChange({ items });
-      setActiveFormIndex(null);
-      setActiveSlotIndex(null);
-      setDraftTicket(emptyTicketForm);
-      setFormErrors({});
-    } catch (error) {
-      const message = parseApiError(error, 'Failed to save ticket');
-      setFormErrors({ api: message });
-      toast({
-        title: 'Error',
-        description: message,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSavingLocal(false);
-    }
     },
     [
       draftTicket,
@@ -409,9 +413,7 @@ export const TicketsStep = ({
     hasTicketDateBadge && formData.items.length > 0 && activeFormIndex === null;
 
   // For recurring: check if all valid slots have a saved ticket with apiId
-  const validSlots = (dateTypeData?.timeSlots ?? []).filter(
-    (s) => s.startTime && s.endTime,
-  );
+  const validSlots = (dateTypeData?.timeSlots ?? []).filter((s) => s.startTime && s.endTime);
   const allSlotsHaveTickets =
     !isRecurring ||
     (validSlots.length > 0 &&
@@ -579,7 +581,9 @@ export const TicketsStep = ({
       ) : isRecurring && hasTicketDateBadge ? (
         <div className="space-y-2">
           {validSlots.map((slot, slotIndex) => {
-            const slotTicket = formData.items.find((t) => t.slotIndex === slotIndex && t.apiId != null);
+            const slotTicket = formData.items.find(
+              (t) => t.slotIndex === slotIndex && t.apiId != null,
+            );
             return (
               <div key={slotIndex} className="relative pt-2">
                 <div className="mb-3">
@@ -657,7 +661,7 @@ export const TicketsStep = ({
           )}
 
           {isRecurring && !allSlotsHaveTickets && validSlots.length > 0 && (
-            <p className="text-xs text-muted-foreground text-center mt-4">
+            <p className="mt-4 text-center text-xs text-muted-foreground">
               {savedTicketsCount} of {validSlots.length} time slots have tickets — add a ticket to
               each slot to continue
             </p>

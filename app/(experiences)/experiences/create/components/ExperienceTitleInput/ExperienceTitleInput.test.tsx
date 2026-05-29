@@ -7,9 +7,7 @@ describe('ExperienceTitleInput', () => {
   describe('Rendering', () => {
     it('renders the component', () => {
       const onChange = jest.fn();
-      const { container } = render(
-        <ExperienceTitleInput value="" onChange={onChange} />
-      );
+      const { container } = render(<ExperienceTitleInput value="" onChange={onChange} />);
       expect(container).toBeInTheDocument();
     });
 
@@ -28,13 +26,7 @@ describe('ExperienceTitleInput', () => {
 
     it('displays error message when error is provided', () => {
       const onChange = jest.fn();
-      render(
-        <ExperienceTitleInput
-          value=""
-          onChange={onChange}
-          error="Title is required"
-        />
-      );
+      render(<ExperienceTitleInput value="" onChange={onChange} error="Title is required" />);
       expect(screen.getByText('Title is required')).toBeInTheDocument();
     });
 
@@ -48,26 +40,17 @@ describe('ExperienceTitleInput', () => {
   describe('Input Value', () => {
     it('displays the current value in the input', () => {
       const onChange = jest.fn();
-      render(
-        <ExperienceTitleInput
-          value="Amazing Adventure"
-          onChange={onChange}
-        />
-      );
+      render(<ExperienceTitleInput value="Amazing Adventure" onChange={onChange} />);
       const input = screen.getByDisplayValue('Amazing Adventure');
       expect(input).toBeInTheDocument();
     });
 
     it('updates input value when prop changes', () => {
       const onChange = jest.fn();
-      const { rerender } = render(
-        <ExperienceTitleInput value="Old Title" onChange={onChange} />
-      );
+      const { rerender } = render(<ExperienceTitleInput value="Old Title" onChange={onChange} />);
       expect(screen.getByDisplayValue('Old Title')).toBeInTheDocument();
 
-      rerender(
-        <ExperienceTitleInput value="New Title" onChange={onChange} />
-      );
+      rerender(<ExperienceTitleInput value="New Title" onChange={onChange} />);
       expect(screen.getByDisplayValue('New Title')).toBeInTheDocument();
     });
 
@@ -81,9 +64,7 @@ describe('ExperienceTitleInput', () => {
     it('handles very long titles', () => {
       const longTitle = 'A'.repeat(200);
       const onChange = jest.fn();
-      render(
-        <ExperienceTitleInput value={longTitle} onChange={onChange} />
-      );
+      render(<ExperienceTitleInput value={longTitle} onChange={onChange} />);
       expect(screen.getByDisplayValue(longTitle)).toBeInTheDocument();
     });
   });
@@ -104,7 +85,7 @@ describe('ExperienceTitleInput', () => {
       const onChange = jest.fn();
       render(<ExperienceTitleInput value="Initial" onChange={onChange} />);
       const input = screen.getByDisplayValue('Initial') as HTMLInputElement;
-      
+
       expect(input.readOnly).toBe(false);
     });
   });
@@ -113,11 +94,7 @@ describe('ExperienceTitleInput', () => {
     it('applies red border when error exists', () => {
       const onChange = jest.fn();
       const { container } = render(
-        <ExperienceTitleInput
-          value=""
-          onChange={onChange}
-          error="Title is required"
-        />
+        <ExperienceTitleInput value="" onChange={onChange} error="Title is required" />,
       );
       const input = container.querySelector('input');
       expect(input?.className).toContain('border-red-500');
@@ -126,19 +103,13 @@ describe('ExperienceTitleInput', () => {
     it('removes error styling when error is cleared', () => {
       const onChange = jest.fn();
       const { container, rerender } = render(
-        <ExperienceTitleInput
-          value=""
-          onChange={onChange}
-          error="Error"
-        />
+        <ExperienceTitleInput value="" onChange={onChange} error="Error" />,
       );
 
       let input = container.querySelector('input');
       expect(input?.className).toContain('border-red-500');
 
-      rerender(
-        <ExperienceTitleInput value="" onChange={onChange} />
-      );
+      rerender(<ExperienceTitleInput value="" onChange={onChange} />);
 
       input = container.querySelector('input');
       expect(input?.className).not.toContain('border-red-500');

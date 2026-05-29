@@ -1,5 +1,7 @@
 import { render, screen } from '@testing-library/react';
 
+import { PreviewPhotoSection } from './index';
+
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: any) => <span>{iconName}</span>,
 }));
@@ -7,8 +9,6 @@ jest.mock('@/app/shared/components/Icons', () => ({
 jest.mock('@/components/ui/imageCarousel', () => ({
   ImageCarousel: ({ images }: any) => <div>{`carousel-${images.length}`}</div>,
 }));
-
-import { PreviewPhotoSection } from './index';
 
 describe('PreviewPhotoSection', () => {
   describe('Rendering', () => {
@@ -37,7 +37,7 @@ describe('PreviewPhotoSection', () => {
   describe('Photo Display', () => {
     it('displays single photo with single image element', () => {
       const { container } = render(
-        <PreviewPhotoSection photos={['https://example.com/photo.jpg']} />
+        <PreviewPhotoSection photos={['https://example.com/photo.jpg']} />,
       );
       const images = container.querySelectorAll('img');
       expect(images.length).toBeGreaterThan(0);
@@ -46,32 +46,20 @@ describe('PreviewPhotoSection', () => {
     it('displays carousel when multiple photos', () => {
       render(
         <PreviewPhotoSection
-          photos={[
-            'https://example.com/photo1.jpg',
-            'https://example.com/photo2.jpg',
-          ]}
-        />
+          photos={['https://example.com/photo1.jpg', 'https://example.com/photo2.jpg']}
+        />,
       );
       expect(screen.getByText('carousel-2')).toBeInTheDocument();
     });
 
     it('displays edit button when photos exist and onEdit provided', () => {
       const onEdit = jest.fn();
-      render(
-        <PreviewPhotoSection
-          photos={['https://example.com/photo.jpg']}
-          onEdit={onEdit}
-        />
-      );
+      render(<PreviewPhotoSection photos={['https://example.com/photo.jpg']} onEdit={onEdit} />);
       expect(screen.getByText('Edit02Icon')).toBeInTheDocument();
     });
 
     it('does not display edit button when onEdit not provided', () => {
-      render(
-        <PreviewPhotoSection
-          photos={['https://example.com/photo.jpg']}
-        />
-      );
+      render(<PreviewPhotoSection photos={['https://example.com/photo.jpg']} />);
       expect(screen.queryByText('Edit02Icon')).not.toBeInTheDocument();
     });
   });
@@ -79,9 +67,7 @@ describe('PreviewPhotoSection', () => {
   describe('Edit Functionality', () => {
     it('calls onEdit when add photos button clicked', () => {
       const onEdit = jest.fn();
-      render(
-        <PreviewPhotoSection photos={[]} onEdit={onEdit} />
-      );
+      render(<PreviewPhotoSection photos={[]} onEdit={onEdit} />);
       const addButton = screen.getByText('Add photos');
       addButton.click();
       expect(onEdit).toHaveBeenCalled();
@@ -89,12 +75,7 @@ describe('PreviewPhotoSection', () => {
 
     it('calls onEdit when edit button clicked for existing photos', () => {
       const onEdit = jest.fn();
-      render(
-        <PreviewPhotoSection
-          photos={['https://example.com/photo.jpg']}
-          onEdit={onEdit}
-        />
-      );
+      render(<PreviewPhotoSection photos={['https://example.com/photo.jpg']} onEdit={onEdit} />);
       const editButton = screen.getByText('Edit02Icon').closest('button');
       editButton?.click();
       expect(onEdit).toHaveBeenCalled();

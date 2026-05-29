@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react';
 
-import { PreviewTicketsSection } from './index';
 import type { Ticket } from '@/types/ticket';
+
+import { PreviewTicketsSection } from './index';
 
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: any) => <span>{iconName}</span>,
@@ -101,7 +102,7 @@ describe('PreviewTicketsSection', () => {
     it('renders ticket section with cover photo', () => {
       const coverPhoto = 'https://example.com/cover.jpg';
       const { container } = render(
-        <PreviewTicketsSection tickets={mockTickets} coverPhoto={coverPhoto} />
+        <PreviewTicketsSection tickets={mockTickets} coverPhoto={coverPhoto} />,
       );
       expect(container).toBeInTheDocument();
     });
@@ -144,34 +145,19 @@ describe('PreviewTicketsSection', () => {
 
   describe('Commission Handling', () => {
     it('displays host commission without additional cost', () => {
-      render(
-        <PreviewTicketsSection
-          tickets={mockTickets}
-          commissionPayer="host"
-        />
-      );
+      render(<PreviewTicketsSection tickets={mockTickets} commissionPayer="host" />);
       // Should only show base price, not customer pay
       expect(screen.queryByText(/Customer Pays/i)).not.toBeInTheDocument();
     });
 
     it('displays customer commission with total cost', () => {
-      render(
-        <PreviewTicketsSection
-          tickets={mockTickets}
-          commissionPayer="customer"
-        />
-      );
+      render(<PreviewTicketsSection tickets={mockTickets} commissionPayer="customer" />);
       // Should show customer pays with 4% commission
       expect(screen.getAllByText(/Customer Pays/i)).toBeDefined();
     });
 
     it('displays split commission correctly', () => {
-      render(
-        <PreviewTicketsSection
-          tickets={mockTickets}
-          commissionPayer="split"
-        />
-      );
+      render(<PreviewTicketsSection tickets={mockTickets} commissionPayer="split" />);
       // Should show customer pays with 2% commission (split)
       expect(screen.getAllByText(/Customer Pays/i)).toBeDefined();
     });
@@ -218,10 +204,7 @@ describe('PreviewTicketsSection', () => {
     });
 
     it('handles mixed absolute and relative validity in different tickets', () => {
-      const mixedTickets: Ticket[] = [
-        mockTickets[0],
-        recurringTickets[0],
-      ];
+      const mixedTickets: Ticket[] = [mockTickets[0], recurringTickets[0]];
 
       const { container } = render(<PreviewTicketsSection tickets={mixedTickets} />);
       const text = container.textContent;

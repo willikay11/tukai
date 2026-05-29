@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 
+import { PreviewTitleSection } from './index';
+
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: any) => <span>{iconName}</span>,
 }));
-
-import { PreviewTitleSection } from './index';
 
 describe('PreviewTitleSection', () => {
   describe('Rendering', () => {
@@ -20,9 +20,7 @@ describe('PreviewTitleSection', () => {
 
     it('displays edit icon when onEdit provided', () => {
       const onEdit = jest.fn();
-      render(
-        <PreviewTitleSection title="Test Title" onEdit={onEdit} />
-      );
+      render(<PreviewTitleSection title="Test Title" onEdit={onEdit} />);
       expect(screen.getByText('Edit02Icon')).toBeInTheDocument();
     });
 
@@ -54,9 +52,7 @@ describe('PreviewTitleSection', () => {
   describe('Edit Functionality', () => {
     it('calls onEdit when edit button clicked', () => {
       const onEdit = jest.fn();
-      render(
-        <PreviewTitleSection title="Test Title" onEdit={onEdit} />
-      );
+      render(<PreviewTitleSection title="Test Title" onEdit={onEdit} />);
       const editButton = screen.getByText('Edit02Icon').closest('button');
       editButton?.click();
       expect(onEdit).toHaveBeenCalled();

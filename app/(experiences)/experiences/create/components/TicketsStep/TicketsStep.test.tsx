@@ -1,12 +1,12 @@
-import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen } from '@testing-library/react';
+
+import type { FormData } from '../../hooks/useCreateExperienceFlow';
+import { TicketsStep } from './index';
 
 jest.mock('uuid', () => ({
   v4: () => 'test-id-123',
 }));
-
-import { TicketsStep } from './index';
-import type { FormData } from '../../hooks/useCreateExperienceFlow';
 
 const mockFormData: FormData['tickets'] = {
   commission: 'host',
@@ -47,11 +47,7 @@ const renderWithQueryClient = (component: React.ReactElement) => {
     },
   });
 
-  return render(
-    <QueryClientProvider client={queryClient}>
-      {component}
-    </QueryClientProvider>
-  );
+  return render(<QueryClientProvider client={queryClient}>{component}</QueryClientProvider>);
 };
 
 describe('TicketsStep', () => {
@@ -153,9 +149,7 @@ describe('TicketsStep', () => {
         ],
       };
 
-      renderWithQueryClient(
-        <TicketsStep {...defaultProps} formData={formDataWithTicket} />
-      );
+      renderWithQueryClient(<TicketsStep {...defaultProps} formData={formDataWithTicket} />);
 
       expect(screen.getByText('VIP Ticket')).toBeInTheDocument();
     });

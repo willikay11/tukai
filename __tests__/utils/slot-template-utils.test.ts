@@ -1,9 +1,9 @@
 import {
+  SlotTemplateRecord,
   buildSlotTemplatePayload,
   calculateDurationMinutes,
   calculateEndTime,
   diffSlotTemplates,
-  SlotTemplateRecord,
 } from '@/utils/slot-template-utils';
 
 describe('calculateDurationMinutes', () => {
@@ -109,11 +109,7 @@ describe('buildSlotTemplatePayload', () => {
 });
 
 describe('diffSlotTemplates', () => {
-  const makeRecord = (
-    id: string,
-    startTime: string,
-    endTime: string,
-  ): SlotTemplateRecord => ({
+  const makeRecord = (id: string, startTime: string, endTime: string): SlotTemplateRecord => ({
     uiId: id,
     templateId: id,
     startTime,
@@ -125,10 +121,7 @@ describe('diffSlotTemplates', () => {
       { startTime: '09:00', endTime: '11:00' },
       { startTime: '14:00', endTime: '16:00' },
     ];
-    const existing = [
-      makeRecord('t1', '09:00', '11:00'),
-      makeRecord('t2', '14:00', '16:00'),
-    ];
+    const existing = [makeRecord('t1', '09:00', '11:00'), makeRecord('t2', '14:00', '16:00')];
     const result = diffSlotTemplates(current, existing);
     expect(result.toCreate).toHaveLength(0);
     expect(result.toUpdate).toHaveLength(0);
@@ -153,10 +146,7 @@ describe('diffSlotTemplates', () => {
 
   it('detects a deleted slot', () => {
     const current = [{ startTime: '09:00', endTime: '11:00' }];
-    const existing = [
-      makeRecord('t1', '09:00', '11:00'),
-      makeRecord('t2', '14:00', '16:00'),
-    ];
+    const existing = [makeRecord('t1', '09:00', '11:00'), makeRecord('t2', '14:00', '16:00')];
     const result = diffSlotTemplates(current, existing);
     expect(result.toCreate).toHaveLength(0);
     expect(result.toUpdate).toHaveLength(0);
@@ -213,10 +203,7 @@ describe('diffSlotTemplates', () => {
   });
 
   it('handles all slots deleted', () => {
-    const existing = [
-      makeRecord('t1', '09:00', '11:00'),
-      makeRecord('t2', '14:00', '16:00'),
-    ];
+    const existing = [makeRecord('t1', '09:00', '11:00'), makeRecord('t2', '14:00', '16:00')];
     const result = diffSlotTemplates([], existing);
     expect(result.toCreate).toHaveLength(0);
     expect(result.toUpdate).toHaveLength(0);

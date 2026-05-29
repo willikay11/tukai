@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 
+import { ExperienceStepSidePanel } from './index';
+
 jest.mock('../SharedExperiencePreview', () => ({
-  SharedExperiencePreview: ({ step }: any) => (
-    <div>{`preview-step-${step}`}</div>
-  ),
+  SharedExperiencePreview: ({ step }: any) => <div>{`preview-step-${step}`}</div>,
 }));
 
 jest.mock('../customiseItinerary', () => ({
@@ -16,8 +16,6 @@ jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: any) => <img {...props} />,
 }));
-
-import { ExperienceStepSidePanel } from './index';
 
 describe('ExperienceStepSidePanel', () => {
   const defaultProps = {
@@ -45,11 +43,7 @@ describe('ExperienceStepSidePanel', () => {
   describe('About Step', () => {
     it('renders preview for about step', () => {
       render(
-        <ExperienceStepSidePanel
-          {...defaultProps}
-          step="about"
-          aboutTitle="Test Experience"
-        />
+        <ExperienceStepSidePanel {...defaultProps} step="about" aboutTitle="Test Experience" />,
       );
       expect(screen.getByText('preview-step-about')).toBeInTheDocument();
     });
@@ -62,7 +56,7 @@ describe('ExperienceStepSidePanel', () => {
           step="about"
           aboutTitle="Test Experience"
           onEditStep={mockOnEdit}
-        />
+        />,
       );
       expect(screen.getByText('preview-step-about')).toBeInTheDocument();
     });
@@ -75,7 +69,7 @@ describe('ExperienceStepSidePanel', () => {
           {...defaultProps}
           step="dates-tickets"
           canShowDateTickets={false}
-        />
+        />,
       );
       expect(screen.getByText('Create Tickets')).toBeInTheDocument();
       expect(screen.getByText(/Update and save experience date and time/i)).toBeInTheDocument();
@@ -88,7 +82,7 @@ describe('ExperienceStepSidePanel', () => {
           step="dates-tickets"
           canShowDateTickets={true}
           itineraryConfig={{ startDate: '2026-06-01', endDate: '2026-06-05' }}
-        />
+        />,
       );
       expect(screen.getByText('itinerary-2026-06-01-2026-06-05')).toBeInTheDocument();
     });
@@ -99,7 +93,7 @@ describe('ExperienceStepSidePanel', () => {
           {...defaultProps}
           step="dates-tickets"
           canShowDateTickets={true}
-        />
+        />,
       );
       expect(screen.getByText('preview-step-dates-tickets')).toBeInTheDocument();
     });
@@ -108,11 +102,7 @@ describe('ExperienceStepSidePanel', () => {
   describe('Guests Step', () => {
     it('renders preview for guests step', () => {
       render(
-        <ExperienceStepSidePanel
-          {...defaultProps}
-          step="guests"
-          aboutTitle="Test Experience"
-        />
+        <ExperienceStepSidePanel {...defaultProps} step="guests" aboutTitle="Test Experience" />,
       );
       expect(screen.getByText('preview-step-guests')).toBeInTheDocument();
     });
@@ -121,11 +111,7 @@ describe('ExperienceStepSidePanel', () => {
   describe('Wallet Step', () => {
     it('renders preview for wallet step', () => {
       render(
-        <ExperienceStepSidePanel
-          {...defaultProps}
-          step="wallet"
-          aboutTitle="Test Experience"
-        />
+        <ExperienceStepSidePanel {...defaultProps} step="wallet" aboutTitle="Test Experience" />,
       );
       expect(screen.getByText('preview-step-wallet')).toBeInTheDocument();
     });
@@ -144,7 +130,7 @@ describe('ExperienceStepSidePanel', () => {
           aboutLocation="Test Location"
           aboutMeetingPoint="Park Entrance"
           onEditStep={mockOnEdit}
-        />
+        />,
       );
       expect(screen.getByText('preview-step-about')).toBeInTheDocument();
     });
@@ -157,7 +143,7 @@ describe('ExperienceStepSidePanel', () => {
           isRecurring={true}
           experienceType="one-time"
           selectedRecurringDays={['mon', 'wed', 'fri']}
-        />
+        />,
       );
       expect(screen.getByText('preview-step-about')).toBeInTheDocument();
     });
@@ -171,7 +157,7 @@ describe('ExperienceStepSidePanel', () => {
           experienceType="multi-day"
           multiDayStartDate="2026-06-15"
           multiDayEndDate="2026-06-17"
-        />
+        />,
       );
       expect(screen.getByText('preview-step-dates-tickets')).toBeInTheDocument();
     });
@@ -179,35 +165,17 @@ describe('ExperienceStepSidePanel', () => {
 
   describe('Experience Types', () => {
     it('handles one-time experience type', () => {
-      render(
-        <ExperienceStepSidePanel
-          {...defaultProps}
-          step="about"
-          experienceType="one-time"
-        />
-      );
+      render(<ExperienceStepSidePanel {...defaultProps} step="about" experienceType="one-time" />);
       expect(screen.getByText('preview-step-about')).toBeInTheDocument();
     });
 
     it('handles multi-day experience type', () => {
-      render(
-        <ExperienceStepSidePanel
-          {...defaultProps}
-          step="about"
-          experienceType="multi-day"
-        />
-      );
+      render(<ExperienceStepSidePanel {...defaultProps} step="about" experienceType="multi-day" />);
       expect(screen.getByText('preview-step-about')).toBeInTheDocument();
     });
 
     it('handles itinerary experience type', () => {
-      render(
-        <ExperienceStepSidePanel
-          {...defaultProps}
-          step="about"
-          experienceType="itinerary"
-        />
-      );
+      render(<ExperienceStepSidePanel {...defaultProps} step="about" experienceType="itinerary" />);
       expect(screen.getByText('preview-step-about')).toBeInTheDocument();
     });
   });
