@@ -2,9 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import Image from 'next/image';
+
 import {
   DndContext,
   DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
   KeyboardSensor,
   PointerSensor,
   closestCenter,
@@ -53,10 +57,14 @@ export const PhotoUploader = ({
   const [currentCrop, setCurrentCrop] = useState<{ photo: FormPhoto; objectUrl: string } | null>(
     null,
   );
+  const [activeId, setActiveId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const blobUrlMap = useRef<Map<File, string>>(new Map());
   const { mutateAsync: deletePhotoAsync } = useDeleteExperiencePhoto();
   const { toast } = useToast();
+
+  // Find the currently dragged photo
+  const activePhoto = activeId ? photos.find((p) => p.id === activeId) ?? null : null;
 
   // Drag sensors — 8px threshold prevents accidental drag on tap
   const sensors = useSensors(
@@ -87,8 +95,15 @@ export const PhotoUploader = ({
     };
   }, []);
 
+  // Handle drag start
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
   // Handle drag end — reorder the array
   const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null);
+
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
@@ -100,6 +115,11 @@ export const PhotoUploader = ({
       const reorderedPhotos = arrayMove(photos, oldIndex, newIndex);
       onPhotoFilesChange?.(reorderedPhotos);
     }
+  };
+
+  // Handle drag cancel
+  const handleDragCancel = () => {
+    setActiveId(null);
   };
 
   const handleFilesSelected = useCallback(
@@ -319,7 +339,13 @@ export const PhotoUploader = ({
         <p className="text-xs font-medium text-gray-800">Upload experience poster (JPEG, PNG or WebP · Minimum 800×450px · Max 10MB)</p>
 
         {/* Draggable photo grid */}
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
           <SortableContext items={photoIds} strategy={rectSortingStrategy}>
             <div className="flex flex-wrap items-start gap-3">
               {photos.map((photo, index) => (
@@ -331,6 +357,7 @@ export const PhotoUploader = ({
                   onRemove={handleRemovePreview}
                   isDeletingPhoto={isDeletingPhoto}
                   getBlobUrl={getBlobUrl}
+                  isDragActive={activeId !== null}
                 />
               ))}
 
@@ -362,6 +389,35 @@ export const PhotoUploader = ({
               )}
             </div>
           </SortableContext>
+
+          {/* Drag overlay — shows floating photo while dragging */}
+          <DragOverlay
+            dropAnimation={{
+              duration: 200,
+              easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+            }}
+          >
+            {activePhoto && (
+              <div className="relative aspect-square h-[105px] w-[155px] rounded-lg overflow-hidden rotate-6 scale-105 shadow-2xl ring-2 ring-primary cursor-grabbing">
+                {activePhoto.file ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={getBlobUrl(activePhoto.file)}
+                    alt="Dragging"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Image
+                    src={activePhoto.url}
+                    alt="Dragging"
+                    fill
+                    sizes="155px"
+                    className="object-cover"
+                  />
+                )}
+              </div>
+            )}
+          </DragOverlay>
         </DndContext>
 
         <input

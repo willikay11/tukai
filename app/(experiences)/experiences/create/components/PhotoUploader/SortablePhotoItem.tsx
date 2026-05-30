@@ -1,9 +1,8 @@
 'use client';
 
-import Image from 'next/image';
-
-import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useSortable } from '@dnd-kit/sortable';
+import Image from 'next/image';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 
@@ -16,6 +15,7 @@ interface SortablePhotoItemProps {
   onRemove: (index: number) => void;
   isDeletingPhoto: boolean;
   getBlobUrl: (file: File) => string;
+  isDragActive: boolean; // whether any photo is being dragged
 }
 
 const isExternalUrl = (src: string) => src.startsWith('https://') || src.startsWith('http://');
@@ -27,6 +27,7 @@ export const SortablePhotoItem = ({
   onRemove,
   isDeletingPhoto,
   getBlobUrl,
+  isDragActive,
 }: SortablePhotoItemProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
@@ -34,26 +35,42 @@ export const SortablePhotoItem = ({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 10 : undefined,
+    transition: isDragging ? 'none' : transition,
   };
 
   const src = photo.file ? getBlobUrl(photo.file) : photo.url;
+
+  // Show dashed placeholder while dragging
+  if (isDragging) {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style as React.CSSProperties}
+        className="relative h-[105px] w-[155px] rounded-lg border-2 border-dashed border-primary/40 bg-primary/5"
+      />
+    );
+  }
 
   return (
     <div
       ref={setNodeRef}
       style={style as React.CSSProperties}
-      className="group relative h-[105px] w-[155px] rounded-xl"
+      {...attributes}
+      {...listeners}
+      className="relative aspect-square h-[105px] w-[155px] rounded-lg overflow-hidden group cursor-grab active:cursor-grabbing transition-transform duration-150"
     >
-      {/* Drag handle — top-left grip icon */}
+      {/* Hover overlay with Hold04Icon */}
       <div
-        {...attributes}
-        {...listeners}
-        className="absolute left-1 top-1 z-10 cursor-grab rounded bg-black/40 p-1 opacity-0 transition-opacity active:cursor-grabbing group-hover:opacity-100"
+        className={`
+          absolute inset-0 z-10
+          flex items-center justify-center
+          bg-black/20 rounded-lg
+          transition-opacity duration-150
+          pointer-events-none
+          ${isDragActive && !isDragging ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}
+        `}
       >
-        <IconComponent iconName="DragDropVerticalIcon" size={14} className="text-white" />
+        <IconComponent iconName="Hold04Icon" size={32} className="text-white drop-shadow-md" />
       </div>
 
       {/* Cover badge on first photo */}
@@ -70,14 +87,14 @@ export const SortablePhotoItem = ({
           alt={`Photo ${index + 1}`}
           fill
           sizes="155px"
-          className="rounded-xl object-cover"
+          className="rounded-lg object-cover"
         />
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={src}
           alt={`Photo ${index + 1}`}
-          className="h-full w-full rounded-xl object-cover"
+          className="h-full w-full rounded-lg object-cover"
         />
       )}
 
