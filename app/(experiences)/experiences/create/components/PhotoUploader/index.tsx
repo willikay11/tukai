@@ -391,12 +391,7 @@ export const PhotoUploader = ({
           </SortableContext>
 
           {/* Drag overlay — shows floating photo while dragging */}
-          <DragOverlay
-            dropAnimation={{
-              duration: 200,
-              easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
-            }}
-          >
+          <DragOverlay dropAnimation={null}>
             {activePhoto && (
               <div className="relative aspect-square h-[105px] w-[155px] rounded-lg overflow-hidden rotate-6 scale-105 shadow-2xl ring-2 ring-primary cursor-grabbing">
                 {activePhoto.file ? (
