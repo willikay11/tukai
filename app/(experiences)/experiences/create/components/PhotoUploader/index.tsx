@@ -321,7 +321,7 @@ export const PhotoUploader = ({
   return (
     <>
       <div className="space-y-2">
-        <p className="text-xs font-medium text-gray-800">Upload experience poster</p>
+        <p className="text-xs font-medium text-gray-800">Upload experience poster (JPEG, PNG or WebP · Minimum 800×450px · Max 10MB)</p>
 
         {/* Draggable photo grid */}
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -383,10 +383,10 @@ export const PhotoUploader = ({
         />
 
         {/* Info text and hint */}
-        <div className="space-y-1 text-xs text-muted-foreground">
+        {/* <div className="space-y-1 text-xs text-muted-foreground">
           <p>JPEG, PNG or WebP · Minimum 800×450px · Max 10MB</p>
           <p>Best results with landscape photos (16:9 or 4:3)</p>
-        </div>
+        </div> */}
 
         {/* Drag hint — only show if 2+ photos */}
         {photos.length > 1 && (
