@@ -92,10 +92,7 @@ export const PhotoUploader = ({
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const photoIds = photos.map((photo, index) =>
-      photo.file ? `new-${index}-${photo.id}` : photo.id,
-    );
-
+    const photoIds = photos.map((photo) => photo.id);
     const oldIndex = photoIds.indexOf(active.id as string);
     const newIndex = photoIds.indexOf(over.id as string);
 
@@ -311,10 +308,8 @@ export const PhotoUploader = ({
     [photos, deletePhotoAsync, onPhotoDelete, onPhotoFilesChange, toast],
   );
 
-  // Generate stable IDs for dnd-kit
-  const photoIds = photos.map((photo, index) =>
-    photo.file ? `new-${index}-${photo.id}` : photo.id,
-  );
+  // Generate stable IDs for dnd-kit — both existing and new photos have stable IDs
+  const photoIds = photos.map((photo) => photo.id);
 
   const hasReachedMax = photos.length >= 6;
 
