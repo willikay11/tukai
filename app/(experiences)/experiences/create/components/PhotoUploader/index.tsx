@@ -2,9 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import Image from 'next/image';
+
 import {
   DndContext,
   DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
   KeyboardSensor,
   PointerSensor,
   closestCenter,
@@ -53,10 +57,14 @@ export const PhotoUploader = ({
   const [currentCrop, setCurrentCrop] = useState<{ photo: FormPhoto; objectUrl: string } | null>(
     null,
   );
+  const [activeId, setActiveId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const blobUrlMap = useRef<Map<File, string>>(new Map());
   const { mutateAsync: deletePhotoAsync } = useDeleteExperiencePhoto();
   const { toast } = useToast();
+
+  // Find the currently dragged photo
+  const activePhoto = activeId ? photos.find((p) => p.id === activeId) ?? null : null;
 
   // Drag sensors — 8px threshold prevents accidental drag on tap
   const sensors = useSensors(
@@ -87,15 +95,19 @@ export const PhotoUploader = ({
     };
   }, []);
 
+  // Handle drag start
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
   // Handle drag end — reorder the array
   const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null);
+
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const photoIds = photos.map((photo, index) =>
-      photo.file ? `new-${index}-${photo.id}` : photo.id,
-    );
-
+    const photoIds = photos.map((photo) => photo.id);
     const oldIndex = photoIds.indexOf(active.id as string);
     const newIndex = photoIds.indexOf(over.id as string);
 
@@ -103,6 +115,11 @@ export const PhotoUploader = ({
       const reorderedPhotos = arrayMove(photos, oldIndex, newIndex);
       onPhotoFilesChange?.(reorderedPhotos);
     }
+  };
+
+  // Handle drag cancel
+  const handleDragCancel = () => {
+    setActiveId(null);
   };
 
   const handleFilesSelected = useCallback(
@@ -311,20 +328,24 @@ export const PhotoUploader = ({
     [photos, deletePhotoAsync, onPhotoDelete, onPhotoFilesChange, toast],
   );
 
-  // Generate stable IDs for dnd-kit
-  const photoIds = photos.map((photo, index) =>
-    photo.file ? `new-${index}-${photo.id}` : photo.id,
-  );
+  // Generate stable IDs for dnd-kit — both existing and new photos have stable IDs
+  const photoIds = photos.map((photo) => photo.id);
 
   const hasReachedMax = photos.length >= 6;
 
   return (
     <>
       <div className="space-y-2">
-        <p className="text-xs font-medium text-gray-800">Upload experience poster</p>
+        <p className="text-xs font-medium text-gray-800">Upload experience poster (JPEG, PNG or WebP · Minimum 800×450px · Max 10MB)</p>
 
         {/* Draggable photo grid */}
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
           <SortableContext items={photoIds} strategy={rectSortingStrategy}>
             <div className="flex flex-wrap items-start gap-3">
               {photos.map((photo, index) => (
@@ -336,6 +357,7 @@ export const PhotoUploader = ({
                   onRemove={handleRemovePreview}
                   isDeletingPhoto={isDeletingPhoto}
                   getBlobUrl={getBlobUrl}
+                  isDragActive={activeId !== null}
                 />
               ))}
 
@@ -367,6 +389,30 @@ export const PhotoUploader = ({
               )}
             </div>
           </SortableContext>
+
+          {/* Drag overlay — shows floating photo while dragging */}
+          <DragOverlay dropAnimation={null}>
+            {activePhoto && (
+              <div className="relative aspect-square h-[105px] w-[155px] rounded-lg overflow-hidden rotate-6 scale-105 shadow-2xl ring-2 ring-primary cursor-grabbing">
+                {activePhoto.file ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={getBlobUrl(activePhoto.file)}
+                    alt="Dragging"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Image
+                    src={activePhoto.url}
+                    alt="Dragging"
+                    fill
+                    sizes="155px"
+                    className="object-cover"
+                  />
+                )}
+              </div>
+            )}
+          </DragOverlay>
         </DndContext>
 
         <input
@@ -383,10 +429,10 @@ export const PhotoUploader = ({
         />
 
         {/* Info text and hint */}
-        <div className="space-y-1 text-xs text-muted-foreground">
+        {/* <div className="space-y-1 text-xs text-muted-foreground">
           <p>JPEG, PNG or WebP · Minimum 800×450px · Max 10MB</p>
           <p>Best results with landscape photos (16:9 or 4:3)</p>
-        </div>
+        </div> */}
 
         {/* Drag hint — only show if 2+ photos */}
         {photos.length > 1 && (
