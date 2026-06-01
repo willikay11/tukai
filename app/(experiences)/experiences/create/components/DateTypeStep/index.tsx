@@ -48,7 +48,7 @@ export const DateTypeStep = ({
   errors,
 }: DateTypeStepProps) => {
   const handleCommunityChange = useCallback(
-    (community: Community) => {
+    (community: Community | null) => {
       onChange({ community });
     },
     [onChange],
@@ -177,12 +177,12 @@ export const DateTypeStep = ({
 
       <CommunitySelector
         value={formData.community}
-        options={communityOptions}
+        communities={communityOptions}
         onChange={handleCommunityChange}
         error={errors.community}
       />
 
-      <ExperienceTypePicker value={formData.experiencePricing} onChange={handlePricingChange} />
+      {/* <ExperienceTypePicker value={formData.experiencePricing} onChange={handlePricingChange} /> */}
 
       <ExperienceTypeRadio
         value={formData.experienceType}
