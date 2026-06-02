@@ -13,11 +13,16 @@ export interface TicketFormValue {
   name: string;
   quantity: number | null;
   amount: number | null;
+  // Ticket slot time (when the ticket/experience runs) — for multi-day in "entire-period" mode
+  startTime: string | null;
+  endTime: string | null;
+  // Sales validity (when people can purchase) — absolute dates/times for single-day and multi-day
   salesStartDate: string | null;
   salesStartTime: string | null;
   salesEndDate: string | null;
   salesEndTime: string | null;
   acceptPartialPayment: boolean;
+  // Sales validity (when people can purchase) — relative for recurring
   salesStartRelative?: RelativeValidityValue | null;
   salesEndRelative?: RelativeValidityValue | null;
   duplicateForEntirePeriod?: boolean;

@@ -141,11 +141,16 @@ export interface FormData {
       name: string;
       quantity: number;
       amount: number;
+      // Ticket slot time (when the ticket/experience runs) — for multi-day in "entire-period" mode
+      startTime: string | null;
+      endTime: string | null;
+      // Sales validity (when people can purchase)
       salesStartDate: string | null;
       salesStartTime: string | null;
       salesEndDate: string | null;
       salesEndTime: string | null;
       acceptPartialPayment: boolean;
+      // Relative validity for recurring
       salesStartRelative: {
         amount: number;
         unit: 'hour' | 'day' | 'week';
