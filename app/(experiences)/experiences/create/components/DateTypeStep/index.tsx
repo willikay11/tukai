@@ -2,11 +2,12 @@
 
 import { useCallback } from 'react';
 
+import { useRouter } from 'next/navigation';
+
 import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
 
 import { type Community, CommunitySelector } from '../CommunitySelector';
-import { ExperienceTypePicker } from '../ExperienceTypePicker';
 import { ExperienceTypeRadio } from '../ExperienceTypeRadio';
 import { MultiDayDateSection } from '../MultiDayDateSection';
 import { RecurrenceDateRange } from '../RecurrenceDateRange';
@@ -14,7 +15,7 @@ import { RecurrencePreviewLabel } from '../RecurrencePreviewLabel';
 import { RecurringDayPicker } from '../RecurringDayPicker';
 import { type TimeSlot, TimeSlotList } from '../TimeSlotList';
 
-type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+type DayOfWeek = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
 
 export interface DateTypeFormData {
   community: Community | null;
@@ -47,8 +48,10 @@ export const DateTypeStep = ({
   onChange,
   errors,
 }: DateTypeStepProps) => {
+  const router = useRouter();
+
   const handleCommunityChange = useCallback(
-    (community: Community) => {
+    (community: Community | null) => {
       onChange({ community });
     },
     [onChange],
@@ -177,12 +180,15 @@ export const DateTypeStep = ({
 
       <CommunitySelector
         value={formData.community}
-        options={communityOptions}
+        onCreateNew={() => {
+          router.push('/communities/create');
+        }}
+        communities={communityOptions}
         onChange={handleCommunityChange}
         error={errors.community}
       />
 
-      <ExperienceTypePicker value={formData.experiencePricing} onChange={handlePricingChange} />
+      {/* <ExperienceTypePicker value={formData.experiencePricing} onChange={handlePricingChange} /> */}
 
       <ExperienceTypeRadio
         value={formData.experienceType}

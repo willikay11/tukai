@@ -13,11 +13,16 @@ export interface TicketFormValue {
   name: string;
   quantity: number | null;
   amount: number | null;
+  // Ticket slot time (when the ticket/experience runs) — for multi-day in "entire-period" mode
+  startTime: string | null;
+  endTime: string | null;
+  // Sales validity (when people can purchase) — absolute dates/times for single-day and multi-day
   salesStartDate: string | null;
   salesStartTime: string | null;
   salesEndDate: string | null;
   salesEndTime: string | null;
   acceptPartialPayment: boolean;
+  // Sales validity (when people can purchase) — relative for recurring
   salesStartRelative?: RelativeValidityValue | null;
   salesEndRelative?: RelativeValidityValue | null;
   duplicateForEntirePeriod?: boolean;
@@ -117,24 +122,22 @@ export const TicketForm = ({
         {errors.quantity && <p className="text-xs text-red-500">{errors.quantity}</p>}
       </div>
 
-      {experiencePricing === 'paid' && (
-        <div className="space-y-1.5">
-          <Input
-            id="ticket-amount"
-            type="number"
-            placeholder="Amount per ticket"
-            value={value.amount ?? ''}
-            onChange={(e) =>
-              onChange({ amount: e.target.value ? parseFloat(e.target.value) : null })
-            }
-            suffixIcon={<IconComponent iconName="Money02Icon" size={18} />}
-            className="text-xs"
-          />
-          {errors.amount && <p className="text-xs text-red-500">{errors.amount}</p>}
-        </div>
-      )}
+      <div className="space-y-1.5">
+        <Input
+          id="ticket-amount"
+          type="number"
+          placeholder="Amount per ticket"
+          value={value.amount ?? ''}
+          onChange={(e) =>
+            onChange({ amount: e.target.value ? parseFloat(e.target.value) : null })
+          }
+          suffixIcon={<IconComponent iconName="Money02Icon" size={18} />}
+          className="text-xs"
+        />
+        {errors.amount && <p className="text-xs text-red-500">{errors.amount}</p>}
+      </div>
 
-      {experiencePricing === 'paid' && value.quantity && value.amount && (
+      {value.quantity && value.amount && (
         <div className="rounded-full border border-blue-200 bg-blue-100/60 px-4 py-2">
           <p className="flex flex-wrap items-center gap-2 text-xs text-gray-600">
             <span className="italic">Total Tickets Cost:</span>
@@ -194,12 +197,12 @@ export const TicketForm = ({
           </div>
           {errors.salesEndDate && <p className="text-xs text-red-500">{errors.salesEndDate}</p>}
 
-          {isMultiDay && ticketMode === 'each-day' && (
+          {/* {isMultiDay && ticketMode === 'each-day' && (
             <DuplicateTicketsCheckbox
               value={value.duplicateForEntirePeriod ?? false}
               onChange={(val) => onChange({ duplicateForEntirePeriod: val })}
             />
-          )}
+          )} */}
         </div>
       ) : (
         <>

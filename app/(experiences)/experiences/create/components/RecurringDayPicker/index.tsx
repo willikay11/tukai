@@ -13,13 +13,13 @@ interface RecurringDayPickerProps {
 }
 
 const DAYS = [
+  { key: 'sun' as DayOfWeek, label: 'Sun' },
   { key: 'mon' as DayOfWeek, label: 'Mon' },
   { key: 'tue' as DayOfWeek, label: 'Tue' },
   { key: 'wed' as DayOfWeek, label: 'Wed' },
   { key: 'thu' as DayOfWeek, label: 'Thu' },
   { key: 'fri' as DayOfWeek, label: 'Fri' },
   { key: 'sat' as DayOfWeek, label: 'Sat' },
-  { key: 'sun' as DayOfWeek, label: 'Sun' },
 ];
 
 export const RecurringDayPicker = ({ value, onChange }: RecurringDayPickerProps) => {

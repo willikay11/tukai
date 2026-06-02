@@ -6,7 +6,7 @@ import Image, { ImageProps } from 'next/image';
 
 import clsx from 'clsx';
 
-import { ImageSkeleton } from '@/app/shared/components/Cards';
+import { AvatarSkeleton } from '@/app/shared/components/Cards/Skeletons';
 
 export const TukaiImage = ({
   src,
@@ -20,7 +20,7 @@ export const TukaiImage = ({
 
   return (
     <>
-      {!isLoaded && !hasError && <ImageSkeleton />}
+      {!isLoaded && !hasError && <AvatarSkeleton />}
       {!hasError && (
         <Image
           src={src}

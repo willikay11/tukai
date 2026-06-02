@@ -56,6 +56,12 @@ export function EventSkeleton() {
   );
 }
 
+export function AvatarSkeleton() {
+  return (
+    <div className={`${shimmer} relative h-7 w-7 rounded-full bg-gray-200 text-sm font-medium`} />
+  );
+}
+
 export function ImageSkeleton() {
   return (
     <div className={`${shimmer} relative h-full w-full`}>

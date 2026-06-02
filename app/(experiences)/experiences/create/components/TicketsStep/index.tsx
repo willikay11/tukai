@@ -52,6 +52,8 @@ const emptyTicketForm: TicketFormValue = {
   name: '',
   quantity: null,
   amount: null,
+  startTime: null,
+  endTime: null,
   salesStartDate: null,
   salesStartTime: null,
   salesEndDate: null,
@@ -165,6 +167,8 @@ export const TicketsStep = ({
         name: ticket.name,
         quantity: ticket.quantity,
         amount: ticket.amount,
+        startTime: (ticket as any).startTime || null,
+        endTime: (ticket as any).endTime || null,
         salesStartDate: ticket.salesStartDate,
         salesStartTime: ticket.salesStartTime,
         salesEndDate: ticket.salesEndDate,
@@ -189,6 +193,8 @@ export const TicketsStep = ({
         name: draftTicket.name,
         quantity: draftTicket.quantity!,
         amount: draftTicket.amount!,
+        startTime: draftTicket.startTime || null,
+        endTime: draftTicket.endTime || null,
         salesStartDate: draftTicket.salesStartDate!,
         salesStartTime: draftTicket.salesStartTime!,
         salesEndDate: draftTicket.salesEndDate!,
@@ -207,6 +213,8 @@ export const TicketsStep = ({
         name: draftTicket.name,
         quantity: draftTicket.quantity!,
         amount: draftTicket.amount!,
+        startTime: draftTicket.startTime || null,
+        endTime: draftTicket.endTime || null,
         salesStartDate: draftTicket.salesStartDate!,
         salesStartTime: draftTicket.salesStartTime!,
         salesEndDate: draftTicket.salesEndDate!,
@@ -306,6 +314,8 @@ export const TicketsStep = ({
             name: draftTicket.name,
             quantity: draftTicket.quantity!,
             amount: draftTicket.amount!,
+            startTime: draftTicket.startTime || null,
+            endTime: draftTicket.endTime || null,
             salesStartDate: draftTicket.salesStartDate!,
             salesStartTime: draftTicket.salesStartTime!,
             salesEndDate: draftTicket.salesEndDate!,
@@ -323,6 +333,8 @@ export const TicketsStep = ({
             name: draftTicket.name,
             quantity: draftTicket.quantity!,
             amount: draftTicket.amount!,
+            startTime: draftTicket.startTime || null,
+            endTime: draftTicket.endTime || null,
             salesStartDate: draftTicket.salesStartDate!,
             salesStartTime: draftTicket.salesStartTime!,
             salesEndDate: draftTicket.salesEndDate!,
@@ -447,10 +459,8 @@ export const TicketsStep = ({
                 <DateBadgeWithTimes
                   startDate={multiDayStartDate}
                   endDate={multiDayEndDate}
-                  startTime={draftTicket.salesStartTime}
-                  endTime={draftTicket.salesEndTime}
-                  onStartTimeChange={(time) => handleDraftTicketChange({ salesStartTime: time })}
-                  onEndTimeChange={(time) => handleDraftTicketChange({ salesEndTime: time })}
+                  startTime={multiDayStartTime}
+                  endTime={multiDayEndTime}
                 />
               </div>
               <span className="pointer-events-none absolute -left-[1.25rem] bottom-0 top-[1.5rem] border-l-[1px] border-dashed border-primary" />

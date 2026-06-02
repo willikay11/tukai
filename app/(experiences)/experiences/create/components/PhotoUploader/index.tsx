@@ -64,7 +64,7 @@ export const PhotoUploader = ({
   const { toast } = useToast();
 
   // Find the currently dragged photo
-  const activePhoto = activeId ? photos.find((p) => p.id === activeId) ?? null : null;
+  const activePhoto = activeId ? (photos.find((p) => p.id === activeId) ?? null) : null;
 
   // Drag sensors — 8px threshold prevents accidental drag on tap
   const sensors = useSensors(
@@ -336,7 +336,9 @@ export const PhotoUploader = ({
   return (
     <>
       <div className="space-y-2">
-        <p className="text-xs font-medium text-gray-800">Upload experience poster (JPEG, PNG or WebP · Minimum 800×450px · Max 10MB)</p>
+        <p className="text-xs font-medium text-gray-800">
+          Upload experience poster (JPEG, PNG or WebP · Minimum 800×450px · Max 10MB)
+        </p>
 
         {/* Draggable photo grid */}
         <DndContext
@@ -393,13 +395,13 @@ export const PhotoUploader = ({
           {/* Drag overlay — shows floating photo while dragging */}
           <DragOverlay dropAnimation={null}>
             {activePhoto && (
-              <div className="relative aspect-square h-[105px] w-[155px] rounded-lg overflow-hidden rotate-6 scale-105 shadow-2xl ring-2 ring-primary cursor-grabbing">
+              <div className="relative aspect-square h-[105px] w-[155px] rotate-6 scale-105 cursor-grabbing overflow-hidden rounded-lg shadow-2xl ring-2 ring-primary">
                 {activePhoto.file ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={getBlobUrl(activePhoto.file)}
                     alt="Dragging"
-                    className="w-full h-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                 ) : (
                   <Image
