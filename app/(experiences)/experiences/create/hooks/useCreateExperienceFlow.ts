@@ -924,20 +924,43 @@ export const useCreateExperienceFlow = () => {
     try {
       const photoFiles = formData.about.photos.filter((p) => p.file).map((p) => p.file!);
 
-      // Use recurrence dates if recurring, otherwise use single date
+      // Determine which date/time fields to use based on experience type
+      const isMultiDay = formData.dateType.experienceType === 'multi-day';
       const isRecurring = formData.dateType.isRecurring;
-      const startDateValue = isRecurring
-        ? formData.dateType.recurrenceStartDate || ''
-        : formData.dateType.date || '';
-      const endDateValue = isRecurring
-        ? formData.dateType.recurrenceEndDate || ''
-        : formData.dateType.date || '';
-      const startTime = isRecurring
-        ? formData.dateType.timeSlots?.[0]?.startTime || null
-        : formData.dateType.startTime || null;
-      const endTime = isRecurring
-        ? formData.dateType.timeSlots?.[0]?.endTime || null
-        : formData.dateType.endTime || null;
+
+      let startDateValue = '';
+      let endDateValue = '';
+      let startTime: string | null = null;
+      let endTime: string | null = null;
+
+      if (isMultiDay) {
+        // Multi-day uses its own dedicated date + time fields
+        startDateValue = formData.dateType.multiDayStartDate || '';
+        endDateValue = formData.dateType.multiDayEndDate || '';
+        startTime = formData.dateType.multiDayStartTime || null;
+        endTime = formData.dateType.multiDayEndTime || null;
+      } else if (isRecurring) {
+        // Recurring uses recurrence start/end date range with first time slot
+        startDateValue = formData.dateType.recurrenceStartDate || '';
+        endDateValue = formData.dateType.recurrenceEndDate || '';
+        startTime = formData.dateType.timeSlots?.[0]?.startTime || null;
+        endTime = formData.dateType.timeSlots?.[0]?.endTime || null;
+      } else {
+        // Single-day uses single date with start/end times
+        startDateValue = formData.dateType.date || '';
+        endDateValue = formData.dateType.date || '';
+        startTime = formData.dateType.startTime || null;
+        endTime = formData.dateType.endTime || null;
+      }
+
+      // Validate that all required date/time fields are populated
+      if (!startDateValue || !endDateValue || !startTime || !endTime) {
+        setApiError(
+          'Please set a start date, end date, start time and end time before continuing.',
+        );
+        setIsSavingExperience(false);
+        return;
+      }
 
       const payload = {
         title: formData.about.title,

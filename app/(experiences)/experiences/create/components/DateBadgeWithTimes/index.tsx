@@ -35,7 +35,7 @@ export const DateBadgeWithTimes = ({
   }, [startTime, endTime]);
 
   return (
-    <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-6">
+    <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4">
       <div className="w-full lg:w-3/5">
         {startDate && endDate ? (
           <TicketDateBadge mode="multi-day-range" startDate={startDate} endDate={endDate} />

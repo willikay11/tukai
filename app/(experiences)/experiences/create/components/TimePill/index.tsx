@@ -19,11 +19,11 @@ export const TimePill = ({ startTime, endTime, onClick }: TimePillProps) => {
       onClick={onClick}
       className="inline-flex items-center gap-2 rounded-full border border-dashed border-emerald-500 bg-emerald-100 px-5 py-3 transition-opacity hover:opacity-90"
     >
-      <IconComponent iconName="Clock02Icon" size={20} className="flex-shrink-0 text-emerald-700" />
+      <IconComponent iconName="Clock02Icon" size={18} className="flex-shrink-0 text-emerald-700" />
       <p className="whitespace-nowrap text-xs font-medium text-primary">
         {formattedStart} - {formattedEnd}
       </p>
-      <IconComponent iconName="Edit02Icon" size={20} className="flex-shrink-0 text-emerald-700" />
+      <IconComponent iconName="Edit02Icon" size={18} className="flex-shrink-0 text-emerald-700" />
     </button>
   );
 };
