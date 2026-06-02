@@ -3,6 +3,7 @@
 import Image from 'next/image';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { Button } from '@/components/ui/button';
 
 export interface Community {
   id: string;
@@ -41,18 +42,14 @@ export const CommunitySelector = ({
       {/* Label */}
       <div className="flex items-center gap-1.5">
         <label className="text-sm font-medium text-gray-800">Select Host Community</label>
-        <IconComponent
-          iconName="InformationCircleIcon"
-          size={16}
-          className="text-gray-400"
-        />
+        <IconComponent iconName="InformationCircleIcon" size={16} className="text-gray-400" />
       </div>
 
       {/* Community pills */}
       {isLoading ? (
         <div className="flex gap-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-10 w-32 rounded-full bg-gray-100 animate-pulse" />
+            <div key={i} className="h-10 w-32 animate-pulse rounded-full bg-gray-100" />
           ))}
         </div>
       ) : (
@@ -64,18 +61,11 @@ export const CommunitySelector = ({
                 key={community.id}
                 type="button"
                 onClick={() => handlePillClick(community)}
-                className={`
-                  flex items-center gap-2
-                  pl-1 pr-4 py-1
-                  rounded-full border
-                  text-sm font-medium
-                  transition-colors duration-150
-                  ${
-                    isSelected
-                      ? 'bg-primary border-primary text-white'
-                      : 'bg-white border-gray-200 text-gray-800 hover:border-gray-400'
-                  }
-                `}
+                className={`inline-flex items-center gap-2 rounded-full px-2 py-2 text-xs font-medium transition-colors ${
+                  isSelected
+                    ? 'border-primary bg-gradient-to-b from-[#047857] to-[#064E3B] text-white'
+                    : 'bg-gray-100 text-gray-700 hover:border-gray-400'
+                } `}
               >
                 {/* Community image */}
                 <div className="h-7 w-7 flex-shrink-0 overflow-hidden rounded-full bg-gray-100">
@@ -89,11 +79,7 @@ export const CommunitySelector = ({
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">
-                      <IconComponent
-                        iconName="UserIcon"
-                        size={14}
-                        className="text-gray-400"
-                      />
+                      <IconComponent iconName="UserIcon" size={14} className="text-gray-400" />
                     </div>
                   )}
                 </div>
@@ -108,18 +94,10 @@ export const CommunitySelector = ({
 
       {/* Create a Community link */}
       {onCreateNew && (
-        <button
-          type="button"
-          onClick={onCreateNew}
-          className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-gray-700"
-        >
-          <IconComponent
-            iconName="UserAdd01Icon"
-            size={16}
-            className="text-muted-foreground"
-          />
+        <Button variant="link" onClick={onCreateNew} className="px-0">
+          <IconComponent iconName="UserAdd01Icon" size={16} className="text-muted-foreground" />
           <span>Create a Community</span>
-        </button>
+        </Button>
       )}
 
       {/* Error message */}

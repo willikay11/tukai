@@ -225,9 +225,7 @@ describe('CommunitySelector', () => {
 
     it('does not display create community link when onCreateNew is not provided', () => {
       const onChange = jest.fn();
-      render(
-        <CommunitySelector value={null} communities={mockCommunities} onChange={onChange} />,
-      );
+      render(<CommunitySelector value={null} communities={mockCommunities} onChange={onChange} />);
 
       expect(screen.queryByText('Create a Community')).not.toBeInTheDocument();
     });

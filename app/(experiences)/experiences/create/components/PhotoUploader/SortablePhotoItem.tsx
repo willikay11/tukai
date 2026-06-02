@@ -1,8 +1,9 @@
 'use client';
 
-import { CSS } from '@dnd-kit/utilities';
-import { useSortable } from '@dnd-kit/sortable';
 import Image from 'next/image';
+
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 
@@ -57,18 +58,11 @@ export const SortablePhotoItem = ({
       style={style as React.CSSProperties}
       {...attributes}
       {...listeners}
-      className="relative aspect-square h-[105px] w-[155px] rounded-lg overflow-hidden group cursor-grab active:cursor-grabbing transition-transform duration-150"
+      className="group relative aspect-square h-[105px] w-[155px] cursor-grab overflow-hidden rounded-lg transition-transform duration-150 active:cursor-grabbing"
     >
       {/* Hover overlay with Hold04Icon */}
       <div
-        className={`
-          absolute inset-0 z-10
-          flex items-center justify-center
-          bg-black/20 rounded-lg
-          transition-opacity duration-150
-          pointer-events-none
-          ${isDragActive && !isDragging ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}
-        `}
+        className={`pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/20 transition-opacity duration-150 ${isDragActive && !isDragging ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'} `}
       >
         <IconComponent iconName="Hold04Icon" size={32} className="text-white drop-shadow-md" />
       </div>
