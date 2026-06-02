@@ -52,7 +52,7 @@ export const TimeSlotList = ({ slots, onChange, errors }: TimeSlotListProps) => 
 
       <div className="space-y-2">
         {slots.map((slot, index) => (
-          <div key={index} className="flex items-end gap-2">
+          <div key={index} className="flex items-end items-center gap-2">
             <div className="flex-1">
               <TimePicker
                 value={slot.startTime || undefined}
@@ -82,7 +82,7 @@ export const TimeSlotList = ({ slots, onChange, errors }: TimeSlotListProps) => 
                 className="mb-2 text-red-500 hover:text-red-700"
                 aria-label="Remove time slot"
               >
-                <IconComponent iconName="Trash03Icon" size={18} />
+                <IconComponent iconName="Delete02Icon" size={18} />
               </button>
             )}
           </div>
