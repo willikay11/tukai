@@ -1,0 +1,57 @@
+import { inferUIExperienceType } from './date-utils';
+
+describe('inferUIExperienceType', () => {
+  it('maps itinerary API type to itinerary UI type', () => {
+    expect(inferUIExperienceType('itinerary', '2026-06-10T09:00:00', '2026-06-14T18:00:00')).toBe(
+      'itinerary',
+    );
+  });
+
+  it('maps itinerary regardless of date span', () => {
+    expect(inferUIExperienceType('itinerary', '2026-06-10T09:00:00', '2026-06-10T18:00:00')).toBe(
+      'itinerary',
+    );
+  });
+
+  it('maps standard same-day to one-time', () => {
+    expect(inferUIExperienceType('standard', '2026-06-10T09:00:00', '2026-06-10T18:00:00')).toBe(
+      'one-time',
+    );
+  });
+
+  it('maps standard same-day different times to one-time', () => {
+    expect(inferUIExperienceType('standard', '2026-06-10T00:00:00', '2026-06-10T23:59:59')).toBe(
+      'one-time',
+    );
+  });
+
+  it('maps standard multi-day to multi-day', () => {
+    expect(inferUIExperienceType('standard', '2026-06-10T09:00:00', '2026-06-14T18:00:00')).toBe(
+      'multi-day',
+    );
+  });
+
+  it('maps standard two consecutive days to multi-day', () => {
+    expect(inferUIExperienceType('standard', '2026-06-10T09:00:00', '2026-06-11T09:00:00')).toBe(
+      'multi-day',
+    );
+  });
+
+  it('defaults to one-time when startDate is null', () => {
+    expect(inferUIExperienceType('standard', null, '2026-06-10T18:00:00')).toBe('one-time');
+  });
+
+  it('defaults to one-time when endDate is null', () => {
+    expect(inferUIExperienceType('standard', '2026-06-10T09:00:00', null)).toBe('one-time');
+  });
+
+  it('defaults to one-time when both dates null', () => {
+    expect(inferUIExperienceType('standard', null, null)).toBe('one-time');
+  });
+
+  it('handles ISO strings with timezone offset', () => {
+    expect(inferUIExperienceType('standard', '2026-06-10T09:00:00Z', '2026-06-10T18:00:00Z')).toBe(
+      'one-time',
+    );
+  });
+});

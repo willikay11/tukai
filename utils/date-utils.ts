@@ -143,3 +143,31 @@ export const formatTimeForPreview = (isoString: string | null): string | null =>
     return null;
   }
 };
+
+export type UIExperienceType = 'one-time' | 'multi-day' | 'itinerary';
+
+// Infer the UI experience type from the API response
+export const inferUIExperienceType = (
+  apiExperienceType: 'standard' | 'itinerary',
+  startDate: string | null,
+  endDate: string | null,
+): UIExperienceType => {
+  // Itinerary is always direct
+  if (apiExperienceType === 'itinerary') {
+    return 'itinerary';
+  }
+
+  // Standard — infer from date span
+  if (!startDate || !endDate) {
+    return 'one-time'; // default if dates missing
+  }
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  // Compare calendar dates only (ignore time)
+  const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+  const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+
+  return startDay.getTime() === endDay.getTime() ? 'one-time' : 'multi-day';
+};
