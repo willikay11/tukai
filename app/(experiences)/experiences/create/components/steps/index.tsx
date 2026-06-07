@@ -198,6 +198,15 @@ interface CreateExperienceStepsProps {
     endTime: string;
     name?: string;
   }>;
+  setSlotTemplateRecords?: (
+    records: Array<{
+      uiId: string;
+      templateId: string;
+      startTime: string;
+      endTime: string;
+      name?: string;
+    }>,
+  ) => void;
 }
 
 export const CreateExperienceSteps = ({
@@ -239,6 +248,7 @@ export const CreateExperienceSteps = ({
   isPreviewDrawerOpen = false,
   setIsPreviewDrawerOpen,
   slotTemplateRecords = [],
+  setSlotTemplateRecords,
 }: CreateExperienceStepsProps) => {
   const router = useRouter();
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
@@ -497,7 +507,7 @@ export const CreateExperienceSteps = ({
                   }
                 }}
                 onCancel={() => handleStepChange('about')}
-                photos={aboutFormData?.photos}
+                photos={aboutFormData?.photos.map((p) => p.url)}
                 isRecurring={formData?.isRecurring}
                 timeSlots={formData?.timeSlots}
                 recurringDays={formData?.recurringDays}
@@ -506,12 +516,10 @@ export const CreateExperienceSteps = ({
                 multiDayStartTime={formData?.multiDayStartTime}
                 multiDayEndDate={formData?.multiDayEndDate}
                 multiDayEndTime={formData?.multiDayEndTime}
-                saveContinueLabel={
-                  formData?.experienceType === 'multi-day' ? 'Save Tickets' : undefined
-                }
                 experienceId={experience?.id || null}
                 onPreview={handlePreviewClick}
                 slotTemplateRecords={slotTemplateRecords}
+                setSlotTemplateRecords={setSlotTemplateRecords}
               />
             ) : (
               <ExperienceDates
