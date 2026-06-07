@@ -8,12 +8,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { useCreateExperienceTicket } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
-import { deleteExperienceTicket, updateExperienceTicket } from '@/services/experience';
+import { createSlotTemplate, deleteExperienceTicket, updateExperienceTicket } from '@/services/experience';
 import type { ApiResponse } from '@/types/apiResponse';
 import type { CreateExperienceTicket } from '@/types/experience';
 import { getDaysBetween } from '@/utils/date-utils';
 import { parseApiError } from '@/utils/parseApiError';
 import type { SlotTemplateRecord } from '@/utils/slot-template-utils';
+import { buildSingleOccurrenceRule } from '@/utils/slot-template-utils';
 import { buildAbsoluteTicketValidity, buildRecurringTicketValidity } from '@/utils/ticket-utils';
 
 import { FormData } from '../../hooks/useCreateExperienceFlow';
@@ -46,6 +47,7 @@ interface TicketsStepProps {
   saveContinueLabel?: string;
   onPreview?: () => void;
   slotTemplateRecords?: SlotTemplateRecord[];
+  setSlotTemplateRecords?: (records: SlotTemplateRecord[]) => void;
 }
 
 const emptyTicketForm: TicketFormValue = {
@@ -127,6 +129,7 @@ export const TicketsStep = ({
   saveContinueLabel = 'Save & Continue',
   experienceId = null,
   onPreview,
+  setSlotTemplateRecords,
 }: TicketsStepProps) => {
   const [activeFormIndex, setActiveFormIndex] = useState<number | null>(null);
   const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
@@ -140,6 +143,14 @@ export const TicketsStep = ({
   // API mutation hooks
   const createTicketMutation = useCreateExperienceTicket(experienceId ?? '');
   const { toast } = useToast();
+
+  const calculateDurationMinutes = (startTime: string, endTime: string): number => {
+    const [startHours, startMins] = startTime.split(':').map(Number);
+    const [endHours, endMins] = endTime.split(':').map(Number);
+    const startTotalMins = startHours * 60 + startMins;
+    const endTotalMins = endHours * 60 + endMins;
+    return Math.max(0, endTotalMins - startTotalMins);
+  };
 
   const handleTicketModeChange = (mode: 'entire-period' | 'each-day') => {
     setTicketMode(mode);
@@ -266,36 +277,78 @@ export const TicketsStep = ({
             draftTicket.salesEndTime,
           );
 
-      // Build API payload
-      const slotTemplateId =
-        isRecurringExperience && slotIndex !== undefined
-          ? slotTemplateRecords[slotIndex]?.templateId
-          : undefined;
-
-      console.log('[TicketsStep] Payload building:', {
-        isRecurringExperience,
-        slotIndex,
-        slotTemplateRecords: slotTemplateRecords.length,
-        slotTemplateId,
-      });
-
-      const payload: CreateExperienceTicket = {
-        name: draftTicket.name,
-        experience: experienceId,
-        quantity: draftTicket.quantity!,
-        price: draftTicket.amount!.toString(),
-        is_paid: experiencePricing === 'paid',
-        ...validityFields,
-        ...(slotTemplateId ? { slot_template: slotTemplateId } : {}),
-      };
-
-      console.log('[TicketsStep] Final payload:', payload);
-
-      const isEdit = activeFormIndex !== null && formData.items[activeFormIndex]?.apiId != null;
-      const existingApiId = isEdit ? formData.items[activeFormIndex].apiId : undefined;
-
       try {
         setIsSavingLocal(true);
+
+        // Build API payload and create slot template if needed
+        let slotTemplateId: string | undefined;
+
+        // For multi-day "entire-period" mode: create slot template if it doesn't exist
+        if (isMultiDay && ticketMode === 'entire-period' && slotTemplateRecords.length === 0) {
+          console.log('[TicketsStep] Creating slot template for entire-period mode...');
+
+          if (!multiDayStartTime || !multiDayEndTime || !multiDayStartDate) {
+            throw new Error('Multi-day start/end times and date are required');
+          }
+
+          const durationMinutes = calculateDurationMinutes(multiDayStartTime, multiDayEndTime);
+          const recurrenceRule = buildSingleOccurrenceRule(multiDayStartDate, multiDayStartTime);
+
+          const slotResponse = await createSlotTemplate(experienceId, {
+            start_time: multiDayStartTime,
+            duration_minutes: durationMinutes,
+            recurrence_rule: recurrenceRule,
+          });
+
+          const createdId = slotResponse.data?.id;
+          if (!createdId) {
+            throw new Error('Slot template creation failed — no id returned');
+          }
+
+          slotTemplateId = createdId;
+
+          // Store the created slot template
+          setSlotTemplateRecords?.([
+            {
+              uiId: 'entire-period',
+              templateId: createdId,
+              startTime: multiDayStartTime,
+              endTime: multiDayEndTime,
+            },
+          ]);
+
+          console.log('[TicketsStep] Slot template created:', createdId);
+        } else if (isRecurringExperience && slotIndex !== undefined) {
+          slotTemplateId = slotTemplateRecords[slotIndex]?.templateId;
+        } else if (isMultiDay && slotTemplateRecords.length > 0) {
+          // For multi-day experiences with existing slot templates, use the first one
+          slotTemplateId = slotTemplateRecords[0]?.templateId;
+        }
+
+        console.log('[TicketsStep] Payload building:', {
+          isRecurringExperience,
+          isMultiDay,
+          ticketMode,
+          slotIndex,
+          slotTemplateRecords: slotTemplateRecords.length,
+          slotTemplateId,
+        });
+
+        const payload: CreateExperienceTicket = {
+          name: draftTicket.name,
+          experience: experienceId,
+          quantity: draftTicket.quantity!,
+          price: draftTicket.amount!.toString(),
+          is_paid: experiencePricing === 'paid',
+          ...validityFields,
+          ...(slotTemplateId ? { slot_template: slotTemplateId } : {}),
+        };
+
+        console.log('[TicketsStep] Final payload:', payload);
+
+        const isEdit = activeFormIndex !== null && formData.items[activeFormIndex]?.apiId != null;
+        const existingApiId = isEdit ? formData.items[activeFormIndex].apiId : undefined;
+
         let response: ApiResponse;
         if (existingApiId) {
           response = await updateExperienceTicket(experienceId, existingApiId, payload);
@@ -306,7 +359,7 @@ export const TicketsStep = ({
         const apiId = response.data?.id;
 
         const items = [...formData.items];
-        const isRecurringExperience = dateTypeData?.isRecurring ?? false;
+        const isRecurringExperienceLocal = dateTypeData?.isRecurring ?? false;
         if (activeFormIndex !== null && activeFormIndex < items.length) {
           items[activeFormIndex] = {
             ...items[activeFormIndex],
@@ -324,7 +377,7 @@ export const TicketsStep = ({
             salesStartRelative: draftTicket.salesStartRelative || null,
             salesEndRelative: draftTicket.salesEndRelative || null,
             duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
-            ...(isRecurringExperience && slotIndex !== undefined ? { slotIndex } : {}),
+            ...(isRecurringExperienceLocal && slotIndex !== undefined ? { slotIndex } : {}),
           };
         } else {
           items.push({
@@ -343,7 +396,7 @@ export const TicketsStep = ({
             salesStartRelative: draftTicket.salesStartRelative || null,
             salesEndRelative: draftTicket.salesEndRelative || null,
             duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
-            ...(isRecurringExperience && slotIndex !== undefined ? { slotIndex } : {}),
+            ...(isRecurringExperienceLocal && slotIndex !== undefined ? { slotIndex } : {}),
           });
         }
 
@@ -377,6 +430,12 @@ export const TicketsStep = ({
       toast,
       dateTypeData,
       slotTemplateRecords,
+      isMultiDay,
+      ticketMode,
+      multiDayStartDate,
+      multiDayStartTime,
+      multiDayEndTime,
+      setSlotTemplateRecords,
     ],
   );
 
@@ -614,7 +673,7 @@ export const TicketsStep = ({
                     quantity={slotTicket.quantity}
                     amount={slotTicket.amount}
                     validity={`${slotTicket.salesEndRelative?.amount ?? 1} ${slotTicket.salesEndRelative?.unit ?? 'hour'} before the experience ${slotTicket.salesEndRelative?.anchor === 'start' ? 'starts' : 'ends'}`}
-                    coverPhoto={photos?.[0]?.url}
+                    coverPhoto={photos?.[0]}
                     onEdit={() => {
                       setActiveFormIndex(formData.items.indexOf(slotTicket));
                       setActiveSlotIndex(slotIndex);

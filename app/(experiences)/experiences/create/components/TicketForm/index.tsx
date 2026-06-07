@@ -128,9 +128,7 @@ export const TicketForm = ({
           type="number"
           placeholder="Amount per ticket"
           value={value.amount ?? ''}
-          onChange={(e) =>
-            onChange({ amount: e.target.value ? parseFloat(e.target.value) : null })
-          }
+          onChange={(e) => onChange({ amount: e.target.value ? parseFloat(e.target.value) : null })}
           suffixIcon={<IconComponent iconName="Money02Icon" size={18} />}
           className="text-xs"
         />

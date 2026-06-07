@@ -39,6 +39,7 @@ import { Experience } from '@/types/experience';
 import { Interest } from '@/types/interest';
 import { Wallet } from '@/types/payment';
 import { Photo } from '@/types/photo';
+import { inferUIExperienceType } from '@/utils/date-utils';
 import { parseApiError } from '@/utils/parseApiError';
 import {
   SlotTemplateRecord,
@@ -398,6 +399,15 @@ export const useCreateExperienceFlow = () => {
 
     // Check if experience is recurring and parse recurrence rule
     const hasRecurrenceRule = !!experience.recurrenceRule;
+
+    // Infer the UI experience type from API response and dates
+    const apiExperienceType = (experience as any).experience_type ?? 'standard';
+    const uiExperienceType = inferUIExperienceType(
+      apiExperienceType,
+      experience.startDate ?? null,
+      experience.endDate ?? null,
+    );
+
     let dateTypeUpdate: any = {
       community: experience.hostCommunity
         ? {
@@ -407,10 +417,24 @@ export const useCreateExperienceFlow = () => {
           }
         : null,
       experiencePricing: experience.isPaid ? 'paid' : 'free',
+      experienceType: uiExperienceType,
       date: startDate,
       startTime,
       endTime,
     };
+
+    // For multi-day experiences, also populate the multi-day date/time fields
+    if (uiExperienceType === 'multi-day') {
+      const endDate = experience.endDate?.split('T')[0];
+      const endTime = experience.endDate
+        ? (experience.endDate.split('T')[1]?.substring(0, 5) ?? null)
+        : null;
+
+      dateTypeUpdate.multiDayStartDate = startDate;
+      dateTypeUpdate.multiDayStartTime = startTime;
+      dateTypeUpdate.multiDayEndDate = endDate;
+      dateTypeUpdate.multiDayEndTime = endTime;
+    }
 
     // If recurring, parse the recurrence rule using RRule
     if (hasRecurrenceRule) {
@@ -435,7 +459,7 @@ export const useCreateExperienceFlow = () => {
           ...dateTypeUpdate,
           isRecurring: true,
           recurringDays: rule.options.byweekday?.map((day) => {
-            const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+            const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
             return days[day];
           }) as any,
           recurrenceStartDate: moment(rule.options.dtstart).format('YYYY-MM-DD'),

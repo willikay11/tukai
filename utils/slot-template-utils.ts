@@ -1,3 +1,5 @@
+import { RRule } from 'rrule';
+
 export interface SlotTemplatePayload {
   start_time: string;
   duration_minutes: number;
@@ -12,6 +14,19 @@ export interface SlotTemplateRecord {
   endTime: string;
   name?: string;
 }
+
+export const buildSingleOccurrenceRule = (startDate: string, startTime: string): string => {
+  const [year, month, day] = startDate.split('-').map(Number);
+  const [hour, minute] = startTime.split(':').map(Number);
+
+  const rule = new RRule({
+    freq: RRule.DAILY,
+    count: 1,
+    dtstart: new Date(Date.UTC(year, month - 1, day, hour, minute, 0)),
+  });
+
+  return rule.toString();
+};
 
 export const calculateDurationMinutes = (startTime: string, endTime: string): number => {
   const [startHour, startMin] = startTime.split(':').map(Number);
