@@ -267,14 +267,19 @@ export const TicketsStep = ({
           );
 
       // Build API payload
-      const slotTemplateId =
-        isRecurringExperience && slotIndex !== undefined
-          ? slotTemplateRecords[slotIndex]?.templateId
-          : undefined;
+      let slotTemplateId: string | undefined;
+      if (isRecurringExperience && slotIndex !== undefined) {
+        slotTemplateId = slotTemplateRecords[slotIndex]?.templateId;
+      } else if (isMultiDay && slotTemplateRecords.length > 0) {
+        // For multi-day experiences, use the first slot template
+        slotTemplateId = slotTemplateRecords[0]?.templateId;
+      }
 
       console.log('[TicketsStep] Payload building:', {
         isRecurringExperience,
+        isMultiDay,
         slotIndex,
+        ticketMode,
         slotTemplateRecords: slotTemplateRecords.length,
         slotTemplateId,
       });
