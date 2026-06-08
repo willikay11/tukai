@@ -144,6 +144,48 @@ export const formatTimeForPreview = (isoString: string | null): string | null =>
   }
 };
 
+export const formatFirstExperienceDate = (dateString: string): string => {
+  try {
+    const date = new Date(dateString);
+    const dayName = date.toLocaleDateString('en-GB', { weekday: 'long' });
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-GB', { month: 'long' });
+    return `${dayName} ${day}, ${month}`;
+  } catch {
+    return dateString;
+  }
+};
+
+export const formatItineraryDateRange = (startDate: string, endDate: string): string => {
+  try {
+    const fmt = (d: string) => {
+      const date = new Date(d);
+      const day = date.getDate();
+      const month = date.toLocaleDateString('en-GB', { month: 'short' });
+      return `${day} ${month}`;
+    };
+    return `${fmt(startDate)} - ${fmt(endDate)}`;
+  } catch {
+    return `${startDate} - ${endDate}`;
+  }
+};
+
+export const getNumberOfDaysAndNights = (
+  startDate: string,
+  endDate: string,
+): { days: number; nights: number } => {
+  try {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const timeDiff = end.getTime() - start.getTime();
+    const days = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // inclusive of start and end date
+    const nights = days > 1 ? days - 1 : 0; // nights is one less than days, but minimum 0
+    return { days, nights };
+  } catch {
+    return { days: 0, nights: 0 };
+  }
+};
+
 export type UIExperienceType = 'one-time' | 'multi-day' | 'itinerary';
 
 // Infer the UI experience type from the API response

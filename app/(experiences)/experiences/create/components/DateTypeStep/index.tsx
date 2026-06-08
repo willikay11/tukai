@@ -9,6 +9,7 @@ import { TimePicker } from '@/components/ui/time-picker';
 
 import { type Community, CommunitySelector } from '../CommunitySelector';
 import { ExperienceTypeRadio } from '../ExperienceTypeRadio';
+import { ItineraryDateSection } from '../ItineraryDateSection';
 import { MultiDayDateSection } from '../MultiDayDateSection';
 import { RecurrenceDateRange } from '../RecurrenceDateRange';
 import { RecurrencePreviewLabel } from '../RecurrencePreviewLabel';
@@ -33,6 +34,8 @@ export interface DateTypeFormData {
   multiDayStartTime: string | null;
   multiDayEndDate: string | null;
   multiDayEndTime: string | null;
+  itineraryStartDate: string | null;
+  itineraryEndDate: string | null;
 }
 
 export interface DateTypeStepProps {
@@ -170,6 +173,20 @@ export const DateTypeStep = ({
     [onChange],
   );
 
+  const handleItineraryStartDateChange = useCallback(
+    (date: string | null) => {
+      onChange({ itineraryStartDate: date });
+    },
+    [onChange],
+  );
+
+  const handleItineraryEndDateChange = useCallback(
+    (date: string | null) => {
+      onChange({ itineraryEndDate: date });
+    },
+    [onChange],
+  );
+
   return (
     <div className="space-y-4">
       <div>
@@ -197,7 +214,15 @@ export const DateTypeStep = ({
         onRecurringChange={handleRecurringChange}
       />
 
-      {formData.experienceType === 'multi-day' ? (
+      {formData.experienceType === 'itinerary' ? (
+        <ItineraryDateSection
+          startDate={formData.itineraryStartDate}
+          endDate={formData.itineraryEndDate}
+          onStartDateChange={handleItineraryStartDateChange}
+          onEndDateChange={handleItineraryEndDateChange}
+          errors={errors}
+        />
+      ) : formData.experienceType === 'multi-day' ? (
         <MultiDayDateSection
           startDate={formData.multiDayStartDate}
           startTime={formData.multiDayStartTime}

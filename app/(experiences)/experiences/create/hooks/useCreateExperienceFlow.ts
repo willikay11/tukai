@@ -119,6 +119,8 @@ export interface FormData {
     multiDayStartTime: string | null;
     multiDayEndDate: string | null;
     multiDayEndTime: string | null;
+    itineraryStartDate: string | null;
+    itineraryEndDate: string | null;
   };
   about: {
     photos: FormPhoto[];
@@ -193,6 +195,8 @@ const initialFormData: FormData = {
     multiDayStartTime: null,
     multiDayEndDate: null,
     multiDayEndTime: null,
+    itineraryStartDate: null,
+    itineraryEndDate: null,
   },
   about: {
     photos: [],
@@ -627,7 +631,21 @@ export const useCreateExperienceFlow = () => {
       errors.community = 'Community is required';
     }
 
-    if (formData.dateType.experienceType === 'multi-day') {
+    if (formData.dateType.experienceType === 'itinerary') {
+      if (!formData.dateType.itineraryStartDate) {
+        errors.itineraryStartDate = 'Please select a start date';
+      }
+      if (!formData.dateType.itineraryEndDate) {
+        errors.itineraryEndDate = 'Please select an end date';
+      }
+      if (
+        formData.dateType.itineraryStartDate &&
+        formData.dateType.itineraryEndDate &&
+        formData.dateType.itineraryStartDate > formData.dateType.itineraryEndDate
+      ) {
+        errors.itineraryEndDate = 'End date must be after start date';
+      }
+    } else if (formData.dateType.experienceType === 'multi-day') {
       if (!formData.dateType.multiDayStartDate) {
         errors.multiDayStartDate = 'Start date is required';
       }
@@ -956,13 +974,20 @@ export const useCreateExperienceFlow = () => {
       // Determine which date/time fields to use based on experience type
       const isMultiDay = formData.dateType.experienceType === 'multi-day';
       const isRecurring = formData.dateType.isRecurring;
+      const isItinerary = formData.dateType.experienceType === 'itinerary';
 
       let startDateValue = '';
       let endDateValue = '';
       let startTime: string | null = null;
       let endTime: string | null = null;
 
-      if (isMultiDay) {
+      if (isItinerary) {
+        // Itinerary uses its own dedicated date fields (no times)
+        startDateValue = formData.dateType.itineraryStartDate || '';
+        endDateValue = formData.dateType.itineraryEndDate || '';
+        startTime = null;
+        endTime = null;
+      } else if (isMultiDay) {
         // Multi-day uses its own dedicated date + time fields
         startDateValue = formData.dateType.multiDayStartDate || '';
         endDateValue = formData.dateType.multiDayEndDate || '';
@@ -982,8 +1007,14 @@ export const useCreateExperienceFlow = () => {
         endTime = formData.dateType.endTime || null;
       }
 
-      // Validate that all required date/time fields are populated
-      if (!startDateValue || !endDateValue || !startTime || !endTime) {
+      // Validate that all required date/time fields are populated (skip time validation for itinerary)
+      if (!startDateValue || !endDateValue) {
+        setApiError('Please set start and end dates before continuing.');
+        setIsSavingExperience(false);
+        return;
+      }
+
+      if (!isItinerary && (!startTime || !endTime)) {
         setApiError(
           'Please set a start date, end date, start time and end time before continuing.',
         );
@@ -1011,6 +1042,12 @@ export const useCreateExperienceFlow = () => {
         feesAllocation: mapCommission(formData.tickets.commission),
         meetingPlace: formData.about.meetingPoint?.trim() || null,
         meetingTime: formData.about.meetingTime?.trim() || null,
+        ...(isItinerary && {
+          experienceType: 'itinerary',
+        }),
+        ...(isItinerary && {
+          itineraryMode: 'fixed', // this should be removed when the API is updated
+        })
       };
 
       if (experienceId) {

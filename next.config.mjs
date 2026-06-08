@@ -19,7 +19,7 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'cdn-staging.tukai.co',
-      },  
+      },
       {
         protocol: 'https',
         hostname: '**.amazonaws.com',
