@@ -144,6 +144,18 @@ export const formatTimeForPreview = (isoString: string | null): string | null =>
   }
 };
 
+export const formatFirstExperienceDate = (dateString: string): string => {
+  try {
+    const date = new Date(dateString);
+    const dayName = date.toLocaleDateString('en-GB', { weekday: 'long' });
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-GB', { month: 'long' });
+    return `${dayName} ${day}, ${month}`;
+  } catch {
+    return dateString;
+  }
+};
+
 export type UIExperienceType = 'one-time' | 'multi-day' | 'itinerary';
 
 // Infer the UI experience type from the API response

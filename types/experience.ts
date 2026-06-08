@@ -53,7 +53,7 @@ export interface InvitedMember {
 export type CreateExperience = {
   title: string;
   description: string;
-  googleMapPlaceId: string;
+  googleMapPlaceId?: string;
   startDate: string;
   endDate: string;
   recurrence_rule: string;
@@ -69,6 +69,9 @@ export type CreateExperience = {
   feesAllocation?: 'host_pays' | 'customer_pays' | 'split';
   meetingPlace?: string | null;
   meetingTime?: string | null;
+  experienceType?: 'standard' | 'itinerary';
+  itineraryMode?: 'fixed' | 'open';
+  itineraryDurationDays?: number;
 };
 
 export type CreateExperienceTicket = {

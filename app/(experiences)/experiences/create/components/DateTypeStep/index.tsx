@@ -9,6 +9,7 @@ import { TimePicker } from '@/components/ui/time-picker';
 
 import { type Community, CommunitySelector } from '../CommunitySelector';
 import { ExperienceTypeRadio } from '../ExperienceTypeRadio';
+import { ItineraryDateSection } from '../ItineraryDateSection';
 import { MultiDayDateSection } from '../MultiDayDateSection';
 import { RecurrenceDateRange } from '../RecurrenceDateRange';
 import { RecurrencePreviewLabel } from '../RecurrencePreviewLabel';
@@ -33,6 +34,10 @@ export interface DateTypeFormData {
   multiDayStartTime: string | null;
   multiDayEndDate: string | null;
   multiDayEndTime: string | null;
+  itineraryMode: 'fixed' | 'open' | null;
+  itineraryStartDate: string | null;
+  itineraryEndDate: string | null;
+  itineraryDurationDays: number | null;
 }
 
 export interface DateTypeStepProps {
@@ -66,7 +71,17 @@ export const DateTypeStep = ({
 
   const handleTypeChange = useCallback(
     (type: 'one-time' | 'multi-day' | 'itinerary') => {
-      onChange({ experienceType: type });
+      if (type === 'itinerary') {
+        onChange({
+          experienceType: type,
+          itineraryMode: 'fixed',
+          itineraryStartDate: null,
+          itineraryEndDate: null,
+          itineraryDurationDays: null,
+        });
+      } else {
+        onChange({ experienceType: type });
+      }
     },
     [onChange],
   );
@@ -170,6 +185,34 @@ export const DateTypeStep = ({
     [onChange],
   );
 
+  const handleItineraryModeChange = useCallback(
+    (mode: 'fixed' | 'open') => {
+      onChange({ itineraryMode: mode });
+    },
+    [onChange],
+  );
+
+  const handleItineraryStartDateChange = useCallback(
+    (date: string | null) => {
+      onChange({ itineraryStartDate: date });
+    },
+    [onChange],
+  );
+
+  const handleItineraryEndDateChange = useCallback(
+    (date: string | null) => {
+      onChange({ itineraryEndDate: date });
+    },
+    [onChange],
+  );
+
+  const handleItineraryDurationDaysChange = useCallback(
+    (days: number | null) => {
+      onChange({ itineraryDurationDays: days });
+    },
+    [onChange],
+  );
+
   return (
     <div className="space-y-4">
       <div>
@@ -197,7 +240,19 @@ export const DateTypeStep = ({
         onRecurringChange={handleRecurringChange}
       />
 
-      {formData.experienceType === 'multi-day' ? (
+      {formData.experienceType === 'itinerary' ? (
+        <ItineraryDateSection
+          itineraryMode={formData.itineraryMode}
+          itineraryStartDate={formData.itineraryStartDate}
+          itineraryEndDate={formData.itineraryEndDate}
+          itineraryDurationDays={formData.itineraryDurationDays}
+          onModeChange={handleItineraryModeChange}
+          onStartDateChange={handleItineraryStartDateChange}
+          onEndDateChange={handleItineraryEndDateChange}
+          onDurationDaysChange={handleItineraryDurationDaysChange}
+          errors={errors}
+        />
+      ) : formData.experienceType === 'multi-day' ? (
         <MultiDayDateSection
           startDate={formData.multiDayStartDate}
           startTime={formData.multiDayStartTime}

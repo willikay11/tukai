@@ -155,6 +155,18 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
       formData.append('meeting_time', data.meetingTime);
     }
 
+    if (data.experienceType) {
+      formData.append('experience_type', data.experienceType);
+    }
+
+    if (data.itineraryMode) {
+      formData.append('itinerary_mode', data.itineraryMode);
+    }
+
+    if (data.itineraryDurationDays !== undefined && data.itineraryDurationDays !== null) {
+      formData.append('itinerary_duration_days', String(data.itineraryDurationDays));
+    }
+
     const response = await axiosInstance.post(`/v2/experiences/`, formData, {
       headers: {
         'Content-Type': undefined,
