@@ -428,7 +428,28 @@ export const CreateExperienceSteps = ({
             ) : (
               <CreateExperienceCommunity
                 selectedCommunityId={selectedCommunityId}
-                onSelectCommunity={setSelectedCommunityId}
+                onSelectCommunity={(communityId) => {
+                  setSelectedCommunityId(communityId);
+                  // Also update form data with the selected community
+                  const community = communitiesForSelector.find((c) => c.id === communityId);
+                  if (community && updateFormData) {
+                    updateFormData({
+                      community: {
+                        id: community.id,
+                        title: community.name,
+                        description: '',
+                        categories: [],
+                        isPublic: true,
+                        status: 'active',
+                        photos: [],
+                        location: { latitude: 0, longitude: 0, address: '' },
+                        members: [],
+                        dateCreated: new Date().toISOString(),
+                        dateModified: new Date().toISOString(),
+                      } as any,
+                    });
+                  }
+                }}
                 onContinue={() => handleStepChange('about')}
               />
             )}
