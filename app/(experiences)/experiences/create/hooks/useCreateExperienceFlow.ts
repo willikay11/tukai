@@ -119,10 +119,8 @@ export interface FormData {
     multiDayStartTime: string | null;
     multiDayEndDate: string | null;
     multiDayEndTime: string | null;
-    itineraryMode: 'fixed' | 'open' | null;
     itineraryStartDate: string | null;
     itineraryEndDate: string | null;
-    itineraryDurationDays: number | null;
   };
   about: {
     photos: FormPhoto[];
@@ -197,10 +195,8 @@ const initialFormData: FormData = {
     multiDayStartTime: null,
     multiDayEndDate: null,
     multiDayEndTime: null,
-    itineraryMode: null,
     itineraryStartDate: null,
     itineraryEndDate: null,
-    itineraryDurationDays: null,
   },
   about: {
     photos: [],
@@ -636,17 +632,11 @@ export const useCreateExperienceFlow = () => {
     }
 
     if (formData.dateType.experienceType === 'itinerary') {
-      if (!formData.dateType.itineraryMode) {
-        errors.itineraryMode = 'Please select Specific Dates or Flexible Dates';
-      }
       if (!formData.dateType.itineraryStartDate) {
         errors.itineraryStartDate = 'Please select a start date';
       }
       if (!formData.dateType.itineraryEndDate) {
         errors.itineraryEndDate = 'Please select an end date';
-      }
-      if (!formData.dateType.itineraryDurationDays) {
-        errors.itineraryDurationDays = 'Please enter how many days this itinerary lasts';
       }
       if (
         formData.dateType.itineraryStartDate &&
@@ -1054,8 +1044,6 @@ export const useCreateExperienceFlow = () => {
         meetingTime: formData.about.meetingTime?.trim() || null,
         ...(isItinerary && {
           experienceType: 'itinerary',
-          itineraryMode: formData.dateType.itineraryMode || 'fixed',
-          itineraryDurationDays: formData.dateType.itineraryDurationDays || 1,
         }),
       };
 

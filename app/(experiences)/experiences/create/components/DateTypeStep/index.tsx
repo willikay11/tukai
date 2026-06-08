@@ -34,10 +34,8 @@ export interface DateTypeFormData {
   multiDayStartTime: string | null;
   multiDayEndDate: string | null;
   multiDayEndTime: string | null;
-  itineraryMode: 'fixed' | 'open' | null;
   itineraryStartDate: string | null;
   itineraryEndDate: string | null;
-  itineraryDurationDays: number | null;
 }
 
 export interface DateTypeStepProps {
@@ -71,17 +69,7 @@ export const DateTypeStep = ({
 
   const handleTypeChange = useCallback(
     (type: 'one-time' | 'multi-day' | 'itinerary') => {
-      if (type === 'itinerary') {
-        onChange({
-          experienceType: type,
-          itineraryMode: 'fixed',
-          itineraryStartDate: null,
-          itineraryEndDate: null,
-          itineraryDurationDays: null,
-        });
-      } else {
-        onChange({ experienceType: type });
-      }
+      onChange({ experienceType: type });
     },
     [onChange],
   );
@@ -185,13 +173,6 @@ export const DateTypeStep = ({
     [onChange],
   );
 
-  const handleItineraryModeChange = useCallback(
-    (mode: 'fixed' | 'open') => {
-      onChange({ itineraryMode: mode });
-    },
-    [onChange],
-  );
-
   const handleItineraryStartDateChange = useCallback(
     (date: string | null) => {
       onChange({ itineraryStartDate: date });
@@ -202,13 +183,6 @@ export const DateTypeStep = ({
   const handleItineraryEndDateChange = useCallback(
     (date: string | null) => {
       onChange({ itineraryEndDate: date });
-    },
-    [onChange],
-  );
-
-  const handleItineraryDurationDaysChange = useCallback(
-    (days: number | null) => {
-      onChange({ itineraryDurationDays: days });
     },
     [onChange],
   );
@@ -242,14 +216,10 @@ export const DateTypeStep = ({
 
       {formData.experienceType === 'itinerary' ? (
         <ItineraryDateSection
-          itineraryMode={formData.itineraryMode}
-          itineraryStartDate={formData.itineraryStartDate}
-          itineraryEndDate={formData.itineraryEndDate}
-          itineraryDurationDays={formData.itineraryDurationDays}
-          onModeChange={handleItineraryModeChange}
+          startDate={formData.itineraryStartDate}
+          endDate={formData.itineraryEndDate}
           onStartDateChange={handleItineraryStartDateChange}
           onEndDateChange={handleItineraryEndDateChange}
-          onDurationDaysChange={handleItineraryDurationDaysChange}
           errors={errors}
         />
       ) : formData.experienceType === 'multi-day' ? (

@@ -70,8 +70,6 @@ export type CreateExperience = {
   meetingPlace?: string | null;
   meetingTime?: string | null;
   experienceType?: 'standard' | 'itinerary';
-  itineraryMode?: 'fixed' | 'open';
-  itineraryDurationDays?: number;
 };
 
 export type CreateExperienceTicket = {
