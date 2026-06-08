@@ -8,21 +8,26 @@ import {
   bookmarkExperience,
   createExperience,
   createExperienceTicket,
+  createItineraryDay,
   createSlotTemplate,
   deleteExperiencePhoto,
   deleteExperienceTicket,
+  deleteItineraryDay,
   deleteSlotTemplate,
   fetchExperience,
   fetchExperiences,
+  fetchItineraryDays,
   fetchSlotTemplates,
   publishExperience,
   purchaseExperienceTicket,
   searchUsers,
   updateExperience,
   updateExperienceTicket,
+  updateItineraryDay,
   updateSlotTemplate,
 } from '@/services/experience';
 import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
+import { ItineraryDayPayload } from '@/types/itinerary';
 import { PurchaserDetails } from '@/types/purchaser';
 
 export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean) => {
@@ -239,3 +244,66 @@ export const useDeleteSlotTemplate = () => {
     },
   });
 };
+
+export const useCreateItineraryDay = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      experienceId,
+      data,
+    }: {
+      experienceId: string;
+      data: ItineraryDayPayload;
+    }) => createItineraryDay(experienceId, data),
+    onSuccess: (_, { experienceId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ['itinerary-days', experienceId],
+      });
+    },
+  });
+};
+
+export const useUpdateItineraryDay = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      experienceId,
+      dayId,
+      data,
+    }: {
+      experienceId: string;
+      dayId: string;
+      data: Partial<ItineraryDayPayload>;
+    }) => updateItineraryDay(experienceId, dayId, data),
+    onSuccess: (_, { experienceId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ['itinerary-days', experienceId],
+      });
+    },
+  });
+};
+
+export const useDeleteItineraryDay = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      experienceId,
+      dayId,
+    }: {
+      experienceId: string;
+      dayId: string;
+    }) => deleteItineraryDay(experienceId, dayId),
+    onSuccess: (_, { experienceId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ['itinerary-days', experienceId],
+      });
+    },
+  });
+};
+
+export const useFetchItineraryDays = (experienceId: string | null) =>
+  useQuery({
+    queryKey: ['itinerary-days', experienceId],
+    queryFn: () => fetchItineraryDays(experienceId!),
+    enabled: !!experienceId,
+  });

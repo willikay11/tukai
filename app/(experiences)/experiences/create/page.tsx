@@ -39,6 +39,7 @@ function CreateExperiencePageContent() {
     updateAboutFormData,
     updateTicketsFormData,
     updateInviteFormData,
+    updateItineraryDays,
     dateTypeErrors,
     aboutErrors,
     ticketsErrors,
@@ -168,6 +169,8 @@ function CreateExperiencePageContent() {
           validateTickets={validateTickets}
           inviteFormData={formData.invite}
           updateInviteFormData={updateInviteFormData}
+          itineraryDays={formData.itineraryDays}
+          updateItineraryDays={updateItineraryDays}
           walletFormData={formData.wallet}
           updateWalletFormData={updateWalletFormData}
           walletErrors={walletErrors}
@@ -177,6 +180,7 @@ function CreateExperiencePageContent() {
           walletMutations={walletMutations}
           handlers={{
             handleSaveAbout: handlers.handleSaveAbout,
+            handleSaveItineraryDays: handlers.handleSaveItineraryDays,
             handlePublish: handlers.handlePublish,
           }}
           isSavingExperience={isSavingExperience}

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { RRule } from 'rrule';
 
@@ -22,6 +23,7 @@ import {
   useDeleteExperiencePhoto,
   useFetchSingleExperience,
   useFetchSlotTemplates,
+  useFetchItineraryDays,
   usePublishExperience,
   useUpdateExperience,
 } from '@/app/shared/hooks/useExperiences';
@@ -29,17 +31,20 @@ import { useToast } from '@/app/shared/hooks/useToast';
 import { InvitedMember } from '@/components/ui/invite-members';
 import {
   addExperiencePhotos,
+  createItineraryDay,
   createSlotTemplate,
   deleteSlotTemplate,
   fetchSlotTemplates,
+  updateItineraryDay,
   updateSlotTemplate,
 } from '@/services/experience';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
+import { ItineraryDayFormValue } from '@/types/itinerary';
 import { Interest } from '@/types/interest';
 import { Wallet } from '@/types/payment';
 import { Photo } from '@/types/photo';
-import { inferUIExperienceType } from '@/utils/date-utils';
+import { inferUIExperienceType, getDaysBetween } from '@/utils/date-utils';
 import { parseApiError } from '@/utils/parseApiError';
 import {
   SlotTemplateRecord,
@@ -48,7 +53,7 @@ import {
   diffSlotTemplates,
 } from '@/utils/slot-template-utils';
 
-export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
+export type ExperienceStepId = 'community' | 'about' | 'itinerary-days' | 'dates-tickets' | 'guests' | 'wallet';
 
 const formatDateWithTime = (
   date: string,
@@ -72,6 +77,7 @@ const parseExperienceStepId = (step: string | null): ExperienceStepId | null => 
   const validSteps: ExperienceStepId[] = [
     'community',
     'about',
+    'itinerary-days',
     'dates-tickets',
     'guests',
     'wallet',
@@ -176,7 +182,20 @@ export interface FormData {
     selectedWallet?: Wallet;
     phoneNumber: string;
   };
+  itineraryDays: ItineraryDayFormValue[];
 }
+
+const generateItineraryDays = (startDate: string, endDate: string): ItineraryDayFormValue[] => {
+  const days = getDaysBetween(startDate, endDate);
+  return days.map((_, index) => ({
+    id: uuidv4(),
+    dayNumber: index + 1,
+    title: '',
+    description: '',
+    placeId: null,
+    placeName: null,
+  }));
+};
 
 const initialFormData: FormData = {
   dateType: {
@@ -225,6 +244,7 @@ const initialFormData: FormData = {
     paymentMethod: 'phone',
     phoneNumber: '',
   },
+  itineraryDays: [],
 };
 
 export const useCreateExperienceFlow = () => {
@@ -271,6 +291,10 @@ export const useCreateExperienceFlow = () => {
   // Slot template hooks
   const { data: slotTemplatesResponse, isLoading: isLoadingSlotTemplates } =
     useFetchSlotTemplates(experienceId);
+
+  // Itinerary days hooks
+  const { data: itineraryDaysResponse, isLoading: isLoadingItineraryDays } =
+    useFetchItineraryDays(experienceId);
 
   // Wallet hooks
   const { data: walletsResponse, isLoading: isWalletsLoading } = useGetWallets();
@@ -610,6 +634,27 @@ export const useCreateExperienceFlow = () => {
     }
   }, [experience?.photos, formData.about.photos, updateAboutFormData]);
 
+  // Hydrate itinerary days from API when loading a draft itinerary experience
+  useEffect(() => {
+    if (
+      formData.dateType.experienceType === 'itinerary' &&
+      itineraryDaysResponse?.data &&
+      experienceId
+    ) {
+      const apiDays = itineraryDaysResponse.data;
+      const hydrationDays: ItineraryDayFormValue[] = apiDays.map((day: any) => ({
+        id: uuidv4(),
+        apiId: day.id,
+        dayNumber: day.day_number,
+        title: day.title || '',
+        description: day.description || '',
+        placeId: null,
+        placeName: null,
+      }));
+      updateItineraryDays(hydrationDays);
+    }
+  }, [itineraryDaysResponse?.data, experienceId, formData.dateType.experienceType]);
+
   const updateWalletFormData = useCallback((data: Partial<FormData['wallet']>) => {
     setFormData((prev) => ({
       ...prev,
@@ -623,6 +668,28 @@ export const useCreateExperienceFlow = () => {
       paymentMethod: wallets.find((w) => w.isActive)?.walletType,
     });
   }, [wallets.length]);
+
+  // Generate itinerary days when start/end dates change
+  useEffect(() => {
+    if (
+      formData.dateType.experienceType === 'itinerary' &&
+      formData.dateType.itineraryStartDate &&
+      formData.dateType.itineraryEndDate
+    ) {
+      const days = generateItineraryDays(
+        formData.dateType.itineraryStartDate,
+        formData.dateType.itineraryEndDate,
+      );
+      // Only regenerate if day count changed
+      if (days.length !== formData.itineraryDays.length) {
+        updateItineraryDays(days);
+      }
+    }
+  }, [
+    formData.dateType.itineraryStartDate,
+    formData.dateType.itineraryEndDate,
+    formData.dateType.experienceType,
+  ]);
 
   const validateDateType = useCallback((): boolean => {
     const errors: Record<string, string> = {};
@@ -865,6 +932,13 @@ export const useCreateExperienceFlow = () => {
     setFormData((prev) => ({
       ...prev,
       invite: { ...prev.invite, ...data },
+    }));
+  }, []);
+
+  const updateItineraryDays = useCallback((days: ItineraryDayFormValue[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      itineraryDays: days,
     }));
   }, []);
 
@@ -1159,10 +1233,20 @@ export const useCreateExperienceFlow = () => {
           }
         }
 
-        handleExperienceCreated(newExperienceId, 'dates-tickets');
+        const nextStep =
+          formData.dateType.experienceType === 'itinerary'
+            ? 'itinerary-days'
+            : 'dates-tickets';
+
+        handleExperienceCreated(newExperienceId, nextStep);
       }
 
-      setActiveStep('dates-tickets');
+      const nextStep =
+        formData.dateType.experienceType === 'itinerary'
+          ? 'itinerary-days'
+          : 'dates-tickets';
+
+      setActiveStep(nextStep);
     } catch (error: any) {
       const message = parseApiError(error, 'Failed to save experience');
       setApiError(message);
@@ -1258,6 +1342,50 @@ export const useCreateExperienceFlow = () => {
     },
     [experienceId, addGuestAsync, toast],
   );
+
+  const handleSaveItineraryDays = useCallback(async () => {
+    if (!experienceId) return;
+
+    setIsSavingExperience(true);
+    try {
+      const days = formData.itineraryDays;
+
+      await Promise.all(
+        days.map(async (day) => {
+          const payload = {
+            day_number: day.dayNumber,
+            title: day.title,
+            description: day.description,
+          };
+
+          if (day.apiId) {
+            // Update existing day
+            await updateItineraryDay(experienceId, day.apiId, payload);
+          } else {
+            // Create new day
+            const response = await createItineraryDay(experienceId, payload);
+            day.apiId = response.data?.id;
+          }
+        }),
+      );
+
+      // Update formData with apiIds
+      updateItineraryDays([...days]);
+
+      // Advance to tickets step
+      handleStepChange('dates-tickets');
+    } catch (error: any) {
+      const message = parseApiError(error, 'Failed to save itinerary days');
+      setApiError(message);
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSavingExperience(false);
+    }
+  }, [experienceId, formData.itineraryDays, handleStepChange, toast]);
 
   const handlePublish = useCallback(async () => {
     setIsSavingExperience(true);
@@ -1390,6 +1518,7 @@ export const useCreateExperienceFlow = () => {
       handleItineraryCustomise,
       handleInvitesChange,
       handleSaveAbout,
+      handleSaveItineraryDays,
       handleAddPhotos,
       handleDeletePhoto,
       handleAddGuest,

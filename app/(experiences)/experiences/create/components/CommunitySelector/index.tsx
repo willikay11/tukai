@@ -41,7 +41,7 @@ export const CommunitySelector = ({
     <div className="space-y-3">
       {/* Label */}
       <div className="flex items-center gap-1.5">
-        <label className="text-sm font-medium text-gray-800">Select Host Community</label>
+        <label className="text-xs font-medium text-gray-800">Select Host Community</label>
         <IconComponent iconName="InformationCircleIcon" size={16} className="text-gray-400" />
       </div>
 

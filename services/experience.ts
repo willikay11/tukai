@@ -3,6 +3,7 @@ import { ca } from 'date-fns/locale';
 import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
 import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
+import { ItineraryDayPayload } from '@/types/itinerary';
 import { PurchaserDetails } from '@/types/purchaser';
 import { assertValidImageFiles } from '@/utils/images';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
@@ -529,6 +530,110 @@ export const deleteSlotTemplate = async (
     const axiosInstance = await apiWithToken();
     const response = await axiosInstance.delete(
       `/v1/experiences/${experienceId}/slot-templates/${templateId}/`,
+    );
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+};
+
+export const createItineraryDay = async (
+  experienceId: string,
+  data: ItineraryDayPayload,
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.post(
+      `/v1/experiences/${experienceId}/itinerary-days/`,
+      data,
+    );
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+};
+
+export const updateItineraryDay = async (
+  experienceId: string,
+  dayId: string,
+  data: Partial<ItineraryDayPayload>,
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.patch(
+      `/v1/experiences/${experienceId}/itinerary-days/${dayId}/`,
+      data,
+    );
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+};
+
+export const deleteItineraryDay = async (
+  experienceId: string,
+  dayId: string,
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.delete(
+      `/v1/experiences/${experienceId}/itinerary-days/${dayId}/`,
+    );
+
+    return {
+      status: response.status,
+      success: true,
+      data: null,
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+};
+
+export const fetchItineraryDays = async (experienceId: string): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.get(
+      `/v1/experiences/${experienceId}/itinerary-days/`,
     );
 
     return {
