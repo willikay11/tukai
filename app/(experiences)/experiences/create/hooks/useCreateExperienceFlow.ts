@@ -1045,6 +1045,9 @@ export const useCreateExperienceFlow = () => {
         ...(isItinerary && {
           experienceType: 'itinerary',
         }),
+        ...(isItinerary && {
+          itineraryMode: 'fixed', // this should be removed when the API is updated
+        })
       };
 
       if (experienceId) {

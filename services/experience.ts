@@ -159,6 +159,11 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
       formData.append('experience_type', data.experienceType);
     }
 
+    if (data.itineraryMode) {
+      formData.append('itinerary_mode', data.itineraryMode);
+      formData.append('itinerary_duration_days', "30");
+    }
+
     const response = await axiosInstance.post(`/v2/experiences/`, formData, {
       headers: {
         'Content-Type': undefined,
