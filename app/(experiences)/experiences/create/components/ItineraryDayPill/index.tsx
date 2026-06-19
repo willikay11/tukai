@@ -33,6 +33,8 @@ export const ItineraryDayPill = ({
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
 
+  console.log('[ItineraryDayPill] Rendered with day:', { dayNumber: day.dayNumber, places: day.places, placeCount: day.places?.length });
+
   const handlePlaceSelected = (selected: {
     id: string;
     name: string;
@@ -49,8 +51,10 @@ export const ItineraryDayPill = ({
       startTime: null,
       endTime: null,
     };
+    const updatedPlaces = [...(day.places ?? []), newPlace];
+    console.log('[ItineraryDayPill] Place selected:', { selected, newPlace, currentPlaces: day.places, updatedPlaces });
     onChange({
-      places: [...(day.places ?? []), newPlace],
+      places: updatedPlaces,
     });
     setEditingPlaceId(newPlace.id);
     setIsPickerOpen(false);

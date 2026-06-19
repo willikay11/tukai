@@ -117,6 +117,7 @@ export const AddPlaceModal = ({
                     className="group relative cursor-pointer"
                     onClick={() => {
                       if (!isAdded) {
+                        console.log('[AddPlaceModal] Place card clicked:', { place: place.title, isAdded });
                         onSelect({
                           id: place.id,
                           name: place.title,

@@ -696,7 +696,13 @@ export const useCreateExperienceFlow = () => {
         formData.dateType.itineraryEndDate,
       );
       // Only regenerate if day count changed
+      console.log('[useCreateExperienceFlow] Itinerary regenerate check:', {
+        newDaysLength: days.length,
+        currentDaysLength: formData.itineraryDays.length,
+        shouldRegenerate: days.length !== formData.itineraryDays.length
+      });
       if (days.length !== formData.itineraryDays.length) {
+        console.log('[useCreateExperienceFlow] Regenerating itinerary days!');
         updateItineraryDays(days);
       }
     }

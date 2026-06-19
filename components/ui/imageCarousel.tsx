@@ -56,10 +56,6 @@ export const ImageCarousel = ({
     e.nativeEvent.stopImmediatePropagation();
   };
 
-  useEffect(() => {
-    console.log('Images updated:', images);
-  }, [images]);
-
   return (
     <div className={cn('group relative', width, className)}>
       <Carousel className={cn(width)}>
