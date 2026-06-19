@@ -162,7 +162,7 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
 
     if (data.itineraryMode) {
       formData.append('itinerary_mode', data.itineraryMode);
-      formData.append('itinerary_duration_days', "30");
+      formData.append('itinerary_duration_days', data.itineraryDurationDays ? String(data.itineraryDurationDays) : '0');
     }
 
     const response = await axiosInstance.post(`/v2/experiences/`, formData, {
