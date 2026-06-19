@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 
-import { Drawer } from '@/components/ui/drawer';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { Input } from '@/components/ui/input';
 import { usePlaces, usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { SimplePillFilters } from '@/app/shared/components/Filters/SimplePillFilters';
 import { SinglePlace } from '@/app/(places)/places/components/place';
@@ -32,18 +33,14 @@ export const AddPlaceModal = ({
 
   // Fetch categories for filter pills
   const { data: categoriesResponse, isLoading: isCategoriesLoading } =
-    usePlaceCategories({ pageSize: 100 }, true);
+    usePlaceCategories({ pageSize: 100 }, isOpen);
 
   // Fetch places with current filters
   const { data: placesResponse, isLoading: isPlacesLoading } = usePlaces({
     categoryId: selectedCategory || undefined,
     page: 1,
     enabled: isOpen,
-    // Note: search param is passed to fetchPlaces but not exposed in current usePlaces hook
-    // We'll use the existing hook as-is and rely on categoryId filtering
   });
-
-  if (!isOpen) return null;
 
   const categories =
     categoriesResponse?.data?.results?.map((cat: any) => ({
@@ -55,12 +52,12 @@ export const AddPlaceModal = ({
   const places = placesResponse?.data?.results || [];
 
   return (
-    <Drawer isOpen={isOpen} setIsOpen={onClose}>
-      <div className="flex h-full flex-col overflow-hidden">
-        {/* Header with search and close */}
-        <div className="flex-shrink-0 space-y-3 px-4 py-4">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="flex flex-col max-h-[90vh] w-full max-w-4xl p-0">
+        {/* Header with search and title */}
+        <div className="flex-shrink-0 space-y-3 px-6 pt-4">
           {/* Search input */}
-          <div className="flex items-center gap-2 border border-gray-200 rounded-full px-3 py-2">
+          <div className="flex items-center gap-2 border border-gray-200 bg-gray-100 rounded-full px-3 py-2">
             <IconComponent
               iconName="Search01Icon"
               size={16}
@@ -71,7 +68,7 @@ export const AddPlaceModal = ({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Find a place"
-              className="flex-1 text-sm outline-none bg-transparent placeholder:text-gray-400"
+              className="flex-1 text-sm outline-none bg-transparent placeholder:text-gray-400 h-[30px]"
             />
             {search && (
               <button
@@ -81,17 +78,11 @@ export const AddPlaceModal = ({
                 <IconComponent iconName="Cancel01Icon" size={14} />
               </button>
             )}
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-2"
-            >
-              <IconComponent iconName="Cancel01Icon" size={18} />
-            </button>
           </div>
         </div>
 
         {/* Category filter pills */}
-        <div className="flex-shrink-0 px-4 py-0">
+        <div className="flex-shrink-0 px-6 py-0">
           {isCategoriesLoading ? (
             <div className="h-8 bg-gray-100 rounded animate-pulse" />
           ) : categories.length > 0 ? (
@@ -104,10 +95,10 @@ export const AddPlaceModal = ({
         </div>
 
         {/* Place grid */}
-        <div className="flex-1 overflow-y-auto px-4 py-4">
+        <div className="flex-1 overflow-y-auto px-6">
           {isPlacesLoading ? (
-            <div className="grid grid-cols-2 gap-4">
-              {Array.from({ length: 4 }).map((_, i) => (
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+              {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="animate-pulse">
                   <div className="aspect-square bg-gray-200 rounded-lg mb-2" />
                   <div className="h-3 bg-gray-200 rounded mb-2" />
@@ -183,7 +174,7 @@ export const AddPlaceModal = ({
             </div>
           )}
         </div>
-      </div>
-    </Drawer>
+      </DialogContent>
+    </Dialog>
   );
 };

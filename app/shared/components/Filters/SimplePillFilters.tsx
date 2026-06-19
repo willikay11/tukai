@@ -125,9 +125,9 @@ export const SimplePillFilters = ({
             className={clsx(
               'flex h-9 flex-row items-center justify-center rounded-full px-3 py-2 flex-shrink-0 text-xs font-medium transition-colors',
               {
-                'bg-primary/20 text-primary border border-primary':
+                'bg-emerald-100 text-primary':
                   selected === filter.value,
-                'bg-gray-100 text-gray-600 border border-gray-200 hover:border-primary hover:text-primary':
+                'bg-gray-100 text-gray-600 hover:border-primary hover:text-primary':
                   selected !== filter.value,
               },
             )}
