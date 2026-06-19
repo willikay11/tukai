@@ -641,17 +641,20 @@ export const useCreateExperienceFlow = () => {
       itineraryDaysResponse?.data &&
       experienceId
     ) {
-      const apiDays = itineraryDaysResponse.data;
-      const hydrationDays: ItineraryDayFormValue[] = apiDays.map((day: any) => ({
-        id: uuidv4(),
-        apiId: day.id,
-        dayNumber: day.day_number,
-        title: day.title || '',
-        description: day.description || '',
-        placeId: null,
-        placeName: null,
-      }));
-      updateItineraryDays(hydrationDays);
+      const apiDays = itineraryDaysResponse.data.results || [];
+
+      if (apiDays.length > 0) {
+        const hydrationDays: ItineraryDayFormValue[] = apiDays.map((day: any) => ({
+          id: uuidv4(),
+          apiId: day.id,
+          dayNumber: day.day_number,
+          title: day.title || '',
+          description: day.description || '',
+          placeId: null,
+          placeName: null,
+        }));
+        updateItineraryDays(hydrationDays);
+      }
     }
   }, [itineraryDaysResponse?.data, experienceId, formData.dateType.experienceType]);
 
