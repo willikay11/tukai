@@ -29,6 +29,7 @@ export const ItineraryDayPill = ({
       {/* Timeline dot + dashed vertical line */}
       <div className="flex flex-col items-center relative">
         <div className="mt-3.5 h-1.5 w-1.5 flex-shrink-0 rounded-full border-2 border-gray-300 bg-gray-300 z-10" />
+        <div className="pointer-events-none absolute mt-4 h-0 w-3.5 left-1 border-t-[1px] border-dashed border-gray-300" />
         <div className="mt-1 flex-1 border-l-[1px] border-dashed border-gray-300 absolute top-2.5 -bottom-[14px]" />
       </div>
 
