@@ -192,8 +192,7 @@ const generateItineraryDays = (startDate: string, endDate: string): ItineraryDay
     dayNumber: index + 1,
     title: '',
     description: '',
-    placeId: null,
-    placeName: null,
+    places: [],
   }));
 };
 
@@ -657,8 +656,7 @@ export const useCreateExperienceFlow = () => {
           dayNumber: day.day_number,
           title: day.title || '',
           description: day.description || '',
-          placeId: null,
-          placeName: null,
+          places: [],
         }));
         updateItineraryDays(hydrationDays);
       }

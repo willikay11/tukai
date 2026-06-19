@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 
+import { v4 as uuidv4 } from 'uuid';
+
 import { IconComponent } from '@/app/shared/components/Icons';
-import { ItineraryDayFormValue } from '@/types/itinerary';
+import { ItineraryDayFormValue, ItineraryDayPlace } from '@/types/itinerary';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { AddPlaceModal } from '../AddPlaceModal';
+import { ItineraryPlaceCard } from '../ItineraryPlaceCard';
 
 interface ItineraryDayPillProps {
   day: ItineraryDayFormValue;
@@ -28,6 +31,50 @@ export const ItineraryDayPill = ({
   error,
 }: ItineraryDayPillProps) => {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
+
+  const handlePlaceSelected = (selected: {
+    id: string;
+    name: string;
+    imageUrl: string | null;
+    city: string | null;
+  }) => {
+    const newPlace: ItineraryDayPlace = {
+      id: uuidv4(),
+      placeId: selected.id,
+      placeName: selected.name,
+      imageUrl: selected.imageUrl,
+      city: selected.city,
+      date: null,
+      startTime: null,
+      endTime: null,
+    };
+    onChange({
+      places: [...(day.places ?? []), newPlace],
+    });
+    setEditingPlaceId(newPlace.id);
+    setIsPickerOpen(false);
+  };
+
+  const handlePlaceUpdate = (
+    placeLocalId: string,
+    updates: Partial<ItineraryDayPlace>,
+  ) => {
+    onChange({
+      places: (day.places ?? []).map((p) =>
+        p.id === placeLocalId ? { ...p, ...updates } : p,
+      ),
+    });
+  };
+
+  const handlePlaceDelete = (placeLocalId: string) => {
+    onChange({
+      places: (day.places ?? []).filter((p) => p.id !== placeLocalId),
+    });
+    if (editingPlaceId === placeLocalId) {
+      setEditingPlaceId(null);
+    }
+  };
 
   return (
     <div className="relative flex gap-3">
@@ -93,47 +140,43 @@ export const ItineraryDayPill = ({
               rows={4}
             />
 
-            {/* Add Place */}
+            {/* Place cards */}
+            <div className="space-y-3">
+              {(day.places ?? []).map((place) => (
+                <ItineraryPlaceCard
+                  key={place.id}
+                  place={place}
+                  isEditingDate={editingPlaceId === place.id}
+                  onEdit={() =>
+                    setEditingPlaceId(editingPlaceId === place.id ? null : place.id)
+                  }
+                  onDelete={() => handlePlaceDelete(place.id)}
+                  onDateChange={(date) => handlePlaceUpdate(place.id, { date })}
+                  onStartTimeChange={(time) =>
+                    handlePlaceUpdate(place.id, { startTime: time })
+                  }
+                  onEndTimeChange={(time) => handlePlaceUpdate(place.id, { endTime: time })}
+                />
+              ))}
+            </div>
+
+            {/* Add Place button — always visible */}
             <div className="space-y-2">
-              <p className="text-xs font-medium text-gray-800">
+              <p className="text-xs text-gray-800">
                 Where will these activities take place?
               </p>
               <button
                 type="button"
                 onClick={() => setIsPickerOpen(true)}
-                className="flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-xs font-medium text-primary hover:bg-primary/5 transition-colors"
+                className="flex items-center gap-2 border border-primary text-primary rounded-full px-4 py-2 text-sm font-medium hover:bg-primary/5 transition-colors"
               >
                 <IconComponent
                   iconName="PlusSignCircleIcon"
                   size={16}
                   className="text-primary"
                 />
-                {day.placeName ? 'Change Place' : 'Add Place'}
+                Add Place
               </button>
-
-              {/* Show selected place name if set */}
-              {day.placeName && (
-                <div className="flex items-center gap-2 mt-2 p-2 bg-primary/5 rounded-lg">
-                  <IconComponent
-                    iconName="Location01Icon"
-                    size={14}
-                    className="text-primary flex-shrink-0"
-                  />
-                  <span className="text-xs text-gray-700 flex-1">{day.placeName}</span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onChange({
-                        placeId: null,
-                        placeName: null,
-                      })
-                    }
-                    className="text-gray-400 hover:text-red-400 flex-shrink-0"
-                  >
-                    <IconComponent iconName="Cancel01Icon" size={12} />
-                  </button>
-                </div>
-              )}
             </div>
 
             {error && <p className="text-xs text-red-500">{error}</p>}
@@ -144,14 +187,8 @@ export const ItineraryDayPill = ({
         <AddPlaceModal
           isOpen={isPickerOpen}
           onClose={() => setIsPickerOpen(false)}
-          selectedPlaceIds={day.placeId ? [day.placeId] : []}
-          onSelect={(place) => {
-            onChange({
-              placeId: place.id,
-              placeName: place.name,
-            });
-            setIsPickerOpen(false);
-          }}
+          selectedPlaceIds={(day.places ?? []).map((p) => p.placeId)}
+          onSelect={handlePlaceSelected}
         />
       </div>
     </div>
