@@ -1,9 +1,12 @@
 'use client';
 
+import { useState } from 'react';
+
 import { IconComponent } from '@/app/shared/components/Icons';
 import { ItineraryDayFormValue } from '@/types/itinerary';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { AddPlaceModal } from '../AddPlaceModal';
 
 interface ItineraryDayPillProps {
   day: ItineraryDayFormValue;
@@ -24,6 +27,8 @@ export const ItineraryDayPill = ({
   isSaving,
   error,
 }: ItineraryDayPillProps) => {
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+
   return (
     <div className="relative flex gap-3">
       {/* Timeline dot + dashed vertical line */}
@@ -95,6 +100,7 @@ export const ItineraryDayPill = ({
               </p>
               <button
                 type="button"
+                onClick={() => setIsPickerOpen(true)}
                 className="flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-xs font-medium text-primary hover:bg-primary/5 transition-colors"
               >
                 <IconComponent
@@ -102,13 +108,51 @@ export const ItineraryDayPill = ({
                   size={16}
                   className="text-primary"
                 />
-                Add Place
+                {day.placeName ? 'Change Place' : 'Add Place'}
               </button>
+
+              {/* Show selected place name if set */}
+              {day.placeName && (
+                <div className="flex items-center gap-2 mt-2 p-2 bg-primary/5 rounded-lg">
+                  <IconComponent
+                    iconName="Location01Icon"
+                    size={14}
+                    className="text-primary flex-shrink-0"
+                  />
+                  <span className="text-xs text-gray-700 flex-1">{day.placeName}</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onChange({
+                        placeId: null,
+                        placeName: null,
+                      })
+                    }
+                    className="text-gray-400 hover:text-red-400 flex-shrink-0"
+                  >
+                    <IconComponent iconName="Cancel01Icon" size={12} />
+                  </button>
+                </div>
+              )}
             </div>
 
             {error && <p className="text-xs text-red-500">{error}</p>}
           </div>
         )}
+
+        {/* Place picker modal */}
+        <AddPlaceModal
+          isOpen={isPickerOpen}
+          onClose={() => setIsPickerOpen(false)}
+          selectedPlaceIds={day.placeId ? [day.placeId] : []}
+          onSelect={(place) => {
+            onChange({
+              placeId: place.id,
+              placeName: place.name,
+            });
+            setIsPickerOpen(false);
+          }}
+        />
       </div>
     </div>
   );
