@@ -47,8 +47,8 @@ export const ItineraryDaysStep = ({
     <div className="space-y-4">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold text-gray-900">Customise Your Itinerary</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-xl font-bold text-gray-800">Customise Your Itinerary</h2>
+        <p className="mt-1 text-xs text-gray-800">
           Add the days and the places you plan to visit
         </p>
       </div>

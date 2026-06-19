@@ -2,6 +2,8 @@
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { ItineraryDayFormValue } from '@/types/itinerary';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 interface ItineraryDayPillProps {
   day: ItineraryDayFormValue;
@@ -25,9 +27,9 @@ export const ItineraryDayPill = ({
   return (
     <div className="relative flex gap-3">
       {/* Timeline dot + dashed vertical line */}
-      <div className="flex flex-col items-center">
-        <div className="mt-3.5 h-2.5 w-2.5 flex-shrink-0 rounded-full border-2 border-gray-300 bg-white z-10" />
-        <div className="mt-1 flex-1 border-l-2 border-dashed border-gray-300" />
+      <div className="flex flex-col items-center relative">
+        <div className="mt-3.5 h-1.5 w-1.5 flex-shrink-0 rounded-full border-2 border-gray-300 bg-gray-300 z-10" />
+        <div className="mt-1 flex-1 border-l-[1px] border-dashed border-gray-300 absolute top-2.5 -bottom-[14px]" />
       </div>
 
       {/* Pill + expanded content */}
@@ -37,7 +39,7 @@ export const ItineraryDayPill = ({
           <button
             type="button"
             onClick={onToggle}
-            className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-800 hover:border-gray-400 transition-colors"
+            className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-800 hover:border-gray-400 transition-colors"
           >
             <IconComponent iconName="Calendar03Icon" size={16} className="text-gray-500" />
             <span>Day {day.dayNumber}</span>
@@ -71,31 +73,28 @@ export const ItineraryDayPill = ({
         {isExpanded && (
           <div className="mt-3 space-y-3">
             {/* Activity Title */}
-            <input
-              type="text"
+            <Input
               value={day.title}
               onChange={(e) => onChange({ title: e.target.value })}
               placeholder="Activity Title"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-gray-400"
             />
 
             {/* Description */}
-            <textarea
+            <Textarea
               value={day.description}
               onChange={(e) => onChange({ description: e.target.value })}
               placeholder="Add a brief description about the day's experiences/activities"
               rows={4}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-gray-400"
             />
 
             {/* Add Place */}
             <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-800">
+              <p className="text-xs font-medium text-gray-800">
                 Where will these activities take place?
               </p>
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary/5 transition-colors"
+                className="flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-xs font-medium text-primary hover:bg-primary/5 transition-colors"
               >
                 <IconComponent
                   iconName="PlusSignCircleIcon"
