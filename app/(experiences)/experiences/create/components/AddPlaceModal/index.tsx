@@ -40,6 +40,7 @@ export const AddPlaceModal = ({
     categoryId: selectedCategory || undefined,
     page: 1,
     enabled: isOpen,
+    search: search || undefined,
   });
 
   const categories =

@@ -168,7 +168,7 @@ export const ItineraryDayPill = ({
               <button
                 type="button"
                 onClick={() => setIsPickerOpen(true)}
-                className="flex items-center gap-2 border border-primary text-primary rounded-full px-4 py-2 text-sm font-medium hover:bg-primary/5 transition-colors"
+                className="flex items-center gap-2 border border-primary text-primary rounded-full px-4 py-2 text-xs font-medium hover:bg-primary/5 transition-colors"
               >
                 <IconComponent
                   iconName="PlusSignCircleIcon"
