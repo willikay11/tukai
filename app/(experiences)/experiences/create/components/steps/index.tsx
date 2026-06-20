@@ -18,9 +18,11 @@ import type { FormData } from '../../hooks/useCreateExperienceFlow';
 import { AboutStep } from '../AboutStep';
 import { type DateTypeFormData, DateTypeStep } from '../DateTypeStep';
 import { InviteGuestsStep } from '../InviteGuestsStep';
+import { ItineraryDaysStep } from '../ItineraryDaysStep';
 import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { TicketsStep } from '../TicketsStep';
 import { WalletDetailsStep } from '../WalletDetailsStep';
+import { ItineraryDayFormValue } from '@/types/itinerary';
 import { CreateExperienceAbout } from '../about';
 import { CreateExperienceCommunity } from '../community';
 import { ExperienceDates } from '../dates';
@@ -42,7 +44,7 @@ type AboutFormData = {
   categories: Interest[];
 };
 
-export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
+export type ExperienceStepId = 'community' | 'about' | 'itinerary-days' | 'dates-tickets' | 'guests' | 'wallet';
 
 const STEPS_DEFAULT = [
   {
@@ -84,8 +86,35 @@ const STEPS_MULTI_DAY = [
   { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
 ];
 
+const STEPS_ITINERARY = [
+  {
+    id: 'community',
+    label: 'Community',
+    icon: 'AddTeamIcon',
+  },
+  {
+    id: 'about',
+    label: 'About',
+    icon: 'InformationCircleIcon',
+  },
+  {
+    id: 'itinerary-days',
+    label: 'Itinerary',
+    icon: 'MapIcon',
+  },
+  {
+    id: 'dates-tickets',
+    label: 'Dates & Tickets',
+    icon: 'Ticket02Icon',
+  },
+  { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
+  { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
+];
+
 const getSteps = (experienceType: 'one-time' | 'multi-day' | 'itinerary'): typeof STEPS_DEFAULT => {
-  return experienceType === 'multi-day' ? STEPS_MULTI_DAY : STEPS_DEFAULT;
+  if (experienceType === 'multi-day') return STEPS_MULTI_DAY;
+  if (experienceType === 'itinerary') return STEPS_ITINERARY;
+  return STEPS_DEFAULT;
 };
 
 interface CreateExperienceStepsProps {
@@ -167,6 +196,8 @@ interface CreateExperienceStepsProps {
       invitedCommunityIds: string[];
     }>,
   ) => void;
+  itineraryDays?: ItineraryDayFormValue[];
+  updateItineraryDays?: (days: ItineraryDayFormValue[]) => void;
   walletFormData?: FormData['wallet'];
   updateWalletFormData?: (data: Partial<FormData['wallet']>) => void;
   walletErrors?: Record<string, string>;
@@ -186,6 +217,7 @@ interface CreateExperienceStepsProps {
   onPreviewAndPublish?: () => void;
   handlers?: {
     handleSaveAbout?: () => Promise<void>;
+    handleSaveItineraryDays?: () => Promise<void>;
     handlePublish?: () => Promise<void>;
     handleUpdateFeesAllocation?: () => Promise<void>;
   };
@@ -233,7 +265,8 @@ export const CreateExperienceSteps = ({
   validateTickets = () => true,
   inviteFormData,
   updateInviteFormData,
-
+  itineraryDays = [],
+  updateItineraryDays,
   walletFormData,
   updateWalletFormData,
   walletErrors = {},
@@ -489,8 +522,30 @@ export const CreateExperienceSteps = ({
               <CreateExperienceAbout
                 experience={experience}
                 onSuccess={(experienceId) => {
-                  onExperienceCreated?.(experienceId, 'dates-tickets');
+                  const nextStep = formData?.experienceType === 'itinerary' ? 'itinerary-days' : 'dates-tickets';
+                  onExperienceCreated?.(experienceId, nextStep);
                 }}
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="itinerary-days" className="col-span-1 mt-6">
+            {formData?.experienceType === 'itinerary' && experience?.id && (
+              <ItineraryDaysStep
+                experienceId={experience.id}
+                days={itineraryDays}
+                onChange={(days) => {
+                  updateItineraryDays?.(days);
+                }}
+                onSaveContinue={() => {
+                  if (handlers?.handleSaveItineraryDays) {
+                    handlers.handleSaveItineraryDays();
+                  } else {
+                    handleStepChange('dates-tickets');
+                  }
+                }}
+                onCancel={() => handleStepChange('about')}
+                isSaving={isSavingExperience}
               />
             )}
           </TabsContent>

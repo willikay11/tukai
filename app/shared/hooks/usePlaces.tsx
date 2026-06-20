@@ -24,16 +24,18 @@ export const usePlaces = ({
   enabled,
   lat,
   lng,
+  search,
 }: {
   categoryId?: string | string[];
   page: number;
   enabled: boolean;
   lat?: number;
   lng?: number;
+  search?: string;
 }) => {
   return useQuery({
-    queryKey: ['places', { categoryId, page, lat, lng }],
-    queryFn: async () => await fetchPlaces(page, 12, categoryId, undefined, lat, lng),
+    queryKey: ['places', { categoryId, page, lat, lng, search }],
+    queryFn: async () => await fetchPlaces(page, 12, categoryId, search, lat, lng),
     enabled,
   });
 };

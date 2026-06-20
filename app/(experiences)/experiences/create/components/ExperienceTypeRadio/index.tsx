@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -29,6 +29,10 @@ export const ExperienceTypeRadio = ({
     [onRecurringChange],
   );
 
+  useEffect(() => {
+    setExperienceType(value);
+  }, [value]);
+  
   return (
     <div className="space-y-2">
       <label className="text-xs font-medium text-gray-900">Experience Type</label>
