@@ -5,10 +5,12 @@ import { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Input } from '@/components/ui/input';
-import { usePlaces, usePlaceCategories } from '@/app/shared/hooks/usePlaces';
+import { usePlaces, usePlaceCategories, useGoogleMapsAutocomplete } from '@/app/shared/hooks/usePlaces';
 import { SimplePillFilters } from '@/app/shared/components/Filters/SimplePillFilters';
 import { SinglePlace } from '@/app/(places)/places/components/place';
+import { GooglePlaceCard } from '../GooglePlaceCard';
 import { Place } from '@/types/place';
+import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 
 interface AddPlaceModalProps {
   isOpen: boolean;
@@ -43,6 +45,21 @@ export const AddPlaceModal = ({
     search: search || undefined,
   });
 
+  const places = placesResponse?.data?.results || [];
+
+  // Determine when to show Google fallback
+  const hasTukaiResults = !isPlacesLoading && places.length > 0;
+  const showGoogleFallback = !isPlacesLoading && places.length === 0 && search.trim().length >= 2;
+
+  // Google Places fallback — only fetch when Tukai has no results
+  const { data: googleResponse, isLoading: isLoadingGoogle } = useGoogleMapsAutocomplete(
+    search,
+    showGoogleFallback,
+  );
+
+  const googlePredictions = Array.isArray(googleResponse?.data) ? googleResponse.data : [];
+  const isLoading = isPlacesLoading || (showGoogleFallback && isLoadingGoogle);
+
   const categories =
     categoriesResponse?.data?.results?.map((cat: any) => ({
       label: cat.name || cat.title,
@@ -50,7 +67,14 @@ export const AddPlaceModal = ({
       icon: cat.icon || 'FolderIcon',
     })) || [];
 
-  const places = placesResponse?.data?.results || [];
+  const handleGooglePlaceSelect = (prediction: GoogleMapsAutocompletePrediction) => {
+    onSelect({
+      id: prediction.place_id,
+      name: prediction.structured_formatting?.main_text ?? prediction.description,
+      imageUrl: null,
+      city: prediction.structured_formatting?.secondary_text ?? null,
+    });
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -96,8 +120,8 @@ export const AddPlaceModal = ({
         </div>
 
         {/* Place grid */}
-        <div className="flex-1 overflow-y-auto px-6">
-          {isPlacesLoading ? (
+        <div className="flex-1 overflow-y-auto px-6 py-4 min-h-[400px]">
+          {isLoading ? (
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="animate-pulse">
@@ -107,7 +131,7 @@ export const AddPlaceModal = ({
                 </div>
               ))}
             </div>
-          ) : places.length > 0 ? (
+          ) : hasTukaiResults ? (
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
               {places.map((place: Place) => {
                 const isAdded = selectedPlaceIds.includes(place.id);
@@ -117,7 +141,6 @@ export const AddPlaceModal = ({
                     className="group relative cursor-pointer"
                     onClick={() => {
                       if (!isAdded) {
-                        console.log('[AddPlaceModal] Place card clicked:', { place: place.title, isAdded });
                         onSelect({
                           id: place.id,
                           name: place.title,
@@ -169,10 +192,40 @@ export const AddPlaceModal = ({
                 );
               })}
             </div>
+          ) : showGoogleFallback ? (
+            <div className="space-y-3">
+              {/* Section label */}
+              {googlePredictions.length > 0 && (
+                <p className="text-xs text-gray-500 mb-3">
+                  No Tukai places found · Showing Google results
+                </p>
+              )}
+
+              {/* Google place cards */}
+              {googlePredictions.map((prediction) => {
+                const isAdded = selectedPlaceIds.includes(prediction.place_id);
+                return (
+                  <GooglePlaceCard
+                    key={prediction.place_id}
+                    prediction={prediction}
+                    isAdded={isAdded}
+                    onAdd={() => handleGooglePlaceSelect(prediction)}
+                  />
+                );
+              })}
+
+              {/* Both empty */}
+              {googlePredictions.length === 0 && search.trim().length >= 2 && (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <IconComponent iconName="Search01Icon" size={32} className="text-gray-300 mb-2" />
+                  <p className="text-sm text-gray-500">No places found for "{search}"</p>
+                </div>
+              )}
+            </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <IconComponent iconName="Search01Icon" size={32} className="text-gray-300 mb-2" />
-              <p className="text-sm text-gray-500">No places found</p>
+              <p className="text-sm text-gray-500">Search for a place to get started</p>
             </div>
           )}
         </div>

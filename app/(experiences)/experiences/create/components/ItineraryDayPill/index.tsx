@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -77,9 +77,7 @@ export const ItineraryDayPill = ({
     }
   };
 
-  useEffect(() => {
-    console.log('[ItineraryDayPill] Places updated for Day', day.dayNumber, day.places);
-  }, [day.places]); // Log whenever places change for debugging  
+  
 
   return (
     <div className="relative flex gap-3">
