@@ -120,9 +120,9 @@ export const AddPlaceModal = ({
         </div>
 
         {/* Place grid */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 min-h-[400px]">
+        <div className="flex-1 overflow-y-auto px-6 py-4 w-full">
           {isLoading ? (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 w-full">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="animate-pulse">
                   <div className="aspect-square bg-gray-200 rounded-lg mb-2" />
@@ -132,7 +132,7 @@ export const AddPlaceModal = ({
               ))}
             </div>
           ) : hasTukaiResults ? (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 w-full">
               {places.map((place: Place) => {
                 const isAdded = selectedPlaceIds.includes(place.id);
                 return (
@@ -193,7 +193,7 @@ export const AddPlaceModal = ({
               })}
             </div>
           ) : showGoogleFallback ? (
-            <div className="space-y-3">
+            <div className="space-y-3 w-full">
               {/* Section label */}
               {googlePredictions.length > 0 && (
                 <p className="text-xs text-gray-500 mb-3">
@@ -223,7 +223,7 @@ export const AddPlaceModal = ({
               )}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex flex-col items-center justify-center py-12 text-center w-full">
               <IconComponent iconName="Search01Icon" size={32} className="text-gray-300 mb-2" />
               <p className="text-sm text-gray-500">Search for a place to get started</p>
             </div>
