@@ -30,10 +30,8 @@ export const ItineraryDaysStep = ({
   };
 
   const handleDayChange = (index: number, data: Partial<ItineraryDayFormValue>) => {
-    console.log('[ItineraryDaysStep] Day changed:', { index, data, dayBefore: days[index], dayAfter: { ...days[index], ...data } });
     const updated = [...days];
     updated[index] = { ...updated[index], ...data };
-    console.log('[ItineraryDaysStep] Updated days:', updated);
     onChange(updated);
   };
 

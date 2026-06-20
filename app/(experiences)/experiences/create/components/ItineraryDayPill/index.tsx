@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -33,8 +33,6 @@ export const ItineraryDayPill = ({
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
 
-  console.log('[ItineraryDayPill] Rendered with day:', { dayNumber: day.dayNumber, places: day.places, placeCount: day.places?.length });
-
   const handlePlaceSelected = (selected: {
     id: string;
     name: string;
@@ -52,7 +50,6 @@ export const ItineraryDayPill = ({
       endTime: null,
     };
     const updatedPlaces = [...(day.places ?? []), newPlace];
-    console.log('[ItineraryDayPill] Place selected:', { selected, newPlace, currentPlaces: day.places, updatedPlaces });
     onChange({
       places: updatedPlaces,
     });
@@ -79,6 +76,10 @@ export const ItineraryDayPill = ({
       setEditingPlaceId(null);
     }
   };
+
+  useEffect(() => {
+    console.log('[ItineraryDayPill] Places updated for Day', day.dayNumber, day.places);
+  }, [day.places]); // Log whenever places change for debugging  
 
   return (
     <div className="relative flex gap-3">

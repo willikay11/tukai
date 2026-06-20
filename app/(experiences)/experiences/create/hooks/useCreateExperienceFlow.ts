@@ -1552,7 +1552,6 @@ export const useCreateExperienceFlow = () => {
     aboutErrors,
     ticketsErrors,
     communitiesForSelector,
-
     // Computed
     hasCreatedCommunity,
     isCheckingCommunityAccess,
@@ -1562,11 +1561,10 @@ export const useCreateExperienceFlow = () => {
     updateAboutFormData,
     updateTicketsFormData,
     updateInviteFormData,
+    updateItineraryDays,
     validateDateType,
     validateAbout,
     validateTickets,
-
-    // Handl,
 
     // Wallet state and mutations
     wallets,
