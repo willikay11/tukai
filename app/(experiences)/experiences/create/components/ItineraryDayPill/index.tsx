@@ -5,9 +5,10 @@ import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { ItineraryDayFormValue, ItineraryDayPlace } from '@/types/itinerary';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { ItineraryDayFormValue, ItineraryDayPlace } from '@/types/itinerary';
+
 import { AddPlaceModal } from '../AddPlaceModal';
 import { ItineraryPlaceCard } from '../ItineraryPlaceCard';
 
@@ -57,14 +58,9 @@ export const ItineraryDayPill = ({
     setIsPickerOpen(false);
   };
 
-  const handlePlaceUpdate = (
-    placeLocalId: string,
-    updates: Partial<ItineraryDayPlace>,
-  ) => {
+  const handlePlaceUpdate = (placeLocalId: string, updates: Partial<ItineraryDayPlace>) => {
     onChange({
-      places: (day.places ?? []).map((p) =>
-        p.id === placeLocalId ? { ...p, ...updates } : p,
-      ),
+      places: (day.places ?? []).map((p) => (p.id === placeLocalId ? { ...p, ...updates } : p)),
     });
   };
 
@@ -77,15 +73,13 @@ export const ItineraryDayPill = ({
     }
   };
 
-  
-
   return (
     <div className="relative flex gap-3">
       {/* Timeline dot + dashed vertical line */}
-      <div className="flex flex-col items-center relative">
-        <div className="mt-3.5 h-1.5 w-1.5 flex-shrink-0 rounded-full border-2 border-gray-300 bg-gray-300 z-10" />
-        <div className="pointer-events-none absolute mt-4 h-0 w-3.5 left-1 border-t-[1px] border-dashed border-gray-300" />
-        <div className="mt-1 flex-1 border-l-[1px] border-dashed border-gray-300 absolute top-2.5 -bottom-[14px]" />
+      <div className="relative flex flex-col items-center">
+        <div className="z-10 mt-3.5 h-1.5 w-1.5 flex-shrink-0 rounded-full border-2 border-gray-300 bg-gray-300" />
+        <div className="pointer-events-none absolute left-1 mt-4 h-0 w-3.5 border-t-[1px] border-dashed border-gray-300" />
+        <div className="absolute -bottom-[14px] top-2.5 mt-1 flex-1 border-l-[1px] border-dashed border-gray-300" />
       </div>
 
       {/* Pill + expanded content */}
@@ -95,7 +89,7 @@ export const ItineraryDayPill = ({
           <button
             type="button"
             onClick={onToggle}
-            className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-800 hover:border-gray-400 transition-colors"
+            className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-800 transition-colors hover:border-gray-400"
           >
             <IconComponent iconName="Calendar03Icon" size={16} className="text-gray-500" />
             <span>Day {day.dayNumber}</span>
@@ -110,7 +104,7 @@ export const ItineraryDayPill = ({
           <button
             type="button"
             onClick={onToggle}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 transition-colors hover:text-gray-600"
           >
             <IconComponent iconName="Edit02Icon" size={16} />
           </button>
@@ -119,7 +113,7 @@ export const ItineraryDayPill = ({
           <button
             type="button"
             onClick={onDelete}
-            className="text-red-400 hover:text-red-600 transition-colors"
+            className="text-red-400 transition-colors hover:text-red-600"
           >
             <IconComponent iconName="Delete02Icon" size={16} />
           </button>
@@ -150,14 +144,10 @@ export const ItineraryDayPill = ({
                   key={place.id}
                   place={place}
                   isEditingDate={editingPlaceId === place.id}
-                  onEdit={() =>
-                    setEditingPlaceId(editingPlaceId === place.id ? null : place.id)
-                  }
+                  onEdit={() => setEditingPlaceId(editingPlaceId === place.id ? null : place.id)}
                   onDelete={() => handlePlaceDelete(place.id)}
                   onDateChange={(date) => handlePlaceUpdate(place.id, { date })}
-                  onStartTimeChange={(time) =>
-                    handlePlaceUpdate(place.id, { startTime: time })
-                  }
+                  onStartTimeChange={(time) => handlePlaceUpdate(place.id, { startTime: time })}
                   onEndTimeChange={(time) => handlePlaceUpdate(place.id, { endTime: time })}
                 />
               ))}
@@ -165,19 +155,13 @@ export const ItineraryDayPill = ({
 
             {/* Add Place button — always visible */}
             <div className="space-y-2">
-              <p className="text-xs text-gray-800">
-                Where will these activities take place?
-              </p>
+              <p className="text-xs text-gray-800">Where will these activities take place?</p>
               <button
                 type="button"
                 onClick={() => setIsPickerOpen(true)}
-                className="flex items-center gap-2 border border-primary text-primary rounded-full px-4 py-2 text-xs font-medium hover:bg-primary/5 transition-colors"
+                className="flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/5"
               >
-                <IconComponent
-                  iconName="PlusSignCircleIcon"
-                  size={16}
-                  className="text-primary"
-                />
+                <IconComponent iconName="PlusSignCircleIcon" size={16} className="text-primary" />
                 Add Place
               </button>
             </div>

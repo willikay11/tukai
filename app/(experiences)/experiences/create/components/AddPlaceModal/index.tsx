@@ -2,15 +2,20 @@
 
 import { useState } from 'react';
 
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { IconComponent } from '@/app/shared/components/Icons';
-import { Input } from '@/components/ui/input';
-import { usePlaces, usePlaceCategories, useGoogleMapsAutocomplete } from '@/app/shared/hooks/usePlaces';
-import { SimplePillFilters } from '@/app/shared/components/Filters/SimplePillFilters';
 import { SinglePlace } from '@/app/(places)/places/components/place';
-import { GooglePlaceCard } from '../GooglePlaceCard';
-import { Place } from '@/types/place';
+import { SimplePillFilters } from '@/app/shared/components/Filters/SimplePillFilters';
+import { IconComponent } from '@/app/shared/components/Icons';
+import {
+  useGoogleMapsAutocomplete,
+  usePlaceCategories,
+  usePlaces,
+} from '@/app/shared/hooks/usePlaces';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
+import { Place } from '@/types/place';
+
+import { GooglePlaceCard } from '../GooglePlaceCard';
 
 interface AddPlaceModalProps {
   isOpen: boolean;
@@ -34,8 +39,10 @@ export const AddPlaceModal = ({
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Fetch categories for filter pills
-  const { data: categoriesResponse, isLoading: isCategoriesLoading } =
-    usePlaceCategories({ pageSize: 100 }, isOpen);
+  const { data: categoriesResponse, isLoading: isCategoriesLoading } = usePlaceCategories(
+    { pageSize: 100 },
+    isOpen,
+  );
 
   // Fetch places with current filters
   const { data: placesResponse, isLoading: isPlacesLoading } = usePlaces({
@@ -78,27 +85,27 @@ export const AddPlaceModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="flex flex-col max-h-[90vh] w-full max-w-4xl p-0">
+      <DialogContent className="flex max-h-[90vh] w-full max-w-4xl flex-col p-0">
         {/* Header with search and title */}
         <div className="flex-shrink-0 space-y-3 px-6 pt-4">
           {/* Search input */}
-          <div className="flex items-center gap-2 border border-gray-200 bg-gray-100 rounded-full px-3 py-2">
+          <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-gray-100 px-3 py-2">
             <IconComponent
               iconName="Search01Icon"
               size={16}
-              className="text-gray-400 flex-shrink-0"
+              className="flex-shrink-0 text-gray-400"
             />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Find a place"
-              className="flex-1 text-sm outline-none bg-transparent placeholder:text-gray-400 h-[30px]"
+              className="h-[30px] flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400"
             />
             {search && (
               <button
                 onClick={() => setSearch('')}
-                className="text-red-400 hover:text-red-500 flex-shrink-0"
+                className="flex-shrink-0 text-red-400 hover:text-red-500"
               >
                 <IconComponent iconName="Cancel01Icon" size={14} />
               </button>
@@ -109,7 +116,7 @@ export const AddPlaceModal = ({
         {/* Category filter pills */}
         <div className="flex-shrink-0 px-6 py-0">
           {isCategoriesLoading ? (
-            <div className="h-8 bg-gray-100 rounded animate-pulse" />
+            <div className="h-8 animate-pulse rounded bg-gray-100" />
           ) : categories.length > 0 ? (
             <SimplePillFilters
               filters={categories}
@@ -120,19 +127,19 @@ export const AddPlaceModal = ({
         </div>
 
         {/* Place grid */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 w-full">
+        <div className="w-full flex-1 overflow-y-auto px-6 py-4">
           {isLoading ? (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 w-full">
+            <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-3">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="animate-pulse">
-                  <div className="aspect-square bg-gray-200 rounded-lg mb-2" />
-                  <div className="h-3 bg-gray-200 rounded mb-2" />
-                  <div className="h-2 bg-gray-100 rounded" />
+                  <div className="mb-2 aspect-square rounded-lg bg-gray-200" />
+                  <div className="mb-2 h-3 rounded bg-gray-200" />
+                  <div className="h-2 rounded bg-gray-100" />
                 </div>
               ))}
             </div>
           ) : hasTukaiResults ? (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 w-full">
+            <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-3">
               {places.map((place: Place) => {
                 const isAdded = selectedPlaceIds.includes(place.id);
                 return (
@@ -168,18 +175,11 @@ export const AddPlaceModal = ({
                             });
                           }
                         }}
-                        className={`
-                          absolute top-2 right-2
-                          flex items-center gap-1
-                          px-3 py-1.5 rounded-full text-xs
-                          font-medium shadow-sm
-                          transition-colors
-                          ${
-                            isAdded
-                              ? 'bg-white text-primary border border-primary'
-                              : 'bg-white text-gray-700 border border-gray-200 hover:border-primary hover:text-primary'
-                          }
-                        `}
+                        className={`absolute right-2 top-2 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium shadow-sm transition-colors ${
+                          isAdded
+                            ? 'border border-primary bg-white text-primary'
+                            : 'border border-gray-200 bg-white text-gray-700 hover:border-primary hover:text-primary'
+                        } `}
                       >
                         <IconComponent
                           iconName={isAdded ? 'CheckmarkCircle01Icon' : 'PlusSignCircleIcon'}
@@ -193,10 +193,10 @@ export const AddPlaceModal = ({
               })}
             </div>
           ) : showGoogleFallback ? (
-            <div className="space-y-3 w-full">
+            <div className="w-full space-y-3">
               {/* Section label */}
               {googlePredictions.length > 0 && (
-                <p className="text-xs text-gray-500 mb-3">
+                <p className="mb-3 text-xs text-gray-500">
                   No Tukai places found · Showing Google results
                 </p>
               )}
@@ -217,14 +217,14 @@ export const AddPlaceModal = ({
               {/* Both empty */}
               {googlePredictions.length === 0 && search.trim().length >= 2 && (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <IconComponent iconName="Search01Icon" size={32} className="text-gray-300 mb-2" />
+                  <IconComponent iconName="Search01Icon" size={32} className="mb-2 text-gray-300" />
                   <p className="text-sm text-gray-500">No places found for "{search}"</p>
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center w-full">
-              <IconComponent iconName="Search01Icon" size={32} className="text-gray-300 mb-2" />
+            <div className="flex w-full flex-col items-center justify-center py-12 text-center">
+              <IconComponent iconName="Search01Icon" size={32} className="mb-2 text-gray-300" />
               <p className="text-sm text-gray-500">Search for a place to get started</p>
             </div>
           )}

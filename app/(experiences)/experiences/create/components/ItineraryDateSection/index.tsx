@@ -55,7 +55,7 @@ export const ItineraryDateSection = ({
           <span>{formatItineraryDateRange(startDate, endDate)}</span>
           <div className="h-1 w-1 rounded-full bg-gray-500" />
           <span>
-            {getNumberOfDaysAndNights(startDate, endDate).days} days {' '}
+            {getNumberOfDaysAndNights(startDate, endDate).days} days{' '}
             {getNumberOfDaysAndNights(startDate, endDate).nights} nights
           </span>
         </div>

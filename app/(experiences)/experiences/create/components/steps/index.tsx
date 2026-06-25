@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Interest } from '@/types/interest';
+import { ItineraryDayFormValue } from '@/types/itinerary';
 import { Wallet } from '@/types/payment';
 
 import type { FormData } from '../../hooks/useCreateExperienceFlow';
@@ -22,7 +23,6 @@ import { ItineraryDaysStep } from '../ItineraryDaysStep';
 import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { TicketsStep } from '../TicketsStep';
 import { WalletDetailsStep } from '../WalletDetailsStep';
-import { ItineraryDayFormValue } from '@/types/itinerary';
 import { CreateExperienceAbout } from '../about';
 import { CreateExperienceCommunity } from '../community';
 import { ExperienceDates } from '../dates';
@@ -44,7 +44,13 @@ type AboutFormData = {
   categories: Interest[];
 };
 
-export type ExperienceStepId = 'community' | 'about' | 'itinerary-days' | 'dates-tickets' | 'guests' | 'wallet';
+export type ExperienceStepId =
+  | 'community'
+  | 'about'
+  | 'itinerary-days'
+  | 'dates-tickets'
+  | 'guests'
+  | 'wallet';
 
 const STEPS_DEFAULT = [
   {
@@ -522,7 +528,8 @@ export const CreateExperienceSteps = ({
               <CreateExperienceAbout
                 experience={experience}
                 onSuccess={(experienceId) => {
-                  const nextStep = formData?.experienceType === 'itinerary' ? 'itinerary-days' : 'dates-tickets';
+                  const nextStep =
+                    formData?.experienceType === 'itinerary' ? 'itinerary-days' : 'dates-tickets';
                   onExperienceCreated?.(experienceId, nextStep);
                 }}
               />

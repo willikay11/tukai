@@ -13,7 +13,13 @@ import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { SharedExperiencePreview } from '../SharedExperiencePreview';
 import { CustomiseItinerary } from '../customiseItinerary';
 
-export type ExperienceStepId = 'community' | 'about' | 'itinerary-days' | 'dates-tickets' | 'guests' | 'wallet';
+export type ExperienceStepId =
+  | 'community'
+  | 'about'
+  | 'itinerary-days'
+  | 'dates-tickets'
+  | 'guests'
+  | 'wallet';
 
 export type ExperienceType = 'one-time' | 'multi-day' | 'itinerary';
 
@@ -144,7 +150,7 @@ export const ExperienceStepSidePanel = ({
         selectedWallet={selectedWallet}
       />
     ),
-    'itinerary-days' : (
+    'itinerary-days': (
       <SharedExperiencePreview
         step="about"
         experienceType={experienceType}

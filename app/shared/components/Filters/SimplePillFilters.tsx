@@ -17,11 +17,7 @@ interface SimplePillFiltersProps {
   onChange: (value: string) => void;
 }
 
-export const SimplePillFilters = ({
-  filters,
-  selected,
-  onChange,
-}: SimplePillFiltersProps) => {
+export const SimplePillFilters = ({ filters, selected, onChange }: SimplePillFiltersProps) => {
   const scrollBy = useRef<number>(500);
   const ref = useRef<any>();
   const [showPrevBtn, setShowPrevBtn] = useState<boolean>(false);
@@ -97,7 +93,7 @@ export const SimplePillFilters = ({
     <div className="relative">
       <button
         className={clsx(
-          'absolute left-0 top-1.5 rounded-full border-[1px] bg-white p-1 text-gray-300 shadow-scroll-filters z-10',
+          'absolute left-0 top-1.5 z-10 rounded-full border-[1px] bg-white p-1 text-gray-300 shadow-scroll-filters',
           {
             hidden: !showPrevBtn,
             block: showPrevBtn,
@@ -111,7 +107,7 @@ export const SimplePillFilters = ({
       </button>
       <div
         ref={ref}
-        className="flex h-10 items-center overflow-x-auto scroll-smooth scrollbar-hide gap-2"
+        className="flex h-10 items-center gap-2 overflow-x-auto scroll-smooth scrollbar-hide"
         onMouseDown={handleMouseDown}
         onMouseLeave={handleMouseLeave}
         onMouseUp={handleMouseUp}
@@ -123,10 +119,9 @@ export const SimplePillFilters = ({
             type="button"
             onClick={() => onChange(filter.value)}
             className={clsx(
-              'flex h-9 flex-row items-center justify-center rounded-full px-3 py-2 flex-shrink-0 text-xs font-medium transition-colors',
+              'flex h-9 flex-shrink-0 flex-row items-center justify-center rounded-full px-3 py-2 text-xs font-medium transition-colors',
               {
-                'bg-emerald-100 text-primary':
-                  selected === filter.value,
+                'bg-emerald-100 text-primary': selected === filter.value,
                 'bg-gray-100 text-gray-600 hover:border-primary hover:text-primary':
                   selected !== filter.value,
               },
@@ -139,7 +134,7 @@ export const SimplePillFilters = ({
       </div>
       <button
         className={clsx(
-          'absolute right-0 top-1.5 rounded-full border-[1px] bg-white p-1 text-gray-300 shadow-scroll-filters z-10',
+          'absolute right-0 top-1.5 z-10 rounded-full border-[1px] bg-white p-1 text-gray-300 shadow-scroll-filters',
           {
             hidden: !showNextBtn,
             block: showNextBtn,

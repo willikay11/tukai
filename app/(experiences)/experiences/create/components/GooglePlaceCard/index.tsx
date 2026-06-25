@@ -14,16 +14,16 @@ export const GooglePlaceCard = ({ prediction, onAdd, isAdded }: GooglePlaceCardP
   const secondaryText = prediction.structured_formatting?.secondary_text ?? '';
 
   return (
-    <div className="flex items-center justify-between gap-3 border border-dashed border-gray-200 rounded-xl px-4 py-3 bg-white">
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-gray-200 bg-white px-4 py-3">
       {/* Location icon + text */}
-      <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="w-10 h-10 rounded-lg bg-primary/10 flex-shrink-0 flex items-center justify-center">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
           <IconComponent iconName="Location01Icon" size={18} className="text-primary" />
         </div>
 
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-gray-900 truncate">{mainText}</p>
-          {secondaryText && <p className="text-xs text-gray-500 truncate">{secondaryText}</p>}
+          <p className="truncate text-sm font-semibold text-gray-900">{mainText}</p>
+          {secondaryText && <p className="truncate text-xs text-gray-500">{secondaryText}</p>}
         </div>
       </div>
 
@@ -32,15 +32,11 @@ export const GooglePlaceCard = ({ prediction, onAdd, isAdded }: GooglePlaceCardP
         type="button"
         onClick={onAdd}
         disabled={isAdded}
-        className={`
-          flex items-center gap-1 px-3 py-1.5 rounded-full text-xs
-          font-medium flex-shrink-0 transition-colors
-          ${
-            isAdded
-              ? 'bg-white text-primary border border-primary'
-              : 'bg-white text-gray-700 border border-gray-200 hover:border-primary hover:text-primary'
-          }
-        `}
+        className={`flex flex-shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+          isAdded
+            ? 'border border-primary bg-white text-primary'
+            : 'border border-gray-200 bg-white text-gray-700 hover:border-primary hover:text-primary'
+        } `}
       >
         <IconComponent
           iconName={isAdded ? 'CheckmarkCircle01Icon' : 'PlusSignCircleIcon'}
