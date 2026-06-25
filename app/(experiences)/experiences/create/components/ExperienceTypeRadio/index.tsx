@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { cn } from '@/lib/utils';
+import { Switch } from "@/components/ui/switch"
 
 const experienceTypeOptions = [
   { value: 'one-time', label: 'One-Time/Day Experience' },
@@ -66,10 +65,10 @@ export const ExperienceTypeRadio = ({
       </div>
 
       {experienceType === 'one-time' && (
-        <div className="flex items-center space-x-2 pt-2">
-          <Checkbox id="recurring" checked={isRecurring} onCheckedChange={handleRecurringChange} />
+        <div className="flex items-center space-x-2 pt-4">
+          <Switch id="recurring" checked={isRecurring} onCheckedChange={handleRecurringChange} />
           <label htmlFor="recurring" className="cursor-pointer text-xs font-medium text-gray-900">
-            Create a recurring experience
+            Make this a recurring experience
           </label>
         </div>
       )}
