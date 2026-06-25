@@ -320,23 +320,12 @@ export const TicketsStep = ({
               endTime: multiDayEndTime,
             },
           ]);
-
-          console.log('[TicketsStep] Slot template created:', createdId);
         } else if (isRecurringExperience && slotIndex !== undefined) {
           slotTemplateId = slotTemplateRecords[slotIndex]?.templateId;
         } else if (isMultiDay && slotTemplateRecords.length > 0) {
           // For multi-day experiences with existing slot templates, use the first one
           slotTemplateId = slotTemplateRecords[0]?.templateId;
         }
-
-        console.log('[TicketsStep] Payload building:', {
-          isRecurringExperience,
-          isMultiDay,
-          ticketMode,
-          slotIndex,
-          slotTemplateRecords: slotTemplateRecords.length,
-          slotTemplateId,
-        });
 
         const payload: CreateExperienceTicket = {
           name: draftTicket.name,
@@ -347,8 +336,6 @@ export const TicketsStep = ({
           ...validityFields,
           ...(slotTemplateId ? { slot_template: slotTemplateId } : {}),
         };
-
-        console.log('[TicketsStep] Final payload:', payload);
 
         const isEdit = activeFormIndex !== null && formData.items[activeFormIndex]?.apiId != null;
         const existingApiId = isEdit ? formData.items[activeFormIndex].apiId : undefined;
@@ -404,7 +391,6 @@ export const TicketsStep = ({
           });
         }
 
-        console.log('[TicketsStep] Calling onChange with items:', items);
         onChange({ items });
         setActiveFormIndex(null);
         setActiveSlotIndex(null);

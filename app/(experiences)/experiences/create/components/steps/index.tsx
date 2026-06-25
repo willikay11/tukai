@@ -508,18 +508,13 @@ export const CreateExperienceSteps = ({
                 }}
                 isSaving={isSavingExperience}
                 onSaveContinue={async () => {
-                  console.log('[steps.tsx] onSaveContinue called');
                   const isValid = validateAbout();
-                  console.log('[steps.tsx] validateAbout returned:', isValid);
                   if (isValid) {
-                    console.log('[steps.tsx] Validation passed, calling handleSaveAbout');
                     if (handlers?.handleSaveAbout) {
                       await handlers.handleSaveAbout();
                     } else {
                       handleStepChange('dates-tickets');
                     }
-                  } else {
-                    console.log('[steps.tsx] Validation failed');
                   }
                 }}
                 onPreview={handlePreviewClick}

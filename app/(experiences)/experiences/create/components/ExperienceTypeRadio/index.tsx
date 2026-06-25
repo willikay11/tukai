@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { Checkbox } from '@/components/ui/checkbox';
-import { Switch } from "@/components/ui/switch"
+import { Switch } from '@/components/ui/switch';
 
 const experienceTypeOptions = [
   { value: 'one-time', label: 'One-Time/Day Experience' },
