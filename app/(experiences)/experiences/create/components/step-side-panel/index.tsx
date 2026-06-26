@@ -110,7 +110,7 @@ export const ExperienceStepSidePanel = ({
   const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
     community: (
       <StepPlaceholderContent
-        title="Select a Community"
+        title="Preview Community"
         description="Please add the details of the experience"
       />
     ),
