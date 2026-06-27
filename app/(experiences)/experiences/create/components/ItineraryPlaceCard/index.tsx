@@ -2,9 +2,9 @@
 
 import Image from 'next/image';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
-import { IconComponent } from '@/app/shared/components/Icons';
 import { ItineraryDayPlace } from '@/types/itinerary';
 
 interface ItineraryPlaceCardProps {
@@ -43,10 +43,10 @@ export const ItineraryPlaceCard = ({
   return (
     <div className="space-y-3">
       {/* Place card */}
-      <div className="flex items-center gap-3 border border-dashed border-gray-200 rounded-xl overflow-hidden bg-white">
+      <div className="flex items-center gap-3 overflow-hidden rounded-xl border border-dashed border-gray-200 bg-white">
         {/* Place photo */}
         {place.imageUrl && (
-          <div className="relative w-24 h-20 flex-shrink-0 overflow-hidden">
+          <div className="relative h-20 w-24 flex-shrink-0 overflow-hidden">
             <Image
               src={place.imageUrl}
               alt={place.placeName}
@@ -58,23 +58,21 @@ export const ItineraryPlaceCard = ({
         )}
 
         {/* Place info */}
-        <div className="flex-1 py-3 min-w-0">
+        <div className="min-w-0 flex-1 py-3">
           <div className="flex items-center gap-1.5">
-            <p className="text-sm font-semibold text-gray-900 truncate">
-              {place.placeName}
-            </p>
+            <p className="truncate text-sm font-semibold text-gray-900">{place.placeName}</p>
             {/* External link icon */}
             <IconComponent
               iconName="ArrowUpRight01Icon"
               size={14}
-              className="text-primary flex-shrink-0"
+              className="flex-shrink-0 text-primary"
             />
           </div>
 
           {/* Date + time */}
-          <p className="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
+          <p className="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
             <span>{formatDisplayDate(place.date)}</span>
-            <span className="w-1 h-1 rounded-full bg-gray-400 inline-block" />
+            <span className="inline-block h-1 w-1 rounded-full bg-gray-400" />
             <span>
               {formatDisplayTime(place.startTime)}
               {' - '}
@@ -84,19 +82,19 @@ export const ItineraryPlaceCard = ({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1 pr-3 flex-shrink-0">
+        <div className="flex flex-shrink-0 items-center gap-1 pr-3">
           <button
             type="button"
             onClick={onEdit}
-            className="p-1.5 text-gray-400 hover:text-primary transition-colors"
+            className="p-1.5 text-gray-400 transition-colors hover:text-primary"
           >
             <IconComponent iconName="Edit02Icon" size={16} />
           </button>
-          <div className="w-px h-4 bg-gray-200" />
+          <div className="h-4 w-px bg-gray-200" />
           <button
             type="button"
             onClick={onDelete}
-            className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+            className="p-1.5 text-gray-400 transition-colors hover:text-red-500"
           >
             <IconComponent iconName="Delete02Icon" size={16} />
           </button>

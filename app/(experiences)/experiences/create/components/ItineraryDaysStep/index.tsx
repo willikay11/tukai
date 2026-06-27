@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { ItineraryDayFormValue } from '@/types/itinerary';
+
 import { ItineraryDayPill } from '../ItineraryDayPill';
 
 interface ItineraryDaysStepProps {
@@ -48,9 +49,7 @@ export const ItineraryDaysStep = ({
       {/* Header */}
       <div>
         <h2 className="text-xl font-bold text-gray-800">Customise Your Itinerary</h2>
-        <p className="mt-1 text-xs text-gray-800">
-          Add the days and the places you plan to visit
-        </p>
+        <p className="mt-1 text-xs text-gray-800">Add the days and the places you plan to visit</p>
       </div>
 
       {/* Day pills */}
@@ -69,11 +68,7 @@ export const ItineraryDaysStep = ({
 
       {/* Action bar */}
       <div className="flex items-center justify-between pt-4">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="text-sm font-medium text-destructive"
-        >
+        <button type="button" onClick={onCancel} className="text-sm font-medium text-destructive">
           Cancel
         </button>
         <div className="flex gap-3">

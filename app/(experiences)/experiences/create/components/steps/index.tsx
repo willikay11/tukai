@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Interest } from '@/types/interest';
+import { ItineraryDayFormValue } from '@/types/itinerary';
 import { Wallet } from '@/types/payment';
 
 import type { FormData } from '../../hooks/useCreateExperienceFlow';
@@ -22,7 +23,6 @@ import { ItineraryDaysStep } from '../ItineraryDaysStep';
 import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { TicketsStep } from '../TicketsStep';
 import { WalletDetailsStep } from '../WalletDetailsStep';
-import { ItineraryDayFormValue } from '@/types/itinerary';
 import { CreateExperienceAbout } from '../about';
 import { CreateExperienceCommunity } from '../community';
 import { ExperienceDates } from '../dates';
@@ -44,7 +44,13 @@ type AboutFormData = {
   categories: Interest[];
 };
 
-export type ExperienceStepId = 'community' | 'about' | 'itinerary-days' | 'dates-tickets' | 'guests' | 'wallet';
+export type ExperienceStepId =
+  | 'community'
+  | 'about'
+  | 'itinerary-days'
+  | 'dates-tickets'
+  | 'guests'
+  | 'wallet';
 
 const STEPS_DEFAULT = [
   {
@@ -416,7 +422,7 @@ export const CreateExperienceSteps = ({
       </TabsList>
 
       <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-12 md:col-span-8 3xl:col-span-10 4xl:col-span-12">
+        <div className="col-span-12">
           <TabsContent value="community" className="col-span-1 mt-6">
             {formData && updateFormData ? (
               <div className="space-y-4">
@@ -502,18 +508,13 @@ export const CreateExperienceSteps = ({
                 }}
                 isSaving={isSavingExperience}
                 onSaveContinue={async () => {
-                  console.log('[steps.tsx] onSaveContinue called');
                   const isValid = validateAbout();
-                  console.log('[steps.tsx] validateAbout returned:', isValid);
                   if (isValid) {
-                    console.log('[steps.tsx] Validation passed, calling handleSaveAbout');
                     if (handlers?.handleSaveAbout) {
                       await handlers.handleSaveAbout();
                     } else {
                       handleStepChange('dates-tickets');
                     }
-                  } else {
-                    console.log('[steps.tsx] Validation failed');
                   }
                 }}
                 onPreview={handlePreviewClick}
@@ -522,7 +523,8 @@ export const CreateExperienceSteps = ({
               <CreateExperienceAbout
                 experience={experience}
                 onSuccess={(experienceId) => {
-                  const nextStep = formData?.experienceType === 'itinerary' ? 'itinerary-days' : 'dates-tickets';
+                  const nextStep =
+                    formData?.experienceType === 'itinerary' ? 'itinerary-days' : 'dates-tickets';
                   onExperienceCreated?.(experienceId, nextStep);
                 }}
               />

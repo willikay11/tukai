@@ -337,7 +337,7 @@ export const PhotoUploader = ({
     <>
       <div className="space-y-2">
         <p className="text-xs font-medium text-gray-800">
-          Upload experience poster (JPEG, PNG or WebP · Minimum 800×450px · Max 10MB)
+          Upload experience poster (JPEG, PNG or WebP · Minimum 540×540px · Max 10MB)
         </p>
 
         {/* Draggable photo grid */}

@@ -77,7 +77,7 @@ function CreateExperiencePageContent() {
   }
 
   return (
-    <main className="mt-6 grid min-h-screen grid-cols-12 items-stretch gap-4 px-4 md:px-0">
+    <main className="mt-6 grid min-h-screen grid-cols-12 items-stretch gap-12 px-4 md:px-0">
       {/* Mobile preview drawer */}
       <Drawer isOpen={isPreviewDrawerOpen} setIsOpen={setIsPreviewDrawerOpen}>
         <div className="w-full max-w-full space-y-4 overflow-hidden overflow-y-auto p-4">
@@ -204,7 +204,7 @@ function CreateExperiencePageContent() {
           }}
         />
       </div>
-      <div className="hidden h-full lg:col-span-4 lg:col-start-8 lg:block xl:col-span-4 xl:col-start-8 3xl:col-span-3 3xl:col-start-8 4xl:col-span-2 4xl:col-start-8">
+      <div className="hidden h-full lg:col-span-4 lg:col-start-7 lg:block xl:col-span-5 xl:col-start-7 3xl:col-span-3 3xl:col-start-8 4xl:col-span-2 4xl:col-start-8">
         <ExperienceStepSidePanel
           step={activeStep}
           canShowDateTickets={

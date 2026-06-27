@@ -162,7 +162,10 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
 
     if (data.itineraryMode) {
       formData.append('itinerary_mode', data.itineraryMode);
-      formData.append('itinerary_duration_days', data.itineraryDurationDays ? String(data.itineraryDurationDays) : '0');
+      formData.append(
+        'itinerary_duration_days',
+        data.itineraryDurationDays ? String(data.itineraryDurationDays) : '0',
+      );
     }
 
     const response = await axiosInstance.post(`/v2/experiences/`, formData, {
@@ -632,9 +635,7 @@ export const deleteItineraryDay = async (
 export const fetchItineraryDays = async (experienceId: string): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();
-    const response = await axiosInstance.get(
-      `/v1/experiences/${experienceId}/itinerary-days/`,
-    );
+    const response = await axiosInstance.get(`/v1/experiences/${experienceId}/itinerary-days/`);
 
     return {
       status: response.status,

@@ -3,9 +3,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { RRule } from 'rrule';
+import { v4 as uuidv4 } from 'uuid';
 
 import { buildRecurrenceRule } from '@/app/(experiences)/experiences/create/utils/buildRecurrenceRule';
 import {
@@ -21,9 +21,9 @@ import {
   useAddGuestToExperience,
   useCreateExperience,
   useDeleteExperiencePhoto,
+  useFetchItineraryDays,
   useFetchSingleExperience,
   useFetchSlotTemplates,
-  useFetchItineraryDays,
   usePublishExperience,
   useUpdateExperience,
 } from '@/app/shared/hooks/useExperiences';
@@ -40,11 +40,11 @@ import {
 } from '@/services/experience';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
-import { ItineraryDayFormValue } from '@/types/itinerary';
 import { Interest } from '@/types/interest';
+import { ItineraryDayFormValue } from '@/types/itinerary';
 import { Wallet } from '@/types/payment';
 import { Photo } from '@/types/photo';
-import { inferUIExperienceType, getDaysBetween } from '@/utils/date-utils';
+import { getDaysBetween, inferUIExperienceType } from '@/utils/date-utils';
 import { parseApiError } from '@/utils/parseApiError';
 import {
   SlotTemplateRecord,
@@ -53,7 +53,13 @@ import {
   diffSlotTemplates,
 } from '@/utils/slot-template-utils';
 
-export type ExperienceStepId = 'community' | 'about' | 'itinerary-days' | 'dates-tickets' | 'guests' | 'wallet';
+export type ExperienceStepId =
+  | 'community'
+  | 'about'
+  | 'itinerary-days'
+  | 'dates-tickets'
+  | 'guests'
+  | 'wallet';
 
 const formatDateWithTime = (
   date: string,
@@ -434,7 +440,7 @@ export const useCreateExperienceFlow = () => {
       experience.startDate ?? null,
       experience.endDate ?? null,
     );
-    
+
     let dateTypeUpdate: any = {
       community: experience.hostCommunity
         ? {
@@ -1170,7 +1176,7 @@ export const useCreateExperienceFlow = () => {
         : basePayload;
 
       console.log('[handleSaveAbout] Prepared payload for API:', payload);
-  
+
       if (experienceId) {
         console.log('[handleSaveAbout] Calling updateExperienceAsync with payload:', payload);
         await updateExperienceAsync(payload);
@@ -1311,9 +1317,7 @@ export const useCreateExperienceFlow = () => {
       }
 
       const nextStep =
-        formData.dateType.experienceType === 'itinerary'
-          ? 'itinerary-days'
-          : 'dates-tickets';
+        formData.dateType.experienceType === 'itinerary' ? 'itinerary-days' : 'dates-tickets';
 
       setActiveStep(nextStep);
     } catch (error: any) {

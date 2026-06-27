@@ -13,7 +13,13 @@ import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { SharedExperiencePreview } from '../SharedExperiencePreview';
 import { CustomiseItinerary } from '../customiseItinerary';
 
-export type ExperienceStepId = 'community' | 'about' | 'dates-tickets' | 'guests' | 'wallet';
+export type ExperienceStepId =
+  | 'community'
+  | 'about'
+  | 'itinerary-days'
+  | 'dates-tickets'
+  | 'guests'
+  | 'wallet';
 
 export type ExperienceType = 'one-time' | 'multi-day' | 'itinerary';
 
@@ -104,11 +110,47 @@ export const ExperienceStepSidePanel = ({
   const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
     community: (
       <StepPlaceholderContent
-        title="Select a Community"
+        title="Preview Community"
         description="Please add the details of the experience"
       />
     ),
     about: (
+      <SharedExperiencePreview
+        step="about"
+        experienceType={experienceType}
+        isRecurring={isRecurring}
+        aboutPhotos={aboutPhotos}
+        aboutTitle={aboutTitle}
+        aboutDescription={aboutDescription}
+        aboutVisibility={aboutVisibility}
+        aboutWhatsIncluded={aboutWhatsIncluded}
+        aboutWhatsNotIncluded={aboutWhatsNotIncluded}
+        aboutLocation={aboutLocation}
+        aboutMeetingPoint={aboutMeetingPoint}
+        aboutMeetingTime={aboutMeetingTime}
+        aboutCategories={aboutCategories}
+        selectedDate={selectedDate}
+        selectedStartTime={selectedStartTime}
+        selectedEndTime={selectedEndTime}
+        selectedRecurringDays={selectedRecurringDays}
+        selectedTimeSlots={selectedTimeSlots}
+        selectedRecurrenceStartDate={selectedRecurrenceStartDate}
+        selectedRecurrenceEndDate={selectedRecurrenceEndDate}
+        multiDayStartDate={multiDayStartDate}
+        multiDayStartTime={multiDayStartTime}
+        multiDayEndDate={multiDayEndDate}
+        multiDayEndTime={multiDayEndTime}
+        selectedCommunity={selectedCommunity}
+        ticketsItems={ticketsItems}
+        ticketsCommissionPayer={ticketsCommissionPayer}
+        invitedGuests={invitedGuests}
+        invitedCommunityIds={invitedCommunityIds}
+        allCommunities={allCommunities}
+        onEditStep={onEditStep}
+        selectedWallet={selectedWallet}
+      />
+    ),
+    'itinerary-days': (
       <SharedExperiencePreview
         step="about"
         experienceType={experienceType}
