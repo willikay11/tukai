@@ -248,7 +248,7 @@ export const useDeleteSlotTemplate = () => {
 export const useCreateItineraryDay = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ experienceId, data }: { experienceId: string; data: ItineraryDayPayload }) =>
+    mutationFn: ({ experienceId, data }: { experienceId: string; data: ItineraryDayPayload[] }) =>
       createItineraryDay(experienceId, data),
     onSuccess: (_, { experienceId }) => {
       queryClient.invalidateQueries({
@@ -263,13 +263,11 @@ export const useUpdateItineraryDay = () => {
   return useMutation({
     mutationFn: ({
       experienceId,
-      dayId,
       data,
     }: {
       experienceId: string;
-      dayId: string;
-      data: Partial<ItineraryDayPayload>;
-    }) => updateItineraryDay(experienceId, dayId, data),
+      data: Partial<ItineraryDayPayload[]>;
+    }) => updateItineraryDay(experienceId, data),
     onSuccess: (_, { experienceId }) => {
       queryClient.invalidateQueries({
         queryKey: ['itinerary-days', experienceId],

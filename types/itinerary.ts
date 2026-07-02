@@ -22,4 +22,5 @@ export interface ItineraryDayPayload {
   day_number: number;
   title: string;
   description: string;
+  id?: string; // optional, only for updates
 }

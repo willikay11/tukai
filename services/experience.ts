@@ -553,7 +553,7 @@ export const deleteSlotTemplate = async (
 
 export const createItineraryDay = async (
   experienceId: string,
-  data: ItineraryDayPayload,
+  data: ItineraryDayPayload[],
 ): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();
@@ -580,13 +580,12 @@ export const createItineraryDay = async (
 
 export const updateItineraryDay = async (
   experienceId: string,
-  dayId: string,
-  data: Partial<ItineraryDayPayload>,
+  data: Partial<ItineraryDayPayload[]>,
 ): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();
     const response = await axiosInstance.patch(
-      `/v1/experiences/${experienceId}/itinerary-days/${dayId}/`,
+      `/v1/experiences/${experienceId}/itinerary-days/`,
       data,
     );
 

@@ -1062,21 +1062,20 @@ export const useCreateExperienceFlow = () => {
   ): Promise<void> => {
     const days = getDaysBetween(startDate, endDate);
 
-    const responses = await Promise.all(
-      days.map((_, index) =>
-        createItineraryDay(experienceId, {
-          day_number: index + 1,
-          title: '',
-          description: '',
-        }),
-      ),
+    const response = await createItineraryDay(
+      experienceId,
+      days.map((_, index) => ({
+        day_number: index + 1,
+        title: '',
+        description: '',
+      })),
     );
 
     // Store returned apiIds in formData.itineraryDays
     // so the customise step can use PATCH not POST
     const itineraryDays: ItineraryDayFormValue[] = days.map((day, index) => ({
       id: uuidv4(),
-      apiId: responses[index].data.id,
+      apiId: response.data[index].id,
       dayNumber: index + 1,
       title: '',
       description: '',
@@ -1428,24 +1427,40 @@ export const useCreateExperienceFlow = () => {
     try {
       const days = formData.itineraryDays;
 
-      await Promise.all(
-        days.map(async (day) => {
-          const payload = {
-            day_number: day.dayNumber,
-            title: day.title,
-            description: day.description,
-          };
+      const daysToBeUpdated = days.filter((day) => day.apiId);
+      const daysToBeCreated = days.filter((day) => !day.apiId);
 
-          if (day.apiId) {
-            // Update existing day
-            await updateItineraryDay(experienceId, day.apiId, payload);
-          } else {
-            // Create new day
-            const response = await createItineraryDay(experienceId, payload);
-            day.apiId = response.data?.id;
-          }
-        }),
-      );
+      await createItineraryDay(experienceId, daysToBeCreated.map((day) => ({
+        day_number: day.dayNumber,
+        title: day.title,
+        description: day.description,
+      })));
+
+
+      await updateItineraryDay(experienceId, daysToBeUpdated.map((day) => ({
+        day_number: day.dayNumber,
+        title: day.title,
+        description: day.description,
+      })));
+
+      // await Promise.all(
+      //   days.map(async (day) => {
+      //     const payload = {
+      //       day_number: day.dayNumber,
+      //       title: day.title,
+      //       description: day.description,
+      //     };
+
+      //     if (day.apiId) {
+      //       // Update existing day
+      //       await updateItineraryDay(experienceId, day.apiId, payload);
+      //     } else {
+      //       // Create new day
+      //       const response = await createItineraryDay(experienceId, payload);
+      //       day.apiId = response.data?.id;
+      //     }
+      //   }),
+      // );
 
       // Update formData with apiIds
       updateItineraryDays([...days]);

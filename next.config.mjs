@@ -24,6 +24,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: '**.amazonaws.com',
       },
+      {
+        protocol: 'https',
+        hostname: '**.ngrok-free.app',
+      },
+      {
+        protocol: 'http',
+        hostname: '**.ngrok-free.app',
+      }
     ],
   },
 };
