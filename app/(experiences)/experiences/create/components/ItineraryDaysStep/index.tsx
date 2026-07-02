@@ -10,6 +10,7 @@ import { ItineraryDayPill } from '../ItineraryDayPill';
 interface ItineraryDaysStepProps {
   experienceId: string;
   days: ItineraryDayFormValue[];
+  itineraryStartDate: string | null;
   onChange: (days: ItineraryDayFormValue[]) => void;
   onSaveContinue: () => void;
   onCancel: () => void;
@@ -19,6 +20,7 @@ interface ItineraryDaysStepProps {
 export const ItineraryDaysStep = ({
   experienceId,
   days,
+  itineraryStartDate,
   onChange,
   onSaveContinue,
   onCancel,
@@ -59,6 +61,7 @@ export const ItineraryDaysStep = ({
             key={day.id}
             day={day}
             isExpanded={expandedIndex === index}
+            itineraryStartDate={itineraryStartDate}
             onToggle={() => handleToggle(index)}
             onChange={(data) => handleDayChange(index, data)}
             onDelete={() => handleDayDelete(index)}

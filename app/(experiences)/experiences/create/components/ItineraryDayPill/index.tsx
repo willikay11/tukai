@@ -15,6 +15,7 @@ import { ItineraryPlaceCard } from '../ItineraryPlaceCard';
 interface ItineraryDayPillProps {
   day: ItineraryDayFormValue;
   isExpanded: boolean;
+  itineraryStartDate: string | null;
   onToggle: () => void;
   onChange: (data: Partial<ItineraryDayFormValue>) => void;
   onDelete: () => void;
@@ -22,9 +23,17 @@ interface ItineraryDayPillProps {
   error?: string;
 }
 
+const getDayDate = (itineraryStartDate: string | null, dayNumber: number): string | null => {
+  if (!itineraryStartDate) return null;
+  const start = new Date(itineraryStartDate);
+  start.setDate(start.getDate() + dayNumber - 1);
+  return start.toISOString().split('T')[0];
+};
+
 export const ItineraryDayPill = ({
   day,
   isExpanded,
+  itineraryStartDate,
   onToggle,
   onChange,
   onDelete,
@@ -33,6 +42,8 @@ export const ItineraryDayPill = ({
 }: ItineraryDayPillProps) => {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
+
+  const dayDate = getDayDate(itineraryStartDate, day.dayNumber);
 
   const handlePlaceSelected = (selected: {
     id: string;
@@ -46,7 +57,6 @@ export const ItineraryDayPill = ({
       placeName: selected.name,
       imageUrl: selected.imageUrl,
       city: selected.city,
-      date: null,
       startTime: null,
       endTime: null,
     };
@@ -143,10 +153,10 @@ export const ItineraryDayPill = ({
                 <ItineraryPlaceCard
                   key={place.id}
                   place={place}
-                  isEditingDate={editingPlaceId === place.id}
+                  dayDate={dayDate}
+                  isEditingTime={editingPlaceId === place.id}
                   onEdit={() => setEditingPlaceId(editingPlaceId === place.id ? null : place.id)}
                   onDelete={() => handlePlaceDelete(place.id)}
-                  onDateChange={(date) => handlePlaceUpdate(place.id, { date })}
                   onStartTimeChange={(time) => handlePlaceUpdate(place.id, { startTime: time })}
                   onEndTimeChange={(time) => handlePlaceUpdate(place.id, { endTime: time })}
                 />

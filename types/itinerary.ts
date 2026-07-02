@@ -4,7 +4,6 @@ export interface ItineraryDayPlace {
   placeName: string; // display name
   imageUrl: string | null;
   city: string | null;
-  date: string | null; // "YYYY-MM-DD"
   startTime: string | null; // "HH:MM"
   endTime: string | null; // "HH:MM"
 }

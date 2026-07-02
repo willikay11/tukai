@@ -536,6 +536,7 @@ export const CreateExperienceSteps = ({
               <ItineraryDaysStep
                 experienceId={experience.id}
                 days={itineraryDays}
+                itineraryStartDate={formData?.dateType?.itineraryStartDate ?? null}
                 onChange={(days) => {
                   updateItineraryDays?.(days);
                 }}
