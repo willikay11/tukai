@@ -94,7 +94,8 @@ export const ItineraryDayPill = ({
       const payload: ItineraryActivityPayload = {
         title: day.title,
         description: day.description,
-        location: place.placeId,
+        // location: place.placeId,
+        location: '51e03803-798e-4ebf-8a64-e080e9eeb3b1',
         start_time: place.startTime ?? null,
         end_time: place.endTime ?? null,
       };

@@ -10,9 +10,12 @@ export const getCroppedImageFile = async (
   const blob = await response.blob();
   const image = await createImageBitmap(blob);
 
+  // Cap output at 1024×1024
+  const outputSize = Math.min(cropArea.width, cropArea.height, 1024);
+
   const canvas = document.createElement('canvas');
-  canvas.width = cropArea.width;
-  canvas.height = cropArea.height;
+  canvas.width = outputSize;
+  canvas.height = outputSize;
 
   const ctx = canvas.getContext('2d')!;
   ctx.drawImage(
@@ -23,8 +26,8 @@ export const getCroppedImageFile = async (
     cropArea.height,
     0,
     0,
-    cropArea.width,
-    cropArea.height,
+    outputSize,
+    outputSize,
   );
 
   return new Promise((resolve, reject) => {
@@ -43,8 +46,11 @@ export const getCroppedImageFile = async (
 };
 
 export const imageNeedsCrop = (width: number, height: number): boolean => {
-  const ratio = width / height;
-  return ratio < 1.2;
+  // Needs crop if not square
+  if (width !== height) return true;
+  // Needs crop if larger than 1024px
+  if (width > 1024 || height > 1024) return true;
+  return false;
 };
 
 export const getImageDimensions = (

@@ -336,9 +336,14 @@ export const PhotoUploader = ({
   return (
     <>
       <div className="space-y-2">
-        <p className="text-xs font-medium text-gray-800">
-          Upload experience poster (JPEG, PNG or WebP · Minimum 540×540px · Max 10MB)
-        </p>
+        <div className="space-y-1">
+          <p className="text-xs font-medium text-gray-800">
+            Upload experience poster (JPEG, PNG or WebP · Square images · 500×500px to 1024×1024px · Max 10MB)
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Non-square images will be cropped automatically
+          </p>
+        </div>
 
         {/* Draggable photo grid */}
         <DndContext
