@@ -651,3 +651,69 @@ export const fetchItineraryDays = async (experienceId: string): Promise<ApiRespo
     };
   }
 };
+
+export interface ItineraryActivityPayload {
+  title: string;
+  description: string;
+  location?: string | null;
+  start_time?: string | null;
+  end_time?: string | null;
+  order: number;
+}
+
+export const createItineraryDayActivity = async (
+  experienceId: string,
+  dayId: string,
+  data: ItineraryActivityPayload,
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.post(
+      `/v1/experiences/${experienceId}/itinerary-days/${dayId}/activities/`,
+      data,
+    );
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+};
+
+export const updateItineraryDayActivity = async (
+  experienceId: string,
+  dayId: string,
+  activityId: string,
+  data: Partial<ItineraryActivityPayload>,
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.patch(
+      `/v1/experiences/${experienceId}/itinerary-days/${dayId}/activities/${activityId}/`,
+      data,
+    );
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+};

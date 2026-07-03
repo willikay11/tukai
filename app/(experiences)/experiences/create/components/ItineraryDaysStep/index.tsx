@@ -62,6 +62,7 @@ export const ItineraryDaysStep = ({
             day={day}
             isExpanded={expandedIndex === index}
             itineraryStartDate={itineraryStartDate}
+            experienceId={experienceId}
             onToggle={() => handleToggle(index)}
             onChange={(data) => handleDayChange(index, data)}
             onDelete={() => handleDayDelete(index)}

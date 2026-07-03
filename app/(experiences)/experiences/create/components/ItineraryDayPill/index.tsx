@@ -8,6 +8,12 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ItineraryDayFormValue, ItineraryDayPlace } from '@/types/itinerary';
+import {
+  createItineraryDayActivity,
+  updateItineraryDayActivity,
+  type ItineraryActivityPayload,
+} from '@/services/experience';
+import { parseApiError } from '@/utils/parseApiError';
 
 import { AddPlaceModal } from '../AddPlaceModal';
 import { ItineraryPlaceCard } from '../ItineraryPlaceCard';
@@ -16,6 +22,7 @@ interface ItineraryDayPillProps {
   day: ItineraryDayFormValue;
   isExpanded: boolean;
   itineraryStartDate: string | null;
+  experienceId: string | null;
   onToggle: () => void;
   onChange: (data: Partial<ItineraryDayFormValue>) => void;
   onDelete: () => void;
@@ -34,6 +41,7 @@ export const ItineraryDayPill = ({
   day,
   isExpanded,
   itineraryStartDate,
+  experienceId,
   onToggle,
   onChange,
   onDelete,
@@ -42,8 +50,57 @@ export const ItineraryDayPill = ({
 }: ItineraryDayPillProps) => {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
+  const [isSavingDay, setIsSavingDay] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const dayDate = getDayDate(itineraryStartDate, day.dayNumber);
+
+  const isSaved = day.places.length > 0 && day.places.every((p) => p.activityApiId != null);
+
+  const handleSave = async () => {
+    if (!experienceId) return;
+    console.log(day);
+    if (!day.apiId) {
+      setSaveError('Please save the day details first (use Save & Continue on the itinerary step)');
+      return;
+    }
+
+    setIsSavingDay(true);
+    setSaveError(null);
+
+    try {
+      const updatedPlaces = await Promise.all(
+        day.places.map(async (place, index) => {
+          const payload: ItineraryActivityPayload = {
+            title: place.placeName,
+            description: '',
+            location: place.placeId,
+            start_time: place.startTime ?? null,
+            end_time: place.endTime ?? null,
+            order: index,
+          };
+
+          if (place.activityApiId) {
+            await updateItineraryDayActivity(experienceId, day.apiId!, place.activityApiId, payload);
+            return place;
+          } else {
+            const response = await createItineraryDayActivity(experienceId, day.apiId!, payload);
+            return {
+              ...place,
+              activityApiId: response.data.id,
+            };
+          }
+        }),
+      );
+
+      onChange({ places: updatedPlaces });
+      onToggle();
+    } catch (err) {
+      setSaveError(parseApiError(err));
+    } finally {
+      setIsSavingDay(false);
+    }
+  };
 
   const handlePlaceSelected = (selected: {
     id: string;
@@ -103,6 +160,7 @@ export const ItineraryDayPill = ({
           >
             <IconComponent iconName="Calendar03Icon" size={16} className="text-gray-500" />
             <span>Day {day.dayNumber}</span>
+            {isSaved && <IconComponent iconName="CheckmarkCircle01Icon" size={14} className="text-primary" />}
             <IconComponent
               iconName={isExpanded ? 'ArrowUp01Icon' : 'ArrowDown01Icon'}
               size={14}
@@ -175,6 +233,24 @@ export const ItineraryDayPill = ({
                 Add Place
               </button>
             </div>
+
+            {/* Save button row — bottom of expanded content */}
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={isSavingDay || !experienceId}
+                className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isSavingDay ? 
+                    "Saving..."
+                : (
+                    `Save Day ${day.dayNumber}`
+                )}
+              </button>
+            </div>
+
+            {saveError && <p className="mt-1 text-right text-xs text-red-500">{saveError}</p>}
 
             {error && <p className="text-xs text-red-500">{error}</p>}
           </div>

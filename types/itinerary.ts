@@ -6,6 +6,7 @@ export interface ItineraryDayPlace {
   city: string | null;
   startTime: string | null; // "HH:MM"
   endTime: string | null; // "HH:MM"
+  activityApiId?: string; // returned after POST
 }
 
 export interface ItineraryDayFormValue {
