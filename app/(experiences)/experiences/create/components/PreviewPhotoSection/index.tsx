@@ -1,9 +1,7 @@
 'use client';
 
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
-import { ImageCarousel } from '@/components/ui/imageCarousel';
+import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
 
 interface PreviewPhotoSectionProps {
   photos?: string[];
@@ -16,27 +14,7 @@ export const PreviewPhotoSection = ({ photos, onEdit }: PreviewPhotoSectionProps
   return (
     <div className="relative space-y-3">
       {imagesToDisplay.length > 0 ? (
-        <div className="space-y-4">
-          {imagesToDisplay.length > 1 ? (
-            <ImageCarousel
-              images={imagesToDisplay}
-              width="w-full"
-              aspectRatio="aspect-[4/3]"
-              className="h-40"
-            />
-          ) : (
-            <div className="relative h-40 w-full overflow-hidden rounded-lg">
-              <Image
-                src={imagesToDisplay[0]}
-                alt="Experience"
-                fill
-                sizes="(max-width: 768px) 100vw, 560px"
-                className="object-cover"
-                priority
-              />
-            </div>
-          )}
-        </div>
+        <SquarePhotoStrip photos={imagesToDisplay} />
       ) : (
         <div className="relative flex flex-col items-center justify-center rounded-lg bg-gray-50 py-12">
           <IconComponent iconName="Album02Icon" size={28} className="mb-2 text-gray-400" />
