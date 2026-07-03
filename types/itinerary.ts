@@ -1,21 +1,23 @@
-export interface ItineraryDayPlace {
+export interface ItineraryActivity {
   id: string; // local uuid
-  placeId: string; // google place id
-  placeName: string; // display name
-  imageUrl: string | null;
-  city: string | null;
+  activityApiId?: string; // set after POST
+  title: string;
+  description: string;
+  placeId: string | null; // optional
+  placeName: string | null;
+  placeImageUrl: string | null;
+  placeCity: string | null;
   startTime: string | null; // "HH:MM"
   endTime: string | null; // "HH:MM"
-  activityApiId?: string; // returned after POST
 }
 
 export interface ItineraryDayFormValue {
   id: string; // local uuid
   apiId?: string; // returned by API after POST
   dayNumber: number; // 1-based
-  title: string; // "Activity Title"
-  description: string;
-  places: ItineraryDayPlace[]; // multiple places per day
+  activities: ItineraryActivity[]; // multiple activities per day
+  title?: string; // kept for API compatibility, not rendered
+  description?: string; // kept for API compatibility, not rendered
 }
 
 export interface ItineraryDayPayload {

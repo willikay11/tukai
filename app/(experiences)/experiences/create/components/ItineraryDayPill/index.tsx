@@ -1,22 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { ActivityCard } from '@/app/(experiences)/experiences/create/components/ActivityCard';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { ItineraryDayFormValue, ItineraryDayPlace } from '@/types/itinerary';
+import { ItineraryActivity, ItineraryDayFormValue } from '@/types/itinerary';
 import {
   createItineraryDayActivity,
+  deleteItineraryDayActivity,
   updateItineraryDayActivity,
   type ItineraryActivityPayload,
 } from '@/services/experience';
 import { parseApiError } from '@/utils/parseApiError';
+import { useToast } from '@/app/shared/hooks/useToast';
 
 import { AddPlaceModal } from '../AddPlaceModal';
-import { ItineraryPlaceCard } from '../ItineraryPlaceCard';
 
 interface ItineraryDayPillProps {
   day: ItineraryDayFormValue;
@@ -48,114 +48,154 @@ export const ItineraryDayPill = ({
   isSaving,
   error,
 }: ItineraryDayPillProps) => {
+  const { toast } = useToast();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
   const [isSavingDay, setIsSavingDay] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [formErrors, setFormErrors] = useState<{ title?: string; description?: string; places?: string }>({});
 
   const dayDate = getDayDate(itineraryStartDate, day.dayNumber);
 
-  const isSaved = day.places.length > 0 && day.places.every((p) => p.activityApiId != null);
+  const isSaved = day.activities.length > 0 && day.activities.every((a) => a.activityApiId != null);
 
   const validateForm = (): boolean => {
-    const errors: { title?: string; description?: string; places?: string } = {};
-    if (!day.title.trim()) {
-      errors.title = 'Activity title is required';
+    if (!day.activities || day.activities.length === 0) {
+      setSaveError('At least one activity is required');
+      return false;
     }
-    if (!day.description.trim()) {
-      errors.description = 'Description is required';
+    for (const activity of day.activities) {
+      if (!activity.title.trim()) {
+        setSaveError('Each activity must have a title');
+        return false;
+      }
     }
-    if (!day.places || day.places.length === 0) {
-      errors.places = 'At least one place is required';
-    }
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
+    return true;
   };
 
-  const handleSave = async () => {
-    if (!experienceId) return;
+  const handleAddActivity = useCallback(() => {
+    setIsPickerOpen(true);
+  }, []);
+
+  const handlePlaceSelected = useCallback(
+    (selected: {
+      id: string;
+      name: string;
+      imageUrl: string | null;
+      city: string | null;
+    }) => {
+      const newActivity: ItineraryActivity = {
+        id: uuidv4(),
+        title: '',
+        description: '',
+        placeId: selected.id,
+        placeName: selected.name,
+        placeImageUrl: selected.imageUrl,
+        placeCity: selected.city,
+        startTime: null,
+        endTime: null,
+      };
+      onChange({
+        activities: [...day.activities, newActivity],
+      });
+      setIsPickerOpen(false);
+    },
+    [day.activities, onChange],
+  );
+
+  const handleSkipPlace = useCallback(() => {
+    const newActivity: ItineraryActivity = {
+      id: uuidv4(),
+      title: '',
+      description: '',
+      placeId: null,
+      placeName: null,
+      placeImageUrl: null,
+      placeCity: null,
+      startTime: null,
+      endTime: null,
+    };
+    onChange({
+      activities: [...day.activities, newActivity],
+    });
+    setIsPickerOpen(false);
+  }, [day.activities, onChange]);
+
+  const handleActivityChange = useCallback(
+    (activityId: string, data: Partial<ItineraryActivity>) => {
+      onChange({
+        activities: day.activities.map((a) =>
+          a.id === activityId ? { ...a, ...data } : a,
+        ),
+      });
+    },
+    [day.activities, onChange],
+  );
+
+  const handleActivityDelete = useCallback(
+    async (activityId: string) => {
+      const activity = day.activities.find((a) => a.id === activityId);
+
+      if (activity?.activityApiId && experienceId && day.apiId) {
+        try {
+          await deleteItineraryDayActivity(experienceId, day.apiId, activity.activityApiId);
+        } catch (err) {
+          toast({
+            description: parseApiError(err),
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
+      onChange({
+        activities: day.activities.filter((a) => a.id !== activityId),
+      });
+    },
+    [day.activities, onChange, experienceId, day.apiId, toast],
+  );
+
+  const handleSave = useCallback(async () => {
+    if (!experienceId || !day.apiId) return;
 
     if (!validateForm()) {
       return;
     }
 
-    console.log('Saving day', day);
-    // if (!day.apiId) {
-    //   setSaveError('Please save the day details first (use Save & Continue on the itinerary step)');
-    //   return;
-    // }
-
     setIsSavingDay(true);
     setSaveError(null);
 
     try {
-      let place = day.places[0]; // For now, only handle the first place
-      const payload: ItineraryActivityPayload = {
-        title: day.title,
-        description: day.description,
-        // location: place.placeId,
-        location: '51e03803-798e-4ebf-8a64-e080e9eeb3b1',
-        start_time: place.startTime ?? null,
-        end_time: place.endTime ?? null,
-      };
+      const updatedActivities = await Promise.all(
+        day.activities.map(async (activity, index) => {
+          const payload: ItineraryActivityPayload = {
+            title: activity.title,
+            description: activity.description,
+            location: activity.placeId,
+            start_time: activity.startTime,
+            end_time: activity.endTime,
+            order: index,
+          };
 
-      if (place.activityApiId) {
-        await updateItineraryDayActivity(experienceId, day.apiId!, place.activityApiId, payload);
-      } else {
-        const response = await createItineraryDayActivity(experienceId, day.apiId!, payload);
-         place = {
-          ...place,
-          activityApiId: response.data.id,
-        };
-      }
+          if (activity.activityApiId) {
+            await updateItineraryDayActivity(experienceId, day.apiId!, activity.activityApiId, payload);
+            return activity;
+          } else {
+            const response = await createItineraryDayActivity(experienceId, day.apiId!, payload);
+            return {
+              ...activity,
+              activityApiId: response.data.id,
+            };
+          }
+        }),
+      );
 
-      onChange({ places: place ? [place] : [] });
+      onChange({ activities: updatedActivities });
       onToggle();
     } catch (err) {
       setSaveError(parseApiError(err));
     } finally {
       setIsSavingDay(false);
     }
-  };
-
-  const handlePlaceSelected = (selected: {
-    id: string;
-    name: string;
-    imageUrl: string | null;
-    city: string | null;
-  }) => {
-    const newPlace: ItineraryDayPlace = {
-      id: uuidv4(),
-      placeId: selected.id,
-      placeName: selected.name,
-      imageUrl: selected.imageUrl,
-      city: selected.city,
-      startTime: null,
-      endTime: null,
-    };
-    const updatedPlaces = [...(day.places ?? []), newPlace];
-    onChange({
-      places: updatedPlaces,
-    });
-    setEditingPlaceId(newPlace.id);
-    setIsPickerOpen(false);
-  };
-
-  const handlePlaceUpdate = (placeLocalId: string, updates: Partial<ItineraryDayPlace>) => {
-    onChange({
-      places: (day.places ?? []).map((p) => (p.id === placeLocalId ? { ...p, ...updates } : p)),
-    });
-  };
-
-  const handlePlaceDelete = (placeLocalId: string) => {
-    onChange({
-      places: (day.places ?? []).filter((p) => p.id !== placeLocalId),
-    });
-    if (editingPlaceId === placeLocalId) {
-      setEditingPlaceId(null);
-    }
-  };
+  }, [experienceId, day, onChange, onToggle]);
 
   return (
     <div className="relative flex gap-3">
@@ -207,62 +247,26 @@ export const ItineraryDayPill = ({
         {/* Expanded content */}
         {isExpanded && (
           <div className="mt-3 space-y-3">
-            {/* Activity Title */}
-            <div>
-              <Input
-                value={day.title}
-                onChange={(e) => {
-                  onChange({ title: e.target.value });
-                  setFormErrors({});
-                }}
-                placeholder="Activity Title"
+            {/* Activity cards */}
+            {day.activities.map((activity) => (
+              <ActivityCard
+                key={activity.id}
+                activity={activity}
+                dayDate={dayDate}
+                onChange={(data) => handleActivityChange(activity.id, data)}
+                onDelete={() => handleActivityDelete(activity.id)}
               />
-              {formErrors.title && <p className="mt-1 text-xs text-red-500">{formErrors.title}</p>}
-            </div>
+            ))}
 
-            {/* Description */}
-            <div>
-              <Textarea
-                value={day.description}
-                onChange={(e) => {
-                  onChange({ description: e.target.value });
-                  setFormErrors({});
-                }}
-                placeholder="Add a brief description about the day's experiences/activities"
-                rows={4}
-              />
-              {formErrors.description && <p className="mt-1 text-xs text-red-500">{formErrors.description}</p>}
-            </div>
-
-            {/* Place cards */}
-            <div className="space-y-3">
-              {(day.places ?? []).map((place) => (
-                <ItineraryPlaceCard
-                  key={place.id}
-                  place={place}
-                  dayDate={dayDate}
-                  isEditingTime={editingPlaceId === place.id}
-                  onEdit={() => setEditingPlaceId(editingPlaceId === place.id ? null : place.id)}
-                  onDelete={() => handlePlaceDelete(place.id)}
-                  onStartTimeChange={(time) => handlePlaceUpdate(place.id, { startTime: time })}
-                  onEndTimeChange={(time) => handlePlaceUpdate(place.id, { endTime: time })}
-                />
-              ))}
-              {formErrors.places && <p className="text-xs text-red-500">{formErrors.places}</p>}
-            </div>
-
-            {/* Add Place button — always visible */}
-            <div className="space-y-2">
-              <p className="text-xs text-gray-800">Where will these activities take place?</p>
-              <button
-                type="button"
-                onClick={() => setIsPickerOpen(true)}
-                className="flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/5"
-              >
-                <IconComponent iconName="PlusSignCircleIcon" size={16} className="text-primary" />
-                Add Place
-              </button>
-            </div>
+            {/* Add Activity button */}
+            <button
+              type="button"
+              onClick={handleAddActivity}
+              className="flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/5"
+            >
+              <IconComponent iconName="PlusSignCircleIcon" size={16} className="text-primary" />
+              Add Activity
+            </button>
 
             {/* Save button row — bottom of expanded content */}
             <div className="flex justify-end pt-2">
@@ -272,11 +276,7 @@ export const ItineraryDayPill = ({
                 disabled={isSavingDay || !experienceId}
                 className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isSavingDay ? 
-                    "Saving..."
-                : (
-                    `Save Day ${day.dayNumber}`
-                )}
+                {isSavingDay ? 'Saving...' : `Save Day ${day.dayNumber}`}
               </button>
             </div>
 
@@ -290,8 +290,11 @@ export const ItineraryDayPill = ({
         <AddPlaceModal
           isOpen={isPickerOpen}
           onClose={() => setIsPickerOpen(false)}
-          selectedPlaceIds={(day.places ?? []).map((p) => p.placeId)}
           onSelect={handlePlaceSelected}
+          onSkip={handleSkipPlace}
+          selectedPlaceIds={day.activities
+            .filter((a) => a.placeId)
+            .map((a) => a.placeId!)}
         />
       </div>
     </div>

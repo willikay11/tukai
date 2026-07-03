@@ -196,9 +196,7 @@ const generateItineraryDays = (startDate: string, endDate: string): ItineraryDay
   return days.map((_, index) => ({
     id: uuidv4(),
     dayNumber: index + 1,
-    title: '',
-    description: '',
-    places: [],
+    activities: [],
   }));
 };
 
@@ -662,7 +660,18 @@ export const useCreateExperienceFlow = () => {
           dayNumber: day.day_number,
           title: day.title || '',
           description: day.description || '',
-          places: [],
+          activities: (day.activities ?? []).map((a: any) => ({
+            id: uuidv4(),
+            activityApiId: a.id,
+            title: a.title ?? '',
+            description: a.description ?? '',
+            placeId: a.location?.id ?? a.location ?? null,
+            placeName: a.location?.title ?? null,
+            placeImageUrl: a.location?.photos?.[0]?.photo ?? null,
+            placeCity: a.location?.city ?? null,
+            startTime: a.start_time ?? null,
+            endTime: a.end_time ?? null,
+          })),
         }));
         updateItineraryDays(hydrationDays);
       }
