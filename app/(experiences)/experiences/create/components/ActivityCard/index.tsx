@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import Image from 'next/image';
 
 import { IconComponent } from '@/app/shared/components/Icons';
@@ -7,12 +9,15 @@ import { TimePicker } from '@/components/ui/time-picker';
 import { ItineraryActivity } from '@/types/itinerary';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 
 interface ActivityCardProps {
   activity: ItineraryActivity;
   dayDate: string | null;
   onChange: (data: Partial<ItineraryActivity>) => void;
   onDelete: () => void;
+  onSave: () => Promise<void>;
+  isSaving?: boolean;
 }
 
 export const ActivityCard = ({
@@ -20,7 +25,21 @@ export const ActivityCard = ({
   dayDate,
   onChange,
   onDelete,
+  onSave,
+  isSaving = false,
 }: ActivityCardProps) => {
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSave = async () => {
+    if (!activity.title.trim()) {
+      setError('Activity title is required');
+      return;
+    }
+        
+    setError(null);
+    await onSave();
+  };
+
   return (
     <div className="border border-dashed border-gray-200 rounded-xl bg-white overflow-hidden">
       {/* Place header — only if place attached */}
@@ -118,6 +137,28 @@ export const ActivityCard = ({
             value={activity.endTime}
             onChange={(time) => onChange({ endTime: time })}
           />
+        </div>
+
+        {/* Save button and status */}
+        <div className="flex items-center justify-between pt-2">
+          <div>
+            {error && <p className="text-xs text-red-500">{error}</p>}
+            {activity.activityApiId && !isSaving && (
+              <p className="text-xs text-green-600 flex items-center gap-1">
+                <IconComponent iconName="CheckmarkCircle01Icon" size={12} />
+                Saved
+              </p>
+            )}
+          </div>
+          <Button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving || !!activity.activityApiId}
+            variant="gradient"
+            className="rounded-full"
+          >
+            {isSaving ? 'Saving...' : activity.activityApiId ? 'Saved' : 'Save'}
+          </Button>
         </div>
       </div>
     </div>

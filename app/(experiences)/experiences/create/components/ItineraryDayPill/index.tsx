@@ -50,26 +50,11 @@ export const ItineraryDayPill = ({
 }: ItineraryDayPillProps) => {
   const { toast } = useToast();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [isSavingDay, setIsSavingDay] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [savingActivityId, setSavingActivityId] = useState<string | null>(null);
 
   const dayDate = getDayDate(itineraryStartDate, day.dayNumber);
 
   const isSaved = day.activities.length > 0 && day.activities.every((a) => a.activityApiId != null);
-
-  const validateForm = (): boolean => {
-    if (!day.activities || day.activities.length === 0) {
-      setSaveError('At least one activity is required');
-      return false;
-    }
-    for (const activity of day.activities) {
-      if (!activity.title.trim()) {
-        setSaveError('Each activity must have a title');
-        return false;
-      }
-    }
-    return true;
-  };
 
   const handleAddActivity = useCallback(() => {
     setIsPickerOpen(true);
@@ -153,49 +138,47 @@ export const ItineraryDayPill = ({
     [day.activities, onChange, experienceId, day.apiId, toast],
   );
 
-  const handleSave = useCallback(async () => {
-    if (!experienceId || !day.apiId) return;
+  const handleActivitySave = useCallback(
+    async (activityId: string) => {
+      if (!experienceId) return;
 
-    if (!validateForm()) {
-      return;
-    }
+      const activity = day.activities.find((a) => a.id === activityId);
+      if (!activity) return;
 
-    setIsSavingDay(true);
-    setSaveError(null);
+      setSavingActivityId(activityId);
 
-    try {
-      const updatedActivities = await Promise.all(
-        day.activities.map(async (activity, index) => {
-          const payload: ItineraryActivityPayload = {
-            title: activity.title,
-            description: activity.description,
-            location: activity.placeId,
-            start_time: activity.startTime,
-            end_time: activity.endTime,
-            order: index,
-          };
+      try {
+        const index = day.activities.indexOf(activity);
+        const payload: ItineraryActivityPayload = {
+          title: activity.title,
+          description: activity.description,
+          location: activity.placeId,
+          start_time: activity.startTime,
+          end_time: activity.endTime,
+          order: index,
+        };
 
-          if (activity.activityApiId) {
-            await updateItineraryDayActivity(experienceId, day.apiId!, activity.activityApiId, payload);
-            return activity;
-          } else {
-            const response = await createItineraryDayActivity(experienceId, day.apiId!, payload);
-            return {
-              ...activity,
-              activityApiId: response.data.id,
-            };
-          }
-        }),
-      );
-
-      onChange({ activities: updatedActivities });
-      onToggle();
-    } catch (err) {
-      setSaveError(parseApiError(err));
-    } finally {
-      setIsSavingDay(false);
-    }
-  }, [experienceId, day, onChange, onToggle]);
+        if (activity.activityApiId) {
+          await updateItineraryDayActivity(experienceId, day.apiId, activity.activityApiId, payload);
+        } else {
+          const response = await createItineraryDayActivity(experienceId, day.apiId, payload);
+          onChange({
+            activities: day.activities.map((a) =>
+              a.id === activityId ? { ...a, activityApiId: response.data.id } : a,
+            ),
+          });
+        }
+      } catch (err) {
+        toast({
+          description: parseApiError(err),
+          variant: 'destructive',
+        });
+      } finally {
+        setSavingActivityId(null);
+      }
+    },
+    [experienceId, day, onChange, toast],
+  );
 
   return (
     <div className="relative flex gap-3">
@@ -255,6 +238,8 @@ export const ItineraryDayPill = ({
                 dayDate={dayDate}
                 onChange={(data) => handleActivityChange(activity.id, data)}
                 onDelete={() => handleActivityDelete(activity.id)}
+                onSave={() => handleActivitySave(activity.id)}
+                isSaving={savingActivityId === activity.id}
               />
             ))}
 
@@ -267,20 +252,6 @@ export const ItineraryDayPill = ({
               <IconComponent iconName="PlusSignCircleIcon" size={16} className="text-primary" />
               Add Activity
             </button>
-
-            {/* Save button row — bottom of expanded content */}
-            <div className="flex justify-end pt-2">
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={isSavingDay || !experienceId}
-                className="flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isSavingDay ? 'Saving...' : `Save Day ${day.dayNumber}`}
-              </button>
-            </div>
-
-            {saveError && <p className="mt-1 text-right text-xs text-red-500">{saveError}</p>}
 
             {error && <p className="text-xs text-red-500">{error}</p>}
           </div>
