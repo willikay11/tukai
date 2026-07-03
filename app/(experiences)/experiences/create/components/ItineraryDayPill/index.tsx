@@ -52,48 +52,64 @@ export const ItineraryDayPill = ({
   const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
   const [isSavingDay, setIsSavingDay] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<{ title?: string; description?: string; places?: string }>({});
 
   const dayDate = getDayDate(itineraryStartDate, day.dayNumber);
 
   const isSaved = day.places.length > 0 && day.places.every((p) => p.activityApiId != null);
 
+  const validateForm = (): boolean => {
+    const errors: { title?: string; description?: string; places?: string } = {};
+    if (!day.title.trim()) {
+      errors.title = 'Activity title is required';
+    }
+    if (!day.description.trim()) {
+      errors.description = 'Description is required';
+    }
+    if (!day.places || day.places.length === 0) {
+      errors.places = 'At least one place is required';
+    }
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
     if (!experienceId) return;
-    console.log(day);
-    if (!day.apiId) {
-      setSaveError('Please save the day details first (use Save & Continue on the itinerary step)');
+
+    if (!validateForm()) {
       return;
     }
+
+    console.log('Saving day', day);
+    // if (!day.apiId) {
+    //   setSaveError('Please save the day details first (use Save & Continue on the itinerary step)');
+    //   return;
+    // }
 
     setIsSavingDay(true);
     setSaveError(null);
 
     try {
-      const updatedPlaces = await Promise.all(
-        day.places.map(async (place, index) => {
-          const payload: ItineraryActivityPayload = {
-            title: place.placeName,
-            description: '',
-            location: place.placeId,
-            start_time: place.startTime ?? null,
-            end_time: place.endTime ?? null,
-            order: index,
-          };
+      let place = day.places[0]; // For now, only handle the first place
+      const payload: ItineraryActivityPayload = {
+        title: day.title,
+        description: day.description,
+        location: place.placeId,
+        start_time: place.startTime ?? null,
+        end_time: place.endTime ?? null,
+      };
 
-          if (place.activityApiId) {
-            await updateItineraryDayActivity(experienceId, day.apiId!, place.activityApiId, payload);
-            return place;
-          } else {
-            const response = await createItineraryDayActivity(experienceId, day.apiId!, payload);
-            return {
-              ...place,
-              activityApiId: response.data.id,
-            };
-          }
-        }),
-      );
+      if (place.activityApiId) {
+        await updateItineraryDayActivity(experienceId, day.apiId!, place.activityApiId, payload);
+      } else {
+        const response = await createItineraryDayActivity(experienceId, day.apiId!, payload);
+         place = {
+          ...place,
+          activityApiId: response.data.id,
+        };
+      }
 
-      onChange({ places: updatedPlaces });
+      onChange({ places: place ? [place] : [] });
       onToggle();
     } catch (err) {
       setSaveError(parseApiError(err));
@@ -191,19 +207,31 @@ export const ItineraryDayPill = ({
         {isExpanded && (
           <div className="mt-3 space-y-3">
             {/* Activity Title */}
-            <Input
-              value={day.title}
-              onChange={(e) => onChange({ title: e.target.value })}
-              placeholder="Activity Title"
-            />
+            <div>
+              <Input
+                value={day.title}
+                onChange={(e) => {
+                  onChange({ title: e.target.value });
+                  setFormErrors({});
+                }}
+                placeholder="Activity Title"
+              />
+              {formErrors.title && <p className="mt-1 text-xs text-red-500">{formErrors.title}</p>}
+            </div>
 
             {/* Description */}
-            <Textarea
-              value={day.description}
-              onChange={(e) => onChange({ description: e.target.value })}
-              placeholder="Add a brief description about the day's experiences/activities"
-              rows={4}
-            />
+            <div>
+              <Textarea
+                value={day.description}
+                onChange={(e) => {
+                  onChange({ description: e.target.value });
+                  setFormErrors({});
+                }}
+                placeholder="Add a brief description about the day's experiences/activities"
+                rows={4}
+              />
+              {formErrors.description && <p className="mt-1 text-xs text-red-500">{formErrors.description}</p>}
+            </div>
 
             {/* Place cards */}
             <div className="space-y-3">
@@ -219,6 +247,7 @@ export const ItineraryDayPill = ({
                   onEndTimeChange={(time) => handlePlaceUpdate(place.id, { endTime: time })}
                 />
               ))}
+              {formErrors.places && <p className="text-xs text-red-500">{formErrors.places}</p>}
             </div>
 
             {/* Add Place button — always visible */}

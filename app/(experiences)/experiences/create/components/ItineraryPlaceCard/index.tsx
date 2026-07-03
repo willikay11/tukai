@@ -114,8 +114,8 @@ export const ItineraryPlaceCard = ({
 
           {/* Start + End time side by side */}
           <div className="grid grid-cols-2 gap-3">
-            <TimePicker value={place.startTime || undefined} onChange={onStartTimeChange} />
-            <TimePicker value={place.endTime || undefined} onChange={onEndTimeChange} />
+            <TimePicker value={place.startTime || undefined} placeholder='Start Time' onChange={onStartTimeChange} />
+            <TimePicker value={place.endTime || undefined} placeholder='End Time' onChange={onEndTimeChange} />
           </div>
         </div>
       )}

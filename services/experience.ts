@@ -658,7 +658,7 @@ export interface ItineraryActivityPayload {
   location?: string | null;
   start_time?: string | null;
   end_time?: string | null;
-  order: number;
+  order?: number;
 }
 
 export const createItineraryDayActivity = async (
