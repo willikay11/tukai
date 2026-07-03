@@ -7,13 +7,14 @@ export interface ItineraryActivity {
   placeName: string | null;
   placeImageUrl: string | null;
   placeCity: string | null;
+  locationId: string | null;
   startTime: string | null; // "HH:MM"
   endTime: string | null; // "HH:MM"
 }
 
 export interface ItineraryDayFormValue {
   id: string; // local uuid
-  apiId?: string; // returned by API after POST
+  apiId: string;
   dayNumber: number; // 1-based
   activities: ItineraryActivity[]; // multiple activities per day
   title?: string; // kept for API compatibility, not rendered

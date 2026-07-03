@@ -25,6 +25,7 @@ interface AddPlaceModalProps {
     name: string;
     imageUrl: string | null;
     city: string | null;
+    locationId: string | null;
   }) => void;
   onSkip?: () => void;
   selectedPlaceIds?: string[];
@@ -128,19 +129,6 @@ export const AddPlaceModal = ({
           ) : null}
         </div>
 
-        {/* Skip option */}
-        {onSkip && (
-          <div className="flex-shrink-0 px-6 pb-2">
-            <button
-              type="button"
-              onClick={onSkip}
-              className="text-sm text-gray-500 underline hover:text-gray-700"
-            >
-              Skip — this activity has no specific place
-            </button>
-          </div>
-        )}
-
         {/* Place grid */}
         <div className="w-full flex-1 overflow-y-auto px-6 py-4">
           {isLoading ? (
@@ -168,6 +156,7 @@ export const AddPlaceModal = ({
                           name: place.title,
                           imageUrl: place.photos?.[0]?.photo ?? null,
                           city: place.location?.city ?? null,
+                          locationId: place.location?.id ?? null,
                         });
                       }
                     }}

@@ -34,6 +34,7 @@ import {
   createItineraryDay,
   createSlotTemplate,
   deleteSlotTemplate,
+  fetchItineraryDays,
   fetchSlotTemplates,
   updateItineraryDay,
   updateSlotTemplate,
@@ -654,10 +655,10 @@ export const useCreateExperienceFlow = () => {
       const apiDays = itineraryDaysResponse.data.results || [];
 
       if (apiDays.length > 0) {
-        const hydrationDays: ItineraryDayFormValue[] = apiDays.map((day: any) => ({
+        const hydrationDays: ItineraryDayFormValue[] = apiDays.map((day: any, index: number) => ({
           id: uuidv4(),
           apiId: day.id,
-          dayNumber: day.day_number,
+          dayNumber: index + 1,
           title: day.title || '',
           description: day.description || '',
           activities: (day.activities ?? []).map((a: any) => ({
@@ -673,10 +674,12 @@ export const useCreateExperienceFlow = () => {
             endTime: a.end_time ?? null,
           })),
         }));
+
+        console.log('[Hydration] Hydrating itinerary days from API:', hydrationDays);
         updateItineraryDays(hydrationDays);
       }
     }
-  }, [itineraryDaysResponse?.data, experienceId, formData.dateType.experienceType]);
+  }, [itineraryDaysResponse?.data?.results?.length, experienceId, formData.dateType.experienceType]);
 
   const updateWalletFormData = useCallback((data: Partial<FormData['wallet']>) => {
     setFormData((prev) => ({
@@ -700,28 +703,28 @@ export const useCreateExperienceFlow = () => {
   }, []);
 
   // Generate itinerary days when start/end dates change
-  useEffect(() => {
-    if (
-      formData.dateType.experienceType === 'itinerary' &&
-      formData.dateType.itineraryStartDate &&
-      formData.dateType.itineraryEndDate
-    ) {
-      const days = generateItineraryDays(
-        formData.dateType.itineraryStartDate,
-        formData.dateType.itineraryEndDate,
-      );
-      // Only regenerate if day count changed
-      if (days.length !== formData.itineraryDays.length) {
-        updateItineraryDays(days);
-      }
-    }
-  }, [
-    formData.dateType.itineraryStartDate,
-    formData.dateType.itineraryEndDate,
-    formData.dateType.experienceType,
-    formData.itineraryDays.length,
-    updateItineraryDays,
-  ]);
+  // useEffect(() => {
+  //   if (
+  //     formData.dateType.experienceType === 'itinerary' &&
+  //     formData.dateType.itineraryStartDate &&
+  //     formData.dateType.itineraryEndDate
+  //   ) {
+  //     const days = generateItineraryDays(
+  //       formData.dateType.itineraryStartDate,
+  //       formData.dateType.itineraryEndDate,
+  //     );
+  //     // Only regenerate if day count changed
+  //     if (days.length !== formData.itineraryDays.length) {
+  //       updateItineraryDays(days);
+  //     }
+  //   }
+  // }, [
+  //   formData.dateType.itineraryStartDate,
+  //   formData.dateType.itineraryEndDate,
+  //   formData.dateType.experienceType,
+  //   formData.itineraryDays.length,
+  //   updateItineraryDays,
+  // ]);
 
   const validateDateType = useCallback((): boolean => {
     const errors: Record<string, string> = {};
@@ -842,8 +845,6 @@ export const useCreateExperienceFlow = () => {
 
   const validateAbout = useCallback((): boolean => {
     const errors: Record<string, string> = {};
-    console.log('[validateAbout] Starting validation for about form');
-    console.log('[validateAbout] formData.about:', formData.about);
 
     if (!formData.about.title.trim()) {
       errors.title = 'Title is required';
@@ -1071,7 +1072,8 @@ export const useCreateExperienceFlow = () => {
   ): Promise<void> => {
     const days = getDaysBetween(startDate, endDate);
 
-    const response = await createItineraryDay(
+    // Create the itinerary days
+    await createItineraryDay(
       experienceId,
       days.map((_, index) => ({
         day_number: index + 1,
@@ -1080,14 +1082,18 @@ export const useCreateExperienceFlow = () => {
       })),
     );
 
-    // Store returned apiIds in formData.itineraryDays
-    // so the customise step can use PATCH not POST
-    const itineraryDays: ItineraryDayFormValue[] = days.map((day, index) => ({
+    // Fetch the created days from GET to get the API IDs
+    const fetchResponse = await fetchItineraryDays(experienceId);
+    const apiDays = fetchResponse.data?.results || [];
+
+    // Map API response to form state with correct apiIds
+    const itineraryDays: ItineraryDayFormValue[] = apiDays.map((day: any) => ({
       id: uuidv4(),
-      apiId: response.data[index].id,
-      dayNumber: index + 1,
-      title: '',
-      description: '',
+      apiId: day.id,
+      dayNumber: day.day_number,
+      title: day.title || '',
+      description: day.description || '',
+      activities: [],
       placeId: null,
       placeName: null,
     }));
@@ -1271,7 +1277,7 @@ export const useCreateExperienceFlow = () => {
                 timeSlots.map((slot, index) =>
                   createSlotTemplate(
                     newExperienceId,
-                    buildSlotTemplatePayload(slot, formData.dateType.recurrenceRule ?? null),
+                    buildSlotTemplatePayload(slot, buildRecurrenceRule(formData.dateType)),
                   ),
                 ),
               );

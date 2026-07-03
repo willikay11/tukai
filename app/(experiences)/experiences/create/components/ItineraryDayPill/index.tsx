@@ -66,6 +66,7 @@ export const ItineraryDayPill = ({
       name: string;
       imageUrl: string | null;
       city: string | null;
+      locationId: string | null;
     }) => {
       const newActivity: ItineraryActivity = {
         id: uuidv4(),
@@ -77,6 +78,7 @@ export const ItineraryDayPill = ({
         placeCity: selected.city,
         startTime: null,
         endTime: null,
+        locationId: selected.locationId,
       };
       onChange({
         activities: [...day.activities, newActivity],
@@ -97,6 +99,7 @@ export const ItineraryDayPill = ({
       placeCity: null,
       startTime: null,
       endTime: null,
+      locationId: null,
     };
     onChange({
       activities: [...day.activities, newActivity],
@@ -140,6 +143,8 @@ export const ItineraryDayPill = ({
 
   const handleActivitySave = useCallback(
     async (activityId: string) => {
+      console.log('day:', day);
+
       if (!experienceId) return;
 
       const activity = day.activities.find((a) => a.id === activityId);
@@ -152,7 +157,7 @@ export const ItineraryDayPill = ({
         const payload: ItineraryActivityPayload = {
           title: activity.title,
           description: activity.description,
-          location: activity.placeId,
+          location: activity.locationId,
           start_time: activity.startTime,
           end_time: activity.endTime,
           order: index,
