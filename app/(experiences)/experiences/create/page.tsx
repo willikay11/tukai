@@ -223,6 +223,8 @@ function CreateExperiencePageContent() {
           isRecurring={formData.dateType.isRecurring}
           experienceType={formData.dateType.experienceType}
           itineraryConfig={itineraryConfig}
+          itineraryDays={formData.itineraryDays}
+          itineraryStartDate={formData.dateType.itineraryStartDate}
           selectedCommunity={formData.dateType.community}
           selectedDate={formData.dateType.date}
           selectedStartTime={formData.dateType.startTime}
