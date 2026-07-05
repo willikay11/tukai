@@ -28,16 +28,62 @@ export const ActivityCard = ({
   onSave,
   isSaving = false,
 }: ActivityCardProps) => {
-  const [error, setError] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!activity.title.trim()) {
+      errors.title = 'Activity title is required';
+    }
+
+    if (!activity.description.trim()) {
+      errors.description = 'Description is required';
+    }
+
+    // Time validation
+    if (activity.startTime && !activity.endTime) {
+      errors.endTime = 'End time is required when start time is set';
+    }
+
+    if (activity.endTime && !activity.startTime) {
+      errors.startTime = 'Start time is required when end time is set';
+    }
+
+    if (activity.startTime && activity.endTime) {
+      const [startHour, startMin] = activity.startTime.split(':').map(Number);
+      const [endHour, endMin] = activity.endTime.split(':').map(Number);
+      const startTotalMin = startHour * 60 + startMin;
+      const endTotalMin = endHour * 60 + endMin;
+
+      if (endTotalMin <= startTotalMin) {
+        errors.endTime = 'End time must be after start time';
+      }
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const clearError = (field: string) => {
+    setFormErrors((prev) => {
+      const updated = { ...prev };
+      delete updated[field];
+      return updated;
+    });
+  };
 
   const handleSave = async () => {
-    if (!activity.title.trim()) {
-      setError('Activity title is required');
+    if (!validateForm()) {
       return;
     }
-        
-    setError(null);
-    await onSave();
+    setSaveError(null);
+    try {
+      await onSave();
+    } catch (err) {
+      setSaveError('Failed to save activity');
+    }
   };
 
   return (
@@ -112,37 +158,73 @@ export const ActivityCard = ({
 
       {/* Activity fields */}
       <div className="p-3 space-y-3">
-        <Input
-          type="text"
-          value={activity.title}
-          onChange={(e) => onChange({ title: e.target.value })}
-          placeholder="Activity Title"
-        />
+        <div>
+          <Input
+            type="text"
+            value={activity.title}
+            onChange={(e) => {
+              onChange({ title: e.target.value });
+              clearError('title');
+            }}
+            placeholder="Activity Title"
+          />
+          {formErrors.title && (
+            <p className="mt-1 text-xs text-red-500">{formErrors.title}</p>
+          )}
+        </div>
 
-        <Textarea
-          value={activity.description}
-          onChange={(e) => onChange({ description: e.target.value })}
-          placeholder="Add a brief description about this activity"
-          rows={3}
-        />
+        <div>
+          <Textarea
+            value={activity.description}
+            onChange={(e) => {
+              onChange({ description: e.target.value });
+              clearError('description');
+            }}
+            placeholder="Add a brief description about this activity"
+            rows={3}
+          />
+          {formErrors.description && (
+            <p className="mt-1 text-xs text-red-500">{formErrors.description}</p>
+          )}
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <TimePicker
-            label="Start Time"
-            value={activity.startTime}
-            onChange={(time) => onChange({ startTime: time })}
-          />
-          <TimePicker
-            label="End Time"
-            value={activity.endTime}
-            onChange={(time) => onChange({ endTime: time })}
-          />
+          <div>
+            <label className="text-xs font-medium text-gray-700 mb-1.5 block">
+              Start Time
+            </label>
+            <TimePicker
+              value={activity.startTime ?? undefined}
+              onChange={(time) => {
+                onChange({ startTime: time });
+                clearError('startTime');
+              }}
+            />
+            {formErrors.startTime && (
+              <p className="mt-1 text-xs text-red-500">{formErrors.startTime}</p>
+            )}
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-700 mb-1.5 block">
+              End Time
+            </label>
+            <TimePicker
+              value={activity.endTime ?? undefined}
+              onChange={(time) => {
+                onChange({ endTime: time });
+                clearError('endTime');
+              }}
+            />
+            {formErrors.endTime && (
+              <p className="mt-1 text-xs text-red-500">{formErrors.endTime}</p>
+            )}
+          </div>
         </div>
 
         {/* Save button and status */}
         <div className="flex items-center justify-between pt-2">
           <div>
-            {error && <p className="text-xs text-red-500">{error}</p>}
+            {saveError && <p className="text-xs text-red-500">{saveError}</p>}
             {activity.activityApiId && !isSaving && (
               <p className="text-xs text-green-600 flex items-center gap-1">
                 <IconComponent iconName="CheckmarkCircle01Icon" size={12} />

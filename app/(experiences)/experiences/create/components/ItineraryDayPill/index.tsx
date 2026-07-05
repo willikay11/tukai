@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ActivityCard } from '@/app/(experiences)/experiences/create/components/ActivityCard';
+import { ActivityListItem } from '@/app/(experiences)/experiences/create/components/ActivityListItem';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { ItineraryActivity, ItineraryDayFormValue } from '@/types/itinerary';
 import {
@@ -235,18 +236,31 @@ export const ItineraryDayPill = ({
         {/* Expanded content */}
         {isExpanded && (
           <div className="mt-3 space-y-3">
-            {/* Activity cards */}
-            {day.activities.map((activity) => (
-              <ActivityCard
-                key={activity.id}
-                activity={activity}
-                dayDate={dayDate}
-                onChange={(data) => handleActivityChange(activity.id, data)}
-                onDelete={() => handleActivityDelete(activity.id)}
-                onSave={() => handleActivitySave(activity.id)}
-                isSaving={savingActivityId === activity.id}
-              />
-            ))}
+            {/* Activity cards/list items */}
+            {day.activities.map((activity) =>
+              activity.activityApiId ? (
+                // Saved activity — show as list item
+                <ActivityListItem
+                  key={activity.id}
+                  activity={activity}
+                  onEdit={() => {
+                    // TODO: Toggle edit mode for this activity
+                  }}
+                  onDelete={() => handleActivityDelete(activity.id)}
+                />
+              ) : (
+                // Unsaved activity — show as editable card
+                <ActivityCard
+                  key={activity.id}
+                  activity={activity}
+                  dayDate={dayDate}
+                  onChange={(data) => handleActivityChange(activity.id, data)}
+                  onDelete={() => handleActivityDelete(activity.id)}
+                  onSave={() => handleActivitySave(activity.id)}
+                  isSaving={savingActivityId === activity.id}
+                />
+              ),
+            )}
 
             {/* Add Activity button */}
             <button

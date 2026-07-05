@@ -93,7 +93,7 @@ export const SquarePhotoStrip = ({ photos, className = '' }: SquarePhotoStripPro
         </div>
 
         {/* Left arrow */}
-        {activeIndex > 0 && (
+        {/* {activeIndex > 0 && (
           <button
             type="button"
             onClick={scrollPrev}
@@ -102,10 +102,10 @@ export const SquarePhotoStrip = ({ photos, className = '' }: SquarePhotoStripPro
           >
             <IconComponent iconName="ArrowLeft01TwotoneRounded" size={20} className="text-gray-600" />
           </button>
-        )}
+        )} */}
 
         {/* Right arrow */}
-        {activeIndex < photos.length - 1 && (
+        {/* {activeIndex < photos.length - 1 && (
           <button
             type="button"
             onClick={scrollNext}
@@ -114,24 +114,7 @@ export const SquarePhotoStrip = ({ photos, className = '' }: SquarePhotoStripPro
           >
             <IconComponent iconName="ArrowRight01TwotoneRounded" size={20} className="text-gray-600" />
           </button>
-        )}
-      </div>
-
-      {/* Dot indicators */}
-      <div className="flex justify-center gap-1.5 mt-2">
-        {photos.map((_, index) => (
-          <button
-            key={index}
-            type="button"
-            onClick={() => scrollTo(index)}
-            className={`h-2 w-2 rounded-full transition-colors flex ${
-              index === activeIndex
-                ? 'bg-primary'
-                : 'bg-gray-300 hover:bg-gray-400'
-            }`}
-            aria-label={`Photo ${index + 1}`}
-          />
-        ))}
+        )} */}
       </div>
     </div>
   );
