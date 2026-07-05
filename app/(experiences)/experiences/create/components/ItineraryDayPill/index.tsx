@@ -57,8 +57,13 @@ export const ItineraryDayPill = ({
   const [changingPlaceForActivityId, setChangingPlaceForActivityId] = useState<string | null>(null);
   const [savingActivityId, setSavingActivityId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [isEditingTitleAndDescription, setIsEditingTitleAndDescription] = useState(false);
+  const [savedTick, setSavedTick] = useState(0);
+  // Start in edit mode if either field is empty on mount
+  const [isEditingTitleAndDescription, setIsEditingTitleAndDescription] = useState<boolean>(
+    () => day.title.trim() === '' || day.description.trim() === '',
+  );
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const editContainerRef = useRef<HTMLDivElement>(null);
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pendingDataRef = useRef<{
     title?: string;
@@ -73,8 +78,23 @@ export const ItineraryDayPill = ({
   const showDisplayView =
     !isEditingTitleAndDescription && day.title.trim() !== '' && day.description.trim() !== '';
 
-  // Auto-exit edit mode when both fields filled
-  const maybeExitEditMode = () => {
+  // Exit edit mode on blur only if focus leaves the edit container entirely
+  const handleFieldBlur = (e: React.FocusEvent<HTMLElement>) => {
+    // Check if focus is moving to another field within the same edit container
+    if (
+      editContainerRef.current &&
+      e.relatedTarget instanceof Node &&
+      editContainerRef.current.contains(e.relatedTarget)
+    ) {
+      // Still within the edit form, just flush the save
+      flushPendingSave();
+      return;
+    }
+
+    // Focus has left the edit form entirely
+    flushPendingSave();
+
+    // Only flip to display view if both fields have content
     if (day.title.trim() !== '' && day.description.trim() !== '') {
       setIsEditingTitleAndDescription(false);
     }
@@ -133,12 +153,20 @@ export const ItineraryDayPill = ({
     onChange({ title: value });
     pendingDataRef.current.title = value;
     scheduleDebouncedSave();
+    // Ensure we stay in edit mode while typing
+    if (!isEditingTitleAndDescription) {
+      setIsEditingTitleAndDescription(true);
+    }
   };
 
   const handleDescriptionChange = (value: string) => {
     onChange({ description: value });
     pendingDataRef.current.description = value;
     scheduleDebouncedSave();
+    // Ensure we stay in edit mode while typing
+    if (!isEditingTitleAndDescription) {
+      setIsEditingTitleAndDescription(true);
+    }
   };
 
   // Cleanup — flush on unmount
@@ -316,6 +344,10 @@ export const ItineraryDayPill = ({
             ),
           });
         }
+
+        // After successful save, collapse the activity card and day-level edit mode
+        setSavedTick((t) => t + 1);
+        setIsEditingTitleAndDescription(false);
       } catch (err) {
         toast({
           description: parseApiError(err),
@@ -394,26 +426,20 @@ export const ItineraryDayPill = ({
                 <p className="text-xs leading-relaxed text-gray-600">{day.description}</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div ref={editContainerRef} className="space-y-3">
                 <Input
                   ref={titleInputRef}
                   type="text"
                   value={day.title}
                   onChange={(e) => handleTitleChange(e.target.value)}
-                  onBlur={() => {
-                    flushPendingSave();
-                    maybeExitEditMode();
-                  }}
+                  onBlur={handleFieldBlur}
                   placeholder="Day Title"
                 />
 
                 <Textarea
                   value={day.description}
                   onChange={(e) => handleDescriptionChange(e.target.value)}
-                  onBlur={() => {
-                    flushPendingSave();
-                    maybeExitEditMode();
-                  }}
+                  onBlur={handleFieldBlur}
                   placeholder="Add a brief description about the day's experiences/activities"
                   rows={3}
                 />
@@ -426,7 +452,7 @@ export const ItineraryDayPill = ({
             {/* Activity cards */}
             {sortActivitiesByTime(day.activities).map((activity) => (
               <ActivityCard
-                key={activity.id}
+                key={`${activity.id}-${activity.activityApiId ?? 'draft'}-${savedTick}`}
                 activity={activity}
                 dayDate={dayDate}
                 otherActivities={day.activities.filter((a) => a.id !== activity.id)}

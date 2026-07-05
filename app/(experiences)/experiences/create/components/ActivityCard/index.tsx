@@ -127,7 +127,7 @@ export const ActivityCard = ({
     <>
       {/* Compact display view — only for saved activities not editing */}
       {!showEditForm && isSaved && (
-        <div className="flex items-start gap-3 rounded-xl border border-dashed border-gray-200 bg-white p-3">
+        <div className="flex items-start gap-3 rounded-xl border border-dashed border-gray-200 bg-gray-50 p-3">
           {/* Place photo or placeholder */}
           {activity.placeImageUrl ? (
             <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg">
