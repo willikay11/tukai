@@ -28,6 +28,29 @@ export const ItineraryDaysStep = ({
 }: ItineraryDaysStepProps) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0); // Day 1 open by default
 
+  // Completeness check: all days must have at least one saved activity
+  const daysWithActivities = days
+    .filter((day) => day.activities.some((a) => a.activityApiId != null))
+    .length;
+
+  const totalDays = days.length;
+
+  const allDaysHaveActivities = totalDays > 0 && daysWithActivities === totalDays;
+
+  const incompleteDays = days
+    .filter((day) => !day.activities.some((a) => a.activityApiId != null))
+    .map((day) => day.dayNumber);
+
+  const scrollToDay = (dayNumber: number) => {
+    const element = document.getElementById(`itinerary-day-${dayNumber}`);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  };
+
   const handleToggle = (index: number) => {
     setExpandedIndex((prev) => (prev === index ? null : index));
   };
@@ -57,18 +80,38 @@ export const ItineraryDaysStep = ({
       {/* Day pills */}
       <div className="mt-4">
         {days.map((day, index) => (
-          <ItineraryDayPill
-            key={day.id}
-            day={day}
-            isExpanded={expandedIndex === index}
-            itineraryStartDate={itineraryStartDate}
-            experienceId={experienceId}
-            onToggle={() => handleToggle(index)}
-            onChange={(data) => handleDayChange(index, data)}
-            onDelete={() => handleDayDelete(index)}
-          />
+          <div key={day.id} id={`itinerary-day-${day.dayNumber}`}>
+            <ItineraryDayPill
+              day={day}
+              isExpanded={expandedIndex === index}
+              itineraryStartDate={itineraryStartDate}
+              experienceId={experienceId}
+              onToggle={() => handleToggle(index)}
+              onChange={(data) => handleDayChange(index, data)}
+              onDelete={() => handleDayDelete(index)}
+            />
+          </div>
         ))}
       </div>
+
+      {/* Progress indicator */}
+      {!allDaysHaveActivities && (
+        <p className="text-center text-xs text-muted-foreground">
+          {daysWithActivities} of {totalDays} days have activities — add at least one activity to{' '}
+          <button
+            type="button"
+            onClick={() => incompleteDays.length > 0 && scrollToDay(incompleteDays[0])}
+            className="text-primary underline hover:no-underline"
+          >
+            {incompleteDays.length === 1
+              ? `Day ${incompleteDays[0]}`
+              : incompleteDays.length <= 3
+                ? `Days ${incompleteDays.join(', ')}`
+                : `${incompleteDays.length} remaining days`}
+          </button>
+          {' to continue'}
+        </p>
+      )}
 
       {/* Action bar */}
       <div className="flex items-center justify-between pt-4">
@@ -76,13 +119,13 @@ export const ItineraryDaysStep = ({
           Cancel
         </button>
         <div className="flex gap-3">
-          <Button type="button" variant="outline">
+          <Button type="button" variant="outline" className="rounded-full">
             Save & Exit
           </Button>
           <Button
             type="button"
             onClick={onSaveContinue}
-            disabled={isSaving}
+            disabled={isSaving || !allDaysHaveActivities}
             variant="gradient"
             className="rounded-full"
           >
