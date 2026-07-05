@@ -400,6 +400,7 @@ export const ItineraryDayPill = ({
                   key={activity.id}
                   activity={activity}
                   dayDate={dayDate}
+                  otherActivities={day.activities.filter((a) => a.id !== activity.id)}
                   onChange={(data) => handleActivityChange(activity.id, data)}
                   onDelete={() => handleActivityDelete(activity.id)}
                   onSave={() => handleActivitySave(activity.id)}

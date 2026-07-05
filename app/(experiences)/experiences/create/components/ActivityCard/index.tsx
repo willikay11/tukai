@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import Image from 'next/image';
 
@@ -10,10 +10,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TimePicker } from '@/components/ui/time-picker';
 import { ItineraryActivity } from '@/types/itinerary';
+import { doTimesOverlap, findOverlappingActivity, isEndAfterStart } from '@/utils/itinerary-utils';
 
 interface ActivityCardProps {
   activity: ItineraryActivity;
   dayDate: string | null;
+  otherActivities: ItineraryActivity[];
   onChange: (data: Partial<ItineraryActivity>) => void;
   onDelete: () => void;
   onSave: () => Promise<void>;
@@ -23,6 +25,7 @@ interface ActivityCardProps {
 export const ActivityCard = ({
   activity,
   dayDate,
+  otherActivities,
   onChange,
   onDelete,
   onSave,
@@ -30,6 +33,27 @@ export const ActivityCard = ({
 }: ActivityCardProps) => {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Detect time errors (overlap or end before start)
+  const timeError = useMemo(() => {
+    // End must be after start
+    if (
+      activity.startTime &&
+      activity.endTime &&
+      !isEndAfterStart(activity.startTime, activity.endTime)
+    ) {
+      return 'End time must be after start time';
+    }
+
+    // No overlap with other activities on this day
+    const overlap = findOverlappingActivity(activity, otherActivities);
+    if (overlap) {
+      const name = overlap.placeName ?? overlap.title ?? 'another activity';
+      return `Time overlaps with ${name}`;
+    }
+
+    return null;
+  }, [activity.startTime, activity.endTime, activity.id, otherActivities]);
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
@@ -87,7 +111,11 @@ export const ActivityCard = ({
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-dashed border-gray-200 bg-white">
+    <div
+      className={`overflow-hidden rounded-xl border border-dashed bg-white ${
+        timeError ? 'border-red-300' : 'border-gray-200'
+      }`}
+    >
       {/* Place header — only if place attached */}
       {activity.placeId && (
         <div className="flex items-center gap-3 border-b border-gray-100 p-2">
@@ -205,6 +233,8 @@ export const ActivityCard = ({
           </div>
         </div>
 
+        {timeError && <p className="text-xs text-red-500">{timeError}</p>}
+
         {/* Save button and status */}
         <div className="flex items-center justify-between pt-2">
           <div>
@@ -219,7 +249,7 @@ export const ActivityCard = ({
           <Button
             type="button"
             onClick={handleSave}
-            disabled={isSaving || !!activity.activityApiId}
+            disabled={isSaving || !!activity.activityApiId || !!timeError}
             variant="gradient"
             className="rounded-full"
           >
