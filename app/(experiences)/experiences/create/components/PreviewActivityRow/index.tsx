@@ -20,7 +20,7 @@ export const PreviewActivityRow = ({ activity, dayDate }: PreviewActivityRowProp
     <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-2">
       {/* Photo */}
       {activity.placeImageUrl ? (
-        <div className="relative h-12 w-14 flex-shrink-0 overflow-hidden rounded-lg">
+        <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg">
           <Image
             src={activity.placeImageUrl}
             alt={activity.placeName ?? activity.title}
@@ -30,8 +30,8 @@ export const PreviewActivityRow = ({ activity, dayDate }: PreviewActivityRowProp
           />
         </div>
       ) : (
-        <div className="flex h-12 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
-          <IconComponent iconName="Location01Icon" size={16} className="text-primary" />
+        <div className="flex h-16 w-20 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100">
+          <IconComponent iconName="Image02Icon" size={24} className="text-gray-600" />
         </div>
       )}
 
@@ -49,7 +49,7 @@ export const PreviewActivityRow = ({ activity, dayDate }: PreviewActivityRowProp
             />
           )}
         </div>
-        <p className="truncate text-xs text-gray-900">
+        <p className="truncate text-xs text-gray-900 mt-1">
             {activity.description}
           </p>
         <div className="mt-1 inline-flex items-center gap-1">

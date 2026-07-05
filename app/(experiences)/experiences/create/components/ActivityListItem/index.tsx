@@ -24,21 +24,21 @@ export const ActivityListItem = ({ activity, onEdit, onDelete }: ActivityListIte
     <div className="flex items-center gap-3 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3">
       {/* Photo on the left */}
       {activity.placeImageUrl ? (
-        <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg">
+        <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg">
           <Image
             src={activity.placeImageUrl}
             alt={activity.placeName ?? ''}
             fill
-            sizes="64px"
+            sizes="80px"
             className="object-cover"
           />
         </div>
       ) : (
-        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+        <div className="flex h-16 w-20 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100">
           {activity.placeId ? (
-            <IconComponent iconName="Location01Icon" size={20} className="text-primary" />
+            <IconComponent iconName="Image02Icon" size={20} className="text-primary" />
           ) : (
-            <IconComponent iconName="Activity01Icon" size={20} className="text-gray-400" />
+            <IconComponent iconName="Image02Icon" size={24} className="text-gray-600" />
           )}
         </div>
       )}

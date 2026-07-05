@@ -130,18 +130,18 @@ export const ActivityCard = ({
         <div className="flex items-start gap-3 rounded-xl border border-dashed border-gray-200 bg-white p-3">
           {/* Place photo or placeholder */}
           {activity.placeImageUrl ? (
-            <div className="relative h-14 w-16 flex-shrink-0 overflow-hidden rounded-lg">
+            <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg">
               <Image
                 src={activity.placeImageUrl}
                 alt={activity.placeName ?? activity.title}
                 fill
-                sizes="64px"
+                sizes="80px"
                 className="object-cover"
               />
             </div>
           ) : (
-            <div className="flex h-14 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <IconComponent iconName="Location01Icon" size={18} className="text-primary" />
+            <div className="flex h-16 w-20 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100">
+              <IconComponent iconName="Image02Icon" size={24} className="text-gray-600" />
             </div>
           )}
 
@@ -215,18 +215,18 @@ export const ActivityCard = ({
           {activity.placeId && (
             <div className="flex items-center gap-3 border-b border-gray-100 p-2">
               {activity.placeImageUrl ? (
-                <div className="relative h-14 w-16 flex-shrink-0 overflow-hidden rounded-lg">
+                <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg">
                   <Image
                     src={activity.placeImageUrl}
                     alt={activity.placeName ?? ''}
                     fill
-                    sizes="64px"
+                    sizes="80px"
                     className="object-cover"
                   />
                 </div>
               ) : (
-                <div className="flex h-14 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                  <IconComponent iconName="Location01Icon" size={18} className="text-primary" />
+                <div className="flex h-16 w-20 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100">
+                  <IconComponent iconName="Image02Icon" size={24} className="text-gray-600" />
                 </div>
               )}
 
