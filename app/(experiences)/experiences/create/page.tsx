@@ -56,6 +56,7 @@ function CreateExperiencePageContent() {
     walletMutations,
     isSavingExperience,
     apiError,
+    registerFlusher,
     slotTemplateRecords,
   } = useCreateExperienceFlow();
 
@@ -184,6 +185,7 @@ function CreateExperiencePageContent() {
           }}
           isSavingExperience={isSavingExperience}
           apiError={apiError}
+          registerFlusher={registerFlusher}
           isPreviewDrawerOpen={isPreviewDrawerOpen}
           setIsPreviewDrawerOpen={setIsPreviewDrawerOpen}
           slotTemplateRecords={slotTemplateRecords}

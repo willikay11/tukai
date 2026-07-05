@@ -229,6 +229,7 @@ interface CreateExperienceStepsProps {
   };
   isSavingExperience?: boolean;
   apiError?: string | null;
+  registerFlusher?: (dayId: string, flusher: () => { title?: string; description?: string }) => () => void;
   slotTemplateRecords?: Array<{
     uiId: string;
     templateId: string;
@@ -284,6 +285,7 @@ export const CreateExperienceSteps = ({
   handlers,
   isSavingExperience = false,
   apiError,
+  registerFlusher,
   isPreviewDrawerOpen = false,
   setIsPreviewDrawerOpen,
   slotTemplateRecords = [],
@@ -549,6 +551,8 @@ export const CreateExperienceSteps = ({
                 }}
                 onCancel={() => handleStepChange('about')}
                 isSaving={isSavingExperience}
+                isParentSaving={isSavingExperience}
+                registerFlusher={registerFlusher}
               />
             )}
           </TabsContent>

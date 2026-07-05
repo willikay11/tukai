@@ -32,6 +32,8 @@ interface ItineraryDayPillProps {
   onDelete: () => void;
   isSaving?: boolean;
   error?: string;
+  isParentSaving?: boolean;
+  registerFlusher?: (dayId: string, flusher: () => { title?: string; description?: string }) => () => void;
 }
 
 const getDayDate = (itineraryStartDate: string | null, dayNumber: number): string | null => {
@@ -51,6 +53,8 @@ export const ItineraryDayPill = ({
   onDelete,
   isSaving,
   error,
+  isParentSaving = false,
+  registerFlusher,
 }: ItineraryDayPillProps) => {
   const { toast } = useToast();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -65,6 +69,7 @@ export const ItineraryDayPill = ({
   const titleInputRef = useRef<HTMLInputElement>(null);
   const editContainerRef = useRef<HTMLDivElement>(null);
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isParentSavingRef = useRef(false);
   const pendingDataRef = useRef<{
     title?: string;
     description?: string;
@@ -99,6 +104,28 @@ export const ItineraryDayPill = ({
       setIsEditingTitleAndDescription(false);
     }
   };
+
+  // Sync isParentSaving to ref for use in cleanup effects
+  useEffect(() => {
+    isParentSavingRef.current = isParentSaving;
+  }, [isParentSaving]);
+
+  // Register synchronous flusher with parent hook
+  useEffect(() => {
+    if (!day.apiId || !registerFlusher) return;
+
+    const flusher = () => {
+      const pending = { ...pendingDataRef.current };
+      pendingDataRef.current = {};
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
+      return pending;
+    };
+
+    return registerFlusher(day.apiId, flusher);
+  }, [day.apiId, registerFlusher]);
 
   // Focus title input when entering edit mode
   useEffect(() => {
@@ -169,19 +196,22 @@ export const ItineraryDayPill = ({
     }
   };
 
-  // Cleanup — flush on unmount
+  // Cleanup — flush on unmount (unless parent is already saving)
   useEffect(() => {
     return () => {
       if (saveTimerRef.current) {
         clearTimeout(saveTimerRef.current);
-        performSave();
+        // Only perform save if parent is NOT handling it
+        if (!isParentSavingRef.current) {
+          performSave();
+        }
       }
     };
   }, [performSave]);
 
-  // Flush when collapsing the pill
+  // Flush when collapsing the pill (unless parent is already saving)
   useEffect(() => {
-    if (!isExpanded) {
+    if (!isExpanded && !isParentSavingRef.current) {
       flushPendingSave();
     }
   }, [isExpanded, flushPendingSave]);

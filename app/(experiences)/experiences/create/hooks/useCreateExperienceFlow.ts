@@ -31,12 +31,12 @@ import { useToast } from '@/app/shared/hooks/useToast';
 import { InvitedMember } from '@/components/ui/invite-members';
 import {
   addExperiencePhotos,
+  bulkUpdateItineraryDays,
   createItineraryDay,
   createSlotTemplate,
   deleteSlotTemplate,
   fetchItineraryDays,
   fetchSlotTemplates,
-  updateItineraryDay,
   updateSlotTemplate,
 } from '@/services/experience';
 import { Community } from '@/types/community';
@@ -319,6 +319,29 @@ export const useCreateExperienceFlow = () => {
 
   const [isSavingExperience, setIsSavingExperience] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+
+  // Track pending debounced saves in ItineraryDayPill components
+  const pendingFlushersRef = useRef<
+    Map<string, () => { title?: string; description?: string }>
+  >(new Map());
+
+  const registerFlusher = useCallback(
+    (dayId: string, flusher: () => { title?: string; description?: string }) => {
+      pendingFlushersRef.current.set(dayId, flusher);
+      return () => {
+        pendingFlushersRef.current.delete(dayId);
+      };
+    },
+    [],
+  );
+
+  const flushAllPendingSaves = useCallback((): Record<string, { title?: string; description?: string }> => {
+    const flushed: Record<string, { title?: string; description?: string }> = {};
+    pendingFlushersRef.current.forEach((fn, dayId) => {
+      flushed[dayId] = fn();
+    });
+    return flushed;
+  }, []);
 
   const experience = experienceResponse?.data;
   const wallets: Wallet[] = walletsResponse?.data?.results ?? [];
@@ -1445,50 +1468,54 @@ export const useCreateExperienceFlow = () => {
 
     setIsSavingExperience(true);
     try {
-      const days = formData.itineraryDays;
+      // Flush all pending debounced saves synchronously before making API calls
+      const flushed = flushAllPendingSaves();
 
-      const daysToBeUpdated = days.filter((day) => day.apiId);
-      const daysToBeCreated = days.filter((day) => !day.apiId);
+      // Merge flushed values into the days
+      const daysWithLatestData = formData.itineraryDays.map((day) => {
+        const pending = day.apiId ? flushed[day.apiId] : undefined;
+        return {
+          ...day,
+          title: pending?.title ?? day.title,
+          description: pending?.description ?? day.description,
+        };
+      });
 
-      await createItineraryDay(
-        experienceId,
-        daysToBeCreated.map((day) => ({
-          day_number: day.dayNumber,
-          title: day.title,
-          description: day.description,
-        })),
+      const daysToBeCreated = daysWithLatestData.filter((day) => !day.apiId);
+      const daysToBeUpdated = daysWithLatestData.filter((day) => day.apiId != null);
+
+      // POST new days one by one
+      const createdDays = await Promise.all(
+        daysToBeCreated.map(async (day) => {
+          const response = await createItineraryDay(experienceId, {
+            day_number: day.dayNumber,
+            title: day.title,
+            description: day.description,
+          });
+          return {
+            ...day,
+            apiId: response.data.id,
+          };
+        }),
       );
 
-      await updateItineraryDay(
-        experienceId,
-        daysToBeUpdated.map((day) => ({
-          day_number: day.dayNumber,
-          title: day.title,
-          description: day.description,
-        })),
+      // Bulk PATCH existing days with correct payload shape (array of objects with id field)
+      if (daysToBeUpdated.length > 0) {
+        await bulkUpdateItineraryDays(
+          experienceId,
+          daysToBeUpdated.map((day) => ({
+            id: day.apiId!,
+            day_number: day.dayNumber,
+            title: day.title,
+            description: day.description,
+          })),
+        );
+      }
+
+      // Update formData with any new apiIds and latest values
+      updateItineraryDays(
+        [...createdDays, ...daysToBeUpdated].sort((a, b) => a.dayNumber - b.dayNumber),
       );
-
-      // await Promise.all(
-      //   days.map(async (day) => {
-      //     const payload = {
-      //       day_number: day.dayNumber,
-      //       title: day.title,
-      //       description: day.description,
-      //     };
-
-      //     if (day.apiId) {
-      //       // Update existing day
-      //       await updateItineraryDay(experienceId, day.apiId, payload);
-      //     } else {
-      //       // Create new day
-      //       const response = await createItineraryDay(experienceId, payload);
-      //       day.apiId = response.data?.id;
-      //     }
-      //   }),
-      // );
-
-      // Update formData with apiIds
-      updateItineraryDays([...days]);
 
       // Advance to tickets step
       handleStepChange('dates-tickets');
@@ -1503,7 +1530,7 @@ export const useCreateExperienceFlow = () => {
     } finally {
       setIsSavingExperience(false);
     }
-  }, [experienceId, formData.itineraryDays, handleStepChange, toast]);
+  }, [experienceId, formData.itineraryDays, handleStepChange, toast, flushAllPendingSaves, updateItineraryDays]);
 
   const handlePublish = useCallback(async () => {
     setIsSavingExperience(true);
@@ -1613,6 +1640,9 @@ export const useCreateExperienceFlow = () => {
     updateWalletFormData,
     isSavingExperience,
     apiError,
+
+    // Itinerary flusher for syncing pending saves
+    registerFlusher,
 
     walletMutations: {
       createBankWallet,

@@ -15,6 +15,8 @@ interface ItineraryDaysStepProps {
   onSaveContinue: () => void;
   onCancel: () => void;
   isSaving: boolean;
+  isParentSaving?: boolean;
+  registerFlusher?: (dayId: string, flusher: () => { title?: string; description?: string }) => () => void;
 }
 
 export const ItineraryDaysStep = ({
@@ -25,6 +27,8 @@ export const ItineraryDaysStep = ({
   onSaveContinue,
   onCancel,
   isSaving,
+  isParentSaving = false,
+  registerFlusher,
 }: ItineraryDaysStepProps) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0); // Day 1 open by default
 
@@ -89,6 +93,8 @@ export const ItineraryDaysStep = ({
               onToggle={() => handleToggle(index)}
               onChange={(data) => handleDayChange(index, data)}
               onDelete={() => handleDayDelete(index)}
+              isParentSaving={isParentSaving}
+              registerFlusher={registerFlusher}
             />
           </div>
         ))}
