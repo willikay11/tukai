@@ -106,7 +106,7 @@ const STEPS_ITINERARY = [
   {
     id: 'itinerary-days',
     label: 'Itinerary',
-    icon: 'MapIcon',
+    icon: 'RouteBlockIcon',
   },
   {
     id: 'dates-tickets',
@@ -389,9 +389,20 @@ export const CreateExperienceSteps = ({
                 inviteFormData.invitedCommunityIds?.length > 0,
               )
             : false;
+          const isItineraryDaysFilled =
+            formData?.experienceType !== 'itinerary'
+              ? true
+              : Boolean(
+                  itineraryDays &&
+                    itineraryDays.length > 0 &&
+                    itineraryDays.every((day) =>
+                      day.activities.some((a) => a.activityApiId != null),
+                    ),
+                );
           const stepFilledMap: Record<string, boolean> = {
             community: canAccessDetailsSteps,
             about: isAboutFilled,
+            'itinerary-days': isItineraryDaysFilled,
             'dates-tickets': isDatesTicketsFilled,
             guests: isGuestsFilled,
             wallet: hasSavedWallets,
