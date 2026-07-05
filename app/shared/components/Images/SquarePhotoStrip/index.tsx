@@ -73,7 +73,7 @@ export const SquarePhotoStrip = ({ photos, className = '' }: SquarePhotoStripPro
             {photos.map((photo, index) => (
               <div
                 key={index}
-                className="relative flex-shrink-0 rounded-lg overflow-hidden"
+                className="relative flex-shrink-0 overflow-hidden rounded-lg"
                 style={{
                   width: '240px',
                   height: '240px',

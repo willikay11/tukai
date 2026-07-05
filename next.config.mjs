@@ -31,7 +31,7 @@ const nextConfig = {
       {
         protocol: 'http',
         hostname: '**.ngrok-free.app',
-      }
+      },
     ],
   },
 };

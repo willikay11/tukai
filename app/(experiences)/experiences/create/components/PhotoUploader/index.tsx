@@ -338,7 +338,8 @@ export const PhotoUploader = ({
       <div className="space-y-2">
         <div className="space-y-1">
           <p className="text-xs font-medium text-gray-800">
-            Upload experience poster (JPEG, PNG or WebP · Square images · 500×500px to 1024×1024px · Max 10MB)
+            Upload experience poster (JPEG, PNG or WebP · Square images · 500×500px to 1024×1024px ·
+            Max 10MB)
           </p>
           <p className="text-xs text-muted-foreground">
             Non-square images will be cropped automatically

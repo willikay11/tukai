@@ -5,11 +5,11 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { TimePicker } from '@/components/ui/time-picker';
-import { ItineraryActivity } from '@/types/itinerary';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
+import { TimePicker } from '@/components/ui/time-picker';
+import { ItineraryActivity } from '@/types/itinerary';
 
 interface ActivityCardProps {
   activity: ItineraryActivity;
@@ -87,12 +87,12 @@ export const ActivityCard = ({
   };
 
   return (
-    <div className="border border-dashed border-gray-200 rounded-xl bg-white overflow-hidden">
+    <div className="overflow-hidden rounded-xl border border-dashed border-gray-200 bg-white">
       {/* Place header — only if place attached */}
       {activity.placeId && (
-        <div className="flex items-center gap-3 p-2 border-b border-gray-100">
+        <div className="flex items-center gap-3 border-b border-gray-100 p-2">
           {activity.placeImageUrl ? (
-            <div className="relative w-16 h-14 rounded-lg overflow-hidden flex-shrink-0">
+            <div className="relative h-14 w-16 flex-shrink-0 overflow-hidden rounded-lg">
               <Image
                 src={activity.placeImageUrl}
                 alt={activity.placeName ?? ''}
@@ -102,36 +102,28 @@ export const ActivityCard = ({
               />
             </div>
           ) : (
-            <div className="w-16 h-14 rounded-lg bg-primary/10 flex-shrink-0 flex items-center justify-center">
-              <IconComponent
-                iconName="Location01Icon"
-                size={18}
-                className="text-primary"
-              />
+            <div className="flex h-14 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              <IconComponent iconName="Location01Icon" size={18} className="text-primary" />
             </div>
           )}
 
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1">
-              <p className="text-sm font-semibold text-gray-900 truncate">
-                {activity.placeName}
-              </p>
+              <p className="truncate text-sm font-semibold text-gray-900">{activity.placeName}</p>
               <IconComponent
                 iconName="ArrowUpRight01Icon"
                 size={14}
-                className="text-primary flex-shrink-0"
+                className="flex-shrink-0 text-primary"
               />
             </div>
-            {activity.placeCity && (
-              <p className="text-xs text-gray-500">{activity.placeCity}</p>
-            )}
+            {activity.placeCity && <p className="text-xs text-gray-500">{activity.placeCity}</p>}
           </div>
 
           {/* Delete activity */}
           <button
             type="button"
             onClick={onDelete}
-            className="p-1.5 text-red-400 hover:text-red-600 mr-1"
+            className="mr-1 p-1.5 text-red-400 hover:text-red-600"
             aria-label="Delete activity"
           >
             <IconComponent iconName="Delete02Icon" size={16} />
@@ -142,9 +134,7 @@ export const ActivityCard = ({
       {/* No place — show generic header with delete */}
       {!activity.placeId && (
         <div className="flex items-center justify-between px-3 pt-3">
-          <p className="text-xs font-medium text-gray-500">
-            Activity (no specific place)
-          </p>
+          <p className="text-xs font-medium text-gray-500">Activity (no specific place)</p>
           <button
             type="button"
             onClick={onDelete}
@@ -157,7 +147,7 @@ export const ActivityCard = ({
       )}
 
       {/* Activity fields */}
-      <div className="p-3 space-y-3">
+      <div className="space-y-3 p-3">
         <div>
           <Input
             type="text"
@@ -168,9 +158,7 @@ export const ActivityCard = ({
             }}
             placeholder="Activity Title"
           />
-          {formErrors.title && (
-            <p className="mt-1 text-xs text-red-500">{formErrors.title}</p>
-          )}
+          {formErrors.title && <p className="mt-1 text-xs text-red-500">{formErrors.title}</p>}
         </div>
 
         <div>
@@ -190,9 +178,7 @@ export const ActivityCard = ({
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-medium text-gray-700 mb-1.5 block">
-              Start Time
-            </label>
+            <label className="mb-1.5 block text-xs font-medium text-gray-700">Start Time</label>
             <TimePicker
               value={activity.startTime ?? undefined}
               onChange={(time) => {
@@ -205,9 +191,7 @@ export const ActivityCard = ({
             )}
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-700 mb-1.5 block">
-              End Time
-            </label>
+            <label className="mb-1.5 block text-xs font-medium text-gray-700">End Time</label>
             <TimePicker
               value={activity.endTime ?? undefined}
               onChange={(time) => {
@@ -226,7 +210,7 @@ export const ActivityCard = ({
           <div>
             {saveError && <p className="text-xs text-red-500">{saveError}</p>}
             {activity.activityApiId && !isSaving && (
-              <p className="text-xs text-green-600 flex items-center gap-1">
+              <p className="flex items-center gap-1 text-xs text-green-600">
                 <IconComponent iconName="CheckmarkCircle01Icon" size={12} />
                 Saved
               </p>

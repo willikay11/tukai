@@ -681,7 +681,11 @@ export const useCreateExperienceFlow = () => {
         updateItineraryDays(hydrationDays);
       }
     }
-  }, [itineraryDaysResponse?.data?.results?.length, experienceId, formData.dateType.experienceType]);
+  }, [
+    itineraryDaysResponse?.data?.results?.length,
+    experienceId,
+    formData.dateType.experienceType,
+  ]);
 
   const updateWalletFormData = useCallback((data: Partial<FormData['wallet']>) => {
     setFormData((prev) => ({
@@ -1447,18 +1451,23 @@ export const useCreateExperienceFlow = () => {
       const daysToBeUpdated = days.filter((day) => day.apiId);
       const daysToBeCreated = days.filter((day) => !day.apiId);
 
-      await createItineraryDay(experienceId, daysToBeCreated.map((day) => ({
-        day_number: day.dayNumber,
-        title: day.title,
-        description: day.description,
-      })));
+      await createItineraryDay(
+        experienceId,
+        daysToBeCreated.map((day) => ({
+          day_number: day.dayNumber,
+          title: day.title,
+          description: day.description,
+        })),
+      );
 
-
-      await updateItineraryDay(experienceId, daysToBeUpdated.map((day) => ({
-        day_number: day.dayNumber,
-        title: day.title,
-        description: day.description,
-      })));
+      await updateItineraryDay(
+        experienceId,
+        daysToBeUpdated.map((day) => ({
+          day_number: day.dayNumber,
+          title: day.title,
+          description: day.description,
+        })),
+      );
 
       // await Promise.all(
       //   days.map(async (day) => {

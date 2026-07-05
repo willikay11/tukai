@@ -108,14 +108,21 @@ export const ItineraryPlaceCard = ({
       {isEditingTime && (
         <div className="space-y-3 px-1">
           <p className="text-sm text-gray-600">
-            Add the time you will visit{' '}
-            <span className="font-bold">{place.placeName}</span>
+            Add the time you will visit <span className="font-bold">{place.placeName}</span>
           </p>
 
           {/* Start + End time side by side */}
           <div className="grid grid-cols-2 gap-3">
-            <TimePicker value={place.startTime || undefined} placeholder='Start Time' onChange={onStartTimeChange} />
-            <TimePicker value={place.endTime || undefined} placeholder='End Time' onChange={onEndTimeChange} />
+            <TimePicker
+              value={place.startTime || undefined}
+              placeholder="Start Time"
+              onChange={onStartTimeChange}
+            />
+            <TimePicker
+              value={place.endTime || undefined}
+              placeholder="End Time"
+              onChange={onEndTimeChange}
+            />
           </div>
         </div>
       )}

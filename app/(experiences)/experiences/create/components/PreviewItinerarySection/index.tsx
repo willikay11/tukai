@@ -2,19 +2,21 @@
 
 import { useState } from 'react';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import { ItineraryDayFormValue } from '@/types/itinerary';
+
 import { PreviewItineraryDayPill } from '../PreviewItineraryDayPill';
 
 interface PreviewItinerarySectionProps {
   days: ItineraryDayFormValue[];
   itineraryStartDate: string | null;
-  onEditDay?: (dayNumber: number) => void;
+  onEdit?: () => void;
 }
 
 export const PreviewItinerarySection = ({
   days,
   itineraryStartDate,
-  onEditDay,
+  onEdit,
 }: PreviewItinerarySectionProps) => {
   const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set([1]));
 
@@ -38,25 +40,38 @@ export const PreviewItinerarySection = ({
   };
 
   if (days.length === 0) {
-    return <p className="italic text-gray-500">No itinerary days yet</p>;
+    return null;
   }
 
   return (
-    <div className="space-y-1">
-      {days.map((day, index) => (
-        <PreviewItineraryDayPill
-          key={day.id}
-          dayNumber={day.dayNumber}
-          title={day.title}
-          description={day.description}
-          activities={day.activities}
-          dayDate={getDayDate(day.dayNumber)}
-          isExpanded={expandedDays.has(day.dayNumber)}
-          onToggle={() => toggleDay(day.dayNumber)}
-          onEdit={() => onEditDay?.(day.dayNumber)}
-          isLast={index === days.length - 1}
-        />
-      ))}
+    <div className="space-y-2">
+      {/* Section label with edit icon — matches siblings */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium text-gray-800">Itinerary</p>
+        {onEdit && (
+          <button type="button" onClick={onEdit} className="text-gray-400 hover:text-gray-600">
+            <IconComponent iconName="Edit02Icon" size={14} />
+          </button>
+        )}
+      </div>
+
+      {/* Day pills */}
+      <div className="space-y-1">
+        {days.map((day, index) => (
+          <PreviewItineraryDayPill
+            key={day.id}
+            dayNumber={day.dayNumber}
+            title={day.title}
+            description={day.description}
+            activities={day.activities}
+            dayDate={getDayDate(day.dayNumber)}
+            isExpanded={expandedDays.has(day.dayNumber)}
+            onToggle={() => toggleDay(day.dayNumber)}
+            onEdit={onEdit}
+            isLast={index === days.length - 1}
+          />
+        ))}
+      </div>
     </div>
   );
 };

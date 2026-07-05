@@ -7,20 +7,20 @@ import { v4 as uuidv4 } from 'uuid';
 import { ActivityCard } from '@/app/(experiences)/experiences/create/components/ActivityCard';
 import { ActivityListItem } from '@/app/(experiences)/experiences/create/components/ActivityListItem';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { ItineraryActivity, ItineraryDayFormValue } from '@/types/itinerary';
+import { useToast } from '@/app/shared/hooks/useToast';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
+  type ItineraryActivityPayload,
   createItineraryDayActivity,
   deleteItineraryDayActivity,
   updateItineraryDayActivity,
   updateItineraryDayMetadata,
-  type ItineraryActivityPayload,
 } from '@/services/experience';
+import { ItineraryActivity, ItineraryDayFormValue } from '@/types/itinerary';
 import { parseApiError } from '@/utils/parseApiError';
-import { useToast } from '@/app/shared/hooks/useToast';
 
 import { AddPlaceModal } from '../AddPlaceModal';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 
 interface ItineraryDayPillProps {
   day: ItineraryDayFormValue;
@@ -189,9 +189,7 @@ export const ItineraryDayPill = ({
   const handleActivityChange = useCallback(
     (activityId: string, data: Partial<ItineraryActivity>) => {
       onChange({
-        activities: day.activities.map((a) =>
-          a.id === activityId ? { ...a, ...data } : a,
-        ),
+        activities: day.activities.map((a) => (a.id === activityId ? { ...a, ...data } : a)),
       });
     },
     [day.activities, onChange],
@@ -243,7 +241,12 @@ export const ItineraryDayPill = ({
         };
 
         if (activity.activityApiId) {
-          await updateItineraryDayActivity(experienceId, day.apiId, activity.activityApiId, payload);
+          await updateItineraryDayActivity(
+            experienceId,
+            day.apiId,
+            activity.activityApiId,
+            payload,
+          );
         } else {
           const response = await createItineraryDayActivity(experienceId, day.apiId, payload);
           onChange({
@@ -284,7 +287,9 @@ export const ItineraryDayPill = ({
           >
             <IconComponent iconName="Calendar03Icon" size={16} className="text-gray-500" />
             <span>Day {day.dayNumber}</span>
-            {isSaved && <IconComponent iconName="CheckmarkCircle01Icon" size={14} className="text-primary" />}
+            {isSaved && (
+              <IconComponent iconName="CheckmarkCircle01Icon" size={14} className="text-primary" />
+            )}
             <IconComponent
               iconName={isExpanded ? 'ArrowUp01Icon' : 'ArrowDown01Icon'}
               size={14}
@@ -333,9 +338,7 @@ export const ItineraryDayPill = ({
             />
 
             {/* Save error message */}
-            {saveError && (
-              <p className="text-xs text-red-500">Failed to save: {saveError}</p>
-            )}
+            {saveError && <p className="text-xs text-red-500">Failed to save: {saveError}</p>}
 
             {/* Activity cards/list items */}
             {day.activities.map((activity) =>
@@ -383,9 +386,7 @@ export const ItineraryDayPill = ({
           onClose={() => setIsPickerOpen(false)}
           onSelect={handlePlaceSelected}
           onSkip={handleSkipPlace}
-          selectedPlaceIds={day.activities
-            .filter((a) => a.placeId)
-            .map((a) => a.placeId!)}
+          selectedPlaceIds={day.activities.filter((a) => a.placeId).map((a) => a.placeId!)}
         />
       </div>
     </div>

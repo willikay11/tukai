@@ -6,14 +6,14 @@ import Image from 'next/image';
 
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Interest } from '@/types/interest';
+import { ItineraryDayFormValue } from '@/types/itinerary';
 import { Wallet } from '@/types/payment';
 
-import { ItineraryDayFormValue } from '@/types/itinerary';
 import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
+import { PreviewItinerarySection } from '../PreviewItinerarySection';
 import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { SharedExperiencePreview } from '../SharedExperiencePreview';
 import { CustomiseItinerary } from '../customiseItinerary';
-import { PreviewItinerarySection } from '../PreviewItinerarySection';
 
 export type ExperienceStepId =
   | 'community'
@@ -146,6 +146,8 @@ export const ExperienceStepSidePanel = ({
         multiDayStartTime={multiDayStartTime}
         multiDayEndDate={multiDayEndDate}
         multiDayEndTime={multiDayEndTime}
+        itineraryDays={itineraryDays}
+        itineraryStartDate={itineraryStartDate}
         selectedCommunity={selectedCommunity}
         ticketsItems={ticketsItems}
         ticketsCommissionPayer={ticketsCommissionPayer}
@@ -157,12 +159,41 @@ export const ExperienceStepSidePanel = ({
       />
     ),
     'itinerary-days': (
-      <PreviewItinerarySection
-        days={itineraryDays}
-        itineraryStartDate={itineraryStartDate ?? null}
-        onEditDay={() => {
-          onEditStep?.('itinerary-days');
-        }}
+      <SharedExperiencePreview
+        step="about"
+        experienceType={experienceType}
+        isRecurring={isRecurring}
+        aboutPhotos={aboutPhotos}
+        aboutTitle={aboutTitle}
+        aboutDescription={aboutDescription}
+        aboutVisibility={aboutVisibility}
+        aboutWhatsIncluded={aboutWhatsIncluded}
+        aboutWhatsNotIncluded={aboutWhatsNotIncluded}
+        aboutLocation={aboutLocation}
+        aboutMeetingPoint={aboutMeetingPoint}
+        aboutMeetingTime={aboutMeetingTime}
+        aboutCategories={aboutCategories}
+        selectedDate={selectedDate}
+        selectedStartTime={selectedStartTime}
+        selectedEndTime={selectedEndTime}
+        selectedRecurringDays={selectedRecurringDays}
+        selectedTimeSlots={selectedTimeSlots}
+        selectedRecurrenceStartDate={selectedRecurrenceStartDate}
+        selectedRecurrenceEndDate={selectedRecurrenceEndDate}
+        multiDayStartDate={multiDayStartDate}
+        multiDayStartTime={multiDayStartTime}
+        multiDayEndDate={multiDayEndDate}
+        multiDayEndTime={multiDayEndTime}
+        itineraryDays={itineraryDays}
+        itineraryStartDate={itineraryStartDate}
+        selectedCommunity={selectedCommunity}
+        ticketsItems={ticketsItems}
+        ticketsCommissionPayer={ticketsCommissionPayer}
+        invitedGuests={invitedGuests}
+        invitedCommunityIds={invitedCommunityIds}
+        allCommunities={allCommunities}
+        onEditStep={onEditStep}
+        selectedWallet={selectedWallet}
       />
     ),
     'dates-tickets': itineraryConfig ? (
@@ -193,6 +224,8 @@ export const ExperienceStepSidePanel = ({
         multiDayStartTime={multiDayStartTime}
         multiDayEndDate={multiDayEndDate}
         multiDayEndTime={multiDayEndTime}
+        itineraryDays={itineraryDays}
+        itineraryStartDate={itineraryStartDate}
         selectedCommunity={selectedCommunity}
         ticketsItems={ticketsItems}
         ticketsCommissionPayer={ticketsCommissionPayer}
@@ -234,6 +267,8 @@ export const ExperienceStepSidePanel = ({
         multiDayStartTime={multiDayStartTime}
         multiDayEndDate={multiDayEndDate}
         multiDayEndTime={multiDayEndTime}
+        itineraryDays={itineraryDays}
+        itineraryStartDate={itineraryStartDate}
         selectedCommunity={selectedCommunity}
         ticketsItems={ticketsItems}
         ticketsCommissionPayer={ticketsCommissionPayer}
@@ -270,6 +305,8 @@ export const ExperienceStepSidePanel = ({
         multiDayStartTime={multiDayStartTime}
         multiDayEndDate={multiDayEndDate}
         multiDayEndTime={multiDayEndTime}
+        itineraryDays={itineraryDays}
+        itineraryStartDate={itineraryStartDate}
         selectedCommunity={selectedCommunity}
         ticketsItems={ticketsItems}
         ticketsCommissionPayer={ticketsCommissionPayer}

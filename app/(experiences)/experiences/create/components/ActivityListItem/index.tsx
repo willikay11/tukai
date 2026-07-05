@@ -19,13 +19,9 @@ const formatTime = (time: string | null) => {
   return `${hour}:${String(m).padStart(2, '0')} ${period}`;
 };
 
-export const ActivityListItem = ({
-  activity,
-  onEdit,
-  onDelete,
-}: ActivityListItemProps) => {
+export const ActivityListItem = ({ activity, onEdit, onDelete }: ActivityListItemProps) => {
   return (
-    <div className="flex items-center gap-3 border border-dashed border-gray-200 rounded-lg bg-gray-50 p-3">
+    <div className="flex items-center gap-3 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3">
       {/* Photo on the left */}
       {activity.placeImageUrl ? (
         <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg">
@@ -38,59 +34,45 @@ export const ActivityListItem = ({
           />
         </div>
       ) : (
-        <div className="h-16 w-16 flex-shrink-0 rounded-lg bg-primary/10 flex items-center justify-center">
+        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
           {activity.placeId ? (
-            <IconComponent
-              iconName="Location01Icon"
-              size={20}
-              className="text-primary"
-            />
+            <IconComponent iconName="Location01Icon" size={20} className="text-primary" />
           ) : (
-            <IconComponent
-              iconName="Activity01Icon"
-              size={20}
-              className="text-gray-400"
-            />
+            <IconComponent iconName="Activity01Icon" size={20} className="text-gray-400" />
           )}
         </div>
       )}
 
       {/* Content in the center */}
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         {/* Title */}
-        <p className="text-sm font-semibold text-gray-900 truncate">
-          {activity.title}
-        </p>
+        <p className="truncate text-sm font-semibold text-gray-900">{activity.title}</p>
 
         {/* Description */}
         {activity.description && (
-          <p className="text-xs text-gray-600 line-clamp-1">
-            {activity.description}
-          </p>
+          <p className="line-clamp-1 text-xs text-gray-600">{activity.description}</p>
         )}
 
         {/* Time (under description) */}
         {(activity.startTime || activity.endTime) && (
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="mt-1 text-xs text-gray-500">
             {formatTime(activity.startTime)} - {formatTime(activity.endTime)}
           </p>
         )}
 
         {/* Location */}
         {activity.placeName && (
-          <p className="text-xs text-gray-500 truncate">
-            {activity.placeName}
-          </p>
+          <p className="truncate text-xs text-gray-500">{activity.placeName}</p>
         )}
       </div>
 
       {/* Edit and Delete icons on the right */}
-      <div className="flex items-center gap-1 flex-shrink-0">
+      <div className="flex flex-shrink-0 items-center gap-1">
         {onEdit && (
           <button
             type="button"
             onClick={onEdit}
-            className="p-1.5 text-gray-400 hover:text-primary transition-colors"
+            className="p-1.5 text-gray-400 transition-colors hover:text-primary"
             aria-label="Edit activity"
           >
             <IconComponent iconName="Edit02Icon" size={16} />
@@ -100,7 +82,7 @@ export const ActivityListItem = ({
           <button
             type="button"
             onClick={onDelete}
-            className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+            className="p-1.5 text-gray-400 transition-colors hover:text-red-500"
             aria-label="Delete activity"
           >
             <IconComponent iconName="Delete02Icon" size={16} />
