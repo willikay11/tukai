@@ -20,6 +20,7 @@ const formatTime = (time: string | null) => {
 };
 
 export const ActivityListItem = ({ activity, onEdit, onDelete }: ActivityListItemProps) => {
+  console.log('ActivityListItem activity:', activity);
   return (
     <div className="flex items-center gap-3 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3">
       {/* Photo on the left */}

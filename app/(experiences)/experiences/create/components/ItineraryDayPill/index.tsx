@@ -56,6 +56,8 @@ export const ItineraryDayPill = ({
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [savingActivityId, setSavingActivityId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [isEditingTitleAndDescription, setIsEditingTitleAndDescription] = useState(false);
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pendingDataRef = useRef<{
     title?: string;
@@ -65,6 +67,26 @@ export const ItineraryDayPill = ({
   const dayDate = getDayDate(itineraryStartDate, day.dayNumber);
 
   const isSaved = day.activities.length > 0 && day.activities.every((a) => a.activityApiId != null);
+
+  // Show display view when both fields have content and user is not editing
+  const showDisplayView =
+    !isEditingTitleAndDescription && day.title.trim() !== '' && day.description.trim() !== '';
+
+  // Auto-exit edit mode when both fields filled
+  const maybeExitEditMode = () => {
+    if (day.title.trim() !== '' && day.description.trim() !== '') {
+      setIsEditingTitleAndDescription(false);
+    }
+  };
+
+  // Focus title input when entering edit mode
+  useEffect(() => {
+    if (isEditingTitleAndDescription) {
+      requestAnimationFrame(() => {
+        titleInputRef.current?.focus();
+      });
+    }
+  }, [isEditingTitleAndDescription]);
 
   const performSave = useCallback(async () => {
     const pending = pendingDataRef.current;
@@ -287,9 +309,6 @@ export const ItineraryDayPill = ({
           >
             <IconComponent iconName="Calendar03Icon" size={16} className="text-gray-500" />
             <span>Day {day.dayNumber}</span>
-            {isSaved && (
-              <IconComponent iconName="CheckmarkCircle01Icon" size={14} className="text-primary" />
-            )}
             <IconComponent
               iconName={isExpanded ? 'ArrowUp01Icon' : 'ArrowDown01Icon'}
               size={14}
@@ -298,13 +317,13 @@ export const ItineraryDayPill = ({
           </button>
 
           {/* Edit icon */}
-          <button
+          {/* <button
             type="button"
             onClick={onToggle}
             className="text-gray-400 transition-colors hover:text-gray-600"
           >
             <IconComponent iconName="Edit02Icon" size={16} />
-          </button>
+          </button> */}
 
           {/* Delete icon */}
           <button
@@ -319,23 +338,48 @@ export const ItineraryDayPill = ({
         {/* Expanded content */}
         {isExpanded && (
           <div className="mt-3 space-y-3">
-            {/* Day-level title */}
-            <Input
-              type="text"
-              value={day.title}
-              onChange={(e) => handleTitleChange(e.target.value)}
-              onBlur={flushPendingSave}
-              placeholder="Activity Title"
-            />
+            {/* Title and description display/edit toggle */}
+            {showDisplayView ? (
+              <div className="space-y-1">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-xs font-bold leading-snug text-gray-900">{day.title}</p>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingTitleAndDescription(true)}
+                    className="flex-shrink-0 p-1 text-gray-400 transition-colors hover:text-primary"
+                    aria-label="Edit title and description"
+                  >
+                    <IconComponent iconName="Edit02Icon" size={16} />
+                  </button>
+                </div>
+                <p className="text-xs leading-relaxed text-gray-600">{day.description}</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Input
+                  ref={titleInputRef}
+                  type="text"
+                  value={day.title}
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                  onBlur={() => {
+                    flushPendingSave();
+                    maybeExitEditMode();
+                  }}
+                  placeholder="Day Title"
+                />
 
-            {/* Day-level description */}
-            <Textarea
-              value={day.description}
-              onChange={(e) => handleDescriptionChange(e.target.value)}
-              onBlur={flushPendingSave}
-              placeholder="Add a brief description about the day's experiences/activities"
-              rows={3}
-            />
+                <Textarea
+                  value={day.description}
+                  onChange={(e) => handleDescriptionChange(e.target.value)}
+                  onBlur={() => {
+                    flushPendingSave();
+                    maybeExitEditMode();
+                  }}
+                  placeholder="Add a brief description about the day's experiences/activities"
+                  rows={3}
+                />
+              </div>
+            )}
 
             {/* Save error message */}
             {saveError && <p className="text-xs text-red-500">Failed to save: {saveError}</p>}

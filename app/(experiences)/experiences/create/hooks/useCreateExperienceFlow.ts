@@ -672,12 +672,11 @@ export const useCreateExperienceFlow = () => {
             placeName: a.location?.title ?? null,
             placeImageUrl: a.location?.photos?.[0]?.photo ?? null,
             placeCity: a.location?.city ?? null,
-            startTime: a.start_time ?? null,
-            endTime: a.end_time ?? null,
+            startTime: a.startTime ?? null,
+            endTime: a.endTime ?? null,
           })),
         }));
 
-        console.log('[Hydration] Hydrating itinerary days from API:', hydrationDays);
         updateItineraryDays(hydrationDays);
       }
     }
