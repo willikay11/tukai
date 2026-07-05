@@ -605,6 +605,38 @@ export const updateItineraryDay = async (
   }
 };
 
+export const updateItineraryDayMetadata = async (
+  experienceId: string,
+  dayId: string,
+  data: {
+    day_number?: number;
+    title?: string;
+    description?: string;
+  },
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.patch(
+      `/v1/experiences/${experienceId}/itinerary-days/${dayId}/`,
+      data,
+    );
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+};
+
 export const deleteItineraryDay = async (
   experienceId: string,
   dayId: string,

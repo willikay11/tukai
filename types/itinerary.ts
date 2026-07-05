@@ -16,9 +16,9 @@ export interface ItineraryDayFormValue {
   id: string; // local uuid
   apiId: string;
   dayNumber: number; // 1-based
+  title: string; // day title
+  description: string; // day description
   activities: ItineraryActivity[]; // multiple activities per day
-  title?: string; // kept for API compatibility, not rendered
-  description?: string; // kept for API compatibility, not rendered
 }
 
 export interface ItineraryDayPayload {

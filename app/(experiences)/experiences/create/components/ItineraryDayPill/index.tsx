@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -12,12 +12,15 @@ import {
   createItineraryDayActivity,
   deleteItineraryDayActivity,
   updateItineraryDayActivity,
+  updateItineraryDayMetadata,
   type ItineraryActivityPayload,
 } from '@/services/experience';
 import { parseApiError } from '@/utils/parseApiError';
 import { useToast } from '@/app/shared/hooks/useToast';
 
 import { AddPlaceModal } from '../AddPlaceModal';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 interface ItineraryDayPillProps {
   day: ItineraryDayFormValue;
@@ -52,10 +55,85 @@ export const ItineraryDayPill = ({
   const { toast } = useToast();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [savingActivityId, setSavingActivityId] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingDataRef = useRef<{
+    title?: string;
+    description?: string;
+  }>({});
 
   const dayDate = getDayDate(itineraryStartDate, day.dayNumber);
 
   const isSaved = day.activities.length > 0 && day.activities.every((a) => a.activityApiId != null);
+
+  const performSave = useCallback(async () => {
+    const pending = pendingDataRef.current;
+    if (!experienceId || !day.apiId) return;
+
+    // Check if there's anything to save
+    const hasTitle = pending.title !== undefined;
+    const hasDescription = pending.description !== undefined;
+    if (!hasTitle && !hasDescription) return;
+
+    try {
+      await updateItineraryDayMetadata(experienceId, day.apiId, {
+        day_number: day.dayNumber,
+        title: pending.title ?? day.title,
+        description: pending.description ?? day.description,
+      });
+      pendingDataRef.current = {};
+      setSaveError(null);
+    } catch (err) {
+      setSaveError(parseApiError(err));
+    }
+  }, [experienceId, day.apiId, day.dayNumber, day.title, day.description]);
+
+  const scheduleDebouncedSave = useCallback(() => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+    }
+    saveTimerRef.current = setTimeout(() => {
+      performSave();
+      saveTimerRef.current = null;
+    }, 800);
+  }, [performSave]);
+
+  const flushPendingSave = useCallback(() => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+      performSave();
+    }
+  }, [performSave]);
+
+  const handleTitleChange = (value: string) => {
+    onChange({ title: value });
+    pendingDataRef.current.title = value;
+    scheduleDebouncedSave();
+  };
+
+  const handleDescriptionChange = (value: string) => {
+    onChange({ description: value });
+    pendingDataRef.current.description = value;
+    scheduleDebouncedSave();
+  };
+
+  // Cleanup — flush on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        performSave();
+      }
+    };
+  }, [performSave]);
+
+  // Flush when collapsing the pill
+  useEffect(() => {
+    if (!isExpanded) {
+      flushPendingSave();
+    }
+  }, [isExpanded, flushPendingSave]);
 
   const handleAddActivity = useCallback(() => {
     setIsPickerOpen(true);
@@ -236,6 +314,29 @@ export const ItineraryDayPill = ({
         {/* Expanded content */}
         {isExpanded && (
           <div className="mt-3 space-y-3">
+            {/* Day-level title */}
+            <Input
+              type="text"
+              value={day.title}
+              onChange={(e) => handleTitleChange(e.target.value)}
+              onBlur={flushPendingSave}
+              placeholder="Activity Title"
+            />
+
+            {/* Day-level description */}
+            <Textarea
+              value={day.description}
+              onChange={(e) => handleDescriptionChange(e.target.value)}
+              onBlur={flushPendingSave}
+              placeholder="Add a brief description about the day's experiences/activities"
+              rows={3}
+            />
+
+            {/* Save error message */}
+            {saveError && (
+              <p className="text-xs text-red-500">Failed to save: {saveError}</p>
+            )}
+
             {/* Activity cards/list items */}
             {day.activities.map((activity) =>
               activity.activityApiId ? (

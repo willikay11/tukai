@@ -197,6 +197,8 @@ const generateItineraryDays = (startDate: string, endDate: string): ItineraryDay
   return days.map((_, index) => ({
     id: uuidv4(),
     dayNumber: index + 1,
+    title: '',
+    description: '',
     activities: [],
   }));
 };
