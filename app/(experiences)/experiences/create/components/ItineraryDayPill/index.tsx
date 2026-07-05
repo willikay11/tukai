@@ -5,7 +5,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ActivityCard } from '@/app/(experiences)/experiences/create/components/ActivityCard';
-import { ActivityListItem } from '@/app/(experiences)/experiences/create/components/ActivityListItem';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Input } from '@/components/ui/input';
@@ -54,6 +53,7 @@ export const ItineraryDayPill = ({
 }: ItineraryDayPillProps) => {
   const { toast } = useToast();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [changingPlaceForActivityId, setChangingPlaceForActivityId] = useState<string | null>(null);
   const [savingActivityId, setSavingActivityId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isEditingTitleAndDescription, setIsEditingTitleAndDescription] = useState(false);
@@ -169,44 +169,84 @@ export const ItineraryDayPill = ({
       city: string | null;
       locationId: string | null;
     }) => {
+      // If changing place on existing activity
+      if (changingPlaceForActivityId) {
+        onChange({
+          activities: day.activities.map((a) =>
+            a.id === changingPlaceForActivityId
+              ? {
+                  ...a,
+                  placeId: selected.id,
+                  placeName: selected.name,
+                  placeImageUrl: selected.imageUrl,
+                  placeCity: selected.city,
+                  locationId: selected.locationId,
+                }
+              : a,
+          ),
+        });
+        setChangingPlaceForActivityId(null);
+      } else {
+        // Adding new activity
+        const newActivity: ItineraryActivity = {
+          id: uuidv4(),
+          title: '',
+          description: '',
+          placeId: selected.id,
+          placeName: selected.name,
+          placeImageUrl: selected.imageUrl,
+          placeCity: selected.city,
+          startTime: null,
+          endTime: null,
+          locationId: selected.locationId,
+        };
+        onChange({
+          activities: [...day.activities, newActivity],
+        });
+      }
+      setIsPickerOpen(false);
+    },
+    [day.activities, onChange, changingPlaceForActivityId],
+  );
+
+  const handleSkipPlace = useCallback(() => {
+    // If changing place on existing activity, just skip (clear place)
+    if (changingPlaceForActivityId) {
+      onChange({
+        activities: day.activities.map((a) =>
+          a.id === changingPlaceForActivityId
+            ? {
+                ...a,
+                placeId: null,
+                placeName: null,
+                placeImageUrl: null,
+                placeCity: null,
+                locationId: null,
+              }
+            : a,
+        ),
+      });
+      setChangingPlaceForActivityId(null);
+    } else {
+      // Adding new activity without place
       const newActivity: ItineraryActivity = {
         id: uuidv4(),
         title: '',
         description: '',
-        placeId: selected.id,
-        placeName: selected.name,
-        placeImageUrl: selected.imageUrl,
-        placeCity: selected.city,
+        placeId: null,
+        placeName: null,
+        placeImageUrl: null,
+        placeCity: null,
         startTime: null,
         endTime: null,
-        locationId: selected.locationId,
+        locationId: null,
       };
       onChange({
         activities: [...day.activities, newActivity],
       });
-      setIsPickerOpen(false);
-    },
-    [day.activities, onChange],
-  );
-
-  const handleSkipPlace = useCallback(() => {
-    const newActivity: ItineraryActivity = {
-      id: uuidv4(),
-      title: '',
-      description: '',
-      placeId: null,
-      placeName: null,
-      placeImageUrl: null,
-      placeCity: null,
-      startTime: null,
-      endTime: null,
-      locationId: null,
-    };
-    onChange({
-      activities: [...day.activities, newActivity],
-    });
+    }
     setIsPickerOpen(false);
-  }, [day.activities, onChange]);
+  }, [day.activities, onChange, changingPlaceForActivityId]);
 
   const handleActivityChange = useCallback(
     (activityId: string, data: Partial<ItineraryActivity>) => {
@@ -382,32 +422,23 @@ export const ItineraryDayPill = ({
             {/* Save error message */}
             {saveError && <p className="text-xs text-red-500">Failed to save: {saveError}</p>}
 
-            {/* Activity cards/list items */}
-            {day.activities.map((activity) =>
-              activity.activityApiId ? (
-                // Saved activity — show as list item
-                <ActivityListItem
-                  key={activity.id}
-                  activity={activity}
-                  onEdit={() => {
-                    // TODO: Toggle edit mode for this activity
-                  }}
-                  onDelete={() => handleActivityDelete(activity.id)}
-                />
-              ) : (
-                // Unsaved activity — show as editable card
-                <ActivityCard
-                  key={activity.id}
-                  activity={activity}
-                  dayDate={dayDate}
-                  otherActivities={day.activities.filter((a) => a.id !== activity.id)}
-                  onChange={(data) => handleActivityChange(activity.id, data)}
-                  onDelete={() => handleActivityDelete(activity.id)}
-                  onSave={() => handleActivitySave(activity.id)}
-                  isSaving={savingActivityId === activity.id}
-                />
-              ),
-            )}
+            {/* Activity cards */}
+            {day.activities.map((activity) => (
+              <ActivityCard
+                key={activity.id}
+                activity={activity}
+                dayDate={dayDate}
+                otherActivities={day.activities.filter((a) => a.id !== activity.id)}
+                onChange={(data) => handleActivityChange(activity.id, data)}
+                onDelete={() => handleActivityDelete(activity.id)}
+                onSave={() => handleActivitySave(activity.id)}
+                onChangePlace={() => {
+                  setChangingPlaceForActivityId(activity.id);
+                  setIsPickerOpen(true);
+                }}
+                isSaving={savingActivityId === activity.id}
+              />
+            ))}
 
             {/* Add Activity button */}
             <button
@@ -426,10 +457,15 @@ export const ItineraryDayPill = ({
         {/* Place picker modal */}
         <AddPlaceModal
           isOpen={isPickerOpen}
-          onClose={() => setIsPickerOpen(false)}
+          onClose={() => {
+            setIsPickerOpen(false);
+            setChangingPlaceForActivityId(null);
+          }}
           onSelect={handlePlaceSelected}
           onSkip={handleSkipPlace}
-          selectedPlaceIds={day.activities.filter((a) => a.placeId).map((a) => a.placeId!)}
+          selectedPlaceIds={day.activities
+            .filter((a) => a.placeId && a.id !== changingPlaceForActivityId)
+            .map((a) => a.placeId!)}
         />
       </div>
     </div>

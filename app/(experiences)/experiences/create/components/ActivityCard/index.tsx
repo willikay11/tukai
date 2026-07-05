@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import Image from 'next/image';
 
@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { TimePicker } from '@/components/ui/time-picker';
 import { ItineraryActivity } from '@/types/itinerary';
 import { doTimesOverlap, findOverlappingActivity, isEndAfterStart } from '@/utils/itinerary-utils';
+import { formatDateDDMMYYYY, formatTimeTo12Hour } from '@/utils/date-utils';
 
 interface ActivityCardProps {
   activity: ItineraryActivity;
@@ -18,7 +19,8 @@ interface ActivityCardProps {
   otherActivities: ItineraryActivity[];
   onChange: (data: Partial<ItineraryActivity>) => void;
   onDelete: () => void;
-  onSave: () => Promise<void>;
+  onChangePlace: () => void;
+  onSave?: () => Promise<void>;
   isSaving?: boolean;
 }
 
@@ -28,11 +30,18 @@ export const ActivityCard = ({
   otherActivities,
   onChange,
   onDelete,
+  onChangePlace,
   onSave,
   isSaving = false,
 }: ActivityCardProps) => {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Edit mode state: new activities start in edit mode, saved ones start in view mode
+  const isSaved = activity.activityApiId != null;
+  const [isEditing, setIsEditing] = useState(!isSaved);
+
+  const showEditForm = isEditing || !isSaved;
 
   // Detect time errors (overlap or end before start)
   const timeError = useMemo(() => {
@@ -111,19 +120,16 @@ export const ActivityCard = ({
   };
 
   return (
-    <div
-      className={`overflow-hidden rounded-xl border border-dashed bg-white ${
-        timeError ? 'border-red-300' : 'border-gray-200'
-      }`}
-    >
-      {/* Place header — only if place attached */}
-      {activity.placeId && (
-        <div className="flex items-center gap-3 border-b border-gray-100 p-2">
+    <>
+      {/* Compact display view — only for saved activities not editing */}
+      {!showEditForm && isSaved && (
+        <div className="flex items-start gap-3 rounded-xl border border-dashed border-gray-200 bg-white p-3">
+          {/* Place photo or placeholder */}
           {activity.placeImageUrl ? (
             <div className="relative h-14 w-16 flex-shrink-0 overflow-hidden rounded-lg">
               <Image
                 src={activity.placeImageUrl}
-                alt={activity.placeName ?? ''}
+                alt={activity.placeName ?? activity.title}
                 fill
                 sizes="64px"
                 className="object-cover"
@@ -135,47 +141,148 @@ export const ActivityCard = ({
             </div>
           )}
 
+          {/* Content */}
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1">
-              <p className="truncate text-sm font-semibold text-gray-900">{activity.placeName}</p>
-              <IconComponent
-                iconName="ArrowUpRight01Icon"
-                size={14}
-                className="flex-shrink-0 text-primary"
-              />
-            </div>
-            {activity.placeCity && <p className="text-xs text-gray-500">{activity.placeCity}</p>}
+            {/* Place name if attached */}
+            {activity.placeName && (
+              <div className="flex items-center gap-1">
+                <p className="truncate text-sm font-semibold text-gray-900">{activity.placeName}</p>
+                <IconComponent
+                  iconName="ArrowUpRight01Icon"
+                  size={13}
+                  className="flex-shrink-0 text-primary"
+                />
+              </div>
+            )}
+
+            {/* Activity title */}
+            {activity.title && (
+              <p className={`text-sm text-gray-800 ${activity.placeName ? 'mt-0.5' : 'font-semibold'}`}>
+                {activity.title}
+              </p>
+            )}
+
+            {/* Description */}
+            {activity.description && (
+              <p className="mt-1 line-clamp-2 text-xs text-gray-500">{activity.description}</p>
+            )}
+
+            {/* Time */}
+            <p className="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
+              <span>{formatDateDDMMYYYY(dayDate)}</span>
+              <span className="inline-block h-1 w-1 rounded-full bg-gray-400" />
+              <span>
+                {formatTimeTo12Hour(activity.startTime ?? '')} -{' '}
+                {formatTimeTo12Hour(activity.endTime ?? '')}
+              </span>
+            </p>
           </div>
 
-          {/* Delete activity */}
-          <button
-            type="button"
-            onClick={onDelete}
-            className="mr-1 p-1.5 text-red-400 hover:text-red-600"
-            aria-label="Delete activity"
-          >
-            <IconComponent iconName="Delete02Icon" size={16} />
-          </button>
+          {/* Edit + delete actions */}
+          <div className="flex flex-shrink-0 items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="p-1.5 text-gray-400 transition-colors hover:text-primary"
+              aria-label="Edit activity"
+            >
+              <IconComponent iconName="Edit02Icon" size={16} />
+            </button>
+            <div className="h-4 w-px bg-gray-200" />
+            <button
+              type="button"
+              onClick={onDelete}
+              className="p-1.5 text-gray-400 transition-colors hover:text-red-500"
+              aria-label="Delete activity"
+            >
+              <IconComponent iconName="Delete02Icon" size={16} className="text-red-400" />
+            </button>
+          </div>
         </div>
       )}
 
-      {/* No place — show generic header with delete */}
-      {!activity.placeId && (
-        <div className="flex items-center justify-between px-3 pt-3">
-          <p className="text-xs font-medium text-gray-500">Activity (no specific place)</p>
-          <button
-            type="button"
-            onClick={onDelete}
-            className="p-1 text-red-400 hover:text-red-600"
-            aria-label="Delete activity"
-          >
-            <IconComponent iconName="Delete02Icon" size={14} />
-          </button>
-        </div>
-      )}
+      {/* Edit form view */}
+      {showEditForm && (
+        <div
+          className={`overflow-hidden rounded-xl border border-dashed bg-white ${
+            timeError ? 'border-red-300' : 'border-gray-200'
+          }`}
+        >
+          {/* Place header — with Change place button */}
+          {activity.placeId && (
+            <div className="flex items-center gap-3 border-b border-gray-100 p-2">
+              {activity.placeImageUrl ? (
+                <div className="relative h-14 w-16 flex-shrink-0 overflow-hidden rounded-lg">
+                  <Image
+                    src={activity.placeImageUrl}
+                    alt={activity.placeName ?? ''}
+                    fill
+                    sizes="64px"
+                    className="object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="flex h-14 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  <IconComponent iconName="Location01Icon" size={18} className="text-primary" />
+                </div>
+              )}
 
-      {/* Activity fields */}
-      <div className="space-y-3 p-3">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1">
+                  <p className="truncate text-sm font-semibold text-gray-900">{activity.placeName}</p>
+                  <IconComponent
+                    iconName="ArrowUpRight01Icon"
+                    size={14}
+                    className="flex-shrink-0 text-primary"
+                  />
+                </div>
+                {activity.placeCity && <p className="text-xs text-gray-500">{activity.placeCity}</p>}
+              </div>
+
+              {/* Change place button */}
+              <button
+                type="button"
+                onClick={onChangePlace}
+                className="flex-shrink-0 whitespace-nowrap text-xs font-medium text-primary hover:underline"
+              >
+                Change place
+              </button>
+
+              {/* Delete activity */}
+              <button
+                type="button"
+                onClick={onDelete}
+                className="mr-1 p-1.5 text-red-400 hover:text-red-600"
+                aria-label="Delete activity"
+              >
+                <IconComponent iconName="Delete02Icon" size={16} />
+              </button>
+            </div>
+          )}
+
+          {/* No place attached — show "Add place" option */}
+          {!activity.placeId && (
+            <div className="flex items-center justify-between border-b border-gray-100 px-3 py-2">
+              <button
+                type="button"
+                onClick={onChangePlace}
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                + Add a place to this activity
+              </button>
+              <button
+                type="button"
+                onClick={onDelete}
+                className="p-1 text-red-400 hover:text-red-600"
+                aria-label="Delete activity"
+              >
+                <IconComponent iconName="Delete02Icon" size={14} />
+              </button>
+            </div>
+          )}
+
+          {/* Activity fields */}
+          <div className="space-y-3 p-3">
         <div>
           <Input
             type="text"
@@ -239,24 +346,41 @@ export const ActivityCard = ({
         <div className="flex items-center justify-between pt-2">
           <div>
             {saveError && <p className="text-xs text-red-500">{saveError}</p>}
-            {activity.activityApiId && !isSaving && (
+            {isSaved && !isEditing && (
               <p className="flex items-center gap-1 text-xs text-green-600">
                 <IconComponent iconName="CheckmarkCircle01Icon" size={12} />
                 Saved
               </p>
             )}
           </div>
-          <Button
-            type="button"
-            onClick={handleSave}
-            disabled={isSaving || !!activity.activityApiId || !!timeError}
-            variant="gradient"
-            className="rounded-full"
-          >
-            {isSaving ? 'Saving...' : activity.activityApiId ? 'Saved' : 'Save'}
-          </Button>
+          {!isSaved && (
+            <Button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving || !!timeError}
+              variant="gradient"
+              className="rounded-full"
+            >
+              {isSaving ? 'Saving...' : 'Save'}
+            </Button>
+          )}
         </div>
-      </div>
-    </div>
+
+        {/* Done editing button — only for saved activities */}
+        {isSaved && (
+          <div className="flex justify-end px-3 pb-3">
+            <button
+              type="button"
+              onClick={() => setIsEditing(false)}
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              Done editing
+            </button>
+          </div>
+        )}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
