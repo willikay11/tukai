@@ -242,8 +242,6 @@ export const ItineraryDayPill = ({
 
   const handleActivitySave = useCallback(
     async (activityId: string) => {
-      console.log('day:', day);
-
       if (!experienceId) return;
 
       const activity = day.activities.find((a) => a.id === activityId);
@@ -340,7 +338,7 @@ export const ItineraryDayPill = ({
           <div className="mt-3 space-y-3">
             {/* Title and description display/edit toggle */}
             {showDisplayView ? (
-              <div className="space-y-1">
+              <div className="space-y-0">
                 <div className="flex items-start justify-between gap-3">
                   <p className="text-xs font-bold leading-snug text-gray-900">{day.title}</p>
                   <button
