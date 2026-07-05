@@ -32,6 +32,10 @@ const nextConfig = {
         protocol: 'http',
         hostname: '**.ngrok-free.app',
       },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      }
     ],
   },
 };
