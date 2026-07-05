@@ -18,6 +18,7 @@ import {
 } from '@/services/experience';
 import { ItineraryActivity, ItineraryDayFormValue } from '@/types/itinerary';
 import { parseApiError } from '@/utils/parseApiError';
+import { sortActivitiesByTime } from '@/utils/itinerary-utils';
 
 import { AddPlaceModal } from '../AddPlaceModal';
 
@@ -423,7 +424,7 @@ export const ItineraryDayPill = ({
             {saveError && <p className="text-xs text-red-500">Failed to save: {saveError}</p>}
 
             {/* Activity cards */}
-            {day.activities.map((activity) => (
+            {sortActivitiesByTime(day.activities).map((activity) => (
               <ActivityCard
                 key={activity.id}
                 activity={activity}

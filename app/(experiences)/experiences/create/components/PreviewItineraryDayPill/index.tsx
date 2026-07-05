@@ -2,6 +2,7 @@
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { ItineraryActivity } from '@/types/itinerary';
+import { sortActivitiesByTime } from '@/utils/itinerary-utils';
 
 import { PreviewActivityRow } from '../PreviewActivityRow';
 
@@ -88,7 +89,7 @@ export const PreviewItineraryDayPill = ({
                   Where will these activities take place?
                 </p>
                 <div className="space-y-2">
-                  {activities.map((activity) => (
+                  {sortActivitiesByTime(activities).map((activity) => (
                     <PreviewActivityRow key={activity.id} activity={activity} dayDate={dayDate} />
                   ))}
                 </div>

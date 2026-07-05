@@ -20,7 +20,7 @@ interface ActivityCardProps {
   onChange: (data: Partial<ItineraryActivity>) => void;
   onDelete: () => void;
   onChangePlace: () => void;
-  onSave?: () => Promise<void>;
+  onSave: () => Promise<void>;
   isSaving?: boolean;
 }
 
@@ -114,6 +114,10 @@ export const ActivityCard = ({
     setSaveError(null);
     try {
       await onSave();
+      // Exit edit mode after successful save for saved activities
+      if (isSaved) {
+        setIsEditing(false);
+      }
     } catch (err) {
       setSaveError('Failed to save activity');
     }
@@ -167,15 +171,14 @@ export const ActivityCard = ({
               <p className="mt-1 line-clamp-2 text-xs text-gray-500">{activity.description}</p>
             )}
 
-            {/* Time */}
-            <p className="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
-              <span>{formatDateDDMMYYYY(dayDate)}</span>
-              <span className="inline-block h-1 w-1 rounded-full bg-gray-400" />
-              <span>
+            {/* Date and Time */}
+            <div className="mt-2 space-y-1">
+              <p className="text-xs font-medium text-gray-600">{formatDateDDMMYYYY(dayDate)}</p>
+              <p className="text-xs text-gray-500">
                 {formatTimeTo12Hour(activity.startTime ?? '')} -{' '}
                 {formatTimeTo12Hour(activity.endTime ?? '')}
-              </span>
-            </p>
+              </p>
+            </div>
           </div>
 
           {/* Edit + delete actions */}
@@ -346,38 +349,17 @@ export const ActivityCard = ({
         <div className="flex items-center justify-between pt-2">
           <div>
             {saveError && <p className="text-xs text-red-500">{saveError}</p>}
-            {isSaved && !isEditing && (
-              <p className="flex items-center gap-1 text-xs text-green-600">
-                <IconComponent iconName="CheckmarkCircle01Icon" size={12} />
-                Saved
-              </p>
-            )}
           </div>
-          {!isSaved && (
-            <Button
-              type="button"
-              onClick={handleSave}
-              disabled={isSaving || !!timeError}
-              variant="gradient"
-              className="rounded-full"
-            >
-              {isSaving ? 'Saving...' : 'Save'}
-            </Button>
-          )}
+          <Button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving || !!timeError}
+            variant="gradient"
+            className="rounded-full"
+          >
+            {isSaving ? 'Saving...' : 'Save'}
+          </Button>
         </div>
-
-        {/* Done editing button — only for saved activities */}
-        {isSaved && (
-          <div className="flex justify-end px-3 pb-3">
-            <button
-              type="button"
-              onClick={() => setIsEditing(false)}
-              className="text-xs font-medium text-primary hover:underline"
-            >
-              Done editing
-            </button>
-          </div>
-        )}
           </div>
         </div>
       )}

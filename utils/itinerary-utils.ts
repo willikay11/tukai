@@ -59,3 +59,16 @@ export const isEndAfterStart = (
   if (!startTime || !endTime) return true; // incomplete = valid so far
   return toMinutes(endTime) > toMinutes(startTime);
 };
+
+// Sort activities by start time (ascending)
+// Activities without start time go to the end
+export const sortActivitiesByTime = <T extends { startTime: string | null }>(
+  activities: T[],
+): T[] => {
+  return [...activities].sort((a, b) => {
+    if (!a.startTime && !b.startTime) return 0;
+    if (!a.startTime) return 1;
+    if (!b.startTime) return -1;
+    return toMinutes(a.startTime) - toMinutes(b.startTime);
+  });
+};

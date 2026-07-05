@@ -38,8 +38,8 @@ export const PreviewActivityRow = ({ activity, dayDate }: PreviewActivityRowProp
       {/* Content */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1">
-          <p className="truncate text-sm font-semibold text-gray-900">
-            {activity.placeName ?? activity.title}
+          <p className="truncate text-xs font-semibold text-gray-900">
+            {activity.title}
           </p>
           {activity.placeName && (
             <IconComponent
@@ -49,13 +49,16 @@ export const PreviewActivityRow = ({ activity, dayDate }: PreviewActivityRowProp
             />
           )}
         </div>
-        <p className="mt-0.5 flex items-center gap-1.5 text-xs text-gray-500">
-          <span>{displayDate}</span>
-          <span className="inline-block h-1 w-1 rounded-full bg-gray-400" />
-          <span>
+        <p className="truncate text-xs text-gray-900">
+            {activity.description}
+          </p>
+        <div className="mt-1 inline-flex items-center gap-1">
+          <p className="text-xs text-gray-600">{displayDate}</p>
+          <div className="inline-block h-1 w-1 flex-shrink-0 rounded-full bg-gray-400" />
+          <p className="text-xs text-gray-500">
             {displayStartTime} - {displayEndTime}
-          </span>
-        </p>
+          </p>
+        </div>
       </div>
     </div>
   );
