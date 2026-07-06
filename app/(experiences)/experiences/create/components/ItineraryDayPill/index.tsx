@@ -1,77 +1,394 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { ActivityCard } from '@/app/(experiences)/experiences/create/components/ActivityCard';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { useToast } from '@/app/shared/hooks/useToast';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ItineraryDayFormValue, ItineraryDayPlace } from '@/types/itinerary';
+import {
+  type ItineraryActivityPayload,
+  createItineraryDayActivity,
+  deleteItineraryDayActivity,
+  updateItineraryDayActivity,
+  updateItineraryDayMetadata,
+} from '@/services/experience';
+import { ItineraryActivity, ItineraryDayFormValue } from '@/types/itinerary';
+import { parseApiError } from '@/utils/parseApiError';
+import { sortActivitiesByTime } from '@/utils/itinerary-utils';
 
 import { AddPlaceModal } from '../AddPlaceModal';
-import { ItineraryPlaceCard } from '../ItineraryPlaceCard';
 
 interface ItineraryDayPillProps {
   day: ItineraryDayFormValue;
   isExpanded: boolean;
+  itineraryStartDate: string | null;
+  experienceId: string | null;
   onToggle: () => void;
   onChange: (data: Partial<ItineraryDayFormValue>) => void;
   onDelete: () => void;
   isSaving?: boolean;
   error?: string;
+  isParentSaving?: boolean;
+  registerFlusher?: (dayId: string, flusher: () => { title?: string; description?: string }) => () => void;
 }
+
+const getDayDate = (itineraryStartDate: string | null, dayNumber: number): string | null => {
+  if (!itineraryStartDate) return null;
+  const start = new Date(itineraryStartDate);
+  start.setDate(start.getDate() + dayNumber - 1);
+  return start.toISOString().split('T')[0];
+};
 
 export const ItineraryDayPill = ({
   day,
   isExpanded,
+  itineraryStartDate,
+  experienceId,
   onToggle,
   onChange,
   onDelete,
   isSaving,
   error,
+  isParentSaving = false,
+  registerFlusher,
 }: ItineraryDayPillProps) => {
+  const { toast } = useToast();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
+  const [changingPlaceForActivityId, setChangingPlaceForActivityId] = useState<string | null>(null);
+  const [savingActivityId, setSavingActivityId] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [savedTick, setSavedTick] = useState(0);
+  // Start in edit mode if either field is empty on mount
+  const [isEditingTitleAndDescription, setIsEditingTitleAndDescription] = useState<boolean>(
+    () => day.title.trim() === '' || day.description.trim() === '',
+  );
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const editContainerRef = useRef<HTMLDivElement>(null);
+  const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isParentSavingRef = useRef(false);
+  const pendingDataRef = useRef<{
+    title?: string;
+    description?: string;
+  }>({});
 
-  const handlePlaceSelected = (selected: {
-    id: string;
-    name: string;
-    imageUrl: string | null;
-    city: string | null;
-  }) => {
-    const newPlace: ItineraryDayPlace = {
-      id: uuidv4(),
-      placeId: selected.id,
-      placeName: selected.name,
-      imageUrl: selected.imageUrl,
-      city: selected.city,
-      date: null,
-      startTime: null,
-      endTime: null,
-    };
-    const updatedPlaces = [...(day.places ?? []), newPlace];
-    onChange({
-      places: updatedPlaces,
-    });
-    setEditingPlaceId(newPlace.id);
-    setIsPickerOpen(false);
-  };
+  const dayDate = getDayDate(itineraryStartDate, day.dayNumber);
 
-  const handlePlaceUpdate = (placeLocalId: string, updates: Partial<ItineraryDayPlace>) => {
-    onChange({
-      places: (day.places ?? []).map((p) => (p.id === placeLocalId ? { ...p, ...updates } : p)),
-    });
-  };
+  const isSaved = day.activities.length > 0 && day.activities.every((a) => a.activityApiId != null);
 
-  const handlePlaceDelete = (placeLocalId: string) => {
-    onChange({
-      places: (day.places ?? []).filter((p) => p.id !== placeLocalId),
-    });
-    if (editingPlaceId === placeLocalId) {
-      setEditingPlaceId(null);
+  // Show display view when both fields have content and user is not editing
+  const showDisplayView =
+    !isEditingTitleAndDescription && day.title.trim() !== '' && day.description.trim() !== '';
+
+  // Exit edit mode on blur only if focus leaves the edit container entirely
+  const handleFieldBlur = (e: React.FocusEvent<HTMLElement>) => {
+    // Check if focus is moving to another field within the same edit container
+    if (
+      editContainerRef.current &&
+      e.relatedTarget instanceof Node &&
+      editContainerRef.current.contains(e.relatedTarget)
+    ) {
+      // Still within the edit form, just flush the save
+      flushPendingSave();
+      return;
+    }
+
+    // Focus has left the edit form entirely
+    flushPendingSave();
+
+    // Only flip to display view if both fields have content
+    if (day.title.trim() !== '' && day.description.trim() !== '') {
+      setIsEditingTitleAndDescription(false);
     }
   };
+
+  // Sync isParentSaving to ref for use in cleanup effects
+  useEffect(() => {
+    isParentSavingRef.current = isParentSaving;
+  }, [isParentSaving]);
+
+  // Register synchronous flusher with parent hook
+  useEffect(() => {
+    if (!day.apiId || !registerFlusher) return;
+
+    const flusher = () => {
+      const pending = { ...pendingDataRef.current };
+      pendingDataRef.current = {};
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
+      return pending;
+    };
+
+    return registerFlusher(day.apiId, flusher);
+  }, [day.apiId, registerFlusher]);
+
+  // Focus title input when entering edit mode
+  useEffect(() => {
+    if (isEditingTitleAndDescription) {
+      requestAnimationFrame(() => {
+        titleInputRef.current?.focus();
+      });
+    }
+  }, [isEditingTitleAndDescription]);
+
+  const performSave = useCallback(async () => {
+    const pending = pendingDataRef.current;
+    if (!experienceId || !day.apiId) return;
+
+    // Check if there's anything to save
+    const hasTitle = pending.title !== undefined;
+    const hasDescription = pending.description !== undefined;
+    if (!hasTitle && !hasDescription) return;
+
+    try {
+      await updateItineraryDayMetadata(experienceId, day.apiId, {
+        day_number: day.dayNumber,
+        title: pending.title ?? day.title,
+        description: pending.description ?? day.description,
+      });
+      pendingDataRef.current = {};
+      setSaveError(null);
+    } catch (err) {
+      setSaveError(parseApiError(err));
+    }
+  }, [experienceId, day.apiId, day.dayNumber, day.title, day.description]);
+
+  const scheduleDebouncedSave = useCallback(() => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+    }
+    saveTimerRef.current = setTimeout(() => {
+      performSave();
+      saveTimerRef.current = null;
+    }, 800);
+  }, [performSave]);
+
+  const flushPendingSave = useCallback(() => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+      performSave();
+    }
+  }, [performSave]);
+
+  const handleTitleChange = (value: string) => {
+    onChange({ title: value });
+    pendingDataRef.current.title = value;
+    scheduleDebouncedSave();
+    // Ensure we stay in edit mode while typing
+    if (!isEditingTitleAndDescription) {
+      setIsEditingTitleAndDescription(true);
+    }
+  };
+
+  const handleDescriptionChange = (value: string) => {
+    onChange({ description: value });
+    pendingDataRef.current.description = value;
+    scheduleDebouncedSave();
+    // Ensure we stay in edit mode while typing
+    if (!isEditingTitleAndDescription) {
+      setIsEditingTitleAndDescription(true);
+    }
+  };
+
+  // Cleanup — flush on unmount (unless parent is already saving)
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        // Only perform save if parent is NOT handling it
+        if (!isParentSavingRef.current) {
+          performSave();
+        }
+      }
+    };
+  }, [performSave]);
+
+  // Flush when collapsing the pill (unless parent is already saving)
+  useEffect(() => {
+    if (!isExpanded && !isParentSavingRef.current) {
+      flushPendingSave();
+    }
+  }, [isExpanded, flushPendingSave]);
+
+  const handleAddActivity = useCallback(() => {
+    setIsPickerOpen(true);
+  }, []);
+
+  const handlePlaceSelected = useCallback(
+    (selected: {
+      id: string;
+      name: string;
+      imageUrl: string | null;
+      city: string | null;
+      locationId: string | null;
+    }) => {
+      // If changing place on existing activity
+      if (changingPlaceForActivityId) {
+        onChange({
+          activities: day.activities.map((a) =>
+            a.id === changingPlaceForActivityId
+              ? {
+                  ...a,
+                  placeId: selected.id,
+                  placeName: selected.name,
+                  placeImageUrl: selected.imageUrl,
+                  placeCity: selected.city,
+                  locationId: selected.locationId,
+                }
+              : a,
+          ),
+        });
+        setChangingPlaceForActivityId(null);
+      } else {
+        // Adding new activity
+        const newActivity: ItineraryActivity = {
+          id: uuidv4(),
+          title: '',
+          description: '',
+          placeId: selected.id,
+          placeName: selected.name,
+          placeImageUrl: selected.imageUrl,
+          placeCity: selected.city,
+          startTime: null,
+          endTime: null,
+          locationId: selected.locationId,
+        };
+        onChange({
+          activities: [...day.activities, newActivity],
+        });
+      }
+      setIsPickerOpen(false);
+    },
+    [day.activities, onChange, changingPlaceForActivityId],
+  );
+
+  const handleSkipPlace = useCallback(() => {
+    // If changing place on existing activity, just skip (clear place)
+    if (changingPlaceForActivityId) {
+      onChange({
+        activities: day.activities.map((a) =>
+          a.id === changingPlaceForActivityId
+            ? {
+                ...a,
+                placeId: null,
+                placeName: null,
+                placeImageUrl: null,
+                placeCity: null,
+                locationId: null,
+              }
+            : a,
+        ),
+      });
+      setChangingPlaceForActivityId(null);
+    } else {
+      // Adding new activity without place
+      const newActivity: ItineraryActivity = {
+        id: uuidv4(),
+        title: '',
+        description: '',
+        placeId: null,
+        placeName: null,
+        placeImageUrl: null,
+        placeCity: null,
+        startTime: null,
+        endTime: null,
+        locationId: null,
+      };
+      onChange({
+        activities: [...day.activities, newActivity],
+      });
+    }
+    setIsPickerOpen(false);
+  }, [day.activities, onChange, changingPlaceForActivityId]);
+
+  const handleActivityChange = useCallback(
+    (activityId: string, data: Partial<ItineraryActivity>) => {
+      onChange({
+        activities: day.activities.map((a) => (a.id === activityId ? { ...a, ...data } : a)),
+      });
+    },
+    [day.activities, onChange],
+  );
+
+  const handleActivityDelete = useCallback(
+    async (activityId: string) => {
+      const activity = day.activities.find((a) => a.id === activityId);
+
+      if (activity?.activityApiId && experienceId && day.apiId) {
+        try {
+          await deleteItineraryDayActivity(experienceId, day.apiId, activity.activityApiId);
+        } catch (err) {
+          toast({
+            description: parseApiError(err),
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
+      onChange({
+        activities: day.activities.filter((a) => a.id !== activityId),
+      });
+    },
+    [day.activities, onChange, experienceId, day.apiId, toast],
+  );
+
+  const handleActivitySave = useCallback(
+    async (activityId: string) => {
+      if (!experienceId) return;
+
+      const activity = day.activities.find((a) => a.id === activityId);
+      if (!activity) return;
+
+      setSavingActivityId(activityId);
+
+      try {
+        const index = day.activities.indexOf(activity);
+        const payload: ItineraryActivityPayload = {
+          title: activity.title,
+          description: activity.description,
+          location: activity.locationId,
+          start_time: activity.startTime,
+          end_time: activity.endTime,
+          order: index,
+        };
+
+        if (activity.activityApiId) {
+          await updateItineraryDayActivity(
+            experienceId,
+            day.apiId,
+            activity.activityApiId,
+            payload,
+          );
+        } else {
+          const response = await createItineraryDayActivity(experienceId, day.apiId, payload);
+          onChange({
+            activities: day.activities.map((a) =>
+              a.id === activityId ? { ...a, activityApiId: response.data.id } : a,
+            ),
+          });
+        }
+
+        // After successful save, collapse the activity card and day-level edit mode
+        setSavedTick((t) => t + 1);
+        setIsEditingTitleAndDescription(false);
+      } catch (err) {
+        toast({
+          description: parseApiError(err),
+          variant: 'destructive',
+        });
+      } finally {
+        setSavingActivityId(null);
+      }
+    },
+    [experienceId, day, onChange, toast],
+  );
 
   return (
     <div className="relative flex gap-3">
@@ -101,13 +418,13 @@ export const ItineraryDayPill = ({
           </button>
 
           {/* Edit icon */}
-          <button
+          {/* <button
             type="button"
             onClick={onToggle}
             className="text-gray-400 transition-colors hover:text-gray-600"
           >
             <IconComponent iconName="Edit02Icon" size={16} />
-          </button>
+          </button> */}
 
           {/* Delete icon */}
           <button
@@ -122,49 +439,73 @@ export const ItineraryDayPill = ({
         {/* Expanded content */}
         {isExpanded && (
           <div className="mt-3 space-y-3">
-            {/* Activity Title */}
-            <Input
-              value={day.title}
-              onChange={(e) => onChange({ title: e.target.value })}
-              placeholder="Activity Title"
-            />
-
-            {/* Description */}
-            <Textarea
-              value={day.description}
-              onChange={(e) => onChange({ description: e.target.value })}
-              placeholder="Add a brief description about the day's experiences/activities"
-              rows={4}
-            />
-
-            {/* Place cards */}
-            <div className="space-y-3">
-              {(day.places ?? []).map((place) => (
-                <ItineraryPlaceCard
-                  key={place.id}
-                  place={place}
-                  isEditingDate={editingPlaceId === place.id}
-                  onEdit={() => setEditingPlaceId(editingPlaceId === place.id ? null : place.id)}
-                  onDelete={() => handlePlaceDelete(place.id)}
-                  onDateChange={(date) => handlePlaceUpdate(place.id, { date })}
-                  onStartTimeChange={(time) => handlePlaceUpdate(place.id, { startTime: time })}
-                  onEndTimeChange={(time) => handlePlaceUpdate(place.id, { endTime: time })}
+            {/* Title and description display/edit toggle */}
+            {showDisplayView ? (
+              <div className="space-y-0">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-xs font-bold leading-snug text-gray-900">{day.title}</p>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingTitleAndDescription(true)}
+                    className="flex-shrink-0 p-1 text-gray-400 transition-colors hover:text-primary"
+                    aria-label="Edit title and description"
+                  >
+                    <IconComponent iconName="Edit02Icon" size={16} />
+                  </button>
+                </div>
+                <p className="text-xs leading-relaxed text-gray-600">{day.description}</p>
+              </div>
+            ) : (
+              <div ref={editContainerRef} className="space-y-3">
+                <Input
+                  ref={titleInputRef}
+                  type="text"
+                  value={day.title}
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                  onBlur={handleFieldBlur}
+                  placeholder="Day Title"
                 />
-              ))}
-            </div>
 
-            {/* Add Place button — always visible */}
-            <div className="space-y-2">
-              <p className="text-xs text-gray-800">Where will these activities take place?</p>
-              <button
-                type="button"
-                onClick={() => setIsPickerOpen(true)}
-                className="flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/5"
-              >
-                <IconComponent iconName="PlusSignCircleIcon" size={16} className="text-primary" />
-                Add Place
-              </button>
-            </div>
+                <Textarea
+                  value={day.description}
+                  onChange={(e) => handleDescriptionChange(e.target.value)}
+                  onBlur={handleFieldBlur}
+                  placeholder="Add a brief description about the day's experiences/activities"
+                  rows={3}
+                />
+              </div>
+            )}
+
+            {/* Save error message */}
+            {saveError && <p className="text-xs text-red-500">Failed to save: {saveError}</p>}
+
+            {/* Activity cards */}
+            {sortActivitiesByTime(day.activities).map((activity) => (
+              <ActivityCard
+                key={`${activity.id}-${activity.activityApiId ?? 'draft'}-${savedTick}`}
+                activity={activity}
+                dayDate={dayDate}
+                otherActivities={day.activities.filter((a) => a.id !== activity.id)}
+                onChange={(data) => handleActivityChange(activity.id, data)}
+                onDelete={() => handleActivityDelete(activity.id)}
+                onSave={() => handleActivitySave(activity.id)}
+                onChangePlace={() => {
+                  setChangingPlaceForActivityId(activity.id);
+                  setIsPickerOpen(true);
+                }}
+                isSaving={savingActivityId === activity.id}
+              />
+            ))}
+
+            {/* Add Activity button */}
+            <button
+              type="button"
+              onClick={handleAddActivity}
+              className="flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/5"
+            >
+              <IconComponent iconName="PlusSignCircleIcon" size={16} className="text-primary" />
+              Add Activity
+            </button>
 
             {error && <p className="text-xs text-red-500">{error}</p>}
           </div>
@@ -173,9 +514,15 @@ export const ItineraryDayPill = ({
         {/* Place picker modal */}
         <AddPlaceModal
           isOpen={isPickerOpen}
-          onClose={() => setIsPickerOpen(false)}
-          selectedPlaceIds={(day.places ?? []).map((p) => p.placeId)}
+          onClose={() => {
+            setIsPickerOpen(false);
+            setChangingPlaceForActivityId(null);
+          }}
           onSelect={handlePlaceSelected}
+          onSkip={handleSkipPlace}
+          selectedPlaceIds={day.activities
+            .filter((a) => a.placeId && a.id !== changingPlaceForActivityId)
+            .map((a) => a.placeId!)}
         />
       </div>
     </div>

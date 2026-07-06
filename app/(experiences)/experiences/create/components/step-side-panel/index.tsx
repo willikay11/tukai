@@ -2,10 +2,10 @@
 
 import { ReactNode } from 'react';
 
-import Image from 'next/image';
-
+import { PreviewPanel } from '@/app/shared/components/PreviewPanel';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Interest } from '@/types/interest';
+import { ItineraryDayFormValue } from '@/types/itinerary';
 import { Wallet } from '@/types/payment';
 
 import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
@@ -29,6 +29,8 @@ export const ExperienceStepSidePanel = ({
   isRecurring = false,
   experienceType = 'one-time',
   itineraryConfig,
+  itineraryDays = [],
+  itineraryStartDate,
   selectedCommunity,
   selectedDate,
   selectedStartTime,
@@ -64,6 +66,8 @@ export const ExperienceStepSidePanel = ({
   isRecurring?: boolean;
   experienceType?: ExperienceType;
   itineraryConfig?: { startDate: string; endDate: string } | null;
+  itineraryDays?: ItineraryDayFormValue[];
+  itineraryStartDate?: string | null;
   selectedCommunity?: { name: string; imageUrl: string } | null;
   selectedDate?: string | null;
   selectedStartTime?: string | null;
@@ -108,12 +112,7 @@ export const ExperienceStepSidePanel = ({
   selectedWallet?: Wallet;
 }) => {
   const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
-    community: (
-      <StepPlaceholderContent
-        title="Preview Community"
-        description="Please add the details of the experience"
-      />
-    ),
+    community: null,
     about: (
       <SharedExperiencePreview
         step="about"
@@ -140,6 +139,8 @@ export const ExperienceStepSidePanel = ({
         multiDayStartTime={multiDayStartTime}
         multiDayEndDate={multiDayEndDate}
         multiDayEndTime={multiDayEndTime}
+        itineraryDays={itineraryDays}
+        itineraryStartDate={itineraryStartDate}
         selectedCommunity={selectedCommunity}
         ticketsItems={ticketsItems}
         ticketsCommissionPayer={ticketsCommissionPayer}
@@ -176,6 +177,8 @@ export const ExperienceStepSidePanel = ({
         multiDayStartTime={multiDayStartTime}
         multiDayEndDate={multiDayEndDate}
         multiDayEndTime={multiDayEndTime}
+        itineraryDays={itineraryDays}
+        itineraryStartDate={itineraryStartDate}
         selectedCommunity={selectedCommunity}
         ticketsItems={ticketsItems}
         ticketsCommissionPayer={ticketsCommissionPayer}
@@ -214,6 +217,8 @@ export const ExperienceStepSidePanel = ({
         multiDayStartTime={multiDayStartTime}
         multiDayEndDate={multiDayEndDate}
         multiDayEndTime={multiDayEndTime}
+        itineraryDays={itineraryDays}
+        itineraryStartDate={itineraryStartDate}
         selectedCommunity={selectedCommunity}
         ticketsItems={ticketsItems}
         ticketsCommissionPayer={ticketsCommissionPayer}
@@ -223,12 +228,7 @@ export const ExperienceStepSidePanel = ({
         selectedWallet={selectedWallet}
         onEditStep={onEditStep}
       />
-    ) : (
-      <StepPlaceholderContent
-        title="Create Tickets"
-        description="Update and save experience date and time first to continue."
-      />
-    ),
+    ) : null,
     guests: (
       <SharedExperiencePreview
         step="guests"
@@ -255,6 +255,8 @@ export const ExperienceStepSidePanel = ({
         multiDayStartTime={multiDayStartTime}
         multiDayEndDate={multiDayEndDate}
         multiDayEndTime={multiDayEndTime}
+        itineraryDays={itineraryDays}
+        itineraryStartDate={itineraryStartDate}
         selectedCommunity={selectedCommunity}
         ticketsItems={ticketsItems}
         ticketsCommissionPayer={ticketsCommissionPayer}
@@ -291,6 +293,8 @@ export const ExperienceStepSidePanel = ({
         multiDayStartTime={multiDayStartTime}
         multiDayEndDate={multiDayEndDate}
         multiDayEndTime={multiDayEndTime}
+        itineraryDays={itineraryDays}
+        itineraryStartDate={itineraryStartDate}
         selectedCommunity={selectedCommunity}
         ticketsItems={ticketsItems}
         ticketsCommissionPayer={ticketsCommissionPayer}
@@ -304,21 +308,22 @@ export const ExperienceStepSidePanel = ({
   };
   const content = stepPanelContent[step];
 
+  // Determine if we should show empty state
+  const isEmpty =
+    step === 'community' ||
+    (step === 'dates-tickets' && !canShowDateTickets);
+
   return (
-    <div className="xs:px-4 xs:py-4 h-full rounded-t-xl bg-white md:border-x md:border-t-[1px] md:border-gray-200 md:px-12 md:py-6 md:shadow-lg">
-      {content}
-    </div>
+    <PreviewPanel
+      title={isEmpty ? (step === 'community' ? 'Preview Community' : 'Create Tickets') : 'Preview Experience'}
+      isEmpty={isEmpty}
+      emptyText={
+        step === 'community'
+          ? 'Please add the details of the experience'
+          : 'Update and save experience date and time first to continue.'
+      }
+    >
+      {!isEmpty && content}
+    </PreviewPanel>
   );
 };
-
-function StepPlaceholderContent({ title, description }: { title: string; description: string }) {
-  return (
-    <>
-      <h2 className="text-sm font-semibold text-gray-900">{title}</h2>
-      <div className="mt-6 flex flex-col items-center justify-center">
-        <Image src="/images/chilling.svg" alt={title} width={240} height={240} />
-        <p className="mt-4 text-center text-xs text-gray-500">{description}</p>
-      </div>
-    </>
-  );
-}

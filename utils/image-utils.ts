@@ -35,14 +35,19 @@ export const validateExperienceImage = (file: File): Promise<ImageValidationResu
 
       const { width, height } = img;
 
-      if (width < 800 || height < 450) {
+      // Minimum size check
+      if (width < 500 || height < 500) {
         resolve({
           valid: false,
-          error: `Image is too small (${width}×${height}px). Minimum size is 800×450px.`,
+          error: `Image is too small (${width}×${height}px). Minimum size is 500×500px.`,
         });
         return;
       }
 
+      // Valid — crop dialog handles:
+      //   - non-square aspect ratio
+      //   - images larger than 1024×1024
+      // No warning needed — crop is automatic
       resolve({ valid: true });
     };
 

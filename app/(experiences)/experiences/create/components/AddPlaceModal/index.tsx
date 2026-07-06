@@ -25,7 +25,9 @@ interface AddPlaceModalProps {
     name: string;
     imageUrl: string | null;
     city: string | null;
+    locationId: string | null;
   }) => void;
+  onSkip?: () => void;
   selectedPlaceIds?: string[];
 }
 
@@ -33,6 +35,7 @@ export const AddPlaceModal = ({
   isOpen,
   onClose,
   onSelect,
+  onSkip,
   selectedPlaceIds = [],
 }: AddPlaceModalProps) => {
   const [search, setSearch] = useState('');
@@ -153,6 +156,7 @@ export const AddPlaceModal = ({
                           name: place.title,
                           imageUrl: place.photos?.[0]?.photo ?? null,
                           city: place.location?.city ?? null,
+                          locationId: place.location?.id ?? null,
                         });
                       }
                     }}

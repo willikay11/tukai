@@ -13,12 +13,16 @@ interface CommunityOption {
 interface PreviewCommunitiesSectionProps {
   communityIds: string[];
   allCommunities: CommunityOption[];
+  label?: string;
+  emptyText?: string;
   onEdit?: () => void;
 }
 
 export const PreviewCommunitiesSection = ({
   communityIds,
   allCommunities,
+  label = 'Invited Communities',
+  emptyText = 'No communities invited yet',
   onEdit,
 }: PreviewCommunitiesSectionProps) => {
   const communities = allCommunities.filter((c) => communityIds.includes(c.id));
@@ -27,7 +31,7 @@ export const PreviewCommunitiesSection = ({
     <div className="space-y-3">
       <div className="flex items-start justify-between">
         <h3 className="text-xs font-semibold text-gray-900">
-          Invited Communities ({communities.length})
+          {label} ({communities.length})
         </h3>
         {onEdit && (
           <button type="button" onClick={onEdit} className="text-gray-400 hover:text-gray-600">
@@ -56,7 +60,7 @@ export const PreviewCommunitiesSection = ({
           ))}
         </div>
       ) : (
-        <p className="text-xs text-gray-500">No communities invited yet</p>
+        <p className="text-xs text-gray-500">{emptyText}</p>
       )}
     </div>
   );

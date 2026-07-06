@@ -19,9 +19,11 @@ const createCommunitySchema = z.object({
   description: z.string().min(10, { message: 'Description must be at least 10 characters.' }),
   selectedCategories: z.array(z.string()).min(1, { message: 'Select at least one category.' }),
   visibility: z.enum(['public', 'private']),
-  uploadedFiles: z.array(z.instanceof(File)).min(1, {
+  photos: z.array(z.any()).min(1, {
     message: 'Please upload at least one community poster.',
   }),
+  invitedGuests: z.array(z.any()).default([]),
+  invitedCommunities: z.array(z.string()).default([]),
 });
 
 export type CreateCommunityFormValues = z.infer<typeof createCommunitySchema>;
@@ -41,7 +43,9 @@ export const useCreateCommunityFlow = () => {
       description: '',
       selectedCategories: [],
       visibility: 'public',
-      uploadedFiles: [],
+      photos: [],
+      invitedGuests: [],
+      invitedCommunities: [],
     },
   });
 
@@ -154,7 +158,9 @@ export const useCreateCommunityFlow = () => {
         categoriesIds: values.selectedCategories,
         isPublic: values.visibility === 'public',
         googleMapPlaceId: values.city,
-        newPhotos: values.uploadedFiles,
+        newPhotos: values.photos
+          .filter((photo: any) => photo.file)
+          .map((photo: any) => photo.file),
         invitedMemberIds: memberIds,
         invitedCommunityIds: invitedCommunities.map((c) => c.id),
         invitedEmails: emails,
@@ -167,7 +173,6 @@ export const useCreateCommunityFlow = () => {
           form.reset();
           setSelectedCategories([]);
           setCityInput('');
-          setUploadedFiles([]);
           setInvitedMembers([]);
           setInvitedCommunities([]);
         },

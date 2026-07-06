@@ -1,20 +1,24 @@
 'use client';
 
+import {
+  PreviewCommunitiesSection,
+  PreviewGuestsSection,
+  PreviewLocationSection,
+} from '@/app/shared/components/Preview';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Interest } from '@/types/interest';
+import { ItineraryDayFormValue } from '@/types/itinerary';
 import { Wallet } from '@/types/payment';
 
 import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
-import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
 import { PreviewCommunitySection } from '../PreviewCommunitySection';
 import { PreviewDateSection } from '../PreviewDateSection';
 import { PreviewDescriptionSection } from '../PreviewDescriptionSection';
 import { PreviewExcludedSection } from '../PreviewExcludedSection';
-import { PreviewGuestsSection } from '../PreviewGuestsSection';
 import { PreviewIncludedSection } from '../PreviewIncludedSection';
+import { PreviewItinerarySection } from '../PreviewItinerarySection';
 import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
-import { PreviewLocationSection } from '../PreviewLocationSection';
 import { PreviewMeetingSection } from '../PreviewMeetingSection';
 import { PreviewPhotoSection } from '../PreviewPhotoSection';
 import { PreviewTicketsSection } from '../PreviewTicketsSection';
@@ -52,6 +56,10 @@ interface SharedExperiencePreviewProps {
   multiDayStartTime?: string | null;
   multiDayEndDate?: string | null;
   multiDayEndTime?: string | null;
+
+  // Itinerary data
+  itineraryDays?: ItineraryDayFormValue[];
+  itineraryStartDate?: string | null;
 
   // Community section
   selectedCommunity?: { name: string; imageUrl: string } | null;
@@ -109,6 +117,8 @@ export const SharedExperiencePreview = ({
   multiDayStartTime,
   multiDayEndDate,
   multiDayEndTime,
+  itineraryDays = [],
+  itineraryStartDate,
   selectedCommunity,
   ticketsItems,
   ticketsCommissionPayer,
@@ -170,6 +180,16 @@ export const SharedExperiencePreview = ({
 
       {aboutDescription && <PreviewDescriptionSection description={aboutDescription} />}
 
+      {renderDateSection()}
+
+      {experienceType === 'itinerary' && itineraryDays.length > 0 && (
+        <PreviewItinerarySection
+          days={itineraryDays}
+          itineraryStartDate={itineraryStartDate ?? null}
+          onEdit={() => onEditStep?.('itinerary-days')}
+        />
+      )}
+
       <PreviewIncludedSection
         items={
           aboutWhatsIncluded ? aboutWhatsIncluded.split('\n').filter((item) => item.trim()) : []
@@ -185,8 +205,6 @@ export const SharedExperiencePreview = ({
       />
 
       <PreviewCategoriesSection categories={aboutCategories || []} />
-
-      {renderDateSection()}
 
       <PreviewItineraryTypeSection visibility={aboutVisibility || 'public'} />
 

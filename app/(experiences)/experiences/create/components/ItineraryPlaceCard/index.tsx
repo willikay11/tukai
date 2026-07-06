@@ -3,16 +3,15 @@
 import Image from 'next/image';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
 import { ItineraryDayPlace } from '@/types/itinerary';
 
 interface ItineraryPlaceCardProps {
   place: ItineraryDayPlace;
-  isEditingDate: boolean;
+  dayDate: string | null;
+  isEditingTime: boolean;
   onEdit: () => void;
   onDelete: () => void;
-  onDateChange: (date: string | null) => void;
   onStartTimeChange: (time: string | null) => void;
   onEndTimeChange: (time: string | null) => void;
 }
@@ -33,35 +32,39 @@ const formatDisplayTime = (time: string | null) => {
 
 export const ItineraryPlaceCard = ({
   place,
-  isEditingDate,
+  dayDate,
+  isEditingTime,
   onEdit,
   onDelete,
-  onDateChange,
   onStartTimeChange,
   onEndTimeChange,
 }: ItineraryPlaceCardProps) => {
   return (
     <div className="space-y-3">
       {/* Place card */}
-      <div className="flex items-center gap-3 overflow-hidden rounded-xl border border-dashed border-gray-200 bg-white">
-        {/* Place photo */}
-        {place.imageUrl && (
-          <div className="relative h-20 w-24 flex-shrink-0 overflow-hidden">
+      <div className="flex items-center gap-3 rounded-xl border border-dashed border-gray-200 bg-gray-50 p-2">
+        {/* Photo — rounded, fixed size, not full bleed */}
+        {place.imageUrl ? (
+          <div className="relative h-16 w-36 flex-shrink-0 overflow-hidden rounded-lg">
             <Image
               src={place.imageUrl}
               alt={place.placeName}
               fill
-              sizes="96px"
+              sizes="80px"
               className="object-cover"
             />
           </div>
+        ) : (
+          <div className="flex h-16 w-20 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <IconComponent iconName="Location01Icon" size={20} className="text-primary" />
+          </div>
         )}
 
-        {/* Place info */}
-        <div className="min-w-0 flex-1 py-3">
-          <div className="flex items-center gap-1.5">
+        {/* Info */}
+        <div className="min-w-0 flex-1">
+          {/* Name + link icon */}
+          <div className="flex items-center gap-1">
             <p className="truncate text-sm font-semibold text-gray-900">{place.placeName}</p>
-            {/* External link icon */}
             <IconComponent
               iconName="ArrowUpRight01Icon"
               size={14}
@@ -70,19 +73,19 @@ export const ItineraryPlaceCard = ({
           </div>
 
           {/* Date + time */}
-          <p className="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
-            <span>{formatDisplayDate(place.date)}</span>
-            <span className="inline-block h-1 w-1 rounded-full bg-gray-400" />
+          <p className="mt-0.5 flex items-center gap-1.5 text-xs text-gray-500">
+            {/* <span>{formatDisplayDate(dayDate)}</span> */}
+            {/* <span className="inline-block h-1 w-1 flex-shrink-0 rounded-full bg-gray-400" /> */}
             <span>
-              {formatDisplayTime(place.startTime)}
+              {place.startTime ? formatDisplayTime(place.startTime) : '--:--'}
               {' - '}
-              {formatDisplayTime(place.endTime)}
+              {place.endTime ? formatDisplayTime(place.endTime) : '--:--'}
             </span>
           </p>
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-shrink-0 items-center gap-1 pr-3">
+        {/* Edit + divider + delete */}
+        <div className="flex flex-shrink-0 items-center gap-1">
           <button
             type="button"
             onClick={onEdit}
@@ -96,26 +99,30 @@ export const ItineraryPlaceCard = ({
             onClick={onDelete}
             className="p-1.5 text-gray-400 transition-colors hover:text-red-500"
           >
-            <IconComponent iconName="Delete02Icon" size={16} />
+            <IconComponent iconName="Delete02Icon" size={16} className="text-red-400" />
           </button>
         </div>
       </div>
 
-      {/* Date/time form — shown when editing */}
-      {isEditingDate && (
+      {/* Time form — shown when editing (no date picker) */}
+      {isEditingTime && (
         <div className="space-y-3 px-1">
           <p className="text-sm text-gray-600">
-            Add the date and time you will visit{' '}
-            <span className="font-bold">{place.placeName}</span>
+            Add the time you will visit <span className="font-bold">{place.placeName}</span>
           </p>
-
-          {/* Date picker */}
-          <DatePicker value={place.date || undefined} onChange={onDateChange} />
 
           {/* Start + End time side by side */}
           <div className="grid grid-cols-2 gap-3">
-            <TimePicker value={place.startTime || undefined} onChange={onStartTimeChange} />
-            <TimePicker value={place.endTime || undefined} onChange={onEndTimeChange} />
+            <TimePicker
+              value={place.startTime || undefined}
+              placeholder="Start Time"
+              onChange={onStartTimeChange}
+            />
+            <TimePicker
+              value={place.endTime || undefined}
+              placeholder="End Time"
+              onChange={onEndTimeChange}
+            />
           </div>
         </div>
       )}

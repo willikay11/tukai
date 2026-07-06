@@ -5,6 +5,7 @@ import { Suspense, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { CreateStepContentSkeleton, ReviewWalletsSkeleton } from '@/app/shared/components/Cards';
+import { TwoPanelLayout } from '@/app/shared/components/TwoPanelLayout';
 import { Drawer } from '@/components/ui/drawer';
 
 import { ExperienceStepSidePanel } from './components/step-side-panel';
@@ -56,6 +57,7 @@ function CreateExperiencePageContent() {
     walletMutations,
     isSavingExperience,
     apiError,
+    registerFlusher,
     slotTemplateRecords,
   } = useCreateExperienceFlow();
 
@@ -77,7 +79,7 @@ function CreateExperiencePageContent() {
   }
 
   return (
-    <main className="mt-6 grid min-h-screen grid-cols-12 items-stretch gap-12 px-4 md:px-0">
+    <>
       {/* Mobile preview drawer */}
       <Drawer isOpen={isPreviewDrawerOpen} setIsOpen={setIsPreviewDrawerOpen}>
         <div className="w-full max-w-full space-y-4 overflow-hidden overflow-y-auto p-4">
@@ -128,7 +130,6 @@ function CreateExperiencePageContent() {
               aboutMeetingTime={formData.about.meetingTime}
               aboutCategories={formData.about.categories}
               ticketsItems={(() => {
-                console.log('[Page] formData.tickets.items:', formData.tickets.items);
                 return formData.tickets.items;
               })()}
               ticketsCommissionPayer={formData.tickets.commission}
@@ -144,8 +145,9 @@ function CreateExperiencePageContent() {
         </div>
       </Drawer>
 
-      <div className="col-span-12 mb-4 md:col-span-10 md:col-start-2 md:mx-0 lg:col-span-4 lg:col-start-3 xl:col-span-5 xl:col-start-2 3xl:col-span-3 3xl:col-start-3 4xl:col-span-2 4xl:col-start-4">
-        <CreateExperienceSteps
+      <TwoPanelLayout
+        left={
+          <CreateExperienceSteps
           currentStep={activeStep}
           onStepChange={handlers.handleStepChange}
           onExperienceCreated={handlers.handleExperienceCreated}
@@ -185,6 +187,7 @@ function CreateExperiencePageContent() {
           }}
           isSavingExperience={isSavingExperience}
           apiError={apiError}
+          registerFlusher={registerFlusher}
           isPreviewDrawerOpen={isPreviewDrawerOpen}
           setIsPreviewDrawerOpen={setIsPreviewDrawerOpen}
           slotTemplateRecords={slotTemplateRecords}
@@ -203,9 +206,9 @@ function CreateExperiencePageContent() {
             router.push(`/experiences/review/${finalExperienceId}`);
           }}
         />
-      </div>
-      <div className="hidden h-full lg:col-span-4 lg:col-start-7 lg:block xl:col-span-5 xl:col-start-7 3xl:col-span-3 3xl:col-start-8 4xl:col-span-2 4xl:col-start-8">
-        <ExperienceStepSidePanel
+        }
+        right={
+          <ExperienceStepSidePanel
           step={activeStep}
           canShowDateTickets={
             hasUpdatedDates ||
@@ -224,6 +227,8 @@ function CreateExperiencePageContent() {
           isRecurring={formData.dateType.isRecurring}
           experienceType={formData.dateType.experienceType}
           itineraryConfig={itineraryConfig}
+          itineraryDays={formData.itineraryDays}
+          itineraryStartDate={formData.dateType.itineraryStartDate}
           selectedCommunity={formData.dateType.community}
           selectedDate={formData.dateType.date}
           selectedStartTime={formData.dateType.startTime}
@@ -256,7 +261,8 @@ function CreateExperiencePageContent() {
           allCommunities={communitiesForSelector}
           selectedWallet={formData.wallet.selectedWallet}
         />
-      </div>
-    </main>
+        }
+      />
+    </>
   );
 }

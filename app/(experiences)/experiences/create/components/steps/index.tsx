@@ -106,7 +106,7 @@ const STEPS_ITINERARY = [
   {
     id: 'itinerary-days',
     label: 'Itinerary',
-    icon: 'MapIcon',
+    icon: 'RouteBlockIcon',
   },
   {
     id: 'dates-tickets',
@@ -229,6 +229,7 @@ interface CreateExperienceStepsProps {
   };
   isSavingExperience?: boolean;
   apiError?: string | null;
+  registerFlusher?: (dayId: string, flusher: () => { title?: string; description?: string }) => () => void;
   slotTemplateRecords?: Array<{
     uiId: string;
     templateId: string;
@@ -284,6 +285,7 @@ export const CreateExperienceSteps = ({
   handlers,
   isSavingExperience = false,
   apiError,
+  registerFlusher,
   isPreviewDrawerOpen = false,
   setIsPreviewDrawerOpen,
   slotTemplateRecords = [],
@@ -387,9 +389,20 @@ export const CreateExperienceSteps = ({
                 inviteFormData.invitedCommunityIds?.length > 0,
               )
             : false;
+          const isItineraryDaysFilled =
+            formData?.experienceType !== 'itinerary'
+              ? true
+              : Boolean(
+                  itineraryDays &&
+                    itineraryDays.length > 0 &&
+                    itineraryDays.every((day) =>
+                      day.activities.some((a) => a.activityApiId != null),
+                    ),
+                );
           const stepFilledMap: Record<string, boolean> = {
             community: canAccessDetailsSteps,
             about: isAboutFilled,
+            'itinerary-days': isItineraryDaysFilled,
             'dates-tickets': isDatesTicketsFilled,
             guests: isGuestsFilled,
             wallet: hasSavedWallets,
@@ -536,6 +549,7 @@ export const CreateExperienceSteps = ({
               <ItineraryDaysStep
                 experienceId={experience.id}
                 days={itineraryDays}
+                itineraryStartDate={formData?.dateType?.itineraryStartDate ?? null}
                 onChange={(days) => {
                   updateItineraryDays?.(days);
                 }}
@@ -548,6 +562,8 @@ export const CreateExperienceSteps = ({
                 }}
                 onCancel={() => handleStepChange('about')}
                 isSaving={isSavingExperience}
+                isParentSaving={isSavingExperience}
+                registerFlusher={registerFlusher}
               />
             )}
           </TabsContent>
