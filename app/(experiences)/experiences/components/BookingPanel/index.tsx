@@ -50,13 +50,13 @@ export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
         <TabsList className="bg-white rounded-full h-auto p-0.5 gap-0">
           <TabsTrigger
             value="reservation"
-            className="flex-1 rounded-full px-6 py-3 text-xs border-0 bg-white text-gray-700 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-b-0"
+            className="flex-1 rounded-full px-4 py-2 text-xs border-0 bg-white text-gray-700 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-b-0"
           >
             Make Reservation
           </TabsTrigger>
           <TabsTrigger
             value="moments"
-            className="flex-1 rounded-full px-6 py-3 text-xs border-0 bg-white text-gray-700 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-b-0"
+            className="flex-1 rounded-full px-4 py-2 text-xs border-0 bg-white text-gray-700 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-b-0"
           >
             Moments
           </TabsTrigger>
@@ -72,8 +72,8 @@ export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
                 className="text-primary flex-shrink-0 mt-0.5"
               />
               <div className="space-y-2">
-                <p className="text-xs font-semibold text-gray-900">{dateRange}</p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-sm font-semibold text-gray-900">{dateRange}</p>
+                <p className="text-xs text-gray-500">
                   From {currency} {experience.priceStartsFrom.amount.toLocaleString()}/Guest
                 </p>
               </div>
@@ -86,13 +86,13 @@ export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
           {/* Ticket selector */}
           {experience.tickets.length > 0 && (
             <div className="space-y-4">
-              <p className="text-sm font-semibold text-gray-900">Select your preferred ticket</p>
+              <p className="text-base font-bold text-gray-900">Select your preferred ticket</p>
 
               <div className="space-y-3">
                 {experience.tickets.map((ticket) => (
                   <div key={ticket.id} className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-semibold text-gray-900">
+                      <p className="text-sm font-bold text-gray-900">
                         {currency} {parseFloat(ticket.price as any).toLocaleString()}/person
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5">{ticket.name}</p>
@@ -168,22 +168,22 @@ export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
 
           {/* Phone input (only for M-Pesa) */}
           {paymentMethod === 'mpesa' && (
-            <div className="flex items-center bg-white rounded-xl px-4 py-3 gap-3 h-[50px]">
-              <span className="text-xs font-medium text-gray-700 flex-shrink-0">+254</span>
+            <div className="flex items-center bg-white rounded-2xl px-4 py-3 gap-3">
+              <span className="text-sm font-medium text-gray-700 flex-shrink-0">+254</span>
               <div className="w-px h-5 bg-gray-200 flex-shrink-0" />
               <input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="Enter M-Pesa number"
-                className="flex-1 outline-none bg-transparent text-xs placeholder:text-gray-400"
+                className="flex-1 outline-none bg-transparent text-sm placeholder:text-gray-400"
               />
             </div>
           )}
 
           {/* Pay button */}
           <Button variant="gradient" onClick={handlePay} disabled={total === 0} className="w-full h-12 rounded-full py-3">
-            <span className="flex items-center gap-3 justify-center">
+            <span className="flex items-center text-sm gap-3 justify-center">
               <span>Pay</span>
               <span className="text-white/60">|</span>
               <span>
