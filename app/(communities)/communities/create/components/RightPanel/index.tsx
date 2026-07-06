@@ -6,10 +6,10 @@ import {
   PreviewLocationSection,
 } from '@/app/shared/components/Preview';
 import { PreviewPanel } from '@/app/shared/components/PreviewPanel';
+import { PreviewCategoriesSection } from '@/app/(experiences)/experiences/create/components/PreviewCategoriesSection';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Interest } from '@/types/interest';
 
-import { CommunityPreviewCategory } from '../CommunityPreviewCategory';
 import { CommunityPreviewHeader } from '../CommunityPreviewHeader';
 import { CommunityPreviewVisibility } from '../CommunityPreviewVisibility';
 
@@ -44,9 +44,9 @@ export const RightPanel = ({
   invitedCommunities = [],
   allCommunities = [],
 }: RightPanelProps) => {
-  const categoryNames = (categories || [])
-    .filter((cat) => selectedCategories.includes(cat.id))
-    .map((cat) => cat.name);
+  const selectedCategoryObjects = (categories || []).filter((cat) =>
+    selectedCategories.includes(cat.id),
+  );
 
   const isEmpty = !name && !description && photos.length === 0;
 
@@ -58,26 +58,17 @@ export const RightPanel = ({
     >
       <CommunityPreviewHeader photos={photos} name={name} description={description} />
 
-      {location && (
-        <PreviewLocationSection
-          location={location}
-          label="Community Location"
-          onEdit={() => {
-            // Scroll to location field
-          }}
-        />
-      )}
+      {location && <PreviewLocationSection location={location} label="Community Location" />}
 
-      {categoryNames.length > 0 && <CommunityPreviewCategory categories={categoryNames} />}
+      {selectedCategoryObjects.length > 0 && (
+        <PreviewCategoriesSection categories={selectedCategoryObjects} />
+      )}
 
       {invitedGuests.length > 0 && (
         <PreviewGuestsSection
           guests={invitedGuests}
           label="Invited Members"
           emptyText="No members invited yet"
-          onEdit={() => {
-            // Scroll to invites field
-          }}
         />
       )}
 
@@ -87,9 +78,6 @@ export const RightPanel = ({
           allCommunities={allCommunities}
           label="Invited Communities"
           emptyText="No communities invited yet"
-          onEdit={() => {
-            // Scroll to invites field
-          }}
         />
       )}
 
