@@ -4,8 +4,8 @@ import moment from 'moment';
 
 import { DescriptionShowMore } from '@/app/shared/components/Global';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
 import { Share } from '@/app/shared/components/Share';
-import { PhotoGallery } from '@/components/ui/PhotoGallery';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Experience } from '@/types/experience';
@@ -38,18 +38,23 @@ export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageCont
       : 'before the experience ends.';
 
   return (
-    <main className="max-w-7xl mx-auto px-4 py-6">
+    <main className="max-w-6xl mx-auto px-4 py-6">
       <BackToExplore />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+      <div className="grid grid-cols-12 gap-6 mt-6">
         {/* Left column: Main content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="col-span-12 lg:col-span-7 space-y-6">
           {/* Hero with badge */}
           <div className="relative">
-            <PhotoGallery photos={experience.photos} />
+            <SquarePhotoStrip
+              photos={experience.photos
+                .sort((a, b) => Number(b.isCover) - Number(a.isCover))
+                .map((p) => p.photo)}
+              variant="hero"
+            />
             <ExperienceTypeBadge
               type={experience.experienceType || 'standard'}
-              className="absolute top-4 left-4"
+              className="absolute top-4 left-4 z-10"
             />
           </div>
 
@@ -150,7 +155,7 @@ export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageCont
         </div>
 
         {/* Right column: Sticky booking panel */}
-        <div className="lg:col-span-1">
+        <div className="col-span-12 lg:col-span-5">
           <div className="sticky top-6 space-y-4">
             {/* Bookmark and Share buttons */}
             <div className="flex items-center justify-end gap-2">
