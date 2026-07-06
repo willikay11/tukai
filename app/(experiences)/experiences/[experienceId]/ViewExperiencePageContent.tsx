@@ -1,0 +1,175 @@
+'use client';
+
+import moment from 'moment';
+
+import { DescriptionShowMore } from '@/app/shared/components/Global';
+import { IconComponent } from '@/app/shared/components/Icons';
+import { Share } from '@/app/shared/components/Share';
+import { PhotoGallery } from '@/components/ui/PhotoGallery';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Experience } from '@/types/experience';
+import { Photo } from '@/types/photo';
+
+import { BackToExplore } from '../components/BackToExplore';
+import { BookmarkExperience } from '../components/bookmarkExperience';
+import { ExperienceTypeBadge } from '../components/ExperienceTypeBadge';
+import { MetaRow } from '../components/MetaRow';
+import { IncludedExcludedSection } from '../components/IncludedExcludedSection';
+import { LocationMeetingSection } from '../components/LocationMeetingSection';
+import { HostCommunityCard } from '../components/HostCommunityCard';
+import { BookingPanel } from '../components/BookingPanel';
+import { ExperienceOrganiser } from '../components/experienceOrganiser';
+
+interface ViewExperiencePageContentProps {
+  experience: Experience;
+}
+
+export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageContentProps) => {
+  const closingDuration = experience?.ticketSalesClosingDuration;
+  const closingUnitRaw = experience?.ticketSalesClosingUnit ?? '';
+  const closingUnit =
+    closingDuration === 1 && closingUnitRaw.endsWith('s')
+      ? closingUnitRaw.slice(0, -1)
+      : closingUnitRaw;
+  const closingConditionText =
+    experience?.ticketSalesClosingCondition === 'before_start'
+      ? 'before the experience starts.'
+      : 'before the experience ends.';
+
+  return (
+    <main className="max-w-7xl mx-auto px-4 py-6">
+      <BackToExplore />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        {/* Left column: Main content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Hero with badge */}
+          <div className="relative">
+            <PhotoGallery photos={experience.photos} />
+            <ExperienceTypeBadge
+              type={experience.experienceType || 'standard'}
+              className="absolute top-4 left-4"
+            />
+          </div>
+
+          {/* Title */}
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{experience.title}</h1>
+            <MetaRow
+              location={`${experience.location.city}, ${experience.location.country}`}
+              durationMinutes={
+                experience.startDate && experience.endDate
+                  ? moment(experience.endDate).diff(moment(experience.startDate), 'minutes')
+                  : undefined
+              }
+            />
+          </div>
+
+          {/* Host card */}
+          <div>
+            <ExperienceOrganiser experience={experience} />
+          </div>
+
+          {/* Description */}
+          <div>
+            <p className="text-base font-bold text-gray-900 mb-3">About</p>
+            <DescriptionShowMore
+              text={experience.description}
+              photo={
+                experience.photos.find((photo: Photo) => photo.isCover)?.photo ||
+                experience.photos[0].photo
+              }
+            />
+          </div>
+
+          {/* Categories */}
+          {experience.categories.length > 0 && (
+            <div>
+              <div className="flex flex-wrap gap-2">
+                {experience.categories.map((category) => (
+                  <div
+                    className="inline-flex w-fit rounded-full bg-gray-100 px-4 py-2"
+                    key={category.id}
+                  >
+                    <div className="inline-flex items-center gap-2">
+                      <IconComponent
+                        iconName={category.icon as string}
+                        size={16}
+                        color="gray-700"
+                      />
+                      <p className="text-sm text-gray-700">{category.name}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <Separator />
+
+          {/* Included/Excluded */}
+          {(experience.whatsIncluded || experience.whatsNotIncluded) && (
+            <>
+              <IncludedExcludedSection
+                included={experience.whatsIncluded}
+                excluded={experience.whatsNotIncluded}
+              />
+              <Separator />
+            </>
+          )}
+
+          {/* Location and Meeting Point */}
+          <LocationMeetingSection experience={experience} />
+
+          {/* Host Community */}
+          {experience.hostCommunity && (
+            <>
+              <Separator />
+              <HostCommunityCard community={experience.hostCommunity} />
+            </>
+          )}
+
+          <Separator />
+
+          {/* Cancellation Policy */}
+          <div>
+            <p className="text-base font-bold text-gray-900 mb-2">Cancellation Policy</p>
+            <p className="text-sm font-medium text-gray-600">
+              Ticket sales close {closingDuration} {closingUnit} {closingConditionText}
+            </p>
+          </div>
+
+          <Separator />
+
+          {/* Report */}
+          <Button variant="text" className="justify-start">
+            <IconComponent iconName="Flag02Icon" color="red" size={18} />
+            Report this experience
+          </Button>
+        </div>
+
+        {/* Right column: Sticky booking panel */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-6 space-y-4">
+            {/* Bookmark and Share buttons */}
+            <div className="flex items-center justify-end gap-2">
+              <BookmarkExperience experience={experience} />
+              <Share
+                coverPhoto={
+                  experience.photos?.find((photo: Photo) => photo.isCover)?.photo ||
+                  experience.photos[0].photo
+                }
+                title={experience.title}
+                link={`${process.env.NEXT_PUBLIC_APP_URL}/experiences/${experience.id}`}
+              />
+            </div>
+
+            {/* Booking panel */}
+            <BookingPanel experience={experience} />
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+};
