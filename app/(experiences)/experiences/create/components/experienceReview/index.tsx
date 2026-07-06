@@ -1,19 +1,21 @@
 'use client';
 
+import {
+  PreviewCommunitiesSection,
+  PreviewGuestsSection,
+  PreviewLocationSection,
+} from '@/app/shared/components/Preview';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 
 import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
-import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
 import { PreviewDateSection } from '../PreviewDateSection';
 import { PreviewDescriptionSection } from '../PreviewDescriptionSection';
 import { PreviewExcludedSection } from '../PreviewExcludedSection';
-import { PreviewGuestsSection } from '../PreviewGuestsSection';
 import { PreviewIncludedSection } from '../PreviewIncludedSection';
 import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
-import { PreviewLocationSection } from '../PreviewLocationSection';
 import { PreviewMeetingSection } from '../PreviewMeetingSection';
 import { PreviewPhotoSection } from '../PreviewPhotoSection';
 import { PreviewTicketsSection } from '../PreviewTicketsSection';

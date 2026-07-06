@@ -1,32 +1,22 @@
 'use client';
 
-import Image from 'next/image';
+import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
 
 interface CommunityPreviewHeaderProps {
-  photo: string | null;
+  photos: string[];
   name: string;
   description: string;
 }
 
 export const CommunityPreviewHeader = ({
-  photo,
+  photos,
   name,
   description,
 }: CommunityPreviewHeaderProps) => {
   return (
     <div className="space-y-3">
       {/* Photo strip */}
-      {photo && (
-        <div className="relative h-32 w-full overflow-hidden rounded-lg bg-gray-100">
-          <Image
-            src={photo}
-            alt={name}
-            fill
-            sizes="300px"
-            className="object-cover"
-          />
-        </div>
-      )}
+      {photos.length > 0 && <SquarePhotoStrip photos={photos} />}
 
       {/* Name and description */}
       <div>

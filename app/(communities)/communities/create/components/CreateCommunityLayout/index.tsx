@@ -41,7 +41,10 @@ export const CreateCommunityLayout = () => {
   const description = form.getValues('description') || '';
   const visibility = form.getValues('visibility') || 'public';
   const formCategories = form.getValues('selectedCategories') || [];
-  const photoUrl = uploadedFiles[0] ? URL.createObjectURL(uploadedFiles[0]) : null;
+  const formPhotos = form.getValues('photos') || [];
+
+  // Extract photo URLs from FormPhoto array
+  const photos = formPhotos.map((photo: any) => photo.url);
 
   return (
     <TwoPanelLayout
@@ -79,11 +82,18 @@ export const CreateCommunityLayout = () => {
         <RightPanel
           name={name}
           description={description}
-          photoUrl={photoUrl}
+          photos={photos}
           location={cityInput}
           selectedCategories={formCategories}
           visibility={visibility}
           categories={categories}
+          invitedGuests={invitedMembers}
+          invitedCommunities={invitedCommunities.map((c: any) => c.id)}
+          allCommunities={availableCommunities.map((c: any) => ({
+            id: c.id,
+            name: c.title,
+            imageUrl: c.photos?.[0]?.url || '',
+          }))}
         />
       }
     />

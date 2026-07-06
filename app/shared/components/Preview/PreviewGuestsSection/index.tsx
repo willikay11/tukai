@@ -1,13 +1,12 @@
 'use client';
 
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
 import { InvitedMember } from '@/components/ui/invite-members';
-import { Experience } from '@/types/experience';
 
 interface PreviewGuestsSectionProps {
-  guests: Experience['guests'];
+  guests: InvitedMember[];
+  label?: string;
+  emptyText?: string;
   onEdit?: () => void;
 }
 
@@ -20,7 +19,12 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-export const PreviewGuestsSection = ({ guests, onEdit }: PreviewGuestsSectionProps) => {
+export const PreviewGuestsSection = ({
+  guests,
+  label = 'Guests',
+  emptyText = 'No guests invited yet',
+  onEdit,
+}: PreviewGuestsSectionProps) => {
   const MAX_AVATARS = 8;
   const visibleGuests = guests.slice(0, MAX_AVATARS);
   const overflowCount = Math.max(0, guests.length - MAX_AVATARS);
@@ -28,7 +32,9 @@ export const PreviewGuestsSection = ({ guests, onEdit }: PreviewGuestsSectionPro
   return (
     <div className="space-y-3">
       <div className="flex items-start justify-between">
-        <h3 className="text-xs font-semibold text-gray-900">Guests ({guests.length})</h3>
+        <h3 className="text-xs font-semibold text-gray-900">
+          {label} ({guests.length})
+        </h3>
         {onEdit && (
           <button type="button" onClick={onEdit} className="text-gray-400 hover:text-gray-600">
             <IconComponent iconName="Edit02Icon" size={16} className="text-gray-800" />
@@ -58,7 +64,7 @@ export const PreviewGuestsSection = ({ guests, onEdit }: PreviewGuestsSectionPro
           )}
         </div>
       ) : (
-        <p className="text-xs text-gray-500">No guests invited yet</p>
+        <p className="text-xs text-gray-500">{emptyText}</p>
       )}
     </div>
   );

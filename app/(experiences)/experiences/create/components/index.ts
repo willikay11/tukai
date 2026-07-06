@@ -39,7 +39,14 @@ export { TimeSlotList } from './TimeSlotList';
 export { InviteGuestsStep } from './InviteGuestsStep';
 export { WalletDetailsStep } from './WalletDetailsStep';
 
-// Preview Section Components
+// Preview Section Components (shared)
+export {
+  PreviewLocationSection,
+  PreviewGuestsSection,
+  PreviewCommunitiesSection,
+} from '@/app/shared/components/Preview';
+
+// Preview Section Components (experience-specific)
 export { PreviewPhotoSection } from './PreviewPhotoSection';
 export { PreviewTitleSection } from './PreviewTitleSection';
 export { PreviewDescriptionSection } from './PreviewDescriptionSection';
@@ -47,10 +54,7 @@ export { PreviewIncludedSection } from './PreviewIncludedSection';
 export { PreviewExcludedSection } from './PreviewExcludedSection';
 export { PreviewCategoriesSection } from './PreviewCategoriesSection';
 export { PreviewItineraryTypeSection } from './PreviewItineraryTypeSection';
-export { PreviewLocationSection } from './PreviewLocationSection';
 export { PreviewMeetingSection } from './PreviewMeetingSection';
-export { PreviewGuestsSection } from './PreviewGuestsSection';
-export { PreviewCommunitiesSection } from './PreviewCommunitiesSection';
 export { PreviewTicketsSection } from './PreviewTicketsSection';
 export { PreviewCommunitySection } from './PreviewCommunitySection';
 export { PreviewDateSection } from './PreviewDateSection';

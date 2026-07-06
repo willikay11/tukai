@@ -1,5 +1,10 @@
 'use client';
 
+import {
+  PreviewCommunitiesSection,
+  PreviewGuestsSection,
+  PreviewLocationSection,
+} from '@/app/shared/components/Preview';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Interest } from '@/types/interest';
 import { ItineraryDayFormValue } from '@/types/itinerary';
@@ -7,16 +12,13 @@ import { Wallet } from '@/types/payment';
 
 import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
-import { PreviewCommunitiesSection } from '../PreviewCommunitiesSection';
 import { PreviewCommunitySection } from '../PreviewCommunitySection';
 import { PreviewDateSection } from '../PreviewDateSection';
 import { PreviewDescriptionSection } from '../PreviewDescriptionSection';
 import { PreviewExcludedSection } from '../PreviewExcludedSection';
-import { PreviewGuestsSection } from '../PreviewGuestsSection';
 import { PreviewIncludedSection } from '../PreviewIncludedSection';
 import { PreviewItinerarySection } from '../PreviewItinerarySection';
 import { PreviewItineraryTypeSection } from '../PreviewItineraryTypeSection';
-import { PreviewLocationSection } from '../PreviewLocationSection';
 import { PreviewMeetingSection } from '../PreviewMeetingSection';
 import { PreviewPhotoSection } from '../PreviewPhotoSection';
 import { PreviewTicketsSection } from '../PreviewTicketsSection';
