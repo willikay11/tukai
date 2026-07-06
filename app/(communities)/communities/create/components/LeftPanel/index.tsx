@@ -1,6 +1,6 @@
 'use client';
 
-import { FileUploadField } from '@/app/shared/components/Forms';
+import { PhotoUploader, type FormPhoto } from '@/app/shared/components';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { LocationAutocompleteField } from '@/app/shared/components/LocationPicker';
 import { Button } from '@/components/ui/button';
@@ -110,33 +110,23 @@ export const LeftPanel = ({
           {/* Photo upload */}
           <FormField
             control={form.control}
-            name="uploadedFiles"
-            render={() => (
+            name="photos"
+            render={({ field, fieldState }) => (
               <FormItem>
                 <FormControl>
-                  <FileUploadField
-                    id={uploadId}
-                    label="Upload a community poster (Dimensions: 1024*1024, Max 15 Mbs)"
-                    accept="image/*"
-                    excludedMimeTypes={['image/svg+xml']}
-                    multiple
-                    minImageWidth={1024}
-                    minImageHeight={1024}
-                    maxImageWidth={4096}
-                    maxImageHeight={4096}
-                    maxFileSizeMb={15}
-                    onValidationError={(errors) => {
-                      const message = errors[0] || 'Please upload a valid image file.';
-                      form.setError('uploadedFiles', {
-                        type: 'manual',
-                        message,
-                      });
+                  <PhotoUploader
+                    photos={field.value || []}
+                    onPhotoChange={() => {
+                      form.clearErrors('photos');
                     }}
-                    onFilesChange={(files) => {
-                      setUploadedFiles(files);
-                      form.clearErrors('uploadedFiles');
-                      form.setValue('uploadedFiles', files, { shouldValidate: true });
+                    onPhotoFilesChange={(photos: FormPhoto[]) => {
+                      field.onChange(photos);
+                      form.clearErrors('photos');
                     }}
+                    onPhotoDelete={() => {
+                      form.clearErrors('photos');
+                    }}
+                    error={fieldState.error?.message}
                   />
                 </FormControl>
                 <FormMessage />
