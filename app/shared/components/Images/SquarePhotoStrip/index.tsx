@@ -50,7 +50,7 @@ export const SquarePhotoStrip = ({
     if (photos.length === 1) {
       return (
         <div
-          className={`relative w-full aspect-square overflow-hidden rounded-2xl ${className}`}
+          className={`relative w-full aspect-[4/3] overflow-hidden rounded-2xl ${className}`}
         >
           <Image
             src={photos[0]}
@@ -67,11 +67,11 @@ export const SquarePhotoStrip = ({
     // Multiple images — carousel with arrows and dots
     return (
       <div className={`relative ${className}`}>
-        {/* Square scroll container */}
+        {/* 4:3 scroll container */}
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="relative w-full aspect-square overflow-x-auto scrollbar-hide rounded-2xl"
+          className="relative w-full aspect-[4/3] overflow-x-auto scrollbar-hide rounded-2xl"
           style={{
             scrollSnapType: 'x mandatory',
             WebkitOverflowScrolling: 'touch',

@@ -12,7 +12,7 @@ import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 
 import { BackToExplore } from '../components/BackToExplore';
-import { BookmarkExperience } from '../components/bookmarkExperience';
+import { BucketListButton } from '../components/BucketListButton';
 import { ExperienceTypeBadge } from '../components/ExperienceTypeBadge';
 import { MetaRow } from '../components/MetaRow';
 import { IncludedExcludedSection } from '../components/IncludedExcludedSection';
@@ -39,9 +39,27 @@ export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageCont
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-6">
-      <BackToExplore />
+      {/* Top row — Back link on left, actions on right */}
+      <div className="flex items-center justify-between mb-6">
+        <BackToExplore />
 
-      <div className="grid grid-cols-12 gap-6 mt-6">
+        <div className="flex items-center gap-2">
+          <BucketListButton
+            experienceId={experience.id}
+            isBookmarked={experience.isBookmarked}
+          />
+          <Share
+            coverPhoto={
+              experience.photos?.find((photo: Photo) => photo.isCover)?.photo ||
+              experience.photos[0].photo
+            }
+            title={experience.title}
+            link={`${process.env.NEXT_PUBLIC_APP_URL}/experiences/${experience.id}`}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-12 gap-6">
         {/* Left column: Main content */}
         <div className="col-span-12 lg:col-span-7 space-y-6">
           {/* Hero with badge */}
@@ -156,21 +174,7 @@ export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageCont
 
         {/* Right column: Sticky booking panel */}
         <div className="col-span-12 lg:col-span-5">
-          <div className="sticky top-6 space-y-4">
-            {/* Bookmark and Share buttons */}
-            <div className="flex items-center justify-end gap-2">
-              <BookmarkExperience experience={experience} />
-              <Share
-                coverPhoto={
-                  experience.photos?.find((photo: Photo) => photo.isCover)?.photo ||
-                  experience.photos[0].photo
-                }
-                title={experience.title}
-                link={`${process.env.NEXT_PUBLIC_APP_URL}/experiences/${experience.id}`}
-              />
-            </div>
-
-            {/* Booking panel */}
+          <div className="sticky top-6">
             <BookingPanel experience={experience} />
           </div>
         </div>
