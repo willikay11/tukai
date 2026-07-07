@@ -19,7 +19,6 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
-import { Separator } from '@/components/ui/separator';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 
 export const AuthActions = () => {
@@ -67,12 +66,12 @@ export const AuthActions = () => {
   return (
     <div className="flex items-center">
       <Button
-        variant="primary-light"
-        className="mr-2 hidden rounded-[40px] md:inline-flex"
+        variant="lime"
+        className="mr-2 hidden flex-shrink-0 gap-1.5 rounded-full px-6 font-semibold text-gray-900 md:inline-flex"
         onClick={handleCreateExperience}
       >
-        <IconComponent iconName="PlusSignCircleIcon" size={15} color="emerald" />
-        Create Experience
+        <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />
+        Create
       </Button>
       {session?.user ? (
         <NavigationMenu>
@@ -91,7 +90,6 @@ export const AuthActions = () => {
                   />
                   <div className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-[1px] border-white bg-red-600" />
                 </div>
-                <span className="ml-2 mr-2.5 text-xs text-gray-600">{session?.user?.name}</span>
                 <NavigationMenuContent className="w-54 z-50 rounded-lg p-2">
                   <div className="flex w-40 flex-col gap-2">
                     {/* <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">

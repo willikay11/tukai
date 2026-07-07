@@ -24,8 +24,10 @@ describe('Nav', () => {
 
       render(<Nav />);
 
+      expect(screen.getByRole('link', { name: /discover/i })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /experiences/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /explore/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /places/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /moments/i })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /communities/i })).toBeInTheDocument();
     });
 
@@ -34,8 +36,13 @@ describe('Nav', () => {
 
       render(<Nav />);
 
-      expect(screen.getByRole('link', { name: /experiences/i })).toHaveAttribute('href', '/');
-      expect(screen.getByRole('link', { name: /explore/i })).toHaveAttribute('href', '/places');
+      expect(screen.getByRole('link', { name: /discover/i })).toHaveAttribute('href', '/');
+      expect(screen.getByRole('link', { name: /experiences/i })).toHaveAttribute(
+        'href',
+        '/experiences',
+      );
+      expect(screen.getByRole('link', { name: /places/i })).toHaveAttribute('href', '/places');
+      expect(screen.getByRole('link', { name: /moments/i })).toHaveAttribute('href', '/moments');
       expect(screen.getByRole('link', { name: /communities/i })).toHaveAttribute(
         'href',
         '/communities',
@@ -48,7 +55,7 @@ describe('Nav', () => {
       render(<Nav />);
 
       const linkElements = screen.getAllByRole('link');
-      expect(linkElements).toHaveLength(3);
+      expect(linkElements).toHaveLength(5);
       linkElements.forEach((link) => {
         // Each link should have an SVG (icon)
         const svg = link.querySelector('svg');
@@ -56,53 +63,53 @@ describe('Nav', () => {
       });
     });
 
-    it('hides navigation on mobile (display: none by default)', () => {
+    it('hides navigation below the lg breakpoint', () => {
       mockUsePathname.mockReturnValue('/');
 
       const { container } = render(<Nav />);
-      const navContainer = container.querySelector('div.hidden');
+      const nav = container.querySelector('nav');
 
-      expect(navContainer).toBeInTheDocument();
-      expect(navContainer).toHaveClass('hidden');
+      expect(nav).toHaveClass('hidden');
+      expect(nav).toHaveClass('lg:flex');
     });
   });
 
   describe('active link styling', () => {
-    it('marks Experiences link as active when pathname is /', () => {
+    it('marks Discover link as active when pathname is /', () => {
       mockUsePathname.mockReturnValue('/');
 
       render(<Nav />);
 
-      const experiencesLink = screen.getByRole('link', { name: /experiences/i });
-      expect(experiencesLink).toHaveClass('text-primary');
-      expect(experiencesLink).toHaveClass('md:border-b-[1px]');
+      const discoverLink = screen.getByRole('link', { name: /discover/i });
+      expect(discoverLink).toHaveClass('bg-white');
+      expect(discoverLink).toHaveClass('shadow-sm');
     });
 
-    it('marks Explore link as active when pathname is /places', () => {
+    it('marks Experiences link as active when pathname is /experiences', () => {
+      mockUsePathname.mockReturnValue('/experiences');
+
+      render(<Nav />);
+
+      const experiencesLink = screen.getByRole('link', { name: /experiences/i });
+      expect(experiencesLink).toHaveClass('bg-white');
+    });
+
+    it('marks Experiences link as active for /experiences subpaths', () => {
+      mockUsePathname.mockReturnValue('/experiences/123');
+
+      render(<Nav />);
+
+      const experiencesLink = screen.getByRole('link', { name: /experiences/i });
+      expect(experiencesLink).toHaveClass('bg-white');
+    });
+
+    it('marks Places link as active when pathname is /places', () => {
       mockUsePathname.mockReturnValue('/places');
 
       render(<Nav />);
 
-      const exploreLink = screen.getByRole('link', { name: /explore/i });
-      expect(exploreLink).toHaveClass('text-primary');
-    });
-
-    it('marks Explore link as active for /places subpaths', () => {
-      mockUsePathname.mockReturnValue('/places/123');
-
-      render(<Nav />);
-
-      const exploreLink = screen.getByRole('link', { name: /explore/i });
-      expect(exploreLink).toHaveClass('text-primary');
-    });
-
-    it('marks Communities link as active when pathname is /communities', () => {
-      mockUsePathname.mockReturnValue('/communities');
-
-      render(<Nav />);
-
-      const communitiesLink = screen.getByRole('link', { name: /communities/i });
-      expect(communitiesLink).toHaveClass('text-primary');
+      const placesLink = screen.getByRole('link', { name: /places/i });
+      expect(placesLink).toHaveClass('bg-white');
     });
 
     it('marks Communities link as active for /communities subpaths', () => {
@@ -111,7 +118,16 @@ describe('Nav', () => {
       render(<Nav />);
 
       const communitiesLink = screen.getByRole('link', { name: /communities/i });
-      expect(communitiesLink).toHaveClass('text-primary');
+      expect(communitiesLink).toHaveClass('bg-white');
+    });
+
+    it('does not mark Discover as active on subroutes', () => {
+      mockUsePathname.mockReturnValue('/places');
+
+      render(<Nav />);
+
+      const discoverLink = screen.getByRole('link', { name: /discover/i });
+      expect(discoverLink).not.toHaveClass('bg-white');
     });
 
     it('only marks one link as active at a time', () => {
@@ -119,13 +135,12 @@ describe('Nav', () => {
 
       render(<Nav />);
 
-      const experiencesLink = screen.getByRole('link', { name: /experiences/i });
-      const exploreLink = screen.getByRole('link', { name: /explore/i });
-      const communitiesLink = screen.getByRole('link', { name: /communities/i });
+      const activeLinks = screen
+        .getAllByRole('link')
+        .filter((link) => link.classList.contains('bg-white'));
 
-      expect(exploreLink).toHaveClass('text-primary');
-      expect(experiencesLink).not.toHaveClass('text-primary');
-      expect(communitiesLink).not.toHaveClass('text-primary');
+      expect(activeLinks).toHaveLength(1);
+      expect(activeLinks[0]).toHaveTextContent('Places');
     });
 
     it('applies non-active styling to inactive links', () => {
@@ -133,12 +148,9 @@ describe('Nav', () => {
 
       render(<Nav />);
 
-      const exploreLink = screen.getByRole('link', { name: /explore/i });
-      const span = exploreLink.querySelector('span');
-
-      // Text color styling is on the inner span, not the link
-      expect(span).toHaveClass('text-gray-800');
-      expect(exploreLink).not.toHaveClass('text-primary');
+      const placesLink = screen.getByRole('link', { name: /places/i });
+      expect(placesLink).toHaveClass('text-gray-700');
+      expect(placesLink).not.toHaveClass('bg-white');
     });
   });
 
@@ -162,33 +174,19 @@ describe('Nav', () => {
 
       const experiencesLink = screen.getByRole('link', { name: /experiences/i });
 
-      // Verify link is clickable and has correct href
       await user.click(experiencesLink);
-      expect(experiencesLink).toHaveAttribute('href', '/');
-    });
-
-    it('closes menu on link click (if menu state existed)', async () => {
-      const user = userEvent.setup();
-      mockUsePathname.mockReturnValue('/');
-
-      render(<Nav />);
-
-      const exploreLink = screen.getByRole('link', { name: /explore/i });
-
-      // Verify clicking doesn't cause errors
-      await user.click(exploreLink);
-      expect(exploreLink).toBeInTheDocument();
+      expect(experiencesLink).toHaveAttribute('href', '/experiences');
     });
   });
 
   describe('accessibility', () => {
-    it('has semantic link structure', () => {
+    it('has semantic nav and link structure', () => {
       mockUsePathname.mockReturnValue('/');
 
       render(<Nav />);
 
-      const links = screen.getAllByRole('link');
-      expect(links.length).toBe(3);
+      expect(screen.getByRole('navigation')).toBeInTheDocument();
+      expect(screen.getAllByRole('link').length).toBe(5);
     });
 
     it('uses readable link text (not just icons)', () => {
@@ -196,71 +194,24 @@ describe('Nav', () => {
 
       render(<Nav />);
 
-      // All links should have text content
+      expect(screen.getByText('Discover')).toBeInTheDocument();
       expect(screen.getByText('Experiences')).toBeInTheDocument();
-      expect(screen.getByText('Explore')).toBeInTheDocument();
+      expect(screen.getByText('Places')).toBeInTheDocument();
+      expect(screen.getByText('Moments')).toBeInTheDocument();
       expect(screen.getByText('Communities')).toBeInTheDocument();
     });
 
-    it('maintains link order: Experiences, Explore, Communities', () => {
+    it('maintains link order: Discover, Experiences, Places, Moments, Communities', () => {
       mockUsePathname.mockReturnValue('/');
 
       render(<Nav />);
 
       const links = screen.getAllByRole('link');
-      expect(links[0]).toHaveTextContent('Experiences');
-      expect(links[1]).toHaveTextContent('Explore');
-      expect(links[2]).toHaveTextContent('Communities');
-    });
-
-    it('active link has visual indication via color and border', () => {
-      mockUsePathname.mockReturnValue('/communities');
-
-      render(<Nav />);
-
-      const activeLink = screen.getByRole('link', { name: /communities/i });
-
-      // Primary color indicates active state
-      expect(activeLink).toHaveClass('text-primary');
-      // Border indicates active state on desktop
-      expect(activeLink).toHaveClass('md:border-b-[1px]');
-    });
-  });
-
-  describe('responsive behavior', () => {
-    it('is hidden on mobile screens (display: hidden)', () => {
-      mockUsePathname.mockReturnValue('/');
-
-      const { container } = render(<Nav />);
-      const nav = container.firstChild;
-
-      expect(nav).toHaveClass('hidden');
-    });
-
-    it('is shown on tablet/desktop (md breakpoint)', () => {
-      mockUsePathname.mockReturnValue('/');
-
-      const { container } = render(<Nav />);
-      const nav = container.firstChild;
-
-      expect(nav).toHaveClass('md:inline-flex');
-    });
-  });
-
-  describe('link spacing', () => {
-    it('adds margin between links except the last one', () => {
-      mockUsePathname.mockReturnValue('/');
-
-      render(<Nav />);
-
-      const links = screen.getAllByRole('link');
-
-      // First two links should have mr-6 margin
-      expect(links[0]).toHaveClass('mr-6');
-      expect(links[1]).toHaveClass('mr-6');
-
-      // Last link should not have mr-6
-      expect(links[2]).not.toHaveClass('mr-6');
+      expect(links[0]).toHaveTextContent('Discover');
+      expect(links[1]).toHaveTextContent('Experiences');
+      expect(links[2]).toHaveTextContent('Places');
+      expect(links[3]).toHaveTextContent('Moments');
+      expect(links[4]).toHaveTextContent('Communities');
     });
   });
 });
