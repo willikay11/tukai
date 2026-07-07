@@ -41,7 +41,7 @@ export const DescriptionShowMore = ({
 
   return (
     <div>
-      <div dangerouslySetInnerHTML={{ __html: displayedText }} />
+      <div className='text-xs' dangerouslySetInnerHTML={{ __html: displayedText }} />
       {shouldTruncate && (
         <Button
           onClick={() => setIsOpen(!isOpen)}

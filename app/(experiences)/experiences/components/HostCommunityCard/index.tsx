@@ -34,7 +34,7 @@ export const HostCommunityCard = ({ community }: HostCommunityCardProps) => {
           )}
           <div>
             <div className="flex items-center gap-1">
-              <p className="font-semibold text-sm">{community.title}</p>
+              <p className="font-semibold text-xs">{community.title}</p>
               <IconComponent
                 iconName="ArrowUpRight01Icon"
                 size={13}
