@@ -137,11 +137,9 @@ export const PreviewDateSection = (props: PreviewDateSectionProps) => {
     return null;
   }
 
-  const firstSlot = props.timeSlots[0];
-  const firstTimeRange =
-    firstSlot && firstSlot.startTime && firstSlot.endTime
-      ? `${formatTime(firstSlot.startTime)} – ${formatTime(firstSlot.endTime)}`
-      : '';
+  const timeRanges = props.timeSlots
+    .filter((slot) => slot.startTime && slot.endTime)
+    .map((slot) => `${formatTime(slot.startTime)} – ${formatTime(slot.endTime)}`);
 
   const daysLabel = formatDays(props.days);
   const dateRange =
@@ -159,16 +157,18 @@ export const PreviewDateSection = (props: PreviewDateSectionProps) => {
           </button>
         )}
       </div>
-      {daysLabel && firstTimeRange ? (
+      {daysLabel && timeRanges.length > 0 ? (
         <div className="flex items-center gap-2">
           <div className="rounded-[12px] bg-lime p-4">
             <IconComponent iconName="CalendarAdd01Icon" size={28} className="text-emerald-600" />
           </div>
           <div className="space-y-1 text-xs text-gray-700">
-            <div>
-              <span className="font-medium text-gray-800">Every {daysLabel},</span>
-              <span className="font-medium text-gray-800">&nbsp;{firstTimeRange}</span>
-            </div>
+            {timeRanges.map((timeRange, index) => (
+              <div key={index}>
+                <span className="font-medium text-gray-800">Every {daysLabel},</span>
+                <span className="font-medium text-gray-800">&nbsp;{timeRange}</span>
+              </div>
+            ))}
             {dateRange && <div className="text-gray-600">{dateRange}</div>}
           </div>
         </div>
