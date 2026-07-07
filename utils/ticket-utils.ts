@@ -22,6 +22,37 @@ export const mapAnchorToCondition = (anchor: 'start' | 'end'): ApiTicketConditio
   return anchor === 'start' ? 'before_start' : 'before_end';
 };
 
+/**
+ * Inverse of buildRecurringTicketValidity: converts an API ticket's closing
+ * fields back into the form's relative-validity shape. Returns null when any
+ * field is missing. Used when hydrating an existing recurring experience.
+ */
+export const parseSalesEndRelativeFromTicket = (
+  closingDuration: number | null | undefined,
+  closingUnit: string | null | undefined,
+  closingCondition: string | null | undefined,
+): { amount: number; unit: RelativeUnit; anchor: 'start' | 'end' } | null => {
+  if (!closingDuration || !closingUnit || !closingCondition) {
+    return null;
+  }
+
+  let unit: RelativeUnit = 'day';
+  if (closingUnit === 'hours') unit = 'hour';
+  else if (closingUnit === 'days') unit = closingDuration > 7 ? 'week' : 'day';
+  else if (closingUnit === 'minutes') unit = 'hour';
+
+  // Collapse whole-week day counts back to weeks
+  let amount = closingDuration;
+  if (unit === 'day' && amount % 7 === 0 && amount > 7) {
+    unit = 'week';
+    amount = amount / 7;
+  }
+
+  const anchor: 'start' | 'end' = closingCondition === 'before_start' ? 'start' : 'end';
+
+  return { amount, unit, anchor };
+};
+
 export const buildRecurringTicketValidity = (
   salesEndRelative: {
     amount: number;
