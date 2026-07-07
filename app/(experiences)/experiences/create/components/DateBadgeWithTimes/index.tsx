@@ -18,14 +18,14 @@ export const DateBadgeWithTimes = ({
 }: DateBadgeWithTimesProps) => {
   return (
     <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-4">
-      <div className="w-full lg:w-3/5">
+      <div className="w-fit">
         {startDate && endDate ? (
           <TicketDateBadge mode="multi-day-range" startDate={startDate} endDate={endDate} />
         ) : null}
       </div>
 
       {startTime && endTime ? (
-        <div className="w-full lg:w-2/5">
+        <div className="w-fit">
           <TimePill startTime={startTime} endTime={endTime} onClick={() => {}} />
         </div>
       ) : null}
