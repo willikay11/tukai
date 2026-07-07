@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 
-import { ShoppingBasket01Icon } from '@hugeicons/react-pro';
-
 import { useBookmarkExperience } from '@/app/shared/hooks/useExperiences';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { useSession } from 'next-auth/react';
+import { Button } from '@/components/ui/button';
+import { IconComponent } from '@/app/shared/components';
 
 interface BucketListButtonProps {
   experienceId: string;
@@ -33,22 +33,15 @@ export const BucketListButton = ({
   };
 
   return (
-    <button
+    <Button
       type="button"
       onClick={handleClick}
       disabled={isPending}
-      className="
-        flex items-center gap-2
-        px-5 py-2.5 rounded-full
-        bg-white border border-gray-200
-        text-gray-800 text-sm font-medium
-        hover:border-gray-300 hover:bg-gray-50
-        transition-colors
-        disabled:opacity-50
-      "
+      variant={bookmarked ? 'default' : 'outline'}
+      className="rounded-full"
     >
       <span>{bookmarked ? 'Saved to Bucket List' : 'Add to Bucket List'}</span>
-      <ShoppingBasket01Icon size={16} className="text-gray-800" />
-    </button>
+      <IconComponent iconName="ShoppingBasket01Icon" size={16} className="ml-2" />
+    </Button>
   );
 };

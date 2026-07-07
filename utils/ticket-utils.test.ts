@@ -1,9 +1,11 @@
+import { parseSnakeToCamel } from './parseSnakeToCamel';
 import {
   buildAbsoluteTicketValidity,
   buildRecurringTicketValidity,
   mapAnchorToCondition,
   mapRelativeUnit,
   mapRelativeUnitAmount,
+  parseSalesEndRelativeFromTicket,
 } from './ticket-utils';
 
 describe('mapRelativeUnit', () => {
@@ -146,5 +148,77 @@ describe('buildAbsoluteTicketValidity', () => {
       sales_start_date: null,
       sales_end_date: null,
     });
+  });
+});
+
+describe('parseSalesEndRelativeFromTicket', () => {
+  it('converts hours to an hour-anchored relative value', () => {
+    expect(parseSalesEndRelativeFromTicket(1, 'hours', 'before_start')).toEqual({
+      amount: 1,
+      unit: 'hour',
+      anchor: 'start',
+    });
+  });
+
+  it('converts a small day count to days with end anchor', () => {
+    expect(parseSalesEndRelativeFromTicket(3, 'days', 'before_end')).toEqual({
+      amount: 3,
+      unit: 'day',
+      anchor: 'end',
+    });
+  });
+
+  it('returns null when any field is missing', () => {
+    expect(parseSalesEndRelativeFromTicket(null, 'hours', 'before_start')).toBeNull();
+    expect(parseSalesEndRelativeFromTicket(1, null, 'before_start')).toBeNull();
+    expect(parseSalesEndRelativeFromTicket(1, 'hours', null)).toBeNull();
+  });
+
+  it('round-trips a form value through build → parse', () => {
+    const built = buildRecurringTicketValidity({ amount: 2, unit: 'hour', anchor: 'start' });
+    expect(
+      parseSalesEndRelativeFromTicket(
+        built.ticket_sales_closing_duration,
+        built.ticket_sales_closing_unit,
+        built.ticket_sales_closing_condition,
+      ),
+    ).toEqual({ amount: 2, unit: 'hour', anchor: 'start' });
+  });
+
+  it('reads the camelCase keys that parseSnakeToCamel produces (the hydration bug)', () => {
+    // The experience fetch runs parseSnakeToCamel, so the ticket arrives camelCased.
+    // This proves the field names the hydration reads actually exist post-transform.
+    const apiTicket = {
+      ticket_sales_closing_duration: 1,
+      ticket_sales_closing_unit: 'hours',
+      ticket_sales_closing_condition: 'before_start',
+    };
+    const camel = parseSnakeToCamel(apiTicket) as {
+      ticketSalesClosingDuration: number;
+      ticketSalesClosingUnit: string;
+      ticketSalesClosingCondition: string;
+    };
+
+    expect(camel.ticketSalesClosingDuration).toBe(1);
+    expect(camel.ticketSalesClosingUnit).toBe('hours');
+    expect(camel.ticketSalesClosingCondition).toBe('before_start');
+
+    // The old code read snake_case keys, which are undefined post-transform → null.
+    expect(
+      parseSalesEndRelativeFromTicket(
+        (camel as any).ticket_sales_closing_duration,
+        (camel as any).ticket_sales_closing_unit,
+        (camel as any).ticket_sales_closing_condition,
+      ),
+    ).toBeNull();
+
+    // The fix reads camelCase keys → a real relative value.
+    expect(
+      parseSalesEndRelativeFromTicket(
+        camel.ticketSalesClosingDuration,
+        camel.ticketSalesClosingUnit,
+        camel.ticketSalesClosingCondition,
+      ),
+    ).toEqual({ amount: 1, unit: 'hour', anchor: 'start' });
   });
 });

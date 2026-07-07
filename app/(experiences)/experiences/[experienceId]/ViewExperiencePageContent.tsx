@@ -159,7 +159,7 @@ export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageCont
           {/* Cancellation Policy */}
           <div>
             <p className="text-base font-bold text-gray-900 mb-2">Cancellation Policy</p>
-            <p className="text-sm font-medium text-gray-600">
+            <p className="text-xs font-medium text-gray-600">
               Ticket sales close {closingDuration} {closingUnit} {closingConditionText}
             </p>
           </div>
@@ -175,7 +175,7 @@ export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageCont
 
         {/* Right column: Sticky booking panel */}
         <div className="col-span-12 lg:col-span-5">
-          <div className="sticky top-6">
+          <div className="sticky top-16">
             <BookingPanel experience={experience} />
           </div>
         </div>

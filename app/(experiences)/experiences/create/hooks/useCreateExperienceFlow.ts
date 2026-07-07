@@ -53,6 +53,7 @@ import {
   calculateEndTime,
   diffSlotTemplates,
 } from '@/utils/slot-template-utils';
+import { parseSalesEndRelativeFromTicket } from '@/utils/ticket-utils';
 
 export type ExperienceStepId =
   | 'community'
@@ -295,8 +296,11 @@ export const useCreateExperienceFlow = () => {
   );
 
   // Slot template hooks
-  const { data: slotTemplatesResponse, isLoading: isLoadingSlotTemplates } =
-    useFetchSlotTemplates(experienceId);
+  const {
+    data: slotTemplatesResponse,
+    isLoading: isLoadingSlotTemplates,
+    isFetching: isFetchingSlotTemplates,
+  } = useFetchSlotTemplates(experienceId);
 
   // Itinerary days hooks
   const { data: itineraryDaysResponse, isLoading: isLoadingItineraryDays } =
@@ -423,6 +427,16 @@ export const useCreateExperienceFlow = () => {
     if (!experience || !experienceId || hasHydrated.current) {
       return;
     }
+
+    // For recurring experiences, time slots are hydrated from the slot-templates
+    // query. With staleTime: 0 the query serves a (possibly incomplete) cached
+    // result immediately and refetches in the background, so committing here too
+    // early drops slots. Wait until the query has settled to fresh data before
+    // marking hydration done — the effect re-runs when isFetching flips to false.
+    if (!!experience.recurrenceRule && (isLoadingSlotTemplates || isFetchingSlotTemplates)) {
+      return;
+    }
+
     hasHydrated.current = true;
 
     // Parse dates from ISO format (extract without timezone conversion)
@@ -463,6 +477,7 @@ export const useCreateExperienceFlow = () => {
       apiExperienceType,
       experience.startDate ?? null,
       experience.endDate ?? null,
+      hasRecurrenceRule,
     );
 
     let dateTypeUpdate: any = {
@@ -558,45 +573,14 @@ export const useCreateExperienceFlow = () => {
         );
         const salesEndDateTime = extractDateTime(ticket.salesEndDate || ticket.sales_end_date);
 
-        // Map API relative validity fields to form format
-        let salesEndRelative = null;
-
-        console.log('[Hydration] Ticket:', {
-          name: ticket.name,
-          ticket_sales_closing_duration: ticket.ticket_sales_closing_duration,
-          ticket_sales_closing_unit: ticket.ticket_sales_closing_unit,
-          ticket_sales_closing_condition: ticket.ticket_sales_closing_condition,
-        });
-
-        if (
-          ticket.ticket_sales_closing_duration &&
-          ticket.ticket_sales_closing_unit &&
-          ticket.ticket_sales_closing_condition
-        ) {
-          // Convert API format to form format
-          let unit: 'hour' | 'day' | 'week' = 'day';
-          if (ticket.ticket_sales_closing_unit === 'hours') unit = 'hour';
-          else if (ticket.ticket_sales_closing_unit === 'days')
-            unit = ticket.ticket_sales_closing_duration > 7 ? 'week' : 'day';
-          else if (ticket.ticket_sales_closing_unit === 'minutes') unit = 'hour';
-
-          // Convert days to weeks if divisible by 7
-          let amount = ticket.ticket_sales_closing_duration;
-          if (unit === 'day' && amount % 7 === 0 && amount > 7) {
-            unit = 'week';
-            amount = amount / 7;
-          }
-
-          const anchor = ticket.ticket_sales_closing_condition === 'before_start' ? 'start' : 'end';
-
-          salesEndRelative = {
-            amount,
-            unit,
-            anchor,
-          };
-
-          console.log('[Hydration] Converted to salesEndRelative:', salesEndRelative);
-        }
+        // Map API relative validity fields to form format. The experience is
+        // fetched through parseSnakeToCamel, so the fields arrive camelCased;
+        // keep the snake_case names as a fallback for any un-transformed payload.
+        const salesEndRelative = parseSalesEndRelativeFromTicket(
+          ticket.ticketSalesClosingDuration ?? ticket.ticket_sales_closing_duration,
+          ticket.ticketSalesClosingUnit ?? ticket.ticket_sales_closing_unit,
+          ticket.ticketSalesClosingCondition ?? ticket.ticket_sales_closing_condition,
+        );
 
         // For recurring experiences, find the slot index from the slot_template ID
         let slotIndex: number | undefined;
@@ -634,7 +618,15 @@ export const useCreateExperienceFlow = () => {
         tickets: { ...prev.tickets, items: savedTickets },
       }));
     }
-  }, [experience?.id, experienceId, slotTemplatesResponse, updateAboutFormData, updateFormData]);
+  }, [
+    experience?.id,
+    experienceId,
+    slotTemplatesResponse,
+    isLoadingSlotTemplates,
+    isFetchingSlotTemplates,
+    updateAboutFormData,
+    updateFormData,
+  ]);
 
   // Sync photo IDs after photos are uploaded (replace temp IDs with real IDs)
   useEffect(() => {
@@ -933,9 +925,8 @@ export const useCreateExperienceFlow = () => {
       }
 
       if (formData.dateType.isRecurring) {
-        if (!ticket.salesStartRelative) {
-          errors[`tickets.${index}.salesStartRelative`] = 'Sales start validity is required';
-        }
+        // Recurring tickets only capture a sales-closing (end) validity — there is
+        // no start-relative field in the form or the API payload, so don't require it.
         if (!ticket.salesEndRelative) {
           errors[`tickets.${index}.salesEndRelative`] = 'Sales end validity is required';
         }

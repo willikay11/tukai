@@ -8,6 +8,12 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 
 import { useCreateExperienceFlow } from './useCreateExperienceFlow';
 
+// Mock uuid (ESM-only package jest can't parse)
+jest.mock('uuid', () => ({
+  v4: () => 'test-uuid-v4',
+  v1: () => 'test-uuid-v1',
+}));
+
 // Mock Next.js navigation
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
@@ -186,5 +192,85 @@ describe('useCreateExperienceFlow', () => {
     expect(typeof result.current.handlers.handleStepChange).toBe('function');
     expect(typeof result.current.handlers.handleExperienceCreated).toBe('function');
     expect(typeof result.current.handlers.handleDatesUpdatedSuccess).toBe('function');
+  });
+
+  describe('validateTickets for recurring experiences', () => {
+    const recurringTicket = {
+      id: 'ticket-1',
+      name: 'General',
+      quantity: 10,
+      amount: 500,
+      startTime: null,
+      endTime: null,
+      salesStartDate: null,
+      salesStartTime: null,
+      salesEndDate: null,
+      salesEndTime: null,
+      acceptPartialPayment: false,
+      // Recurring only captures a closing (end) validity — no start-relative field
+      salesStartRelative: null,
+      salesEndRelative: { amount: 1, unit: 'hour' as const, anchor: 'start' as const },
+      duplicateForEntirePeriod: false,
+      slotIndex: 0,
+    };
+
+    it('passes when a recurring ticket has salesEndRelative but no salesStartRelative', () => {
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.updateFormData({ isRecurring: true, experiencePricing: 'paid' });
+        result.current.updateTicketsFormData({ items: [recurringTicket] });
+      });
+
+      let isValid = false;
+      act(() => {
+        isValid = result.current.validateTickets();
+      });
+
+      expect(isValid).toBe(true);
+    });
+
+    it('fails when a recurring ticket is missing salesEndRelative', () => {
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.updateFormData({ isRecurring: true, experiencePricing: 'paid' });
+        result.current.updateTicketsFormData({
+          items: [{ ...recurringTicket, salesEndRelative: null }],
+        });
+      });
+
+      let isValid = true;
+      act(() => {
+        isValid = result.current.validateTickets();
+      });
+
+      expect(isValid).toBe(false);
+    });
+
+    it('advances from the tickets step to guests (reproduces Save & Continue)', () => {
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.handlers.handleStepChange('dates-tickets');
+        result.current.updateFormData({ isRecurring: true, experiencePricing: 'paid' });
+        result.current.updateTicketsFormData({ items: [recurringTicket] });
+      });
+
+      // Mirror the onSaveContinue handler wired to the tickets step.
+      act(() => {
+        if (result.current.validateTickets()) {
+          result.current.handlers.handleStepChange('guests');
+        }
+      });
+
+      expect(result.current.activeStep).toBe('guests');
+    });
   });
 });

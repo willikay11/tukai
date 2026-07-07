@@ -172,7 +172,7 @@ export const SharedExperiencePreview = ({
 
   return (
     <div className="space-y-5">
-      <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2>
+      {/* <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2> */}
 
       <PreviewPhotoSection photos={aboutPhotos?.map((p) => p.url) || []} />
 

@@ -47,22 +47,22 @@ export const SquarePhotoStrip = ({
     }, []);
 
     // Single image — no arrows or dots
-    if (photos.length === 1) {
-      return (
-        <div
-          className={`relative w-full aspect-[4/3] overflow-hidden rounded-2xl ${className}`}
-        >
-          <Image
-            src={photos[0]}
-            alt="Experience photo"
-            fill
-            sizes="(max-width: 768px) 100vw, 800px"
-            className="object-cover"
-            priority
-          />
-        </div>
-      );
-    }
+    // if (photos.length === 1) {
+    //   return (
+    //     <div
+    //       className={`relative w-full aspect-[4/3] overflow-hidden rounded-2xl ${className}`}
+    //     >
+    //       <Image
+    //         src={photos[0]}
+    //         alt="Experience photo"
+    //         fill
+    //         sizes="(max-width: 768px) 100vw, 800px"
+    //         className="object-cover"
+    //         priority
+    //       />
+    //     </div>
+    //   );
+    // }
 
     // Multiple images — carousel with arrows and dots
     return (

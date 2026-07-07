@@ -1,24 +1,64 @@
 'use client';
 
 import moment from 'moment';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { useFetchSlotTemplates } from '@/app/shared/hooks/useExperiences';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Quantity } from '@/components/ui/quantity';
 import { Experience } from '@/types/experience';
+import { calculateEndTime } from '@/utils/slot-template-utils';
+
+import { RecurringDateSlotPicker } from './RecurringDateSlotPicker';
 
 interface BookingPanelProps {
   experience: Experience;
-  onPay?: (data: { quantities: Record<string, number>; paymentMethod: 'mpesa' | 'card'; phone?: string }) => void;
+  onPay?: (data: {
+    quantities: Record<string, number>;
+    paymentMethod: 'mpesa' | 'card';
+    phone?: string;
+    delivery: { method: 'email' | 'whatsapp'; contact: string };
+    date?: string;
+    slotTemplateId?: string;
+  }) => void;
 }
+
+const formatSlotLabel = (startTime: string, durationMinutes: number): string => {
+  const endTime = calculateEndTime(startTime, durationMinutes);
+  return `${moment(startTime, 'HH:mm:ss').format('h:mm A')} - ${moment(endTime, 'HH:mm').format('h:mm A')}`;
+};
 
 export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
   const [tab, setTab] = useState<'reservation' | 'moments'>('reservation');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'card'>('mpesa');
   const [phone, setPhone] = useState('');
+  const [deliveryMethod, setDeliveryMethod] = useState<'email' | 'whatsapp'>('whatsapp');
+  const [deliveryContact, setDeliveryContact] = useState('');
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+
+  const isRecurring = Boolean(experience.recurrenceRule);
+
+  const { data: slotTemplatesResponse } = useFetchSlotTemplates(
+    isRecurring ? experience.id : null,
+  );
+  const timeSlots: { id: string; label: string }[] = (
+    slotTemplatesResponse?.data?.results ?? []
+  ).map((template: { id: string; startTime: string; durationMinutes: number }) => ({
+    id: template.id,
+    label: formatSlotLabel(template.startTime, template.durationMinutes),
+  }));
+
+  // Default to the first time slot once slot templates load
+  const firstSlotId = timeSlots[0]?.id ?? null;
+  useEffect(() => {
+    if (!selectedSlotId && firstSlotId) {
+      setSelectedSlotId(firstSlotId);
+    }
+  }, [selectedSlotId, firstSlotId]);
 
   const updateQuantity = (ticketId: string, qty: number) => {
     setQuantities((prev) => ({ ...prev, [ticketId]: qty }));
@@ -36,6 +76,9 @@ export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
         quantities,
         paymentMethod,
         phone: paymentMethod === 'mpesa' ? phone : undefined,
+        delivery: { method: deliveryMethod, contact: deliveryContact },
+        date: isRecurring ? (selectedDate ?? undefined) : undefined,
+        slotTemplateId: isRecurring ? (selectedSlotId ?? undefined) : undefined,
       });
     }
   };
@@ -63,36 +106,48 @@ export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
         </TabsList>
 
         <TabsContent value="reservation" className="space-y-4 mt-4">
-          {/* Date pill */}
-          <div className="flex items-center justify-between gap-3 bg-white rounded-2xl px-4 py-3">
-            <div className="flex items-start gap-3">
-              <IconComponent
-                iconName="Calendar03Icon"
-                size={20}
-                className="text-primary flex-shrink-0 mt-0.5"
-              />
-              <div className="space-y-2">
-                <p className="text-sm font-semibold text-gray-900">{dateRange}</p>
-                <p className="text-xs text-gray-500">
-                  From {currency} {experience.priceStartsFrom.amount.toLocaleString()}/Guest
-                </p>
+          {isRecurring ? (
+            /* Date & slot picker (recurring experiences) */
+            <RecurringDateSlotPicker
+              recurrenceRule={experience.recurrenceRule!}
+              timeSlots={timeSlots}
+              selectedDate={selectedDate}
+              onDateChange={setSelectedDate}
+              selectedSlotId={selectedSlotId}
+              onSlotChange={setSelectedSlotId}
+            />
+          ) : (
+            /* Date pill (single / multi-day experiences) */
+            <div className="flex items-center justify-between gap-3 bg-white rounded-2xl px-4 py-3">
+              <div className="flex items-start gap-3">
+                <IconComponent
+                  iconName="Calendar03Icon"
+                  size={20}
+                  className="text-primary flex-shrink-0 mt-0.5"
+                />
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-gray-900">{dateRange}</p>
+                  <p className="text-xs text-gray-500">
+                    From {currency} {experience.priceStartsFrom.amount.toLocaleString()}/Guest
+                  </p>
+                </div>
               </div>
+              <button type="button" className="text-sm font-medium text-primary hover:underline flex-shrink-0">
+                Change
+              </button>
             </div>
-            <button type="button" className="text-sm font-medium text-primary hover:underline flex-shrink-0">
-              Change
-            </button>
-          </div>
+          )}
 
           {/* Ticket selector */}
           {experience.tickets.length > 0 && (
             <div className="space-y-4">
-              <p className="text-base font-bold text-gray-900">Select your preferred ticket</p>
+              <p className="text-sm font-bold text-gray-900">Select your preferred ticket</p>
 
               <div className="space-y-3">
                 {experience.tickets.map((ticket) => (
                   <div key={ticket.id} className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-bold text-gray-900">
+                      <p className="text-xs font-bold text-gray-900">
                         {currency} {parseFloat(ticket.price as any).toLocaleString()}/person
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5">{ticket.name}</p>
@@ -115,12 +170,93 @@ export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
           {/* Total */}
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Total</span>
-            <span className="text-lg font-bold text-gray-900">
+            <span className="text-sm font-bold text-gray-900">
               {currency} {total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </div>
 
+          {/* Ticket delivery */}
+          <div className="space-y-3">
+            <p className="text-xs font-bold text-gray-900">
+              How would you like to receive your tickets?
+            </p>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  if (deliveryMethod !== 'email') setDeliveryContact('');
+                  setDeliveryMethod('email');
+                }}
+                className={`
+                  rounded-full py-3 px-4 text-xs font-medium
+                  transition-colors
+                  ${
+                    deliveryMethod === 'email'
+                      ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
+                      : 'bg-white text-gray-500'
+                  }
+                `}
+              >
+                Via Email
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (deliveryMethod !== 'whatsapp') setDeliveryContact('');
+                  setDeliveryMethod('whatsapp');
+                }}
+                className={`
+                  rounded-full py-3 px-4 text-xs font-medium
+                  transition-colors
+                  ${
+                    deliveryMethod === 'whatsapp'
+                      ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
+                      : 'bg-white text-gray-500'
+                  }
+                `}
+              >
+                Via Whatsapp
+              </button>
+            </div>
+
+            {deliveryMethod === 'whatsapp' ? (
+              <div className="flex items-center bg-white rounded-2xl px-4 py-3 gap-3">
+                <IconComponent
+                  iconName="Call02Icon"
+                  size={16}
+                  className="text-gray-700 flex-shrink-0"
+                />
+                <span className="text-sm font-medium text-gray-700 flex-shrink-0">+254</span>
+                <div className="w-px h-5 bg-gray-200 flex-shrink-0" />
+                <input
+                  type="tel"
+                  value={deliveryContact}
+                  onChange={(e) => setDeliveryContact(e.target.value)}
+                  placeholder="Enter Whatsapp number"
+                  className="flex-1 min-w-0 outline-none bg-transparent text-sm placeholder:text-gray-400"
+                />
+              </div>
+            ) : (
+              <div className="flex items-center bg-white rounded-2xl px-4 py-3 gap-3">
+                <IconComponent
+                  iconName="Mail01Icon"
+                  size={16}
+                  className="text-gray-700 flex-shrink-0"
+                />
+                <input
+                  type="email"
+                  value={deliveryContact}
+                  onChange={(e) => setDeliveryContact(e.target.value)}
+                  placeholder="Enter email address"
+                  className="flex-1 min-w-0 outline-none bg-transparent text-sm placeholder:text-gray-400"
+                />
+              </div>
+            )}
+          </div>
+
           {/* Payment method */}
+          <p className="text-sm font-bold text-gray-900">Payment method</p>
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"

@@ -54,8 +54,6 @@ export const PreviewTicketsSection = ({
             const salesStartDateStr = ticket.salesStartDate || (ticket as any).sales_start_date;
             const salesEndDateStr = ticket.salesEndDate || (ticket as any).sales_end_date;
 
-            console.log('[PreviewTicketsSection] Full ticket object:', ticket);
-
             let validity = 'Not set';
 
             if (salesStartDateStr && salesEndDateStr) {
@@ -67,8 +65,6 @@ export const PreviewTicketsSection = ({
               const { amount, unit, anchor } = ticket.salesStartRelative;
               validity = `${amount} ${unit} ${anchor === 'start' ? 'before' : 'after'} experience`;
             }
-
-            console.log(`[PreviewTicketsSection] Ticket ${ticket.id}: validity = "${validity}"`);
 
             // Handle both 'amount' (from form) and 'price' (from API)
             const price = (ticket as any).amount || (ticket as any).price;

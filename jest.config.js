@@ -10,6 +10,11 @@ const customJestConfig = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
     '^@hugeicons/react-pro$': '<rootDir>/__mocks__/@hugeicons/react-pro.js', // Mock for HugeIcons
+    '^@hugeicons/react$': '<rootDir>/__mocks__/@hugeicons/react.js', // ESM package jest can't parse
+    '^@hugeicons-pro/core-twotone-rounded$':
+      '<rootDir>/__mocks__/@hugeicons-pro/core-twotone-rounded.js', // ESM package jest can't parse
+    '^@hugeicons-pro/core-solid-rounded$':
+      '<rootDir>/__mocks__/@hugeicons-pro/core-solid-rounded.js', // ESM package jest can't parse
     '^lucide-react$': '<rootDir>/__mocks__/lucide-react.js', // Mock for lucide-react
   },
   testEnvironment: 'jest-environment-jsdom',

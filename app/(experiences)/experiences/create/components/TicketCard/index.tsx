@@ -95,7 +95,7 @@ export const TicketCard = ({
             </div>
           </div>
 
-          <div className="mt-3 space-y-2">
+          <div className="mt-1 space-y-2">
             <div className="grid grid-cols-3 gap-2">
               <div>
                 <p className="text-xs text-gray-500">Qty</p>

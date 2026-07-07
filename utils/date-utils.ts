@@ -193,10 +193,20 @@ export const inferUIExperienceType = (
   apiExperienceType: 'standard' | 'itinerary',
   startDate: string | null,
   endDate: string | null,
+  isRecurring = false,
 ): UIExperienceType => {
   // Itinerary is always direct
   if (apiExperienceType === 'itinerary') {
     return 'itinerary';
+  }
+
+  // Recurring experiences use the 'one-time' base type with the isRecurring flag
+  // layered on top. Their start/end span the first-to-last occurrence (often
+  // several calendar days), so they must NOT be inferred as multi-day — doing so
+  // routes the tickets step to the single-time multi-day layout instead of the
+  // per-slot recurring layout.
+  if (isRecurring) {
+    return 'one-time';
   }
 
   // Standard — infer from date span
