@@ -13,7 +13,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 const links = [
   {
     name: 'Experiences',
-    href: '/',
+    href: '/experiences',
     icon: <Calendar04Icon size={20} variant="stroke" />,
   },
   {
