@@ -175,7 +175,7 @@ export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageCont
 
         {/* Right column: Sticky booking panel */}
         <div className="col-span-12 lg:col-span-5">
-          <div className="sticky top-6">
+          <div className="sticky top-16">
             <BookingPanel experience={experience} />
           </div>
         </div>
