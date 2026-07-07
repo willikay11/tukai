@@ -84,29 +84,31 @@ export default function RootLayout({
                             </Suspense>
                           </div>
                           {/* Browser */}
-                          <header className="hidden items-center gap-4 px-6 py-3 md:flex">
-                            <Link href="/" className="flex-shrink-0">
-                              <Image
-                                src="/images/logo.svg"
-                                alt="Tukai logo"
-                                width={100}
-                                height={40}
-                                className="h-10 w-[100px] shrink-0"
-                              />
-                            </Link>
-                            <Nav />
-                            <div className="min-w-0 flex-1">
-                              <Suspense
-                                fallback={
-                                  <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
-                                }
-                              >
-                                <Search />
-                              </Suspense>
-                            </div>
-                            <AskTukaiButton />
-                            <AuthActions />
-                          </header>
+                          <div className="hidden md:grid md:grid-cols-12 md:gap-x-4">
+                            <header className="flex items-center gap-4 py-3 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+                              <Link href="/" className="flex-shrink-0">
+                                <Image
+                                  src="/images/logo.svg"
+                                  alt="Tukai logo"
+                                  width={100}
+                                  height={40}
+                                  className="h-10 w-[100px] shrink-0"
+                                />
+                              </Link>
+                              <Nav />
+                              <div className="min-w-0 flex-1">
+                                <Suspense
+                                  fallback={
+                                    <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
+                                  }
+                                >
+                                  <Search />
+                                </Suspense>
+                              </div>
+                              <AskTukaiButton />
+                              <AuthActions />
+                            </header>
+                          </div>
                         </div>
                         <Suspense fallback={<PillsSkeleton />}>
                           <PageFilters />
