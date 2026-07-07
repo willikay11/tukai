@@ -1,29 +1,21 @@
 'use client';
-import { useState } from 'react';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { Calendar04Icon, Search01Icon, UserMultipleIcon } from '@hugeicons/react-pro';
 import clsx from 'clsx';
 
-const links = [
-  {
-    name: 'Experiences',
-    href: '/',
-    icon: <Calendar04Icon size={18} variant="twotone" />,
-  },
-  { name: 'Explore', href: '/places', icon: <Search01Icon size={18} variant="twotone" /> },
-  {
-    name: 'Communities',
-    href: '/communities',
-    icon: <UserMultipleIcon size={18} variant="twotone" />,
-  },
+import { IconComponent } from '@/app/shared/components/Icons';
+
+const NAV_ITEMS = [
+  { label: 'Discover', href: '/', icon: 'CompassIcon' },
+  { label: 'Experiences', href: '/experiences', icon: 'Ticket01Icon' },
+  { label: 'Places', href: '/places', icon: 'Location01Icon' },
+  { label: 'Moments', href: '/moments', icon: 'DashboardSquare01Icon' },
 ];
 
 export const Nav = () => {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
 
   const isActive = (href: string) => {
     if (href === '/') {
@@ -33,29 +25,29 @@ export const Nav = () => {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
-  const linkItems = (showIcon: boolean) =>
-    links.map((link, index) => (
-      <Link
-        href={link.href}
-        key={link.name}
-        className={clsx('inline-flex h-fit items-center md:pb-4', {
-          'mr-6': index !== links.length - 1,
-          'text-primary md:border-b-[1px] md:border-primary': isActive(link.href),
-        })}
-        onClick={() => setOpen(false)}
-      >
-        <div className="inline-flex items-center">
-          {showIcon && link.icon}
-          <span
-            className={clsx('ml-1 text-xs', {
-              'text-gray-800': !isActive(link.href),
-              'font-semibold text-primary': isActive(link.href),
-            })}
+  return (
+    <nav className="hidden flex-shrink-0 items-center gap-1 rounded-full bg-gray-100 p-1 lg:flex">
+      {NAV_ITEMS.map((item) => {
+        const active = isActive(item.href);
+
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={clsx(
+              'flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-colors',
+              active ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-700 hover:text-gray-900',
+            )}
           >
-            {link.name}
-          </span>
-        </div>
-      </Link>
-    ));
-  return <div className="hidden md:inline-flex md:h-full">{linkItems(true)}</div>;
+            <IconComponent
+              iconName={item.icon}
+              size={18}
+              className={active ? 'text-primary' : 'text-gray-600'}
+            />
+            {item.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
 };

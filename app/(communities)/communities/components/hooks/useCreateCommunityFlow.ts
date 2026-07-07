@@ -131,11 +131,11 @@ export const useCreateCommunityFlow = () => {
   }, []);
 
   // Handlers
-  const toggleCategory = (category: string) => {
+  const toggleCategory = (category: Interest) => {
     setSelectedCategories((prev) => {
-      const next = prev.includes(category)
-        ? prev.filter((item) => item !== category)
-        : [...prev, category];
+      const next = prev.includes(category.id)
+        ? prev.filter((item) => item !== category.id)
+        : [...prev, category.id];
 
       form.setValue('selectedCategories', next, { shouldValidate: true });
       return next;

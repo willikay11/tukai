@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { Search01Icon } from '@hugeicons/react-pro';
-import clsx from 'clsx';
 import { debounce } from 'lodash';
 
 import { IconComponent } from '@/app/shared/components/Icons';
@@ -69,73 +68,53 @@ export const Search = () => {
       <PopoverTrigger asChild className="my-4 md:my-0">
         <div
           ref={containerRef}
-          className="relative inline-flex h-[50px] w-full items-center justify-between rounded-[50px] border-[1px] border-gray-200 bg-white py-4 pl-4 pr-1 shadow-search-bar"
+          className="relative flex w-full items-center gap-2 rounded-full border-[1px] border-gray-200 bg-white py-1.5 pl-4 pr-1.5 shadow-search-bar"
         >
-          <Search01Icon size={24} className="mr-2 text-gray-500" variant="twotone" />
-          <div
+          <Search01Icon size={18} className="flex-shrink-0 text-gray-400" variant="twotone" />
+          {tag && (
+            <span
+              className="inline-flex flex-shrink-0 cursor-pointer items-center gap-1 rounded-full bg-gray-100 py-1 pl-2 pr-1 text-sm"
+              onClick={() => removeTag()}
+            >
+              {tag.name}
+              <div className="flex items-center justify-center rounded-full bg-gray-400 p-1">
+                <IconComponent iconName="Cancel01Icon" size={12} color="white" />
+              </div>
+            </span>
+          )}
+          <input
+            ref={inputElRef}
+            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400"
+            placeholder="Search places or activities"
             onClick={() => setShowSearchResults(true)}
-            className={clsx('flex w-[80%]', {
-              'mt-0 flex-row items-center': (query && query.length > 0) || tag,
-              'flex-col': !query && !tag,
-            })}
-          >
-            {!query && !tag && (
-              <p className="mb-0 text-xs font-medium text-gray-700">
-                {pathname === '/' || pathname.includes('/place')
-                  ? "What's The Plan?"
-                  : pathname.includes('/experiences')
-                    ? 'Find Experiences?'
-                    : 'Find Your Communities?'}
-              </p>
-            )}
-            {tag && (
-              <span
-                className="mr-2 inline-flex cursor-pointer items-center gap-1 rounded-full bg-gray-100 py-1 pl-2 pr-1 text-sm"
-                onClick={() => removeTag()}
-              >
-                {tag.name}
-                <div className="flex items-center justify-center rounded-full bg-gray-400 p-1">
-                  <IconComponent iconName="Cancel01Icon" size={12} color="white" />
-                </div>
-              </span>
-            )}
-            <input
-              ref={inputElRef}
-              className={clsx(
-                'mt-[2px] h-full w-full text-[12px] outline-0 placeholder:text-[12px] placeholder:font-medium placeholder:text-gray-400 hover:border-primary focus:border-primary',
-                query && query.length > 0 && tag && 'mt-0',
-              )}
-              placeholder={
-                pathname === '/' || pathname.includes('/place')
-                  ? 'Any City · Any day'
-                  : pathname.includes('/experiences')
-                    ? 'Any City · By Activity'
-                    : 'Any City · By Activity'
-              }
-              onChange={(e) => {
-                debounce(() => {
-                  setQuery(e.target.value);
-                }, 500)();
-              }}
-            />
-          </div>
-          <div
-            className="flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full bg-gray-100"
-            onClick={() => {
-              setShowSearchResults(false);
-              setQuery(undefined);
-              setTag(undefined);
-              inputElRef.current!.value = '';
+            onChange={(e) => {
+              debounce(() => {
+                setQuery(e.target.value);
+              }, 500)();
             }}
+          />
+
+          {/* Divider */}
+          <div className="h-6 w-px flex-shrink-0 bg-gray-200" />
+
+          {/* Anytime dropdown (placeholder) */}
+          <button
+            type="button"
+            className="flex flex-shrink-0 items-center gap-1 px-2 text-sm font-medium text-gray-800"
           >
-            <IconComponent
-              iconName={
-                showSearchResults || query?.length ? 'Cancel01Icon' : 'FilterHorizontalIcon'
-              }
-              size={20}
-              color="gray"
-            />
-          </div>
+            Anytime
+            <IconComponent iconName="ArrowDown01Icon" size={14} className="text-gray-500" />
+          </button>
+
+          {/* Search button */}
+          <Button
+            variant="gradient"
+            size="sm"
+            onClick={() => setShowSearchResults(true)}
+            className="flex-shrink-0 rounded-full px-6"
+          >
+            Search
+          </Button>
         </div>
       </PopoverTrigger>
       <PopoverContent

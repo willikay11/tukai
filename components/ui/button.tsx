@@ -20,7 +20,7 @@ const buttonVariants = cva(
         text: 'hover:text-primary !p-0',
         'primary-text': 'text-primary !p-0',
         gradient: 'bg-gradient-to-b to-[#064E3B] from-[#047857] text-white',
-        //
+        lime: 'bg-lime text-teal-950 hover:bg-lime-600',
       },
       size: {
         default: 'h-9 px-4 py-2',

@@ -38,7 +38,7 @@ describe('BottomNavigation', () => {
       const links = screen.getAllByRole('link');
       expect(links).toHaveLength(3);
 
-      expect(links[0]).toHaveAttribute('href', '/');
+      expect(links[0]).toHaveAttribute('href', '/experiences');
       expect(links[1]).toHaveAttribute('href', '/places');
       expect(links[2]).toHaveAttribute('href', '/communities');
     });
@@ -50,7 +50,7 @@ describe('BottomNavigation', () => {
 
       const links = screen.getAllByRole('link');
 
-      expect(links[0]).toHaveAttribute('href', '/');
+      expect(links[0]).toHaveAttribute('href', '/experiences');
       expect(links[1]).toHaveAttribute('href', '/places');
       expect(links[2]).toHaveAttribute('href', '/communities');
     });
@@ -91,7 +91,7 @@ describe('BottomNavigation', () => {
 
   describe('active link styling and labels', () => {
     it('shows label only for active link', () => {
-      mockUsePathname.mockReturnValue('/');
+      mockUsePathname.mockReturnValue('/experiences');
 
       render(<BottomNavigation />);
 
@@ -106,7 +106,6 @@ describe('BottomNavigation', () => {
 
       render(<BottomNavigation />);
 
-      const exploreLink = screen.getByRole('link', { name: '' });
       const links = screen.getAllByRole('link');
       const exploreLinkElement = links.find((link) => link.getAttribute('href') === '/places');
 
@@ -115,7 +114,7 @@ describe('BottomNavigation', () => {
     });
 
     it('applies active styling (background and color)', () => {
-      mockUsePathname.mockReturnValue('/');
+      mockUsePathname.mockReturnValue('/experiences');
 
       render(<BottomNavigation />);
 
@@ -137,8 +136,8 @@ describe('BottomNavigation', () => {
       expect(exploreLink).not.toHaveClass('bg-[#D4F1E8]');
     });
 
-    it('marks Experiences link as active when pathname is /', () => {
-      mockUsePathname.mockReturnValue('/');
+    it('marks Experiences link as active when pathname is /experiences', () => {
+      mockUsePathname.mockReturnValue('/experiences');
 
       render(<BottomNavigation />);
 
@@ -293,7 +292,7 @@ describe('BottomNavigation', () => {
 
       const links = screen.getAllByRole('link');
       // First link should be Experiences (href="/")
-      expect(links[0]).toHaveAttribute('href', '/');
+      expect(links[0]).toHaveAttribute('href', '/experiences');
       // Second link should be Explore (href="/places")
       expect(links[1]).toHaveAttribute('href', '/places');
       // Third link should be Communities

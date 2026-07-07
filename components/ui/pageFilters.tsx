@@ -46,7 +46,7 @@ export const PageFilters = () => {
       setSelectedCategoryId(selectedCategoryId);
     }
 
-    if (pathname === '/' || pathname === '/experiences') {
+    if (pathname === '/experiences') {
       setFilters([
         { label: 'All Experiences', value: 'all', icon: 'WorkoutStretchingIcon' },
         {
@@ -80,8 +80,9 @@ export const PageFilters = () => {
     }
   }, [categories, pathname, categoryFromQuery, setSelectedCategoryId]);
 
-  // Hide filters on detail pages (with IDs)
+  // Hide filters on Discover and detail pages (with IDs)
   if (
+    pathname === '/' ||
     pathname.startsWith('/places/') ||
     pathname.startsWith('/experiences/') ||
     pathname.startsWith('/communities/') ||
@@ -95,7 +96,7 @@ export const PageFilters = () => {
   }
 
   return (
-    <div className="sticky top-0 z-[9] border-b-[1px] border-t-[1px] border-gray-100 bg-gray-50 md:top-[8.313rem] 3xl:top-[8.313rem] 4xl:top-[7.8rem]">
+    <div className="">
       <div className="col-span-12 gap-4 px-4 md:px-0">
         <div className="w-full">
           <div className="grid grid-cols-12 gap-4">

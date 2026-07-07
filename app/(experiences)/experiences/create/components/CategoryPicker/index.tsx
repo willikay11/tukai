@@ -30,7 +30,7 @@ export const CategoryPicker = ({ selectedCategories, onChange }: CategoryPickerP
         Select a category the experience falls under
       </label>
       <div className="flex flex-wrap gap-2">
-        {categories.map((category: Interest) => (
+        {categories?.map((category: Interest) => (
           <CategoryPill
             key={category.id}
             category={category}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import sanitizeHtml from 'sanitize-html';
+import { safeText } from '@/utils/safe-text-utils';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
@@ -23,51 +23,11 @@ export const DescriptionShowMore = ({
 
   // Sanitize text to prevent XSS (if content is dynamic) and ensure any
   // anchor tags receive the expected link classes.
-  const safeText = sanitizeHtml(text, {
-    // Ensure class (and optionally target/rel) are preserved on <a>
-    allowedAttributes: {
-      a: ['href', 'name', 'target', 'rel', 'class'],
-      ol: ['class'],
-      ul: ['class'],
-      li: ['class'],
-    },
-    transformTags: {
-      a: (tagName, attribs) => {
-        const existing = attribs.class ? attribs.class + ' ' : '';
-        return {
-          tagName: 'a',
-          attribs: {
-            ...attribs,
-            class: `${existing}text-primary underline underline-offset-2 hover:text-primary transition-colors`,
-          },
-        } as any;
-      },
-      ol: (tagName, attribs) => {
-        const existing = attribs.class ? attribs.class + ' ' : '';
-        return {
-          tagName: 'ol',
-          attribs: {
-            ...attribs,
-            class: `${existing}list-decimal list-inside`,
-          },
-        } as any;
-      },
-      ul: (tagName, attribs) => {
-        const existing = attribs.class ? attribs.class + ' ' : '';
-        return {
-          tagName: 'ul',
-          attribs: {
-            ...attribs,
-            class: `${existing}list-disc list-inside`,
-          },
-        } as any;
-      },
-    },
-  });
+  const sanitizedText = safeText(text);
 
   // Determine whether to truncate text
   const shouldTruncate = text.length > maxLength;
-  const displayedText = !shouldTruncate ? safeText : safeText.slice(0, maxLength) + '...';
+  const displayedText = !shouldTruncate ? sanitizedText : sanitizedText.slice(0, maxLength) + '...';
 
   useEffect(() => {
     if (isOpen) {
@@ -81,7 +41,7 @@ export const DescriptionShowMore = ({
 
   return (
     <div>
-      <div className="font-medium" dangerouslySetInnerHTML={{ __html: displayedText }} />
+      <div dangerouslySetInnerHTML={{ __html: displayedText }} />
       {shouldTruncate && (
         <Button
           onClick={() => setIsOpen(!isOpen)}
@@ -106,7 +66,7 @@ export const DescriptionShowMore = ({
 
         <div className="max p-6">
           <p className="mb-1 text-base font-black text-gray-600">About</p>
-          <div className="font-medium" dangerouslySetInnerHTML={{ __html: safeText }} />
+          <div dangerouslySetInnerHTML={{ __html: sanitizedText }} />
         </div>
         <div className="fixed bottom-[1rem] left-0 right-0 flex justify-center">
           <Button

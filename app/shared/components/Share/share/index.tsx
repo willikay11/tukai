@@ -82,12 +82,21 @@ export const Share = ({
 
   return (
     <>
-      <Share08Icon
-        size={16}
-        variant="twotone"
-        className="cursor-pointer text-primary"
+      <button
+        type="button"
         onClick={() => setOpen(true)}
-      />
+        className="
+          flex items-center gap-2
+          px-5 py-2.5 rounded-full
+          bg-white border border-gray-200
+          text-gray-800 text-sm font-medium
+          hover:border-gray-300 hover:bg-gray-50
+          transition-colors
+        "
+      >
+        <span>Share</span>
+        <Share08Icon size={16} className="text-gray-800" />
+      </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="px-6 md:w-[24rem]">
           <div className="flex flex-col gap-4">
