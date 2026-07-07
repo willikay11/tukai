@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { MapPinpoint02Icon } from '@hugeicons-pro/core-twotone-rounded';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { GoogleMap, LoadScript, OverlayView } from '@react-google-maps/api';
+import { IconComponent } from '../Icons';
 
 const containerStyle = {
   width: '100%',
@@ -25,6 +26,16 @@ export const GoogleMapComponent = ({ lat, lng }: { lat?: number; lng?: number })
   if (!isReady) {
     return <p className="text-center text-gray-500">Waiting for location...</p>;
   }
+
+  return (
+    <div className="w-14 h-14 rounded-lg bg-primary/10 flex-shrink-0 flex items-center justify-center">
+      <IconComponent
+        iconName="Location01Icon"
+        size={20}
+        className="text-primary"
+      />
+    </div>
+  );
 
   return (
     <LoadScript googleMapsApiKey={API_KEY}>

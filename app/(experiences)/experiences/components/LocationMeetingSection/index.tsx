@@ -21,19 +21,18 @@ export const LocationMeetingSection = ({ experience }: LocationMeetingSectionPro
         <div className="flex items-center gap-3">
           <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
             <GoogleMapComponent
-              lat={experience.location.point.coordinates[1]}
-              lng={experience.location.point.coordinates[0]}
-              thumbnail
+              lat={experience?.location?.point?.coordinates[1]}
+              lng={experience?.location?.point?.coordinates[0]}
             />
           </div>
           <div>
             <p className="font-semibold text-sm">
-              {experience.location.city}, {experience.location.country}
+              {experience?.location?.city}, {experience?.location?.country}
             </p>
             <Link
               href={googleMapsUrl}
               target="_blank"
-              className="text-xs text-primary underline"
+              className="text-xs text-primary font-semibold"
             >
               View on Google Maps
             </Link>

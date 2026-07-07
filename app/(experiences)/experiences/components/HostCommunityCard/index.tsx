@@ -19,7 +19,7 @@ export const HostCommunityCard = ({ community }: HostCommunityCardProps) => {
   return (
     <div>
       <h3 className="font-bold text-gray-900 mb-3">Host Community</h3>
-      <Link href={`/communities/${community.id}`}>
+      <Link target='_blank' href={`/communities/${community.id}`}>
         <div className="flex items-center gap-3 cursor-pointer hover:opacity-75 transition-opacity">
           {photoUrl && (
             <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">

@@ -8,6 +8,7 @@ import { SendMessage } from '@/app/shared/components/SendMessage/SendMessage';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Experience } from '@/types/experience';
+import { IconComponent } from '@/app/shared/components';
 
 export const ExperienceOrganiser = ({ experience }: { experience: Experience }) => {
   const [open, setOpen] = useState(false);
@@ -15,7 +16,7 @@ export const ExperienceOrganiser = ({ experience }: { experience: Experience }) 
   return (
     <>
       <SendMessage open={open} setOpen={setOpen} recipientId={experience.host.id} />
-      <div className="inline-flex w-full rounded-[15px] bg-blue-50 px-3 py-3.5">
+      <div className="inline-flex w-full rounded-[15px] bg-gray-50 px-3 py-3.5">
         <div className="inline-flex w-full justify-between">
           <div className="inline-flex">
             <Avatar className={`mr-2.5 h-[40px] w-[40px]`}>
@@ -35,8 +36,9 @@ export const ExperienceOrganiser = ({ experience }: { experience: Experience }) 
               </p>
             </div>
           </div>
-          <Button variant="primary-light" className="h-full" onClick={() => setOpen(true)}>
-            Send Message
+          <Button variant="lime" className="h-full rounded-full" onClick={() => setOpen(true)}>
+            Message Organiser
+            <IconComponent iconName="MessageCircle01Icon" size={18} color="text-teal-950" />
           </Button>
         </div>
       </div>

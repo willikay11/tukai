@@ -26,6 +26,7 @@ interface ViewExperiencePageContentProps {
 }
 
 export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageContentProps) => {
+  console.log('experience', experience);
   const closingDuration = experience?.ticketSalesClosingDuration;
   const closingUnitRaw = experience?.ticketSalesClosingUnit ?? '';
   const closingUnit =
