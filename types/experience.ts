@@ -13,6 +13,7 @@ export type Experience = {
   location: Location;
   startDate: string;
   endDate: string;
+  recurrenceRule?: string | null;
   currency: string;
   isPaid: boolean;
   ticketSalesClosingDuration: number;
