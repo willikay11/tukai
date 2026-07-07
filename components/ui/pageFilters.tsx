@@ -95,7 +95,7 @@ export const PageFilters = () => {
   }
 
   return (
-    <div className="sticky top-0 z-[9] border-b-[1px] border-t-[1px] border-gray-100 bg-gray-50">
+    <div className="">
       <div className="col-span-12 gap-4 px-4 md:px-0">
         <div className="w-full">
           <div className="grid grid-cols-12 gap-4">
