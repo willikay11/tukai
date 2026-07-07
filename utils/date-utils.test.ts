@@ -54,4 +54,24 @@ describe('inferUIExperienceType', () => {
       'one-time',
     );
   });
+
+  it('maps a recurring experience spanning multiple days to one-time, not multi-day', () => {
+    // Recurring experiences span first-to-last occurrence (here 27–29 Aug) but
+    // must stay on the one-time base type so the recurring tickets layout renders.
+    expect(
+      inferUIExperienceType('standard', '2026-08-27T14:00:00', '2026-08-29T21:00:00', true),
+    ).toBe('one-time');
+  });
+
+  it('still infers multi-day for a non-recurring multi-day span', () => {
+    expect(
+      inferUIExperienceType('standard', '2026-08-27T14:00:00', '2026-08-29T21:00:00', false),
+    ).toBe('multi-day');
+  });
+
+  it('keeps itinerary even when recurring flag is set', () => {
+    expect(
+      inferUIExperienceType('itinerary', '2026-08-27T14:00:00', '2026-08-29T21:00:00', true),
+    ).toBe('itinerary');
+  });
 });

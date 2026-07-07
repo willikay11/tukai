@@ -295,8 +295,11 @@ export const useCreateExperienceFlow = () => {
   );
 
   // Slot template hooks
-  const { data: slotTemplatesResponse, isLoading: isLoadingSlotTemplates } =
-    useFetchSlotTemplates(experienceId);
+  const {
+    data: slotTemplatesResponse,
+    isLoading: isLoadingSlotTemplates,
+    isFetching: isFetchingSlotTemplates,
+  } = useFetchSlotTemplates(experienceId);
 
   // Itinerary days hooks
   const { data: itineraryDaysResponse, isLoading: isLoadingItineraryDays } =
@@ -423,6 +426,16 @@ export const useCreateExperienceFlow = () => {
     if (!experience || !experienceId || hasHydrated.current) {
       return;
     }
+
+    // For recurring experiences, time slots are hydrated from the slot-templates
+    // query. With staleTime: 0 the query serves a (possibly incomplete) cached
+    // result immediately and refetches in the background, so committing here too
+    // early drops slots. Wait until the query has settled to fresh data before
+    // marking hydration done — the effect re-runs when isFetching flips to false.
+    if (!!experience.recurrenceRule && (isLoadingSlotTemplates || isFetchingSlotTemplates)) {
+      return;
+    }
+
     hasHydrated.current = true;
 
     // Parse dates from ISO format (extract without timezone conversion)
@@ -463,6 +476,7 @@ export const useCreateExperienceFlow = () => {
       apiExperienceType,
       experience.startDate ?? null,
       experience.endDate ?? null,
+      hasRecurrenceRule,
     );
 
     let dateTypeUpdate: any = {
@@ -634,7 +648,15 @@ export const useCreateExperienceFlow = () => {
         tickets: { ...prev.tickets, items: savedTickets },
       }));
     }
-  }, [experience?.id, experienceId, slotTemplatesResponse, updateAboutFormData, updateFormData]);
+  }, [
+    experience?.id,
+    experienceId,
+    slotTemplatesResponse,
+    isLoadingSlotTemplates,
+    isFetchingSlotTemplates,
+    updateAboutFormData,
+    updateFormData,
+  ]);
 
   // Sync photo IDs after photos are uploaded (replace temp IDs with real IDs)
   useEffect(() => {
