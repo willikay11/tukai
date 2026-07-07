@@ -12,7 +12,6 @@ const NAV_ITEMS = [
   { label: 'Experiences', href: '/experiences', icon: 'Ticket01Icon' },
   { label: 'Places', href: '/places', icon: 'Location01Icon' },
   { label: 'Moments', href: '/moments', icon: 'DashboardSquare01Icon' },
-  { label: 'Communities', href: '/communities', icon: 'UserMultipleIcon' },
 ];
 
 export const Nav = () => {
