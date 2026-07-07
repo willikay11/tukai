@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { TukaiImage } from '@/components/ui/image';
+import { IconComponent } from '../../Icons';
 
 const shareOptions = [
   {
@@ -82,21 +83,15 @@ export const Share = ({
 
   return (
     <>
-      <button
+      <Button
         type="button"
         onClick={() => setOpen(true)}
-        className="
-          flex items-center gap-2
-          px-5 py-2.5 rounded-full
-          bg-white border border-gray-200
-          text-gray-800 text-sm font-medium
-          hover:border-gray-300 hover:bg-gray-50
-          transition-colors
-        "
+        className="rounded-full"
+        variant="outline"
       >
         <span>Share</span>
-        <Share08Icon size={16} className="text-gray-800" />
-      </button>
+        <IconComponent iconName="Share08Icon" size={16} className="ml-2" />
+      </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="px-6 md:w-[24rem]">
           <div className="flex flex-col gap-4">
