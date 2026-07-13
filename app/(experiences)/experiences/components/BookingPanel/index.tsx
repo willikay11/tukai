@@ -12,6 +12,7 @@ import { Experience } from '@/types/experience';
 import { calculateEndTime } from '@/utils/slot-template-utils';
 
 import { RecurringDateSlotPicker } from './RecurringDateSlotPicker';
+import { PhoneNumber } from '@/components/ui/phoneNumber';
 
 interface BookingPanelProps {
   experience: Experience;
@@ -221,22 +222,27 @@ export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
             </div>
 
             {deliveryMethod === 'whatsapp' ? (
-              <div className="flex items-center bg-white rounded-2xl px-4 py-3 gap-3">
-                <IconComponent
-                  iconName="Call02Icon"
-                  size={16}
-                  className="text-gray-700 flex-shrink-0"
-                />
-                <span className="text-sm font-medium text-gray-700 flex-shrink-0">+254</span>
-                <div className="w-px h-5 bg-gray-200 flex-shrink-0" />
-                <input
-                  type="tel"
-                  value={deliveryContact}
-                  onChange={(e) => setDeliveryContact(e.target.value)}
-                  placeholder="Enter Whatsapp number"
-                  className="flex-1 min-w-0 outline-none bg-transparent text-sm placeholder:text-gray-400"
-                />
-              </div>
+              <PhoneNumber
+                // value={deliveryContact}
+                onChange={(value) => setDeliveryContact(value)}
+                placeholder="Enter Whatsapp number"
+              />
+              // <div className="flex items-center bg-white rounded-2xl px-4 py-3 gap-3">
+              //   <IconComponent
+              //     iconName="Call02Icon"
+              //     size={16}
+              //     className="text-gray-700 flex-shrink-0"
+              //   />
+              //   <span className="text-sm font-medium text-gray-700 flex-shrink-0">+254</span>
+              //   <div className="w-px h-5 bg-gray-200 flex-shrink-0" />
+              //   <input
+              //     type="tel"
+              //     value={deliveryContact}
+              //     onChange={(e) => setDeliveryContact(e.target.value)}
+              //     placeholder="Enter Whatsapp number"
+              //     className="flex-1 min-w-0 outline-none bg-transparent text-sm placeholder:text-gray-400"
+              //   />
+              // </div>
             ) : (
               <div className="flex items-center bg-white rounded-2xl px-4 py-3 gap-3">
                 <IconComponent

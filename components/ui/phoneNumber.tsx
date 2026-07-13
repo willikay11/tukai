@@ -8,6 +8,7 @@ import { Separator } from './separator';
 interface PhoneNumberInputProps extends Omit<React.ComponentProps<'input'>, 'onChange'> {
   icon?: React.ReactNode;
   onChange?: (value: string) => void;
+  className?: string;
 }
 const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberInputProps>(
   ({ className, type = 'tel', icon, onChange, ...props }, ref) => {
@@ -21,7 +22,10 @@ const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberInputProps>(
     }, [countryCode, localNumber, onChange]);
 
     return (
-      <div className="flex items-center rounded-[10px] border border-gray-700 border-input px-2 shadow-sm focus-within:border-primary focus-within:outline-none disabled:cursor-not-allowed disabled:opacity-50">
+      <div className={cn(
+        'flex h-14 w-full items-center rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm focus-within:border-transparent focus-within:ring-[1px] focus-within:ring-primary md:text-sm',
+        className,
+      )}>
         <Select onValueChange={(val) => setCountryCode(val)}>
           <SelectTrigger
             className="focus:ring-none w-fit border-none px-0 pl-2 pr-2 shadow-none ring-transparent"
