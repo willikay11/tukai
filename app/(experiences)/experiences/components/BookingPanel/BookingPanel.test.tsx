@@ -65,7 +65,11 @@ const experience = {
   currency: 'Ksh.',
   isPaid: true,
   priceStartsFrom: { amount: 1500, currency: 'KES' },
-  tickets: [{ id: 'ticket-1', name: 'Normal', price: '1500.00', quantity: 10 }],
+  // Mirrors live data: one ticket per slot template
+  tickets: [
+    { id: 'ticket-1', name: 'Normal', price: '1500.00', quantity: 10, slotTemplate: 'c093ca3e' },
+    { id: 'ticket-2', name: 'VIP', price: '2500.00', quantity: 5, slotTemplate: 'ba199d91' },
+  ],
 } as unknown as Experience;
 
 describe('BookingPanel purchase flow', () => {
@@ -112,6 +116,32 @@ describe('BookingPanel purchase flow', () => {
 
     expect(screen.getByText('2:00 PM - 5:00 PM')).toBeInTheDocument();
     expect(screen.getByText('6:00 PM - 9:00 PM')).toBeInTheDocument();
+  });
+
+  it('lists only the selected slot’s tickets and swaps them on slot change', async () => {
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} />);
+
+    // First slot (template c093ca3e) auto-selected → only "Normal" shows
+    expect(screen.getByText('Normal')).toBeInTheDocument();
+    expect(screen.queryByText('VIP')).not.toBeInTheDocument();
+
+    await user.click(screen.getByText('6:00 PM - 9:00 PM'));
+
+    expect(screen.getByText('VIP')).toBeInTheDocument();
+    expect(screen.queryByText('Normal')).not.toBeInTheDocument();
+  });
+
+  it('keeps quantities picked on another slot out of the total and disables Pay', async () => {
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} />);
+
+    // Pick a "Normal" ticket on the first slot, then switch slots
+    await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+    await user.click(screen.getByText('6:00 PM - 9:00 PM'));
+
+    // Hidden slot's quantity is inert: total resets, Pay is blocked
+    expect(screen.getByRole('button', { name: /^pay/i })).toBeDisabled();
   });
 
   it('blocks anonymous purchase until contact details are valid, then includes them', async () => {

@@ -102,11 +102,28 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
     }
   }, [timeSlots, selectedSlotId]);
 
+  // Tickets are linked to a slot template — list only the selected slot's
+  // tickets. Tickets without a slot template (one-time experiences) always
+  // show. Total and payload are scoped the same way, so quantities picked on
+  // another slot stay inert.
+  const selectedTemplateId = useMemo(
+    () => occurrences.find((occurrence) => occurrence.id === selectedSlotId)?.slotTemplate.id,
+    [occurrences, selectedSlotId],
+  );
+
+  const visibleTickets = useMemo(
+    () =>
+      experience.tickets.filter(
+        (ticket) => !ticket.slotTemplate || ticket.slotTemplate === selectedTemplateId,
+      ),
+    [experience.tickets, selectedTemplateId],
+  );
+
   const updateQuantity = (ticketId: string, qty: number) => {
     setQuantities((prev) => ({ ...prev, [ticketId]: qty }));
   };
 
-  const total = experience.tickets.reduce((sum, ticket) => {
+  const total = visibleTickets.reduce((sum, ticket) => {
     const qty = quantities[ticket.id] ?? 0;
     const price = typeof ticket.price === 'string' ? parseFloat(ticket.price) : ticket.price;
     return sum + qty * price;
@@ -152,9 +169,9 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
     }
 
     const payload: TicketPurchasePayload = {
-      ticket_purchases: Object.entries(quantities)
-        .filter(([, qty]) => qty > 0)
-        .map(([ticketId, qty]) => ({ ticket_id: ticketId, quantity: qty })),
+      ticket_purchases: visibleTickets
+        .filter((ticket) => (quantities[ticket.id] ?? 0) > 0)
+        .map((ticket) => ({ ticket_id: ticket.id, quantity: quantities[ticket.id] })),
       occurrence: selectedSlotId!,
       ...(isLoggedIn
         ? {}
@@ -253,24 +270,28 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
             <div className="space-y-4">
               <p className="text-sm font-bold text-gray-900">Select your preferred ticket</p>
 
-              <div className="space-y-3">
-                {experience.tickets.map((ticket) => (
-                  <div key={ticket.id} className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-gray-900">
-                        {currency} {parseFloat(ticket.price as any).toLocaleString()}/person
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">{ticket.name}</p>
+              {visibleTickets.length === 0 ? (
+                <p className="text-xs text-gray-500">No tickets available for this time slot.</p>
+              ) : (
+                <div className="space-y-3">
+                  {visibleTickets.map((ticket) => (
+                    <div key={ticket.id} className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-bold text-gray-900">
+                          {currency} {parseFloat(ticket.price as any).toLocaleString()}/person
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">{ticket.name}</p>
+                      </div>
+                      <Quantity
+                        initialValue={quantities[ticket.id] ?? 0}
+                        min={0}
+                        max={ticket.quantity}
+                        onChange={(qty) => updateQuantity(ticket.id, qty)}
+                      />
                     </div>
-                    <Quantity
-                      initialValue={quantities[ticket.id] ?? 0}
-                      min={0}
-                      max={ticket.quantity}
-                      onChange={(qty) => updateQuantity(ticket.id, qty)}
-                    />
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
