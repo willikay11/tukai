@@ -44,6 +44,20 @@ export type Experience = {
   }[];
 };
 
+export type ExperienceOccurrence = {
+  id: string;
+  startDate: string;
+  endDate: string;
+  slotTemplate: {
+    id: string;
+    name?: string;
+    startTime: string;
+    durationMinutes: number;
+    recurrenceRule?: string;
+    dateCreated?: string;
+  };
+};
+
 export interface InvitedMember {
   id: string;
   name: string;

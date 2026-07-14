@@ -46,25 +46,6 @@ export const PageFilters = () => {
       setSelectedCategoryId(selectedCategoryId);
     }
 
-    if (pathname === '/experiences') {
-      setFilters([
-        { label: 'All Experiences', value: 'all', icon: 'WorkoutStretchingIcon' },
-        {
-          label: 'Reserved Experiences',
-          value: 'reserved',
-          icon: 'CalendarAdd01Icon',
-          shouldBeLoggedIn: true,
-        },
-        { label: 'Saved', value: 'saved', icon: 'Bookmark02Icon', shouldBeLoggedIn: true },
-        { label: 'Hosting', value: 'hosting', icon: 'WavingHand02Icon', shouldBeLoggedIn: true },
-      ]);
-      setIsLoading(false);
-      if (categoryFromQuery == null) {
-        setSelectedCategoryId('all');
-      } else {
-        setSelectedCategoryId(categoryFromQuery);
-      }
-    }
     if (pathname === '/communities') {
       setFilters([
         { label: 'Recommended', value: 'recommended', icon: 'UserSearch01Icon' },
@@ -80,9 +61,11 @@ export const PageFilters = () => {
     }
   }, [categories, pathname, categoryFromQuery, setSelectedCategoryId]);
 
-  // Hide filters on Discover and detail pages (with IDs)
+  // Hide filters on Discover, Experiences (which renders its own tabs), and
+  // detail pages (with IDs)
   if (
     pathname === '/' ||
+    pathname === '/experiences' ||
     pathname.startsWith('/places/') ||
     pathname.startsWith('/experiences/') ||
     pathname.startsWith('/communities/') ||

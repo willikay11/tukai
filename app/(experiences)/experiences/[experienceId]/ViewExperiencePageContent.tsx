@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
+import { inferUIExperienceType } from '@/utils/date-utils';
 
 import { BackToExplore } from '../components/BackToExplore';
 import { BucketListButton } from '../components/BucketListButton';
@@ -26,7 +27,17 @@ interface ViewExperiencePageContentProps {
 }
 
 export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageContentProps) => {
-  console.log('experience', experience);
+  // Recurring is checked first: inferUIExperienceType folds recurring into the
+  // 'one-time' base type, and a recurring experience's start/end span would
+  // otherwise read as multi-day
+  const badgeType = experience.recurrenceRule
+    ? 'recurring'
+    : inferUIExperienceType(
+        experience.experienceType || 'standard',
+        experience.startDate ?? null,
+        experience.endDate ?? null,
+      );
+
   const closingDuration = experience?.ticketSalesClosingDuration;
   const closingUnitRaw = experience?.ticketSalesClosingUnit ?? '';
   const closingUnit =
@@ -71,10 +82,7 @@ export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageCont
                 .map((p) => p.photo)}
               variant="hero"
             />
-            <ExperienceTypeBadge
-              type={experience.experienceType || 'standard'}
-              className="absolute top-4 left-4 z-10"
-            />
+            <ExperienceTypeBadge type={badgeType} className="absolute top-4 left-4 z-10" />
           </div>
 
           {/* Title */}

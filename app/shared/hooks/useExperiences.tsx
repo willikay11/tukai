@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ExperiencesQueryParams,
   SlotTemplatePayload,
+  TicketPurchasePayload,
   addExperiencePhotos,
   addGuestToExperience,
   bookmarkExperience,
@@ -15,11 +16,13 @@ import {
   deleteItineraryDay,
   deleteSlotTemplate,
   fetchExperience,
+  fetchExperienceOccurrences,
   fetchExperiences,
   fetchItineraryDays,
   fetchSlotTemplates,
   publishExperience,
   purchaseExperienceTicket,
+  purchaseExperienceTicketV2,
   searchUsers,
   updateExperience,
   updateExperienceTicket,
@@ -42,6 +45,7 @@ export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean)
       params.date,
       params.bookmarked,
       params.hosted_by,
+      params.search,
     ],
     queryFn: async () => await fetchExperiences(params),
     enabled: enabled,
@@ -65,6 +69,23 @@ export const usePurchaseExperienceTicket = () => {
     },
   });
 };
+
+export const usePurchaseExperienceTicketV2 = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: TicketPurchasePayload) => await purchaseExperienceTicketV2(data),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['experience'] });
+    },
+  });
+};
+
+export const useFetchExperienceOccurrences = (experienceId: string | null) =>
+  useQuery({
+    queryKey: ['experience-occurrences', experienceId],
+    queryFn: () => fetchExperienceOccurrences(experienceId!),
+    enabled: !!experienceId,
+  });
 
 export const useBookmarkExperience = () => {
   const queryClient = useQueryClient();

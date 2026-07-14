@@ -9,6 +9,9 @@ type LocationState = {
 };
 
 type LocationContextType = LocationState & {
+  // Reverse-geocoded city name, populated by UserLocation once resolved
+  city?: string;
+  setCity: (city: string) => void;
   requestLocation: () => void;
   setLocation: (lat: number, lng: number) => void;
 };
@@ -21,6 +24,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [lat, setLat] = useState<number | undefined>(undefined);
   const [lng, setLng] = useState<number | undefined>(undefined);
   const [status, setStatus] = useState<LocationState['status']>('idle');
+  const [city, setCity] = useState<string | undefined>(undefined);
 
   const save = (lat?: number, lng?: number, st?: LocationState['status']) => {
     if (lat !== undefined && lng !== undefined) {
@@ -84,7 +88,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <LocationContext.Provider value={{ lat, lng, status, requestLocation, setLocation }}>
+    <LocationContext.Provider value={{ lat, lng, status, city, setCity, requestLocation, setLocation }}>
       {children}
     </LocationContext.Provider>
   );

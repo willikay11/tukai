@@ -21,11 +21,11 @@ export const PaymentSuccess = ({
         <p className="text-xl font-bold text-gray-700">Payment Made Successfully</p>
         <div className="flex flex-col items-center gap-2 px-6">
           <p className="text-center text-sm text-gray-700">Your payment was made successfully.</p>
-          <p className="text-center text-sm text-gray-700">
+          {/* <p className="text-center text-sm text-gray-700">
             You can proceed to view the experience and invite guests
-          </p>
+          </p> */}
           <Button onClick={() => closeModal(true)} className="mt-2.5 h-[54px] w-full">
-            Invite Guests
+            Close
           </Button>
         </div>
       </AlertDialogContent>

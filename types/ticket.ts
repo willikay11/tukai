@@ -6,6 +6,8 @@ export type Ticket = {
   experience: string;
   availableQuantity?: number;
   available_quantity?: number;
+  slotTemplate?: string | null;
+  slot_template?: string | null;
   dateCreated?: string;
   date_created?: string;
   salesStartDate?: string | null;
