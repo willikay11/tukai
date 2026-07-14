@@ -170,7 +170,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
         <div className="col-span-12 space-y-10 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
             {/* Featured Experience */}
             {isLoadingDiscover ? (
-              <div className="aspect-[16/9] w-full animate-pulse rounded-2xl bg-gray-200 md:aspect-[21/9]" />
+              <div className="aspect-[16/9] w-full animate-pulse rounded-2xl bg-gray-200 md:aspect-[3/1]" />
             ) : (
               featuredExperience && <FeaturedExperienceBanner experience={featuredExperience} />
             )}

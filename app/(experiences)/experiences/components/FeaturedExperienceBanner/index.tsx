@@ -29,7 +29,7 @@ export const FeaturedExperienceBanner = ({ experience }: FeaturedExperienceBanne
       : undefined;
 
   return (
-    <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl md:aspect-[21/9]">
+    <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl md:aspect-[3/1]">
       {coverPhoto ? (
         <Image
           src={coverPhoto}
