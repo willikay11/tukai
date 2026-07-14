@@ -38,6 +38,29 @@ export const getOrdinalDate = (dateString: string): string => {
   }
 };
 
+// → "Thursday, 19th March"
+export const formatLongDateWithOrdinal = (date: Date): string => {
+  const weekday = date.toLocaleDateString('en-GB', { weekday: 'long' });
+  const day = date.getDate();
+  const month = date.toLocaleDateString('en-GB', { month: 'long' });
+
+  const ordinal = (d: number) => {
+    if (d > 3 && d < 21) return 'th';
+    switch (d % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  };
+
+  return `${weekday}, ${day}${ordinal(day)} ${month}`;
+};
+
 export const getDaysBetween = (startDate: string, endDate: string): string[] => {
   try {
     const days: string[] = [];

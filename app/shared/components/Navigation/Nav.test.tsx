@@ -28,7 +28,6 @@ describe('Nav', () => {
       expect(screen.getByRole('link', { name: /experiences/i })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /places/i })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /moments/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /communities/i })).toBeInTheDocument();
     });
 
     it('renders with correct href attributes', () => {
@@ -43,10 +42,6 @@ describe('Nav', () => {
       );
       expect(screen.getByRole('link', { name: /places/i })).toHaveAttribute('href', '/places');
       expect(screen.getByRole('link', { name: /moments/i })).toHaveAttribute('href', '/moments');
-      expect(screen.getByRole('link', { name: /communities/i })).toHaveAttribute(
-        'href',
-        '/communities',
-      );
     });
 
     it('renders navigation icons', () => {
@@ -55,7 +50,7 @@ describe('Nav', () => {
       render(<Nav />);
 
       const linkElements = screen.getAllByRole('link');
-      expect(linkElements).toHaveLength(5);
+      expect(linkElements).toHaveLength(4);
       linkElements.forEach((link) => {
         // Each link should have an SVG (icon)
         const svg = link.querySelector('svg');
@@ -110,15 +105,6 @@ describe('Nav', () => {
 
       const placesLink = screen.getByRole('link', { name: /places/i });
       expect(placesLink).toHaveClass('bg-white');
-    });
-
-    it('marks Communities link as active for /communities subpaths', () => {
-      mockUsePathname.mockReturnValue('/communities/abc-123');
-
-      render(<Nav />);
-
-      const communitiesLink = screen.getByRole('link', { name: /communities/i });
-      expect(communitiesLink).toHaveClass('bg-white');
     });
 
     it('does not mark Discover as active on subroutes', () => {
@@ -186,7 +172,7 @@ describe('Nav', () => {
       render(<Nav />);
 
       expect(screen.getByRole('navigation')).toBeInTheDocument();
-      expect(screen.getAllByRole('link').length).toBe(5);
+      expect(screen.getAllByRole('link').length).toBe(4);
     });
 
     it('uses readable link text (not just icons)', () => {
@@ -198,10 +184,9 @@ describe('Nav', () => {
       expect(screen.getByText('Experiences')).toBeInTheDocument();
       expect(screen.getByText('Places')).toBeInTheDocument();
       expect(screen.getByText('Moments')).toBeInTheDocument();
-      expect(screen.getByText('Communities')).toBeInTheDocument();
     });
 
-    it('maintains link order: Discover, Experiences, Places, Moments, Communities', () => {
+    it('maintains link order: Discover, Experiences, Places, Moments', () => {
       mockUsePathname.mockReturnValue('/');
 
       render(<Nav />);
@@ -211,7 +196,6 @@ describe('Nav', () => {
       expect(links[1]).toHaveTextContent('Experiences');
       expect(links[2]).toHaveTextContent('Places');
       expect(links[3]).toHaveTextContent('Moments');
-      expect(links[4]).toHaveTextContent('Communities');
     });
   });
 });

@@ -5,7 +5,7 @@ module.exports = new Proxy(
   {
     has: () => true,
     get: (_, name) => {
-      if (name === '__esModule') return false;
+      if (name === '__esModule') return true;
       return { name: String(name) };
     },
   },

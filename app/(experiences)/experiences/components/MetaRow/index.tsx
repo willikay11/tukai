@@ -6,6 +6,7 @@ interface MetaRowProps {
   durationMinutes?: number;
   rating?: number;
   reviewCount?: number;
+  className?: string;
 }
 
 const formatDuration = (minutes?: number): string => {
@@ -24,6 +25,7 @@ export const MetaRow = ({
   durationMinutes,
   rating,
   reviewCount,
+  className = 'text-gray-600',
 }: MetaRowProps) => {
   const parts: (string | null)[] = [
     location || null,
@@ -35,7 +37,7 @@ export const MetaRow = ({
   if (parts.length === 0) return null;
 
   return (
-    <div className="flex items-center flex-wrap gap-2 text-sm text-gray-600">
+    <div className={`flex items-center flex-wrap gap-2 text-sm ${className}`}>
       {parts.map((part, index) => (
         <div key={index} className="flex items-center gap-2">
           {index > 0 && <span className="text-gray-300">·</span>}

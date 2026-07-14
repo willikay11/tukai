@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useLocation } from '@/context/LocationContext';
 
 export const UserLocation = () => {
-  const { lat, lng, status, requestLocation } = useLocation();
+  const { lat, lng, status, requestLocation, setCity } = useLocation();
   const [address, setAddress] = useState<string>('Embakasi, Nairobi');
   const [isLoadingAddress, setIsLoadingAddress] = useState<boolean>(false);
 
@@ -39,6 +39,11 @@ export const UserLocation = () => {
               }
             }
 
+            if (city) {
+              // Share the resolved city with the rest of the app
+              setCity(city);
+            }
+
             if (locality && city) {
               setAddress(`${locality}, ${city}`);
             } else if (city) {
@@ -58,7 +63,7 @@ export const UserLocation = () => {
 
       fetchAddress();
     }
-  }, [lat, lng, status]);
+  }, [lat, lng, status, setCity]);
 
   return (
     <div className="mt-2 flex h-fit items-center gap-1 rounded-[30px] bg-green-200 px-2 py-1 text-green-800 lg:mt-4 lg:px-3">
