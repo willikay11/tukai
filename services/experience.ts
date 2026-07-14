@@ -507,6 +507,56 @@ export const fetchSlotTemplates = async (experienceId: string): Promise<ApiRespo
   };
 };
 
+export const fetchExperienceOccurrences = async (experienceId: string): Promise<ApiResponse> => {
+  const axiosInstance = await apiWithToken();
+  const response = await axiosInstance.get(`/v1/experiences/${experienceId}/occurrences/`);
+
+  return {
+    status: response.status,
+    success: true,
+    data: parseSnakeToCamel(response.data),
+  };
+};
+
+export interface TicketPurchasePayload {
+  ticket_purchases: Array<{
+    ticket_id: string;
+    quantity: number;
+  }>;
+  occurrence: string;
+  first_name?: string;
+  last_name?: string;
+  confirmation_email?: string;
+  whatsapp_phone?: string;
+}
+
+export const purchaseExperienceTicketV2 = async (
+  data: TicketPurchasePayload,
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.post(`/v2/experiences/ticket-purchases/`, data);
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message:
+        error.response?.data?.errors?.[0]?.detail ||
+        error.response?.data?.message ||
+        'An error occurred while processing your ticket purchase.',
+      data: error.response?.data,
+    };
+  }
+};
+
 export const updateSlotTemplate = async (
   experienceId: string,
   templateId: string,

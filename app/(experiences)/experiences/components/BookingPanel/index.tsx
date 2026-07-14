@@ -1,37 +1,50 @@
 'use client';
 
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
+import { useSession } from 'next-auth/react';
+
+import { Mail02TwotoneRounded, UserTwotoneRounded } from '@hugeicons-pro/core-twotone-rounded';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { z } from 'zod';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { useFetchSlotTemplates } from '@/app/shared/hooks/useExperiences';
+import {
+  useFetchExperienceOccurrences,
+  usePurchaseExperienceTicketV2,
+} from '@/app/shared/hooks/useExperiences';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { PaymentSuccess } from '@/components/ui/paymentSuccess';
+import { Paystack } from '@/components/ui/paystack';
+import { PhoneNumber } from '@/components/ui/phoneNumber';
 import { Quantity } from '@/components/ui/quantity';
-import { Experience } from '@/types/experience';
-import { calculateEndTime } from '@/utils/slot-template-utils';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { TicketPurchasePayload } from '@/services/experience';
+import { Experience, ExperienceOccurrence } from '@/types/experience';
+import { parseApiError } from '@/utils/parseApiError';
 
 import { RecurringDateSlotPicker } from './RecurringDateSlotPicker';
-import { PhoneNumber } from '@/components/ui/phoneNumber';
 
 interface BookingPanelProps {
   experience: Experience;
-  onPay?: (data: {
-    quantities: Record<string, number>;
-    paymentMethod: 'mpesa' | 'card';
-    phone?: string;
-    delivery: { method: 'email' | 'whatsapp'; contact: string };
-    date?: string;
-    slotTemplateId?: string;
-  }) => void;
 }
 
 const formatSlotLabel = (startTime: string, durationMinutes: number): string => {
-  const endTime = calculateEndTime(startTime, durationMinutes);
-  return `${moment(startTime, 'HH:mm:ss').format('h:mm A')} - ${moment(endTime, 'HH:mm').format('h:mm A')}`;
+  const [hour, min] = startTime.split(':').map(Number);
+  const start = moment({ hour, minute: min });
+  const end = start.clone().add(durationMinutes, 'minutes');
+  return `${start.format('h:mm A')} - ${end.format('h:mm A')}`;
 };
 
-export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
+// Same rule PaymentForm's paymentFormSchema applies to mobile-money numbers
+const PHONE_REGEX = /^\+\d{6,15}$/;
+
+export const BookingPanel = ({ experience }: BookingPanelProps) => {
+  const { data: session } = useSession();
+  const isLoggedIn = Boolean(session?.user);
+
   const [tab, setTab] = useState<'reservation' | 'moments'>('reservation');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'card'>('mpesa');
@@ -40,26 +53,54 @@ export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
   const [deliveryContact, setDeliveryContact] = useState('');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isPaystackOpen, setIsPaystackOpen] = useState(false);
+  const [isPaymentSuccessOpen, setIsPaymentSuccessOpen] = useState(false);
 
   const isRecurring = Boolean(experience.recurrenceRule);
 
-  const { data: slotTemplatesResponse } = useFetchSlotTemplates(
-    isRecurring ? experience.id : null,
+  const { data: occurrencesResponse } = useFetchExperienceOccurrences(experience.id);
+  const occurrences: ExperienceOccurrence[] = useMemo(
+    () => occurrencesResponse?.data ?? [],
+    [occurrencesResponse],
   );
-  const timeSlots: { id: string; label: string }[] = (
-    slotTemplatesResponse?.data?.results ?? []
-  ).map((template: { id: string; startTime: string; durationMinutes: number }) => ({
-    id: template.id,
-    label: formatSlotLabel(template.startTime, template.durationMinutes),
-  }));
 
-  // Default to the first time slot once slot templates load
-  const firstSlotId = timeSlots[0]?.id ?? null;
+  const {
+    mutate: purchaseTicket,
+    isPending: isPaying,
+    data: purchaseData,
+  } = usePurchaseExperienceTicketV2();
+
+  // Slot options are occurrences: id is the OCCURRENCE uuid the v2 API requires.
+  // Recurring experiences narrow to the picker's selected date; non-recurring
+  // experiences have a single occurrence.
+  const timeSlots: { id: string; label: string }[] = useMemo(() => {
+    const source = isRecurring
+      ? occurrences.filter(
+          (occurrence) => moment(occurrence.startDate).format('YYYY-MM-DD') === selectedDate,
+        )
+      : occurrences;
+
+    return source.map((occurrence) => ({
+      id: occurrence.id,
+      label: formatSlotLabel(
+        occurrence.slotTemplate.startTime,
+        occurrence.slotTemplate.durationMinutes,
+      ),
+    }));
+  }, [occurrences, isRecurring, selectedDate]);
+
+  // Keep an occurrence selected: default to the first slot, and re-default
+  // when the selected date changes and the previous occurrence no longer applies
   useEffect(() => {
-    if (!selectedSlotId && firstSlotId) {
-      setSelectedSlotId(firstSlotId);
+    const stillValid = selectedSlotId && timeSlots.some((slot) => slot.id === selectedSlotId);
+    if (!stillValid) {
+      setSelectedSlotId(timeSlots[0]?.id ?? null);
     }
-  }, [selectedSlotId, firstSlotId]);
+  }, [timeSlots, selectedSlotId]);
 
   const updateQuantity = (ticketId: string, qty: number) => {
     setQuantities((prev) => ({ ...prev, [ticketId]: qty }));
@@ -71,17 +112,88 @@ export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
     return sum + qty * price;
   }, 0);
 
-  const handlePay = () => {
-    if (onPay) {
-      onPay({
-        quantities,
-        paymentMethod,
-        phone: paymentMethod === 'mpesa' ? phone : undefined,
-        delivery: { method: deliveryMethod, contact: deliveryContact },
-        date: isRecurring ? (selectedDate ?? undefined) : undefined,
-        slotTemplateId: isRecurring ? (selectedSlotId ?? undefined) : undefined,
-      });
+  // Mirrors the reserve page's paymentFormSchema rules and messages
+  const validatePurchase = (): Record<string, string> => {
+    const validationErrors: Record<string, string> = {};
+
+    if (!isLoggedIn) {
+      if (firstName.trim().length < 2) {
+        validationErrors.firstName = 'Please enter your first name.';
+      }
+      if (lastName.trim().length < 2) {
+        validationErrors.lastName = 'Please enter your last name.';
+      }
+      if (!z.string().email().safeParse(email.trim()).success) {
+        validationErrors.email = 'Please enter a valid email address.';
+      }
     }
+
+    if (experience.isPaid && paymentMethod === 'mpesa' && !PHONE_REGEX.test(phone)) {
+      validationErrors.phone = 'Please enter a valid phone number.';
+    }
+
+    if (deliveryMethod === 'whatsapp' && !PHONE_REGEX.test(deliveryContact)) {
+      validationErrors.deliveryContact = 'Please enter a valid phone number.';
+    }
+
+    return validationErrors;
+  };
+
+  const resetPanel = () => {
+    setQuantities({});
+    setErrors({});
+  };
+
+  const handlePay = () => {
+    const validationErrors = validatePurchase();
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      return;
+    }
+
+    const payload: TicketPurchasePayload = {
+      ticket_purchases: Object.entries(quantities)
+        .filter(([, qty]) => qty > 0)
+        .map(([ticketId, qty]) => ({ ticket_id: ticketId, quantity: qty })),
+      occurrence: selectedSlotId!,
+      ...(isLoggedIn
+        ? {}
+        : {
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+            confirmation_email: email.trim(),
+          }),
+      ...(deliveryMethod === 'whatsapp' && PHONE_REGEX.test(deliveryContact)
+        ? { whatsapp_phone: deliveryContact }
+        : {}),
+    };
+
+    purchaseTicket(payload, {
+      onSuccess: (response) => {
+        const authorizationUrl = response.data?.paymentDetails?.authorizationUrl;
+        if (authorizationUrl) {
+          setIsPaystackOpen(true);
+        } else {
+          setIsPaymentSuccessOpen(true);
+          resetPanel();
+        }
+      },
+      onError: (error: any) => {
+        const status = error?.status ?? error?.response?.status;
+        // Prefer the API's own detail — a 400 can also mean the occurrence
+        // belongs to a different experience, not just sold-out tickets
+        const apiDetail = error?.data?.errors?.[0]?.detail;
+        if (status === 400) {
+          setErrors({ api: apiDetail || 'Not enough tickets available.' });
+        } else if (status === 404) {
+          setErrors({ api: 'Ticket not found.' });
+        } else if (status === 503) {
+          setErrors({ api: 'Payment service unavailable. Please try again.' });
+        } else {
+          setErrors({ api: parseApiError(error, 'Failed to complete your purchase.') });
+        }
+      },
+    });
   };
 
   const dateRange = `${moment(experience.startDate).format('ddd D MMM')} · ${moment(experience.startDate).format('h:mm A')} — ${moment(experience.endDate).format('h:mm A')}`;
@@ -133,9 +245,6 @@ export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
                   </p>
                 </div>
               </div>
-              <button type="button" className="text-sm font-medium text-primary hover:underline flex-shrink-0">
-                Change
-              </button>
             </div>
           )}
 
@@ -175,6 +284,55 @@ export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
               {currency} {total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </div>
+
+          {/* Contact details (anonymous purchasers only) */}
+          {!isLoggedIn && (
+            <div className="space-y-3">
+              <p className="text-xs font-bold text-gray-900">Contact Details</p>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Input
+                    placeholder="First Name"
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    icon={
+                      <HugeiconsIcon icon={UserTwotoneRounded} size={20} className="text-gray-600" />
+                    }
+                  />
+                  {errors.firstName && (
+                    <p className="mt-1 text-xs text-red-500">{errors.firstName}</p>
+                  )}
+                </div>
+                <div>
+                  <Input
+                    placeholder="Last Name"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    icon={
+                      <HugeiconsIcon icon={UserTwotoneRounded} size={20} className="text-gray-600" />
+                    }
+                  />
+                  {errors.lastName && <p className="mt-1 text-xs text-red-500">{errors.lastName}</p>}
+                </div>
+              </div>
+
+              <div>
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  icon={
+                    <HugeiconsIcon icon={Mail02TwotoneRounded} size={20} className="text-gray-600" />
+                  }
+                />
+                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+              </div>
+            </div>
+          )}
 
           {/* Ticket delivery */}
           <div className="space-y-3">
@@ -222,27 +380,15 @@ export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
             </div>
 
             {deliveryMethod === 'whatsapp' ? (
-              <PhoneNumber
-                // value={deliveryContact}
-                onChange={(value) => setDeliveryContact(value)}
-                placeholder="Enter Whatsapp number"
-              />
-              // <div className="flex items-center bg-white rounded-2xl px-4 py-3 gap-3">
-              //   <IconComponent
-              //     iconName="Call02Icon"
-              //     size={16}
-              //     className="text-gray-700 flex-shrink-0"
-              //   />
-              //   <span className="text-sm font-medium text-gray-700 flex-shrink-0">+254</span>
-              //   <div className="w-px h-5 bg-gray-200 flex-shrink-0" />
-              //   <input
-              //     type="tel"
-              //     value={deliveryContact}
-              //     onChange={(e) => setDeliveryContact(e.target.value)}
-              //     placeholder="Enter Whatsapp number"
-              //     className="flex-1 min-w-0 outline-none bg-transparent text-sm placeholder:text-gray-400"
-              //   />
-              // </div>
+              <div>
+                <PhoneNumber
+                  onChange={(value) => setDeliveryContact(value)}
+                  placeholder="Enter Whatsapp number"
+                />
+                {errors.deliveryContact && (
+                  <p className="mt-1 text-xs text-red-500">{errors.deliveryContact}</p>
+                )}
+              </div>
             ) : (
               <div className="flex items-center bg-white rounded-2xl px-4 py-3 gap-3">
                 <IconComponent
@@ -310,23 +456,24 @@ export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
 
           {/* Phone input (only for M-Pesa) */}
           {paymentMethod === 'mpesa' && (
-            <div className="flex items-center bg-white rounded-2xl px-4 py-3 gap-3">
-              <span className="text-sm font-medium text-gray-700 flex-shrink-0">+254</span>
-              <div className="w-px h-5 bg-gray-200 flex-shrink-0" />
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="Enter M-Pesa number"
-                className="flex-1 outline-none bg-transparent text-sm placeholder:text-gray-400"
-              />
+            <div>
+              <PhoneNumber onChange={(value) => setPhone(value)} placeholder="Enter M-Pesa number" />
+              {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
             </div>
           )}
 
+          {/* API error */}
+          {errors.api && <p className="text-xs text-red-500 text-center">{errors.api}</p>}
+
           {/* Pay button */}
-          <Button variant="gradient" onClick={handlePay} disabled={total === 0} className="w-full h-12 rounded-full py-3">
+          <Button
+            variant="gradient"
+            onClick={handlePay}
+            disabled={total === 0 || !selectedSlotId || isPaying}
+            className="w-full h-12 rounded-full py-3"
+          >
             <span className="flex items-center text-sm gap-3 justify-center">
-              <span>Pay</span>
+              <span>{isPaying ? 'Processing…' : 'Pay'}</span>
               <span className="text-white/60">|</span>
               <span>
                 {currency} {total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -339,6 +486,26 @@ export const BookingPanel = ({ experience, onPay }: BookingPanelProps) => {
           <p className="text-sm text-gray-500">Moments coming soon</p>
         </TabsContent>
       </Tabs>
+
+      {/* Same post-purchase flow as the reserve page */}
+      <Paystack
+        isOpen={isPaystackOpen}
+        closeModal={(paymentSuccess) => {
+          setIsPaystackOpen(false);
+          if (paymentSuccess) {
+            setIsPaymentSuccessOpen(true);
+            resetPanel();
+          }
+        }}
+        url={purchaseData?.data?.paymentDetails?.authorizationUrl || ''}
+      />
+
+      <PaymentSuccess
+        isOpen={isPaymentSuccessOpen}
+        closeModal={() => {
+          setIsPaymentSuccessOpen(false);
+        }}
+      />
     </div>
   );
 };
