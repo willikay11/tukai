@@ -26,7 +26,7 @@ export const Nav = () => {
   };
 
   return (
-    <nav className="hidden flex-shrink-0 items-center gap-1 rounded-full bg-gray-100 p-1 lg:flex">
+    <nav className="hidden flex-shrink-0 items-center gap-1 rounded-full bg-gray-50 p-1 lg:flex">
       {NAV_ITEMS.map((item) => {
         const active = isActive(item.href);
 
