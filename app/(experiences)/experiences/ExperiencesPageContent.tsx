@@ -400,18 +400,23 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                       null;
 
                     return (
-                      <ReservationCard
+                      <Link
                         key={reservation.key}
-                        title={experience?.title ?? reservation.ticketName}
-                        coverPhoto={coverPhoto}
-                        occurrenceStart={reservation.occurrenceStart}
-                        occurrenceEnd={reservation.occurrenceEnd}
-                        communityName={experience?.hostCommunity?.title ?? null}
-                        ticketCount={reservation.ticketCount}
-                        status={reservation.status}
-                        hasTicketPdf={Boolean(reservation.pdfPurchaseId)}
-                        onViewTicket={() => handleViewTicket(reservation.pdfPurchaseId!)}
-                      />
+                        target="_blank"
+                        href={`/experiences/${reservation.experienceId}`}
+                      >
+                        <ReservationCard
+                          title={experience?.title ?? reservation.ticketName}
+                          coverPhoto={coverPhoto}
+                          occurrenceStart={reservation.occurrenceStart}
+                          occurrenceEnd={reservation.occurrenceEnd}
+                          communityName={experience?.hostCommunity?.title ?? null}
+                          ticketCount={reservation.ticketCount}
+                          status={reservation.status}
+                          hasTicketPdf={Boolean(reservation.pdfPurchaseId)}
+                          onViewTicket={() => handleViewTicket(reservation.pdfPurchaseId!)}
+                        />
+                      </Link>
                     );
                   })}
                 </div>

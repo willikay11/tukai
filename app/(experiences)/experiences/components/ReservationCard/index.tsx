@@ -36,7 +36,7 @@ export const ReservationCard = ({
   const metaLine = [dateTime, communityName].filter(Boolean).join(' · ');
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
       {/* Cover with status badge */}
       <div className="relative h-[240px]">
         {coverPhoto ? (
@@ -72,7 +72,13 @@ export const ReservationCard = ({
           {hasTicketPdf && (
             <button
               type="button"
-              onClick={onViewTicket}
+              onClick={(e) => {
+                // The card is wrapped in a link to the experience — keep the
+                // ticket action from also triggering that navigation
+                e.preventDefault();
+                e.stopPropagation();
+                onViewTicket();
+              }}
               className="text-sm font-semibold text-primary hover:underline"
             >
               View ticket

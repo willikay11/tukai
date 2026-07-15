@@ -56,4 +56,20 @@ describe('ReservationCard', () => {
     rerender(<ReservationCard {...defaultProps} hasTicketPdf={false} />);
     expect(screen.queryByRole('button', { name: 'View ticket' })).not.toBeInTheDocument();
   });
+
+  it('does not propagate the View ticket click to a wrapping card link', async () => {
+    const user = userEvent.setup();
+    const onCardNavigate = jest.fn();
+
+    render(
+      <a href="/experiences/exp-1" onClick={onCardNavigate}>
+        <ReservationCard {...defaultProps} />
+      </a>,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'View ticket' }));
+
+    expect(defaultProps.onViewTicket).toHaveBeenCalled();
+    expect(onCardNavigate).not.toHaveBeenCalled();
+  });
 });
