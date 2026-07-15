@@ -105,18 +105,29 @@ export const buildAbsoluteTicketValidity = (
  * experience + occurrence + status (mixed statuses for the same occurrence
  * render as separate cards, each with an accurate badge).
  */
+const purchaseHolderName = (purchase: TicketPurchase): string => {
+  const fullName = [purchase.user?.firstName, purchase.user?.lastName].filter(Boolean).join(' ');
+  return fullName || purchase.user?.displayName || '';
+};
+
 export const groupTicketPurchases = (purchases: TicketPurchase[]): Reservation[] => {
   const groups = new Map<string, Reservation>();
 
   purchases.forEach((purchase) => {
     const key = `${purchase.ticket.experience}|${purchase.occurrence?.id ?? 'none'}|${purchase.status}`;
-    const existing = groups.get(key);
+    const ticket = {
+      id: purchase.id,
+      ticketNumber: purchase.ticketNumber,
+      qrCodeImage: purchase.qrCodeImage,
+      hasPdf: Boolean(purchase.ticketPdf),
+      holderName: purchaseHolderName(purchase),
+      ticketType: purchase.ticket.name,
+    };
 
+    const existing = groups.get(key);
     if (existing) {
       existing.ticketCount += 1;
-      if (!existing.pdfPurchaseId && purchase.ticketPdf) {
-        existing.pdfPurchaseId = purchase.id;
-      }
+      existing.tickets.push(ticket);
     } else {
       groups.set(key, {
         key,
@@ -127,7 +138,7 @@ export const groupTicketPurchases = (purchases: TicketPurchase[]): Reservation[]
         status: purchase.status,
         ticketName: purchase.ticket.name,
         ticketCount: 1,
-        pdfPurchaseId: purchase.ticketPdf ? purchase.id : null,
+        tickets: [ticket],
       });
     }
   });

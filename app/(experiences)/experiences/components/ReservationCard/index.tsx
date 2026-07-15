@@ -1,9 +1,15 @@
+'use client';
+
+import { useState } from 'react';
+
 import Image from 'next/image';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { ReservationTicket } from '@/types/ticket-purchase';
 import { formatReservationDateTime } from '@/utils/date-utils';
 
 import { PaymentStatusBadge } from '../PaymentStatusBadge';
+import { TicketModal } from '../TicketModal';
 
 interface ReservationCardProps {
   title: string;
@@ -13,8 +19,10 @@ interface ReservationCardProps {
   communityName: string | null;
   ticketCount: number;
   status: string;
-  hasTicketPdf: boolean;
-  onViewTicket: () => void;
+  tickets: ReservationTicket[];
+  shareLink: string;
+  onDownloadAll: () => void;
+  isDownloading?: boolean;
 }
 
 export const ReservationCard = ({
@@ -25,9 +33,13 @@ export const ReservationCard = ({
   communityName,
   ticketCount,
   status,
-  hasTicketPdf,
-  onViewTicket,
+  tickets,
+  shareLink,
+  onDownloadAll,
+  isDownloading = false,
 }: ReservationCardProps) => {
+  const [isTicketOpen, setIsTicketOpen] = useState(false);
+
   const dateTime =
     occurrenceStart && occurrenceEnd
       ? formatReservationDateTime(occurrenceStart, occurrenceEnd)
@@ -69,7 +81,7 @@ export const ReservationCard = ({
             </span>
           </div>
 
-          {hasTicketPdf && (
+          {tickets.length > 0 && (
             <button
               type="button"
               onClick={(e) => {
@@ -77,7 +89,7 @@ export const ReservationCard = ({
                 // ticket action from also triggering that navigation
                 e.preventDefault();
                 e.stopPropagation();
-                onViewTicket();
+                setIsTicketOpen(true);
               }}
               className="text-sm font-semibold text-primary hover:underline"
             >
@@ -86,6 +98,22 @@ export const ReservationCard = ({
           )}
         </div>
       </div>
+
+      {/* Renders in a portal, so clicks inside never reach the wrapping link */}
+      <TicketModal
+        isOpen={isTicketOpen}
+        onClose={() => setIsTicketOpen(false)}
+        experienceTitle={title}
+        hostCommunity={communityName}
+        coverPhoto={coverPhoto}
+        occurrenceStart={occurrenceStart}
+        occurrenceEnd={occurrenceEnd}
+        paymentStatus={status}
+        tickets={tickets}
+        shareLink={shareLink}
+        onDownloadAll={onDownloadAll}
+        isDownloading={isDownloading}
+      />
     </div>
   );
 };

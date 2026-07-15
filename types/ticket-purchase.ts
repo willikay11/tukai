@@ -4,6 +4,13 @@
 
 export interface TicketPurchase {
   id: string;
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    displayName: string;
+    picture?: string | null;
+  } | null;
   ticketNumber: string;
   ticket: {
     id: string;
@@ -23,6 +30,17 @@ export interface TicketPurchase {
   dateCreated: string;
 }
 
+// One entry per individual ticket inside a reservation — drives the
+// ticket modal's paginated QR view
+export interface ReservationTicket {
+  id: string; // purchase record id — used for the per-ticket PDF download
+  ticketNumber: string;
+  qrCodeImage: string | null;
+  hasPdf: boolean;
+  holderName: string;
+  ticketType: string;
+}
+
 export interface Reservation {
   key: string;
   experienceId: string;
@@ -32,6 +50,5 @@ export interface Reservation {
   status: string;
   ticketName: string;
   ticketCount: number;
-  // First purchase in the group that has a downloadable ticket PDF
-  pdfPurchaseId: string | null;
+  tickets: ReservationTicket[];
 }

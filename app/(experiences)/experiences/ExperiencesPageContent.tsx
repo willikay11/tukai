@@ -142,16 +142,29 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const reservedExperiences: Experience[] = reservedExperiencesResponse?.data?.results ?? [];
   const isLoadingReservations = isLoadingPurchases || isLoadingReservedExperiences;
 
-  const handleViewTicket = async (pdfPurchaseId: string) => {
+  const [downloadingKey, setDownloadingKey] = useState<string | null>(null);
+
+  // Per-ticket PDFs only — no bulk endpoint, so download each in sequence
+  const handleDownloadAll = async (reservation: Reservation) => {
+    setDownloadingKey(reservation.key);
     try {
-      const blob = await downloadTicketPdf(pdfPurchaseId);
-      window.open(URL.createObjectURL(blob), '_blank');
+      for (const ticket of reservation.tickets.filter((item) => item.hasPdf)) {
+        const blob = await downloadTicketPdf(ticket.id);
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `${ticket.ticketNumber}.pdf`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+      }
     } catch {
       toast({
         title: 'Error',
-        description: 'Could not open the ticket. Please try again.',
+        description: 'Could not download your tickets. Please try again.',
         variant: 'destructive',
       });
+    } finally {
+      setDownloadingKey(null);
     }
   };
   const userCity = city ?? 'Nairobi';
@@ -413,8 +426,10 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                           communityName={experience?.hostCommunity?.title ?? null}
                           ticketCount={reservation.ticketCount}
                           status={reservation.status}
-                          hasTicketPdf={Boolean(reservation.pdfPurchaseId)}
-                          onViewTicket={() => handleViewTicket(reservation.pdfPurchaseId!)}
+                          tickets={reservation.tickets}
+                          shareLink={`${process.env.NEXT_PUBLIC_APP_URL}/experiences/${reservation.experienceId}`}
+                          onDownloadAll={() => handleDownloadAll(reservation)}
+                          isDownloading={downloadingKey === reservation.key}
                         />
                       </Link>
                     );

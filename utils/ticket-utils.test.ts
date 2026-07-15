@@ -193,7 +193,7 @@ describe('parseSalesEndRelativeFromTicket', () => {
       ticket_sales_closing_unit: 'hours',
       ticket_sales_closing_condition: 'before_start',
     };
-    const camel = parseSnakeToCamel(apiTicket) as {
+    const camel = parseSnakeToCamel(apiTicket) as unknown as {
       ticketSalesClosingDuration: number;
       ticketSalesClosingUnit: string;
       ticketSalesClosingCondition: string;
@@ -260,7 +260,7 @@ describe('groupTicketPurchases', () => {
     purchase('p6', 'completed', 'f9202bdc', '2026-08-29T14:00:00Z', 'https://x/pdf6'),
   ];
 
-  it('groups by experience + occurrence + status with ticket counts', () => {
+  it('groups by experience + occurrence + status with per-ticket data', () => {
     const reservations = groupTicketPurchases(purchases);
 
     expect(reservations).toHaveLength(3);
@@ -270,13 +270,19 @@ describe('groupTicketPurchases', () => {
         r.occurrenceId === 'bed13941' && r.status === 'completed',
     );
     expect(completedAug27?.ticketCount).toBe(4);
-    expect(completedAug27?.pdfPurchaseId).toBe('p1');
+    expect(completedAug27?.tickets).toHaveLength(4);
+    expect(completedAug27?.tickets[0]).toMatchObject({
+      id: 'p1',
+      ticketNumber: 'TKT-p1',
+      hasPdf: true,
+      ticketType: 'Normal',
+    });
 
     const expiredAug27 = reservations.find(
       (r: { status: string }) => r.status === 'expired',
     );
     expect(expiredAug27?.ticketCount).toBe(1);
-    expect(expiredAug27?.pdfPurchaseId).toBeNull();
+    expect(expiredAug27?.tickets[0].hasPdf).toBe(false);
   });
 
   it('sorts reservations by occurrence start date', () => {
