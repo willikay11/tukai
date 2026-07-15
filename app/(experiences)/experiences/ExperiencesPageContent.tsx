@@ -9,15 +9,23 @@ import { useRouter } from 'next/navigation';
 import moment from 'moment';
 
 import { Experiences } from '@/app/(experiences)/experiences/components/List/experiences';
+import { BucketListCard } from '@/app/(experiences)/experiences/components/BucketListCard';
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
+import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
 import { FeaturedExperienceBanner } from '@/app/(experiences)/experiences/components/FeaturedExperienceBanner';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
+import { SharedBucketListCard } from '@/app/(experiences)/experiences/components/SharedBucketListCard';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
+import { useMyBucketLists, useSharedBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
+import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
+import { NoData } from '@/components/ui/noData';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocation } from '@/context/LocationContext';
+import { BucketList } from '@/types/bucket-list';
 import { Experience } from '@/types/experience';
 import { PlaceCategory } from '@/types/placeCategory';
 import { formatLongDateWithOrdinal } from '@/utils/date-utils';
@@ -97,8 +105,16 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const [activeTab, setActiveTab] = useState(
     TABS.some((tab) => tab.value === initialCategory) ? initialCategory : 'all',
   );
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const isAll = activeTab === 'all';
+  const isSaved = activeTab === 'saved';
+
+  // ⚠️ Bucket lists are served by a MOCK service — no backend endpoints exist yet
+  const { data: myBucketListsResponse, isLoading: isLoadingMine } = useMyBucketLists(isSaved);
+  const { data: sharedBucketListsResponse } = useSharedBucketLists(isSaved);
+  const myBucketLists: BucketList[] = myBucketListsResponse?.data?.results ?? [];
+  const sharedBucketLists: BucketList[] = sharedBucketListsResponse?.data?.results ?? [];
   const userCity = city ?? 'Nairobi';
   const today = moment().format('YYYY-MM-DD');
   const tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
@@ -237,19 +253,70 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
           )}
         </div>
       ) : (
-        /* Reserved / Saved / Hosting — existing grid lists with empty states.
-           The Experiences wrapper positions itself inside this 12-col grid. */
+        /* Reserved / Saved / Hosting — the Experiences wrapper positions
+           itself inside this 12-col grid; the Saved tab has its own layout. */
         <>
           {activeTab === 'saved' && (
-            <Experiences
-              key={activeTab}
-              category={activeTab}
-              isPortal={false}
-              isBookedmarked={true}
-              isReserved={false}
-              isHosted={false}
-              noDataMessage="You have no bookmarked experiences"
-            />
+            <div className="col-span-12 space-y-10 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+              {/* Your Bucket Lists */}
+              <section>
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-gray-900">Your Bucket Lists</h2>
+                  <Button
+                    onClick={() => setIsCreateOpen(true)}
+                    className="flex items-center gap-2 rounded-full px-6"
+                  >
+                    <IconComponent iconName="PlusSignIcon" size={16} color="white" />
+                    Create Bucket List
+                  </Button>
+                </div>
+
+                {isLoadingMine ? (
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="h-[300px] animate-pulse rounded-2xl bg-gray-200"
+                      />
+                    ))}
+                  </div>
+                ) : myBucketLists.length === 0 ? (
+                  <div className="flex flex-col items-center gap-4 py-8">
+                    <NoData message="You haven't created any bucket lists yet" />
+                    <Button
+                      onClick={() => setIsCreateOpen(true)}
+                      className="rounded-full px-6"
+                    >
+                      Create your first bucket list
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {myBucketLists.map((bucketList) => (
+                      <BucketListCard
+                        key={bucketList.id}
+                        bucketList={bucketList}
+                        onClick={() => router.push(`/bucket-lists/${bucketList.id}`)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              {/* Shared with you — hidden entirely when empty */}
+              {sharedBucketLists.length > 0 && (
+                <section>
+                  <h2 className="mb-4 text-2xl font-bold text-gray-900">Shared with you</h2>
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {sharedBucketLists.map((bucketList) => (
+                      <SharedBucketListCard key={bucketList.id} bucketList={bucketList} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              <CreateBucketListModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+            </div>
           )}
           {activeTab === 'hosting' && (
             <Experiences
