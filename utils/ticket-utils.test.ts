@@ -193,7 +193,7 @@ describe('parseSalesEndRelativeFromTicket', () => {
       ticket_sales_closing_unit: 'hours',
       ticket_sales_closing_condition: 'before_start',
     };
-    const camel = parseSnakeToCamel(apiTicket) as {
+    const camel = parseSnakeToCamel(apiTicket) as unknown as {
       ticketSalesClosingDuration: number;
       ticketSalesClosingUnit: string;
       ticketSalesClosingCondition: string;
@@ -220,5 +220,74 @@ describe('parseSalesEndRelativeFromTicket', () => {
         camel.ticketSalesClosingCondition,
       ),
     ).toEqual({ amount: 1, unit: 'hour', anchor: 'start' });
+  });
+});
+
+describe('groupTicketPurchases', () => {
+  const { groupTicketPurchases } = jest.requireActual('./ticket-utils');
+
+  const purchase = (
+    id: string,
+    status: string,
+    occurrenceId: string,
+    startDate: string,
+    ticketPdf: string | null,
+  ) => ({
+    id,
+    ticketNumber: `TKT-${id}`,
+    ticket: {
+      id: '0464df54',
+      name: 'Normal',
+      price: '1500.00',
+      currency: 'KES',
+      experience: 'a97edd4f',
+    },
+    occurrence: { id: occurrenceId, startDate, endDate: startDate.replace('14:00', '17:00') },
+    qrCodeImage: null,
+    ticketPdf,
+    status,
+    dateCreated: '2026-07-14T20:04:50Z',
+  });
+
+  // Mirrors the real staging response: 4 completed + 1 expired on the Aug 27
+  // occurrence, 1 completed on Aug 29
+  const purchases = [
+    purchase('p1', 'completed', 'bed13941', '2026-08-27T14:00:00Z', 'https://x/pdf1'),
+    purchase('p2', 'completed', 'bed13941', '2026-08-27T14:00:00Z', 'https://x/pdf2'),
+    purchase('p3', 'completed', 'bed13941', '2026-08-27T14:00:00Z', 'https://x/pdf3'),
+    purchase('p4', 'expired', 'bed13941', '2026-08-27T14:00:00Z', null),
+    purchase('p5', 'completed', 'bed13941', '2026-08-27T14:00:00Z', 'https://x/pdf5'),
+    purchase('p6', 'completed', 'f9202bdc', '2026-08-29T14:00:00Z', 'https://x/pdf6'),
+  ];
+
+  it('groups by experience + occurrence + status with per-ticket data', () => {
+    const reservations = groupTicketPurchases(purchases);
+
+    expect(reservations).toHaveLength(3);
+
+    const completedAug27 = reservations.find(
+      (r: { occurrenceId: string; status: string }) =>
+        r.occurrenceId === 'bed13941' && r.status === 'completed',
+    );
+    expect(completedAug27?.ticketCount).toBe(4);
+    expect(completedAug27?.tickets).toHaveLength(4);
+    expect(completedAug27?.tickets[0]).toMatchObject({
+      id: 'p1',
+      ticketNumber: 'TKT-p1',
+      hasPdf: true,
+      ticketType: 'Normal',
+    });
+
+    const expiredAug27 = reservations.find(
+      (r: { status: string }) => r.status === 'expired',
+    );
+    expect(expiredAug27?.ticketCount).toBe(1);
+    expect(expiredAug27?.tickets[0].hasPdf).toBe(false);
+  });
+
+  it('sorts reservations by occurrence start date', () => {
+    const reservations = groupTicketPurchases(purchases);
+    expect(reservations[0].occurrenceStart).toBe('2026-08-27T14:00:00Z');
+    expect(reservations[reservations.length - 1].occurrenceStart).toBe('2026-08-29T14:00:00Z');
   });
 });

@@ -557,6 +557,33 @@ export const purchaseExperienceTicketV2 = async (
   }
 };
 
+export const fetchTicketPurchases = async (params: {
+  user?: string;
+  ticket__experience?: string;
+  page_size?: number;
+}): Promise<ApiResponse> => {
+  const axiosInstance = await apiWithToken();
+  const response = await axiosInstance.get(`/v1/experiences/ticket-purchases/`, { params });
+
+  return {
+    status: response.status,
+    success: true,
+    data: parseSnakeToCamel(response.data),
+  };
+};
+
+// Returns the ticket PDF bytes — the URL requires the Bearer token, so a plain
+// link/new-tab navigation would 401; callers open the blob as an object URL.
+export const downloadTicketPdf = async (purchaseId: string): Promise<Blob> => {
+  const axiosInstance = await apiWithToken();
+  const response = await axiosInstance.get(
+    `/v1/experiences/ticket-purchases/${purchaseId}/download-ticket-pdf/`,
+    { responseType: 'blob' },
+  );
+
+  return response.data;
+};
+
 export const updateSlotTemplate = async (
   experienceId: string,
   templateId: string,

@@ -1,4 +1,5 @@
 import type { CreateExperienceTicket } from '@/types/experience';
+import type { Reservation, TicketPurchase } from '@/types/ticket-purchase';
 
 export type RelativeUnit = 'hour' | 'day' | 'week';
 export type ApiTicketUnit = 'days' | 'hours' | 'minutes';
@@ -96,4 +97,53 @@ export const buildAbsoluteTicketValidity = (
     sales_start_date: buildDateTime(salesStartDate, salesStartTime),
     sales_end_date: buildDateTime(salesEndDate, salesEndTime),
   };
+};
+
+/**
+ * The ticket-purchases API returns one record per individual ticket. The
+ * Reserved tab shows one card per reservation, so group purchases by
+ * experience + occurrence + status (mixed statuses for the same occurrence
+ * render as separate cards, each with an accurate badge).
+ */
+const purchaseHolderName = (purchase: TicketPurchase): string => {
+  const fullName = [purchase.user?.firstName, purchase.user?.lastName].filter(Boolean).join(' ');
+  return fullName || purchase.user?.displayName || '';
+};
+
+export const groupTicketPurchases = (purchases: TicketPurchase[]): Reservation[] => {
+  const groups = new Map<string, Reservation>();
+
+  purchases.forEach((purchase) => {
+    const key = `${purchase.ticket.experience}|${purchase.occurrence?.id ?? 'none'}|${purchase.status}`;
+    const ticket = {
+      id: purchase.id,
+      ticketNumber: purchase.ticketNumber,
+      qrCodeImage: purchase.qrCodeImage,
+      hasPdf: Boolean(purchase.ticketPdf),
+      holderName: purchaseHolderName(purchase),
+      ticketType: purchase.ticket.name,
+    };
+
+    const existing = groups.get(key);
+    if (existing) {
+      existing.ticketCount += 1;
+      existing.tickets.push(ticket);
+    } else {
+      groups.set(key, {
+        key,
+        experienceId: purchase.ticket.experience,
+        occurrenceId: purchase.occurrence?.id ?? null,
+        occurrenceStart: purchase.occurrence?.startDate ?? null,
+        occurrenceEnd: purchase.occurrence?.endDate ?? null,
+        status: purchase.status,
+        ticketName: purchase.ticket.name,
+        ticketCount: 1,
+        tickets: [ticket],
+      });
+    }
+  });
+
+  return Array.from(groups.values()).sort((a, b) =>
+    (a.occurrenceStart ?? '').localeCompare(b.occurrenceStart ?? ''),
+  );
 };
