@@ -85,12 +85,12 @@ export const SingleExperience = ({
         <p className="mt-2 text-base font-bold text-gray-900">{experience.title}</p>
         {metaLine && <p className="mt-0.5 text-sm text-gray-400">{metaLine}</p>}
         {experience.hostCommunity && (
-          <span className="mt-0.5 inline-flex items-center gap-1.5 text-sm text-primary">
-            <IconComponent iconName="UserMultipleIcon" size={14} className="text-primary" />
+          <span className="mt-2 inline-flex items-center gap-1.5 text-sm text-primary">
+            <IconComponent iconName="UserMultipleIcon" size={18} className="text-primary" />
             {experience.hostCommunity.title}
           </span>
         )}
-        <p className="mt-0.5 text-sm font-semibold text-primary">
+        <p className="mt-2 text-sm font-semibold text-primary">
           {experience.priceStartsFrom?.currency}{' '}
           {numeral(experience.priceStartsFrom?.amount).format('0,0')}/person
         </p>
