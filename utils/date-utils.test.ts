@@ -75,3 +75,20 @@ describe('inferUIExperienceType', () => {
     ).toBe('itinerary');
   });
 });
+
+describe('formatReservationDateTime', () => {
+  const { formatReservationDateTime } = jest.requireActual('./date-utils');
+
+  it('formats a same-day range as "Sat 4 July · 6:00 AM — 4:00 PM"', () => {
+    // Local timestamps (no Z) so the assertion is timezone-independent
+    expect(formatReservationDateTime('2026-07-04T06:00:00', '2026-07-04T16:00:00')).toBe(
+      'Sat 4 July · 6:00 AM — 4:00 PM',
+    );
+  });
+
+  it('formats midnight and noon correctly', () => {
+    expect(formatReservationDateTime('2026-07-06T00:00:00', '2026-07-06T12:30:00')).toBe(
+      'Mon 6 July · 12:00 AM — 12:30 PM',
+    );
+  });
+});

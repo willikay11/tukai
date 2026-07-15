@@ -61,6 +61,26 @@ export const formatLongDateWithOrdinal = (date: Date): string => {
   return `${weekday}, ${day}${ordinal(day)} ${month}`;
 };
 
+// start + end ISO → "Sat 4 July · 6:00 AM — 4:00 PM"
+export const formatReservationDateTime = (start: string, end: string): string => {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+
+  const dayName = startDate.toLocaleDateString('en-GB', { weekday: 'short' });
+  const day = startDate.getDate();
+  const month = startDate.toLocaleDateString('en-GB', { month: 'long' });
+
+  const time = (date: Date) => {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const hour = hours % 12 || 12;
+    return `${hour}:${String(minutes).padStart(2, '0')} ${period}`;
+  };
+
+  return `${dayName} ${day} ${month} · ${time(startDate)} — ${time(endDate)}`;
+};
+
 export const getDaysBetween = (startDate: string, endDate: string): string[] => {
   try {
     const days: string[] = [];

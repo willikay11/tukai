@@ -13,22 +13,28 @@ import { BucketListCard } from '@/app/(experiences)/experiences/components/Bucke
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
 import { FeaturedExperienceBanner } from '@/app/(experiences)/experiences/components/FeaturedExperienceBanner';
+import { ReservationCard } from '@/app/(experiences)/experiences/components/ReservationCard';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { SharedBucketListCard } from '@/app/(experiences)/experiences/components/SharedBucketListCard';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
+import { toast } from '@/app/shared/hooks/useToast';
 import { useMyBucketLists, useSharedBucketLists } from '@/app/shared/hooks/useBucketLists';
-import { useExperiences } from '@/app/shared/hooks/useExperiences';
+import { useExperiences, useTicketPurchases } from '@/app/shared/hooks/useExperiences';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { NoData } from '@/components/ui/noData';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocation } from '@/context/LocationContext';
+import { downloadTicketPdf } from '@/services/experience';
 import { BucketList } from '@/types/bucket-list';
 import { Experience } from '@/types/experience';
 import { PlaceCategory } from '@/types/placeCategory';
+import { Photo } from '@/types/photo';
+import { Reservation } from '@/types/ticket-purchase';
 import { formatLongDateWithOrdinal } from '@/utils/date-utils';
+import { groupTicketPurchases } from '@/utils/ticket-utils';
 
 const TABS = [
   { value: 'all', label: 'All' },
@@ -109,12 +115,45 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
 
   const isAll = activeTab === 'all';
   const isSaved = activeTab === 'saved';
+  const isReserved = activeTab === 'reserved';
+  const userId = session?.user?.id;
 
   // ⚠️ Bucket lists are served by a MOCK service — no backend endpoints exist yet
   const { data: myBucketListsResponse, isLoading: isLoadingMine } = useMyBucketLists(isSaved);
   const { data: sharedBucketListsResponse } = useSharedBucketLists(isSaved);
   const myBucketLists: BucketList[] = myBucketListsResponse?.data?.results ?? [];
   const sharedBucketLists: BucketList[] = sharedBucketListsResponse?.data?.results ?? [];
+
+  // Reservations: one purchase record per ticket, grouped into cards; the
+  // purchase only carries the experience uuid, so join against the user's
+  // reserved experiences for title / cover / community
+  const { data: purchasesResponse, isLoading: isLoadingPurchases } = useTicketPurchases(
+    userId,
+    isReserved,
+  );
+  const { data: reservedExperiencesResponse, isLoading: isLoadingReservedExperiences } =
+    useExperiences(
+      { page: 1, page_size: 100, reserved_by: isReserved ? userId : undefined },
+      isReserved && Boolean(userId),
+    );
+  const reservations: Reservation[] = groupTicketPurchases(
+    purchasesResponse?.data?.results ?? [],
+  );
+  const reservedExperiences: Experience[] = reservedExperiencesResponse?.data?.results ?? [];
+  const isLoadingReservations = isLoadingPurchases || isLoadingReservedExperiences;
+
+  const handleViewTicket = async (pdfPurchaseId: string) => {
+    try {
+      const blob = await downloadTicketPdf(pdfPurchaseId);
+      window.open(URL.createObjectURL(blob), '_blank');
+    } catch {
+      toast({
+        title: 'Error',
+        description: 'Could not open the ticket. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
   const userCity = city ?? 'Nairobi';
   const today = moment().format('YYYY-MM-DD');
   const tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
@@ -330,15 +369,54 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             />
           )}
           {activeTab === 'reserved' && (
-            <Experiences
-              key={activeTab}
-              category={activeTab}
-              isPortal={false}
-              isBookedmarked={false}
-              isReserved={true}
-              isHosted={false}
-              noDataMessage="You have no reserved experiences"
-            />
+            <div className="col-span-12 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+              <SectionHeader
+                title="Reserved Experiences"
+                subtitle="Your upcoming adventures, tickets in hand"
+              />
+
+              {isLoadingReservations ? (
+                <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {Array.from({ length: 2 }).map((_, index) => (
+                    <div key={index} className="h-[340px] animate-pulse rounded-2xl bg-gray-200" />
+                  ))}
+                </div>
+              ) : reservations.length === 0 ? (
+                <div className="flex flex-col items-center gap-4 py-8">
+                  <NoData message="You have no reserved experiences yet" />
+                  <Button onClick={() => handleTabChange('all')} className="rounded-full px-6">
+                    Explore experiences
+                  </Button>
+                </div>
+              ) : (
+                <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {reservations.map((reservation) => {
+                    const experience = reservedExperiences.find(
+                      (item) => item.id === reservation.experienceId,
+                    );
+                    const coverPhoto =
+                      experience?.photos?.find((photo: Photo) => photo.isCover)?.photo ||
+                      experience?.photos?.[0]?.photo ||
+                      null;
+
+                    return (
+                      <ReservationCard
+                        key={reservation.key}
+                        title={experience?.title ?? reservation.ticketName}
+                        coverPhoto={coverPhoto}
+                        occurrenceStart={reservation.occurrenceStart}
+                        occurrenceEnd={reservation.occurrenceEnd}
+                        communityName={experience?.hostCommunity?.title ?? null}
+                        ticketCount={reservation.ticketCount}
+                        status={reservation.status}
+                        hasTicketPdf={Boolean(reservation.pdfPurchaseId)}
+                        onViewTicket={() => handleViewTicket(reservation.pdfPurchaseId!)}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           )}
         </>
       )}

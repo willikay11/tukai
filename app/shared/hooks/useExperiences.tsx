@@ -20,6 +20,7 @@ import {
   fetchExperiences,
   fetchItineraryDays,
   fetchSlotTemplates,
+  fetchTicketPurchases,
   publishExperience,
   purchaseExperienceTicket,
   purchaseExperienceTicketV2,
@@ -85,6 +86,13 @@ export const useFetchExperienceOccurrences = (experienceId: string | null) =>
     queryKey: ['experience-occurrences', experienceId],
     queryFn: () => fetchExperienceOccurrences(experienceId!),
     enabled: !!experienceId,
+  });
+
+export const useTicketPurchases = (userId: string | undefined, enabled: boolean = true) =>
+  useQuery({
+    queryKey: ['ticket-purchases', userId],
+    queryFn: () => fetchTicketPurchases({ user: userId!, page_size: 100 }),
+    enabled: enabled && !!userId,
   });
 
 export const useBookmarkExperience = () => {
