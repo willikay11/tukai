@@ -56,7 +56,7 @@ export const TicketModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] w-[calc(100%-32px)] max-w-md overflow-y-auto rounded-3xl border-0 p-0">
+      <DialogContent className="max-h-[90vh] w-[calc(100%-32px)] max-w-sm overflow-y-auto rounded-3xl border-0 p-0 md:max-w-[560px]">
         <DialogTitle className="sr-only">Tickets for {experienceTitle}</DialogTitle>
         <DialogDescription className="sr-only">
           Your ticket QR codes for {experienceTitle} — scan at entry
