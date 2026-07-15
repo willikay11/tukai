@@ -5,7 +5,11 @@ import * as searchService from '@/services/search';
 
 import { useSearch } from './useSearch';
 
-jest.mock('@/services/search');
+// Factory mock — the real module now imports services/community.ts, whose
+// lib/auth import drags in ESM-only deps (jose) that jest can't parse
+jest.mock('@/services/search', () => ({
+  searchPlaces: jest.fn(),
+}));
 
 const mockSearchService = searchService as jest.Mocked<typeof searchService>;
 
