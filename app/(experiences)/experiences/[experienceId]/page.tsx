@@ -9,6 +9,7 @@ import { ApiResponse } from '@/types/apiResponse';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 
+import { ExperienceUnavailable } from './components/ExperienceUnavailable';
 import { ViewExperiencePageContent } from './ViewExperiencePageContent';
 
 // Deduplicate the fetch between generateMetadata and the page render
@@ -40,6 +41,13 @@ const buildDescription = (experience: Experience): string => {
 const normalizeCurrency = (currency: string | undefined): string =>
   !currency || currency.toLowerCase().startsWith('ksh') ? 'KES' : currency;
 
+// Unavailable = fetch failed (404/403/…), not published, or sold out.
+// NOTE: the API returns status lowercase ('published'), unlike the Status enum
+const isExperienceUnavailable = (experience: Experience | null): boolean =>
+  !experience ||
+  String(experience.status).toLowerCase() !== 'published' ||
+  experience.isSoldOut;
+
 export async function generateMetadata({
   params,
 }: {
@@ -47,6 +55,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const experience = await getExperience(params.experienceId);
 
+  if (isExperienceUnavailable(experience)) {
+    return {
+      title: 'Tukai - Experience unavailable',
+      robots: { index: false, follow: false },
+    };
+  }
+  // Narrowed by the guard above
   if (!experience) {
     return { title: 'Tukai' };
   }
@@ -134,8 +149,13 @@ const buildEventJsonLd = (experience: Experience) => {
 export default async function ViewExperiencePage({ params }: { params: { experienceId: string } }) {
   const experience = await getExperience(params.experienceId);
 
-  if (!experience) {
-    return;
+  if (isExperienceUnavailable(experience) || !experience) {
+    return (
+      <ExperienceUnavailable
+        experienceName={experience?.title ?? null}
+        excludeExperienceId={experience?.id ?? null}
+      />
+    );
   }
 
   const jsonLd = buildEventJsonLd(experience);
