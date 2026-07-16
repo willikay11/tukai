@@ -1,6 +1,9 @@
 'use client';
 
-import { PhotoUploader, type FormPhoto } from '@/app/shared/components';
+import { UseFormReturn } from 'react-hook-form';
+
+import { CreateCommunityFormValues } from '@/app/(communities)/communities/components/hooks/useCreateCommunityFlow';
+import { type FormPhoto, PhotoUploader } from '@/app/shared/components';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { LocationAutocompleteField } from '@/app/shared/components/LocationPicker';
 import { Button } from '@/components/ui/button';
@@ -12,10 +15,8 @@ import { InviteCommunities } from '@/components/ui/invite-communities';
 import { InviteMembers } from '@/components/ui/invite-members';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { Textarea } from '@/components/ui/textarea';
-import { CreateCommunityFormValues } from '@/app/(communities)/communities/components/hooks/useCreateCommunityFlow';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';
-import { UseFormReturn } from 'react-hook-form';
 
 interface LeftPanelProps {
   form: UseFormReturn<CreateCommunityFormValues>;

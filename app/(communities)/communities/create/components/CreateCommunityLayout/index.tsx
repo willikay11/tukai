@@ -1,7 +1,7 @@
 'use client';
 
-import { TwoPanelLayout } from '@/app/shared/components/TwoPanelLayout';
 import { useCreateCommunityFlow } from '@/app/(communities)/communities/components/hooks/useCreateCommunityFlow';
+import { TwoPanelLayout } from '@/app/shared/components/TwoPanelLayout';
 
 import { LeftPanel } from '../LeftPanel';
 import { RightPanel } from '../RightPanel';

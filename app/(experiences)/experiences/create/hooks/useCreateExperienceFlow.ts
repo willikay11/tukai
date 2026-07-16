@@ -325,9 +325,9 @@ export const useCreateExperienceFlow = () => {
   const [apiError, setApiError] = useState<string | null>(null);
 
   // Track pending debounced saves in ItineraryDayPill components
-  const pendingFlushersRef = useRef<
-    Map<string, () => { title?: string; description?: string }>
-  >(new Map());
+  const pendingFlushersRef = useRef<Map<string, () => { title?: string; description?: string }>>(
+    new Map(),
+  );
 
   const registerFlusher = useCallback(
     (dayId: string, flusher: () => { title?: string; description?: string }) => {
@@ -339,7 +339,10 @@ export const useCreateExperienceFlow = () => {
     [],
   );
 
-  const flushAllPendingSaves = useCallback((): Record<string, { title?: string; description?: string }> => {
+  const flushAllPendingSaves = useCallback((): Record<
+    string,
+    { title?: string; description?: string }
+  > => {
     const flushed: Record<string, { title?: string; description?: string }> = {};
     pendingFlushersRef.current.forEach((fn, dayId) => {
       flushed[dayId] = fn();
@@ -1521,7 +1524,14 @@ export const useCreateExperienceFlow = () => {
     } finally {
       setIsSavingExperience(false);
     }
-  }, [experienceId, formData.itineraryDays, handleStepChange, toast, flushAllPendingSaves, updateItineraryDays]);
+  }, [
+    experienceId,
+    formData.itineraryDays,
+    handleStepChange,
+    toast,
+    flushAllPendingSaves,
+    updateItineraryDays,
+  ]);
 
   const handlePublish = useCallback(async () => {
     setIsSavingExperience(true);

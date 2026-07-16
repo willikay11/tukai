@@ -309,13 +309,17 @@ export const ExperienceStepSidePanel = ({
   const content = stepPanelContent[step];
 
   // Determine if we should show empty state
-  const isEmpty =
-    step === 'community' ||
-    (step === 'dates-tickets' && !canShowDateTickets);
+  const isEmpty = step === 'community' || (step === 'dates-tickets' && !canShowDateTickets);
 
   return (
     <PreviewPanel
-      title={isEmpty ? (step === 'community' ? 'Preview Community' : 'Create Tickets') : 'Preview Experience'}
+      title={
+        isEmpty
+          ? step === 'community'
+            ? 'Preview Community'
+            : 'Create Tickets'
+          : 'Preview Experience'
+      }
       isEmpty={isEmpty}
       emptyText={
         step === 'community'

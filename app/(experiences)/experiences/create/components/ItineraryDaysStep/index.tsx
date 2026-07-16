@@ -16,7 +16,10 @@ interface ItineraryDaysStepProps {
   onCancel: () => void;
   isSaving: boolean;
   isParentSaving?: boolean;
-  registerFlusher?: (dayId: string, flusher: () => { title?: string; description?: string }) => () => void;
+  registerFlusher?: (
+    dayId: string,
+    flusher: () => { title?: string; description?: string },
+  ) => () => void;
 }
 
 export const ItineraryDaysStep = ({
@@ -33,9 +36,9 @@ export const ItineraryDaysStep = ({
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0); // Day 1 open by default
 
   // Completeness check: all days must have at least one saved activity
-  const daysWithActivities = days
-    .filter((day) => day.activities.some((a) => a.activityApiId != null))
-    .length;
+  const daysWithActivities = days.filter((day) =>
+    day.activities.some((a) => a.activityApiId != null),
+  ).length;
 
   const totalDays = days.length;
 

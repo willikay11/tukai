@@ -7,15 +7,15 @@ import { useSession } from 'next-auth/react';
 import { useSubscriptionPlans } from '@/app/(auth)/hooks/useSubscriptions';
 import { Paystack } from '@/components/ui/paystack';
 import { StepIndicator } from '@/components/ui/stepIndicator';
-
 import {
   Stepper,
-  StepperItem,
-  StepperTrigger,
   StepperIndicator,
+  StepperItem,
+  StepperNav,
   StepperSeparator,
-  StepperNav
-} from '@/components/ui/stepper'
+  StepperTitle,
+  StepperTrigger,
+} from '@/components/ui/stepper';
 
 import { Package } from '../package';
 import { PaymentDetails } from '../paymentDetails';
@@ -23,7 +23,7 @@ import { PaymentDetails } from '../paymentDetails';
 const steps = [
   { id: 'details', title: 'Payment Details' },
   { id: 'package', title: 'Package Selection' },
-  { id: 'done', title: 'Done' }
+  { id: 'done', title: 'Done' },
 ];
 
 // The full subscribe flow, extracted verbatim from the /auth/subscribe page so
@@ -56,18 +56,21 @@ export const SubscribeView = () => {
       </div>
 
       <div className="mb-4">
-        <Stepper steps={steps} className='flex items-center max-md:w-xs md:w-full md:max-w-xl'>
-            <StepperNav>
-              {steps.map(step => (
-                <StepperItem key={step.id} stepId={step.id}>
-                  <StepperTrigger>
-                    <StepperIndicator>{step.title}</StepperIndicator>
-                  </StepperTrigger>
-                  <StepperSeparator />
-                </StepperItem>
-              ))}
-            </StepperNav>
-          </Stepper>
+        <Stepper steps={steps} className="w-full">
+          <StepperNav>
+            {steps.map((step, index) => (
+              <StepperItem key={step.id} stepId={step.id}>
+                <StepperTrigger>
+                  <StepperIndicator>{index + 1}</StepperIndicator>
+
+                  <StepperTitle>{step.title}</StepperTitle>
+                </StepperTrigger>
+
+                <StepperSeparator />
+              </StepperItem>
+            ))}
+          </StepperNav>
+        </Stepper>
       </div>
 
       <Paystack

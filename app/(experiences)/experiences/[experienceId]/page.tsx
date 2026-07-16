@@ -9,8 +9,8 @@ import { ApiResponse } from '@/types/apiResponse';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 
-import { ExperienceUnavailable } from './components/ExperienceUnavailable';
 import { ViewExperiencePageContent } from './ViewExperiencePageContent';
+import { ExperienceUnavailable } from './components/ExperienceUnavailable';
 
 // Deduplicate the fetch between generateMetadata and the page render
 const getExperience = cache(async (experienceId: string): Promise<Experience | null> => {
@@ -23,8 +23,7 @@ const getExperience = cache(async (experienceId: string): Promise<Experience | n
 });
 
 const getCoverPhoto = (experience: Experience): string | undefined =>
-  experience.photos?.find((photo: Photo) => photo.isCover)?.photo ||
-  experience.photos?.[0]?.photo;
+  experience.photos?.find((photo: Photo) => photo.isCover)?.photo || experience.photos?.[0]?.photo;
 
 const buildDescription = (experience: Experience): string => {
   // Descriptions are stored as HTML — strip to plain text for meta tags
@@ -44,9 +43,7 @@ const normalizeCurrency = (currency: string | undefined): string =>
 // Unavailable = fetch failed (404/403/…), not published, or sold out.
 // NOTE: the API returns status lowercase ('published'), unlike the Status enum
 const isExperienceUnavailable = (experience: Experience | null): boolean =>
-  !experience ||
-  String(experience.status).toLowerCase() !== 'published' ||
-  experience.isSoldOut;
+  !experience || String(experience.status).toLowerCase() !== 'published' || experience.isSoldOut;
 
 export async function generateMetadata({
   params,

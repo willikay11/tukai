@@ -1,15 +1,15 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Community } from '@/types/community';
-import { Experience } from '@/types/experience';
-import { Wallet } from '@/types/payment';
-
 import {
   PreviewCommunitiesSection,
   PreviewGuestsSection,
   PreviewLocationSection,
 } from '@/app/shared/components/Preview';
+import { Button } from '@/components/ui/button';
+import { Community } from '@/types/community';
+import { Experience } from '@/types/experience';
+import { Wallet } from '@/types/payment';
+
 import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
 import { PreviewCommunitySection } from '../PreviewCommunitySection';

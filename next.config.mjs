@@ -39,7 +39,7 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'cdn.tukai.co',
-      }
+      },
     ],
   },
 };

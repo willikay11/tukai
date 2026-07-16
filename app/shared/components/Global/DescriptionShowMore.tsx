@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from 'react';
 
-import { safeText } from '@/utils/safe-text-utils';
-
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
 import { TukaiImage } from '@/components/ui/image';
 import { cn } from '@/lib/utils';
+import { safeText } from '@/utils/safe-text-utils';
 
 export const DescriptionShowMore = ({
   photo,
@@ -41,7 +40,7 @@ export const DescriptionShowMore = ({
 
   return (
     <div>
-      <div className='text-xs' dangerouslySetInnerHTML={{ __html: displayedText }} />
+      <div className="text-xs" dangerouslySetInnerHTML={{ __html: displayedText }} />
       {shouldTruncate && (
         <Button
           onClick={() => setIsOpen(!isOpen)}

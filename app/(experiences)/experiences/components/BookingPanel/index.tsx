@@ -1,12 +1,12 @@
 'use client';
 
-import moment from 'moment';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 
 import { Mail02TwotoneRounded, UserTwotoneRounded } from '@hugeicons-pro/core-twotone-rounded';
 import { HugeiconsIcon } from '@hugeicons/react';
+import moment from 'moment';
 import { z } from 'zod';
 
 import { IconComponent } from '@/app/shared/components/Icons';
@@ -20,7 +20,7 @@ import { PaymentSuccess } from '@/components/ui/paymentSuccess';
 import { Paystack } from '@/components/ui/paystack';
 import { PhoneNumber } from '@/components/ui/phoneNumber';
 import { Quantity } from '@/components/ui/quantity';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TicketPurchasePayload } from '@/services/experience';
 import { Experience, ExperienceOccurrence } from '@/types/experience';
 import { parseApiError } from '@/utils/parseApiError';
@@ -217,25 +217,25 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
   const currency = experience.currency ?? 'Ksh.';
 
   return (
-    <div className="bg-gray-50 rounded-3xl p-5 space-y-4">
+    <div className="space-y-4 rounded-3xl bg-gray-50 p-5">
       {/* Tabs */}
       <Tabs value={tab} onValueChange={(val) => setTab(val as 'reservation' | 'moments')}>
-        <TabsList className="bg-white rounded-full h-auto p-0.5 gap-0">
+        <TabsList className="h-auto gap-0 rounded-full bg-white p-0.5">
           <TabsTrigger
             value="reservation"
-            className="flex-1 rounded-full px-4 py-2 text-xs border-0 bg-white text-gray-700 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-b-0"
+            className="flex-1 rounded-full border-0 bg-white px-4 py-2 text-xs text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             Make Reservation
           </TabsTrigger>
           <TabsTrigger
             value="moments"
-            className="flex-1 rounded-full px-4 py-2 text-xs border-0 bg-white text-gray-700 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-b-0"
+            className="flex-1 rounded-full border-0 bg-white px-4 py-2 text-xs text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             Moments
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="reservation" className="space-y-4 mt-4">
+        <TabsContent value="reservation" className="mt-4 space-y-4">
           {isRecurring ? (
             /* Date & slot picker (recurring experiences) */
             <RecurringDateSlotPicker
@@ -248,12 +248,12 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
             />
           ) : (
             /* Date pill (single / multi-day experiences) */
-            <div className="flex items-center justify-between gap-3 bg-white rounded-2xl px-4 py-3">
+            <div className="flex items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3">
               <div className="flex items-start gap-3">
                 <IconComponent
                   iconName="Calendar03Icon"
                   size={20}
-                  className="text-primary flex-shrink-0 mt-0.5"
+                  className="mt-0.5 flex-shrink-0 text-primary"
                 />
                 <div className="space-y-2">
                   <p className="text-sm font-semibold text-gray-900">{dateRange}</p>
@@ -280,7 +280,7 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
                         <p className="text-xs font-bold text-gray-900">
                           {currency} {parseFloat(ticket.price as any).toLocaleString()}/person
                         </p>
-                        <p className="text-xs text-gray-500 mt-0.5">{ticket.name}</p>
+                        <p className="mt-0.5 text-xs text-gray-500">{ticket.name}</p>
                       </div>
                       <Quantity
                         initialValue={quantities[ticket.id] ?? 0}
@@ -302,7 +302,11 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Total</span>
             <span className="text-sm font-bold text-gray-900">
-              {currency} {total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {currency}{' '}
+              {total.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </span>
           </div>
 
@@ -319,7 +323,11 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     icon={
-                      <HugeiconsIcon icon={UserTwotoneRounded} size={20} className="text-gray-600" />
+                      <HugeiconsIcon
+                        icon={UserTwotoneRounded}
+                        size={20}
+                        className="text-gray-600"
+                      />
                     }
                   />
                   {errors.firstName && (
@@ -333,10 +341,16 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     icon={
-                      <HugeiconsIcon icon={UserTwotoneRounded} size={20} className="text-gray-600" />
+                      <HugeiconsIcon
+                        icon={UserTwotoneRounded}
+                        size={20}
+                        className="text-gray-600"
+                      />
                     }
                   />
-                  {errors.lastName && <p className="mt-1 text-xs text-red-500">{errors.lastName}</p>}
+                  {errors.lastName && (
+                    <p className="mt-1 text-xs text-red-500">{errors.lastName}</p>
+                  )}
                 </div>
               </div>
 
@@ -347,7 +361,11 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   icon={
-                    <HugeiconsIcon icon={Mail02TwotoneRounded} size={20} className="text-gray-600" />
+                    <HugeiconsIcon
+                      icon={Mail02TwotoneRounded}
+                      size={20}
+                      className="text-gray-600"
+                    />
                   }
                 />
                 {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
@@ -368,15 +386,11 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
                   if (deliveryMethod !== 'email') setDeliveryContact('');
                   setDeliveryMethod('email');
                 }}
-                className={`
-                  rounded-full py-3 px-4 text-xs font-medium
-                  transition-colors
-                  ${
-                    deliveryMethod === 'email'
-                      ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
-                      : 'bg-white text-gray-500'
-                  }
-                `}
+                className={`rounded-full px-4 py-3 text-xs font-medium transition-colors ${
+                  deliveryMethod === 'email'
+                    ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
+                    : 'bg-white text-gray-500'
+                } `}
               >
                 Via Email
               </button>
@@ -386,15 +400,11 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
                   if (deliveryMethod !== 'whatsapp') setDeliveryContact('');
                   setDeliveryMethod('whatsapp');
                 }}
-                className={`
-                  rounded-full py-3 px-4 text-xs font-medium
-                  transition-colors
-                  ${
-                    deliveryMethod === 'whatsapp'
-                      ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
-                      : 'bg-white text-gray-500'
-                  }
-                `}
+                className={`rounded-full px-4 py-3 text-xs font-medium transition-colors ${
+                  deliveryMethod === 'whatsapp'
+                    ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
+                    : 'bg-white text-gray-500'
+                } `}
               >
                 Via Whatsapp
               </button>
@@ -411,18 +421,18 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
                 )}
               </div>
             ) : (
-              <div className="flex items-center bg-white rounded-2xl px-4 py-3 gap-3">
+              <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3">
                 <IconComponent
                   iconName="Mail01Icon"
                   size={16}
-                  className="text-gray-700 flex-shrink-0"
+                  className="flex-shrink-0 text-gray-700"
                 />
                 <input
                   type="email"
                   value={deliveryContact}
                   onChange={(e) => setDeliveryContact(e.target.value)}
                   placeholder="Enter email address"
-                  className="flex-1 min-w-0 outline-none bg-transparent text-sm placeholder:text-gray-400"
+                  className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400"
                 />
               </div>
             )}
@@ -434,16 +444,11 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
             <button
               type="button"
               onClick={() => setPaymentMethod('mpesa')}
-              className={`
-                flex items-center justify-center gap-2
-                bg-white rounded-xl py-3 text-xs font-medium
-                transition-colors
-                ${
-                  paymentMethod === 'mpesa'
-                    ? 'border-2 border-primary text-primary'
-                    : 'border-2 border-transparent text-gray-500'
-                }
-              `}
+              className={`flex items-center justify-center gap-2 rounded-xl bg-white py-3 text-xs font-medium transition-colors ${
+                paymentMethod === 'mpesa'
+                  ? 'border-2 border-primary text-primary'
+                  : 'border-2 border-transparent text-gray-500'
+              } `}
             >
               <IconComponent
                 iconName="Smartphone01Icon"
@@ -455,16 +460,11 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
             <button
               type="button"
               onClick={() => setPaymentMethod('card')}
-              className={`
-                flex items-center justify-center gap-2
-                bg-white rounded-xl py-3 text-xs font-medium
-                transition-colors
-                ${
-                  paymentMethod === 'card'
-                    ? 'border-2 border-primary text-primary'
-                    : 'border-2 border-transparent text-gray-500'
-                }
-              `}
+              className={`flex items-center justify-center gap-2 rounded-xl bg-white py-3 text-xs font-medium transition-colors ${
+                paymentMethod === 'card'
+                  ? 'border-2 border-primary text-primary'
+                  : 'border-2 border-transparent text-gray-500'
+              } `}
             >
               <IconComponent
                 iconName="CreditCardIcon"
@@ -478,32 +478,39 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
           {/* Phone input (only for M-Pesa) */}
           {paymentMethod === 'mpesa' && (
             <div>
-              <PhoneNumber onChange={(value) => setPhone(value)} placeholder="Enter M-Pesa number" />
+              <PhoneNumber
+                onChange={(value) => setPhone(value)}
+                placeholder="Enter M-Pesa number"
+              />
               {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
             </div>
           )}
 
           {/* API error */}
-          {errors.api && <p className="text-xs text-red-500 text-center">{errors.api}</p>}
+          {errors.api && <p className="text-center text-xs text-red-500">{errors.api}</p>}
 
           {/* Pay button */}
           <Button
             variant="gradient"
             onClick={handlePay}
             disabled={total === 0 || !selectedSlotId || isPaying}
-            className="w-full h-12 rounded-full py-3"
+            className="h-12 w-full rounded-full py-3"
           >
-            <span className="flex items-center text-sm gap-3 justify-center">
+            <span className="flex items-center justify-center gap-3 text-sm">
               <span>{isPaying ? 'Processing…' : 'Pay'}</span>
               <span className="text-white/60">|</span>
               <span>
-                {currency} {total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {currency}{' '}
+                {total.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </span>
             </span>
           </Button>
         </TabsContent>
 
-        <TabsContent value="moments" className="text-center py-8">
+        <TabsContent value="moments" className="py-8 text-center">
           <p className="text-sm text-gray-500">Moments coming soon</p>
         </TabsContent>
       </Tabs>

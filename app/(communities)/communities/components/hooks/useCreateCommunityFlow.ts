@@ -158,9 +158,7 @@ export const useCreateCommunityFlow = () => {
         categoriesIds: values.selectedCategories,
         isPublic: values.visibility === 'public',
         googleMapPlaceId: values.city,
-        newPhotos: values.photos
-          .filter((photo: any) => photo.file)
-          .map((photo: any) => photo.file),
+        newPhotos: values.photos.filter((photo: any) => photo.file).map((photo: any) => photo.file),
         invitedMemberIds: memberIds,
         invitedCommunityIds: invitedCommunities.map((c) => c.id),
         invitedEmails: emails,

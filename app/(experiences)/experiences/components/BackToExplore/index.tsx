@@ -10,7 +10,7 @@ export const BackToExplore = () => {
   return (
     <button
       onClick={() => router.back()}
-      className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 transition-colors"
+      className="flex items-center gap-2 text-sm text-gray-700 transition-colors hover:text-gray-900"
     >
       <IconComponent iconName="ArrowLeft01Icon" size={16} />
       Back to Explore

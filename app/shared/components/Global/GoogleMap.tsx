@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { MapPinpoint02Icon } from '@hugeicons-pro/core-twotone-rounded';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { GoogleMap, LoadScript, OverlayView } from '@react-google-maps/api';
+
 import { IconComponent } from '../Icons';
 
 const containerStyle = {
@@ -28,12 +29,8 @@ export const GoogleMapComponent = ({ lat, lng }: { lat?: number; lng?: number })
   }
 
   return (
-    <div className="w-14 h-14 rounded-lg bg-primary/10 flex-shrink-0 flex items-center justify-center">
-      <IconComponent
-        iconName="Location01Icon"
-        size={20}
-        className="text-primary"
-      />
+    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+      <IconComponent iconName="Location01Icon" size={20} className="text-primary" />
     </div>
   );
 

@@ -45,9 +45,7 @@ describe('ResultRow', () => {
     ['place', 'Place'],
     ['community', 'Community'],
   ] as const)('labels %s results with the %s pill', (type, label) => {
-    render(
-      <ResultRow result={{ ...result, type } as SearchResult} onSelect={jest.fn()} />,
-    );
+    render(<ResultRow result={{ ...result, type } as SearchResult} onSelect={jest.fn()} />);
     expect(screen.getByText(label)).toBeInTheDocument();
   });
 

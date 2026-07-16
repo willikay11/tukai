@@ -1,7 +1,7 @@
 import { IconComponent } from '@/app/shared/components/Icons';
 import { TukaiImage } from '@/components/ui/image';
-import { SearchResult, SearchResultType } from '@/types/search';
 import { Photo } from '@/types/photo';
+import { SearchResult, SearchResultType } from '@/types/search';
 
 const TYPE_LABEL: Record<SearchResultType, string> = {
   experience: 'Experience',
@@ -46,9 +46,7 @@ export const ResultRow = ({ result, onSelect }: ResultRowProps) => {
       <div className="min-w-0 flex-1">
         <p className="truncate text-base font-bold text-gray-900">{result.data.title}</p>
         {result.data.location?.formattedAddress && (
-          <p className="truncate text-sm text-gray-500">
-            {result.data.location.formattedAddress}
-          </p>
+          <p className="truncate text-sm text-gray-500">{result.data.location.formattedAddress}</p>
         )}
       </div>
 

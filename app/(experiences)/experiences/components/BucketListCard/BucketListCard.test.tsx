@@ -49,9 +49,7 @@ describe('BucketListCard', () => {
   });
 
   it('shows Private badge and member avatar overflow', () => {
-    render(
-      <BucketListCard bucketList={{ ...bucketList, isPublic: false }} onClick={jest.fn()} />,
-    );
+    render(<BucketListCard bucketList={{ ...bucketList, isPublic: false }} onClick={jest.fn()} />);
 
     expect(screen.getByText('Private')).toBeInTheDocument();
     // 4 members with max 3 avatars → "+1" facepile overflow

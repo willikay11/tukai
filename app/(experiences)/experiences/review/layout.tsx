@@ -4,10 +4,6 @@ export const metadata: Metadata = {
   title: 'Tukai - Create Experience',
 };
 
-export default function ReviewLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ReviewLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

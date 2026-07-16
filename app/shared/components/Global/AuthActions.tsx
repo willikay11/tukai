@@ -67,23 +67,24 @@ export const AuthActions = () => {
 
   return (
     <div className="flex items-center">
-      {
-        hasSubscribed ? (
-          <Link href="/communities/create" className="mr-2 hidden flex-shrink-0 gap-1.5 rounded-full px-6 text-gray-900 md:inline-flex">
-            <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />
-            Create
-          </Link>
-        ) : (
-          <Button
-            variant="lime"
-            className="mr-2 hidden flex-shrink-0 gap-1.5 rounded-full px-6 text-gray-900 md:inline-flex"
-            onClick={handleCreateExperience}
-          >
-            <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />
-            Create
-          </Button>
-        )
-      }
+      {hasSubscribed ? (
+        <Link
+          href="/communities/create"
+          className="mr-2 hidden flex-shrink-0 gap-1.5 rounded-full px-6 text-gray-900 md:inline-flex"
+        >
+          <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />
+          Create
+        </Link>
+      ) : (
+        <Button
+          variant="lime"
+          className="mr-2 hidden flex-shrink-0 gap-1.5 rounded-full px-6 text-gray-900 md:inline-flex"
+          onClick={handleCreateExperience}
+        >
+          <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />
+          Create
+        </Button>
+      )}
       {session?.user ? (
         <NavigationMenu>
           <NavigationMenuList>

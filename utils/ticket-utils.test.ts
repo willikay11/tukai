@@ -278,9 +278,7 @@ describe('groupTicketPurchases', () => {
       ticketType: 'Normal',
     });
 
-    const expiredAug27 = reservations.find(
-      (r: { status: string }) => r.status === 'expired',
-    );
+    const expiredAug27 = reservations.find((r: { status: string }) => r.status === 'expired');
     expect(expiredAug27?.ticketCount).toBe(1);
     expect(expiredAug27?.tickets[0].hasPdf).toBe(false);
   });

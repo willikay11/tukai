@@ -7,17 +7,16 @@ interface TicketQuantityRowProps {
   onChange: (qty: number) => void;
 }
 
-export const TicketQuantityRow = ({
-  ticket,
-  quantity,
-  onChange,
-}: TicketQuantityRowProps) => {
-  const maxQty = typeof ticket.availableQuantity === 'number'
-    ? ticket.availableQuantity
-    : (typeof ticket.available_quantity === 'number' ? ticket.available_quantity : ticket.quantity);
+export const TicketQuantityRow = ({ ticket, quantity, onChange }: TicketQuantityRowProps) => {
+  const maxQty =
+    typeof ticket.availableQuantity === 'number'
+      ? ticket.availableQuantity
+      : typeof ticket.available_quantity === 'number'
+        ? ticket.available_quantity
+        : ticket.quantity;
 
   return (
-    <div className="flex items-center justify-between p-3 border border-gray-100 rounded-lg">
+    <div className="flex items-center justify-between rounded-lg border border-gray-100 p-3">
       <div>
         <p className="text-sm font-semibold">
           ${typeof ticket.price === 'string' ? ticket.price : ticket.price.toFixed(2)}/person

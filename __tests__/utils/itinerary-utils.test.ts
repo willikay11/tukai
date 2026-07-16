@@ -1,8 +1,4 @@
-import {
-  doTimesOverlap,
-  findOverlappingActivity,
-  isEndAfterStart,
-} from '@/utils/itinerary-utils';
+import { doTimesOverlap, findOverlappingActivity, isEndAfterStart } from '@/utils/itinerary-utils';
 
 describe('doTimesOverlap', () => {
   it('returns false when ranges are entirely separate', () => {

@@ -13,13 +13,13 @@ import { Photo } from '@/types/photo';
 import { inferUIExperienceType } from '@/utils/date-utils';
 
 import { BackToExplore } from '../components/BackToExplore';
+import { BookingPanel } from '../components/BookingPanel';
 import { BucketListButton } from '../components/BucketListButton';
 import { ExperienceTypeBadge } from '../components/ExperienceTypeBadge';
-import { MetaRow } from '../components/MetaRow';
+import { HostCommunityCard } from '../components/HostCommunityCard';
 import { IncludedExcludedSection } from '../components/IncludedExcludedSection';
 import { LocationMeetingSection } from '../components/LocationMeetingSection';
-import { HostCommunityCard } from '../components/HostCommunityCard';
-import { BookingPanel } from '../components/BookingPanel';
+import { MetaRow } from '../components/MetaRow';
 import { ExperienceOrganiser } from '../components/experienceOrganiser';
 
 interface ViewExperiencePageContentProps {
@@ -50,16 +50,13 @@ export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageCont
       : 'before the experience ends.';
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py-6">
+    <main className="mx-auto max-w-6xl px-4 py-6">
       {/* Top row — Back link on left, actions on right */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <BackToExplore />
 
         <div className="flex items-center gap-2">
-          <BucketListButton
-            experienceId={experience.id}
-            isBookmarked={experience.isBookmarked}
-          />
+          <BucketListButton experienceId={experience.id} isBookmarked={experience.isBookmarked} />
           <Share
             coverPhoto={
               experience.photos?.find((photo: Photo) => photo.isCover)?.photo ||
@@ -73,7 +70,7 @@ export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageCont
 
       <div className="grid grid-cols-12 gap-6">
         {/* Left column: Main content */}
-        <div className="col-span-12 lg:col-span-7 space-y-6">
+        <div className="col-span-12 space-y-6 lg:col-span-7">
           {/* Hero with badge */}
           <div className="relative">
             <SquarePhotoStrip
@@ -82,12 +79,12 @@ export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageCont
                 .map((p) => p.photo)}
               variant="hero"
             />
-            <ExperienceTypeBadge type={badgeType} className="absolute top-4 left-4 z-10" />
+            <ExperienceTypeBadge type={badgeType} className="absolute left-4 top-4 z-10" />
           </div>
 
           {/* Title */}
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{experience.title}</h1>
+            <h1 className="mb-2 text-3xl font-bold text-gray-900">{experience.title}</h1>
             <MetaRow
               location={`${experience.location.city}, ${experience.location.country}`}
               durationMinutes={
@@ -105,7 +102,7 @@ export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageCont
 
           {/* Description */}
           <div>
-            <p className="text-base font-bold text-gray-900 mb-3">About</p>
+            <p className="mb-3 text-base font-bold text-gray-900">About</p>
             <DescriptionShowMore
               text={experience.description}
               photo={
@@ -166,7 +163,7 @@ export const ViewExperiencePageContent = ({ experience }: ViewExperiencePageCont
 
           {/* Cancellation Policy */}
           <div>
-            <p className="text-base font-bold text-gray-900 mb-2">Cancellation Policy</p>
+            <p className="mb-2 text-base font-bold text-gray-900">Cancellation Policy</p>
             <p className="text-xs font-medium text-gray-600">
               Ticket sales close {closingDuration} {closingUnit} {closingConditionText}
             </p>

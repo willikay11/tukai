@@ -229,7 +229,10 @@ interface CreateExperienceStepsProps {
   };
   isSavingExperience?: boolean;
   apiError?: string | null;
-  registerFlusher?: (dayId: string, flusher: () => { title?: string; description?: string }) => () => void;
+  registerFlusher?: (
+    dayId: string,
+    flusher: () => { title?: string; description?: string },
+  ) => () => void;
   slotTemplateRecords?: Array<{
     uiId: string;
     templateId: string;
@@ -394,10 +397,8 @@ export const CreateExperienceSteps = ({
               ? true
               : Boolean(
                   itineraryDays &&
-                    itineraryDays.length > 0 &&
-                    itineraryDays.every((day) =>
-                      day.activities.some((a) => a.activityApiId != null),
-                    ),
+                  itineraryDays.length > 0 &&
+                  itineraryDays.every((day) => day.activities.some((a) => a.activityApiId != null)),
                 );
           const stepFilledMap: Record<string, boolean> = {
             community: canAccessDetailsSteps,

@@ -93,7 +93,7 @@ export const RecurringDateSlotPicker = ({
     <div className="space-y-3">
       <p className="text-sm font-bold text-gray-900">Select Date &amp; Slot</p>
 
-      <div className="bg-white rounded-2xl p-4 space-y-4">
+      <div className="space-y-4 rounded-2xl bg-white p-4">
         <div className="flex items-center justify-between gap-2">
           <p className="text-xs font-bold text-gray-900">{monthLabel}</p>
           {parsed.daysLabel && (
@@ -116,18 +116,13 @@ export const RecurringDateSlotPicker = ({
                   disabled={!day.enabled}
                   onClick={() => onDateChange(day.date)}
                   aria-label={moment(day.date).format('ddd, MMM D')}
-                  className={`
-                    flex flex-col items-center gap-1 flex-shrink-0
-                    rounded-2xl px-4 py-3 text-center
-                    transition-colors
-                    ${
-                      isSelected
-                        ? 'bg-emerald-100 text-primary'
-                        : day.enabled
-                          ? 'bg-white border border-gray-200 text-gray-900 hover:border-gray-300'
-                          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    }
-                  `}
+                  className={`flex flex-shrink-0 flex-col items-center gap-1 rounded-2xl px-4 py-3 text-center transition-colors ${
+                    isSelected
+                      ? 'bg-emerald-100 text-primary'
+                      : day.enabled
+                        ? 'border border-gray-200 bg-white text-gray-900 hover:border-gray-300'
+                        : 'cursor-not-allowed bg-gray-100 text-gray-400'
+                  } `}
                 >
                   <span className="text-xs">{moment(day.date).format('ddd')}</span>
                   <span className="text-base font-semibold">{moment(day.date).format('D')}</span>
@@ -147,15 +142,11 @@ export const RecurringDateSlotPicker = ({
                 key={slot.id}
                 type="button"
                 onClick={() => onSlotChange(slot.id)}
-                className={`
-                  rounded-full px-5 py-3 text-xs font-normal
-                  transition-colors
-                  ${
-                    isSelected
-                      ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
-                      : 'bg-white border border-gray-200 text-gray-900 hover:border-gray-300'
-                  }
-                `}
+                className={`rounded-full px-5 py-3 text-xs font-normal transition-colors ${
+                  isSelected
+                    ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
+                    : 'border border-gray-200 bg-white text-gray-900 hover:border-gray-300'
+                } `}
               >
                 {slot.label}
               </button>
