@@ -49,7 +49,7 @@ export const JoinTukaiPremium = ({
   price = 'KES 130.00/month',
 }: JoinTukaiPremiumProps) => {
   return (
-    <div className="w-full max-w-[560px] rounded-xl border border-gray-200 bg-white p-4 md:p-5">
+    <div className="mx-auto w-full max-w-[560px] rounded-xl border border-gray-200 bg-white p-4 md:p-5">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <p className="text-xl font-black text-gray-700">Join Tukai Premium</p>
