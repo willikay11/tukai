@@ -8,8 +8,23 @@ import { useSubscriptionPlans } from '@/app/(auth)/hooks/useSubscriptions';
 import { Paystack } from '@/components/ui/paystack';
 import { StepIndicator } from '@/components/ui/stepIndicator';
 
+import {
+  Stepper,
+  StepperItem,
+  StepperTrigger,
+  StepperIndicator,
+  StepperSeparator,
+  StepperNav
+} from '@/components/ui/stepper'
+
 import { Package } from '../package';
 import { PaymentDetails } from '../paymentDetails';
+
+const steps = [
+  { id: 'details', title: 'Payment Details' },
+  { id: 'package', title: 'Package Selection' },
+  { id: 'done', title: 'Done' }
+];
 
 // The full subscribe flow, extracted verbatim from the /auth/subscribe page so
 // it can also render inside the Join Tukai Premium modal. Orchestration only —
@@ -41,13 +56,18 @@ export const SubscribeView = () => {
       </div>
 
       <div className="mb-4">
-        <StepIndicator
-          currentStep={currentStep}
-          steps={[
-            { label: 'Payment Details', completed: false },
-            { label: 'Package Selection', completed: false },
-          ]}
-        />
+        <Stepper steps={steps} className='flex items-center max-md:w-xs md:w-full md:max-w-xl'>
+            <StepperNav>
+              {steps.map(step => (
+                <StepperItem key={step.id} stepId={step.id}>
+                  <StepperTrigger>
+                    <StepperIndicator>{step.title}</StepperIndicator>
+                  </StepperTrigger>
+                  <StepperSeparator />
+                </StepperItem>
+              ))}
+            </StepperNav>
+          </Stepper>
       </div>
 
       <Paystack
