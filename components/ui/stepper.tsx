@@ -338,9 +338,13 @@ interface StepperTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 function StepperTrigger({ className, children, ...props }: StepperTriggerProps) {
-  const { step, state, isDisabled } = useStepItem();
+  const { step, state, isDisabled, index } = useStepItem();
 
-  const { stepper, registerTrigger } = useStepper();
+  const { stepper, registerTrigger, steps } = useStepper();
+
+  const isFirst = index === 0;
+
+  const isLast = index === steps.length - 1;
 
   const ref = useRef<HTMLButtonElement>(null);
 
@@ -359,7 +363,11 @@ function StepperTrigger({ className, children, ...props }: StepperTriggerProps) 
       data-state={state}
       disabled={isDisabled}
       onClick={() => stepper.navigation.goTo(step.id)}
-      className={cn('relative flex w-full flex-col text-center', className)}
+      className={cn(
+        'relative flex w-full flex-col text-center',
+        isFirst ? 'items-start' : isLast ? 'items-end' : 'items-center',
+        className,
+      )}
       {...props}
     >
       {children}
@@ -391,13 +399,7 @@ function StepperIndicator({ className, children }: StepperIndicatorProps) {
 }
 
 function StepperSeparator({ className }: ComponentProps<'div'>) {
-  const { state, index } = useStepItem();
-
-  const { steps } = useStepper();
-
-  if (index === steps.length - 1) {
-    return null;
-  }
+  const { state } = useStepItem();
 
   return (
     <div
@@ -421,7 +423,7 @@ function StepperTitle({ className, children }: StepperTitleProps) {
       data-slot="stepper-title"
       data-state={state}
       className={cn(
-        'mt-3 text-center text-sm font-medium leading-tight',
+        'mt-3 text-center text-xs font-normal leading-tight',
         'data-[state=inactive]:text-muted-foreground',
         className,
       )}
