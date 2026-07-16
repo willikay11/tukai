@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { JoinTukaiPremium } from '@/app/shared/components/JoinTukaiPremium/JoinTukaiPremium';
+import { SubscribeView } from '@/app/shared/components/Subscription';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { TukaiImage } from '@/components/ui/image';
@@ -26,6 +27,7 @@ export const AuthActions = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const [showJoinPremium, setShowJoinPremium] = useState(false);
+  const [premiumStep, setPremiumStep] = useState<'intro' | 'subscribe'>('intro');
   const [pendingCreateAfterLogin, setPendingCreateAfterLogin] = useState(false);
 
   const hasSubscribed = Boolean(session?.user?.hasSubscribed);
@@ -153,14 +155,22 @@ export const AuthActions = () => {
         </Link>
       )}
 
-      <Dialog open={showJoinPremium} onOpenChange={setShowJoinPremium}>
+      <Dialog
+        open={showJoinPremium}
+        onOpenChange={(open) => {
+          setShowJoinPremium(open);
+          // Always reopen on the intro step
+          if (!open) setPremiumStep('intro');
+        }}
+      >
         <DialogContent className="w-[calc(100%-35px)] max-w-[620px] border-0 bg-transparent p-0 shadow-none">
-          <JoinTukaiPremium
-            onUpgrade={() => {
-              setShowJoinPremium(false);
-              router.push('/auth/subscribe');
-            }}
-          />
+          {premiumStep === 'intro' ? (
+            <JoinTukaiPremium onUpgrade={() => setPremiumStep('subscribe')} />
+          ) : (
+            <div className="mx-auto max-h-[85vh] w-full max-w-[560px] overflow-y-auto rounded-xl border border-gray-200 bg-white p-4 md:p-5">
+              <SubscribeView />
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
