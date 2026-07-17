@@ -52,12 +52,16 @@ export const SubscriptionModalFlow = ({ onClose }: SubscriptionModalFlowProps) =
           onSubmitStart={() => setStep('connecting')}
           onError={() => setStep('billing')}
           onSuccess={({ verificationResponse }) => {
-            if (verificationResponse) {
-              setCheckoutUrl(verificationResponse);
-              setStep('checkout');
-            } else {
-              setStep('billing');
-            }
+            console.log('verificationResponse', verificationResponse);
+            setCheckoutUrl('https://checkout.paystack.com/mgk99hs4wr21ejb');
+            setStep('checkout');
+            // if (verificationResponse) {
+            //   setCheckoutUrl(verificationResponse);
+            //   setStep('checkout');
+            // } else {
+            //   setCheckoutUrl('https://checkout.paystack.com/mgk99hs4wr21ejb');
+            //   // setStep('billing');
+            // }
           }}
         />
       </div>
