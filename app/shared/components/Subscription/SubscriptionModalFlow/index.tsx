@@ -8,7 +8,7 @@ import { JoinTukaiPremium } from '@/app/shared/components/JoinTukaiPremium/JoinT
 import { Paystack } from '@/components/ui/paystack';
 import { SubscriptionPlan } from '@/types/subscription';
 
-import { PaymentDetails } from '../paymentDetails';
+import { BillingDetailsForm } from '../BillingDetailsForm';
 
 type SubscribeStep = 'intro' | 'billing' | 'connecting' | 'checkout';
 
@@ -48,8 +48,7 @@ export const SubscriptionModalFlow = ({ onClose }: SubscriptionModalFlowProps) =
         <p className="mb-3 text-xs text-gray-700">
           We need your billing details to create a secure checkout with Paystack.
         </p>
-        <PaymentDetails
-          submitLabel="Continue to payment"
+        <BillingDetailsForm
           onSubmitStart={() => setStep('connecting')}
           onError={() => setStep('billing')}
           onSuccess={({ verificationResponse }) => {
