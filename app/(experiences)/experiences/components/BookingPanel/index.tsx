@@ -517,8 +517,7 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
 
       {/* Same post-purchase flow as the reserve page */}
       <Paystack
-        isOpen={isPaystackOpen}
-        closeModal={(paymentSuccess) => {
+        onPaymentSuccess={(paymentSuccess) => {
           setIsPaystackOpen(false);
           if (paymentSuccess) {
             setIsPaymentSuccessOpen(true);

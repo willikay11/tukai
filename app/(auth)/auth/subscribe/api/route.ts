@@ -37,7 +37,8 @@ export async function CreateBillingDetails(data: any) {
           },
           payment_method: {
             user: session?.user?.id,
-            payment_option: paymentOption,
+            payment_option: 'card',
+            // payment_option: paymentOption,
             mobile_money_phone: phoneNumber,
             is_active: true,
           },

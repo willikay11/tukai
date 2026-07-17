@@ -16,6 +16,7 @@ import {
   StepperTitle,
   StepperTrigger,
 } from '@/components/ui/stepper';
+import { cn } from '@/lib/utils';
 
 import { Package } from '../package';
 import { PaymentDetails } from '../paymentDetails';
@@ -49,35 +50,33 @@ export const SubscribeView = () => {
     }
   }, [session]);
 
+  const showPaystack = currentStep === 1 && isPaystackOpen;
+
   return (
     <>
-      <div className="mb-2">
+      <div className={cn('mb-2', showPaystack && 'mb-3')}>
         <p className="text-xl font-black text-gray-700">Subscribe to Tukai.</p>
       </div>
 
-      <div className="mb-4">
-        <Stepper steps={steps} className="w-full">
-          <StepperNav>
-            {steps.map((step, index) => (
-              <StepperItem key={step.id} stepId={step.id}>
-                <StepperTrigger>
-                  <StepperIndicator>{index + 1}</StepperIndicator>
+      {!showPaystack && (
+        <div className={cn('mb-4', showPaystack && 'mb-0')}>
+          <Stepper steps={steps} className="w-full">
+            <StepperNav>
+              {steps.map((step, index) => (
+                <StepperItem key={step.id} stepId={step.id}>
+                  <StepperTrigger>
+                    <StepperIndicator>{index + 1}</StepperIndicator>
 
-                  <StepperTitle>{step.title}</StepperTitle>
-                </StepperTrigger>
+                    <StepperTitle>{step.title}</StepperTitle>
+                  </StepperTrigger>
 
-                <StepperSeparator />
-              </StepperItem>
-            ))}
-          </StepperNav>
-        </Stepper>
-      </div>
-
-      <Paystack
-        isOpen={isPaystackOpen}
-        closeModal={() => setIsPaystackOpen(false)}
-        url={paymentMethod?.verificationResponse || ''}
-      />
+                  <StepperSeparator />
+                </StepperItem>
+              ))}
+            </StepperNav>
+          </Stepper>
+        </div>
+      )}
 
       {currentStep === 0 && (
         <PaymentDetails
@@ -94,12 +93,21 @@ export const SubscribeView = () => {
           }) => {
             setPaymentMethod({ paymentMethodId, phoneNumber, paymentOption, verificationResponse });
             setIsPaystackOpen(true);
-            // setCurrentStep(1);
+            setCurrentStep(1);
           }}
         />
       )}
 
-      {currentStep === 1 && (
+      
+      <div className="h-[calc(85dvh-4.5rem)] w-full overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <Paystack
+          onPaymentSuccess={() => setIsPaystackOpen(false)}
+          url={paymentMethod?.verificationResponse || 'https://checkout.paystack.com/mgk99hs4wr21ejb'}
+        />
+      </div>
+      
+
+      {/* {currentStep === 1 && !showPaystack && (
         <Package
           subscriptionPlans={subscriptionPlans?.data?.results}
           selectedSubscriptionPlan={selectedSubscriptionPlan}
@@ -107,7 +115,7 @@ export const SubscribeView = () => {
           onEdit={() => setCurrentStep(0)}
           paymentMethod={paymentMethod}
         />
-      )}
+      )} */}
     </>
   );
 };
