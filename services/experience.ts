@@ -120,6 +120,9 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
     formData.append('title', data.title);
     formData.append('description', data.description);
     formData.append('google_map_place_id', data.googleMapPlaceId);
+    if (data.placeId) {
+      formData.append('place_id', data.placeId);
+    }
     formData.append('start_date', data.startDate);
     formData.append('end_date', data.endDate);
     formData.append('recurrence_rule', data.recurrence_rule);
@@ -203,6 +206,9 @@ export async function updateExperience(id: string, data: CreateExperience): Prom
     }
     if (data.googleMapPlaceId !== undefined) {
       formData.append('google_map_place_id', data.googleMapPlaceId);
+    }
+    if (data.placeId !== undefined && data.placeId !== null) {
+      formData.append('place_id', data.placeId);
     }
     if (data.startDate !== undefined) {
       formData.append('start_date', data.startDate);

@@ -126,6 +126,7 @@ function CreateExperiencePageContent() {
               aboutWhatsIncluded={formData.about.whatsIncluded}
               aboutWhatsNotIncluded={formData.about.whatsNotIncluded}
               aboutLocation={formData.about.location}
+              aboutLocationImageUrl={formData.about.placeImageUrl}
               aboutMeetingPoint={formData.about.meetingPoint}
               aboutMeetingTime={formData.about.meetingTime}
               aboutCategories={formData.about.categories}
@@ -248,6 +249,7 @@ function CreateExperiencePageContent() {
             aboutWhatsIncluded={formData.about.whatsIncluded}
             aboutWhatsNotIncluded={formData.about.whatsNotIncluded}
             aboutLocation={formData.about.location}
+              aboutLocationImageUrl={formData.about.placeImageUrl}
             aboutMeetingPoint={formData.about.meetingPoint}
             aboutMeetingTime={formData.about.meetingTime}
             aboutCategories={formData.about.categories}

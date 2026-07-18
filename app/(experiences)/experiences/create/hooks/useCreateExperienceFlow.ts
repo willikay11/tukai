@@ -145,6 +145,8 @@ export interface FormData {
     whatsNotIncluded: string;
     location: string;
     locationPlaceId: string;
+    placeId: string | null;
+    placeImageUrl: string | null;
     meetingPoint: string;
     meetingTime: string | null;
     categories: Interest[];
@@ -233,6 +235,8 @@ const initialFormData: FormData = {
     whatsNotIncluded: '',
     location: '',
     locationPlaceId: '',
+    placeId: null,
+    placeImageUrl: null,
     meetingPoint: '',
     meetingTime: null,
     categories: [],
@@ -464,8 +468,15 @@ export const useCreateExperienceFlow = () => {
           isTempId: false,
         })) || [],
       categories: experience.categories || [],
-      location: experience.location?.formattedAddress || experience.location?.city || '',
+      location:
+        experience.place?.title ??
+        (experience.location?.formattedAddress || experience.location?.city || ''),
       locationPlaceId: experience.location?.googleMapPlaceId ?? '',
+      placeId: experience.place?.id ?? null,
+      placeImageUrl:
+        experience.place?.photos?.find((photo: Photo) => photo.isCover)?.photo ??
+        experience.place?.photos?.[0]?.photo ??
+        null,
       meetingPoint: experience.meetingPlace || '',
       meetingTime: experience.meetingTime || null,
       whatsIncluded: experience.whatsIncluded ?? '',
@@ -1196,9 +1207,11 @@ export const useCreateExperienceFlow = () => {
       const basePayload = {
         title: formData.about.title,
         description: formData.about.description,
-        ...(formData.about.locationPlaceId
-          ? { googleMapPlaceId: formData.about.locationPlaceId }
-          : {}),
+        ...(formData.about.placeId
+          ? { placeId: formData.about.placeId }
+          : formData.about.locationPlaceId
+            ? { googleMapPlaceId: formData.about.locationPlaceId }
+            : {}),
         startDate: formatDateWithTime(startDateValue, startTime),
         endDate: formatDateWithTime(endDateValue, endTime, true),
         recurrence_rule: buildRecurrenceRule(formData.dateType),

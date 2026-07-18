@@ -1,15 +1,20 @@
 'use client';
 
+import Image from 'next/image';
+
 import { IconComponent } from '@/app/shared/components/Icons';
 
 interface PreviewLocationSectionProps {
   location: string | null;
+  // Tukai place photo — Google picks have none and keep the icon tile
+  imageUrl?: string | null;
   label?: string;
   onEdit?: () => void;
 }
 
 export const PreviewLocationSection = ({
   location,
+  imageUrl = null,
   label = 'Experience Location',
   onEdit,
 }: PreviewLocationSectionProps) => {
@@ -26,9 +31,15 @@ export const PreviewLocationSection = ({
       {location ? (
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <div className="rounded-[12px] bg-gray-100 p-4">
-              <IconComponent iconName="Image02Icon" size={28} className="text-gray-600" />
-            </div>
+            {imageUrl ? (
+              <div className="relative h-[60px] w-[60px] flex-shrink-0 overflow-hidden rounded-[12px]">
+                <Image src={imageUrl} alt={location} fill sizes="60px" className="object-cover" />
+              </div>
+            ) : (
+              <div className="rounded-[12px] bg-gray-100 p-4">
+                <IconComponent iconName="Image02Icon" size={28} className="text-gray-600" />
+              </div>
+            )}
             <p className="text-xs font-medium text-gray-800">{location}</p>
           </div>
         </div>

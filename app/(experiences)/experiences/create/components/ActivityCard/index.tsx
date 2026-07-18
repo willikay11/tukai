@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import Image from 'next/image';
 
@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { TimePicker } from '@/components/ui/time-picker';
 import { ItineraryActivity } from '@/types/itinerary';
 import { formatDateDDMMYYYY, formatTimeTo12Hour } from '@/utils/date-utils';
-import { doTimesOverlap, findOverlappingActivity, isEndAfterStart } from '@/utils/itinerary-utils';
+import { findOverlappingActivity, isEndAfterStart } from '@/utils/itinerary-utils';
 
 interface ActivityCardProps {
   activity: ItineraryActivity;

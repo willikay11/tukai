@@ -25,7 +25,9 @@ interface AddPlaceModalProps {
     name: string;
     imageUrl: string | null;
     city: string | null;
-    locationId: string | null;
+    locationId?: string | null;
+    // Tukai places submit as place_id; Google picks as google_map_place_id
+    source: 'tukai' | 'google';
   }) => void;
   onSkip?: () => void;
   selectedPlaceIds?: string[];
@@ -83,6 +85,8 @@ export const AddPlaceModal = ({
       name: prediction.structured_formatting?.main_text ?? prediction.description,
       imageUrl: null,
       city: prediction.structured_formatting?.secondary_text ?? null,
+      locationId: null,
+      source: 'google',
     });
   };
 
@@ -157,6 +161,7 @@ export const AddPlaceModal = ({
                           imageUrl: place.photos?.[0]?.photo ?? null,
                           city: place.location?.city ?? null,
                           locationId: place.location?.id ?? null,
+                          source: 'tukai',
                         });
                       }
                     }}
@@ -176,6 +181,8 @@ export const AddPlaceModal = ({
                               name: place.title,
                               imageUrl: place.photos?.[0]?.photo ?? null,
                               city: place.location?.city ?? null,
+                              locationId: place.location?.id ?? null,
+                              source: 'tukai',
                             });
                           }
                         }}
