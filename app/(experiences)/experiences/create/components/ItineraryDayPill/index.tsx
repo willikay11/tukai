@@ -353,9 +353,11 @@ export const ItineraryDayPill = ({
 
       try {
         const index = day.activities.indexOf(activity);
+        console.log("activity", activity);
         const payload: ItineraryActivityPayload = {
           title: activity.title,
           description: activity.description,
+          place_id: activity.placeId,
           location: activity.locationId,
           start_time: activity.startTime,
           end_time: activity.endTime,

@@ -798,6 +798,7 @@ export const fetchItineraryDays = async (experienceId: string): Promise<ApiRespo
 export interface ItineraryActivityPayload {
   title: string;
   description: string;
+  place_id?: string | null;
   location?: string | null;
   start_time?: string | null;
   end_time?: string | null;
