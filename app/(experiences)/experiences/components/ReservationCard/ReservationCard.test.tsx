@@ -44,9 +44,7 @@ describe('ReservationCard', () => {
     render(<ReservationCard {...defaultProps} />);
 
     expect(screen.getByText('Gikuyu na Mumbi')).toBeInTheDocument();
-    expect(
-      screen.getByText('Sat 4 July · 6:00 AM — 4:00 PM · Trails And Us'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Sat 4 July · 6:00 AM — 4:00 PM · Trails And Us')).toBeInTheDocument();
     expect(screen.getByText('2 tickets')).toBeInTheDocument();
   });
 

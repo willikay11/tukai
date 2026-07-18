@@ -40,6 +40,7 @@ interface SharedExperiencePreviewProps {
   aboutWhatsIncluded?: string;
   aboutWhatsNotIncluded?: string;
   aboutLocation?: string;
+  aboutLocationImageUrl?: string | null;
   aboutMeetingPoint?: string;
   aboutMeetingTime?: string | null;
   aboutCategories?: Interest[];
@@ -103,6 +104,7 @@ export const SharedExperiencePreview = ({
   aboutWhatsIncluded,
   aboutWhatsNotIncluded,
   aboutLocation,
+  aboutLocationImageUrl,
   aboutMeetingPoint,
   aboutMeetingTime,
   aboutCategories,
@@ -208,7 +210,10 @@ export const SharedExperiencePreview = ({
 
       <PreviewItineraryTypeSection visibility={aboutVisibility || 'public'} />
 
-      <PreviewLocationSection location={aboutLocation || null} />
+      <PreviewLocationSection
+        location={aboutLocation || null}
+        imageUrl={aboutLocationImageUrl ?? null}
+      />
 
       <PreviewMeetingSection
         meetingPoint={aboutMeetingPoint || null}

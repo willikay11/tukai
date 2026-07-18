@@ -4,11 +4,11 @@ import { useState } from 'react';
 
 import { CheckmarkBadge02Icon } from '@hugeicons/react-pro';
 
+import { IconComponent } from '@/app/shared/components';
 import { SendMessage } from '@/app/shared/components/SendMessage/SendMessage';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Experience } from '@/types/experience';
-import { IconComponent } from '@/app/shared/components';
 
 export const ExperienceOrganiser = ({ experience }: { experience: Experience }) => {
   const [open, setOpen] = useState(false);

@@ -52,10 +52,7 @@ export const findOverlappingActivity = (
 };
 
 // Validate that end is after start on the activity itself
-export const isEndAfterStart = (
-  startTime: string | null,
-  endTime: string | null,
-): boolean => {
+export const isEndAfterStart = (startTime: string | null, endTime: string | null): boolean => {
   if (!startTime || !endTime) return true; // incomplete = valid so far
   return toMinutes(endTime) > toMinutes(startTime);
 };

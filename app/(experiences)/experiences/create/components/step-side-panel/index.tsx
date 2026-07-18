@@ -50,6 +50,7 @@ export const ExperienceStepSidePanel = ({
   aboutWhatsIncluded,
   aboutWhatsNotIncluded,
   aboutLocation,
+  aboutLocationImageUrl,
   aboutMeetingPoint,
   aboutMeetingTime,
   aboutCategories,
@@ -87,6 +88,7 @@ export const ExperienceStepSidePanel = ({
   aboutWhatsIncluded?: string;
   aboutWhatsNotIncluded?: string;
   aboutLocation?: string;
+  aboutLocationImageUrl?: string | null;
   aboutMeetingPoint?: string;
   aboutMeetingTime?: string | null;
   aboutCategories?: Interest[];
@@ -125,6 +127,7 @@ export const ExperienceStepSidePanel = ({
         aboutWhatsIncluded={aboutWhatsIncluded}
         aboutWhatsNotIncluded={aboutWhatsNotIncluded}
         aboutLocation={aboutLocation}
+        aboutLocationImageUrl={aboutLocationImageUrl}
         aboutMeetingPoint={aboutMeetingPoint}
         aboutMeetingTime={aboutMeetingTime}
         aboutCategories={aboutCategories}
@@ -163,6 +166,7 @@ export const ExperienceStepSidePanel = ({
         aboutWhatsIncluded={aboutWhatsIncluded}
         aboutWhatsNotIncluded={aboutWhatsNotIncluded}
         aboutLocation={aboutLocation}
+        aboutLocationImageUrl={aboutLocationImageUrl}
         aboutMeetingPoint={aboutMeetingPoint}
         aboutMeetingTime={aboutMeetingTime}
         aboutCategories={aboutCategories}
@@ -203,6 +207,7 @@ export const ExperienceStepSidePanel = ({
         aboutWhatsIncluded={aboutWhatsIncluded}
         aboutWhatsNotIncluded={aboutWhatsNotIncluded}
         aboutLocation={aboutLocation}
+        aboutLocationImageUrl={aboutLocationImageUrl}
         aboutMeetingPoint={aboutMeetingPoint}
         aboutMeetingTime={aboutMeetingTime}
         aboutCategories={aboutCategories}
@@ -241,6 +246,7 @@ export const ExperienceStepSidePanel = ({
         aboutWhatsIncluded={aboutWhatsIncluded}
         aboutWhatsNotIncluded={aboutWhatsNotIncluded}
         aboutLocation={aboutLocation}
+        aboutLocationImageUrl={aboutLocationImageUrl}
         aboutMeetingPoint={aboutMeetingPoint}
         aboutMeetingTime={aboutMeetingTime}
         aboutCategories={aboutCategories}
@@ -279,6 +285,7 @@ export const ExperienceStepSidePanel = ({
         aboutWhatsIncluded={aboutWhatsIncluded}
         aboutWhatsNotIncluded={aboutWhatsNotIncluded}
         aboutLocation={aboutLocation}
+        aboutLocationImageUrl={aboutLocationImageUrl}
         aboutMeetingPoint={aboutMeetingPoint}
         aboutMeetingTime={aboutMeetingTime}
         aboutCategories={aboutCategories}
@@ -309,13 +316,17 @@ export const ExperienceStepSidePanel = ({
   const content = stepPanelContent[step];
 
   // Determine if we should show empty state
-  const isEmpty =
-    step === 'community' ||
-    (step === 'dates-tickets' && !canShowDateTickets);
+  const isEmpty = step === 'community' || (step === 'dates-tickets' && !canShowDateTickets);
 
   return (
     <PreviewPanel
-      title={isEmpty ? (step === 'community' ? 'Preview Community' : 'Create Tickets') : 'Preview Experience'}
+      title={
+        isEmpty
+          ? step === 'community'
+            ? 'Preview Community'
+            : 'Create Tickets'
+          : 'Preview Experience'
+      }
       isEmpty={isEmpty}
       emptyText={
         step === 'community'

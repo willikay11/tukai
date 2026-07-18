@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { JoinTukaiPremium } from '@/app/shared/components/JoinTukaiPremium/JoinTukaiPremium';
+import { SubscriptionModalFlow } from '@/app/shared/components/Subscription';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { TukaiImage } from '@/components/ui/image';
@@ -42,7 +42,7 @@ export const AuthActions = () => {
         return;
       }
 
-      router.push('/communities/create');
+      router.push('/experiences/create');
       return;
     }
 
@@ -55,7 +55,7 @@ export const AuthActions = () => {
     if (!pendingCreateAfterLogin || !session?.user) return;
 
     if (hasSubscribed) {
-      router.push('/communities/create');
+      router.push('/experiences/create');
     } else {
       setShowJoinPremium(true);
     }
@@ -65,14 +65,24 @@ export const AuthActions = () => {
 
   return (
     <div className="flex items-center">
-      <Button
-        variant="lime"
-        className="mr-2 hidden flex-shrink-0 gap-1.5 rounded-full px-6 font-semibold text-gray-900 md:inline-flex"
-        onClick={handleCreateExperience}
-      >
-        <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />
-        Create
-      </Button>
+      {hasSubscribed ? (
+        <Link
+          href="/experiences/create"
+          className="mr-2 hidden flex-shrink-0 gap-1.5 rounded-full py-2 px-6 text-sm text-gray-900 items-center bg-lime md:inline-flex"
+        >
+          <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />
+          Create
+        </Link>
+      ) : (
+        <Button
+          variant="lime"
+          className="mr-2 hidden flex-shrink-0 gap-1.5 rounded-full py-2 px-6 text-sm text-gray-900 items-center bg-lime md:inline-flex"
+          onClick={handleCreateExperience}
+        >
+          <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />
+          Create
+        </Button>
+      )}
       {session?.user ? (
         <NavigationMenu>
           <NavigationMenuList>
@@ -146,12 +156,8 @@ export const AuthActions = () => {
 
       <Dialog open={showJoinPremium} onOpenChange={setShowJoinPremium}>
         <DialogContent className="w-[calc(100%-35px)] max-w-[620px] border-0 bg-transparent p-0 shadow-none">
-          <JoinTukaiPremium
-            onUpgrade={() => {
-              setShowJoinPremium(false);
-              router.push('/auth/subscribe');
-            }}
-          />
+          {/* Steps reset automatically — Radix unmounts content on close */}
+          <SubscriptionModalFlow onClose={() => setShowJoinPremium(false)} />
         </DialogContent>
       </Dialog>
     </div>

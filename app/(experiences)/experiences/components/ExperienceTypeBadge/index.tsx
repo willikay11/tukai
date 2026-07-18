@@ -11,13 +11,12 @@ const LABEL: Record<string, string> = {
   recurring: 'Recurring Experience',
 };
 
-export const ExperienceTypeBadge = ({ type = 'standard', className = '' }: ExperienceTypeBadgeProps) => (
+export const ExperienceTypeBadge = ({
+  type = 'standard',
+  className = '',
+}: ExperienceTypeBadgeProps) => (
   <div
-    className={`
-      bg-black/60 backdrop-blur-sm text-white text-sm
-      font-medium px-4 py-1.5 rounded-full
-      ${className}
-    `}
+    className={`rounded-full bg-black/60 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm ${className} `}
   >
     {LABEL[type] ?? type}
   </div>

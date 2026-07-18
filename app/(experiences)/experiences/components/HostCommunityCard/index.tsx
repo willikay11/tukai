@@ -13,16 +13,15 @@ interface HostCommunityCardProps {
 }
 
 export const HostCommunityCard = ({ community }: HostCommunityCardProps) => {
-  const photoUrl =
-    community.photos?.[0]?.photo || community.photos?.[0]?.url || '';
+  const photoUrl = community.photos?.[0]?.photo || community.photos?.[0]?.url || '';
 
   return (
     <div>
-      <h3 className="font-bold text-gray-900 mb-3">Host Community</h3>
-      <Link target='_blank' href={`/communities/${community.id}`}>
-        <div className="flex items-center gap-3 cursor-pointer hover:opacity-75 transition-opacity">
+      <h3 className="mb-3 font-bold text-gray-900">Host Community</h3>
+      <Link target="_blank" href={`/communities/${community.id}`}>
+        <div className="flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-75">
           {photoUrl && (
-            <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+            <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
               <Image
                 src={photoUrl}
                 alt={community.title}
@@ -34,12 +33,8 @@ export const HostCommunityCard = ({ community }: HostCommunityCardProps) => {
           )}
           <div>
             <div className="flex items-center gap-1">
-              <p className="font-semibold text-xs">{community.title}</p>
-              <IconComponent
-                iconName="ArrowUpRight01Icon"
-                size={13}
-                className="text-primary"
-              />
+              <p className="text-xs font-semibold">{community.title}</p>
+              <IconComponent iconName="ArrowUpRight01Icon" size={13} className="text-primary" />
             </div>
             {community.experiencesHostedCount !== undefined && (
               <p className="text-xs text-gray-500">

@@ -42,9 +42,7 @@ export const CreateBucketListModal = ({ open, onOpenChange }: CreateBucketListMo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="px-6 md:w-[24rem]">
         <div className="flex flex-col gap-4">
-          <DialogTitle className="text-xl font-black text-gray-700">
-            Create Bucket List
-          </DialogTitle>
+          <DialogTitle className="text-xl font-black text-gray-700">Create Bucket List</DialogTitle>
           <DialogDescription className="sr-only">
             Name your bucket list and choose who can see it
           </DialogDescription>

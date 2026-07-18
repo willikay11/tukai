@@ -1,7 +1,8 @@
 'use client';
 
-import Image from 'next/image';
 import { ReactNode } from 'react';
+
+import Image from 'next/image';
 
 interface PreviewPanelProps {
   title: string;

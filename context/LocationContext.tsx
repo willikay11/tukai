@@ -88,7 +88,9 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <LocationContext.Provider value={{ lat, lng, status, city, setCity, requestLocation, setLocation }}>
+    <LocationContext.Provider
+      value={{ lat, lng, status, city, setCity, requestLocation, setLocation }}
+    >
       {children}
     </LocationContext.Provider>
   );

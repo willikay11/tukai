@@ -5,8 +5,7 @@ import { RecurringDateSlotPicker } from './RecurringDateSlotPicker';
 
 // A weekly Tue/Thu rule over a fixed future window (Aug 2027):
 // Sun 15 … Sat 21, where Tue 17 and Thu 19 are occurrences.
-const RULE =
-  'DTSTART:20270815T060000Z\nRRULE:FREQ=WEEKLY;UNTIL=20270821T205959Z;BYDAY=TU,TH';
+const RULE = 'DTSTART:20270815T060000Z\nRRULE:FREQ=WEEKLY;UNTIL=20270821T205959Z;BYDAY=TU,TH';
 
 const TIME_SLOTS = [
   { id: 'slot-1', label: '6:00 AM - 12:00 PM' },

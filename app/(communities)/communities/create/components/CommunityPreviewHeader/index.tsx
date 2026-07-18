@@ -21,9 +21,7 @@ export const CommunityPreviewHeader = ({
       {/* Name and description */}
       <div>
         <h3 className="text-base font-bold text-gray-900">{name}</h3>
-        {description && (
-          <p className="mt-1 text-xs leading-relaxed text-gray-600">{description}</p>
-        )}
+        {description && <p className="mt-1 text-xs leading-relaxed text-gray-600">{description}</p>}
       </div>
     </div>
   );

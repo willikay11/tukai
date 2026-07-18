@@ -21,6 +21,7 @@ export type Experience = {
   ticketSalesClosingCondition: 'before_end' | 'before_start';
   priceStartsFrom: { amount: number; currency: string };
   ticketsAvailable: boolean;
+  reservedTicketsCount?: number;
   isSoldOut: boolean;
   isPublic: boolean;
   isBookmarked: boolean;
@@ -31,6 +32,7 @@ export type Experience = {
   host: User;
   coHosts: User[];
   hostCommunity?: { id: string; title: string; photos?: Photo[] };
+  place?: { id: string; title: string; photos?: Photo[] } | null;
   whatsIncluded?: string;
   whatsNotIncluded?: string;
   meetingPoint?: string;
@@ -69,6 +71,7 @@ export type CreateExperience = {
   title: string;
   description: string;
   googleMapPlaceId?: string;
+  placeId?: string;
   startDate: string;
   endDate: string;
   recurrence_rule: string;

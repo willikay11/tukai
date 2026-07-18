@@ -58,7 +58,7 @@ export default function RootLayout({
                   <AuthDialogProvider>
                     <SelectedCategoryProvider>
                       <div className="relative flex min-h-screen flex-col">
-                        <div className="z-50 border-b border-gray-100 bg-white/95 md:sticky md:top-0 backdrop-opacity-50">
+                        <div className="z-50 border-b border-gray-100 bg-white/95 backdrop-opacity-50 md:sticky md:top-0">
                           {/* Mobile */}
                           <div className="mx-4 mt-5 inline-flex w-[calc(100%-2rem)] justify-between md:hidden">
                             <div className="inline-flex cursor-pointer items-center justify-center md:hidden">

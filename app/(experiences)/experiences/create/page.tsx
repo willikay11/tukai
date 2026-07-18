@@ -126,6 +126,7 @@ function CreateExperiencePageContent() {
               aboutWhatsIncluded={formData.about.whatsIncluded}
               aboutWhatsNotIncluded={formData.about.whatsNotIncluded}
               aboutLocation={formData.about.location}
+              aboutLocationImageUrl={formData.about.placeImageUrl}
               aboutMeetingPoint={formData.about.meetingPoint}
               aboutMeetingTime={formData.about.meetingTime}
               aboutCategories={formData.about.categories}
@@ -148,119 +149,120 @@ function CreateExperiencePageContent() {
       <TwoPanelLayout
         left={
           <CreateExperienceSteps
-          currentStep={activeStep}
-          onStepChange={handlers.handleStepChange}
-          onExperienceCreated={handlers.handleExperienceCreated}
-          onDatesUpdatedSuccess={handlers.handleDatesUpdatedSuccess}
-          onItineraryCustomise={handlers.handleItineraryCustomise}
-          onInvitesChange={handlers.handleInvitesChange}
-          experience={experience}
-          isLoadingExperience={isLoadingExperience}
-          formData={formData.dateType}
-          updateFormData={updateFormData}
-          dateTypeErrors={dateTypeErrors}
-          aboutFormData={formData.about}
-          updateAboutFormData={updateAboutFormData}
-          aboutErrors={aboutErrors}
-          ticketsFormData={formData.tickets}
-          updateTicketsFormData={updateTicketsFormData}
-          ticketsErrors={ticketsErrors}
-          communitiesForSelector={communitiesForSelector}
-          validateDateType={validateDateType}
-          validateAbout={validateAbout}
-          validateTickets={validateTickets}
-          inviteFormData={formData.invite}
-          updateInviteFormData={updateInviteFormData}
-          itineraryDays={formData.itineraryDays}
-          updateItineraryDays={updateItineraryDays}
-          walletFormData={formData.wallet}
-          updateWalletFormData={updateWalletFormData}
-          walletErrors={walletErrors}
-          wallets={wallets}
-          isWalletsLoading={isWalletsLoading}
-          hasSavedWallets={hasSavedWallets}
-          walletMutations={walletMutations}
-          handlers={{
-            handleSaveAbout: handlers.handleSaveAbout,
-            handleSaveItineraryDays: handlers.handleSaveItineraryDays,
-            handlePublish: handlers.handlePublish,
-          }}
-          isSavingExperience={isSavingExperience}
-          apiError={apiError}
-          registerFlusher={registerFlusher}
-          isPreviewDrawerOpen={isPreviewDrawerOpen}
-          setIsPreviewDrawerOpen={setIsPreviewDrawerOpen}
-          slotTemplateRecords={slotTemplateRecords}
-          onPreviewAndPublish={() => {
-            const isWalletValid = validateWallet();
+            currentStep={activeStep}
+            onStepChange={handlers.handleStepChange}
+            onExperienceCreated={handlers.handleExperienceCreated}
+            onDatesUpdatedSuccess={handlers.handleDatesUpdatedSuccess}
+            onItineraryCustomise={handlers.handleItineraryCustomise}
+            onInvitesChange={handlers.handleInvitesChange}
+            experience={experience}
+            isLoadingExperience={isLoadingExperience}
+            formData={formData.dateType}
+            updateFormData={updateFormData}
+            dateTypeErrors={dateTypeErrors}
+            aboutFormData={formData.about}
+            updateAboutFormData={updateAboutFormData}
+            aboutErrors={aboutErrors}
+            ticketsFormData={formData.tickets}
+            updateTicketsFormData={updateTicketsFormData}
+            ticketsErrors={ticketsErrors}
+            communitiesForSelector={communitiesForSelector}
+            validateDateType={validateDateType}
+            validateAbout={validateAbout}
+            validateTickets={validateTickets}
+            inviteFormData={formData.invite}
+            updateInviteFormData={updateInviteFormData}
+            itineraryDays={formData.itineraryDays}
+            updateItineraryDays={updateItineraryDays}
+            walletFormData={formData.wallet}
+            updateWalletFormData={updateWalletFormData}
+            walletErrors={walletErrors}
+            wallets={wallets}
+            isWalletsLoading={isWalletsLoading}
+            hasSavedWallets={hasSavedWallets}
+            walletMutations={walletMutations}
+            handlers={{
+              handleSaveAbout: handlers.handleSaveAbout,
+              handleSaveItineraryDays: handlers.handleSaveItineraryDays,
+              handlePublish: handlers.handlePublish,
+            }}
+            isSavingExperience={isSavingExperience}
+            apiError={apiError}
+            registerFlusher={registerFlusher}
+            isPreviewDrawerOpen={isPreviewDrawerOpen}
+            setIsPreviewDrawerOpen={setIsPreviewDrawerOpen}
+            slotTemplateRecords={slotTemplateRecords}
+            onPreviewAndPublish={() => {
+              const isWalletValid = validateWallet();
 
-            // Try to get experience ID from state or from the experience object
-            const finalExperienceId = experienceId || experience?.id;
+              // Try to get experience ID from state or from the experience object
+              const finalExperienceId = experienceId || experience?.id;
 
-            if (!isWalletValid) {
-              console.error('Wallet validation failed', walletErrors);
-              return;
-            }
+              if (!isWalletValid) {
+                console.error('Wallet validation failed', walletErrors);
+                return;
+              }
 
-            console.log('Navigating to review page:', finalExperienceId);
-            router.push(`/experiences/review/${finalExperienceId}`);
-          }}
-        />
+              console.log('Navigating to review page:', finalExperienceId);
+              router.push(`/experiences/review/${finalExperienceId}`);
+            }}
+          />
         }
         right={
           <ExperienceStepSidePanel
-          step={activeStep}
-          canShowDateTickets={
-            hasUpdatedDates ||
-            !!(
-              formData.dateType.experienceType === 'multi-day' &&
-              formData.dateType.multiDayStartDate &&
-              formData.dateType.multiDayEndDate
-            ) ||
-            !!(
-              formData.dateType.isRecurring &&
-              formData.dateType.recurrenceStartDate &&
-              formData.dateType.recurrenceEndDate
-            ) ||
-            !!(formData.dateType.date && formData.dateType.startTime && formData.dateType.endTime)
-          }
-          isRecurring={formData.dateType.isRecurring}
-          experienceType={formData.dateType.experienceType}
-          itineraryConfig={itineraryConfig}
-          itineraryDays={formData.itineraryDays}
-          itineraryStartDate={formData.dateType.itineraryStartDate}
-          selectedCommunity={formData.dateType.community}
-          selectedDate={formData.dateType.date}
-          selectedStartTime={formData.dateType.startTime}
-          selectedEndTime={formData.dateType.endTime}
-          selectedRecurringDays={formData.dateType.recurringDays}
-          selectedTimeSlots={formData.dateType.timeSlots}
-          selectedRecurrenceStartDate={formData.dateType.recurrenceStartDate}
-          selectedRecurrenceEndDate={formData.dateType.recurrenceEndDate}
-          multiDayStartDate={formData.dateType.multiDayStartDate}
-          multiDayStartTime={formData.dateType.multiDayStartTime}
-          multiDayEndDate={formData.dateType.multiDayEndDate}
-          multiDayEndTime={formData.dateType.multiDayEndTime}
-          aboutPhotos={formData.about.photos}
-          aboutTitle={formData.about.title}
-          aboutDescription={formData.about.description}
-          aboutVisibility={formData.about.visibility}
-          aboutWhatsIncluded={formData.about.whatsIncluded}
-          aboutWhatsNotIncluded={formData.about.whatsNotIncluded}
-          aboutLocation={formData.about.location}
-          aboutMeetingPoint={formData.about.meetingPoint}
-          aboutMeetingTime={formData.about.meetingTime}
-          aboutCategories={formData.about.categories}
-          ticketsItems={formData.tickets.items}
-          ticketsCommissionPayer={formData.tickets.commission}
-          invitedGuests={formData.invite.invitedGuests.map((guest) => ({
-            ...guest,
-            name: guest.email.split('@')[0],
-          }))}
-          invitedCommunityIds={formData.invite.invitedCommunityIds}
-          allCommunities={communitiesForSelector}
-          selectedWallet={formData.wallet.selectedWallet}
-        />
+            step={activeStep}
+            canShowDateTickets={
+              hasUpdatedDates ||
+              !!(
+                formData.dateType.experienceType === 'multi-day' &&
+                formData.dateType.multiDayStartDate &&
+                formData.dateType.multiDayEndDate
+              ) ||
+              !!(
+                formData.dateType.isRecurring &&
+                formData.dateType.recurrenceStartDate &&
+                formData.dateType.recurrenceEndDate
+              ) ||
+              !!(formData.dateType.date && formData.dateType.startTime && formData.dateType.endTime)
+            }
+            isRecurring={formData.dateType.isRecurring}
+            experienceType={formData.dateType.experienceType}
+            itineraryConfig={itineraryConfig}
+            itineraryDays={formData.itineraryDays}
+            itineraryStartDate={formData.dateType.itineraryStartDate}
+            selectedCommunity={formData.dateType.community}
+            selectedDate={formData.dateType.date}
+            selectedStartTime={formData.dateType.startTime}
+            selectedEndTime={formData.dateType.endTime}
+            selectedRecurringDays={formData.dateType.recurringDays}
+            selectedTimeSlots={formData.dateType.timeSlots}
+            selectedRecurrenceStartDate={formData.dateType.recurrenceStartDate}
+            selectedRecurrenceEndDate={formData.dateType.recurrenceEndDate}
+            multiDayStartDate={formData.dateType.multiDayStartDate}
+            multiDayStartTime={formData.dateType.multiDayStartTime}
+            multiDayEndDate={formData.dateType.multiDayEndDate}
+            multiDayEndTime={formData.dateType.multiDayEndTime}
+            aboutPhotos={formData.about.photos}
+            aboutTitle={formData.about.title}
+            aboutDescription={formData.about.description}
+            aboutVisibility={formData.about.visibility}
+            aboutWhatsIncluded={formData.about.whatsIncluded}
+            aboutWhatsNotIncluded={formData.about.whatsNotIncluded}
+            aboutLocation={formData.about.location}
+              aboutLocationImageUrl={formData.about.placeImageUrl}
+            aboutMeetingPoint={formData.about.meetingPoint}
+            aboutMeetingTime={formData.about.meetingTime}
+            aboutCategories={formData.about.categories}
+            ticketsItems={formData.tickets.items}
+            ticketsCommissionPayer={formData.tickets.commission}
+            invitedGuests={formData.invite.invitedGuests.map((guest) => ({
+              ...guest,
+              name: guest.email.split('@')[0],
+            }))}
+            invitedCommunityIds={formData.invite.invitedCommunityIds}
+            allCommunities={communitiesForSelector}
+            selectedWallet={formData.wallet.selectedWallet}
+          />
         }
       />
     </>

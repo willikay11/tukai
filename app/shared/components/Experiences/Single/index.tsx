@@ -58,7 +58,7 @@ export const SingleExperience = ({
 
     return (
       <div className="flex flex-col">
-        <div className="relative w-full aspect-[4/3] overflow-hidden rounded-xl">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl">
           {coverPhoto && !hasError ? (
             <Image
               src={coverPhoto}

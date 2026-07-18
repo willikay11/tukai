@@ -4,10 +4,6 @@ export const metadata: Metadata = {
   title: 'Tukai - Create Experience',
 };
 
-export default function CreateExperienceLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function CreateExperienceLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

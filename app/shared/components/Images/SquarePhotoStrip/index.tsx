@@ -26,18 +26,15 @@ export const SquarePhotoStrip = ({
 
   // ─── Hero variant (full-width square carousel) ────────────────
   if (variant === 'hero') {
-    const scrollTo = useCallback(
-      (index: number) => {
-        if (!scrollRef.current) return;
-        const containerWidth = scrollRef.current.clientWidth;
-        scrollRef.current.scrollTo({
-          left: index * containerWidth,
-          behavior: 'smooth',
-        });
-        setActiveIndex(index);
-      },
-      [],
-    );
+    const scrollTo = useCallback((index: number) => {
+      if (!scrollRef.current) return;
+      const containerWidth = scrollRef.current.clientWidth;
+      scrollRef.current.scrollTo({
+        left: index * containerWidth,
+        behavior: 'smooth',
+      });
+      setActiveIndex(index);
+    }, []);
 
     const handleScroll = useCallback(() => {
       if (!scrollRef.current) return;
@@ -71,7 +68,7 @@ export const SquarePhotoStrip = ({
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="relative w-full aspect-[4/3] overflow-x-auto scrollbar-hide rounded-2xl"
+          className="relative aspect-[4/3] w-full overflow-x-auto rounded-2xl scrollbar-hide"
           style={{
             scrollSnapType: 'x mandatory',
             WebkitOverflowScrolling: 'touch',
@@ -81,7 +78,7 @@ export const SquarePhotoStrip = ({
             {photos.map((photo, index) => (
               <div
                 key={index}
-                className="relative flex-shrink-0 w-full h-full"
+                className="relative h-full w-full flex-shrink-0"
                 style={{ scrollSnapAlign: 'start' }}
               >
                 <Image
@@ -102,7 +99,7 @@ export const SquarePhotoStrip = ({
           <button
             type="button"
             onClick={() => scrollTo(activeIndex - 1)}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:bg-white transition-colors z-10"
+            className="absolute left-4 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm transition-colors hover:bg-white"
             aria-label="Previous photo"
           >
             <IconComponent iconName="ArrowLeft01Icon" size={18} className="text-gray-800" />
@@ -114,7 +111,7 @@ export const SquarePhotoStrip = ({
           <button
             type="button"
             onClick={() => scrollTo(activeIndex + 1)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:bg-white transition-colors z-10"
+            className="absolute right-4 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm transition-colors hover:bg-white"
             aria-label="Next photo"
           >
             <IconComponent iconName="ArrowRight01Icon" size={18} className="text-gray-800" />
@@ -122,14 +119,14 @@ export const SquarePhotoStrip = ({
         )}
 
         {/* Dots — bottom center */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+        <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
           {photos.map((_, index) => (
             <button
               key={index}
               type="button"
               onClick={() => scrollTo(index)}
-              className={`w-2 h-2 rounded-full transition-all ${
-                index === activeIndex ? 'bg-white w-6' : 'bg-white/50'
+              className={`h-2 w-2 rounded-full transition-all ${
+                index === activeIndex ? 'w-6 bg-white' : 'bg-white/50'
               }`}
               aria-label={`Photo ${index + 1}`}
             />

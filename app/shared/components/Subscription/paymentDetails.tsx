@@ -10,6 +10,9 @@ import { PaymentForm, paymentFormSchema } from '@/components/ui/paymentForm';
 
 export const PaymentDetails = ({
   onSuccess,
+  onSubmitStart,
+  onError,
+  submitLabel = 'Submit',
 }: {
   onSuccess: (paymentMethod: {
     paymentMethodId: string;
@@ -17,6 +20,10 @@ export const PaymentDetails = ({
     paymentOption: string;
     verificationResponse: string;
   }) => void;
+  // Step-wiring callbacks for the in-modal flow — optional, no-ops elsewhere
+  onSubmitStart?: () => void;
+  onError?: (message?: string) => void;
+  submitLabel?: string;
 }) => {
   const formRef = useRef<any>();
 
@@ -30,6 +37,8 @@ export const PaymentDetails = ({
     if (paymentOption === 'mobile_money') {
       data.phoneNumber = values.phoneNumber;
     }
+
+    onSubmitStart?.();
 
     const response = await fetch('/auth/subscribe/api', {
       method: 'POST',
@@ -45,6 +54,7 @@ export const PaymentDetails = ({
         description: res.message,
         variant: 'destructive',
       });
+      onError?.(res.message);
       return;
     }
 
@@ -83,7 +93,7 @@ export const PaymentDetails = ({
         disabled={formRef.current?.formState.isSubmitting}
         onClick={() => formRef.current?.submit()}
       >
-        {formRef.current?.formState.isSubmitting ? 'Submitting...' : 'Submit'}
+        {formRef.current?.formState.isSubmitting ? 'Submitting...' : submitLabel}
       </Button>
     </>
   );

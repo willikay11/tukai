@@ -22,10 +22,12 @@ const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberInputProps>(
     }, [countryCode, localNumber, onChange]);
 
     return (
-      <div className={cn(
-        'flex h-14 w-full items-center rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm focus-within:border-transparent focus-within:ring-[1px] focus-within:ring-primary md:text-sm',
-        className,
-      )}>
+      <div
+        className={cn(
+          'flex h-14 w-full items-center rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm focus-within:border-transparent focus-within:ring-[1px] focus-within:ring-primary md:text-sm',
+          className,
+        )}
+      >
         <Select onValueChange={(val) => setCountryCode(val)}>
           <SelectTrigger
             className="focus:ring-none w-fit border-none px-0 pl-2 pr-2 shadow-none ring-transparent"

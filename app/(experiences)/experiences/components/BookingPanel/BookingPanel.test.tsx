@@ -59,7 +59,8 @@ jest.mock('@/app/shared/hooks/useExperiences', () => ({
 const experience = {
   id: 'a97edd4f-763f-49ef-a9bc-fea0a36c1dbe',
   title: 'Gikuyu na Mumbi',
-  recurrenceRule: 'DTSTART:20260827T110000Z\nRRULE:FREQ=WEEKLY;UNTIL=20260829T205959Z;BYDAY=TH,SA,FR',
+  recurrenceRule:
+    'DTSTART:20260827T110000Z\nRRULE:FREQ=WEEKLY;UNTIL=20260829T205959Z;BYDAY=TH,SA,FR',
   startDate: '2026-08-27T14:00:00Z',
   endDate: '2026-08-29T21:00:00Z',
   currency: 'Ksh.',

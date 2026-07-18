@@ -1,12 +1,12 @@
 'use client';
 
+import { PreviewCategoriesSection } from '@/app/(experiences)/experiences/create/components/PreviewCategoriesSection';
 import {
   PreviewCommunitiesSection,
   PreviewGuestsSection,
   PreviewLocationSection,
 } from '@/app/shared/components/Preview';
 import { PreviewPanel } from '@/app/shared/components/PreviewPanel';
-import { PreviewCategoriesSection } from '@/app/(experiences)/experiences/create/components/PreviewCategoriesSection';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Interest } from '@/types/interest';
 

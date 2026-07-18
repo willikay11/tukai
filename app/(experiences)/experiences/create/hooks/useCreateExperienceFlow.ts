@@ -145,6 +145,8 @@ export interface FormData {
     whatsNotIncluded: string;
     location: string;
     locationPlaceId: string;
+    placeId: string | null;
+    placeImageUrl: string | null;
     meetingPoint: string;
     meetingTime: string | null;
     categories: Interest[];
@@ -233,6 +235,8 @@ const initialFormData: FormData = {
     whatsNotIncluded: '',
     location: '',
     locationPlaceId: '',
+    placeId: null,
+    placeImageUrl: null,
     meetingPoint: '',
     meetingTime: null,
     categories: [],
@@ -324,10 +328,11 @@ export const useCreateExperienceFlow = () => {
   const [isSavingExperience, setIsSavingExperience] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
+
   // Track pending debounced saves in ItineraryDayPill components
-  const pendingFlushersRef = useRef<
-    Map<string, () => { title?: string; description?: string }>
-  >(new Map());
+  const pendingFlushersRef = useRef<Map<string, () => { title?: string; description?: string }>>(
+    new Map(),
+  );
 
   const registerFlusher = useCallback(
     (dayId: string, flusher: () => { title?: string; description?: string }) => {
@@ -339,7 +344,10 @@ export const useCreateExperienceFlow = () => {
     [],
   );
 
-  const flushAllPendingSaves = useCallback((): Record<string, { title?: string; description?: string }> => {
+  const flushAllPendingSaves = useCallback((): Record<
+    string,
+    { title?: string; description?: string }
+  > => {
     const flushed: Record<string, { title?: string; description?: string }> = {};
     pendingFlushersRef.current.forEach((fn, dayId) => {
       flushed[dayId] = fn();
@@ -460,8 +468,15 @@ export const useCreateExperienceFlow = () => {
           isTempId: false,
         })) || [],
       categories: experience.categories || [],
-      location: experience.location?.formattedAddress || experience.location?.city || '',
+      location:
+        experience.place?.title ??
+        (experience.location?.formattedAddress || experience.location?.city || ''),
       locationPlaceId: experience.location?.googleMapPlaceId ?? '',
+      placeId: experience.place?.id ?? null,
+      placeImageUrl:
+        experience.place?.photos?.find((photo: Photo) => photo.isCover)?.photo ??
+        experience.place?.photos?.[0]?.photo ??
+        null,
       meetingPoint: experience.meetingPlace || '',
       meetingTime: experience.meetingTime || null,
       whatsIncluded: experience.whatsIncluded ?? '',
@@ -683,10 +698,19 @@ export const useCreateExperienceFlow = () => {
             activityApiId: a.id,
             title: a.title ?? '',
             description: a.description ?? '',
-            placeId: a.location?.id ?? a.location ?? null,
-            placeName: a.location?.title ?? null,
-            placeImageUrl: a.location?.photos?.[0]?.photo ?? null,
-            placeCity: a.location?.city ?? null,
+            // The API nests the rich place object under `place`; `location`
+            // is only the location uuid
+            placeId: a.place?.id ?? null,
+            placeName: a.place?.title ?? null,
+            placeImageUrl:
+              a.place?.photos?.find((photo: any) => photo.isCover)?.photo ??
+              a.place?.photos?.[0]?.photo ??
+              null,
+            placeCity: a.place?.location?.city ?? null,
+            locationId:
+              (typeof a.location === 'string' ? a.location : a.location?.id) ??
+              a.place?.location?.id ??
+              null,
             startTime: a.startTime ?? null,
             endTime: a.endTime ?? null,
           })),
@@ -1105,11 +1129,14 @@ export const useCreateExperienceFlow = () => {
     const fetchResponse = await fetchItineraryDays(experienceId);
     const apiDays = fetchResponse.data?.results || [];
 
-    // Map API response to form state with correct apiIds
-    const itineraryDays: ItineraryDayFormValue[] = apiDays.map((day: any) => ({
+    // Map API response to form state with correct apiIds.
+    // fetchItineraryDays camel-cases the response, so day_number arrives as
+    // dayNumber — reading only the snake key left dayNumber undefined, which
+    // cascaded into Invalid Date crashes in the itinerary preview
+    const itineraryDays: ItineraryDayFormValue[] = apiDays.map((day: any, index: number) => ({
       id: uuidv4(),
       apiId: day.id,
-      dayNumber: day.day_number,
+      dayNumber: day.dayNumber ?? day.day_number ?? index + 1,
       title: day.title || '',
       description: day.description || '',
       activities: [],
@@ -1180,9 +1207,11 @@ export const useCreateExperienceFlow = () => {
       const basePayload = {
         title: formData.about.title,
         description: formData.about.description,
-        ...(formData.about.locationPlaceId
-          ? { googleMapPlaceId: formData.about.locationPlaceId }
-          : {}),
+        ...(formData.about.placeId
+          ? { placeId: formData.about.placeId }
+          : formData.about.locationPlaceId
+            ? { googleMapPlaceId: formData.about.locationPlaceId }
+            : {}),
         startDate: formatDateWithTime(startDateValue, startTime),
         endDate: formatDateWithTime(endDateValue, endTime, true),
         recurrence_rule: buildRecurrenceRule(formData.dateType),
@@ -1293,7 +1322,7 @@ export const useCreateExperienceFlow = () => {
           if (timeSlots.length > 0) {
             try {
               const slotResults = await Promise.all(
-                timeSlots.map((slot, index) =>
+                timeSlots.map((slot) =>
                   createSlotTemplate(
                     newExperienceId,
                     buildSlotTemplatePayload(slot, buildRecurrenceRule(formData.dateType)),
@@ -1301,12 +1330,15 @@ export const useCreateExperienceFlow = () => {
                 ),
               );
 
-              const records: SlotTemplateRecord[] = timeSlots.map((slot, i) => ({
-                uiId: `slot-${i}`,
-                templateId: slotResults[i].data.id,
-                startTime: slot.startTime,
-                endTime: slot.endTime,
-              }));
+              // Store the created records so later syncs can diff against them
+              setSlotTemplateRecords(
+                timeSlots.map((slot, i) => ({
+                  uiId: `slot-${i}`,
+                  templateId: slotResults[i].data.id,
+                  startTime: slot.startTime,
+                  endTime: slot.endTime,
+                })),
+              );
             } catch (slotError) {
               console.error('[handleSaveAbout] Slot template creation failed:', slotError);
               toast({
@@ -1320,7 +1352,6 @@ export const useCreateExperienceFlow = () => {
         }
 
         // Create itinerary days for itinerary experiences
-        const isItinerary = formData.dateType.experienceType === 'itinerary';
         if (isItinerary) {
           const startDate = formData.dateType.itineraryStartDate;
           const endDate = formData.dateType.itineraryEndDate;
@@ -1521,7 +1552,14 @@ export const useCreateExperienceFlow = () => {
     } finally {
       setIsSavingExperience(false);
     }
-  }, [experienceId, formData.itineraryDays, handleStepChange, toast, flushAllPendingSaves, updateItineraryDays]);
+  }, [
+    experienceId,
+    formData.itineraryDays,
+    handleStepChange,
+    toast,
+    flushAllPendingSaves,
+    updateItineraryDays,
+  ]);
 
   const handlePublish = useCallback(async () => {
     setIsSavingExperience(true);

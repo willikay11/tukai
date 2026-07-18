@@ -17,8 +17,8 @@ import {
   updateItineraryDayMetadata,
 } from '@/services/experience';
 import { ItineraryActivity, ItineraryDayFormValue } from '@/types/itinerary';
-import { parseApiError } from '@/utils/parseApiError';
 import { sortActivitiesByTime } from '@/utils/itinerary-utils';
+import { parseApiError } from '@/utils/parseApiError';
 
 import { AddPlaceModal } from '../AddPlaceModal';
 
@@ -33,7 +33,10 @@ interface ItineraryDayPillProps {
   isSaving?: boolean;
   error?: string;
   isParentSaving?: boolean;
-  registerFlusher?: (dayId: string, flusher: () => { title?: string; description?: string }) => () => void;
+  registerFlusher?: (
+    dayId: string,
+    flusher: () => { title?: string; description?: string },
+  ) => () => void;
 }
 
 const getDayDate = (itineraryStartDate: string | null, dayNumber: number): string | null => {
@@ -350,9 +353,11 @@ export const ItineraryDayPill = ({
 
       try {
         const index = day.activities.indexOf(activity);
+        console.log("activity", activity);
         const payload: ItineraryActivityPayload = {
           title: activity.title,
           description: activity.description,
+          place_id: activity.placeId,
           location: activity.locationId,
           start_time: activity.startTime,
           end_time: activity.endTime,

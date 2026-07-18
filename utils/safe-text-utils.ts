@@ -2,7 +2,8 @@ import sanitizeHtml from 'sanitize-html';
 
 // Sanitize text to prevent XSS (if content is dynamic) and ensure any
 // anchor tags receive the expected link classes.
-export const safeText = (text: string) => sanitizeHtml(text, {
+export const safeText = (text: string) =>
+  sanitizeHtml(text, {
     // Ensure class (and optionally target/rel) are preserved on <a>
     allowedAttributes: {
       a: ['href', 'name', 'target', 'rel', 'class'],

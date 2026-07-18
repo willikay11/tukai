@@ -114,9 +114,7 @@ export const TicketModal = ({
               <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
                 Ticket Type
               </p>
-              <p className="mt-1 text-sm font-semibold text-gray-900">
-                {currentTicket.ticketType}
-              </p>
+              <p className="mt-1 text-sm font-semibold text-gray-900">{currentTicket.ticketType}</p>
             </div>
             {currentTicket.holderName && (
               <div>

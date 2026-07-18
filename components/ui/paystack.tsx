@@ -3,34 +3,31 @@
 import { useEffect, useRef } from 'react';
 
 import { toast } from '@/app/shared/hooks/useToast';
-import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
 
 export const Paystack = ({
-  isOpen,
-  closeModal,
+  onPaymentSuccess,
   url,
 }: {
-  isOpen: boolean;
-  closeModal: (paymentSuccess: boolean) => void;
+  onPaymentSuccess: (paymentSuccess: boolean) => void;
   url: string;
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!url) return;
 
     // Listen for postMessage events from Paystack
     const handleMessage = (event: MessageEvent) => {
       // Check if Paystack sends success/cancel events
       if (event.data?.status === 'success' || event.data?.event === 'success') {
-        closeModal(true);
+        onPaymentSuccess(true);
       } else if (event.data?.status === 'cancelled' || event.data?.event === 'cancelled') {
         toast({
           title: 'Error',
           description: 'Payment was cancelled.',
           variant: 'destructive',
         });
-        closeModal(false);
+        onPaymentSuccess(false);
       }
     };
 
@@ -45,7 +42,7 @@ export const Paystack = ({
 
         // Check if URL indicates completion (adjust based on Paystack's redirect URLs)
         if (iframeUrl?.includes('success') || iframeUrl?.includes('callback')) {
-          closeModal(true);
+          onPaymentSuccess(true);
           clearInterval(pollInterval);
         }
       } catch (e) {
@@ -58,19 +55,15 @@ export const Paystack = ({
       window.removeEventListener('message', handleMessage);
       clearInterval(pollInterval);
     };
-  }, [isOpen, closeModal]);
+  }, [url, onPaymentSuccess]);
 
   return (
-    <AlertDialog open={isOpen}>
-      <AlertDialogContent className="h-[80vh] w-[calc(100%-32px)] rounded-lg p-0 sm:h-[36rem] sm:w-[40rem] sm:max-w-none">
-        <iframe
-          ref={iframeRef}
-          src={url}
-          width="100%"
-          height="100%"
-          className="rounded-lg border-0"
-        />
-      </AlertDialogContent>
-    </AlertDialog>
+    <iframe
+      ref={iframeRef}
+      src={url}
+      width="100%"
+      height="100%"
+      className="rounded-lg border-0"
+    />
   );
 };

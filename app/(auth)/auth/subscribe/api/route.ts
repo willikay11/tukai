@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
 export async function CreateBillingDetails(data: any) {
   try {
-    const { paymentOption, countryCode, phoneNumber } = data;
+    const { paymentOption, countryCode, phoneNumber, townCity, postcode } = data;
 
     const session = await getAuthSession();
     const token = session?.user?.accessToken;
@@ -33,11 +33,14 @@ export async function CreateBillingDetails(data: any) {
           billing_address: {
             user: session?.user?.id,
             country: countryCode,
+            ...(townCity ? { town: townCity } : {}),
+            ...(postcode ? { postal_code: postcode } : {}),
             is_active: true,
           },
           payment_method: {
             user: session?.user?.id,
-            payment_option: paymentOption,
+            payment_option: 'card',
+            // payment_option: paymentOption,
             mobile_money_phone: phoneNumber,
             is_active: true,
           },
