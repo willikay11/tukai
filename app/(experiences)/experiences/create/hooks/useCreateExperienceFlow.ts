@@ -1109,11 +1109,14 @@ export const useCreateExperienceFlow = () => {
     const fetchResponse = await fetchItineraryDays(experienceId);
     const apiDays = fetchResponse.data?.results || [];
 
-    // Map API response to form state with correct apiIds
-    const itineraryDays: ItineraryDayFormValue[] = apiDays.map((day: any) => ({
+    // Map API response to form state with correct apiIds.
+    // fetchItineraryDays camel-cases the response, so day_number arrives as
+    // dayNumber — reading only the snake key left dayNumber undefined, which
+    // cascaded into Invalid Date crashes in the itinerary preview
+    const itineraryDays: ItineraryDayFormValue[] = apiDays.map((day: any, index: number) => ({
       id: uuidv4(),
       apiId: day.id,
-      dayNumber: day.day_number,
+      dayNumber: day.dayNumber ?? day.day_number ?? index + 1,
       title: day.title || '',
       description: day.description || '',
       activities: [],

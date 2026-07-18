@@ -33,9 +33,12 @@ export const PreviewItinerarySection = ({
   };
 
   const getDayDate = (dayNumber: number): string | null => {
-    if (!itineraryStartDate) return null;
+    if (!itineraryStartDate || !Number.isFinite(dayNumber)) return null;
     const start = new Date(itineraryStartDate);
     start.setDate(start.getDate() + dayNumber - 1);
+    // An unparseable start date (or bad day number) yields an Invalid Date,
+    // where toISOString() throws a RangeError
+    if (Number.isNaN(start.getTime())) return null;
     return start.toISOString().split('T')[0];
   };
 
