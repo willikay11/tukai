@@ -231,13 +231,13 @@ export const ReviewLayout = ({
           <div className="flex gap-3">
             <Button
               type="button"
-              variant="outline"
+              variant="outline-primary"
               onClick={() => {
                 console.log('Save & Exit clicked');
                 onCancel?.();
               }}
               disabled={isPublishing}
-              className="rounded-full"
+              className="text-xs font-semibold"
             >
               Save & Exit
             </Button>

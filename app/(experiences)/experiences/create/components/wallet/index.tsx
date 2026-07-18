@@ -369,8 +369,8 @@ export const CreateExperienceWallet = ({
             {!hideSaveAndExit && (
               <Button
                 type="button"
-                variant="outline"
-                className="rounded-full border-primary px-6 text-xs font-semibold text-primary"
+                variant="outline-primary"
+                className="px-6 text-xs font-semibold"
               >
                 {saveAndExitActionLabel}
               </Button>

@@ -128,7 +128,7 @@ export const ItineraryDaysStep = ({
           Cancel
         </button>
         <div className="flex gap-3">
-          <Button type="button" variant="outline" className="rounded-full">
+          <Button type="button" variant="outline-primary" className="text-xs font-semibold">
             Save & Exit
           </Button>
           <Button

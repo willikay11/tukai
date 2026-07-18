@@ -652,8 +652,8 @@ export const CreateExperienceAbout = ({
                 {!hideSaveAndExit && (
                   <Button
                     type="button"
-                    variant="outline"
-                    className="rounded-full text-xs font-semibold"
+                    variant="outline-primary"
+                    className="text-xs font-semibold"
                   >
                     {saveAndExitActionLabel}
                   </Button>
