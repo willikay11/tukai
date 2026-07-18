@@ -13,6 +13,7 @@ interface InviteGuestsStepProps {
   experienceId?: string | null;
   experience?: Experience;
   onNext?: () => void;
+  onSaveAndExit?: () => void;
   onCancel?: () => void;
   onPreview?: () => void;
 }
@@ -23,6 +24,7 @@ export const InviteGuestsStep = ({
   experienceId,
   experience,
   onNext,
+  onSaveAndExit,
   onCancel,
   onPreview,
 }: InviteGuestsStepProps) => {
@@ -44,6 +46,7 @@ export const InviteGuestsStep = ({
       onNext={onNext}
       onPreview={onPreview}
       cancelActionLabel="Cancel"
+      onSaveAndExit={onSaveAndExit}
       saveAndExitActionLabel="Save & Exit"
       nextActionLabel="Next"
       hideSaveAndExit={false}

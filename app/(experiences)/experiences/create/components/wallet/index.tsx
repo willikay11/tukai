@@ -19,6 +19,7 @@ interface CreateExperienceWalletProps {
   saveAndExitActionLabel?: string;
   previewAndPublishActionLabel?: string;
   hideSaveAndExit?: boolean;
+  onSaveAndExit?: () => void;
 
   // Data props
   wallets: Wallet[];
@@ -49,6 +50,7 @@ export const CreateExperienceWallet = ({
   saveAndExitActionLabel = 'Save & Exit',
   previewAndPublishActionLabel = 'Preview',
   hideSaveAndExit = false,
+  onSaveAndExit,
   wallets,
   isWalletsLoading,
   selectedWallet,
@@ -369,8 +371,9 @@ export const CreateExperienceWallet = ({
             {!hideSaveAndExit && (
               <Button
                 type="button"
-                variant="outline"
-                className="rounded-full border-primary px-6 text-xs font-semibold text-primary"
+                variant="outline-primary"
+                onClick={onSaveAndExit}
+                className="px-6 text-xs font-semibold"
               >
                 {saveAndExitActionLabel}
               </Button>

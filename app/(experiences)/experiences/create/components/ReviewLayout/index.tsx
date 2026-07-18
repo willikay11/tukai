@@ -49,6 +49,7 @@ interface ReviewLayoutProps {
       | 'wallet',
   ) => void;
   onCancel?: () => void;
+  onSaveAndExit?: () => void;
   onPublish?: () => void;
   showActionBar?: boolean;
 }
@@ -61,6 +62,7 @@ export const ReviewLayout = ({
   isPublishing = false,
   onEditSection,
   onCancel,
+  onSaveAndExit,
   onPublish,
   showActionBar = true,
 }: ReviewLayoutProps) => {
@@ -231,13 +233,10 @@ export const ReviewLayout = ({
           <div className="flex gap-3">
             <Button
               type="button"
-              variant="outline"
-              onClick={() => {
-                console.log('Save & Exit clicked');
-                onCancel?.();
-              }}
+              variant="outline-primary"
+              onClick={() => (onSaveAndExit ?? onCancel)?.()}
               disabled={isPublishing}
-              className="rounded-full"
+              className="text-xs font-semibold"
             >
               Save & Exit
             </Button>

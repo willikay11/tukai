@@ -251,13 +251,13 @@ export const AboutStep = ({
         <div className="flex-1" />
         <Button
           type="button"
-          variant="outline"
+          variant="outline-primary"
           onClick={() => {
             console.log('[AboutStep] Save & Edit clicked');
             onSaveEdit();
           }}
           disabled={isSaving}
-          className="rounded-[50px] text-xs font-medium"
+          className="text-xs font-semibold"
         >
           Save & Exit
         </Button>
