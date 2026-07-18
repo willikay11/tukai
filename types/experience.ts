@@ -21,6 +21,7 @@ export type Experience = {
   ticketSalesClosingCondition: 'before_end' | 'before_start';
   priceStartsFrom: { amount: number; currency: string };
   ticketsAvailable: boolean;
+  reservedTicketsCount?: number;
   isSoldOut: boolean;
   isPublic: boolean;
   isBookmarked: boolean;

@@ -38,6 +38,7 @@ export const MultiDayDateSection = ({
             value={startDate || undefined}
             onChange={onStartDateChange}
             minDate={new Date()}
+            placeholder='Start date'
           />
           {errors.multiDayStartDate && (
             <p className="mt-1 text-xs text-red-500">{errors.multiDayStartDate}</p>
@@ -63,7 +64,10 @@ export const MultiDayDateSection = ({
           <DatePicker
             value={endDate || undefined}
             onChange={onEndDateChange}
-            minDate={new Date()}
+            // The experience can't end before it starts — same constraint as
+            // the itinerary and recurrence date pickers
+            minDate={startDate ? new Date(startDate) : new Date()}
+            placeholder='End date'
           />
           {errors.multiDayEndDate && (
             <p className="mt-1 text-xs text-red-500">{errors.multiDayEndDate}</p>

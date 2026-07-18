@@ -42,7 +42,7 @@ export const AuthActions = () => {
         return;
       }
 
-      router.push('/communities/create');
+      router.push('/experiences/create');
       return;
     }
 
@@ -55,7 +55,7 @@ export const AuthActions = () => {
     if (!pendingCreateAfterLogin || !session?.user) return;
 
     if (hasSubscribed) {
-      router.push('/communities/create');
+      router.push('/experiences/create');
     } else {
       setShowJoinPremium(true);
     }
@@ -67,7 +67,7 @@ export const AuthActions = () => {
     <div className="flex items-center">
       {hasSubscribed ? (
         <Link
-          href="/communities/create"
+          href="/experiences/create"
           className="mr-2 hidden flex-shrink-0 gap-1.5 rounded-full px-6 text-gray-900 md:inline-flex"
         >
           <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />

@@ -12,6 +12,7 @@ import { BucketListCard } from '@/app/(experiences)/experiences/components/Bucke
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
 import { FeaturedExperienceBanner } from '@/app/(experiences)/experiences/components/FeaturedExperienceBanner';
+import { HostingCard } from '@/app/(experiences)/experiences/components/HostingCard';
 import { Experiences } from '@/app/(experiences)/experiences/components/List/experiences';
 import { ReservationCard } from '@/app/(experiences)/experiences/components/ReservationCard';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
@@ -145,6 +146,14 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const reservations: Reservation[] = groupTicketPurchases(purchasesResponse?.data?.results ?? []);
   const reservedExperiences: Experience[] = reservedExperiencesResponse?.data?.results ?? [];
   const isLoadingReservations = isLoadingPurchases || isLoadingReservedExperiences;
+
+  // Hosting: everything the user created, across all statuses
+  const isHosting = activeTab === 'hosting';
+  const { data: hostedResponse, isLoading: isLoadingHosted } = useExperiences(
+    { page: 1, page_size: 100, hosted_by: isHosting ? userId : undefined },
+    isHosting && Boolean(userId),
+  );
+  const hostedExperiences: Experience[] = hostedResponse?.data?.results ?? [];
 
   const [downloadingKey, setDownloadingKey] = useState<string | null>(null);
 
@@ -372,15 +381,36 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             </div>
           )}
           {activeTab === 'hosting' && (
-            <Experiences
-              key={activeTab}
-              category={activeTab}
-              isPortal={false}
-              isBookedmarked={false}
-              isReserved={false}
-              isHosted={true}
-              noDataMessage="You are not hosting any experiences"
-            />
+            <div className="col-span-12 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+              <SectionHeader
+                title="Hosting"
+                subtitle="Every experience you host, in all statuses"
+              />
+
+              {isLoadingHosted ? (
+                <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index} className="h-[300px] animate-pulse rounded-2xl bg-gray-200" />
+                  ))}
+                </div>
+              ) : hostedExperiences.length === 0 ? (
+                <div className="flex flex-col items-center gap-4 py-8">
+                  <NoData message="You're not hosting any experiences yet" />
+                  <Button
+                    onClick={() => router.push('/experiences/create')}
+                    className="rounded-full px-6"
+                  >
+                    Create an experience
+                  </Button>
+                </div>
+              ) : (
+                <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {hostedExperiences.map((hostedExperience) => (
+                    <HostingCard key={hostedExperience.id} experience={hostedExperience} />
+                  ))}
+                </div>
+              )}
+            </div>
           )}
           {activeTab === 'reserved' && (
             <div className="col-span-12 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">

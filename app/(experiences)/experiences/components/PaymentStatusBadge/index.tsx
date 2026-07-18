@@ -1,4 +1,4 @@
-interface StatusConfig {
+export interface StatusConfig {
   label: string;
   dot: string;
   text: string;
@@ -17,8 +17,16 @@ const STATUS_CONFIG: Record<string, StatusConfig> = {
   expired: { label: 'Expired', dot: 'bg-gray-400', text: 'text-gray-500' },
 };
 
-export const PaymentStatusBadge = ({ status }: { status: string }) => {
-  const config = STATUS_CONFIG[status] ?? {
+export const PaymentStatusBadge = ({
+  status,
+  config: configMap = STATUS_CONFIG,
+}: {
+  status: string;
+  // Optional override so other features (e.g. hosting statuses) can reuse the
+  // same dot-badge with their own enum-driven map
+  config?: Record<string, StatusConfig>;
+}) => {
+  const config = configMap[status] ?? {
     label: status.charAt(0).toUpperCase() + status.slice(1),
     dot: 'bg-gray-400',
     text: 'text-gray-500',

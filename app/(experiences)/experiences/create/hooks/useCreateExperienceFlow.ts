@@ -324,6 +324,7 @@ export const useCreateExperienceFlow = () => {
   const [isSavingExperience, setIsSavingExperience] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
+
   // Track pending debounced saves in ItineraryDayPill components
   const pendingFlushersRef = useRef<Map<string, () => { title?: string; description?: string }>>(
     new Map(),
@@ -1296,7 +1297,7 @@ export const useCreateExperienceFlow = () => {
           if (timeSlots.length > 0) {
             try {
               const slotResults = await Promise.all(
-                timeSlots.map((slot, index) =>
+                timeSlots.map((slot) =>
                   createSlotTemplate(
                     newExperienceId,
                     buildSlotTemplatePayload(slot, buildRecurrenceRule(formData.dateType)),
@@ -1304,12 +1305,15 @@ export const useCreateExperienceFlow = () => {
                 ),
               );
 
-              const records: SlotTemplateRecord[] = timeSlots.map((slot, i) => ({
-                uiId: `slot-${i}`,
-                templateId: slotResults[i].data.id,
-                startTime: slot.startTime,
-                endTime: slot.endTime,
-              }));
+              // Store the created records so later syncs can diff against them
+              setSlotTemplateRecords(
+                timeSlots.map((slot, i) => ({
+                  uiId: `slot-${i}`,
+                  templateId: slotResults[i].data.id,
+                  startTime: slot.startTime,
+                  endTime: slot.endTime,
+                })),
+              );
             } catch (slotError) {
               console.error('[handleSaveAbout] Slot template creation failed:', slotError);
               toast({
@@ -1323,7 +1327,6 @@ export const useCreateExperienceFlow = () => {
         }
 
         // Create itinerary days for itinerary experiences
-        const isItinerary = formData.dateType.experienceType === 'itinerary';
         if (isItinerary) {
           const startDate = formData.dateType.itineraryStartDate;
           const endDate = formData.dateType.itineraryEndDate;
