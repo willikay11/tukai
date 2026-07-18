@@ -14,6 +14,7 @@ interface ItineraryDaysStepProps {
   onChange: (days: ItineraryDayFormValue[]) => void;
   onSaveContinue: () => void;
   onCancel: () => void;
+  onSaveAndExit?: () => void;
   isSaving: boolean;
   isParentSaving?: boolean;
   registerFlusher?: (
@@ -29,6 +30,7 @@ export const ItineraryDaysStep = ({
   onChange,
   onSaveContinue,
   onCancel,
+  onSaveAndExit,
   isSaving,
   isParentSaving = false,
   registerFlusher,
@@ -128,7 +130,12 @@ export const ItineraryDaysStep = ({
           Cancel
         </button>
         <div className="flex gap-3">
-          <Button type="button" variant="outline-primary" className="text-xs font-semibold">
+          <Button
+            type="button"
+            variant="outline-primary"
+            onClick={onSaveAndExit}
+            className="text-xs font-semibold"
+          >
             Save & Exit
           </Button>
           <Button

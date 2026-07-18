@@ -1193,7 +1193,7 @@ export const useCreateExperienceFlow = () => {
       if (!startDateValue || !endDateValue) {
         setApiError('Please set start and end dates before continuing.');
         setIsSavingExperience(false);
-        return;
+        return false;
       }
 
       if (!isItinerary && (!startTime || !endTime)) {
@@ -1201,7 +1201,7 @@ export const useCreateExperienceFlow = () => {
           'Please set a start date, end date, start time and end time before continuing.',
         );
         setIsSavingExperience(false);
-        return;
+        return false;
       }
 
       const basePayload = {
@@ -1384,6 +1384,7 @@ export const useCreateExperienceFlow = () => {
         formData.dateType.experienceType === 'itinerary' ? 'itinerary-days' : 'dates-tickets';
 
       setActiveStep(nextStep);
+      return true;
     } catch (error: any) {
       const message = parseApiError(error, 'Failed to save experience');
       setApiError(message);
@@ -1393,6 +1394,7 @@ export const useCreateExperienceFlow = () => {
         variant: 'destructive',
       });
       console.error('[handleSaveAbout] Error:', error);
+      return false;
     } finally {
       setIsSavingExperience(false);
     }
@@ -1541,6 +1543,7 @@ export const useCreateExperienceFlow = () => {
 
       // Advance to tickets step
       handleStepChange('dates-tickets');
+      return true;
     } catch (error: any) {
       const message = parseApiError(error, 'Failed to save itinerary days');
       setApiError(message);
@@ -1549,6 +1552,7 @@ export const useCreateExperienceFlow = () => {
         description: message,
         variant: 'destructive',
       });
+      return false;
     } finally {
       setIsSavingExperience(false);
     }

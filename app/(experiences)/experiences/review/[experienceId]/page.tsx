@@ -119,6 +119,7 @@ export default function ExperienceReviewPage() {
               wallet={activeWallet}
               onEditSection={setActiveEditSection}
               onCancel={() => router.back()}
+              onSaveAndExit={() => router.push('/experiences?category=hosting')}
               onPublish={handlePublish}
               isPublishing={isPublishing}
               showActionBar={!activeEditSection}

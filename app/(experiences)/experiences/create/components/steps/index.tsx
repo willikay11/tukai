@@ -222,8 +222,8 @@ interface CreateExperienceStepsProps {
   };
   onPreviewAndPublish?: () => void;
   handlers?: {
-    handleSaveAbout?: () => Promise<void>;
-    handleSaveItineraryDays?: () => Promise<void>;
+    handleSaveAbout?: () => Promise<boolean | void>;
+    handleSaveItineraryDays?: () => Promise<boolean | void>;
     handlePublish?: () => Promise<void>;
     handleUpdateFeesAllocation?: () => Promise<void>;
   };
@@ -295,6 +295,9 @@ export const CreateExperienceSteps = ({
   setSlotTemplateRecords,
 }: CreateExperienceStepsProps) => {
   const router = useRouter();
+
+  // Save & Exit lands on the user's hosted experiences
+  const exitToHosting = () => router.push('/experiences?category=hosting');
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const canAccessDetailsSteps = Boolean(
@@ -515,10 +518,10 @@ export const CreateExperienceSteps = ({
                 errors={aboutErrors}
                 onFormDataChange={updateAboutFormData}
                 onCancel={() => handleStepChange('community')}
-                onSaveEdit={() => {
-                  if (validateAbout()) {
-                    // Stay on about step
-                  }
+                onSaveEdit={async () => {
+                  if (!validateAbout()) return;
+                  const saved = await handlers?.handleSaveAbout?.();
+                  if (saved !== false) exitToHosting();
                 }}
                 isSaving={isSavingExperience}
                 onSaveContinue={async () => {
@@ -560,6 +563,10 @@ export const CreateExperienceSteps = ({
                   } else {
                     handleStepChange('dates-tickets');
                   }
+                }}
+                onSaveAndExit={async () => {
+                  const saved = await handlers?.handleSaveItineraryDays?.();
+                  if (saved !== false) exitToHosting();
                 }}
                 onCancel={() => handleStepChange('about')}
                 isSaving={isSavingExperience}
@@ -636,6 +643,7 @@ export const CreateExperienceSteps = ({
                 experience={experience}
                 onNext={() => handleStepChange('wallet')}
                 onCancel={() => handleStepChange('dates-tickets')}
+                onSaveAndExit={exitToHosting}
                 onPreview={handlePreviewClick}
               />
             ) : (
@@ -669,6 +677,7 @@ export const CreateExperienceSteps = ({
                   }
                 }
                 onPreviewAndPublish={onPreviewAndPublish || (() => {})}
+                onSaveAndExit={exitToHosting}
               />
             ) : (
               <CreateExperienceWallet

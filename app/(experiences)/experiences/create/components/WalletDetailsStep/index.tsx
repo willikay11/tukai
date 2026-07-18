@@ -24,6 +24,7 @@ interface WalletDetailsStepProps {
     isPatchingPhoneWallet: boolean;
   };
   onPreviewAndPublish: () => void;
+  onSaveAndExit?: () => void;
 }
 
 export const WalletDetailsStep = ({
@@ -34,6 +35,7 @@ export const WalletDetailsStep = ({
   isWalletsLoading,
   walletMutations,
   onPreviewAndPublish,
+  onSaveAndExit,
 }: WalletDetailsStepProps) => {
   const { toast } = useToast();
 
@@ -165,6 +167,7 @@ export const WalletDetailsStep = ({
       onPatchBankWallet={handlePatchBankWallet}
       isPatchingBankWallet={walletMutations.isPatchingBankWallet}
       onPreviewAndPublish={onPreviewAndPublish}
+      onSaveAndExit={onSaveAndExit}
     />
   );
 };

@@ -20,6 +20,7 @@ interface CreateExperienceInvitesProps {
   experience?: Experience;
   onInvitesChange?: (members: InvitedMember[], communities: Community[]) => void;
   onNext?: () => void;
+  onSaveAndExit?: () => void;
   onPreview?: () => void;
   cancelActionLabel?: string;
   saveAndExitActionLabel?: string;
@@ -32,6 +33,7 @@ export const CreateExperienceInvites = ({
   experience,
   onInvitesChange,
   onNext,
+  onSaveAndExit,
   onPreview,
   cancelActionLabel = 'Cancel',
   saveAndExitActionLabel = 'Save & Exit',
@@ -255,6 +257,7 @@ export const CreateExperienceInvites = ({
               <Button
                 type="button"
                 variant="outline-primary"
+                onClick={onSaveAndExit}
                 className="px-6 text-xs font-semibold"
               >
                 {saveAndExitActionLabel}

@@ -49,6 +49,7 @@ interface ReviewLayoutProps {
       | 'wallet',
   ) => void;
   onCancel?: () => void;
+  onSaveAndExit?: () => void;
   onPublish?: () => void;
   showActionBar?: boolean;
 }
@@ -61,6 +62,7 @@ export const ReviewLayout = ({
   isPublishing = false,
   onEditSection,
   onCancel,
+  onSaveAndExit,
   onPublish,
   showActionBar = true,
 }: ReviewLayoutProps) => {
@@ -232,10 +234,7 @@ export const ReviewLayout = ({
             <Button
               type="button"
               variant="outline-primary"
-              onClick={() => {
-                console.log('Save & Exit clicked');
-                onCancel?.();
-              }}
+              onClick={() => (onSaveAndExit ?? onCancel)?.()}
               disabled={isPublishing}
               className="text-xs font-semibold"
             >
