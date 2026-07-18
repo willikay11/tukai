@@ -687,10 +687,19 @@ export const useCreateExperienceFlow = () => {
             activityApiId: a.id,
             title: a.title ?? '',
             description: a.description ?? '',
-            placeId: a.location?.id ?? a.location ?? null,
-            placeName: a.location?.title ?? null,
-            placeImageUrl: a.location?.photos?.[0]?.photo ?? null,
-            placeCity: a.location?.city ?? null,
+            // The API nests the rich place object under `place`; `location`
+            // is only the location uuid
+            placeId: a.place?.id ?? null,
+            placeName: a.place?.title ?? null,
+            placeImageUrl:
+              a.place?.photos?.find((photo: any) => photo.isCover)?.photo ??
+              a.place?.photos?.[0]?.photo ??
+              null,
+            placeCity: a.place?.location?.city ?? null,
+            locationId:
+              (typeof a.location === 'string' ? a.location : a.location?.id) ??
+              a.place?.location?.id ??
+              null,
             startTime: a.startTime ?? null,
             endTime: a.endTime ?? null,
           })),
