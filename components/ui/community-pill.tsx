@@ -4,13 +4,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Community } from '@/types/community';
 
 interface CommunityPillProps {
-  community: Community;
+  title: string;
+  photoUrl?: string;
   isSelected?: boolean;
-  onClick?: (community: Community) => void;
+  onClick?: () => void;
   className?: string;
 }
 
-function getCommunityPhoto(community: Community) {
+export function getCommunityPhoto(community: Community) {
   return community.photos?.find((photo) => photo.isCover)?.photo || community.photos?.[0]?.photo;
 }
 
@@ -24,7 +25,8 @@ function getInitials(title: string) {
 }
 
 export function CommunityPill({
-  community,
+  title,
+  photoUrl,
   isSelected = false,
   onClick,
   className = '',
@@ -36,18 +38,18 @@ export function CommunityPill({
   const content = (
     <>
       <Avatar className="h-6 w-6 shrink-0">
-        <AvatarImage src={getCommunityPhoto(community)} alt={community.title} />
+        <AvatarImage src={photoUrl} alt={title} />
         <AvatarFallback className="bg-emerald-100 text-xs font-semibold text-emerald-700">
-          {getInitials(community.title)}
+          {getInitials(title)}
         </AvatarFallback>
       </Avatar>
-      <span className="max-w-[180px] truncate">{community.title}</span>
+      <span className="max-w-[180px] truncate">{title}</span>
     </>
   );
 
   if (onClick) {
     return (
-      <button type="button" onClick={() => onClick(community)} className={containerClass}>
+      <button type="button" onClick={onClick} className={containerClass}>
         {content}
       </button>
     );

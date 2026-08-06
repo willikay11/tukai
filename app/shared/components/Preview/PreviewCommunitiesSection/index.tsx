@@ -1,8 +1,7 @@
 'use client';
 
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
+import { CommunityPill } from '@/components/ui/community-pill';
 
 interface CommunityOption {
   id: string;
@@ -41,22 +40,14 @@ export const PreviewCommunitiesSection = ({
       </div>
 
       {communities.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Same pill the host sees while picking communities in the invite step */}
           {communities.map((community) => (
-            <div
+            <CommunityPill
               key={community.id}
-              className="flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-xs"
-            >
-              <Image
-                src={community.imageUrl}
-                alt={community.name}
-                width={16}
-                height={16}
-                sizes="16px"
-                className="rounded-full object-cover"
-              />
-              <span className="max-w-xs truncate">{community.name}</span>
-            </div>
+              title={community.name}
+              photoUrl={community.imageUrl}
+            />
           ))}
         </div>
       ) : (

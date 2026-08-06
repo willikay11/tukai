@@ -1,6 +1,6 @@
 'use client';
 
-import { CommunityPill } from '@/components/ui/community-pill';
+import { CommunityPill, getCommunityPhoto } from '@/components/ui/community-pill';
 import { Community } from '@/types/community';
 
 const shimmer =
@@ -61,9 +61,10 @@ export function InviteCommunities({
           return (
             <CommunityPill
               key={community.id}
-              community={community}
+              title={community.title}
+              photoUrl={getCommunityPhoto(community)}
               isSelected={isSelected}
-              onClick={handleToggleCommunity}
+              onClick={() => handleToggleCommunity(community)}
             />
           );
         })}
