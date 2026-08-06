@@ -210,9 +210,9 @@ export const AboutStep = ({
           onClick={() => setIsPlaceModalOpen(true)}
           className="flex h-[50px] w-full items-center gap-2 rounded-[10px] border border-gray-700 border-input px-3 text-left focus:border-primary focus:outline-none"
         >
-          <IconComponent iconName="Location01Icon" size={20} className="text-gray-600" />
+          <IconComponent iconName="Location01Icon" size={18} className="text-gray-600" />
           <span
-            className={`flex-1 truncate text-sm ${formData.location ? 'text-gray-900' : 'text-gray-400'}`}
+            className={`flex-1 truncate text-xs ${formData.location ? 'text-gray-900' : 'text-gray-400'}`}
           >
             {formData.location || 'Select a place'}
           </span>
