@@ -46,8 +46,48 @@ describe('PreviewDateSection', () => {
         endTime="17:00"
       />,
     );
-    expect(screen.getByText(/May 15, 2026 – May 20, 2026/)).toBeInTheDocument();
-    expect(screen.getByText(/9:00 AM – 5:00 PM/)).toBeInTheDocument();
+
+    // Multi-day uses the same strip layout as recurring
+    expect(screen.getByText('May 2026')).toBeInTheDocument();
+    expect(screen.getByText('Runs for 6 Days')).toBeInTheDocument();
+    expect(screen.getByText(/9:00 AM - 5:00 PM/)).toBeInTheDocument();
+    expect(screen.getByText('15')).toBeInTheDocument();
+    expect(screen.getByText('20')).toBeInTheDocument();
+  });
+
+  it('pads the multi-day run with surrounding days for context', () => {
+    render(
+      <PreviewDateSection
+        mode="multi-day"
+        startDate="2026-05-15"
+        startTime="09:00"
+        endDate="2026-05-20"
+        endTime="17:00"
+      />,
+    );
+
+    // Three days either side of the 15th–20th run, dimmed rather than active
+    expect(screen.getByText('12')).toBeInTheDocument();
+    expect(screen.getByText('14')).toBeInTheDocument();
+    expect(screen.getByText('21')).toBeInTheDocument();
+    expect(screen.getByText('23')).toBeInTheDocument();
+    expect(screen.queryByText('11')).not.toBeInTheDocument();
+    expect(screen.queryByText('24')).not.toBeInTheDocument();
+  });
+
+  it('shows a past multi-day run in full rather than dropping it', () => {
+    render(
+      <PreviewDateSection
+        mode="multi-day"
+        startDate="2020-05-15"
+        startTime="09:00"
+        endDate="2020-05-16"
+        endTime="17:00"
+      />,
+    );
+
+    expect(screen.getByText('Runs for 2 Days')).toBeInTheDocument();
+    expect(screen.queryByText('No upcoming dates for this experience.')).not.toBeInTheDocument();
   });
 
   it('displays "Not selected yet" for multi-day when dates are missing', () => {
