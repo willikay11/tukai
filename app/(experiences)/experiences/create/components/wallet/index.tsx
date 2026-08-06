@@ -14,12 +14,15 @@ import { MpesaDetailsForm } from '@/components/ui/mpesa-details-form';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Wallet } from '@/types/payment';
 
+import { usePendingAction } from '../../hooks/usePendingAction';
+
 interface CreateExperienceWalletProps {
   cancelActionLabel?: string;
   saveAndExitActionLabel?: string;
   previewAndPublishActionLabel?: string;
   hideSaveAndExit?: boolean;
-  onSaveAndExit?: () => void;
+  // Resolves once the save settles, so the button can stop its spinner
+  onSaveAndExit?: () => void | Promise<void>;
 
   // Data props
   wallets: Wallet[];
@@ -69,6 +72,7 @@ export const CreateExperienceWallet = ({
   isPatchingBankWallet,
   onPreviewAndPublish,
 }: CreateExperienceWalletProps) => {
+  const { pendingAction, runAction } = usePendingAction<'exit'>();
   const [showForm, setShowForm] = useState(false);
   const [editingWallet, setEditingWallet] = useState<Wallet | null>(null);
   const { toast } = useToast();
@@ -372,9 +376,13 @@ export const CreateExperienceWallet = ({
               <Button
                 type="button"
                 variant="outline-primary"
-                onClick={onSaveAndExit}
+                onClick={() => runAction('exit', onSaveAndExit)}
+                disabled={pendingAction === 'exit'}
                 className="px-6 text-xs font-semibold"
               >
+                {pendingAction === 'exit' && (
+                  <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
+                )}
                 {saveAndExitActionLabel}
               </Button>
             )}

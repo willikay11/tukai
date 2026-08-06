@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import {
   useAddGuestToExperience,
@@ -15,12 +16,15 @@ import { InviteMembers, InvitedMember } from '@/components/ui/invite-members';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 
+import { usePendingAction } from '../../hooks/usePendingAction';
+
 interface CreateExperienceInvitesProps {
   experienceId?: string | null;
   experience?: Experience;
   onInvitesChange?: (members: InvitedMember[], communities: Community[]) => void;
   onNext?: () => void;
-  onSaveAndExit?: () => void;
+  // Resolves once the save settles, so the button can stop its spinner
+  onSaveAndExit?: () => void | Promise<void>;
   onPreview?: () => void;
   cancelActionLabel?: string;
   saveAndExitActionLabel?: string;
@@ -98,6 +102,8 @@ export const CreateExperienceInvites = ({
   useEffect(() => {
     onInvitesChange?.(invitedMembers, invitedCommunities);
   }, [invitedMembers, invitedCommunities, onInvitesChange]);
+
+  const { pendingAction, runAction } = usePendingAction<'exit'>();
 
   const { data: userCommunities, isFetching: isFetchingCommunities } = useGetCommunities({
     page: 1,
@@ -257,9 +263,13 @@ export const CreateExperienceInvites = ({
               <Button
                 type="button"
                 variant="outline-primary"
-                onClick={onSaveAndExit}
+                onClick={() => runAction('exit', onSaveAndExit)}
+                disabled={pendingAction === 'exit'}
                 className="px-6 text-xs font-semibold"
               >
+                {pendingAction === 'exit' && (
+                  <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
+                )}
                 {saveAndExitActionLabel}
               </Button>
             )}

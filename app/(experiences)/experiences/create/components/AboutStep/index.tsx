@@ -6,9 +6,10 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
 import { Interest } from '@/types/interest';
 
+import { usePendingAction } from '../../hooks/usePendingAction';
+import { AddPlaceModal } from '../AddPlaceModal';
 import { CategoryPicker } from '../CategoryPicker';
 import { DescriptionFields } from '../DescriptionFields';
-import { AddPlaceModal } from '../AddPlaceModal';
 import { ExperienceTitleInput } from '../ExperienceTitleInput';
 import { MeetingDetailsInput } from '../MeetingDetailsInput';
 import { PhotoUploader } from '../PhotoUploader';
@@ -42,8 +43,9 @@ interface AboutStepProps {
   errors: Record<string, string>;
   onFormDataChange: (data: Partial<AboutFormData>) => void;
   onCancel: () => void;
-  onSaveEdit: () => void;
-  onSaveContinue: () => void;
+  // Both resolve once the save settles, so the button can stop its spinner
+  onSaveEdit: () => void | Promise<void>;
+  onSaveContinue: () => void | Promise<void>;
   isSaving?: boolean;
   onPreview?: () => void;
 }
@@ -59,6 +61,7 @@ export const AboutStep = ({
   onPreview,
 }: AboutStepProps) => {
   const [isPlaceModalOpen, setIsPlaceModalOpen] = useState(false);
+  const { pendingAction, runAction } = usePendingAction<'exit' | 'continue'>();
 
   const handlePhotoChange = useCallback(
     (photo: FormPhoto | null) => {
@@ -254,11 +257,14 @@ export const AboutStep = ({
           variant="outline-primary"
           onClick={() => {
             console.log('[AboutStep] Save & Edit clicked');
-            onSaveEdit();
+            runAction('exit', onSaveEdit);
           }}
           disabled={isSaving}
           className="text-xs font-semibold"
         >
+          {pendingAction === 'exit' && (
+            <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
+          )}
           Save & Exit
         </Button>
         <Button
@@ -273,12 +279,15 @@ export const AboutStep = ({
           type="button"
           onClick={() => {
             console.log('[AboutStep] Save & Continue clicked', { formData, errors });
-            onSaveContinue();
+            runAction('continue', onSaveContinue);
           }}
           variant="gradient"
           disabled={isSaving}
           className="rounded-[50px] text-xs font-medium"
         >
+          {pendingAction === 'continue' && (
+            <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
+          )}
           Save & Continue
         </Button>
       </div>

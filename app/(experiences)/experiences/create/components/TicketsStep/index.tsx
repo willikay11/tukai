@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import { useCreateExperienceTicket } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ import { buildSingleOccurrenceRule } from '@/utils/slot-template-utils';
 import { buildAbsoluteTicketValidity, buildRecurringTicketValidity } from '@/utils/ticket-utils';
 
 import { FormData } from '../../hooks/useCreateExperienceFlow';
+import { usePendingAction } from '../../hooks/usePendingAction';
 import { AddTicketTypeButton } from '../AddTicketTypeButton';
 import { CommissionPicker } from '../CommissionPicker';
 import { DateBadgeWithTimes } from '../DateBadgeWithTimes';
@@ -36,7 +38,8 @@ interface TicketsStepProps {
   experiencePricing: 'paid' | 'free';
   onChange: (data: Partial<FormData['tickets']>) => void;
   errors: Record<string, string>;
-  onSaveContinue: () => void;
+  // Resolves once the save settles, so the button can stop its spinner
+  onSaveContinue: () => void | Promise<void>;
   onCancel: () => void;
   photos?: string[];
   isRecurring?: boolean;
@@ -143,6 +146,7 @@ export const TicketsStep = ({
     (formData.ticketMode as 'entire-period' | 'each-day') || 'entire-period',
   );
   const [isSavingLocal, setIsSavingLocal] = useState(false);
+  const { pendingAction, runAction } = usePendingAction<'continue'>();
 
   // API mutation hooks
   const createTicketMutation = useCreateExperienceTicket(experienceId ?? '');
@@ -710,10 +714,14 @@ export const TicketsStep = ({
               </Button>
               <Button
                 type="button"
-                onClick={onSaveContinue}
+                onClick={() => runAction('continue', onSaveContinue)}
+                disabled={pendingAction === 'continue'}
                 variant="gradient"
                 className="rounded-[50px]"
               >
+                {pendingAction === 'continue' && (
+                  <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
+                )}
                 {saveContinueLabel}
               </Button>
             </div>
@@ -808,10 +816,14 @@ export const TicketsStep = ({
           </Button>
           <Button
             type="button"
-            onClick={onSaveContinue}
+            onClick={() => runAction('continue', onSaveContinue)}
+            disabled={pendingAction === 'continue'}
             variant="gradient"
             className="rounded-[50px]"
           >
+            {pendingAction === 'continue' && (
+              <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
+            )}
             {saveContinueLabel}
           </Button>
         </div>

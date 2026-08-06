@@ -1,5 +1,6 @@
 'use client';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import {
   PreviewCommunitiesSection,
   PreviewGuestsSection,
@@ -11,6 +12,7 @@ import { Experience } from '@/types/experience';
 import { Wallet } from '@/types/payment';
 
 import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
+import { usePendingAction } from '../../hooks/usePendingAction';
 import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
 import { PreviewCommunitySection } from '../PreviewCommunitySection';
 import { PreviewDateSection } from '../PreviewDateSection';
@@ -49,7 +51,8 @@ interface ReviewLayoutProps {
       | 'wallet',
   ) => void;
   onCancel?: () => void;
-  onSaveAndExit?: () => void;
+  // Resolves once the save settles, so the button can stop its spinner
+  onSaveAndExit?: () => void | Promise<void>;
   onPublish?: () => void;
   showActionBar?: boolean;
 }
@@ -66,6 +69,8 @@ export const ReviewLayout = ({
   onPublish,
   showActionBar = true,
 }: ReviewLayoutProps) => {
+  const { pendingAction, runAction } = usePendingAction<'exit'>();
+
   const handleEditClick = (
     section:
       | 'about-title'
@@ -234,10 +239,13 @@ export const ReviewLayout = ({
             <Button
               type="button"
               variant="outline-primary"
-              onClick={() => (onSaveAndExit ?? onCancel)?.()}
-              disabled={isPublishing}
+              onClick={() => runAction('exit', onSaveAndExit ?? onCancel)}
+              disabled={isPublishing || pendingAction === 'exit'}
               className="text-xs font-semibold"
             >
+              {pendingAction === 'exit' && (
+                <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
+              )}
               Save & Exit
             </Button>
             <Button
