@@ -28,15 +28,17 @@ export const PreviewCommunitySection = ({
         )}
       </div>
       {communityName && communityImageUrl ? (
-        <div className="flex items-center gap-3">
-          <Image
-            src={communityImageUrl}
-            alt={communityName ?? ''}
-            width={48}
-            height={48}
-            sizes="48px"
-            className="rounded-full object-cover"
-          />
+        <div className="flex items-center gap-2">
+          {/* Same tile as the Experience Location image */}
+          <div className="relative h-[60px] w-[60px] flex-shrink-0 overflow-hidden rounded-[12px]">
+            <Image
+              src={communityImageUrl}
+              alt={communityName ?? ''}
+              fill
+              sizes="60px"
+              className="object-cover"
+            />
+          </div>
           <div className="flex-1">
             <p className="text-xs font-medium text-gray-800">{communityName}</p>
             {communityMembersCount > 0 && (
