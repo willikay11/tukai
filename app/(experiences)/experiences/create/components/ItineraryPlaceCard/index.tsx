@@ -122,6 +122,7 @@ export const ItineraryPlaceCard = ({
               value={place.endTime || undefined}
               placeholder="End Time"
               onChange={onEndTimeChange}
+              minTime={place.startTime || undefined}
             />
           </div>
         </div>

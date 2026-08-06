@@ -328,7 +328,6 @@ export const useCreateExperienceFlow = () => {
   const [isSavingExperience, setIsSavingExperience] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
-
   // Track pending debounced saves in ItineraryDayPill components
   const pendingFlushersRef = useRef<Map<string, () => { title?: string; description?: string }>>(
     new Map(),
@@ -814,6 +813,17 @@ export const useCreateExperienceFlow = () => {
         formData.dateType.multiDayStartDate > formData.dateType.multiDayEndDate
       ) {
         errors.multiDayEndDate = 'End date must be after start date';
+      }
+
+      // Only meaningful on a single day — across days an earlier end time is fine
+      if (
+        formData.dateType.multiDayStartDate &&
+        formData.dateType.multiDayStartDate === formData.dateType.multiDayEndDate &&
+        formData.dateType.multiDayStartTime &&
+        formData.dateType.multiDayEndTime &&
+        formData.dateType.multiDayStartTime >= formData.dateType.multiDayEndTime
+      ) {
+        errors.multiDayEndTime = 'End time must be after start time';
       }
     } else if (formData.dateType.isRecurring) {
       if (formData.dateType.recurringDays.length === 0) {

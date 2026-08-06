@@ -342,6 +342,7 @@ export const ActivityCard = ({
                     onChange({ endTime: time });
                     clearError('endTime');
                   }}
+                  minTime={activity.startTime ?? undefined}
                 />
                 {formErrors.endTime && (
                   <p className="mt-1 text-xs text-red-500">{formErrors.endTime}</p>

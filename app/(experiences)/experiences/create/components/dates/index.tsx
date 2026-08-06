@@ -996,6 +996,10 @@ export const ExperienceDates = ({
                                     value={field.value}
                                     onChange={field.onChange}
                                     placeholder="End Time"
+                                    minTime={
+                                      form.watch(`timeSlots.${index}.startTime` as const) ||
+                                      undefined
+                                    }
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -1078,6 +1082,7 @@ export const ExperienceDates = ({
                             value={field.value}
                             onChange={field.onChange}
                             placeholder="End Time"
+                            minTime={form.watch('startTime') || undefined}
                           />
                         </FormControl>
                         <FormMessage />

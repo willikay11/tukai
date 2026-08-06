@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { TimePicker } from '@/components/ui/time-picker';
+import { isEndAfterStart } from '@/utils/itinerary-utils';
 
 export interface TimeSlot {
   startTime: string | null;
@@ -51,42 +52,53 @@ export const TimeSlotList = ({ slots, onChange, errors }: TimeSlotListProps) => 
       <label className="block text-xs font-medium text-gray-900">Times/Time Slots</label>
 
       <div className="space-y-2">
-        {slots.map((slot, index) => (
-          <div key={index} className="flex items-end items-center gap-2">
-            <div className="flex-1">
-              <TimePicker
-                value={slot.startTime || undefined}
-                onChange={(time) => handleStartTimeChange(index, time)}
-                placeholder="Select time"
-              />
-              {errors[`slots.${index}.startTime`] && (
-                <p className="mt-1 text-xs text-red-500">{errors[`slots.${index}.startTime`]}</p>
+        {slots.map((slot, index) => {
+          // Shown as soon as the pair goes out of order (e.g. the start time was
+          // moved past an already-picked end time)
+          const endTimeOrderError = isEndAfterStart(slot.startTime, slot.endTime)
+            ? null
+            : 'End time must be after start time';
+
+          return (
+            <div key={index} className="flex items-end items-center gap-2">
+              <div className="flex-1">
+                <TimePicker
+                  value={slot.startTime || undefined}
+                  onChange={(time) => handleStartTimeChange(index, time)}
+                  placeholder="Select time"
+                />
+                {errors[`slots.${index}.startTime`] && (
+                  <p className="mt-1 text-xs text-red-500">{errors[`slots.${index}.startTime`]}</p>
+                )}
+              </div>
+
+              <div className="flex-1">
+                <TimePicker
+                  value={slot.endTime || undefined}
+                  onChange={(time) => handleEndTimeChange(index, time)}
+                  placeholder="Select time"
+                  minTime={slot.startTime || undefined}
+                />
+                {(errors[`slots.${index}.endTime`] || endTimeOrderError) && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {errors[`slots.${index}.endTime`] || endTimeOrderError}
+                  </p>
+                )}
+              </div>
+
+              {slots.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => handleRemoveSlot(index)}
+                  className="mb-2 text-red-500 hover:text-red-700"
+                  aria-label="Remove time slot"
+                >
+                  <IconComponent iconName="Delete02Icon" size={18} />
+                </button>
               )}
             </div>
-
-            <div className="flex-1">
-              <TimePicker
-                value={slot.endTime || undefined}
-                onChange={(time) => handleEndTimeChange(index, time)}
-                placeholder="Select time"
-              />
-              {errors[`slots.${index}.endTime`] && (
-                <p className="mt-1 text-xs text-red-500">{errors[`slots.${index}.endTime`]}</p>
-              )}
-            </div>
-
-            {slots.length > 1 && (
-              <button
-                type="button"
-                onClick={() => handleRemoveSlot(index)}
-                className="mb-2 text-red-500 hover:text-red-700"
-                aria-label="Remove time slot"
-              >
-                <IconComponent iconName="Delete02Icon" size={18} />
-              </button>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <button

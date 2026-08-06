@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
+import { isEndAfterStart } from '@/utils/itinerary-utils';
 
 import { type Community, CommunitySelector } from '../CommunitySelector';
 import { ExperienceTypeRadio } from '../ExperienceTypeRadio';
@@ -187,6 +188,13 @@ export const DateTypeStep = ({
     [onChange],
   );
 
+  // The picker blocks an end time before the start time, but moving the start
+  // time afterwards can still leave the pair out of order — flag it right away
+  // instead of waiting for the step to be submitted
+  const endTimeOrderError = isEndAfterStart(formData.startTime, formData.endTime)
+    ? null
+    : 'End time must be after start time';
+
   return (
     <div className="space-y-4">
       <div>
@@ -265,8 +273,11 @@ export const DateTypeStep = ({
                 value={formData.endTime || undefined}
                 onChange={handleEndTimeChange}
                 placeholder="Select time"
+                minTime={formData.startTime || undefined}
               />
-              {errors.endTime && <p className="mt-1 text-xs text-red-500">{errors.endTime}</p>}
+              {(errors.endTime || endTimeOrderError) && (
+                <p className="mt-1 text-xs text-red-500">{errors.endTime || endTimeOrderError}</p>
+              )}
             </div>
           </div>
         </>

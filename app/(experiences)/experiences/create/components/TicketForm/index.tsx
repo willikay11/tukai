@@ -191,6 +191,11 @@ export const TicketForm = ({
               value={value.salesEndTime || undefined}
               onChange={(time) => onChange({ salesEndTime: time })}
               placeholder="End Time"
+              minTime={
+                value.salesStartDate && value.salesStartDate === value.salesEndDate
+                  ? value.salesStartTime || undefined
+                  : undefined
+              }
             />
           </div>
           {errors.salesEndDate && <p className="text-xs text-red-500">{errors.salesEndDate}</p>}
