@@ -3,7 +3,7 @@
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { getOrdinalDate } from '@/utils/date-utils';
+import { formatFullDayLabel, toWeekdayIndex } from '@/utils/recurrence-utils';
 
 type PreviewDateSectionProps =
   | {
@@ -39,25 +39,36 @@ const formatTime = (time: string | null) => {
   return `${displayHour}:${minutes} ${period}`;
 };
 
-const formatDays = (days: string[]): string => {
-  const dayNames: Record<string, string> = {
-    mon: 'Mon',
-    tue: 'Tue',
-    wed: 'Wed',
-    thu: 'Thu',
-    fri: 'Fri',
-    sat: 'Sat',
-    sun: 'Sun',
-  };
+// The recurring view mirrors the customer's booking picker
+// (RecurringDateSlotPicker): the strip starts today — or the recurrence start,
+// whichever is later — and runs to the recurrence end, capped at 30 days.
+const MAX_STRIP_DAYS = 30;
 
-  const formattedDays = days.map((day) => dayNames[day] || day);
+const buildDateStrip = (days: string[], startDate: string | null, endDate: string | null) => {
+  const weekdays = days.map(toWeekdayIndex).filter((index): index is number => index !== null);
 
-  if (formattedDays.length === 0) return '';
-  if (formattedDays.length === 1) return formattedDays[0];
+  if (weekdays.length === 0) return [];
 
-  const lastDay = formattedDays[formattedDays.length - 1];
-  const otherDays = formattedDays.slice(0, -1).join(', ');
-  return `${otherDays} & ${lastDay}`;
+  const start = moment.max(
+    moment().startOf('day'),
+    startDate ? moment(startDate).startOf('day') : moment().startOf('day'),
+  );
+  const end = endDate
+    ? moment(endDate).startOf('day')
+    : start.clone().add(MAX_STRIP_DAYS - 1, 'days');
+
+  const strip: { date: string; enabled: boolean }[] = [];
+  const cursor = start.clone();
+
+  while (cursor.isSameOrBefore(end) && strip.length < MAX_STRIP_DAYS) {
+    strip.push({
+      date: cursor.format('YYYY-MM-DD'),
+      enabled: weekdays.includes(cursor.day()),
+    });
+    cursor.add(1, 'day');
+  }
+
+  return strip;
 };
 
 export const PreviewDateSection = (props: PreviewDateSectionProps) => {
@@ -137,15 +148,19 @@ export const PreviewDateSection = (props: PreviewDateSectionProps) => {
     return null;
   }
 
+  // Same label format as the customer's slot pills: "9:00 AM - 5:00 PM"
   const timeRanges = props.timeSlots
     .filter((slot) => slot.startTime && slot.endTime)
-    .map((slot) => `${formatTime(slot.startTime)} – ${formatTime(slot.endTime)}`);
+    .map((slot) => `${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}`);
 
-  const daysLabel = formatDays(props.days);
-  const dateRange =
-    props.recurrenceStartDate && props.recurrenceEndDate
-      ? `From ${getOrdinalDate(props.recurrenceStartDate)} – ${getOrdinalDate(props.recurrenceEndDate)}`
-      : '';
+  const daysLabel = formatFullDayLabel(props.days);
+  const strip = buildDateStrip(props.days, props.recurrenceStartDate, props.recurrenceEndDate);
+  // The booking panel opens on the first available date and slot — show the
+  // host the same starting state
+  const firstEnabledDate = strip.find((day) => day.enabled)?.date ?? null;
+  const monthLabel = moment(firstEnabledDate ?? props.recurrenceStartDate ?? undefined).format(
+    'MMMM YYYY',
+  );
 
   return (
     <div className="space-y-3">
@@ -158,18 +173,51 @@ export const PreviewDateSection = (props: PreviewDateSectionProps) => {
         )}
       </div>
       {daysLabel && timeRanges.length > 0 ? (
-        <div className="flex items-center gap-2">
-          <div className="rounded-[12px] bg-lime p-4">
-            <IconComponent iconName="CalendarAdd01Icon" size={28} className="text-emerald-600" />
+        <div className="space-y-3">
+          <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-4">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-bold text-gray-900">{monthLabel}</p>
+              <span className="rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-medium text-primary">
+                Recurs Every {daysLabel}
+              </span>
+            </div>
+
+            {strip.length === 0 ? (
+              <p className="text-xs text-gray-500">No upcoming dates for this experience.</p>
+            ) : (
+              <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+                {strip.map((day) => (
+                  <div
+                    key={day.date}
+                    className={`flex flex-shrink-0 flex-col items-center gap-1 rounded-2xl px-4 py-3 text-center ${
+                      day.date === firstEnabledDate
+                        ? 'bg-emerald-100 text-primary'
+                        : day.enabled
+                          ? 'border border-gray-200 bg-white text-gray-900'
+                          : 'bg-gray-100 text-gray-400'
+                    }`}
+                  >
+                    <span className="text-xs">{moment(day.date).format('ddd')}</span>
+                    <span className="text-base font-semibold">{moment(day.date).format('D')}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="space-y-1 text-xs text-gray-700">
+
+          <div className="flex flex-wrap gap-3">
             {timeRanges.map((timeRange, index) => (
-              <div key={index}>
-                <span className="font-medium text-gray-800">Every {daysLabel},</span>
-                <span className="font-medium text-gray-800">&nbsp;{timeRange}</span>
+              <div
+                key={index}
+                className={`rounded-full px-5 py-3 text-xs font-normal ${
+                  index === 0
+                    ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
+                    : 'border border-gray-200 bg-white text-gray-900'
+                }`}
+              >
+                {timeRange}
               </div>
             ))}
-            {dateRange && <div className="text-gray-600">{dateRange}</div>}
           </div>
         </div>
       ) : (

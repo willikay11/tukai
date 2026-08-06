@@ -5,6 +5,8 @@ import { useEffect, useMemo } from 'react';
 import moment from 'moment';
 import { RRule } from 'rrule';
 
+import { formatFullDayLabel } from '@/utils/recurrence-utils';
+
 interface RecurringTimeSlot {
   id: string;
   label: string;
@@ -31,12 +33,6 @@ const RRULE_DAY_NAMES = [
 ];
 
 const MAX_STRIP_DAYS = 30;
-
-const formatFullDayLabel = (names: string[]): string => {
-  if (names.length === 0) return '';
-  if (names.length === 1) return names[0];
-  return `${names.slice(0, -1).join(', ')} & ${names[names.length - 1]}`;
-};
 
 export const RecurringDateSlotPicker = ({
   recurrenceRule,

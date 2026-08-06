@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Wallet } from '@/types/payment';
+import { parseRecurrenceRule } from '@/utils/recurrence-utils';
 
 import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
 import { usePendingAction } from '../../hooks/usePendingAction';
@@ -31,6 +32,8 @@ interface ReviewLayoutProps {
   invitedCommunities: Community[];
   wallet?: Wallet;
   allCommunities?: CommunityOption[];
+  // Slot times for a recurring experience, from its slot templates
+  recurringTimeSlots?: { startTime: string | null; endTime: string | null }[];
   isPublishing?: boolean;
   onEditSection?: (
     section:
@@ -62,6 +65,7 @@ export const ReviewLayout = ({
   invitedCommunities,
   wallet,
   allCommunities = [],
+  recurringTimeSlots = [],
   isPublishing = false,
   onEditSection,
   onCancel,
@@ -70,6 +74,10 @@ export const ReviewLayout = ({
   showActionBar = true,
 }: ReviewLayoutProps) => {
   const { pendingAction, runAction } = usePendingAction<'exit'>();
+
+  const recurrence = experience.recurrenceRule
+    ? parseRecurrenceRule(experience.recurrenceRule)
+    : null;
 
   const handleEditClick = (
     section:
@@ -159,14 +167,25 @@ export const ReviewLayout = ({
       />
 
       {/* 6. Date of Experience */}
-      {experience.startDate && (
+      {recurrence ? (
         <PreviewDateSection
-          mode="single"
-          date={experience.startDate.split('T')[0]}
-          startTime={experience.startDate.split('T')[1]?.substring(0, 5) ?? null}
-          endTime={experience.endDate.split('T')[1]?.substring(0, 5) ?? null}
+          mode="recurring"
+          days={recurrence.days}
+          timeSlots={recurringTimeSlots}
+          recurrenceStartDate={recurrence.startDate ?? experience.startDate?.split('T')[0] ?? null}
+          recurrenceEndDate={recurrence.endDate ?? experience.endDate?.split('T')[0] ?? null}
           onEdit={() => handleEditClick('dates')}
         />
+      ) : (
+        experience.startDate && (
+          <PreviewDateSection
+            mode="single"
+            date={experience.startDate.split('T')[0]}
+            startTime={experience.startDate.split('T')[1]?.substring(0, 5) ?? null}
+            endTime={experience.endDate.split('T')[1]?.substring(0, 5) ?? null}
+            onEdit={() => handleEditClick('dates')}
+          />
+        )
       )}
 
       {/* 7. Location */}

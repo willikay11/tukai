@@ -78,8 +78,8 @@ describe('PreviewDateSection', () => {
         />,
       );
 
-      expect(screen.getByText(/2:00 PM – 5:00 PM/)).toBeInTheDocument();
-      expect(screen.getByText(/6:00 PM – 9:00 PM/)).toBeInTheDocument();
+      expect(screen.getByText(/2:00 PM - 5:00 PM/)).toBeInTheDocument();
+      expect(screen.getByText(/6:00 PM - 9:00 PM/)).toBeInTheDocument();
     });
 
     it('ignores incomplete slots but still renders complete ones', () => {
@@ -96,8 +96,41 @@ describe('PreviewDateSection', () => {
         />,
       );
 
-      expect(screen.getByText(/10:00 AM – 12:00 PM/)).toBeInTheDocument();
+      expect(screen.getByText(/10:00 AM - 12:00 PM/)).toBeInTheDocument();
       expect(screen.queryByText('Not selected yet')).not.toBeInTheDocument();
+    });
+
+    it('labels the recurrence the way the booking panel does', () => {
+      render(
+        <PreviewDateSection
+          mode="recurring"
+          days={['mon', 'wed', 'fri']}
+          timeSlots={[{ startTime: '09:00', endTime: '17:00' }]}
+          recurrenceStartDate="2026-08-27"
+          recurrenceEndDate="2026-09-30"
+        />,
+      );
+
+      // Full day names, matching RecurringDateSlotPicker's chip
+      expect(screen.getByText('Recurs Every Monday, Wednesday & Friday')).toBeInTheDocument();
+    });
+
+    it('renders a date strip with the matching weekdays available', () => {
+      render(
+        <PreviewDateSection
+          mode="recurring"
+          days={['thu']}
+          timeSlots={[{ startTime: '14:00', endTime: '17:00' }]}
+          recurrenceStartDate="2026-08-27"
+          recurrenceEndDate="2026-08-29"
+        />,
+      );
+
+      // 27 Aug 2026 is a Thursday, so the strip runs Thu 27 – Sat 29
+      expect(screen.getByText('27')).toBeInTheDocument();
+      expect(screen.getByText('28')).toBeInTheDocument();
+      expect(screen.getByText('29')).toBeInTheDocument();
+      expect(screen.getByText('August 2026')).toBeInTheDocument();
     });
 
     it('displays "Not selected yet" when no slot is complete', () => {

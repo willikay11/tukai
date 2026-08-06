@@ -209,7 +209,7 @@ describe('SharedExperiencePreview', () => {
         />,
       );
       const text = container.textContent;
-      expect(text).toContain('Every Mon, Wed & Fri');
+      expect(text).toContain('Recurs Every Monday, Wednesday & Friday');
       expect(text).toContain('2026');
     });
   });
