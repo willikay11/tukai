@@ -90,49 +90,53 @@ export const TicketForm = ({
         {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
       </div>
 
-      <div className="space-y-1.5">
-        <Input
-          id="ticket-quantity"
-          type="number"
-          placeholder="Available Ticket Quantity"
-          value={value.quantity ?? ''}
-          className="text-xs"
-          onChange={(e) =>
-            onChange({ quantity: e.target.value ? parseInt(e.target.value, 10) : null })
-          }
-          suffixIcon={
-            <div className="flex flex-col gap-0.5">
-              <button
-                type="button"
-                onClick={() => onChange({ quantity: (value.quantity ?? 0) + 1 })}
-                className="text-gray-700 hover:text-gray-900"
-              >
-                <IconComponent iconName="ArrowUp01Icon" size={16} />
-              </button>
-              <button
-                type="button"
-                onClick={() => onChange({ quantity: Math.max(0, (value.quantity ?? 0) - 1) })}
-                className="text-gray-700 hover:text-gray-900"
-              >
-                <IconComponent iconName="ArrowDown01Icon" size={16} />
-              </button>
-            </div>
-          }
-        />
-        {errors.quantity && <p className="text-xs text-red-500">{errors.quantity}</p>}
-      </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Input
+            id="ticket-quantity"
+            type="number"
+            placeholder="Available Ticket Quantity"
+            value={value.quantity ?? ''}
+            className="text-xs"
+            onChange={(e) =>
+              onChange({ quantity: e.target.value ? parseInt(e.target.value, 10) : null })
+            }
+            suffixIcon={
+              <div className="flex flex-col gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => onChange({ quantity: (value.quantity ?? 0) + 1 })}
+                  className="text-gray-700 hover:text-gray-900"
+                >
+                  <IconComponent iconName="ArrowUp01Icon" size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onChange({ quantity: Math.max(0, (value.quantity ?? 0) - 1) })}
+                  className="text-gray-700 hover:text-gray-900"
+                >
+                  <IconComponent iconName="ArrowDown01Icon" size={16} />
+                </button>
+              </div>
+            }
+          />
+          {errors.quantity && <p className="text-xs text-red-500">{errors.quantity}</p>}
+        </div>
 
-      <div className="space-y-1.5">
-        <Input
-          id="ticket-amount"
-          type="number"
-          placeholder="Amount per ticket"
-          value={value.amount ?? ''}
-          onChange={(e) => onChange({ amount: e.target.value ? parseFloat(e.target.value) : null })}
-          suffixIcon={<IconComponent iconName="Money02Icon" size={18} />}
-          className="text-xs"
-        />
-        {errors.amount && <p className="text-xs text-red-500">{errors.amount}</p>}
+        <div className="space-y-1.5">
+          <Input
+            id="ticket-amount"
+            type="number"
+            placeholder="Amount per ticket"
+            value={value.amount ?? ''}
+            onChange={(e) =>
+              onChange({ amount: e.target.value ? parseFloat(e.target.value) : null })
+            }
+            suffixIcon={<IconComponent iconName="Money02Icon" size={18} />}
+            className="text-xs"
+          />
+          {errors.amount && <p className="text-xs text-red-500">{errors.amount}</p>}
+        </div>
       </div>
 
       {value.quantity && value.amount && (

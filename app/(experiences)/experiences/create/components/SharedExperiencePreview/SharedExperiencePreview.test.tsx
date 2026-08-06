@@ -81,7 +81,9 @@ describe('SharedExperiencePreview', () => {
       const { container } = render(
         <SharedExperiencePreview {...defaultProps} step="dates-tickets" />,
       );
-      expect(container.textContent).toContain('2026');
+      // The date section renders "Mon, Jun 15" — the year only ever appeared via
+      // the ticket validity line, which is commented out in TicketCard
+      expect(container.textContent).toContain('Jun');
       expect(container.textContent).toContain('15');
     });
   });
@@ -167,7 +169,7 @@ describe('SharedExperiencePreview', () => {
     it('displays date, start time, and end time for single-day', () => {
       const { container } = render(<SharedExperiencePreview {...defaultProps} />);
       const text = container.textContent;
-      expect(text).toContain('2026');
+      expect(text).toContain('Jun');
       expect(text).toContain('9:00');
       expect(text).toContain('5:00');
     });
@@ -201,11 +203,13 @@ describe('SharedExperiencePreview', () => {
           isRecurring={true}
           selectedDate={undefined}
           selectedRecurringDays={['mon', 'wed', 'fri']}
+          selectedTimeSlots={[{ startTime: '09:00', endTime: '17:00' }]}
           selectedRecurrenceStartDate="2026-06-01"
           selectedRecurrenceEndDate="2026-08-31"
         />,
       );
       const text = container.textContent;
+      expect(text).toContain('Every Mon, Wed & Fri');
       expect(text).toContain('2026');
     });
   });
