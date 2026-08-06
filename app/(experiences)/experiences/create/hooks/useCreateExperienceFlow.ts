@@ -958,41 +958,44 @@ export const useCreateExperienceFlow = () => {
         }
       }
 
-      if (formData.dateType.isRecurring) {
-        // Recurring tickets only capture a sales-closing (end) validity — there is
-        // no start-relative field in the form or the API payload, so don't require it.
-        if (!ticket.salesEndRelative) {
-          errors[`tickets.${index}.salesEndRelative`] = 'Sales end validity is required';
-        }
-      } else if (formData.dateType.experienceType === 'multi-day') {
-        if (!ticket.salesStartDate) {
-          errors[`tickets.${index}.salesStartDate`] = 'Start date is required';
-        }
-        if (!ticket.salesEndDate) {
-          errors[`tickets.${index}.salesEndDate`] = 'End date is required';
-        }
-        if (
-          ticket.salesStartDate &&
-          ticket.salesEndDate &&
-          ticket.salesStartDate > ticket.salesEndDate
-        ) {
-          errors[`tickets.${index}.salesEndDate`] = 'End date must be after start date';
-        }
-      } else {
-        if (!ticket.salesStartDate) {
-          errors[`tickets.${index}.salesStartDate`] = 'Start date is required';
-        }
-        if (!ticket.salesEndDate) {
-          errors[`tickets.${index}.salesEndDate`] = 'End date is required';
-        }
-        if (
-          ticket.salesStartDate &&
-          ticket.salesEndDate &&
-          ticket.salesStartDate > ticket.salesEndDate
-        ) {
-          errors[`tickets.${index}.salesEndDate`] = 'End date must be after start date';
-        }
-      }
+      // Ticket sales validity is hidden in TicketForm for now, so a host can
+      // reach this step with nothing to check — restore alongside that section.
+      //
+      // if (formData.dateType.isRecurring) {
+      //   // Recurring tickets only capture a sales-closing (end) validity — there is
+      //   // no start-relative field in the form or the API payload, so don't require it.
+      //   if (!ticket.salesEndRelative) {
+      //     errors[`tickets.${index}.salesEndRelative`] = 'Sales end validity is required';
+      //   }
+      // } else if (formData.dateType.experienceType === 'multi-day') {
+      //   if (!ticket.salesStartDate) {
+      //     errors[`tickets.${index}.salesStartDate`] = 'Start date is required';
+      //   }
+      //   if (!ticket.salesEndDate) {
+      //     errors[`tickets.${index}.salesEndDate`] = 'End date is required';
+      //   }
+      //   if (
+      //     ticket.salesStartDate &&
+      //     ticket.salesEndDate &&
+      //     ticket.salesStartDate > ticket.salesEndDate
+      //   ) {
+      //     errors[`tickets.${index}.salesEndDate`] = 'End date must be after start date';
+      //   }
+      // } else {
+      //   if (!ticket.salesStartDate) {
+      //     errors[`tickets.${index}.salesStartDate`] = 'Start date is required';
+      //   }
+      //   if (!ticket.salesEndDate) {
+      //     errors[`tickets.${index}.salesEndDate`] = 'End date is required';
+      //   }
+      //   if (
+      //     ticket.salesStartDate &&
+      //     ticket.salesEndDate &&
+      //     ticket.salesStartDate > ticket.salesEndDate
+      //   ) {
+      //     errors[`tickets.${index}.salesEndDate`] = 'End date must be after start date';
+      //   }
+      // }
     });
 
     setTicketsErrors(errors);

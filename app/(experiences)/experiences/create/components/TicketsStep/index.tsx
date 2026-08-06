@@ -92,25 +92,28 @@ const validateTicket = (
     errors.amount = 'Amount must be greater than 0';
   }
 
-  // For recurring: validate relative validity instead of absolute dates
-  if (isRecurring) {
-    if (!draft.salesEndRelative) {
-      errors.salesEndRelative = 'Ticket sales validity is required';
-    }
-  } else {
-    // For non-recurring: validate absolute dates
-    if (!draft.salesStartDate) {
-      errors.salesStartDate = 'Start date is required';
-    }
-
-    if (!draft.salesEndDate) {
-      errors.salesEndDate = 'End date is required';
-    }
-
-    if (draft.salesStartDate && draft.salesEndDate && draft.salesStartDate > draft.salesEndDate) {
-      errors.salesEndDate = 'End date must be after start date';
-    }
-  }
+  // Ticket sales validity is hidden in TicketForm for now, so nothing can be
+  // entered here — restore these checks when that section comes back.
+  //
+  // // For recurring: validate relative validity instead of absolute dates
+  // if (isRecurring) {
+  //   if (!draft.salesEndRelative) {
+  //     errors.salesEndRelative = 'Ticket sales validity is required';
+  //   }
+  // } else {
+  //   // For non-recurring: validate absolute dates
+  //   if (!draft.salesStartDate) {
+  //     errors.salesStartDate = 'Start date is required';
+  //   }
+  //
+  //   if (!draft.salesEndDate) {
+  //     errors.salesEndDate = 'End date is required';
+  //   }
+  //
+  //   if (draft.salesStartDate && draft.salesEndDate && draft.salesStartDate > draft.salesEndDate) {
+  //     errors.salesEndDate = 'End date must be after start date';
+  //   }
+  // }
 
   return errors;
 };

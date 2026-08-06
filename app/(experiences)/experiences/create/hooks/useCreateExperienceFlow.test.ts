@@ -232,7 +232,9 @@ describe('useCreateExperienceFlow', () => {
       expect(isValid).toBe(true);
     });
 
-    it('fails when a recurring ticket is missing salesEndRelative', () => {
+    // Sales validity is commented out in TicketForm, so a ticket without it must
+    // still pass — flip this back to expect(false) when that section returns
+    it('passes when a recurring ticket has no salesEndRelative', () => {
       const { result } = renderHook(() => useCreateExperienceFlow(), {
         wrapper: createWrapper(),
       });
@@ -244,12 +246,12 @@ describe('useCreateExperienceFlow', () => {
         });
       });
 
-      let isValid = true;
+      let isValid = false;
       act(() => {
         isValid = result.current.validateTickets();
       });
 
-      expect(isValid).toBe(false);
+      expect(isValid).toBe(true);
     });
 
     it('advances from the tickets step to guests (reproduces Save & Continue)', () => {

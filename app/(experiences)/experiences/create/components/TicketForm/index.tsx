@@ -153,6 +153,13 @@ export const TicketForm = ({
         </div>
       )}
 
+      {/*
+        Ticket Sales Validity — hidden for now so a ticket can be saved without
+        a sales window. The matching checks are commented out in validateTicket
+        (TicketsStep) and validateTickets (useCreateExperienceFlow); restore all
+        three together. The payload builders already emit null for these fields
+        when they are unset.
+
       {isMultiDay || !isRecurring ? (
         <div className="space-y-2">
           <label className="text-xs font-medium text-gray-800">
@@ -199,28 +206,15 @@ export const TicketForm = ({
             />
           </div>
           {errors.salesEndDate && <p className="text-xs text-red-500">{errors.salesEndDate}</p>}
-
-          {/* {isMultiDay && ticketMode === 'each-day' && (
-            <DuplicateTicketsCheckbox
-              value={value.duplicateForEntirePeriod ?? false}
-              onChange={(val) => onChange({ duplicateForEntirePeriod: val })}
-            />
-          )} */}
         </div>
       ) : (
-        <>
-          <RelativeValidityPicker
-            value={value.salesEndRelative ?? null}
-            onChange={(val) => onChange({ salesEndRelative: val })}
-            errors={errors}
-          />
-
-          {/* <DuplicateTicketsCheckbox
-            value={value.duplicateForEntirePeriod ?? false}
-            onChange={(val) => onChange({ duplicateForEntirePeriod: val })}
-          /> */}
-        </>
+        <RelativeValidityPicker
+          value={value.salesEndRelative ?? null}
+          onChange={(val) => onChange({ salesEndRelative: val })}
+          errors={errors}
+        />
       )}
+      */}
 
       {/* <div className="flex items-center gap-2 pt-1">
         <Checkbox
