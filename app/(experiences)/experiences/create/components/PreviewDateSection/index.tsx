@@ -155,8 +155,8 @@ export const PreviewDateSection = (props: PreviewDateSectionProps) => {
 
   const daysLabel = formatFullDayLabel(props.days);
   const strip = buildDateStrip(props.days, props.recurrenceStartDate, props.recurrenceEndDate);
-  // The booking panel opens on the first available date and slot — show the
-  // host the same starting state
+  // Every date the experience actually runs on is shown in the selected green;
+  // the rest are dimmed. Only the month label keys off the first one.
   const firstEnabledDate = strip.find((day) => day.enabled)?.date ?? null;
   const monthLabel = moment(firstEnabledDate ?? props.recurrenceStartDate ?? undefined).format(
     'MMMM YYYY',
@@ -190,11 +190,7 @@ export const PreviewDateSection = (props: PreviewDateSectionProps) => {
                   <div
                     key={day.date}
                     className={`flex flex-shrink-0 flex-col items-center gap-1 rounded-2xl px-4 py-3 text-center ${
-                      day.date === firstEnabledDate
-                        ? 'bg-emerald-100 text-primary'
-                        : day.enabled
-                          ? 'border border-gray-200 bg-white text-gray-900'
-                          : 'bg-gray-100 text-gray-400'
+                      day.enabled ? 'bg-emerald-100 text-primary' : 'bg-gray-100 text-gray-400'
                     }`}
                   >
                     <span className="text-xs">{moment(day.date).format('ddd')}</span>
