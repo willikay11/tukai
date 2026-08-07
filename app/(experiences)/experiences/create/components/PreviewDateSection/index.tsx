@@ -28,6 +28,14 @@ type PreviewDateSectionProps =
       endDate: string | null;
       endTime: string | null;
       onEdit?: () => void;
+    }
+  | {
+      // Same run-of-days view as multi-day. Times live on the individual
+      // activities, so there is no overall time range to show.
+      mode: 'itinerary';
+      startDate: string | null;
+      endDate: string | null;
+      onEdit?: () => void;
     };
 
 const formatTime = (time: string | null) => {
@@ -157,6 +165,59 @@ const DateStripView = ({
   );
 };
 
+const EmptyDateSection = ({ onEdit }: { onEdit?: () => void }) => (
+  <div className="space-y-3">
+    <div className="flex items-start justify-between">
+      <h3 className="text-xs font-semibold text-gray-900">Date of the Experience</h3>
+      {onEdit && (
+        <button onClick={onEdit} className="text-gray-400 hover:text-gray-600">
+          <IconComponent iconName="Edit02Icon" size={16} className="text-gray-800" />
+        </button>
+      )}
+    </div>
+    <p className="text-xs text-gray-500">Not selected yet</p>
+  </div>
+);
+
+/**
+ * A fixed run of consecutive days — multi-day and itinerary experiences. Every
+ * date in the run is active, padded either side with a few surrounding days for
+ * context, the way the off-days read in the recurring strip.
+ */
+const DateRunView = ({
+  startDate,
+  endDate,
+  timeRanges,
+  onEdit,
+}: {
+  startDate: string;
+  endDate: string;
+  timeRanges: string[];
+  onEdit?: () => void;
+}) => {
+  const runStart = moment(startDate).startOf('day');
+  const runEnd = moment(endDate).startOf('day');
+  const totalDays = runEnd.diff(runStart, 'days') + 1;
+
+  // The padding gives way to the run itself when a long one would otherwise be
+  // cut off by the 30-day cap
+  const padding = Math.max(0, Math.min(CONTEXT_DAYS, Math.floor((MAX_STRIP_DAYS - totalDays) / 2)));
+
+  return (
+    <DateStripView
+      chipLabel={`Runs for ${totalDays} ${totalDays === 1 ? 'Day' : 'Days'}`}
+      strip={buildStrip(
+        runStart.clone().subtract(padding, 'days').format('YYYY-MM-DD'),
+        runEnd.clone().add(padding, 'days').format('YYYY-MM-DD'),
+        (date) => date.isBetween(runStart, runEnd, 'day', '[]'),
+      )}
+      timeRanges={timeRanges}
+      fallbackDate={startDate}
+      onEdit={onEdit}
+    />
+  );
+};
+
 export const PreviewDateSection = (props: PreviewDateSectionProps) => {
   if (props.mode === 'single') {
     const timeRange =
@@ -196,48 +257,36 @@ export const PreviewDateSection = (props: PreviewDateSectionProps) => {
   if (props.mode === 'multi-day') {
     const startTimeFormatted = formatTime(props.startTime);
     const endTimeFormatted = formatTime(props.endTime);
-    const isComplete =
-      props.startDate && props.endDate && startTimeFormatted && endTimeFormatted ? true : false;
-
-    if (!isComplete) {
-      return (
-        <div className="space-y-3">
-          <div className="flex items-start justify-between">
-            <h3 className="text-xs font-semibold text-gray-900">Date of the Experience</h3>
-            {props.onEdit && (
-              <button onClick={props.onEdit} className="text-gray-400 hover:text-gray-600">
-                <IconComponent iconName="Edit02Icon" size={16} className="text-gray-800" />
-              </button>
-            )}
-          </div>
-          <p className="text-xs text-gray-500">Not selected yet</p>
-        </div>
-      );
-    }
-
-    const runStart = moment(props.startDate).startOf('day');
-    const runEnd = moment(props.endDate).startOf('day');
-    const totalDays = runEnd.diff(runStart, 'days') + 1;
-
-    // Pad the run with a few surrounding days so it reads in context, the way
-    // the off-days do in the recurring strip. The padding gives way to the run
-    // itself when a long one would otherwise be cut off by the 30-day cap.
-    const padding = Math.max(
-      0,
-      Math.min(CONTEXT_DAYS, Math.floor((MAX_STRIP_DAYS - totalDays) / 2)),
+    const isComplete = Boolean(
+      props.startDate && props.endDate && startTimeFormatted && endTimeFormatted,
     );
 
+    if (!isComplete) {
+      return <EmptyDateSection onEdit={props.onEdit} />;
+    }
+
     return (
-      <DateStripView
-        chipLabel={`Runs for ${totalDays} ${totalDays === 1 ? 'Day' : 'Days'}`}
-        strip={buildStrip(
-          runStart.clone().subtract(padding, 'days').format('YYYY-MM-DD'),
-          runEnd.clone().add(padding, 'days').format('YYYY-MM-DD'),
-          // Only the dates the experience actually runs on are active
-          (date) => date.isBetween(runStart, runEnd, 'day', '[]'),
-        )}
+      <DateRunView
+        startDate={props.startDate as string}
+        endDate={props.endDate as string}
         timeRanges={[`${startTimeFormatted} - ${endTimeFormatted}`]}
-        fallbackDate={props.startDate}
+        onEdit={props.onEdit}
+      />
+    );
+  }
+
+  if (props.mode === 'itinerary') {
+    if (!props.startDate || !props.endDate) {
+      return <EmptyDateSection onEdit={props.onEdit} />;
+    }
+
+    // Activity times are shown on the itinerary section itself, so this run
+    // carries no time pills
+    return (
+      <DateRunView
+        startDate={props.startDate}
+        endDate={props.endDate}
+        timeRanges={[]}
         onEdit={props.onEdit}
       />
     );

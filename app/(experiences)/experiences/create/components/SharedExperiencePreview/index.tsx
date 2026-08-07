@@ -61,6 +61,7 @@ interface SharedExperiencePreviewProps {
   // Itinerary data
   itineraryDays?: ItineraryDayFormValue[];
   itineraryStartDate?: string | null;
+  itineraryEndDate?: string | null;
 
   // Community section
   selectedCommunity?: { name: string; imageUrl: string } | null;
@@ -121,6 +122,7 @@ export const SharedExperiencePreview = ({
   multiDayEndTime,
   itineraryDays = [],
   itineraryStartDate,
+  itineraryEndDate,
   selectedCommunity,
   ticketsItems,
   ticketsCommissionPayer,
@@ -132,6 +134,16 @@ export const SharedExperiencePreview = ({
 }: SharedExperiencePreviewProps) => {
   // Render date section based on experience type
   const renderDateSection = () => {
+    if (experienceType === 'itinerary') {
+      return (
+        <PreviewDateSection
+          mode="itinerary"
+          startDate={itineraryStartDate || null}
+          endDate={itineraryEndDate || null}
+        />
+      );
+    }
+
     if (experienceType === 'multi-day') {
       return (
         <PreviewDateSection

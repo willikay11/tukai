@@ -176,6 +176,13 @@ export const ReviewLayout = ({
           recurrenceEndDate={recurrence.endDate ?? experience.endDate?.split('T')[0] ?? null}
           onEdit={() => handleEditClick('dates')}
         />
+      ) : experience.experienceType === 'itinerary' ? (
+        <PreviewDateSection
+          mode="itinerary"
+          startDate={experience.startDate?.split('T')[0] ?? null}
+          endDate={experience.endDate?.split('T')[0] ?? null}
+          onEdit={() => handleEditClick('dates')}
+        />
       ) : (
         experience.startDate && (
           <PreviewDateSection

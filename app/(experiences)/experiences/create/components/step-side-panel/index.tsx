@@ -31,6 +31,7 @@ export const ExperienceStepSidePanel = ({
   itineraryConfig,
   itineraryDays = [],
   itineraryStartDate,
+  itineraryEndDate,
   selectedCommunity,
   selectedDate,
   selectedStartTime,
@@ -69,6 +70,7 @@ export const ExperienceStepSidePanel = ({
   itineraryConfig?: { startDate: string; endDate: string } | null;
   itineraryDays?: ItineraryDayFormValue[];
   itineraryStartDate?: string | null;
+  itineraryEndDate?: string | null;
   selectedCommunity?: { name: string; imageUrl: string } | null;
   selectedDate?: string | null;
   selectedStartTime?: string | null;
@@ -144,6 +146,7 @@ export const ExperienceStepSidePanel = ({
         multiDayEndTime={multiDayEndTime}
         itineraryDays={itineraryDays}
         itineraryStartDate={itineraryStartDate}
+        itineraryEndDate={itineraryEndDate}
         selectedCommunity={selectedCommunity}
         ticketsItems={ticketsItems}
         ticketsCommissionPayer={ticketsCommissionPayer}
@@ -183,6 +186,7 @@ export const ExperienceStepSidePanel = ({
         multiDayEndTime={multiDayEndTime}
         itineraryDays={itineraryDays}
         itineraryStartDate={itineraryStartDate}
+        itineraryEndDate={itineraryEndDate}
         selectedCommunity={selectedCommunity}
         ticketsItems={ticketsItems}
         ticketsCommissionPayer={ticketsCommissionPayer}
@@ -224,6 +228,7 @@ export const ExperienceStepSidePanel = ({
         multiDayEndTime={multiDayEndTime}
         itineraryDays={itineraryDays}
         itineraryStartDate={itineraryStartDate}
+        itineraryEndDate={itineraryEndDate}
         selectedCommunity={selectedCommunity}
         ticketsItems={ticketsItems}
         ticketsCommissionPayer={ticketsCommissionPayer}
@@ -263,6 +268,7 @@ export const ExperienceStepSidePanel = ({
         multiDayEndTime={multiDayEndTime}
         itineraryDays={itineraryDays}
         itineraryStartDate={itineraryStartDate}
+        itineraryEndDate={itineraryEndDate}
         selectedCommunity={selectedCommunity}
         ticketsItems={ticketsItems}
         ticketsCommissionPayer={ticketsCommissionPayer}
@@ -302,6 +308,7 @@ export const ExperienceStepSidePanel = ({
         multiDayEndTime={multiDayEndTime}
         itineraryDays={itineraryDays}
         itineraryStartDate={itineraryStartDate}
+        itineraryEndDate={itineraryEndDate}
         selectedCommunity={selectedCommunity}
         ticketsItems={ticketsItems}
         ticketsCommissionPayer={ticketsCommissionPayer}

@@ -103,6 +103,33 @@ describe('PreviewDateSection', () => {
     expect(screen.getByText('Not selected yet')).toBeInTheDocument();
   });
 
+  describe('itinerary mode', () => {
+    it('shows the run of days without time pills', () => {
+      render(<PreviewDateSection mode="itinerary" startDate="2026-09-10" endDate="2026-09-12" />);
+
+      expect(screen.getByText('September 2026')).toBeInTheDocument();
+      expect(screen.getByText('Runs for 3 Days')).toBeInTheDocument();
+      expect(screen.getByText('10')).toBeInTheDocument();
+      expect(screen.getByText('12')).toBeInTheDocument();
+      // Activity times live on the itinerary section, not here
+      expect(screen.queryByText(/AM -/)).not.toBeInTheDocument();
+    });
+
+    it('pads the run with surrounding days, as multi-day does', () => {
+      render(<PreviewDateSection mode="itinerary" startDate="2026-09-10" endDate="2026-09-12" />);
+
+      expect(screen.getByText('7')).toBeInTheDocument();
+      expect(screen.getByText('15')).toBeInTheDocument();
+      expect(screen.queryByText('6')).not.toBeInTheDocument();
+      expect(screen.queryByText('16')).not.toBeInTheDocument();
+    });
+
+    it('displays "Not selected yet" when the range is incomplete', () => {
+      render(<PreviewDateSection mode="itinerary" startDate="2026-09-10" endDate={null} />);
+      expect(screen.getByText('Not selected yet')).toBeInTheDocument();
+    });
+  });
+
   describe('recurring mode', () => {
     it('renders a time range for every time slot, not just the first', () => {
       render(
