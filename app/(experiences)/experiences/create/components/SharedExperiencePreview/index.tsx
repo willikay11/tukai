@@ -200,7 +200,6 @@ export const SharedExperiencePreview = ({
         <PreviewItinerarySection
           days={itineraryDays}
           itineraryStartDate={itineraryStartDate ?? null}
-          onEdit={() => onEditStep?.('itinerary-days')}
         />
       )}
 
