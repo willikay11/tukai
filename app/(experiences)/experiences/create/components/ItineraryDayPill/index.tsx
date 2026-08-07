@@ -33,6 +33,8 @@ interface ItineraryDayPillProps {
   isSaving?: boolean;
   error?: string;
   isParentSaving?: boolean;
+  // The connecting line is dropped on the final day so it stops at the last dot
+  isLast?: boolean;
   registerFlusher?: (
     dayId: string,
     flusher: () => { title?: string; description?: string },
@@ -57,6 +59,7 @@ export const ItineraryDayPill = ({
   isSaving,
   error,
   isParentSaving = false,
+  isLast = false,
   registerFlusher,
 }: ItineraryDayPillProps) => {
   const { toast } = useToast();
@@ -353,7 +356,7 @@ export const ItineraryDayPill = ({
 
       try {
         const index = day.activities.indexOf(activity);
-        console.log("activity", activity);
+        console.log('activity', activity);
         const payload: ItineraryActivityPayload = {
           title: activity.title,
           description: activity.description,
@@ -401,7 +404,9 @@ export const ItineraryDayPill = ({
       <div className="relative flex flex-col items-center">
         <div className="z-10 mt-3.5 h-1.5 w-1.5 flex-shrink-0 rounded-full border-2 border-gray-300 bg-gray-300" />
         <div className="pointer-events-none absolute left-1 mt-4 h-0 w-3.5 border-t-[1px] border-dashed border-gray-300" />
-        <div className="absolute -bottom-[14px] top-2.5 mt-1 flex-1 border-l-[1px] border-dashed border-gray-300" />
+        {!isLast && (
+          <div className="absolute -bottom-[14px] top-2.5 mt-1 flex-1 border-l-[1px] border-dashed border-gray-300" />
+        )}
       </div>
 
       {/* Pill + expanded content */}

@@ -103,6 +103,7 @@ export const ItineraryDaysStep = ({
               onChange={(data) => handleDayChange(index, data)}
               onDelete={() => handleDayDelete(index)}
               isParentSaving={isParentSaving}
+              isLast={index === days.length - 1}
               registerFlusher={registerFlusher}
             />
           </div>
