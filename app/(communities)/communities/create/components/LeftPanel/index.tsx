@@ -2,6 +2,8 @@
 
 import { UseFormReturn } from 'react-hook-form';
 
+import { useRouter } from 'next/navigation';
+
 import { CreateCommunityFormValues } from '@/app/(communities)/communities/components/hooks/useCreateCommunityFlow';
 import { type FormPhoto, PhotoUploader } from '@/app/shared/components';
 import { IconComponent } from '@/app/shared/components/Icons';
@@ -75,6 +77,8 @@ export const LeftPanel = ({
   onSubmit,
   onToggleCategory,
 }: LeftPanelProps) => {
+  const router = useRouter();
+
   return (
     <div className="space-y-6 py-6">
       <CommunityCreatedSuccessDialog
@@ -279,7 +283,12 @@ export const LeftPanel = ({
 
           {/* Action buttons */}
           <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" className="flex-1 rounded-full">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 rounded-full"
+              onClick={() => router.back()}
+            >
               Cancel
             </Button>
             <Button
