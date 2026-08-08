@@ -243,7 +243,10 @@ const initialFormData: FormData = {
   },
   tickets: {
     commission: 'host',
-    ticketMode: null,
+    // Matches the mode MultiDayTicketModePicker shows selected on first render.
+    // Leaving this null made multi-day validation fail against a picker that
+    // already looked answered.
+    ticketMode: 'entire-period',
     items: [],
   },
   invite: {

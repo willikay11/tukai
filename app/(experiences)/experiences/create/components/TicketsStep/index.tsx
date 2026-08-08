@@ -165,7 +165,10 @@ export const TicketsStep = ({
 
   const handleTicketModeChange = (mode: 'entire-period' | 'each-day') => {
     setTicketMode(mode);
-    onChange({ ticketMode: mode, items: [] });
+    // Saved tickets are kept. They already exist on the API (they carry an
+    // apiId), so dropping them from local state here would leave them on the
+    // experience with no way to see or delete them.
+    onChange({ ticketMode: mode });
     setActiveFormIndex(null);
     setDraftTicket(emptyTicketForm);
     setFormErrors({});
@@ -494,6 +497,30 @@ export const TicketsStep = ({
 
   const multiDayDays = getDaysBetween(multiDayStartDate || '', multiDayEndDate || '');
 
+  // Per-ticket validation messages only ever reached an open TicketForm, so a
+  // blocked Save & Continue gave no feedback once the form was closed. Surface
+  // them next to the action buttons instead.
+  const ticketErrorMessages = Object.entries(errors)
+    .filter(([key]) => key.startsWith('tickets.'))
+    .map(([, message]) => message);
+
+  const blockedMessages = [
+    ...(errors.items ? [errors.items] : []),
+    ...(errors.ticketMode ? [errors.ticketMode] : []),
+    ...ticketErrorMessages,
+  ];
+
+  const validationSummary =
+    blockedMessages.length > 0 ? (
+      <div className="space-y-1 pt-4">
+        {blockedMessages.map((message, index) => (
+          <p key={index} className="text-xs text-red-500">
+            {message}
+          </p>
+        ))}
+      </div>
+    ) : null;
+
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-bold text-gray-900">Create Tickets</h2>
@@ -504,7 +531,10 @@ export const TicketsStep = ({
       />
 
       {isMultiDay && (
-        <MultiDayTicketModePicker value={ticketMode} onChange={handleTicketModeChange} />
+        <div className="space-y-1">
+          <MultiDayTicketModePicker value={ticketMode} onChange={handleTicketModeChange} />
+          {errors.ticketMode && <p className="text-xs text-red-500">{errors.ticketMode}</p>}
+        </div>
       )}
 
       {isMultiDay ? (
@@ -710,6 +740,8 @@ export const TicketsStep = ({
             );
           })}
 
+          {validationSummary}
+
           {allSlotsHaveTickets && (
             <div className="flex justify-between gap-4 pt-6">
               <Button type="button" variant="ghost" onClick={onCancel} className="text-red-600">
@@ -806,7 +838,7 @@ export const TicketsStep = ({
         </div>
       )}
 
-      {errors.items && <p className="text-xs text-red-500">{errors.items}</p>}
+      {!isMultiDay && validationSummary}
 
       {showTicketConnector && !(isRecurring && allSlotsHaveTickets) && (
         <div className="flex gap-2 pt-6 lg:gap-4">
