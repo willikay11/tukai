@@ -143,6 +143,8 @@ export const TicketsStep = ({
 }: TicketsStepProps) => {
   const [activeFormIndex, setActiveFormIndex] = useState<number | null>(null);
   const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
+  // Which day of a multi-day run the open form belongs to, in "each day" mode
+  const [activeDayIndex, setActiveDayIndex] = useState<number | null>(null);
   const [draftTicket, setDraftTicket] = useState<TicketFormValue>(emptyTicketForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [ticketMode, setTicketMode] = useState<'entire-period' | 'each-day'>(
@@ -184,6 +186,28 @@ export const TicketsStep = ({
     setFormErrors({});
   }, [formData.items.length]);
 
+  const handleAddTicketForDay = useCallback(
+    (dayIndex: number) => {
+      setActiveFormIndex(formData.items.length);
+      setActiveDayIndex(dayIndex);
+      setDraftTicket(emptyTicketForm);
+      setFormErrors({});
+    },
+    [formData.items.length],
+  );
+
+  // Recurring experiences hang tickets off a time slot, so adding one has to
+  // remember which slot the blank form belongs to
+  const handleAddTicketForSlot = useCallback(
+    (slotIndex: number) => {
+      setActiveFormIndex(formData.items.length);
+      setActiveSlotIndex(slotIndex);
+      setDraftTicket(emptyTicketForm);
+      setFormErrors({});
+    },
+    [formData.items.length],
+  );
+
   const handleEditTicket = useCallback(
     (index: number) => {
       const ticket = formData.items[index];
@@ -208,62 +232,79 @@ export const TicketsStep = ({
     [formData.items],
   );
 
-  // Save locally without API
-  const saveLocally = useCallback(() => {
-    const items = [...formData.items];
-    const isRecurringExperience = dateTypeData?.isRecurring ?? false;
-    if (activeFormIndex !== null && activeFormIndex < items.length) {
-      items[activeFormIndex] = {
-        ...items[activeFormIndex],
-        name: draftTicket.name,
-        quantity: draftTicket.quantity!,
-        amount: draftTicket.amount!,
-        startTime: draftTicket.startTime || null,
-        endTime: draftTicket.endTime || null,
-        salesStartDate: draftTicket.salesStartDate!,
-        salesStartTime: draftTicket.salesStartTime!,
-        salesEndDate: draftTicket.salesEndDate!,
-        salesEndTime: draftTicket.salesEndTime!,
-        acceptPartialPayment: draftTicket.acceptPartialPayment,
-        salesStartRelative: draftTicket.salesStartRelative || null,
-        salesEndRelative: draftTicket.salesEndRelative || null,
-        duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
-        ...(isRecurringExperience && activeSlotIndex !== null
-          ? { slotIndex: activeSlotIndex }
-          : {}),
-      };
-    } else {
-      items.push({
-        id: uuidv4(),
-        name: draftTicket.name,
-        quantity: draftTicket.quantity!,
-        amount: draftTicket.amount!,
-        startTime: draftTicket.startTime || null,
-        endTime: draftTicket.endTime || null,
-        salesStartDate: draftTicket.salesStartDate!,
-        salesStartTime: draftTicket.salesStartTime!,
-        salesEndDate: draftTicket.salesEndDate!,
-        salesEndTime: draftTicket.salesEndTime!,
-        acceptPartialPayment: draftTicket.acceptPartialPayment,
-        salesStartRelative: draftTicket.salesStartRelative || null,
-        salesEndRelative: draftTicket.salesEndRelative || null,
-        duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
-        ...(isRecurringExperience && activeSlotIndex !== null
-          ? { slotIndex: activeSlotIndex }
-          : {}),
-      });
-    }
+  // Save locally without API. The day is passed in rather than read from state
+  // so a save fired in the same tick as setActiveDayIndex still records it.
+  const saveLocally = useCallback(
+    (dayIndexOverride?: number) => {
+      const items = [...formData.items];
+      const isRecurringExperience = dateTypeData?.isRecurring ?? false;
+      const resolvedDayIndex = dayIndexOverride ?? activeDayIndex ?? undefined;
+      if (activeFormIndex !== null && activeFormIndex < items.length) {
+        items[activeFormIndex] = {
+          ...items[activeFormIndex],
+          name: draftTicket.name,
+          quantity: draftTicket.quantity!,
+          amount: draftTicket.amount!,
+          startTime: draftTicket.startTime || null,
+          endTime: draftTicket.endTime || null,
+          salesStartDate: draftTicket.salesStartDate!,
+          salesStartTime: draftTicket.salesStartTime!,
+          salesEndDate: draftTicket.salesEndDate!,
+          salesEndTime: draftTicket.salesEndTime!,
+          acceptPartialPayment: draftTicket.acceptPartialPayment,
+          salesStartRelative: draftTicket.salesStartRelative || null,
+          salesEndRelative: draftTicket.salesEndRelative || null,
+          duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
+          ...(isRecurringExperience && activeSlotIndex !== null
+            ? { slotIndex: activeSlotIndex }
+            : {}),
+          ...(resolvedDayIndex !== undefined ? { dayIndex: resolvedDayIndex } : {}),
+        };
+      } else {
+        items.push({
+          id: uuidv4(),
+          name: draftTicket.name,
+          quantity: draftTicket.quantity!,
+          amount: draftTicket.amount!,
+          startTime: draftTicket.startTime || null,
+          endTime: draftTicket.endTime || null,
+          salesStartDate: draftTicket.salesStartDate!,
+          salesStartTime: draftTicket.salesStartTime!,
+          salesEndDate: draftTicket.salesEndDate!,
+          salesEndTime: draftTicket.salesEndTime!,
+          acceptPartialPayment: draftTicket.acceptPartialPayment,
+          salesStartRelative: draftTicket.salesStartRelative || null,
+          salesEndRelative: draftTicket.salesEndRelative || null,
+          duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
+          ...(isRecurringExperience && activeSlotIndex !== null
+            ? { slotIndex: activeSlotIndex }
+            : {}),
+          ...(resolvedDayIndex !== undefined ? { dayIndex: resolvedDayIndex } : {}),
+        });
+      }
 
-    onChange({ items });
-    setActiveFormIndex(null);
-    setActiveSlotIndex(null);
-    setDraftTicket(emptyTicketForm);
-    setFormErrors({});
-  }, [draftTicket, formData.items, activeFormIndex, activeSlotIndex, onChange, dateTypeData]);
+      onChange({ items });
+      setActiveFormIndex(null);
+      setActiveSlotIndex(null);
+      setActiveDayIndex(null);
+      setDraftTicket(emptyTicketForm);
+      setFormErrors({});
+    },
+    [
+      draftTicket,
+      formData.items,
+      activeFormIndex,
+      activeSlotIndex,
+      activeDayIndex,
+      onChange,
+      dateTypeData,
+    ],
+  );
 
   const handleSaveTicket = useCallback(
-    async (slotIndex?: number) => {
+    async (slotIndex?: number, dayIndexOverride?: number) => {
       const isRecurringExperience = dateTypeData?.isRecurring ?? false;
+      const resolvedDayIndex = dayIndexOverride ?? activeDayIndex ?? undefined;
       const newErrors = validateTicket(
         draftTicket,
         experiencePricing === 'paid',
@@ -277,7 +318,7 @@ export const TicketsStep = ({
 
       // If no experienceId yet, save locally only
       if (!experienceId) {
-        saveLocally();
+        saveLocally(resolvedDayIndex);
         return;
       }
 
@@ -379,6 +420,7 @@ export const TicketsStep = ({
             salesEndRelative: draftTicket.salesEndRelative || null,
             duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
             ...(isRecurringExperienceLocal && slotIndex !== undefined ? { slotIndex } : {}),
+            ...(resolvedDayIndex !== undefined ? { dayIndex: resolvedDayIndex } : {}),
           };
         } else {
           items.push({
@@ -398,12 +440,14 @@ export const TicketsStep = ({
             salesEndRelative: draftTicket.salesEndRelative || null,
             duplicateForEntirePeriod: draftTicket.duplicateForEntirePeriod || false,
             ...(isRecurringExperienceLocal && slotIndex !== undefined ? { slotIndex } : {}),
+            ...(resolvedDayIndex !== undefined ? { dayIndex: resolvedDayIndex } : {}),
           });
         }
 
         onChange({ items });
         setActiveFormIndex(null);
         setActiveSlotIndex(null);
+        setActiveDayIndex(null);
         setDraftTicket(emptyTicketForm);
         setFormErrors({});
       } catch (error) {
@@ -422,6 +466,7 @@ export const TicketsStep = ({
       draftTicket,
       formData.items,
       activeFormIndex,
+      activeDayIndex,
       onChange,
       experiencePricing,
       experienceId,
@@ -441,6 +486,8 @@ export const TicketsStep = ({
 
   const handleCancelForm = useCallback(() => {
     setActiveFormIndex(null);
+    setActiveSlotIndex(null);
+    setActiveDayIndex(null);
     setDraftTicket(emptyTicketForm);
     setFormErrors({});
   }, []);
@@ -606,36 +653,31 @@ export const TicketsStep = ({
           ) : ticketMode === 'each-day' && hasTicketDateBadge ? (
             <div className="space-y-4">
               <div className="space-y-2">
-                {multiDayDays.map((day, index) => (
-                  <div key={index} className="relative">
-                    <div className="mb-3">
-                      <TicketDateBadge
-                        mode="single"
-                        date={day}
-                        startTime={multiDayStartTime!}
-                        endTime={multiDayEndTime!}
-                      />
-                    </div>
-                    <span className="pointer-events-none absolute -bottom-[1.875rem] -left-[1.25rem] top-[1.5rem] border-l-[1px] border-dashed border-primary" />
-                    <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
-                    <span className="pointer-events-none absolute -left-[1.563rem] top-[1.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
-                    {formData.items.length === 0 && activeFormIndex === null ? (
-                      <TicketForm
-                        value={draftTicket}
-                        onChange={handleDraftTicketChange}
-                        errors={formErrors}
-                        onSave={handleSaveTicket}
-                        experiencePricing={experiencePricing}
-                        commissionPayer={formData.commission}
-                        isRecurring={isRecurring}
-                        isMultiDay={isMultiDay}
-                        ticketMode={ticketMode}
-                        isSaving={createTicketMutation.isPending || isSavingLocal}
-                      />
-                    ) : (
-                      <>
+                {multiDayDays.map((day, dayIndex) => {
+                  // Tickets are scoped to the day they were added under, so each
+                  // day shows only its own and gets its own add button
+                  const dayTickets = formData.items.filter(
+                    (ticket) => ticket.dayIndex === dayIndex,
+                  );
+                  const isFormOpenForDay = activeFormIndex !== null && activeDayIndex === dayIndex;
+
+                  return (
+                    <div key={dayIndex} className="relative">
+                      <div className="mb-3">
+                        <TicketDateBadge
+                          mode="single"
+                          date={day}
+                          startTime={multiDayStartTime!}
+                          endTime={multiDayEndTime!}
+                        />
+                      </div>
+                      <span className="pointer-events-none absolute -bottom-[1.875rem] -left-[1.25rem] top-[1.5rem] border-l-[1px] border-dashed border-primary" />
+                      <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
+                      <span className="pointer-events-none absolute -left-[1.563rem] top-[1.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
+
+                      {dayTickets.length > 0 && (
                         <div className="mb-4 space-y-3">
-                          {formData.items.map((ticket, index) => (
+                          {dayTickets.map((ticket) => (
                             <SavedTicketCard
                               key={ticket.id}
                               name={ticket.name}
@@ -643,43 +685,52 @@ export const TicketsStep = ({
                               amount={ticket.amount}
                               validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
                               coverPhoto={photos?.[0]}
-                              onEdit={() => handleEditTicket(index)}
+                              onEdit={() => handleEditTicket(formData.items.indexOf(ticket))}
                               onDelete={() => handleDeleteTicket(ticket.id)}
                             />
                           ))}
                         </div>
+                      )}
 
-                        {activeFormIndex !== null ? (
-                          <TicketForm
-                            value={draftTicket}
-                            onChange={handleDraftTicketChange}
-                            errors={formErrors}
-                            onSave={handleSaveTicket}
-                            onCancel={handleCancelForm}
-                            experiencePricing={experiencePricing}
-                            commissionPayer={formData.commission}
-                            isRecurring={isRecurring}
-                            isMultiDay={isMultiDay}
-                            ticketMode={ticketMode}
-                            isSaving={createTicketMutation.isPending || isSavingLocal}
-                          />
-                        ) : (
-                          <AddTicketTypeButton onClick={handleAddTicket} />
-                        )}
-                      </>
-                    )}
-                  </div>
-                ))}
+                      {dayTickets.length === 0 || isFormOpenForDay ? (
+                        <TicketForm
+                          value={draftTicket}
+                          onChange={handleDraftTicketChange}
+                          errors={formErrors}
+                          onSave={() => handleSaveTicket(undefined, dayIndex)}
+                          onCancel={dayTickets.length > 0 ? handleCancelForm : undefined}
+                          experiencePricing={experiencePricing}
+                          commissionPayer={formData.commission}
+                          isRecurring={isRecurring}
+                          isMultiDay={isMultiDay}
+                          ticketMode={ticketMode}
+                          isSaving={createTicketMutation.isPending || isSavingLocal}
+                        />
+                      ) : (
+                        <AddTicketTypeButton onClick={() => handleAddTicketForDay(dayIndex)} />
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          ) : null}
+          ) : (
+            // Both multi-day layouts need the full date range and times before
+            // tickets can be attached to anything — say so rather than render
+            // an empty step
+            <p className="text-xs text-muted-foreground">
+              Add the experience start and end dates and times before creating tickets.
+            </p>
+          )}
         </>
       ) : isRecurring && hasTicketDateBadge ? (
         <div className="space-y-2">
           {validSlots.map((slot, slotIndex) => {
-            const slotTicket = formData.items.find(
+            const slotTickets = formData.items.filter(
               (t) => t.slotIndex === slotIndex && t.apiId != null,
             );
+            // The blank form belongs to this slot when it was opened from here
+            const isFormOpenForSlot = activeFormIndex !== null && activeSlotIndex === slotIndex;
             return (
               <div key={slotIndex} className="relative pt-2">
                 <div className="mb-3">
@@ -694,33 +745,42 @@ export const TicketsStep = ({
                 <span className="pointer-events-none absolute -left-[1.25rem] top-[1.5rem] h-0 w-5 border-t-[1px] border-dashed border-primary" />
                 <span className="pointer-events-none absolute -left-[1.563rem] top-[1.3125rem] h-2.5 w-2.5 rounded-full bg-primary" />
 
-                {slotTicket ? (
-                  <SavedTicketCard
-                    name={slotTicket.name}
-                    quantity={slotTicket.quantity}
-                    amount={slotTicket.amount}
-                    validity={`${slotTicket.salesEndRelative?.amount ?? 1} ${slotTicket.salesEndRelative?.unit ?? 'hour'} before the experience ${slotTicket.salesEndRelative?.anchor === 'start' ? 'starts' : 'ends'}`}
-                    coverPhoto={photos?.[0]}
-                    onEdit={() => {
-                      setActiveFormIndex(formData.items.indexOf(slotTicket));
-                      setActiveSlotIndex(slotIndex);
-                      setDraftTicket({
-                        name: slotTicket.name,
-                        quantity: slotTicket.quantity,
-                        amount: slotTicket.amount,
-                        salesStartDate: slotTicket.salesStartDate,
-                        salesStartTime: slotTicket.salesStartTime,
-                        salesEndDate: slotTicket.salesEndDate,
-                        salesEndTime: slotTicket.salesEndTime,
-                        acceptPartialPayment: slotTicket.acceptPartialPayment,
-                        salesStartRelative: slotTicket.salesStartRelative,
-                        salesEndRelative: slotTicket.salesEndRelative,
-                        duplicateForEntirePeriod: slotTicket.duplicateForEntirePeriod,
-                      });
-                    }}
-                    onDelete={() => handleDeleteTicket(slotTicket.id)}
-                  />
-                ) : (
+                {slotTickets.length > 0 && (
+                  <div className="mb-4 space-y-3">
+                    {slotTickets.map((slotTicket) => (
+                      <SavedTicketCard
+                        key={slotTicket.id}
+                        name={slotTicket.name}
+                        quantity={slotTicket.quantity}
+                        amount={slotTicket.amount}
+                        validity={`${slotTicket.salesEndRelative?.amount ?? 1} ${slotTicket.salesEndRelative?.unit ?? 'hour'} before the experience ${slotTicket.salesEndRelative?.anchor === 'start' ? 'starts' : 'ends'}`}
+                        coverPhoto={photos?.[0]}
+                        onEdit={() => {
+                          setActiveFormIndex(formData.items.indexOf(slotTicket));
+                          setActiveSlotIndex(slotIndex);
+                          setDraftTicket({
+                            name: slotTicket.name,
+                            quantity: slotTicket.quantity,
+                            amount: slotTicket.amount,
+                            startTime: slotTicket.startTime ?? null,
+                            endTime: slotTicket.endTime ?? null,
+                            salesStartDate: slotTicket.salesStartDate,
+                            salesStartTime: slotTicket.salesStartTime,
+                            salesEndDate: slotTicket.salesEndDate,
+                            salesEndTime: slotTicket.salesEndTime,
+                            acceptPartialPayment: slotTicket.acceptPartialPayment,
+                            salesStartRelative: slotTicket.salesStartRelative,
+                            salesEndRelative: slotTicket.salesEndRelative,
+                            duplicateForEntirePeriod: slotTicket.duplicateForEntirePeriod,
+                          });
+                        }}
+                        onDelete={() => handleDeleteTicket(slotTicket.id)}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {slotTickets.length === 0 || isFormOpenForSlot ? (
                   <TicketForm
                     value={draftTicket}
                     onChange={handleDraftTicketChange}
@@ -728,6 +788,7 @@ export const TicketsStep = ({
                     onSave={() => {
                       handleSaveTicket(slotIndex);
                     }}
+                    onCancel={slotTickets.length > 0 ? handleCancelForm : undefined}
                     experiencePricing={experiencePricing}
                     commissionPayer={formData.commission}
                     isRecurring={isRecurring}
@@ -735,6 +796,8 @@ export const TicketsStep = ({
                     ticketMode={ticketMode}
                     isSaving={createTicketMutation.isPending || isSavingLocal}
                   />
+                ) : (
+                  <AddTicketTypeButton onClick={() => handleAddTicketForSlot(slotIndex)} />
                 )}
               </div>
             );

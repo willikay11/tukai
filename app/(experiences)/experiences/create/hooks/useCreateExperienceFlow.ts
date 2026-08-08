@@ -181,6 +181,11 @@ export interface FormData {
         anchor: 'start' | 'end';
       } | null;
       duplicateForEntirePeriod: boolean;
+      // Which recurring time slot the ticket belongs to. Set at save time for
+      // recurring experiences only, so it stays optional.
+      slotIndex?: number;
+      // Which day of a multi-day run the ticket belongs to, in "each day" mode
+      dayIndex?: number;
     }>;
   };
   invite: {
