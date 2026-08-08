@@ -276,6 +276,68 @@ describe('useCreateExperienceFlow', () => {
     });
   });
 
+  describe('validateTickets for multi-day experiences', () => {
+    const multiDayTicket = {
+      id: 'ticket-1',
+      name: 'General',
+      quantity: 10,
+      amount: 500,
+      startTime: null,
+      endTime: null,
+      salesStartDate: null,
+      salesStartTime: null,
+      salesEndDate: null,
+      salesEndTime: null,
+      acceptPartialPayment: false,
+      salesStartRelative: null,
+      salesEndRelative: null,
+      duplicateForEntirePeriod: false,
+    };
+
+    // The picker shows "entire period" selected from the first render, so form
+    // state has to agree — otherwise Save & Continue fails against a question
+    // the host was never actually asked
+    it('passes without the host touching the ticket mode picker', () => {
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.updateFormData({ experienceType: 'multi-day', experiencePricing: 'paid' });
+        result.current.updateTicketsFormData({ items: [multiDayTicket] });
+      });
+
+      let isValid = false;
+      act(() => {
+        isValid = result.current.validateTickets();
+      });
+
+      expect(isValid).toBe(true);
+      expect(result.current.ticketsErrors.ticketMode).toBeUndefined();
+    });
+
+    it('still reports a missing ticket mode if one is explicitly cleared', () => {
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.updateFormData({ experienceType: 'multi-day', experiencePricing: 'paid' });
+        result.current.updateTicketsFormData({ ticketMode: null, items: [multiDayTicket] });
+      });
+
+      let isValid = true;
+      act(() => {
+        isValid = result.current.validateTickets();
+      });
+
+      expect(isValid).toBe(false);
+      expect(result.current.ticketsErrors.ticketMode).toBe(
+        'Please select how you want to create tickets',
+      );
+    });
+  });
+
   describe('validateDateType time ordering', () => {
     const community = { id: 'community-1', name: 'Community 1', imageUrl: null };
 
