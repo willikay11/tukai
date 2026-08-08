@@ -12,6 +12,11 @@ export interface TimePickerProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  /**
+   * Earliest time ("HH:MM") that can be saved. Anything at or before it is
+   * blocked — used to stop an end time landing before its start time.
+   */
+  minTime?: string;
 }
 
 const ROW_HEIGHT = 28;
@@ -24,6 +29,31 @@ const MINUTES_ARRAY = Array.from({ length: 60 }, (_, i) => i.toString().padStart
 const PERIOD_ARRAY = ['AM', 'PM'] as const;
 
 type TimePeriod = (typeof PERIOD_ARRAY)[number];
+
+const toMinutes = (time: string) => {
+  const [h, m] = time.split(':').map(Number);
+  return h * 60 + m;
+};
+
+const formatTimeLabel = (time: string) => {
+  const [h, m] = time.split(':');
+  const hour = parseInt(h, 10);
+  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  return `${displayHour}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
+};
+
+const splitTime = (time: string) => {
+  const [h, m] = time.split(':');
+  const hour = parseInt(h, 10);
+  const period: TimePeriod = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+
+  return {
+    hours: displayHour.toString().padStart(2, '0'),
+    minutes: m || '00',
+    period,
+  };
+};
 
 const getOpacity = (scrollTop: number, itemIndex: number) => {
   const centerPos = scrollTop + DRUM_HEIGHT / 2;
@@ -207,7 +237,7 @@ const DrumColumn = React.memo(
 DrumColumn.displayName = 'DrumColumn';
 
 const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
-  ({ className, value, onChange, placeholder = 'Select time', disabled }, ref) => {
+  ({ className, value, onChange, placeholder = 'Select time', disabled, minTime }, ref) => {
     const [open, setOpen] = React.useState(false);
     const hoursRef = React.useRef<HTMLDivElement>(null);
     const minutesRef = React.useRef<HTMLDivElement>(null);
@@ -217,52 +247,40 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
     const [minutes, setMinutes] = React.useState('00');
     const [period, setPeriod] = React.useState<TimePeriod>('AM');
 
-    // Initialize from value
+    // Initialize from value — or from minTime, so an empty end time starts the
+    // drums next to its start time rather than at midnight
     React.useEffect(() => {
-      if (value && open) {
-        const [time] = value.split(' ');
-        const [h, m] = time.split(':');
-        const hour = parseInt(h, 10);
+      if (!open) return;
 
-        if (hour === 0) {
-          setHours('12');
-          setPeriod('AM');
-        } else if (hour < 12) {
-          setHours(hour.toString().padStart(2, '0'));
-          setPeriod('AM');
-        } else if (hour === 12) {
-          setHours('12');
-          setPeriod('PM');
-        } else {
-          setHours((hour - 12).toString().padStart(2, '0'));
-          setPeriod('PM');
-        }
-        setMinutes(m || '00');
+      const initial = value ? value.split(' ')[0] : minTime;
+      if (!initial) return;
+
+      const { hours: h, minutes: m, period: p } = splitTime(initial);
+      setHours(h);
+      setMinutes(m);
+      setPeriod(p);
+    }, [value, open, minTime]);
+
+    const selectedTime = React.useMemo(() => {
+      let hour24 = parseInt(hours, 10);
+      if (period === 'PM' && hour24 !== 12) {
+        hour24 += 12;
+      } else if (period === 'AM' && hour24 === 12) {
+        hour24 = 0;
       }
-    }, [value, open]);
+      return `${hour24.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    }, [hours, minutes, period]);
+
+    const isBeforeMin = minTime ? toMinutes(selectedTime) <= toMinutes(minTime) : false;
 
     const handleSave = () => {
-      if (onChange) {
-        let hour24 = parseInt(hours, 10);
-        if (period === 'PM' && hour24 !== 12) {
-          hour24 += 12;
-        } else if (period === 'AM' && hour24 === 12) {
-          hour24 = 0;
-        }
-        const formattedTime = `${hour24.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}`;
-        onChange(formattedTime);
-      }
+      if (isBeforeMin) return;
+
+      onChange?.(selectedTime);
       setOpen(false);
     };
 
-    const getDisplayValue = () => {
-      if (!value) return placeholder;
-      const [h, m] = value.split(':');
-      const hour = parseInt(h, 10);
-      const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-      const displayPeriod = hour >= 12 ? 'PM' : 'AM';
-      return `${displayHour}:${m} ${displayPeriod}`;
-    };
+    const getDisplayValue = () => (value ? formatTimeLabel(value) : placeholder);
 
     return (
       <Popover open={open} onOpenChange={setOpen}>
@@ -341,6 +359,12 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
             </div>
           </div>
 
+          {isBeforeMin && minTime && (
+            <p className="px-3 pb-1 pt-2 text-center text-[11px] text-destructive">
+              Must be after {formatTimeLabel(minTime)}
+            </p>
+          )}
+
           {/* Footer */}
           <div className="flex items-center justify-between border-t border-border px-3 py-2.5">
             <button
@@ -353,7 +377,8 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
             <button
               type="button"
               onClick={handleSave}
-              className="text-xs font-medium text-foreground hover:text-foreground/80"
+              disabled={isBeforeMin}
+              className="text-xs font-medium text-foreground hover:text-foreground/80 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-foreground"
             >
               Save
             </button>

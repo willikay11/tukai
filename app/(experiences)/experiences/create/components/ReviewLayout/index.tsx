@@ -1,5 +1,6 @@
 'use client';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import {
   PreviewCommunitiesSection,
   PreviewGuestsSection,
@@ -9,8 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Wallet } from '@/types/payment';
+import { parseRecurrenceRule } from '@/utils/recurrence-utils';
 
 import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
+import { usePendingAction } from '../../hooks/usePendingAction';
 import { PreviewCategoriesSection } from '../PreviewCategoriesSection';
 import { PreviewCommunitySection } from '../PreviewCommunitySection';
 import { PreviewDateSection } from '../PreviewDateSection';
@@ -29,6 +32,8 @@ interface ReviewLayoutProps {
   invitedCommunities: Community[];
   wallet?: Wallet;
   allCommunities?: CommunityOption[];
+  // Slot times for a recurring experience, from its slot templates
+  recurringTimeSlots?: { startTime: string | null; endTime: string | null }[];
   isPublishing?: boolean;
   onEditSection?: (
     section:
@@ -49,7 +54,8 @@ interface ReviewLayoutProps {
       | 'wallet',
   ) => void;
   onCancel?: () => void;
-  onSaveAndExit?: () => void;
+  // Resolves once the save settles, so the button can stop its spinner
+  onSaveAndExit?: () => void | Promise<void>;
   onPublish?: () => void;
   showActionBar?: boolean;
 }
@@ -59,6 +65,7 @@ export const ReviewLayout = ({
   invitedCommunities,
   wallet,
   allCommunities = [],
+  recurringTimeSlots = [],
   isPublishing = false,
   onEditSection,
   onCancel,
@@ -66,6 +73,12 @@ export const ReviewLayout = ({
   onPublish,
   showActionBar = true,
 }: ReviewLayoutProps) => {
+  const { pendingAction, runAction } = usePendingAction<'exit'>();
+
+  const recurrence = experience.recurrenceRule
+    ? parseRecurrenceRule(experience.recurrenceRule)
+    : null;
+
   const handleEditClick = (
     section:
       | 'about-title'
@@ -154,14 +167,32 @@ export const ReviewLayout = ({
       />
 
       {/* 6. Date of Experience */}
-      {experience.startDate && (
+      {recurrence ? (
         <PreviewDateSection
-          mode="single"
-          date={experience.startDate.split('T')[0]}
-          startTime={experience.startDate.split('T')[1]?.substring(0, 5) ?? null}
-          endTime={experience.endDate.split('T')[1]?.substring(0, 5) ?? null}
+          mode="recurring"
+          days={recurrence.days}
+          timeSlots={recurringTimeSlots}
+          recurrenceStartDate={recurrence.startDate ?? experience.startDate?.split('T')[0] ?? null}
+          recurrenceEndDate={recurrence.endDate ?? experience.endDate?.split('T')[0] ?? null}
           onEdit={() => handleEditClick('dates')}
         />
+      ) : experience.experienceType === 'itinerary' ? (
+        <PreviewDateSection
+          mode="itinerary"
+          startDate={experience.startDate?.split('T')[0] ?? null}
+          endDate={experience.endDate?.split('T')[0] ?? null}
+          onEdit={() => handleEditClick('dates')}
+        />
+      ) : (
+        experience.startDate && (
+          <PreviewDateSection
+            mode="single"
+            date={experience.startDate.split('T')[0]}
+            startTime={experience.startDate.split('T')[1]?.substring(0, 5) ?? null}
+            endTime={experience.endDate.split('T')[1]?.substring(0, 5) ?? null}
+            onEdit={() => handleEditClick('dates')}
+          />
+        )
       )}
 
       {/* 7. Location */}
@@ -234,10 +265,13 @@ export const ReviewLayout = ({
             <Button
               type="button"
               variant="outline-primary"
-              onClick={() => (onSaveAndExit ?? onCancel)?.()}
-              disabled={isPublishing}
+              onClick={() => runAction('exit', onSaveAndExit ?? onCancel)}
+              disabled={isPublishing || pendingAction === 'exit'}
               className="text-xs font-semibold"
             >
+              {pendingAction === 'exit' && (
+                <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
+              )}
               Save & Exit
             </Button>
             <Button

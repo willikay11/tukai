@@ -14,6 +14,9 @@ export type Experience = {
   startDate: string;
   endDate: string;
   recurrenceRule?: string | null;
+  // Returned by the API alongside the dates; drives the itinerary vs standard
+  // split (see inferUIExperienceType)
+  experienceType?: 'standard' | 'itinerary';
   currency: string;
   isPaid: boolean;
   ticketSalesClosingDuration: number;

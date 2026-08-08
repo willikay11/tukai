@@ -108,39 +108,47 @@ describe('PreviewTicketsSection', () => {
     });
   });
 
+  // TicketCard has its Validity line commented out for now, so none of the
+  // computed strings reach the DOM. Restore these cases — and the ones under
+  // "Relative Validity Units" below — when that line comes back.
   describe('Validity Display', () => {
-    it('displays absolute date validity for single-day tickets', () => {
+    it('does not render the validity line', () => {
       const { container } = render(<PreviewTicketsSection tickets={mockTickets} />);
-      const text = container.textContent;
-      expect(text).toContain('Jun');
-      expect(text).toContain('2026');
+      expect(container.textContent).not.toContain('Validity');
     });
 
-    it('displays relative validity for recurring tickets', () => {
-      const { container } = render(<PreviewTicketsSection tickets={recurringTickets} />);
-      const text = container.textContent;
-      expect(text).toContain('hour');
-      expect(text).toContain('experience');
-    });
-
-    it('displays "Not set" for tickets without validity', () => {
-      const ticketNoValidity: Ticket[] = [
-        {
-          id: 'ticket-3',
-          name: 'Test Ticket',
-          quantity: 10,
-          price: 100,
-          experience: 'exp-789',
-          availableQuantity: 10,
-          salesStartDate: null,
-          salesEndDate: null,
-          is_sales_window_active: true,
-        } as Ticket,
-      ];
-
-      const { container } = render(<PreviewTicketsSection tickets={ticketNoValidity} />);
-      expect(container.textContent).toContain('Not set');
-    });
+    // it('displays absolute date validity for single-day tickets', () => {
+    //   const { container } = render(<PreviewTicketsSection tickets={mockTickets} />);
+    //   const text = container.textContent;
+    //   expect(text).toContain('Jun');
+    //   expect(text).toContain('2026');
+    // });
+    //
+    // it('displays relative validity for recurring tickets', () => {
+    //   const { container } = render(<PreviewTicketsSection tickets={recurringTickets} />);
+    //   const text = container.textContent;
+    //   expect(text).toContain('hour');
+    //   expect(text).toContain('experience');
+    // });
+    //
+    // it('displays "Not set" for tickets without validity', () => {
+    //   const ticketNoValidity: Ticket[] = [
+    //     {
+    //       id: 'ticket-3',
+    //       name: 'Test Ticket',
+    //       quantity: 10,
+    //       price: 100,
+    //       experience: 'exp-789',
+    //       availableQuantity: 10,
+    //       salesStartDate: null,
+    //       salesEndDate: null,
+    //       is_sales_window_active: true,
+    //     } as Ticket,
+    //   ];
+    //
+    //   const { container } = render(<PreviewTicketsSection tickets={ticketNoValidity} />);
+    //   expect(container.textContent).toContain('Not set');
+    // });
   });
 
   describe('Commission Handling', () => {
@@ -213,53 +221,55 @@ describe('PreviewTicketsSection', () => {
     });
   });
 
-  describe('Relative Validity Units', () => {
-    it('displays relative validity with hour unit', () => {
-      const hourTicket: Ticket[] = [
-        {
-          ...recurringTickets[0],
-          salesEndRelative: {
-            amount: 2,
-            unit: 'hour',
-            anchor: 'end',
-          } as any,
-        } as Ticket,
-      ];
-
-      const { container } = render(<PreviewTicketsSection tickets={hourTicket} />);
-      expect(container.textContent).toContain('hour');
-    });
-
-    it('displays relative validity with day unit', () => {
-      const dayTicket: Ticket[] = [
-        {
-          ...recurringTickets[0],
-          salesEndRelative: {
-            amount: 3,
-            unit: 'day',
-            anchor: 'start',
-          } as any,
-        } as Ticket,
-      ];
-
-      const { container } = render(<PreviewTicketsSection tickets={dayTicket} />);
-      expect(container.textContent).toContain('day');
-    });
-
-    it('displays relative validity with week unit', () => {
-      const weekTicket: Ticket[] = [
-        {
-          ...recurringTickets[0],
-          salesEndRelative: {
-            amount: 1,
-            unit: 'week',
-            anchor: 'start',
-          } as any,
-        } as Ticket,
-      ];
-
-      const { container } = render(<PreviewTicketsSection tickets={weekTicket} />);
-      expect(container.textContent).toContain('week');
-    });
-  });
+  // Restore with the Validity line in TicketCard — see the note above.
+  //
+  // describe('Relative Validity Units', () => {
+  //   it('displays relative validity with hour unit', () => {
+  //     const hourTicket: Ticket[] = [
+  //       {
+  //         ...recurringTickets[0],
+  //         salesEndRelative: {
+  //           amount: 2,
+  //           unit: 'hour',
+  //           anchor: 'end',
+  //         } as any,
+  //       } as Ticket,
+  //     ];
+  //
+  //     const { container } = render(<PreviewTicketsSection tickets={hourTicket} />);
+  //     expect(container.textContent).toContain('hour');
+  //   });
+  //
+  //   it('displays relative validity with day unit', () => {
+  //     const dayTicket: Ticket[] = [
+  //       {
+  //         ...recurringTickets[0],
+  //         salesEndRelative: {
+  //           amount: 3,
+  //           unit: 'day',
+  //           anchor: 'start',
+  //         } as any,
+  //       } as Ticket,
+  //     ];
+  //
+  //     const { container } = render(<PreviewTicketsSection tickets={dayTicket} />);
+  //     expect(container.textContent).toContain('day');
+  //   });
+  //
+  //   it('displays relative validity with week unit', () => {
+  //     const weekTicket: Ticket[] = [
+  //       {
+  //         ...recurringTickets[0],
+  //         salesEndRelative: {
+  //           amount: 1,
+  //           unit: 'week',
+  //           anchor: 'start',
+  //         } as any,
+  //       } as Ticket,
+  //     ];
+  //
+  //     const { container } = render(<PreviewTicketsSection tickets={weekTicket} />);
+  //     expect(container.textContent).toContain('week');
+  //   });
+  // });
 });

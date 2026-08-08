@@ -14,7 +14,6 @@ interface PreviewItineraryDayPillProps {
   dayDate: string | null;
   isExpanded: boolean;
   onToggle: () => void;
-  onEdit: () => void;
   isLast: boolean;
 }
 
@@ -26,7 +25,6 @@ export const PreviewItineraryDayPill = ({
   dayDate,
   isExpanded,
   onToggle,
-  onEdit,
   isLast,
 }: PreviewItineraryDayPillProps) => {
   const hasContent = title || description || activities.length > 0;
@@ -64,15 +62,6 @@ export const PreviewItineraryDayPill = ({
               size={14}
               className="text-primary"
             />
-          </button>
-
-          {/* Edit icon */}
-          <button
-            type="button"
-            onClick={onEdit}
-            className="ml-auto text-gray-400 transition-colors hover:text-primary"
-          >
-            <IconComponent iconName="Edit02Icon" size={16} />
           </button>
         </div>
 

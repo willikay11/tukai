@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
 import { ItineraryDayFormValue } from '@/types/itinerary';
 
+import { usePendingAction } from '../../hooks/usePendingAction';
 import { ItineraryDayPill } from '../ItineraryDayPill';
 
 interface ItineraryDaysStepProps {
@@ -14,7 +16,8 @@ interface ItineraryDaysStepProps {
   onChange: (days: ItineraryDayFormValue[]) => void;
   onSaveContinue: () => void;
   onCancel: () => void;
-  onSaveAndExit?: () => void;
+  // Resolves once the save settles, so the button can stop its spinner
+  onSaveAndExit?: () => void | Promise<void>;
   isSaving: boolean;
   isParentSaving?: boolean;
   registerFlusher?: (
@@ -36,6 +39,7 @@ export const ItineraryDaysStep = ({
   registerFlusher,
 }: ItineraryDaysStepProps) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0); // Day 1 open by default
+  const { pendingAction, runAction } = usePendingAction<'exit'>();
 
   // Completeness check: all days must have at least one saved activity
   const daysWithActivities = days.filter((day) =>
@@ -99,6 +103,7 @@ export const ItineraryDaysStep = ({
               onChange={(data) => handleDayChange(index, data)}
               onDelete={() => handleDayDelete(index)}
               isParentSaving={isParentSaving}
+              isLast={index === days.length - 1}
               registerFlusher={registerFlusher}
             />
           </div>
@@ -133,9 +138,13 @@ export const ItineraryDaysStep = ({
           <Button
             type="button"
             variant="outline-primary"
-            onClick={onSaveAndExit}
+            onClick={() => runAction('exit', onSaveAndExit)}
+            disabled={pendingAction === 'exit'}
             className="text-xs font-semibold"
           >
+            {pendingAction === 'exit' && (
+              <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
+            )}
             Save & Exit
           </Button>
           <Button
@@ -145,6 +154,9 @@ export const ItineraryDaysStep = ({
             variant="gradient"
             className="rounded-full"
           >
+            {isSaving && (
+              <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
+            )}
             {isSaving ? 'Saving...' : 'Save & Continue'}
           </Button>
         </div>

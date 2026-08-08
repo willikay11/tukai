@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useParams, useRouter } from 'next/navigation';
 
@@ -10,8 +10,13 @@ import {
   ReviewLayout,
 } from '@/app/(experiences)/experiences/create/components';
 import { useGetWallets } from '@/app/(experiences)/hooks/usePayment';
-import { useFetchSingleExperience, usePublishExperience } from '@/app/shared/hooks/useExperiences';
+import {
+  useFetchSingleExperience,
+  useFetchSlotTemplates,
+  usePublishExperience,
+} from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
+import { calculateEndTime } from '@/utils/slot-template-utils';
 
 export default function ExperienceReviewPage() {
   const params = useParams<{ experienceId: string | string[] }>();
@@ -25,6 +30,21 @@ export default function ExperienceReviewPage() {
 
   const { data: experienceResponse, isLoading } = useFetchSingleExperience(experienceId, true);
   const experience = experienceResponse?.data;
+
+  // Slot times for a recurring experience — the date section mirrors the
+  // customer's booking picker, which lists one pill per slot
+  const { data: slotTemplatesResponse } = useFetchSlotTemplates(
+    experience?.recurrenceRule ? experienceId : null,
+  );
+  const recurringTimeSlots = useMemo(() => {
+    const records: { startTime: string; durationMinutes: number }[] =
+      slotTemplatesResponse?.data?.results ?? [];
+
+    return records.map((record) => ({
+      startTime: record.startTime,
+      endTime: calculateEndTime(record.startTime, record.durationMinutes),
+    }));
+  }, [slotTemplatesResponse]);
 
   const { data: walletsResponse } = useGetWallets();
   const wallets: any[] = walletsResponse?.data?.results ?? [];
@@ -117,6 +137,7 @@ export default function ExperienceReviewPage() {
               experience={experience}
               invitedCommunities={[]}
               wallet={activeWallet}
+              recurringTimeSlots={recurringTimeSlots}
               onEditSection={setActiveEditSection}
               onCancel={() => router.back()}
               onSaveAndExit={() => router.push('/experiences?category=hosting')}
