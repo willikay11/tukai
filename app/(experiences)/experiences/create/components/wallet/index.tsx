@@ -39,9 +39,15 @@ interface CreateExperienceWalletProps {
   isCreatingPhoneWallet: boolean;
   onPatchPhoneWallet: (walletId: string, phone: string) => void;
   isPatchingPhoneWallet: boolean;
-  onCreateBankWallet: (values: BankAccountFormValues) => void;
+  // The success callback lets this component close the form once the wallet
+  // actually saved, rather than guessing at the moment of submit
+  onCreateBankWallet: (values: BankAccountFormValues, options?: { onSuccess?: () => void }) => void;
   isCreatingBankWallet: boolean;
-  onPatchBankWallet: (walletId: string, values: BankAccountFormValues) => void;
+  onPatchBankWallet: (
+    walletId: string,
+    values: BankAccountFormValues,
+    options?: { onSuccess?: () => void },
+  ) => void;
   isPatchingBankWallet: boolean;
 
   // Navigation
@@ -151,17 +157,20 @@ export const CreateExperienceWallet = ({
       return;
     }
 
-    if (editingWallet?.walletType === 'bank' && editingWallet.id) {
-      onPatchBankWallet(editingWallet.id, values);
-    } else {
-      onCreateBankWallet(values);
-    }
+    // Close the form and drop back to the wallet list only once the save
+    // succeeds. The mutation invalidates the wallets query, so the list that
+    // comes back into view already includes the new account. Errors leave the
+    // form open with the entered details intact; the caller raises the toast.
+    const handleSaved = () => {
+      setShowForm(false);
+      setEditingWallet(null);
+    };
 
-    toast({
-      title: 'Wallet saved',
-      description: 'Your bank wallet has been set up successfully.',
-      variant: 'success',
-    });
+    if (editingWallet?.walletType === 'bank' && editingWallet.id) {
+      onPatchBankWallet(editingWallet.id, values, { onSuccess: handleSaved });
+    } else {
+      onCreateBankWallet(values, { onSuccess: handleSaved });
+    }
   };
 
   const handleCancelForm = () => {

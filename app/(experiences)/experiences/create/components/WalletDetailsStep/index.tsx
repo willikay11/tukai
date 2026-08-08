@@ -85,7 +85,10 @@ export const WalletDetailsStep = ({
     );
   };
 
-  const handleCreateBankWallet = (values: BankAccountFormValues) => {
+  const handleCreateBankWallet = (
+    values: BankAccountFormValues,
+    options?: { onSuccess?: () => void },
+  ) => {
     walletMutations.createBankWallet(
       {
         bankName: values.bankName,
@@ -104,6 +107,7 @@ export const WalletDetailsStep = ({
             description: 'Your bank wallet has been set up successfully.',
             variant: 'success',
           });
+          options?.onSuccess?.();
         },
         onError: (error: Error) => {
           toast({
@@ -116,7 +120,11 @@ export const WalletDetailsStep = ({
     );
   };
 
-  const handlePatchBankWallet = (walletId: string, values: BankAccountFormValues) => {
+  const handlePatchBankWallet = (
+    walletId: string,
+    values: BankAccountFormValues,
+    options?: { onSuccess?: () => void },
+  ) => {
     walletMutations.patchBankWallet(
       {
         walletId,
@@ -136,6 +144,7 @@ export const WalletDetailsStep = ({
             description: 'Your bank wallet has been updated successfully.',
             variant: 'success',
           });
+          options?.onSuccess?.();
         },
         onError: (error: Error) => {
           toast({
