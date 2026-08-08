@@ -35,7 +35,7 @@ export const CreateSuccessDialog = ({
 }: CreateSuccessDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100%-24px)] max-w-[560px] rounded-2xl p-6 sm:p-8">
+      <DialogContent className="w-[calc(100%-24px)] max-w-[440px] rounded-2xl p-6 sm:p-8">
         <div className="flex flex-col items-center text-center">
           <div className="relative h-[220px] w-full max-w-[320px]">
             <Image
@@ -50,7 +50,7 @@ export const CreateSuccessDialog = ({
           <DialogTitle className="mt-6 text-xl font-semibold leading-tight text-slate-800">
             {title}
           </DialogTitle>
-          <DialogDescription className="mt-4 max-w-[450px] text-xs leading-4 text-slate-600">
+          <DialogDescription className="mt-4 max-w-[340px] text-xs leading-4 text-slate-600">
             {description}
           </DialogDescription>
 
