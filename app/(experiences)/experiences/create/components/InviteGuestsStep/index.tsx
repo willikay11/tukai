@@ -2,6 +2,8 @@
 
 import { useCallback } from 'react';
 
+import { InvitedMember } from '@/components/ui/invite-members';
+import type { Community } from '@/types/community';
 import type { Experience } from '@/types/experience';
 
 import { FormData } from '../../hooks/useCreateExperienceFlow';
@@ -29,10 +31,23 @@ export const InviteGuestsStep = ({
   onPreview,
 }: InviteGuestsStepProps) => {
   const handleInvitesChange = useCallback(
-    (members, communities) => {
+    (members: InvitedMember[], communities: Community[]) => {
       onChange({
-        invitedGuests: members,
+        // The invite list yields InvitedMember while this form field is typed to
+        // the API's guest shape. Both carry the email the preview reads; the two
+        // types have drifted and untangling them is a wider change.
+        invitedGuests: members as unknown as FormData['invite']['invitedGuests'],
         invitedCommunityIds: communities.map((c) => c.id),
+        // Carried through so the preview can render them without looking each
+        // one up in a list that may not contain it
+        invitedCommunities: communities.map((community) => ({
+          id: community.id,
+          name: community.title,
+          imageUrl:
+            community.photos?.find((photo) => photo.isCover)?.photo ??
+            community.photos?.[0]?.photo ??
+            '',
+        })),
       });
     },
     [onChange],

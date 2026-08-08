@@ -191,6 +191,10 @@ export interface FormData {
   invite: {
     invitedGuests: Experience['guests'];
     invitedCommunityIds: string[];
+    // The invited communities themselves, kept alongside their ids. The invite
+    // step lists communities the user follows while the rest of the flow knows
+    // only the ones they created, so the preview cannot look these up by id.
+    invitedCommunities: CommunityOption[];
   };
   wallet: {
     paymentMethod: 'phone' | 'bank';
@@ -257,6 +261,7 @@ const initialFormData: FormData = {
   invite: {
     invitedGuests: [],
     invitedCommunityIds: [],
+    invitedCommunities: [],
   },
   wallet: {
     selectedWallet: undefined,
