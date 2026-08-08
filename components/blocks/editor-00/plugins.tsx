@@ -17,6 +17,7 @@ import { FormatHeading } from '@/components/editor/plugins/toolbar/block-format/
 import { FormatParagraph } from '@/components/editor/plugins/toolbar/block-format/format-paragraph';
 import { FormatQuote } from '@/components/editor/plugins/toolbar/block-format/format-quote';
 import { ElementFormatToolbarPlugin } from '@/components/editor/plugins/toolbar/element-format-toolbar-plugin';
+import { FontFormatToolbarPlugin } from '@/components/editor/plugins/toolbar/font-format-toolbar-plugin';
 import { ToolbarPlugin } from '@/components/editor/plugins/toolbar/toolbar-plugin';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -94,6 +95,10 @@ export function Plugins({ placeholderClassName }: { placeholderClassName?: strin
               {/* <FormatCheckList /> */}
               {/* <FormatQuote /> */}
             </BlockFormatDropDown>
+
+            <Separator orientation="vertical" className="!h-7" />
+
+            <FontFormatToolbarPlugin />
 
             <Separator orientation="vertical" className="!h-7" />
 
