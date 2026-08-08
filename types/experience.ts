@@ -53,14 +53,17 @@ export type ExperienceOccurrence = {
   id: string;
   startDate: string;
   endDate: string;
+  // Only recurring experiences and multi-day "entire period" tickets create
+  // slot templates. Itinerary and plain single-day occurrences arrive without
+  // one, so every read has to be guarded.
   slotTemplate: {
     id: string;
     name?: string;
-    startTime: string;
-    durationMinutes: number;
+    startTime: string | null;
+    durationMinutes: number | null;
     recurrenceRule?: string;
     dateCreated?: string;
-  };
+  } | null;
 };
 
 export interface InvitedMember {

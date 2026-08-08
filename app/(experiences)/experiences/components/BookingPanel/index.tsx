@@ -38,6 +38,24 @@ const formatSlotLabel = (startTime: string, durationMinutes: number): string => 
   return `${start.format('h:mm A')} - ${end.format('h:mm A')}`;
 };
 
+// Itinerary occurrences carry no slot template, so fall back to the times on
+// the occurrence itself rather than reading through a null template
+const occurrenceLabel = (occurrence: ExperienceOccurrence): string => {
+  const { startTime, durationMinutes } = occurrence.slotTemplate ?? {};
+
+  if (startTime && durationMinutes != null) {
+    return formatSlotLabel(startTime, durationMinutes);
+  }
+
+  const start = moment(occurrence.startDate);
+  const end = moment(occurrence.endDate);
+
+  if (!start.isValid()) return '';
+  if (!end.isValid()) return start.format('h:mm A');
+
+  return `${start.format('h:mm A')} - ${end.format('h:mm A')}`;
+};
+
 // Same rule PaymentForm's paymentFormSchema applies to mobile-money numbers
 const PHONE_REGEX = /^\+\d{6,15}$/;
 
@@ -86,10 +104,7 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
 
     return source.map((occurrence) => ({
       id: occurrence.id,
-      label: formatSlotLabel(
-        occurrence.slotTemplate.startTime,
-        occurrence.slotTemplate.durationMinutes,
-      ),
+      label: occurrenceLabel(occurrence),
     }));
   }, [occurrences, isRecurring, selectedDate]);
 
@@ -107,7 +122,7 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
   // show. Total and payload are scoped the same way, so quantities picked on
   // another slot stay inert.
   const selectedTemplateId = useMemo(
-    () => occurrences.find((occurrence) => occurrence.id === selectedSlotId)?.slotTemplate.id,
+    () => occurrences.find((occurrence) => occurrence.id === selectedSlotId)?.slotTemplate?.id,
     [occurrences, selectedSlotId],
   );
 

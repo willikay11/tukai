@@ -174,3 +174,36 @@ describe('BookingPanel purchase flow', () => {
     );
   });
 });
+
+// Itinerary experiences have no slot templates — the occurrence arrives with
+// slotTemplate: null, which used to crash on `slotTemplate.startTime`
+describe('BookingPanel for an experience without slot templates', () => {
+  const itineraryExperience = {
+    id: 'itinerary-1',
+    title: 'Mount Kenya Trek',
+    recurrenceRule: null,
+    startDate: '2026-09-10T08:00:00Z',
+    endDate: '2026-09-12T17:00:00Z',
+    currency: 'Ksh.',
+    isPaid: true,
+    priceStartsFrom: { amount: 5000, currency: 'KES' },
+    tickets: [{ id: 'ticket-1', name: 'Standard', price: '5000.00', quantity: 10 }],
+  } as unknown as Experience;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockSession = { data: { user: { id: 'u1' } } };
+    occurrences.length = 0;
+    occurrences.push({
+      id: 'occurrence-1',
+      startDate: '2026-09-10T08:00:00Z',
+      endDate: '2026-09-10T17:00:00Z',
+      slotTemplate: null,
+    } as unknown as (typeof occurrences)[number]);
+  });
+
+  it('renders without throwing and still lists the ticket', () => {
+    expect(() => render(<BookingPanel experience={itineraryExperience} />)).not.toThrow();
+    expect(screen.getByText('Standard')).toBeInTheDocument();
+  });
+});
