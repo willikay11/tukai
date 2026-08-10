@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useSession } from 'next-auth/react';
+
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import {
@@ -105,6 +107,12 @@ export const CreateExperienceInvites = ({
 
   const { pendingAction, runAction } = usePendingAction<'exit'>();
 
+  // The host is already on the experience, so they should never appear as
+  // someone to invite
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id ?? null;
+  const currentUserEmail = session?.user?.email?.toLowerCase() ?? null;
+
   const { data: userCommunities, isFetching: isFetchingCommunities } = useGetCommunities({
     page: 1,
     enabled: true,
@@ -196,8 +204,15 @@ export const CreateExperienceInvites = ({
           image: user.picture,
         } as InvitedMember;
       })
-      .filter((user: InvitedMember) => !invitedMembers.some((member) => member.id === user.id));
-  }, [searchUsers, invitedMembers, memberSearchQuery]);
+      .filter((user: InvitedMember) => {
+        // Match on either — the search API and the session need only agree on one
+        const isCurrentUser =
+          (currentUserId != null && user.id === currentUserId) ||
+          (currentUserEmail != null && user.email?.toLowerCase() === currentUserEmail);
+
+        return !isCurrentUser && !invitedMembers.some((member) => member.id === user.id);
+      });
+  }, [searchUsers, invitedMembers, memberSearchQuery, currentUserId, currentUserEmail]);
 
   const availableCommunities = useMemo<Community[]>(() => {
     if (!userCommunities?.data) {
