@@ -10,7 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
-import { inferUIExperienceType } from '@/utils/date-utils';
+import {
+  formatFirstExperienceDate,
+  formatItineraryDateRange,
+  inferUIExperienceType,
+} from '@/utils/date-utils';
 
 import { BackToExplore } from '../components/BackToExplore';
 import { BookingPanel } from '../components/BookingPanel';
@@ -64,6 +68,21 @@ export const ViewExperiencePageContent = ({
   const locationLabel = [experience.location?.city, experience.location?.country]
     .filter(Boolean)
     .join(', ');
+
+  // The meta row shows WHEN the experience runs rather than how long it lasts.
+  // A run spanning more than one calendar day (multi-day, itinerary, or a
+  // recurring window) shows the span; a single day shows its weekday.
+  const experienceDay = (() => {
+    const start = experience.startDate ? moment(experience.startDate) : null;
+    if (!start?.isValid()) return undefined;
+
+    const end = experience.endDate ? moment(experience.endDate) : null;
+    if (end?.isValid() && !end.isSame(start, 'day')) {
+      return formatItineraryDateRange(experience.startDate, experience.endDate);
+    }
+
+    return formatFirstExperienceDate(experience.startDate);
+  })();
 
   // Recurring is checked first: inferUIExperienceType folds recurring into the
   // 'one-time' base type, and a recurring experience's start/end span would
@@ -123,14 +142,7 @@ export const ViewExperiencePageContent = ({
           {/* Title */}
           <div>
             <h1 className="mb-2 text-3xl font-bold text-gray-900">{experience.title}</h1>
-            <MetaRow
-              location={locationLabel}
-              durationMinutes={
-                experience.startDate && experience.endDate
-                  ? moment(experience.endDate).diff(moment(experience.startDate), 'minutes')
-                  : undefined
-              }
-            />
+            <MetaRow location={locationLabel} date={experienceDay} />
           </div>
 
           {/* Host card */}

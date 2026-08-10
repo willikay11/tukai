@@ -3,6 +3,10 @@ import { IconComponent } from '@/app/shared/components/Icons';
 interface MetaRowProps {
   location?: string;
   distanceKm?: number;
+  // Pre-formatted day the experience runs, e.g. "Saturday 15, August". Takes
+  // the slot durationMinutes used to occupy — when both are supplied the date
+  // wins, since it is the more useful fact on a detail page.
+  date?: string;
   durationMinutes?: number;
   rating?: number;
   reviewCount?: number;
@@ -22,6 +26,7 @@ const formatDuration = (minutes?: number): string => {
 export const MetaRow = ({
   location,
   distanceKm,
+  date,
   durationMinutes,
   rating,
   reviewCount,
@@ -30,7 +35,7 @@ export const MetaRow = ({
   const parts: (string | null)[] = [
     location || null,
     distanceKm ? `${distanceKm} Kms` : null,
-    durationMinutes ? formatDuration(durationMinutes) : null,
+    date || (durationMinutes ? formatDuration(durationMinutes) : null),
     rating ? `⭐ ${rating} (${reviewCount || 0} reviews)` : null,
   ].filter(Boolean);
 
