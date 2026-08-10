@@ -212,7 +212,9 @@ export const ViewExperiencePageContent = ({
 
         {/* Right column: Sticky booking panel */}
         <div className="col-span-12 lg:col-span-5">
-          <div className="sticky top-16">
+          {/* Sticky for customers, static in the preview — there the create
+              flow's own sticky header owns the top of the viewport */}
+          <div className={isPreview ? undefined : 'sticky top-16'}>
             <BookingPanel experience={experience} mode={bookingMode} />
           </div>
         </div>

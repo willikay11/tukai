@@ -360,6 +360,10 @@ export const CreateExperienceSteps = ({
     onStepChange?.(step);
   };
 
+  // Back to the step immediately before Preview — 'wallet' is last in all three
+  // STEPS_* variants, so this holds for every experience type
+  const handleKeepEditing = () => handleStepChange('wallet');
+
   const handleSaveContinue = () => {
     const isValid = validateDateType();
     if (isValid) {
@@ -741,36 +745,37 @@ export const CreateExperienceSteps = ({
 
           <TabsContent value="preview" className="col-span-1 mt-6">
             {previewExperience && (
-              <div className="space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex w-fit items-center gap-2 rounded-2xl bg-blue-50 px-4 py-3">
-                    <IconComponent
-                      iconName="InformationCircleIcon"
-                      size={18}
-                      className="flex-shrink-0 text-blue-600"
-                    />
-                    <p className="text-xs text-blue-800">
-                      This is a preview of how customers will see your experience. Tickets cannot be
-                      purchased here.
-                    </p>
-                  </div>
+              <div>
+                {/* Sticky 20px below the app header, which is `md:sticky md:top-0`
+                    and ~64px tall. On mobile that header does not stick, so the
+                    bar sits 20px from the viewport top. */}
+                <div className="sticky top-5 z-30 mb-6 md:top-[84px]">
+                  <div className="flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white px-5 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                    <div>
+                      <p className="text-base font-bold text-gray-900">Preview</p>
+                      <p className="mt-0.5 text-sm text-gray-400">
+                        This is exactly what a customer sees on your experience page.
+                      </p>
+                    </div>
 
-                  <Button
-                    type="button"
-                    variant="gradient"
-                    onClick={handlePublishClick}
-                    disabled={!publishableExperienceId || isPublishing}
-                    className="rounded-full"
-                  >
-                    {isPublishing && (
-                      <IconComponent
-                        iconName="Loading03Icon"
-                        size={16}
-                        className="mr-2 animate-spin"
-                      />
-                    )}
-                    {isPublishing ? 'Publishing...' : 'Publish Experience'}
-                  </Button>
+                    <div className="flex flex-shrink-0 items-center gap-3">
+                      <Button
+                        type="button"
+                        variant="gradient"
+                        onClick={handlePublishClick}
+                        disabled={!publishableExperienceId || isPublishing}
+                        className="flex items-center gap-2 rounded-full px-5 py-2.5"
+                      >
+                        <IconComponent
+                          iconName={isPublishing ? 'Loading03Icon' : 'RocketIcon'}
+                          size={16}
+                          color="currentColor"
+                          className={isPublishing ? 'animate-spin text-white' : 'text-white'}
+                        />
+                        {isPublishing ? 'Publishing...' : 'Publish Experience'}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
 
                 {/*
