@@ -10,7 +10,7 @@ import { Drawer } from '@/components/ui/drawer';
 
 import { ExperienceStepSidePanel } from './components/step-side-panel';
 import { CreateExperienceSteps } from './components/steps';
-import { useCreateExperienceFlow } from './hooks/useCreateExperienceFlow';
+import { type CommunityOption, useCreateExperienceFlow } from './hooks/useCreateExperienceFlow';
 
 export default function CreateExperiencePage() {
   return (
@@ -139,10 +139,16 @@ function CreateExperiencePageContent() {
               ticketsCommissionPayer={formData.tickets.commission}
               invitedGuests={formData.invite.invitedGuests.map((guest) => ({
                 ...guest,
-                name: guest.email.split('@')[0],
+                name: guest.email?.split('@')[0] ?? 'Guest',
               }))}
               invitedCommunityIds={formData.invite.invitedCommunityIds}
-              allCommunities={communitiesForSelector}
+              allCommunities={[
+                ...formData.invite.invitedCommunities,
+                ...communitiesForSelector.filter(
+                  (community: CommunityOption) =>
+                    !formData.invite.invitedCommunities.some((c) => c.id === community.id),
+                ),
+              ]}
               selectedWallet={formData.wallet.selectedWallet}
             />
           </div>
@@ -261,10 +267,16 @@ function CreateExperiencePageContent() {
             ticketsCommissionPayer={formData.tickets.commission}
             invitedGuests={formData.invite.invitedGuests.map((guest) => ({
               ...guest,
-              name: guest.email.split('@')[0],
+              name: guest.email?.split('@')[0] ?? 'Guest',
             }))}
             invitedCommunityIds={formData.invite.invitedCommunityIds}
-            allCommunities={communitiesForSelector}
+            allCommunities={[
+              ...formData.invite.invitedCommunities,
+              ...communitiesForSelector.filter(
+                (community: CommunityOption) =>
+                  !formData.invite.invitedCommunities.some((c) => c.id === community.id),
+              ),
+            ]}
             selectedWallet={formData.wallet.selectedWallet}
           />
         }
