@@ -7,6 +7,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { ActivityCard } from '@/app/(experiences)/experiences/create/components/ActivityCard';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useToast } from '@/app/shared/hooks/useToast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -30,6 +40,8 @@ interface ItineraryDayPillProps {
   onToggle: () => void;
   onChange: (data: Partial<ItineraryDayFormValue>) => void;
   onDelete: () => void;
+  isDeleting?: boolean;
+  isDeleteDisabled?: boolean;
   isSaving?: boolean;
   error?: string;
   isParentSaving?: boolean;
@@ -56,6 +68,8 @@ export const ItineraryDayPill = ({
   onToggle,
   onChange,
   onDelete,
+  isDeleting = false,
+  isDeleteDisabled = false,
   isSaving,
   error,
   isParentSaving = false,
@@ -64,6 +78,7 @@ export const ItineraryDayPill = ({
 }: ItineraryDayPillProps) => {
   const { toast } = useToast();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [changingPlaceForActivityId, setChangingPlaceForActivityId] = useState<string | null>(null);
   const [savingActivityId, setSavingActivityId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -84,6 +99,8 @@ export const ItineraryDayPill = ({
   const dayDate = getDayDate(itineraryStartDate, day.dayNumber);
 
   const isSaved = day.activities.length > 0 && day.activities.every((a) => a.activityApiId != null);
+
+  const savedActivityCount = day.activities.filter((a) => a.activityApiId != null).length;
 
   // Show display view when both fields have content and user is not editing
   const showDisplayView =
@@ -439,10 +456,16 @@ export const ItineraryDayPill = ({
           {/* Delete icon */}
           <button
             type="button"
-            onClick={onDelete}
-            className="text-red-400 transition-colors hover:text-red-600"
+            onClick={() => setIsDeleteConfirmOpen(true)}
+            disabled={isDeleting || isDeleteDisabled}
+            aria-label={`Delete day ${day.dayNumber}`}
+            className="text-red-400 transition-colors hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <IconComponent iconName="Delete02Icon" size={16} />
+            <IconComponent
+              iconName={isDeleting ? 'Loading03Icon' : 'Delete02Icon'}
+              size={16}
+              className={isDeleting ? 'animate-spin' : undefined}
+            />
           </button>
         </div>
 
@@ -534,6 +557,31 @@ export const ItineraryDayPill = ({
             .filter((a) => a.placeId && a.id !== changingPlaceForActivityId)
             .map((a) => a.placeId!)}
         />
+
+        {/* Delete confirmation — the day and its activities go with it */}
+        <AlertDialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Day {day.dayNumber}?</AlertDialogTitle>
+              <AlertDialogDescription>
+                {savedActivityCount > 0
+                  ? `This will permanently remove Day ${day.dayNumber} and its ${
+                      savedActivityCount === 1 ? 'activity' : `${savedActivityCount} activities`
+                    }. This cannot be undone.`
+                  : `This will permanently remove Day ${day.dayNumber}. This cannot be undone.`}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={onDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
