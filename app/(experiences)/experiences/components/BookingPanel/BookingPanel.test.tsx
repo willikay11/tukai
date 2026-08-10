@@ -112,6 +112,14 @@ describe('BookingPanel purchase flow', () => {
     });
   });
 
+  // The checkout lives in a dialog now; it used to render inline and unguarded,
+  // leaving an empty iframe under the panel before any purchase
+  it('does not mount the checkout iframe before a purchase', () => {
+    render(<BookingPanel experience={experience} />);
+
+    expect(document.querySelector('iframe')).not.toBeInTheDocument();
+  });
+
   it('shows both occurrence slots for the auto-selected first date', () => {
     render(<BookingPanel experience={experience} />);
 
