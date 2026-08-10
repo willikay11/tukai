@@ -81,9 +81,11 @@ describe('BookingPanel purchase flow', () => {
 
   const selectTicketAndSafePaymentOptions = async (user: ReturnType<typeof userEvent.setup>) => {
     await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
-    // Email delivery + card payment avoid the phone-number requirements
+    // Email delivery avoids the WhatsApp phone requirement
     await user.click(screen.getByRole('button', { name: 'Via Email' }));
-    await user.click(screen.getByRole('button', { name: /credit card/i }));
+    // The payment method picker is commented out, so M-Pesa is always the
+    // method and a valid phone number is required
+    await user.type(screen.getByPlaceholderText('Enter M-Pesa number'), '712345678');
   };
 
   it('sends the occurrence id and opens Paystack with the authorization_url from the response', async () => {

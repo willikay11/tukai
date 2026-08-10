@@ -72,6 +72,9 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
 
   const [tab, setTab] = useState<'reservation' | 'moments'>('reservation');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+  // Kept as state, not a constant, so restoring the commented-out payment
+  // method picker below needs no other change. M-Pesa is the only method today.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'card'>('mpesa');
   const [phone, setPhone] = useState('');
   const [deliveryMethod, setDeliveryMethod] = useState<'email' | 'whatsapp'>('whatsapp');
@@ -466,7 +469,11 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
             )}
           </div>
 
-          {/* Payment method */}
+          {/* Payment method picker — hidden for now; `paymentMethod` stays on
+              its 'mpesa' default, so the phone input and its validation below
+              behave exactly as they did with M-Pesa selected. Restore this
+              block to offer card payments again. */}
+          {/*
           <p className="text-sm font-bold text-gray-900">Payment method</p>
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -502,6 +509,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
               Credit Card
             </button>
           </div>
+          */}
 
           {/* Phone input (only for M-Pesa) */}
           {paymentMethod === 'mpesa' && (
