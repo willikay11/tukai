@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { ViewExperiencePageContent } from '@/app/(experiences)/experiences/[experienceId]/ViewExperiencePageContent';
+import { ExperienceCreatedModal } from '@/app/(experiences)/experiences/create/components/ExperienceCreatedModal';
 import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
@@ -230,7 +231,7 @@ interface CreateExperienceStepsProps {
     handleSaveAbout?: () => Promise<boolean | void>;
     handleSaveItineraryDays?: () => Promise<boolean | void>;
     handleDeleteItineraryDay?: (dayId: string) => Promise<boolean>;
-    handlePublish?: () => Promise<void>;
+    handlePublish?: () => Promise<boolean | void>;
     handleUpdateFeesAllocation?: () => Promise<void>;
   };
   isSavingExperience?: boolean;
@@ -307,6 +308,33 @@ export const CreateExperienceSteps = ({
   const canAccessDetailsSteps = Boolean(
     experience?.id || selectedCommunityId || formData?.community?.id,
   );
+
+  // ─── Preview step publishing ─────────────────────────────────────────────
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isPublishedModalOpen, setIsPublishedModalOpen] = useState(false);
+
+  // Publishing needs the saved experience, not the synthetic preview id
+  const publishableExperienceId = experience?.id;
+
+  const handlePublishClick = async () => {
+    if (!handlers?.handlePublish || isPublishing) return;
+
+    setIsPublishing(true);
+    try {
+      // Errors are toasted by the hook; only success opens the modal
+      const published = await handlers.handlePublish();
+      if (published) setIsPublishedModalOpen(true);
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handlePublishComplete = () => {
+    setIsPublishedModalOpen(false);
+    if (publishableExperienceId) {
+      router.push(`/experiences/${publishableExperienceId}`);
+    }
+  };
 
   useEffect(() => {
     // Allow 'about' step if community is selected, even without experience (will be created in about step)
@@ -444,8 +472,15 @@ export const CreateExperienceSteps = ({
         })}
       </TabsList>
 
+      {/* The stepper row above spans the full page width so every step stays
+          visible; the form itself stays in a narrow left column. Preview is the
+          exception — it renders the full customer detail layout. */}
       <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-12">
+        <div
+          className={
+            currentStep === 'preview' ? 'col-span-12' : 'col-span-12 lg:col-span-6 xl:col-span-5'
+          }
+        >
           <TabsContent value="community" className="col-span-1 mt-6">
             {formData && updateFormData ? (
               <div className="space-y-4">
@@ -707,16 +742,35 @@ export const CreateExperienceSteps = ({
           <TabsContent value="preview" className="col-span-1 mt-6">
             {previewExperience && (
               <div className="space-y-4">
-                <div className="flex items-start gap-3 rounded-2xl bg-emerald-50 px-4 py-3">
-                  <IconComponent
-                    iconName="View01Icon"
-                    size={18}
-                    className="mt-0.5 flex-shrink-0 text-emerald-700"
-                  />
-                  <p className="text-xs text-emerald-800">
-                    This is a preview of how customers will see your experience. Tickets cannot be
-                    purchased here.
-                  </p>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex w-fit items-center gap-2 rounded-2xl bg-blue-50 px-4 py-3">
+                    <IconComponent
+                      iconName="InformationCircleIcon"
+                      size={18}
+                      className="flex-shrink-0 text-blue-600"
+                    />
+                    <p className="text-xs text-blue-800">
+                      This is a preview of how customers will see your experience. Tickets cannot be
+                      purchased here.
+                    </p>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="gradient"
+                    onClick={handlePublishClick}
+                    disabled={!publishableExperienceId || isPublishing}
+                    className="rounded-full"
+                  >
+                    {isPublishing && (
+                      <IconComponent
+                        iconName="Loading03Icon"
+                        size={16}
+                        className="mr-2 animate-spin"
+                      />
+                    )}
+                    {isPublishing ? 'Publishing...' : 'Publish Experience'}
+                  </Button>
                 </div>
 
                 {/*
@@ -725,6 +779,16 @@ export const CreateExperienceSteps = ({
                   preview-specific copy; changes there must show up here.
                 */}
                 <ViewExperiencePageContent experience={previewExperience} bookingMode="preview" />
+
+                {/* Reused from the removed review page's publish flow */}
+                <ExperienceCreatedModal
+                  open={isPublishedModalOpen}
+                  onOpenChange={(open) => {
+                    if (!open) handlePublishComplete();
+                  }}
+                  experienceId={publishableExperienceId}
+                  onViewExperience={handlePublishComplete}
+                />
               </div>
             )}
           </TabsContent>

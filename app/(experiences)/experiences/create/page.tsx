@@ -2,8 +2,6 @@
 
 import { Suspense } from 'react';
 
-import { useRouter } from 'next/navigation';
-
 import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
 import { TwoPanelLayout } from '@/app/shared/components/TwoPanelLayout';
 
@@ -19,10 +17,8 @@ export default function CreateExperiencePage() {
 }
 
 function CreateExperiencePageContent() {
-  const router = useRouter();
   const {
     activeStep,
-    experienceId,
     experience,
     isLoadingExperience,
     isCheckingCommunityAccess,
@@ -75,7 +71,9 @@ function CreateExperiencePageContent() {
           column + mobile drawer) has been replaced by the 'preview' step, which
           renders the real customer detail view from the in-progress form. */}
       <TwoPanelLayout
-        wide={activeStep === 'preview'}
+        // Always full width: the stepper spans the page so all steps are
+        // visible, and each step constrains its own content
+        wide
         left={
           <CreateExperienceSteps
             currentStep={activeStep}
@@ -122,18 +120,14 @@ function CreateExperiencePageContent() {
             previewExperience={previewExperience}
             slotTemplateRecords={slotTemplateRecords}
             onPreviewAndPublish={() => {
-              const isWalletValid = validateWallet();
-
-              // Try to get experience ID from state or from the experience object
-              const finalExperienceId = experienceId || experience?.id;
-
-              if (!isWalletValid) {
+              if (!validateWallet()) {
                 console.error('Wallet validation failed', walletErrors);
                 return;
               }
 
-              console.log('Navigating to review page:', finalExperienceId);
-              router.push(`/experiences/review/${finalExperienceId}`);
+              // The standalone review page is gone — the Preview step is where
+              // the creator checks their experience before publishing
+              handlers.handleStepChange('preview');
             }}
           />
         }

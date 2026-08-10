@@ -1683,7 +1683,8 @@ export const useCreateExperienceFlow = () => {
     [experienceId, formData.itineraryDays, updateItineraryDays, toast],
   );
 
-  const handlePublish = useCallback(async () => {
+  // Resolves true so the Preview step knows to show the success modal
+  const handlePublish = useCallback(async (): Promise<boolean> => {
     setIsSavingExperience(true);
     setApiError(null);
     try {
@@ -1691,6 +1692,7 @@ export const useCreateExperienceFlow = () => {
         throw new Error('Experience ID is required to publish');
       }
       await publishAsync();
+      return true;
     } catch (error: any) {
       const message = parseApiError(error, 'Failed to publish experience');
       setApiError(message);
@@ -1700,6 +1702,7 @@ export const useCreateExperienceFlow = () => {
         variant: 'destructive',
       });
       console.error('[handlePublish] Error:', error);
+      return false;
     } finally {
       setIsSavingExperience(false);
     }

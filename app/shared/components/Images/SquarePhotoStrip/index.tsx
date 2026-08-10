@@ -22,27 +22,37 @@ export const SquarePhotoStrip = ({
 
   const ITEM_WIDTH = 240 + 8; // image width + gap
 
+  // Every hook has to run before the early returns below. These used to sit
+  // inside the variant branches, past `photos.length === 0`, so the hook count
+  // changed the moment a photo appeared — which crashes any caller whose photo
+  // list starts empty and fills in later (the create-flow preview).
+  const heroScrollTo = useCallback((index: number) => {
+    if (!scrollRef.current) return;
+    const containerWidth = scrollRef.current.clientWidth;
+    scrollRef.current.scrollTo({
+      left: index * containerWidth,
+      behavior: 'smooth',
+    });
+    setActiveIndex(index);
+  }, []);
+
+  const heroHandleScroll = useCallback(() => {
+    if (!scrollRef.current) return;
+    const containerWidth = scrollRef.current.clientWidth;
+    const index = Math.round(scrollRef.current.scrollLeft / containerWidth);
+    setActiveIndex(index);
+  }, []);
+
+  const stripHandleScroll = useCallback(() => {
+    if (!scrollRef.current) return;
+    const index = Math.round(scrollRef.current.scrollLeft / ITEM_WIDTH);
+    setActiveIndex(index);
+  }, [ITEM_WIDTH]);
+
   if (photos.length === 0) return null;
 
   // ─── Hero variant (full-width square carousel) ────────────────
   if (variant === 'hero') {
-    const scrollTo = useCallback((index: number) => {
-      if (!scrollRef.current) return;
-      const containerWidth = scrollRef.current.clientWidth;
-      scrollRef.current.scrollTo({
-        left: index * containerWidth,
-        behavior: 'smooth',
-      });
-      setActiveIndex(index);
-    }, []);
-
-    const handleScroll = useCallback(() => {
-      if (!scrollRef.current) return;
-      const containerWidth = scrollRef.current.clientWidth;
-      const index = Math.round(scrollRef.current.scrollLeft / containerWidth);
-      setActiveIndex(index);
-    }, []);
-
     // Single image — no arrows or dots
     // if (photos.length === 1) {
     //   return (
@@ -67,7 +77,7 @@ export const SquarePhotoStrip = ({
         {/* 4:3 scroll container */}
         <div
           ref={scrollRef}
-          onScroll={handleScroll}
+          onScroll={heroHandleScroll}
           className="relative aspect-[4/3] w-full overflow-x-auto rounded-2xl scrollbar-hide"
           style={{
             scrollSnapType: 'x mandatory',
@@ -98,7 +108,7 @@ export const SquarePhotoStrip = ({
         {activeIndex > 0 && (
           <button
             type="button"
-            onClick={() => scrollTo(activeIndex - 1)}
+            onClick={() => heroScrollTo(activeIndex - 1)}
             className="absolute left-4 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm transition-colors hover:bg-white"
             aria-label="Previous photo"
           >
@@ -110,7 +120,7 @@ export const SquarePhotoStrip = ({
         {activeIndex < photos.length - 1 && (
           <button
             type="button"
-            onClick={() => scrollTo(activeIndex + 1)}
+            onClick={() => heroScrollTo(activeIndex + 1)}
             className="absolute right-4 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm transition-colors hover:bg-white"
             aria-label="Next photo"
           >
@@ -124,7 +134,7 @@ export const SquarePhotoStrip = ({
             <button
               key={index}
               type="button"
-              onClick={() => scrollTo(index)}
+              onClick={() => heroScrollTo(index)}
               className={`h-2 w-2 rounded-full transition-all ${
                 index === activeIndex ? 'w-6 bg-white' : 'bg-white/50'
               }`}
@@ -137,25 +147,6 @@ export const SquarePhotoStrip = ({
   }
 
   // ─── Strip variant (horizontal scroll strip) ───────────────────
-  const scrollTo = useCallback(
-    (index: number) => {
-      if (!scrollRef.current) return;
-      const clamped = Math.max(0, Math.min(index, photos.length - 1));
-      scrollRef.current.scrollTo({
-        left: clamped * ITEM_WIDTH,
-        behavior: 'smooth',
-      });
-      setActiveIndex(clamped);
-    },
-    [photos.length],
-  );
-
-  const handleScroll = useCallback(() => {
-    if (!scrollRef.current) return;
-    const index = Math.round(scrollRef.current.scrollLeft / ITEM_WIDTH);
-    setActiveIndex(index);
-  }, []);
-
   if (photos.length === 1) {
     return (
       <div
@@ -180,7 +171,7 @@ export const SquarePhotoStrip = ({
         {/* Scroll strip */}
         <div
           ref={scrollRef}
-          onScroll={handleScroll}
+          onScroll={stripHandleScroll}
           className={`overflow-x-auto scrollbar-hide ${className}`}
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
