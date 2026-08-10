@@ -29,6 +29,11 @@ import { RecurringDateSlotPicker } from './RecurringDateSlotPicker';
 
 interface BookingPanelProps {
   experience: Experience;
+  // 'preview' renders the identical panel — tabs, pickers, steppers, totals,
+  // payment method, phone — but hard-disables the purchase call so a creator
+  // previewing their own draft can never buy a ticket. Layout must NOT branch
+  // on this; only the Pay action does.
+  mode?: 'live' | 'preview';
 }
 
 const formatSlotLabel = (startTime: string, durationMinutes: number): string => {
@@ -59,9 +64,10 @@ const occurrenceLabel = (occurrence: ExperienceOccurrence): string => {
 // Same rule PaymentForm's paymentFormSchema applies to mobile-money numbers
 const PHONE_REGEX = /^\+\d{6,15}$/;
 
-export const BookingPanel = ({ experience }: BookingPanelProps) => {
+export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) => {
   const { data: session } = useSession();
   const isLoggedIn = Boolean(session?.user);
+  const isPreview = mode === 'preview';
 
   const [tab, setTab] = useState<'reservation' | 'moments'>('reservation');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -128,7 +134,7 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
 
   const visibleTickets = useMemo(
     () =>
-      experience.tickets.filter(
+      (experience.tickets ?? []).filter(
         (ticket) => !ticket.slotTemplate || ticket.slotTemplate === selectedTemplateId,
       ),
     [experience.tickets, selectedTemplateId],
@@ -177,6 +183,10 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
   };
 
   const handlePay = () => {
+    // Second guard behind the disabled button — the purchase API must be
+    // unreachable from preview even if the button is somehow activated
+    if (isPreview) return;
+
     const validationErrors = validatePurchase();
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) {
@@ -272,16 +282,18 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
                 />
                 <div className="space-y-2">
                   <p className="text-sm font-semibold text-gray-900">{dateRange}</p>
-                  <p className="text-xs text-gray-500">
-                    From {currency} {experience.priceStartsFrom.amount.toLocaleString()}/Guest
-                  </p>
+                  {experience.priceStartsFrom?.amount != null && (
+                    <p className="text-xs text-gray-500">
+                      From {currency} {experience.priceStartsFrom.amount.toLocaleString()}/Guest
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
           )}
 
           {/* Ticket selector */}
-          {experience.tickets.length > 0 && (
+          {(experience.tickets?.length ?? 0) > 0 && (
             <div className="space-y-4">
               <p className="text-sm font-bold text-gray-900">Select your preferred ticket</p>
 
@@ -508,20 +520,24 @@ export const BookingPanel = ({ experience }: BookingPanelProps) => {
           <Button
             variant="gradient"
             onClick={handlePay}
-            disabled={total === 0 || !selectedSlotId || isPaying}
+            disabled={isPreview || total === 0 || !selectedSlotId || isPaying}
             className="h-12 w-full rounded-full py-3"
           >
-            <span className="flex items-center justify-center gap-3 text-sm">
-              <span>{isPaying ? 'Processing…' : 'Pay'}</span>
-              <span className="text-white/60">|</span>
-              <span>
-                {currency}{' '}
-                {total.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+            {isPreview ? (
+              <span className="text-sm">Preview — purchasing disabled</span>
+            ) : (
+              <span className="flex items-center justify-center gap-3 text-sm">
+                <span>{isPaying ? 'Processing…' : 'Pay'}</span>
+                <span className="text-white/60">|</span>
+                <span>
+                  {currency}{' '}
+                  {total.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
               </span>
-            </span>
+            )}
           </Button>
         </TabsContent>
 

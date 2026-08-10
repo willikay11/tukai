@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -8,6 +8,10 @@ import { RRule } from 'rrule';
 import { v4 as uuidv4 } from 'uuid';
 
 import { buildRecurrenceRule } from '@/app/(experiences)/experiences/create/utils/buildRecurrenceRule';
+import {
+  buildPreviewExperience,
+  mapGeocodeResultToLocation,
+} from '@/app/(experiences)/experiences/create/utils/preview-utils';
 import {
   useCreateBankWallet,
   useCreatePhoneWallet,
@@ -27,6 +31,7 @@ import {
   usePublishExperience,
   useUpdateExperience,
 } from '@/app/shared/hooks/useExperiences';
+import { useGoogleMapsPlaceGeocode } from '@/app/shared/hooks/usePlaces';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { InvitedMember } from '@/components/ui/invite-members';
 import {
@@ -62,7 +67,8 @@ export type ExperienceStepId =
   | 'itinerary-days'
   | 'dates-tickets'
   | 'guests'
-  | 'wallet';
+  | 'wallet'
+  | 'preview';
 
 const formatDateWithTime = (
   date: string,
@@ -90,6 +96,7 @@ const parseExperienceStepId = (step: string | null): ExperienceStepId | null => 
     'dates-tickets',
     'guests',
     'wallet',
+    'preview',
   ];
   if (step && validSteps.includes(step as ExperienceStepId)) {
     return step as ExperienceStepId;
@@ -751,6 +758,32 @@ export const useCreateExperienceFlow = () => {
       paymentMethod: wallets.find((w) => w.isActive)?.walletType,
     });
   }, [wallets.length]);
+
+  // ─── Preview step ────────────────────────────────────────────────────────
+  // The form stores only a Google place id for the location; the detail view
+  // renders a map, so resolve coordinates when the preview is actually open
+  const { data: geocodeResponse } = useGoogleMapsPlaceGeocode(
+    formData.about.locationPlaceId || null,
+    activeStep === 'preview',
+  );
+
+  const geocodedLocation = useMemo(
+    () => mapGeocodeResultToLocation(geocodeResponse?.data),
+    [geocodeResponse?.data],
+  );
+
+  // Derived from formData, so editing any earlier step and returning to the
+  // Preview step shows the change without a refetch
+  const previewExperience = useMemo(
+    () =>
+      buildPreviewExperience(formData, {
+        experienceId,
+        hostCommunity: formData.dateType.community,
+        currentUser: session?.user,
+        geocodedLocation,
+      }),
+    [formData, experienceId, session?.user, geocodedLocation],
+  );
 
   const updateItineraryDays = useCallback((days: ItineraryDayFormValue[]) => {
     setFormData((prev) => ({
@@ -1650,7 +1683,8 @@ export const useCreateExperienceFlow = () => {
     [experienceId, formData.itineraryDays, updateItineraryDays, toast],
   );
 
-  const handlePublish = useCallback(async () => {
+  // Resolves true so the Preview step knows to show the success modal
+  const handlePublish = useCallback(async (): Promise<boolean> => {
     setIsSavingExperience(true);
     setApiError(null);
     try {
@@ -1658,6 +1692,7 @@ export const useCreateExperienceFlow = () => {
         throw new Error('Experience ID is required to publish');
       }
       await publishAsync();
+      return true;
     } catch (error: any) {
       const message = parseApiError(error, 'Failed to publish experience');
       setApiError(message);
@@ -1667,6 +1702,7 @@ export const useCreateExperienceFlow = () => {
         variant: 'destructive',
       });
       console.error('[handlePublish] Error:', error);
+      return false;
     } finally {
       setIsSavingExperience(false);
     }
@@ -1761,6 +1797,9 @@ export const useCreateExperienceFlow = () => {
 
     // Itinerary flusher for syncing pending saves
     registerFlusher,
+
+    // Form-derived Experience for the Preview step
+    previewExperience,
 
     walletMutations: {
       createBankWallet,

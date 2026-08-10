@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
+import { ViewExperiencePageContent } from '@/app/(experiences)/experiences/[experienceId]/ViewExperiencePageContent';
+import { ExperienceCreatedModal } from '@/app/(experiences)/experiences/create/components/ExperienceCreatedModal';
 import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
@@ -50,7 +52,8 @@ export type ExperienceStepId =
   | 'itinerary-days'
   | 'dates-tickets'
   | 'guests'
-  | 'wallet';
+  | 'wallet'
+  | 'preview';
 
 const STEPS_DEFAULT = [
   {
@@ -70,6 +73,7 @@ const STEPS_DEFAULT = [
   },
   { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
   { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
+  { id: 'preview', label: 'Preview', icon: 'Monocle01Icon' },
 ];
 
 const STEPS_MULTI_DAY = [
@@ -90,6 +94,7 @@ const STEPS_MULTI_DAY = [
   },
   { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
   { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
+  { id: 'preview', label: 'Preview', icon: 'Monocle01Icon' },
 ];
 
 const STEPS_ITINERARY = [
@@ -115,6 +120,7 @@ const STEPS_ITINERARY = [
   },
   { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
   { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
+  { id: 'preview', label: 'Preview', icon: 'Monocle01Icon' },
 ];
 
 const getSteps = (experienceType: 'one-time' | 'multi-day' | 'itinerary'): typeof STEPS_DEFAULT => {
@@ -138,8 +144,6 @@ interface CreateExperienceStepsProps {
   aboutErrors?: Record<string, string>;
   aboutFormData?: AboutFormData;
   updateAboutFormData?: (data: Partial<AboutFormData>) => void;
-  isPreviewDrawerOpen?: boolean;
-  setIsPreviewDrawerOpen?: (isOpen: boolean) => void;
   ticketsFormData?: {
     commission: 'host' | 'customer' | 'split';
     ticketMode: 'entire-period' | 'each-day' | null;
@@ -220,12 +224,14 @@ interface CreateExperienceStepsProps {
     patchPhoneWallet: any;
     isPatchingPhoneWallet: boolean;
   };
+  // Form-derived Experience rendered by the Preview step
+  previewExperience?: Experience;
   onPreviewAndPublish?: () => void;
   handlers?: {
     handleSaveAbout?: () => Promise<boolean | void>;
     handleSaveItineraryDays?: () => Promise<boolean | void>;
     handleDeleteItineraryDay?: (dayId: string) => Promise<boolean>;
-    handlePublish?: () => Promise<void>;
+    handlePublish?: () => Promise<boolean | void>;
     handleUpdateFeesAllocation?: () => Promise<void>;
   };
   isSavingExperience?: boolean;
@@ -285,13 +291,12 @@ export const CreateExperienceSteps = ({
   isWalletsLoading = false,
   hasSavedWallets = false,
   walletMutations,
+  previewExperience,
   onPreviewAndPublish,
   handlers,
   isSavingExperience = false,
   apiError,
   registerFlusher,
-  isPreviewDrawerOpen = false,
-  setIsPreviewDrawerOpen,
   slotTemplateRecords = [],
   setSlotTemplateRecords,
 }: CreateExperienceStepsProps) => {
@@ -300,10 +305,36 @@ export const CreateExperienceSteps = ({
   // Save & Exit lands on the user's hosted experiences
   const exitToHosting = () => router.push('/experiences?category=hosting');
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
-  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const canAccessDetailsSteps = Boolean(
     experience?.id || selectedCommunityId || formData?.community?.id,
   );
+
+  // ─── Preview step publishing ─────────────────────────────────────────────
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isPublishedModalOpen, setIsPublishedModalOpen] = useState(false);
+
+  // Publishing needs the saved experience, not the synthetic preview id
+  const publishableExperienceId = experience?.id;
+
+  const handlePublishClick = async () => {
+    if (!handlers?.handlePublish || isPublishing) return;
+
+    setIsPublishing(true);
+    try {
+      // Errors are toasted by the hook; only success opens the modal
+      const published = await handlers.handlePublish();
+      if (published) setIsPublishedModalOpen(true);
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handlePublishComplete = () => {
+    setIsPublishedModalOpen(false);
+    if (publishableExperienceId) {
+      router.push(`/experiences/${publishableExperienceId}`);
+    }
+  };
 
   useEffect(() => {
     // Allow 'about' step if community is selected, even without experience (will be created in about step)
@@ -329,6 +360,10 @@ export const CreateExperienceSteps = ({
     onStepChange?.(step);
   };
 
+  // Back to the step immediately before Preview — 'wallet' is last in all three
+  // STEPS_* variants, so this holds for every experience type
+  const handleKeepEditing = () => handleStepChange('wallet');
+
   const handleSaveContinue = () => {
     const isValid = validateDateType();
     if (isValid) {
@@ -336,11 +371,10 @@ export const CreateExperienceSteps = ({
     }
   };
 
+  // The in-step Preview buttons used to open a mobile drawer showing the old
+  // side panel; they now jump to the Preview step, which is the single preview
   const handlePreviewClick = () => {
-    setIsPreviewLoading(true);
-    router.push(window.location.href);
-    setIsPreviewDrawerOpen?.(true);
-    setTimeout(() => setIsPreviewLoading(false), 1000);
+    handleStepChange('preview');
   };
 
   if (isLoadingExperience) {
@@ -411,6 +445,9 @@ export const CreateExperienceSteps = ({
             'dates-tickets': isDatesTicketsFilled,
             guests: isGuestsFilled,
             wallet: hasSavedWallets,
+            // Preview is a read-only view — it is "filled" as soon as there is
+            // something to look at
+            preview: Boolean(previewExperience?.title),
           };
           const isFilled = stepFilledMap[step.id] ?? false;
           const isDisabled = step.id !== 'community' && !canAccessDetailsSteps;
@@ -439,8 +476,15 @@ export const CreateExperienceSteps = ({
         })}
       </TabsList>
 
+      {/* The stepper row above spans the full page width so every step stays
+          visible; the form itself stays in a narrow left column. Preview is the
+          exception — it renders the full customer detail layout. */}
       <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-12">
+        <div
+          className={
+            currentStep === 'preview' ? 'col-span-12' : 'col-span-12 lg:col-span-6 xl:col-span-5'
+          }
+        >
           <TabsContent value="community" className="col-span-1 mt-6">
             {formData && updateFormData ? (
               <div className="space-y-4">
@@ -462,15 +506,10 @@ export const CreateExperienceSteps = ({
                   <Button
                     type="button"
                     onClick={handlePreviewClick}
-                    disabled={isPreviewLoading}
                     variant="outline"
                     className="lg:hidden"
                   >
-                    {isPreviewLoading ? (
-                      <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
-                    ) : (
-                      'Preview'
-                    )}
+                    Preview
                   </Button>
                   <Button
                     type="button"
@@ -701,6 +740,61 @@ export const CreateExperienceSteps = ({
                 isPatchingBankWallet={false}
                 onPreviewAndPublish={onPreviewAndPublish || (() => {})}
               />
+            )}
+          </TabsContent>
+
+          <TabsContent value="preview" className="col-span-1 mt-6">
+            {previewExperience && (
+              <div>
+                {/* Sticky 20px below the app header, which is `md:sticky md:top-0`
+                    and ~64px tall. On mobile that header does not stick, so the
+                    bar sits 20px from the viewport top. */}
+                <div className="sticky top-5 z-30 mb-6 md:top-[84px]">
+                  <div className="flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white px-5 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                    <div>
+                      <p className="text-base font-bold text-gray-900">Preview</p>
+                      <p className="mt-0.5 text-sm text-gray-400">
+                        This is exactly what a customer sees on your experience page.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-shrink-0 items-center gap-3">
+                      <Button
+                        type="button"
+                        variant="gradient"
+                        onClick={handlePublishClick}
+                        disabled={!publishableExperienceId || isPublishing}
+                        className="flex items-center gap-2 rounded-full px-5 py-2.5"
+                      >
+                        <IconComponent
+                          iconName={isPublishing ? 'Loading03Icon' : 'RocketIcon'}
+                          size={16}
+                          color="currentColor"
+                          className={isPublishing ? 'animate-spin text-white' : 'text-white'}
+                        />
+                        {isPublishing ? 'Publishing...' : 'Publish Experience'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/*
+                  The REAL customer detail view — the same component
+                  /experiences/[experienceId] renders. Never fork this into a
+                  preview-specific copy; changes there must show up here.
+                */}
+                <ViewExperiencePageContent experience={previewExperience} bookingMode="preview" />
+
+                {/* Reused from the removed review page's publish flow */}
+                <ExperienceCreatedModal
+                  open={isPublishedModalOpen}
+                  onOpenChange={(open) => {
+                    if (!open) handlePublishComplete();
+                  }}
+                  experienceId={publishableExperienceId}
+                  onViewExperience={handlePublishComplete}
+                />
+              </div>
             )}
           </TabsContent>
         </div>

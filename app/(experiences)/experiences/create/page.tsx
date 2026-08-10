@@ -1,16 +1,12 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense } from 'react';
 
-import { useRouter } from 'next/navigation';
-
-import { CreateStepContentSkeleton, ReviewWalletsSkeleton } from '@/app/shared/components/Cards';
+import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
 import { TwoPanelLayout } from '@/app/shared/components/TwoPanelLayout';
-import { Drawer } from '@/components/ui/drawer';
 
-import { ExperienceStepSidePanel } from './components/step-side-panel';
 import { CreateExperienceSteps } from './components/steps';
-import { type CommunityOption, useCreateExperienceFlow } from './hooks/useCreateExperienceFlow';
+import { useCreateExperienceFlow } from './hooks/useCreateExperienceFlow';
 
 export default function CreateExperiencePage() {
   return (
@@ -21,17 +17,10 @@ export default function CreateExperiencePage() {
 }
 
 function CreateExperiencePageContent() {
-  const router = useRouter();
-  const [isPreviewDrawerOpen, setIsPreviewDrawerOpen] = useState(false);
   const {
     activeStep,
-    experienceId,
     experience,
     isLoadingExperience,
-    hasUpdatedDates,
-    itineraryConfig,
-    invitedMembers,
-    invitedCommunities,
     isCheckingCommunityAccess,
     hasCreatedCommunity,
     handlers,
@@ -58,6 +47,7 @@ function CreateExperiencePageContent() {
     isSavingExperience,
     apiError,
     registerFlusher,
+    previewExperience,
     slotTemplateRecords,
   } = useCreateExperienceFlow();
 
@@ -66,9 +56,6 @@ function CreateExperiencePageContent() {
       <main className="mt-6 grid min-h-screen grid-cols-12 items-stretch gap-4 px-4 md:px-0">
         <div className="col-span-12 mb-4 md:col-span-10 md:col-start-2 md:mx-0 lg:col-span-4 lg:col-start-3 xl:col-span-5 xl:col-start-2 3xl:col-span-3 3xl:col-start-4 4xl:col-span-2 4xl:col-start-5">
           <CreateStepContentSkeleton />
-        </div>
-        <div className="h-full lg:col-span-4 lg:col-start-8 xl:col-span-4 xl:col-start-8 3xl:col-span-3 3xl:col-start-8 4xl:col-span-3 4xl:col-start-8">
-          <ReviewWalletsSkeleton />
         </div>
       </main>
     );
@@ -80,82 +67,13 @@ function CreateExperiencePageContent() {
 
   return (
     <>
-      {/* Mobile preview drawer */}
-      <Drawer isOpen={isPreviewDrawerOpen} setIsOpen={setIsPreviewDrawerOpen}>
-        <div className="w-full max-w-full space-y-4 overflow-hidden overflow-y-auto p-4">
-          <div className="w-full max-w-full overflow-hidden">
-            <ExperienceStepSidePanel
-              step={activeStep}
-              canShowDateTickets={
-                hasUpdatedDates ||
-                !!(
-                  formData.dateType.experienceType === 'multi-day' &&
-                  formData.dateType.multiDayStartDate &&
-                  formData.dateType.multiDayEndDate
-                ) ||
-                !!(
-                  formData.dateType.isRecurring &&
-                  formData.dateType.recurrenceStartDate &&
-                  formData.dateType.recurrenceEndDate
-                ) ||
-                !!(
-                  formData.dateType.date &&
-                  formData.dateType.startTime &&
-                  formData.dateType.endTime
-                )
-              }
-              isRecurring={formData.dateType.isRecurring}
-              experienceType={formData.dateType.experienceType}
-              itineraryConfig={itineraryConfig}
-              itineraryDays={formData.itineraryDays}
-              itineraryStartDate={formData.dateType.itineraryStartDate}
-              itineraryEndDate={formData.dateType.itineraryEndDate}
-              selectedCommunity={formData.dateType.community}
-              selectedDate={formData.dateType.date}
-              selectedStartTime={formData.dateType.startTime}
-              selectedEndTime={formData.dateType.endTime}
-              selectedRecurringDays={formData.dateType.recurringDays}
-              selectedTimeSlots={formData.dateType.timeSlots}
-              selectedRecurrenceStartDate={formData.dateType.recurrenceStartDate}
-              selectedRecurrenceEndDate={formData.dateType.recurrenceEndDate}
-              multiDayStartDate={formData.dateType.multiDayStartDate}
-              multiDayStartTime={formData.dateType.multiDayStartTime}
-              multiDayEndDate={formData.dateType.multiDayEndDate}
-              multiDayEndTime={formData.dateType.multiDayEndTime}
-              aboutPhotos={formData.about.photos}
-              aboutTitle={formData.about.title}
-              aboutDescription={formData.about.description}
-              aboutVisibility={formData.about.visibility}
-              aboutWhatsIncluded={formData.about.whatsIncluded}
-              aboutWhatsNotIncluded={formData.about.whatsNotIncluded}
-              aboutLocation={formData.about.location}
-              aboutLocationImageUrl={formData.about.placeImageUrl}
-              aboutMeetingPoint={formData.about.meetingPoint}
-              aboutMeetingTime={formData.about.meetingTime}
-              aboutCategories={formData.about.categories}
-              ticketsItems={(() => {
-                return formData.tickets.items;
-              })()}
-              ticketsCommissionPayer={formData.tickets.commission}
-              invitedGuests={formData.invite.invitedGuests.map((guest) => ({
-                ...guest,
-                name: guest.email?.split('@')[0] ?? 'Guest',
-              }))}
-              invitedCommunityIds={formData.invite.invitedCommunityIds}
-              allCommunities={[
-                ...formData.invite.invitedCommunities,
-                ...communitiesForSelector.filter(
-                  (community: CommunityOption) =>
-                    !formData.invite.invitedCommunities.some((c) => c.id === community.id),
-                ),
-              ]}
-              selectedWallet={formData.wallet.selectedWallet}
-            />
-          </div>
-        </div>
-      </Drawer>
-
+      {/* The live inline preview panel that used to sit here (desktop right
+          column + mobile drawer) has been replaced by the 'preview' step, which
+          renders the real customer detail view from the in-progress form. */}
       <TwoPanelLayout
+        // Always full width: the stepper spans the page so all steps are
+        // visible, and each step constrains its own content
+        wide
         left={
           <CreateExperienceSteps
             currentStep={activeStep}
@@ -199,86 +117,18 @@ function CreateExperiencePageContent() {
             isSavingExperience={isSavingExperience}
             apiError={apiError}
             registerFlusher={registerFlusher}
-            isPreviewDrawerOpen={isPreviewDrawerOpen}
-            setIsPreviewDrawerOpen={setIsPreviewDrawerOpen}
+            previewExperience={previewExperience}
             slotTemplateRecords={slotTemplateRecords}
             onPreviewAndPublish={() => {
-              const isWalletValid = validateWallet();
-
-              // Try to get experience ID from state or from the experience object
-              const finalExperienceId = experienceId || experience?.id;
-
-              if (!isWalletValid) {
+              if (!validateWallet()) {
                 console.error('Wallet validation failed', walletErrors);
                 return;
               }
 
-              console.log('Navigating to review page:', finalExperienceId);
-              router.push(`/experiences/review/${finalExperienceId}`);
+              // The standalone review page is gone — the Preview step is where
+              // the creator checks their experience before publishing
+              handlers.handleStepChange('preview');
             }}
-          />
-        }
-        right={
-          <ExperienceStepSidePanel
-            step={activeStep}
-            canShowDateTickets={
-              hasUpdatedDates ||
-              !!(
-                formData.dateType.experienceType === 'multi-day' &&
-                formData.dateType.multiDayStartDate &&
-                formData.dateType.multiDayEndDate
-              ) ||
-              !!(
-                formData.dateType.isRecurring &&
-                formData.dateType.recurrenceStartDate &&
-                formData.dateType.recurrenceEndDate
-              ) ||
-              !!(formData.dateType.date && formData.dateType.startTime && formData.dateType.endTime)
-            }
-            isRecurring={formData.dateType.isRecurring}
-            experienceType={formData.dateType.experienceType}
-            itineraryConfig={itineraryConfig}
-            itineraryDays={formData.itineraryDays}
-            itineraryStartDate={formData.dateType.itineraryStartDate}
-            itineraryEndDate={formData.dateType.itineraryEndDate}
-            selectedCommunity={formData.dateType.community}
-            selectedDate={formData.dateType.date}
-            selectedStartTime={formData.dateType.startTime}
-            selectedEndTime={formData.dateType.endTime}
-            selectedRecurringDays={formData.dateType.recurringDays}
-            selectedTimeSlots={formData.dateType.timeSlots}
-            selectedRecurrenceStartDate={formData.dateType.recurrenceStartDate}
-            selectedRecurrenceEndDate={formData.dateType.recurrenceEndDate}
-            multiDayStartDate={formData.dateType.multiDayStartDate}
-            multiDayStartTime={formData.dateType.multiDayStartTime}
-            multiDayEndDate={formData.dateType.multiDayEndDate}
-            multiDayEndTime={formData.dateType.multiDayEndTime}
-            aboutPhotos={formData.about.photos}
-            aboutTitle={formData.about.title}
-            aboutDescription={formData.about.description}
-            aboutVisibility={formData.about.visibility}
-            aboutWhatsIncluded={formData.about.whatsIncluded}
-            aboutWhatsNotIncluded={formData.about.whatsNotIncluded}
-            aboutLocation={formData.about.location}
-            aboutLocationImageUrl={formData.about.placeImageUrl}
-            aboutMeetingPoint={formData.about.meetingPoint}
-            aboutMeetingTime={formData.about.meetingTime}
-            aboutCategories={formData.about.categories}
-            ticketsItems={formData.tickets.items}
-            ticketsCommissionPayer={formData.tickets.commission}
-            invitedGuests={formData.invite.invitedGuests.map((guest) => ({
-              ...guest,
-              name: guest.email?.split('@')[0] ?? 'Guest',
-            }))}
-            invitedCommunityIds={formData.invite.invitedCommunityIds}
-            allCommunities={[
-              ...formData.invite.invitedCommunities,
-              ...communitiesForSelector.filter(
-                (community: CommunityOption) =>
-                  !formData.invite.invitedCommunities.some((c) => c.id === community.id),
-              ),
-            ]}
-            selectedWallet={formData.wallet.selectedWallet}
           />
         }
       />

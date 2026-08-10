@@ -9,10 +9,18 @@ interface LocationMeetingSectionProps {
 }
 
 export const LocationMeetingSection = ({ experience }: LocationMeetingSectionProps) => {
+  // A create-flow preview may not have coordinates yet, so nothing here may
+  // index into `coordinates` unguarded
+  const coordinates = experience.location?.point?.coordinates;
+  const lat = coordinates?.[1];
+  const lng = coordinates?.[0];
+
   const googleMapsUrl =
-    experience.location && experience.location.point
-      ? `https://maps.google.com/?q=${experience.location.point.coordinates[1]},${experience.location.point.coordinates[0]}`
-      : '#';
+    lat != null && lng != null ? `https://maps.google.com/?q=${lat},${lng}` : '#';
+
+  const locationLabel = [experience.location?.city, experience.location?.country]
+    .filter(Boolean)
+    .join(', ');
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -20,22 +28,19 @@ export const LocationMeetingSection = ({ experience }: LocationMeetingSectionPro
         <h3 className="mb-3 font-bold text-gray-900">Location</h3>
         <div className="flex items-center gap-3">
           <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg">
-            <GoogleMapComponent
-              lat={experience?.location?.point?.coordinates[1]}
-              lng={experience?.location?.point?.coordinates[0]}
-            />
+            <GoogleMapComponent lat={lat} lng={lng} />
           </div>
           <div>
-            <p className="text-sm font-semibold">
-              {experience?.location?.city}, {experience?.location?.country}
-            </p>
-            <Link
-              href={googleMapsUrl}
-              target="_blank"
-              className="text-xs font-semibold text-primary"
-            >
-              View on Google Maps
-            </Link>
+            <p className="text-sm font-semibold">{locationLabel}</p>
+            {googleMapsUrl !== '#' && (
+              <Link
+                href={googleMapsUrl}
+                target="_blank"
+                className="text-xs font-semibold text-primary"
+              >
+                View on Google Maps
+              </Link>
+            )}
           </div>
         </div>
       </div>

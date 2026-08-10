@@ -7,6 +7,7 @@ import {
   deletePlaceReview,
   deletePlaceReviewImage,
   fetchGoogleMapsAutocomplete,
+  fetchGoogleMapsPlaceGeocode,
   fetchPlaceCategories,
   fetchPlaceReviewComments,
   fetchPlaceReviews,
@@ -205,5 +206,15 @@ export const useGoogleMapsAutocomplete = (input: string, enabled: boolean = true
     queryFn: async () => await fetchGoogleMapsAutocomplete(input),
     enabled: enabled && input.length > 0,
     staleTime: 60000, // 60 seconds
+  });
+};
+
+// A place id resolves to the same coordinates forever, so this is cached hard
+export const useGoogleMapsPlaceGeocode = (placeId: string | null, enabled: boolean = true) => {
+  return useQuery({
+    queryKey: ['googleMapsPlaceGeocode', placeId],
+    queryFn: async () => await fetchGoogleMapsPlaceGeocode(placeId!),
+    enabled: enabled && Boolean(placeId),
+    staleTime: Infinity,
   });
 };

@@ -12,15 +12,24 @@ import { useAuthDialog } from '@/context/AuthDialogContext';
 interface BucketListButtonProps {
   experienceId: string;
   isBookmarked: boolean;
+  // Renders normally but does nothing — used by the create-flow preview, where
+  // the experience id may be synthetic and bookmarking makes no sense
+  inert?: boolean;
 }
 
-export const BucketListButton = ({ experienceId, isBookmarked }: BucketListButtonProps) => {
+export const BucketListButton = ({
+  experienceId,
+  isBookmarked,
+  inert = false,
+}: BucketListButtonProps) => {
   const [bookmarked, setBookmarked] = useState(isBookmarked);
   const { mutate: bookmarkExperience, isPending } = useBookmarkExperience();
   const { data: session } = useSession();
   const { setOpenSignIn } = useAuthDialog();
 
   const handleClick = () => {
+    if (inert) return;
+
     if (!session?.user?.id) {
       setOpenSignIn(true);
       return;
