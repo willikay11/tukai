@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
+import { ViewExperiencePageContent } from '@/app/(experiences)/experiences/[experienceId]/ViewExperiencePageContent';
 import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
@@ -50,7 +51,8 @@ export type ExperienceStepId =
   | 'itinerary-days'
   | 'dates-tickets'
   | 'guests'
-  | 'wallet';
+  | 'wallet'
+  | 'preview';
 
 const STEPS_DEFAULT = [
   {
@@ -70,6 +72,7 @@ const STEPS_DEFAULT = [
   },
   { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
   { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
+  { id: 'preview', label: 'Preview', icon: 'View01Icon' },
 ];
 
 const STEPS_MULTI_DAY = [
@@ -90,6 +93,7 @@ const STEPS_MULTI_DAY = [
   },
   { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
   { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
+  { id: 'preview', label: 'Preview', icon: 'View01Icon' },
 ];
 
 const STEPS_ITINERARY = [
@@ -115,6 +119,7 @@ const STEPS_ITINERARY = [
   },
   { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
   { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
+  { id: 'preview', label: 'Preview', icon: 'View01Icon' },
 ];
 
 const getSteps = (experienceType: 'one-time' | 'multi-day' | 'itinerary'): typeof STEPS_DEFAULT => {
@@ -138,8 +143,6 @@ interface CreateExperienceStepsProps {
   aboutErrors?: Record<string, string>;
   aboutFormData?: AboutFormData;
   updateAboutFormData?: (data: Partial<AboutFormData>) => void;
-  isPreviewDrawerOpen?: boolean;
-  setIsPreviewDrawerOpen?: (isOpen: boolean) => void;
   ticketsFormData?: {
     commission: 'host' | 'customer' | 'split';
     ticketMode: 'entire-period' | 'each-day' | null;
@@ -220,6 +223,8 @@ interface CreateExperienceStepsProps {
     patchPhoneWallet: any;
     isPatchingPhoneWallet: boolean;
   };
+  // Form-derived Experience rendered by the Preview step
+  previewExperience?: Experience;
   onPreviewAndPublish?: () => void;
   handlers?: {
     handleSaveAbout?: () => Promise<boolean | void>;
@@ -285,13 +290,12 @@ export const CreateExperienceSteps = ({
   isWalletsLoading = false,
   hasSavedWallets = false,
   walletMutations,
+  previewExperience,
   onPreviewAndPublish,
   handlers,
   isSavingExperience = false,
   apiError,
   registerFlusher,
-  isPreviewDrawerOpen = false,
-  setIsPreviewDrawerOpen,
   slotTemplateRecords = [],
   setSlotTemplateRecords,
 }: CreateExperienceStepsProps) => {
@@ -300,7 +304,6 @@ export const CreateExperienceSteps = ({
   // Save & Exit lands on the user's hosted experiences
   const exitToHosting = () => router.push('/experiences?category=hosting');
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
-  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const canAccessDetailsSteps = Boolean(
     experience?.id || selectedCommunityId || formData?.community?.id,
   );
@@ -336,11 +339,10 @@ export const CreateExperienceSteps = ({
     }
   };
 
+  // The in-step Preview buttons used to open a mobile drawer showing the old
+  // side panel; they now jump to the Preview step, which is the single preview
   const handlePreviewClick = () => {
-    setIsPreviewLoading(true);
-    router.push(window.location.href);
-    setIsPreviewDrawerOpen?.(true);
-    setTimeout(() => setIsPreviewLoading(false), 1000);
+    handleStepChange('preview');
   };
 
   if (isLoadingExperience) {
@@ -411,6 +413,9 @@ export const CreateExperienceSteps = ({
             'dates-tickets': isDatesTicketsFilled,
             guests: isGuestsFilled,
             wallet: hasSavedWallets,
+            // Preview is a read-only view — it is "filled" as soon as there is
+            // something to look at
+            preview: Boolean(previewExperience?.title),
           };
           const isFilled = stepFilledMap[step.id] ?? false;
           const isDisabled = step.id !== 'community' && !canAccessDetailsSteps;
@@ -462,15 +467,10 @@ export const CreateExperienceSteps = ({
                   <Button
                     type="button"
                     onClick={handlePreviewClick}
-                    disabled={isPreviewLoading}
                     variant="outline"
                     className="lg:hidden"
                   >
-                    {isPreviewLoading ? (
-                      <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
-                    ) : (
-                      'Preview'
-                    )}
+                    Preview
                   </Button>
                   <Button
                     type="button"
@@ -701,6 +701,31 @@ export const CreateExperienceSteps = ({
                 isPatchingBankWallet={false}
                 onPreviewAndPublish={onPreviewAndPublish || (() => {})}
               />
+            )}
+          </TabsContent>
+
+          <TabsContent value="preview" className="col-span-1 mt-6">
+            {previewExperience && (
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 rounded-2xl bg-emerald-50 px-4 py-3">
+                  <IconComponent
+                    iconName="View01Icon"
+                    size={18}
+                    className="mt-0.5 flex-shrink-0 text-emerald-700"
+                  />
+                  <p className="text-xs text-emerald-800">
+                    This is a preview of how customers will see your experience. Tickets cannot be
+                    purchased here.
+                  </p>
+                </div>
+
+                {/*
+                  The REAL customer detail view — the same component
+                  /experiences/[experienceId] renders. Never fork this into a
+                  preview-specific copy; changes there must show up here.
+                */}
+                <ViewExperiencePageContent experience={previewExperience} bookingMode="preview" />
+              </div>
             )}
           </TabsContent>
         </div>
