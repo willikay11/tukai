@@ -92,9 +92,11 @@ export const AddPlaceModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="flex max-h-[90vh] w-full max-w-4xl flex-col p-0">
+      {/* p-0 puts the shared close button (absolute right-4 top-4) on top of the
+          search row, so it is pulled onto the content gutter and centred on it */}
+      <DialogContent className="flex max-h-[90vh] w-full max-w-4xl flex-col p-0 [&>button]:right-6 [&>button]:top-[30px]">
         {/* Header with search and title */}
-        <div className="flex-shrink-0 space-y-3 px-6 pt-4">
+        <div className="flex-shrink-0 space-y-3 pl-6 pr-14 pt-4">
           {/* Search input */}
           <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-gray-100 px-3 py-2">
             <IconComponent
