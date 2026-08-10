@@ -539,6 +539,10 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
               </span>
             )}
           </Button>
+
+          <p className="text-center text-xs italic text-gray-500">
+            *Payments are handled externally via Paystack
+          </p>
         </TabsContent>
 
         <TabsContent value="moments" className="py-8 text-center">
