@@ -73,7 +73,7 @@ const STEPS_DEFAULT = [
   },
   { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
   { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
-  { id: 'preview', label: 'Preview', icon: 'View01Icon' },
+  { id: 'preview', label: 'Preview', icon: 'Monocle01Icon' },
 ];
 
 const STEPS_MULTI_DAY = [
@@ -94,7 +94,7 @@ const STEPS_MULTI_DAY = [
   },
   { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
   { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
-  { id: 'preview', label: 'Preview', icon: 'View01Icon' },
+  { id: 'preview', label: 'Preview', icon: 'Monocle01Icon' },
 ];
 
 const STEPS_ITINERARY = [
@@ -120,7 +120,7 @@ const STEPS_ITINERARY = [
   },
   { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
   { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
-  { id: 'preview', label: 'Preview', icon: 'View01Icon' },
+  { id: 'preview', label: 'Preview', icon: 'Monocle01Icon' },
 ];
 
 const getSteps = (experienceType: 'one-time' | 'multi-day' | 'itinerary'): typeof STEPS_DEFAULT => {
