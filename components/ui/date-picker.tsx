@@ -25,6 +25,7 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
     ref,
   ) => {
     const [date, setDate] = React.useState<Date | undefined>(value ? new Date(value) : undefined);
+    const [open, setOpen] = React.useState(false);
 
     React.useEffect(() => {
       if (value) {
@@ -37,10 +38,16 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
       if (selectedDate && onChange) {
         onChange(format(selectedDate, 'yyyy-MM-dd'));
       }
+      // Picking a day completes the interaction, so dismiss the calendar. A
+      // click on the already-selected day clears it instead, and the calendar
+      // stays open so another day can be chosen
+      if (selectedDate) {
+        setOpen(false);
+      }
     };
 
     return (
-      <Popover>
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
             ref={ref}
