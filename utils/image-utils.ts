@@ -4,6 +4,10 @@ export interface ImageValidationResult {
   warning?: string;
 }
 
+// Small images are accepted — they just lose detail once cropped, so this is a
+// quality hint rather than a hard floor
+export const RECOMMENDED_MIN_DIMENSION = 500;
+
 export const validateExperienceImage = (file: File): Promise<ImageValidationResult> => {
   return new Promise((resolve) => {
     // Check file type
@@ -35,11 +39,12 @@ export const validateExperienceImage = (file: File): Promise<ImageValidationResu
 
       const { width, height } = img;
 
-      // Minimum size check
-      if (width < 500 || height < 500) {
+      // Below the recommended size the upload still goes through, the user is
+      // just told it may not look sharp
+      if (width < RECOMMENDED_MIN_DIMENSION || height < RECOMMENDED_MIN_DIMENSION) {
         resolve({
-          valid: false,
-          error: `Image is too small (${width}×${height}px). Minimum size is 500×500px.`,
+          valid: true,
+          warning: `This image is small (${width}×${height}px) and may look blurry. ${RECOMMENDED_MIN_DIMENSION}×${RECOMMENDED_MIN_DIMENSION}px or larger is recommended.`,
         });
         return;
       }

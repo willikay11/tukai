@@ -136,13 +136,18 @@ export const PhotoUploader = ({
 
       const validFiles: File[] = [];
       const errors: string[] = [];
+      const warnings: string[] = [];
 
       for (const { file, validation } of results) {
         if (!validation.valid) {
           errors.push(`${file.name}: ${validation.error}`);
-        } else {
-          validFiles.push(file);
+          continue;
         }
+
+        if (validation.warning) {
+          warnings.push(`${file.name}: ${validation.warning}`);
+        }
+        validFiles.push(file);
       }
 
       // Show errors
@@ -151,6 +156,16 @@ export const PhotoUploader = ({
           toast({
             description: error,
             variant: 'destructive',
+          }),
+        );
+      }
+
+      // Advisory only — these files still upload
+      if (warnings.length > 0) {
+        warnings.forEach((warning) =>
+          toast({
+            description: warning,
+            variant: 'info',
           }),
         );
       }
@@ -338,8 +353,8 @@ export const PhotoUploader = ({
       <div className="space-y-2">
         <div className="space-y-1">
           <p className="text-xs font-medium text-gray-800">
-            Upload experience poster (JPEG, PNG or WebP · Square images · 500×500px to 1024×1024px ·
-            Max 10MB)
+            Upload experience poster (JPEG, PNG or WebP · Square images · 500×500px or larger
+            recommended · Max 10MB)
           </p>
           <p className="text-xs text-muted-foreground">
             Non-square images will be cropped automatically
