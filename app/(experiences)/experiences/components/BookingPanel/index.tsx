@@ -154,9 +154,24 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
     return sum + qty * price;
   }, 0);
 
+  // Counted rather than derived from `total`, which is 0 for a free experience
+  // even when tickets have been picked
+  const selectedTicketCount = visibleTickets.reduce(
+    (sum, ticket) => sum + (quantities[ticket.id] ?? 0),
+    0,
+  );
+
   // Mirrors the reserve page's paymentFormSchema rules and messages
   const validatePurchase = (): Record<string, string> => {
     const validationErrors: Record<string, string> = {};
+
+    if (selectedTicketCount === 0) {
+      validationErrors.tickets = 'Please select at least one ticket.';
+    }
+
+    if (!selectedSlotId) {
+      validationErrors.slot = 'Please select a date and time.';
+    }
 
     if (!isLoggedIn) {
       if (firstName.trim().length < 2) {
@@ -176,6 +191,13 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
 
     if (deliveryMethod === 'whatsapp' && !PHONE_REGEX.test(deliveryContact)) {
       validationErrors.deliveryContact = 'Please enter a valid phone number.';
+    }
+
+    if (
+      deliveryMethod === 'email' &&
+      !z.string().email().safeParse(deliveryContact.trim()).success
+    ) {
+      validationErrors.deliveryContact = 'Please enter a valid email address.';
     }
 
     return validationErrors;
@@ -296,6 +318,8 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
             </div>
           )}
 
+          {errors.slot && <p className="text-xs text-red-500">{errors.slot}</p>}
+
           {/* Ticket selector */}
           {(experience.tickets?.length ?? 0) > 0 && (
             <div className="space-y-4">
@@ -323,6 +347,8 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                   ))}
                 </div>
               )}
+
+              {errors.tickets && <p className="text-xs text-red-500">{errors.tickets}</p>}
             </div>
           )}
 
@@ -452,19 +478,24 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3">
-                <IconComponent
-                  iconName="Mail01Icon"
-                  size={16}
-                  className="flex-shrink-0 text-gray-700"
-                />
-                <input
-                  type="email"
-                  value={deliveryContact}
-                  onChange={(e) => setDeliveryContact(e.target.value)}
-                  placeholder="Enter email address"
-                  className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400"
-                />
+              <div>
+                <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3">
+                  <IconComponent
+                    iconName="Mail01Icon"
+                    size={16}
+                    className="flex-shrink-0 text-gray-700"
+                  />
+                  <input
+                    type="email"
+                    value={deliveryContact}
+                    onChange={(e) => setDeliveryContact(e.target.value)}
+                    placeholder="Enter email address"
+                    className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400"
+                  />
+                </div>
+                {errors.deliveryContact && (
+                  <p className="mt-1 text-xs text-red-500">{errors.deliveryContact}</p>
+                )}
               </div>
             )}
           </div>
@@ -529,7 +560,9 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
           <Button
             variant="gradient"
             onClick={handlePay}
-            disabled={isPreview || total === 0 || !selectedSlotId || isPaying}
+            // Stays enabled when the form is incomplete — pressing it surfaces
+            // an error on each offending input instead of silently doing nothing
+            disabled={isPreview || isPaying}
             className="h-12 w-full rounded-full py-3"
           >
             {isPreview ? (

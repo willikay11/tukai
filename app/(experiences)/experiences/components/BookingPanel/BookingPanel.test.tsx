@@ -81,8 +81,10 @@ describe('BookingPanel purchase flow', () => {
 
   const selectTicketAndSafePaymentOptions = async (user: ReturnType<typeof userEvent.setup>) => {
     await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
-    // Email delivery avoids the WhatsApp phone requirement
+    // Email delivery avoids the WhatsApp phone requirement, but still needs a
+    // valid address of its own
     await user.click(screen.getByRole('button', { name: 'Via Email' }));
+    await user.type(screen.getByPlaceholderText('Enter email address'), 'guest@example.com');
     // The payment method picker is commented out, so M-Pesa is always the
     // method and a valid phone number is required
     await user.type(screen.getByPlaceholderText('Enter M-Pesa number'), '712345678');
@@ -143,7 +145,7 @@ describe('BookingPanel purchase flow', () => {
     expect(screen.queryByText('Normal')).not.toBeInTheDocument();
   });
 
-  it('keeps quantities picked on another slot out of the total and disables Pay', async () => {
+  it('keeps quantities picked on another slot out of the total and blocks Pay', async () => {
     const user = userEvent.setup();
     render(<BookingPanel experience={experience} />);
 
@@ -151,8 +153,27 @@ describe('BookingPanel purchase flow', () => {
     await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
     await user.click(screen.getByText('6:00 PM - 9:00 PM'));
 
-    // Hidden slot's quantity is inert: total resets, Pay is blocked
-    expect(screen.getByRole('button', { name: /^pay/i })).toBeDisabled();
+    // Pay stays clickable; the hidden slot's quantity is inert, so pressing it
+    // reports the missing ticket rather than submitting
+    const payButton = screen.getByRole('button', { name: /^pay/i });
+    expect(payButton).not.toBeDisabled();
+
+    await user.click(payButton);
+
+    expect(mockMutate).not.toHaveBeenCalled();
+    expect(screen.getByText('Please select at least one ticket.')).toBeInTheDocument();
+  });
+
+  it('reports every missing field on the inputs when Pay is pressed empty', async () => {
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} />);
+
+    await user.click(screen.getByRole('button', { name: /^pay/i }));
+
+    expect(mockMutate).not.toHaveBeenCalled();
+    expect(screen.getByText('Please select at least one ticket.')).toBeInTheDocument();
+    // Delivery defaults to WhatsApp, and M-Pesa is the only payment method
+    expect(screen.getAllByText('Please enter a valid phone number.')).toHaveLength(2);
   });
 
   it('blocks anonymous purchase until contact details are valid, then includes them', async () => {
