@@ -15,6 +15,7 @@ import {
   usePurchaseExperienceTicketV2,
 } from '@/app/shared/hooks/useExperiences';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { PaymentSuccess } from '@/components/ui/paymentSuccess';
 import { Paystack } from '@/components/ui/paystack';
@@ -550,17 +551,34 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
         </TabsContent>
       </Tabs>
 
-      {/* Same post-purchase flow as the reserve page */}
-      <Paystack
-        onPaymentSuccess={(paymentSuccess) => {
-          setIsPaystackOpen(false);
-          if (paymentSuccess) {
-            setIsPaymentSuccessOpen(true);
-            resetPanel();
-          }
+      {/* Same post-purchase flow as the reserve page. The checkout is an
+          overlay so it covers the panel instead of appending an iframe below
+          it — Radix also unmounts it while closed, so the iframe never mounts
+          against an empty url. */}
+      <Dialog
+        open={isPaystackOpen}
+        onOpenChange={(open) => {
+          if (!open) setIsPaystackOpen(false);
         }}
-        url={purchaseData?.data?.paymentDetails?.authorizationUrl || ''}
-      />
+      >
+        <DialogContent className="max-w-2xl gap-0 p-0">
+          <DialogTitle className="px-6 pb-4 pt-6 text-base font-bold text-gray-900">
+            Complete your payment
+          </DialogTitle>
+          <div className="h-[70vh] w-full overflow-hidden px-6 pb-6">
+            <Paystack
+              onPaymentSuccess={(paymentSuccess) => {
+                setIsPaystackOpen(false);
+                if (paymentSuccess) {
+                  setIsPaymentSuccessOpen(true);
+                  resetPanel();
+                }
+              }}
+              url={purchaseData?.data?.paymentDetails?.authorizationUrl || ''}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <PaymentSuccess
         isOpen={isPaymentSuccessOpen}
