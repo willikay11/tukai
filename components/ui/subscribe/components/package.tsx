@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { Button } from '@/components/ui/button';
 import { toast } from '@/app/shared/hooks/useToast';
+import { Button } from '@/components/ui/button';
 import { SubscriptionPlan } from '@/types/subscription';
 
 export const Package = ({
@@ -22,7 +22,7 @@ export const Package = ({
   setSelectedSubscriptionPlan: (subscriptionPlan: string) => void;
   onEdit: () => void;
   paymentMethod: { paymentMethodId: string; phoneNumber: string; paymentOption: string } | null;
-}) {
+}) => {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -156,4 +156,3 @@ export const Package = ({
     </div>
   );
 };
-

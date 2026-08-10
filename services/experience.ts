@@ -636,7 +636,7 @@ export const deleteSlotTemplate = async (
 
 export const createItineraryDay = async (
   experienceId: string,
-  data: ItineraryDayPayload[],
+  data: ItineraryDayPayload | ItineraryDayPayload[],
 ): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();

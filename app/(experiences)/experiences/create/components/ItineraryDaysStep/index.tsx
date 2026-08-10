@@ -14,6 +14,8 @@ interface ItineraryDaysStepProps {
   days: ItineraryDayFormValue[];
   itineraryStartDate: string | null;
   onChange: (days: ItineraryDayFormValue[]) => void;
+  // Persists the deletion; falls back to a form-state-only removal when absent
+  onDeleteDay?: (dayId: string) => Promise<boolean>;
   onSaveContinue: () => void;
   onCancel: () => void;
   // Resolves once the save settles, so the button can stop its spinner
@@ -31,6 +33,7 @@ export const ItineraryDaysStep = ({
   days,
   itineraryStartDate,
   onChange,
+  onDeleteDay,
   onSaveContinue,
   onCancel,
   onSaveAndExit,
@@ -39,6 +42,7 @@ export const ItineraryDaysStep = ({
   registerFlusher,
 }: ItineraryDaysStepProps) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0); // Day 1 open by default
+  const [deletingDayId, setDeletingDayId] = useState<string | null>(null);
   const { pendingAction, runAction } = usePendingAction<'exit'>();
 
   // Completeness check: all days must have at least one saved activity
@@ -74,12 +78,48 @@ export const ItineraryDaysStep = ({
     onChange(updated);
   };
 
-  const handleDayDelete = (index: number) => {
-    // Renumber remaining days
-    const updated = days
-      .filter((_, i) => i !== index)
-      .map((day, i) => ({ ...day, dayNumber: i + 1 }));
-    onChange(updated);
+  // Indices shift once a day is removed, so the expanded pill has to follow
+  const settleExpandedIndex = (deletedIndex: number) => {
+    setExpandedIndex((prev) => {
+      if (prev === null) return null;
+      if (prev === deletedIndex) return null;
+      return prev > deletedIndex ? prev - 1 : prev;
+    });
+  };
+
+  const handleDayDelete = async (index: number) => {
+    const day = days[index];
+    if (!day || deletingDayId) return;
+
+    // A day that was never persisted only exists in form state
+    if (!day.apiId) {
+      // Renumber remaining days
+      const updated = days
+        .filter((_, i) => i !== index)
+        .map((d, i) => ({ ...d, dayNumber: i + 1 }));
+      onChange(updated);
+      settleExpandedIndex(index);
+      return;
+    }
+
+    // Dropping a persisted day locally would leave the row orphaned in the DB
+    // — the exact bug this handler exists to fix — so refuse rather than lie
+    if (!onDeleteDay) {
+      console.error('ItineraryDaysStep: onDeleteDay is not wired; refusing to remove a saved day');
+      return;
+    }
+
+    setDeletingDayId(day.id);
+    try {
+      // The handler owns the form-state update so it only drops the day once
+      // the API confirms the delete
+      const deleted = await onDeleteDay(day.id);
+      if (deleted) {
+        settleExpandedIndex(index);
+      }
+    } finally {
+      setDeletingDayId(null);
+    }
   };
 
   return (
@@ -102,6 +142,8 @@ export const ItineraryDaysStep = ({
               onToggle={() => handleToggle(index)}
               onChange={(data) => handleDayChange(index, data)}
               onDelete={() => handleDayDelete(index)}
+              isDeleting={deletingDayId === day.id}
+              isDeleteDisabled={deletingDayId !== null && deletingDayId !== day.id}
               isParentSaving={isParentSaving}
               isLast={index === days.length - 1}
               registerFlusher={registerFlusher}

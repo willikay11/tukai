@@ -193,6 +193,7 @@ function CreateExperiencePageContent() {
             handlers={{
               handleSaveAbout: handlers.handleSaveAbout,
               handleSaveItineraryDays: handlers.handleSaveItineraryDays,
+              handleDeleteItineraryDay: handlers.handleDeleteItineraryDay,
               handlePublish: handlers.handlePublish,
             }}
             isSavingExperience={isSavingExperience}

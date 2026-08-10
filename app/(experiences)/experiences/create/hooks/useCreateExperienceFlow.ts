@@ -34,6 +34,7 @@ import {
   bulkUpdateItineraryDays,
   createItineraryDay,
   createSlotTemplate,
+  deleteItineraryDay,
   deleteSlotTemplate,
   fetchItineraryDays,
   fetchSlotTemplates,
@@ -1591,6 +1592,64 @@ export const useCreateExperienceFlow = () => {
     updateItineraryDays,
   ]);
 
+  const handleDeleteItineraryDay = useCallback(
+    async (dayId: string): Promise<boolean> => {
+      const day = formData.itineraryDays.find((d) => d.id === dayId);
+      if (!day) return false;
+
+      const remainingDays = formData.itineraryDays
+        .filter((d) => d.id !== dayId)
+        .map((d, index) => ({ ...d, dayNumber: index + 1 }));
+
+      // Days that were never persisted only exist in form state
+      if (!day.apiId) {
+        updateItineraryDays(remainingDays);
+        return true;
+      }
+
+      // A saved day with no experience to delete it from is not recoverable
+      // here; dropping it locally would orphan the row
+      if (!experienceId) {
+        console.error('[handleDeleteItineraryDay] Missing experienceId for a persisted day');
+        return false;
+      }
+
+      setApiError(null);
+      try {
+        await deleteItineraryDay(experienceId, day.apiId);
+
+        // The renumbering has to land after the delete — patching survivors
+        // first would push a day_number onto the value the doomed row still
+        // holds, which the API rejects as a duplicate
+        const persistedDays = remainingDays.filter((d) => d.apiId);
+        if (persistedDays.length > 0) {
+          await bulkUpdateItineraryDays(
+            experienceId,
+            persistedDays.map((d) => ({
+              id: d.apiId,
+              day_number: d.dayNumber,
+              title: d.title,
+              description: d.description,
+            })),
+          );
+        }
+
+        updateItineraryDays(remainingDays);
+        return true;
+      } catch (error: any) {
+        const message = parseApiError(error, 'Failed to delete day');
+        setApiError(message);
+        toast({
+          title: 'Error',
+          description: message,
+          variant: 'destructive',
+        });
+        return false;
+      }
+    },
+    [experienceId, formData.itineraryDays, updateItineraryDays, toast],
+  );
+
   const handlePublish = useCallback(async () => {
     setIsSavingExperience(true);
     setApiError(null);
@@ -1724,6 +1783,7 @@ export const useCreateExperienceFlow = () => {
       handleInvitesChange,
       handleSaveAbout,
       handleSaveItineraryDays,
+      handleDeleteItineraryDay,
       handleAddPhotos,
       handleDeletePhoto,
       handleAddGuest,

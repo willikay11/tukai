@@ -224,6 +224,7 @@ interface CreateExperienceStepsProps {
   handlers?: {
     handleSaveAbout?: () => Promise<boolean | void>;
     handleSaveItineraryDays?: () => Promise<boolean | void>;
+    handleDeleteItineraryDay?: (dayId: string) => Promise<boolean>;
     handlePublish?: () => Promise<void>;
     handleUpdateFeesAllocation?: () => Promise<void>;
   };
@@ -557,6 +558,7 @@ export const CreateExperienceSteps = ({
                 onChange={(days) => {
                   updateItineraryDays?.(days);
                 }}
+                onDeleteDay={handlers?.handleDeleteItineraryDay}
                 onSaveContinue={() => {
                   if (handlers?.handleSaveItineraryDays) {
                     handlers.handleSaveItineraryDays();
