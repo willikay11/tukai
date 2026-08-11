@@ -1,12 +1,19 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
 import { TwoPanelLayout } from '@/app/shared/components/TwoPanelLayout';
 
+import { BeforeYouCreate } from './components/BeforeYouCreate';
 import { CreateExperienceSteps } from './components/steps';
 import { useCreateExperienceFlow } from './hooks/useCreateExperienceFlow';
+
+// The wizard is preceded by a listing of everything the creator already made.
+// It is not a stepper step — the step pills belong to the wizard only.
+type CreateEntryState = 'gate' | 'wizard';
 
 export default function CreateExperiencePage() {
   return (
@@ -17,6 +24,20 @@ export default function CreateExperiencePage() {
 }
 
 function CreateExperiencePageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  // Editing an existing draft (Manage on a draft card) must land in the wizard
+  // directly — the listing would be a detour back to where they just came from
+  const experienceIdParam = searchParams.get('experienceId');
+
+  const [entryState, setEntryState] = useState<CreateEntryState>(
+    experienceIdParam ? 'wizard' : 'gate',
+  );
+
+  useEffect(() => {
+    if (experienceIdParam) setEntryState('wizard');
+  }, [experienceIdParam]);
+
   const {
     activeStep,
     experience,
@@ -49,7 +70,27 @@ function CreateExperiencePageContent() {
     registerFlusher,
     previewExperience,
     slotTemplateRecords,
-  } = useCreateExperienceFlow();
+  } = useCreateExperienceFlow({ enforceCommunityGuard: entryState === 'wizard' });
+
+  // The listing is open to everyone; a community is only required to actually
+  // build an experience, so the redirect happens on the way into the wizard
+  const handleProceedToWizard = () => {
+    if (!isCheckingCommunityAccess && !hasCreatedCommunity) {
+      router.push('/communities/create');
+      return;
+    }
+
+    setEntryState('wizard');
+  };
+
+  if (entryState === 'gate') {
+    return (
+      <BeforeYouCreate
+        onCreateNew={handleProceedToWizard}
+        onStartFromScratch={handleProceedToWizard}
+      />
+    );
+  }
 
   if (isCheckingCommunityAccess) {
     return (
