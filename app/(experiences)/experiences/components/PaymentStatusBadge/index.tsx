@@ -7,11 +7,16 @@ export interface StatusConfig {
 // Covers the statuses the API actually returns ('completed', 'expired') plus
 // the payment states the design anticipates; unknown values fall back to a
 // neutral badge showing the raw status.
+//
+// Colour bands: green = settled, orange = needs attention (warning), red =
+// terminal failure, grey = inert. There is no `warning` colour token, so orange
+// is the codebase's warning colour — see `partial` below.
 const STATUS_CONFIG: Record<string, StatusConfig> = {
   completed: { label: 'Paid', dot: 'bg-primary', text: 'text-primary' },
   paid: { label: 'Paid', dot: 'bg-primary', text: 'text-primary' },
   partial: { label: 'Partial', dot: 'bg-orange-500', text: 'text-orange-600' },
-  pending: { label: 'Pending', dot: 'bg-yellow-500', text: 'text-yellow-600' },
+  pending: { label: 'Pending', dot: 'bg-orange-500', text: 'text-orange-600' },
+  failed: { label: 'Failed', dot: 'bg-red-500', text: 'text-red-600' },
   cancelled: { label: 'Cancelled', dot: 'bg-red-500', text: 'text-red-600' },
   refunded: { label: 'Refunded', dot: 'bg-gray-400', text: 'text-gray-500' },
   expired: { label: 'Expired', dot: 'bg-gray-400', text: 'text-gray-500' },

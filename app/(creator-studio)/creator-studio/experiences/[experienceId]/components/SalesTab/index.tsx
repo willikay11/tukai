@@ -25,8 +25,12 @@ interface SalesTabProps {
 // A completed purchase is settled in full. There is no partial-payment field on
 // the purchase record, so "Partially Paid" cannot be represented — see the
 // filter comment below.
+// Overrides the badge's default map entirely, so every status the list can show
+// has to be listed here or it falls back to a neutral grey badge
 const SALES_STATUS_CONFIG: Record<string, StatusConfig> = {
   completed: { label: 'Fully Paid', dot: 'bg-primary', text: 'text-primary' },
+  pending: { label: 'Pending', dot: 'bg-yellow-500', text: 'text-yellow-600' },
+  failed: { label: 'Failed', dot: 'bg-red-500', text: 'text-red-600' },
   expired: { label: 'Expired', dot: 'bg-gray-400', text: 'text-gray-500' },
 };
 
