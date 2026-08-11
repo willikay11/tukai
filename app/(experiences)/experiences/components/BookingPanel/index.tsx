@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 import { Mail02TwotoneRounded, UserTwotoneRounded } from '@hugeicons-pro/core-twotone-rounded';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -17,7 +18,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { PaymentSuccess } from '@/components/ui/paymentSuccess';
 import { Paystack } from '@/components/ui/paystack';
 import { PhoneNumber } from '@/components/ui/phoneNumber';
 import { Quantity } from '@/components/ui/quantity';
@@ -66,6 +66,7 @@ const occurrenceLabel = (occurrence: ExperienceOccurrence): string => {
 const PHONE_REGEX = /^\+\d{6,15}$/;
 
 export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) => {
+  const router = useRouter();
   const { data: session } = useSession();
   const isLoggedIn = Boolean(session?.user);
   const isPreview = mode === 'preview';
@@ -88,7 +89,6 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
   // Bumped by resetPanel to remount the uncontrolled inputs (PhoneNumber, Quantity)
   const [formResetKey, setFormResetKey] = useState(0);
   const [isPaystackOpen, setIsPaystackOpen] = useState(false);
-  const [isPaymentSuccessOpen, setIsPaymentSuccessOpen] = useState(false);
 
   const isRecurring = Boolean(experience.recurrenceRule);
 
@@ -221,6 +221,18 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
     setFormResetKey((key) => key + 1);
   };
 
+  // Both success paths land on the confirmation page. The reference and
+  // experience id travel as query params so the page can fetch the real
+  // confirmation once that API exists, with no further wiring here.
+  const goToBookingSuccess = (reference?: string) => {
+    resetPanel();
+
+    const params = new URLSearchParams({ experienceId: experience.id });
+    if (reference) params.set('ref', reference);
+
+    router.push(`/experiences/booking-success?${params.toString()}`);
+  };
+
   const handlePay = () => {
     // Second guard behind the disabled button — the purchase API must be
     // unreachable from preview even if the button is somehow activated
@@ -255,8 +267,8 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
         if (authorizationUrl) {
           setIsPaystackOpen(true);
         } else {
-          setIsPaymentSuccessOpen(true);
-          resetPanel();
+          // Nothing to charge — the purchase is already complete
+          goToBookingSuccess(response.data?.paymentDetails?.reference);
         }
       },
       onError: (error: any) => {
@@ -642,8 +654,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
               onPaymentSuccess={(paymentSuccess) => {
                 setIsPaystackOpen(false);
                 if (paymentSuccess) {
-                  setIsPaymentSuccessOpen(true);
-                  resetPanel();
+                  goToBookingSuccess(purchaseData?.data?.paymentDetails?.reference);
                 }
               }}
               url={purchaseData?.data?.paymentDetails?.authorizationUrl || ''}
@@ -651,13 +662,6 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
           </div>
         </DialogContent>
       </Dialog>
-
-      <PaymentSuccess
-        isOpen={isPaymentSuccessOpen}
-        closeModal={() => {
-          setIsPaymentSuccessOpen(false);
-        }}
-      />
     </div>
   );
 };
