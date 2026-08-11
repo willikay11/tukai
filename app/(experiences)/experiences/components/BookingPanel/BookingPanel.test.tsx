@@ -10,6 +10,11 @@ jest.mock('next-auth/react', () => ({
   useSession: () => mockSession,
 }));
 
+const mockPush = jest.fn();
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
 // Camel-cased shape of the real v2 ticket-purchases 201 response
 const purchaseResponse = {
   status: 201,
@@ -114,6 +119,25 @@ describe('BookingPanel purchase flow', () => {
       expect(iframe).toBeInTheDocument();
       expect(iframe).toHaveAttribute('src', 'https://checkout.paystack.com/mgk99hs4wr21ejb');
     });
+  });
+
+  it('redirects to the confirmation page with ref and experienceId on success', async () => {
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} />);
+
+    await selectTicketAndSafePaymentOptions(user);
+    await user.click(screen.getByRole('button', { name: /^pay/i }));
+
+    await waitFor(() => expect(document.querySelector('iframe')).toBeInTheDocument());
+    expect(mockPush).not.toHaveBeenCalled();
+
+    fireEvent(window, new MessageEvent('message', { data: { status: 'success' } }));
+
+    await waitFor(() =>
+      expect(mockPush).toHaveBeenCalledWith(
+        `/experiences/booking-success?experienceId=${experience.id}&ref=TRN-20260714-4OIK5LDP`,
+      ),
+    );
   });
 
   it('clears the purchaser’s details once Paystack reports success', async () => {

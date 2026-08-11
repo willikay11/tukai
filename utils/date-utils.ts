@@ -266,3 +266,31 @@ export const inferUIExperienceType = (
 
   return startDay.getTime() === endDay.getTime() ? 'one-time' : 'multi-day';
 };
+
+// → "Tue 17 Mar 2026 · 6:00 AM – 12:00 PM"
+// Takes an ISO date plus already-formatted display times, which is the shape a
+// booking confirmation carries. formatReservationDateTime is the two-ISO
+// equivalent and is left alone for its existing callers.
+export const formatBookingDateTime = (date: string, startTime: string, endTime: string): string => {
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return '';
+
+  const weekday = parsed.toLocaleDateString('en-GB', { weekday: 'short' });
+  const month = parsed.toLocaleDateString('en-GB', { month: 'short' });
+
+  return `${weekday} ${parsed.getDate()} ${month} ${parsed.getFullYear()} · ${startTime} – ${endTime}`;
+};
+
+// → "11 Aug 2026, 9:07 AM"
+export const formatPaidAt = (isoString: string): string => {
+  const parsed = new Date(isoString);
+  if (Number.isNaN(parsed.getTime())) return '';
+
+  const month = parsed.toLocaleDateString('en-GB', { month: 'short' });
+  const hours = parsed.getHours();
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const displayHour = hours % 12 || 12;
+  const minutes = String(parsed.getMinutes()).padStart(2, '0');
+
+  return `${parsed.getDate()} ${month} ${parsed.getFullYear()}, ${displayHour}:${minutes} ${period}`;
+};
