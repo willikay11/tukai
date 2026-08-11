@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 
@@ -21,6 +21,8 @@ interface BeforeYouCreateProps {
 
 const GRID_CLASSES = 'mt-3 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3';
 
+const SEARCH_DEBOUNCE_MS = 350;
+
 const GateGridSkeleton = () => (
   <div className={GRID_CLASSES}>
     {Array.from({ length: 3 }).map((_, index) => (
@@ -33,25 +35,32 @@ export const BeforeYouCreate = ({ onCreateNew, onStartFromScratch }: BeforeYouCr
   const { data: session } = useSession();
   const userId = session?.user?.id ?? undefined;
   const [search, setSearch] = useState('');
+  // The query runs against the API, so hold off until typing settles rather
+  // than firing a request per keystroke
+  const [submittedSearch, setSubmittedSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSubmittedSearch(search.trim()), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   // Same call the Hosting tab makes — every experience the user created, in
-  // all statuses
+  // all statuses — narrowed by the API's own search param
   const { data: hostedResponse, isLoading } = useExperiences(
-    { page: 1, page_size: 100, hosted_by: userId },
+    {
+      page: 1,
+      page_size: 100,
+      hosted_by: userId,
+      search: submittedSearch || undefined,
+    },
     Boolean(userId),
   );
 
   const experiences: Experience[] = hostedResponse?.data?.results ?? [];
 
-  // Client-side: the request already caps at 100, and filtering locally keeps
-  // the list responsive as the user types
-  const filtered = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    if (!query) return experiences;
-    return experiences.filter((experience) => experience.title?.toLowerCase().includes(query));
-  }, [experiences, search]);
-
-  const hasSearch = search.trim().length > 0;
+  // Reflects the term actually queried, so the empty state never names a
+  // string the results do not correspond to
+  const hasSearch = submittedSearch.length > 0;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-6">
@@ -76,8 +85,8 @@ export const BeforeYouCreate = ({ onCreateNew, onStartFromScratch }: BeforeYouCr
         </Button>
       </div>
 
-      {/* Search */}
-      <div className="mt-6">
+      {/* Search — full width on small screens, a third of the container on large */}
+      <div className="mt-6 w-full lg:w-[30%]">
         <Input
           type="search"
           value={search}
@@ -97,18 +106,18 @@ export const BeforeYouCreate = ({ onCreateNew, onStartFromScratch }: BeforeYouCr
 
       {/* Count */}
       <p className="mt-6 text-xs font-medium uppercase tracking-wide text-gray-400">
-        {filtered.length} {filtered.length === 1 ? 'Experience' : 'Experiences'}
+        {experiences.length} {experiences.length === 1 ? 'Experience' : 'Experiences'}
       </p>
 
       {/* Grid / empty states */}
       {isLoading ? (
         <GateGridSkeleton />
-      ) : filtered.length === 0 ? (
+      ) : experiences.length === 0 ? (
         <div className="flex flex-col items-center gap-4 py-10">
           <NoData
             message={
               hasSearch
-                ? `“${search.trim()}” doesn't exist yet — go ahead and create it.`
+                ? `“${submittedSearch}” doesn't exist yet — go ahead and create it.`
                 : "You haven't created any experiences yet."
             }
           />
@@ -123,7 +132,7 @@ export const BeforeYouCreate = ({ onCreateNew, onStartFromScratch }: BeforeYouCr
         </div>
       ) : (
         <div className={GRID_CLASSES}>
-          {filtered.map((experience) => (
+          {experiences.map((experience) => (
             <HostingCard key={experience.id} experience={experience} />
           ))}
         </div>
