@@ -21,7 +21,6 @@ import { PaymentSuccess } from '@/components/ui/paymentSuccess';
 import { Paystack } from '@/components/ui/paystack';
 import { PhoneNumber } from '@/components/ui/phoneNumber';
 import { Quantity } from '@/components/ui/quantity';
-import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TicketPurchasePayload } from '@/services/experience';
 import { Experience, ExperienceOccurrence } from '@/types/experience';
@@ -547,14 +546,23 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
           </div>
           */}
 
-          {/* Phone input (only for M-Pesa) */}
+          {/* Phone input (only for M-Pesa). Labelled explicitly because the
+              payment method picker above is commented out — without it the
+              field has nothing but a placeholder to explain itself. The wording
+              still reads correctly if that picker is restored. */}
           {paymentMethod === 'mpesa' && (
             <div>
-              <PhoneNumber
-                onChange={(value) => setPhone(value)}
-                placeholder="Enter M-Pesa number"
-              />
-              {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
+              <p className="text-sm font-bold text-gray-900">Pay with M-Pesa</p>
+              <p className="mt-0.5 text-xs text-gray-500">
+                Enter the M-Pesa number you want to pay from.
+              </p>
+              <div className="mt-3">
+                <PhoneNumber
+                  onChange={(value) => setPhone(value)}
+                  placeholder="Enter M-Pesa number"
+                />
+                {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
+              </div>
             </div>
           )}
 
