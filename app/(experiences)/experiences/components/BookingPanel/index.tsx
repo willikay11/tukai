@@ -85,6 +85,8 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  // Bumped by resetPanel to remount the uncontrolled inputs (PhoneNumber, Quantity)
+  const [formResetKey, setFormResetKey] = useState(0);
   const [isPaystackOpen, setIsPaystackOpen] = useState(false);
   const [isPaymentSuccessOpen, setIsPaymentSuccessOpen] = useState(false);
 
@@ -203,9 +205,20 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
     return validationErrors;
   };
 
+  // Clears everything the purchaser typed once the payment lands, so the panel
+  // is not left holding their details. PhoneNumber and Quantity are both
+  // uncontrolled — they seed from their props once and ignore later changes —
+  // so clearing the state alone leaves the old values on screen. Bumping the
+  // key remounts them.
   const resetPanel = () => {
     setQuantities({});
     setErrors({});
+    setPhone('');
+    setDeliveryContact('');
+    setFirstName('');
+    setLastName('');
+    setEmail('');
+    setFormResetKey((key) => key + 1);
   };
 
   const handlePay = () => {
@@ -338,6 +351,9 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                         <p className="mt-0.5 text-xs text-gray-500">{ticket.name}</p>
                       </div>
                       <Quantity
+                        // Uncontrolled like PhoneNumber — it seeds from
+                        // initialValue once, so a reset needs a remount
+                        key={`${ticket.id}-${formResetKey}`}
                         initialValue={quantities[ticket.id] ?? 0}
                         min={0}
                         max={ticket.quantity}
@@ -470,6 +486,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
             {deliveryMethod === 'whatsapp' ? (
               <div>
                 <PhoneNumber
+                  key={`delivery-${formResetKey}`}
                   onChange={(value) => setDeliveryContact(value)}
                   placeholder="Enter Whatsapp number"
                 />
@@ -558,6 +575,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
               </p>
               <div className="mt-3">
                 <PhoneNumber
+                  key={`mpesa-${formResetKey}`}
                   onChange={(value) => setPhone(value)}
                   placeholder="Enter M-Pesa number"
                 />
