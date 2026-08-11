@@ -89,13 +89,14 @@ export const TicketsCreatedTab = ({ experienceId, tickets, currency }: TicketsCr
               <MetricCell label="Estimated Date of Expiry" value={expiry} />
             </div>
 
-            <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-gray-100 pt-4">
+            <div className="mt-5 flex flex-wrap items-center justify-end gap-4 border-t border-gray-100 pt-4">
               <button
                 type="button"
                 disabled
                 title="Pausing ticket sales is not available yet"
-                className="rounded-full border border-orange-200 px-4 py-2 text-sm font-medium text-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-full px-2 py-2 text-sm font-medium text-orange-600 transition-colors hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
               >
+                <IconComponent iconName="PauseIcon" size={16} color="currentColor" />
                 Pause Ticket Sales
               </button>
 
@@ -104,8 +105,9 @@ export const TicketsCreatedTab = ({ experienceId, tickets, currency }: TicketsCr
                 onClick={() =>
                   router.push(`/experiences/create?experienceId=${experienceId}&step=dates-tickets`)
                 }
-                className="rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-800 transition-colors hover:border-gray-300"
+                className="inline-flex items-center gap-2 rounded-full px-2 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50"
               >
+                <IconComponent iconName="Edit02Icon" size={16} color="currentColor" />
                 Edit Ticket
               </button>
             </div>
