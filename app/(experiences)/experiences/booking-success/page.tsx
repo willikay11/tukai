@@ -246,15 +246,14 @@ const BookingSuccessContent = () => {
           </Button>
 
           <div className="grid grid-cols-2 gap-3">
-            <a
-              href={buildGoogleCalendarUrl(data)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-full border border-gray-200 py-2.5 text-sm font-medium text-gray-800 transition-colors hover:border-gray-300"
+            <Button
+              onClick={() => window.open(buildGoogleCalendarUrl(data), '_blank', 'noopener,noreferrer')}
+              className="rounded-full"
+              variant="outline"
             >
               <IconComponent iconName="Calendar03Icon" size={16} color="currentColor" />
               Add to calendar
-            </a>
+            </Button>
 
             {/* Share brings its own outlined trigger button */}
             <Share
