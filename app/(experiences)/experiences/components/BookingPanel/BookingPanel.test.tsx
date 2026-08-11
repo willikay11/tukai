@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { Experience } from '@/types/experience';
@@ -114,6 +114,24 @@ describe('BookingPanel purchase flow', () => {
       expect(iframe).toBeInTheDocument();
       expect(iframe).toHaveAttribute('src', 'https://checkout.paystack.com/mgk99hs4wr21ejb');
     });
+  });
+
+  it('clears the purchaser’s details once Paystack reports success', async () => {
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} />);
+
+    await selectTicketAndSafePaymentOptions(user);
+    await user.click(screen.getByRole('button', { name: /^pay/i }));
+
+    await waitFor(() => expect(document.querySelector('iframe')).toBeInTheDocument());
+
+    // How the real Paystack component learns the payment went through
+    fireEvent(window, new MessageEvent('message', { data: { status: 'success' } }));
+
+    await waitFor(() => expect(screen.getByPlaceholderText('Enter M-Pesa number')).toHaveValue(''));
+    expect(screen.getByPlaceholderText('Enter email address')).toHaveValue('');
+    // Quantity is uncontrolled, so this only passes because it is remounted
+    expect(screen.getByText('0')).toBeInTheDocument();
   });
 
   // The checkout lives in a dialog now; it used to render inline and unguarded,

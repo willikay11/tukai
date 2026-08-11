@@ -85,6 +85,8 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  // Bumped by resetPanel to remount the uncontrolled inputs (PhoneNumber, Quantity)
+  const [formResetKey, setFormResetKey] = useState(0);
   const [isPaystackOpen, setIsPaystackOpen] = useState(false);
   const [isPaymentSuccessOpen, setIsPaymentSuccessOpen] = useState(false);
 
@@ -203,9 +205,20 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
     return validationErrors;
   };
 
+  // Clears everything the purchaser typed once the payment lands, so the panel
+  // is not left holding their details. PhoneNumber and Quantity are both
+  // uncontrolled — they seed from their props once and ignore later changes —
+  // so clearing the state alone leaves the old values on screen. Bumping the
+  // key remounts them.
   const resetPanel = () => {
     setQuantities({});
     setErrors({});
+    setPhone('');
+    setDeliveryContact('');
+    setFirstName('');
+    setLastName('');
+    setEmail('');
+    setFormResetKey((key) => key + 1);
   };
 
   const handlePay = () => {
@@ -338,6 +351,9 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                         <p className="mt-0.5 text-xs text-gray-500">{ticket.name}</p>
                       </div>
                       <Quantity
+                        // Uncontrolled like PhoneNumber — it seeds from
+                        // initialValue once, so a reset needs a remount
+                        key={`${ticket.id}-${formResetKey}`}
                         initialValue={quantities[ticket.id] ?? 0}
                         min={0}
                         max={ticket.quantity}
@@ -470,6 +486,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
             {deliveryMethod === 'whatsapp' ? (
               <div>
                 <PhoneNumber
+                  key={`delivery-${formResetKey}`}
                   onChange={(value) => setDeliveryContact(value)}
                   placeholder="Enter Whatsapp number"
                 />
@@ -479,18 +496,22 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
               </div>
             ) : (
               <div>
-                <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3">
-                  <IconComponent
-                    iconName="Mail01Icon"
-                    size={16}
-                    className="flex-shrink-0 text-gray-700"
-                  />
+                {/* Mirrors PhoneNumber's shell so the two delivery inputs are
+                    identical when toggling between Whatsapp and Email */}
+                <div className="flex h-14 w-full items-center rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm focus-within:border-transparent focus-within:ring-[1px] focus-within:ring-primary md:text-sm">
+                  <div className="px-2">
+                    <IconComponent
+                      iconName="Mail01Icon"
+                      size={16}
+                      className="flex-shrink-0 text-gray-700"
+                    />
+                  </div>
                   <input
                     type="email"
                     value={deliveryContact}
                     onChange={(e) => setDeliveryContact(e.target.value)}
                     placeholder="Enter email address"
-                    className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400"
+                    className="h-14 w-full min-w-0 flex-1 border-none bg-transparent py-1 text-sm placeholder:text-gray-400 focus:outline-none md:text-sm"
                   />
                 </div>
                 {errors.deliveryContact && (
@@ -542,14 +563,24 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
           </div>
           */}
 
-          {/* Phone input (only for M-Pesa) */}
+          {/* Phone input (only for M-Pesa). Labelled explicitly because the
+              payment method picker above is commented out — without it the
+              field has nothing but a placeholder to explain itself. The wording
+              still reads correctly if that picker is restored. */}
           {paymentMethod === 'mpesa' && (
             <div>
-              <PhoneNumber
-                onChange={(value) => setPhone(value)}
-                placeholder="Enter M-Pesa number"
-              />
-              {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
+              <p className="text-sm font-bold text-gray-900">Pay with M-Pesa</p>
+              <p className="mt-0.5 text-xs text-gray-500">
+                Enter the M-Pesa number you want to pay from.
+              </p>
+              <div className="mt-3">
+                <PhoneNumber
+                  key={`mpesa-${formResetKey}`}
+                  onChange={(value) => setPhone(value)}
+                  placeholder="Enter M-Pesa number"
+                />
+                {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
+              </div>
             </div>
           )}
 
