@@ -93,6 +93,7 @@ export const BeforeYouCreate = ({ onCreateNew, onStartFromScratch }: BeforeYouCr
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search your experiences by name"
           aria-label="Search your experiences by name"
+          className="rounded-full"
           icon={
             <IconComponent
               iconName="Search01Icon"

@@ -61,14 +61,15 @@ export const PageFilters = () => {
     }
   }, [categories, pathname, categoryFromQuery, setSelectedCategoryId]);
 
-  // Hide filters on Discover, Experiences (which renders its own tabs), and
-  // detail pages (with IDs)
+  // Hide filters on Discover, Experiences (which renders its own tabs), detail
+  // pages (with IDs), and Creator Studio (a host dashboard, not browsable content)
   if (
     pathname === '/' ||
     pathname === '/experiences' ||
     pathname.startsWith('/places/') ||
     pathname.startsWith('/experiences/') ||
     pathname.startsWith('/communities/') ||
+    pathname.startsWith('/creator-studio') ||
     pathname.startsWith('/auth/') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/privacy') ||
