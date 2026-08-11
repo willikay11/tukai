@@ -279,7 +279,14 @@ const initialFormData: FormData = {
   itineraryDays: [],
 };
 
-export const useCreateExperienceFlow = () => {
+interface UseCreateExperienceFlowOptions {
+  // The wizard requires a community; the listing that precedes it does not
+  enforceCommunityGuard?: boolean;
+}
+
+export const useCreateExperienceFlow = ({
+  enforceCommunityGuard = true,
+}: UseCreateExperienceFlowOptions = {}) => {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
@@ -404,8 +411,14 @@ export const useCreateExperienceFlow = () => {
     }
   }, [experience]);
 
-  // Guard: Redirect to communities/create if no community
+  // Guard: Redirect to communities/create if no community.
+  // Disabled while the pre-wizard listing is showing — that screen is visible
+  // to every creator, and only proceeding into the wizard requires a community.
   useEffect(() => {
+    if (!enforceCommunityGuard) {
+      return;
+    }
+
     if (sessionStatus !== 'authenticated' || isLoadingCreatedCommunities) {
       return;
     }
@@ -413,7 +426,13 @@ export const useCreateExperienceFlow = () => {
     if (!hasCreatedCommunity) {
       router.replace('/communities/create');
     }
-  }, [hasCreatedCommunity, isLoadingCreatedCommunities, router, sessionStatus]);
+  }, [
+    enforceCommunityGuard,
+    hasCreatedCommunity,
+    isLoadingCreatedCommunities,
+    router,
+    sessionStatus,
+  ]);
 
   const replaceCreateUrlParams = (
     nextValues: Partial<{ experienceId: string | null; step: ExperienceStepId }>,

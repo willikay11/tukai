@@ -13,9 +13,10 @@ import { Photo } from '@/types/photo';
 import { PaymentStatusBadge, StatusConfig } from '../PaymentStatusBadge';
 
 // Exhaustive over the Status enum — tsc fails here if a status is unhandled.
-// Labels follow the design: published experiences read "Live".
+// Labels mirror the Status enum wording so the badge reads the same wherever
+// it appears (Hosting tab and the pre-wizard listing).
 const HOSTING_STATUS_CONFIG: Record<Status, StatusConfig> = {
-  [Status.Published]: { label: 'Live', dot: 'bg-primary', text: 'text-primary' },
+  [Status.Published]: { label: 'Published', dot: 'bg-primary', text: 'text-primary' },
   [Status.Draft]: { label: 'Draft', dot: 'bg-gray-400', text: 'text-gray-600' },
   [Status.Cancelled]: { label: 'Cancelled', dot: 'bg-red-500', text: 'text-red-600' },
 };

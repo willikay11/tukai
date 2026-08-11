@@ -19,10 +19,10 @@ const baseExperience = {
 } as unknown as Experience;
 
 describe('HostingCard', () => {
-  it('renders a Live badge, date meta and tickets-sold footer for published', () => {
+  it('renders a Published badge, date meta and tickets-sold footer for published', () => {
     render(<HostingCard experience={baseExperience} />);
 
-    expect(screen.getByText('Live')).toBeInTheDocument();
+    expect(screen.getByText('Published')).toBeInTheDocument();
     expect(screen.getByText('Nairobi · Sat 4 July · 6:00 AM')).toBeInTheDocument();
     expect(screen.getByText('34 / 40 tickets sold')).toBeInTheDocument();
   });
@@ -37,9 +37,7 @@ describe('HostingCard', () => {
 
   it('renders Draft badge, Not published meta, created-ago footer and editor routing', () => {
     render(
-      <HostingCard
-        experience={{ ...baseExperience, status: 'draft' } as unknown as Experience}
-      />,
+      <HostingCard experience={{ ...baseExperience, status: 'draft' } as unknown as Experience} />,
     );
 
     expect(screen.getByText('Draft')).toBeInTheDocument();
