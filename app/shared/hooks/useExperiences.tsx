@@ -95,6 +95,18 @@ export const useTicketPurchases = (userId: string | undefined, enabled: boolean 
     enabled: enabled && !!userId,
   });
 
+// Host-facing counterpart of useTicketPurchases: every purchase made against
+// one experience, which is what the creator's Sales tab lists
+export const useExperienceTicketPurchases = (
+  experienceId: string | undefined,
+  enabled: boolean = true,
+) =>
+  useQuery({
+    queryKey: ['ticket-purchases', 'experience', experienceId],
+    queryFn: () => fetchTicketPurchases({ ticket__experience: experienceId!, page_size: 100 }),
+    enabled: enabled && !!experienceId,
+  });
+
 export const useBookmarkExperience = () => {
   const queryClient = useQueryClient();
   return useMutation({

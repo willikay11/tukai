@@ -12,8 +12,11 @@ import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
 import { Experience } from '@/types/experience';
 
 import { AboutTab } from './components/AboutTab';
+import { InvitedGuestsTab } from './components/InvitedGuestsTab';
 import { ManageExperienceHero } from './components/ManageExperienceHero';
 import { ManageExperienceTabs, type ManageTabId } from './components/ManageExperienceTabs';
+import { SalesTab } from './components/SalesTab';
+import { TicketsCreatedTab } from './components/TicketsCreatedTab';
 import { buildManageExperienceMetrics } from './utils/manage-metrics';
 
 export default function ManageExperiencePage() {
@@ -93,9 +96,23 @@ export default function ManageExperiencePage() {
       />
 
       {tab === 'about' && <AboutTab experience={experience} metrics={metrics} />}
-      {tab === 'sales' && <ComingSoon feature="Sales" iconName="Invoice01Icon" />}
-      {tab === 'tickets' && <ComingSoon feature="Tickets Created" iconName="Ticket01Icon" />}
-      {tab === 'guests' && <ComingSoon feature="Invited Guests" iconName="UserAdd01Icon" />}
+      {tab === 'sales' && (
+        <SalesTab
+          experienceId={experienceId}
+          currency={experience.currency ?? 'Ksh.'}
+          metrics={metrics}
+        />
+      )}
+      {tab === 'tickets' && (
+        <TicketsCreatedTab
+          experienceId={experienceId}
+          tickets={experience.tickets ?? []}
+          currency={experience.currency ?? 'Ksh.'}
+        />
+      )}
+      {tab === 'guests' && (
+        <InvitedGuestsTab experienceId={experienceId} guests={experience.guests ?? []} />
+      )}
       {tab === 'moments' && <ComingSoon feature="Moments" iconName="GridIcon" />}
       {tab === 'analytics' && <ComingSoon feature="Analytics" iconName="PieChartIcon" />}
     </main>
