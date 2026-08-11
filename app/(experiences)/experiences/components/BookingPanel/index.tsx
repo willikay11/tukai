@@ -21,6 +21,7 @@ import { PaymentSuccess } from '@/components/ui/paymentSuccess';
 import { Paystack } from '@/components/ui/paystack';
 import { PhoneNumber } from '@/components/ui/phoneNumber';
 import { Quantity } from '@/components/ui/quantity';
+import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TicketPurchasePayload } from '@/services/experience';
 import { Experience, ExperienceOccurrence } from '@/types/experience';
@@ -479,18 +480,22 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
               </div>
             ) : (
               <div>
-                <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3">
-                  <IconComponent
-                    iconName="Mail01Icon"
-                    size={16}
-                    className="flex-shrink-0 text-gray-700"
-                  />
+                {/* Mirrors PhoneNumber's shell so the two delivery inputs are
+                    identical when toggling between Whatsapp and Email */}
+                <div className="flex h-14 w-full items-center rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm focus-within:border-transparent focus-within:ring-[1px] focus-within:ring-primary md:text-sm">
+                  <div className="px-2">
+                    <IconComponent
+                      iconName="Mail01Icon"
+                      size={16}
+                      className="flex-shrink-0 text-gray-700"
+                    />
+                  </div>
                   <input
                     type="email"
                     value={deliveryContact}
                     onChange={(e) => setDeliveryContact(e.target.value)}
                     placeholder="Enter email address"
-                    className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400"
+                    className="h-14 w-full min-w-0 flex-1 border-none bg-transparent py-1 text-sm placeholder:text-gray-400 focus:outline-none md:text-sm"
                   />
                 </div>
                 {errors.deliveryContact && (
