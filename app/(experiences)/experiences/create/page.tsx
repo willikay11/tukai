@@ -1,18 +1,25 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 
+import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
 import { TwoPanelLayout } from '@/app/shared/components/TwoPanelLayout';
+import { useExperiences } from '@/app/shared/hooks/useExperiences';
+import { useToast } from '@/app/shared/hooks/useToast';
+import { cancelExperience } from '@/services/experience';
+import { Experience } from '@/types/experience';
+import { parseApiError } from '@/utils/parseApiError';
 
-import { BeforeYouCreate } from './components/BeforeYouCreate';
+import { ResumeDraft } from './components/ResumeDraft';
 import { CreateExperienceSteps } from './components/steps';
 import { useCreateExperienceFlow } from './hooks/useCreateExperienceFlow';
+import { pickLatestDraft, selectDrafts } from './utils/draft-progress';
 
-// The wizard is preceded by a listing of everything the creator already made.
-// It is not a stepper step — the step pills belong to the wizard only.
+// An unfinished draft is offered for resuming before the wizard opens. It is
+// not a stepper step — the step pills belong to the wizard only.
 type CreateEntryState = 'gate' | 'wizard';
 
 export default function CreateExperiencePage() {
@@ -26,17 +33,45 @@ export default function CreateExperiencePage() {
 function CreateExperiencePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // Editing an existing draft (Manage on a draft card) must land in the wizard
-  // directly — the listing would be a detour back to where they just came from
+  const { toast } = useToast();
+  const { data: session, status: sessionStatus } = useSession();
+  const userId = session?.user?.id ?? undefined;
+
+  // Editing a specific draft (Hosting "Manage", or Continue draft) must land in
+  // the wizard directly — the resume screen would be a detour back to where
+  // they just came from
   const experienceIdParam = searchParams.get('experienceId');
 
   const [entryState, setEntryState] = useState<CreateEntryState>(
     experienceIdParam ? 'wizard' : 'gate',
   );
+  const [isClearingDraft, setIsClearingDraft] = useState(false);
 
   useEffect(() => {
     if (experienceIdParam) setEntryState('wizard');
   }, [experienceIdParam]);
+
+  const {
+    data: draftsResponse,
+    isLoading: isLoadingDrafts,
+    refetch: refetchDrafts,
+  } = useExperiences(
+    { page: 1, page_size: 100, hosted_by: userId },
+    Boolean(userId) && entryState === 'gate',
+  );
+
+  const hostedExperiences: Experience[] = draftsResponse?.data?.results ?? [];
+  const drafts = useMemo(() => selectDrafts(hostedExperiences), [hostedExperiences]);
+  const latestDraft = useMemo(() => pickLatestDraft(drafts), [drafts]);
+
+  // Until the session and the draft list resolve we cannot tell which screen
+  // the user belongs on
+  const isResolvingEntry =
+    entryState === 'gate' && (sessionStatus === 'loading' || isLoadingDrafts);
+
+  // The wizard is on screen either because the user chose to proceed, or
+  // because there is no draft to resume — the community guard applies to both
+  const isWizardVisible = !isResolvingEntry && (entryState === 'wizard' || !latestDraft);
 
   const {
     activeStep,
@@ -70,10 +105,10 @@ function CreateExperiencePageContent() {
     registerFlusher,
     previewExperience,
     slotTemplateRecords,
-  } = useCreateExperienceFlow({ enforceCommunityGuard: entryState === 'wizard' });
+  } = useCreateExperienceFlow({ enforceCommunityGuard: isWizardVisible });
 
-  // The listing is open to everyone; a community is only required to actually
-  // build an experience, so the redirect happens on the way into the wizard
+  // The resume screen is open to everyone; a community is only required to
+  // actually build an experience, so the redirect happens on the way in
   const handleProceedToWizard = () => {
     if (!isCheckingCommunityAccess && !hasCreatedCommunity) {
       router.push('/communities/create');
@@ -83,11 +118,46 @@ function CreateExperiencePageContent() {
     setEntryState('wizard');
   };
 
-  if (entryState === 'gate') {
+  // No delete endpoint exists — cancelling takes the draft out of the draft
+  // list, which is what "clear" needs to mean here
+  const handleClearDraft = async () => {
+    if (!latestDraft) return;
+
+    setIsClearingDraft(true);
+    try {
+      await cancelExperience(latestDraft.id);
+      await refetchDrafts();
+      handleProceedToWizard();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: parseApiError(error, 'Failed to clear the draft'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsClearingDraft(false);
+    }
+  };
+
+  // Wait before deciding — showing the wizard first and swapping to the resume
+  // screen once drafts arrive would be a jarring flash
+  if (isResolvingEntry) {
     return (
-      <BeforeYouCreate
-        onCreateNew={handleProceedToWizard}
-        onStartFromScratch={handleProceedToWizard}
+      <main className="mx-auto max-w-2xl px-6 py-10">
+        <CreateStepContentSkeleton />
+      </main>
+    );
+  }
+
+  // An unfinished draft is offered for resuming; with none, the wizard opens
+  // directly at the first step
+  if (entryState === 'gate' && latestDraft) {
+    return (
+      <ResumeDraft
+        draft={latestDraft}
+        onContinue={() => router.push(`/experiences/create?experienceId=${latestDraft.id}`)}
+        onClearAndStartFresh={handleClearDraft}
+        isClearing={isClearingDraft}
       />
     );
   }

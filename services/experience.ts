@@ -26,8 +26,13 @@ export type ExperiencesQueryParams = {
 
 export async function fetchExperiences(params: ExperiencesQueryParams): Promise<ApiResponse> {
   try {
+    // User-scoped queries need the bearer token. Anonymously, the list endpoint
+    // can only return public/published rows — so a host's own drafts (and their
+    // reservations) are invisible without it.
+    const needsAuth = Boolean(params.invited || params.hosted_by || params.reserved_by);
+
     let response;
-    if (params.invited) {
+    if (needsAuth) {
       const axiosInstance = await apiWithToken();
       response = await axiosInstance.get(`/v1/experiences/`, { params });
     } else {
@@ -382,6 +387,36 @@ export const publishExperience = async (id: string): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();
     const response = await axiosInstance.post(`/v1/experiences/${id}/publish/`);
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: error.response?.data?.message || 'An unexpected error occurred',
+    };
+  }
+};
+
+// There is no delete-experience endpoint, so discarding a draft means marking
+// it cancelled — it stops being an unfinished draft without destroying the row.
+export const cancelExperience = async (id: string): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const formData = new FormData();
+    formData.append('status', 'cancelled');
+
+    const response = await axiosInstance.patch(`/v2/experiences/${id}/`, formData, {
+      headers: {
+        'Content-Type': undefined,
+      },
+    });
+
     return {
       status: response.status,
       success: true,

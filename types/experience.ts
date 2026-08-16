@@ -41,6 +41,10 @@ export type Experience = {
   meetingPoint?: string;
   meetingTime?: string;
   dateCreated: string;
+  // Not documented on every response — parseSnakeToCamel maps `date_updated`
+  // when the API sends it. Read it through getLastSavedAt(), which falls back
+  // to dateCreated so callers never depend on it being present.
+  dateUpdated?: string;
   guests: {
     id: string;
     email: string;
