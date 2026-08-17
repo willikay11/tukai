@@ -19,7 +19,7 @@ jest.mock('next/image', () => ({
 
 describe('ExperienceStepSidePanel', () => {
   const defaultProps = {
-    step: 'community' as const,
+    step: 'dates-type' as const,
   };
 
   describe('Rendering', () => {
@@ -29,13 +29,13 @@ describe('ExperienceStepSidePanel', () => {
     });
 
     it('renders community step placeholder content', () => {
-      render(<ExperienceStepSidePanel {...defaultProps} step="community" />);
+      render(<ExperienceStepSidePanel {...defaultProps} step="dates-type" />);
       expect(screen.getByText('Select a Community')).toBeInTheDocument();
       expect(screen.getByText(/Please add the details/i)).toBeInTheDocument();
     });
 
     it('renders placeholder image for community step', () => {
-      render(<ExperienceStepSidePanel {...defaultProps} step="community" />);
+      render(<ExperienceStepSidePanel {...defaultProps} step="dates-type" />);
       expect(screen.getByAltText('Select a Community')).toBeInTheDocument();
     });
   });
@@ -63,13 +63,9 @@ describe('ExperienceStepSidePanel', () => {
   });
 
   describe('Dates-Tickets Step', () => {
-    it('shows placeholder when cannot show dates-tickets', () => {
+    it('shows placeholder when cannot show tickets', () => {
       render(
-        <ExperienceStepSidePanel
-          {...defaultProps}
-          step="dates-tickets"
-          canShowDateTickets={false}
-        />,
+        <ExperienceStepSidePanel {...defaultProps} step="tickets" canShowDateTickets={false} />,
       );
       expect(screen.getByText('Create Tickets')).toBeInTheDocument();
       expect(screen.getByText(/Update and save experience date and time/i)).toBeInTheDocument();
@@ -79,7 +75,7 @@ describe('ExperienceStepSidePanel', () => {
       render(
         <ExperienceStepSidePanel
           {...defaultProps}
-          step="dates-tickets"
+          step="tickets"
           canShowDateTickets={true}
           itineraryConfig={{ startDate: '2026-06-01', endDate: '2026-06-05' }}
         />,
@@ -87,15 +83,11 @@ describe('ExperienceStepSidePanel', () => {
       expect(screen.getByText('itinerary-2026-06-01-2026-06-05')).toBeInTheDocument();
     });
 
-    it('shows preview when can show dates-tickets and no itinerary', () => {
+    it('shows preview when can show tickets and no itinerary', () => {
       render(
-        <ExperienceStepSidePanel
-          {...defaultProps}
-          step="dates-tickets"
-          canShowDateTickets={true}
-        />,
+        <ExperienceStepSidePanel {...defaultProps} step="tickets" canShowDateTickets={true} />,
       );
-      expect(screen.getByText('preview-step-dates-tickets')).toBeInTheDocument();
+      expect(screen.getByText('preview-step-tickets')).toBeInTheDocument();
     });
   });
 
@@ -152,14 +144,14 @@ describe('ExperienceStepSidePanel', () => {
       render(
         <ExperienceStepSidePanel
           {...defaultProps}
-          step="dates-tickets"
+          step="tickets"
           canShowDateTickets={true}
           experienceType="multi-day"
           multiDayStartDate="2026-06-15"
           multiDayEndDate="2026-06-17"
         />,
       );
-      expect(screen.getByText('preview-step-dates-tickets')).toBeInTheDocument();
+      expect(screen.getByText('preview-step-tickets')).toBeInTheDocument();
     });
   });
 

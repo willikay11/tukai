@@ -62,10 +62,10 @@ import {
 import { parseSalesEndRelativeFromTicket } from '@/utils/ticket-utils';
 
 export type ExperienceStepId =
-  | 'community'
+  | 'dates-type'
   | 'about'
   | 'itinerary-days'
-  | 'dates-tickets'
+  | 'tickets'
   | 'guests'
   | 'wallet'
   | 'preview';
@@ -90,10 +90,10 @@ const formatDateWithTime = (
 
 const parseExperienceStepId = (step: string | null): ExperienceStepId | null => {
   const validSteps: ExperienceStepId[] = [
-    'community',
+    'dates-type',
     'about',
     'itinerary-days',
-    'dates-tickets',
+    'tickets',
     'guests',
     'wallet',
     'preview',
@@ -297,7 +297,7 @@ export const useCreateExperienceFlow = ({
   const experienceIdFromUrl = searchParams.get('experienceId');
   const stepFromUrl = parseExperienceStepId(searchParams.get('step'));
 
-  const [activeStep, setActiveStep] = useState<ExperienceStepId>(stepFromUrl || 'community');
+  const [activeStep, setActiveStep] = useState<ExperienceStepId>(stepFromUrl || 'dates-type');
   const [experienceId, setExperienceId] = useState<string | null>(experienceIdFromUrl);
   const [hasUpdatedDates, setHasUpdatedDates] = useState(false);
   const [itineraryConfig, setItineraryConfig] = useState<{
@@ -1454,13 +1454,13 @@ export const useCreateExperienceFlow = ({
           }
         }
 
-        const nextStep = isItinerary ? 'itinerary-days' : 'dates-tickets';
+        const nextStep = isItinerary ? 'itinerary-days' : 'tickets';
 
         handleExperienceCreated(newExperienceId, nextStep);
       }
 
       const nextStep =
-        formData.dateType.experienceType === 'itinerary' ? 'itinerary-days' : 'dates-tickets';
+        formData.dateType.experienceType === 'itinerary' ? 'itinerary-days' : 'tickets';
 
       setActiveStep(nextStep);
       return true;
@@ -1621,7 +1621,7 @@ export const useCreateExperienceFlow = ({
       );
 
       // Advance to tickets step
-      handleStepChange('dates-tickets');
+      handleStepChange('tickets');
       return true;
     } catch (error: any) {
       const message = parseApiError(error, 'Failed to save itinerary days');

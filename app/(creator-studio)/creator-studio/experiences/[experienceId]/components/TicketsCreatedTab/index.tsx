@@ -103,7 +103,7 @@ export const TicketsCreatedTab = ({ experienceId, tickets, currency }: TicketsCr
               <button
                 type="button"
                 onClick={() =>
-                  router.push(`/experiences/create?experienceId=${experienceId}&step=dates-tickets`)
+                  router.push(`/experiences/create?experienceId=${experienceId}&step=tickets`)
                 }
                 className="inline-flex items-center gap-2 rounded-full px-2 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50"
               >

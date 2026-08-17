@@ -19,9 +19,9 @@ export interface DraftStep {
  * fetched experience without claiming every draft has it done.
  */
 const BASE_STEPS: Array<{ id: string; label: string }> = [
-  { id: 'community', label: 'Community' },
+  { id: 'dates-type', label: 'Dates & Type' },
   { id: 'about', label: 'About' },
-  { id: 'dates-tickets', label: 'Dates & Tickets' },
+  { id: 'tickets', label: 'Tickets' },
   { id: 'guests', label: 'Invite Guests' },
   { id: 'preview', label: 'Preview' },
 ];
@@ -34,7 +34,7 @@ const isStepComplete = (step: string, experience: Experience): boolean => {
   switch (step) {
     // A saved draft always belongs to a community — it could not have been
     // created otherwise
-    case 'community':
+    case 'dates-type':
       return true;
     case 'about':
       return Boolean(
@@ -45,7 +45,7 @@ const isStepComplete = (step: string, experience: Experience): boolean => {
       );
     case 'itinerary-days':
       return Boolean(experience.startDate && experience.endDate);
-    case 'dates-tickets':
+    case 'tickets':
       return (experience.tickets?.length ?? 0) > 0;
     case 'guests':
       return (experience.guests?.length ?? 0) > 0;

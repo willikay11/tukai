@@ -14,10 +14,10 @@ import { SharedExperiencePreview } from '../SharedExperiencePreview';
 import { CustomiseItinerary } from '../customiseItinerary';
 
 export type ExperienceStepId =
-  | 'community'
+  | 'dates-type'
   | 'about'
   | 'itinerary-days'
-  | 'dates-tickets'
+  | 'tickets'
   | 'guests'
   | 'wallet';
 
@@ -116,7 +116,7 @@ export const ExperienceStepSidePanel = ({
   selectedWallet?: Wallet;
 }) => {
   const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
-    community: null,
+    'dates-type': null,
     about: (
       <SharedExperiencePreview
         step="about"
@@ -197,11 +197,11 @@ export const ExperienceStepSidePanel = ({
         selectedWallet={selectedWallet}
       />
     ),
-    'dates-tickets': itineraryConfig ? (
+    tickets: itineraryConfig ? (
       <CustomiseItinerary startDate={itineraryConfig.startDate} endDate={itineraryConfig.endDate} />
     ) : canShowDateTickets ? (
       <SharedExperiencePreview
-        step="dates-tickets"
+        step="tickets"
         experienceType={experienceType}
         isRecurring={isRecurring}
         aboutPhotos={aboutPhotos}
@@ -323,20 +323,20 @@ export const ExperienceStepSidePanel = ({
   const content = stepPanelContent[step];
 
   // Determine if we should show empty state
-  const isEmpty = step === 'community' || (step === 'dates-tickets' && !canShowDateTickets);
+  const isEmpty = step === 'dates-type' || (step === 'tickets' && !canShowDateTickets);
 
   return (
     <PreviewPanel
       title={
         isEmpty
-          ? step === 'community'
+          ? step === 'dates-type'
             ? 'Preview Community'
             : 'Create Tickets'
           : 'Preview Experience'
       }
       isEmpty={isEmpty}
       emptyText={
-        step === 'community'
+        step === 'dates-type'
           ? 'Please add the details of the experience'
           : 'Update and save experience date and time first to continue.'
       }

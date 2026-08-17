@@ -89,7 +89,7 @@ jest.mock('../wallet', () => ({
 
 describe('CreateExperienceSteps', () => {
   const defaultProps = {
-    currentStep: 'community' as const,
+    currentStep: 'dates-type' as const,
     onStepChange: jest.fn(),
     formData: {
       community: { id: 'comm-1', name: 'Community 1' },
@@ -249,7 +249,7 @@ describe('CreateExperienceSteps', () => {
         <CreateExperienceSteps
           {...defaultProps}
           onStepChange={onStepChange}
-          currentStep="community"
+          currentStep="dates-type"
         />,
       );
       const tabs = screen.getAllByRole('button');
@@ -296,7 +296,7 @@ describe('CreateExperienceSteps', () => {
       const { container } = render(
         <CreateExperienceSteps
           {...defaultProps}
-          currentStep="community"
+          currentStep="dates-type"
           aboutFormData={{
             photos: ['photo.jpg'],
             photoFiles: [],

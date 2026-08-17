@@ -22,7 +22,7 @@ describe('buildDraftSteps', () => {
     const ids = buildDraftSteps(draft()).map((step) => step.id);
 
     expect(ids).not.toContain('wallet');
-    expect(ids).toEqual(['community', 'about', 'dates-tickets', 'guests', 'preview']);
+    expect(ids).toEqual(['dates-type', 'about', 'tickets', 'guests', 'preview']);
   });
 
   it('adds the itinerary step for itinerary experiences', () => {
@@ -36,10 +36,10 @@ describe('buildDraftSteps', () => {
     const steps = buildDraftSteps(draft());
     const byId = Object.fromEntries(steps.map((step) => [step.id, step.state]));
 
-    expect(byId.community).toBe('done');
+    expect(byId['dates-type']).toBe('done');
     expect(byId.about).toBe('done');
     // No tickets yet — this is where the creator left off
-    expect(byId['dates-tickets']).toBe('current');
+    expect(byId['tickets']).toBe('current');
     expect(byId.guests).toBe('pending');
     expect(byId.preview).toBe('pending');
   });

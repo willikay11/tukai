@@ -78,7 +78,7 @@ describe('useCreateExperienceFlow', () => {
       wrapper: createWrapper(),
     });
 
-    expect(result.current.activeStep).toBe('community');
+    expect(result.current.activeStep).toBe('dates-type');
     expect(result.current.experienceId).toBeNull();
     expect(result.current.hasUpdatedDates).toBe(false);
     expect(result.current.itineraryConfig).toBeNull();
@@ -260,7 +260,7 @@ describe('useCreateExperienceFlow', () => {
       });
 
       act(() => {
-        result.current.handlers.handleStepChange('dates-tickets');
+        result.current.handlers.handleStepChange('tickets');
         result.current.updateFormData({ isRecurring: true, experiencePricing: 'paid' });
         result.current.updateTicketsFormData({ items: [recurringTicket] });
       });
