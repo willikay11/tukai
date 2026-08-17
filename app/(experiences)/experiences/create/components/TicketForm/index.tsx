@@ -93,6 +93,21 @@ export const TicketForm = ({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Input
+            id="ticket-amount"
+            type="number"
+            placeholder="Amount per ticket"
+            value={value.amount ?? ''}
+            onChange={(e) =>
+              onChange({ amount: e.target.value ? parseFloat(e.target.value) : null })
+            }
+            suffixIcon={<IconComponent iconName="Money02Icon" size={18} />}
+            className="text-xs"
+          />
+          {errors.amount && <p className="text-xs text-red-500">{errors.amount}</p>}
+        </div>
+
+        <div className="space-y-1.5">
+          <Input
             id="ticket-quantity"
             type="number"
             placeholder="Available Ticket Quantity"
@@ -121,21 +136,6 @@ export const TicketForm = ({
             }
           />
           {errors.quantity && <p className="text-xs text-red-500">{errors.quantity}</p>}
-        </div>
-
-        <div className="space-y-1.5">
-          <Input
-            id="ticket-amount"
-            type="number"
-            placeholder="Amount per ticket"
-            value={value.amount ?? ''}
-            onChange={(e) =>
-              onChange({ amount: e.target.value ? parseFloat(e.target.value) : null })
-            }
-            suffixIcon={<IconComponent iconName="Money02Icon" size={18} />}
-            className="text-xs"
-          />
-          {errors.amount && <p className="text-xs text-red-500">{errors.amount}</p>}
         </div>
       </div>
 
