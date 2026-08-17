@@ -2,15 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useSession } from 'next-auth/react';
-
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
-import {
-  useAddGuestToExperience,
-  useSearchUsersDebounced,
-  useUpdateExperience,
-} from '@/app/shared/hooks/useExperiences';
+import { useAddGuestToExperience, useUpdateExperience } from '@/app/shared/hooks/useExperiences';
 import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { InviteCommunities } from '@/components/ui/invite-communities';
@@ -62,40 +56,7 @@ export const CreateExperienceInvites = ({
   }, [experience?.guests]);
 
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>(initialInvitedMembers);
-  const [memberSearchQuery, setMemberSearchQuery] = useState('');
-  const [searchUsers, setSearchUsers] = useState<any[]>([]);
-  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
-
   const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
-
-  // Search hook with mutation-based API call
-  const { mutateAsync: searchUsersAsync } = useSearchUsersDebounced();
-
-  // Debounced search implementation
-  useEffect(() => {
-    const debounceTimer = setTimeout(async () => {
-      const normalizedQuery = memberSearchQuery.trim();
-
-      if (normalizedQuery.length === 0) {
-        setSearchUsers([]);
-        setIsSearchingUsers(false);
-        return;
-      }
-
-      try {
-        setIsSearchingUsers(true);
-        const response = await searchUsersAsync(normalizedQuery);
-        setSearchUsers(response?.data?.results || []);
-      } catch (error: any) {
-        console.error('[invites] User search error:', error);
-        setSearchUsers([]);
-      } finally {
-        setIsSearchingUsers(false);
-      }
-    }, 500); // 500ms debounce delay
-
-    return () => clearTimeout(debounceTimer);
-  }, [memberSearchQuery, searchUsersAsync]);
 
   useEffect(() => {
     setInvitedMembers(initialInvitedMembers);
@@ -107,21 +68,13 @@ export const CreateExperienceInvites = ({
 
   const { pendingAction, runAction } = usePendingAction<'exit'>();
 
-  // The host is already on the experience, so they should never appear as
-  // someone to invite
-  const { data: session } = useSession();
-  const currentUserId = session?.user?.id ?? null;
-  const currentUserEmail = session?.user?.email?.toLowerCase() ?? null;
-
   const { data: userCommunities, isFetching: isFetchingCommunities } = useGetCommunities({
     page: 1,
     enabled: true,
     following: true,
   });
 
-  const { mutateAsync: addGuestToExperience, isPending: isAddingGuest } = useAddGuestToExperience(
-    experienceId || '',
-  );
+  const { mutateAsync: addGuestToExperience } = useAddGuestToExperience(experienceId || '');
   const { mutateAsync: updateExperience, isPending: isUpdatingCommunities } = useUpdateExperience(
     experienceId || '',
   );
@@ -160,59 +113,50 @@ export const CreateExperienceInvites = ({
   };
 
   const handleMemberInvited = async (members: InvitedMember[]) => {
-    // Find newly added member (last one in the new array that's not in current state)
-    const newMember = members.find((m) => !invitedMembers.some((existing) => existing.id === m.id));
+    // Comma-separated entry can add several at once, so every newcomer is
+    // invited — not just the first
+    const newMembers = members.filter(
+      (member) => !invitedMembers.some((existing) => existing.id === member.id),
+    );
 
     // Update local state first
     setInvitedMembers(members);
 
-    // If there's a new member with an email, call the API
-    if (newMember?.email && experienceId) {
+    const invitable = newMembers.filter((member) => member.email);
+    if (invitable.length === 0 || !experienceId) return;
+
+    const failed: string[] = [];
+
+    for (const member of invitable) {
       try {
-        await addGuestToExperience(newMember.email);
-        toast({
-          title: 'Guest invited',
-          description: `${newMember.name} has been invited to the experience.`,
-          variant: 'success',
-        });
-      } catch (error: any) {
-        toast({
-          title: 'Error',
-          description: error?.message || 'Failed to invite guest.',
-          variant: 'destructive',
-        });
+        await addGuestToExperience(member.email!);
+      } catch (error) {
+        failed.push(member.email!);
+        console.error('[invites] Failed to invite guest:', error);
       }
     }
-  };
 
-  const memberSearchResults = useMemo<InvitedMember[]>(() => {
-    const normalizedQuery = memberSearchQuery.trim();
-    if (!normalizedQuery) {
-      return [];
+    const invited = invitable.length - failed.length;
+
+    if (invited > 0) {
+      toast({
+        title: invited === 1 ? 'Guest invited' : 'Guests invited',
+        description:
+          invited === 1
+            ? `${invitable[0].name} has been invited to the experience.`
+            : `${invited} guests have been invited to the experience.`,
+        variant: 'success',
+      });
     }
 
-    return searchUsers
-      ?.map((user: any) => {
-        const firstName = user.firstName || '';
-        const lastName = user.lastName || '';
-        const fullName = `${firstName} ${lastName}`.trim();
-
-        return {
-          id: user.id,
-          name: user.displayName || fullName || user.email || 'User',
-          email: user.email,
-          image: user.picture,
-        } as InvitedMember;
-      })
-      .filter((user: InvitedMember) => {
-        // Match on either — the search API and the session need only agree on one
-        const isCurrentUser =
-          (currentUserId != null && user.id === currentUserId) ||
-          (currentUserEmail != null && user.email?.toLowerCase() === currentUserEmail);
-
-        return !isCurrentUser && !invitedMembers.some((member) => member.id === user.id);
+    if (failed.length > 0) {
+      toast({
+        title: 'Error',
+        description: `Could not invite ${failed.join(', ')}.`,
+        variant: 'destructive',
       });
-  }, [searchUsers, invitedMembers, memberSearchQuery, currentUserId, currentUserEmail]);
+    }
+  };
 
   const availableCommunities = useMemo<Community[]>(() => {
     if (!userCommunities?.data) {
@@ -239,15 +183,12 @@ export const CreateExperienceInvites = ({
           or are a member of.
         </p>
 
+        {/* No backend lookup here — guests are invited by typing addresses,
+            comma-separated for several at once */}
         <InviteMembers
           invitedMembers={invitedMembers}
           onMembersChange={handleMemberInvited}
-          searchResults={memberSearchResults}
-          isSearching={isSearchingUsers || isAddingGuest}
-          onSearch={(query) => {
-            setMemberSearchQuery(query);
-          }}
-          debounceMs={500}
+          placeholder="Add guest emails, separated by commas"
           className="mt-3"
         />
 
