@@ -599,35 +599,48 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
           {/* API error */}
           {errors.api && <p className="text-center text-xs text-red-500">{errors.api}</p>}
 
-          {/* Pay button */}
+          {/* Pay button — the creator sees the real label and total, greyed out,
+              so the preview still shows what a customer would see */}
           <Button
             variant="gradient"
             onClick={handlePay}
             // Stays enabled when the form is incomplete — pressing it surfaces
             // an error on each offending input instead of silently doing nothing
             disabled={isPreview || isPaying}
-            className="h-12 w-full rounded-full py-3"
+            className={`h-12 w-full rounded-full py-3 ${
+              isPreview ? 'bg-gray-200 bg-none text-gray-500 disabled:opacity-100' : ''
+            }`}
           >
-            {isPreview ? (
-              <span className="text-sm">Preview — purchasing disabled</span>
-            ) : (
-              <span className="flex items-center justify-center gap-3 text-sm">
-                <span>{isPaying ? 'Processing…' : 'Pay'}</span>
-                <span className="text-white/60">|</span>
-                <span>
-                  {currency}{' '}
-                  {total.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </span>
+            <span className="flex items-center justify-center gap-3 text-sm">
+              <span>{isPaying ? 'Processing…' : 'Pay'}</span>
+              <span className={isPreview ? 'text-gray-400' : 'text-white/60'}>|</span>
+              <span>
+                {currency}{' '}
+                {total.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </span>
-            )}
+            </span>
           </Button>
 
-          <p className="text-center text-xs italic text-gray-500">
-            *Payments are handled externally via Paystack
-          </p>
+          {isPreview ? (
+            <div className="flex items-start gap-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3">
+              <IconComponent
+                iconName="SquareLock01Icon"
+                size={16}
+                color="currentColor"
+                className="mt-0.5 flex-shrink-0 text-orange-500"
+              />
+              <p className="text-xs leading-relaxed text-orange-700">
+                Booking is disabled in preview. Guests can reserve once you publish this experience.
+              </p>
+            </div>
+          ) : (
+            <p className="text-center text-xs italic text-gray-500">
+              *Payments are handled externally via Paystack
+            </p>
+          )}
         </TabsContent>
 
         <TabsContent value="moments" className="py-8 text-center">
