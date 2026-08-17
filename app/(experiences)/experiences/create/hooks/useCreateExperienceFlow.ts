@@ -31,7 +31,7 @@ import {
   usePublishExperience,
   useUpdateExperience,
 } from '@/app/shared/hooks/useExperiences';
-import { useGoogleMapsPlaceGeocode } from '@/app/shared/hooks/usePlaces';
+import { useGoogleMapsPlaceGeocode, usePlace } from '@/app/shared/hooks/usePlaces';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { InvitedMember } from '@/components/ui/invite-members';
 import {
@@ -49,6 +49,7 @@ import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Interest } from '@/types/interest';
 import { ItineraryDayFormValue } from '@/types/itinerary';
+import { Location } from '@/types/location';
 import { Wallet } from '@/types/payment';
 import { Photo } from '@/types/photo';
 import { getDaysBetween, inferUIExperienceType } from '@/utils/date-utils';
@@ -843,17 +844,27 @@ export const useCreateExperienceFlow = ({
   }, [wallets.length]);
 
   // ─── Preview step ────────────────────────────────────────────────────────
-  // The form stores only a Google place id for the location; the detail view
-  // renders a map, so resolve coordinates when the preview is actually open
+  // The form never stores coordinates, and the detail view renders a map from
+  // them. There are TWO location sources and each resolves differently:
+  //   - a Google pick sets `locationPlaceId`  → geocode it
+  //   - a Tukai place sets `placeId`          → the place already has a Location
+  // Both are resolved only while the preview is open.
+  const isPreviewOpen = activeStep === 'preview';
+
   const { data: geocodeResponse } = useGoogleMapsPlaceGeocode(
     formData.about.locationPlaceId || null,
-    activeStep === 'preview',
+    isPreviewOpen,
   );
 
-  const geocodedLocation = useMemo(
-    () => mapGeocodeResultToLocation(geocodeResponse?.data),
-    [geocodeResponse?.data],
-  );
+  const { data: previewPlaceResponse } = usePlace(formData.about.placeId, isPreviewOpen);
+
+  const resolvedPreviewLocation = useMemo(() => {
+    // A Tukai place carries a full Location, so it is preferred over geocoding
+    const placeLocation = previewPlaceResponse?.data?.location;
+    if (placeLocation) return placeLocation as Partial<Location>;
+
+    return mapGeocodeResultToLocation(geocodeResponse?.data);
+  }, [previewPlaceResponse?.data, geocodeResponse?.data]);
 
   // Derived from formData, so editing any earlier step and returning to the
   // Preview step shows the change without a refetch
@@ -863,9 +874,9 @@ export const useCreateExperienceFlow = ({
         experienceId,
         hostCommunity: formData.dateType.community,
         currentUser: session?.user,
-        geocodedLocation,
+        geocodedLocation: resolvedPreviewLocation,
       }),
-    [formData, experienceId, session?.user, geocodedLocation],
+    [formData, experienceId, session?.user, resolvedPreviewLocation],
   );
 
   const updateItineraryDays = useCallback((days: ItineraryDayFormValue[]) => {
