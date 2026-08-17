@@ -28,7 +28,12 @@ import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { ExperienceStepId, ExperienceType } from '../step-side-panel';
 
 interface SharedExperiencePreviewProps {
-  step: ExperienceStepId;
+  // Which step the side panel is mirroring. Irrelevant when showAllSections is
+  // set, so it is optional.
+  step?: ExperienceStepId;
+  // The Preview step renders this as a full summary of everything captured,
+  // rather than the progressive side-panel view tied to the current step
+  showAllSections?: boolean;
   experienceType?: ExperienceType;
   isRecurring?: boolean;
 
@@ -96,6 +101,7 @@ interface SharedExperiencePreviewProps {
 
 export const SharedExperiencePreview = ({
   step,
+  showAllSections = false,
   experienceType = 'one-time',
   isRecurring = false,
   aboutPhotos,
@@ -140,6 +146,7 @@ export const SharedExperiencePreview = ({
           mode="itinerary"
           startDate={itineraryStartDate || null}
           endDate={itineraryEndDate || null}
+          onEdit={editHandler('community')}
         />
       );
     }
@@ -152,6 +159,7 @@ export const SharedExperiencePreview = ({
           startTime={multiDayStartTime || null}
           endDate={multiDayEndDate || null}
           endTime={multiDayEndTime || null}
+          onEdit={editHandler('community')}
         />
       );
     }
@@ -164,6 +172,7 @@ export const SharedExperiencePreview = ({
           timeSlots={selectedTimeSlots || []}
           recurrenceStartDate={selectedRecurrenceStartDate || null}
           recurrenceEndDate={selectedRecurrenceEndDate || null}
+          onEdit={editHandler('community')}
         />
       );
     }
@@ -174,25 +183,38 @@ export const SharedExperiencePreview = ({
         date={selectedDate || null}
         startTime={selectedStartTime || null}
         endTime={selectedEndTime || null}
+        onEdit={editHandler('community')}
       />
     );
   };
 
   // Determine if we should show tickets section
-  const shouldShowTickets = step !== 'about' && ticketsItems && ticketsItems.length > 0;
+  const shouldShowTickets =
+    (showAllSections || step !== 'about') && ticketsItems && ticketsItems.length > 0;
 
   // Determine if we should show community section (only on about step)
-  const shouldShowCommunitySection = step === 'about';
+  const shouldShowCommunitySection = showAllSections || step === 'about';
+
+  // Each section's pencil jumps to the step that owns its data. Step ids are
+  // legacy: 'community' is the Date & Type step, and 'dates-tickets' owns
+  // tickets only — the dates themselves are captured in 'community'.
+  const editHandler = (ownerStep: ExperienceStepId) =>
+    onEditStep ? () => onEditStep(ownerStep) : undefined;
 
   return (
     <div className="space-y-5">
       {/* <h2 className="text-sm font-semibold text-gray-900">Preview Experience</h2> */}
 
-      <PreviewPhotoSection photos={aboutPhotos?.map((p) => p.url) || []} />
+      <PreviewPhotoSection
+        photos={aboutPhotos?.map((p) => p.url) || []}
+        onEdit={editHandler('about')}
+      />
 
-      {aboutTitle && <PreviewTitleSection title={aboutTitle} />}
+      {aboutTitle && <PreviewTitleSection title={aboutTitle} onEdit={editHandler('about')} />}
 
-      {aboutDescription && <PreviewDescriptionSection description={aboutDescription} />}
+      {aboutDescription && (
+        <PreviewDescriptionSection description={aboutDescription} onEdit={editHandler('about')} />
+      )}
 
       {renderDateSection()}
 
@@ -200,6 +222,7 @@ export const SharedExperiencePreview = ({
         <PreviewItinerarySection
           days={itineraryDays}
           itineraryStartDate={itineraryStartDate ?? null}
+          onEdit={editHandler('itinerary-days')}
         />
       )}
 
@@ -207,6 +230,7 @@ export const SharedExperiencePreview = ({
         items={
           aboutWhatsIncluded ? aboutWhatsIncluded.split('\n').filter((item) => item.trim()) : []
         }
+        onEdit={editHandler('about')}
       />
 
       <PreviewExcludedSection
@@ -215,26 +239,33 @@ export const SharedExperiencePreview = ({
             ? aboutWhatsNotIncluded.split('\n').filter((item) => item.trim())
             : []
         }
+        onEdit={editHandler('about')}
       />
 
-      <PreviewCategoriesSection categories={aboutCategories || []} />
+      <PreviewCategoriesSection categories={aboutCategories || []} onEdit={editHandler('about')} />
 
-      <PreviewItineraryTypeSection visibility={aboutVisibility || 'public'} />
+      <PreviewItineraryTypeSection
+        visibility={aboutVisibility || 'public'}
+        onEdit={editHandler('about')}
+      />
 
       <PreviewLocationSection
         location={aboutLocation || null}
         imageUrl={aboutLocationImageUrl ?? null}
+        onEdit={editHandler('about')}
       />
 
       <PreviewMeetingSection
         meetingPoint={aboutMeetingPoint || null}
         meetingTime={aboutMeetingTime || null}
+        onEdit={editHandler('about')}
       />
 
       {shouldShowCommunitySection && (
         <PreviewCommunitySection
           communityName={selectedCommunity?.name || null}
           communityImageUrl={selectedCommunity?.imageUrl || null}
+          onEdit={editHandler('community')}
         />
       )}
 
@@ -243,18 +274,20 @@ export const SharedExperiencePreview = ({
           tickets={ticketsItems}
           coverPhoto={aboutPhotos?.[0]?.url || undefined}
           commissionPayer={ticketsCommissionPayer}
+          onEdit={editHandler('dates-tickets')}
         />
       )}
 
       <>
-        <PreviewGuestsSection guests={invitedGuests || []} />
+        <PreviewGuestsSection guests={invitedGuests || []} onEdit={editHandler('guests')} />
         <PreviewCommunitiesSection
           communityIds={invitedCommunityIds || []}
           allCommunities={allCommunities || []}
+          onEdit={editHandler('guests')}
         />
       </>
 
-      <PreviewWalletSection wallet={selectedWallet} />
+      <PreviewWalletSection wallet={selectedWallet} onEdit={editHandler('wallet')} />
     </div>
   );
 };

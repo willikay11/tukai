@@ -280,3 +280,47 @@ describe('BookingPanel for an experience without slot templates', () => {
     expect(screen.getByText('Standard')).toBeInTheDocument();
   });
 });
+
+describe('BookingPanel preview mode', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockSession = { data: { user: { id: 'u1' } } };
+  });
+
+  it('keeps the real Pay label and total, greyed out and disabled', () => {
+    render(<BookingPanel experience={experience} mode="preview" />);
+
+    const payButton = screen.getByRole('button', { name: /^pay/i });
+
+    expect(payButton).toBeDisabled();
+    expect(payButton).toHaveTextContent('Pay');
+    expect(payButton).toHaveTextContent('Ksh. 0.00');
+  });
+
+  it('explains why booking is unavailable instead of the Paystack note', () => {
+    render(<BookingPanel experience={experience} mode="preview" />);
+
+    expect(
+      screen.getByText(
+        'Booking is disabled in preview. Guests can reserve once you publish this experience.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/handled externally via Paystack/)).not.toBeInTheDocument();
+  });
+
+  it('shows the Paystack note and no preview notice in live mode', () => {
+    render(<BookingPanel experience={experience} />);
+
+    expect(screen.getByText(/handled externally via Paystack/)).toBeInTheDocument();
+    expect(screen.queryByText(/Booking is disabled in preview/)).not.toBeInTheDocument();
+  });
+
+  it('cannot start a purchase', async () => {
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} mode="preview" />);
+
+    await user.click(screen.getByRole('button', { name: /^pay/i }));
+
+    expect(mockMutate).not.toHaveBeenCalled();
+  });
+});

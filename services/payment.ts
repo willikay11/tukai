@@ -4,6 +4,7 @@ import {
   UpdateBankWallet,
   UpdatePhoneWallet,
 } from '@/types/payment';
+import { parseApiError } from '@/utils/parseApiError';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 import { apiWithToken } from './apiService';
@@ -19,7 +20,7 @@ export async function fetchWallets() {
     };
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || 'An unexpected error occurred');
+    throw new Error(parseApiError(error.response?.data, 'An unexpected error occurred'));
   }
 }
 
@@ -37,7 +38,7 @@ export async function createPhoneWallet(data: CreatePhoneWallet) {
     };
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || 'An unexpected error occurred');
+    throw new Error(parseApiError(error.response?.data, 'An unexpected error occurred'));
   }
 }
 
@@ -55,7 +56,7 @@ export async function patchPhoneWallet(data: UpdatePhoneWallet) {
     };
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || 'An unexpected error occurred');
+    throw new Error(parseApiError(error.response?.data, 'An unexpected error occurred'));
   }
 }
 
@@ -81,7 +82,7 @@ export async function createBankWallet(data: CreateBankWallet) {
     };
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || 'An unexpected error occurred');
+    throw new Error(parseApiError(error.response?.data, 'An unexpected error occurred'));
   }
 }
 
@@ -107,6 +108,6 @@ export async function patchBankWallet(data: UpdateBankWallet) {
     };
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || 'An unexpected error occurred');
+    throw new Error(parseApiError(error.response?.data, 'An unexpected error occurred'));
   }
 }

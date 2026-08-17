@@ -47,6 +47,9 @@ export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean)
       params.bookmarked,
       params.hosted_by,
       params.search,
+      // Without this, two calls differing only by status share a cache entry
+      // and serve each other's results
+      params.status,
     ],
     queryFn: async () => await fetchExperiences(params),
     enabled: enabled,

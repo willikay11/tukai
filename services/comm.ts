@@ -1,5 +1,6 @@
 import { getSession } from 'next-auth/react';
 
+import { parseApiError } from '@/utils/parseApiError';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 import { api, apiWithToken } from './apiService';
@@ -33,7 +34,7 @@ export const sendMessage = async ({
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
