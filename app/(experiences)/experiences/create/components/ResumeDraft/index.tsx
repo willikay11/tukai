@@ -152,21 +152,39 @@ export const ResumeDraft = ({
       </p>
 
       <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Clear this draft?</AlertDialogTitle>
-            <AlertDialogDescription>
-              “{draft.title?.trim() || 'Untitled experience'}” will be cancelled and removed from
-              your drafts. This cannot be undone.
-            </AlertDialogDescription>
+        <AlertDialogContent className="max-w-md gap-5 rounded-2xl p-6">
+          <AlertDialogHeader className="space-y-4 text-left sm:text-left">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-red-50">
+              <IconComponent
+                iconName="Delete02Icon"
+                size={20}
+                color="currentColor"
+                className="text-red-500"
+              />
+            </span>
+
+            <div className="space-y-2">
+              <AlertDialogTitle className="text-lg font-bold text-gray-900">
+                Clear this draft?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-sm leading-relaxed text-gray-500">
+                &ldquo;{draft.title?.trim() || 'Untitled experience'}&rdquo; will be deleted and you
+                will start the wizard from scratch. This cannot be undone.
+              </AlertDialogDescription>
+            </div>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep draft</AlertDialogCancel>
+
+          <AlertDialogFooter className="gap-2 sm:gap-3">
+            {/* Plain text, so the destructive action is the only thing that reads
+                as a button */}
+            <AlertDialogCancel className="border-0 bg-transparent font-medium text-gray-600 shadow-none hover:bg-transparent hover:text-gray-900">
+              Keep draft
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={onClearAndStartFresh}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="rounded-lg bg-destructive px-5 text-destructive-foreground hover:bg-destructive/90"
             >
-              Clear draft
+              Clear and start fresh
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
