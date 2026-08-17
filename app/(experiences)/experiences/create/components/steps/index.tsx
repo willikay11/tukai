@@ -852,13 +852,13 @@ export const CreateExperienceSteps = ({
                   <ViewExperiencePageContent experience={previewExperience} bookingMode="preview" />
                 )}
 
-                <div className="mt-8 max-w-2xl">
+                <div className="mt-8 justify-end flex">
                   <Button
                     type="button"
                     variant="gradient"
                     onClick={handlePublishClick}
                     disabled={!publishableExperienceId || isPublishing}
-                    className="flex w-full items-center justify-center gap-2 rounded-full"
+                    className="flex w-fit items-center justify-center gap-2 rounded-full"
                   >
                     <IconComponent
                       iconName={isPublishing ? 'Loading03Icon' : 'RocketIcon'}
