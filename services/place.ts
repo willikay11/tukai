@@ -1,6 +1,7 @@
 import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
 import { PlaceCategoryParams } from '@/types/networkParam';
+import { parseApiError } from '@/utils/parseApiError';
 import { parseCamelToSnake, parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 export async function fetchPlaces(
@@ -43,7 +44,7 @@ export async function fetchPlaces(
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -63,7 +64,7 @@ export async function fetchPlace(id?: string): Promise<ApiResponse> {
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -83,7 +84,7 @@ export async function fetchPlaceCategories(params?: PlaceCategoryParams): Promis
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -103,7 +104,7 @@ export async function fetchPlaceProperties(id: string): Promise<ApiResponse> {
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -123,7 +124,7 @@ export async function fetchPlaceSocialLinks(id: string): Promise<ApiResponse> {
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -143,7 +144,7 @@ export async function fetchPlaceReviews(id: string): Promise<ApiResponse> {
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -163,7 +164,7 @@ export async function fetchPlaceReviewComments(id: string, reviewId: string): Pr
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -188,7 +189,7 @@ export async function createPlaceReviewComment(
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -400,12 +401,12 @@ export async function fetchGoogleMapsAutocomplete(input: string): Promise<ApiRes
       data: data.data,
     };
   } catch (error: any) {
-    console.error('API Error:', error.message);
+    console.error('API Error:', error.response?.data || error.message);
 
     return {
-      status: 500,
+      status: error.response?.status || 500,
       success: false,
-      message: 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -429,12 +430,12 @@ export async function fetchGoogleMapsPlaceGeocode(placeId: string): Promise<ApiR
       data: data.data,
     };
   } catch (error: any) {
-    console.error('API Error:', error.message);
+    console.error('API Error:', error.response?.data || error.message);
 
     return {
-      status: 500,
+      status: error.response?.status || 500,
       success: false,
-      message: 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }

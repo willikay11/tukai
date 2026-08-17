@@ -533,5 +533,23 @@ describe('Experience Service', () => {
         message: 'Experience incomplete - missing required fields',
       });
     });
+
+    // The API's real error shape — this used to be swallowed and replaced with
+    // "An unexpected error occurred"
+    it('surfaces the API detail from the errors array', async () => {
+      const error = {
+        response: {
+          status: 400,
+          data: { errors: [{ detail: 'Cannot publish an experience without tickets.' }] },
+        },
+      };
+      mockApi.post.mockRejectedValue(error);
+
+      await expect(experienceService.publishExperience('exp-1')).rejects.toEqual({
+        status: 400,
+        success: false,
+        message: 'Cannot publish an experience without tickets.',
+      });
+    });
   });
 });

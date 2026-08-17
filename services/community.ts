@@ -1,6 +1,7 @@
 import { getAuthSession } from '@/lib/auth';
 import { CommunityPostsQueryParams, CreateCommunity } from '@/types/community';
 import { assertValidImageFiles } from '@/utils/images';
+import { parseApiError } from '@/utils/parseApiError';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 import { api, apiWithToken } from './apiService';
@@ -44,7 +45,7 @@ export async function getCommunities(
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -69,7 +70,7 @@ export async function fetchCommunity(communityId: string) {
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -88,7 +89,7 @@ export async function joinCommunity(communityId: string) {
     };
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || 'An unexpected error occurred');
+    throw new Error(parseApiError(error.response?.data, 'An unexpected error occurred'));
   }
 }
 
@@ -106,7 +107,7 @@ export async function joinCommunityWithToken(communityId: string, token?: string
       data: parseSnakeToCamel(response.data),
     };
   } catch (error: any) {
-    throw new Error(error?.response?.data?.error || 'An unexpected error occurred');
+    throw new Error(parseApiError(error.response?.data, 'An unexpected error occurred'));
   }
 }
 
@@ -126,7 +127,7 @@ export async function fetchCommunityPosts(params: CommunityPostsQueryParams) {
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -147,7 +148,7 @@ export async function fetchCommunityPostPhotos(communityId: string) {
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -177,7 +178,7 @@ export async function createCommunityPhotos(communityId: string, photos: File[])
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -231,7 +232,7 @@ export async function createCommunity(data: CreateCommunity) {
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }

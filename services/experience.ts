@@ -6,6 +6,7 @@ import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
 import { ItineraryDayPayload } from '@/types/itinerary';
 import { PurchaserDetails } from '@/types/purchaser';
 import { assertValidImageFiles } from '@/utils/images';
+import { parseApiError } from '@/utils/parseApiError';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 export type ExperiencesQueryParams = {
@@ -50,7 +51,7 @@ export async function fetchExperiences(params: ExperiencesQueryParams): Promise<
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -70,7 +71,7 @@ export async function fetchExperience(id: string, withAuth: boolean = false): Pr
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -113,7 +114,7 @@ export async function bookmarkExperience(id: string): Promise<ApiResponse> {
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -193,7 +194,7 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -280,7 +281,7 @@ export async function updateExperience(id: string, data: CreateExperience): Prom
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -304,7 +305,7 @@ export async function createExperienceTicket(
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -332,7 +333,7 @@ export async function updateExperienceTicket(
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -358,7 +359,7 @@ export const deleteExperienceTicket = async (
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -378,7 +379,7 @@ export const addGuestToExperience = async (id: string, email: string) => {
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -398,7 +399,7 @@ export const publishExperience = async (id: string): Promise<ApiResponse> => {
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -428,7 +429,7 @@ export const cancelExperience = async (id: string): Promise<ApiResponse> => {
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -464,7 +465,7 @@ export const addExperiencePhotos = async (
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -485,7 +486,7 @@ export const deleteExperiencePhoto = async (photoId: string): Promise<ApiRespons
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -508,7 +509,7 @@ export const searchUsers = async (query: string): Promise<ApiResponse> => {
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -664,7 +665,7 @@ export const deleteSlotTemplate = async (
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -691,7 +692,7 @@ export const createItineraryDay = async (
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -718,7 +719,7 @@ export const updateItineraryDay = async (
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -752,7 +753,7 @@ export const bulkUpdateItineraryDays = async (
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -784,7 +785,7 @@ export const updateItineraryDayMetadata = async (
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -810,7 +811,7 @@ export const deleteItineraryDay = async (
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -831,7 +832,7 @@ export const fetchItineraryDays = async (experienceId: string): Promise<ApiRespo
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -869,7 +870,7 @@ export const createItineraryDayActivity = async (
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -898,7 +899,7 @@ export const updateItineraryDayActivity = async (
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
@@ -925,7 +926,7 @@ export const deleteItineraryDayActivity = async (
     throw {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 };
