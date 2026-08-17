@@ -60,7 +60,9 @@ export const TimeSlotList = ({ slots, onChange, errors }: TimeSlotListProps) => 
             : 'End time must be after start time';
 
           return (
-            <div key={index} className="flex items-end items-center gap-2">
+            // Top-aligned so an error message under one field cannot push the
+            // other field's input out of line — the message hangs below instead
+            <div key={index} className="flex items-start gap-2">
               <div className="flex-1">
                 <TimePicker
                   value={slot.startTime || undefined}
@@ -87,10 +89,12 @@ export const TimeSlotList = ({ slots, onChange, errors }: TimeSlotListProps) => 
               </div>
 
               {slots.length > 1 && (
+                // Matches the TimePicker's h-[50px] so the icon stays centred on
+                // the inputs whether or not an error is showing below them
                 <button
                   type="button"
                   onClick={() => handleRemoveSlot(index)}
-                  className="mb-2 text-red-500 hover:text-red-700"
+                  className="flex h-[50px] flex-shrink-0 items-center text-red-500 hover:text-red-700"
                   aria-label="Remove time slot"
                 >
                   <IconComponent iconName="Delete02Icon" size={18} />
