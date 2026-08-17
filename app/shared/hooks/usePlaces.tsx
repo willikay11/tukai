@@ -8,6 +8,7 @@ import {
   deletePlaceReviewImage,
   fetchGoogleMapsAutocomplete,
   fetchGoogleMapsPlaceGeocode,
+  fetchPlace,
   fetchPlaceCategories,
   fetchPlaceReviewComments,
   fetchPlaceReviews,
@@ -40,6 +41,16 @@ export const usePlaces = ({
     enabled,
   });
 };
+
+// A single place, used where only its id is known — e.g. resolving the
+// coordinates of a Tukai place picked during experience creation
+export const usePlace = (id: string | null, enabled: boolean = true) =>
+  useQuery({
+    queryKey: ['place', id],
+    queryFn: async () => await fetchPlace(id!),
+    enabled: enabled && Boolean(id),
+    staleTime: Infinity,
+  });
 
 export const usePlaceCategories = (
   params: PlaceCategoryParams = { pageSize: 100 },
