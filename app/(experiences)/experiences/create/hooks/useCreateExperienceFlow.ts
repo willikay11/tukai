@@ -1625,13 +1625,37 @@ export const useCreateExperienceFlow = ({
     return preferredPhoto?.photo || 'https://via.placeholder.com/32';
   };
 
-  const communitiesForSelector = (createdCommunitiesResponse?.data?.results || []).map(
-    (community: Community) => ({
-      id: community.id,
-      name: community.title,
-      imageUrl: resolveCommunityImageUrl(community),
-    }),
+  // Memoised so the auto-select effect below does not re-run on every render
+  const communitiesForSelector: CommunityOption[] = useMemo(
+    () =>
+      (createdCommunitiesResponse?.data?.results || []).map((community: Community) => ({
+        id: community.id,
+        name: community.title,
+        imageUrl: resolveCommunityImageUrl(community),
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [createdCommunitiesResponse?.data?.results],
   );
+
+  // A creator with exactly one community has no choice to make, so it is
+  // preselected. Runs once: the pills toggle, and re-selecting after a
+  // deliberate deselection would leave the field impossible to clear.
+  const hasAutoSelectedCommunity = useRef(false);
+
+  useEffect(() => {
+    if (hasAutoSelectedCommunity.current) return;
+
+    // Already chosen, or hydrated from a draft — nothing to preselect
+    if (formData.dateType.community) {
+      hasAutoSelectedCommunity.current = true;
+      return;
+    }
+
+    if (communitiesForSelector.length !== 1) return;
+
+    hasAutoSelectedCommunity.current = true;
+    updateFormData({ community: communitiesForSelector[0] });
+  }, [communitiesForSelector, formData.dateType.community, updateFormData]);
 
   return {
     // State
