@@ -439,4 +439,88 @@ describe('useCreateExperienceFlow', () => {
       expect(isValid).toBe(true);
     });
   });
+  describe('clearing validation errors as fields are filled', () => {
+    it('clears an About field error once the field is filled', () => {
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.validateAbout();
+      });
+      expect(result.current.aboutErrors.title).toBe('Title is required');
+
+      act(() => {
+        result.current.updateAboutFormData({ title: 'Ngong Hills Ridge' });
+      });
+
+      expect(result.current.aboutErrors.title).toBeUndefined();
+      // Untouched fields keep theirs
+      expect(result.current.aboutErrors.description).toBe('Description is required');
+    });
+
+    it('keeps the error when the field is blanked again', () => {
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.validateAbout();
+      });
+
+      act(() => {
+        result.current.updateAboutFormData({ title: '   ' });
+      });
+
+      expect(result.current.aboutErrors.title).toBe('Title is required');
+    });
+
+    it('clears a Date & Type field error once the field is filled', () => {
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.validateDateType();
+      });
+      expect(result.current.dateTypeErrors.community).toBe('Community is required');
+
+      act(() => {
+        result.current.updateFormData({
+          community: { id: 'c1', name: 'Hikers', imageUrl: '' },
+        });
+      });
+
+      expect(result.current.dateTypeErrors.community).toBeUndefined();
+    });
+
+    it('clears a time-slot error for the slot that was filled', () => {
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.updateFormData({
+          isRecurring: true,
+          recurringDays: ['mon'],
+          recurrenceStartDate: '2026-09-01',
+          recurrenceEndDate: '2026-09-30',
+          timeSlots: [{ startTime: '08:00', endTime: null }],
+        });
+      });
+
+      act(() => {
+        result.current.validateDateType();
+      });
+      expect(result.current.dateTypeErrors['slots.0.endTime']).toBeTruthy();
+
+      act(() => {
+        result.current.updateFormData({
+          timeSlots: [{ startTime: '08:00', endTime: '14:00' }],
+        });
+      });
+
+      expect(result.current.dateTypeErrors['slots.0.endTime']).toBeUndefined();
+    });
+  });
 });

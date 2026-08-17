@@ -18,6 +18,7 @@ import { ItineraryDayFormValue } from '@/types/itinerary';
 import { Wallet } from '@/types/payment';
 
 import type { FormData, FormPhoto } from '../../hooks/useCreateExperienceFlow';
+import { type AboutFormValues } from '../../schemas';
 import { AboutStep } from '../AboutStep';
 import { type DateTypeFormData, DateTypeStep } from '../DateTypeStep';
 import { InviteGuestsStep } from '../InviteGuestsStep';
@@ -32,22 +33,8 @@ import { ExperienceDates } from '../dates';
 import { CreateExperienceInvites } from '../invites';
 import { CreateExperienceWallet } from '../wallet';
 
-type AboutFormData = {
-  // FormPhoto[], not string[] — AboutStep declares it this way and page.tsx
-  // passes formData.about straight through
-  photos: FormPhoto[];
-  photoFiles: File[];
-  title: string;
-  visibility: 'public' | 'private';
-  description: string;
-  whatsIncluded: string;
-  whatsNotIncluded: string;
-  location: string;
-  locationPlaceId: string;
-  meetingPoint: string;
-  meetingTime: string | null;
-  categories: Interest[];
-};
+// Derived from the zod schema — never redeclare this shape by hand
+type AboutFormData = AboutFormValues;
 
 // The Preview step shows either the captured-data summary or the customer mirror
 type PreviewMode = 'captured' | 'customer';

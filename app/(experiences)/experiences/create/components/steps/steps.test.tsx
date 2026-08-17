@@ -171,7 +171,6 @@ describe('CreateExperienceSteps', () => {
           currentStep="about"
           aboutFormData={{
             photos: [],
-            photoFiles: [],
             title: 'Test',
             visibility: 'public',
             description: 'Test',
@@ -179,6 +178,8 @@ describe('CreateExperienceSteps', () => {
             whatsNotIncluded: '',
             location: 'Test',
             locationPlaceId: '',
+            placeId: null,
+            placeImageUrl: null,
             meetingPoint: '',
             meetingTime: null,
             categories: [],
@@ -299,7 +300,6 @@ describe('CreateExperienceSteps', () => {
           currentStep="dates-type"
           aboutFormData={{
             photos: ['photo.jpg'],
-            photoFiles: [],
             title: 'Test Experience',
             visibility: 'public',
             description: 'Test Description',
@@ -307,6 +307,8 @@ describe('CreateExperienceSteps', () => {
             whatsNotIncluded: '',
             location: 'Test Location',
             locationPlaceId: '',
+            placeId: null,
+            placeImageUrl: null,
             meetingPoint: '',
             meetingTime: null,
             categories: [],
