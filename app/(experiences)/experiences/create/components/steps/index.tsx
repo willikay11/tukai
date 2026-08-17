@@ -53,19 +53,19 @@ type AboutFormData = {
 type PreviewMode = 'captured' | 'customer';
 
 export type ExperienceStepId =
-  | 'community'
+  | 'dates-type'
   | 'about'
   | 'itinerary-days'
-  | 'dates-tickets'
+  | 'tickets'
   | 'guests'
   | 'wallet'
   | 'preview';
 
 const STEPS_DEFAULT = [
   {
-    id: 'community',
-    label: 'Community',
-    icon: 'AddTeamIcon',
+    id: 'dates-type',
+    label: 'Dates Type',
+    icon: 'CalendarIcon',
   },
   {
     id: 'about',
@@ -73,8 +73,8 @@ const STEPS_DEFAULT = [
     icon: 'InformationCircleIcon',
   },
   {
-    id: 'dates-tickets',
-    label: 'Dates & Tickets',
+    id: 'tickets',
+    label: 'Tickets',
     icon: 'Ticket02Icon',
   },
   { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
@@ -84,9 +84,9 @@ const STEPS_DEFAULT = [
 
 const STEPS_MULTI_DAY = [
   {
-    id: 'community',
-    label: 'Community',
-    icon: 'AddTeamIcon',
+    id: 'dates-type',
+    label: 'Dates Type',
+    icon: 'CalendarIcon',
   },
   {
     id: 'about',
@@ -94,8 +94,8 @@ const STEPS_MULTI_DAY = [
     icon: 'InformationCircleIcon',
   },
   {
-    id: 'dates-tickets',
-    label: 'Dates & Tickets',
+    id: 'tickets',
+    label: 'Tickets',
     icon: 'Ticket02Icon',
   },
   { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
@@ -105,9 +105,9 @@ const STEPS_MULTI_DAY = [
 
 const STEPS_ITINERARY = [
   {
-    id: 'community',
-    label: 'Community',
-    icon: 'AddTeamIcon',
+    id: 'dates-type',
+    label: 'Dates Type',
+    icon: 'CalendarIcon',
   },
   {
     id: 'about',
@@ -120,8 +120,8 @@ const STEPS_ITINERARY = [
     icon: 'RouteBlockIcon',
   },
   {
-    id: 'dates-tickets',
-    label: 'Dates & Tickets',
+    id: 'tickets',
+    label: 'Tickets',
     icon: 'Ticket02Icon',
   },
   { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
@@ -265,7 +265,7 @@ interface CreateExperienceStepsProps {
 }
 
 export const CreateExperienceSteps = ({
-  currentStep = 'community',
+  currentStep = 'dates-type',
   onStepChange,
   onExperienceCreated,
   onDatesUpdatedSuccess,

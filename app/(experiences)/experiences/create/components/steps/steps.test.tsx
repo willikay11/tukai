@@ -147,18 +147,18 @@ describe('CreateExperienceSteps', () => {
 
   describe('Community Step', () => {
     it('renders community step content', () => {
-      render(<CreateExperienceSteps {...defaultProps} currentStep="community" />);
+      render(<CreateExperienceSteps {...defaultProps} currentStep="dates-type" />);
       expect(screen.getByText('date-type-step')).toBeInTheDocument();
     });
 
     it('renders cancel and save continue buttons', () => {
-      render(<CreateExperienceSteps {...defaultProps} currentStep="community" />);
+      render(<CreateExperienceSteps {...defaultProps} currentStep="dates-type" />);
       expect(screen.getByText('Cancel')).toBeInTheDocument();
       expect(screen.getByText('Save & Continue')).toBeInTheDocument();
     });
 
     it('shows preview button on mobile', () => {
-      render(<CreateExperienceSteps {...defaultProps} currentStep="community" />);
+      render(<CreateExperienceSteps {...defaultProps} currentStep="dates-type" />);
       expect(screen.getByText('Preview')).toBeInTheDocument();
     });
   });
@@ -195,7 +195,7 @@ describe('CreateExperienceSteps', () => {
       render(
         <CreateExperienceSteps
           {...defaultProps}
-          currentStep="dates-tickets"
+          currentStep="tickets"
           ticketsFormData={{
             commission: 'host',
             ticketMode: 'entire-period',
