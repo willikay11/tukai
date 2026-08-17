@@ -277,9 +277,13 @@ export const buildTicketsSchema = ({ experiencePricing, experienceType }: Ticket
         require(['tickets', index, 'quantity'], 'Quantity must be greater than 0');
       }
 
+      // A zero-cost ticket is allowed on a paid experience — the amount must
+      // be entered, but 0 is a valid price
       if (experiencePricing === 'paid') {
-        if (ticket.amount === null || ticket.amount === undefined || ticket.amount <= 0) {
-          require(['tickets', index, 'amount'], 'Amount must be greater than 0');
+        if (ticket.amount === null || ticket.amount === undefined) {
+          require(['tickets', index, 'amount'], 'Amount is required');
+        } else if (ticket.amount < 0) {
+          require(['tickets', index, 'amount'], 'Amount cannot be negative');
         }
       }
     });
@@ -307,5 +311,34 @@ export const buildWalletSchema = ({ hasSavedWallets }: { hasSavedWallets: boolea
         path: ['wallet'],
         message: 'Please set up a payment method before continuing.',
       });
+    }
+  });
+
+// ─── A single ticket being edited in the Tickets step ───────────────────────
+
+interface TicketDraft {
+  name: string;
+  quantity: number | null;
+  amount: number | null;
+}
+
+export const buildTicketDraftSchema = ({ isPaid }: { isPaid: boolean }) =>
+  z.custom<TicketDraft>().superRefine((draft, ctx) => {
+    const require = (path: (string | number)[], message: string) =>
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path, message });
+
+    if (!draft.name?.trim()) require(['name'], 'Ticket name is required');
+
+    if (draft.quantity === null || draft.quantity === undefined || draft.quantity <= 0) {
+      require(['quantity'], 'Quantity must be greater than 0');
+    }
+
+    // 0 is a valid price — a free ticket on an otherwise paid experience
+    if (isPaid) {
+      if (draft.amount === null || draft.amount === undefined) {
+        require(['amount'], 'Amount is required');
+      } else if (draft.amount < 0) {
+        require(['amount'], 'Amount cannot be negative');
+      }
     }
   });

@@ -1,5 +1,6 @@
 import {
   aboutSchema,
+  buildTicketDraftSchema,
   buildTicketsSchema,
   buildWalletSchema,
   dateTypeSchema,
@@ -173,12 +174,32 @@ describe('buildTicketsSchema', () => {
     const errors = errorsFor(schema(), {
       commission: 'host',
       ticketMode: null,
-      items: [ticket({ name: '  ', quantity: 0, amount: 0 })],
+      items: [ticket({ name: '  ', quantity: 0, amount: null })],
     });
 
     expect(errors['tickets.0.name']).toBe('Ticket name is required');
     expect(errors['tickets.0.quantity']).toBe('Quantity must be greater than 0');
-    expect(errors['tickets.0.amount']).toBe('Amount must be greater than 0');
+    expect(errors['tickets.0.amount']).toBe('Amount is required');
+  });
+
+  it('accepts a zero-cost ticket on a paid experience', () => {
+    const errors = errorsFor(schema(), {
+      commission: 'host',
+      ticketMode: null,
+      items: [ticket({ amount: 0 })],
+    });
+
+    expect(errors['tickets.0.amount']).toBeUndefined();
+  });
+
+  it('rejects a negative amount', () => {
+    const errors = errorsFor(schema(), {
+      commission: 'host',
+      ticketMode: null,
+      items: [ticket({ amount: -5 })],
+    });
+
+    expect(errors['tickets.0.amount']).toBe('Amount cannot be negative');
   });
 
   it('does not require an amount on a free experience', () => {
@@ -212,5 +233,46 @@ describe('buildWalletSchema', () => {
         phoneNumber: '+254712345678',
       }),
     ).toEqual({});
+  });
+});
+
+describe('buildTicketDraftSchema', () => {
+  const draft = (overrides: Record<string, unknown> = {}) => ({
+    name: 'Standard',
+    quantity: 10,
+    amount: 1500,
+    ...overrides,
+  });
+
+  it('accepts a zero-cost ticket', () => {
+    expect(errorsFor(buildTicketDraftSchema({ isPaid: true }), draft({ amount: 0 }))).toEqual({});
+  });
+
+  it('still requires an amount to be entered', () => {
+    expect(
+      errorsFor(buildTicketDraftSchema({ isPaid: true }), draft({ amount: null })).amount,
+    ).toBe('Amount is required');
+  });
+
+  it('rejects a negative amount', () => {
+    expect(errorsFor(buildTicketDraftSchema({ isPaid: true }), draft({ amount: -1 })).amount).toBe(
+      'Amount cannot be negative',
+    );
+  });
+
+  it('ignores the amount entirely on a free experience', () => {
+    expect(
+      errorsFor(buildTicketDraftSchema({ isPaid: false }), draft({ amount: null })).amount,
+    ).toBeUndefined();
+  });
+
+  it('still requires a name and a positive quantity', () => {
+    const errors = errorsFor(
+      buildTicketDraftSchema({ isPaid: true }),
+      draft({ name: '  ', quantity: 0 }),
+    );
+
+    expect(errors.name).toBe('Ticket name is required');
+    expect(errors.quantity).toBe('Quantity must be greater than 0');
   });
 });

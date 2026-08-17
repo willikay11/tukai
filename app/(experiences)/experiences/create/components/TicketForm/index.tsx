@@ -76,6 +76,9 @@ export const TicketForm = ({
     ? value.amount + (value.amount * commissionPercentage) / 100
     : 0;
 
+  // A ticket priced at 0 costs the customer nothing, commission included
+  const isFreeTicket = value.amount === 0;
+
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
@@ -139,19 +142,24 @@ export const TicketForm = ({
         </div>
       </div>
 
-      {value.quantity && value.amount && (
+      {/* Guarded with an explicit comparison: `quantity && amount &&` renders a
+          stray "0" once a zero-cost ticket is allowed */}
+      {value.quantity != null && value.amount != null && (
         <div className="rounded-full border border-blue-200 bg-blue-100/60 px-4 py-2">
           <p className="flex flex-wrap items-center gap-2 text-xs text-gray-600">
             <span className="italic">Total Tickets Cost:</span>
-            <span className="font-semibold text-gray-900">KES {totalCost.toLocaleString()}.00</span>
+            <span className="font-semibold text-gray-900">
+              {isFreeTicket ? 'Free' : `KES ${totalCost.toLocaleString()}.00`}
+            </span>
             <span className="text-blue-400">•</span>
             <span className="italic">Per ticket customer pays:</span>
             <span className="font-semibold text-gray-900">
-              KES{' '}
-              {customerPayAmount.toLocaleString('en', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
+              {isFreeTicket
+                ? 'Free'
+                : `KES ${customerPayAmount.toLocaleString('en', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`}
             </span>
           </p>
         </div>
