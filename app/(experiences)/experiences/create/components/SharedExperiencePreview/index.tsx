@@ -146,7 +146,7 @@ export const SharedExperiencePreview = ({
           mode="itinerary"
           startDate={itineraryStartDate || null}
           endDate={itineraryEndDate || null}
-          onEdit={editHandler('community')}
+          onEdit={editHandler('dates-type')}
         />
       );
     }
@@ -159,7 +159,7 @@ export const SharedExperiencePreview = ({
           startTime={multiDayStartTime || null}
           endDate={multiDayEndDate || null}
           endTime={multiDayEndTime || null}
-          onEdit={editHandler('community')}
+          onEdit={editHandler('dates-type')}
         />
       );
     }
@@ -172,7 +172,7 @@ export const SharedExperiencePreview = ({
           timeSlots={selectedTimeSlots || []}
           recurrenceStartDate={selectedRecurrenceStartDate || null}
           recurrenceEndDate={selectedRecurrenceEndDate || null}
-          onEdit={editHandler('community')}
+          onEdit={editHandler('dates-type')}
         />
       );
     }
@@ -183,7 +183,7 @@ export const SharedExperiencePreview = ({
         date={selectedDate || null}
         startTime={selectedStartTime || null}
         endTime={selectedEndTime || null}
-        onEdit={editHandler('community')}
+        onEdit={editHandler('dates-type')}
       />
     );
   };
@@ -196,8 +196,8 @@ export const SharedExperiencePreview = ({
   const shouldShowCommunitySection = showAllSections || step === 'about';
 
   // Each section's pencil jumps to the step that owns its data. Step ids are
-  // legacy: 'community' is the Date & Type step, and 'dates-tickets' owns
-  // tickets only — the dates themselves are captured in 'community'.
+  // legacy: 'dates-type' is the Date & Type step, and 'tickets' owns
+  // tickets only — the dates themselves are captured in 'dates-type'.
   const editHandler = (ownerStep: ExperienceStepId) =>
     onEditStep ? () => onEditStep(ownerStep) : undefined;
 
@@ -265,7 +265,7 @@ export const SharedExperiencePreview = ({
         <PreviewCommunitySection
           communityName={selectedCommunity?.name || null}
           communityImageUrl={selectedCommunity?.imageUrl || null}
-          onEdit={editHandler('community')}
+          onEdit={editHandler('dates-type')}
         />
       )}
 
@@ -274,7 +274,7 @@ export const SharedExperiencePreview = ({
           tickets={ticketsItems}
           coverPhoto={aboutPhotos?.[0]?.url || undefined}
           commissionPayer={ticketsCommissionPayer}
-          onEdit={editHandler('dates-tickets')}
+          onEdit={editHandler('tickets')}
         />
       )}
 

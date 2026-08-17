@@ -24,6 +24,7 @@ import { buildAbsoluteTicketValidity, buildRecurringTicketValidity } from '@/uti
 
 import { FormData } from '../../hooks/useCreateExperienceFlow';
 import { usePendingAction } from '../../hooks/usePendingAction';
+import { buildTicketDraftSchema, zodErrorsToMap } from '../../schemas';
 import { AddTicketTypeButton } from '../AddTicketTypeButton';
 import { CommissionPicker } from '../CommissionPicker';
 import { DateBadgeWithTimes } from '../DateBadgeWithTimes';
@@ -76,46 +77,12 @@ const emptyTicketForm: TicketFormValue = {
 const validateTicket = (
   draft: TicketFormValue,
   isPaid: boolean,
-  isRecurring: boolean = false,
+  // Sales-validity rules are hidden while that section is commented out in
+  // TicketForm; restore them in buildTicketDraftSchema alongside it
+  _isRecurring: boolean = false,
 ): Record<string, string> => {
-  const errors: Record<string, string> = {};
-
-  if (!draft.name.trim()) {
-    errors.name = 'Ticket name is required';
-  }
-
-  if (draft.quantity === null || draft.quantity === undefined || draft.quantity <= 0) {
-    errors.quantity = 'Quantity must be greater than 0';
-  }
-
-  if (isPaid && (draft.amount === null || draft.amount === undefined || draft.amount <= 0)) {
-    errors.amount = 'Amount must be greater than 0';
-  }
-
-  // Ticket sales validity is hidden in TicketForm for now, so nothing can be
-  // entered here — restore these checks when that section comes back.
-  //
-  // // For recurring: validate relative validity instead of absolute dates
-  // if (isRecurring) {
-  //   if (!draft.salesEndRelative) {
-  //     errors.salesEndRelative = 'Ticket sales validity is required';
-  //   }
-  // } else {
-  //   // For non-recurring: validate absolute dates
-  //   if (!draft.salesStartDate) {
-  //     errors.salesStartDate = 'Start date is required';
-  //   }
-  //
-  //   if (!draft.salesEndDate) {
-  //     errors.salesEndDate = 'End date is required';
-  //   }
-  //
-  //   if (draft.salesStartDate && draft.salesEndDate && draft.salesStartDate > draft.salesEndDate) {
-  //     errors.salesEndDate = 'End date must be after start date';
-  //   }
-  // }
-
-  return errors;
+  const result = buildTicketDraftSchema({ isPaid }).safeParse(draft);
+  return result.success ? {} : zodErrorsToMap(result.error);
 };
 
 export const TicketsStep = ({

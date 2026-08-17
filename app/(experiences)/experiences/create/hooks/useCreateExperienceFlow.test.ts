@@ -27,9 +27,10 @@ jest.mock('next-auth/react', () => ({
 }));
 
 // Mock custom hooks
+let mockCommunities: Array<{ id: string; title: string; photos?: unknown[] }> = [];
 jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useGetCommunities: jest.fn(() => ({
-    data: { data: [] },
+    data: { data: { results: mockCommunities } },
     isFetching: false,
   })),
 }));
@@ -78,7 +79,7 @@ describe('useCreateExperienceFlow', () => {
       wrapper: createWrapper(),
     });
 
-    expect(result.current.activeStep).toBe('community');
+    expect(result.current.activeStep).toBe('dates-type');
     expect(result.current.experienceId).toBeNull();
     expect(result.current.hasUpdatedDates).toBe(false);
     expect(result.current.itineraryConfig).toBeNull();
@@ -260,7 +261,7 @@ describe('useCreateExperienceFlow', () => {
       });
 
       act(() => {
-        result.current.handlers.handleStepChange('dates-tickets');
+        result.current.handlers.handleStepChange('tickets');
         result.current.updateFormData({ isRecurring: true, experiencePricing: 'paid' });
         result.current.updateTicketsFormData({ items: [recurringTicket] });
       });
@@ -437,6 +438,140 @@ describe('useCreateExperienceFlow', () => {
       });
 
       expect(isValid).toBe(true);
+    });
+  });
+  describe('clearing validation errors as fields are filled', () => {
+    it('clears an About field error once the field is filled', () => {
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.validateAbout();
+      });
+      expect(result.current.aboutErrors.title).toBe('Title is required');
+
+      act(() => {
+        result.current.updateAboutFormData({ title: 'Ngong Hills Ridge' });
+      });
+
+      expect(result.current.aboutErrors.title).toBeUndefined();
+      // Untouched fields keep theirs
+      expect(result.current.aboutErrors.description).toBe('Description is required');
+    });
+
+    it('keeps the error when the field is blanked again', () => {
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.validateAbout();
+      });
+
+      act(() => {
+        result.current.updateAboutFormData({ title: '   ' });
+      });
+
+      expect(result.current.aboutErrors.title).toBe('Title is required');
+    });
+
+    it('clears a Date & Type field error once the field is filled', () => {
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.validateDateType();
+      });
+      expect(result.current.dateTypeErrors.community).toBe('Community is required');
+
+      act(() => {
+        result.current.updateFormData({
+          community: { id: 'c1', name: 'Hikers', imageUrl: '' },
+        });
+      });
+
+      expect(result.current.dateTypeErrors.community).toBeUndefined();
+    });
+
+    it('clears a time-slot error for the slot that was filled', () => {
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.updateFormData({
+          isRecurring: true,
+          recurringDays: ['mon'],
+          recurrenceStartDate: '2026-09-01',
+          recurrenceEndDate: '2026-09-30',
+          timeSlots: [{ startTime: '08:00', endTime: null }],
+        });
+      });
+
+      act(() => {
+        result.current.validateDateType();
+      });
+      expect(result.current.dateTypeErrors['slots.0.endTime']).toBeTruthy();
+
+      act(() => {
+        result.current.updateFormData({
+          timeSlots: [{ startTime: '08:00', endTime: '14:00' }],
+        });
+      });
+
+      expect(result.current.dateTypeErrors['slots.0.endTime']).toBeUndefined();
+    });
+  });
+  describe('host community preselection', () => {
+    afterEach(() => {
+      mockCommunities = [];
+    });
+
+    it('preselects the only community a creator has', async () => {
+      mockCommunities = [{ id: 'c1', title: 'Hikers Club', photos: [] }];
+
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() =>
+        expect(result.current.formData.dateType.community).toEqual(
+          expect.objectContaining({ id: 'c1', name: 'Hikers Club' }),
+        ),
+      );
+    });
+
+    it('leaves the choice open when there is more than one', async () => {
+      mockCommunities = [
+        { id: 'c1', title: 'Hikers Club', photos: [] },
+        { id: 'c2', title: 'Cyclists', photos: [] },
+      ];
+
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.communitiesForSelector).toHaveLength(2));
+      expect(result.current.formData.dateType.community).toBeNull();
+    });
+
+    it('does not re-select after the creator deliberately clears it', async () => {
+      mockCommunities = [{ id: 'c1', title: 'Hikers Club', photos: [] }];
+
+      const { result } = renderHook(() => useCreateExperienceFlow(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.formData.dateType.community).not.toBeNull());
+
+      // The pills toggle, so clearing must stick
+      act(() => {
+        result.current.updateFormData({ community: null });
+      });
+
+      expect(result.current.formData.dateType.community).toBeNull();
     });
   });
 });

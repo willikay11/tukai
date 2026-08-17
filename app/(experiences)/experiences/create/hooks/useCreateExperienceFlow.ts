@@ -61,11 +61,19 @@ import {
 } from '@/utils/slot-template-utils';
 import { parseSalesEndRelativeFromTicket } from '@/utils/ticket-utils';
 
+import {
+  aboutSchema,
+  buildTicketsSchema,
+  buildWalletSchema,
+  dateTypeSchema,
+  zodErrorsToMap,
+} from '../schemas';
+
 export type ExperienceStepId =
-  | 'community'
+  | 'dates-type'
   | 'about'
   | 'itinerary-days'
-  | 'dates-tickets'
+  | 'tickets'
   | 'guests'
   | 'wallet'
   | 'preview';
@@ -90,10 +98,10 @@ const formatDateWithTime = (
 
 const parseExperienceStepId = (step: string | null): ExperienceStepId | null => {
   const validSteps: ExperienceStepId[] = [
-    'community',
+    'dates-type',
     'about',
     'itinerary-days',
-    'dates-tickets',
+    'tickets',
     'guests',
     'wallet',
     'preview',
@@ -103,6 +111,39 @@ const parseExperienceStepId = (step: string | null): ExperienceStepId | null => 
   }
   return null;
 };
+
+// "Filled in" for the purpose of clearing a validation message. A blanked
+// field keeps its error, so emptying a required input does not hide the reason.
+const isFilled = (value: unknown): boolean => {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') return value.trim().length > 0;
+  if (Array.isArray(value)) return value.length > 0;
+  return true;
+};
+
+/**
+ * Drops the validation messages for fields the user has just filled in, so an
+ * error disappears as it is fixed rather than lingering until the next save.
+ * Returns the previous object untouched when nothing matched, so this cannot
+ * cause a render on every keystroke.
+ */
+const clearErrorKeys = (
+  setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>,
+  shouldClear: (errorKey: string) => boolean,
+) => {
+  setErrors((prev) => {
+    const stale = Object.keys(prev).filter(shouldClear);
+    if (stale.length === 0) return prev;
+
+    const next = { ...prev };
+    stale.forEach((key) => delete next[key]);
+    return next;
+  });
+};
+
+// Error keys mirror field names, so a field is cleared by its own name
+const filledFieldNames = (data: Record<string, unknown>): string[] =>
+  Object.keys(data).filter((field) => isFilled(data[field]));
 
 const mapCommission = (
   value: 'host' | 'customer' | 'split',
@@ -297,7 +338,7 @@ export const useCreateExperienceFlow = ({
   const experienceIdFromUrl = searchParams.get('experienceId');
   const stepFromUrl = parseExperienceStepId(searchParams.get('step'));
 
-  const [activeStep, setActiveStep] = useState<ExperienceStepId>(stepFromUrl || 'community');
+  const [activeStep, setActiveStep] = useState<ExperienceStepId>(stepFromUrl || 'dates-type');
   const [experienceId, setExperienceId] = useState<string | null>(experienceIdFromUrl);
   const [hasUpdatedDates, setHasUpdatedDates] = useState(false);
   const [itineraryConfig, setItineraryConfig] = useState<{
@@ -459,6 +500,20 @@ export const useCreateExperienceFlow = ({
       ...prev,
       dateType: { ...prev.dateType, ...data },
     }));
+
+    const filled = filledFieldNames(data);
+
+    // Time slots validate per entry under `slots.<index>.<field>`, so they are
+    // matched against the incoming array rather than by field name
+    const filledSlotKeys = new Set<string>();
+    if (Array.isArray(data.timeSlots)) {
+      data.timeSlots.forEach((slot, index) => {
+        if (isFilled(slot?.startTime)) filledSlotKeys.add(`slots.${index}.startTime`);
+        if (isFilled(slot?.endTime)) filledSlotKeys.add(`slots.${index}.endTime`);
+      });
+    }
+
+    clearErrorKeys(setDateTypeErrors, (key) => filled.includes(key) || filledSlotKeys.has(key));
   }, []);
 
   const updateAboutFormData = useCallback((data: Partial<FormData['about']>) => {
@@ -466,6 +521,9 @@ export const useCreateExperienceFlow = ({
       ...prev,
       about: { ...prev.about, ...data },
     }));
+
+    const filled = filledFieldNames(data);
+    clearErrorKeys(setAboutErrors, (key) => filled.includes(key));
   }, []);
 
   // Populate form when experience is loaded
@@ -769,6 +827,12 @@ export const useCreateExperienceFlow = ({
       ...prev,
       wallet: { ...prev.wallet, ...data },
     }));
+
+    const filled = filledFieldNames(data);
+    // The wallet step reports under a single `wallet` key rather than per field
+    clearErrorKeys(setWalletErrors, (key) =>
+      key === 'wallet' ? filled.length > 0 : filled.includes(key),
+    );
   }, []);
 
   useEffect(() => {
@@ -836,121 +900,9 @@ export const useCreateExperienceFlow = ({
   // ]);
 
   const validateDateType = useCallback((): boolean => {
-    const errors: Record<string, string> = {};
-
-    if (!formData.dateType.community) {
-      errors.community = 'Community is required';
-    }
-
-    if (formData.dateType.experienceType === 'itinerary') {
-      if (!formData.dateType.itineraryStartDate) {
-        errors.itineraryStartDate = 'Please select a start date';
-      }
-      if (!formData.dateType.itineraryEndDate) {
-        errors.itineraryEndDate = 'Please select an end date';
-      }
-      if (
-        formData.dateType.itineraryStartDate &&
-        formData.dateType.itineraryEndDate &&
-        formData.dateType.itineraryStartDate > formData.dateType.itineraryEndDate
-      ) {
-        errors.itineraryEndDate = 'End date must be after start date';
-      }
-    } else if (formData.dateType.experienceType === 'multi-day') {
-      if (!formData.dateType.multiDayStartDate) {
-        errors.multiDayStartDate = 'Start date is required';
-      }
-
-      if (!formData.dateType.multiDayStartTime) {
-        errors.multiDayStartTime = 'Start time is required';
-      }
-
-      if (!formData.dateType.multiDayEndDate) {
-        errors.multiDayEndDate = 'End date is required';
-      }
-
-      if (!formData.dateType.multiDayEndTime) {
-        errors.multiDayEndTime = 'End time is required';
-      }
-
-      if (
-        formData.dateType.multiDayStartDate &&
-        formData.dateType.multiDayEndDate &&
-        formData.dateType.multiDayStartDate > formData.dateType.multiDayEndDate
-      ) {
-        errors.multiDayEndDate = 'End date must be after start date';
-      }
-
-      // Only meaningful on a single day — across days an earlier end time is fine
-      if (
-        formData.dateType.multiDayStartDate &&
-        formData.dateType.multiDayStartDate === formData.dateType.multiDayEndDate &&
-        formData.dateType.multiDayStartTime &&
-        formData.dateType.multiDayEndTime &&
-        formData.dateType.multiDayStartTime >= formData.dateType.multiDayEndTime
-      ) {
-        errors.multiDayEndTime = 'End time must be after start time';
-      }
-    } else if (formData.dateType.isRecurring) {
-      if (formData.dateType.recurringDays.length === 0) {
-        errors.recurringDays = 'At least one day must be selected';
-      }
-
-      if (!formData.dateType.recurrenceStartDate) {
-        errors.recurrenceStartDate = 'Start date is required';
-      }
-
-      if (!formData.dateType.recurrenceEndDate) {
-        errors.recurrenceEndDate = 'End date is required';
-      }
-
-      if (
-        formData.dateType.recurrenceStartDate &&
-        formData.dateType.recurrenceEndDate &&
-        formData.dateType.recurrenceStartDate > formData.dateType.recurrenceEndDate
-      ) {
-        errors.recurrenceEndDate = 'End date must be after start date';
-      }
-
-      if (formData.dateType.timeSlots.length === 0) {
-        errors.timeSlots = 'At least one time slot is required';
-      }
-
-      formData.dateType.timeSlots.forEach((slot, index) => {
-        if (!slot.startTime) {
-          errors[`slots.${index}.startTime`] = 'Start time is required';
-        }
-        if (!slot.endTime) {
-          errors[`slots.${index}.endTime`] = 'End time is required';
-        }
-        if (slot.startTime && slot.endTime && slot.startTime >= slot.endTime) {
-          errors[`slots.${index}.endTime`] = 'End time must be after start time';
-        }
-      });
-    } else {
-      if (!formData.dateType.date) {
-        errors.date = 'Date is required';
-      }
-
-      if (!formData.dateType.startTime) {
-        errors.startTime = 'Start time is required';
-      }
-
-      if (!formData.dateType.endTime) {
-        errors.endTime = 'End time is required';
-      }
-
-      if (
-        formData.dateType.startTime &&
-        formData.dateType.endTime &&
-        formData.dateType.startTime >= formData.dateType.endTime
-      ) {
-        errors.endTime = 'End time must be after start time';
-      }
-    }
-
-    setDateTypeErrors(errors);
-    return Object.keys(errors).length === 0;
+    const result = dateTypeSchema.safeParse(formData.dateType);
+    setDateTypeErrors(result.success ? {} : zodErrorsToMap(result.error));
+    return result.success;
   }, [formData.dateType]);
 
   const updateTicketsFormData = useCallback((data: Partial<FormData['tickets']>) => {
@@ -961,127 +913,33 @@ export const useCreateExperienceFlow = ({
       };
       return updated;
     });
+
+    const filled = filledFieldNames(data);
+    clearErrorKeys(setTicketsErrors, (key) => filled.includes(key));
   }, []);
 
   const validateAbout = useCallback((): boolean => {
-    const errors: Record<string, string> = {};
-
-    if (!formData.about.title.trim()) {
-      errors.title = 'Title is required';
-    }
-
-    if (!formData.about.description.trim()) {
-      errors.description = 'Description is required';
-    }
-
-    if (!formData.about.location.trim()) {
-      errors.location = 'Location is required';
-    }
-
-    if (formData.about.photos.length === 0) {
-      errors.photos = 'At least one photo is required';
-    }
-
-    setAboutErrors(errors);
-    console.log('[validateAbout] Errors found:', errors);
-    console.log('[validateAbout] Is valid:', Object.keys(errors).length === 0);
-    return Object.keys(errors).length === 0;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    formData.about.title,
-    formData.about.description,
-    formData.about.location,
-    formData.about.photos,
-  ]);
+    const result = aboutSchema.safeParse(formData.about);
+    setAboutErrors(result.success ? {} : zodErrorsToMap(result.error));
+    return result.success;
+  }, [formData.about]);
 
   const validateTickets = useCallback((): boolean => {
-    const errors: Record<string, string> = {};
-
-    if (formData.tickets.items.length === 0) {
-      errors.items = 'At least one ticket is required';
-      setTicketsErrors(errors);
-      return false;
-    }
-
-    if (formData.dateType.experienceType === 'multi-day' && !formData.tickets.ticketMode) {
-      errors.ticketMode = 'Please select how you want to create tickets';
-      setTicketsErrors(errors);
-      return false;
-    }
-
-    formData.tickets.items.forEach((ticket, index) => {
-      if (!ticket.name.trim()) {
-        errors[`tickets.${index}.name`] = 'Ticket name is required';
-      }
-
-      if (ticket.quantity === null || ticket.quantity === undefined || ticket.quantity <= 0) {
-        errors[`tickets.${index}.quantity`] = 'Quantity must be greater than 0';
-      }
-
-      if (formData.dateType.experiencePricing === 'paid') {
-        if (ticket.amount === null || ticket.amount === undefined || ticket.amount <= 0) {
-          errors[`tickets.${index}.amount`] = 'Amount must be greater than 0';
-        }
-      }
-
-      // Ticket sales validity is hidden in TicketForm for now, so a host can
-      // reach this step with nothing to check — restore alongside that section.
-      //
-      // if (formData.dateType.isRecurring) {
-      //   // Recurring tickets only capture a sales-closing (end) validity — there is
-      //   // no start-relative field in the form or the API payload, so don't require it.
-      //   if (!ticket.salesEndRelative) {
-      //     errors[`tickets.${index}.salesEndRelative`] = 'Sales end validity is required';
-      //   }
-      // } else if (formData.dateType.experienceType === 'multi-day') {
-      //   if (!ticket.salesStartDate) {
-      //     errors[`tickets.${index}.salesStartDate`] = 'Start date is required';
-      //   }
-      //   if (!ticket.salesEndDate) {
-      //     errors[`tickets.${index}.salesEndDate`] = 'End date is required';
-      //   }
-      //   if (
-      //     ticket.salesStartDate &&
-      //     ticket.salesEndDate &&
-      //     ticket.salesStartDate > ticket.salesEndDate
-      //   ) {
-      //     errors[`tickets.${index}.salesEndDate`] = 'End date must be after start date';
-      //   }
-      // } else {
-      //   if (!ticket.salesStartDate) {
-      //     errors[`tickets.${index}.salesStartDate`] = 'Start date is required';
-      //   }
-      //   if (!ticket.salesEndDate) {
-      //     errors[`tickets.${index}.salesEndDate`] = 'End date is required';
-      //   }
-      //   if (
-      //     ticket.salesStartDate &&
-      //     ticket.salesEndDate &&
-      //     ticket.salesStartDate > ticket.salesEndDate
-      //   ) {
-      //     errors[`tickets.${index}.salesEndDate`] = 'End date must be after start date';
-      //   }
-      // }
+    const schema = buildTicketsSchema({
+      experiencePricing: formData.dateType.experiencePricing,
+      experienceType: formData.dateType.experienceType,
     });
-
-    setTicketsErrors(errors);
-    return Object.keys(errors).length === 0;
-  }, [
-    formData.dateType.isRecurring,
-    formData.dateType.experiencePricing,
-    formData.dateType.experienceType,
-    formData.tickets.items,
-    formData.tickets.ticketMode,
-  ]);
+    const result = schema.safeParse(formData.tickets);
+    setTicketsErrors(result.success ? {} : zodErrorsToMap(result.error));
+    return result.success;
+  }, [formData.dateType.experiencePricing, formData.dateType.experienceType, formData.tickets]);
 
   const validateWallet = useCallback((): boolean => {
-    const errors: Record<string, string> = {};
-    if (!wallets.length && !formData.wallet.selectedWallet && !formData.wallet.phoneNumber) {
-      errors.wallet = 'Please set up a payment method before continuing.';
-    }
-    setWalletErrors(errors);
-    return Object.keys(errors).length === 0;
-  }, [wallets.length, formData.wallet.selectedWallet, formData.wallet.phoneNumber]);
+    const schema = buildWalletSchema({ hasSavedWallets: wallets.length > 0 });
+    const result = schema.safeParse(formData.wallet);
+    setWalletErrors(result.success ? {} : zodErrorsToMap(result.error));
+    return result.success;
+  }, [wallets.length, formData.wallet]);
 
   const updateInviteFormData = useCallback((data: Partial<FormData['invite']>) => {
     setFormData((prev) => ({
@@ -1454,13 +1312,13 @@ export const useCreateExperienceFlow = ({
           }
         }
 
-        const nextStep = isItinerary ? 'itinerary-days' : 'dates-tickets';
+        const nextStep = isItinerary ? 'itinerary-days' : 'tickets';
 
         handleExperienceCreated(newExperienceId, nextStep);
       }
 
       const nextStep =
-        formData.dateType.experienceType === 'itinerary' ? 'itinerary-days' : 'dates-tickets';
+        formData.dateType.experienceType === 'itinerary' ? 'itinerary-days' : 'tickets';
 
       setActiveStep(nextStep);
       return true;
@@ -1621,7 +1479,7 @@ export const useCreateExperienceFlow = ({
       );
 
       // Advance to tickets step
-      handleStepChange('dates-tickets');
+      handleStepChange('tickets');
       return true;
     } catch (error: any) {
       const message = parseApiError(error, 'Failed to save itinerary days');
@@ -1767,13 +1625,37 @@ export const useCreateExperienceFlow = ({
     return preferredPhoto?.photo || 'https://via.placeholder.com/32';
   };
 
-  const communitiesForSelector = (createdCommunitiesResponse?.data?.results || []).map(
-    (community: Community) => ({
-      id: community.id,
-      name: community.title,
-      imageUrl: resolveCommunityImageUrl(community),
-    }),
+  // Memoised so the auto-select effect below does not re-run on every render
+  const communitiesForSelector: CommunityOption[] = useMemo(
+    () =>
+      (createdCommunitiesResponse?.data?.results || []).map((community: Community) => ({
+        id: community.id,
+        name: community.title,
+        imageUrl: resolveCommunityImageUrl(community),
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [createdCommunitiesResponse?.data?.results],
   );
+
+  // A creator with exactly one community has no choice to make, so it is
+  // preselected. Runs once: the pills toggle, and re-selecting after a
+  // deliberate deselection would leave the field impossible to clear.
+  const hasAutoSelectedCommunity = useRef(false);
+
+  useEffect(() => {
+    if (hasAutoSelectedCommunity.current) return;
+
+    // Already chosen, or hydrated from a draft — nothing to preselect
+    if (formData.dateType.community) {
+      hasAutoSelectedCommunity.current = true;
+      return;
+    }
+
+    if (communitiesForSelector.length !== 1) return;
+
+    hasAutoSelectedCommunity.current = true;
+    updateFormData({ community: communitiesForSelector[0] });
+  }, [communitiesForSelector, formData.dateType.community, updateFormData]);
 
   return {
     // State

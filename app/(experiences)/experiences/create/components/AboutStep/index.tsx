@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Interest } from '@/types/interest';
 
 import { usePendingAction } from '../../hooks/usePendingAction';
+import { type AboutFormValues } from '../../schemas';
 import { AddPlaceModal } from '../AddPlaceModal';
 import { CategoryPicker } from '../CategoryPicker';
 import { DescriptionFields } from '../DescriptionFields';
@@ -22,21 +23,8 @@ type FormPhoto = {
   isTempId?: boolean;
 };
 
-type AboutFormData = {
-  photos: FormPhoto[];
-  title: string;
-  visibility: 'public' | 'private';
-  description: string;
-  whatsIncluded: string;
-  whatsNotIncluded: string;
-  location: string;
-  locationPlaceId: string;
-  placeId: string | null;
-  placeImageUrl: string | null;
-  meetingPoint: string;
-  meetingTime: string | null;
-  categories: Interest[];
-};
+// Derived from the zod schema — never redeclare this shape by hand
+type AboutFormData = AboutFormValues;
 
 interface AboutStepProps {
   formData: AboutFormData;

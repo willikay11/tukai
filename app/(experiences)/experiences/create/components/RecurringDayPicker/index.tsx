@@ -2,9 +2,6 @@
 
 import { useCallback } from 'react';
 
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-
 type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
 interface RecurringDayPickerProps {
@@ -36,6 +33,11 @@ export const RecurringDayPicker = ({ value, onChange }: RecurringDayPickerProps)
 
   return (
     <div className="space-y-3">
+      <div>
+        <p className="text-sm font-bold text-gray-900">Select the days the experience will recur</p>
+        <p className="mt-1 text-xs text-gray-500">You can select more than one</p>
+      </div>
+
       <div className="justity-center inline-flex items-center space-x-2">
         {DAYS.map(({ key, label }) => (
           <div key={key} className="flex items-center gap-1">

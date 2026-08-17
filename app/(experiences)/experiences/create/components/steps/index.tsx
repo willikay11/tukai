@@ -18,6 +18,7 @@ import { ItineraryDayFormValue } from '@/types/itinerary';
 import { Wallet } from '@/types/payment';
 
 import type { FormData, FormPhoto } from '../../hooks/useCreateExperienceFlow';
+import { type AboutFormValues } from '../../schemas';
 import { AboutStep } from '../AboutStep';
 import { type DateTypeFormData, DateTypeStep } from '../DateTypeStep';
 import { InviteGuestsStep } from '../InviteGuestsStep';
@@ -32,22 +33,8 @@ import { ExperienceDates } from '../dates';
 import { CreateExperienceInvites } from '../invites';
 import { CreateExperienceWallet } from '../wallet';
 
-type AboutFormData = {
-  // FormPhoto[], not string[] — AboutStep declares it this way and page.tsx
-  // passes formData.about straight through
-  photos: FormPhoto[];
-  photoFiles: File[];
-  title: string;
-  visibility: 'public' | 'private';
-  description: string;
-  whatsIncluded: string;
-  whatsNotIncluded: string;
-  location: string;
-  locationPlaceId: string;
-  meetingPoint: string;
-  meetingTime: string | null;
-  categories: Interest[];
-};
+// Derived from the zod schema — never redeclare this shape by hand
+type AboutFormData = AboutFormValues;
 
 // The Preview step shows either the captured-data summary or the customer mirror
 type PreviewMode = 'captured' | 'customer';
@@ -64,7 +51,7 @@ export type ExperienceStepId =
 const STEPS_DEFAULT = [
   {
     id: 'dates-type',
-    label: 'Dates Type',
+    label: 'Dates & Type',
     icon: 'CalendarIcon',
   },
   {
@@ -85,7 +72,7 @@ const STEPS_DEFAULT = [
 const STEPS_MULTI_DAY = [
   {
     id: 'dates-type',
-    label: 'Dates Type',
+    label: 'Dates & Type',
     icon: 'CalendarIcon',
   },
   {
@@ -106,7 +93,7 @@ const STEPS_MULTI_DAY = [
 const STEPS_ITINERARY = [
   {
     id: 'dates-type',
-    label: 'Dates Type',
+    label: 'Dates & Type',
     icon: 'CalendarIcon',
   },
   {
@@ -348,8 +335,8 @@ export const CreateExperienceSteps = ({
     const canAccessStep =
       currentStep === 'about' ? Boolean(formData?.community?.id) : canAccessDetailsSteps;
 
-    if (!isLoadingExperience && currentStep !== 'community' && !canAccessStep) {
-      onStepChange?.('community');
+    if (!isLoadingExperience && currentStep !== 'dates-type' && !canAccessStep) {
+      onStepChange?.('dates-type');
     }
   }, [
     canAccessDetailsSteps,
@@ -360,7 +347,7 @@ export const CreateExperienceSteps = ({
   ]);
 
   const handleStepChange = (step: ExperienceStepId) => {
-    if (step !== 'community' && !canAccessDetailsSteps) {
+    if (step !== 'dates-type' && !canAccessDetailsSteps) {
       return;
     }
 
@@ -446,10 +433,10 @@ export const CreateExperienceSteps = ({
                   itineraryDays.every((day) => day.activities.some((a) => a.activityApiId != null)),
                 );
           const stepFilledMap: Record<string, boolean> = {
-            community: canAccessDetailsSteps,
+            'dates-type': canAccessDetailsSteps,
             about: isAboutFilled,
             'itinerary-days': isItineraryDaysFilled,
-            'dates-tickets': isDatesTicketsFilled,
+            tickets: isDatesTicketsFilled,
             guests: isGuestsFilled,
             wallet: hasSavedWallets,
             // Preview is a read-only view — it is "filled" as soon as there is
@@ -457,7 +444,7 @@ export const CreateExperienceSteps = ({
             preview: Boolean(previewExperience?.title),
           };
           const isFilled = stepFilledMap[step.id] ?? false;
-          const isDisabled = step.id !== 'community' && !canAccessDetailsSteps;
+          const isDisabled = step.id !== 'dates-type' && !canAccessDetailsSteps;
 
           return (
             <TabsTrigger
@@ -492,7 +479,7 @@ export const CreateExperienceSteps = ({
             currentStep === 'preview' ? 'col-span-12' : 'col-span-12 lg:col-span-6 xl:col-span-5'
           }
         >
-          <TabsContent value="community" className="col-span-1 mt-6">
+          <TabsContent value="dates-type" className="col-span-1 mt-6">
             {formData && updateFormData ? (
               <div className="space-y-4">
                 <DateTypeStep
@@ -564,7 +551,7 @@ export const CreateExperienceSteps = ({
                 formData={aboutFormData}
                 errors={aboutErrors}
                 onFormDataChange={updateAboutFormData}
-                onCancel={() => handleStepChange('community')}
+                onCancel={() => handleStepChange('dates-type')}
                 onSaveEdit={async () => {
                   if (!validateAbout()) return;
                   const saved = await handlers?.handleSaveAbout?.();
@@ -577,7 +564,7 @@ export const CreateExperienceSteps = ({
                     if (handlers?.handleSaveAbout) {
                       await handlers.handleSaveAbout();
                     } else {
-                      handleStepChange('dates-tickets');
+                      handleStepChange('tickets');
                     }
                   }
                 }}
@@ -588,7 +575,7 @@ export const CreateExperienceSteps = ({
                 experience={experience}
                 onSuccess={(experienceId) => {
                   const nextStep =
-                    formData?.experienceType === 'itinerary' ? 'itinerary-days' : 'dates-tickets';
+                    formData?.experienceType === 'itinerary' ? 'itinerary-days' : 'tickets';
                   onExperienceCreated?.(experienceId, nextStep);
                 }}
               />
@@ -609,7 +596,7 @@ export const CreateExperienceSteps = ({
                   if (handlers?.handleSaveItineraryDays) {
                     handlers.handleSaveItineraryDays();
                   } else {
-                    handleStepChange('dates-tickets');
+                    handleStepChange('tickets');
                   }
                 }}
                 onSaveAndExit={async () => {
@@ -624,7 +611,7 @@ export const CreateExperienceSteps = ({
             )}
           </TabsContent>
 
-          <TabsContent value="dates-tickets" className="col-span-1 mt-6">
+          <TabsContent value="tickets" className="col-span-1 mt-6">
             {ticketsFormData && updateTicketsFormData ? (
               <TicketsStep
                 formData={ticketsFormData}
@@ -690,7 +677,7 @@ export const CreateExperienceSteps = ({
                 experienceId={experience?.id || null}
                 experience={experience}
                 onNext={() => handleStepChange('wallet')}
-                onCancel={() => handleStepChange('dates-tickets')}
+                onCancel={() => handleStepChange('tickets')}
                 onSaveAndExit={exitToHosting}
                 onPreview={handlePreviewClick}
               />
@@ -852,7 +839,7 @@ export const CreateExperienceSteps = ({
                   <ViewExperiencePageContent experience={previewExperience} bookingMode="preview" />
                 )}
 
-                <div className="mt-8 justify-end flex">
+                <div className="mt-8 flex justify-end">
                   <Button
                     type="button"
                     variant="gradient"

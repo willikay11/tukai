@@ -23,7 +23,7 @@ describe('SharedExperiencePreview', () => {
   } as Wallet;
 
   const defaultProps = {
-    step: 'community' as const,
+    step: 'dates-type' as const,
     experienceType: 'one-time' as const,
     isRecurring: false,
     aboutPhotos: [{ id: '1', url: 'https://example.com/photo.jpg', isTempId: false }],
@@ -77,10 +77,8 @@ describe('SharedExperiencePreview', () => {
       ).toBeInTheDocument();
     });
 
-    it('displays dates-tickets section when step is dates-tickets', () => {
-      const { container } = render(
-        <SharedExperiencePreview {...defaultProps} step="dates-tickets" />,
-      );
+    it('displays tickets section when step is tickets', () => {
+      const { container } = render(<SharedExperiencePreview {...defaultProps} step="tickets" />);
       // The date section renders "Mon, Jun 15" — the year only ever appeared via
       // the ticket validity line, which is commented out in TicketCard
       expect(container.textContent).toContain('Jun');
@@ -215,8 +213,8 @@ describe('SharedExperiencePreview', () => {
   });
 
   describe('Tickets Section', () => {
-    it('displays tickets when on dates-tickets step', () => {
-      render(<SharedExperiencePreview {...defaultProps} step="dates-tickets" />);
+    it('displays tickets when on the tickets step', () => {
+      render(<SharedExperiencePreview {...defaultProps} step="tickets" />);
       expect(screen.getByText('Tickets')).toBeInTheDocument();
       expect(screen.getByText('Regular')).toBeInTheDocument();
     });
@@ -227,7 +225,7 @@ describe('SharedExperiencePreview', () => {
     });
 
     it('hides tickets section when no tickets provided', () => {
-      render(<SharedExperiencePreview {...defaultProps} ticketsItems={[]} step="dates-tickets" />);
+      render(<SharedExperiencePreview {...defaultProps} ticketsItems={[]} step="tickets" />);
       expect(screen.queryByText('Regular')).not.toBeInTheDocument();
     });
   });
@@ -333,7 +331,7 @@ describe('SharedExperiencePreview', () => {
       expect(container1).toBeInTheDocument();
 
       const { container: container2 } = render(
-        <SharedExperiencePreview {...defaultProps} step="dates-tickets" />,
+        <SharedExperiencePreview {...defaultProps} step="tickets" />,
       );
       expect(container2).toBeInTheDocument();
     });
