@@ -13,7 +13,11 @@ interface TwoPanelLayoutProps {
 const NARROW_LEFT =
   'col-span-12 mb-4 md:col-span-10 md:col-start-2 md:mx-0 lg:col-span-4 lg:col-start-3 xl:col-span-5 xl:col-start-2 3xl:col-span-3 3xl:col-start-3 4xl:col-span-2 4xl:col-start-4';
 
-const WIDE_LEFT = 'col-span-12 mb-4 md:col-span-10 md:col-start-2 md:mx-0';
+// Column spans mirror the site header in app/layout.tsx so full-width content
+// starts on the same gridline as the logo at every breakpoint — the header
+// narrows at 3xl/4xl, and without these the content stayed at col-start-2
+const WIDE_LEFT =
+  'col-span-12 mb-4 md:col-span-10 md:col-start-2 md:mx-0 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4';
 
 export const TwoPanelLayout = ({ left, right, wide = false }: TwoPanelLayoutProps) => {
   return (
