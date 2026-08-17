@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import { ItineraryDayFormValue } from '@/types/itinerary';
 
 import { PreviewItineraryDayPill } from '../PreviewItineraryDayPill';
@@ -9,11 +10,13 @@ import { PreviewItineraryDayPill } from '../PreviewItineraryDayPill';
 interface PreviewItinerarySectionProps {
   days: ItineraryDayFormValue[];
   itineraryStartDate: string | null;
+  onEdit?: () => void;
 }
 
 export const PreviewItinerarySection = ({
   days,
   itineraryStartDate,
+  onEdit,
 }: PreviewItinerarySectionProps) => {
   const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set([1]));
 
@@ -45,10 +48,16 @@ export const PreviewItinerarySection = ({
 
   return (
     <div className="space-y-2">
-      {/* Read-only, unlike the sibling sections — the itinerary is edited from
-          its own step, so neither the heading nor the day pills carry an edit
-          affordance */}
-      <p className="text-sm font-medium text-gray-800">Itinerary</p>
+      {/* The day pills stay read-only; only the heading carries the edit
+          affordance, which jumps to the itinerary step */}
+      <div className="flex items-start justify-between">
+        <p className="text-sm font-medium text-gray-800">Itinerary</p>
+        {onEdit && (
+          <button onClick={onEdit} className="text-gray-400 hover:text-gray-600">
+            <IconComponent iconName="Edit02Icon" size={16} className="text-gray-800" />
+          </button>
+        )}
+      </div>
 
       {/* Day pills */}
       <div className="space-y-1">

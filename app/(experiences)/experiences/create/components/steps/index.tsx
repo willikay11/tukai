@@ -17,12 +17,13 @@ import { Interest } from '@/types/interest';
 import { ItineraryDayFormValue } from '@/types/itinerary';
 import { Wallet } from '@/types/payment';
 
-import type { FormData } from '../../hooks/useCreateExperienceFlow';
+import type { FormData, FormPhoto } from '../../hooks/useCreateExperienceFlow';
 import { AboutStep } from '../AboutStep';
 import { type DateTypeFormData, DateTypeStep } from '../DateTypeStep';
 import { InviteGuestsStep } from '../InviteGuestsStep';
 import { ItineraryDaysStep } from '../ItineraryDaysStep';
 import { type RelativeValidityValue } from '../RelativeValidityPicker';
+import { SharedExperiencePreview } from '../SharedExperiencePreview';
 import { TicketsStep } from '../TicketsStep';
 import { WalletDetailsStep } from '../WalletDetailsStep';
 import { CreateExperienceAbout } from '../about';
@@ -32,7 +33,9 @@ import { CreateExperienceInvites } from '../invites';
 import { CreateExperienceWallet } from '../wallet';
 
 type AboutFormData = {
-  photos: string[];
+  // FormPhoto[], not string[] — AboutStep declares it this way and page.tsx
+  // passes formData.about straight through
+  photos: FormPhoto[];
   photoFiles: File[];
   title: string;
   visibility: 'public' | 'private';
@@ -45,6 +48,9 @@ type AboutFormData = {
   meetingTime: string | null;
   categories: Interest[];
 };
+
+// The Preview step shows either the captured-data summary or the customer mirror
+type PreviewMode = 'captured' | 'customer';
 
 export type ExperienceStepId =
   | 'community'
@@ -310,6 +316,7 @@ export const CreateExperienceSteps = ({
   );
 
   // ─── Preview step publishing ─────────────────────────────────────────────
+  const [previewMode, setPreviewMode] = useState<PreviewMode>('captured');
   const [isPublishing, setIsPublishing] = useState(false);
   const [isPublishedModalOpen, setIsPublishedModalOpen] = useState(false);
 
@@ -754,36 +761,114 @@ export const CreateExperienceSteps = ({
                     <div>
                       <p className="text-base font-bold text-gray-900">Preview</p>
                       <p className="mt-0.5 text-sm text-gray-400">
-                        This is exactly what a customer sees on your experience page.
+                        Everything you have captured so far. Edit any section to jump back to that
+                        step.
                       </p>
                     </div>
 
-                    <div className="flex flex-shrink-0 items-center gap-3">
-                      <Button
-                        type="button"
-                        variant="gradient"
-                        onClick={handlePublishClick}
-                        disabled={!publishableExperienceId || isPublishing}
-                        className="flex items-center gap-2 rounded-full px-5 py-2.5"
-                      >
-                        <IconComponent
-                          iconName={isPublishing ? 'Loading03Icon' : 'RocketIcon'}
-                          size={16}
-                          color="currentColor"
-                          className={isPublishing ? 'animate-spin text-white' : 'text-white'}
-                        />
-                        {isPublishing ? 'Publishing...' : 'Publish Experience'}
-                      </Button>
-                    </div>
+                    {/* Same segmented control as the Experiences page filter
+                        tabs: a grey track with a white active pill */}
+                    <Tabs
+                      value={previewMode}
+                      onValueChange={(value) => setPreviewMode(value as PreviewMode)}
+                      className="flex-shrink-0"
+                    >
+                      <TabsList className="h-auto gap-0 rounded-full bg-gray-100 p-1">
+                        <TabsTrigger
+                          value="captured"
+                          className="rounded-full border-0 px-5 py-2 text-sm font-normal text-gray-500 data-[state=active]:border-b-0 data-[state=active]:bg-white data-[state=active]:font-normal data-[state=active]:text-primary"
+                        >
+                          What you captured
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="customer"
+                          className="rounded-full border-0 px-5 py-2 text-sm font-normal text-gray-500 data-[state=active]:border-b-0 data-[state=active]:bg-white data-[state=active]:font-normal data-[state=active]:text-primary"
+                        >
+                          Customer view
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
                   </div>
                 </div>
 
-                {/*
-                  The REAL customer detail view — the same component
-                  /experiences/[experienceId] renders. Never fork this into a
-                  preview-specific copy; changes there must show up here.
-                */}
-                <ViewExperiencePageContent experience={previewExperience} bookingMode="preview" />
+                {previewMode === 'captured' ? (
+                  /* The same section components the removed side panel used —
+                     each pencil jumps to the step that owns its data */
+                  <div className="max-w-2xl">
+                    <SharedExperiencePreview
+                      showAllSections
+                      experienceType={formData?.experienceType}
+                      isRecurring={formData?.isRecurring}
+                      aboutPhotos={aboutFormData?.photos}
+                      aboutTitle={aboutFormData?.title}
+                      aboutDescription={aboutFormData?.description}
+                      aboutVisibility={aboutFormData?.visibility}
+                      aboutWhatsIncluded={aboutFormData?.whatsIncluded}
+                      aboutWhatsNotIncluded={aboutFormData?.whatsNotIncluded}
+                      aboutLocation={aboutFormData?.location}
+                      aboutMeetingPoint={aboutFormData?.meetingPoint}
+                      aboutMeetingTime={aboutFormData?.meetingTime}
+                      aboutCategories={aboutFormData?.categories}
+                      selectedDate={formData?.date}
+                      selectedStartTime={formData?.startTime}
+                      selectedEndTime={formData?.endTime}
+                      selectedRecurringDays={formData?.recurringDays}
+                      selectedTimeSlots={formData?.timeSlots}
+                      selectedRecurrenceStartDate={formData?.recurrenceStartDate}
+                      selectedRecurrenceEndDate={formData?.recurrenceEndDate}
+                      multiDayStartDate={formData?.multiDayStartDate}
+                      multiDayStartTime={formData?.multiDayStartTime}
+                      multiDayEndDate={formData?.multiDayEndDate}
+                      multiDayEndTime={formData?.multiDayEndTime}
+                      itineraryDays={itineraryDays}
+                      itineraryStartDate={formData?.itineraryStartDate}
+                      itineraryEndDate={formData?.itineraryEndDate}
+                      selectedCommunity={
+                        formData?.community
+                          ? {
+                              name: formData.community.name,
+                              imageUrl: formData.community.imageUrl ?? '',
+                            }
+                          : null
+                      }
+                      ticketsItems={ticketsFormData?.items}
+                      ticketsCommissionPayer={ticketsFormData?.commission}
+                      invitedGuests={(inviteFormData?.invitedGuests ?? []).map((guest) => ({
+                        ...guest,
+                        name: guest.email?.split('@')[0] ?? 'Guest',
+                      }))}
+                      invitedCommunityIds={inviteFormData?.invitedCommunityIds}
+                      allCommunities={communitiesForSelector}
+                      selectedWallet={walletFormData?.selectedWallet}
+                      onEditStep={(step) => handleStepChange(step as ExperienceStepId)}
+                    />
+                  </div>
+                ) : (
+                  /*
+                    The REAL customer detail view — the same component
+                    /experiences/[experienceId] renders. Never fork this into a
+                    preview-specific copy; changes there must show up here.
+                  */
+                  <ViewExperiencePageContent experience={previewExperience} bookingMode="preview" />
+                )}
+
+                <div className="mt-8 max-w-2xl">
+                  <Button
+                    type="button"
+                    variant="gradient"
+                    onClick={handlePublishClick}
+                    disabled={!publishableExperienceId || isPublishing}
+                    className="flex w-full items-center justify-center gap-2 rounded-full"
+                  >
+                    <IconComponent
+                      iconName={isPublishing ? 'Loading03Icon' : 'RocketIcon'}
+                      size={16}
+                      color="currentColor"
+                      className={isPublishing ? 'animate-spin text-white' : 'text-white'}
+                    />
+                    {isPublishing ? 'Publishing...' : 'Publish Experience'}
+                  </Button>
+                </div>
 
                 {/* Reused from the removed review page's publish flow */}
                 <ExperienceCreatedModal
