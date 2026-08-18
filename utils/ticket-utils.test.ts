@@ -2,6 +2,7 @@ import { parseSnakeToCamel } from './parseSnakeToCamel';
 import {
   buildAbsoluteTicketValidity,
   buildRecurringTicketValidity,
+  getTicketBuyerPrice,
   mapAnchorToCondition,
   mapRelativeUnit,
   mapRelativeUnitAmount,
@@ -148,6 +149,61 @@ describe('buildAbsoluteTicketValidity', () => {
       sales_start_date: null,
       sales_end_date: null,
     });
+  });
+});
+
+describe('getTicketBuyerPrice', () => {
+  it('uses buyerPrice.amount over the host base price', () => {
+    expect(
+      getTicketBuyerPrice({
+        price: '1000.00',
+        buyerPrice: { amount: '1020.00', currency: 'KES' },
+      }),
+    ).toBe(1020);
+  });
+
+  it('reads the camelCase key parseSnakeToCamel produces from buyer_price', () => {
+    const apiTicket = {
+      price: '1000.00',
+      buyer_price: { amount: '1020.00', currency: 'KES' },
+    };
+    const camel = parseSnakeToCamel(apiTicket);
+
+    expect(getTicketBuyerPrice(camel as any)).toBe(1020);
+  });
+
+  it('still reads a raw snake_case payload', () => {
+    expect(
+      getTicketBuyerPrice({
+        price: '1000.00',
+        buyer_price: { amount: '1020.00', currency: 'KES' },
+      }),
+    ).toBe(1020);
+  });
+
+  it('falls back to price when no buyer price is present', () => {
+    expect(getTicketBuyerPrice({ price: '1000.00' })).toBe(1000);
+    expect(getTicketBuyerPrice({ price: 1000 })).toBe(1000);
+    expect(getTicketBuyerPrice({ price: '1000.00', buyerPrice: null })).toBe(1000);
+  });
+
+  it('accepts a numeric buyer amount', () => {
+    expect(
+      getTicketBuyerPrice({ price: '1000.00', buyerPrice: { amount: 1020, currency: 'KES' } }),
+    ).toBe(1020);
+  });
+
+  it('returns 0 rather than NaN for an unparseable amount', () => {
+    expect(getTicketBuyerPrice({ price: '' })).toBe(0);
+    expect(
+      getTicketBuyerPrice({ price: '1000.00', buyerPrice: { amount: 'n/a', currency: 'KES' } }),
+    ).toBe(0);
+  });
+
+  it('keeps a zero buyer price instead of falling through to the base price', () => {
+    expect(
+      getTicketBuyerPrice({ price: '1000.00', buyerPrice: { amount: '0.00', currency: 'KES' } }),
+    ).toBe(0);
   });
 });
 

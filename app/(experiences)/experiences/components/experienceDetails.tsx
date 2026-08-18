@@ -6,6 +6,7 @@ import numeral from 'numeral';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
 import { Experience } from '@/types/experience';
+import { getTicketBuyerPrice } from '@/utils/ticket-utils';
 
 export const ExperienceDetails = ({ experience }: { experience: Experience }) => {
   return (
@@ -37,7 +38,7 @@ export const ExperienceDetails = ({ experience }: { experience: Experience }) =>
               <li className="text-sm font-normal text-gray-500">
                 <span className="text-gray-700">{ticket.name}</span>&nbsp;-&nbsp;
                 <span className="text-gray-500">
-                  {experience.currency} {numeral(ticket.price).format('0,0')}
+                  {experience.currency} {numeral(getTicketBuyerPrice(ticket)).format('0,0')}
                 </span>
               </li>
             ))}

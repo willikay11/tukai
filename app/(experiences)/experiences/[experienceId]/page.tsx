@@ -8,6 +8,7 @@ import { fetchExperience } from '@/services/experience';
 import { ApiResponse } from '@/types/apiResponse';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
+import { getTicketBuyerPrice } from '@/utils/ticket-utils';
 
 import { ViewExperiencePageContent } from './ViewExperiencePageContent';
 import { ExperienceUnavailable } from './components/ExperienceUnavailable';
@@ -131,7 +132,7 @@ const buildEventJsonLd = (experience: Experience) => {
           offers: experience.tickets.map((ticket) => ({
             '@type': 'Offer',
             name: ticket.name,
-            price: typeof ticket.price === 'string' ? parseFloat(ticket.price) : ticket.price,
+            price: getTicketBuyerPrice(ticket),
             priceCurrency: currency,
             availability: experience.isSoldOut
               ? 'https://schema.org/SoldOut'

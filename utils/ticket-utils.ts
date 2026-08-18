@@ -1,7 +1,26 @@
 import type { CreateExperienceTicket } from '@/types/experience';
+import type { Ticket } from '@/types/ticket';
 import type { Reservation, TicketPurchase } from '@/types/ticket-purchase';
 
 export type RelativeUnit = 'hour' | 'day' | 'week';
+
+/**
+ * The amount a buyer is charged for one ticket. `buyer_price` is computed by the
+ * API from the experience's fees_allocation, so anything shown to or totalled
+ * for a buyer must use it rather than `price` (the host's base amount).
+ *
+ * Falls back to `price` for payloads without a buyer price — locally built
+ * preview tickets, and any experience saved before the field existed.
+ */
+export const getTicketBuyerPrice = (
+  ticket: Pick<Ticket, 'price' | 'buyerPrice' | 'buyer_price'>,
+): number => {
+  const buyerAmount = (ticket.buyerPrice ?? ticket.buyer_price)?.amount;
+  const amount = buyerAmount ?? ticket.price;
+  const parsed = typeof amount === 'string' ? parseFloat(amount) : amount;
+
+  return Number.isFinite(parsed) ? parsed : 0;
+};
 export type ApiTicketUnit = 'days' | 'hours' | 'minutes';
 export type ApiTicketCondition = 'before_start' | 'before_end';
 

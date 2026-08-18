@@ -1,5 +1,6 @@
 import { Quantity } from '@/components/ui/quantity';
 import { Ticket } from '@/types/ticket';
+import { getTicketBuyerPrice } from '@/utils/ticket-utils';
 
 interface TicketQuantityRowProps {
   ticket: Ticket;
@@ -19,7 +20,7 @@ export const TicketQuantityRow = ({ ticket, quantity, onChange }: TicketQuantity
     <div className="flex items-center justify-between rounded-lg border border-gray-100 p-3">
       <div>
         <p className="text-sm font-semibold">
-          ${typeof ticket.price === 'string' ? ticket.price : ticket.price.toFixed(2)}/person
+          ${getTicketBuyerPrice(ticket).toFixed(2)}/person
         </p>
         <p className="text-xs text-gray-500">{ticket.name}</p>
       </div>
