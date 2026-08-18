@@ -552,4 +552,44 @@ describe('Experience Service', () => {
       });
     });
   });
+
+  describe('cancelExperience', () => {
+    it('posts to the cancel action, the way publish does', async () => {
+      const mockResponse = { data: { status: 'CANCELLED' }, status: 200 };
+      mockApi.post.mockResolvedValue(mockResponse);
+
+      const result = await experienceService.cancelExperience('exp-1');
+
+      expect(mockApiWithToken).toHaveBeenCalled();
+      expect(mockApi.post).toHaveBeenCalledWith('/v1/experiences/exp-1/cancel/');
+      expect(result.success).toBe(true);
+      expect(result.status).toBe(200);
+    });
+
+    it('surfaces the API detail from the errors array', async () => {
+      const error = {
+        response: {
+          status: 400,
+          data: { errors: [{ detail: 'Cannot cancel an experience with sold tickets.' }] },
+        },
+      };
+      mockApi.post.mockRejectedValue(error);
+
+      await expect(experienceService.cancelExperience('exp-1')).rejects.toEqual({
+        status: 400,
+        success: false,
+        message: 'Cannot cancel an experience with sold tickets.',
+      });
+    });
+
+    it('falls back to a generic message when the error carries no detail', async () => {
+      mockApi.post.mockRejectedValue({ message: 'Network Error' });
+
+      await expect(experienceService.cancelExperience('exp-1')).rejects.toEqual({
+        status: 500,
+        success: false,
+        message: 'An unexpected error occurred',
+      });
+    });
+  });
 });

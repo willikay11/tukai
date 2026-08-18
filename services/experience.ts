@@ -408,19 +408,17 @@ export const publishExperience = async (id: string): Promise<ApiResponse> => {
   }
 };
 
-// There is no delete-experience endpoint, so discarding a draft means marking
-// it cancelled — it stops being an unfinished draft without destroying the row.
+// There is no delete-experience endpoint, so discarding a draft means
+// cancelling it — it stops being an unfinished draft without destroying the
+// row. Mirrors publishExperience: same verb, same shape, different action.
+//
+// Called from exactly one place: "Clear draft and start fresh" on the resume
+// screen (ResumeDraft → handleClearDraft). Do not wire it to any other action —
+// cancelling a live experience is not what this endpoint is here for.
 export const cancelExperience = async (id: string): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();
-    const formData = new FormData();
-    formData.append('status', 'cancelled');
-
-    const response = await axiosInstance.patch(`/v2/experiences/${id}/`, formData, {
-      headers: {
-        'Content-Type': undefined,
-      },
-    });
+    const response = await axiosInstance.post(`/v1/experiences/${id}/cancel/`);
 
     return {
       status: response.status,

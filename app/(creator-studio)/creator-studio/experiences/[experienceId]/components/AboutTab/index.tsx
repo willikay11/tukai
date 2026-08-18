@@ -113,7 +113,10 @@ export const AboutTab = ({ experience, metrics }: AboutTabProps) => {
         )}
 
         <div>
-          {/* TODO: no cancel/unpublish endpoint exists — wire when one does */}
+          {/* Stays disabled. The cancel endpoint is reserved for clearing an
+              unfinished draft ("Clear draft and start fresh"), so it must not
+              be wired here — cancelling a live experience needs its own
+              endpoint and its own rules about sold tickets. */}
           <button
             type="button"
             disabled
