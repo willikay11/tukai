@@ -199,7 +199,11 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
   }
 }
 
-export async function updateExperience(id: string, data: CreateExperience): Promise<ApiResponse> {
+// Every field below is guarded, so callers may PATCH as little as one field
+export async function updateExperience(
+  id: string,
+  data: Partial<CreateExperience>,
+): Promise<ApiResponse> {
   try {
     console.error('[updateExperience] Update called with data:', data);
     const axiosInstance = await apiWithToken();

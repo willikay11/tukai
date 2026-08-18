@@ -1,16 +1,10 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { CommissionPicker } from './CommissionPicker';
+import { CommissionPicker } from './index';
 
-jest.mock('@/components/ui/radio-group', () => ({
-  RadioGroup: ({ children, value, onValueChange }: any) => (
-    <div data-testid="radio-group" data-value={value}>
-      {Array.isArray(children) ? children : [children]}
-    </div>
-  ),
-  RadioGroupItem: ({ value, id }: any) => (
-    <input type="radio" value={value} id={id} data-testid={`radio-item-${value}`} />
-  ),
+jest.mock('@/app/shared/components/Icons', () => ({
+  IconComponent: ({ iconName }: any) => <span data-testid={`icon-${iconName}`} />,
 }));
 
 describe('CommissionPicker', () => {
@@ -26,11 +20,26 @@ describe('CommissionPicker', () => {
     expect(screen.getByText(/Tukai charges a 4% commission/i)).toBeInTheDocument();
   });
 
-  it('receives correct props', () => {
+  it('reports the picked option', async () => {
     const onChange = jest.fn();
-    const { rerender } = render(<CommissionPicker value="host" onChange={onChange} />);
-    expect(screen.getByTestId('radio-group')).toHaveAttribute('data-value', 'host');
-    rerender(<CommissionPicker value="customer" onChange={onChange} />);
-    expect(screen.getByTestId('radio-group')).toHaveAttribute('data-value', 'customer');
+    render(<CommissionPicker value="host" onChange={onChange} />);
+
+    await userEvent.click(screen.getByText('The customer will pay the commission'));
+
+    expect(onChange).toHaveBeenCalledWith('customer');
+  });
+
+  it('locks the options and shows a spinner while the pick is saving', () => {
+    render(<CommissionPicker value="split" onChange={() => {}} isSaving />);
+
+    screen.getAllByRole('button').forEach((button) => expect(button).toBeDisabled());
+    expect(screen.getByTestId('icon-Loading03Icon')).toBeInTheDocument();
+  });
+
+  it('leaves the options clickable when nothing is saving', () => {
+    render(<CommissionPicker value="split" onChange={() => {}} />);
+
+    screen.getAllByRole('button').forEach((button) => expect(button).toBeEnabled());
+    expect(screen.queryByTestId('icon-Loading03Icon')).not.toBeInTheDocument();
   });
 });

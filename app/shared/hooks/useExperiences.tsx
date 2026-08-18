@@ -131,7 +131,7 @@ export const useUpdateExperience = (id: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ['updateExperience', id],
-    mutationFn: async (data: CreateExperience) => await updateExperience(id, data),
+    mutationFn: async (data: Partial<CreateExperience>) => await updateExperience(id, data),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['experience', id] });
     },

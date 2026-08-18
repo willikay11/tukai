@@ -42,6 +42,8 @@ interface TicketsStepProps {
   // Resolves once the save settles, so the button can stop its spinner
   onSaveContinue: () => void | Promise<void>;
   onCancel: () => void;
+  // Persists the picked fees allocation to the experience right away
+  onCommissionChange?: (commission: 'host' | 'customer' | 'split') => void | Promise<void>;
   photos?: string[];
   isRecurring?: boolean;
   experienceId?: string | null;
@@ -93,6 +95,7 @@ export const TicketsStep = ({
   errors,
   onSaveContinue,
   onCancel,
+  onCommissionChange,
   photos,
   isRecurring = false,
   timeSlots = [],
@@ -118,6 +121,7 @@ export const TicketsStep = ({
     (formData.ticketMode as 'entire-period' | 'each-day') || 'entire-period',
   );
   const [isSavingLocal, setIsSavingLocal] = useState(false);
+  const [isSavingCommission, setIsSavingCommission] = useState(false);
   const { pendingAction, runAction } = usePendingAction<'continue'>();
 
   // API mutation hooks
@@ -142,6 +146,24 @@ export const TicketsStep = ({
     setDraftTicket(emptyTicketForm);
     setFormErrors({});
   };
+
+  // The selection is applied locally straight away and then persisted, so the
+  // pill stays lit while the PATCH is in flight
+  const handleCommissionChange = useCallback(
+    async (commission: 'host' | 'customer' | 'split') => {
+      onChange({ commission });
+
+      if (!onCommissionChange) return;
+
+      setIsSavingCommission(true);
+      try {
+        await onCommissionChange(commission);
+      } finally {
+        setIsSavingCommission(false);
+      }
+    },
+    [onChange, onCommissionChange],
+  );
 
   const handleDraftTicketChange = useCallback((data: Partial<TicketFormValue>) => {
     setDraftTicket((prev) => ({ ...prev, ...data }));
@@ -541,7 +563,8 @@ export const TicketsStep = ({
 
       <CommissionPicker
         value={formData.commission}
-        onChange={(commission) => onChange({ commission })}
+        onChange={handleCommissionChange}
+        isSaving={isSavingCommission}
       />
 
       {isMultiDay && (
