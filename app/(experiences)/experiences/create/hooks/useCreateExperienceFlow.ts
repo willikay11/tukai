@@ -153,6 +153,13 @@ const mapCommission = (
   return map[value];
 };
 
+// Inverse of mapCommission, for restoring the picker from a saved experience.
+// Returns null for an absent or unrecognised value, leaving the form default.
+const parseCommission = (value: string | null | undefined): 'host' | 'customer' | 'split' | null => {
+  const map = { host_pays: 'host', customer_pays: 'customer', split: 'split' } as const;
+  return value && value in map ? map[value as keyof typeof map] : null;
+};
+
 export interface CommunityOption {
   id: string;
   name: string;
@@ -672,6 +679,16 @@ export const useCreateExperienceFlow = ({
 
     // Update date type form with community
     updateFormData(dateTypeUpdate);
+
+    // Restore the saved fees allocation so the picker opens on the host's own
+    // choice rather than the 'host' default. Runs whether or not tickets exist.
+    const savedCommission = parseCommission(experience.feesAllocation);
+    if (savedCommission) {
+      setFormData((prev) => ({
+        ...prev,
+        tickets: { ...prev.tickets, commission: savedCommission },
+      }));
+    }
 
     // Load tickets from saved experience
     if (experience.tickets && experience.tickets.length > 0) {

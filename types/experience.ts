@@ -40,6 +40,8 @@ export type Experience = {
   whatsNotIncluded?: string;
   meetingPoint?: string;
   meetingTime?: string;
+  // Who absorbs Tukai's commission. Drives each ticket's buyer_price.
+  feesAllocation?: 'host_pays' | 'customer_pays' | 'split' | null;
   dateCreated: string;
   // Not documented on every response — parseSnakeToCamel maps `date_updated`
   // when the API sends it. Read it through getLastSavedAt(), which falls back
