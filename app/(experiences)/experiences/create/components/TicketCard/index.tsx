@@ -16,7 +16,11 @@ function formatKsh(value: number) {
 export interface TicketCardProps {
   name: string;
   quantity: number;
+  // The host's base amount, as typed into the ticket form
   amount: number;
+  // What the buyer is charged, straight from the API's buyer_price. Null until
+  // the ticket has been saved and the API has allocated the commission.
+  buyerPrice?: number | null;
   validity: string;
   coverPhoto?: string;
   onEdit?: () => void;
@@ -34,6 +38,7 @@ export const TicketCard = ({
   name,
   quantity,
   amount,
+  buyerPrice = null,
   validity,
   coverPhoto,
   onEdit,
@@ -43,7 +48,10 @@ export const TicketCard = ({
 }: TicketCardProps) => {
   const commissionPercentage = getCommissionPercentage(commissionPayer);
   const customerPrice = amount + (amount * commissionPercentage) / 100;
-  const showCommissionNote = commissionPercentage > 0;
+  // The API's buyer price already has the commission allocated, so it is both
+  // the price to show and the reason the estimated note below is redundant
+  const displayPrice = buyerPrice ?? amount;
+  const showCommissionNote = buyerPrice === null && commissionPercentage > 0;
 
   return (
     <div className="relative rounded-[12px] border border-dashed border-primary bg-emerald-50 p-2">
@@ -103,7 +111,7 @@ export const TicketCard = ({
               </div>
               <div>
                 <p className="text-xs text-gray-500">Price</p>
-                <p className="text-xs font-semibold text-gray-800">{formatKsh(amount)}</p>
+                <p className="text-xs font-semibold text-gray-800">{formatKsh(displayPrice)}</p>
               </div>
               {showCommissionNote && (
                 <div>

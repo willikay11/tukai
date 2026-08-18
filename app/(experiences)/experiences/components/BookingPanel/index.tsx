@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TicketPurchasePayload } from '@/services/experience';
 import { Experience, ExperienceOccurrence } from '@/types/experience';
 import { parseApiError } from '@/utils/parseApiError';
+import { getTicketBuyerPrice } from '@/utils/ticket-utils';
 
 import { RecurringDateSlotPicker } from './RecurringDateSlotPicker';
 
@@ -150,10 +151,10 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
     setQuantities((prev) => ({ ...prev, [ticketId]: qty }));
   };
 
+  // Totalled on the buyer price so the figure matches what is charged
   const total = visibleTickets.reduce((sum, ticket) => {
     const qty = quantities[ticket.id] ?? 0;
-    const price = typeof ticket.price === 'string' ? parseFloat(ticket.price) : ticket.price;
-    return sum + qty * price;
+    return sum + qty * getTicketBuyerPrice(ticket);
   }, 0);
 
   // Counted rather than derived from `total`, which is 0 for a free experience
@@ -358,7 +359,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                     <div key={ticket.id} className="flex items-center justify-between">
                       <div>
                         <p className="text-xs font-bold text-gray-900">
-                          {currency} {parseFloat(ticket.price as any).toLocaleString()}/person
+                          {currency} {getTicketBuyerPrice(ticket).toLocaleString()}/person
                         </p>
                         <p className="mt-0.5 text-xs text-gray-500">{ticket.name}</p>
                       </div>

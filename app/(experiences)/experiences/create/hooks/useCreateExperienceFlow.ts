@@ -60,7 +60,7 @@ import {
   calculateEndTime,
   diffSlotTemplates,
 } from '@/utils/slot-template-utils';
-import { parseSalesEndRelativeFromTicket } from '@/utils/ticket-utils';
+import { getTicketBuyerAmount, parseSalesEndRelativeFromTicket } from '@/utils/ticket-utils';
 
 import {
   aboutSchema,
@@ -153,6 +153,13 @@ const mapCommission = (
   return map[value];
 };
 
+// Inverse of mapCommission, for restoring the picker from a saved experience.
+// Returns null for an absent or unrecognised value, leaving the form default.
+const parseCommission = (value: string | null | undefined): 'host' | 'customer' | 'split' | null => {
+  const map = { host_pays: 'host', customer_pays: 'customer', split: 'split' } as const;
+  return value && value in map ? map[value as keyof typeof map] : null;
+};
+
 export interface CommunityOption {
   id: string;
   name: string;
@@ -210,6 +217,9 @@ export interface FormData {
       name: string;
       quantity: number;
       amount: number;
+      // What the buyer is charged, as returned by the API once the ticket is
+      // saved. Null for a draft the API has not seen yet.
+      buyerPrice?: number | null;
       // Ticket slot time (when the ticket/experience runs) — for multi-day in "entire-period" mode
       startTime: string | null;
       endTime: string | null;
@@ -670,6 +680,16 @@ export const useCreateExperienceFlow = ({
     // Update date type form with community
     updateFormData(dateTypeUpdate);
 
+    // Restore the saved fees allocation so the picker opens on the host's own
+    // choice rather than the 'host' default. Runs whether or not tickets exist.
+    const savedCommission = parseCommission(experience.feesAllocation);
+    if (savedCommission) {
+      setFormData((prev) => ({
+        ...prev,
+        tickets: { ...prev.tickets, commission: savedCommission },
+      }));
+    }
+
     // Load tickets from saved experience
     if (experience.tickets && experience.tickets.length > 0) {
       const savedTickets = experience.tickets.map((ticket: any) => {
@@ -715,6 +735,7 @@ export const useCreateExperienceFlow = ({
           name: ticket.name,
           quantity: ticket.availableQuantity || ticket.quantity,
           amount: Number(ticket.price),
+          buyerPrice: getTicketBuyerAmount(ticket),
           salesStartDate: salesStartDateTime.date,
           salesStartTime: salesStartDateTime.time,
           salesEndDate: salesEndDateTime.date,
@@ -1596,39 +1617,54 @@ export const useCreateExperienceFlow = ({
     }
   }, [experienceId, publishAsync, toast]);
 
-  const handleUpdateFeesAllocation = useCallback(async () => {
-    if (!experienceId || !experience) {
-      return;
-    }
+  /**
+   * PATCHes fees_allocation on its own. Fired as soon as the picker is clicked,
+   * so the value is passed in rather than read from formData — a click and the
+   * state update land in the same tick.
+   *
+   * Only fees_allocation is sent: re-sending the whole experience here would
+   * overwrite fields the tickets step knows nothing about (it previously blanked
+   * recurrence_rule).
+   */
+  const handleUpdateFeesAllocation = useCallback(
+    async (commission?: 'host' | 'customer' | 'split') => {
+      if (!experienceId) {
+        return;
+      }
 
-    try {
-      const payload = {
-        title: experience.title,
-        description: experience.description,
-        ...(experience.location?.googleMapPlaceId
-          ? { googleMapPlaceId: experience.location.googleMapPlaceId }
-          : {}),
-        startDate: experience.startDate,
-        endDate: experience.endDate,
-        recurrence_rule: '',
-        categoriesIds: experience.categories?.map((c: any) => c.id) || [],
-        isPublic: experience.isPublic,
-        isPaid: experience.isPaid,
-        invitedCommunityIds: [],
-        invitedGuestsEmails: [],
-        hostCommunityId: experience.hostCommunity?.id || '',
-        whatsIncluded: experience.whatsIncluded || '',
-        whatsNotIncluded: experience.whatsNotIncluded || '',
-        feesAllocation: mapCommission(formData.tickets.commission),
-        meetingPlace: experience.meetingPoint || null,
-        meetingTime: experience.meetingTime || null,
-      };
+      try {
+        const response = await updateExperienceAsync({
+          feesAllocation: mapCommission(commission ?? formData.tickets.commission),
+        });
 
-      await updateExperienceAsync(payload);
-    } catch (error: any) {
-      console.warn('[handleUpdateFeesAllocation] Failed to update fees allocation:', error);
-    }
-  }, [experienceId, experience, formData.tickets.commission, updateExperienceAsync]);
+        // A new allocation re-prices every ticket, so the buyer prices the
+        // saved cards show are refreshed from the same response. Skipped when
+        // the response carries no tickets — the cards keep what they had.
+        const repricedTickets = response?.data?.tickets;
+        if (Array.isArray(repricedTickets)) {
+          setFormData((prev) => ({
+            ...prev,
+            tickets: {
+              ...prev.tickets,
+              items: prev.tickets.items.map((item) => {
+                const repriced = repricedTickets.find((ticket: any) => ticket.id === item.apiId);
+                return repriced ? { ...item, buyerPrice: getTicketBuyerAmount(repriced) } : item;
+              }),
+            },
+          }));
+        }
+      } catch (error: any) {
+        const message = parseApiError(error, 'Failed to update fees allocation');
+        console.warn('[handleUpdateFeesAllocation] Failed to update fees allocation:', error);
+        toast({
+          title: 'Error',
+          description: message,
+          variant: 'destructive',
+        });
+      }
+    },
+    [experienceId, formData.tickets.commission, updateExperienceAsync, toast],
+  );
 
   const resolveCommunityImageUrl = (community: Community): string => {
     const preferredPhoto =

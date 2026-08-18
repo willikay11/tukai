@@ -225,7 +225,7 @@ interface CreateExperienceStepsProps {
     handleSaveItineraryDays?: () => Promise<boolean | void>;
     handleDeleteItineraryDay?: (dayId: string) => Promise<boolean>;
     handlePublish?: () => Promise<boolean | void>;
-    handleUpdateFeesAllocation?: () => Promise<void>;
+    handleUpdateFeesAllocation?: (commission?: 'host' | 'customer' | 'split') => Promise<void>;
   };
   isSavingExperience?: boolean;
   apiError?: string | null;
@@ -644,6 +644,7 @@ export const CreateExperienceSteps = ({
                   }
                 }}
                 onCancel={() => handleStepChange('about')}
+                onCommissionChange={handlers?.handleUpdateFeesAllocation}
                 photos={aboutFormData?.photos.map((p) => p.url)}
                 isRecurring={formData?.isRecurring}
                 timeSlots={formData?.timeSlots}

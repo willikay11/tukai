@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 
-import { TicketCard } from './TicketCard';
+import { TicketCard } from './index';
 
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: any) => <span>{iconName}</span>,
@@ -24,6 +24,38 @@ describe('TicketCard', () => {
     render(<TicketCard {...mockProps} onEdit={() => {}} onDelete={() => {}} />);
     expect(screen.getByText('50')).toBeInTheDocument();
     expect(screen.getByText(/Ksh 5,000/)).toBeInTheDocument();
+  });
+
+  describe('price', () => {
+    it('shows the buyer price rather than the host base amount', () => {
+      render(<TicketCard {...mockProps} buyerPrice={5100} />);
+
+      expect(screen.getByText(/Ksh 5,100/)).toBeInTheDocument();
+      expect(screen.queryByText(/Ksh 5,000/)).not.toBeInTheDocument();
+    });
+
+    it('falls back to the entered amount before the ticket is saved', () => {
+      render(<TicketCard {...mockProps} commissionPayer="customer" />);
+
+      expect(screen.getByText(/Ksh 5,000/)).toBeInTheDocument();
+      // With no buyer price yet, the estimated customer figure still shows
+      expect(screen.getByText('Customer Pays')).toBeInTheDocument();
+      expect(screen.getByText(/Ksh 5,200/)).toBeInTheDocument();
+    });
+
+    it('drops the estimated customer figure once the API price is known', () => {
+      render(<TicketCard {...mockProps} commissionPayer="customer" buyerPrice={5100} />);
+
+      expect(screen.getByText(/Ksh 5,100/)).toBeInTheDocument();
+      expect(screen.queryByText('Customer Pays')).not.toBeInTheDocument();
+    });
+
+    it('shows a zero buyer price rather than treating it as missing', () => {
+      render(<TicketCard {...mockProps} buyerPrice={0} />);
+
+      expect(screen.getByText(/Ksh 0.00/)).toBeInTheDocument();
+      expect(screen.queryByText(/Ksh 5,000/)).not.toBeInTheDocument();
+    });
   });
 
   it('renders edit and delete buttons', () => {

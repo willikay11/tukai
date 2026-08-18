@@ -226,6 +226,7 @@ function CreateExperiencePageContent() {
               handleSaveItineraryDays: handlers.handleSaveItineraryDays,
               handleDeleteItineraryDay: handlers.handleDeleteItineraryDay,
               handlePublish: handlers.handlePublish,
+              handleUpdateFeesAllocation: handlers.handleUpdateFeesAllocation,
             }}
             isSavingExperience={isSavingExperience}
             apiError={apiError}

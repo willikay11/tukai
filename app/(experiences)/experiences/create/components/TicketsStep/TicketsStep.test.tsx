@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import type { FormData } from '../../hooks/useCreateExperienceFlow';
 import { TicketsStep } from './index';
@@ -77,6 +78,36 @@ describe('TicketsStep', () => {
 
       renderWithQueryClient(<TicketsStep {...errorProps} />);
       expect(screen.getByText(/Please add at least one ticket/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Fees allocation', () => {
+    it('saves the picked fees allocation as soon as it is clicked', async () => {
+      const onChange = jest.fn();
+      const onCommissionChange = jest.fn().mockResolvedValue(undefined);
+
+      renderWithQueryClient(
+        <TicketsStep
+          {...defaultProps}
+          onChange={onChange}
+          onCommissionChange={onCommissionChange}
+        />,
+      );
+
+      await userEvent.click(screen.getByText('The customer will pay the commission'));
+
+      expect(onChange).toHaveBeenCalledWith({ commission: 'customer' });
+      expect(onCommissionChange).toHaveBeenCalledWith('customer');
+    });
+
+    it('still updates the form when no save handler is supplied', async () => {
+      const onChange = jest.fn();
+
+      renderWithQueryClient(<TicketsStep {...defaultProps} onChange={onChange} />);
+
+      await userEvent.click(screen.getByText('Split 50-50 between the customer and myself'));
+
+      expect(onChange).toHaveBeenCalledWith({ commission: 'split' });
     });
   });
 

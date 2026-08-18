@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import type { Ticket } from '@/types/ticket';
+import { getTicketBuyerAmount } from '@/utils/ticket-utils';
 
 import { SavedTicketCard } from '../TicketCard';
 import { TicketForm, type TicketFormValue } from '../TicketForm';
@@ -97,6 +98,7 @@ export const RecurringSlotPill = ({
                 name={ticket.name}
                 quantity={ticket.quantity}
                 amount={isNaN(Number(ticket.price)) ? 0 : Number(ticket.price)}
+                buyerPrice={getTicketBuyerAmount(ticket)}
                 validity={`${ticket.salesEndRelative?.amount ?? 1} ${ticket.salesEndRelative?.unit ?? 'hour'} before the experience ${ticket.salesEndRelative?.anchor === 'start' ? 'starts' : 'ends'}`}
                 coverPhoto={undefined}
                 onEdit={onEditTicket}
