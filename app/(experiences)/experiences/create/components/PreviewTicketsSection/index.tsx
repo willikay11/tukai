@@ -4,6 +4,7 @@ import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Ticket } from '@/types/ticket';
+import { getTicketBuyerAmount } from '@/utils/ticket-utils';
 
 import { SavedTicketCard } from '../TicketCard';
 
@@ -75,6 +76,7 @@ export const PreviewTicketsSection = ({
                 name={ticket.name}
                 quantity={ticket.quantity}
                 amount={Number(price)}
+                buyerPrice={getTicketBuyerAmount(ticket)}
                 validity={validity}
                 coverPhoto={coverPhoto}
                 commissionPayer={commissionPayer}

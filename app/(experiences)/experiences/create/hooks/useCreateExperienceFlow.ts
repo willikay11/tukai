@@ -60,7 +60,7 @@ import {
   calculateEndTime,
   diffSlotTemplates,
 } from '@/utils/slot-template-utils';
-import { parseSalesEndRelativeFromTicket } from '@/utils/ticket-utils';
+import { getTicketBuyerAmount, parseSalesEndRelativeFromTicket } from '@/utils/ticket-utils';
 
 import {
   aboutSchema,
@@ -210,6 +210,9 @@ export interface FormData {
       name: string;
       quantity: number;
       amount: number;
+      // What the buyer is charged, as returned by the API once the ticket is
+      // saved. Null for a draft the API has not seen yet.
+      buyerPrice?: number | null;
       // Ticket slot time (when the ticket/experience runs) — for multi-day in "entire-period" mode
       startTime: string | null;
       endTime: string | null;
@@ -715,6 +718,7 @@ export const useCreateExperienceFlow = ({
           name: ticket.name,
           quantity: ticket.availableQuantity || ticket.quantity,
           amount: Number(ticket.price),
+          buyerPrice: getTicketBuyerAmount(ticket),
           salesStartDate: salesStartDateTime.date,
           salesStartTime: salesStartDateTime.time,
           salesEndDate: salesEndDateTime.date,
@@ -1612,9 +1616,26 @@ export const useCreateExperienceFlow = ({
       }
 
       try {
-        await updateExperienceAsync({
+        const response = await updateExperienceAsync({
           feesAllocation: mapCommission(commission ?? formData.tickets.commission),
         });
+
+        // A new allocation re-prices every ticket, so the buyer prices the
+        // saved cards show are refreshed from the same response. Skipped when
+        // the response carries no tickets — the cards keep what they had.
+        const repricedTickets = response?.data?.tickets;
+        if (Array.isArray(repricedTickets)) {
+          setFormData((prev) => ({
+            ...prev,
+            tickets: {
+              ...prev.tickets,
+              items: prev.tickets.items.map((item) => {
+                const repriced = repricedTickets.find((ticket: any) => ticket.id === item.apiId);
+                return repriced ? { ...item, buyerPrice: getTicketBuyerAmount(repriced) } : item;
+              }),
+            },
+          }));
+        }
       } catch (error: any) {
         const message = parseApiError(error, 'Failed to update fees allocation');
         console.warn('[handleUpdateFeesAllocation] Failed to update fees allocation:', error);

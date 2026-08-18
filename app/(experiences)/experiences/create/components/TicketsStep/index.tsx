@@ -20,7 +20,11 @@ import { getDaysBetween } from '@/utils/date-utils';
 import { parseApiError } from '@/utils/parseApiError';
 import type { SlotTemplateRecord } from '@/utils/slot-template-utils';
 import { buildSingleOccurrenceRule } from '@/utils/slot-template-utils';
-import { buildAbsoluteTicketValidity, buildRecurringTicketValidity } from '@/utils/ticket-utils';
+import {
+  buildAbsoluteTicketValidity,
+  buildRecurringTicketValidity,
+  getTicketBuyerAmount,
+} from '@/utils/ticket-utils';
 
 import { FormData } from '../../hooks/useCreateExperienceFlow';
 import { usePendingAction } from '../../hooks/usePendingAction';
@@ -388,6 +392,9 @@ export const TicketsStep = ({
         }
 
         const apiId = response.data?.id;
+        // The API allocates the commission and returns what the buyer pays —
+        // the saved card shows that rather than the amount typed in
+        const buyerPrice = response.data ? getTicketBuyerAmount(response.data) : null;
 
         const items = [...formData.items];
         const isRecurringExperienceLocal = dateTypeData?.isRecurring ?? false;
@@ -398,6 +405,7 @@ export const TicketsStep = ({
             name: draftTicket.name,
             quantity: draftTicket.quantity!,
             amount: draftTicket.amount!,
+            buyerPrice,
             startTime: draftTicket.startTime || null,
             endTime: draftTicket.endTime || null,
             salesStartDate: draftTicket.salesStartDate!,
@@ -418,6 +426,7 @@ export const TicketsStep = ({
             name: draftTicket.name,
             quantity: draftTicket.quantity!,
             amount: draftTicket.amount!,
+            buyerPrice,
             startTime: draftTicket.startTime || null,
             endTime: draftTicket.endTime || null,
             salesStartDate: draftTicket.salesStartDate!,
@@ -612,6 +621,7 @@ export const TicketsStep = ({
                         name={ticket.name}
                         quantity={ticket.quantity}
                         amount={ticket.amount}
+                        buyerPrice={ticket.buyerPrice}
                         validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
                         coverPhoto={photos?.[0]}
                         onEdit={() => handleEditTicket(index)}
@@ -673,6 +683,7 @@ export const TicketsStep = ({
                               name={ticket.name}
                               quantity={ticket.quantity}
                               amount={ticket.amount}
+                              buyerPrice={ticket.buyerPrice}
                               validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
                               coverPhoto={photos?.[0]}
                               onEdit={() => handleEditTicket(formData.items.indexOf(ticket))}
@@ -743,6 +754,7 @@ export const TicketsStep = ({
                         name={slotTicket.name}
                         quantity={slotTicket.quantity}
                         amount={slotTicket.amount}
+                        buyerPrice={slotTicket.buyerPrice}
                         validity={`${slotTicket.salesEndRelative?.amount ?? 1} ${slotTicket.salesEndRelative?.unit ?? 'hour'} before the experience ${slotTicket.salesEndRelative?.anchor === 'start' ? 'starts' : 'ends'}`}
                         coverPhoto={photos?.[0]}
                         onEdit={() => {
@@ -861,6 +873,7 @@ export const TicketsStep = ({
                     name={ticket.name}
                     quantity={ticket.quantity}
                     amount={ticket.amount}
+                    buyerPrice={ticket.buyerPrice}
                     validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
                     coverPhoto={photos?.[0]}
                     onEdit={() => handleEditTicket(index)}

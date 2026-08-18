@@ -3,26 +3,34 @@ import type { Ticket } from '@/types/ticket';
 import type { Reservation, TicketPurchase } from '@/types/ticket-purchase';
 
 export type RelativeUnit = 'hour' | 'day' | 'week';
+export type ApiTicketUnit = 'days' | 'hours' | 'minutes';
+export type ApiTicketCondition = 'before_start' | 'before_end';
+
+const toNumber = (value: number | string | null | undefined): number | null => {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = typeof value === 'string' ? parseFloat(value) : value;
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+/**
+ * The buyer amount the API sent, or null when the payload carries none —
+ * locally built draft tickets, and any ticket saved before the field existed.
+ * Use this where the caller needs to tell "no buyer price" apart from a price
+ * of zero; use getTicketBuyerPrice where a number is all that is needed.
+ */
+export const getTicketBuyerAmount = (
+  ticket: Pick<Ticket, 'buyerPrice' | 'buyer_price'>,
+): number | null => toNumber((ticket.buyerPrice ?? ticket.buyer_price)?.amount);
 
 /**
  * The amount a buyer is charged for one ticket. `buyer_price` is computed by the
  * API from the experience's fees_allocation, so anything shown to or totalled
- * for a buyer must use it rather than `price` (the host's base amount).
- *
- * Falls back to `price` for payloads without a buyer price — locally built
- * preview tickets, and any experience saved before the field existed.
+ * for a buyer must use it rather than `price` (the host's base amount), which
+ * is what remains as the fallback.
  */
 export const getTicketBuyerPrice = (
   ticket: Pick<Ticket, 'price' | 'buyerPrice' | 'buyer_price'>,
-): number => {
-  const buyerAmount = (ticket.buyerPrice ?? ticket.buyer_price)?.amount;
-  const amount = buyerAmount ?? ticket.price;
-  const parsed = typeof amount === 'string' ? parseFloat(amount) : amount;
-
-  return Number.isFinite(parsed) ? parsed : 0;
-};
-export type ApiTicketUnit = 'days' | 'hours' | 'minutes';
-export type ApiTicketCondition = 'before_start' | 'before_end';
+): number => getTicketBuyerAmount(ticket) ?? toNumber(ticket.price) ?? 0;
 
 export const mapRelativeUnit = (unit: RelativeUnit): ApiTicketUnit => {
   const map: Record<RelativeUnit, ApiTicketUnit> = {

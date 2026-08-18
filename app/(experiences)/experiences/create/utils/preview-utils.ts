@@ -10,6 +10,7 @@ import { Location } from '@/types/location';
 import { Photo } from '@/types/photo';
 import { Ticket } from '@/types/ticket';
 import { User } from '@/types/user';
+import { getTicketBuyerPrice } from '@/utils/ticket-utils';
 
 /**
  * Maps the in-progress create-experience form onto the Experience shape the
@@ -112,6 +113,12 @@ export const mapFormTicketsToPreview = (formData: FormData): Ticket[] =>
     name: item.name,
     quantity: item.quantity,
     price: item.amount,
+    // Only saved tickets have one — a draft the API has not seen yet previews
+    // at the host's base amount
+    buyerPrice:
+      item.buyerPrice != null
+        ? { amount: item.buyerPrice, currency: PREVIEW_DEFAULTS.currency }
+        : null,
     experience: PREVIEW_EXPERIENCE_ID,
     availableQuantity: item.quantity,
     // Preview tickets are never scoped to a slot template: without one they
@@ -207,8 +214,9 @@ export const buildPreviewExperience = (
   const { startDate, endDate } = resolvePreviewDates(dateType);
   const previewTickets = mapFormTicketsToPreview(formData);
 
+  // "From" pricing is shown to buyers, so it follows the buyer price
   const ticketPrices = previewTickets
-    .map((ticket) => Number(ticket.price))
+    .map((ticket) => getTicketBuyerPrice(ticket))
     .filter((price) => Number.isFinite(price));
 
   const hostCommunity = context.hostCommunity ?? dateType.community;

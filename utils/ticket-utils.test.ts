@@ -2,6 +2,7 @@ import { parseSnakeToCamel } from './parseSnakeToCamel';
 import {
   buildAbsoluteTicketValidity,
   buildRecurringTicketValidity,
+  getTicketBuyerAmount,
   getTicketBuyerPrice,
   mapAnchorToCondition,
   mapRelativeUnit,
@@ -193,17 +194,31 @@ describe('getTicketBuyerPrice', () => {
     ).toBe(1020);
   });
 
-  it('returns 0 rather than NaN for an unparseable amount', () => {
+  it('never returns NaN', () => {
     expect(getTicketBuyerPrice({ price: '' })).toBe(0);
+    // An unreadable buyer amount is treated like an absent one
     expect(
       getTicketBuyerPrice({ price: '1000.00', buyerPrice: { amount: 'n/a', currency: 'KES' } }),
-    ).toBe(0);
+    ).toBe(1000);
   });
 
   it('keeps a zero buyer price instead of falling through to the base price', () => {
     expect(
       getTicketBuyerPrice({ price: '1000.00', buyerPrice: { amount: '0.00', currency: 'KES' } }),
     ).toBe(0);
+  });
+});
+
+describe('getTicketBuyerAmount', () => {
+  it('returns the buyer amount as a number', () => {
+    expect(getTicketBuyerAmount({ buyerPrice: { amount: '1020.00', currency: 'KES' } })).toBe(1020);
+    expect(getTicketBuyerAmount({ buyer_price: { amount: 1020, currency: 'KES' } })).toBe(1020);
+  });
+
+  it('distinguishes a zero buyer price from an absent one', () => {
+    expect(getTicketBuyerAmount({ buyerPrice: { amount: '0.00', currency: 'KES' } })).toBe(0);
+    expect(getTicketBuyerAmount({})).toBeNull();
+    expect(getTicketBuyerAmount({ buyerPrice: null })).toBeNull();
   });
 });
 
