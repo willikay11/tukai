@@ -3,9 +3,11 @@ import moment from 'moment';
 import {
   CITIES_SECTION,
   SEE_ALL_CONFIG,
+  SEE_ALL_MIN_RESULTS,
   type SeeAllContext,
   cityExperiencesHref,
   isSeeAllType,
+  shouldShowSeeAll,
 } from './config';
 
 const context: SeeAllContext = { city: 'Lamu', lat: -1.29, lng: 36.82 };
@@ -98,5 +100,25 @@ describe('CITIES_SECTION', () => {
 
   it('omits the count while the categories load', () => {
     expect(CITIES_SECTION.subtitle(null)).toBe('Browse by destination');
+  });
+});
+
+describe('shouldShowSeeAll', () => {
+  it('hides the link for a section smaller than the threshold', () => {
+    expect(shouldShowSeeAll(0)).toBe(false);
+    expect(shouldShowSeeAll(1)).toBe(false);
+    expect(shouldShowSeeAll(SEE_ALL_MIN_RESULTS - 1)).toBe(false);
+  });
+
+  it('shows the link once the section reaches the threshold', () => {
+    expect(shouldShowSeeAll(SEE_ALL_MIN_RESULTS)).toBe(true);
+    expect(shouldShowSeeAll(120)).toBe(true);
+  });
+
+  // Rows fetch a page_size of 8-10, so an absent total means "not known yet" —
+  // showing the link then would make it flicker away once the count arrives
+  it('hides the link while the total is still unknown', () => {
+    expect(shouldShowSeeAll(undefined)).toBe(false);
+    expect(shouldShowSeeAll(null)).toBe(false);
   });
 });

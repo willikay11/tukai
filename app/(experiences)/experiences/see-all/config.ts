@@ -47,6 +47,16 @@ interface SeeAllSection {
 export const isSeeAllType = (value: string | undefined): value is SeeAllType =>
   SEE_ALL_TYPES.includes(value as SeeAllType);
 
+// A "See all" link only earns its place when the full-page grid would show
+// meaningfully more than the row already does. Below this, the row is the
+// whole story and the link is a dead end.
+export const SEE_ALL_MIN_RESULTS = 10;
+
+// Rows request a page_size smaller than this threshold, so the decision has to
+// come from the API total — never from the length of the rendered array.
+export const shouldShowSeeAll = (total: number | null | undefined): boolean =>
+  (total ?? 0) >= SEE_ALL_MIN_RESULTS;
+
 // Where a city card on the cities page points
 export const cityExperiencesHref = (cityName: string) =>
   `/experiences/see-all?type=city&city=${encodeURIComponent(cityName)}`;

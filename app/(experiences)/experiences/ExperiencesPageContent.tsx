@@ -17,7 +17,10 @@ import { Experiences } from '@/app/(experiences)/experiences/components/List/exp
 import { ReservationCard } from '@/app/(experiences)/experiences/components/ReservationCard';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { SharedBucketListCard } from '@/app/(experiences)/experiences/components/SharedBucketListCard';
-import { cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
+import {
+  cityExperiencesHref,
+  shouldShowSeeAll,
+} from '@/app/(experiences)/experiences/see-all/config';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useMyBucketLists, useSharedBucketLists } from '@/app/shared/hooks/useBucketLists';
@@ -77,12 +80,15 @@ const ExperienceRow = ({
   title,
   subtitle,
   seeAllHref,
+  total,
   experiences,
   isLoading,
 }: {
   title: string;
   subtitle?: string;
   seeAllHref?: string;
+  // API total for the section, which is larger than the page the row renders
+  total?: number;
   experiences: Experience[];
   isLoading: boolean;
 }) => {
@@ -93,7 +99,11 @@ const ExperienceRow = ({
 
   return (
     <section>
-      <SectionHeader title={title} subtitle={subtitle} seeAllHref={seeAllHref} />
+      <SectionHeader
+        title={title}
+        subtitle={subtitle}
+        seeAllHref={shouldShowSeeAll(total) ? seeAllHref : undefined}
+      />
       {isLoading ? (
         <RowSkeleton />
       ) : (
@@ -269,6 +279,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             title="Happening Near You"
             subtitle={`Within 25 km of ${userCity}`}
             seeAllHref="/experiences/see-all?type=near-me"
+            total={nearbyResponse?.data?.count}
             experiences={nearbyExperiences}
             isLoading={isLoadingNearby}
           />
@@ -279,7 +290,9 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
               <SectionHeader
                 title="Experiences by City"
                 subtitle="Browse by destination"
-                seeAllHref="/experiences/see-all?type=cities"
+                seeAllHref={
+                  shouldShowSeeAll(cities.length) ? '/experiences/see-all?type=cities' : undefined
+                }
               />
               {isLoadingCities ? (
                 <RowSkeleton cardWidth={240} cardHeight={130} />
@@ -304,6 +317,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             title="Happening Today"
             subtitle={formatLongDateWithOrdinal(new Date())}
             seeAllHref="/experiences/see-all?type=today"
+            total={todayResponse?.data?.count}
             experiences={todayResponse?.data?.results ?? []}
             isLoading={isLoadingToday}
           />
@@ -312,6 +326,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             title={`Happening Tomorrow in ${userCity}`}
             subtitle={formatLongDateWithOrdinal(moment().add(1, 'days').toDate())}
             seeAllHref={`/experiences/see-all?type=tomorrow&city=${encodeURIComponent(userCity)}`}
+            total={tomorrowResponse?.data?.count}
             experiences={tomorrowResponse?.data?.results ?? []}
             isLoading={isLoadingTomorrow}
           />
@@ -321,6 +336,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
               title={`Experiences in ${topCity.name}`}
               subtitle="Curated destination"
               seeAllHref={cityExperiencesHref(topCity.name)}
+              total={topCityResponse?.data?.count}
               experiences={topCityResponse?.data?.results ?? []}
               isLoading={isLoadingTopCity}
             />
