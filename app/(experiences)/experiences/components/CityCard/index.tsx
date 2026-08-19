@@ -1,20 +1,39 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { cn } from '@/lib/utils';
+
 interface CityCardProps {
   city: string;
   experienceCount: number;
   imageUrl: string;
   href: string;
+  // Overrides the fixed row sizing — the cities grid wants full-width cards
+  className?: string;
 }
 
-export const CityCard = ({ city, experienceCount, imageUrl, href }: CityCardProps) => (
+export const CityCard = ({
+  city,
+  experienceCount,
+  imageUrl,
+  href,
+  className,
+}: CityCardProps) => (
   <Link
     href={href}
-    className="relative block h-[130px] w-[240px] flex-shrink-0 overflow-hidden rounded-xl"
+    className={cn(
+      'relative block h-[130px] w-[240px] flex-shrink-0 overflow-hidden rounded-xl',
+      className,
+    )}
   >
     {imageUrl ? (
-      <Image src={imageUrl} alt={city} fill sizes="240px" className="object-cover" />
+      <Image
+        src={imageUrl}
+        alt={city}
+        fill
+        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 300px"
+        className="object-cover"
+      />
     ) : (
       <div className="h-full w-full bg-gray-200" />
     )}

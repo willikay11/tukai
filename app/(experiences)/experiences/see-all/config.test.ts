@@ -1,6 +1,12 @@
 import moment from 'moment';
 
-import { SEE_ALL_CONFIG, type SeeAllContext, isSeeAllType } from './config';
+import {
+  CITIES_SECTION,
+  SEE_ALL_CONFIG,
+  type SeeAllContext,
+  cityExperiencesHref,
+  isSeeAllType,
+} from './config';
 
 const context: SeeAllContext = { city: 'Lamu', lat: -1.29, lng: 36.82 };
 
@@ -9,6 +15,10 @@ describe('isSeeAllType', () => {
     expect(isSeeAllType('today')).toBe(true);
     expect(isSeeAllType('near-me')).toBe(true);
     expect(isSeeAllType('city')).toBe(true);
+  });
+
+  it('accepts the cities section, which lists destinations not experiences', () => {
+    expect(isSeeAllType('cities')).toBe(true);
   });
 
   it('rejects unknown or missing types', () => {
@@ -65,5 +75,28 @@ describe('SEE_ALL_CONFIG queries', () => {
 
   it('falls back to free-text search for city, which has no filter', () => {
     expect(SEE_ALL_CONFIG.city.query(context)).toEqual({ search: 'Lamu' });
+  });
+});
+
+describe('cityExperiencesHref', () => {
+  it('points a city card at that city\'s experiences', () => {
+    expect(cityExperiencesHref('Lamu')).toBe('/experiences/see-all?type=city&city=Lamu');
+  });
+
+  it('encodes names that need it', () => {
+    expect(cityExperiencesHref('Diani Beach')).toBe(
+      '/experiences/see-all?type=city&city=Diani%20Beach',
+    );
+  });
+});
+
+describe('CITIES_SECTION', () => {
+  it('counts cities rather than results', () => {
+    expect(CITIES_SECTION.subtitle(12)).toBe('Browse by destination · 12 cities');
+    expect(CITIES_SECTION.subtitle(1)).toBe('Browse by destination · 1 city');
+  });
+
+  it('omits the count while the categories load', () => {
+    expect(CITIES_SECTION.subtitle(null)).toBe('Browse by destination');
   });
 });

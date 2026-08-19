@@ -17,6 +17,7 @@ import { Experiences } from '@/app/(experiences)/experiences/components/List/exp
 import { ReservationCard } from '@/app/(experiences)/experiences/components/ReservationCard';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { SharedBucketListCard } from '@/app/(experiences)/experiences/components/SharedBucketListCard';
+import { cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useMyBucketLists, useSharedBucketLists } from '@/app/shared/hooks/useBucketLists';
@@ -278,7 +279,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
               <SectionHeader
                 title="Experiences by City"
                 subtitle="Browse by destination"
-                seeAllHref="/places"
+                seeAllHref="/experiences/see-all?type=cities"
               />
               {isLoadingCities ? (
                 <RowSkeleton cardWidth={240} cardHeight={130} />
@@ -290,7 +291,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                         city={category.name}
                         experienceCount={category.placesCount}
                         imageUrl={category.image ?? ''}
-                        href={`/places?city=${category.id}`}
+                        href={cityExperiencesHref(category.name)}
                       />
                     </div>
                   ))}
@@ -319,7 +320,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             <ExperienceRow
               title={`Experiences in ${topCity.name}`}
               subtitle="Curated destination"
-              seeAllHref={`/experiences/see-all?type=city&city=${encodeURIComponent(topCity.name)}`}
+              seeAllHref={cityExperiencesHref(topCity.name)}
               experiences={topCityResponse?.data?.results ?? []}
               isLoading={isLoadingTopCity}
             />

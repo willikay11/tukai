@@ -2,33 +2,28 @@
 
 import { useState } from 'react';
 
-import { useRouter } from 'next/navigation';
-
-import { BackToExplore } from '@/app/(experiences)/experiences/components/BackToExplore';
-import { Breadcrumb } from '@/app/shared/components/Breadcrumb';
 import { ListExperiences } from '@/app/shared/components/Experiences/List';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
-import { Button } from '@/components/ui/button';
-import { NoData } from '@/components/ui/noData';
 import { useLocation } from '@/context/LocationContext';
 import { Experience } from '@/types/experience';
 
+import { SeeAllEmptyState } from './SeeAllEmptyState';
+import { SeeAllLayout } from './SeeAllLayout';
 import {
   DEFAULT_CITY,
   SEE_ALL_CONFIG,
   SEE_ALL_PAGE_SIZE,
+  type ExperienceSeeAllType,
   type SeeAllContext,
-  type SeeAllType,
 } from './config';
 
 export const SeeAllPageContent = ({
   type,
   city: cityParam,
 }: {
-  type: SeeAllType;
+  type: ExperienceSeeAllType;
   city?: string;
 }) => {
-  const router = useRouter();
   const { city: locationCity, lat, lng } = useLocation();
   const [page, setPage] = useState(1);
 
@@ -49,33 +44,12 @@ export const SeeAllPageContent = ({
   const experiences: Experience[] = response?.data?.results ?? [];
   // Total from the API, not the number currently rendered
   const count: number | null = response?.data?.count ?? null;
-
-  const title = section.title(context);
-  const subtitle = section.subtitle(context, count);
   const isEmpty = !isLoading && page === 1 && experiences.length === 0;
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-6 md:px-6">
-      <Breadcrumb
-        variant="accent"
-        items={[{ label: 'Discover', href: '/experiences' }, { label: title }]}
-      />
-
-      <div className="mt-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 md:text-4xl">{title}</h1>
-          {subtitle && <p className="mt-2 text-sm text-gray-400">{subtitle}</p>}
-        </div>
-        <BackToExplore label="Back" variant="pill" />
-      </div>
-
+    <SeeAllLayout title={section.title(context)} subtitle={section.subtitle(context, count)}>
       {isEmpty ? (
-        <div className="flex flex-col items-center gap-4 py-16">
-          <NoData message="Nothing here right now" />
-          <Button onClick={() => router.push('/experiences')} className="rounded-full px-6">
-            Back to Discover
-          </Button>
-        </div>
+        <SeeAllEmptyState message="Nothing here right now" />
       ) : (
         <ListExperiences
           type="discover"
@@ -89,6 +63,6 @@ export const SeeAllPageContent = ({
           className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         />
       )}
-    </main>
+    </SeeAllLayout>
   );
 };

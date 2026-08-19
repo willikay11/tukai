@@ -5,7 +5,19 @@ import { formatLongDateWithOrdinal } from '@/utils/date-utils';
 
 // One entry per "See all" section on /experiences. Adding a section to the
 // listing page means adding it here — the see-all page is otherwise generic.
-export const SEE_ALL_TYPES = ['today', 'tomorrow', 'near-me', 'city', 'featured'] as const;
+export const EXPERIENCE_SEE_ALL_TYPES = [
+  'today',
+  'tomorrow',
+  'near-me',
+  'city',
+  'featured',
+] as const;
+
+export type ExperienceSeeAllType = (typeof EXPERIENCE_SEE_ALL_TYPES)[number];
+
+// 'cities' is the odd one out: it lists destinations rather than experiences,
+// and each card drills into ?type=city for that destination.
+export const SEE_ALL_TYPES = [...EXPERIENCE_SEE_ALL_TYPES, 'cities'] as const;
 
 export type SeeAllType = (typeof SEE_ALL_TYPES)[number];
 
@@ -35,6 +47,10 @@ interface SeeAllSection {
 export const isSeeAllType = (value: string | undefined): value is SeeAllType =>
   SEE_ALL_TYPES.includes(value as SeeAllType);
 
+// Where a city card on the cities page points
+export const cityExperiencesHref = (cityName: string) =>
+  `/experiences/see-all?type=city&city=${encodeURIComponent(cityName)}`;
+
 const resultsLabel = (count: number | null): string | null => {
   if (count === null) return null;
   return `${count} ${count === 1 ? 'result' : 'results'}`;
@@ -45,7 +61,7 @@ const joinSubtitle = (...parts: (string | null)[]): string => parts.filter(Boole
 const today = () => moment().format('YYYY-MM-DD');
 const tomorrow = () => moment().add(1, 'days').format('YYYY-MM-DD');
 
-export const SEE_ALL_CONFIG: Record<SeeAllType, SeeAllSection> = {
+export const SEE_ALL_CONFIG: Record<ExperienceSeeAllType, SeeAllSection> = {
   today: {
     title: () => 'Happening Today',
     subtitle: (_context, count) =>
@@ -89,4 +105,15 @@ export const SEE_ALL_CONFIG: Record<SeeAllType, SeeAllSection> = {
     // ⚠️ No `is_featured` param — the default published list stands in
     query: () => ({ status: 'published' }),
   },
+};
+
+// The cities grid is not paginated — every destination arrives in one page of
+// place categories — so its count is simply how many cities we render.
+export const CITIES_SECTION = {
+  title: 'Experiences by City',
+  subtitle: (count: number | null): string =>
+    joinSubtitle(
+      'Browse by destination',
+      count === null ? null : `${count} ${count === 1 ? 'city' : 'cities'}`,
+    ),
 };
