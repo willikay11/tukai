@@ -22,6 +22,8 @@ type ListExperiencesProps = {
   skeletonCount?: number;
   type: 'discover' | 'invited';
   noDataMessage?: string;
+  // Forwarded to SingleExperience — 'row' is the compact 4:3 discover card
+  variant?: 'default' | 'row';
 };
 
 const createPlaceholders = (count: number): Experience[] => {
@@ -77,6 +79,7 @@ export const ListExperiences = ({
   page,
   setPage,
   noDataMessage,
+  variant = 'default',
 }: ListExperiencesProps) => {
   const { selectedCategoryId } = useSelectedCategory();
 
@@ -209,7 +212,7 @@ export const ListExperiences = ({
             className="cursor-pointer"
           >
             <Link target="_blank" href={`/experiences/${experience.id}`}>
-              <SingleExperience type={type} experience={experience} />
+              <SingleExperience type={type} experience={experience} variant={variant} />
             </Link>
           </motion.div>
         );

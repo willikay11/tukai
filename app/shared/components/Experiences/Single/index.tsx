@@ -35,6 +35,18 @@ export const SingleExperience = ({
   const { lat, lng } = useLocation();
 
   if (experience.id.startsWith('placeholder-')) {
+    // The row card is much shorter than the default one, so it gets a
+    // matching skeleton to stop the grid jumping when results land
+    if (variant === 'row') {
+      return (
+        <div className="flex flex-col">
+          <div className="aspect-[4/3] w-full animate-pulse rounded-xl bg-gray-200" />
+          <div className="mt-2 h-4 w-3/4 animate-pulse rounded bg-gray-200" />
+          <div className="mt-1 h-3 w-1/2 animate-pulse rounded bg-gray-200" />
+        </div>
+      );
+    }
+
     return <EventSkeleton />;
   }
 

@@ -267,7 +267,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
           <ExperienceRow
             title="Happening Near You"
             subtitle={`Within 25 km of ${userCity}`}
-            seeAllHref="/experiences?near=me"
+            seeAllHref="/experiences/see-all?type=near-me"
             experiences={nearbyExperiences}
             isLoading={isLoadingNearby}
           />
@@ -302,7 +302,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
           <ExperienceRow
             title="Happening Today"
             subtitle={formatLongDateWithOrdinal(new Date())}
-            seeAllHref="/experiences?date=today"
+            seeAllHref="/experiences/see-all?type=today"
             experiences={todayResponse?.data?.results ?? []}
             isLoading={isLoadingToday}
           />
@@ -310,7 +310,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
           <ExperienceRow
             title={`Happening Tomorrow in ${userCity}`}
             subtitle={formatLongDateWithOrdinal(moment().add(1, 'days').toDate())}
-            seeAllHref="/experiences?date=tomorrow"
+            seeAllHref={`/experiences/see-all?type=tomorrow&city=${encodeURIComponent(userCity)}`}
             experiences={tomorrowResponse?.data?.results ?? []}
             isLoading={isLoadingTomorrow}
           />
@@ -319,7 +319,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             <ExperienceRow
               title={`Experiences in ${topCity.name}`}
               subtitle="Curated destination"
-              seeAllHref={`/places?city=${topCity.id}`}
+              seeAllHref={`/experiences/see-all?type=city&city=${encodeURIComponent(topCity.name)}`}
               experiences={topCityResponse?.data?.results ?? []}
               isLoading={isLoadingTopCity}
             />
