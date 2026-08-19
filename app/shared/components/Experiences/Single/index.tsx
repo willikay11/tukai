@@ -83,8 +83,9 @@ export const SingleExperience = ({
           ) : (
             <div className="h-full w-full bg-gray-100" />
           )}
-          <div className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm">
+          <div className="absolute right-2 top-2">
             <Bookmark
+              icon="basket"
               bookmarked={experience.isBookmarked}
               userId={session?.user?.id}
               onBookmark={() => bookmarkExperience(experience.id)}
@@ -149,10 +150,12 @@ export const SingleExperience = ({
         </div>
         <div className="absolute right-2 top-2">
           <Bookmark
+            icon="basket"
             bookmarked={experience.isBookmarked}
             userId={session?.user?.id}
             onBookmark={() => bookmarkExperience(experience.id)}
             onUnbookmark={() => bookmarkExperience(experience.id)}
+            className="text-white"
           />
         </div>
       </div>

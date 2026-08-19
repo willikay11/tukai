@@ -75,3 +75,57 @@ describe('Bookmark Component', () => {
     expect(screen.getByTestId('Bookmark02Icon')).toHaveClass('text-red-500');
   });
 });
+
+describe('Bookmark basket mode', () => {
+  const basketProps = {
+    userId: '8129381931983',
+    onBookmark: jest.fn(),
+    onUnbookmark: jest.fn(),
+    icon: 'basket' as const,
+  };
+
+  it('shows the add icon on a dark container before being added', () => {
+    renderWithProvider(<Bookmark {...basketProps} bookmarked={false} className="text-white" />);
+
+    const icon = screen.getByTestId('ShoppingBasketAdd02Icon');
+    expect(icon).toHaveClass('text-white');
+    expect(screen.queryByTestId('ShoppingBasketDone02Icon')).not.toBeInTheDocument();
+    expect(screen.getByRole('button')).toHaveClass('bg-black/40');
+  });
+
+  it('switches to the lime done icon on a white container once added', () => {
+    renderWithProvider(<Bookmark {...basketProps} bookmarked={false} className="text-white" />);
+
+    fireEvent.click(screen.getByRole('button'));
+
+    const icon = screen.getByTestId('ShoppingBasketDone02Icon');
+    expect(icon).toHaveClass('text-lime');
+    expect(screen.queryByTestId('ShoppingBasketAdd02Icon')).not.toBeInTheDocument();
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('bg-white');
+    expect(button).not.toHaveClass('bg-black/40');
+  });
+
+  it('renders the done state straight away for an already-added experience', () => {
+    renderWithProvider(<Bookmark {...basketProps} bookmarked={true} className="text-white" />);
+
+    expect(screen.getByTestId('ShoppingBasketDone02Icon')).toHaveClass('text-lime');
+    expect(screen.getByRole('button')).toHaveClass('bg-white');
+  });
+
+  it('leaves the default bookmark treatment untouched', () => {
+    renderWithProvider(
+      <Bookmark
+        userId="8129381931983"
+        bookmarked={false}
+        onBookmark={jest.fn()}
+        onUnbookmark={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByTestId('Bookmark02Icon')).toBeInTheDocument();
+    expect(screen.queryByTestId('ShoppingBasketAdd02Icon')).not.toBeInTheDocument();
+    expect(screen.getByRole('button')).not.toHaveClass('bg-black/40');
+  });
+});
