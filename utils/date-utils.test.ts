@@ -1,4 +1,4 @@
-import { inferUIExperienceType } from './date-utils';
+import { formatShortDate, inferUIExperienceType } from './date-utils';
 
 describe('inferUIExperienceType', () => {
   it('maps itinerary API type to itinerary UI type', () => {
@@ -90,5 +90,19 @@ describe('formatReservationDateTime', () => {
     expect(formatReservationDateTime('2026-07-06T00:00:00', '2026-07-06T12:30:00')).toBe(
       'Mon 6 July · 12:00 AM — 12:30 PM',
     );
+  });
+});
+
+describe('formatShortDate', () => {
+  it('formats an ISO date as "Sat 4 July"', () => {
+    expect(formatShortDate('2026-07-04T06:00:00Z')).toBe('Sat 4 July');
+  });
+
+  it('does not pad single-digit days', () => {
+    expect(formatShortDate('2026-03-01T09:30:00Z')).toBe('Sun 1 March');
+  });
+
+  it('returns an empty string for an unparseable date', () => {
+    expect(formatShortDate('not-a-date')).toBe('');
   });
 });

@@ -14,6 +14,9 @@ interface FeaturedBannerProps {
   rating?: number | null;
   ctaLabel: string; // "Reserve a spot — Ksh. X" | "Reserve a table"
   onCtaClick: () => void;
+  // Optional outlined companion action, e.g. "View details" beside "Reserve"
+  secondaryCtaLabel?: string;
+  onSecondaryCtaClick?: () => void;
 }
 
 export const FeaturedBanner = ({
@@ -25,6 +28,8 @@ export const FeaturedBanner = ({
   rating = null,
   ctaLabel,
   onCtaClick,
+  secondaryCtaLabel,
+  onSecondaryCtaClick,
 }: FeaturedBannerProps) => (
   <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl md:aspect-[3/1]">
     {coverPhoto ? (
@@ -74,14 +79,26 @@ export const FeaturedBanner = ({
         </p>
       )}
 
-      {/* Lime CTA */}
-      <Button
-        variant="lime"
-        onClick={onCtaClick}
-        className="mt-5 rounded-full px-6 font-semibold text-gray-900"
-      >
-        {ctaLabel}
-      </Button>
+      {/* Lime CTA, plus an optional outlined companion */}
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <Button
+          variant="lime"
+          onClick={onCtaClick}
+          className="rounded-full px-6 font-semibold text-gray-900"
+        >
+          {ctaLabel}
+        </Button>
+
+        {secondaryCtaLabel && (
+          <Button
+            variant="outline"
+            onClick={onSecondaryCtaClick}
+            className="rounded-full border-white/40 bg-transparent px-6 font-medium text-white backdrop-blur-sm hover:bg-white/10 hover:text-white"
+          >
+            {secondaryCtaLabel}
+          </Button>
+        )}
+      </div>
     </div>
   </div>
 );

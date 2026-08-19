@@ -61,6 +61,17 @@ export const formatLongDateWithOrdinal = (date: Date): string => {
   return `${weekday}, ${day}${ordinal(day)} ${month}`;
 };
 
+// → "Sat 4 July"
+export const formatShortDate = (isoString: string): string => {
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return '';
+
+  const weekday = date.toLocaleDateString('en-GB', { weekday: 'short' });
+  const month = date.toLocaleDateString('en-GB', { month: 'long' });
+
+  return `${weekday} ${date.getDate()} ${month}`;
+};
+
 // start + end ISO → "Sat 4 July · 6:00 AM — 4:00 PM"
 export const formatReservationDateTime = (start: string, end: string): string => {
   const startDate = new Date(start);

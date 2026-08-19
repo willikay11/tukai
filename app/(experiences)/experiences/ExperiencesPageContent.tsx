@@ -23,6 +23,7 @@ import {
 } from '@/app/(experiences)/experiences/see-all/config';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { ScrollRow } from '@/app/shared/components/Lists';
 import { useMyBucketLists, useSharedBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useExperiences, useTicketPurchases } from '@/app/shared/hooks/useExperiences';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
@@ -46,14 +47,6 @@ const TABS = [
   { value: 'saved', label: 'Saved' },
   { value: 'hosting', label: 'Hosting' },
 ];
-
-// Native horizontal scroller — unlike the embla carousel it responds to
-// trackpad/wheel scrolling and keyboard as well as touch drag
-const ScrollRow = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-1 scrollbar-hide">
-    {children}
-  </div>
-);
 
 const RowSkeleton = ({
   cardWidth = 280,
