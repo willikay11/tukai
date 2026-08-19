@@ -24,7 +24,6 @@ import { useExperiences, useTicketPurchases } from '@/app/shared/hooks/useExperi
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { NoData } from '@/components/ui/noData';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocation } from '@/context/LocationContext';
@@ -43,12 +42,6 @@ const TABS = [
   { value: 'saved', label: 'Saved' },
   { value: 'hosting', label: 'Hosting' },
 ];
-
-const CardRow = ({ children }: { children: React.ReactNode }) => (
-  <Carousel opts={{ align: 'start', dragFree: true }} className="w-full">
-    <CarouselContent>{children}</CarouselContent>
-  </Carousel>
-);
 
 // Native horizontal scroller — unlike the embla carousel it responds to
 // trackpad/wheel scrolling and keyboard as well as touch drag
@@ -228,6 +221,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   // Curated destination row: no featured-destination field exists, so use the
   // top city by count; experiences have no city filter, so search by city name
   const topCity = cities[0];
+  const visibleCities = cities.slice(0, 10);
   const { data: topCityResponse, isLoading: isLoadingTopCity } = useExperiences(
     { page: 1, page_size: 8, search: topCity?.name },
     isAll && Boolean(topCity),
@@ -289,18 +283,18 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
               {isLoadingCities ? (
                 <RowSkeleton cardWidth={240} cardHeight={130} />
               ) : (
-                <CardRow>
-                  {cities.map((category) => (
-                    <CarouselItem key={category.id} className="basis-auto">
+                <ScrollRow>
+                  {visibleCities.map((category) => (
+                    <div key={category.id} className="snap-start">
                       <CityCard
                         city={category.name}
                         experienceCount={category.placesCount}
                         imageUrl={category.image ?? ''}
                         href={`/places?city=${category.id}`}
                       />
-                    </CarouselItem>
+                    </div>
                   ))}
-                </CardRow>
+                </ScrollRow>
               )}
             </section>
           )}
