@@ -87,8 +87,13 @@ export const ListExperiences = ({
   const [experienceList, setExperienceList] = useState<Experience[]>(initialPlaceholders);
   const [endPage, setEndPage] = useState<number | null>(null);
 
-  const prevPageRef = useRef(page);
+  // Pages whose placeholders are on screen, and pages whose real results have
+  // already been merged in. These must be tracked separately: the loading pass
+  // and the results pass of the effect below both run with the same `page`, so
+  // a single "last page seen" ref gets consumed by the first and starves the
+  // second, leaving the skeletons on screen forever.
   const hasAddedPlaceholdersRef = useRef<Set<number>>(new Set());
+  const appendedPagesRef = useRef<Set<number>>(new Set());
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   // Calculate end page when count changes
@@ -104,7 +109,7 @@ export const ListExperiences = ({
     setExperienceList(initialPlaceholders);
     setEndPage(null);
     hasAddedPlaceholdersRef.current.clear();
-    prevPageRef.current = 1;
+    appendedPagesRef.current.clear();
   }, [selectedCategoryId, setPage, initialPlaceholders]);
 
   // Handle experience updates
@@ -115,7 +120,7 @@ export const ListExperiences = ({
 
     if (isLoading) {
       // Only add placeholders for subsequent pages if not already added
-      if (page > 1 && prevPageRef.current !== page && !hasAddedPlaceholdersRef.current.has(page)) {
+      if (page > 1 && !hasAddedPlaceholdersRef.current.has(page)) {
         hasAddedPlaceholdersRef.current.add(page);
         setExperienceList((prev) => [
           ...prev.filter((exp) => !exp.id.startsWith('placeholder-')),
@@ -127,8 +132,10 @@ export const ListExperiences = ({
         if (isFirstPage) {
           setExperienceList(experiences);
           hasAddedPlaceholdersRef.current.clear();
-        } else if (prevPageRef.current !== page) {
-          // Only append if this is a new page
+          appendedPagesRef.current = new Set([1]);
+        } else if (!appendedPagesRef.current.has(page)) {
+          // Only append a page once, however many times the effect re-runs
+          appendedPagesRef.current.add(page);
           setExperienceList((prev) => [
             ...prev.filter((exp) => !exp.id.startsWith('placeholder-')),
             ...experiences,
@@ -137,10 +144,9 @@ export const ListExperiences = ({
       } else if (isEmpty && isFirstPage) {
         setExperienceList([]);
         hasAddedPlaceholdersRef.current.clear();
+        appendedPagesRef.current.clear();
       }
     }
-
-    prevPageRef.current = page;
   }, [experiences, isLoading, page, skeletonCount]);
 
   // Intersection observer for infinite scroll
