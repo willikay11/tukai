@@ -50,6 +50,8 @@ export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean)
       // Without this, two calls differing only by status share a cache entry
       // and serve each other's results
       params.status,
+      params.lat,
+      params.long,
     ],
     queryFn: async () => await fetchExperiences(params),
     enabled: enabled,

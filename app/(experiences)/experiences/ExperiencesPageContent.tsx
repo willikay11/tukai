@@ -50,6 +50,14 @@ const CardRow = ({ children }: { children: React.ReactNode }) => (
   </Carousel>
 );
 
+// Native horizontal scroller — unlike the embla carousel it responds to
+// trackpad/wheel scrolling and keyboard as well as touch drag
+const ScrollRow = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-1 scrollbar-hide">
+    {children}
+  </div>
+);
+
 const RowSkeleton = ({
   cardWidth = 280,
   cardHeight,
@@ -95,17 +103,15 @@ const ExperienceRow = ({
       {isLoading ? (
         <RowSkeleton />
       ) : (
-        <CardRow>
+        <ScrollRow>
           {experiences.map((experience) => (
-            <CarouselItem key={experience.id} className="basis-auto">
-              <div className="w-[280px]">
-                <Link target="_blank" href={`/experiences/${experience.id}`}>
-                  <SingleExperience type="discover" variant="row" experience={experience} />
-                </Link>
-              </div>
-            </CarouselItem>
+            <div key={experience.id} className="w-[280px] flex-shrink-0 snap-start">
+              <Link target="_blank" href={`/experiences/${experience.id}`}>
+                <SingleExperience type="discover" variant="row" experience={experience} />
+              </Link>
+            </div>
           ))}
-        </CardRow>
+        </ScrollRow>
       )}
     </section>
   );
@@ -114,7 +120,7 @@ const ExperienceRow = ({
 export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: string }) => {
   const router = useRouter();
   const { data: session } = useSession();
-  const { city } = useLocation();
+  const { city, lat, lng } = useLocation();
   const [activeTab, setActiveTab] = useState(
     TABS.some((tab) => tab.value === initialCategory) ? initialCategory : 'all',
   );
@@ -184,15 +190,23 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const today = moment().format('YYYY-MM-DD');
   const tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
 
-  // No featured/nearby endpoints exist — the default list is the closest
-  // available query: first result is the featured hero, the rest are "near you"
+  // No featured endpoint exists — the default list is the closest available
+  // query, and its first result stands in as the featured hero
   const { data: discoverResponse, isLoading: isLoadingDiscover } = useExperiences(
     { page: 1, page_size: 9 },
     isAll,
   );
   const discoverExperiences: Experience[] = discoverResponse?.data?.results ?? [];
   const featuredExperience = discoverExperiences[0];
-  const nearbyExperiences = discoverExperiences.slice(1);
+
+  // "Happening Near You": the first 10 published experiences, scoped to the
+  // coordinates the LocationContext resolved. Coordinates are omitted until the
+  // user grants location, so the row still renders (unscoped) if they decline.
+  const { data: nearbyResponse, isLoading: isLoadingNearby } = useExperiences(
+    { page: 1, page_size: 10, status: 'published', lat, long: lng },
+    isAll,
+  );
+  const nearbyExperiences: Experience[] = nearbyResponse?.data?.results ?? [];
 
   const { data: todayResponse, isLoading: isLoadingToday } = useExperiences(
     { page: 1, page_size: 8, date: today },
@@ -261,7 +275,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             subtitle={`Within 25 km of ${userCity}`}
             seeAllHref="/experiences?near=me"
             experiences={nearbyExperiences}
-            isLoading={isLoadingDiscover}
+            isLoading={isLoadingNearby}
           />
 
           {/* Experiences by City */}

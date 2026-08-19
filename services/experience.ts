@@ -23,6 +23,9 @@ export type ExperiencesQueryParams = {
   page_size?: number;
   invited?: boolean;
   date?: string;
+  // Geo scoping — the API expects `lat`/`long` (see fetchPlaces for the same pair)
+  lat?: number;
+  long?: number;
 };
 
 export async function fetchExperiences(params: ExperiencesQueryParams): Promise<ApiResponse> {
