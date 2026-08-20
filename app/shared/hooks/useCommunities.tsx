@@ -38,7 +38,20 @@ export const useGetCommunities = (
   },
 ) => {
   return useQuery({
-    queryKey: ['communities', page, category, search, createdBy],
+    // Every flag that changes the request must be in the key. Without the
+    // boolean flags, a popular/recommended/following query shares a cache entry
+    // with a plain one and they serve each other's results.
+    queryKey: [
+      'communities',
+      page,
+      category,
+      search,
+      createdBy,
+      showUpComingExperiences,
+      recommendedCommunities,
+      popularCommunities,
+      following,
+    ],
     queryFn: async () =>
       await getCommunities(
         category,

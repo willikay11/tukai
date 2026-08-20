@@ -1,2 +1,2 @@
 export { PageLayoutContent } from './PageLayoutContent';
-export { DiscoverHeroSection } from './DiscoverHeroSection';
+export { DiscoverPageContent } from './DiscoverPageContent';

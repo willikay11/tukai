@@ -23,6 +23,17 @@ describe('SectionHeader', () => {
     expect(screen.queryByTestId('Compass01Icon')).not.toBeInTheDocument();
   });
 
+  it('keeps the subtitle inline beside the title, with or without an icon', () => {
+    const { container } = render(
+      <SectionHeader icon="Compass01Icon" title="Moments" subtitle="Fresh from the community" />,
+    );
+
+    // Same baseline row as the icon-less usages on /experiences
+    const inlineRow = container.querySelector('.flex.items-baseline');
+    expect(inlineRow).toContainElement(screen.getByRole('heading', { level: 2 }));
+    expect(inlineRow).toContainElement(screen.getByText('Fresh from the community'));
+  });
+
   it('renders a leading icon in a pale circle when given', () => {
     render(
       <SectionHeader
