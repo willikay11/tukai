@@ -18,6 +18,7 @@ import { SectionHeader } from '@/app/(experiences)/experiences/components/Sectio
 import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
 import { FeaturedBanner } from '@/app/shared/components/Banners';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
+import { PageContainer } from '@/app/shared/components/Layout';
 import { ScrollRow } from '@/app/shared/components/Lists';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
@@ -164,7 +165,7 @@ export const DiscoverPageContent = () => {
   const price = featured?.priceStartsFrom;
 
   return (
-    <main className="mx-auto max-w-7xl space-y-10 px-4 py-6 md:px-6">
+    <PageContainer className="space-y-10 py-6">
       {isLoadingFeatured ? (
         <div className="aspect-[16/9] w-full animate-pulse rounded-2xl bg-gray-200 md:aspect-[3/1]" />
       ) : (
@@ -373,6 +374,6 @@ export const DiscoverPageContent = () => {
           )}
         </section>
       )}
-    </main>
+    </PageContainer>
   );
 };
