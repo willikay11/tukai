@@ -150,3 +150,26 @@ describe('MomentDetail', () => {
     expect(screen.queryByRole('button', { name: 'Follow' })).not.toBeInTheDocument();
   });
 });
+
+// Same regression as comments: the heart ignored the server's is_liked
+describe('moment like state on load', () => {
+  const heart = () => screen.getByText('12').closest('button');
+
+  it('shows a moment the user already liked as lit', () => {
+    render(<MomentDetail moment={makeMoment({ isLiked: true })} />);
+
+    expect(heart()?.querySelector('.text-red-500')).toBeInTheDocument();
+  });
+
+  it('shows an unliked moment as unlit', () => {
+    render(<MomentDetail moment={makeMoment({ isLiked: false })} />);
+
+    expect(heart()?.querySelector('.text-red-500')).not.toBeInTheDocument();
+  });
+
+  it('falls back to unlit when the serializer omits is_liked', () => {
+    render(<MomentDetail moment={makeMoment()} />);
+
+    expect(heart()?.querySelector('.text-red-500')).not.toBeInTheDocument();
+  });
+});

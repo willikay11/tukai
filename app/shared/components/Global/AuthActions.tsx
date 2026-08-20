@@ -11,15 +11,10 @@ import { SubscriptionModalFlow } from '@/app/shared/components/Subscription';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { TukaiImage } from '@/components/ui/image';
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from '@/components/ui/navigation-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAuthDialog } from '@/context/AuthDialogContext';
+
+import { ProfileMenu } from './ProfileMenu';
 
 export const AuthActions = () => {
   const { openSignInWithCallback } = useAuthDialog();
@@ -68,7 +63,7 @@ export const AuthActions = () => {
       {hasSubscribed ? (
         <Link
           href="/experiences/create"
-          className="mr-2 hidden flex-shrink-0 gap-1.5 rounded-full py-2 px-6 text-sm text-gray-900 items-center bg-lime md:inline-flex"
+          className="mr-2 hidden flex-shrink-0 items-center gap-1.5 rounded-full bg-lime px-6 py-2 text-sm text-gray-900 md:inline-flex"
         >
           <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />
           Create
@@ -76,7 +71,7 @@ export const AuthActions = () => {
       ) : (
         <Button
           variant="lime"
-          className="mr-2 hidden flex-shrink-0 gap-1.5 rounded-full py-2 px-6 text-sm text-gray-900 items-center bg-lime md:inline-flex"
+          className="mr-2 hidden flex-shrink-0 items-center gap-1.5 rounded-full bg-lime px-6 py-2 text-sm text-gray-900 md:inline-flex"
           onClick={handleCreateExperience}
         >
           <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />
@@ -84,70 +79,46 @@ export const AuthActions = () => {
         </Button>
       )}
       {session?.user ? (
-        <NavigationMenu>
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuTrigger className="bg-transparent pr-0">
-                <div className="relative aspect-square h-7 w-7">
-                  <TukaiImage
-                    src={session?.user?.image || ''}
-                    alt={session?.user?.name || ''}
-                    className="h-7 w-7 rounded-full"
-                    quality={100}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    showNotFoundText={false}
-                  />
-                  <div className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-[1px] border-white bg-red-600" />
-                </div>
-                <NavigationMenuContent className="w-54 z-50 rounded-lg p-2">
-                  <div className="flex w-40 flex-col gap-2">
-                    {/* <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
-                      <div className="inline-flex items-center gap-2">
-                        <IconComponent iconName="UserIcon" size={15} color="gray" />
-                        My Profile
-                      </div>
-                    </NavigationMenuLink>
+        // Popover rather than NavigationMenu: the avatar sits at the right edge
+        // of the header, and NavigationMenu anchors its viewport left-0 with no
+        // way to align it per usage, so a 300px panel ran off-screen. Popover
+        // aligns to the trigger's end and handles collisions.
+        <Popover>
+          <PopoverTrigger className="flex items-center gap-1.5 rounded-full outline-none">
+            <div className="relative aspect-square h-7 w-7">
+              <TukaiImage
+                src={session?.user?.image || ''}
+                alt={session?.user?.name || ''}
+                className="h-7 w-7 rounded-full"
+                quality={100}
+                fill
+                style={{ objectFit: 'cover' }}
+                showNotFoundText={false}
+              />
+            </div>
+            <IconComponent
+              iconName="ArrowDown01Icon"
+              size={16}
+              color="currentColor"
+              className="text-gray-600"
+            />
+          </PopoverTrigger>
 
-                    <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
-                      <div className="inline-flex items-center gap-2">
-                        <IconComponent iconName="Bookmark02Icon" size={15} color="gray" />
-                        Wishlist
-                      </div>
-                    </NavigationMenuLink>
-
-                    <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
-                      <div className="inline-flex items-center gap-2">
-                        <IconComponent iconName="BubbleChatIcon" size={15} color="gray" />
-                        Messages
-                      </div>
-                    </NavigationMenuLink>
-
-                    <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
-                      <div className="inline-flex items-center gap-2">
-                        <IconComponent iconName="Notification03Icon" size={15} color="gray" />
-                        Notifications
-                      </div>
-                    </NavigationMenuLink>
-                    <Separator />
-                    <NavigationMenuLink className="cursor-pointer text-sm text-gray-600">
-                      <div className="inline-flex items-center gap-2">
-                        <IconComponent iconName="DirectionRight01Icon" size={15} color="gray" />
-                        Tour Guide Account
-                      </div>
-                    </NavigationMenuLink> */}
-                    <NavigationMenuLink onClick={handleLogout} className="cursor-pointer">
-                      <div className="inline-flex items-center gap-2">
-                        <IconComponent iconName="Logout04Icon" size={15} color="gray" />
-                        <span className="font-satoshi text-sm text-gray-600">Logout</span>
-                      </div>
-                    </NavigationMenuLink>
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuTrigger>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+          <PopoverContent
+            align="end"
+            sideOffset={8}
+            collisionPadding={12}
+            className="w-auto rounded-2xl p-0"
+          >
+            <ProfileMenu
+              name={session.user.name ?? ''}
+              handle={session.user.displayName}
+              image={session.user.image}
+              hasUnreadNotifications
+              onSignOut={handleLogout}
+            />
+          </PopoverContent>
+        </Popover>
       ) : (
         <Link href="/auth/sign-in" className="inline-flex">
           <Button className="h-[38px] rounded-[68px]">Sign In/Sign Up</Button>

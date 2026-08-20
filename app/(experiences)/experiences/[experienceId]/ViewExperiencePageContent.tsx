@@ -22,6 +22,7 @@ import { BucketListButton } from '../components/BucketListButton';
 import { ExperienceTypeBadge } from '../components/ExperienceTypeBadge';
 import { HostCommunityCard } from '../components/HostCommunityCard';
 import { IncludedExcludedSection } from '../components/IncludedExcludedSection';
+import { ItineraryDayByDay } from '../components/ItineraryDayByDay';
 import { LocationMeetingSection } from '../components/LocationMeetingSection';
 import { MetaRow } from '../components/MetaRow';
 import { ExperienceOrganiser } from '../components/experienceOrganiser';
@@ -153,7 +154,7 @@ export const ViewExperiencePageContent = ({
           {/* Description */}
           <div>
             <p className="mb-3 text-base font-bold text-gray-900">About</p>
-            <DescriptionShowMore text={experience.description} photo={coverPhoto} />
+            <DescriptionShowMore text={experience.description} />
           </div>
 
           {/* Categories */}
@@ -180,6 +181,9 @@ export const ViewExperiencePageContent = ({
           )}
 
           <Separator />
+
+          {/* Day by day — renders only when the experience has itinerary days */}
+          <ItineraryDayByDay experienceId={experience.id} startDate={experience.startDate} />
 
           {/* Included/Excluded */}
           {(experience.whatsIncluded || experience.whatsNotIncluded) && (

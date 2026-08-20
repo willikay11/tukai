@@ -27,3 +27,52 @@ export interface ItineraryDayPayload {
   description: string;
   id?: string; // optional, only for updates
 }
+
+/**
+ * What /v1/experiences/{id}/itinerary-days/ returns after parseSnakeToCamel.
+ * Distinct from ItineraryDayFormValue above, which is the create flow's local
+ * draft shape — the API carries no client uuid and nests a full place object.
+ */
+export interface ItineraryDayActivity {
+  id: string;
+  title: string;
+  description: string;
+  // "06:00:00"
+  startTime: string | null;
+  endTime: string | null;
+  order: number;
+  location: string | null;
+  place: {
+    id: string;
+    title: string;
+    photos?: { id: string; photo: string | null; isCover?: boolean }[];
+  } | null;
+}
+
+export interface ItineraryDay {
+  id: string;
+  dayNumber: number;
+  title: string;
+  description: string;
+  activities: ItineraryDayActivity[];
+}
+
+// The API stores no per-day date; a day is its offset from the experience start
+export const itineraryDayDate = (
+  experienceStart: string | null | undefined,
+  dayNumber: number,
+): Date | null => {
+  if (!experienceStart || !Number.isFinite(dayNumber)) return null;
+
+  const date = new Date(experienceStart);
+  if (Number.isNaN(date.getTime())) return null;
+
+  date.setDate(date.getDate() + dayNumber - 1);
+  return date;
+};
+
+export const activityPhoto = (activity: ItineraryDayActivity): string | null => {
+  const photos = activity.place?.photos ?? [];
+  const cover = photos.find((photo) => photo.isCover)?.photo;
+  return cover || photos[0]?.photo || null;
+};

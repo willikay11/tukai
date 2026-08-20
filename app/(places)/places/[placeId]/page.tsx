@@ -82,14 +82,7 @@ export default async function ViewPlacePage({ params }: { params: { placeId: str
         <div className="mb-4 mt-4 flex flex-col">
           <p className="mb-1 text-base font-black text-gray-600">About</p>
           <div className="text-sm font-normal text-gray-600">
-            <DescriptionShowMore
-              photo={
-                place?.photos.find((photo: Photo) => photo.isCover)?.photo ||
-                place?.photos[0]?.photo
-              }
-              text={place.description}
-              maxLength={600}
-            />
+            <DescriptionShowMore text={place.description} maxLength={600} />
           </div>
         </div>
         <div className="my-2.5">

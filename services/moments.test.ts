@@ -106,6 +106,23 @@ describe('moment comments', () => {
 
     expect(mockPost).toHaveBeenCalledWith('/v1/moments/m1/comments/', { content: 'Nice' });
   });
+
+  // Pins the call to the documented request:
+  //   POST /v1/moments/{moment_id}/comments/  -d '{ "content": "test" }'
+  it('matches the documented endpoint and body exactly', async () => {
+    mockPost.mockResolvedValue({ status: 201, data: {} });
+
+    await addMomentComment('85e05c62-75db-4789-b4cf-22f036438339', 'test');
+
+    expect(mockPost).toHaveBeenCalledWith(
+      '/v1/moments/85e05c62-75db-4789-b4cf-22f036438339/comments/',
+      { content: 'test' },
+    );
+    // Auth is the bearer token on the shared client; the X-CSRFTOKEN in the
+    // Swagger example is a browser-session artifact and must not be sent
+    expect(mockPost).toHaveBeenCalledTimes(1);
+    expect(mockPost.mock.calls[0]).toHaveLength(2);
+  });
 });
 
 // The read serializers carry no is_liked, so the status code is the only

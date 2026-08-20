@@ -7,9 +7,13 @@ import { MomentComment } from '@/types/moment';
 import { MomentComments } from './MomentComments';
 
 const mockAddComment = jest.fn();
+const mockToggleCommentLike = jest.fn();
 let commentsPages: unknown[] = [];
 let isLoading = false;
 
+jest.mock('next-auth/react', () => ({
+  useSession: () => ({ data: { user: { name: 'George Ralak', image: null } } }),
+}));
 jest.mock('@/app/shared/hooks/useMoments', () => ({
   useMomentComments: () => ({
     data: { pages: commentsPages },
@@ -19,7 +23,7 @@ jest.mock('@/app/shared/hooks/useMoments', () => ({
     isFetchingNextPage: false,
   }),
   useAddComment: () => ({ mutate: mockAddComment, isPending: false }),
-  useToggleCommentLike: () => ({ mutate: jest.fn() }),
+  useToggleCommentLike: () => ({ mutate: mockToggleCommentLike }),
   useFlagComment: () => ({ mutate: jest.fn(), isPending: false }),
   useFlagReasons: () => ({ data: undefined, isLoading: false }),
 }));
@@ -80,21 +84,21 @@ describe('MomentComments', () => {
     expect(screen.getByText('No comments yet — be the first.')).toBeInTheDocument();
   });
 
-  it('keeps Post disabled until the draft has content', () => {
+  it('keeps the send button disabled until the draft has content', () => {
     render(<MomentComments momentId="m1" />);
-    const post = screen.getByRole('button', { name: 'Post' });
+    const post = screen.getByRole('button', { name: 'Post comment' });
 
     expect(post).toBeDisabled();
 
-    fireEvent.change(screen.getByLabelText('Add a comment'), { target: { value: 'Nice' } });
+    fireEvent.change(screen.getByLabelText('Leave a comment'), { target: { value: 'Nice' } });
     expect(post).toBeEnabled();
   });
 
   it('does not post a whitespace-only draft', () => {
     render(<MomentComments momentId="m1" />);
 
-    fireEvent.change(screen.getByLabelText('Add a comment'), { target: { value: '   ' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Post' }));
+    fireEvent.change(screen.getByLabelText('Leave a comment'), { target: { value: '   ' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Post comment' }));
 
     expect(mockAddComment).not.toHaveBeenCalled();
   });
@@ -102,19 +106,131 @@ describe('MomentComments', () => {
   it('posts the trimmed draft', () => {
     render(<MomentComments momentId="m1" />);
 
-    fireEvent.change(screen.getByLabelText('Add a comment'), { target: { value: '  Lovely  ' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Post' }));
+    fireEvent.change(screen.getByLabelText('Leave a comment'), { target: { value: '  Lovely  ' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Post comment' }));
 
     expect(mockAddComment).toHaveBeenCalledWith('Lovely', expect.anything());
   });
 
   it('posts on Enter', () => {
     render(<MomentComments momentId="m1" />);
-    const input = screen.getByLabelText('Add a comment');
+    const input = screen.getByLabelText('Leave a comment');
 
     fireEvent.change(input, { target: { value: 'Via enter' } });
     fireEvent.keyDown(input, { key: 'Enter' });
 
     expect(mockAddComment).toHaveBeenCalledWith('Via enter', expect.anything());
+  });
+});
+
+// Matches the design: an avatar, a placeholder and a send icon in one pill
+describe('comment bar', () => {
+  it('shows the signed-in user avatar beside the input', () => {
+    render(<MomentComments momentId="m1" />);
+
+    expect(screen.getByLabelText('Leave a comment')).toHaveAttribute(
+      'placeholder',
+      'Leave a comment...',
+    );
+    // No picture on the session, so the avatar falls back to the initial
+    expect(screen.getByText('G')).toBeInTheDocument();
+  });
+
+  it('sends with an icon button rather than a Post label', () => {
+    render(<MomentComments momentId="m1" />);
+
+    expect(screen.getByRole('button', { name: 'Post comment' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Post' })).not.toBeInTheDocument();
+  });
+});
+
+// POST /v1/moments/{moment_id}/comments/{comment_id}/like/
+describe('liking a comment', () => {
+  const clickHeart = () => {
+    const row = screen.getByText('Beautiful shot').closest('div')?.parentElement;
+    const heart = row?.querySelector('button');
+    fireEvent.click(heart as HTMLElement);
+  };
+
+  it('calls the toggle with the comment id', () => {
+    render(<MomentComments momentId="m1" />);
+
+    clickHeart();
+
+    expect(mockToggleCommentLike).toHaveBeenCalledWith('c1', expect.anything());
+  });
+
+  it('optimistically bumps the count and lights the heart', () => {
+    render(<MomentComments momentId="m1" />);
+
+    expect(screen.getByText('4')).toBeInTheDocument();
+    clickHeart();
+    expect(screen.getByText('5')).toBeInTheDocument();
+  });
+
+  it('reconciles the count to what the server reports', () => {
+    mockToggleCommentLike.mockImplementation((_id, options) =>
+      // 204 — the like was removed rather than added
+      options.onSuccess({ isLiked: false }),
+    );
+    render(<MomentComments momentId="m1" />);
+
+    clickHeart();
+
+    expect(screen.getByText('4')).toBeInTheDocument();
+  });
+
+  it('rolls the count back when the request fails', () => {
+    mockToggleCommentLike.mockImplementation((_id, options) => options.onError());
+    render(<MomentComments momentId="m1" />);
+
+    clickHeart();
+
+    expect(screen.getByText('4')).toBeInTheDocument();
+  });
+});
+
+// Regression: the heart always started unlit, so a comment the user had
+// already liked looked unliked, and the first click unliked it — the red
+// flash then revert people were seeing.
+describe('like state on load', () => {
+  const heartOf = (text: string) => {
+    const row = screen.getByText(text).closest('div')?.parentElement;
+    return row?.querySelector('button');
+  };
+
+  it('shows a comment the user already liked as lit', () => {
+    setComments([makeComment({ isLiked: true })]);
+    render(<MomentComments momentId="m1" />);
+
+    expect(heartOf('Beautiful shot')?.querySelector('.text-red-500')).toBeInTheDocument();
+  });
+
+  it('shows an unliked comment as unlit', () => {
+    setComments([makeComment({ isLiked: false })]);
+    render(<MomentComments momentId="m1" />);
+
+    expect(heartOf('Beautiful shot')?.querySelector('.text-red-500')).not.toBeInTheDocument();
+  });
+
+  // An already-liked comment must unlike on click, not like-then-revert
+  it('unlikes on the first click when the comment was already liked', () => {
+    mockToggleCommentLike.mockImplementation((_id, options) =>
+      options.onSuccess({ isLiked: false }),
+    );
+    setComments([makeComment({ isLiked: true })]);
+    render(<MomentComments momentId="m1" />);
+
+    fireEvent.click(heartOf('Beautiful shot') as HTMLElement);
+
+    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(heartOf('Beautiful shot')?.querySelector('.text-red-500')).not.toBeInTheDocument();
+  });
+
+  it('falls back to unlit when the serializer omits is_liked', () => {
+    setComments([makeComment()]);
+    render(<MomentComments momentId="m1" />);
+
+    expect(heartOf('Beautiful shot')?.querySelector('.text-red-500')).not.toBeInTheDocument();
   });
 });

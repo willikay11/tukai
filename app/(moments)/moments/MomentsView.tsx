@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { useSearchParams } from 'next/navigation';
 
+import { PageContainer } from '@/app/shared/components/Layout';
 import { useInfiniteMoments } from '@/app/shared/hooks/useMoments';
 import { Drawer } from '@/components/ui/drawer';
 import { NoData } from '@/components/ui/noData';
@@ -78,7 +79,7 @@ export const MomentsView = () => {
   };
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-6 md:px-6">
+    <PageContainer className="py-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Moments</h1>
         <p className="mt-1 text-sm text-gray-400">
@@ -125,6 +126,6 @@ export const MomentsView = () => {
           {selectedMoment && <MomentDetail key={selectedMoment.id} moment={selectedMoment} />}
         </div>
       </Drawer>
-    </main>
+    </PageContainer>
   );
 };

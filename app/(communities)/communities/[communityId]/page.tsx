@@ -14,7 +14,6 @@ import { getAuthSession } from '@/lib/auth';
 import { fetchCommunity } from '@/services/community';
 import { ApiResponse } from '@/types/apiResponse';
 import { Community, CommunityMember } from '@/types/community';
-import { Photo } from '@/types/photo';
 
 import { AuthGuard } from './components/authGuard';
 import { CommunityTabs } from './components/communityTabs';
@@ -77,13 +76,7 @@ export default async function ViewCommunityPage({
           <div className="flex flex-col">
             <p className="mb-1 text-base font-black text-gray-600">About</p>
             <div className="mb-3.5 text-sm font-normal text-gray-600">
-              <DescriptionShowMore
-                text={community.description}
-                photo={
-                  community.photos.find((photo: Photo) => photo.isCover)?.photo ||
-                  community.photos[0].photo
-                }
-              />
+              <DescriptionShowMore text={community.description} />
             </div>
             <div className="mb-3.5 inline-flex gap-2">
               {community.categories.map((category) => (
