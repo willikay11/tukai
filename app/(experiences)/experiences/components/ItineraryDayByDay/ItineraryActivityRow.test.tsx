@@ -51,7 +51,7 @@ describe('ItineraryActivityRow', () => {
     );
 
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
-    expect(container.querySelector('.w-\\[52px\\]')).toBeInTheDocument();
+    expect(container.querySelector('.w-11')).toBeInTheDocument();
   });
 
   it('shows the link arrow only when the activity has a place', () => {

@@ -82,7 +82,9 @@ describe('ItineraryDayByDay', () => {
   it('strips markup and decodes entities in the day description', () => {
     render(<ItineraryDayByDay experienceId="e1" startDate="2026-08-24T06:00:00Z" />);
 
-    expect(screen.getByText('Piazzale Michelangelo offers a stunning view & more.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Piazzale Michelangelo offers a stunning view & more.'),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/<p>|&amp;/)).not.toBeInTheDocument();
   });
 
