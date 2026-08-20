@@ -1,7 +1,7 @@
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 
-import { ReservationView } from './types';
+import { ExperienceReservationView } from './types';
 
 /**
  * The calendar panel lists two different things on one timeline: reservations
@@ -17,8 +17,9 @@ export interface PanelItem {
   end: string | null;
   // "from KES 1,200", or "Free" when the experience carries no charge
   priceLabel: string | null;
-  // Present on reservations, and what the ticket modal is opened with
-  reservation?: ReservationView;
+  // Present on reservations, and what the ticket modal is opened with. One per
+  // experience, carrying every ticket the user holds for it across all dates.
+  reservation?: ExperienceReservationView;
 }
 
 const coverOf = (experience: Experience): string | null =>
@@ -36,7 +37,7 @@ const priceLabelOf = (experience: Experience): string | null => {
 };
 
 export const reservationToPanelItem = (
-  reservation: ReservationView,
+  reservation: ExperienceReservationView,
   experiences: Experience[],
 ): PanelItem => {
   const experience = experiences.find((item) => item.id === reservation.experienceId);
@@ -65,9 +66,14 @@ export const inviteToPanelItem = (experience: Experience): PanelItem => ({
   priceLabel: priceLabelOf(experience),
 });
 
-// Reservations and invites share one date-ordered timeline
+/**
+ * Reservations and invites share one date-ordered timeline, with ONE ROW PER
+ * EXPERIENCE rather than one per ticket or per occurrence. An experience booked
+ * on several dates is a single row anchored to its soonest date; the ticket
+ * modal pages through every ticket behind it.
+ */
 export const buildPanelItems = (
-  reservations: ReservationView[],
+  reservations: ExperienceReservationView[],
   experiences: Experience[],
   invites: Experience[],
 ): PanelItem[] => {

@@ -15,13 +15,18 @@ import { PanelItem } from './panelItems';
 
 export const dayKey = (date: Date | string): string => moment(date).format('YYYY-MM-DD');
 
-// Every day of the month, so the strip can show days with nothing on them too
-export const buildMonthDays = (monthCursor: moment.Moment): Date[] => {
-  const start = monthCursor.clone().startOf('month');
-  return Array.from({ length: monthCursor.daysInMonth() }, (_, index) =>
-    start.clone().add(index, 'days').toDate(),
-  );
-};
+// Only the days that actually have bookings — an empty day pill is noise, and a
+// full month of them buries the handful that matter
+export const buildActiveDays = (items: PanelItem[], monthCursor: moment.Moment): Date[] =>
+  Array.from(
+    new Set(
+      items
+        .filter((item) => item.start && moment(item.start).isSame(monthCursor, 'month'))
+        .map((item) => dayKey(item.start!)),
+    ),
+  )
+    .sort()
+    .map((key) => moment(key).toDate());
 
 export const groupByDay = (items: PanelItem[]): Record<string, PanelItem[]> =>
   items.reduce<Record<string, PanelItem[]>>((accumulator, item) => {
@@ -30,6 +35,28 @@ export const groupByDay = (items: PanelItem[]): Record<string, PanelItem[]> =>
     accumulator[key] = [...(accumulator[key] ?? []), item];
     return accumulator;
   }, {});
+
+/**
+ * Which month the panel opens on.
+ *
+ * It used to open on the earliest item, which meant the oldest booking in the
+ * user's history pinned the panel to a long-past month. The current month is
+ * the useful default; the panel only jumps forward when there is nothing to
+ * show now but something later on.
+ */
+export const initialMonthFor = (items: PanelItem[], now: Date = new Date()): moment.Moment => {
+  const thisMonth = moment(now).startOf('month');
+
+  const starts = items
+    .map((item) => item.start)
+    .filter((start): start is string => Boolean(start))
+    .sort();
+
+  if (starts.some((start) => moment(start).isSame(thisMonth, 'month'))) return thisMonth;
+
+  const nextWithItems = starts.find((start) => moment(start).isAfter(thisMonth, 'month'));
+  return nextWithItems ? moment(nextWithItems).startOf('month') : thisMonth;
+};
 
 const ALL = 'all';
 
@@ -62,19 +89,10 @@ export const ReservationCalendarPanel = ({
 }: ReservationCalendarPanelProps) => {
   const byDay = useMemo(() => groupByDay(items), [items]);
 
-  // Open on the month holding the soonest item, falling back to today
-  const initialMonth = useMemo(() => {
-    const earliest = items
-      .map((item) => item.start)
-      .filter(Boolean)
-      .sort()[0];
-    return earliest ? moment(earliest).startOf('month') : moment().startOf('month');
-  }, [items]);
-
-  const [monthCursor, setMonthCursor] = useState(initialMonth);
+  const [monthCursor, setMonthCursor] = useState(() => initialMonthFor(items));
   const [selectedKey, setSelectedKey] = useState<string>(ALL);
 
-  const days = useMemo(() => buildMonthDays(monthCursor), [monthCursor]);
+  const days = useMemo(() => buildActiveDays(items, monthCursor), [items, monthCursor]);
 
   const monthItems = useMemo(
     () => items.filter((item) => item.start && moment(item.start).isSame(monthCursor, 'month')),
@@ -149,7 +167,7 @@ export const ReservationCalendarPanel = ({
             >
               <span>{moment(day).format('ddd')}</span>
               <span className="font-bold">{day.getDate()}</span>
-              {hasItems && <span className="h-1.5 w-1.5 rounded-full bg-lime" />}
+              {hasItems && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
             </button>
           );
         })}

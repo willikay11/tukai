@@ -42,6 +42,16 @@ const items = [
   reservation('r2', 'Gikuyu na Mumbi', '2026-08-29T17:00:00Z'),
 ];
 
+// The panel opens on the current month, so the fixtures below only make sense
+// against a pinned clock — otherwise these pass today and fail next month
+beforeAll(() => {
+  jest.useFakeTimers({ now: new Date('2026-08-20T12:00:00Z') });
+});
+
+afterAll(() => {
+  jest.useRealTimers();
+});
+
 describe('ReservationCalendarPanel', () => {
   it('defaults to All and lists every booking that month', () => {
     render(<ReservationCalendarPanel items={items} onViewTicket={jest.fn()} />);
@@ -113,6 +123,33 @@ describe('ReservationCalendarPanel', () => {
       2,
     );
     expect(screen.getByText(/^Free\s+•\s+/)).toBeInTheDocument();
+  });
+
+  // A full month of pills buries the few days that matter
+  it('only offers day pills for days that have bookings', () => {
+    render(<ReservationCalendarPanel items={items} onViewTicket={jest.fn()} />);
+
+    expect(screen.getByRole('button', { name: /Thu\s*27/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Fri\s*28/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Sat\s*29/ })).toBeInTheDocument();
+
+    // Nothing is booked on these, so they are not offered at all
+    expect(screen.queryByRole('button', { name: /Sun\s*30/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Mon\s*31/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /\b1\b/ })).not.toBeInTheDocument();
+  });
+
+  it('marks day pills with a brand-coloured dot, not lime', () => {
+    const { container } = render(
+      <ReservationCalendarPanel items={items} onViewTicket={jest.fn()} />,
+    );
+
+    [/Thu\s*27/, /Fri\s*28/, /Sat\s*29/].forEach((name) => {
+      const pill = screen.getByRole('button', { name });
+      expect(pill.querySelector('.bg-primary')).toBeInTheDocument();
+    });
+
+    expect(container.querySelector('.bg-lime')).not.toBeInTheDocument();
   });
 
   it('changes month with the steppers', () => {
