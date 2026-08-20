@@ -90,9 +90,7 @@ describe('CommunityDiscoverCard', () => {
   });
 
   it('shows the overflow count beyond the three visible avatars', () => {
-    const members = Array.from({ length: 9 }, (_, index) =>
-      member(`m${index}`, `User${index}`),
-    );
+    const members = Array.from({ length: 9 }, (_, index) => member(`m${index}`, `User${index}`));
     render(<CommunityDiscoverCard community={makeCommunity({ members } as never)} />);
 
     expect(screen.getByText('+6')).toBeInTheDocument();

@@ -27,7 +27,7 @@ import { useLocation } from '@/context/LocationContext';
 import { cn } from '@/lib/utils';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
-import { Moment } from '@/types/moment';
+import { Moment, momentPhotos } from '@/types/moment';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
 import { PlaceCategory } from '@/types/placeCategory';
@@ -71,10 +71,10 @@ export const DiscoverPageContent = () => {
     page: 1,
     page_size: ROW_SIZE,
   });
-  // A moment can be posted without media; this row is photo-led, so those are
-  // dropped rather than rendered as empty tiles
+  // This row is photo-led. Media whose photo is null (a video, or an upload
+  // still processing) cannot be rendered and would throw in next/image.
   const moments: Moment[] = (momentsResponse?.data?.results ?? []).filter(
-    (moment: Moment) => moment.media?.length > 0,
+    (moment: Moment) => momentPhotos(moment).length > 0,
   );
 
   const { data: communitiesResponse, isLoading: isLoadingCommunities } = useGetCommunities({

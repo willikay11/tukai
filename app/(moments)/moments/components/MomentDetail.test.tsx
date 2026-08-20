@@ -85,13 +85,47 @@ describe('MomentDetail', () => {
       <MomentDetail
         moment={makeMoment({
           media: [
-            { id: 'a', photo: 'x', width: 1, height: 1, order: 0 },
-            { id: 'b', photo: 'y', width: 1, height: 1, order: 1 },
+            { id: 'a', photo: 'https://cdn.tukai.co/a.jpg', width: 1, height: 1, order: 0 },
+            { id: 'b', photo: 'https://cdn.tukai.co/b.jpg', width: 1, height: 1, order: 1 },
           ] as never,
         })}
       />,
     );
     expect(screen.getByText('strip:2')).toBeInTheDocument();
+  });
+
+  // Regression: media with photo: null (a video, or an upload still
+  // processing) reached next/image and threw, crashing the page
+  it('ignores media whose photo cannot be rendered', () => {
+    render(
+      <MomentDetail
+        moment={makeMoment({
+          media: [
+            { id: 'v', photo: null, width: 1, height: 1, order: 0 },
+            { id: 'ok', photo: 'https://cdn.tukai.co/real.jpg', width: 800, height: 600, order: 1 },
+          ] as never,
+        })}
+      />,
+    );
+
+    // One renderable photo left, so it takes the single-image path
+    expect(screen.getByAltText('Sunrise on the Mara')).toHaveAttribute(
+      'src',
+      'https://cdn.tukai.co/real.jpg',
+    );
+  });
+
+  it('renders no image at all when every media item is unrenderable', () => {
+    render(
+      <MomentDetail
+        moment={makeMoment({
+          media: [{ id: 'v', photo: null, width: 1, height: 1, order: 0 }] as never,
+        })}
+      />,
+    );
+
+    expect(screen.queryByAltText('Sunrise on the Mara')).not.toBeInTheDocument();
+    expect(screen.getByText('Sunrise on the Mara')).toBeInTheDocument();
   });
 
   it('shows like and comment counts', () => {

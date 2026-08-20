@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import Image from 'next/image';
 
-import { Moment } from '@/types/moment';
+import { Moment, momentPhotos } from '@/types/moment';
 
 interface MomentsMasonryProps {
   moments: Moment[];
@@ -51,7 +51,8 @@ export const MomentsMasonry = ({
           the layout masonry rather than a grid */}
       <div className="columns-2 gap-4 md:columns-3">
         {moments.map((moment) => {
-          const media = moment.media[0];
+          const media = momentPhotos(moment)[0];
+          if (!media) return null;
 
           return (
             <button
