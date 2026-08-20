@@ -72,6 +72,25 @@ export const formatShortDate = (isoString: string): string => {
   return `${weekday} ${date.getDate()} ${month}`;
 };
 
+// start + end ISO → "6:00 AM - 4:00 PM" (no date, for rows that show one already)
+export const formatTimeRange = (start: string | null, end: string | null): string => {
+  if (!start || !end) return '';
+
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) return '';
+
+  const time = (date: Date) => {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const hour = hours % 12 || 12;
+    return `${hour}:${String(minutes).padStart(2, '0')} ${period}`;
+  };
+
+  return `${time(startDate)} - ${time(endDate)}`;
+};
+
 // start + end ISO → "Sat 4 July · 6:00 AM — 4:00 PM"
 export const formatReservationDateTime = (start: string, end: string): string => {
   const startDate = new Date(start);

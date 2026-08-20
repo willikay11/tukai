@@ -331,32 +331,90 @@ describe('groupTicketPurchases', () => {
     purchase('p6', 'completed', 'f9202bdc', '2026-08-29T14:00:00Z', 'https://x/pdf6'),
   ];
 
-  it('groups by experience + occurrence + status with per-ticket data', () => {
+  // Regression: status used to be part of the key, so this single Aug 27
+  // booking rendered as two cards for the same experience — one for the four
+  // completed tickets, one for the lone expired one.
+  it('renders one card per outing, not per ticket status', () => {
     const reservations = groupTicketPurchases(purchases);
 
-    expect(reservations).toHaveLength(3);
+    expect(reservations).toHaveLength(2);
 
-    const completedAug27 = reservations.find(
-      (r: { occurrenceId: string; status: string }) =>
-        r.occurrenceId === 'bed13941' && r.status === 'completed',
+    const aug27 = reservations.find(
+      (r: { occurrenceStart: string }) => r.occurrenceStart === '2026-08-27T14:00:00Z',
     );
-    expect(completedAug27?.ticketCount).toBe(4);
-    expect(completedAug27?.tickets).toHaveLength(4);
-    expect(completedAug27?.tickets[0]).toMatchObject({
+    expect(aug27?.ticketCount).toBe(5);
+    expect(aug27?.tickets).toHaveLength(5);
+    // Four of the five are usable, so the booking is not marked expired
+    expect(aug27?.status).toBe('completed');
+    expect(aug27?.tickets[0]).toMatchObject({
       id: 'p1',
       ticketNumber: 'TKT-p1',
       hasPdf: true,
       ticketType: 'Normal',
     });
+    expect(aug27?.tickets.find((t: { id: string }) => t.id === 'p4')?.hasPdf).toBe(false);
+  });
 
-    const expiredAug27 = reservations.find((r: { status: string }) => r.status === 'expired');
-    expect(expiredAug27?.ticketCount).toBe(1);
-    expect(expiredAug27?.tickets[0].hasPdf).toBe(false);
+  it('keeps separate occurrences of the same experience apart', () => {
+    const reservations = groupTicketPurchases(purchases);
+
+    expect(reservations.map((r: { occurrenceStart: string }) => r.occurrenceStart)).toEqual([
+      '2026-08-27T14:00:00Z',
+      '2026-08-29T14:00:00Z',
+    ]);
+  });
+
+  // Tickets bought separately for the same outing can come back on distinct
+  // occurrence rows; the start time is the reliable identity
+  it('merges tickets whose occurrence ids differ but start at the same time', () => {
+    const reservations = groupTicketPurchases([
+      purchase('p1', 'completed', 'occ-a', '2026-08-27T14:00:00Z', null),
+      purchase('p2', 'completed', 'occ-b', '2026-08-27T14:00:00Z', null),
+    ]);
+
+    expect(reservations).toHaveLength(1);
+    expect(reservations[0].ticketCount).toBe(2);
+  });
+
+  it('surfaces an unpaid ticket over paid ones', () => {
+    const reservations = groupTicketPurchases([
+      purchase('p1', 'completed', 'occ-a', '2026-08-27T14:00:00Z', null),
+      purchase('p2', 'pending', 'occ-a', '2026-08-27T14:00:00Z', null),
+    ]);
+
+    expect(reservations[0].status).toBe('pending');
+  });
+
+  it('stays expired when every ticket is expired', () => {
+    const reservations = groupTicketPurchases([
+      purchase('p1', 'expired', 'occ-a', '2026-08-27T14:00:00Z', null),
+      purchase('p2', 'expired', 'occ-a', '2026-08-27T14:00:00Z', null),
+    ]);
+
+    expect(reservations[0].status).toBe('expired');
   });
 
   it('sorts reservations by occurrence start date', () => {
     const reservations = groupTicketPurchases(purchases);
     expect(reservations[0].occurrenceStart).toBe('2026-08-27T14:00:00Z');
     expect(reservations[reservations.length - 1].occurrenceStart).toBe('2026-08-29T14:00:00Z');
+  });
+});
+
+describe('mergeReservationStatus', () => {
+  const { mergeReservationStatus } = jest.requireActual('./ticket-utils');
+
+  it('lets anything awaiting payment win', () => {
+    expect(mergeReservationStatus('completed', 'pending')).toBe('pending');
+    expect(mergeReservationStatus('partial', 'completed')).toBe('partial');
+  });
+
+  it('prefers a usable ticket over an inert one', () => {
+    expect(mergeReservationStatus('expired', 'completed')).toBe('completed');
+    expect(mergeReservationStatus('completed', 'expired')).toBe('completed');
+  });
+
+  it('keeps the existing status when neither is actionable or usable', () => {
+    expect(mergeReservationStatus('expired', 'refunded')).toBe('expired');
   });
 });
