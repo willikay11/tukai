@@ -40,10 +40,7 @@ export const ItineraryDayByDay = ({ experienceId, startDate }: ItineraryDayByDay
 
   return (
     <section>
-      <div className="flex items-center gap-4">
-        <h3 className="flex-shrink-0 font-bold text-gray-900">Day by day</h3>
-        <span className="h-px flex-1 bg-gray-200" />
-      </div>
+      <h3 className="font-bold text-gray-900">Day by day</h3>
 
       <div className="mt-6 space-y-8">
         {days.map((day) => {

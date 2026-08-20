@@ -154,7 +154,7 @@ export const ViewExperiencePageContent = ({
           {/* Description */}
           <div>
             <p className="mb-3 text-base font-bold text-gray-900">About</p>
-            <DescriptionShowMore text={experience.description} photo={coverPhoto} />
+            <DescriptionShowMore text={experience.description} />
           </div>
 
           {/* Categories */}
