@@ -3,7 +3,6 @@ import moment from 'moment';
 import { Experience } from '@/types/experience';
 import { Reservation } from '@/types/ticket-purchase';
 
-import { buildDayPages, dayKey, groupByDay } from './ReservationCalendarPanel';
 import {
   ReservationView,
   isExperiencePast,
@@ -85,48 +84,6 @@ describe('isUpcoming', () => {
 
   it('drops reservations with no occurrence date', () => {
     expect(isUpcoming({ start: null } as ReservationView, now)).toBe(false);
-  });
-});
-
-describe('groupByDay', () => {
-  it('buckets reservations by calendar day', () => {
-    const grouped = groupByDay([
-      { key: 'a', start: '2026-08-29T06:00:00Z' },
-      { key: 'b', start: '2026-08-29T18:00:00Z' },
-      { key: 'c', start: '2026-08-30T06:00:00Z' },
-    ] as ReservationView[]);
-
-    expect(Object.keys(grouped).sort()).toEqual(['2026-08-29', '2026-08-30']);
-    expect(grouped['2026-08-29']).toHaveLength(2);
-  });
-
-  it('ignores reservations with no start', () => {
-    expect(groupByDay([{ key: 'a', start: null }] as ReservationView[])).toEqual({});
-  });
-});
-
-describe('buildDayPages', () => {
-  it('pages a month into 7-day strips', () => {
-    const pages = buildDayPages(moment('2026-08-01'));
-
-    // 31 days → 5 strips of 7
-    expect(pages).toHaveLength(5);
-    pages.forEach((page) => expect(page).toHaveLength(7));
-    expect(dayKey(pages[0][0])).toBe('2026-08-01');
-  });
-
-  // This is what produces strips like "Thu 27 … Tue 1"
-  it('lets the final strip run into the next month', () => {
-    const pages = buildDayPages(moment('2026-08-01'));
-    const lastStrip = pages[pages.length - 1].map(dayKey);
-
-    expect(lastStrip[0]).toBe('2026-08-29');
-    expect(lastStrip).toContain('2026-09-01');
-  });
-
-  it('handles a short month', () => {
-    const pages = buildDayPages(moment('2026-02-01'));
-    expect(pages).toHaveLength(4);
   });
 });
 

@@ -87,10 +87,10 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   // "N invites waiting" — experiences the user was invited to. Same query
   // InvitedExperiences uses; the count is the API total, not the page length.
   const { data: invitedResponse } = useExperiences(
-    { page: 1, page_size: 1, invited: isReserved ? true : undefined },
+    { page: 1, page_size: 50, invited: isReserved ? true : undefined },
     isReserved && Boolean(userId),
   );
-  const invitesWaiting: number = invitedResponse?.data?.count ?? 0;
+  const invites: Experience[] = invitedResponse?.data?.results ?? [];
   const isLoadingReservations = isLoadingPurchases || isLoadingReservedExperiences;
 
   // Hosting: everything the user created, across all statuses
@@ -378,7 +378,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
               <ReservedTab
                 reservations={reservations}
                 reservedExperiences={reservedExperiences}
-                invitesWaiting={invitesWaiting}
+                invites={invites}
                 isLoading={isLoadingReservations}
                 downloadingKey={downloadingKey}
                 onDownloadAll={handleDownloadAll}

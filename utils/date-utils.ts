@@ -72,7 +72,7 @@ export const formatShortDate = (isoString: string): string => {
   return `${weekday} ${date.getDate()} ${month}`;
 };
 
-// start + end ISO → "6:00 AM — 4:00 PM" (no date, for rows that show one already)
+// start + end ISO → "6:00 AM - 4:00 PM" (no date, for rows that show one already)
 export const formatTimeRange = (start: string | null, end: string | null): string => {
   if (!start || !end) return '';
 
@@ -88,7 +88,7 @@ export const formatTimeRange = (start: string | null, end: string | null): strin
     return `${hour}:${String(minutes).padStart(2, '0')} ${period}`;
   };
 
-  return `${time(startDate)} — ${time(endDate)}`;
+  return `${time(startDate)} - ${time(endDate)}`;
 };
 
 // start + end ISO → "Sat 4 July · 6:00 AM — 4:00 PM"

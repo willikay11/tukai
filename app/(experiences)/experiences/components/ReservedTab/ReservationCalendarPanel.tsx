@@ -7,101 +7,86 @@ import Image from 'next/image';
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
 import { formatTimeRange } from '@/utils/date-utils';
 
-import { ReservationView } from './types';
-
-const DAYS_PER_PAGE = 7;
+import { PanelItem } from './panelItems';
 
 export const dayKey = (date: Date | string): string => moment(date).format('YYYY-MM-DD');
 
-// One 7-day window per page, walking forward from the 1st. The final window can
-// run into the next month, which is what makes strips like "Thu 27 … Tue 1"
-export const buildDayPages = (monthCursor: moment.Moment): Date[][] => {
+// Every day of the month, so the strip can show days with nothing on them too
+export const buildMonthDays = (monthCursor: moment.Moment): Date[] => {
   const start = monthCursor.clone().startOf('month');
-  const pageCount = Math.ceil(monthCursor.daysInMonth() / DAYS_PER_PAGE);
-
-  return Array.from({ length: pageCount }, (_, pageIndex) =>
-    Array.from({ length: DAYS_PER_PAGE }, (_, dayIndex) =>
-      start
-        .clone()
-        .add(pageIndex * DAYS_PER_PAGE + dayIndex, 'days')
-        .toDate(),
-    ),
+  return Array.from({ length: monthCursor.daysInMonth() }, (_, index) =>
+    start.clone().add(index, 'days').toDate(),
   );
 };
 
-export const groupByDay = (reservations: ReservationView[]): Record<string, ReservationView[]> =>
-  reservations.reduce<Record<string, ReservationView[]>>((accumulator, reservation) => {
-    if (!reservation.start) return accumulator;
-    const key = dayKey(reservation.start);
-    accumulator[key] = [...(accumulator[key] ?? []), reservation];
+export const groupByDay = (items: PanelItem[]): Record<string, PanelItem[]> =>
+  items.reduce<Record<string, PanelItem[]>>((accumulator, item) => {
+    if (!item.start) return accumulator;
+    const key = dayKey(item.start);
+    accumulator[key] = [...(accumulator[key] ?? []), item];
     return accumulator;
   }, {});
 
-const WeekDots = ({ current, total }: { current: number; total: number }) => (
-  <div className="flex items-center gap-1.5">
-    {Array.from({ length: total }).map((_, index) => (
-      <span
-        key={index}
-        className={`h-1.5 rounded-full transition-all ${
-          index === current ? 'w-4 bg-primary' : 'w-1.5 bg-gray-300'
-        }`}
-      />
-    ))}
-  </div>
-);
+const ALL = 'all';
+
+const StatusPill = ({ kind }: { kind: PanelItem['kind'] }) =>
+  kind === 'invite' ? (
+    <span className="rounded-md bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700">
+      Invite
+    </span>
+  ) : (
+    <span className="rounded-md bg-green-100 px-2 py-1 text-xs font-semibold text-green-800">
+      Reserved
+    </span>
+  );
 
 interface ReservationCalendarPanelProps {
-  reservations: ReservationView[];
-  onViewTicket: (reservation: ReservationView) => void;
+  items: PanelItem[];
+  onViewTicket: (item: PanelItem) => void;
+  onAcceptInvite?: (item: PanelItem) => void;
+  onDeclineInvite?: (item: PanelItem) => void;
+  // No accept/decline endpoint exists yet — see ReservedTab
+  invitesActionable?: boolean;
 }
 
 export const ReservationCalendarPanel = ({
-  reservations,
+  items,
   onViewTicket,
+  onAcceptInvite,
+  onDeclineInvite,
+  invitesActionable = false,
 }: ReservationCalendarPanelProps) => {
-  const byDay = useMemo(() => groupByDay(reservations), [reservations]);
+  const byDay = useMemo(() => groupByDay(items), [items]);
 
-  // Open on the month holding the soonest reservation, falling back to today
+  // Open on the month holding the soonest item, falling back to today
   const initialMonth = useMemo(() => {
-    const earliest = reservations
-      .map((reservation) => reservation.start)
+    const earliest = items
+      .map((item) => item.start)
       .filter(Boolean)
       .sort()[0];
     return earliest ? moment(earliest).startOf('month') : moment().startOf('month');
-  }, [reservations]);
+  }, [items]);
 
   const [monthCursor, setMonthCursor] = useState(initialMonth);
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string>(ALL);
 
-  const pages = useMemo(() => buildDayPages(monthCursor), [monthCursor]);
+  const days = useMemo(() => buildMonthDays(monthCursor), [monthCursor]);
 
-  // Default to the first day in this month that actually has something on it
-  const defaultKey = useMemo(() => {
-    const inMonth = pages
-      .flat()
-      .map(dayKey)
-      .find((key) => (byDay[key]?.length ?? 0) > 0);
-    return inMonth ?? dayKey(pages[0]?.[0] ?? new Date());
-  }, [pages, byDay]);
-
-  const activeKey = selectedKey ?? defaultKey;
-  const activePageIndex = Math.max(
-    pages.findIndex((page) => page.some((day) => dayKey(day) === activeKey)),
-    0,
+  const monthItems = useMemo(
+    () => items.filter((item) => item.start && moment(item.start).isSame(monthCursor, 'month')),
+    [items, monthCursor],
   );
-  const [pageIndex, setPageIndex] = useState<number | null>(null);
-  const currentPage = pages[pageIndex ?? activePageIndex] ?? pages[0] ?? [];
+
+  const visibleItems = selectedKey === ALL ? monthItems : (byDay[selectedKey] ?? []);
 
   const changeMonth = (delta: number) => {
     setMonthCursor((cursor) => cursor.clone().add(delta, 'month'));
-    setSelectedKey(null);
-    setPageIndex(null);
+    setSelectedKey(ALL);
   };
-
-  const selectedReservations = byDay[activeKey] ?? [];
 
   return (
     <div className="mt-4 rounded-3xl bg-gray-50 p-5">
@@ -126,23 +111,35 @@ export const ReservationCalendarPanel = ({
           </button>
         </div>
 
-        <WeekDots current={pageIndex ?? activePageIndex} total={pages.length} />
+        <span className="flex-shrink-0 text-sm text-gray-400">
+          {monthItems.length} {monthItems.length === 1 ? 'booking' : 'bookings'}
+        </span>
       </div>
 
       <div className="mt-4 flex items-center gap-2 overflow-x-auto scrollbar-hide">
-        {currentPage.map((day) => {
+        <button
+          type="button"
+          onClick={() => setSelectedKey(ALL)}
+          aria-pressed={selectedKey === ALL}
+          className={`flex-shrink-0 rounded-full border px-5 py-2.5 text-sm ${
+            selectedKey === ALL
+              ? 'border-transparent bg-green-200 font-semibold text-gray-900'
+              : 'border-gray-200 bg-white text-gray-700'
+          }`}
+        >
+          All
+        </button>
+
+        {days.map((day) => {
           const key = dayKey(day);
-          const isSelected = key === activeKey;
+          const isSelected = key === selectedKey;
           const hasItems = (byDay[key]?.length ?? 0) > 0;
 
           return (
             <button
               key={key}
               type="button"
-              onClick={() => {
-                setSelectedKey(key);
-                setPageIndex(pages.findIndex((page) => page.some((item) => dayKey(item) === key)));
-              }}
+              onClick={() => setSelectedKey(key)}
               aria-pressed={isSelected}
               className={`flex flex-shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-sm ${
                 isSelected
@@ -159,23 +156,34 @@ export const ReservationCalendarPanel = ({
       </div>
 
       <div className="mt-5 space-y-3">
-        {selectedReservations.length === 0 ? (
+        {visibleItems.length === 0 ? (
           <div className="py-8">
-            <NoData message="Nothing on this day" />
+            <NoData message={selectedKey === ALL ? 'Nothing this month' : 'Nothing on this day'} />
           </div>
         ) : (
-          selectedReservations.map((reservation) => (
+          visibleItems.map((item) => (
             <div
-              key={reservation.key}
+              key={item.id}
               className="flex flex-wrap items-center gap-4 rounded-2xl bg-white px-4 py-3"
             >
-              <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl">
-                {reservation.coverPhoto ? (
+              {item.start && (
+                <div className="flex w-14 flex-shrink-0 flex-col items-center rounded-xl bg-indigo-50 py-2">
+                  <span className="text-[11px] text-gray-400">
+                    {moment(item.start).format('MMM')}
+                  </span>
+                  <span className="text-base font-bold text-gray-900">
+                    {moment(item.start).date()}
+                  </span>
+                </div>
+              )}
+
+              <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl">
+                {item.coverPhoto ? (
                   <Image
-                    src={reservation.coverPhoto}
-                    alt={reservation.title}
+                    src={item.coverPhoto}
+                    alt={item.title}
                     fill
-                    sizes="48px"
+                    sizes="56px"
                     className="object-cover"
                   />
                 ) : (
@@ -184,39 +192,58 @@ export const ReservationCalendarPanel = ({
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-gray-900">{reservation.title}</p>
+                <div className="flex items-center gap-2">
+                  <StatusPill kind={item.kind} />
+                  {item.start && (
+                    <span className="text-sm text-gray-400">
+                      {moment(item.start).format('ddd D MMM')}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 truncate text-base font-bold text-gray-900">{item.title}</p>
                 <p className="truncate text-sm text-gray-400">
-                  {[
-                    reservation.priceAmount !== null
-                      ? `from ${reservation.currency} ${reservation.priceAmount.toLocaleString()}`
-                      : null,
-                    formatTimeRange(reservation.start, reservation.end),
-                  ]
+                  {[item.priceLabel, formatTimeRange(item.start, item.end)]
                     .filter(Boolean)
-                    .join(' · ')}
+                    .join('  •  ')}
                 </p>
               </div>
 
-              {reservation.tickets.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => onViewTicket(reservation)}
-                  className="flex flex-shrink-0 items-center gap-1.5 rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:border-gray-300"
-                >
-                  <IconComponent iconName="Ticket01Icon" size={15} className="text-primary" />
-                  View ticket
-                </button>
-              )}
-
-              {reservation.start && (
-                <div className="flex flex-shrink-0 flex-col items-center rounded-xl bg-gray-50 px-3 py-2">
-                  <span className="text-[11px] text-gray-400">
-                    {moment(reservation.start).format('MMM')}
-                  </span>
-                  <span className="text-base font-bold text-gray-900">
-                    {new Date(reservation.start).getDate()}
-                  </span>
+              {item.kind === 'invite' ? (
+                <div className="flex flex-shrink-0 items-center gap-2">
+                  <Button
+                    onClick={() => onAcceptInvite?.(item)}
+                    disabled={!invitesActionable}
+                    title={
+                      invitesActionable ? undefined : 'Responding to invites is not available yet'
+                    }
+                    className="rounded-full px-6"
+                  >
+                    Accept
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => onDeclineInvite?.(item)}
+                    disabled={!invitesActionable}
+                    title={
+                      invitesActionable ? undefined : 'Responding to invites is not available yet'
+                    }
+                    className="rounded-full px-6 text-gray-500"
+                  >
+                    Decline
+                  </Button>
                 </div>
+              ) : (
+                item.reservation &&
+                item.reservation.tickets.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => onViewTicket(item)}
+                    className="flex flex-shrink-0 items-center gap-1.5 rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:border-gray-300"
+                  >
+                    <IconComponent iconName="Ticket01Icon" size={15} className="text-primary" />
+                    View ticket
+                  </button>
+                )
               )}
             </div>
           ))

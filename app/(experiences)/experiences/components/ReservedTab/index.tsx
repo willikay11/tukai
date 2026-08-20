@@ -10,6 +10,7 @@ import { Reservation } from '@/types/ticket-purchase';
 import { TicketModal } from '../TicketModal';
 import { ReservationCalendarPanel } from './ReservationCalendarPanel';
 import { UpcomingReservationCard } from './UpcomingReservationCard';
+import { PanelItem, buildPanelItems } from './panelItems';
 import {
   ExperienceReservationView,
   ReservationView,
@@ -22,7 +23,7 @@ import {
 interface ReservedTabProps {
   reservations: Reservation[];
   reservedExperiences: Experience[];
-  invitesWaiting: number;
+  invites: Experience[];
   isLoading: boolean;
   downloadingKey: string | null;
   onDownloadAll: (reservation: Reservation) => void;
@@ -32,7 +33,7 @@ interface ReservedTabProps {
 export const ReservedTab = ({
   reservations,
   reservedExperiences,
-  invitesWaiting,
+  invites,
   isLoading,
   downloadingKey,
   onDownloadAll,
@@ -56,6 +57,12 @@ export const ReservedTab = ({
   const past = useMemo(
     () => experienceViews.filter((view) => isExperiencePast(view)),
     [experienceViews],
+  );
+
+  // Reservations and invites share one date-ordered list in the panel
+  const panelItems: PanelItem[] = useMemo(
+    () => buildPanelItems(views, reservedExperiences, invites),
+    [views, reservedExperiences, invites],
   );
 
   // The calendar row opens the same modal the cards do, so it is hoisted here
@@ -101,14 +108,7 @@ export const ReservedTab = ({
   return (
     <div>
       <section>
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-2xl font-bold text-gray-900">Your Upcoming Experiences</h2>
-          {invitesWaiting > 0 && (
-            <span className="flex-shrink-0 text-sm text-gray-400">
-              {invitesWaiting} {invitesWaiting === 1 ? 'invite' : 'invites'} waiting
-            </span>
-          )}
-        </div>
+        <h2 className="text-2xl font-bold text-gray-900">Your Upcoming Experiences</h2>
 
         {upcoming.length === 0 ? (
           <div className="py-8">
@@ -131,7 +131,15 @@ export const ReservedTab = ({
 
       <section className="mt-12">
         <h2 className="text-2xl font-bold text-gray-900">Reservations &amp; Invites</h2>
-        <ReservationCalendarPanel reservations={views} onViewTicket={setCalendarTicket} />
+        {invites.length > 0 && (
+          <p className="mt-1 text-sm text-gray-400">
+            {invites.length} {invites.length === 1 ? 'invite' : 'invites'} waiting on you
+          </p>
+        )}
+        <ReservationCalendarPanel
+          items={panelItems}
+          onViewTicket={(item) => setCalendarTicket(item.reservation ?? null)}
+        />
       </section>
 
       {past.length > 0 && (
