@@ -5,13 +5,16 @@ import { BucketListMember } from '@/types/bucket-list';
 interface AvatarStackProps {
   users: BucketListMember[];
   max?: number;
+  // Overrides the overflow derived from `users`, for callers that hold a total
+  // count larger than the handful of avatars they were given
+  extraCount?: number;
 }
 
-export const AvatarStack = ({ users, max = 3 }: AvatarStackProps) => {
+export const AvatarStack = ({ users, max = 3, extraCount }: AvatarStackProps) => {
   if (users.length === 0) return null;
 
   const visible = users.slice(0, max);
-  const overflow = users.length - visible.length;
+  const overflow = extraCount ?? users.length - visible.length;
 
   return (
     <div className="flex items-center -space-x-2">

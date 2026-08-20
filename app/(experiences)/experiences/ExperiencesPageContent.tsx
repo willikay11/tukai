@@ -11,20 +11,26 @@ import moment from 'moment';
 import { BucketListCard } from '@/app/(experiences)/experiences/components/BucketListCard';
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
+import {
+  ExperienceRow,
+  RowSkeleton,
+} from '@/app/(experiences)/experiences/components/ExperienceRow';
 import { FeaturedExperienceBanner } from '@/app/(experiences)/experiences/components/FeaturedExperienceBanner';
 import { HostingCard } from '@/app/(experiences)/experiences/components/HostingCard';
-import { Experiences } from '@/app/(experiences)/experiences/components/List/experiences';
 import { ReservationCard } from '@/app/(experiences)/experiences/components/ReservationCard';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { SharedBucketListCard } from '@/app/(experiences)/experiences/components/SharedBucketListCard';
-import { SingleExperience } from '@/app/shared/components/Experiences/Single';
+import {
+  cityExperiencesHref,
+  shouldShowSeeAll,
+} from '@/app/(experiences)/experiences/see-all/config';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { ScrollRow } from '@/app/shared/components/Lists';
 import { useMyBucketLists, useSharedBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useExperiences, useTicketPurchases } from '@/app/shared/hooks/useExperiences';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { NoData } from '@/components/ui/noData';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocation } from '@/context/LocationContext';
@@ -44,77 +50,10 @@ const TABS = [
   { value: 'hosting', label: 'Hosting' },
 ];
 
-const CardRow = ({ children }: { children: React.ReactNode }) => (
-  <Carousel opts={{ align: 'start', dragFree: true }} className="w-full">
-    <CarouselContent>{children}</CarouselContent>
-  </Carousel>
-);
-
-const RowSkeleton = ({
-  cardWidth = 280,
-  cardHeight,
-}: {
-  cardWidth?: number;
-  cardHeight?: number;
-}) => (
-  <div className="flex gap-4 overflow-hidden">
-    {Array.from({ length: 5 }).map((_, index) => (
-      <div key={index} className="flex-shrink-0" style={{ width: cardWidth }}>
-        <div
-          className="w-full animate-pulse rounded-xl bg-gray-200"
-          style={cardHeight ? { height: cardHeight } : { aspectRatio: '4 / 3' }}
-        />
-        <div className="mt-2 h-4 w-3/4 animate-pulse rounded bg-gray-200" />
-        <div className="mt-1 h-3 w-1/2 animate-pulse rounded bg-gray-200" />
-      </div>
-    ))}
-  </div>
-);
-
-const ExperienceRow = ({
-  title,
-  subtitle,
-  seeAllHref,
-  experiences,
-  isLoading,
-}: {
-  title: string;
-  subtitle?: string;
-  seeAllHref?: string;
-  experiences: Experience[];
-  isLoading: boolean;
-}) => {
-  // Hide the whole section when it loaded empty
-  if (!isLoading && experiences.length === 0) {
-    return null;
-  }
-
-  return (
-    <section>
-      <SectionHeader title={title} subtitle={subtitle} seeAllHref={seeAllHref} />
-      {isLoading ? (
-        <RowSkeleton />
-      ) : (
-        <CardRow>
-          {experiences.map((experience) => (
-            <CarouselItem key={experience.id} className="basis-auto">
-              <div className="w-[280px]">
-                <Link target="_blank" href={`/experiences/${experience.id}`}>
-                  <SingleExperience type="discover" variant="row" experience={experience} />
-                </Link>
-              </div>
-            </CarouselItem>
-          ))}
-        </CardRow>
-      )}
-    </section>
-  );
-};
-
 export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: string }) => {
   const router = useRouter();
   const { data: session } = useSession();
-  const { city } = useLocation();
+  const { city, lat, lng } = useLocation();
   const [activeTab, setActiveTab] = useState(
     TABS.some((tab) => tab.value === initialCategory) ? initialCategory : 'all',
   );
@@ -184,15 +123,23 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const today = moment().format('YYYY-MM-DD');
   const tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
 
-  // No featured/nearby endpoints exist — the default list is the closest
-  // available query: first result is the featured hero, the rest are "near you"
+  // No featured endpoint exists — the default list is the closest available
+  // query, and its first result stands in as the featured hero
   const { data: discoverResponse, isLoading: isLoadingDiscover } = useExperiences(
     { page: 1, page_size: 9 },
     isAll,
   );
   const discoverExperiences: Experience[] = discoverResponse?.data?.results ?? [];
   const featuredExperience = discoverExperiences[0];
-  const nearbyExperiences = discoverExperiences.slice(1);
+
+  // "Happening Near You": the first 10 published experiences, scoped to the
+  // coordinates the LocationContext resolved. Coordinates are omitted until the
+  // user grants location, so the row still renders (unscoped) if they decline.
+  const { data: nearbyResponse, isLoading: isLoadingNearby } = useExperiences(
+    { page: 1, page_size: 10, status: 'published', lat, long: lng },
+    isAll,
+  );
+  const nearbyExperiences: Experience[] = nearbyResponse?.data?.results ?? [];
 
   const { data: todayResponse, isLoading: isLoadingToday } = useExperiences(
     { page: 1, page_size: 8, date: today },
@@ -214,6 +161,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   // Curated destination row: no featured-destination field exists, so use the
   // top city by count; experiences have no city filter, so search by city name
   const topCity = cities[0];
+  const visibleCities = cities.slice(0, 10);
   const { data: topCityResponse, isLoading: isLoadingTopCity } = useExperiences(
     { page: 1, page_size: 8, search: topCity?.name },
     isAll && Boolean(topCity),
@@ -259,9 +207,10 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
           <ExperienceRow
             title="Happening Near You"
             subtitle={`Within 25 km of ${userCity}`}
-            seeAllHref="/experiences?near=me"
+            seeAllHref="/experiences/see-all?type=near-me"
+            total={nearbyResponse?.data?.count}
             experiences={nearbyExperiences}
-            isLoading={isLoadingDiscover}
+            isLoading={isLoadingNearby}
           />
 
           {/* Experiences by City */}
@@ -270,23 +219,25 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
               <SectionHeader
                 title="Experiences by City"
                 subtitle="Browse by destination"
-                seeAllHref="/places"
+                seeAllHref={
+                  shouldShowSeeAll(cities.length) ? '/experiences/see-all?type=cities' : undefined
+                }
               />
               {isLoadingCities ? (
-                <RowSkeleton cardWidth={240} cardHeight={130} />
+                <RowSkeleton cardClassName="h-[130px] w-[240px]" />
               ) : (
-                <CardRow>
-                  {cities.map((category) => (
-                    <CarouselItem key={category.id} className="basis-auto">
+                <ScrollRow>
+                  {visibleCities.map((category) => (
+                    <div key={category.id} className="snap-start">
                       <CityCard
                         city={category.name}
                         experienceCount={category.placesCount}
                         imageUrl={category.image ?? ''}
-                        href={`/places?city=${category.id}`}
+                        href={cityExperiencesHref(category.name)}
                       />
-                    </CarouselItem>
+                    </div>
                   ))}
-                </CardRow>
+                </ScrollRow>
               )}
             </section>
           )}
@@ -294,7 +245,8 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
           <ExperienceRow
             title="Happening Today"
             subtitle={formatLongDateWithOrdinal(new Date())}
-            seeAllHref="/experiences?date=today"
+            seeAllHref="/experiences/see-all?type=today"
+            total={todayResponse?.data?.count}
             experiences={todayResponse?.data?.results ?? []}
             isLoading={isLoadingToday}
           />
@@ -302,7 +254,8 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
           <ExperienceRow
             title={`Happening Tomorrow in ${userCity}`}
             subtitle={formatLongDateWithOrdinal(moment().add(1, 'days').toDate())}
-            seeAllHref="/experiences?date=tomorrow"
+            seeAllHref={`/experiences/see-all?type=tomorrow&city=${encodeURIComponent(userCity)}`}
+            total={tomorrowResponse?.data?.count}
             experiences={tomorrowResponse?.data?.results ?? []}
             isLoading={isLoadingTomorrow}
           />
@@ -311,7 +264,8 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             <ExperienceRow
               title={`Experiences in ${topCity.name}`}
               subtitle="Curated destination"
-              seeAllHref={`/places?city=${topCity.id}`}
+              seeAllHref={cityExperiencesHref(topCity.name)}
+              total={topCityResponse?.data?.count}
               experiences={topCityResponse?.data?.results ?? []}
               isLoading={isLoadingTopCity}
             />

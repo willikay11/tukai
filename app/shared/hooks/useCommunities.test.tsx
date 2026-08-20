@@ -572,3 +572,62 @@ describe('Communities Hooks', () => {
     });
   });
 });
+
+// Regression: the query key omitted the boolean flags, so a popular/recommended
+// /following query shared a cache entry with a plain one and they served each
+// other's results.
+describe('useGetCommunities cache separation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const popularCommunity = { ...mockCommunity, id: 'popular-1', name: 'Popular Crew' };
+  const plainCommunity = { ...mockCommunity, id: 'plain-1', name: 'Plain Crew' };
+
+  it('does not let a popular query serve a plain query its results', async () => {
+    mockCommunityService.getCommunities.mockImplementation((...args: any[]) => {
+      const isPopular = args[6] === true;
+      return Promise.resolve({
+        data: { results: [isPopular ? popularCommunity : plainCommunity], count: 1 },
+      } as any);
+    });
+
+    // One client, so both hooks share a cache — the whole point of the test
+    const wrapper = createWrapper();
+
+    const popular = renderHook(
+      () => useGetCommunities({ page: 1, enabled: true, popularCommunities: true }),
+      { wrapper },
+    );
+    const plain = renderHook(() => useGetCommunities({ page: 1, enabled: true }), { wrapper });
+
+    await waitFor(() => expect(popular.result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(plain.result.current.isSuccess).toBe(true));
+
+    expect(popular.result.current.data?.data?.results[0].id).toBe('popular-1');
+    expect(plain.result.current.data?.data?.results[0].id).toBe('plain-1');
+    expect(mockCommunityService.getCommunities).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps recommended and following queries distinct too', async () => {
+    mockCommunityService.getCommunities.mockResolvedValue({
+      data: { results: [mockCommunity], count: 1 },
+    } as any);
+
+    const wrapper = createWrapper();
+
+    const recommended = renderHook(
+      () => useGetCommunities({ page: 1, enabled: true, recommendedCommunities: true }),
+      { wrapper },
+    );
+    const following = renderHook(
+      () => useGetCommunities({ page: 1, enabled: true, following: true }),
+      { wrapper },
+    );
+
+    await waitFor(() => expect(recommended.result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(following.result.current.isSuccess).toBe(true));
+
+    expect(mockCommunityService.getCommunities).toHaveBeenCalledTimes(2);
+  });
+});

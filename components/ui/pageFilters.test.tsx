@@ -73,6 +73,8 @@ describe('PageFilters', () => {
       '/experiences/456',
       '/communities/789',
       '/creator-studio/experiences/456',
+      '/moments',
+      '/moments?momentId=abc',
       '/auth/login',
       '/terms',
       '/privacy',
@@ -86,6 +88,18 @@ describe('PageFilters', () => {
 
       const { container } = renderWithProviders(<PageFilters />);
       expect(container.firstChild).toBeNull();
+    });
+
+    // Regression: /moments matched no branch of the effect, so isLoading never
+    // cleared and the pill skeleton sat at the top of the page permanently
+    it('should not leave a pill skeleton on /moments', () => {
+      (nextNavigation.usePathname as jest.Mock).mockReturnValue('/moments');
+      (nextNavigation.useSearchParams as jest.Mock).mockReturnValue({
+        get: jest.fn().mockReturnValue(null),
+      });
+
+      renderWithProviders(<PageFilters />);
+      expect(screen.queryByTestId('pills-skeleton')).not.toBeInTheDocument();
     });
   });
 

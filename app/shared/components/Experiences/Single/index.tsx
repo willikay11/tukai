@@ -35,6 +35,18 @@ export const SingleExperience = ({
   const { lat, lng } = useLocation();
 
   if (experience.id.startsWith('placeholder-')) {
+    // The row card is much shorter than the default one, so it gets a
+    // matching skeleton to stop the grid jumping when results land
+    if (variant === 'row') {
+      return (
+        <div className="flex flex-col">
+          <div className="aspect-[4/3] w-full animate-pulse rounded-xl bg-gray-200" />
+          <div className="mt-2 h-4 w-3/4 animate-pulse rounded bg-gray-200" />
+          <div className="mt-1 h-3 w-1/2 animate-pulse rounded bg-gray-200" />
+        </div>
+      );
+    }
+
     return <EventSkeleton />;
   }
 
@@ -71,8 +83,9 @@ export const SingleExperience = ({
           ) : (
             <div className="h-full w-full bg-gray-100" />
           )}
-          <div className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm">
+          <div className="absolute right-2 top-2">
             <Bookmark
+              icon="basket"
               bookmarked={experience.isBookmarked}
               userId={session?.user?.id}
               onBookmark={() => bookmarkExperience(experience.id)}
@@ -137,10 +150,12 @@ export const SingleExperience = ({
         </div>
         <div className="absolute right-2 top-2">
           <Bookmark
+            icon="basket"
             bookmarked={experience.isBookmarked}
             userId={session?.user?.id}
             onBookmark={() => bookmarkExperience(experience.id)}
             onUnbookmark={() => bookmarkExperience(experience.id)}
+            className="text-white"
           />
         </div>
       </div>
