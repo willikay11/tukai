@@ -1,14 +1,16 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import Link from 'next/link';
+import moment from 'moment';
 
 import { CommunityDiscoverCard } from '@/app/(experiences)/components/CommunityDiscoverCard';
 import { MomentRowCard } from '@/app/(experiences)/components/MomentRowCard';
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
+import { ExperienceRow } from '@/app/(experiences)/experiences/components/ExperienceRow';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
-import { cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
+import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
 import { FeaturedBanner } from '@/app/shared/components/Banners';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { ScrollRow } from '@/app/shared/components/Lists';
@@ -23,7 +25,7 @@ import { Experience } from '@/types/experience';
 import { Moment } from '@/types/moment';
 import { Photo } from '@/types/photo';
 import { PlaceCategory } from '@/types/placeCategory';
-import { formatShortDate } from '@/utils/date-utils';
+import { formatLongDateWithOrdinal, formatShortDate } from '@/utils/date-utils';
 import { haversineKm } from '@/utils/geo-utils';
 
 const ROW_SIZE = 10;
@@ -52,7 +54,7 @@ const RowSkeleton = ({
 
 export const DiscoverPageContent = () => {
   const router = useRouter();
-  const { lat, lng } = useLocation();
+  const { city, lat, lng } = useLocation();
 
   // ⚠️ No featured endpoint and no is_featured param exist — the first row of
   // the default list stands in, matching what /experiences and the Places
@@ -97,6 +99,20 @@ export const DiscoverPageContent = () => {
     popularCommunities: true,
   });
   const communities: Community[] = communitiesResponse?.data?.results ?? [];
+
+  // Same queries the /experiences rows issue
+  const userCity = city ?? DEFAULT_CITY;
+  const today = moment().format('YYYY-MM-DD');
+  const tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
+
+  const { data: todayResponse, isLoading: isLoadingToday } = useExperiences(
+    { page: 1, page_size: 8, date: today },
+    true,
+  );
+  const { data: tomorrowResponse, isLoading: isLoadingTomorrow } = useExperiences(
+    { page: 1, page_size: 8, date: tomorrow },
+    true,
+  );
 
   const coverPhoto =
     featured?.photos?.find((photo: Photo) => photo.isCover)?.photo ||
@@ -242,6 +258,24 @@ export const DiscoverPageContent = () => {
           )}
         </section>
       )}
+
+      <ExperienceRow
+        title="Happening Today"
+        subtitle={formatLongDateWithOrdinal(new Date())}
+        seeAllHref="/experiences/see-all?type=today"
+        total={todayResponse?.data?.count}
+        experiences={todayResponse?.data?.results ?? []}
+        isLoading={isLoadingToday}
+      />
+
+      <ExperienceRow
+        title={`Happening Tomorrow in ${userCity}`}
+        subtitle={formatLongDateWithOrdinal(moment().add(1, 'days').toDate())}
+        seeAllHref={`/experiences/see-all?type=tomorrow&city=${encodeURIComponent(userCity)}`}
+        total={tomorrowResponse?.data?.count}
+        experiences={tomorrowResponse?.data?.results ?? []}
+        isLoading={isLoadingTomorrow}
+      />
     </main>
   );
 };

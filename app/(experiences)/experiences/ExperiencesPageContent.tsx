@@ -11,9 +11,12 @@ import moment from 'moment';
 import { BucketListCard } from '@/app/(experiences)/experiences/components/BucketListCard';
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
+import {
+  ExperienceRow,
+  RowSkeleton,
+} from '@/app/(experiences)/experiences/components/ExperienceRow';
 import { FeaturedExperienceBanner } from '@/app/(experiences)/experiences/components/FeaturedExperienceBanner';
 import { HostingCard } from '@/app/(experiences)/experiences/components/HostingCard';
-import { Experiences } from '@/app/(experiences)/experiences/components/List/experiences';
 import { ReservationCard } from '@/app/(experiences)/experiences/components/ReservationCard';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { SharedBucketListCard } from '@/app/(experiences)/experiences/components/SharedBucketListCard';
@@ -21,7 +24,6 @@ import {
   cityExperiencesHref,
   shouldShowSeeAll,
 } from '@/app/(experiences)/experiences/see-all/config';
-import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { ScrollRow } from '@/app/shared/components/Lists';
 import { useMyBucketLists, useSharedBucketLists } from '@/app/shared/hooks/useBucketLists';
@@ -47,72 +49,6 @@ const TABS = [
   { value: 'saved', label: 'Saved' },
   { value: 'hosting', label: 'Hosting' },
 ];
-
-const RowSkeleton = ({
-  cardWidth = 280,
-  cardHeight,
-}: {
-  cardWidth?: number;
-  cardHeight?: number;
-}) => (
-  <div className="flex gap-4 overflow-hidden">
-    {Array.from({ length: 5 }).map((_, index) => (
-      <div key={index} className="flex-shrink-0" style={{ width: cardWidth }}>
-        <div
-          className="w-full animate-pulse rounded-xl bg-gray-200"
-          style={cardHeight ? { height: cardHeight } : { aspectRatio: '4 / 3' }}
-        />
-        <div className="mt-2 h-4 w-3/4 animate-pulse rounded bg-gray-200" />
-        <div className="mt-1 h-3 w-1/2 animate-pulse rounded bg-gray-200" />
-      </div>
-    ))}
-  </div>
-);
-
-const ExperienceRow = ({
-  title,
-  subtitle,
-  seeAllHref,
-  total,
-  experiences,
-  isLoading,
-}: {
-  title: string;
-  subtitle?: string;
-  seeAllHref?: string;
-  // API total for the section, which is larger than the page the row renders
-  total?: number;
-  experiences: Experience[];
-  isLoading: boolean;
-}) => {
-  // Hide the whole section when it loaded empty
-  if (!isLoading && experiences.length === 0) {
-    return null;
-  }
-
-  return (
-    <section>
-      <SectionHeader
-        title={title}
-        subtitle={subtitle}
-        seeAllHref={shouldShowSeeAll(total) ? seeAllHref : undefined}
-      />
-      {isLoading ? (
-        <RowSkeleton />
-      ) : (
-        <ScrollRow>
-          {experiences.map((experience) => (
-            <div key={experience.id} className="w-[280px] flex-shrink-0 snap-start">
-              <Link target="_blank" href={`/experiences/${experience.id}`}>
-                <SingleExperience type="discover" variant="row" experience={experience} />
-              </Link>
-            </div>
-          ))}
-        </ScrollRow>
-      )}
-    </section>
-  );
-};
 
 export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: string }) => {
   const router = useRouter();

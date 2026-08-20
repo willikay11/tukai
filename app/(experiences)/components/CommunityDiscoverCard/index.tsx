@@ -13,8 +13,7 @@ const AVATAR_LIMIT = 3;
 
 export const CommunityDiscoverCard = ({ community }: { community: Community }) => {
   const coverPhoto =
-    community.photos?.find((photo: Photo) => photo.isCover)?.photo ||
-    community.photos?.[0]?.photo;
+    community.photos?.find((photo: Photo) => photo.isCover)?.photo || community.photos?.[0]?.photo;
 
   const category = community.categories?.[0]?.name;
 
@@ -45,8 +44,10 @@ export const CommunityDiscoverCard = ({ community }: { community: Community }) =
           <div className="h-full w-full bg-gray-200" />
         )}
 
+        {/* Same translucent treatment as the bookmark circle over an experience
+            photo, rather than a solid brand fill */}
         {category && (
-          <span className="absolute left-3 top-3 rounded-full bg-primary px-3 py-1 text-xs font-medium text-white">
+          <span className="absolute left-3 top-3 rounded-full bg-black/40 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
             {category}
           </span>
         )}

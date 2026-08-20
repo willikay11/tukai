@@ -104,6 +104,16 @@ describe('CommunityDiscoverCard', () => {
     expect(screen.queryByText(/^\+/)).not.toBeInTheDocument();
   });
 
+  // Matches the translucent bookmark circle over an experience photo rather
+  // than a solid brand fill
+  it('renders the category pill translucent, not brand-filled', () => {
+    render(<CommunityDiscoverCard community={makeCommunity()} />);
+
+    const pill = screen.getByText('Hiking');
+    expect(pill).toHaveClass('bg-black/40', 'backdrop-blur-sm', 'text-white');
+    expect(pill).not.toHaveClass('bg-primary');
+  });
+
   it('omits the badge when the community has no category', () => {
     render(<CommunityDiscoverCard community={makeCommunity({ categories: [] })} />);
 
