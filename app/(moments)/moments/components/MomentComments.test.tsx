@@ -10,6 +10,9 @@ const mockAddComment = jest.fn();
 let commentsPages: unknown[] = [];
 let isLoading = false;
 
+jest.mock('next-auth/react', () => ({
+  useSession: () => ({ data: { user: { name: 'George Ralak', image: null } } }),
+}));
 jest.mock('@/app/shared/hooks/useMoments', () => ({
   useMomentComments: () => ({
     data: { pages: commentsPages },
@@ -80,21 +83,21 @@ describe('MomentComments', () => {
     expect(screen.getByText('No comments yet — be the first.')).toBeInTheDocument();
   });
 
-  it('keeps Post disabled until the draft has content', () => {
+  it('keeps the send button disabled until the draft has content', () => {
     render(<MomentComments momentId="m1" />);
-    const post = screen.getByRole('button', { name: 'Post' });
+    const post = screen.getByRole('button', { name: 'Post comment' });
 
     expect(post).toBeDisabled();
 
-    fireEvent.change(screen.getByLabelText('Add a comment'), { target: { value: 'Nice' } });
+    fireEvent.change(screen.getByLabelText('Leave a comment'), { target: { value: 'Nice' } });
     expect(post).toBeEnabled();
   });
 
   it('does not post a whitespace-only draft', () => {
     render(<MomentComments momentId="m1" />);
 
-    fireEvent.change(screen.getByLabelText('Add a comment'), { target: { value: '   ' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Post' }));
+    fireEvent.change(screen.getByLabelText('Leave a comment'), { target: { value: '   ' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Post comment' }));
 
     expect(mockAddComment).not.toHaveBeenCalled();
   });
@@ -102,19 +105,40 @@ describe('MomentComments', () => {
   it('posts the trimmed draft', () => {
     render(<MomentComments momentId="m1" />);
 
-    fireEvent.change(screen.getByLabelText('Add a comment'), { target: { value: '  Lovely  ' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Post' }));
+    fireEvent.change(screen.getByLabelText('Leave a comment'), { target: { value: '  Lovely  ' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Post comment' }));
 
     expect(mockAddComment).toHaveBeenCalledWith('Lovely', expect.anything());
   });
 
   it('posts on Enter', () => {
     render(<MomentComments momentId="m1" />);
-    const input = screen.getByLabelText('Add a comment');
+    const input = screen.getByLabelText('Leave a comment');
 
     fireEvent.change(input, { target: { value: 'Via enter' } });
     fireEvent.keyDown(input, { key: 'Enter' });
 
     expect(mockAddComment).toHaveBeenCalledWith('Via enter', expect.anything());
+  });
+});
+
+// Matches the design: an avatar, a placeholder and a send icon in one pill
+describe('comment bar', () => {
+  it('shows the signed-in user avatar beside the input', () => {
+    render(<MomentComments momentId="m1" />);
+
+    expect(screen.getByLabelText('Leave a comment')).toHaveAttribute(
+      'placeholder',
+      'Leave a comment...',
+    );
+    // No picture on the session, so the avatar falls back to the initial
+    expect(screen.getByText('G')).toBeInTheDocument();
+  });
+
+  it('sends with an icon button rather than a Post label', () => {
+    render(<MomentComments momentId="m1" />);
+
+    expect(screen.getByRole('button', { name: 'Post comment' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Post' })).not.toBeInTheDocument();
   });
 });

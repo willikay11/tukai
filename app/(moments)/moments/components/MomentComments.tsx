@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { useSession } from 'next-auth/react';
+
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
@@ -12,7 +14,6 @@ import {
   useToggleCommentLike,
 } from '@/app/shared/hooks/useMoments';
 import { toast } from '@/app/shared/hooks/useToast';
-import { Button } from '@/components/ui/button';
 import { MomentComment, momentAuthorName } from '@/types/moment';
 
 import { FlagReasonPicker } from './FlagReasonPicker';
@@ -114,6 +115,10 @@ const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: s
 };
 
 export const MomentComments = ({ momentId }: { momentId: string }) => {
+  const { data: session } = useSession();
+  const currentUserName = session?.user?.name ?? '';
+  const currentUserImage = session?.user?.image ?? null;
+
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useMomentComments(momentId);
   const { mutate: addComment, isPending: isPosting } = useAddComment(momentId);
@@ -173,22 +178,29 @@ export const MomentComments = ({ momentId }: { momentId: string }) => {
         </div>
       )}
 
-      <div className="mt-4 flex items-center gap-2">
-        <input
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={(event) => event.key === 'Enter' && submit()}
-          placeholder="Add a comment..."
-          aria-label="Add a comment"
-          className="flex-1 rounded-full border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-primary"
-        />
-        <Button
-          onClick={submit}
-          disabled={!draft.trim() || isPosting}
-          className="rounded-full px-5"
-        >
-          Post
-        </Button>
+      <div className="mt-4 border-t border-gray-100 pt-4">
+        <div className="flex items-center gap-3 rounded-full border border-gray-200 bg-white py-2 pl-2 pr-4 shadow-sm">
+          <MomentAvatar src={currentUserImage} name={currentUserName} size={40} />
+
+          <input
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={(event) => event.key === 'Enter' && submit()}
+            placeholder="Leave a comment..."
+            aria-label="Leave a comment"
+            className="min-w-0 flex-1 bg-transparent text-base text-gray-800 outline-none placeholder:text-gray-400"
+          />
+
+          <button
+            type="button"
+            onClick={submit}
+            disabled={!draft.trim() || isPosting}
+            aria-label="Post comment"
+            className="flex-shrink-0 text-primary transition-opacity disabled:opacity-40"
+          >
+            <IconComponent iconName="Sent02Icon" size={24} color="currentColor" />
+          </button>
+        </div>
       </div>
     </div>
   );
