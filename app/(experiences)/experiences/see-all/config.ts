@@ -11,6 +11,7 @@ export const EXPERIENCE_SEE_ALL_TYPES = [
   'near-me',
   'city',
   'featured',
+  'itineraries',
 ] as const;
 
 export type ExperienceSeeAllType = (typeof EXPERIENCE_SEE_ALL_TYPES)[number];
@@ -107,6 +108,15 @@ export const SEE_ALL_CONFIG: Record<ExperienceSeeAllType, SeeAllSection> = {
     // ⚠️ No `city` param — free-text search on the city name is the closest
     // available filter, matching what the listing row already does
     query: (context) => ({ search: context.city }),
+  },
+
+  // Sourced from itinerary-type experiences — there is no itineraries endpoint,
+  // but the experiences list honours experience_type server-side
+  itineraries: {
+    title: () => 'Discover Itineraries',
+    subtitle: (_context, count) =>
+      joinSubtitle('Ready-to-book plans from TukAI', resultsLabel(count)),
+    query: () => ({ experience_type: 'itinerary' }),
   },
 
   featured: {

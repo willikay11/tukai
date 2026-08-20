@@ -6,9 +6,14 @@ import { useRouter } from 'next/navigation';
 import moment from 'moment';
 
 import { CommunityDiscoverCard } from '@/app/(experiences)/components/CommunityDiscoverCard';
+import { ItineraryCard } from '@/app/(experiences)/components/ItineraryCard';
 import { MomentRowCard } from '@/app/(experiences)/components/MomentRowCard';
+import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
-import { ExperienceRow } from '@/app/(experiences)/experiences/components/ExperienceRow';
+import {
+  ExperienceRow,
+  RowSkeleton,
+} from '@/app/(experiences)/experiences/components/ExperienceRow';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
 import { FeaturedBanner } from '@/app/shared/components/Banners';
@@ -17,40 +22,19 @@ import { ScrollRow } from '@/app/shared/components/Lists';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useMoments } from '@/app/shared/hooks/useMoments';
-import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
+import { usePlaceCategories, usePlaces } from '@/app/shared/hooks/usePlaces';
 import { useLocation } from '@/context/LocationContext';
 import { cn } from '@/lib/utils';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Moment } from '@/types/moment';
 import { Photo } from '@/types/photo';
+import { Place } from '@/types/place';
 import { PlaceCategory } from '@/types/placeCategory';
 import { formatLongDateWithOrdinal, formatShortDate } from '@/utils/date-utils';
 import { haversineKm } from '@/utils/geo-utils';
 
 const ROW_SIZE = 10;
-
-const RowSkeleton = ({
-  cardClassName = 'aspect-[4/3] w-[280px]',
-  hideText = false,
-}: {
-  cardClassName?: string;
-  hideText?: boolean;
-}) => (
-  <div className="flex gap-4 overflow-hidden">
-    {Array.from({ length: 5 }).map((_, index) => (
-      <div key={index} className="flex-shrink-0">
-        <div className={cn('animate-pulse rounded-xl bg-gray-200', cardClassName)} />
-        {!hideText && (
-          <>
-            <div className="mt-2 h-4 w-3/4 animate-pulse rounded bg-gray-200" />
-            <div className="mt-1 h-3 w-1/2 animate-pulse rounded bg-gray-200" />
-          </>
-        )}
-      </div>
-    ))}
-  </div>
-);
 
 export const DiscoverPageContent = () => {
   const router = useRouter();
@@ -78,10 +62,10 @@ export const DiscoverPageContent = () => {
     { pageSize: 100, group: 'cities' },
     true,
   );
-  const cities: PlaceCategory[] = (citiesResponse?.data?.results ?? [])
+  const allCities: PlaceCategory[] = (citiesResponse?.data?.results ?? [])
     .filter((category: PlaceCategory) => category.group === 'cities')
-    .sort((a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount)
-    .slice(0, ROW_SIZE);
+    .sort((a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount);
+  const cities: PlaceCategory[] = allCities.slice(0, ROW_SIZE);
 
   const { data: momentsResponse, isLoading: isLoadingMoments } = useMoments({
     page: 1,
@@ -113,6 +97,50 @@ export const DiscoverPageContent = () => {
     { page: 1, page_size: 8, date: tomorrow },
     true,
   );
+
+  // No itineraries endpoint exists, but the experiences list honours
+  // experience_type server-side, so this is a real filter rather than a guess
+  const { data: itinerariesResponse, isLoading: isLoadingItineraries } = useExperiences(
+    { page: 1, page_size: ROW_SIZE, experience_type: 'itinerary' },
+    true,
+  );
+  const itineraries: Experience[] = itinerariesResponse?.data?.results ?? [];
+
+  // ⚠️ The places API ignores `popular` and `ordering` (verified: identical
+  // count and order), so "Popular" is scoped to the user's city rather than
+  // actually ranked. Reuses the city categories already fetched above.
+  const userCityCategory = allCities.find(
+    (category) => category.name.toLowerCase() === userCity.toLowerCase(),
+  );
+  const { data: popularPlacesResponse, isLoading: isFetchingPopularPlaces } = usePlaces({
+    page: 1,
+    enabled: Boolean(userCityCategory),
+    categoryId: userCityCategory?.id,
+  });
+  const popularPlaces: Place[] = popularPlacesResponse?.data?.results ?? [];
+  // A disabled query reports isLoading false, so without folding in the
+  // prerequisite the section would render nothing at all while it resolves
+  const isLoadingPopularPlaces = isLoadingCities || isFetchingPopularPlaces;
+
+  const { data: interestsResponse, isLoading: isLoadingInterests } = usePlaceCategories(
+    { pageSize: 100, group: 'interests' },
+    true,
+  );
+  const restaurantCategoryId = (interestsResponse?.data?.results ?? []).find(
+    (category: PlaceCategory) => category.name === 'Restaurants',
+  )?.id;
+
+  // ⚠️ No radius param exists — "Within 20 km" is copy; the API decides the
+  // radius from lat/lng
+  const { data: restaurantsResponse, isLoading: isFetchingRestaurants } = usePlaces({
+    page: 1,
+    enabled: Boolean(restaurantCategoryId),
+    categoryId: restaurantCategoryId,
+    lat,
+    lng,
+  });
+  const nearbyRestaurants: Place[] = restaurantsResponse?.data?.results ?? [];
+  const isLoadingRestaurants = isLoadingInterests || isFetchingRestaurants;
 
   const coverPhoto =
     featured?.photos?.find((photo: Photo) => photo.isCover)?.photo ||
@@ -276,6 +304,75 @@ export const DiscoverPageContent = () => {
         experiences={tomorrowResponse?.data?.results ?? []}
         isLoading={isLoadingTomorrow}
       />
+
+      {/* Discover Itineraries */}
+      {(isLoadingItineraries || itineraries.length > 0) && (
+        <section>
+          <SectionHeader
+            icon="SparklesIcon"
+            iconBgClass="bg-purple-100"
+            iconColorClass="text-purple-600"
+            title="Discover Itineraries"
+            subtitle="Ready-to-book plans from TukAI"
+            seeAllHref="/experiences/see-all?type=itineraries"
+          />
+          {isLoadingItineraries ? (
+            <RowSkeleton cardClassName="aspect-[4/3] w-[300px]" />
+          ) : (
+            <ScrollRow>
+              {itineraries.map((itinerary) => (
+                <ItineraryCard key={itinerary.id} itinerary={itinerary} />
+              ))}
+            </ScrollRow>
+          )}
+        </section>
+      )}
+
+      {/* Popular Places */}
+      {(isLoadingPopularPlaces || popularPlaces.length > 0) && (
+        <section>
+          <SectionHeader
+            icon="Fire03Icon"
+            iconBgClass="bg-red-100"
+            iconColorClass="text-red-500"
+            title={`Popular Places in ${userCity}`}
+            subtitle="Loved by the community"
+            seeAllHref="/places"
+          />
+          {isLoadingPopularPlaces ? (
+            <RowSkeleton />
+          ) : (
+            <ScrollRow>
+              {popularPlaces.map((place) => (
+                <PlaceCard key={place.id} place={place} />
+              ))}
+            </ScrollRow>
+          )}
+        </section>
+      )}
+
+      {/* Nearby Restaurants */}
+      {(isLoadingRestaurants || nearbyRestaurants.length > 0) && (
+        <section>
+          <SectionHeader
+            icon="Restaurant02Icon"
+            iconBgClass="bg-orange-100"
+            iconColorClass="text-orange-500"
+            title="Nearby Restaurants"
+            subtitle="Within 20 km of you"
+            seeAllHref="/places"
+          />
+          {isLoadingRestaurants ? (
+            <RowSkeleton />
+          ) : (
+            <ScrollRow>
+              {nearbyRestaurants.map((place) => (
+                <PlaceCard key={place.id} place={place} />
+              ))}
+            </ScrollRow>
+          )}
+        </section>
+      )}
     </main>
   );
 };

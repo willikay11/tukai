@@ -23,6 +23,8 @@ export type ExperiencesQueryParams = {
   page_size?: number;
   invited?: boolean;
   date?: string;
+  // Server-side filter; the list response does not echo the field back
+  experience_type?: 'standard' | 'itinerary';
   // Geo scoping — the API expects `lat`/`long` (see fetchPlaces for the same pair)
   lat?: number;
   long?: number;

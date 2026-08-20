@@ -52,6 +52,7 @@ export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean)
       params.status,
       params.lat,
       params.long,
+      params.experience_type,
     ],
     queryFn: async () => await fetchExperiences(params),
     enabled: enabled,

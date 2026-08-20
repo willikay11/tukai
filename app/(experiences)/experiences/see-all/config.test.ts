@@ -17,6 +17,7 @@ describe('isSeeAllType', () => {
     expect(isSeeAllType('today')).toBe(true);
     expect(isSeeAllType('near-me')).toBe(true);
     expect(isSeeAllType('city')).toBe(true);
+    expect(isSeeAllType('itineraries')).toBe(true);
   });
 
   it('accepts the cities section, which lists destinations not experiences', () => {
@@ -120,5 +121,18 @@ describe('shouldShowSeeAll', () => {
   it('hides the link while the total is still unknown', () => {
     expect(shouldShowSeeAll(undefined)).toBe(false);
     expect(shouldShowSeeAll(null)).toBe(false);
+  });
+});
+
+describe('itineraries section', () => {
+  it('filters the experiences list by type server-side', () => {
+    expect(SEE_ALL_CONFIG.itineraries.query(context)).toEqual({ experience_type: 'itinerary' });
+  });
+
+  it('titles and counts the section', () => {
+    expect(SEE_ALL_CONFIG.itineraries.title(context)).toBe('Discover Itineraries');
+    expect(SEE_ALL_CONFIG.itineraries.subtitle(context, 4)).toBe(
+      'Ready-to-book plans from TukAI · 4 results',
+    );
   });
 });

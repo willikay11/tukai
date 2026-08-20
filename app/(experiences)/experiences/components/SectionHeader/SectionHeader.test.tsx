@@ -48,6 +48,28 @@ describe('SectionHeader', () => {
     expect(screen.getByText('Handpicked for you')).toBeInTheDocument();
   });
 
+  it('defaults the icon circle to the brand tint', () => {
+    const { container } = render(<SectionHeader icon="Compass01Icon" title="Discover" />);
+
+    expect(container.querySelector('.bg-primary\\/10')).toBeInTheDocument();
+    expect(screen.getByTestId('Compass01Icon')).toHaveClass('text-primary');
+  });
+
+  it('accepts a per-section icon tint', () => {
+    const { container } = render(
+      <SectionHeader
+        icon="Fire03Icon"
+        iconBgClass="bg-red-100"
+        iconColorClass="text-red-500"
+        title="Popular Places"
+      />,
+    );
+
+    expect(container.querySelector('.bg-red-100')).toBeInTheDocument();
+    expect(container.querySelector('.bg-primary\\/10')).not.toBeInTheDocument();
+    expect(screen.getByTestId('Fire03Icon')).toHaveClass('text-red-500');
+  });
+
   it('omits See all when no href is given', () => {
     render(<SectionHeader icon="Compass01Icon" title="Discover Experiences" />);
 

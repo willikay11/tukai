@@ -224,7 +224,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                 }
               />
               {isLoadingCities ? (
-                <RowSkeleton cardWidth={240} cardHeight={130} />
+                <RowSkeleton cardClassName="h-[130px] w-[240px]" />
               ) : (
                 <ScrollRow>
                   {visibleCities.map((category) => (
