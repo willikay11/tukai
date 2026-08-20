@@ -28,9 +28,9 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
   const { mutate: flag, isPending: isFlagging } = useFlagMoment();
   const [isFlagOpen, setIsFlagOpen] = useState(false);
 
-  // ⚠️ No is_liked on the moment serializer, so this starts false on every
-  // load and only reflects toggles made in this session
-  const [isLiked, setIsLiked] = useState(false);
+  // Seeded from the server so a moment the user already liked shows lit on
+  // load; falls back to false when the serializer omits is_liked
+  const [isLiked, setIsLiked] = useState(item.isLiked ?? false);
   const [likeCount, setLikeCount] = useState(item.totalLikes);
 
   // Only media that can actually be rendered — a null photo throws in next/image

@@ -7,6 +7,7 @@ import { MomentComment } from '@/types/moment';
 import { MomentComments } from './MomentComments';
 
 const mockAddComment = jest.fn();
+const mockToggleCommentLike = jest.fn();
 let commentsPages: unknown[] = [];
 let isLoading = false;
 
@@ -22,7 +23,7 @@ jest.mock('@/app/shared/hooks/useMoments', () => ({
     isFetchingNextPage: false,
   }),
   useAddComment: () => ({ mutate: mockAddComment, isPending: false }),
-  useToggleCommentLike: () => ({ mutate: jest.fn() }),
+  useToggleCommentLike: () => ({ mutate: mockToggleCommentLike }),
   useFlagComment: () => ({ mutate: jest.fn(), isPending: false }),
   useFlagReasons: () => ({ data: undefined, isLoading: false }),
 }));
@@ -140,5 +141,96 @@ describe('comment bar', () => {
 
     expect(screen.getByRole('button', { name: 'Post comment' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Post' })).not.toBeInTheDocument();
+  });
+});
+
+// POST /v1/moments/{moment_id}/comments/{comment_id}/like/
+describe('liking a comment', () => {
+  const clickHeart = () => {
+    const row = screen.getByText('Beautiful shot').closest('div')?.parentElement;
+    const heart = row?.querySelector('button');
+    fireEvent.click(heart as HTMLElement);
+  };
+
+  it('calls the toggle with the comment id', () => {
+    render(<MomentComments momentId="m1" />);
+
+    clickHeart();
+
+    expect(mockToggleCommentLike).toHaveBeenCalledWith('c1', expect.anything());
+  });
+
+  it('optimistically bumps the count and lights the heart', () => {
+    render(<MomentComments momentId="m1" />);
+
+    expect(screen.getByText('4')).toBeInTheDocument();
+    clickHeart();
+    expect(screen.getByText('5')).toBeInTheDocument();
+  });
+
+  it('reconciles the count to what the server reports', () => {
+    mockToggleCommentLike.mockImplementation((_id, options) =>
+      // 204 — the like was removed rather than added
+      options.onSuccess({ isLiked: false }),
+    );
+    render(<MomentComments momentId="m1" />);
+
+    clickHeart();
+
+    expect(screen.getByText('4')).toBeInTheDocument();
+  });
+
+  it('rolls the count back when the request fails', () => {
+    mockToggleCommentLike.mockImplementation((_id, options) => options.onError());
+    render(<MomentComments momentId="m1" />);
+
+    clickHeart();
+
+    expect(screen.getByText('4')).toBeInTheDocument();
+  });
+});
+
+// Regression: the heart always started unlit, so a comment the user had
+// already liked looked unliked, and the first click unliked it — the red
+// flash then revert people were seeing.
+describe('like state on load', () => {
+  const heartOf = (text: string) => {
+    const row = screen.getByText(text).closest('div')?.parentElement;
+    return row?.querySelector('button');
+  };
+
+  it('shows a comment the user already liked as lit', () => {
+    setComments([makeComment({ isLiked: true })]);
+    render(<MomentComments momentId="m1" />);
+
+    expect(heartOf('Beautiful shot')?.querySelector('.text-red-500')).toBeInTheDocument();
+  });
+
+  it('shows an unliked comment as unlit', () => {
+    setComments([makeComment({ isLiked: false })]);
+    render(<MomentComments momentId="m1" />);
+
+    expect(heartOf('Beautiful shot')?.querySelector('.text-red-500')).not.toBeInTheDocument();
+  });
+
+  // An already-liked comment must unlike on click, not like-then-revert
+  it('unlikes on the first click when the comment was already liked', () => {
+    mockToggleCommentLike.mockImplementation((_id, options) =>
+      options.onSuccess({ isLiked: false }),
+    );
+    setComments([makeComment({ isLiked: true })]);
+    render(<MomentComments momentId="m1" />);
+
+    fireEvent.click(heartOf('Beautiful shot') as HTMLElement);
+
+    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(heartOf('Beautiful shot')?.querySelector('.text-red-500')).not.toBeInTheDocument();
+  });
+
+  it('falls back to unlit when the serializer omits is_liked', () => {
+    setComments([makeComment()]);
+    render(<MomentComments momentId="m1" />);
+
+    expect(heartOf('Beautiful shot')?.querySelector('.text-red-500')).not.toBeInTheDocument();
   });
 });

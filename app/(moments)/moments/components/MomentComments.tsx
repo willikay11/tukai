@@ -24,9 +24,10 @@ const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: s
   const { mutate: flag, isPending: isFlagging } = useFlagComment(momentId);
   const [isFlagOpen, setIsFlagOpen] = useState(false);
 
-  // ⚠️ The comment serializer carries no is_liked, so this starts false on
-  // every load and only reflects toggles made in this session
-  const [isLiked, setIsLiked] = useState(false);
+  // Seeded from the server so a comment the user already liked shows lit on
+  // load. Falls back to false when the serializer omits is_liked — in which
+  // case the first click toggles whatever the server actually holds.
+  const [isLiked, setIsLiked] = useState(comment.isLiked ?? false);
   const [likeCount, setLikeCount] = useState(comment.totalLikes);
 
   const name = momentAuthorName(comment.commenter);

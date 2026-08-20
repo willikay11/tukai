@@ -29,6 +29,10 @@ export interface Moment {
   media: MomentMedia[];
   totalLikes: number;
   totalComments: number;
+  // Whether the signed-in user has liked this. Optional because the serializer
+  // does not always send it; without it the heart cannot show a prior like and
+  // the first click toggles the opposite way to what the UI implies.
+  isLiked?: boolean;
   dateCreated: string;
 }
 
@@ -57,6 +61,8 @@ export interface MomentComment {
   content: string;
   totalLikes: number;
   totalFlags: number;
+  // See Moment.isLiked
+  isLiked?: boolean;
   dateCreated: string;
   dateModified: string;
 }
