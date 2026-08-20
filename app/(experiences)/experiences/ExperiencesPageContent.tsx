@@ -3,7 +3,6 @@
 import { useState } from 'react';
 
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import moment from 'moment';
@@ -17,7 +16,7 @@ import {
 } from '@/app/(experiences)/experiences/components/ExperienceRow';
 import { FeaturedExperienceBanner } from '@/app/(experiences)/experiences/components/FeaturedExperienceBanner';
 import { HostingCard } from '@/app/(experiences)/experiences/components/HostingCard';
-import { ReservationCard } from '@/app/(experiences)/experiences/components/ReservationCard';
+import { ReservedTab } from '@/app/(experiences)/experiences/components/ReservedTab';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { SharedBucketListCard } from '@/app/(experiences)/experiences/components/SharedBucketListCard';
 import {
@@ -37,17 +36,17 @@ import { useLocation } from '@/context/LocationContext';
 import { downloadTicketPdf } from '@/services/experience';
 import { BucketList } from '@/types/bucket-list';
 import { Experience } from '@/types/experience';
-import { Photo } from '@/types/photo';
 import { PlaceCategory } from '@/types/placeCategory';
 import { Reservation } from '@/types/ticket-purchase';
 import { formatLongDateWithOrdinal } from '@/utils/date-utils';
 import { groupTicketPurchases } from '@/utils/ticket-utils';
 
+// Saved and Hosting are no longer surfaced. Their components and render
+// branches below are intentionally left in place — only the tabs are gone, so
+// nothing routes to them.
 const TABS = [
   { value: 'all', label: 'All' },
   { value: 'reserved', label: 'Reserved' },
-  { value: 'saved', label: 'Saved' },
-  { value: 'hosting', label: 'Hosting' },
 ];
 
 export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: string }) => {
@@ -84,6 +83,14 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
     );
   const reservations: Reservation[] = groupTicketPurchases(purchasesResponse?.data?.results ?? []);
   const reservedExperiences: Experience[] = reservedExperiencesResponse?.data?.results ?? [];
+
+  // "N invites waiting" — experiences the user was invited to. Same query
+  // InvitedExperiences uses; the count is the API total, not the page length.
+  const { data: invitedResponse } = useExperiences(
+    { page: 1, page_size: 1, invited: isReserved ? true : undefined },
+    isReserved && Boolean(userId),
+  );
+  const invitesWaiting: number = invitedResponse?.data?.count ?? 0;
   const isLoadingReservations = isLoadingPurchases || isLoadingReservedExperiences;
 
   // Hosting: everything the user created, across all statuses
@@ -368,59 +375,15 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
           )}
           {activeTab === 'reserved' && (
             <div className="col-span-12 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
-              <SectionHeader
-                title="Reserved Experiences"
-                subtitle="Your upcoming adventures, tickets in hand"
+              <ReservedTab
+                reservations={reservations}
+                reservedExperiences={reservedExperiences}
+                invitesWaiting={invitesWaiting}
+                isLoading={isLoadingReservations}
+                downloadingKey={downloadingKey}
+                onDownloadAll={handleDownloadAll}
+                onExplore={() => handleTabChange('all')}
               />
-
-              {isLoadingReservations ? (
-                <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {Array.from({ length: 2 }).map((_, index) => (
-                    <div key={index} className="h-[340px] animate-pulse rounded-2xl bg-gray-200" />
-                  ))}
-                </div>
-              ) : reservations.length === 0 ? (
-                <div className="flex flex-col items-center gap-4 py-8">
-                  <NoData message="You have no reserved experiences yet" />
-                  <Button onClick={() => handleTabChange('all')} className="rounded-full px-6">
-                    Explore experiences
-                  </Button>
-                </div>
-              ) : (
-                <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {reservations.map((reservation) => {
-                    const experience = reservedExperiences.find(
-                      (item) => item.id === reservation.experienceId,
-                    );
-                    const coverPhoto =
-                      experience?.photos?.find((photo: Photo) => photo.isCover)?.photo ||
-                      experience?.photos?.[0]?.photo ||
-                      null;
-
-                    return (
-                      <Link
-                        key={reservation.key}
-                        target="_blank"
-                        href={`/experiences/${reservation.experienceId}`}
-                      >
-                        <ReservationCard
-                          title={experience?.title ?? reservation.ticketName}
-                          coverPhoto={coverPhoto}
-                          occurrenceStart={reservation.occurrenceStart}
-                          occurrenceEnd={reservation.occurrenceEnd}
-                          communityName={experience?.hostCommunity?.title ?? null}
-                          ticketCount={reservation.ticketCount}
-                          status={reservation.status}
-                          tickets={reservation.tickets}
-                          shareLink={`${process.env.NEXT_PUBLIC_APP_URL}/experiences/${reservation.experienceId}`}
-                          onDownloadAll={() => handleDownloadAll(reservation)}
-                          isDownloading={downloadingKey === reservation.key}
-                        />
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
             </div>
           )}
         </>

@@ -25,6 +25,9 @@ export type Experience = {
   priceStartsFrom: { amount: number; currency: string };
   ticketsAvailable: boolean;
   reservedTicketsCount?: number;
+  // What this user actually paid across their tickets for this experience.
+  // Amount arrives as a decimal string ("190.00").
+  reservedTicketsAmount?: { amount: string | number; currency: string };
   isSoldOut: boolean;
   isPublic: boolean;
   isBookmarked: boolean;

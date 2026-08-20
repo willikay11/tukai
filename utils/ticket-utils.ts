@@ -128,20 +128,50 @@ export const buildAbsoluteTicketValidity = (
 
 /**
  * The ticket-purchases API returns one record per individual ticket. The
- * Reserved tab shows one card per reservation, so group purchases by
- * experience + occurrence + status (mixed statuses for the same occurrence
- * render as separate cards, each with an accurate badge).
+ * Reserved tab shows one card per outing, so purchases are grouped by
+ * experience + occurrence.
+ *
+ * Status is deliberately NOT part of the key. It used to be, which split a
+ * single booking across several cards the moment one of its tickets differed —
+ * 4 completed + 1 expired on the same occurrence rendered as two cards for the
+ * same experience. The group now carries one merged status instead (see
+ * mergeReservationStatus).
+ *
+ * The occurrence is identified by its start time rather than its id, so tickets
+ * bought separately for the same outing still land in one card even if the API
+ * hands back distinct occurrence rows.
  */
 const purchaseHolderName = (purchase: TicketPurchase): string => {
   const fullName = [purchase.user?.firstName, purchase.user?.lastName].filter(Boolean).join(' ');
   return fullName || purchase.user?.displayName || '';
 };
 
+// Statuses that mean the buyer still has to do something. If any ticket in a
+// group is in one of these, the whole reservation is shown that way.
+const ACTION_NEEDED = new Set(['pending', 'partial']);
+const USABLE = new Set(['completed', 'paid']);
+
+/**
+ * One status for a group of tickets:
+ *   1. anything awaiting payment wins, so a part-paid outing never reads as paid
+ *   2. otherwise, if any ticket is usable the reservation is settled — one
+ *      expired ticket among four valid ones must not mark the booking expired
+ *   3. otherwise keep what was already there (expired, failed, refunded…)
+ */
+export const mergeReservationStatus = (current: string, incoming: string): string => {
+  if (ACTION_NEEDED.has(current)) return current;
+  if (ACTION_NEEDED.has(incoming)) return incoming;
+  if (USABLE.has(current)) return current;
+  if (USABLE.has(incoming)) return incoming;
+  return current;
+};
+
 export const groupTicketPurchases = (purchases: TicketPurchase[]): Reservation[] => {
   const groups = new Map<string, Reservation>();
 
   purchases.forEach((purchase) => {
-    const key = `${purchase.ticket.experience}|${purchase.occurrence?.id ?? 'none'}|${purchase.status}`;
+    const occurrenceKey = purchase.occurrence?.startDate ?? purchase.occurrence?.id ?? 'none';
+    const key = `${purchase.ticket.experience}|${occurrenceKey}`;
     const ticket = {
       id: purchase.id,
       ticketNumber: purchase.ticketNumber,
@@ -155,6 +185,7 @@ export const groupTicketPurchases = (purchases: TicketPurchase[]): Reservation[]
     if (existing) {
       existing.ticketCount += 1;
       existing.tickets.push(ticket);
+      existing.status = mergeReservationStatus(existing.status, purchase.status);
     } else {
       groups.set(key, {
         key,
