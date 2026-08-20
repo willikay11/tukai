@@ -32,6 +32,19 @@ export interface Moment {
   dateCreated: string;
 }
 
+// next/image hard-throws on a null src (it treats a non-string as a static
+// import and reads .default off it) and on a relative path without a leading
+// slash. Media items carry a media_type, so a video or a still-processing
+// upload can legitimately have photo: null — those must never reach an <Image>.
+export const isRenderablePhoto = (photo: string | null | undefined): photo is string =>
+  typeof photo === 'string' &&
+  photo.trim().length > 0 &&
+  (photo.startsWith('/') || photo.startsWith('http://') || photo.startsWith('https://'));
+
+// The media on a moment that can actually be rendered as a photo
+export const momentPhotos = (item: Pick<Moment, 'media'>): MomentMedia[] =>
+  (item.media ?? []).filter((media) => isRenderablePhoto(media.photo));
+
 // display_name is optional on the API, so fall back to the real name
 export const momentAuthorName = (author: MomentAuthor): string =>
   author.displayName?.trim() || `${author.firstName} ${author.lastName}`.trim();

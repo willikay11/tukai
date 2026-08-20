@@ -7,7 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import { useInfiniteMoments } from '@/app/shared/hooks/useMoments';
 import { Drawer } from '@/components/ui/drawer';
 import { NoData } from '@/components/ui/noData';
-import { Moment } from '@/types/moment';
+import { Moment, momentPhotos } from '@/types/moment';
 
 import { MomentDetail } from './components/MomentDetail';
 import { MomentsMasonry } from './components/MomentsMasonry';
@@ -49,13 +49,14 @@ export const MomentsView = () => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const isDesktop = useIsDesktop();
 
-  // The masonry is photo-led, so moments posted without media have nothing to
-  // show and are left out entirely
+  // The masonry is photo-led. A moment with no media — or whose only media is a
+  // video / still-processing upload with photo: null — has nothing to show, and
+  // would crash next/image if it reached one.
   const moments: Moment[] = useMemo(
     () =>
       (data?.pages ?? [])
         .flatMap((page) => (page?.data?.results ?? []) as Moment[])
-        .filter((item) => item.media?.length > 0),
+        .filter((item) => momentPhotos(item).length > 0),
     [data],
   );
 

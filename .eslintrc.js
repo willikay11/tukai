@@ -15,7 +15,17 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['**/page.tsx', '**/layout.tsx', '**/route.ts'],
+      // Next.js requires a default export from these App Router files
+      files: [
+        '**/page.tsx',
+        '**/layout.tsx',
+        '**/route.ts',
+        '**/error.tsx',
+        '**/global-error.tsx',
+        '**/not-found.tsx',
+        '**/loading.tsx',
+        '**/template.tsx',
+      ],
       rules: {
         'import/no-default-export': 'off',
       },

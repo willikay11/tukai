@@ -31,7 +31,14 @@ const makeMoment = (overrides: Partial<Moment> = {}): Moment =>
     experience: null,
     place: null,
     media: [
-      { id: 'md1', mediaType: 'photo', photo: 'https://cdn.tukai.co/photo.jpg', width: 1, height: 1, order: 0 },
+      {
+        id: 'md1',
+        mediaType: 'photo',
+        photo: 'https://cdn.tukai.co/photo.jpg',
+        width: 1,
+        height: 1,
+        order: 0,
+      },
     ],
     totalLikes: 0,
     totalComments: 0,
@@ -70,8 +77,22 @@ describe('MomentRowCard', () => {
   it('uses the first media item when several are present', () => {
     const moment = makeMoment({
       media: [
-        { id: 'a', mediaType: 'photo', photo: 'https://cdn.tukai.co/first.jpg', width: 1, height: 1, order: 0 },
-        { id: 'b', mediaType: 'photo', photo: 'https://cdn.tukai.co/second.jpg', width: 1, height: 1, order: 1 },
+        {
+          id: 'a',
+          mediaType: 'photo',
+          photo: 'https://cdn.tukai.co/first.jpg',
+          width: 1,
+          height: 1,
+          order: 0,
+        },
+        {
+          id: 'b',
+          mediaType: 'photo',
+          photo: 'https://cdn.tukai.co/second.jpg',
+          width: 1,
+          height: 1,
+          order: 1,
+        },
       ],
     });
     render(<MomentRowCard moment={moment} onClick={jest.fn()} />);

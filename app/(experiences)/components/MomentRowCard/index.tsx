@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 
-import { Moment, momentAuthorName } from '@/types/moment';
+import { Moment, momentAuthorName, momentPhotos } from '@/types/moment';
 
 interface MomentRowCardProps {
   moment: Moment;
@@ -10,8 +10,9 @@ interface MomentRowCardProps {
 }
 
 export const MomentRowCard = ({ moment, onClick }: MomentRowCardProps) => {
-  // Callers filter out media-less moments, so this is always present
-  const photo = moment.media[0]?.photo;
+  // Callers filter to moments with a renderable photo, but this stays defensive:
+  // a null photo throws inside next/image rather than rendering nothing
+  const photo = momentPhotos(moment)[0]?.photo;
   const authorName = momentAuthorName(moment.author);
 
   return (
@@ -21,13 +22,7 @@ export const MomentRowCard = ({ moment, onClick }: MomentRowCardProps) => {
       className="relative block aspect-square w-[280px] flex-shrink-0 snap-start overflow-hidden rounded-2xl"
     >
       {photo ? (
-        <Image
-          src={photo}
-          alt={moment.title}
-          fill
-          sizes="280px"
-          className="object-cover"
-        />
+        <Image src={photo} alt={moment.title} fill sizes="280px" className="object-cover" />
       ) : (
         <div className="h-full w-full bg-gray-100" />
       )}

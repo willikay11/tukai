@@ -96,6 +96,37 @@ describe('MomentsMasonry', () => {
     expect(onSelect).toHaveBeenCalledWith('a');
   });
 
+  // Regression: a moment whose media is a video (photo: null) reached
+  // next/image, which threw "Cannot read properties of null (reading 'default')"
+  // and took the whole page down with a client-side exception
+  it('skips media whose photo cannot be rendered', () => {
+    const withVideo = {
+      id: 'v',
+      title: 'Video moment',
+      media: [{ id: 'md-v', photo: null, width: 800, height: 600, order: 0 }],
+    } as unknown as Moment;
+
+    render(<MomentsMasonry {...defaults} moments={[withVideo, makeMoment('a', 800, 600)]} />);
+
+    expect(screen.queryByAltText('Video moment')).not.toBeInTheDocument();
+    expect(screen.getByAltText('Moment a')).toBeInTheDocument();
+  });
+
+  it('prefers the first renderable photo over an unrenderable one', () => {
+    const mixed = {
+      id: 'x',
+      title: 'Mixed',
+      media: [
+        { id: 'a', photo: null, width: 1, height: 1, order: 0 },
+        { id: 'b', photo: 'https://cdn.tukai.co/real.jpg', width: 800, height: 600, order: 1 },
+      ],
+    } as unknown as Moment;
+
+    render(<MomentsMasonry {...defaults} moments={[mixed]} />);
+
+    expect(screen.getByAltText('Mixed')).toHaveAttribute('src', 'https://cdn.tukai.co/real.jpg');
+  });
+
   it('shows loading tiles while the next page is in flight', () => {
     const { container } = render(
       <MomentsMasonry {...defaults} isLoadingMore moments={[makeMoment('a', 1, 1)]} />,

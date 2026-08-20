@@ -12,7 +12,7 @@ import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStri
 import { useFlagMoment, useToggleMomentLike } from '@/app/shared/hooks/useMoments';
 import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
-import { Moment, momentAuthorName } from '@/types/moment';
+import { Moment, momentAuthorName, momentPhotos } from '@/types/moment';
 
 import { FlagReasonPicker } from './FlagReasonPicker';
 import { MomentAvatar } from './MomentAvatar';
@@ -33,6 +33,8 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(item.totalLikes);
 
+  // Only media that can actually be rendered — a null photo throws in next/image
+  const photos = momentPhotos(item);
   const authorName = momentAuthorName(item.author);
   const context = contextLabel(item);
   const isOwnMoment = session?.user?.id === item.author.id;
@@ -102,24 +104,24 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
         )}
       </div>
 
-      {item.media.length === 1 ? (
+      {photos.length === 1 ? (
         <div className="mt-4 overflow-hidden rounded-2xl">
           <Image
-            src={item.media[0].photo}
+            src={photos[0].photo}
             alt={item.title}
-            width={item.media[0].width || 800}
-            height={item.media[0].height || 800}
+            width={photos[0].width || 800}
+            height={photos[0].height || 800}
             sizes="(max-width: 1024px) 100vw, 600px"
             className="h-auto w-full object-cover"
           />
         </div>
-      ) : (
+      ) : photos.length > 1 ? (
         <SquarePhotoStrip
-          photos={item.media.map((media) => media.photo)}
+          photos={photos.map((media) => media.photo)}
           variant="hero"
           className="mt-4"
         />
-      )}
+      ) : null}
 
       <p className="mt-4 text-xl font-bold text-gray-900">{item.title}</p>
       {item.description && (

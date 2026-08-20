@@ -49,7 +49,10 @@ describe('PlaceCard', () => {
   it('renders cover, title and rating', () => {
     render(<PlaceCard place={makePlace()} />);
 
-    expect(screen.getByAltText('Talisman')).toHaveAttribute('src', 'https://cdn.tukai.co/cover.jpg');
+    expect(screen.getByAltText('Talisman')).toHaveAttribute(
+      'src',
+      'https://cdn.tukai.co/cover.jpg',
+    );
     expect(screen.getByText('Talisman')).toBeInTheDocument();
     expect(screen.getByText('4.6')).toBeInTheDocument();
   });
@@ -74,11 +77,7 @@ describe('PlaceCard', () => {
   });
 
   it('falls back to the location name when there is no city', () => {
-    render(
-      <PlaceCard
-        place={makePlace({ location: { name: 'Karen Rd' } as never })}
-      />,
-    );
+    render(<PlaceCard place={makePlace({ location: { name: 'Karen Rd' } as never })} />);
 
     expect(screen.getByText('Restaurants · Karen Rd')).toBeInTheDocument();
   });
