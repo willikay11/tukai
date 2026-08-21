@@ -101,7 +101,10 @@ export interface ExperienceProgress {
 
 export const experienceProgress = (experience: Experience): ExperienceProgress => {
   const sold = experience.ticketsSold ?? 0;
-  const total = experience.totalTickets ?? experience.ticketsCreated ?? 0;
+  const remaining = Number(experience.ticketsAvailable) || 0;
+  // total_tickets is the host figure; sold + remaining is the fallback for a
+  // payload that omits it
+  const total = experience.totalTickets ?? experience.ticketsCreated ?? sold + remaining;
   const percent = total > 0 ? Math.min(Math.round((sold / total) * 100), 100) : 0;
 
   return { sold, total, percent, isSellingFast: percent >= 60 && percent < 100 };

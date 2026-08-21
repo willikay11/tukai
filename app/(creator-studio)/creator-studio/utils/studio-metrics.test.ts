@@ -105,7 +105,9 @@ describe('experienceProgress', () => {
   });
 
   it('falls back to ticketsCreated when totalTickets is absent', () => {
-    expect(experienceProgress(hosted({ totalTickets: undefined, ticketsCreated: 8 })).total).toBe(8);
+    expect(experienceProgress(hosted({ totalTickets: undefined, ticketsCreated: 8 })).total).toBe(
+      8,
+    );
   });
 });
 

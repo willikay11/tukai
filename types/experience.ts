@@ -23,7 +23,10 @@ export type Experience = {
   ticketSalesClosingUnit: 'minutes' | 'hours' | 'days';
   ticketSalesClosingCondition: 'before_end' | 'before_start';
   priceStartsFrom: { amount: number; currency: string };
-  ticketsAvailable: boolean;
+  // Remaining inventory, not a flag — the API sends a count here (and the same
+  // count again as available_tickets)
+  ticketsAvailable: number;
+  availableTickets?: number;
   reservedTicketsCount?: number;
   // Host-only fields: the API includes these when the requesting user owns the
   // experience. Money values arrive as decimal strings.
