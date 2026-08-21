@@ -3,6 +3,8 @@ import moment from 'moment';
 import { Status } from '@/enums/status';
 import { Experience } from '@/types/experience';
 
+import { experienceProgress } from '../../../utils/studio-metrics';
+
 /**
  * Host-facing metrics for the Manage Experience dashboard.
  *
@@ -45,11 +47,18 @@ const normalizeStatus = (status: string): string => String(status).toUpperCase()
 export const buildManageExperienceMetrics = (
   experience: Experience | undefined,
 ): ManageExperienceMetrics => {
-  const ticketsSold = experience?.reservedTicketsCount ?? 0;
+  /**
+   * tickets_sold and total_tickets are the host's own figures. This used to read
+   * reserved_tickets_count, which is how many tickets the REQUESTING USER has
+   * reserved as a buyer — on your own experience that is normally zero, so the
+   * dashboard reported almost no sales and the donut barely moved.
+   */
   const remaining = Number(experience?.ticketsAvailable) || 0;
-  const ticketsTotal = ticketsSold + remaining;
-
-  const fillRatePercent = ticketsTotal > 0 ? Math.round((ticketsSold / ticketsTotal) * 100) : 0;
+  const {
+    sold: ticketsSold,
+    total: ticketsTotal,
+    percent: fillRatePercent,
+  } = experience ? experienceProgress(experience) : { sold: 0, total: 0, percent: 0 };
 
   const start = experience?.startDate ? moment(experience.startDate) : null;
   const daysToGo = start?.isValid() ? Math.max(start.diff(moment(), 'days'), 0) : null;

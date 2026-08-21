@@ -8,10 +8,8 @@ export interface ProfileMenuItem {
 }
 
 /**
- * ⚠️ Only My Profile and My Communities have routes today. Bucket List,
- * Notifications, Messages and Creator Studio have no page yet — Creator Studio
- * exists only as /creator-studio/experiences/[id], with no index — so they are
- * listed but disabled until those pages land.
+ * ⚠️ Bucket List, Notifications and Messages have no page yet, so they are
+ * listed but disabled until those land. Everything with an href routes.
  */
 export const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   { label: 'My Profile', icon: 'UserIcon', href: '/auth/profile' },
@@ -24,7 +22,7 @@ export const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   { label: 'Bucket List', icon: 'ShoppingBasket01Icon' },
   { label: 'Notifications', icon: 'Notification03Icon', showsUnreadDot: true },
   { label: 'Messages', icon: 'BubbleChatIcon' },
-  { label: 'Creator Studio', icon: 'Analytics01Icon' },
+  { label: 'Creator Studio', icon: 'Analytics01Icon', href: '/creator-studio' },
 ];
 
 export const UNAVAILABLE_TITLE = 'Coming soon';

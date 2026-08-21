@@ -99,6 +99,41 @@ describe('moment comments', () => {
     expect(result.data.results[0].commenter.firstName).toBe('Asha');
   });
 
+  /**
+   * The client is ready for is_liked the moment the serializer sends it: this
+   * asserts a raw snake_case payload carrying it survives the camel-case pass
+   * and reaches callers as isLiked. Without the field the heart cannot show a
+   * prior like after a reload — there is no other source for that state.
+   */
+  it('carries is_liked through to the caller when the serializer sends it', async () => {
+    mockGet.mockResolvedValue({
+      status: 200,
+      data: {
+        count: 2,
+        results: [
+          { id: 'c1', content: 'liked one', total_likes: 4, is_liked: true },
+          { id: 'c2', content: 'not liked', total_likes: 1, is_liked: false },
+        ],
+      },
+    });
+
+    const result = await fetchMomentComments('m1');
+
+    expect(result.data.results[0].isLiked).toBe(true);
+    expect(result.data.results[1].isLiked).toBe(false);
+  });
+
+  it('leaves isLiked undefined when the serializer omits it', async () => {
+    mockGet.mockResolvedValue({
+      status: 200,
+      data: { count: 1, results: [{ id: 'c1', content: 'x', total_likes: 4 }] },
+    });
+
+    const result = await fetchMomentComments('m1');
+
+    expect(result.data.results[0].isLiked).toBeUndefined();
+  });
+
   it('posts a comment as { content }', async () => {
     mockPost.mockResolvedValue({ status: 201, data: { id: 'c2', content: 'Nice' } });
 

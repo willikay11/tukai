@@ -58,6 +58,18 @@ describe('ProfileMenu', () => {
       'href',
       '/communities?category=my-communities',
     );
+    expect(screen.getByRole('link', { name: /Creator Studio/ })).toHaveAttribute(
+      'href',
+      '/creator-studio',
+    );
+  });
+
+  it('links Creator Studio now that the page exists', () => {
+    render(<ProfileMenu {...defaults} />);
+
+    const control = screen.getByText('Creator Studio').closest('a');
+    expect(control).toHaveAttribute('href', '/creator-studio');
+    expect(screen.getByText('Creator Studio').closest('button')).toBeNull();
   });
 
   // Bucket List, Notifications, Messages and Creator Studio have no page yet

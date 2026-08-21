@@ -23,8 +23,19 @@ export type Experience = {
   ticketSalesClosingUnit: 'minutes' | 'hours' | 'days';
   ticketSalesClosingCondition: 'before_end' | 'before_start';
   priceStartsFrom: { amount: number; currency: string };
-  ticketsAvailable: boolean;
+  // Remaining inventory, not a flag — the API sends a count here (and the same
+  // count again as available_tickets)
+  ticketsAvailable: number;
+  availableTickets?: number;
   reservedTicketsCount?: number;
+  // Host-only fields: the API includes these when the requesting user owns the
+  // experience. Money values arrive as decimal strings.
+  totalTickets?: number;
+  ticketsCreated?: number;
+  ticketsSold?: number;
+  targetSales?: { amount: string | number; currency: string };
+  totalExpectedTicketSales?: { amount: string | number; currency: string };
+  totalAmountSold?: { amount: string | number; currency: string };
   // What this user actually paid across their tickets for this experience.
   // Amount arrives as a decimal string ("190.00").
   reservedTicketsAmount?: { amount: string | number; currency: string };

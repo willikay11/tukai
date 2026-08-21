@@ -195,7 +195,7 @@ const mapPreviewLocation = (
 const PREVIEW_DEFAULTS = {
   isBookmarked: false,
   isSoldOut: false,
-  ticketsAvailable: true,
+  ticketsAvailable: 0,
   reservedTicketsCount: 0,
   coHosts: [] as User[],
   currency: 'Ksh.',

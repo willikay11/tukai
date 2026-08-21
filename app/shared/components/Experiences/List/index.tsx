@@ -48,7 +48,7 @@ const createPlaceholders = (count: number): Experience[] => {
     endDate: '',
     currency: '',
     priceStartsFrom: { amount: 0, currency: '' },
-    ticketsAvailable: false,
+    ticketsAvailable: 0,
     isSoldOut: false,
     isPublic: false,
     isBookmarked: false,

@@ -61,10 +61,17 @@ export const useToggleMomentLike = () =>
     mutationFn: async (momentId: string) => await toggleMomentLike(momentId),
   });
 
-export const useToggleCommentLike = (momentId: string) =>
-  useMutation({
+export const useToggleCommentLike = (momentId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
     mutationFn: async (commentId: string) => await toggleCommentLike(momentId, commentId),
+    // Re-read the list so total_likes comes from the server rather than a
+    // locally accumulated guess
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['moment-comments', momentId] });
+    },
   });
+};
 
 export const useFlagReasons = (enabled: boolean = false) =>
   useQuery({
