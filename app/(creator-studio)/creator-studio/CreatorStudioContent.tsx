@@ -21,7 +21,7 @@ import { RevenueChart } from './components/RevenueChart';
 import { StudioHero } from './components/StudioHero';
 import { StudioStatCard } from './components/StudioStatCard';
 import { YourPlaces } from './components/YourPlaces';
-import { buildStudioMetrics, upcomingExperiences } from './utils/studio-metrics';
+import { buildStudioMetrics, isActive, upcomingExperiences } from './utils/studio-metrics';
 
 // Purchases are only queryable one experience at a time, so the feed is capped
 const RESERVATION_SOURCE_LIMIT = 5;
@@ -78,6 +78,9 @@ export const CreatorStudioContent = () => {
 
   const metrics = useMemo(() => buildStudioMetrics(experiences), [experiences]);
   const upcoming = useMemo(() => upcomingExperiences(experiences), [experiences]);
+  // The studio lists what is live; drafts and expired runs are not "my
+  // experiences" a host is currently offering
+  const published = useMemo(() => experiences.filter(isActive), [experiences]);
 
   // No host-wide purchases filter exists, so this fans out over the most
   // recent experiences rather than loading every one
@@ -223,7 +226,7 @@ export const CreatorStudioContent = () => {
         </div>
       </div>
 
-      {experiences.length > 0 && <MyExperiences experiences={experiences.slice(0, 3)} />}
+      <MyExperiences experiences={published} />
 
       <YourPlaces />
 

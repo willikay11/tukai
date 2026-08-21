@@ -8,7 +8,13 @@ import { SalesProgressDonut } from './index';
 jest.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   PieChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Pie: ({ data, children }: { data: { name: string; value: number }[]; children: React.ReactNode }) => (
+  Pie: ({
+    data,
+    children,
+  }: {
+    data: { name: string; value: number }[];
+    children: React.ReactNode;
+  }) => (
     <div data-testid="pie" data-slices={JSON.stringify(data)}>
       {children}
     </div>
