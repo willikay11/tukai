@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 
@@ -9,69 +9,81 @@ import moment from 'moment';
 import { IconComponent } from '@/app/shared/components/Icons';
 import {
   useAddComment,
-  useFlagComment,
   useMomentComments,
   useToggleCommentLike,
 } from '@/app/shared/hooks/useMoments';
 import { toast } from '@/app/shared/hooks/useToast';
 import { MomentComment, momentAuthorName } from '@/types/moment';
 
-import { FlagReasonPicker } from './FlagReasonPicker';
 import { MomentAvatar } from './MomentAvatar';
 
 const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: string }) => {
   const { mutate: toggleLike } = useToggleCommentLike(momentId);
-  const { mutate: flag, isPending: isFlagging } = useFlagComment(momentId);
-  const [isFlagOpen, setIsFlagOpen] = useState(false);
 
-  // Seeded from the server so a comment the user already liked shows lit on
-  // load. Falls back to false when the serializer omits is_liked — in which
-  // case the first click toggles whatever the server actually holds.
-  const [isLiked, setIsLiked] = useState(comment.isLiked ?? false);
-  const [likeCount, setLikeCount] = useState(comment.totalLikes);
+  /**
+   * The server does not tell us whether the signed-in user has liked a comment
+   * (no is_liked on the serializer), so the heart has to start from a guess.
+   * When that guess is wrong the toggle does the opposite of what the reader
+   * asked for — clicking "like" on an already-liked comment removed the like
+   * and the heart flashed red then went clear.
+   *
+   * The like endpoint does report the resulting state (201 liked / 204
+   * unliked), so a contradicting response tells us the guess was wrong. We then
+   * toggle once more to land on what the reader actually asked for. The retry
+   * is capped at one, so an inconsistent server cannot loop.
+   */
+  const [likedOverride, setLikedOverride] = useState<boolean | null>(null);
+  const [pendingDelta, setPendingDelta] = useState(0);
+
+  // The optimistic delta is held until the invalidated list comes back with a
+  // new total, otherwise the count snaps to the stale value and flickers
+  const lastTotal = useRef(comment.totalLikes);
+  useEffect(() => {
+    if (comment.totalLikes !== lastTotal.current) {
+      lastTotal.current = comment.totalLikes;
+      setPendingDelta(0);
+    }
+  }, [comment.totalLikes]);
+
+  const isLiked = likedOverride ?? comment.isLiked ?? false;
+  // Server total plus whatever this session has changed but not yet refetched
+  const likeCount = Math.max(comment.totalLikes + pendingDelta, 0);
 
   const name = momentAuthorName(comment.commenter);
 
-  const onLike = () => {
-    const next = !isLiked;
-    setIsLiked(next);
-    setLikeCount((count) => count + (next ? 1 : -1));
+  const runToggle = (intent: boolean, allowRetry: boolean) => {
     toggleLike(comment.id, {
       onSuccess: (result) => {
-        setIsLiked(result.isLiked);
-        setLikeCount((count) =>
-          result.isLiked === next ? count : count + (result.isLiked ? 1 : -1),
-        );
+        if (result.isLiked === intent) {
+          // The guess held: the server total moves by our delta, so keep it
+          setLikedOverride(result.isLiked);
+          return;
+        }
+
+        // The starting guess was wrong. Toggle again so the reader's intent
+        // wins — the two calls cancel out, leaving the total unchanged.
+        if (allowRetry) {
+          setPendingDelta(0);
+          runToggle(intent, false);
+          return;
+        }
+
+        setLikedOverride(result.isLiked);
+        setPendingDelta(0);
       },
       onError: () => {
-        setIsLiked(!next);
-        setLikeCount((count) => count + (next ? -1 : 1));
+        setLikedOverride(!intent);
+        setPendingDelta(0);
       },
     });
   };
 
-  const onFlag = (reasonId: string) =>
-    flag(
-      { commentId: comment.id, reasonId },
-      {
-        onSuccess: (result) => {
-          setIsFlagOpen(false);
-          toast({
-            title: result.status === 204 ? 'Already reported' : 'Reported',
-            description:
-              result.status === 204
-                ? 'You have already reported this comment.'
-                : 'Thanks — our team will take a look.',
-          });
-        },
-        onError: () =>
-          toast({
-            title: 'Could not report',
-            description: 'Please try again.',
-            variant: 'destructive',
-          }),
-      },
-    );
+  const onLike = () => {
+    const intent = !isLiked;
+    setLikedOverride(intent);
+    setPendingDelta(intent ? 1 : -1);
+    runToggle(intent, true);
+  };
 
   return (
     <div className="flex gap-3">
@@ -85,7 +97,7 @@ const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: s
         <p className="mt-0.5 break-words text-sm text-gray-700">{comment.content}</p>
       </div>
 
-      <div className="flex flex-shrink-0 items-start gap-3">
+      <div className="flex flex-shrink-0 items-start">
         <button type="button" onClick={onLike} className="flex items-center gap-1">
           <IconComponent
             iconName="FavouriteIcon"
@@ -95,22 +107,7 @@ const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: s
           />
           <span className="text-xs text-gray-500">{likeCount}</span>
         </button>
-        <button
-          type="button"
-          onClick={() => setIsFlagOpen(true)}
-          className="text-gray-300 hover:text-gray-500"
-          aria-label={`Report comment by ${name}`}
-        >
-          <IconComponent iconName="Flag01Icon" size={14} color="currentColor" />
-        </button>
       </div>
-
-      <FlagReasonPicker
-        open={isFlagOpen}
-        onOpenChange={setIsFlagOpen}
-        onSelect={onFlag}
-        isSubmitting={isFlagging}
-      />
     </div>
   );
 };
