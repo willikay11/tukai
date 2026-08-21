@@ -2,11 +2,10 @@
 
 import { useMemo, useState } from 'react';
 
-import Image from 'next/image';
-
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
 import { formatTimeRange } from '@/utils/date-utils';
@@ -196,17 +195,13 @@ export const ReservationCalendarPanel = ({
               )}
 
               <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl">
-                {item.coverPhoto ? (
-                  <Image
-                    src={item.coverPhoto}
-                    alt={item.title}
-                    fill
-                    sizes="56px"
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="h-full w-full bg-gray-200" />
-                )}
+                <PhotoImage
+                  src={item.coverPhoto}
+                  alt={item.title}
+                  fill
+                  sizes="56px"
+                  className="object-cover"
+                />
               </div>
 
               <div className="min-w-0 flex-1">

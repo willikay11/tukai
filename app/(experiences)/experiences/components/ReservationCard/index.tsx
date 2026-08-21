@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { ReservationTicket } from '@/types/ticket-purchase';
 import { formatReservationDateTime } from '@/utils/date-utils';
 
@@ -51,17 +50,13 @@ export const ReservationCard = ({
     <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
       {/* Cover with status badge */}
       <div className="relative h-[240px]">
-        {coverPhoto ? (
-          <Image
-            src={coverPhoto}
-            alt={title}
-            fill
-            sizes="(max-width: 768px) 100vw, 560px"
-            className="object-cover"
-          />
-        ) : (
-          <div className="h-full w-full bg-gray-200" />
-        )}
+        <PhotoImage
+          src={coverPhoto}
+          alt={title}
+          fill
+          sizes="(max-width: 768px) 100vw, 560px"
+          className="object-cover"
+        />
         <div className="absolute left-4 top-4">
           <PaymentStatusBadge status={status} />
         </div>

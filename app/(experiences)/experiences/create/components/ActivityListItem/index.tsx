@@ -1,8 +1,7 @@
 'use client';
 
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { ItineraryActivity } from '@/types/itinerary';
 
 interface ActivityListItemProps {
@@ -25,7 +24,7 @@ export const ActivityListItem = ({ activity, onEdit, onDelete }: ActivityListIte
       {/* Photo on the left */}
       {activity.placeImageUrl ? (
         <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg">
-          <Image
+          <PhotoImage
             src={activity.placeImageUrl}
             alt={activity.placeName ?? ''}
             fill

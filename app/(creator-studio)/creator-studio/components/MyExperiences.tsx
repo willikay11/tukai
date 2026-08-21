@@ -1,9 +1,9 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { NoData } from '@/components/ui/noData';
 import { Experience } from '@/types/experience';
 
@@ -35,17 +35,13 @@ export const MyExperiences = ({ experiences }: { experiences: Experience[] }) =>
               className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
             >
               <div className="relative aspect-[16/10] w-full">
-                {cover ? (
-                  <Image
-                    src={cover}
-                    alt={experience.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 400px"
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="h-full w-full bg-gray-200" />
-                )}
+                <PhotoImage
+                  src={cover}
+                  alt={experience.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 400px"
+                  className="object-cover"
+                />
                 <div className="absolute left-3 top-3">
                   <StatusBadge isSellingFast={isSellingFast} />
                 </div>

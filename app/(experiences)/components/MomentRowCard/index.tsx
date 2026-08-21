@@ -1,7 +1,5 @@
 'use client';
 
-import Image from 'next/image';
-
 import { PhotoImage } from '@/app/shared/components/Images';
 import { Moment, momentAuthorName, momentPhotos } from '@/types/moment';
 
@@ -29,21 +27,20 @@ export const MomentRowCard = ({ moment, onClick }: MomentRowCardProps) => {
 
       <div className="absolute bottom-3 left-3 flex items-center gap-2">
         <div className="relative h-8 w-8 overflow-hidden rounded-full bg-gray-200 ring-2 ring-white/80">
-          {moment.author.picture ? (
-            <Image
-              src={moment.author.picture}
-              alt={authorName}
-              fill
-              sizes="32px"
-              className="object-cover"
-            />
-          ) : (
+          <PhotoImage
+            src={moment.author.picture}
+            alt={authorName}
+            fill
+            sizes="32px"
+            className="object-cover"
             // No placeholder avatar asset exists — fall back to the initial,
             // the same treatment AvatarStack uses
-            <div className="flex h-full w-full items-center justify-center text-xs font-medium text-gray-600">
-              {authorName.charAt(0).toUpperCase()}
-            </div>
-          )}
+            fallback={
+              <div className="flex h-full w-full items-center justify-center text-xs font-medium text-gray-600">
+                {authorName.charAt(0).toUpperCase()}
+              </div>
+            }
+          />
         </div>
         <span className="text-sm font-medium text-white drop-shadow">{authorName}</span>
       </div>

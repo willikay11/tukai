@@ -1,8 +1,7 @@
 'use client';
 
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { ItineraryDayActivity, activityPhoto } from '@/types/itinerary';
 import { formatDateDDMMYYYY, formatTimeTo12Hour } from '@/utils/date-utils';
 
@@ -27,7 +26,7 @@ export const ItineraryActivityRow = ({
       <div className="h-12 w-12 flex-shrink-0">
         {photo && (
           <div className="relative h-full w-full overflow-hidden rounded-xl">
-            <Image
+            <PhotoImage
               src={photo}
               alt={activity.place?.title ?? activity.title}
               fill

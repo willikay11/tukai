@@ -1,8 +1,7 @@
 'use client';
 
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { Button } from '@/components/ui/button';
 
 interface FeaturedBannerProps {
@@ -32,18 +31,14 @@ export const FeaturedBanner = ({
   onSecondaryCtaClick,
 }: FeaturedBannerProps) => (
   <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl md:aspect-[3/1]">
-    {coverPhoto ? (
-      <Image
-        src={coverPhoto}
-        alt={title}
-        fill
-        sizes="(max-width: 768px) 100vw, 1280px"
-        className="object-cover"
-        priority
-      />
-    ) : (
-      <div className="h-full w-full bg-gray-200" />
-    )}
+    <PhotoImage
+      src={coverPhoto}
+      alt={title}
+      fill
+      sizes="(max-width: 768px) 100vw, 1280px"
+      className="object-cover"
+      priority
+    />
 
     {/* Dark gradient so the text stays readable */}
     <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />

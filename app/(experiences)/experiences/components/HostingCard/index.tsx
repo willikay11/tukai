@@ -1,11 +1,11 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { Status } from '@/enums/status';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
@@ -88,17 +88,13 @@ export const HostingCard = ({ experience }: HostingCardProps) => {
     <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
       {/* Cover with status badge */}
       <div className="relative h-[200px]">
-        {coverPhoto ? (
-          <Image
-            src={coverPhoto}
-            alt={experience.title}
-            fill
-            sizes="(max-width: 768px) 100vw, 400px"
-            className="object-cover"
-          />
-        ) : (
-          <div className="h-full w-full bg-gray-200" />
-        )}
+        <PhotoImage
+          src={coverPhoto}
+          alt={experience.title}
+          fill
+          sizes="(max-width: 768px) 100vw, 400px"
+          className="object-cover"
+        />
         <div className="absolute left-4 top-4">
           <PaymentStatusBadge status={status} config={HOSTING_STATUS_CONFIG} />
         </div>

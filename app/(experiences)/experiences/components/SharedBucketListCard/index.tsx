@@ -1,7 +1,6 @@
 'use client';
 
-import Image from 'next/image';
-
+import { PhotoImage } from '@/app/shared/components/Images';
 import { useJoinBucketList } from '@/app/shared/hooks/useBucketLists';
 import { Button } from '@/components/ui/button';
 import { BucketList } from '@/types/bucket-list';
@@ -16,17 +15,13 @@ export const SharedBucketListCard = ({ bucketList }: SharedBucketListCardProps) 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
       <div className="relative h-[200px]">
-        {bucketList.coverPhoto ? (
-          <Image
-            src={bucketList.coverPhoto}
-            alt={bucketList.title}
-            fill
-            sizes="(max-width: 768px) 100vw, 400px"
-            className="object-cover"
-          />
-        ) : (
-          <div className="h-full w-full bg-gray-200" />
-        )}
+        <PhotoImage
+          src={bucketList.coverPhoto}
+          alt={bucketList.title}
+          fill
+          sizes="(max-width: 768px) 100vw, 400px"
+          className="object-cover"
+        />
       </div>
 
       <div className="flex items-center justify-between p-4">

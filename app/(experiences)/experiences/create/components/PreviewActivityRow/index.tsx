@@ -1,8 +1,7 @@
 'use client';
 
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { ItineraryActivity } from '@/types/itinerary';
 import { formatDateDDMMYYYY, formatTimeTo12Hour } from '@/utils/date-utils';
 
@@ -21,7 +20,7 @@ export const PreviewActivityRow = ({ activity, dayDate }: PreviewActivityRowProp
       {/* Photo */}
       {activity.placeImageUrl ? (
         <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg">
-          <Image
+          <PhotoImage
             src={activity.placeImageUrl}
             alt={activity.placeName ?? activity.title}
             fill

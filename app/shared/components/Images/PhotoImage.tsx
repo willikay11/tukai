@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 
 import Image, { ImageProps } from 'next/image';
 
@@ -18,6 +18,7 @@ import { ImageFallback } from './ImageFallback';
 export const PhotoImage = ({
   src,
   alt,
+  fallback,
   fallbackLabel,
   fallbackIconSize,
   fallbackClassName,
@@ -25,6 +26,9 @@ export const PhotoImage = ({
   ...props
 }: Omit<ImageProps, 'src'> & {
   src: ImageProps['src'] | null | undefined;
+  // Something better than a broken-image icon, where the surface has one —
+  // an avatar's initial, say. Takes precedence over the label and icon.
+  fallback?: ReactNode;
   fallbackLabel?: string;
   fallbackIconSize?: number;
   fallbackClassName?: string;
@@ -34,9 +38,15 @@ export const PhotoImage = ({
   // Narrowed inline rather than via a helper so TypeScript can see that `src`
   // is non-null on the rendering path below
   if (hasError || src === null || src === undefined || src === '') {
-    // A `fill` image is sized by its positioned parent, but one sized from its
-    // own intrinsic dimensions has to keep that shape or the layout around it
-    // collapses — a masonry column, for instance.
+    if (fallback) return <>{fallback}</>;
+
+    // A `fill` image is taken out of flow and stretched over its positioned
+    // parent, so the fallback has to be too — left in flow it would push the
+    // parent's other content down instead of sitting behind it.
+    //
+    // An image sized from its own intrinsic dimensions has the opposite need:
+    // keep that shape, or the layout around it collapses — a masonry column,
+    // for instance.
     const ratio =
       !props.fill && typeof props.width === 'number' && typeof props.height === 'number'
         ? { aspectRatio: `${props.width} / ${props.height}` }
@@ -46,7 +56,11 @@ export const PhotoImage = ({
       <ImageFallback
         label={fallbackLabel}
         iconSize={fallbackIconSize}
-        className={cn(ratio && 'h-auto w-full', fallbackClassName)}
+        className={cn(
+          props.fill && 'absolute inset-0',
+          ratio && 'h-auto w-full',
+          fallbackClassName,
+        )}
         style={ratio}
       />
     );

@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react';
 
-import Image from 'next/image';
-
 import { FavouriteIcon } from '@hugeicons/react-pro';
 import moment from 'moment';
 
+import { PhotoImage } from '@/app/shared/components/Images';
 import { useLikePlaceReviewComment } from '@/app/shared/hooks/usePlaces';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -38,7 +37,7 @@ export const ViewComment = ({
       <div className="flex w-full items-center justify-between">
         <div className="inline-flex">
           <div className="relative mr-2 flex aspect-square h-10 w-10 flex-col">
-            <Image
+            <PhotoImage
               src={comment?.commenter?.picture}
               alt={comment?.commenter?.displayName}
               className="h-10 w-10 rounded-full"

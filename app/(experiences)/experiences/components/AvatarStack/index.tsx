@@ -1,5 +1,4 @@
-import Image from 'next/image';
-
+import { PhotoImage } from '@/app/shared/components/Images';
 import { BucketListMember } from '@/types/bucket-list';
 
 interface AvatarStackProps {
@@ -24,13 +23,18 @@ export const AvatarStack = ({ users, max = 3, extraCount }: AvatarStackProps) =>
           className="relative h-7 w-7 overflow-hidden rounded-full bg-gray-200 ring-2 ring-white"
           title={user.name}
         >
-          {user.picture ? (
-            <Image src={user.picture} alt={user.name} fill sizes="28px" className="object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-[10px] font-medium text-gray-600">
-              {user.name.charAt(0).toUpperCase()}
-            </div>
-          )}
+          <PhotoImage
+            src={user.picture}
+            alt={user.name}
+            fill
+            sizes="28px"
+            className="object-cover"
+            fallback={
+              <div className="flex h-full w-full items-center justify-center text-[10px] font-medium text-gray-600">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+            }
+          />
         </div>
       ))}
       {overflow > 0 && (

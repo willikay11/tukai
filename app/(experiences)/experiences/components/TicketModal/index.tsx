@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { Share } from '@/app/shared/components/Share';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
@@ -64,17 +63,13 @@ export const TicketModal = ({
 
         {/* Header image with overlay */}
         <div className="relative h-[180px]">
-          {coverPhoto ? (
-            <Image
-              src={coverPhoto}
-              alt={experienceTitle}
-              fill
-              sizes="448px"
-              className="object-cover"
-            />
-          ) : (
-            <div className="h-full w-full bg-gray-200" />
-          )}
+          <PhotoImage
+            src={coverPhoto}
+            alt={experienceTitle}
+            fill
+            sizes="448px"
+            className="object-cover"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/10" />
 
           <div className="absolute left-4 top-4">
@@ -182,7 +177,7 @@ export const TicketModal = ({
             <div className="rounded-2xl border border-gray-100 p-4">
               <div className="relative h-48 w-48">
                 {currentTicket.qrCodeImage ? (
-                  <Image
+                  <PhotoImage
                     src={currentTicket.qrCodeImage}
                     alt={`QR code for ${currentTicket.ticketNumber}`}
                     fill

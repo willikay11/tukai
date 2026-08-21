@@ -1,9 +1,8 @@
 'use client';
 
-import Image from 'next/image';
-
 import clsx from 'clsx';
 
+import { PhotoImage } from '@/app/shared/components/Images';
 import { CommunityMember } from '@/types/community';
 
 export const CommunityMembers = ({
@@ -25,7 +24,7 @@ export const CommunityMembers = ({
           )}
         >
           <div className={`relative aspect-square`} style={{ width: size, height: size }}>
-            <Image
+            <PhotoImage
               src={member?.user?.picture || ''}
               alt={member?.user?.firstName || ''}
               className="h-7 w-7 rounded-full"

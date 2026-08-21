@@ -1,8 +1,7 @@
 'use client';
 
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { Button } from '@/components/ui/button';
 
 export interface Community {
@@ -70,7 +69,7 @@ export const CommunitySelector = ({
                 {/* Community image */}
                 <div className="h-7 w-7 flex-shrink-0 overflow-hidden rounded-full bg-gray-100">
                   {community.imageUrl ? (
-                    <Image
+                    <PhotoImage
                       src={community.imageUrl}
                       alt={community.name}
                       width={28}

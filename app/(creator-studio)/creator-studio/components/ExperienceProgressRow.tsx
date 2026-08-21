@@ -1,7 +1,6 @@
-import Image from 'next/image';
-
 import moment from 'moment';
 
+import { PhotoImage } from '@/app/shared/components/Images';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 
@@ -36,11 +35,7 @@ export const ExperienceProgressRow = ({ experience }: { experience: Experience }
   return (
     <div className="flex items-center gap-4">
       <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl">
-        {cover ? (
-          <Image src={cover} alt={experience.title} fill sizes="48px" className="object-cover" />
-        ) : (
-          <div className="h-full w-full bg-gray-200" />
-        )}
+        <PhotoImage src={cover} alt={experience.title} fill sizes="48px" className="object-cover" />
       </div>
 
       <div className="min-w-0 flex-1">

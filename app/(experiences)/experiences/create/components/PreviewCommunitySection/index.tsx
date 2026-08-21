@@ -1,8 +1,7 @@
 'use client';
 
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 
 interface PreviewCommunitySectionProps {
   communityName: string | null;
@@ -31,7 +30,7 @@ export const PreviewCommunitySection = ({
         <div className="flex items-center gap-2">
           {/* Same tile as the Experience Location image */}
           <div className="relative h-[60px] w-[60px] flex-shrink-0 overflow-hidden rounded-[12px]">
-            <Image
+            <PhotoImage
               src={communityImageUrl}
               alt={communityName ?? ''}
               fill

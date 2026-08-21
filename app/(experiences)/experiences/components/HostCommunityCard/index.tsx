@@ -1,7 +1,7 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 
 interface HostCommunityCardProps {
   community: {
@@ -22,7 +22,7 @@ export const HostCommunityCard = ({ community }: HostCommunityCardProps) => {
         <div className="flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-75">
           {photoUrl && (
             <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
-              <Image
+              <PhotoImage
                 src={photoUrl}
                 alt={community.title}
                 fill

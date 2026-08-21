@@ -1,10 +1,9 @@
 'use client';
 
-import Image from 'next/image';
-
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { Share } from '@/app/shared/components/Share';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
@@ -46,17 +45,16 @@ export const ManageExperienceHero = ({ experience, metrics }: ManageExperienceHe
 
   return (
     <div className="relative overflow-hidden rounded-3xl">
-      {coverPhoto ? (
-        <Image
-          src={coverPhoto}
-          alt={experience.title}
-          fill
-          sizes="(max-width: 1024px) 100vw, 1024px"
-          className="object-cover"
-        />
-      ) : (
-        <div className="absolute inset-0 bg-gray-800" />
-      )}
+      <PhotoImage
+        src={coverPhoto}
+        alt={experience.title}
+        fill
+        sizes="(max-width: 1024px) 100vw, 1024px"
+        className="object-cover"
+        // Dark rather than the usual light ground: the hero's copy is white
+        // and sits over this
+        fallbackClassName="bg-gray-800 text-gray-600"
+      />
 
       {/* Overlay keeps the white copy legible over any cover */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/40" />

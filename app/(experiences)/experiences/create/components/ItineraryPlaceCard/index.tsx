@@ -1,8 +1,7 @@
 'use client';
 
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { TimePicker } from '@/components/ui/time-picker';
 import { ItineraryDayPlace } from '@/types/itinerary';
 
@@ -46,7 +45,7 @@ export const ItineraryPlaceCard = ({
         {/* Photo — rounded, fixed size, not full bleed */}
         {place.imageUrl ? (
           <div className="relative h-16 w-36 flex-shrink-0 overflow-hidden rounded-lg">
-            <Image
+            <PhotoImage
               src={place.imageUrl}
               alt={place.placeName}
               fill
