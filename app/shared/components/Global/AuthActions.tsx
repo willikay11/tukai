@@ -63,7 +63,7 @@ export const AuthActions = () => {
       {hasSubscribed ? (
         <Link
           href="/experiences/create"
-          className="mr-2 hidden flex-shrink-0 items-center gap-1.5 rounded-full bg-lime px-6 py-2 text-sm text-gray-900 md:inline-flex"
+          className="mr-2 hidden h-11 flex-shrink-0 items-center gap-1.5 rounded-full bg-lime px-6 text-sm text-gray-900 md:inline-flex"
         >
           <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />
           Create
@@ -71,7 +71,7 @@ export const AuthActions = () => {
       ) : (
         <Button
           variant="lime"
-          className="mr-2 hidden flex-shrink-0 items-center gap-1.5 rounded-full bg-lime px-6 py-2 text-sm text-gray-900 md:inline-flex"
+          className="mr-2 hidden h-11 flex-shrink-0 items-center gap-1.5 rounded-full bg-lime px-6 text-sm text-gray-900 md:inline-flex"
           onClick={handleCreateExperience}
         >
           <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />
@@ -84,12 +84,12 @@ export const AuthActions = () => {
         // way to align it per usage, so a 300px panel ran off-screen. Popover
         // aligns to the trigger's end and handles collisions.
         <Popover>
-          <PopoverTrigger className="flex items-center gap-1.5 rounded-full outline-none">
-            <div className="relative aspect-square h-7 w-7">
+          <PopoverTrigger className="flex h-11 flex-shrink-0 items-center gap-1.5 rounded-full outline-none">
+            <div className="relative aspect-square h-9 w-9">
               <TukaiImage
                 src={session?.user?.image || ''}
                 alt={session?.user?.name || ''}
-                className="h-7 w-7 rounded-full"
+                className="h-9 w-9 rounded-full"
                 quality={100}
                 fill
                 style={{ objectFit: 'cover' }}

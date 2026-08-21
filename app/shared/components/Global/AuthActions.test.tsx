@@ -14,8 +14,13 @@ jest.mock('next-auth/react', () => ({
 }));
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock('next/link', () => {
-  function MockLink({ children, href }: Record<string, unknown>) {
-    return <a href={href as string}>{children as React.ReactNode}</a>;
+  // Forward every prop, so class-based assertions see what the app renders
+  function MockLink({ children, href, ...rest }: Record<string, unknown>) {
+    return (
+      <a href={href as string} {...rest}>
+        {children as React.ReactNode}
+      </a>
+    );
   }
   MockLink.displayName = 'MockLink';
   return MockLink;
@@ -58,5 +63,25 @@ describe('AuthActions profile menu', () => {
 
     const panel = screen.getByText('My Profile').closest('[data-align]');
     expect(panel).toHaveAttribute('data-align', 'end');
+  });
+});
+
+// The search bar (py-1.5 around an h-8 button) and AskTukaiButton are both
+// 44px; Create and the profile trigger used to be 36px and 28px
+describe('navbar control heights', () => {
+  it('gives Create and the profile trigger the same height', () => {
+    render(<AuthActions />);
+
+    const create = screen.getByRole('link', { name: /Create/ });
+    const trigger = screen.getByAltText('George Ralak').closest('button');
+
+    expect(create).toHaveClass('h-11');
+    expect(trigger).toHaveClass('h-11');
+  });
+
+  it('no longer sizes Create by padding alone', () => {
+    render(<AuthActions />);
+
+    expect(screen.getByRole('link', { name: /Create/ })).not.toHaveClass('py-2');
   });
 });
