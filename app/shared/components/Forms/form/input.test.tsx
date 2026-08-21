@@ -49,11 +49,11 @@ describe('Input', () => {
       expect(screen.getByTestId('mock-icon')).toBeInTheDocument();
     });
 
-    it('renders container div with correct classes', () => {
-      const { container } = render(<Input {...defaultProps} />);
+    it('renders the field box with the shared input styling', () => {
+      render(<Input {...defaultProps} />);
 
-      const wrapper = container.querySelector('.inline-flex');
-      expect(wrapper).toHaveClass('h-[3.375rem]', 'w-full', 'rounded-[8px]', 'px-4');
+      const wrapper = screen.getByRole('textbox').parentElement;
+      expect(wrapper).toHaveClass('rounded-[14px]', 'border-gray-200', 'px-4', 'py-[13px]');
     });
 
     it('renders with correct type text', () => {
@@ -182,22 +182,22 @@ describe('Input', () => {
     it('applies error styling to container', () => {
       const { container } = render(<Input {...defaultProps} error="Invalid input" />);
 
-      const wrapper = container.querySelector('.inline-flex');
+      const wrapper = screen.getByRole('textbox').parentElement;
       expect(wrapper).toHaveClass('border-red-400');
     });
 
-    it('removes focus styling when error exists', () => {
-      const { container } = render(<Input {...defaultProps} error="Invalid input" />);
+    it('overrides the resting border when there is an error', () => {
+      render(<Input {...defaultProps} error="Invalid input" />);
 
-      const wrapper = container.querySelector('.inline-flex');
-      expect(wrapper).not.toHaveClass('hover:border-primary', 'focus:border-primary');
+      expect(screen.getByRole('textbox').parentElement).toHaveClass('border-red-400');
     });
 
-    it('applies normal styling when no error', () => {
-      const { container } = render(<Input {...defaultProps} />);
+    it('focuses to brand green when there is no error', () => {
+      render(<Input {...defaultProps} />);
 
-      const wrapper = container.querySelector('.inline-flex');
-      expect(wrapper).toHaveClass('hover:border-primary', 'focus:border-primary');
+      const wrapper = screen.getByRole('textbox').parentElement;
+      expect(wrapper).toHaveClass('focus-within:border-brand-green');
+      expect(wrapper).not.toHaveClass('border-red-400');
     });
 
     it('error text has correct styling', () => {
@@ -220,8 +220,7 @@ describe('Input', () => {
     it('renders icon with correct container styling', () => {
       const { container } = render(<Input {...defaultProps} />);
 
-      const iconContainer = container.querySelector('.mr-2');
-      expect(iconContainer).toHaveClass('text-gray-500');
+      const iconContainer = container.querySelector('.text-gray-500');
       expect(iconContainer).toContainElement(screen.getByTestId('mock-icon'));
     });
   });
@@ -271,28 +270,31 @@ describe('Input', () => {
       render(<Input {...defaultProps} />);
 
       const input = screen.getByRole('textbox');
-      expect(input).toHaveClass('w-full', 'text-base', 'font-medium', 'outline-0');
+      expect(input).toHaveClass('w-full', 'text-[14.5px]', 'font-semibold');
     });
 
     it('applies text color classes', () => {
       render(<Input {...defaultProps} />);
 
       const input = screen.getByRole('textbox');
-      expect(input).toHaveClass('text-gray-500');
+      expect(input).toHaveClass('text-gray-800');
     });
 
     it('applies placeholder styling', () => {
       render(<Input {...defaultProps} />);
 
       const input = screen.getByRole('textbox');
-      expect(input).toHaveClass('placeholder:text-base');
+      expect(input).toHaveClass('placeholder:font-normal', 'placeholder:text-gray-400');
     });
 
-    it('applies transform and scale', () => {
+    // The field used to render 16px text scaled to 0.875 to look like 14px.
+    // The size is now set outright, so the caret and hit area match what is
+    // drawn and the computed font-size is the real one.
+    it('sizes the text outright rather than scaling it down', () => {
       render(<Input {...defaultProps} />);
 
       const input = screen.getByRole('textbox');
-      expect(input).toHaveClass('origin-left', 'scale-[0.875]', 'transform');
+      expect(input).not.toHaveClass('scale-[0.875]', 'transform');
     });
   });
 

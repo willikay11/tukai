@@ -98,28 +98,31 @@ export const AddPlaceModal = ({
         {/* Header with search and title */}
         <div className="flex-shrink-0 space-y-3 pl-6 pr-14 pt-4">
           {/* Search input */}
-          <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-gray-100 px-3 py-2">
-            <IconComponent
-              iconName="Search01Icon"
-              size={16}
-              className="flex-shrink-0 text-gray-400"
-            />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Find a place"
-              className="h-[30px] flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch('')}
-                className="flex-shrink-0 text-red-400 hover:text-red-500"
-              >
-                <IconComponent iconName="Cancel01Icon" size={14} />
-              </button>
-            )}
-          </div>
+          <Input
+            shape="pill"
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Find a place"
+            containerClassName="bg-gray-100"
+            icon={
+              <IconComponent
+                iconName="Search01Icon"
+                size={16}
+                className="flex-shrink-0 text-gray-400"
+              />
+            }
+            suffixIcon={
+              search ? (
+                <button
+                  onClick={() => setSearch('')}
+                  className="flex-shrink-0 text-red-400 hover:text-red-500"
+                >
+                  <IconComponent iconName="Cancel01Icon" size={14} />
+                </button>
+              ) : null
+            }
+          />
         </div>
 
         {/* Category filter pills */}

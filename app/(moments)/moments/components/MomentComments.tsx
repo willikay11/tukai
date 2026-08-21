@@ -13,6 +13,7 @@ import {
   useToggleCommentLike,
 } from '@/app/shared/hooks/useMoments';
 import { toast } from '@/app/shared/hooks/useToast';
+import { Input } from '@/components/ui/input';
 import { MomentComment, momentAuthorName } from '@/types/moment';
 
 import { MomentAvatar } from './MomentAvatar';
@@ -177,28 +178,28 @@ export const MomentComments = ({ momentId }: { momentId: string }) => {
       )}
 
       <div className="mt-4 border-t border-gray-100 pt-4">
-        <div className="flex items-center gap-3 rounded-full border border-gray-200 bg-white py-2 pl-2 pr-4 shadow-sm">
-          <MomentAvatar src={currentUserImage} name={currentUserName} size={40} />
-
-          <input
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            onKeyDown={(event) => event.key === 'Enter' && submit()}
-            placeholder="Leave a comment..."
-            aria-label="Leave a comment"
-            className="min-w-0 flex-1 bg-transparent text-base text-gray-800 outline-none placeholder:text-gray-400"
-          />
-
-          <button
-            type="button"
-            onClick={submit}
-            disabled={!draft.trim() || isPosting}
-            aria-label="Post comment"
-            className="flex-shrink-0 text-primary transition-opacity disabled:opacity-40"
-          >
-            <IconComponent iconName="Sent02Icon" size={24} color="currentColor" />
-          </button>
-        </div>
+        <Input
+          shape="pill"
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          onKeyDown={(event) => event.key === 'Enter' && submit()}
+          placeholder="Leave a comment..."
+          aria-label="Leave a comment"
+          // Tighter than the standard 13px/16px: a 40px avatar sits inside
+          containerClassName="gap-3 bg-white py-2 pl-2 pr-4 shadow-sm"
+          icon={<MomentAvatar src={currentUserImage} name={currentUserName} size={40} />}
+          suffixIcon={
+            <button
+              type="button"
+              onClick={submit}
+              disabled={!draft.trim() || isPosting}
+              aria-label="Post comment"
+              className="flex-shrink-0 text-primary transition-opacity disabled:opacity-40"
+            >
+              <IconComponent iconName="Sent02Icon" size={24} color="currentColor" />
+            </button>
+          }
+        />
       </div>
     </div>
   );

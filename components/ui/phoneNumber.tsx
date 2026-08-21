@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
@@ -45,12 +46,10 @@ const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberInputProps>(
           orientation="vertical"
           className="mr-3 h-4 w-[2px] rounded-[10px] border-gray-300"
         />
-        <input
+        <Input
           type={type}
-          className={cn(
-            'h-14 w-full flex-1 border-none bg-transparent py-1 text-sm focus:outline-none md:text-sm',
-            className,
-          )}
+          containerClassName="flex-1 border-none p-0"
+          className={className}
           ref={ref}
           onChange={(e) => setLocalNumber(e.target.value)}
           {...props}
