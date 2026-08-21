@@ -242,7 +242,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                   {shouldShowSeeAll(cities.length) && (
                     <SeeAllCard
                       href="/experiences/see-all?type=cities"
-                      previewPhoto={cities[0]?.image ?? null}
+                      previewPhotos={cities.slice(0, 3).map((city) => city.image ?? null)}
                       className="aspect-auto h-[130px] w-[240px]"
                     />
                   )}

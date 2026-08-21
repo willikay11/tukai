@@ -35,7 +35,7 @@ describe('SeeAllCard', () => {
   // has an empty alt and is exposed as presentation, not an image
   it('previews a photo from the row it closes', () => {
     const { container } = render(
-      <SeeAllCard href="/places" previewPhoto="https://cdn.tukai.co/a.jpg" />,
+      <SeeAllCard href="/places" previewPhotos={['https://cdn.tukai.co/a.jpg']} />,
     );
 
     expect(container.querySelector('img')).toHaveAttribute('src', 'https://cdn.tukai.co/a.jpg');
@@ -43,7 +43,7 @@ describe('SeeAllCard', () => {
   });
 
   it('renders a plain tile when there is no photo', () => {
-    const { container } = render(<SeeAllCard href="/places" previewPhoto={null} />);
+    const { container } = render(<SeeAllCard href="/places" previewPhotos={[]} />);
 
     expect(container.querySelector('img')).not.toBeInTheDocument();
     expect(screen.getByText('See All')).toBeInTheDocument();

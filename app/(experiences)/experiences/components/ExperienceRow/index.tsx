@@ -55,7 +55,7 @@ export const ExperienceRow = ({
           ))}
 
           {seeAllHref && shouldShowSeeAll(total) && (
-            <SeeAllCard href={seeAllHref} previewPhoto={coverOf(experiences[0])} />
+            <SeeAllCard href={seeAllHref} previewPhotos={experiences.slice(0, 3).map(coverOf)} />
           )}
         </ScrollRow>
       )}

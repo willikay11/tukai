@@ -218,7 +218,7 @@ export const DiscoverPageContent = () => {
 
               <SeeAllCard
                 href="/experiences/see-all?type=near-me"
-                previewPhoto={coverPhotoOf(discoverExperiences[0])}
+                previewPhotos={discoverExperiences.slice(0, 3).map(coverPhotoOf)}
               />
             </ScrollRow>
           )}
@@ -250,7 +250,7 @@ export const DiscoverPageContent = () => {
 
               <SeeAllCard
                 href="/experiences/see-all?type=cities"
-                previewPhoto={cities[0]?.image ?? null}
+                previewPhotos={cities.slice(0, 3).map((city) => city.image ?? null)}
                 className="aspect-auto h-[130px] w-[240px]"
               />
             </ScrollRow>
@@ -312,7 +312,9 @@ export const DiscoverPageContent = () => {
 
               <SeeAllCard
                 href="/communities"
-                previewPhoto={communities[0]?.photos?.[0]?.photo ?? null}
+                previewPhotos={communities
+                  .slice(0, 3)
+                  .map((community) => community.photos?.[0]?.photo ?? null)}
                 className="aspect-auto h-[180px] w-[320px]"
               />
             </ScrollRow>
@@ -358,7 +360,7 @@ export const DiscoverPageContent = () => {
 
               <SeeAllCard
                 href="/experiences/see-all?type=itineraries"
-                previewPhoto={coverPhotoOf(itineraries[0])}
+                previewPhotos={itineraries.slice(0, 3).map(coverPhotoOf)}
                 className="w-[300px]"
               />
             </ScrollRow>
@@ -384,7 +386,10 @@ export const DiscoverPageContent = () => {
                 <PlaceCard key={place.id} place={place} />
               ))}
 
-              <SeeAllCard href="/places" previewPhoto={placePhotoOf(popularPlaces[0])} />
+              <SeeAllCard
+                href="/places"
+                previewPhotos={popularPlaces.slice(0, 3).map(placePhotoOf)}
+              />
             </ScrollRow>
           )}
         </section>
@@ -408,7 +413,10 @@ export const DiscoverPageContent = () => {
                 <PlaceCard key={place.id} place={place} />
               ))}
 
-              <SeeAllCard href="/places" previewPhoto={placePhotoOf(nearbyRestaurants[0])} />
+              <SeeAllCard
+                href="/places"
+                previewPhotos={nearbyRestaurants.slice(0, 3).map(placePhotoOf)}
+              />
             </ScrollRow>
           )}
         </section>
