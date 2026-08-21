@@ -243,7 +243,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                     <SeeAllCard
                       href="/experiences/see-all?type=cities"
                       previewPhoto={cities[0]?.image ?? null}
-                      className="w-[240px]"
+                      className="aspect-auto h-[130px] w-[240px]"
                     />
                   )}
                 </ScrollRow>

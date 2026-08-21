@@ -61,4 +61,27 @@ describe('SeeAllCard', () => {
 
     expect(screen.getByRole('link')).toHaveClass('w-[280px]');
   });
+
+  // It must match the height of the cards' IMAGES, not the whole card —
+  // stretching would run it past the titles and prices beneath them
+  it('matches the 4:3 card image and does not stretch to the row height', () => {
+    render(<SeeAllCard href="/places" />);
+    const link = screen.getByRole('link');
+
+    expect(link).toHaveClass('aspect-[4/3]', 'self-start');
+  });
+
+  it('lets a row with a different image height override the aspect', () => {
+    render(<SeeAllCard href="/places" className="aspect-auto h-[130px] w-[240px]" />);
+    const link = screen.getByRole('link');
+
+    expect(link).toHaveClass('aspect-auto', 'h-[130px]', 'w-[240px]');
+    expect(link).not.toHaveClass('aspect-[4/3]');
+  });
+
+  it('carries a drop shadow', () => {
+    render(<SeeAllCard href="/places" />);
+
+    expect(screen.getByRole('link').className).toMatch(/shadow-\[/);
+  });
 });

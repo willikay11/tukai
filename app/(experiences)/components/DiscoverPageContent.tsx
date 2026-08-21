@@ -251,7 +251,7 @@ export const DiscoverPageContent = () => {
               <SeeAllCard
                 href="/experiences/see-all?type=cities"
                 previewPhoto={cities[0]?.image ?? null}
-                className="w-[240px]"
+                className="aspect-auto h-[130px] w-[240px]"
               />
             </ScrollRow>
           )}
@@ -313,7 +313,7 @@ export const DiscoverPageContent = () => {
               <SeeAllCard
                 href="/communities"
                 previewPhoto={communities[0]?.photos?.[0]?.photo ?? null}
-                className="w-[320px]"
+                className="aspect-auto h-[180px] w-[320px]"
               />
             </ScrollRow>
           )}
