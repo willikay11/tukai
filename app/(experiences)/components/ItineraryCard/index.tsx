@@ -8,12 +8,11 @@ import numeral from 'numeral';
 
 import { Bookmark } from '@/app/shared/components/Bookmark';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { FannedPhotos } from '@/app/shared/components/Images';
 import { useBookmarkExperience } from '@/app/shared/hooks/useExperiences';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 import { getNumberOfDaysAndNights } from '@/utils/date-utils';
-
-import { StackedPhotosBadge } from './StackedPhotosBadge';
 
 export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
   const { data: session } = useSession();
@@ -65,7 +64,7 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
           />
         </div>
 
-        <StackedPhotosBadge photos={previewPhotos} className="absolute bottom-3 left-3" />
+        <FannedPhotos photos={previewPhotos} size="sm" className="absolute bottom-3 left-3" />
       </div>
 
       <div className="mt-3">
