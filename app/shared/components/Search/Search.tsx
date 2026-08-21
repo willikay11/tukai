@@ -126,18 +126,6 @@ export const Search = () => {
             }}
           />
 
-          {/* Divider */}
-          <div className="h-6 w-px flex-shrink-0 bg-gray-200" />
-
-          {/* Anytime dropdown (placeholder) */}
-          <button
-            type="button"
-            className="flex flex-shrink-0 items-center gap-1 px-2 text-sm font-medium text-gray-800"
-          >
-            Anytime
-            <IconComponent iconName="ArrowDown01Icon" size={14} className="text-gray-500" />
-          </button>
-
           {/* Search button */}
           <Button
             variant="gradient"

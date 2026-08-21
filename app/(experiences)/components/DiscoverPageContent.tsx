@@ -18,7 +18,7 @@ import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experienc
 import { FeaturedBanner } from '@/app/shared/components/Banners';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { PageContainer } from '@/app/shared/components/Layout';
-import { ScrollRow } from '@/app/shared/components/Lists';
+import { ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
 import { MomentsMasonry } from '@/app/shared/components/Moments';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
@@ -35,6 +35,15 @@ import { formatLongDateWithOrdinal, formatShortDate } from '@/utils/date-utils';
 import { haversineKm } from '@/utils/geo-utils';
 
 const ROW_SIZE = 10;
+
+// First photo of a row's leading item, used as the See All tile's preview
+const coverPhotoOf = (experience: Experience | undefined): string | null =>
+  experience?.photos?.find((photo: Photo) => photo.isCover)?.photo ||
+  experience?.photos?.[0]?.photo ||
+  null;
+
+const placePhotoOf = (place: Place | undefined): string | null =>
+  place?.photos?.find((photo: Photo) => photo.isCover)?.photo || place?.photos?.[0]?.photo || null;
 
 export const DiscoverPageContent = () => {
   const router = useRouter();
@@ -194,7 +203,6 @@ export const DiscoverPageContent = () => {
             icon="Compass01Icon"
             title="Discover Experiences"
             subtitle="Handpicked for you"
-            seeAllHref="/experiences/see-all?type=near-me"
           />
           {isLoadingRow ? (
             <RowSkeleton />
@@ -207,6 +215,11 @@ export const DiscoverPageContent = () => {
                   </Link>
                 </div>
               ))}
+
+              <SeeAllCard
+                href="/experiences/see-all?type=near-me"
+                previewPhoto={coverPhotoOf(discoverExperiences[0])}
+              />
             </ScrollRow>
           )}
         </section>
@@ -219,7 +232,6 @@ export const DiscoverPageContent = () => {
             icon="Location01Icon"
             title="Discover by City"
             subtitle="Where will you go next?"
-            seeAllHref="/experiences/see-all?type=cities"
           />
           {isLoadingCities ? (
             <RowSkeleton cardClassName="h-[130px] w-[240px]" />
@@ -235,6 +247,12 @@ export const DiscoverPageContent = () => {
                   />
                 </div>
               ))}
+
+              <SeeAllCard
+                href="/experiences/see-all?type=cities"
+                previewPhoto={cities[0]?.image ?? null}
+                className="w-[240px]"
+              />
             </ScrollRow>
           )}
         </section>
@@ -283,7 +301,6 @@ export const DiscoverPageContent = () => {
             icon="UserGroupIcon"
             title="Discover Communities"
             subtitle="Find your crew"
-            seeAllHref="/communities"
           />
           {isLoadingCommunities ? (
             <RowSkeleton cardClassName="h-[180px] w-[320px]" />
@@ -292,6 +309,12 @@ export const DiscoverPageContent = () => {
               {communities.map((community) => (
                 <CommunityDiscoverCard key={community.id} community={community} />
               ))}
+
+              <SeeAllCard
+                href="/communities"
+                previewPhoto={communities[0]?.photos?.[0]?.photo ?? null}
+                className="w-[320px]"
+              />
             </ScrollRow>
           )}
         </section>
@@ -324,7 +347,6 @@ export const DiscoverPageContent = () => {
             iconColorClass="text-purple-600"
             title="Discover Itineraries"
             subtitle="Ready-to-book plans from TukAI"
-            seeAllHref="/experiences/see-all?type=itineraries"
           />
           {isLoadingItineraries ? (
             <RowSkeleton cardClassName="aspect-[4/3] w-[300px]" />
@@ -333,6 +355,12 @@ export const DiscoverPageContent = () => {
               {itineraries.map((itinerary) => (
                 <ItineraryCard key={itinerary.id} itinerary={itinerary} />
               ))}
+
+              <SeeAllCard
+                href="/experiences/see-all?type=itineraries"
+                previewPhoto={coverPhotoOf(itineraries[0])}
+                className="w-[300px]"
+              />
             </ScrollRow>
           )}
         </section>
@@ -347,7 +375,6 @@ export const DiscoverPageContent = () => {
             iconColorClass="text-red-500"
             title={`Popular Places in ${userCity}`}
             subtitle="Loved by the community"
-            seeAllHref="/places"
           />
           {isLoadingPopularPlaces ? (
             <RowSkeleton />
@@ -356,6 +383,8 @@ export const DiscoverPageContent = () => {
               {popularPlaces.map((place) => (
                 <PlaceCard key={place.id} place={place} />
               ))}
+
+              <SeeAllCard href="/places" previewPhoto={placePhotoOf(popularPlaces[0])} />
             </ScrollRow>
           )}
         </section>
@@ -370,7 +399,6 @@ export const DiscoverPageContent = () => {
             iconColorClass="text-orange-500"
             title="Nearby Restaurants"
             subtitle="Within 20 km of you"
-            seeAllHref="/places"
           />
           {isLoadingRestaurants ? (
             <RowSkeleton />
@@ -379,6 +407,8 @@ export const DiscoverPageContent = () => {
               {nearbyRestaurants.map((place) => (
                 <PlaceCard key={place.id} place={place} />
               ))}
+
+              <SeeAllCard href="/places" previewPhoto={placePhotoOf(nearbyRestaurants[0])} />
             </ScrollRow>
           )}
         </section>

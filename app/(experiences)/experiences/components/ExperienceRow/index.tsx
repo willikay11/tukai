@@ -3,10 +3,16 @@ import Link from 'next/link';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { shouldShowSeeAll } from '@/app/(experiences)/experiences/see-all/config';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
-import { ScrollRow } from '@/app/shared/components/Lists';
+import { ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
 import { Experience } from '@/types/experience';
+import { Photo } from '@/types/photo';
 
 import { RowSkeleton } from './RowSkeleton';
+
+const coverOf = (experience: Experience | undefined): string | null =>
+  experience?.photos?.find((photo: Photo) => photo.isCover)?.photo ||
+  experience?.photos?.[0]?.photo ||
+  null;
 
 interface ExperienceRowProps {
   title: string;
@@ -35,12 +41,7 @@ export const ExperienceRow = ({
 
   return (
     <section>
-      <SectionHeader
-        icon={icon}
-        title={title}
-        subtitle={subtitle}
-        seeAllHref={shouldShowSeeAll(total) ? seeAllHref : undefined}
-      />
+      <SectionHeader icon={icon} title={title} subtitle={subtitle} />
       {isLoading ? (
         <RowSkeleton />
       ) : (
@@ -52,6 +53,10 @@ export const ExperienceRow = ({
               </Link>
             </div>
           ))}
+
+          {seeAllHref && shouldShowSeeAll(total) && (
+            <SeeAllCard href={seeAllHref} previewPhoto={coverOf(experiences[0])} />
+          )}
         </ScrollRow>
       )}
     </section>
