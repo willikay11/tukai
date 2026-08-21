@@ -2,11 +2,10 @@
 
 import { useState } from 'react';
 
-import Image from 'next/image';
-
 import numeral from 'numeral';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { formatReservationDateTime } from '@/utils/date-utils';
 
 import { TicketModal } from '../TicketModal';
@@ -33,17 +32,13 @@ export const UpcomingReservationCard = ({
   return (
     <div>
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
-        {reservation.coverPhoto ? (
-          <Image
-            src={reservation.coverPhoto}
-            alt={reservation.title}
-            fill
-            sizes="(max-width: 640px) 100vw, 280px"
-            className="object-cover"
-          />
-        ) : (
-          <div className="h-full w-full bg-gray-200" />
-        )}
+        <PhotoImage
+          src={reservation.coverPhoto}
+          alt={reservation.title}
+          fill
+          sizes="(max-width: 640px) 100vw, 280px"
+          className="object-cover"
+        />
 
         {/* Settled reservations get a filled basket on white; anything still
             awaiting payment keeps the translucent add-to-basket circle */}

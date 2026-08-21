@@ -1,8 +1,7 @@
-import Image from 'next/image';
-
 import numeral from 'numeral';
 
 import { PaymentStatusBadge } from '@/app/(experiences)/experiences/components/PaymentStatusBadge';
+import { PhotoImage } from '@/app/shared/components/Images';
 
 export interface StudioReservation {
   id: string;
@@ -46,7 +45,7 @@ export const RecentReservations = ({ reservations }: { reservations: StudioReser
                 <div className="flex items-center gap-3">
                   <div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full bg-gray-200">
                     {reservation.guestPicture && (
-                      <Image
+                      <PhotoImage
                         src={reservation.guestPicture}
                         alt={reservation.guestName}
                         fill

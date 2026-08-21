@@ -3,10 +3,10 @@
 import { useMemo } from 'react';
 
 import { useSession } from 'next-auth/react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { Button } from '@/components/ui/button';
 
@@ -116,16 +116,12 @@ export const CreateExperienceCommunity = ({
                   }`}
                 >
                   <div className="relative h-[56px] w-[86px] flex-shrink-0 overflow-hidden rounded-[12px] bg-gray-100">
-                    {community.image ? (
-                      <Image
-                        src={community.image}
-                        alt={community.title}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="h-full w-full bg-gray-200" />
-                    )}
+                    <PhotoImage
+                      src={community.image}
+                      alt={community.title}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
 
                   <p className="line-clamp-2 flex-1 text-xs leading-[1.2] text-gray-800">
@@ -188,16 +184,12 @@ export const CreateExperienceCommunity = ({
                     }`}
                   >
                     <div className="relative h-[56px] w-[86px] flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
-                      {community.image ? (
-                        <Image
-                          src={community.image}
-                          alt={community.title}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="h-full w-full bg-gray-200" />
-                      )}
+                      <PhotoImage
+                        src={community.image}
+                        alt={community.title}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
 
                     <p className="line-clamp-2 flex-1 text-2xl leading-[1.2] text-gray-800">

@@ -2,12 +2,12 @@
 
 import { Suspense, useState } from 'react';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { PaymentStatusBadge } from '@/app/(experiences)/experiences/components/PaymentStatusBadge';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { Share } from '@/app/shared/components/Share';
 import { Button } from '@/components/ui/button';
 import { formatBookingDateTime, formatPaidAt } from '@/utils/date-utils';
@@ -166,7 +166,7 @@ const BookingSuccessContent = () => {
         <div className="space-y-5 bg-white px-6 py-6">
           <div className="flex items-center gap-3">
             <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl">
-              <Image
+              <PhotoImage
                 src={data.experience.thumbnail}
                 alt={data.experience.title}
                 fill
@@ -247,7 +247,9 @@ const BookingSuccessContent = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <Button
-              onClick={() => window.open(buildGoogleCalendarUrl(data), '_blank', 'noopener,noreferrer')}
+              onClick={() =>
+                window.open(buildGoogleCalendarUrl(data), '_blank', 'noopener,noreferrer')
+              }
               className="rounded-full"
               variant="outline"
             >

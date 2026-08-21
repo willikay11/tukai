@@ -1,6 +1,5 @@
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { BucketList } from '@/types/bucket-list';
 
 import { AvatarStack } from '../AvatarStack';
@@ -17,17 +16,13 @@ export const BucketListCard = ({ bucketList, onClick }: BucketListCardProps) => 
   >
     {/* Cover */}
     <div className="relative h-[220px]">
-      {bucketList.coverPhoto ? (
-        <Image
-          src={bucketList.coverPhoto}
-          alt={bucketList.title}
-          fill
-          sizes="(max-width: 768px) 100vw, 400px"
-          className="object-cover"
-        />
-      ) : (
-        <div className="h-full w-full bg-gray-200" />
-      )}
+      <PhotoImage
+        src={bucketList.coverPhoto}
+        alt={bucketList.title}
+        fill
+        sizes="(max-width: 768px) 100vw, 400px"
+        className="object-cover"
+      />
 
       {/* Public/Private badge */}
       <div className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-900">
@@ -42,7 +37,7 @@ export const BucketListCard = ({ bucketList, onClick }: BucketListCardProps) => 
               key={index}
               className="relative h-11 w-11 overflow-hidden rounded-lg ring-2 ring-white/90"
             >
-              <Image src={photo} alt="" fill sizes="44px" className="object-cover" />
+              <PhotoImage src={photo} alt="" fill sizes="44px" className="object-cover" />
             </div>
           ))}
           {bucketList.savedCount > 4 && (

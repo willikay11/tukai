@@ -2,9 +2,8 @@
 
 import { useCallback, useRef, useState } from 'react';
 
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images/PhotoImage';
 
 interface SquarePhotoStripProps {
   photos: string[];
@@ -91,7 +90,7 @@ export const SquarePhotoStrip = ({
                 className="relative h-full w-full flex-shrink-0"
                 style={{ scrollSnapAlign: 'start' }}
               >
-                <Image
+                <PhotoImage
                   src={photo}
                   alt={`Experience photo ${index + 1}`}
                   fill
@@ -153,7 +152,7 @@ export const SquarePhotoStrip = ({
         className={`relative w-full overflow-hidden rounded-lg ${className}`}
         style={{ height: '200px' }}
       >
-        <Image
+        <PhotoImage
           src={photos[0]}
           alt="Experience photo"
           fill
@@ -185,7 +184,7 @@ export const SquarePhotoStrip = ({
                   height: '240px',
                 }}
               >
-                <Image
+                <PhotoImage
                   src={photo}
                   alt={`Experience photo ${index + 1}`}
                   fill

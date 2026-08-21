@@ -11,6 +11,7 @@ import { Bookmark } from '@/app/shared/components/Bookmark';
 import { EventSkeleton } from '@/app/shared/components/Cards';
 import { Pills } from '@/app/shared/components/Filters';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { useBookmarkExperience } from '@/app/shared/hooks/useExperiences';
 import { Button } from '@/components/ui/button';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
@@ -71,18 +72,14 @@ export const SingleExperience = ({
     return (
       <div className="flex flex-col">
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl">
-          {coverPhoto && !hasError ? (
-            <Image
-              src={coverPhoto}
-              alt={experience.title}
-              fill
-              sizes="280px"
-              className="object-cover"
-              onError={() => setHasError(true)}
-            />
-          ) : (
-            <div className="h-full w-full bg-gray-100" />
-          )}
+          <PhotoImage
+            src={coverPhoto}
+            alt={experience.title}
+            fill
+            sizes="280px"
+            className="object-cover"
+            onError={() => setHasError(true)}
+          />
           <div className="absolute right-2 top-2">
             <Bookmark
               icon="basket"

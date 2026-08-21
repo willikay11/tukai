@@ -3,11 +3,11 @@
 import { useState } from 'react';
 
 import { useSession } from 'next-auth/react';
-import Image from 'next/image';
 
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
 import { useFlagMoment, useToggleMomentLike } from '@/app/shared/hooks/useMoments';
 import { toast } from '@/app/shared/hooks/useToast';
@@ -106,7 +106,7 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
 
       {photos.length === 1 ? (
         <div className="mt-4 overflow-hidden rounded-2xl">
-          <Image
+          <PhotoImage
             src={photos[0].photo}
             alt={item.title}
             width={photos[0].width || 800}

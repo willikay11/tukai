@@ -2,9 +2,8 @@
 
 import { useMemo, useState } from 'react';
 
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -131,7 +130,7 @@ export const ActivityCard = ({
           {/* Place photo or placeholder */}
           {activity.placeImageUrl ? (
             <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg">
-              <Image
+              <PhotoImage
                 src={activity.placeImageUrl}
                 alt={activity.placeName ?? activity.title}
                 fill
@@ -218,7 +217,7 @@ export const ActivityCard = ({
             <div className="flex items-center gap-3 border-b border-gray-100 p-2">
               {activity.placeImageUrl ? (
                 <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg">
-                  <Image
+                  <PhotoImage
                     src={activity.placeImageUrl}
                     alt={activity.placeName ?? ''}
                     fill

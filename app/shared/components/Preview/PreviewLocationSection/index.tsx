@@ -1,8 +1,7 @@
 'use client';
 
-import Image from 'next/image';
-
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 
 interface PreviewLocationSectionProps {
   location: string | null;
@@ -33,7 +32,13 @@ export const PreviewLocationSection = ({
           <div className="flex items-center gap-2">
             {imageUrl ? (
               <div className="relative h-[60px] w-[60px] flex-shrink-0 overflow-hidden rounded-[12px]">
-                <Image src={imageUrl} alt={location} fill sizes="60px" className="object-cover" />
+                <PhotoImage
+                  src={imageUrl}
+                  alt={location}
+                  fill
+                  sizes="60px"
+                  className="object-cover"
+                />
               </div>
             ) : (
               <div className="rounded-[12px] bg-gray-100 p-4">
