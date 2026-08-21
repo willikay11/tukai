@@ -12,6 +12,9 @@ const config: Config = {
     './public/**/*.{js,ts,jsx,tsx}',
     './src/**/*.{js,ts,jsx,tsx}',
     './styles/**/*.{js,ts,jsx,tsx}',
+    // safeText generates Tailwind classes at runtime; without this they are
+    // only emitted when the same utility happens to be used elsewhere
+    './utils/**/*.{js,ts}',
   ],
   theme: {
     extend: {

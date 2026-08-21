@@ -15,7 +15,7 @@ export const IncludedExcludedSection = ({ included, excluded }: IncludedExcluded
       <div>
         <h3 className="mb-3 text-xl font-bold text-gray-900">What's included</h3>
         <div
-          className="text-sm leading-relaxed text-gray-700"
+          className="rich-text text-sm leading-relaxed text-gray-700"
           dangerouslySetInnerHTML={{ __html: sanitizedIncluded }}
         />
       </div>
@@ -23,7 +23,7 @@ export const IncludedExcludedSection = ({ included, excluded }: IncludedExcluded
       <div>
         <h3 className="mb-3 text-xl font-bold text-gray-900">What's not included</h3>
         <div
-          className="text-sm leading-relaxed text-gray-700"
+          className="rich-text text-sm leading-relaxed text-gray-700"
           dangerouslySetInnerHTML={{ __html: sanitizedExcluded }}
         />
       </div>
