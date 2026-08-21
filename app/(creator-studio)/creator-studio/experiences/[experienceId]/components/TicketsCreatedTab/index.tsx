@@ -1,12 +1,14 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { NoData } from '@/components/ui/noData';
 import { Ticket } from '@/types/ticket';
+
+import { EditTicketModal } from '../EditTicketModal';
 
 interface TicketsCreatedTabProps {
   experienceId: string;
@@ -22,7 +24,7 @@ const MetricCell = ({ label, value }: { label: string; value: string }) => (
 );
 
 export const TicketsCreatedTab = ({ experienceId, tickets, currency }: TicketsCreatedTabProps) => {
-  const router = useRouter();
+  const [editing, setEditing] = useState<Ticket | null>(null);
 
   if (tickets.length === 0) {
     return (
@@ -102,9 +104,7 @@ export const TicketsCreatedTab = ({ experienceId, tickets, currency }: TicketsCr
 
               <button
                 type="button"
-                onClick={() =>
-                  router.push(`/experiences/create?experienceId=${experienceId}&step=tickets`)
-                }
+                onClick={() => setEditing(ticket)}
                 className="inline-flex items-center gap-2 rounded-full px-2 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50"
               >
                 <IconComponent iconName="Edit02Icon" size={16} color="currentColor" />
@@ -114,6 +114,13 @@ export const TicketsCreatedTab = ({ experienceId, tickets, currency }: TicketsCr
           </div>
         );
       })}
+
+      <EditTicketModal
+        experienceId={experienceId}
+        ticket={editing}
+        currency={currency}
+        onClose={() => setEditing(null)}
+      />
     </div>
   );
 };
