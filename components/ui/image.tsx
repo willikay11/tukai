@@ -7,6 +7,7 @@ import Image, { ImageProps } from 'next/image';
 import clsx from 'clsx';
 
 import { AvatarSkeleton } from '@/app/shared/components/Cards/Skeletons';
+import { ImageFallback } from '@/app/shared/components/Images';
 
 export const TukaiImage = ({
   src,
@@ -44,14 +45,10 @@ export const TukaiImage = ({
         />
       )}
       {hasError && (
-        <div
-          className={clsx(
-            'absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-500',
-            props.className,
-          )}
-        >
-          {showNotFoundText && <span className="text-center text-sm">Image not available</span>}
-        </div>
+        <ImageFallback
+          label={showNotFoundText ? 'Image not available' : undefined}
+          className={clsx('absolute inset-0', passedClassName)}
+        />
       )}
     </>
   );

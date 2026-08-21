@@ -1,6 +1,6 @@
-import Image from 'next/image';
-
 import { cn } from '@/lib/utils';
+
+import { PhotoImage } from './PhotoImage';
 
 type FanSize = 'sm' | 'md';
 
@@ -9,7 +9,15 @@ type FanSize = 'sm' | 'md';
 // after the first, so a negative value pulls the pile together.
 const FAN_SIZES: Record<
   FanSize,
-  { overlap: string; centre: string; flank: string; centreSizes: string; flankSizes: string }
+  {
+    overlap: string;
+    centre: string;
+    flank: string;
+    centreSizes: string;
+    flankSizes: string;
+    centreIcon: number;
+    flankIcon: number;
+  }
 > = {
   sm: {
     overlap: '-space-x-[11px]',
@@ -17,6 +25,8 @@ const FAN_SIZES: Record<
     flank: 'h-7 w-7 rounded-md',
     centreSizes: '36px',
     flankSizes: '28px',
+    centreIcon: 16,
+    flankIcon: 13,
   },
   md: {
     overlap: '-space-x-[22px]',
@@ -24,6 +34,8 @@ const FAN_SIZES: Record<
     flank: 'h-14 w-14 rounded-xl',
     centreSizes: '80px',
     flankSizes: '56px',
+    centreIcon: 28,
+    flankIcon: 20,
   },
 };
 
@@ -58,17 +70,38 @@ export const FannedPhotos = ({
     <div className={cn('flex items-center', style.overlap, className)}>
       {left && (
         <div className={cn(tile, style.flank, 'z-0 -rotate-12')}>
-          <Image src={left} alt="" fill sizes={style.flankSizes} className="object-cover" />
+          <PhotoImage
+            src={left}
+            alt=""
+            fill
+            sizes={style.flankSizes}
+            className="object-cover"
+            fallbackIconSize={style.flankIcon}
+          />
         </div>
       )}
 
       <div className={cn(tile, style.centre, 'z-10')}>
-        <Image src={centre} alt="" fill sizes={style.centreSizes} className="object-cover" />
+        <PhotoImage
+          src={centre}
+          alt=""
+          fill
+          sizes={style.centreSizes}
+          className="object-cover"
+          fallbackIconSize={style.centreIcon}
+        />
       </div>
 
       {right && (
         <div className={cn(tile, style.flank, 'z-0 rotate-12')}>
-          <Image src={right} alt="" fill sizes={style.flankSizes} className="object-cover" />
+          <PhotoImage
+            src={right}
+            alt=""
+            fill
+            sizes={style.flankSizes}
+            className="object-cover"
+            fallbackIconSize={style.flankIcon}
+          />
         </div>
       )}
     </div>

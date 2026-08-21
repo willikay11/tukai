@@ -1,6 +1,6 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
+import { PhotoImage } from '@/app/shared/components/Images';
 import { cn } from '@/lib/utils';
 
 interface CityCardProps {
@@ -20,17 +20,13 @@ export const CityCard = ({ city, experienceCount, imageUrl, href, className }: C
       className,
     )}
   >
-    {imageUrl ? (
-      <Image
-        src={imageUrl}
-        alt={city}
-        fill
-        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 300px"
-        className="object-cover"
-      />
-    ) : (
-      <div className="h-full w-full bg-gray-200" />
-    )}
+    <PhotoImage
+      src={imageUrl}
+      alt={city}
+      fill
+      sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 300px"
+      className="object-cover"
+    />
 
     {/* Dark overlay for text legibility */}
     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/10" />
