@@ -13,9 +13,7 @@ jest.mock('next/link', () => {
 describe('SectionHeader', () => {
   // Regression: the five existing usages pass no icon
   it('renders title, subtitle and See all without an icon', () => {
-    render(
-      <SectionHeader title="Happening Today" subtitle="Thursday" seeAllHref="/experiences" />,
-    );
+    render(<SectionHeader title="Happening Today" subtitle="Thursday" seeAllHref="/experiences" />);
 
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Happening Today');
     expect(screen.getByText('Thursday')).toBeInTheDocument();

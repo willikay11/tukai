@@ -7,7 +7,6 @@ import moment from 'moment';
 
 import { CommunityDiscoverCard } from '@/app/(experiences)/components/CommunityDiscoverCard';
 import { ItineraryCard } from '@/app/(experiences)/components/ItineraryCard';
-import { MomentRowCard } from '@/app/(experiences)/components/MomentRowCard';
 import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
 import {
@@ -19,13 +18,13 @@ import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experienc
 import { FeaturedBanner } from '@/app/shared/components/Banners';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { PageContainer } from '@/app/shared/components/Layout';
-import { ScrollRow } from '@/app/shared/components/Lists';
+import { ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
+import { MomentsMasonry } from '@/app/shared/components/Moments';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useMoments } from '@/app/shared/hooks/useMoments';
 import { usePlaceCategories, usePlaces } from '@/app/shared/hooks/usePlaces';
 import { useLocation } from '@/context/LocationContext';
-import { cn } from '@/lib/utils';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Moment, momentPhotos } from '@/types/moment';
@@ -36,6 +35,15 @@ import { formatLongDateWithOrdinal, formatShortDate } from '@/utils/date-utils';
 import { haversineKm } from '@/utils/geo-utils';
 
 const ROW_SIZE = 10;
+
+// First photo of a row's leading item, used as the See All tile's preview
+const coverPhotoOf = (experience: Experience | undefined): string | null =>
+  experience?.photos?.find((photo: Photo) => photo.isCover)?.photo ||
+  experience?.photos?.[0]?.photo ||
+  null;
+
+const placePhotoOf = (place: Place | undefined): string | null =>
+  place?.photos?.find((photo: Photo) => photo.isCover)?.photo || place?.photos?.[0]?.photo || null;
 
 export const DiscoverPageContent = () => {
   const router = useRouter();
@@ -195,7 +203,6 @@ export const DiscoverPageContent = () => {
             icon="Compass01Icon"
             title="Discover Experiences"
             subtitle="Handpicked for you"
-            seeAllHref="/experiences/see-all?type=near-me"
           />
           {isLoadingRow ? (
             <RowSkeleton />
@@ -208,6 +215,11 @@ export const DiscoverPageContent = () => {
                   </Link>
                 </div>
               ))}
+
+              <SeeAllCard
+                href="/experiences/see-all?type=near-me"
+                previewPhotos={discoverExperiences.slice(0, 3).map(coverPhotoOf)}
+              />
             </ScrollRow>
           )}
         </section>
@@ -220,7 +232,6 @@ export const DiscoverPageContent = () => {
             icon="Location01Icon"
             title="Discover by City"
             subtitle="Where will you go next?"
-            seeAllHref="/experiences/see-all?type=cities"
           />
           {isLoadingCities ? (
             <RowSkeleton cardClassName="h-[130px] w-[240px]" />
@@ -236,6 +247,12 @@ export const DiscoverPageContent = () => {
                   />
                 </div>
               ))}
+
+              <SeeAllCard
+                href="/experiences/see-all?type=cities"
+                previewPhotos={cities.slice(0, 3).map((city) => city.image ?? null)}
+                className="aspect-auto h-[130px] w-[240px]"
+              />
             </ScrollRow>
           )}
         </section>
@@ -252,17 +269,27 @@ export const DiscoverPageContent = () => {
             seeAllHref="/moments"
           />
           {isLoadingMoments ? (
-            <RowSkeleton cardClassName="aspect-square w-[280px]" hideText />
-          ) : (
-            <ScrollRow>
-              {moments.map((moment) => (
-                <MomentRowCard
-                  key={moment.id}
-                  moment={moment}
-                  onClick={() => router.push(`/moments?momentId=${moment.id}`)}
+            <div className="columns-2 gap-4 md:columns-3 lg:columns-4">
+              {[220, 300, 180, 260].map((height, index) => (
+                <div
+                  key={index}
+                  style={{ height }}
+                  className="mb-4 w-full animate-pulse break-inside-avoid rounded-2xl bg-gray-200"
                 />
               ))}
-            </ScrollRow>
+            </div>
+          ) : (
+            /* The same masonry the Moments page uses, given a wider column
+               count because this section spans the full content width */
+            <MomentsMasonry
+              moments={moments}
+              selectedId={null}
+              onSelect={(id) => router.push(`/moments?momentId=${id}`)}
+              onLoadMore={() => {}}
+              hasMore={false}
+              isLoadingMore={false}
+              columnsClassName="columns-2 gap-4 md:columns-3 lg:columns-4"
+            />
           )}
         </section>
       )}
@@ -274,7 +301,6 @@ export const DiscoverPageContent = () => {
             icon="UserGroupIcon"
             title="Discover Communities"
             subtitle="Find your crew"
-            seeAllHref="/communities"
           />
           {isLoadingCommunities ? (
             <RowSkeleton cardClassName="h-[180px] w-[320px]" />
@@ -283,6 +309,14 @@ export const DiscoverPageContent = () => {
               {communities.map((community) => (
                 <CommunityDiscoverCard key={community.id} community={community} />
               ))}
+
+              <SeeAllCard
+                href="/communities"
+                previewPhotos={communities
+                  .slice(0, 3)
+                  .map((community) => community.photos?.[0]?.photo ?? null)}
+                className="aspect-auto h-[180px] w-[320px]"
+              />
             </ScrollRow>
           )}
         </section>
@@ -315,7 +349,6 @@ export const DiscoverPageContent = () => {
             iconColorClass="text-purple-600"
             title="Discover Itineraries"
             subtitle="Ready-to-book plans from TukAI"
-            seeAllHref="/experiences/see-all?type=itineraries"
           />
           {isLoadingItineraries ? (
             <RowSkeleton cardClassName="aspect-[4/3] w-[300px]" />
@@ -324,6 +357,12 @@ export const DiscoverPageContent = () => {
               {itineraries.map((itinerary) => (
                 <ItineraryCard key={itinerary.id} itinerary={itinerary} />
               ))}
+
+              <SeeAllCard
+                href="/experiences/see-all?type=itineraries"
+                previewPhotos={itineraries.slice(0, 3).map(coverPhotoOf)}
+                className="w-[300px]"
+              />
             </ScrollRow>
           )}
         </section>
@@ -338,7 +377,6 @@ export const DiscoverPageContent = () => {
             iconColorClass="text-red-500"
             title={`Popular Places in ${userCity}`}
             subtitle="Loved by the community"
-            seeAllHref="/places"
           />
           {isLoadingPopularPlaces ? (
             <RowSkeleton />
@@ -347,6 +385,11 @@ export const DiscoverPageContent = () => {
               {popularPlaces.map((place) => (
                 <PlaceCard key={place.id} place={place} />
               ))}
+
+              <SeeAllCard
+                href="/places"
+                previewPhotos={popularPlaces.slice(0, 3).map(placePhotoOf)}
+              />
             </ScrollRow>
           )}
         </section>
@@ -361,7 +404,6 @@ export const DiscoverPageContent = () => {
             iconColorClass="text-orange-500"
             title="Nearby Restaurants"
             subtitle="Within 20 km of you"
-            seeAllHref="/places"
           />
           {isLoadingRestaurants ? (
             <RowSkeleton />
@@ -370,6 +412,11 @@ export const DiscoverPageContent = () => {
               {nearbyRestaurants.map((place) => (
                 <PlaceCard key={place.id} place={place} />
               ))}
+
+              <SeeAllCard
+                href="/places"
+                previewPhotos={nearbyRestaurants.slice(0, 3).map(placePhotoOf)}
+              />
             </ScrollRow>
           )}
         </section>

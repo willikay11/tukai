@@ -155,3 +155,29 @@ input[type='number'] {
     --chart-5: 340 75% 55%;
   }
 }
+
+/*
+ * Rich text authored in the editor and rendered via dangerouslySetInnerHTML.
+ *
+ * The editor wraps every list item's text in a <p>. That is a block element, so
+ * with list-style-position: inside the marker takes its own line box and the
+ * text drops to the line below the bullet. Making those paragraphs inline puts
+ * the text back beside its marker.
+ *
+ * Tailwind's preflight already zeroes list padding, which keeps the list flush
+ * with the heading above it — stated here so a future preflight change cannot
+ * silently re-indent it.
+ */
+.rich-text ul,
+.rich-text ol {
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.rich-text li > p {
+  display: inline;
+}
+
+.rich-text li + li {
+  margin-top: 0.25rem;
+}

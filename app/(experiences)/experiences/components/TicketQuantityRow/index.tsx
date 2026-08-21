@@ -19,9 +19,7 @@ export const TicketQuantityRow = ({ ticket, quantity, onChange }: TicketQuantity
   return (
     <div className="flex items-center justify-between rounded-lg border border-gray-100 p-3">
       <div>
-        <p className="text-sm font-semibold">
-          ${getTicketBuyerPrice(ticket).toFixed(2)}/person
-        </p>
+        <p className="text-sm font-semibold">${getTicketBuyerPrice(ticket).toFixed(2)}/person</p>
         <p className="text-xs text-gray-500">{ticket.name}</p>
       </div>
       <Quantity value={quantity} onChange={onChange} min={0} max={maxQty} />

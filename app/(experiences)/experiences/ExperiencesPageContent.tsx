@@ -24,7 +24,7 @@ import {
   shouldShowSeeAll,
 } from '@/app/(experiences)/experiences/see-all/config';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { ScrollRow } from '@/app/shared/components/Lists';
+import { ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
 import { useMyBucketLists, useSharedBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useExperiences, useTicketPurchases } from '@/app/shared/hooks/useExperiences';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
@@ -223,13 +223,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
           {/* Experiences by City */}
           {(isLoadingCities || cities.length > 0) && (
             <section>
-              <SectionHeader
-                title="Experiences by City"
-                subtitle="Browse by destination"
-                seeAllHref={
-                  shouldShowSeeAll(cities.length) ? '/experiences/see-all?type=cities' : undefined
-                }
-              />
+              <SectionHeader title="Experiences by City" subtitle="Browse by destination" />
               {isLoadingCities ? (
                 <RowSkeleton cardClassName="h-[130px] w-[240px]" />
               ) : (
@@ -244,6 +238,14 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                       />
                     </div>
                   ))}
+
+                  {shouldShowSeeAll(cities.length) && (
+                    <SeeAllCard
+                      href="/experiences/see-all?type=cities"
+                      previewPhotos={cities.slice(0, 3).map((city) => city.image ?? null)}
+                      className="aspect-auto h-[130px] w-[240px]"
+                    />
+                  )}
                 </ScrollRow>
               )}
             </section>

@@ -26,7 +26,10 @@ export const DescriptionShowMore = ({
 
   return (
     <div>
-      <div className="text-xs" dangerouslySetInnerHTML={{ __html: displayedText }} />
+      <div
+        className="text-sm leading-relaxed text-gray-700"
+        dangerouslySetInnerHTML={{ __html: displayedText }}
+      />
       {shouldTruncate && (
         <Button
           onClick={() => setIsExpanded(!isExpanded)}

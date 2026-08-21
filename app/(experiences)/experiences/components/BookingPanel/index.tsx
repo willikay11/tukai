@@ -93,7 +93,8 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
 
   const isRecurring = Boolean(experience.recurrenceRule);
 
-  const { data: occurrencesResponse } = useFetchExperienceOccurrences(experience.id);
+  const { data: occurrencesResponse, isLoading: isLoadingOccurrences } =
+    useFetchExperienceOccurrences(experience.id);
   const occurrences: ExperienceOccurrence[] = useMemo(
     () => occurrencesResponse?.data ?? [],
     [occurrencesResponse],
@@ -173,7 +174,21 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
     }
 
     if (!selectedSlotId) {
-      validationErrors.slot = 'Please select a date and time.';
+      /*
+       * Only a recurring experience shows a date/time picker. Everything else —
+       * single-day, multi-day and itineraries — gets a read-only date pill and
+       * has its occurrence selected automatically, so telling those users to
+       * "select a date and time" asks for something the panel never offers.
+       * The occurrence is required by the purchase payload, so the sale still
+       * cannot go ahead; the message just has to say why.
+       */
+      if (isLoadingOccurrences) {
+        validationErrors.slot = 'Just a moment — still loading available dates.';
+      } else if (timeSlots.length === 0) {
+        validationErrors.slot = 'This experience has no dates available to book right now.';
+      } else {
+        validationErrors.slot = 'Please select a date and time.';
+      }
     }
 
     if (!isLoggedIn) {
@@ -300,13 +315,13 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
         <TabsList className="h-auto gap-0 rounded-full bg-white p-0.5">
           <TabsTrigger
             value="reservation"
-            className="flex-1 rounded-full border-0 bg-white px-4 py-2 text-xs text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-primary data-[state=active]:text-white"
+            className="flex-1 rounded-full border-0 bg-white px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             Make Reservation
           </TabsTrigger>
           <TabsTrigger
             value="moments"
-            className="flex-1 rounded-full border-0 bg-white px-4 py-2 text-xs text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-primary data-[state=active]:text-white"
+            className="flex-1 rounded-full border-0 bg-white px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             Moments
           </TabsTrigger>
@@ -335,7 +350,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                 <div className="space-y-2">
                   <p className="text-sm font-semibold text-gray-900">{dateRange}</p>
                   {experience.priceStartsFrom?.amount != null && (
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm text-gray-500">
                       From {currency} {experience.priceStartsFrom.amount.toLocaleString()}/Guest
                     </p>
                   )}
@@ -344,24 +359,24 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
             </div>
           )}
 
-          {errors.slot && <p className="text-xs text-red-500">{errors.slot}</p>}
+          {errors.slot && <p className="text-sm text-red-500">{errors.slot}</p>}
 
           {/* Ticket selector */}
           {(experience.tickets?.length ?? 0) > 0 && (
             <div className="space-y-4">
-              <p className="text-sm font-bold text-gray-900">Select your preferred ticket</p>
+              <p className="text-base font-bold text-gray-900">Select your preferred ticket</p>
 
               {visibleTickets.length === 0 ? (
-                <p className="text-xs text-gray-500">No tickets available for this time slot.</p>
+                <p className="text-sm text-gray-500">No tickets available for this time slot.</p>
               ) : (
                 <div className="space-y-3">
                   {visibleTickets.map((ticket) => (
                     <div key={ticket.id} className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs font-bold text-gray-900">
+                        <p className="text-sm font-bold text-gray-900">
                           {currency} {getTicketBuyerPrice(ticket).toLocaleString()}/person
                         </p>
-                        <p className="mt-0.5 text-xs text-gray-500">{ticket.name}</p>
+                        <p className="mt-0.5 text-sm text-gray-500">{ticket.name}</p>
                       </div>
                       <Quantity
                         // Uncontrolled like PhoneNumber — it seeds from
@@ -377,7 +392,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                 </div>
               )}
 
-              {errors.tickets && <p className="text-xs text-red-500">{errors.tickets}</p>}
+              {errors.tickets && <p className="text-sm text-red-500">{errors.tickets}</p>}
             </div>
           )}
 
@@ -399,7 +414,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
           {/* Contact details (anonymous purchasers only) */}
           {!isLoggedIn && (
             <div className="space-y-3">
-              <p className="text-xs font-bold text-gray-900">Contact Details</p>
+              <p className="text-base font-bold text-gray-900">Contact Details</p>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -417,7 +432,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                     }
                   />
                   {errors.firstName && (
-                    <p className="mt-1 text-xs text-red-500">{errors.firstName}</p>
+                    <p className="mt-1 text-sm text-red-500">{errors.firstName}</p>
                   )}
                 </div>
                 <div>
@@ -435,7 +450,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                     }
                   />
                   {errors.lastName && (
-                    <p className="mt-1 text-xs text-red-500">{errors.lastName}</p>
+                    <p className="mt-1 text-sm text-red-500">{errors.lastName}</p>
                   )}
                 </div>
               </div>
@@ -454,14 +469,14 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                     />
                   }
                 />
-                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+                {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
               </div>
             </div>
           )}
 
           {/* Ticket delivery */}
           <div className="space-y-3">
-            <p className="text-xs font-bold text-gray-900">
+            <p className="text-base font-bold text-gray-900">
               How would you like to receive your tickets?
             </p>
 
@@ -472,7 +487,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                   if (deliveryMethod !== 'email') setDeliveryContact('');
                   setDeliveryMethod('email');
                 }}
-                className={`rounded-full px-4 py-3 text-xs font-medium transition-colors ${
+                className={`rounded-full px-4 py-3 text-sm font-medium transition-colors ${
                   deliveryMethod === 'email'
                     ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
                     : 'bg-white text-gray-500'
@@ -486,7 +501,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                   if (deliveryMethod !== 'whatsapp') setDeliveryContact('');
                   setDeliveryMethod('whatsapp');
                 }}
-                className={`rounded-full px-4 py-3 text-xs font-medium transition-colors ${
+                className={`rounded-full px-4 py-3 text-sm font-medium transition-colors ${
                   deliveryMethod === 'whatsapp'
                     ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
                     : 'bg-white text-gray-500'
@@ -504,7 +519,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                   placeholder="Enter Whatsapp number"
                 />
                 {errors.deliveryContact && (
-                  <p className="mt-1 text-xs text-red-500">{errors.deliveryContact}</p>
+                  <p className="mt-1 text-sm text-red-500">{errors.deliveryContact}</p>
                 )}
               </div>
             ) : (
@@ -528,7 +543,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                   />
                 </div>
                 {errors.deliveryContact && (
-                  <p className="mt-1 text-xs text-red-500">{errors.deliveryContact}</p>
+                  <p className="mt-1 text-sm text-red-500">{errors.deliveryContact}</p>
                 )}
               </div>
             )}
@@ -539,12 +554,12 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
               behave exactly as they did with M-Pesa selected. Restore this
               block to offer card payments again. */}
           {/*
-          <p className="text-sm font-bold text-gray-900">Payment method</p>
+          <p className="text-base font-bold text-gray-900">Payment method</p>
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
               onClick={() => setPaymentMethod('mpesa')}
-              className={`flex items-center justify-center gap-2 rounded-xl bg-white py-3 text-xs font-medium transition-colors ${
+              className={`flex items-center justify-center gap-2 rounded-xl bg-white py-3 text-sm font-medium transition-colors ${
                 paymentMethod === 'mpesa'
                   ? 'border-2 border-primary text-primary'
                   : 'border-2 border-transparent text-gray-500'
@@ -560,7 +575,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
             <button
               type="button"
               onClick={() => setPaymentMethod('card')}
-              className={`flex items-center justify-center gap-2 rounded-xl bg-white py-3 text-xs font-medium transition-colors ${
+              className={`flex items-center justify-center gap-2 rounded-xl bg-white py-3 text-sm font-medium transition-colors ${
                 paymentMethod === 'card'
                   ? 'border-2 border-primary text-primary'
                   : 'border-2 border-transparent text-gray-500'
@@ -583,7 +598,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
           {paymentMethod === 'mpesa' && (
             <div>
               <p className="text-sm font-bold text-gray-900">Pay with M-Pesa</p>
-              <p className="mt-0.5 text-xs text-gray-500">
+              <p className="mt-0.5 text-sm text-gray-500">
                 Enter the M-Pesa number you want to pay from.
               </p>
               <div className="mt-3">
@@ -592,29 +607,29 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                   onChange={(value) => setPhone(value)}
                   placeholder="Enter M-Pesa number"
                 />
-                {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
+                {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone}</p>}
               </div>
             </div>
           )}
 
           {/* API error */}
-          {errors.api && <p className="text-center text-xs text-red-500">{errors.api}</p>}
+          {errors.api && <p className="text-center text-sm text-red-500">{errors.api}</p>}
 
           {/* Pay button — the creator sees the real label and total, greyed out,
               so the preview still shows what a customer would see */}
           <Button
-            variant="gradient"
+            variant="lime"
             onClick={handlePay}
             // Stays enabled when the form is incomplete — pressing it surfaces
             // an error on each offending input instead of silently doing nothing
             disabled={isPreview || isPaying}
-            className={`h-12 w-full rounded-full py-3 ${
+            className={`h-12 w-full rounded-full py-3 text-primary ${
               isPreview ? 'bg-gray-200 bg-none text-gray-500 disabled:opacity-100' : ''
             }`}
           >
             <span className="flex items-center justify-center gap-3 text-sm">
               <span>{isPaying ? 'Processing…' : 'Pay'}</span>
-              <span className={isPreview ? 'text-gray-400' : 'text-white/60'}>|</span>
+              <span className={isPreview ? 'text-gray-400' : 'text-primary/40'}>|</span>
               <span>
                 {currency}{' '}
                 {total.toLocaleString(undefined, {
@@ -633,7 +648,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
                 color="currentColor"
                 className="mt-0.5 flex-shrink-0 text-orange-500"
               />
-              <p className="text-xs leading-relaxed text-orange-700">
+              <p className="text-sm leading-relaxed text-orange-700">
                 Booking is disabled in preview. Guests can reserve once you publish this experience.
               </p>
             </div>

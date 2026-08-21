@@ -45,12 +45,17 @@ const makeItinerary = (overrides: Partial<Experience> = {}): Experience =>
   }) as unknown as Experience;
 
 describe('ItineraryCard', () => {
-  it('renders the TukAI badge, title and From price', () => {
+  it('renders the title and From price', () => {
     render(<ItineraryCard itinerary={makeItinerary()} />);
 
-    expect(screen.getByText('TukAI')).toBeInTheDocument();
     expect(screen.getByText('2-Day Lake Naivasha Adventure')).toBeInTheDocument();
     expect(screen.getByText('From Ksh. 20,000')).toBeInTheDocument();
+  });
+
+  it('no longer carries the TukAI pill', () => {
+    render(<ItineraryCard itinerary={makeItinerary()} />);
+
+    expect(screen.queryByText('TukAI')).not.toBeInTheDocument();
   });
 
   // The list response has no itinerary_duration_days, so days come from dates
@@ -75,15 +80,31 @@ describe('ItineraryCard', () => {
     expect(screen.queryByText(/1 days/)).not.toBeInTheDocument();
   });
 
-  it('stacks preview photos excluding the cover', () => {
-    render(<ItineraryCard itinerary={makeItinerary()} />);
+  it('fans preview photos from the itinerary, excluding the cover', () => {
+    const { container } = render(<ItineraryCard itinerary={makeItinerary()} />);
 
     const sources = screen.getAllByRole('img').map((img) => img.getAttribute('src'));
-    expect(sources).toEqual([
-      'https://cdn.tukai.co/cover.jpg',
+    expect(sources).toEqual(
+      expect.arrayContaining([
+        'https://cdn.tukai.co/cover.jpg',
+        'https://cdn.tukai.co/p1.jpg',
+        'https://cdn.tukai.co/p2.jpg',
+      ]),
+    );
+
+    // The first non-cover photo sits centred and on top
+    expect(container.querySelector('.z-10 img')).toHaveAttribute(
+      'src',
       'https://cdn.tukai.co/p1.jpg',
+    );
+
+    // With only two to show, the second leans out to the left rather than
+    // leaving a hole on that side
+    expect(container.querySelector('.-rotate-12 img')).toHaveAttribute(
+      'src',
       'https://cdn.tukai.co/p2.jpg',
-    ]);
+    );
+    expect(container.querySelector('.rotate-12:not(.-rotate-12)')).not.toBeInTheDocument();
   });
 
   it('links to the itinerary detail page', () => {

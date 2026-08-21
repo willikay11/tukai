@@ -52,8 +52,14 @@ const mockMutate = jest.fn(
   },
 );
 
+// Mutable so a test can model an experience with no bookable occurrences
+let occurrencesState: { data: unknown; isLoading: boolean } = {
+  data: { data: occurrences },
+  isLoading: false,
+};
+
 jest.mock('@/app/shared/hooks/useExperiences', () => ({
-  useFetchExperienceOccurrences: () => ({ data: { data: occurrences } }),
+  useFetchExperienceOccurrences: () => occurrencesState,
   usePurchaseExperienceTicketV2: () => ({
     mutate: mockMutate,
     isPending: false,
@@ -322,5 +328,60 @@ describe('BookingPanel preview mode', () => {
     await user.click(screen.getByRole('button', { name: /^pay/i }));
 
     expect(mockMutate).not.toHaveBeenCalled();
+  });
+});
+
+describe('pay button styling', () => {
+  it('uses the lime variant with primary text, not the dark gradient', () => {
+    render(<BookingPanel experience={experience} />);
+
+    const pay = screen.getByRole('button', { name: /Pay/ });
+    expect(pay).toHaveClass('bg-lime', 'text-primary');
+    expect(pay).not.toHaveClass('bg-gradient-to-b');
+  });
+});
+
+// Regression: only recurring experiences show a date/time picker. An itinerary
+// with no occurrences got "Please select a date and time." with nothing on
+// screen to select, so the user was stuck.
+describe('when there is no occurrence to select', () => {
+  afterEach(() => {
+    occurrencesState = { data: { data: occurrences }, isLoading: false };
+  });
+
+  it('explains that no dates are bookable rather than asking for a selection', async () => {
+    occurrencesState = { data: { data: [] }, isLoading: false };
+    render(<BookingPanel experience={experience} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Pay/ }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText('This experience has no dates available to book right now.'),
+      ).toBeInTheDocument(),
+    );
+    expect(screen.queryByText('Please select a date and time.')).not.toBeInTheDocument();
+  });
+
+  it('says so while the dates are still loading', async () => {
+    occurrencesState = { data: undefined, isLoading: true };
+    render(<BookingPanel experience={experience} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Pay/ }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText('Just a moment — still loading available dates.'),
+      ).toBeInTheDocument(),
+    );
+  });
+
+  it('auto-selects the occurrence when one exists, so no slot error appears', async () => {
+    render(<BookingPanel experience={experience} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Pay/ }));
+
+    await waitFor(() => expect(screen.queryByText(/available dates/)).not.toBeInTheDocument());
+    expect(screen.queryByText('Please select a date and time.')).not.toBeInTheDocument();
   });
 });

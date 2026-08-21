@@ -8,12 +8,11 @@ import numeral from 'numeral';
 
 import { Bookmark } from '@/app/shared/components/Bookmark';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { FannedPhotos } from '@/app/shared/components/Images';
 import { useBookmarkExperience } from '@/app/shared/hooks/useExperiences';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 import { getNumberOfDaysAndNights } from '@/utils/date-utils';
-
-import { StackedPhotosBadge } from './StackedPhotosBadge';
 
 export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
   const { data: session } = useSession();
@@ -54,11 +53,6 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
           <div className="h-full w-full bg-gray-100" />
         )}
 
-        <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-white px-3 py-1 shadow-sm">
-          <IconComponent iconName="SparklesIcon" size={12} className="text-primary" />
-          <span className="text-xs font-semibold text-gray-800">TukAI</span>
-        </div>
-
         <div className="absolute right-2 top-2">
           <Bookmark
             icon="basket"
@@ -70,7 +64,7 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
           />
         </div>
 
-        <StackedPhotosBadge photos={previewPhotos} className="absolute bottom-3 left-3" />
+        <FannedPhotos photos={previewPhotos} size="sm" className="absolute bottom-3 left-3" />
       </div>
 
       <div className="mt-3">

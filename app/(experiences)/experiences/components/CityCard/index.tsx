@@ -12,13 +12,7 @@ interface CityCardProps {
   className?: string;
 }
 
-export const CityCard = ({
-  city,
-  experienceCount,
-  imageUrl,
-  href,
-  className,
-}: CityCardProps) => (
+export const CityCard = ({ city, experienceCount, imageUrl, href, className }: CityCardProps) => (
   <Link
     href={href}
     className={cn(

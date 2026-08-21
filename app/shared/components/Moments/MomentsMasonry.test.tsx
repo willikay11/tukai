@@ -135,3 +135,27 @@ describe('MomentsMasonry', () => {
     expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0);
   });
 });
+
+// Discover reuses this grid at full content width, so the column count has to
+// be settable rather than baked in
+describe('column count', () => {
+  it('defaults to the Moments page columns', () => {
+    const { container } = render(
+      <MomentsMasonry {...defaults} moments={[makeMoment('a', 1, 1)]} />,
+    );
+
+    expect(container.querySelector('.columns-2.md\\:columns-3')).toBeInTheDocument();
+  });
+
+  it('accepts a wider set of columns', () => {
+    const { container } = render(
+      <MomentsMasonry
+        {...defaults}
+        moments={[makeMoment('a', 1, 1)]}
+        columnsClassName="columns-2 gap-4 md:columns-3 lg:columns-4"
+      />,
+    );
+
+    expect(container.querySelector('.lg\\:columns-4')).toBeInTheDocument();
+  });
+});

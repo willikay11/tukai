@@ -13,6 +13,8 @@ interface MomentsMasonryProps {
   onLoadMore: () => void;
   hasMore: boolean;
   isLoadingMore: boolean;
+  // Column count varies by the width the grid is given
+  columnsClassName?: string;
 }
 
 export const MomentsMasonry = ({
@@ -22,6 +24,7 @@ export const MomentsMasonry = ({
   onLoadMore,
   hasMore,
   isLoadingMore,
+  columnsClassName = 'columns-2 gap-4 md:columns-3',
 }: MomentsMasonryProps) => {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -49,7 +52,7 @@ export const MomentsMasonry = ({
     <div>
       {/* CSS columns keep each tile at its natural height, which is what makes
           the layout masonry rather than a grid */}
-      <div className="columns-2 gap-4 md:columns-3">
+      <div className={columnsClassName}>
         {moments.map((moment) => {
           const media = momentPhotos(moment)[0];
           if (!media) return null;
@@ -80,7 +83,7 @@ export const MomentsMasonry = ({
       <div ref={loadMoreRef} className="h-8" />
 
       {isLoadingMore && (
-        <div className="columns-2 gap-4 md:columns-3">
+        <div className={columnsClassName}>
           {Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}

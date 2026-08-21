@@ -40,7 +40,7 @@ export const ItineraryDayByDay = ({ experienceId, startDate }: ItineraryDayByDay
 
   return (
     <section>
-      <h3 className="font-bold text-gray-900">Day by day</h3>
+      <h3 className="text-xl font-bold text-gray-900">Day by day</h3>
 
       <div className="mt-6 space-y-8">
         {days.map((day) => {
@@ -52,11 +52,11 @@ export const ItineraryDayByDay = ({ experienceId, startDate }: ItineraryDayByDay
               <div className="flex items-center gap-3">
                 <IconComponent
                   iconName="Calendar03Icon"
-                  size={16}
+                  size={18}
                   color="currentColor"
                   className="flex-shrink-0 text-gray-900"
                 />
-                <h4 className="text-sm font-bold text-gray-900">
+                <h4 className="text-base font-bold text-gray-900">
                   Day {day.dayNumber}
                   {date && `: ${moment(date).format('ddd D MMMM')}`}
                 </h4>
@@ -64,9 +64,9 @@ export const ItineraryDayByDay = ({ experienceId, startDate }: ItineraryDayByDay
 
               {/* The dashed rule runs down the day, aligned under the icon */}
               <div className="ml-[9px] border-l border-dashed border-gray-300 pb-2 pl-8 pt-3">
-                {day.title && <p className="text-xs font-bold text-gray-900">{day.title}</p>}
+                {day.title && <p className="text-base font-bold text-gray-900">{day.title}</p>}
                 {description && (
-                  <p className="mt-1.5 text-xs leading-relaxed text-gray-600">{description}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-600">{description}</p>
                 )}
 
                 {day.activities.length > 0 && (

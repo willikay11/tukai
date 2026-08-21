@@ -17,7 +17,7 @@ export const HostCommunityCard = ({ community }: HostCommunityCardProps) => {
 
   return (
     <div>
-      <h3 className="mb-3 font-bold text-gray-900">Host Community</h3>
+      <h3 className="mb-3 text-xl font-bold text-gray-900">Host Community</h3>
       <Link target="_blank" href={`/communities/${community.id}`}>
         <div className="flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-75">
           {photoUrl && (
@@ -33,11 +33,11 @@ export const HostCommunityCard = ({ community }: HostCommunityCardProps) => {
           )}
           <div>
             <div className="flex items-center gap-1">
-              <p className="text-xs font-semibold">{community.title}</p>
+              <p className="text-sm font-semibold">{community.title}</p>
               <IconComponent iconName="ArrowUpRight01Icon" size={13} className="text-primary" />
             </div>
             {community.experiencesHostedCount !== undefined && (
-              <p className="text-xs text-gray-500">
+              <p className="text-sm text-gray-500">
                 {community.experiencesHostedCount} Experiences hosted
               </p>
             )}

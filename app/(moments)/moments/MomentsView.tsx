@@ -5,13 +5,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 import { PageContainer } from '@/app/shared/components/Layout';
+import { MomentsMasonry } from '@/app/shared/components/Moments';
 import { useInfiniteMoments } from '@/app/shared/hooks/useMoments';
 import { Drawer } from '@/components/ui/drawer';
 import { NoData } from '@/components/ui/noData';
 import { Moment, momentPhotos } from '@/types/moment';
 
 import { MomentDetail } from './components/MomentDetail';
-import { MomentsMasonry } from './components/MomentsMasonry';
 
 const MasonrySkeleton = () => (
   <div className="columns-2 gap-4 md:columns-3">
