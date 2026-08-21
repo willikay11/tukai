@@ -54,11 +54,6 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
           <div className="h-full w-full bg-gray-100" />
         )}
 
-        <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-white px-3 py-1 shadow-sm">
-          <IconComponent iconName="SparklesIcon" size={12} className="text-primary" />
-          <span className="text-xs font-semibold text-gray-800">TukAI</span>
-        </div>
-
         <div className="absolute right-2 top-2">
           <Bookmark
             icon="basket"

@@ -45,12 +45,17 @@ const makeItinerary = (overrides: Partial<Experience> = {}): Experience =>
   }) as unknown as Experience;
 
 describe('ItineraryCard', () => {
-  it('renders the TukAI badge, title and From price', () => {
+  it('renders the title and From price', () => {
     render(<ItineraryCard itinerary={makeItinerary()} />);
 
-    expect(screen.getByText('TukAI')).toBeInTheDocument();
     expect(screen.getByText('2-Day Lake Naivasha Adventure')).toBeInTheDocument();
     expect(screen.getByText('From Ksh. 20,000')).toBeInTheDocument();
+  });
+
+  it('no longer carries the TukAI pill', () => {
+    render(<ItineraryCard itinerary={makeItinerary()} />);
+
+    expect(screen.queryByText('TukAI')).not.toBeInTheDocument();
   });
 
   // The list response has no itinerary_duration_days, so days come from dates
