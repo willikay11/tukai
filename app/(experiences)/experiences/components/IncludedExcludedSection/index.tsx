@@ -13,13 +13,19 @@ export const IncludedExcludedSection = ({ included, excluded }: IncludedExcluded
   return (
     <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
       <div>
-        <h3 className="mb-3 font-bold text-gray-900">What's included</h3>
-        <div className="text-xs" dangerouslySetInnerHTML={{ __html: sanitizedIncluded }} />
+        <h3 className="mb-3 text-xl font-bold text-gray-900">What's included</h3>
+        <div
+          className="text-sm leading-relaxed text-gray-700"
+          dangerouslySetInnerHTML={{ __html: sanitizedIncluded }}
+        />
       </div>
 
       <div>
-        <h3 className="mb-3 font-bold text-gray-900">What's not included</h3>
-        <div className="text-xs" dangerouslySetInnerHTML={{ __html: sanitizedExcluded }} />
+        <h3 className="mb-3 text-xl font-bold text-gray-900">What's not included</h3>
+        <div
+          className="text-sm leading-relaxed text-gray-700"
+          dangerouslySetInnerHTML={{ __html: sanitizedExcluded }}
+        />
       </div>
     </div>
   );

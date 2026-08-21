@@ -5,6 +5,7 @@ import moment from 'moment';
 import { DescriptionShowMore } from '@/app/shared/components/Global';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
+import { PageContainer } from '@/app/shared/components/Layout';
 import { Share } from '@/app/shared/components/Share';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -108,7 +109,7 @@ export const ViewExperiencePageContent = ({
       : 'before the experience ends.';
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-6">
+    <PageContainer className="py-6">
       {/* Top row — Back link on left, actions on right */}
       <div className="mb-6 flex items-center justify-between">
         {isPreview ? <div /> : <BackToExplore />}
@@ -153,7 +154,7 @@ export const ViewExperiencePageContent = ({
 
           {/* Description */}
           <div>
-            <p className="mb-3 text-base font-bold text-gray-900">About</p>
+            <p className="mb-3 text-xl font-bold text-gray-900">About</p>
             <DescriptionShowMore text={experience.description} />
           </div>
 
@@ -211,8 +212,8 @@ export const ViewExperiencePageContent = ({
 
           {/* Cancellation Policy */}
           <div>
-            <p className="mb-2 text-base font-bold text-gray-900">Cancellation Policy</p>
-            <p className="text-xs font-medium text-gray-600">
+            <p className="mb-2 text-xl font-bold text-gray-900">Cancellation Policy</p>
+            <p className="text-sm leading-relaxed text-gray-600">
               Ticket sales close {closingDuration} {closingUnit} {closingConditionText}
             </p>
           </div>
@@ -235,6 +236,6 @@ export const ViewExperiencePageContent = ({
           </div>
         </div>
       </div>
-    </main>
+    </PageContainer>
   );
 };

@@ -25,7 +25,7 @@ export const LocationMeetingSection = ({ experience }: LocationMeetingSectionPro
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <div>
-        <h3 className="mb-3 font-bold text-gray-900">Location</h3>
+        <h3 className="mb-3 text-xl font-bold text-gray-900">Location</h3>
         <div className="flex items-center gap-3">
           <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg">
             <GoogleMapComponent lat={lat} lng={lng} />
@@ -36,7 +36,7 @@ export const LocationMeetingSection = ({ experience }: LocationMeetingSectionPro
               <Link
                 href={googleMapsUrl}
                 target="_blank"
-                className="text-xs font-semibold text-primary"
+                className="text-sm font-semibold text-primary"
               >
                 View on Google Maps
               </Link>
@@ -47,7 +47,7 @@ export const LocationMeetingSection = ({ experience }: LocationMeetingSectionPro
 
       {(experience.meetingPoint || experience.meetingTime) && (
         <div>
-          <h3 className="mb-3 font-bold text-gray-900">Meeting Point & Time</h3>
+          <h3 className="mb-3 text-xl font-bold text-gray-900">Meeting Point & Time</h3>
           <div className="flex items-center gap-3">
             <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
               <IconComponent iconName="Location01Icon" size={20} className="text-primary" />
@@ -57,7 +57,7 @@ export const LocationMeetingSection = ({ experience }: LocationMeetingSectionPro
                 <p className="text-sm font-semibold">{experience.meetingPoint}</p>
               )}
               {experience.meetingTime && (
-                <p className="text-xs text-gray-500">{experience.meetingTime}</p>
+                <p className="text-sm text-gray-500">{experience.meetingTime}</p>
               )}
             </div>
           </div>
