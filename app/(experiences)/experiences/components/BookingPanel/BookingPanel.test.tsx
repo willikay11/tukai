@@ -324,3 +324,13 @@ describe('BookingPanel preview mode', () => {
     expect(mockMutate).not.toHaveBeenCalled();
   });
 });
+
+describe('pay button styling', () => {
+  it('uses the lime variant with primary text, not the dark gradient', () => {
+    render(<BookingPanel experience={experience} />);
+
+    const pay = screen.getByRole('button', { name: /Pay/ });
+    expect(pay).toHaveClass('bg-lime', 'text-primary');
+    expect(pay).not.toHaveClass('bg-gradient-to-b');
+  });
+});

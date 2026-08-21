@@ -36,9 +36,18 @@ export const ExperienceOrganiser = ({ experience }: { experience: Experience }) 
               </p>
             </div>
           </div>
-          <Button variant="lime" className="h-full rounded-full" onClick={() => setOpen(true)}>
+          <Button
+            variant="outline-primary"
+            className="h-full rounded-full"
+            onClick={() => setOpen(true)}
+          >
             Message Organiser
-            <IconComponent iconName="MessageCircle01Icon" size={18} color="text-teal-950" />
+            <IconComponent
+              iconName="MessageCircle01Icon"
+              size={18}
+              color="currentColor"
+              className="text-primary"
+            />
           </Button>
         </div>
       </div>
