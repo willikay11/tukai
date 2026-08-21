@@ -42,6 +42,54 @@ describe('SeeAllCard', () => {
     expect(container.querySelector('img')).toHaveAttribute('alt', '');
   });
 
+  // Three photos fan out: the first sits centred and on top, the next two
+  // behind it to either side
+  it('fans up to three photos around the centred one', () => {
+    const { container } = render(
+      <SeeAllCard
+        href="/places"
+        previewPhotos={[
+          'https://cdn.tukai.co/a.jpg',
+          'https://cdn.tukai.co/b.jpg',
+          'https://cdn.tukai.co/c.jpg',
+        ]}
+      />,
+    );
+
+    const sources = Array.from(container.querySelectorAll('img')).map((image) =>
+      image.getAttribute('src'),
+    );
+    expect(sources).toHaveLength(3);
+    expect(sources).toEqual(
+      expect.arrayContaining([
+        'https://cdn.tukai.co/a.jpg',
+        'https://cdn.tukai.co/b.jpg',
+        'https://cdn.tukai.co/c.jpg',
+      ]),
+    );
+  });
+
+  it('ignores extra photos beyond the third', () => {
+    const { container } = render(
+      <SeeAllCard href="/places" previewPhotos={['a.jpg', 'b.jpg', 'c.jpg', 'd.jpg', 'e.jpg']} />,
+    );
+
+    expect(container.querySelectorAll('img')).toHaveLength(3);
+  });
+
+  // Rows can hand over items whose photo is missing; those must not render as
+  // broken tiles or shift the fan
+  it('skips missing photos rather than rendering empty tiles', () => {
+    const { container } = render(
+      <SeeAllCard href="/places" previewPhotos={[null, 'b.jpg', undefined, '']} />,
+    );
+
+    const sources = Array.from(container.querySelectorAll('img')).map((image) =>
+      image.getAttribute('src'),
+    );
+    expect(sources).toEqual(['b.jpg']);
+  });
+
   it('renders a plain tile when there is no photo', () => {
     const { container } = render(<SeeAllCard href="/places" previewPhotos={[]} />);
 
