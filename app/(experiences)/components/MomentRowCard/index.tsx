@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 
+import { PhotoImage } from '@/app/shared/components/Images';
 import { Moment, momentAuthorName, momentPhotos } from '@/types/moment';
 
 interface MomentRowCardProps {
@@ -21,11 +22,7 @@ export const MomentRowCard = ({ moment, onClick }: MomentRowCardProps) => {
       onClick={onClick}
       className="relative block aspect-square w-[280px] flex-shrink-0 snap-start overflow-hidden rounded-2xl"
     >
-      {photo ? (
-        <Image src={photo} alt={moment.title} fill sizes="280px" className="object-cover" />
-      ) : (
-        <div className="h-full w-full bg-gray-100" />
-      )}
+      <PhotoImage src={photo} alt={moment.title} fill sizes="280px" className="object-cover" />
 
       {/* Bottom gradient so the author chip stays readable on light photos */}
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />

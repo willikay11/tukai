@@ -1,11 +1,11 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { Bookmark } from '@/app/shared/components/Bookmark';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { useBookmarkPlace } from '@/app/shared/hooks/usePlaces';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
@@ -32,11 +32,13 @@ export const PlaceCard = ({ place }: { place: Place }) => {
   return (
     <Link href={`/places/${place.id}`} className="block w-[280px] flex-shrink-0 snap-start">
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
-        {coverPhoto ? (
-          <Image src={coverPhoto} alt={place.title} fill sizes="280px" className="object-cover" />
-        ) : (
-          <div className="h-full w-full bg-gray-100" />
-        )}
+        <PhotoImage
+          src={coverPhoto}
+          alt={place.title}
+          fill
+          sizes="280px"
+          className="object-cover"
+        />
 
         <div className="absolute right-2 top-2">
           <Bookmark

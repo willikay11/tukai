@@ -1,13 +1,13 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 import numeral from 'numeral';
 
 import { Bookmark } from '@/app/shared/components/Bookmark';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { FannedPhotos } from '@/app/shared/components/Images';
 import { useBookmarkExperience } from '@/app/shared/hooks/useExperiences';
 import { Experience } from '@/types/experience';
@@ -41,17 +41,13 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
       className="block w-[300px] flex-shrink-0 snap-start"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
-        {coverPhoto ? (
-          <Image
-            src={coverPhoto}
-            alt={itinerary.title}
-            fill
-            sizes="300px"
-            className="object-cover"
-          />
-        ) : (
-          <div className="h-full w-full bg-gray-100" />
-        )}
+        <PhotoImage
+          src={coverPhoto}
+          alt={itinerary.title}
+          fill
+          sizes="300px"
+          className="object-cover"
+        />
 
         <div className="absolute right-2 top-2">
           <Bookmark

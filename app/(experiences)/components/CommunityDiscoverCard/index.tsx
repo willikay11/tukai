@@ -1,9 +1,9 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { AvatarStack } from '@/app/(experiences)/experiences/components/AvatarStack';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { BucketListMember } from '@/types/bucket-list';
 import { Community, CommunityMember } from '@/types/community';
 import { Photo } from '@/types/photo';
@@ -32,17 +32,13 @@ export const CommunityDiscoverCard = ({ community }: { community: Community }) =
   return (
     <Link href={`/communities/${community.id}`} className="w-[320px] flex-shrink-0 snap-start">
       <div className="relative h-[180px] w-full overflow-hidden rounded-2xl">
-        {coverPhoto ? (
-          <Image
-            src={coverPhoto}
-            alt={community.title}
-            fill
-            sizes="320px"
-            className="object-cover"
-          />
-        ) : (
-          <div className="h-full w-full bg-gray-200" />
-        )}
+        <PhotoImage
+          src={coverPhoto}
+          alt={community.title}
+          fill
+          sizes="320px"
+          className="object-cover"
+        />
 
         {/* Same translucent treatment as the bookmark circle over an experience
             photo, rather than a solid brand fill */}

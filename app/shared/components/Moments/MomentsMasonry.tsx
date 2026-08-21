@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
-import Image from 'next/image';
-
+import { PhotoImage } from '@/app/shared/components/Images';
 import { Moment, momentPhotos } from '@/types/moment';
 
 interface MomentsMasonryProps {
@@ -66,7 +65,7 @@ export const MomentsMasonry = ({
                 moment.id === selectedId ? 'ring-2 ring-primary' : ''
               }`}
             >
-              <Image
+              <PhotoImage
                 src={media.photo}
                 alt={moment.title}
                 // Real intrinsic dimensions, so each tile keeps its aspect ratio
