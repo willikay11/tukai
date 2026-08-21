@@ -7,7 +7,6 @@ import moment from 'moment';
 
 import { CommunityDiscoverCard } from '@/app/(experiences)/components/CommunityDiscoverCard';
 import { ItineraryCard } from '@/app/(experiences)/components/ItineraryCard';
-import { MomentRowCard } from '@/app/(experiences)/components/MomentRowCard';
 import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
 import {
@@ -20,12 +19,12 @@ import { FeaturedBanner } from '@/app/shared/components/Banners';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { ScrollRow } from '@/app/shared/components/Lists';
+import { MomentsMasonry } from '@/app/shared/components/Moments';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useMoments } from '@/app/shared/hooks/useMoments';
 import { usePlaceCategories, usePlaces } from '@/app/shared/hooks/usePlaces';
 import { useLocation } from '@/context/LocationContext';
-import { cn } from '@/lib/utils';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Moment, momentPhotos } from '@/types/moment';
@@ -252,17 +251,27 @@ export const DiscoverPageContent = () => {
             seeAllHref="/moments"
           />
           {isLoadingMoments ? (
-            <RowSkeleton cardClassName="aspect-square w-[280px]" hideText />
-          ) : (
-            <ScrollRow>
-              {moments.map((moment) => (
-                <MomentRowCard
-                  key={moment.id}
-                  moment={moment}
-                  onClick={() => router.push(`/moments?momentId=${moment.id}`)}
+            <div className="columns-2 gap-4 md:columns-3 lg:columns-4">
+              {[220, 300, 180, 260].map((height, index) => (
+                <div
+                  key={index}
+                  style={{ height }}
+                  className="mb-4 w-full animate-pulse break-inside-avoid rounded-2xl bg-gray-200"
                 />
               ))}
-            </ScrollRow>
+            </div>
+          ) : (
+            /* The same masonry the Moments page uses, given a wider column
+               count because this section spans the full content width */
+            <MomentsMasonry
+              moments={moments}
+              selectedId={null}
+              onSelect={(id) => router.push(`/moments?momentId=${id}`)}
+              onLoadMore={() => {}}
+              hasMore={false}
+              isLoadingMore={false}
+              columnsClassName="columns-2 gap-4 md:columns-3 lg:columns-4"
+            />
           )}
         </section>
       )}

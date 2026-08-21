@@ -93,7 +93,8 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
 
   const isRecurring = Boolean(experience.recurrenceRule);
 
-  const { data: occurrencesResponse } = useFetchExperienceOccurrences(experience.id);
+  const { data: occurrencesResponse, isLoading: isLoadingOccurrences } =
+    useFetchExperienceOccurrences(experience.id);
   const occurrences: ExperienceOccurrence[] = useMemo(
     () => occurrencesResponse?.data ?? [],
     [occurrencesResponse],
@@ -173,7 +174,21 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
     }
 
     if (!selectedSlotId) {
-      validationErrors.slot = 'Please select a date and time.';
+      /*
+       * Only a recurring experience shows a date/time picker. Everything else —
+       * single-day, multi-day and itineraries — gets a read-only date pill and
+       * has its occurrence selected automatically, so telling those users to
+       * "select a date and time" asks for something the panel never offers.
+       * The occurrence is required by the purchase payload, so the sale still
+       * cannot go ahead; the message just has to say why.
+       */
+      if (isLoadingOccurrences) {
+        validationErrors.slot = 'Just a moment — still loading available dates.';
+      } else if (timeSlots.length === 0) {
+        validationErrors.slot = 'This experience has no dates available to book right now.';
+      } else {
+        validationErrors.slot = 'Please select a date and time.';
+      }
     }
 
     if (!isLoggedIn) {
