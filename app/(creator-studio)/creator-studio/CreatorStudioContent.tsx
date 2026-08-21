@@ -21,7 +21,12 @@ import { RevenueChart } from './components/RevenueChart';
 import { StudioHero } from './components/StudioHero';
 import { StudioStatCard } from './components/StudioStatCard';
 import { YourPlaces } from './components/YourPlaces';
-import { buildStudioMetrics, isActive, upcomingExperiences } from './utils/studio-metrics';
+import {
+  buildStudioMetrics,
+  isActive,
+  isHostedBy,
+  upcomingExperiences,
+} from './utils/studio-metrics';
 
 // Purchases are only queryable one experience at a time, so the feed is capped
 const RESERVATION_SOURCE_LIMIT = 5;
@@ -74,7 +79,12 @@ export const CreatorStudioContent = () => {
     { page: 1, page_size: 100, hosted_by: userId ?? undefined },
     Boolean(userId),
   );
-  const experiences: Experience[] = hostedResponse?.data?.results ?? [];
+  // hosted_by also matches experiences this user only co-hosts, so ownership is
+  // enforced here — everything downstream (metrics, purchases, sections) then
+  // sees only the host's own experiences
+  const experiences: Experience[] = (hostedResponse?.data?.results ?? []).filter(
+    (experience: Experience) => isHostedBy(experience, userId),
+  );
 
   const metrics = useMemo(() => buildStudioMetrics(experiences), [experiences]);
   const upcoming = useMemo(() => upcomingExperiences(experiences), [experiences]);

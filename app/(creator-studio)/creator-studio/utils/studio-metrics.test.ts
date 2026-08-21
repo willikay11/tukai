@@ -4,6 +4,7 @@ import {
   buildStudioMetrics,
   experienceProgress,
   isActive,
+  isHostedBy,
   toAmount,
   upcomingExperiences,
 } from './studio-metrics';
@@ -137,5 +138,45 @@ describe('isActive', () => {
     expect(isActive(hosted({ status: 'published' }))).toBe(true);
     expect(isActive(hosted({ status: 'PUBLISHED' }))).toBe(true);
     expect(isActive(hosted({ status: 'draft' }))).toBe(false);
+  });
+});
+
+// Regression: the hosted_by filter also returns experiences the user only
+// CO-HOSTS, so the studio listed other people's experiences and folded their
+// sales into the host's own figures.
+describe('isHostedBy', () => {
+  const owned = { host: { id: 'me' }, coHosts: [] } as unknown as Experience;
+  const coHosted = {
+    host: { id: 'someone-else' },
+    coHosts: [{ id: 'me' }],
+  } as unknown as Experience;
+
+  it('accepts an experience this user hosts', () => {
+    expect(isHostedBy(owned, 'me')).toBe(true);
+  });
+
+  it('rejects one where the user is only a co-host', () => {
+    expect(isHostedBy(coHosted, 'me')).toBe(false);
+  });
+
+  it('rejects everything when there is no signed-in user', () => {
+    expect(isHostedBy(owned, undefined)).toBe(false);
+    expect(isHostedBy(owned, null)).toBe(false);
+  });
+
+  it('rejects an experience with no host', () => {
+    expect(isHostedBy({} as Experience, 'me')).toBe(false);
+  });
+
+  // Sales on someone else's experience are not this host's revenue
+  it('keeps co-hosted sales out of the host figures', () => {
+    const mine = { ...owned, ticketsSold: 4, status: 'published' } as unknown as Experience;
+    const theirs = { ...coHosted, ticketsSold: 99, status: 'published' } as unknown as Experience;
+
+    const ownedOnly = [mine, theirs].filter((item) => isHostedBy(item, 'me'));
+    const metrics = buildStudioMetrics(ownedOnly);
+
+    expect(metrics.ticketsSold).toBe(4);
+    expect(metrics.activeExperiences).toBe(1);
   });
 });
