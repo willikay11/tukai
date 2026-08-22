@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import { DuplicateTicketsCheckbox } from './DuplicateTicketsCheckbox';
+import { DuplicateTicketsCheckbox } from '.';
 
 jest.mock('@/components/ui/checkbox', () => ({
   Checkbox: ({ checked, onCheckedChange, id }: any) => (

@@ -2,7 +2,14 @@ import React from 'react';
 
 import { render, screen } from '@testing-library/react';
 
-import { type DateTypeFormData, DateTypeStep } from './DateTypeStep';
+import { type DateTypeFormData, DateTypeStep } from '.';
+
+// The step navigates on community change, so it needs the app router
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), refresh: jest.fn() }),
+  usePathname: () => '/experiences/create',
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 const mockCommunities = [
   { id: '1', name: 'Community 1', imageUrl: 'https://via.placeholder.com/32' },
@@ -47,22 +54,22 @@ describe('DateTypeStep', () => {
       />,
     );
 
-    expect(screen.getByText('Select host community')).toBeInTheDocument();
+    expect(screen.getByText('Select Host Community')).toBeInTheDocument();
   });
 
-  it('renders ExperienceTypePicker', () => {
-    const mockOnChange = jest.fn();
-
+  // The free/paid picker was taken out of this step. ExperienceTypePicker keeps
+  // its own suite; here we only pin that the step no longer shows it.
+  it('no longer asks whether the experience is free or paid', () => {
     render(
       <DateTypeStep
         formData={mockFormData}
         communityOptions={mockCommunities}
-        onChange={mockOnChange}
+        onChange={jest.fn()}
         errors={{}}
       />,
     );
 
-    expect(screen.getByText('Is this a free or a paid Experience?')).toBeInTheDocument();
+    expect(screen.queryByText('Is this a free or a paid Experience?')).not.toBeInTheDocument();
   });
 
   it('renders ExperienceTypeRadio', () => {

@@ -6,8 +6,17 @@ jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: any) => <span>{iconName}</span>,
 }));
 
-jest.mock('@/components/ui/imageCarousel', () => ({
-  ImageCarousel: ({ images }: any) => <div>{`carousel-${images.length}`}</div>,
+jest.mock('@/app/shared/components/Images/SquarePhotoStrip', () => ({
+  // Renders real <img> tags as well as a count, so tests can assert either
+  SquarePhotoStrip: ({ photos }: any) => (
+    <div>
+      <span>{`strip-${photos.length}`}</span>
+      {photos.map((photo: string) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img key={photo} src={photo} alt="" />
+      ))}
+    </div>
+  ),
 }));
 
 describe('PreviewPhotoSection', () => {
@@ -43,13 +52,13 @@ describe('PreviewPhotoSection', () => {
       expect(images.length).toBeGreaterThan(0);
     });
 
-    it('displays carousel when multiple photos', () => {
+    it('hands every photo to the strip', () => {
       render(
         <PreviewPhotoSection
           photos={['https://example.com/photo1.jpg', 'https://example.com/photo2.jpg']}
         />,
       );
-      expect(screen.getByText('carousel-2')).toBeInTheDocument();
+      expect(screen.getByText('strip-2')).toBeInTheDocument();
     });
 
     it('displays edit button when photos exist and onEdit provided', () => {

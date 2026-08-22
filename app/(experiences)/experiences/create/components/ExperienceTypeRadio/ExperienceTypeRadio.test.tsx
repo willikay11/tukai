@@ -2,110 +2,93 @@ import React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import { ExperienceTypeRadio } from './ExperienceTypeRadio';
+import { ExperienceTypeRadio } from '.';
+
+// The three types are toggle pills now, not radio inputs, and "recurring" is a
+// Switch rather than a checkbox.
+const renderPicker = (props: Partial<React.ComponentProps<typeof ExperienceTypeRadio>> = {}) => {
+  const onChange = jest.fn();
+  const onRecurringChange = jest.fn();
+
+  render(
+    <ExperienceTypeRadio
+      value="one-time"
+      onChange={onChange}
+      isRecurring={false}
+      onRecurringChange={onRecurringChange}
+      {...props}
+    />,
+  );
+
+  return { onChange, onRecurringChange };
+};
+
+const pill = (name: string) => screen.getByRole('button', { name });
 
 describe('ExperienceTypeRadio', () => {
-  it('renders all three radio options', () => {
-    const mockOnChange = jest.fn();
-    const mockOnRecurringChange = jest.fn();
-
-    render(
-      <ExperienceTypeRadio
-        value="one-time"
-        onChange={mockOnChange}
-        isRecurring={false}
-        onRecurringChange={mockOnRecurringChange}
-      />,
-    );
-
-    expect(screen.getByLabelText('One-Time/Day Experience')).toBeInTheDocument();
-    expect(
-      screen.getByLabelText('Multi-Day Experience (e.g., 2 days straight)'),
-    ).toBeInTheDocument();
-    expect(screen.getByLabelText('Itinerary')).toBeInTheDocument();
-  });
-
-  it('renders the recurring checkbox', () => {
-    const mockOnChange = jest.fn();
-    const mockOnRecurringChange = jest.fn();
-
-    render(
-      <ExperienceTypeRadio
-        value="one-time"
-        onChange={mockOnChange}
-        isRecurring={false}
-        onRecurringChange={mockOnRecurringChange}
-      />,
-    );
-
-    expect(screen.getByLabelText('Create a recurring experience')).toBeInTheDocument();
-  });
-
-  it('calls onChange when radio option is selected', () => {
-    const mockOnChange = jest.fn();
-    const mockOnRecurringChange = jest.fn();
-
-    render(
-      <ExperienceTypeRadio
-        value="one-time"
-        onChange={mockOnChange}
-        isRecurring={false}
-        onRecurringChange={mockOnRecurringChange}
-      />,
-    );
-
-    const multiDayOption = screen.getByRole('radio', { hidden: true });
-    // Note: Direct radio interaction testing in jsdom is complex
-    // This is a simplified test
-  });
-
-  it('renders the label', () => {
-    const mockOnChange = jest.fn();
-    const mockOnRecurringChange = jest.fn();
-
-    render(
-      <ExperienceTypeRadio
-        value="one-time"
-        onChange={mockOnChange}
-        isRecurring={false}
-        onRecurringChange={mockOnRecurringChange}
-      />,
-    );
+  it('renders the section label', () => {
+    renderPicker();
 
     expect(screen.getByText('Experience Type')).toBeInTheDocument();
   });
 
-  it('shows recurring as checked when isRecurring is true', () => {
-    const mockOnChange = jest.fn();
-    const mockOnRecurringChange = jest.fn();
+  it('offers all three experience types', () => {
+    renderPicker();
 
-    const { container } = render(
-      <ExperienceTypeRadio
-        value="one-time"
-        onChange={mockOnChange}
-        isRecurring={true}
-        onRecurringChange={mockOnRecurringChange}
-      />,
-    );
-
-    const checkbox = container.querySelector('input[type="checkbox"]');
-    expect(checkbox).toBeChecked();
+    expect(pill('One-Time/Day Experience')).toBeInTheDocument();
+    expect(pill('Multi-Day Experience (e.g., 2 days straight)')).toBeInTheDocument();
+    expect(pill('Itinerary')).toBeInTheDocument();
   });
 
-  it('shows recurring as unchecked when isRecurring is false', () => {
-    const mockOnChange = jest.fn();
-    const mockOnRecurringChange = jest.fn();
+  it('fills only the selected type', () => {
+    renderPicker({ value: 'itinerary' });
 
-    const { container } = render(
-      <ExperienceTypeRadio
-        value="one-time"
-        onChange={mockOnChange}
-        isRecurring={false}
-        onRecurringChange={mockOnRecurringChange}
-      />,
-    );
+    expect(pill('Itinerary')).toHaveClass('text-white');
+    expect(pill('One-Time/Day Experience')).not.toHaveClass('text-white');
+  });
 
-    const checkbox = container.querySelector('input[type="checkbox"]');
-    expect(checkbox).not.toBeChecked();
+  it('reports the type when a pill is picked', () => {
+    const { onChange } = renderPicker();
+
+    fireEvent.click(pill('Multi-Day Experience (e.g., 2 days straight)'));
+
+    expect(onChange).toHaveBeenCalledWith('multi-day');
+  });
+
+  describe('recurring switch', () => {
+    it('offers recurring for a one-time experience', () => {
+      renderPicker({ value: 'one-time' });
+
+      expect(screen.getByText('Make this a recurring experience')).toBeInTheDocument();
+      expect(screen.getByRole('switch')).toBeInTheDocument();
+    });
+
+    // Only a single-day experience can repeat — a multi-day span or an
+    // itinerary has its own dates
+    it('hides recurring for the other types', () => {
+      renderPicker({ value: 'multi-day' });
+
+      expect(screen.queryByRole('switch')).not.toBeInTheDocument();
+    });
+
+    it('shows as on when the experience recurs', () => {
+      renderPicker({ isRecurring: true });
+
+      expect(screen.getByRole('switch')).toBeChecked();
+    });
+
+    it('shows as off when it does not', () => {
+      renderPicker({ isRecurring: false });
+
+      expect(screen.getByRole('switch')).not.toBeChecked();
+    });
+
+    it('reports a change', () => {
+      const { onRecurringChange } = renderPicker({ isRecurring: false });
+
+      fireEvent.click(screen.getByRole('switch'));
+
+      expect(onRecurringChange).toHaveBeenCalledWith(true);
+    });
   });
 });

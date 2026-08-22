@@ -64,9 +64,13 @@ describe('SharedExperiencePreview', () => {
   };
 
   describe('Rendering', () => {
-    it('renders the preview heading', () => {
-      render(<SharedExperiencePreview {...defaultProps} />);
-      expect(screen.getByText(/Review/i)).toBeInTheDocument();
+    // The "Preview Experience" heading was removed from the panel — the step
+    // side panel labels it now. What matters is that the preview renders the
+    // experience it was handed.
+    it('renders the experience being previewed', () => {
+      render(<SharedExperiencePreview {...defaultProps} step="about" />);
+
+      expect(screen.getByText('Amazing Hiking Adventure')).toBeInTheDocument();
     });
 
     it('displays about section for about step', () => {

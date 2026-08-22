@@ -30,13 +30,13 @@ describe('ExperienceStepSidePanel', () => {
 
     it('renders community step placeholder content', () => {
       render(<ExperienceStepSidePanel {...defaultProps} step="dates-type" />);
-      expect(screen.getByText('Select a Community')).toBeInTheDocument();
+      expect(screen.getByText('Preview Community')).toBeInTheDocument();
       expect(screen.getByText(/Please add the details/i)).toBeInTheDocument();
     });
 
     it('renders placeholder image for community step', () => {
       render(<ExperienceStepSidePanel {...defaultProps} step="dates-type" />);
-      expect(screen.getByAltText('Select a Community')).toBeInTheDocument();
+      expect(screen.getByAltText('Preview Community')).toBeInTheDocument();
     });
   });
 

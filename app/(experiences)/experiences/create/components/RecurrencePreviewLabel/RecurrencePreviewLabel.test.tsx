@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 
-import { RecurrencePreviewLabel } from './RecurrencePreviewLabel';
+import { RecurrencePreviewLabel } from '.';
 
 describe('RecurrencePreviewLabel', () => {
   it('renders nothing when startDate is null', () => {
@@ -32,12 +32,12 @@ describe('RecurrencePreviewLabel', () => {
     expect(text.textContent).toMatch(/Tuesday, \d+ \w+/);
   });
 
-  it('renders with green background styling', () => {
+  it('renders as an informational blue pill', () => {
     const { container } = render(
       <RecurrencePreviewLabel selectedDays={['mon']} startDate="2026-05-05" />,
     );
 
     const pill = container.querySelector('div');
-    expect(pill).toHaveClass('bg-emerald-700', 'text-white');
+    expect(pill).toHaveClass('bg-blue-100', 'border-blue-300', 'text-gray-500');
   });
 });

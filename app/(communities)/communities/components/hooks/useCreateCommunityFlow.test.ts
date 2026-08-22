@@ -3,6 +3,9 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 
+import { Community } from '@/types/community';
+import { Interest } from '@/types/interest';
+
 import { useCreateCommunityFlow } from './useCreateCommunityFlow';
 
 // Mock React Hook Form
@@ -127,13 +130,13 @@ describe('useCreateCommunityFlow', () => {
     });
 
     act(() => {
-      result.current.handlers.toggleCategory('cat-1');
+      result.current.handlers.toggleCategory({ id: 'cat-1', name: 'cat-1' } as Interest);
     });
 
     expect(result.current.selectedCategories).toContain('cat-1');
 
     act(() => {
-      result.current.handlers.toggleCategory('cat-1');
+      result.current.handlers.toggleCategory({ id: 'cat-1', name: 'cat-1' } as Interest);
     });
 
     expect(result.current.selectedCategories).not.toContain('cat-1');
@@ -145,8 +148,8 @@ describe('useCreateCommunityFlow', () => {
     });
 
     act(() => {
-      result.current.handlers.toggleCategory('cat-1');
-      result.current.handlers.toggleCategory('cat-2');
+      result.current.handlers.toggleCategory({ id: 'cat-1', name: 'cat-1' } as Interest);
+      result.current.handlers.toggleCategory({ id: 'cat-2', name: 'cat-2' } as Interest);
     });
 
     expect(result.current.selectedCategories).toEqual(['cat-1', 'cat-2']);
@@ -240,7 +243,7 @@ describe('useCreateCommunityFlow', () => {
       wrapper: createWrapper(),
     });
 
-    const newCommunity = { id: 'com-1', title: 'Community 1', members: 10 };
+    const newCommunity = { id: 'com-1', title: 'Community 1', members: 10 } as unknown as Community;
 
     act(() => {
       result.current.setInvitedCommunities([newCommunity]);
@@ -283,7 +286,9 @@ describe('useCreateCommunityFlow', () => {
       city: 'place-1',
       selectedCategories: ['cat-1'],
       visibility: 'public' as const,
-      uploadedFiles: [new File([''], 'test.png')],
+      photos: [{ id: '1', file: new File([''], 'test.png') }],
+      invitedGuests: [],
+      invitedCommunities: [],
     };
 
     act(() => {
@@ -307,7 +312,9 @@ describe('useCreateCommunityFlow', () => {
       city: 'place-1',
       selectedCategories: ['cat-1'],
       visibility: 'public' as const,
-      uploadedFiles: [new File([''], 'test.png')],
+      photos: [{ id: '1', file: new File([''], 'test.png') }],
+      invitedGuests: [],
+      invitedCommunities: [],
     };
 
     act(() => {

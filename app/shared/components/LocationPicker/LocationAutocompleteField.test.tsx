@@ -90,7 +90,7 @@ describe('LocationAutocompleteField', () => {
     it('renders map pin icon', () => {
       render(<LocationAutocompleteField {...defaultProps} />);
 
-      expect(screen.getByTestId('icon-MapPinpoint01Icon')).toBeInTheDocument();
+      expect(screen.getByTestId('icon-Location06Icon')).toBeInTheDocument();
     });
 
     it('does not show dropdown by default', () => {
@@ -367,7 +367,7 @@ describe('LocationAutocompleteField', () => {
       render(<LocationAutocompleteField {...defaultProps} />);
 
       const input = screen.getByRole('textbox');
-      expect(input).toHaveClass('h-[55px]');
+      expect(input).toHaveClass('h-[50px]');
     });
 
     it('dropdown has correct styling classes', () => {
