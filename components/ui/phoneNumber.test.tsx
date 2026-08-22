@@ -29,14 +29,15 @@ describe('PhoneNumber', () => {
       expect(fieldBox()).toHaveClass('focus-within:border-brand-green', 'bg-transparent');
     });
 
-    it('sets the number in 14.5px semibold gray-800', () => {
+    it('sets the number in 14px medium gray-800', () => {
       render(<PhoneNumber />);
 
-      expect(screen.getByRole('textbox')).toHaveClass(
-        'text-[14.5px]',
-        'font-medium',
-        'text-gray-800',
-      );
+      const field = screen.getByRole('textbox');
+      expect(field).toHaveClass('text-[14px]', 'font-medium', 'text-gray-800');
+      // The line box has to survive the merge alongside the size, or the field
+      // stops matching the 44px of the inputs beside it
+      expect(field).toHaveClass('leading-[18px]');
+      expect(field).not.toHaveClass('text-[14.5px]');
     });
 
     it('is not a pill — only search fields are', () => {

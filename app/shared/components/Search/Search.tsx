@@ -24,6 +24,7 @@ import { ExperienceResultRow } from './ExperienceResultRow';
 import { PlaceResultRow } from './PlaceResultRow';
 import { RecentSearchPill } from './RecentSearchPill';
 import { ResultGroup } from './ResultGroup';
+import { RotatingPlaceholder } from './RotatingPlaceholder';
 import { SearchSectionHeading } from './SearchSectionHeading';
 import { SuggestionRow } from './SuggestionRow';
 
@@ -45,6 +46,8 @@ export const Search = () => {
   const [tag, setTag] = useState<PlaceCategory | undefined>();
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  // `query` lags by the debounce, so the placeholder tracks the field directly
+  const [isFieldEmpty, setIsFieldEmpty] = useState(true);
   const { data: searchResults, isFetching: isSearching } = useSearch(query, tag?.id);
   const { recentSearches, addRecentSearch } = useRecentSearches();
   const inputElRef = useRef<HTMLInputElement | null>(null);
@@ -121,6 +124,7 @@ export const Search = () => {
     if (inputElRef.current) {
       inputElRef.current.value = term;
     }
+    setIsFieldEmpty(!term);
     // Skip the debounce — the term is complete, not mid-typing
     debouncedSetQuery.cancel();
     setQuery(term);
@@ -161,7 +165,15 @@ export const Search = () => {
           <Input
             shape="pill"
             ref={inputElRef}
-            placeholder="Search places or activities"
+            // No `placeholder` attribute: it cannot be animated, so the reel is
+            // drawn over the empty field and this names the input instead
+            aria-label="Search places or activities"
+            overlay={<RotatingPlaceholder visible={isFieldEmpty} />}
+            // 14px here rather than the shared field's 14.5px. `leading` has to
+            // follow the size: tailwind-merge treats a text-* utility as also
+            // setting line-height, so written first it would be dropped and the
+            // placeholder reel would fall out of line with the text.
+            className="text-[14px] leading-[18px]"
             // Tighter than the standard 13px/16px because a full-height button
             // sits inside the pill
             containerClassName="w-full bg-white py-1 pl-4 pr-1 shadow-search-bar"
@@ -193,7 +205,10 @@ export const Search = () => {
             }
             onClick={() => setShowSearchResults(true)}
             onFocus={() => setShowSearchResults(true)}
-            onChange={(e) => debouncedSetQuery(e.target.value)}
+            onChange={(e) => {
+              setIsFieldEmpty(e.target.value.length === 0);
+              debouncedSetQuery(e.target.value);
+            }}
           />
         </div>
       </PopoverTrigger>

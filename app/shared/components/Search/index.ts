@@ -6,3 +6,4 @@ export { ResultThumbnail } from './ResultThumbnail';
 export { ExperienceResultRow } from './ExperienceResultRow';
 export { PlaceResultRow } from './PlaceResultRow';
 export { CommunityResultRow } from './CommunityResultRow';
+export { RotatingPlaceholder } from './RotatingPlaceholder';

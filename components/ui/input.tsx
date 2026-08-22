@@ -5,6 +5,10 @@ import { cn } from '@/lib/utils';
 interface InputProps extends React.ComponentProps<'input'> {
   icon?: React.ReactNode;
   suffixIcon?: React.ReactNode;
+  // Drawn over the field itself — an animated placeholder, say. Given one, the
+  // input is wrapped so the overlay has something to position against; without
+  // one the markup is unchanged.
+  overlay?: React.ReactNode;
   // Search fields keep their pill silhouette; every other field takes the
   // 14px radius
   shape?: 'default' | 'pill';
@@ -23,7 +27,24 @@ interface InputProps extends React.ComponentProps<'input'> {
  * for the former.
  */
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, containerClassName, type, icon, suffixIcon, shape = 'default', ...props }, ref) => {
+  (
+    { className, containerClassName, type, icon, suffixIcon, overlay, shape = 'default', ...props },
+    ref,
+  ) => {
+    const field = (
+      <input
+        type={type}
+        className={cn(
+          // 14.5px/18px + 13px padding top and bottom lands the field on a
+          // 44px height — the standard touch target
+          'w-full flex-1 border-none bg-transparent p-0 text-[14.5px] font-medium leading-[18px] text-gray-800 placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-0 disabled:cursor-not-allowed',
+          className,
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+
     return (
       <div
         className={cn(
@@ -36,17 +57,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
       >
         {icon}
-        <input
-          type={type}
-          className={cn(
-            // 14.5px/18px + 13px padding top and bottom lands the field on a
-            // 44px height — the standard touch target
-            'w-full flex-1 border-none bg-transparent p-0 text-[14.5px] font-medium leading-[18px] text-gray-800 placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-0 disabled:cursor-not-allowed',
-            className,
-          )}
-          ref={ref}
-          {...props}
-        />
+
+        {overlay ? (
+          <div className="relative min-w-0 flex-1">
+            {field}
+            {overlay}
+          </div>
+        ) : (
+          field
+        )}
+
         {suffixIcon}
       </div>
     );

@@ -105,6 +105,16 @@ describe('Search popover', () => {
       expect(screen.getByText('Diani')).toBeInTheDocument();
     });
 
+    // 14px, not the shared field's 14.5px. The leading has to survive the merge
+    // alongside it or the placeholder reel drifts off the text baseline.
+    it('sets the field text to 14px over an 18px line box', () => {
+      render(<Search />);
+
+      const field = screen.getByRole('textbox', { name: 'Search places or activities' });
+      expect(field).toHaveClass('text-[14px]', 'leading-[18px]');
+      expect(field).not.toHaveClass('text-[14.5px]');
+    });
+
     it('hides the recent block when there is nothing to show', () => {
       mockRecent.mockReturnValue([]);
 
@@ -139,7 +149,10 @@ describe('Search popover', () => {
     const typeQuery = async () => {
       const user = userEvent.setup();
       render(<Search />);
-      await user.type(screen.getByPlaceholderText('Search places or activities'), 'karura');
+      await user.type(
+        screen.getByRole('textbox', { name: 'Search places or activities' }),
+        'karura',
+      );
       return user;
     };
 
