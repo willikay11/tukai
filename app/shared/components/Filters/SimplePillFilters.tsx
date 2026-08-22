@@ -11,13 +11,24 @@ interface SimplePillFiltersProps {
   filters: {
     label: string;
     value: string;
-    icon: string;
+    // Category filters lead with an icon; the search popover's type tabs are
+    // label-and-count only
+    icon?: string;
+    count?: number;
   }[];
   selected: string | null;
   onChange: (value: string) => void;
+  // 'panel' is the treatment used inside a white surface (the search popover):
+  // the selected pill is a raised white chip rather than a tinted one
+  variant?: 'default' | 'panel';
 }
 
-export const SimplePillFilters = ({ filters, selected, onChange }: SimplePillFiltersProps) => {
+export const SimplePillFilters = ({
+  filters,
+  selected,
+  onChange,
+  variant = 'default',
+}: SimplePillFiltersProps) => {
   const scrollBy = useRef<number>(500);
   const ref = useRef<any>();
   const [showPrevBtn, setShowPrevBtn] = useState<boolean>(false);
@@ -119,16 +130,26 @@ export const SimplePillFilters = ({ filters, selected, onChange }: SimplePillFil
             type="button"
             onClick={() => onChange(filter.value)}
             className={clsx(
-              'flex h-9 flex-shrink-0 flex-row items-center justify-center rounded-full px-3 py-2 text-xs font-medium transition-colors',
-              {
-                'bg-emerald-100 text-primary': selected === filter.value,
-                'bg-gray-100 text-gray-600 hover:border-primary hover:text-primary':
-                  selected !== filter.value,
-              },
+              'flex h-9 flex-shrink-0 flex-row items-center justify-center rounded-full transition-colors',
+              variant === 'panel' ? 'px-4 text-sm' : 'px-3 py-2 text-xs font-medium',
+              variant === 'panel'
+                ? {
+                    'border border-gray-200 bg-white font-semibold text-gray-900 shadow-sm':
+                      selected === filter.value,
+                    'text-gray-500 hover:text-gray-800': selected !== filter.value,
+                  }
+                : {
+                    'bg-emerald-100 text-primary': selected === filter.value,
+                    'bg-gray-100 text-gray-600 hover:border-primary hover:text-primary':
+                      selected !== filter.value,
+                  },
             )}
           >
-            <IconComponent iconName={filter.icon} size={14} />
-            <span className="ml-1.5 text-nowrap">{filter.label}</span>
+            {filter.icon && <IconComponent iconName={filter.icon} size={14} />}
+            <span className={clsx('text-nowrap', filter.icon && 'ml-1.5')}>{filter.label}</span>
+            {filter.count !== undefined && (
+              <span className="ml-1.5 text-nowrap">&middot; {filter.count}</span>
+            )}
           </button>
         ))}
       </div>

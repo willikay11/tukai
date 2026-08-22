@@ -1,9 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { SearchResult } from '@/types/search';
-
-import { ResultRow } from './ResultRow';
+import { RecentSearchPill } from './RecentSearchPill';
+import { SearchSectionHeading } from './SearchSectionHeading';
 import { SuggestionRow } from './SuggestionRow';
 
 describe('SuggestionRow', () => {
@@ -21,41 +20,33 @@ describe('SuggestionRow', () => {
   });
 });
 
-describe('ResultRow', () => {
-  const result = {
-    id: 'experience-exp-1',
-    type: 'experience',
-    data: {
-      id: 'exp-1',
-      title: 'Karura Forest Hike',
-      location: { formattedAddress: 'Karura, Nairobi' },
-      photos: [],
-    },
-  } as unknown as SearchResult;
-
-  it('renders title, meta and the correct type pill', () => {
-    render(<ResultRow result={result} onSelect={jest.fn()} />);
-
-    expect(screen.getByText('Karura Forest Hike')).toBeInTheDocument();
-    expect(screen.getByText('Karura, Nairobi')).toBeInTheDocument();
-    expect(screen.getByText('Experience')).toBeInTheDocument();
-  });
-
-  it.each([
-    ['place', 'Place'],
-    ['community', 'Community'],
-  ] as const)('labels %s results with the %s pill', (type, label) => {
-    render(<ResultRow result={{ ...result, type } as SearchResult} onSelect={jest.fn()} />);
-    expect(screen.getByText(label)).toBeInTheDocument();
-  });
-
-  it('fires onSelect on click', async () => {
+describe('RecentSearchPill', () => {
+  it('renders the term with a clock and fires onSelect', async () => {
     const onSelect = jest.fn();
     const user = userEvent.setup();
 
-    render(<ResultRow result={result} onSelect={onSelect} />);
-    await user.click(screen.getByRole('button'));
+    render(<RecentSearchPill term="Nyama choma" onSelect={onSelect} />);
 
+    expect(screen.getByText('Nyama choma')).toBeInTheDocument();
+    expect(screen.getByTestId('Clock01Icon')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button'));
     expect(onSelect).toHaveBeenCalled();
+  });
+
+  it('is a pill, not a boxed field', () => {
+    render(<RecentSearchPill term="Hiking" onSelect={jest.fn()} />);
+
+    expect(screen.getByRole('button')).toHaveClass('rounded-full', 'bg-gray-100');
+  });
+});
+
+describe('SearchSectionHeading', () => {
+  // Small caps label, matching the design's section dividers
+  it('renders its label in uppercase styling', () => {
+    render(<SearchSectionHeading>Recent searches</SearchSectionHeading>);
+
+    const heading = screen.getByText('Recent searches');
+    expect(heading).toHaveClass('uppercase', 'tracking-wider', 'text-gray-400');
   });
 });
