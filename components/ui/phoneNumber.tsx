@@ -34,6 +34,11 @@ const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberProps>(
         type={type}
         ref={ref}
         containerClassName={className}
+        // 14px rather than the shared field's 14.5px. `leading` must follow the
+        // size — tailwind-merge treats a text-* utility as also setting
+        // line-height, so written first it would be dropped and the field would
+        // lose its 44px height.
+        className="text-[14px] leading-[18px]"
         onChange={(e) => setLocalNumber(e.target.value)}
         icon={
           <div className="flex items-center">
@@ -49,7 +54,7 @@ const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberProps>(
                   // Match the number beside it. `leading` has to come after the
                   // font size: tailwind-merge treats a text-* utility as also
                   // setting line-height, so an earlier leading-* is dropped.
-                  'text-[14.5px] font-medium leading-[18px] text-gray-800',
+                  'text-[14px] font-medium leading-[18px] text-gray-800',
                 )}
                 prefixIcon={icon}
               >

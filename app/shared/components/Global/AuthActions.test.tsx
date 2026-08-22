@@ -66,17 +66,17 @@ describe('AuthActions profile menu', () => {
   });
 });
 
-// The search bar (py-1.5 around an h-8 button) and AskTukaiButton are both
-// 44px; Create and the profile trigger used to be 36px and 28px
+// Every control in the header row is 40px, set by the search bar: py-1 around
+// an h-8 button. AskTukaiButton matches at h-10 w-10.
 describe('navbar control heights', () => {
-  it('gives Create and the profile trigger the same height', () => {
+  it('gives Create and the profile trigger the search bar height', () => {
     render(<AuthActions />);
 
     const create = screen.getByRole('link', { name: /Create/ });
     const trigger = screen.getByAltText('George Ralak').closest('button');
 
-    expect(create).toHaveClass('h-11');
-    expect(trigger).toHaveClass('h-11');
+    expect(create).toHaveClass('h-10');
+    expect(trigger).toHaveClass('h-10');
   });
 
   it('no longer sizes Create by padding alone', () => {
