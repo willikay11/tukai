@@ -34,6 +34,9 @@ const config: Config = {
         lime: {
           DEFAULT: '#B0E800',
         },
+        'brand-green': {
+          DEFAULT: 'rgba(var(--color-brand-green) / <alpha-value>)',
+        },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {

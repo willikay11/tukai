@@ -35,6 +35,9 @@ strong {
   --background-end-rgb: 255, 255, 255;
   --color-primary: 4 120 87;
   --color-secondary: 209 213 219;
+  /* Focus green for form fields (#066349). Deliberately NOT --color-primary,
+     which is #047857 — see the note in components/ui/input.tsx */
+  --color-brand-green: 6 99 73;
 }
 
 @media (prefers-color-scheme: light) {

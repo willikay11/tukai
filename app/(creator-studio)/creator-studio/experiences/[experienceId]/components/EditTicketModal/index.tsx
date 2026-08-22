@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -10,6 +11,8 @@ import { useUpdateExperienceTicket } from '@/app/shared/hooks/useExperiences';
 import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import { Ticket } from '@/types/ticket';
 
 import { EditTicketValues, editTicketSchema, ticketQuantity, ticketsSoldFor } from './schema';
@@ -21,26 +24,45 @@ interface EditTicketModalProps {
   onClose: () => void;
 }
 
-const Field = ({
-  label,
-  icon,
-  children,
-  error,
-}: {
-  label: string;
-  icon: string;
-  children: React.ReactNode;
-  error?: string;
-}) => (
+/**
+ * A labelled row around the shared {@link Input}. `prefix` renders inside the
+ * field, before the value — the currency on the amount row.
+ */
+/**
+ * A labelled row around the shared {@link Input}. `prefix` renders inside the
+ * field, before the value — the currency on the amount row.
+ *
+ * Forwards its ref: these fields are wired with react-hook-form's `register`,
+ * whose ref React would otherwise drop on a plain function component, leaving
+ * the field unregistered and empty.
+ */
+const Field = React.forwardRef<
+  HTMLInputElement,
+  Omit<React.ComponentProps<typeof Input>, 'prefix'> & {
+    label: string;
+    icon: string;
+    error?: string;
+    prefix?: React.ReactNode;
+  }
+>(({ label, icon, error, prefix, ...inputProps }, ref) => (
   <div>
     <label className="text-sm font-medium text-gray-600">{label}</label>
-    <div className="mt-2 flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 focus-within:border-primary">
-      <IconComponent iconName={icon} size={18} color="currentColor" className="text-gray-400" />
-      {children}
-    </div>
+    <Input
+      {...inputProps}
+      ref={ref}
+      containerClassName={cn('mt-2 gap-3', error && 'border-red-400')}
+      icon={
+        <>
+          <IconComponent iconName={icon} size={18} color="currentColor" className="text-gray-400" />
+          {prefix}
+        </>
+      }
+    />
     {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
   </div>
-);
+));
+
+Field.displayName = 'Field';
 
 export const EditTicketModal = ({
   experienceId,
@@ -149,29 +171,21 @@ export const EditTicketModal = ({
               label="Amount per ticket"
               icon="Money01Icon"
               error={formState.errors.price?.message}
-            >
-              <span className="text-gray-500">{currency}</span>
-              <input
-                type="number"
-                step="any"
-                aria-label="Amount per ticket"
-                className="w-full bg-transparent outline-none"
-                {...register('price', { valueAsNumber: true })}
-              />
-            </Field>
+              prefix={<span className="text-gray-500">{currency}</span>}
+              type="number"
+              step="any"
+              aria-label="Amount per ticket"
+              {...register('price', { valueAsNumber: true })}
+            />
 
             <Field
               label="Available quantity"
               icon="Ticket01Icon"
               error={formState.errors.quantity?.message}
-            >
-              <input
-                type="number"
-                aria-label="Available quantity"
-                className="w-full bg-transparent outline-none"
-                {...register('quantity', { valueAsNumber: true })}
-              />
-            </Field>
+              type="number"
+              aria-label="Available quantity"
+              {...register('quantity', { valueAsNumber: true })}
+            />
             {/* The writable field is the total for this ticket type, so say so
                 rather than letting a host cut it below what buyers hold */}
             {soldCount > 0 && (

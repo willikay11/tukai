@@ -524,24 +524,19 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
               </div>
             ) : (
               <div>
-                {/* Mirrors PhoneNumber's shell so the two delivery inputs are
-                    identical when toggling between Whatsapp and Email */}
-                <div className="flex h-14 w-full items-center rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm focus-within:border-transparent focus-within:ring-[1px] focus-within:ring-primary md:text-sm">
-                  <div className="px-2">
+                <Input
+                  type="email"
+                  value={deliveryContact}
+                  onChange={(e) => setDeliveryContact(e.target.value)}
+                  placeholder="Enter email address"
+                  icon={
                     <IconComponent
                       iconName="Mail01Icon"
                       size={16}
                       className="flex-shrink-0 text-gray-700"
                     />
-                  </div>
-                  <input
-                    type="email"
-                    value={deliveryContact}
-                    onChange={(e) => setDeliveryContact(e.target.value)}
-                    placeholder="Enter email address"
-                    className="h-14 w-full min-w-0 flex-1 border-none bg-transparent py-1 text-sm placeholder:text-gray-400 focus:outline-none md:text-sm"
-                  />
-                </div>
+                  }
+                />
                 {errors.deliveryContact && (
                   <p className="mt-1 text-sm text-red-500">{errors.deliveryContact}</p>
                 )}

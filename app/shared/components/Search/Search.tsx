@@ -11,6 +11,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { useSearch } from '@/app/shared/hooks/useSearch';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { PlaceCategory } from '@/types/placeCategory';
@@ -97,26 +98,42 @@ export const Search = () => {
   return (
     <Popover open={showSearchResults} onOpenChange={(isOpen) => setShowSearchResults(isOpen)}>
       <PopoverTrigger asChild className="my-4 md:my-0">
-        <div
-          ref={containerRef}
-          className="relative flex w-full items-center gap-2 rounded-full border-[1px] border-gray-200 bg-white py-1.5 pl-4 pr-1.5 shadow-search-bar"
-        >
-          <Search01Icon size={18} className="flex-shrink-0 text-gray-400" variant="twotone" />
-          {tag && (
-            <span
-              className="inline-flex flex-shrink-0 cursor-pointer items-center gap-1 rounded-full bg-gray-100 py-1 pl-2 pr-1 text-sm"
-              onClick={() => removeTag()}
-            >
-              {tag.name}
-              <div className="flex items-center justify-center rounded-full bg-gray-400 p-1">
-                <IconComponent iconName="Cancel01Icon" size={12} color="white" />
-              </div>
-            </span>
-          )}
-          <input
+        {/* The wrapper stays a plain box: it anchors the popover and is measured
+            to size it, so it needs a ref the field itself cannot give it */}
+        <div ref={containerRef} className="relative w-full">
+          <Input
+            shape="pill"
             ref={inputElRef}
-            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400"
             placeholder="Search places or activities"
+            // Tighter than the standard 13px/16px because a full-height button
+            // sits inside the pill
+            containerClassName="w-full bg-white py-1.5 pl-4 pr-1.5 shadow-search-bar"
+            icon={
+              <>
+                <Search01Icon size={18} className="flex-shrink-0 text-gray-400" variant="twotone" />
+                {tag && (
+                  <span
+                    className="inline-flex flex-shrink-0 cursor-pointer items-center gap-1 rounded-full bg-gray-100 py-1 pl-2 pr-1 text-sm"
+                    onClick={() => removeTag()}
+                  >
+                    {tag.name}
+                    <div className="flex items-center justify-center rounded-full bg-gray-400 p-1">
+                      <IconComponent iconName="Cancel01Icon" size={12} color="white" />
+                    </div>
+                  </span>
+                )}
+              </>
+            }
+            suffixIcon={
+              <Button
+                variant="gradient"
+                size="sm"
+                onClick={() => setShowSearchResults(true)}
+                className="flex-shrink-0 rounded-full px-6"
+              >
+                Search
+              </Button>
+            }
             onClick={() => setShowSearchResults(true)}
             onFocus={() => setShowSearchResults(true)}
             onChange={(e) => {
@@ -125,16 +142,6 @@ export const Search = () => {
               }, 500)();
             }}
           />
-
-          {/* Search button */}
-          <Button
-            variant="gradient"
-            size="sm"
-            onClick={() => setShowSearchResults(true)}
-            className="flex-shrink-0 rounded-full px-6"
-          >
-            Search
-          </Button>
         </div>
       </PopoverTrigger>
       <PopoverContent

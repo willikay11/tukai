@@ -1,16 +1,24 @@
 import * as React from 'react';
 
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 import { Separator } from './separator';
 
-interface PhoneNumberInputProps extends Omit<React.ComponentProps<'input'>, 'onChange'> {
+interface PhoneNumberProps extends Omit<React.ComponentProps<'input'>, 'onChange'> {
   icon?: React.ReactNode;
   onChange?: (value: string) => void;
+  // Styles the field box, as it did when this component drew its own shell
   className?: string;
 }
-const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberInputProps>(
+
+/**
+ * A phone field: a country-code picker and a divider sit inside the field,
+ * ahead of the number. The box is the shared {@link Input}, so it carries the
+ * same border, radius, padding, type and focus treatment as every other field.
+ */
+const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberProps>(
   ({ className, type = 'tel', icon, onChange, ...props }, ref) => {
     const [countryCode, setCountryCode] = React.useState('+254');
     const [localNumber, setLocalNumber] = React.useState('');
@@ -22,40 +30,42 @@ const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberInputProps>(
     }, [countryCode, localNumber, onChange]);
 
     return (
-      <div
-        className={cn(
-          'flex h-14 w-full items-center rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm focus-within:border-transparent focus-within:ring-[1px] focus-within:ring-primary md:text-sm',
-          className,
-        )}
-      >
-        <Select onValueChange={(val) => setCountryCode(val)}>
-          <SelectTrigger
-            className="focus:ring-none w-fit border-none px-0 pl-2 pr-2 shadow-none ring-transparent"
-            prefixIcon={icon}
-          >
-            <SelectValue placeholder="+254" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="+254">+254</SelectItem>
-            <SelectItem value="+255">+255</SelectItem>
-            <SelectItem value="+256">+256</SelectItem>
-          </SelectContent>
-        </Select>
-        <Separator
-          orientation="vertical"
-          className="mr-3 h-4 w-[2px] rounded-[10px] border-gray-300"
-        />
-        <input
-          type={type}
-          className={cn(
-            'h-14 w-full flex-1 border-none bg-transparent py-1 text-sm focus:outline-none md:text-sm',
-            className,
-          )}
-          ref={ref}
-          onChange={(e) => setLocalNumber(e.target.value)}
-          {...props}
-        />
-      </div>
+      <Input
+        type={type}
+        ref={ref}
+        containerClassName={className}
+        onChange={(e) => setLocalNumber(e.target.value)}
+        icon={
+          <div className="flex items-center">
+            <Select onValueChange={(val) => setCountryCode(val)}>
+              <SelectTrigger
+                className={cn(
+                  'w-fit border-none p-0 pr-2 shadow-none ring-transparent focus:ring-0',
+                  // The trigger ships with a fixed h-[50px] and a 20px chevron;
+                  // left alone they make the phone field taller than every other
+                  // input. Constrained to the same 18px line box the number sits
+                  // in, the field lands on the standard 44px.
+                  'h-auto [&_svg]:h-[18px] [&_svg]:w-[18px]',
+                  // Match the number beside it. `leading` has to come after the
+                  // font size: tailwind-merge treats a text-* utility as also
+                  // setting line-height, so an earlier leading-* is dropped.
+                  'text-[14.5px] font-medium leading-[18px] text-gray-800',
+                )}
+                prefixIcon={icon}
+              >
+                <SelectValue placeholder="+254" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="+254">+254</SelectItem>
+                <SelectItem value="+255">+255</SelectItem>
+                <SelectItem value="+256">+256</SelectItem>
+              </SelectContent>
+            </Select>
+            <Separator orientation="vertical" className="mr-1 h-4 w-px bg-gray-200" />
+          </div>
+        }
+        {...props}
+      />
     );
   },
 );
