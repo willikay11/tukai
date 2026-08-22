@@ -41,7 +41,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className={cn(
             // 14.5px/18px + 13px padding top and bottom lands the field on a
             // 44px height — the standard touch target
-            'w-full flex-1 border-none bg-transparent p-0 text-[14.5px] font-semibold leading-[18px] text-gray-800 placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-0 disabled:cursor-not-allowed',
+            'w-full flex-1 border-none bg-transparent p-0 text-[14.5px] font-medium leading-[18px] text-gray-800 placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-0 disabled:cursor-not-allowed',
             className,
           )}
           ref={ref}

@@ -270,7 +270,7 @@ describe('Input', () => {
       render(<Input {...defaultProps} />);
 
       const input = screen.getByRole('textbox');
-      expect(input).toHaveClass('w-full', 'text-[14.5px]', 'font-semibold');
+      expect(input).toHaveClass('w-full', 'text-[14.5px]', 'font-medium');
     });
 
     it('applies text color classes', () => {

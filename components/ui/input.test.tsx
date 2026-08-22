@@ -41,7 +41,7 @@ describe('Input', () => {
 
       expect(screen.getByRole('textbox')).toHaveClass(
         'text-[14.5px]',
-        'font-semibold',
+        'font-medium',
         'text-gray-800',
       );
     });

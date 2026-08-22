@@ -11,5 +11,4 @@ export { List } from './List';
 export { LocationMeetingSection } from './LocationMeetingSection';
 export { MetaRow } from './MetaRow';
 export { PaymentMethodTabs } from './PaymentMethodTabs';
-export { PhoneNumberInput } from './PhoneNumberInput';
 export { TicketQuantityRow } from './TicketQuantityRow';
