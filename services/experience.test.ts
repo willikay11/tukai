@@ -269,56 +269,10 @@ describe('Experience Service', () => {
       const result = await experienceService.createExperience(experienceData as any);
 
       expect(mockApiWithToken).toHaveBeenCalled();
-      expect(mockApi.post).toHaveBeenCalledWith('/v1/experiences/', expect.any(FormData), {
+      expect(mockApi.post).toHaveBeenCalledWith('/v2/experiences/', expect.any(FormData), {
         headers: { 'Content-Type': undefined },
       });
       expect(result.success).toBe(true);
-    });
-
-    it('includes photos in form data when provided', async () => {
-      const mockResponse = { data: { id: 'exp-new' }, status: 201 };
-      mockApi.post.mockResolvedValue(mockResponse);
-
-      const photoFile = new File(['photo'], 'photo.jpg', { type: 'image/jpeg' });
-      mockAssertValidImageFiles.mockResolvedValue(undefined);
-
-      const experienceData = {
-        title: 'Experience with Photos',
-        description: 'Description',
-        googleMapPlaceId: 'place-123',
-        startDate: '2024-05-01',
-        endDate: '2024-05-01',
-        recurrence_rule: '',
-        categoriesIds: ['cat-1'],
-        newPhotos: [photoFile],
-      };
-
-      await experienceService.createExperience(experienceData as any);
-
-      expect(mockAssertValidImageFiles).toHaveBeenCalledWith([photoFile]);
-      expect(mockApi.post).toHaveBeenCalled();
-    });
-
-    it('validates images before uploading', async () => {
-      const photoFile = new File(['photo'], 'photo.jpg', { type: 'image/jpeg' });
-      mockAssertValidImageFiles.mockRejectedValue(new Error('Invalid image'));
-
-      const experienceData = {
-        title: 'Experience',
-        description: 'Description',
-        googleMapPlaceId: 'place-123',
-        startDate: '2024-05-01',
-        endDate: '2024-05-01',
-        recurrence_rule: '',
-        categoriesIds: ['cat-1'],
-        newPhotos: [photoFile],
-      };
-
-      await expect(experienceService.createExperience(experienceData as any)).rejects.toEqual({
-        status: 500,
-        success: false,
-        message: 'An unexpected error occurred',
-      });
     });
 
     it('handles form data validation error', async () => {
@@ -367,7 +321,7 @@ describe('Experience Service', () => {
       const result = await experienceService.updateExperience('exp-1', experienceData as any);
 
       expect(mockApiWithToken).toHaveBeenCalled();
-      expect(mockApi.patch).toHaveBeenCalledWith('/v1/experiences/exp-1/', expect.any(FormData), {
+      expect(mockApi.patch).toHaveBeenCalledWith('/v2/experiences/exp-1/', expect.any(FormData), {
         headers: { 'Content-Type': undefined },
       });
       expect(result.success).toBe(true);
@@ -394,6 +348,34 @@ describe('Experience Service', () => {
     });
   });
 
+  // Photos are no longer part of the create payload — they are posted to their
+  // own endpoint afterwards, which is where the file validation now lives.
+  describe('addExperiencePhotos', () => {
+    it('validates the files, then posts them against the experience', async () => {
+      mockApi.post.mockResolvedValue({ data: { id: 'photo-1' }, status: 201 });
+      mockAssertValidImageFiles.mockResolvedValue(undefined);
+      const photoFile = new File(['photo'], 'photo.jpg', { type: 'image/jpeg' });
+
+      const result = await experienceService.addExperiencePhotos('exp-1', [photoFile]);
+
+      expect(mockAssertValidImageFiles).toHaveBeenCalledWith([photoFile]);
+      expect(mockApi.post).toHaveBeenCalledWith('/v1/experiences/photos/', expect.any(FormData), {
+        headers: { 'Content-Type': undefined },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects without posting when a file is not a valid image', async () => {
+      mockAssertValidImageFiles.mockRejectedValue(new Error('Invalid image'));
+      const photoFile = new File(['photo'], 'photo.jpg', { type: 'image/jpeg' });
+
+      await expect(
+        experienceService.addExperiencePhotos('exp-1', [photoFile]),
+      ).rejects.toBeDefined();
+      expect(mockApi.post).not.toHaveBeenCalled();
+    });
+  });
+
   describe('createExperienceTicket', () => {
     it('creates ticket with authenticated request', async () => {
       const mockResponse = { data: { id: 'ticket-123', quantity: 5 }, status: 201 };
@@ -405,10 +387,10 @@ describe('Experience Service', () => {
         quantity: 5,
       };
 
-      const result = await experienceService.createExperienceTicket(ticketData as any);
+      const result = await experienceService.createExperienceTicket('exp-1', ticketData as any);
 
       expect(mockApiWithToken).toHaveBeenCalled();
-      expect(mockApi.post).toHaveBeenCalledWith('/v1/experiences/tickets/', ticketData);
+      expect(mockApi.post).toHaveBeenCalledWith('/v2/experiences/exp-1/tickets/', ticketData);
       expect(result.success).toBe(true);
     });
 
@@ -421,7 +403,7 @@ describe('Experience Service', () => {
       };
       mockApi.post.mockRejectedValue(error);
 
-      await expect(experienceService.createExperienceTicket({} as any)).rejects.toEqual({
+      await expect(experienceService.createExperienceTicket('exp-1', {} as any)).rejects.toEqual({
         status: 400,
         success: false,
         message: 'Invalid ticket slot',
@@ -430,16 +412,23 @@ describe('Experience Service', () => {
   });
 
   describe('updateExperienceTicket', () => {
-    it('updates ticket with PUT request', async () => {
+    it('patches the ticket under its experience', async () => {
       const mockResponse = { data: { id: 'ticket-1', quantity: 10 }, status: 200 };
-      mockApi.put.mockResolvedValue(mockResponse);
+      mockApi.patch.mockResolvedValue(mockResponse);
 
       const ticketData = { quantity: 10 };
 
-      const result = await experienceService.updateExperienceTicket('ticket-1', ticketData as any);
+      const result = await experienceService.updateExperienceTicket(
+        'exp-1',
+        'ticket-1',
+        ticketData as any,
+      );
 
       expect(mockApiWithToken).toHaveBeenCalled();
-      expect(mockApi.put).toHaveBeenCalledWith('/v1/experiences/tickets/ticket-1/', ticketData);
+      expect(mockApi.patch).toHaveBeenCalledWith(
+        '/v2/experiences/exp-1/tickets/ticket-1/',
+        ticketData,
+      );
       expect(result.success).toBe(true);
     });
   });
@@ -449,10 +438,10 @@ describe('Experience Service', () => {
       const mockResponse = { data: { success: true }, status: 204 };
       mockApi.delete.mockResolvedValue(mockResponse);
 
-      const result = await experienceService.deleteExperienceTicket('ticket-1');
+      const result = await experienceService.deleteExperienceTicket('exp-1', 'ticket-1');
 
       expect(mockApiWithToken).toHaveBeenCalled();
-      expect(mockApi.delete).toHaveBeenCalledWith('/v1/experiences/tickets/ticket-1/');
+      expect(mockApi.delete).toHaveBeenCalledWith('/v1/experiences/exp-1/tickets/ticket-1/');
       expect(result.success).toBe(true);
     });
 
@@ -465,7 +454,9 @@ describe('Experience Service', () => {
       };
       mockApi.delete.mockRejectedValue(error);
 
-      await expect(experienceService.deleteExperienceTicket('nonexistent')).rejects.toEqual({
+      await expect(
+        experienceService.deleteExperienceTicket('exp-1', 'nonexistent'),
+      ).rejects.toEqual({
         status: 404,
         success: false,
         message: 'Ticket not found',

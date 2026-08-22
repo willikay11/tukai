@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import { TimeSlotList } from './TimeSlotList';
+import { TimeSlotList } from '.';
 
 jest.mock('@/components/ui/time-picker', () => ({
   TimePicker: ({ placeholder, value }: { placeholder: string; value?: string }) => (

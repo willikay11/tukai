@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { MultiDayTicketModePicker } from './MultiDayTicketModePicker';
+import { MultiDayTicketModePicker } from '.';
 
 describe('MultiDayTicketModePicker', () => {
   it('renders the question label', () => {

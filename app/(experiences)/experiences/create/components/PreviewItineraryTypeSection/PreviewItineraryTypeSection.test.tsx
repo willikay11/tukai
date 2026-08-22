@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 
-import { PreviewItineraryTypeSection } from './PreviewItineraryTypeSection';
+import { PreviewItineraryTypeSection } from '.';
 
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: any) => <span>{iconName}</span>,
@@ -9,17 +9,17 @@ jest.mock('@/app/shared/components/Icons', () => ({
 describe('PreviewItineraryTypeSection', () => {
   it('renders section title', () => {
     render(<PreviewItineraryTypeSection visibility="public" />);
-    expect(screen.getByText('Visibility')).toBeInTheDocument();
+    expect(screen.getByText('Itinerary Type')).toBeInTheDocument();
   });
 
   it('displays "Public" when visibility is public', () => {
     render(<PreviewItineraryTypeSection visibility="public" />);
-    expect(screen.getByText('Public')).toBeInTheDocument();
+    expect(screen.getByText('Public (Everyone can join)')).toBeInTheDocument();
   });
 
   it('displays "Private" when visibility is private', () => {
     render(<PreviewItineraryTypeSection visibility="private" />);
-    expect(screen.getByText('Private')).toBeInTheDocument();
+    expect(screen.getByText('Private (Only invited guests can join)')).toBeInTheDocument();
   });
 
   it('renders edit button when onEdit is provided', () => {

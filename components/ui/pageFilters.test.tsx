@@ -196,40 +196,15 @@ describe('PageFilters', () => {
       });
     });
 
-    it.each(['/', '/experiences'])('should render experience filters on %s', async (pathname) => {
+    // The experience tabs moved to ExperiencesPageContent — PageFilters is
+    // deliberately absent on these paths now.
+    it.each(['/', '/experiences'])('renders nothing on %s', async (pathname) => {
       (nextNavigation.usePathname as jest.Mock).mockReturnValue(pathname);
 
-      renderWithProviders(<PageFilters />);
+      const { container } = renderWithProviders(<PageFilters />);
 
       await waitFor(() => {
-        expect(screen.getByText('All Experiences')).toBeInTheDocument();
-      });
-
-      expect(screen.getByText('Reserved Experiences')).toBeInTheDocument();
-      expect(screen.getByText('Saved')).toBeInTheDocument();
-      expect(screen.getByText('Hosting')).toBeInTheDocument();
-    });
-
-    it("should set 'all' as selected category when no query param", async () => {
-      (nextNavigation.usePathname as jest.Mock).mockReturnValue('/experiences');
-
-      renderWithProviders(<PageFilters />);
-
-      await waitFor(() => {
-        expect(mockSetSelectedCategoryId).toHaveBeenCalledWith('all');
-      });
-    });
-
-    it('should set selected category from query param', async () => {
-      (nextNavigation.usePathname as jest.Mock).mockReturnValue('/experiences');
-      (nextNavigation.useSearchParams as jest.Mock).mockReturnValue({
-        get: jest.fn().mockReturnValue('saved'),
-      });
-
-      renderWithProviders(<PageFilters />);
-
-      await waitFor(() => {
-        expect(mockSetSelectedCategoryId).toHaveBeenCalledWith('saved');
+        expect(container).toBeEmptyDOMElement();
       });
     });
   });

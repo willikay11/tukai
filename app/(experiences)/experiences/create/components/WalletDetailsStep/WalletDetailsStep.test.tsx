@@ -1,11 +1,15 @@
 import { render, screen } from '@testing-library/react';
 
-import { WalletDetailsStep } from './WalletDetailsStep';
+import { WalletDetailsStep } from '.';
+
+const selectedWallet = { id: 'wallet-123', name: 'M-Pesa' };
 
 jest.mock('../wallet', () => ({
-  CreateExperienceWallet: ({ onSelectedWalletIdChange }: any) => (
+  CreateExperienceWallet: ({ onSelectedWalletChange }: any) => (
     <div data-testid="wallet-step">
-      <button onClick={() => onSelectedWalletIdChange('wallet-123')}>Select Wallet</button>
+      <button onClick={() => onSelectedWalletChange({ id: 'wallet-123', name: 'M-Pesa' })}>
+        Select Wallet
+      </button>
     </div>
   ),
 }));
@@ -64,7 +68,7 @@ describe('WalletDetailsStep', () => {
     const selectButton = screen.getByText('Select Wallet');
     selectButton.click();
 
-    expect(onChange).toHaveBeenCalledWith({ selectedWalletId: 'wallet-123' });
+    expect(onChange).toHaveBeenCalledWith({ selectedWallet });
   });
 
   it('passes formData fields as props to CreateExperienceWallet', () => {

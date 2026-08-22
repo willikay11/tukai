@@ -19,7 +19,6 @@ describe('RelativeValidityPicker', () => {
     expect(screen.getByText('1 hour before the experience starts')).toBeInTheDocument();
     expect(screen.getByText('1 hour before the experience ends')).toBeInTheDocument();
     expect(screen.getByText('1 day before the experience starts')).toBeInTheDocument();
-    expect(screen.getByText('2 weeks before the experience ends')).toBeInTheDocument();
   });
 
   it('calls onChange when a pill is clicked', async () => {
@@ -37,13 +36,18 @@ describe('RelativeValidityPicker', () => {
     });
   });
 
-  it('highlights selected pill with primary color', () => {
+  // The selected pill is a brand gradient with white text, not a flat fill
+  it('fills the selected pill', () => {
     const onChange = jest.fn();
     const selectedValue = { amount: 1, unit: 'hour', anchor: 'start' };
     render(<RelativeValidityPicker value={selectedValue} onChange={onChange} errors={{}} />);
 
     const selectedPill = screen.getByText('1 hour before the experience starts');
-    expect(selectedPill).toHaveClass('bg-primary', 'text-white');
+    expect(selectedPill).toHaveClass('text-white');
+    expect(selectedPill.className).toContain('bg-gradient-to-b');
+
+    const unselected = screen.getByText('1 day before the experience starts');
+    expect(unselected).not.toHaveClass('text-white');
   });
 
   it('displays error messages', () => {

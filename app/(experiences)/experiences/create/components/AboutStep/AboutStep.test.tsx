@@ -1,7 +1,20 @@
-import { render, screen } from '@testing-library/react';
-import { render as rtlRender } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { type RenderOptions, render, screen } from '@testing-library/react';
 
 import { AboutStep } from './index';
+
+// AboutStep reaches React Query through AddPlaceModal's usePlaceCategories, so
+// every render needs a client. Supplied via `wrapper` rather than by wrapping
+// the element, so `rerender` keeps the provider in place.
+const Wrapper = ({ children }: { children: React.ReactNode }) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: 0 } },
+  });
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+};
+
+const rtlRender = (ui: React.ReactElement, options?: Omit<RenderOptions, 'wrapper'>) =>
+  render(ui, { wrapper: Wrapper, ...options });
 
 jest.mock('@/app/shared/components/Forms', () => ({
   Button: ({ children, onClick, disabled }: any) => (
@@ -82,6 +95,9 @@ describe('AboutStep', () => {
     meetingPoint: '',
     meetingTime: null,
     categories: [],
+    // Set when a place is chosen through AddPlaceModal
+    placeId: '',
+    placeImageUrl: null,
   };
 
   const defaultProps = {
@@ -104,7 +120,7 @@ describe('AboutStep', () => {
       expect(screen.getByTestId('photo-uploader')).toBeInTheDocument();
       expect(screen.getByTestId('title-input')).toBeInTheDocument();
       expect(screen.getByTestId('visibility-picker')).toBeInTheDocument();
-      expect(screen.getByTestId('location-input')).toBeInTheDocument();
+      expect(screen.getByText('Where will the experience take place?')).toBeInTheDocument();
     });
 
     it('renders description fields', () => {
@@ -155,11 +171,18 @@ describe('AboutStep', () => {
       expect(screen.getByTestId('visibility-picker')).toBeInTheDocument();
     });
 
-    it('renders location input component', () => {
+    it('shows the chosen place on the location button', () => {
       rtlRender(
         <AboutStep {...defaultProps} formData={{ ...defaultFormData, location: 'Nairobi' }} />,
       );
-      expect(screen.getByTestId('location-input')).toBeInTheDocument();
+
+      expect(screen.getByRole('button', { name: /Nairobi/ })).toBeInTheDocument();
+    });
+
+    it('prompts to pick a place when none is chosen', () => {
+      rtlRender(<AboutStep {...defaultProps} />);
+
+      expect(screen.getByRole('button', { name: /Select a place/ })).toBeInTheDocument();
     });
 
     it('renders photo uploader with photos', () => {
@@ -348,7 +371,7 @@ describe('AboutStep', () => {
       rtlRender(<AboutStep {...defaultProps} formData={completeData} />);
 
       expect(screen.getByTestId('title-input')).toBeInTheDocument();
-      expect(screen.getByTestId('location-input')).toBeInTheDocument();
+      expect(screen.getByText('Where will the experience take place?')).toBeInTheDocument();
       expect(screen.getByTestId('meeting-input')).toBeInTheDocument();
       expect(screen.getByTestId('photo-uploader')).toBeInTheDocument();
       expect(screen.getByTestId('category-picker')).toBeInTheDocument();

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { MultiDayDateSection } from './MultiDayDateSection';
+import { MultiDayDateSection } from '.';
 
 jest.mock('@/components/ui/date-picker', () => ({
   DatePicker: ({ value, onChange }: any) => (
@@ -38,7 +38,9 @@ describe('MultiDayDateSection', () => {
     jest.clearAllMocks();
   });
 
-  it('renders all date and time labels', () => {
+  // The per-field labels were dropped in favour of one section label; the
+  // pickers name themselves through their placeholders
+  it('labels the section and renders a picker for each end', () => {
     render(
       <MultiDayDateSection
         startDate={null}
@@ -50,10 +52,9 @@ describe('MultiDayDateSection', () => {
       />,
     );
 
-    expect(screen.getByText('Start Date')).toBeInTheDocument();
-    expect(screen.getByText('Start Time')).toBeInTheDocument();
-    expect(screen.getByText('End Date')).toBeInTheDocument();
-    expect(screen.getByText('End Time')).toBeInTheDocument();
+    expect(screen.getByText('Select Experience date(s)')).toBeInTheDocument();
+    expect(screen.getAllByTestId('date-picker')).toHaveLength(2);
+    expect(screen.getAllByTestId('time-picker')).toHaveLength(2);
   });
 
   it('calls handlers when dates/times change', async () => {

@@ -126,7 +126,7 @@ describe('CreateExperienceSteps', () => {
       const { container } = render(<CreateExperienceSteps {...defaultProps} />);
       const tabsList = screen.getByTestId('tabs-list');
       expect(tabsList).toBeInTheDocument();
-      expect(tabsList.textContent).toContain('Community');
+      expect(tabsList.textContent).toContain('Dates & Type');
       expect(tabsList.textContent).toContain('About');
     });
   });
@@ -140,7 +140,7 @@ describe('CreateExperienceSteps', () => {
     it('renders all step tabs in loading state', () => {
       render(<CreateExperienceSteps {...defaultProps} isLoadingExperience={true} />);
       const tabsList = screen.getByTestId('tabs-list');
-      expect(tabsList.textContent).toContain('Community');
+      expect(tabsList.textContent).toContain('Dates & Type');
       expect(tabsList.textContent).toContain('About');
     });
   });
@@ -157,9 +157,13 @@ describe('CreateExperienceSteps', () => {
       expect(screen.getByText('Save & Continue')).toBeInTheDocument();
     });
 
-    it('shows preview button on mobile', () => {
+    // The in-step Preview buttons used to open a mobile drawer; they now jump to
+    // the Preview step, so what matters here is that the step is offered. The
+    // step components themselves are mocked, so their buttons are not in scope.
+    it('offers the preview step', () => {
       render(<CreateExperienceSteps {...defaultProps} currentStep="dates-type" />);
-      expect(screen.getByText('Preview')).toBeInTheDocument();
+
+      expect(screen.getByTestId('tabs-list').textContent).toContain('Preview');
     });
   });
 
@@ -272,7 +276,7 @@ describe('CreateExperienceSteps', () => {
         />,
       );
       const tabsList = screen.getByTestId('tabs-list');
-      expect(tabsList.textContent).toContain('Community');
+      expect(tabsList.textContent).toContain('Dates & Type');
       expect(tabsList.textContent).toContain('About');
     });
 
@@ -287,7 +291,7 @@ describe('CreateExperienceSteps', () => {
         />,
       );
       const tabsList = screen.getByTestId('tabs-list');
-      expect(tabsList.textContent).toContain('Community');
+      expect(tabsList.textContent).toContain('Dates & Type');
       expect(tabsList.textContent).toContain('About');
     });
   });

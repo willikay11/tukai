@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 
-import { TicketForm, TicketFormValue } from './TicketForm';
+import { TicketForm, TicketFormValue } from '.';
 
 jest.mock('@/components/ui/date-picker', () => ({
   DatePicker: ({ placeholder, value, onChange }: any) => (

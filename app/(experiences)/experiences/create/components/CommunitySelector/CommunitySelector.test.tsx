@@ -106,7 +106,8 @@ describe('CommunitySelector', () => {
       );
 
       const selectedPill = screen.getByText('Hiking Community').closest('button');
-      expect(selectedPill?.className).toContain('bg-primary');
+      expect(selectedPill?.className).toContain('text-white');
+      expect(selectedPill?.className).toContain('bg-gradient-to-b');
       expect(selectedPill?.className).toContain('text-white');
     });
 
