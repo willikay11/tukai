@@ -7,6 +7,9 @@ import { cn } from '@/lib/utils';
 
 interface BackToExploreProps {
   label?: string;
+  // Somewhere specific to go. Without it the button steps back through
+  // history, which is right for a detail page reached from anywhere.
+  href?: string;
   // 'pill' is the outlined button used in page headers; 'link' is the bare
   // inline treatment used on the experience detail page
   variant?: 'link' | 'pill';
@@ -14,13 +17,14 @@ interface BackToExploreProps {
 
 export const BackToExplore = ({
   label = 'Back to Explore',
+  href,
   variant = 'link',
 }: BackToExploreProps) => {
   const router = useRouter();
 
   return (
     <button
-      onClick={() => router.back()}
+      onClick={() => (href ? router.push(href) : router.back())}
       className={cn(
         'flex items-center gap-2 text-sm transition-colors',
         variant === 'pill'

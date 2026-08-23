@@ -19,6 +19,10 @@ export type ExperiencesQueryParams = {
   category?: string;
   reserved_by?: string;
   hosted_by?: string;
+  // Experiences belonging to one community. NOTE: `host_community` and
+  // `hosted_by_community` are silently ignored by the API — only `community`
+  // actually filters.
+  community?: string;
   page?: number;
   page_size?: number;
   invited?: boolean;

@@ -3,6 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   createCommunity,
   createCommunityPhotos,
+  fetchCommunity,
   fetchCommunityPostPhotos,
   fetchCommunityPosts,
   getCommunities,
@@ -10,6 +11,23 @@ import {
   joinCommunityWithToken,
 } from '@/services/community';
 import { CommunityPostsQueryParams, CreateCommunity } from '@/types/community';
+
+/**
+ * A single community, for the membership records the LIST endpoint leaves out.
+ * Only the detail endpoint returns `members` with their user objects — the list
+ * carries just `members_count` and `owners`.
+ *
+ * Cached long, and keyed by id: a grid of cards each asks for its own, and the
+ * same community is not re-fetched when the reader switches tabs or opens it.
+ */
+export const useCommunityDetail = (communityId: string, enabled: boolean) => {
+  return useQuery({
+    queryKey: ['community', communityId],
+    queryFn: async () => await fetchCommunity(communityId),
+    enabled: enabled && Boolean(communityId),
+    staleTime: 5 * 60 * 1000,
+  });
+};
 
 export const useGetCommunities = (
   {

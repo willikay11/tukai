@@ -14,7 +14,9 @@ import {
 
 export const useMoments = (params: MomentsQueryParams = {}, enabled: boolean = true) =>
   useQuery({
-    queryKey: ['moments', params.page, params.page_size],
+    // Every param that changes the request belongs in the key — without
+    // `community`, a community-filtered query serves the whole feed from cache
+    queryKey: ['moments', params.page, params.page_size, params.community],
     queryFn: async () => await fetchMoments(params),
     enabled,
   });
