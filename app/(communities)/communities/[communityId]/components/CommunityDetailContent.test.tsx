@@ -158,12 +158,22 @@ describe('CommunityDetailContent', () => {
       });
     });
 
+    // Sticky, and parked below the global navbar rather than under it — the
+    // navbar is sticky from md up at a higher z-index
+    it('pins the pill row below the navbar', () => {
+      renderPage();
+
+      const row = screen.getByRole('tablist').parentElement;
+      expect(row).toHaveClass('sticky', 'top-0', 'md:top-[65px]');
+    });
+
     it('watches every section', () => {
       renderPage();
 
       expect(useScrollSpy).toHaveBeenCalledWith(
         ['about', 'experiences', 'members', 'places', 'moments', 'reviews'],
-        undefined,
+        // clears the sticky navbar plus the pill row
+        128,
       );
     });
   });
@@ -190,11 +200,15 @@ describe('CommunityDetailContent', () => {
       });
     });
 
-    // Headings must clear the sticky tab row when jumped to
-    it('gives each section scroll margin for the sticky tabs', () => {
+    // Headings must clear whatever is pinned above them when jumped to — the
+    // pill row on mobile, the navbar and the pill row from md up
+    it('gives each section scroll margin for the pinned bars', () => {
       const { container } = renderPage();
 
-      expect(container.querySelector('section#about')).toHaveClass('scroll-mt-28');
+      expect(container.querySelector('section#about')).toHaveClass(
+        'scroll-mt-20',
+        'md:scroll-mt-32',
+      );
     });
 
     // `community` is the only filter the experiences list honours
