@@ -6,115 +6,144 @@ import { Community } from '@/types/community';
 
 import { CommunityDiscoverCard } from './index';
 
-jest.mock('next/image', () => {
-  function MockImage({ alt, src }: { alt: string; src: string }) {
-    return <img alt={alt} src={src} />;
-  }
-  MockImage.displayName = 'MockImage';
-  return MockImage;
+jest.mock('@/app/shared/components/Images', () => ({
+  PhotoImage: ({ alt, fallback }: Record<string, unknown>) => (
+    <span data-testid="photo" data-alt={alt as string}>
+      {fallback as React.ReactNode}
+    </span>
+  ),
+}));
+
+const useCommunityDetail = jest.fn();
+jest.mock('@/app/shared/hooks/useCommunities', () => ({
+  useCommunityDetail: (id: string, enabled: boolean) => useCommunityDetail(id, enabled),
+}));
+
+const member = (id: string, name: string) => ({
+  id,
+  user: { id: `u-${id}`, displayName: name, picture: `https://cdn.tukai.co/${id}.jpg` },
 });
-jest.mock('next/link', () => {
-  function MockLink({ children, href }: { children: React.ReactNode; href: string }) {
-    return <a href={href}>{children}</a>;
-  }
-  MockLink.displayName = 'MockLink';
-  return MockLink;
-});
 
-const member = (id: string, firstName: string, picture: string | null = null) =>
-  ({
-    id,
-    role: 'regular',
-    dateCreated: '',
-    inviteStatus: 'accepted',
-    user: { id, firstName, lastName: 'Doe', displayName: '', picture },
-  }) as never;
+const base = {
+  id: 'c1',
+  title: 'Nairobi Hikers',
+  description: 'A crew',
+  categories: [{ id: 'cat', name: 'Hiking', icon: 'Directions01Icon' }],
+  photos: [],
+} as unknown as Community;
 
-const makeCommunity = (overrides: Partial<Community> = {}): Community =>
-  ({
-    id: 'c1',
-    title: 'Nairobi Hikers',
-    description: 'Weekend trails around the city',
-    categories: [{ id: 'cat1', name: 'Hiking', icon: '' }],
-    photos: [{ id: 'p1', photo: 'https://cdn.tukai.co/cover.jpg', isCover: true }],
-    members: [member('m1', 'Ann'), member('m2', 'Ben'), member('m3', 'Cid')],
-    isPublic: true,
-    status: 'published',
-    dateCreated: '',
-    dateModified: '',
-    ...overrides,
-  }) as unknown as Community;
+const community = (extra: Record<string, unknown>) =>
+  ({ ...base, ...extra }) as unknown as Community;
 
-describe('CommunityDiscoverCard', () => {
-  it('renders cover, category badge, title and description', () => {
-    render(<CommunityDiscoverCard community={makeCommunity()} />);
+const facepile = (container: HTMLElement) => container.querySelector('.-space-x-2');
 
-    expect(screen.getByAltText('Nairobi Hikers')).toHaveAttribute(
-      'src',
-      'https://cdn.tukai.co/cover.jpg',
-    );
-    expect(screen.getByText('Hiking')).toBeInTheDocument();
-    expect(screen.getByText('Nairobi Hikers')).toBeInTheDocument();
-    expect(screen.getByText('Weekend trails around the city')).toBeInTheDocument();
+describe('CommunityDiscoverCard facepile', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useCommunityDetail.mockReturnValue({ data: undefined });
   });
 
-  // Regression: descriptions are stored as HTML and were rendered as literal
-  // text, so tags showed up on the card
-  it('strips HTML from the description', () => {
-    render(
+  it('overlaps the first three member avatars', () => {
+    const { container } = render(
       <CommunityDiscoverCard
-        community={makeCommunity({
-          description: '<p>Weekend <strong>trails</strong> around the city</p>',
+        community={community({
+          membersCount: 9,
+          members: [
+            member('1', 'Ann'),
+            member('2', 'Ben'),
+            member('3', 'Cara'),
+            member('4', 'Dan'),
+          ],
         })}
       />,
     );
 
-    expect(screen.getByText('Weekend trails around the city')).toBeInTheDocument();
-    expect(screen.queryByText(/<p>|<strong>/)).not.toBeInTheDocument();
+    const pile = facepile(container);
+    expect(pile).toBeInTheDocument();
+    // three faces, and the overlap that makes it a stack
+    expect(pile?.querySelectorAll('[data-testid="photo"]')).toHaveLength(3);
+    expect(pile).toHaveClass('-space-x-2');
   });
 
-  it('collapses whitespace and entities in the description', () => {
-    render(
+  // The count is everyone not pictured, taken from the API total — not from the
+  // handful of records the row happened to carry
+  it('counts the remaining members from the API total', () => {
+    const { container } = render(
       <CommunityDiscoverCard
-        community={makeCommunity({ description: '<p>Trails &amp;\n   more</p>' })}
+        community={community({
+          membersCount: 9,
+          members: [member('1', 'Ann'), member('2', 'Ben'), member('3', 'Cara')],
+        })}
       />,
     );
 
-    expect(screen.getByText('Trails & more')).toBeInTheDocument();
+    expect(facepile(container)).toHaveTextContent('+6');
   });
 
-  it('links to the community page', () => {
-    render(<CommunityDiscoverCard community={makeCommunity()} />);
+  it('shows no overflow chip when everyone is pictured', () => {
+    const { container } = render(
+      <CommunityDiscoverCard
+        community={community({
+          membersCount: 2,
+          members: [member('1', 'Ann'), member('2', 'Ben')],
+        })}
+      />,
+    );
 
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/communities/c1');
+    expect(facepile(container)).not.toHaveTextContent('+');
   });
 
-  it('shows the overflow count beyond the three visible avatars', () => {
-    const members = Array.from({ length: 9 }, (_, index) => member(`m${index}`, `User${index}`));
-    render(<CommunityDiscoverCard community={makeCommunity({ members } as never)} />);
+  // The list endpoint returns owners but no membership records
+  it('falls back to the owner when no members are known', () => {
+    const { container } = render(
+      <CommunityDiscoverCard
+        community={community({
+          membersCount: 4,
+          owners: [
+            { id: 'o1', firstName: 'Lily', lastName: 'W', displayName: 'Lily', picture: null },
+          ],
+        })}
+      />,
+    );
 
-    expect(screen.getByText('+6')).toBeInTheDocument();
+    expect(facepile(container)?.querySelectorAll('[data-testid="photo"]')).toHaveLength(1);
+    expect(facepile(container)).toHaveTextContent('+3');
   });
 
-  it('hides the facepile when the API returned no members', () => {
-    render(<CommunityDiscoverCard community={makeCommunity({ members: [] } as never)} />);
+  it('uses fetched members once they arrive', () => {
+    useCommunityDetail.mockReturnValue({
+      data: { data: { members: [member('1', 'Ann'), member('2', 'Ben'), member('3', 'Cara')] } },
+    });
 
-    expect(screen.queryByText(/^\+/)).not.toBeInTheDocument();
+    const { container } = render(
+      <CommunityDiscoverCard community={community({ membersCount: 5 })} showMemberAvatars />,
+    );
+
+    expect(facepile(container)?.querySelectorAll('[data-testid="photo"]')).toHaveLength(3);
+    expect(facepile(container)).toHaveTextContent('+2');
   });
 
-  // Matches the translucent bookmark circle over an experience photo rather
-  // than a solid brand fill
-  it('renders the category pill translucent, not brand-filled', () => {
-    render(<CommunityDiscoverCard community={makeCommunity()} />);
+  // One request per card — worth it on the grid, wasteful on the Discover row
+  it('does not fetch unless asked to', () => {
+    render(<CommunityDiscoverCard community={community({ membersCount: 4 })} />);
 
-    const pill = screen.getByText('Hiking');
-    expect(pill).toHaveClass('bg-black/40', 'backdrop-blur-sm', 'text-white');
-    expect(pill).not.toHaveClass('bg-primary');
+    expect(useCommunityDetail).toHaveBeenCalledWith('c1', false);
   });
 
-  it('omits the badge when the community has no category', () => {
-    render(<CommunityDiscoverCard community={makeCommunity({ categories: [] })} />);
+  it('does not fetch when the row already carries members', () => {
+    render(
+      <CommunityDiscoverCard
+        community={community({ members: [member('1', 'Ann')] })}
+        showMemberAvatars
+      />,
+    );
 
-    expect(screen.queryByText('Hiking')).not.toBeInTheDocument();
+    expect(useCommunityDetail).toHaveBeenCalledWith('c1', false);
+  });
+
+  it('hides the facepile when there is nobody to show', () => {
+    const { container } = render(<CommunityDiscoverCard community={community({})} />);
+
+    expect(facepile(container)).not.toBeInTheDocument();
   });
 });

@@ -6,6 +6,8 @@ import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 export type MomentsQueryParams = {
   page?: number;
   page_size?: number;
+  // Moments posted in one community
+  community?: string;
 };
 
 export async function fetchMoments(params: MomentsQueryParams = {}): Promise<ApiResponse> {

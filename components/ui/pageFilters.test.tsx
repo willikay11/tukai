@@ -221,15 +221,14 @@ describe('PageFilters', () => {
       });
     });
 
-    it('should render community filters', async () => {
-      renderWithProviders(<PageFilters />);
+    // The My Communities / Recommended toggle moved onto the page itself, so
+    // PageFilters is deliberately absent here — same as on /experiences.
+    it('renders nothing on /communities', async () => {
+      const { container } = renderWithProviders(<PageFilters />);
 
       await waitFor(() => {
-        expect(screen.getByText('My Communities')).toBeInTheDocument();
+        expect(container).toBeEmptyDOMElement();
       });
-
-      expect(screen.getByText('Recommended')).toBeInTheDocument();
-      expect(screen.getByText('Posts')).toBeInTheDocument();
     });
   });
 });

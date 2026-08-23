@@ -25,13 +25,13 @@ import {
 } from '@/app/(experiences)/experiences/see-all/config';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
+import { PillTabs } from '@/app/shared/components/Tabs';
 import { useMyBucketLists, useSharedBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useExperiences, useTicketPurchases } from '@/app/shared/hooks/useExperiences';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocation } from '@/context/LocationContext';
 import { downloadTicketPdf } from '@/services/experience';
 import { BucketList } from '@/types/bucket-list';
@@ -187,19 +187,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
     <main className="grid grid-cols-12 gap-x-4 px-4 md:px-0">
       {/* Filter tabs */}
       <div className="col-span-12 pt-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
-        <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList className="h-auto gap-0 rounded-full bg-gray-100 p-1">
-            {visibleTabs.map((tab) => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className="rounded-full border-0 px-5 py-2 text-sm font-normal text-gray-500 data-[state=active]:border-b-0 data-[state=active]:bg-white data-[state=active]:font-normal data-[state=active]:text-primary"
-              >
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+        <PillTabs tabs={visibleTabs} value={activeTab} onChange={handleTabChange} />
       </div>
 
       {isAll ? (

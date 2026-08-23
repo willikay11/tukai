@@ -45,29 +45,17 @@ export const PageFilters = () => {
       setIsLoading(false);
       setSelectedCategoryId(selectedCategoryId);
     }
-
-    if (pathname === '/communities') {
-      setFilters([
-        { label: 'Recommended', value: 'recommended', icon: 'UserSearch01Icon' },
-        { label: 'My Communities', value: 'my-communities', icon: 'UserGroupIcon' },
-        { label: 'Posts', value: 'posts', icon: 'GridViewIcon' },
-      ]);
-      setIsLoading(false);
-      if (categoryFromQuery == null) {
-        setSelectedCategoryId('recommended');
-      } else {
-        setSelectedCategoryId(categoryFromQuery);
-      }
-    }
   }, [categories, pathname, categoryFromQuery, setSelectedCategoryId]);
 
-  // Hide filters on Discover, Experiences (which renders its own tabs), Moments
+  // Hide filters on Discover, Experiences and Communities (which render their
+  // own tabs), Moments
   // (a photo feed with no categories — it would otherwise sit on the skeleton
   // forever, since no branch above ever clears isLoading), detail pages (with
   // IDs), and Creator Studio (a host dashboard, not browsable content)
   if (
     pathname === '/' ||
     pathname === '/experiences' ||
+    pathname === '/communities' ||
     pathname.startsWith('/moments') ||
     pathname.startsWith('/places/') ||
     pathname.startsWith('/experiences/') ||
