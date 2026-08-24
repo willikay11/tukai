@@ -10,11 +10,16 @@ export type Place = {
   location: Location;
   categories: PlaceCategory[];
   photos: Photo[];
-  totalReviews: number;
+  // null until the place has been reviewed
+  totalReviews: number | null;
   averageRating: number;
   isBookmarked: boolean;
   status: Status;
   dateCreated: string;
+  // The DETAIL endpoint embeds both of these, so a place page needs no extra
+  // requests for them. The list endpoint does not return them.
+  properties?: PlaceProperty[];
+  socialLinks?: PlaceSocialLink[];
 };
 
 export type PlaceProperty = {

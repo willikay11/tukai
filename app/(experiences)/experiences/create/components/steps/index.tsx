@@ -840,7 +840,7 @@ export const CreateExperienceSteps = ({
                   <ViewExperiencePageContent experience={previewExperience} bookingMode="preview" />
                 )}
 
-                <div className="mt-8 flex justify-end">
+                <div className="mt-8 flex justify-start">
                   <Button
                     type="button"
                     variant="gradient"

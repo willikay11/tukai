@@ -1,6 +1,5 @@
+import { SectionShell } from '@/app/shared/components/Sections';
 import { NoData } from '@/components/ui/noData';
-
-import { SectionShell } from './SectionShell';
 
 /**
  * ⚠️ NO BACKEND. There is no source for a community's places:

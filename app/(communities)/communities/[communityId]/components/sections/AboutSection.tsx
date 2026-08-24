@@ -3,20 +3,9 @@
 import { DescriptionShowMore } from '@/app/shared/components/Global';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
+import { DetailsGrid, SectionShell } from '@/app/shared/components/Sections';
 import { Community } from '@/types/community';
 import { Photo } from '@/types/photo';
-
-import { SectionShell } from './SectionShell';
-
-const DetailRow = ({ icon, label, value }: { icon: string; label: string; value: string }) => (
-  <div className="flex items-start gap-3">
-    <IconComponent iconName={icon} size={24} className="mt-0.5 flex-shrink-0 text-gray-600" />
-    <div className="min-w-0">
-      <p className="text-xs text-gray-400">{label}</p>
-      <p className="truncate text-sm font-medium text-gray-800">{value}</p>
-    </div>
-  </div>
-);
 
 export const AboutSection = ({
   community,
@@ -71,11 +60,7 @@ export const AboutSection = ({
 
       <div className="mt-6">
         <p className="mb-3 text-sm font-bold text-gray-900">Details</p>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {details.map((detail) => (
-            <DetailRow key={detail.label} {...detail} />
-          ))}
-        </div>
+        <DetailsGrid rows={details} />
       </div>
     </SectionShell>
   );

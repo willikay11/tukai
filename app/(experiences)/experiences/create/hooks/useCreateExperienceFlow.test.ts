@@ -112,6 +112,23 @@ describe('useCreateExperienceFlow', () => {
     expect(result.current.activeStep).toBe('dates');
   });
 
+  // Each step is a full page of form — advancing while scrolled down lands the
+  // reader partway into the next one, past its heading
+  it('scrolls back to the top when the step changes', () => {
+    const scrollTo = jest.fn();
+    Object.defineProperty(window, 'scrollTo', { value: scrollTo, writable: true });
+
+    const { result } = renderHook(() => useCreateExperienceFlow(), {
+      wrapper: createWrapper(),
+    });
+
+    act(() => {
+      result.current.handlers.handleStepChange('about');
+    });
+
+    expect(scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 0 }));
+  });
+
   it('should update experienceId when handleExperienceCreated is called', () => {
     const { result } = renderHook(() => useCreateExperienceFlow(), {
       wrapper: createWrapper(),

@@ -5,6 +5,7 @@ import { useMemo } from 'react';
 import { BackToExplore } from '@/app/(experiences)/experiences/components/BackToExplore';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PageContainer } from '@/app/shared/components/Layout';
+import { MomentsGridSection, UpcomingExperiencesSection } from '@/app/shared/components/Sections';
 import { Share } from '@/app/shared/components/Share';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useMoments } from '@/app/shared/hooks/useMoments';
@@ -15,14 +16,7 @@ import { Moment } from '@/types/moment';
 
 import { CommunityAnchorTabs } from './CommunityAnchorTabs';
 import { JoinCommunityPanel } from './JoinCommunityPanel';
-import {
-  AboutSection,
-  ExperiencesSection,
-  MembersSection,
-  MomentsSection,
-  PlacesSection,
-  ReviewsSection,
-} from './sections';
+import { AboutSection, MembersSection, PlacesSection, ReviewsSection } from './sections';
 
 const SECTION_IDS = ['about', 'experiences', 'members', 'places', 'moments', 'reviews'];
 
@@ -69,7 +63,7 @@ export const CommunityDetailContent = ({
   const coverPhoto = community.photos?.[0]?.photo ?? '';
 
   return (
-    <PageContainer className="py-6">
+    <PageContainer variant="detail" className="py-6">
       <BackToExplore href="/communities" label="All communities" />
 
       <div className="mt-4 flex items-start justify-between gap-4">
@@ -107,15 +101,15 @@ export const CommunityDetailContent = ({
       <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="space-y-16 lg:col-span-2">
           <AboutSection community={community} upcomingCount={experiences.length} />
-          <ExperiencesSection
-            communityName={community.title}
+          <UpcomingExperiencesSection
+            hostName={community.title}
             experiences={experiences}
             isLoading={isLoadingExperiences}
           />
           <MembersSection members={members} />
           <PlacesSection communityName={community.title} />
-          <MomentsSection
-            communityName={community.title}
+          <MomentsGridSection
+            hostName={community.title}
             moments={moments}
             isLoading={isLoadingMoments}
           />

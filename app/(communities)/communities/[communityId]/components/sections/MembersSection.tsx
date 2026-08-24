@@ -3,12 +3,11 @@
 import { useMemo, useState } from 'react';
 
 import { PhotoImage } from '@/app/shared/components/Images';
+import { SectionShell } from '@/app/shared/components/Sections';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NoData } from '@/components/ui/noData';
 import { CommunityMember } from '@/types/community';
-
-import { SectionShell } from './SectionShell';
 
 const nameOf = (member: CommunityMember) =>
   member.user?.displayName ||

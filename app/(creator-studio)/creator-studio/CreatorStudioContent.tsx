@@ -98,7 +98,7 @@ export const CreatorStudioContent = () => {
   const purchaseQueries = useQueries({
     queries: reservationSources.map((experience) => ({
       queryKey: ['ticket-purchases', 'experience', experience.id],
-      queryFn: () => fetchTicketPurchases({ ticket__experience: experience.id, page_size: 100 }),
+      queryFn: () => fetchTicketPurchases({ experience: experience.id, page_size: 100 }),
       enabled: Boolean(userId),
     })),
   });

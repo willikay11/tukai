@@ -54,7 +54,10 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             type="button"
             disabled={disabled}
             className={cn(
-              'flex h-[50px] w-full items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5 text-left text-xs placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+              // 44px, the height every field in the app settled on. It sits
+              // beside the TimePicker in a two-column grid, so the pair have to
+              // agree.
+              'flex h-11 w-full items-center justify-between rounded-[14px] border border-gray-200 px-3 py-2.5 text-left text-xs placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
               !date && 'text-gray-400',
               date && 'text-gray-700',
               className,

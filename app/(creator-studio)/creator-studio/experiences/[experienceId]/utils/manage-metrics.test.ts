@@ -1,6 +1,7 @@
 import { Experience } from '@/types/experience';
+import { TicketPurchase } from '@/types/ticket-purchase';
 
-import { buildManageExperienceMetrics } from './manage-metrics';
+import { buildManageExperienceMetrics, countBuyers } from './manage-metrics';
 
 // Mirrors the host payload: tickets_sold / total_tickets are the host's own
 // figures, while reserved_tickets_count is the REQUESTING USER's own bookings
@@ -91,5 +92,56 @@ describe('buildManageExperienceMetrics', () => {
 
     expect(metrics.ticketsSold).toBe(0);
     expect(metrics.isSelling).toBe(false);
+  });
+});
+
+const purchase = (id: string, userId?: string): TicketPurchase =>
+  ({ id, user: userId ? { id: userId } : null }) as unknown as TicketPurchase;
+
+describe('countBuyers', () => {
+  // People, not tickets — one person buying four is one buyer
+  it('counts each person once however many tickets they hold', () => {
+    expect(countBuyers([purchase('1', 'u1'), purchase('2', 'u1'), purchase('3', 'u1')])).toBe(1);
+  });
+
+  it('counts different people separately', () => {
+    expect(countBuyers([purchase('1', 'u1'), purchase('2', 'u2')])).toBe(2);
+  });
+
+  it('is zero with no purchases', () => {
+    expect(countBuyers([])).toBe(0);
+  });
+
+  // Dropping an anonymous purchase would undercount; collapsing them all into
+  // one would undercount worse
+  it('treats purchases with no user as separate buyers', () => {
+    expect(countBuyers([purchase('1'), purchase('2')])).toBe(2);
+  });
+
+  it('mixes known and unknown buyers', () => {
+    expect(countBuyers([purchase('1', 'u1'), purchase('2', 'u1'), purchase('3')])).toBe(2);
+  });
+});
+
+// `buyers` was hardcoded to 80 regardless of the experience
+describe('buildManageExperienceMetrics buyers', () => {
+  const published = { status: 'published', ticketsAvailable: 10 } as unknown as Experience;
+
+  it('reports the real buyer count', () => {
+    const metrics = buildManageExperienceMetrics(published, [
+      purchase('1', 'u1'),
+      purchase('2', 'u2'),
+      purchase('3', 'u2'),
+    ]);
+
+    expect(metrics.buyers).toBe(2);
+  });
+
+  it('reports no buyers before anyone has bought', () => {
+    expect(buildManageExperienceMetrics(published, []).buyers).toBe(0);
+  });
+
+  it('defaults to no buyers when purchases are not supplied', () => {
+    expect(buildManageExperienceMetrics(published).buyers).toBe(0);
   });
 });

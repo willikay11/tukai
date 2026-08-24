@@ -146,7 +146,9 @@ export function BankAccountDetailsForm({
           }}
         >
           <SelectTrigger
-            className="h-[50px] text-sm shadow-none data-[placeholder]:text-sm data-[placeholder]:text-gray-400"
+            // 44px and a 14px radius, matching the Input fields around it —
+            // the trigger's own defaults are 50px and rounded-lg
+            className="h-11 rounded-[14px] text-sm shadow-none data-[placeholder]:text-sm data-[placeholder]:text-gray-400"
             prefixIcon={<IconComponent iconName="Location01Icon" size={18} color="#374151" />}
           >
             <SelectValue placeholder="Country" />
@@ -269,7 +271,9 @@ export function BankAccountDetailsForm({
           }}
         >
           <SelectTrigger
-            className="h-[50px] text-sm shadow-none data-[placeholder]:text-sm data-[placeholder]:text-gray-400"
+            // 44px and a 14px radius, matching the Input fields around it —
+            // the trigger's own defaults are 50px and rounded-lg
+            className="h-11 rounded-[14px] text-sm shadow-none data-[placeholder]:text-sm data-[placeholder]:text-gray-400"
             prefixIcon={<IconComponent iconName="Location01Icon" size={18} color="#374151" />}
           >
             <SelectValue placeholder="Country" />
@@ -323,7 +327,10 @@ export function BankAccountDetailsForm({
           icon={
             <span className="inline-flex items-center gap-3">
               <IconComponent iconName="CallIcon" size={18} color="#374151" />
-              <span className="text-xl text-gray-300">|</span>
+              {/* A hairline rather than a `|` glyph: at text-xl the character
+                  carried a 28px line box and made this field taller than the
+                  ones above it */}
+              <span className="h-4 w-px flex-shrink-0 bg-gray-200" />
               <span className="text-sm text-gray-800">+254</span>
             </span>
           }

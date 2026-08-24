@@ -8,6 +8,9 @@ export type MomentsQueryParams = {
   page_size?: number;
   // Moments posted in one community
   community?: string;
+  // ⚠️ Moments carry a `place`, but nothing in staging has one set, so this
+  // filter could not be verified against real data
+  place?: string;
 };
 
 export async function fetchMoments(params: MomentsQueryParams = {}): Promise<ApiResponse> {

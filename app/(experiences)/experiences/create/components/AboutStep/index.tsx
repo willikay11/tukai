@@ -199,7 +199,7 @@ export const AboutStep = ({
         <button
           type="button"
           onClick={() => setIsPlaceModalOpen(true)}
-          className="flex h-[50px] w-full items-center gap-2 rounded-[10px] border border-gray-700 border-input px-3 text-left focus:border-primary focus:outline-none"
+          className="flex h-11 w-full items-center gap-2 rounded-[10px] border border-gray-700 border-input px-3 text-left focus:border-primary focus:outline-none"
         >
           <IconComponent iconName="Location01Icon" size={18} className="text-gray-600" />
           <span

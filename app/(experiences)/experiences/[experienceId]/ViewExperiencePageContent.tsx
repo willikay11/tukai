@@ -109,7 +109,7 @@ export const ViewExperiencePageContent = ({
       : 'before the experience ends.';
 
   return (
-    <PageContainer className="py-6">
+    <PageContainer variant="detail" className="py-6">
       {/* Top row — Back link on left, actions on right */}
       <div className="mb-6 flex items-center justify-between">
         {isPreview ? <div /> : <BackToExplore />}

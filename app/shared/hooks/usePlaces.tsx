@@ -2,14 +2,20 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
   bookmarkPlace,
+  cancelPlaceBookingRequest,
+  createPlaceBookingRequest,
   createPlaceReview,
   createPlaceReviewComment,
   deletePlaceReview,
   deletePlaceReviewImage,
+  fetchFollowing,
   fetchGoogleMapsAutocomplete,
   fetchGoogleMapsPlaceGeocode,
   fetchPlace,
+  fetchPlaceAvailability,
+  fetchPlaceBookingRequests,
   fetchPlaceCategories,
+  fetchPlaceReservationProfiles,
   fetchPlaceReviewComments,
   fetchPlaceReviews,
   fetchPlaces,
@@ -19,6 +25,7 @@ import {
   uploadPlaceReviewImages,
 } from '@/services/place';
 import { PlaceCategoryParams } from '@/types/networkParam';
+import { CreatePlaceBookingRequest } from '@/types/placeReservation';
 
 export const usePlaces = ({
   categoryId,
@@ -229,3 +236,63 @@ export const useGoogleMapsPlaceGeocode = (placeId: string | null, enabled: boole
     staleTime: Infinity,
   });
 };
+
+// ─── Place reservations ────────────────────────────────────────────────────
+
+/** The place's bookability profiles. Public — anyone may list them. */
+export const usePlaceReservationProfiles = (placeId: string, enabled = true) =>
+  useQuery({
+    queryKey: ['placeReservationProfiles', placeId],
+    queryFn: async () => await fetchPlaceReservationProfiles(placeId),
+    enabled: enabled && Boolean(placeId),
+    staleTime: 5 * 60 * 1000,
+  });
+
+/** Weekly hours plus one-off overrides, fetched together — both drive one picker. */
+export const usePlaceAvailability = (placeId: string, profileId: string | undefined) =>
+  useQuery({
+    queryKey: ['placeAvailability', placeId, profileId],
+    queryFn: async () => await fetchPlaceAvailability(placeId, profileId!),
+    enabled: Boolean(placeId && profileId),
+    staleTime: 5 * 60 * 1000,
+  });
+
+export const usePlaceBookingRequests = (placeId: string, profileId: string | undefined) =>
+  useQuery({
+    queryKey: ['placeBookingRequests', placeId, profileId],
+    queryFn: async () => await fetchPlaceBookingRequests(placeId, profileId!),
+    enabled: Boolean(placeId && profileId),
+  });
+
+export const useCreatePlaceBookingRequest = (placeId: string, profileId: string | undefined) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreatePlaceBookingRequest) =>
+      await createPlaceBookingRequest(placeId, profileId!, data),
+    onSuccess: () => {
+      // The new request has to show up under "My Reservations" straight away
+      queryClient.invalidateQueries({ queryKey: ['placeBookingRequests', placeId, profileId] });
+    },
+  });
+};
+
+export const useCancelPlaceBookingRequest = (placeId: string, profileId: string | undefined) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (purchaseId: string) => await cancelPlaceBookingRequest(purchaseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeBookingRequests', placeId, profileId] });
+    },
+  });
+};
+
+/** People the reader follows, offered as invitees on a reservation. */
+export const useFollowing = (userId: string | undefined) =>
+  useQuery({
+    queryKey: ['following', userId],
+    queryFn: async () => await fetchFollowing(userId!),
+    enabled: Boolean(userId),
+    staleTime: 5 * 60 * 1000,
+  });

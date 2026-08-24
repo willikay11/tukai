@@ -1,6 +1,7 @@
 import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
 import { PlaceCategoryParams } from '@/types/networkParam';
+import { CreatePlaceBookingRequest } from '@/types/placeReservation';
 import { parseApiError } from '@/utils/parseApiError';
 import { parseCamelToSnake, parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
@@ -436,6 +437,153 @@ export async function fetchGoogleMapsPlaceGeocode(placeId: string): Promise<ApiR
       status: error.response?.status || 500,
       success: false,
       message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
+  }
+}
+
+// ─── Reservations ──────────────────────────────────────────────────────────
+//
+// A place becomes bookable when its owning community creates a reservation
+// PROFILE. Diners then post a booking REQUEST against that profile, which the
+// API turns into a Purchase with status "requested" for the venue to accept.
+//
+// Note these are deliberately NOT the experiences ticket-purchase endpoints —
+// per the API spec, places have their own path precisely so the two do not
+// share a booking flow.
+
+export async function fetchPlaceReservationProfiles(placeId: string): Promise<ApiResponse> {
+  try {
+    const res = await api.get(`/v1/places/${placeId}/reservation-profile/`);
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
+  }
+}
+
+export async function fetchPlaceAvailability(
+  placeId: string,
+  profileId: string,
+): Promise<ApiResponse> {
+  try {
+    // Rules are the weekly hours; exceptions are one-off closures and overrides
+    const [rules, exceptions] = await Promise.all([
+      api.get(`/v1/places/${placeId}/reservation-profile/${profileId}/availability-rules/`),
+      api.get(`/v1/places/${placeId}/reservation-profile/${profileId}/availability-exceptions/`),
+    ]);
+
+    return {
+      status: rules.status,
+      success: true,
+      data: {
+        rules: parseSnakeToCamel(rules.data)?.results ?? [],
+        exceptions: parseSnakeToCamel(exceptions.data)?.results ?? [],
+      },
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
+  }
+}
+
+export async function fetchPlaceBookingRequests(
+  placeId: string,
+  profileId: string,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(
+      `/v1/places/${placeId}/reservation-profile/${profileId}/booking-requests/`,
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
+  }
+}
+
+export async function createPlaceBookingRequest(
+  placeId: string,
+  profileId: string,
+  data: CreatePlaceBookingRequest,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    // ⚠️ The request body is NOT documented in the API spec (`parameters: []`).
+    // This mirrors the documented TicketPurchaseRequest / reservation
+    // serializers, which every other purchase path on this API uses. If the
+    // backend expects different field names this fails at runtime — the error
+    // is surfaced to the caller rather than swallowed.
+    const res = await axiosInstance.post(
+      `/v1/places/${placeId}/reservation-profile/${profileId}/booking-requests/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not request this reservation'),
+    };
+  }
+}
+
+/**
+ * Cancelling a table booking goes through the SHARED purchase action, not a
+ * place path — the spec is explicit that "accept/decline/pay/cancel stay on the
+ * unified experiences-api:ticket-purchases-* actions - not duplicated here".
+ */
+export async function cancelPlaceBookingRequest(purchaseId: string): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.patch(`/v1/experiences/ticket-purchases/${purchaseId}/cancel/`);
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not cancel this reservation'),
+    };
+  }
+}
+
+/**
+ * The people the reader follows — the source for the reservation invite list.
+ * `GET /accounts/users/?following=<id>` is the only friend-shaped query the API
+ * offers; there is no dedicated friends endpoint.
+ */
+export async function fetchFollowing(userId: string): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(`/v1/accounts/users/`, {
+      params: { following: userId, page_size: 50 },
+    });
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load your friends'),
     };
   }
 }

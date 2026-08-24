@@ -23,6 +23,8 @@ export type ExperiencesQueryParams = {
   // `hosted_by_community` are silently ignored by the API — only `community`
   // actually filters.
   community?: string;
+  // Experiences held at one place — verified filtering
+  place?: string;
   page?: number;
   page_size?: number;
   invited?: boolean;
@@ -612,7 +614,13 @@ export const purchaseExperienceTicketV2 = async (
 
 export const fetchTicketPurchases = async (params: {
   user?: string;
-  ticket__experience?: string;
+  // The documented filters are `ticket`, `experience`, `user` and `status`.
+  // This used to send `ticket__experience`, which the API does not recognise —
+  // and DRF drops unknown query params silently, so a host's Sales tab was
+  // listing every purchase they could see rather than this experience's.
+  experience?: string;
+  ticket?: string;
+  status?: string;
   page_size?: number;
 }): Promise<ApiResponse> => {
   const axiosInstance = await apiWithToken();
