@@ -363,11 +363,21 @@ describe('LocationAutocompleteField', () => {
   });
 
   describe('styling', () => {
-    it('applies default input height', () => {
+    // The field takes its height from the shared Input's padding and line
+    // height. Forcing h-[50px] on the inner element stacked on that padding and
+    // made the meeting-point field 76px against every other field's 44px.
+    it('does not force a height onto the input', () => {
       render(<LocationAutocompleteField {...defaultProps} />);
 
       const input = screen.getByRole('textbox');
-      expect(input).toHaveClass('h-[50px]');
+      expect(input.className).not.toMatch(/\bh-\[/);
+      expect(input).toHaveClass('leading-[18px]');
+    });
+
+    it('still lets a caller style the input', () => {
+      render(<LocationAutocompleteField {...defaultProps} inputClassName="text-red-500" />);
+
+      expect(screen.getByRole('textbox')).toHaveClass('text-red-500');
     });
 
     it('dropdown has correct styling classes', () => {

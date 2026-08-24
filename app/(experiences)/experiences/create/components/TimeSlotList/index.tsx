@@ -89,12 +89,12 @@ export const TimeSlotList = ({ slots, onChange, errors }: TimeSlotListProps) => 
               </div>
 
               {slots.length > 1 && (
-                // Matches the TimePicker's h-[50px] so the icon stays centred on
+                // Matches the TimePicker's h-11 so the icon stays centred on
                 // the inputs whether or not an error is showing below them
                 <button
                   type="button"
                   onClick={() => handleRemoveSlot(index)}
-                  className="flex h-[50px] flex-shrink-0 items-center text-red-500 hover:text-red-700"
+                  className="flex h-11 flex-shrink-0 items-center text-red-500 hover:text-red-700"
                   aria-label="Remove time slot"
                 >
                   <IconComponent iconName="Delete02Icon" size={18} />

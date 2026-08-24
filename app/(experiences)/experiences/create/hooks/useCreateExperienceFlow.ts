@@ -155,7 +155,9 @@ const mapCommission = (
 
 // Inverse of mapCommission, for restoring the picker from a saved experience.
 // Returns null for an absent or unrecognised value, leaving the form default.
-const parseCommission = (value: string | null | undefined): 'host' | 'customer' | 'split' | null => {
+const parseCommission = (
+  value: string | null | undefined,
+): 'host' | 'customer' | 'split' | null => {
   const map = { host_pays: 'host', customer_pays: 'customer', split: 'split' } as const;
   return value && value in map ? map[value as keyof typeof map] : null;
 };
@@ -485,6 +487,22 @@ export const useCreateExperienceFlow = ({
     router,
     sessionStatus,
   ]);
+
+  /**
+   * Each step is a full page of form, so advancing while scrolled down lands
+   * the reader partway into the next one with its heading and first fields
+   * above the fold.
+   *
+   * Guarded for the server render, and it honours a reader who has asked for
+   * reduced motion.
+   */
+  const scrollToTop = () => {
+    if (typeof window === 'undefined') return;
+
+    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+  };
 
   const replaceCreateUrlParams = (
     nextValues: Partial<{ experienceId: string | null; step: ExperienceStepId }>,
@@ -984,6 +1002,7 @@ export const useCreateExperienceFlow = ({
     (step: ExperienceStepId) => {
       setActiveStep(step);
       replaceCreateUrlParams({ experienceId, step });
+      scrollToTop();
     },
     [experienceId],
   );
@@ -994,6 +1013,7 @@ export const useCreateExperienceFlow = ({
 
       if (step) {
         setActiveStep(step);
+        scrollToTop();
       }
 
       replaceCreateUrlParams({ experienceId: createdExperienceId, step });

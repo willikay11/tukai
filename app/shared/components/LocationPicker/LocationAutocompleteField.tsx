@@ -9,6 +9,10 @@ type LocationAutocompleteFieldProps = {
   containerRef?: RefObject<HTMLDivElement>;
   value: string;
   placeholder?: string;
+  // Reaches the <input> itself. Do NOT set a height here: the shared Input
+  // sizes the field from its own padding and line-height, so an `h-*` on the
+  // inner element stacks on top of that padding and makes the field far taller
+  // than every other one on the form.
   inputClassName?: string;
   showSuggestions: boolean;
   minQueryLength?: number;
@@ -23,7 +27,7 @@ export const LocationAutocompleteField = ({
   containerRef,
   value,
   placeholder = 'City e.g. Nairobi, Watamu...',
-  inputClassName = 'h-[50px]',
+  inputClassName,
   showSuggestions,
   minQueryLength = 3,
   suggestions = [],

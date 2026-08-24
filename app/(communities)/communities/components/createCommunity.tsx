@@ -127,7 +127,7 @@ export const CreateCommunity = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input placeholder="Community Name" className="h-[55px]" {...field} />
+                    <Input placeholder="Community Name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
