@@ -1,6 +1,5 @@
+import { SectionShell } from '@/app/shared/components/Sections';
 import { NoData } from '@/components/ui/noData';
-
-import { SectionShell } from './SectionShell';
 
 /**
  * ⚠️ NO BACKEND. Communities have no reviews: `/v1/communities/{id}/reviews/`,

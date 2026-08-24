@@ -23,6 +23,8 @@ export type ExperiencesQueryParams = {
   // `hosted_by_community` are silently ignored by the API — only `community`
   // actually filters.
   community?: string;
+  // Experiences held at one place — verified filtering
+  place?: string;
   page?: number;
   page_size?: number;
   invited?: boolean;

@@ -42,20 +42,17 @@ const ExperienceRow = ({ experience }: { experience: Experience }) => {
   );
 };
 
-export const ExperiencesSection = ({
-  communityName,
+export const UpcomingExperiencesSection = ({
+  hostName,
   experiences,
   isLoading,
 }: {
-  communityName: string;
+  // Whoever hosts them — a community, or a place
+  hostName: string;
   experiences: Experience[];
   isLoading: boolean;
 }) => (
-  <SectionShell
-    id="experiences"
-    title="Upcoming Experiences"
-    subtitle={`Hosted by ${communityName}`}
-  >
+  <SectionShell id="experiences" title="Upcoming Experiences" subtitle={`Hosted by ${hostName}`}>
     {isLoading ? (
       <div className="space-y-3">
         {Array.from({ length: 2 }).map((_, index) => (
@@ -64,7 +61,7 @@ export const ExperiencesSection = ({
       </div>
     ) : experiences.length === 0 ? (
       <div className="py-10">
-        <NoData message={`${communityName} has no upcoming experiences`} />
+        <NoData message={`${hostName} has no upcoming experiences`} />
       </div>
     ) : (
       <div className="space-y-3">

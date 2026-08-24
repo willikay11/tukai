@@ -16,7 +16,7 @@ export const useMoments = (params: MomentsQueryParams = {}, enabled: boolean = t
   useQuery({
     // Every param that changes the request belongs in the key — without
     // `community`, a community-filtered query serves the whole feed from cache
-    queryKey: ['moments', params.page, params.page_size, params.community],
+    queryKey: ['moments', params.page, params.page_size, params.community, params.place],
     queryFn: async () => await fetchMoments(params),
     enabled,
   });

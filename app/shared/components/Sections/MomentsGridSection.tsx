@@ -8,19 +8,20 @@ import { Moment } from '@/types/moment';
 
 import { SectionShell } from './SectionShell';
 
-export const MomentsSection = ({
-  communityName,
+export const MomentsGridSection = ({
+  hostName,
   moments,
   isLoading,
 }: {
-  communityName: string;
+  // Whoever they were posted at — a community, or a place
+  hostName: string;
   moments: Moment[];
   isLoading: boolean;
 }) => {
   const router = useRouter();
 
   return (
-    <SectionShell id="moments" title={`Moments at ${communityName}`}>
+    <SectionShell id="moments" title={`Moments at ${hostName}`}>
       {isLoading ? (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
@@ -29,7 +30,7 @@ export const MomentsSection = ({
         </div>
       ) : moments.length === 0 ? (
         <div className="py-10">
-          <NoData message={`No moments from ${communityName} yet`} />
+          <NoData message={`No moments from ${hostName} yet`} />
         </div>
       ) : (
         <MomentsMasonry
