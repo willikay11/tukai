@@ -57,6 +57,12 @@ export const CreateExperienceInvites = ({
 
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>(initialInvitedMembers);
   const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
+  // This starts empty and is only filled by the picker, so passing through the
+  // step untouched used to PATCH invitedCommunityIds: [] — wiping any
+  // previously invited communities — and announce "Communities saved" for a
+  // save that never needed to happen. That toast was still the one on screen by
+  // the time the reader reached Publish.
+  const [hasEditedCommunities, setHasEditedCommunities] = useState(false);
 
   useEffect(() => {
     setInvitedMembers(initialInvitedMembers);
@@ -80,7 +86,8 @@ export const CreateExperienceInvites = ({
   );
 
   const handleNext = async () => {
-    if (experienceId && experience) {
+    // Nothing to save if the reader never touched the picker — just move on
+    if (experienceId && experience && hasEditedCommunities) {
       try {
         await updateExperience({
           title: experience.title,
@@ -199,7 +206,10 @@ export const CreateExperienceInvites = ({
 
         <InviteCommunities
           invitedCommunities={invitedCommunities}
-          onCommunitiesChange={setInvitedCommunities}
+          onCommunitiesChange={(communities: Community[]) => {
+            setHasEditedCommunities(true);
+            setInvitedCommunities(communities);
+          }}
           availableCommunities={availableCommunities}
           isLoading={isFetchingCommunities}
         />

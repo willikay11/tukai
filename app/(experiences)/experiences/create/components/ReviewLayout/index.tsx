@@ -248,45 +248,39 @@ export const ReviewLayout = ({
       <PreviewWalletSection wallet={wallet} onEdit={() => handleEditClick('wallet')} />
 
       {/* Action Bar */}
+      {/* Left-aligned: the primary action leads, with the secondary ones after
+          it rather than the bar splitting to both edges */}
       {showActionBar && (
-        <div className="mt-8 flex items-center justify-between gap-3 pt-6">
+        <div className="mt-8 flex flex-wrap items-center gap-3 pt-6">
+          <Button
+            type="button"
+            variant="gradient"
+            onClick={() => onPublish?.()}
+            disabled={isPublishing}
+            className="rounded-full"
+          >
+            {isPublishing ? 'Publishing...' : 'Publish Experience'}
+          </Button>
+          <Button
+            type="button"
+            variant="outline-primary"
+            onClick={() => runAction('exit', onSaveAndExit ?? onCancel)}
+            disabled={isPublishing || pendingAction === 'exit'}
+            className="text-xs font-semibold"
+          >
+            {pendingAction === 'exit' && (
+              <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
+            )}
+            Save & Exit
+          </Button>
           <button
             type="button"
-            onClick={() => {
-              console.log('Cancel clicked');
-              onCancel?.();
-            }}
+            onClick={() => onCancel?.()}
             disabled={isPublishing}
             className="text-xs font-medium text-destructive hover:text-destructive/80 disabled:opacity-50"
           >
             Cancel
           </button>
-          <div className="flex gap-3">
-            <Button
-              type="button"
-              variant="outline-primary"
-              onClick={() => runAction('exit', onSaveAndExit ?? onCancel)}
-              disabled={isPublishing || pendingAction === 'exit'}
-              className="text-xs font-semibold"
-            >
-              {pendingAction === 'exit' && (
-                <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
-              )}
-              Save & Exit
-            </Button>
-            <Button
-              type="button"
-              variant="gradient"
-              onClick={() => {
-                console.log('Publish button clicked - calling onPublish');
-                onPublish?.();
-              }}
-              disabled={isPublishing}
-              className="rounded-full"
-            >
-              {isPublishing ? 'Publishing...' : 'Publish Experience'}
-            </Button>
-          </div>
         </div>
       )}
     </div>

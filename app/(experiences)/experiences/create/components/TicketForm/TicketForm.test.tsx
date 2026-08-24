@@ -35,8 +35,13 @@ jest.mock('@/components/ui/button', () => ({
 }));
 
 jest.mock('@/components/ui/input', () => ({
-  Input: ({ placeholder, value, onChange }: any) => (
-    <input placeholder={placeholder} value={value} onChange={onChange} />
+  // `suffixIcon` and `id` were dropped here, which made anything in a field's
+  // suffix — the quantity stepper, for one — invisible to every test
+  Input: ({ placeholder, value, onChange, suffixIcon, id }: any) => (
+    <span>
+      <input id={id} placeholder={placeholder} value={value} onChange={onChange} />
+      {suffixIcon}
+    </span>
   ),
 }));
 
@@ -89,6 +94,17 @@ describe('TicketForm', () => {
       />,
     );
     expect(screen.getByText(/Total Tickets Cost/i)).toBeInTheDocument();
+  });
+
+  // The quantity stepper used to be two 16px arrows with a gap — 34px tall,
+  // which pushed its field to ~60px while Amount beside it stayed at 44px
+  it('keeps the quantity field the same height as the amount field', () => {
+    render(<TicketForm value={defaultValue} onChange={() => {}} errors={{}} onSave={() => {}} />);
+
+    // Pinned to the input's own 18px line box, so it cannot drive the field
+    // taller than the Amount field sharing its grid row
+    const stepper = screen.getByLabelText('Increase quantity').parentElement;
+    expect(stepper).toHaveClass('h-[18px]');
   });
 
   it('calls onSave when Save Ticket button clicked', () => {

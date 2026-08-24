@@ -63,7 +63,7 @@ export const CommunityDetailContent = ({
   const coverPhoto = community.photos?.[0]?.photo ?? '';
 
   return (
-    <PageContainer className="py-6">
+    <PageContainer variant="detail" className="py-6">
       <BackToExplore href="/communities" label="All communities" />
 
       <div className="mt-4 flex items-start justify-between gap-4">

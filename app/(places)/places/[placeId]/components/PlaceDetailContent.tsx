@@ -68,7 +68,7 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
   ].filter(Boolean);
 
   return (
-    <PageContainer className="py-6">
+    <PageContainer variant="detail" className="py-6">
       <div className="flex items-center justify-between gap-4">
         <BackToExplore href="/places" label="Back to Places" />
         <Share

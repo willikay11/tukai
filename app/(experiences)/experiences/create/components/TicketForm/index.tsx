@@ -120,20 +120,26 @@ export const TicketForm = ({
               onChange({ quantity: e.target.value ? parseInt(e.target.value, 10) : null })
             }
             suffixIcon={
-              <div className="flex flex-col gap-0.5">
+              // Two 16px arrows with a gap stood 34px tall, which pushed this
+              // field to ~60px while the Amount field beside it sat at 44px.
+              // Pinned to the 18px line box the input itself uses, so the pair
+              // in this grid row match.
+              <div className="flex h-[18px] flex-col justify-center -space-y-1.5">
                 <button
                   type="button"
+                  aria-label="Increase quantity"
                   onClick={() => onChange({ quantity: (value.quantity ?? 0) + 1 })}
-                  className="text-gray-700 hover:text-gray-900"
+                  className="leading-none text-gray-700 hover:text-gray-900"
                 >
-                  <IconComponent iconName="ArrowUp01Icon" size={16} />
+                  <IconComponent iconName="ArrowUp01Icon" size={12} />
                 </button>
                 <button
                   type="button"
+                  aria-label="Decrease quantity"
                   onClick={() => onChange({ quantity: Math.max(0, (value.quantity ?? 0) - 1) })}
-                  className="text-gray-700 hover:text-gray-900"
+                  className="leading-none text-gray-700 hover:text-gray-900"
                 >
-                  <IconComponent iconName="ArrowDown01Icon" size={16} />
+                  <IconComponent iconName="ArrowDown01Icon" size={12} />
                 </button>
               </div>
             }
