@@ -8,8 +8,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { Breadcrumb } from '@/app/shared/components/Breadcrumb';
 import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
 import { ComingSoon } from '@/app/shared/components/ComingSoon';
-import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
+import {
+  useExperienceTicketPurchases,
+  useFetchSingleExperience,
+} from '@/app/shared/hooks/useExperiences';
 import { Experience } from '@/types/experience';
+import { TicketPurchase } from '@/types/ticket-purchase';
 
 import { AboutTab } from './components/AboutTab';
 import { InvitedGuestsTab } from './components/InvitedGuestsTab';
@@ -34,7 +38,15 @@ export default function ManageExperiencePage() {
   const { data: experienceResponse, isLoading } = useFetchSingleExperience(experienceId, true);
   const experience: Experience | undefined = experienceResponse?.data;
 
-  const metrics = useMemo(() => buildManageExperienceMetrics(experience), [experience]);
+  // The same purchases the Sales tab lists — the buyer count is derived from
+  // them rather than hardcoded
+  const { data: purchasesResponse } = useExperienceTicketPurchases(experienceId, true);
+  const purchases: TicketPurchase[] = purchasesResponse?.data?.results ?? [];
+
+  const metrics = useMemo(
+    () => buildManageExperienceMetrics(experience, purchases),
+    [experience, purchases],
+  );
 
   // Only the host may see a creator dashboard for their own experience
   const currentUserId = session?.user?.id;

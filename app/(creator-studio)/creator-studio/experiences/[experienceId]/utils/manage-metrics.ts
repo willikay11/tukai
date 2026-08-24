@@ -2,6 +2,7 @@ import moment from 'moment';
 
 import { Status } from '@/enums/status';
 import { Experience } from '@/types/experience';
+import { TicketPurchase } from '@/types/ticket-purchase';
 
 import { experienceProgress } from '../../../utils/studio-metrics';
 
@@ -22,10 +23,12 @@ export interface ManageExperienceMetrics {
   daysToGo: number | null;
   isSelling: boolean;
 
+  // Distinct people who hold a purchase — counted from the purchase list
+  buyers: number;
+
   // ─── Placeholders: no endpoint ───
   revenue: number;
   revenueLabel: string;
-  buyers: number;
   pendingPayments: number;
   averageDailySales: number;
 }
@@ -37,15 +40,25 @@ export interface ManageExperienceMetrics {
 const PLACEHOLDER_METRICS = {
   revenue: 34839,
   revenueLabel: 'Ksh 34.8K',
-  buyers: 80,
   pendingPayments: 78238,
   averageDailySales: 4,
 };
+
+/**
+ * How many different people hold a ticket, not how many tickets were sold —
+ * one person buying four tickets is one buyer, so the rows are grouped by user.
+ *
+ * A purchase whose `user` is missing still counts as its own buyer: dropping it
+ * would undercount, and collapsing them all together would undercount worse.
+ */
+export const countBuyers = (purchases: TicketPurchase[]): number =>
+  new Set(purchases.map((purchase) => purchase.user?.id ?? `purchase:${purchase.id}`)).size;
 
 const normalizeStatus = (status: string): string => String(status).toUpperCase();
 
 export const buildManageExperienceMetrics = (
   experience: Experience | undefined,
+  purchases: TicketPurchase[] = [],
 ): ManageExperienceMetrics => {
   /**
    * tickets_sold and total_tickets are the host's own figures. This used to read
@@ -76,6 +89,7 @@ export const buildManageExperienceMetrics = (
     fillRatePercent,
     daysToGo,
     isSelling,
+    buyers: countBuyers(purchases),
     ...PLACEHOLDER_METRICS,
   };
 };

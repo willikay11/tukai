@@ -109,7 +109,7 @@ export const useExperienceTicketPurchases = (
 ) =>
   useQuery({
     queryKey: ['ticket-purchases', 'experience', experienceId],
-    queryFn: () => fetchTicketPurchases({ ticket__experience: experienceId!, page_size: 100 }),
+    queryFn: () => fetchTicketPurchases({ experience: experienceId!, page_size: 100 }),
     enabled: enabled && !!experienceId,
   });
 
