@@ -105,6 +105,51 @@ describe('ProfileMenu', () => {
     expect(onSignOut).toHaveBeenCalledTimes(1);
   });
 
+  // The popover this sits in stays mounted through client navigation, so it has
+  // to be told a row was chosen
+  describe('closing the menu', () => {
+    it('reports a selection when a linked item is chosen', () => {
+      const onItemSelect = jest.fn();
+      render(<ProfileMenu {...defaults} onItemSelect={onItemSelect} />);
+
+      const linked = PROFILE_MENU_ITEMS.find((item) => item.href)!;
+      fireEvent.click(screen.getByText(linked.label));
+
+      expect(onItemSelect).toHaveBeenCalled();
+    });
+
+    it('reports a selection when signing out', () => {
+      const onItemSelect = jest.fn();
+      const onSignOut = jest.fn();
+      render(<ProfileMenu {...defaults} onSignOut={onSignOut} onItemSelect={onItemSelect} />);
+
+      fireEvent.click(screen.getByText('Sign Out'));
+
+      expect(onItemSelect).toHaveBeenCalled();
+      expect(onSignOut).toHaveBeenCalled();
+    });
+
+    // A disabled row goes nowhere, so nothing should close
+    it('does not report a selection from an unavailable item', () => {
+      const unavailable = PROFILE_MENU_ITEMS.find((item) => !item.href);
+      expect(unavailable).toBeDefined();
+
+      const onItemSelect = jest.fn();
+      render(<ProfileMenu {...defaults} onItemSelect={onItemSelect} />);
+
+      fireEvent.click(screen.getByText(unavailable!.label));
+
+      expect(onItemSelect).not.toHaveBeenCalled();
+    });
+
+    it('works without the callback', () => {
+      render(<ProfileMenu {...defaults} />);
+
+      const linked = PROFILE_MENU_ITEMS.find((item) => item.href)!;
+      expect(() => fireEvent.click(screen.getByText(linked.label))).not.toThrow();
+    });
+  });
+
   it('renders Sign Out in the destructive colour', () => {
     render(<ProfileMenu {...defaults} />);
 
