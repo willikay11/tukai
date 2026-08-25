@@ -21,15 +21,28 @@ describe('SectionHeader', () => {
     expect(screen.queryByTestId('Compass01Icon')).not.toBeInTheDocument();
   });
 
-  it('keeps the subtitle inline beside the title, with or without an icon', () => {
+  // Beside the title from sm up, stacked under it on a phone — a long title
+  // and subtitle side by side overflow a narrow screen
+  it('puts the subtitle beside the title from sm up, stacked below it', () => {
     const { container } = render(
       <SectionHeader icon="Compass01Icon" title="Moments" subtitle="Fresh from the community" />,
     );
 
-    // Same baseline row as the icon-less usages on /experiences
-    const inlineRow = container.querySelector('.flex.items-baseline');
-    expect(inlineRow).toContainElement(screen.getByRole('heading', { level: 2 }));
-    expect(inlineRow).toContainElement(screen.getByText('Fresh from the community'));
+    const titleGroup = container.querySelector('.flex.flex-col');
+    expect(titleGroup).toContainElement(screen.getByRole('heading', { level: 2 }));
+    expect(titleGroup).toContainElement(screen.getByText('Fresh from the community'));
+
+    // Stacked by default, inline once there is room
+    expect(titleGroup).toHaveClass('sm:flex-row', 'sm:items-baseline');
+  });
+
+  // Without min-w-0 a long title pushes the "See all" link off the row
+  it('lets a long title shrink rather than overflow', () => {
+    const { container } = render(
+      <SectionHeader title="An extremely long section title that will not fit" seeAllHref="/x" />,
+    );
+
+    expect(container.querySelector('.min-w-0')).toBeInTheDocument();
   });
 
   it('renders a leading icon in a pale circle when given', () => {

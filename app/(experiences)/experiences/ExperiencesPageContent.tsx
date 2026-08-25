@@ -276,11 +276,13 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             <div className="col-span-12 space-y-10 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
               {/* Your Bucket Lists */}
               <section>
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-2xl font-bold text-gray-900">Your Bucket Lists</h2>
+                {/* Wraps rather than squeezing the button against the heading
+                    on a narrow screen */}
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">Your Bucket Lists</h2>
                   <Button
                     onClick={() => setIsCreateOpen(true)}
-                    className="flex items-center gap-2 rounded-full px-6"
+                    className="flex flex-shrink-0 items-center gap-2 rounded-full px-6"
                   >
                     <IconComponent iconName="PlusSignIcon" size={16} color="white" />
                     Create Bucket List
@@ -319,7 +321,9 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
               {/* Shared with you — hidden entirely when empty */}
               {sharedBucketLists.length > 0 && (
                 <section>
-                  <h2 className="mb-4 text-2xl font-bold text-gray-900">Shared with you</h2>
+                  <h2 className="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">
+                    Shared with you
+                  </h2>
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {sharedBucketLists.map((bucketList) => (
                       <SharedBucketListCard key={bucketList.id} bucketList={bucketList} />
