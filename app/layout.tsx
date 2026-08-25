@@ -96,7 +96,11 @@ export default function RootLayout({
                                 />
                               </Link>
                               <Nav />
-                              <div className="min-w-0 flex-1">
+                              {/* Capped: on flex-1 alone the field absorbed every
+                                  pixel the rest of the header did not use, so it
+                                  stretched far wider than a search bar needs on a
+                                  large screen */}
+                              <div className="min-w-0 max-w-xl flex-1">
                                 <Suspense
                                   fallback={
                                     <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
@@ -105,7 +109,9 @@ export default function RootLayout({
                                   <Search />
                                 </Suspense>
                               </div>
-                              <AskTukaiButton />
+                              {/* Keeps the trailing controls on the right edge once
+                                  the search stops growing */}
+                              <AskTukaiButton className="ml-auto" />
                               <AuthActions />
                             </header>
                           </div>
