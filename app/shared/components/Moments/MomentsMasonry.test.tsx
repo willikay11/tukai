@@ -139,16 +139,15 @@ describe('MomentsMasonry', () => {
 // Discover reuses this grid at full content width, so the column count has to
 // be settable rather than baked in
 describe('column count', () => {
-  // One column on a phone: two half-width columns leave a moment's photo and
-  // caption too narrow to read
-  it('starts at a single column and widens with the screen', () => {
+  // Two columns on a phone so the feed reads as a grid, widening from md
+  it('starts at two columns and widens with the screen', () => {
     const { container } = render(
       <MomentsMasonry {...defaults} moments={[makeMoment('a', 1, 1)]} />,
     );
 
-    const grid = container.querySelector('.columns-1');
+    const grid = container.querySelector('.columns-2');
     expect(grid).toBeInTheDocument();
-    expect(grid).toHaveClass('sm:columns-2', 'md:columns-3');
+    expect(grid).toHaveClass('md:columns-3');
   });
 
   it('accepts a wider set of columns', () => {

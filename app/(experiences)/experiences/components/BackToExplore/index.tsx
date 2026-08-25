@@ -26,7 +26,10 @@ export const BackToExplore = ({
     <button
       onClick={() => (href ? router.push(href) : router.back())}
       className={cn(
-        'flex items-center gap-2 text-sm transition-colors',
+        // `w-fit` because a flex item stretches to fill the cross axis by
+        // default — inside a `flex-col` parent (the see-all header on mobile)
+        // this spanned the full width. flex-shrink-0 does not prevent that.
+        'flex w-fit items-center gap-2 text-sm transition-colors',
         variant === 'pill'
           ? 'flex-shrink-0 rounded-full border border-gray-200 px-5 py-2.5 font-medium text-gray-800 hover:border-gray-300'
           : 'text-gray-700 hover:text-gray-900',

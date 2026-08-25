@@ -40,7 +40,7 @@ export const MomentsGridSection = ({
           onLoadMore={() => {}}
           hasMore={false}
           isLoadingMore={false}
-          columnsClassName="columns-1 gap-4 sm:columns-2 md:columns-3"
+          columnsClassName="columns-2 gap-4 md:columns-3"
         />
       )}
     </SectionShell>
