@@ -30,8 +30,8 @@ export const SectionHeader = ({
   const isStacked = layout === 'stacked';
 
   return (
-    <div className="mb-4 flex items-end justify-between">
-      <div className="flex items-center gap-3">
+    <div className="mb-4 flex items-end justify-between gap-3">
+      <div className="flex min-w-0 items-center gap-3">
         {icon && (
           <div
             className={cn(
@@ -49,8 +49,17 @@ export const SectionHeader = ({
           </div>
         )}
 
-        <div className={cn(isStacked ? 'flex flex-col' : 'flex items-baseline gap-2')}>
-          <h2 className={cn('font-bold text-gray-900', isStacked ? 'text-xl' : 'text-2xl')}>
+        {/* Inline puts the subtitle beside the title on a wide screen, but a
+            long pair overflows a phone — so below sm it stacks either way */}
+        <div
+          className={cn(
+            'flex min-w-0 flex-col',
+            !isStacked && 'sm:flex-row sm:items-baseline sm:gap-2',
+          )}
+        >
+          <h2
+            className={cn('font-bold text-gray-900', isStacked ? 'text-xl' : 'text-xl sm:text-2xl')}
+          >
             {title}
           </h2>
           {subtitle && <span className="text-sm text-gray-400">{subtitle}</span>}

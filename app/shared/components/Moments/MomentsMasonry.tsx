@@ -12,7 +12,9 @@ interface MomentsMasonryProps {
   onLoadMore: () => void;
   hasMore: boolean;
   isLoadingMore: boolean;
-  // Column count varies by the width the grid is given
+  // Column count varies by the width the grid is given. Every variant starts
+  // at one column: two half-width columns on a phone leave a moment's photo and
+  // caption too narrow to read.
   columnsClassName?: string;
 }
 
@@ -23,7 +25,7 @@ export const MomentsMasonry = ({
   onLoadMore,
   hasMore,
   isLoadingMore,
-  columnsClassName = 'columns-2 gap-4 md:columns-3',
+  columnsClassName = 'columns-1 gap-4 sm:columns-2 md:columns-3',
 }: MomentsMasonryProps) => {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);

@@ -1,8 +1,10 @@
 'use client';
 
+import React from 'react';
+
 import { usePathname } from 'next/navigation';
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 
 import { BottomNavigation } from './BottomNavigation';
 
@@ -35,12 +37,13 @@ describe('BottomNavigation', () => {
 
       render(<BottomNavigation />);
 
-      const links = screen.getAllByRole('link');
-      expect(links).toHaveLength(3);
+      const links = within(screen.getByRole('navigation')).getAllByRole('link');
+      expect(links).toHaveLength(4);
 
-      expect(links[0]).toHaveAttribute('href', '/experiences');
-      expect(links[1]).toHaveAttribute('href', '/places');
-      expect(links[2]).toHaveAttribute('href', '/communities');
+      expect(links[0]).toHaveAttribute('href', '/');
+      expect(links[1]).toHaveAttribute('href', '/experiences');
+      expect(links[2]).toHaveAttribute('href', '/places');
+      expect(links[3]).toHaveAttribute('href', '/moments');
     });
 
     it('renders with correct href attributes', () => {
@@ -48,11 +51,12 @@ describe('BottomNavigation', () => {
 
       render(<BottomNavigation />);
 
-      const links = screen.getAllByRole('link');
+      const links = within(screen.getByRole('navigation')).getAllByRole('link');
 
-      expect(links[0]).toHaveAttribute('href', '/experiences');
-      expect(links[1]).toHaveAttribute('href', '/places');
-      expect(links[2]).toHaveAttribute('href', '/communities');
+      expect(links[0]).toHaveAttribute('href', '/');
+      expect(links[1]).toHaveAttribute('href', '/experiences');
+      expect(links[2]).toHaveAttribute('href', '/places');
+      expect(links[3]).toHaveAttribute('href', '/moments');
     });
 
     it('renders navigation icons for all links', () => {
@@ -60,8 +64,8 @@ describe('BottomNavigation', () => {
 
       render(<BottomNavigation />);
 
-      const linkElements = screen.getAllByRole('link');
-      expect(linkElements).toHaveLength(3);
+      const linkElements = within(screen.getByRole('navigation')).getAllByRole('link');
+      expect(linkElements).toHaveLength(4);
 
       // Each link should have an icon
       linkElements.forEach((link) => {
@@ -120,7 +124,7 @@ describe('BottomNavigation', () => {
 
       const experiencesLink = screen.getByRole('link', { name: /experiences/i });
 
-      expect(experiencesLink).toHaveClass('bg-[#D4F1E8]');
+      expect(experiencesLink).toHaveClass('bg-lime');
       expect(experiencesLink).toHaveClass('text-primary');
     });
 
@@ -132,8 +136,8 @@ describe('BottomNavigation', () => {
       const links = screen.getAllByRole('link');
       const exploreLink = links.find((link) => link.getAttribute('href') === '/places');
 
-      expect(exploreLink).toHaveClass('text-gray-600');
-      expect(exploreLink).not.toHaveClass('bg-[#D4F1E8]');
+      expect(exploreLink).toHaveClass('text-gray-500');
+      expect(exploreLink).not.toHaveClass('bg-lime');
     });
 
     it('marks Experiences link as active when pathname is /experiences', () => {
@@ -143,37 +147,40 @@ describe('BottomNavigation', () => {
 
       const experiencesLink = screen.getByRole('link', { name: /experiences/i });
 
-      expect(experiencesLink).toHaveClass('bg-[#D4F1E8]');
+      expect(experiencesLink).toHaveClass('bg-lime');
     });
 
-    it('marks Explore link as active when pathname is /places', () => {
+    it('marks Places as active when pathname is /places', () => {
       mockUsePathname.mockReturnValue('/places');
 
       render(<BottomNavigation />);
 
-      const exploreLink = screen.getByRole('link', { name: /explore/i });
-
-      expect(exploreLink).toHaveClass('bg-[#D4F1E8]');
+      expect(screen.getByRole('link', { name: /places/i })).toHaveClass('bg-lime');
     });
 
-    it('marks Explore link as active for /places subpaths', () => {
+    it('marks Places as active for /places subpaths', () => {
       mockUsePathname.mockReturnValue('/places/123');
 
       render(<BottomNavigation />);
 
-      const exploreLink = screen.getByRole('link', { name: /explore/i });
-
-      expect(exploreLink).toHaveClass('bg-[#D4F1E8]');
+      expect(screen.getByRole('link', { name: /places/i })).toHaveClass('bg-lime');
     });
 
-    it('marks Communities link as active when pathname is /communities', () => {
-      mockUsePathname.mockReturnValue('/communities');
+    it('marks Moments as active when pathname is /moments', () => {
+      mockUsePathname.mockReturnValue('/moments');
 
       render(<BottomNavigation />);
 
-      const communitiesLink = screen.getByRole('link', { name: /communities/i });
+      expect(screen.getByRole('link', { name: /moments/i })).toHaveClass('bg-lime');
+    });
 
-      expect(communitiesLink).toHaveClass('bg-[#D4F1E8]');
+    // Only '/' exactly — every other route starts with it
+    it('marks Discover as active only on the root', () => {
+      mockUsePathname.mockReturnValue('/experiences');
+
+      render(<BottomNavigation />);
+
+      expect(screen.queryByRole('link', { name: /discover/i })).not.toBeInTheDocument();
     });
 
     it('only shows one active link at a time', () => {
@@ -183,10 +190,10 @@ describe('BottomNavigation', () => {
 
       const activeLinks = screen
         .getAllByRole('link')
-        .filter((link) => link.className.includes('bg-[#D4F1E8]'));
+        .filter((link) => link.className.includes('bg-lime'));
 
       expect(activeLinks).toHaveLength(1);
-      expect(activeLinks[0]).toHaveTextContent('Explore');
+      expect(activeLinks[0]).toHaveTextContent('Places');
     });
   });
 
@@ -281,8 +288,8 @@ describe('BottomNavigation', () => {
 
       render(<BottomNavigation />);
 
-      const links = screen.getAllByRole('link');
-      expect(links.length).toBe(3);
+      const links = within(screen.getByRole('navigation')).getAllByRole('link');
+      expect(links.length).toBe(4);
     });
 
     it('maintains link order', () => {
@@ -290,21 +297,51 @@ describe('BottomNavigation', () => {
 
       render(<BottomNavigation />);
 
-      const links = screen.getAllByRole('link');
-      // First link should be Experiences (href="/")
-      expect(links[0]).toHaveAttribute('href', '/experiences');
-      // Second link should be Explore (href="/places")
-      expect(links[1]).toHaveAttribute('href', '/places');
-      // Third link should be Communities
-      expect(links[2]).toHaveAttribute('href', '/communities');
+      // Same order as the desktop nav
+      const links = within(screen.getByRole('navigation')).getAllByRole('link');
+      expect(links[0]).toHaveAttribute('href', '/');
+      expect(links[1]).toHaveAttribute('href', '/experiences');
+      expect(links[2]).toHaveAttribute('href', '/places');
+      expect(links[3]).toHaveAttribute('href', '/moments');
     });
 
     it('shows meaningful label for active link', () => {
-      mockUsePathname.mockReturnValue('/communities');
+      mockUsePathname.mockReturnValue('/moments');
 
       render(<BottomNavigation />);
 
-      expect(screen.getByText('Communities')).toBeInTheDocument();
+      expect(screen.getByText('Moments')).toBeInTheDocument();
+    });
+
+    // Sits outside the nav landmark: it opens an assistant, not a page of
+    // content
+    describe('TukAI', () => {
+      it('offers the assistant alongside the destinations', () => {
+        mockUsePathname.mockReturnValue('/');
+
+        render(<BottomNavigation />);
+
+        expect(screen.getByRole('button', { name: 'Ask TukAI' })).toBeInTheDocument();
+      });
+
+      it('is not one of the destinations', () => {
+        mockUsePathname.mockReturnValue('/');
+
+        render(<BottomNavigation />);
+
+        const navLinks = within(screen.getByRole('navigation')).getAllByRole('link');
+        expect(navLinks).toHaveLength(4);
+        // Every link on the bar is a destination — TukAI is a button
+        expect(screen.getAllByRole('link')).toHaveLength(4);
+      });
+
+      it('shows no account avatar', () => {
+        mockUsePathname.mockReturnValue('/');
+
+        render(<BottomNavigation />);
+
+        expect(screen.queryByRole('link', { name: /account|sign in/i })).not.toBeInTheDocument();
+      });
     });
 
     it('has transition class for smooth animation', () => {
@@ -339,23 +376,22 @@ describe('BottomNavigation', () => {
   });
 
   describe('styling', () => {
+    // The pill styling sits on the nav itself now — the outer element only
+    // positions it, because the profile button floats beside it
     it('has rounded full appearance', () => {
       mockUsePathname.mockReturnValue('/');
 
-      const { container } = render(<BottomNavigation />);
-      const nav = container.firstChild;
+      render(<BottomNavigation />);
 
-      expect(nav).toHaveClass('rounded-full');
+      expect(screen.getByRole('navigation')).toHaveClass('rounded-full');
     });
 
     it('has shadow and white background', () => {
       mockUsePathname.mockReturnValue('/');
 
-      const { container } = render(<BottomNavigation />);
-      const nav = container.firstChild;
+      render(<BottomNavigation />);
 
-      expect(nav).toHaveClass('bg-white');
-      expect(nav).toHaveClass('shadow-lg');
+      expect(screen.getByRole('navigation')).toHaveClass('bg-white', 'shadow-lg');
     });
 
     it('has z-index 50 for proper layering', () => {

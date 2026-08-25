@@ -288,7 +288,7 @@ export const DiscoverPageContent = () => {
               onLoadMore={() => {}}
               hasMore={false}
               isLoadingMore={false}
-              columnsClassName="columns-2 gap-4 md:columns-3 lg:columns-4"
+              columnsClassName="columns-1 gap-4 sm:columns-2 md:columns-3 lg:columns-4"
             />
           )}
         </section>
