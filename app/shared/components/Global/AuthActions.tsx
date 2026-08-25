@@ -22,6 +22,7 @@ export const AuthActions = () => {
   const { data: session } = useSession();
   const [showJoinPremium, setShowJoinPremium] = useState(false);
   const [pendingCreateAfterLogin, setPendingCreateAfterLogin] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const hasSubscribed = Boolean(session?.user?.hasSubscribed);
 
@@ -83,7 +84,7 @@ export const AuthActions = () => {
         // of the header, and NavigationMenu anchors its viewport left-0 with no
         // way to align it per usage, so a 300px panel ran off-screen. Popover
         // aligns to the trigger's end and handles collisions.
-        <Popover>
+        <Popover open={isProfileOpen} onOpenChange={setIsProfileOpen}>
           <PopoverTrigger className="flex h-10 flex-shrink-0 items-center gap-1.5 rounded-full outline-none">
             <div className="relative aspect-square h-9 w-9">
               <TukaiImage
@@ -116,6 +117,9 @@ export const AuthActions = () => {
               image={session.user.image}
               hasUnreadNotifications
               onSignOut={handleLogout}
+              // Client navigation leaves the popover mounted, so choosing a row
+              // has to close it explicitly
+              onItemSelect={() => setIsProfileOpen(false)}
             />
           </PopoverContent>
         </Popover>

@@ -14,6 +14,9 @@ interface ProfileMenuProps {
   image?: string | null;
   hasUnreadNotifications?: boolean;
   onSignOut: () => void;
+  // Fired when a row is chosen. Client navigation does not unmount the popover
+  // this sits in, so it has to be told to close.
+  onItemSelect?: () => void;
 }
 
 const itemClasses =
@@ -22,9 +25,11 @@ const itemClasses =
 const MenuRow = ({
   item,
   hasUnreadNotifications,
+  onSelect,
 }: {
   item: ProfileMenuItem;
   hasUnreadNotifications: boolean;
+  onSelect?: () => void;
 }) => {
   const content = (
     <>
@@ -55,7 +60,7 @@ const MenuRow = ({
   }
 
   return (
-    <Link href={item.href} className={`${itemClasses} hover:bg-gray-50`}>
+    <Link href={item.href} onClick={onSelect} className={`${itemClasses} hover:bg-gray-50`}>
       {content}
     </Link>
   );
@@ -67,6 +72,7 @@ export const ProfileMenu = ({
   image,
   hasUnreadNotifications = false,
   onSignOut,
+  onItemSelect,
 }: ProfileMenuProps) => (
   <div className="w-[300px] p-2">
     <div className="flex items-center gap-3 px-3 py-3">
@@ -91,13 +97,25 @@ export const ProfileMenu = ({
 
     <div className="flex flex-col">
       {PROFILE_MENU_ITEMS.map((item) => (
-        <MenuRow key={item.label} item={item} hasUnreadNotifications={hasUnreadNotifications} />
+        <MenuRow
+          key={item.label}
+          item={item}
+          hasUnreadNotifications={hasUnreadNotifications}
+          onSelect={onItemSelect}
+        />
       ))}
     </div>
 
     <div className="my-1 h-px bg-gray-100" />
 
-    <button type="button" onClick={onSignOut} className={`${itemClasses} hover:bg-red-50`}>
+    <button
+      type="button"
+      onClick={() => {
+        onItemSelect?.();
+        onSignOut();
+      }}
+      className={`${itemClasses} hover:bg-red-50`}
+    >
       <IconComponent
         iconName="Logout04Icon"
         size={18}
