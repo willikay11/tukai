@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils';
 
 interface CityCardProps {
   city: string;
-  experienceCount: number;
+  // Omitted where the card is just a way into the city
+  experienceCount?: number;
   imageUrl: string;
   href: string;
   // Overrides the fixed row sizing — the cities grid wants full-width cards
@@ -33,9 +34,11 @@ export const CityCard = ({ city, experienceCount, imageUrl, href, className }: C
 
     <div className="absolute bottom-3 left-4">
       <p className="text-base font-bold text-white">{city}</p>
-      <p className="text-xs text-white/70">
-        {experienceCount >= 100 ? '100+ experiences' : `${experienceCount} experiences`}
-      </p>
+      {experienceCount !== undefined && (
+        <p className="text-xs text-white/70">
+          {experienceCount >= 100 ? '100+ experiences' : `${experienceCount} experiences`}
+        </p>
+      )}
     </div>
   </Link>
 );

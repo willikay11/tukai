@@ -100,7 +100,7 @@ export default function RootLayout({
                                   pixel the rest of the header did not use, so it
                                   stretched far wider than a search bar needs on a
                                   large screen */}
-                              <div className="min-w-0 max-w-xl flex-1">
+                              <div className="min-w-[200px] max-w-xl flex-1">
                                 <Suspense
                                   fallback={
                                     <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />

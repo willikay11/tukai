@@ -64,7 +64,7 @@ export const AuthActions = () => {
       {hasSubscribed ? (
         <Link
           href="/experiences/create"
-          className="mr-2 hidden h-10 flex-shrink-0 items-center gap-1.5 rounded-full bg-lime px-6 text-sm text-gray-900 md:inline-flex"
+          className="mr-2 hidden h-10 flex-shrink-0 items-center gap-1.5 rounded-full bg-lime px-6 text-sm text-gray-900 lg:inline-flex"
         >
           <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />
           Create
@@ -72,7 +72,7 @@ export const AuthActions = () => {
       ) : (
         <Button
           variant="lime"
-          className="mr-2 hidden h-10 flex-shrink-0 items-center gap-1.5 rounded-full bg-lime px-6 text-sm text-gray-900 md:inline-flex"
+          className="mr-2 hidden h-10 flex-shrink-0 items-center gap-1.5 rounded-full bg-lime px-6 text-sm text-gray-900 lg:inline-flex"
           onClick={handleCreateExperience}
         >
           <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />

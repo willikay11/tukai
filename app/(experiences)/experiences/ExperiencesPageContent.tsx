@@ -36,7 +36,7 @@ import { useLocation } from '@/context/LocationContext';
 import { downloadTicketPdf } from '@/services/experience';
 import { BucketList } from '@/types/bucket-list';
 import { Experience } from '@/types/experience';
-import { PlaceCategory } from '@/types/placeCategory';
+import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
 import { Reservation } from '@/types/ticket-purchase';
 import { formatLongDateWithOrdinal } from '@/utils/date-utils';
 import { groupTicketPurchases } from '@/utils/ticket-utils';
@@ -221,7 +221,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                       <CityCard
                         city={category.name}
                         experienceCount={category.placesCount}
-                        imageUrl={category.image ?? ''}
+                        imageUrl={categoryImageOf(category) ?? ''}
                         href={cityExperiencesHref(category.name)}
                       />
                     </div>
@@ -230,7 +230,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                   {shouldShowSeeAll(cities.length) && (
                     <SeeAllCard
                       href="/experiences/see-all?type=cities"
-                      previewPhotos={cities.slice(0, 3).map((city) => city.image ?? null)}
+                      previewPhotos={cities.slice(0, 3).map(categoryImageOf)}
                       className="aspect-auto h-[130px] w-[240px]"
                     />
                   )}

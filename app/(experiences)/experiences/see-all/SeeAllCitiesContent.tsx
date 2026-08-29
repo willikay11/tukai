@@ -2,7 +2,7 @@
 
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
-import { PlaceCategory } from '@/types/placeCategory';
+import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
 
 import { SeeAllEmptyState } from './SeeAllEmptyState';
 import { SeeAllLayout } from './SeeAllLayout';
@@ -19,7 +19,10 @@ const CitiesGridSkeleton = () => (
 );
 
 export const SeeAllCitiesContent = () => {
-  const { data: response, isLoading } = usePlaceCategories({ pageSize: 100, group: 'cities' }, true);
+  const { data: response, isLoading } = usePlaceCategories(
+    { pageSize: 100, group: 'cities' },
+    true,
+  );
 
   // The group param is passed through, but the listing page filters client-side
   // too — keep doing the same so a non-filtering backend can't leak other groups
@@ -44,7 +47,7 @@ export const SeeAllCitiesContent = () => {
               key={category.id}
               city={category.name}
               experienceCount={category.placesCount}
-              imageUrl={category.image ?? ''}
+              imageUrl={categoryImageOf(category) ?? ''}
               href={cityExperiencesHref(category.name)}
               className="h-[160px] w-full"
             />
