@@ -71,7 +71,7 @@ export const ReservationCalendarPanel = ({
   };
 
   return (
-    <div className="mt-4 rounded-3xl bg-gray-50 p-5">
+    <div className="mt-4 rounded-3xl bg-gray-50 p-4 sm:p-5">
       <MonthDayFilter
         monthCursor={monthCursor}
         days={days}
@@ -93,10 +93,10 @@ export const ReservationCalendarPanel = ({
           visibleItems.map((item) => (
             <div
               key={item.id}
-              className="flex flex-wrap items-center gap-4 rounded-2xl bg-white px-4 py-3"
+              className="flex flex-wrap items-center gap-3 rounded-2xl bg-white px-3 py-3 sm:gap-4 sm:px-4"
             >
               {item.start && (
-                <div className="flex w-14 flex-shrink-0 flex-col items-center rounded-xl bg-indigo-50 py-2">
+                <div className="hidden w-14 flex-shrink-0 flex-col items-center rounded-xl bg-indigo-50 py-2 sm:flex">
                   <span className="text-[11px] text-gray-400">
                     {moment(item.start).format('MMM')}
                   </span>
@@ -117,7 +117,7 @@ export const ReservationCalendarPanel = ({
               </div>
 
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <StatusPill kind={item.kind} />
                   {item.start && (
                     <span className="text-sm text-gray-400">
@@ -134,14 +134,14 @@ export const ReservationCalendarPanel = ({
               </div>
 
               {item.kind === 'invite' ? (
-                <div className="flex flex-shrink-0 items-center gap-2">
+                <div className="flex w-full flex-shrink-0 items-center gap-2 sm:w-auto">
                   <Button
                     onClick={() => onAcceptInvite?.(item)}
                     disabled={!invitesActionable}
                     title={
                       invitesActionable ? undefined : 'Responding to invites is not available yet'
                     }
-                    className="rounded-full px-6"
+                    className="flex-1 rounded-full px-6 sm:flex-none"
                   >
                     Accept
                   </Button>
@@ -152,7 +152,7 @@ export const ReservationCalendarPanel = ({
                     title={
                       invitesActionable ? undefined : 'Responding to invites is not available yet'
                     }
-                    className="rounded-full px-6 text-gray-500"
+                    className="flex-1 rounded-full px-6 text-gray-500 sm:flex-none"
                   >
                     Decline
                   </Button>
@@ -163,7 +163,7 @@ export const ReservationCalendarPanel = ({
                   <button
                     type="button"
                     onClick={() => onViewTicket(item)}
-                    className="flex flex-shrink-0 items-center gap-1.5 rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:border-gray-300"
+                    className="flex w-full flex-shrink-0 items-center justify-center gap-1.5 rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:border-gray-300 sm:w-auto"
                   >
                     <IconComponent iconName="Ticket01Icon" size={15} className="text-primary" />
                     View ticket

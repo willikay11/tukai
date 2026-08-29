@@ -1,7 +1,10 @@
 'use client';
 
+import { useState } from 'react';
+
 import Link from 'next/link';
 
+import { ExperienceCreatedModal } from '@/app/(experiences)/experiences/create/components/ExperienceCreatedModal';
 import { IconComponent } from '@/app/shared/components/Icons';
 import {
   useCancelPlaceBookingRequest,
@@ -22,6 +25,9 @@ export const ReservationPanel = ({
   placeName: string;
 }) => {
   const { toast } = useToast();
+  // Cancelling is confirmed with the same modal the rest of the app uses, not a
+  // toast that slides away while the reader is still reading it
+  const [isCancelledModalOpen, setIsCancelledModalOpen] = useState(false);
 
   const { data: profilesResponse, isLoading } = usePlaceReservationProfiles(placeId);
   const profiles: PlaceReservationProfile[] = profilesResponse?.data?.results ?? [];
@@ -42,12 +48,7 @@ export const ReservationPanel = ({
 
   const handleCancel = (purchaseId: string) => {
     cancelBooking(purchaseId, {
-      onSuccess: () =>
-        toast({
-          title: 'Reservation cancelled',
-          description: `Your table at ${placeName} has been released`,
-          variant: 'success',
-        }),
+      onSuccess: () => setIsCancelledModalOpen(true),
       onError: (error: Error) =>
         toast({
           title: 'Could not cancel',
@@ -140,6 +141,16 @@ export const ReservationPanel = ({
           </p>
         </div>
       )}
+
+      <ExperienceCreatedModal
+        open={isCancelledModalOpen}
+        onOpenChange={setIsCancelledModalOpen}
+        title="Reservation Cancelled Successfully"
+        description={`Your table at ${placeName} has been released. You can request another one whenever you like.`}
+        viewExperienceLabel="Done"
+        // Nowhere to go — the reader is already on the place
+        onViewExperience={() => setIsCancelledModalOpen(false)}
+      />
 
       {reservations.length > 0 && (
         <PlaceReservationsCalendar

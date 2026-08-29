@@ -42,7 +42,7 @@ export const SuccessDialog = ({
   <AlertDialog open={open} onOpenChange={onOpenChange}>
     <AlertDialogContent
       className={cn(
-        'flex w-[calc(100%-32px)] flex-col items-center gap-0 rounded-3xl p-8 sm:w-[30rem] sm:max-w-none',
+        'flex w-[calc(100%-32px)] flex-col items-center gap-0 rounded-3xl p-8 sm:w-[380px] sm:max-w-none',
         className,
       )}
     >

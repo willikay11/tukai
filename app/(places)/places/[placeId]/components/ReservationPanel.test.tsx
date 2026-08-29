@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import moment from 'moment';
 
@@ -229,6 +229,38 @@ describe('ReservationPanel', () => {
       expect(cancelBooking).toHaveBeenCalledWith('b1', expect.anything());
     });
 
+    it('confirms a cancellation with the modal rather than a toast', async () => {
+      withBookings([booking()]);
+      // The mutation reports success through its own callback
+      cancelBooking.mockImplementation((_id: string, { onSuccess }: { onSuccess: () => void }) =>
+        onSuccess(),
+      );
+      const user = userEvent.setup();
+
+      renderPanel();
+      await user.click(screen.getByRole('button', { name: 'Cancel Reservation' }));
+
+      expect(await screen.findByText('Reservation Cancelled Successfully')).toBeInTheDocument();
+      expect(screen.getByText(/table at Kraftory has been released/)).toBeInTheDocument();
+      expect(toast).not.toHaveBeenCalled();
+    });
+
+    it('dismisses the confirmation from its own button', async () => {
+      withBookings([booking()]);
+      cancelBooking.mockImplementation((_id: string, { onSuccess }: { onSuccess: () => void }) =>
+        onSuccess(),
+      );
+      const user = userEvent.setup();
+
+      renderPanel();
+      await user.click(screen.getByRole('button', { name: 'Cancel Reservation' }));
+      await user.click(await screen.findByRole('button', { name: 'Done' }));
+
+      await waitFor(() =>
+        expect(screen.queryByText('Reservation Cancelled Successfully')).not.toBeInTheDocument(),
+      );
+    });
+
     // The list is laid out a month at a time, like the experiences reserved tab
     it('shows only the chosen day once a day pill is picked', async () => {
       const today = moment();
@@ -267,6 +299,17 @@ describe('ReservationPanel', () => {
 
       expect(screen.queryByText(/4 Pax/)).not.toBeInTheDocument();
       expect(screen.getByText('Nothing this month')).toBeInTheDocument();
+    });
+
+    // Declined, cancelled and expired all mean there is no table, so they read
+    // the same way
+    it.each(['declined', 'cancelled', 'expired'])('marks %s as a lost table', (status) => {
+      withBookings([booking({ status })]);
+
+      renderPanel();
+
+      const label = status.charAt(0).toUpperCase() + status.slice(1);
+      expect(screen.getByText(label)).toHaveClass('bg-red-100', 'text-red-600');
     });
 
     // Nothing to cancel once it is already declined or cancelled
