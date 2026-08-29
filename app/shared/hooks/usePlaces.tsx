@@ -13,6 +13,7 @@ import {
   fetchFollowing,
   fetchGoogleMapsAutocomplete,
   fetchGoogleMapsPlaceGeocode,
+  fetchMyPlaces,
   fetchPlace,
   fetchPlaceAvailability,
   fetchPlaceBookingRequests,
@@ -50,6 +51,14 @@ export const usePlaces = ({
     enabled,
   });
 };
+
+/** The places this user owns, for Creator Studio. */
+export const useMyPlaces = (enabled: boolean = true) =>
+  useQuery({
+    queryKey: ['myPlaces'],
+    queryFn: async () => await fetchMyPlaces(),
+    enabled,
+  });
 
 // A single place, used where only its id is known — e.g. resolving the
 // coordinates of a Tukai place picked during experience creation
