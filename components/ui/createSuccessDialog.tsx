@@ -35,9 +35,9 @@ export const CreateSuccessDialog = ({
 }: CreateSuccessDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100%-24px)] max-w-[380px] rounded-2xl p-6 sm:p-8">
+      <DialogContent className="w-[calc(100%-24px)] max-w-[360px] rounded-2xl p-6 sm:p-8 md:max-w-[360px]">
         <div className="flex flex-col items-center text-center">
-          <div className="relative h-[180px] w-full max-w-[260px]">
+          <div className="relative h-[160px] w-full max-w-[230px]">
             <Image
               src={illustrationSrc}
               alt="Community created"
