@@ -187,6 +187,17 @@ describe('ReservationPanel', () => {
       ...extra,
     });
 
+    // The bookings are a second request behind the profile, so the section
+    // holds its shape instead of popping in
+    it('shows skeletons while the bookings load', () => {
+      usePlaceBookingRequests.mockReturnValue({ data: undefined, isLoading: true });
+
+      renderPanel();
+
+      expect(screen.getByText('My Reservations')).toBeInTheDocument();
+      expect(screen.getByRole('status', { name: 'Loading your reservations' })).toBeInTheDocument();
+    });
+
     it('is absent when the reader has none', () => {
       renderPanel();
 
