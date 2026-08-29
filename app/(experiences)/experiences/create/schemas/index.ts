@@ -15,21 +15,9 @@ import { z } from 'zod';
 // 'HH:mm' strings compare correctly with < and > while zero-padded
 const isBefore = (start: string, end: string) => start < end;
 
-/** Flattens a ZodError into the `Record<string, string>` the steps render. */
-export const zodErrorsToMap = (error: z.ZodError): Record<string, string> => {
-  const errors: Record<string, string> = {};
-
-  error.issues.forEach((issue) => {
-    const key = issue.path.join('.');
-    // First message per field wins, so a required check is not masked by a
-    // follow-on rule about the same field
-    if (key && errors[key] === undefined) {
-      errors[key] = issue.message;
-    }
-  });
-
-  return errors;
-};
+// The helper itself is generic and lives in utils, so forms outside this
+// wizard use the same error-map shape
+export { zodErrorsToMap } from '@/utils/zod-errors';
 
 // ─── Shared field shapes ────────────────────────────────────────────────────
 

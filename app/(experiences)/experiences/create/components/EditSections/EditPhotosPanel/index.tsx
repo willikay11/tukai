@@ -172,10 +172,10 @@ export const EditPhotosPanel = ({
           type="button"
           variant="gradient"
           onClick={handleSave}
-          disabled={isLoading}
+          isLoading={isLoading}
           className="rounded-[50px]"
         >
-          {isLoading ? 'Saving...' : 'Save Changes'}
+          Save Changes
         </Button>
       </div>
     </div>

@@ -115,8 +115,8 @@ export default function Page() {
             </div>
 
             <div className="mb-6">
-              <Button className="h-[50px] w-full" disabled={isSubmitting}>
-                {isSubmitting ? 'Submitting...' : 'Submit'}
+              <Button className="h-[50px] w-full" isLoading={isSubmitting}>
+                Submit
               </Button>
             </div>
 

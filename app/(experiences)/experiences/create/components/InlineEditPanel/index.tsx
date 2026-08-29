@@ -109,10 +109,10 @@ const EditTitleFieldWithSave = ({
           type="button"
           variant="gradient"
           onClick={handleSave}
-          disabled={isSaving}
           className="rounded-[50px]"
+          isLoading={isSaving}
         >
-          {isSaving ? 'Saving...' : 'Save Changes'}
+          Save Changes
         </Button>
       </div>
     </div>
@@ -201,10 +201,10 @@ const EditDescriptionFieldWithSave = ({
           type="button"
           variant="gradient"
           onClick={handleSave}
-          disabled={isSaving}
           className="rounded-[50px]"
+          isLoading={isSaving}
         >
-          {isSaving ? 'Saving...' : 'Save Changes'}
+          Save Changes
         </Button>
       </div>
     </div>
@@ -303,10 +303,10 @@ const EditLocationFieldWithSave = ({
           type="button"
           variant="gradient"
           onClick={handleSave}
-          disabled={isSaving}
           className="rounded-[50px]"
+          isLoading={isSaving}
         >
-          {isSaving ? 'Saving...' : 'Save Changes'}
+          Save Changes
         </Button>
       </div>
     </div>
@@ -387,10 +387,10 @@ const EditMeetingPointFieldWithSave = ({
           type="button"
           variant="gradient"
           onClick={handleSave}
-          disabled={isSaving}
           className="rounded-[50px]"
+          isLoading={isSaving}
         >
-          {isSaving ? 'Saving...' : 'Save Changes'}
+          Save Changes
         </Button>
       </div>
     </div>
@@ -471,10 +471,10 @@ const EditMeetingTimeFieldWithSave = ({
           type="button"
           variant="gradient"
           onClick={handleSave}
-          disabled={isSaving}
           className="rounded-[50px]"
+          isLoading={isSaving}
         >
-          {isSaving ? 'Saving...' : 'Save Changes'}
+          Save Changes
         </Button>
       </div>
     </div>
@@ -551,10 +551,10 @@ const EditVisibilityFieldWithSave = ({
           type="button"
           variant="gradient"
           onClick={handleSave}
-          disabled={isSaving}
           className="rounded-[50px]"
+          isLoading={isSaving}
         >
-          {isSaving ? 'Saving...' : 'Save Changes'}
+          Save Changes
         </Button>
       </div>
     </div>
@@ -631,10 +631,10 @@ const EditCategoriesFieldWithSave = ({
           type="button"
           variant="gradient"
           onClick={handleSave}
-          disabled={isSaving}
           className="rounded-[50px]"
+          isLoading={isSaving}
         >
-          {isSaving ? 'Saving...' : 'Save Changes'}
+          Save Changes
         </Button>
       </div>
     </div>
@@ -716,10 +716,10 @@ const EditIncludedFieldWithSave = ({
           type="button"
           variant="gradient"
           onClick={handleSave}
-          disabled={isSaving}
           className="rounded-[50px]"
+          isLoading={isSaving}
         >
-          {isSaving ? 'Saving...' : 'Save Changes'}
+          Save Changes
         </Button>
       </div>
     </div>
@@ -801,10 +801,10 @@ const EditExcludedFieldWithSave = ({
           type="button"
           variant="gradient"
           onClick={handleSave}
-          disabled={isSaving}
           className="rounded-[50px]"
+          isLoading={isSaving}
         >
-          {isSaving ? 'Saving...' : 'Save Changes'}
+          Save Changes
         </Button>
       </div>
     </div>

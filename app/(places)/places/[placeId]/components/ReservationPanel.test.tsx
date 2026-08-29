@@ -2,6 +2,7 @@ import React from 'react';
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import moment from 'moment';
 
 import { ReservationPanel } from './ReservationPanel';
 
@@ -126,12 +127,63 @@ describe('ReservationPanel', () => {
     );
   });
 
+  // Claiming the place is how it becomes bookable, so that is the way out of
+  // the not-yet-open state
+  describe('claiming', () => {
+    it('offers to claim a place that is not open for reservations', () => {
+      withProfiles([]);
+
+      renderPanel();
+
+      expect(screen.getByText(/Own or manage this place\?/)).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Claim it' })).toBeInTheDocument();
+    });
+
+    // Claiming is a page of its own, seeded with the place being claimed
+    it('links to the claim page for this place', () => {
+      withProfiles([]);
+
+      renderPanel();
+
+      expect(screen.getByRole('link', { name: 'Claim it' })).toHaveAttribute(
+        'href',
+        '/places/claim?placeId=p1',
+      );
+    });
+
+    // Already bookable — nothing to claim
+    it('does not offer a claim once the place takes reservations', () => {
+      renderPanel();
+
+      expect(screen.queryByRole('link', { name: 'Claim it' })).not.toBeInTheDocument();
+    });
+
+    // The free-to-reserve promise only holds where booking works
+    it('hides the free-to-reserve card until the place is bookable', () => {
+      withProfiles([]);
+
+      renderPanel();
+
+      expect(screen.queryByText('Free to reserve')).not.toBeInTheDocument();
+    });
+
+    it('shows the free-to-reserve card once it is', () => {
+      renderPanel();
+
+      expect(screen.getByText('Free to reserve')).toBeInTheDocument();
+    });
+  });
+
   describe('my reservations', () => {
+    // Relative to today: the calendar opens on the current month, and a fixture
+    // pinned to a fixed date would drop out of view as the clock moved on
+    const inDays = (days: number) => moment().add(days, 'day').hour(19).minute(0).toISOString();
+
     const booking = (extra: Record<string, unknown> = {}) => ({
       id: 'b1',
       status: 'requested',
       restaurantDetail: { partySize: 4 },
-      occurrence: { id: 'o1', startDate: '2026-06-27T19:00:00Z' },
+      occurrence: { id: 'o1', startDate: moment().hour(19).minute(0).toISOString() },
       ...extra,
     });
 
@@ -175,6 +227,46 @@ describe('ReservationPanel', () => {
       await user.click(screen.getByRole('button', { name: 'Cancel Reservation' }));
 
       expect(cancelBooking).toHaveBeenCalledWith('b1', expect.anything());
+    });
+
+    // The list is laid out a month at a time, like the experiences reserved tab
+    it('shows only the chosen day once a day pill is picked', async () => {
+      const today = moment();
+      // Two bookings this month, on different days
+      const other = moment().date() === today.clone().endOf('month').date() ? -1 : 1;
+      withBookings([
+        booking(),
+        booking({
+          id: 'b2',
+          restaurantDetail: { partySize: 9 },
+          occurrence: { id: 'o2', startDate: inDays(other) },
+        }),
+      ]);
+      const user = userEvent.setup();
+
+      renderPanel();
+      expect(screen.getByText(/4 Pax/)).toBeInTheDocument();
+      expect(screen.getByText(/9 Pax/)).toBeInTheDocument();
+
+      await user.click(
+        screen.getByRole('button', {
+          name: new RegExp(`${today.format('ddd')}\\s*${today.date()}$`),
+        }),
+      );
+
+      expect(screen.getByText(/4 Pax/)).toBeInTheDocument();
+      expect(screen.queryByText(/9 Pax/)).not.toBeInTheDocument();
+    });
+
+    it('steps to another month rather than listing everything at once', async () => {
+      withBookings([booking()]);
+      const user = userEvent.setup();
+
+      renderPanel();
+      await user.click(screen.getByRole('button', { name: 'Next month' }));
+
+      expect(screen.queryByText(/4 Pax/)).not.toBeInTheDocument();
+      expect(screen.getByText('Nothing this month')).toBeInTheDocument();
     });
 
     // Nothing to cancel once it is already declined or cancelled

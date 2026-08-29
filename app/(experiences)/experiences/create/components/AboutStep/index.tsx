@@ -241,6 +241,7 @@ export const AboutStep = ({
         </button>
         <div className="flex-1" />
         <Button
+          isLoading={pendingAction === 'exit'}
           type="button"
           variant="outline-primary"
           onClick={() => {
@@ -250,9 +251,6 @@ export const AboutStep = ({
           disabled={isSaving}
           className="text-xs font-semibold"
         >
-          {pendingAction === 'exit' && (
-            <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
-          )}
           Save & Exit
         </Button>
         <Button
@@ -264,6 +262,7 @@ export const AboutStep = ({
           Preview
         </Button>
         <Button
+          isLoading={pendingAction === 'continue'}
           type="button"
           onClick={() => {
             console.log('[AboutStep] Save & Continue clicked', { formData, errors });
@@ -273,9 +272,6 @@ export const AboutStep = ({
           disabled={isSaving}
           className="rounded-[50px] text-xs font-medium"
         >
-          {pendingAction === 'continue' && (
-            <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
-          )}
           Save & Continue
         </Button>
       </div>

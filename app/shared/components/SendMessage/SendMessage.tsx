@@ -91,8 +91,8 @@ export const SendMessage = ({
                   </FormItem>
                 )}
               />
-              <Button size="lg" className="mt-2.5 w-full" type="submit" disabled={isPending}>
-                {isPending ? 'Submitting...' : 'Submit'}
+              <Button size="lg" className="mt-2.5 w-full" type="submit" isLoading={isPending}>
+                Submit
               </Button>
             </form>
           </Form>

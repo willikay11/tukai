@@ -40,8 +40,6 @@ export const ReservationSummary = ({
   isSubmitting: boolean;
   onSubmit: () => void;
 }) => {
-  const canSubmit = Boolean(selectedDate && selectedTime && !isSubmitting);
-
   const whenValue = selectedDate
     ? `${moment(selectedDate).format('ddd D MMM')} · ${selectedTime ?? 'pick a time'}`
     : 'Pick a date';
@@ -77,12 +75,11 @@ export const ReservationSummary = ({
 
       <div className="h-px bg-gray-200" />
 
-      <Button onClick={onSubmit} disabled={!canSubmit} className="w-full rounded-full">
-        {isSubmitting
-          ? 'Requesting…'
-          : selectedDate && selectedTime
-            ? 'Request Reservation'
-            : 'Pick a date & time'}
+      {/* Live even when the form is incomplete: pressing it is how the reader
+          finds out what is still missing, marked on the section that asks for
+          it rather than hidden behind a disabled button */}
+      <Button onClick={onSubmit} className="w-full rounded-full" isLoading={isSubmitting}>
+        Request Reservation
       </Button>
 
       {/* ⚠️ The design shows a deposit taken up front. The API cannot support

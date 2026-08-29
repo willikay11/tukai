@@ -150,8 +150,14 @@ export const Package = ({
         </div>
       </div>
 
-      <Button size="lg" className="w-full" type="submit" disabled={isSubmitting} onClick={onSubmit}>
-        {isSubmitting ? 'Submitting...' : 'Submit'}
+      <Button
+        size="lg"
+        className="w-full"
+        type="submit"
+        onClick={onSubmit}
+        isLoading={isSubmitting}
+      >
+        Submit
       </Button>
     </div>
   );

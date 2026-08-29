@@ -92,8 +92,10 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="space-y-12 lg:col-span-2">
+      {/* 7/5 of twelve rather than 8/4: the reservation panel reads as cramped
+          at a third of the page, so it takes a column back from the content */}
+      <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <div className="space-y-12 lg:col-span-7">
           {/* The same gallery the experience detail page uses for its hero */}
           {photos.length > 0 && <SquarePhotoStrip photos={photos} variant="hero" />}
 
@@ -130,7 +132,7 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
           )}
         </div>
 
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-5">
           {/* Below the content on mobile, pinned alongside from lg up */}
           <div className="lg:sticky lg:top-20">
             <ReservationPanel placeId={place.id} placeName={place.title} />

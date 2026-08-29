@@ -813,15 +813,13 @@ export const TicketsStep = ({
                 Cancel
               </Button>
               <Button
+                isLoading={pendingAction === 'continue'}
                 type="button"
                 onClick={() => runAction('continue', onSaveContinue)}
                 disabled={pendingAction === 'continue'}
                 variant="gradient"
                 className="rounded-[50px]"
               >
-                {pendingAction === 'continue' && (
-                  <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
-                )}
                 {saveContinueLabel}
               </Button>
             </div>
@@ -916,15 +914,13 @@ export const TicketsStep = ({
             Preview
           </Button>
           <Button
+            isLoading={pendingAction === 'continue'}
             type="button"
             onClick={() => runAction('continue', onSaveContinue)}
             disabled={pendingAction === 'continue'}
             variant="gradient"
             className="rounded-[50px]"
           >
-            {pendingAction === 'continue' && (
-              <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
-            )}
             {saveContinueLabel}
           </Button>
         </div>

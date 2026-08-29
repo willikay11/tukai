@@ -2,7 +2,7 @@
 
 import { UseFormReturn } from 'react-hook-form';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { CreateCommunityFormValues } from '@/app/(communities)/communities/components/hooks/useCreateCommunityFlow';
 import { type FormPhoto, PhotoUploader } from '@/app/shared/components';
@@ -78,6 +78,16 @@ export const LeftPanel = ({
   onToggleCategory,
 }: LeftPanelProps) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Somewhere the reader was sent here from and has to get back to — claiming a
+  // place, for instance, needs a community to claim on behalf of. The community
+  // they just created travels back with them so it arrives already chosen.
+  const returnTo = searchParams.get('returnTo');
+  const returnHref =
+    returnTo && createdCommunityId
+      ? `${returnTo}${returnTo.includes('?') ? '&' : '?'}communityId=${createdCommunityId}`
+      : returnTo;
 
   return (
     <div className="space-y-6 py-6">
@@ -85,9 +95,15 @@ export const LeftPanel = ({
         open={isSuccessDialogOpen}
         onOpenChange={setIsSuccessDialogOpen}
         viewCommunityHref={
-          createdCommunityId ? `/communities/${createdCommunityId}` : '/communities'
+          returnHref ?? (createdCommunityId ? `/communities/${createdCommunityId}` : '/communities')
         }
-        createExperienceHref="/experiences/create"
+        viewCommunityLabel={returnHref ? 'Continue' : undefined}
+        description={
+          returnHref
+            ? 'Your community was created successfully. You can now carry on where you left off.'
+            : undefined
+        }
+        createExperienceHref={returnHref ? undefined : '/experiences/create'}
       />
 
       {/* Header */}

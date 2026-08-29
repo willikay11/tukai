@@ -93,8 +93,8 @@ export const Comments = ({ placeId, reviewId }: { placeId: string; reviewId: str
                 </FormItem>
               )}
             />
-            <Button size="lg" className="w-full" type="submit" disabled={isPending}>
-              {isPending ? 'Submitting...' : 'Submit'}
+            <Button size="lg" className="w-full" type="submit" isLoading={isPending}>
+              Submit
             </Button>
           </form>
         </Form>

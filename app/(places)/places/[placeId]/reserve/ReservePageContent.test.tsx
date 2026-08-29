@@ -25,7 +25,6 @@ jest.mock('@/app/shared/hooks/usePlaces', () => ({
   usePlaceReservationProfiles: () => usePlaceReservationProfiles(),
   usePlaceAvailability: () => usePlaceAvailability(),
   useCreatePlaceBookingRequest: () => ({ mutate: requestBooking, isPending: false }),
-  useFollowing: () => ({ data: { data: { results: [] } }, isLoading: false }),
 }));
 
 const place = {
@@ -88,8 +87,14 @@ describe('ReservePageContent', () => {
     it('renders every step of the form', () => {
       renderPage();
 
-      ['Name your reservation', 'Date & time', 'Guests', 'Add a message', 'Invite people'].forEach(
-        (title) => expect(screen.getByRole('heading', { name: title })).toBeInTheDocument(),
+      [
+        'Name your reservation',
+        'Date & time',
+        'Guests',
+        'Add a message (Optional)',
+        'Invite people (Optional)',
+      ].forEach((title) =>
+        expect(screen.getByRole('heading', { name: title })).toBeInTheDocument(),
       );
     });
 
@@ -112,16 +117,39 @@ describe('ReservePageContent', () => {
   });
 
   describe('summary', () => {
-    it('cannot submit before a date and time are picked', () => {
+    // The button stays live on an incomplete form: pressing it is how the
+    // reader finds out what is still missing
+    it('marks what is missing rather than sitting disabled', async () => {
+      const user = userEvent.setup();
       renderPage();
 
-      expect(screen.getByRole('button', { name: 'Pick a date & time' })).toBeDisabled();
+      const request = screen.getByRole('button', { name: 'Request Reservation' });
+      expect(request).toBeEnabled();
+
+      await user.click(request);
+
+      expect(screen.getByText('Give your reservation a name')).toBeInTheDocument();
+      expect(screen.getByText('Pick a day for your reservation')).toBeInTheDocument();
+      expect(requestBooking).not.toHaveBeenCalled();
+    });
+
+    it('drops a field’s error once it is answered', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await user.click(screen.getByRole('button', { name: 'Request Reservation' }));
+      expect(screen.getByText('Give your reservation a name')).toBeInTheDocument();
+
+      await user.type(screen.getByPlaceholderText("e.g. Valentine's Dinner Date"), 'Date Night');
+
+      expect(screen.queryByText('Give your reservation a name')).not.toBeInTheDocument();
     });
 
     it('updates live as the reader fills the form', async () => {
       const user = userEvent.setup();
       renderPage();
 
+      // The summary's own placeholder, not an error
       expect(screen.getByText('Pick a date')).toBeInTheDocument();
       expect(screen.getByText('2 guests')).toBeInTheDocument();
 
@@ -130,12 +158,42 @@ describe('ReservePageContent', () => {
       expect(screen.getByText('3 guests')).toBeInTheDocument();
     });
 
-    it('enables the request once a slot is chosen', async () => {
+    // The name is required, so a slot alone is not enough to send it
+    it('still asks for a name once a slot is chosen', async () => {
       const user = userEvent.setup();
       renderPage();
       await pickFirstSlot(user);
 
-      expect(screen.getByRole('button', { name: 'Request Reservation' })).toBeEnabled();
+      await user.click(screen.getByRole('button', { name: 'Request Reservation' }));
+
+      expect(screen.getByText('Give your reservation a name')).toBeInTheDocument();
+      expect(requestBooking).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('invites', () => {
+    // The same field the create-experience flow uses: several addresses in one
+    // go, separated by commas
+    it('takes several invitees at once, comma separated', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      const field = screen.getByPlaceholderText('Add guest emails, separated by commas');
+      await user.type(field, 'ada@tukai.co,grace@tukai.co,');
+
+      expect(screen.getByText('ada@tukai.co')).toBeInTheDocument();
+      expect(screen.getByText('grace@tukai.co')).toBeInTheDocument();
+    });
+
+    it('keeps an address that does not parse in the field to be corrected', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      const field = screen.getByPlaceholderText('Add guest emails, separated by commas');
+      await user.type(field, 'not-an-email,');
+
+      expect(screen.getByText(/is not a valid email/)).toBeInTheDocument();
+      expect(field).toHaveValue('not-an-email');
     });
   });
 
@@ -150,7 +208,9 @@ describe('ReservePageContent', () => {
   });
 
   describe('submitting', () => {
-    it('sends the party size and the reader’s note', async () => {
+    // The serializer is flat: requested_date, requested_time and party_size are
+    // the required fields, not a ticket_purchases array
+    it('sends the date, time, party size and the reader’s note', async () => {
       const user = userEvent.setup();
       renderPage();
 
@@ -164,15 +224,32 @@ describe('ReservePageContent', () => {
 
       expect(requestBooking).toHaveBeenCalledWith(
         expect.objectContaining({
-          ticketPurchases: [
-            expect.objectContaining({
-              partySize: 2,
-              specialRequests: 'Date Night — Window seat',
-            }),
-          ],
+          requestedDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+          requestedTime: expect.stringMatching(/^\d{2}:\d{2}$/),
+          partySize: 2,
+          specialRequests: 'Date Night',
+          message: 'Window seat',
         }),
         expect.anything(),
       );
+    });
+
+    // The same modal the create-experience flow ends on, rather than a toast
+    // that disappears while the reader is still reading it
+    it('confirms with the created modal once the request lands', async () => {
+      const user = userEvent.setup();
+      // The mutation reports success through its own callback
+      requestBooking.mockImplementation(
+        (_payload: unknown, { onSuccess }: { onSuccess: () => void }) => onSuccess(),
+      );
+      renderPage();
+
+      await user.type(screen.getByPlaceholderText("e.g. Valentine's Dinner Date"), 'Date Night');
+      await pickFirstSlot(user);
+      await user.click(screen.getByRole('button', { name: 'Request Reservation' }));
+
+      expect(await screen.findByText('Reservation Requested Successfully!')).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /View Mawimbi Seafood House/ })).toBeInTheDocument();
     });
   });
 
