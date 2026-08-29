@@ -423,9 +423,10 @@ export const publishExperience = async (id: string): Promise<ApiResponse> => {
 // cancelling it — it stops being an unfinished draft without destroying the
 // row. Mirrors publishExperience: same verb, same shape, different action.
 //
-// Called from exactly one place: "Clear draft and start fresh" on the resume
-// screen (ResumeDraft → handleClearDraft). Do not wire it to any other action —
-// cancelling a live experience is not what this endpoint is here for.
+// Per the spec this "cancels the experience, refunding any completed
+// purchases", so it serves both callers: clearing an unfinished draft on the
+// resume screen, and cancelling a live experience from Creator Studio. The
+// refunds are the API's business, not the client's.
 export const cancelExperience = async (id: string): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();

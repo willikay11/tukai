@@ -7,6 +7,7 @@ import {
   addExperiencePhotos,
   addGuestToExperience,
   bookmarkExperience,
+  cancelExperience,
   createExperience,
   createExperienceTicket,
   createItineraryDay,
@@ -197,6 +198,22 @@ export const usePublishExperience = (id: string) => {
     mutationFn: async () => await publishExperience(id),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['experience', id] });
+    },
+  });
+};
+
+/**
+ * Cancels the experience. The API refunds any completed purchases itself, so
+ * there is nothing for the caller to settle up.
+ */
+export const useCancelExperience = (id: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['cancelExperience', id],
+    mutationFn: async () => await cancelExperience(id),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['experience', id] });
+      queryClient.invalidateQueries({ queryKey: ['experiences'] });
     },
   });
 };

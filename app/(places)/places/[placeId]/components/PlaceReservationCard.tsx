@@ -8,12 +8,17 @@ import { PlaceBookingRequest } from '@/types/placeReservation';
 
 // A reservation is a Purchase, so it carries the same lifecycle a ticket does.
 // The reader needs to know whether the venue has actually said yes.
+//
+// Declined, cancelled and expired all mean the same thing to the reader —
+// there is no table — so they share one treatment.
+const NO_TABLE = 'bg-red-100 text-red-600';
+
 const STATUS_STYLE: Record<string, { label: string; className: string }> = {
   requested: { label: 'Awaiting confirmation', className: 'bg-amber-100 text-amber-700' },
   accepted: { label: 'Confirmed', className: 'bg-emerald-100 text-emerald-700' },
-  declined: { label: 'Declined', className: 'bg-red-100 text-red-600' },
-  cancelled: { label: 'Cancelled', className: 'bg-gray-100 text-gray-500' },
-  expired: { label: 'Expired', className: 'bg-gray-100 text-gray-500' },
+  declined: { label: 'Declined', className: NO_TABLE },
+  cancelled: { label: 'Cancelled', className: NO_TABLE },
+  expired: { label: 'Expired', className: NO_TABLE },
 };
 
 const CANCELLABLE = new Set(['requested', 'accepted', 'pending']);

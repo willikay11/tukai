@@ -8,6 +8,7 @@ import { inferUIExperienceType } from '@/utils/date-utils';
 import { safeText } from '@/utils/safe-text-utils';
 
 import { ManageExperienceMetrics } from '../../utils/manage-metrics';
+import { CancelExperienceAction } from '../CancelExperienceAction';
 import { SalesProgressDonut } from '../SalesProgressDonut';
 
 interface AboutTabProps {
@@ -112,20 +113,7 @@ export const AboutTab = ({ experience, metrics }: AboutTabProps) => {
           </div>
         )}
 
-        <div>
-          {/* Stays disabled. The cancel endpoint is reserved for clearing an
-              unfinished draft ("Clear draft and start fresh"), so it must not
-              be wired here — cancelling a live experience needs its own
-              endpoint and its own rules about sold tickets. */}
-          <button
-            type="button"
-            disabled
-            title="Cancelling an experience is not available yet"
-            className="text-sm font-semibold text-destructive disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Cancel Experience
-          </button>
-        </div>
+        <CancelExperienceAction experienceId={experience.id} experienceTitle={experience.title} />
       </div>
 
       {/* Right — sales progress */}
