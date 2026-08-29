@@ -523,11 +523,8 @@ export async function createPlaceBookingRequest(
 ): Promise<ApiResponse> {
   try {
     const axiosInstance = await apiWithToken();
-    // ⚠️ The request body is NOT documented in the API spec (`parameters: []`).
-    // This mirrors the documented TicketPurchaseRequest / reservation
-    // serializers, which every other purchase path on this API uses. If the
-    // backend expects different field names this fails at runtime — the error
-    // is surfaced to the caller rather than swallowed.
+    // Flat body — requested_date, requested_time and party_size — not the
+    // ticket_purchases array the experience purchase paths take
     const res = await axiosInstance.post(
       `/v1/places/${placeId}/reservation-profile/${profileId}/booking-requests/`,
       parseCamelToSnake(data),
@@ -584,6 +581,72 @@ export async function fetchFollowing(userId: string): Promise<ApiResponse> {
       status: error.response?.status || 500,
       success: false,
       message: parseApiError(error.response?.data, 'Could not load your friends'),
+    };
+  }
+}
+
+/**
+ * Ownership of a place is held by a COMMUNITY, not a person — the claimant must
+ * be an owner or admin of a published community, and a place can only have one
+ * approved owner.
+ */
+export async function claimPlaceOwnership(
+  placeId: string,
+  communityId: string,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(`/v1/places/${placeId}/ownership/`, {
+      community_id: communityId,
+    });
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not claim this place'),
+    };
+  }
+}
+
+/**
+ * Adds a place that is not on Tukai yet, so it can then be claimed. The API
+ * requires a Google Maps place id and at least one photo, which is why the
+ * "new place" branch of the claim form asks for both.
+ */
+export async function createPlace(data: {
+  title: string;
+  description: string;
+  googleMapPlaceId: string;
+  categoriesIds?: string[];
+  newPhotos: File[];
+}): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const formData = new FormData();
+    formData.append('title', data.title);
+    formData.append('description', data.description);
+    formData.append('google_map_place_id', data.googleMapPlaceId);
+    (data.categoriesIds ?? []).forEach((categoryId) =>
+      formData.append('categories_ids', categoryId),
+    );
+    data.newPhotos.forEach((photo, index) =>
+      formData.append('new_photos', photo, photo.name || `image_${Date.now()}_${index}`),
+    );
+
+    const res = await axiosInstance.post(`/v1/places/`, formData, {
+      headers: { 'Content-Type': undefined },
+    });
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not add this place'),
     };
   }
 }

@@ -360,8 +360,9 @@ export const ActivityCard = ({
                 disabled={isSaving || !!timeError}
                 variant="gradient"
                 className="rounded-full"
+                isLoading={isSaving}
               >
-                {isSaving ? 'Saving...' : 'Save'}
+                Save
               </Button>
             </div>
           </div>

@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   bookmarkPlace,
   cancelPlaceBookingRequest,
+  claimPlaceOwnership,
+  createPlace,
   createPlaceBookingRequest,
   createPlaceReview,
   createPlaceReviewComment,
@@ -296,3 +298,32 @@ export const useFollowing = (userId: string | undefined) =>
     enabled: Boolean(userId),
     staleTime: 5 * 60 * 1000,
   });
+
+export const useClaimPlaceOwnership = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    // The place travels with the mutation rather than with the hook: a claim on
+    // a place that was only just created has no id until submit time
+    mutationFn: async ({ placeId, communityId }: { placeId: string; communityId: string }) =>
+      await claimPlaceOwnership(placeId, communityId),
+    onSuccess: (_data, { placeId }) => {
+      // A granted claim is what makes the place bookable, so the panel has to
+      // re-read its profiles
+      queryClient.invalidateQueries({ queryKey: ['placeReservationProfiles', placeId] });
+    },
+  });
+};
+
+/**
+ * Adds a place the reader could not find on Tukai. The claim form runs this
+ * first, then claims the place it returns.
+ */
+export const useCreatePlace = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: Parameters<typeof createPlace>[0]) => await createPlace(data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['places'] }),
+  });
+};

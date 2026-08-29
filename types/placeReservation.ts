@@ -67,26 +67,17 @@ export type PlaceBookingRequest = {
 };
 
 /**
- * ⚠️ INFERRED SHAPE. The spec documents no request body for
- * POST .../booking-requests/ (`parameters: []`), same as the guides endpoint it
- * mirrors. This follows the documented `TicketPurchaseRequest`
- * (ticket_id/quantity/party_size/special_requests) and
- * `WriteOnlyExperienceReservationSerializer` (occurrence + purchaser details),
- * which is what every other purchase path on this API takes.
- *
- * Confirm with the backend before relying on it — a wrong field name fails at
- * runtime, not at build.
+ * The body of POST …/booking-requests/, per
+ * `WriteOnlyRestaurantBookingRequestCreateSerializer`. It is flat — not the
+ * `ticket_purchases` array the experience purchase paths take — and the first
+ * three fields are required.
  */
 export type CreatePlaceBookingRequest = {
-  occurrence?: string;
-  ticketPurchases: {
-    ticketId?: string;
-    quantity: number;
-    partySize: number;
-    specialRequests?: string;
-  }[];
-  firstName?: string;
-  lastName?: string;
-  confirmationEmail?: string;
-  whatsappPhone?: string;
+  // 'YYYY-MM-DD'
+  requestedDate: string;
+  // 'HH:MM'
+  requestedTime: string;
+  partySize: number;
+  specialRequests?: string;
+  message?: string;
 };

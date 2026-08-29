@@ -1,6 +1,5 @@
 'use client';
 
-import { IconComponent } from '@/app/shared/components/Icons';
 import {
   PreviewCommunitiesSection,
   PreviewGuestsSection,
@@ -262,15 +261,13 @@ export const ReviewLayout = ({
             {isPublishing ? 'Publishing...' : 'Publish Experience'}
           </Button>
           <Button
+            isLoading={pendingAction === 'exit'}
             type="button"
             variant="outline-primary"
             onClick={() => runAction('exit', onSaveAndExit ?? onCancel)}
             disabled={isPublishing || pendingAction === 'exit'}
             className="text-xs font-semibold"
           >
-            {pendingAction === 'exit' && (
-              <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
-            )}
             Save & Exit
           </Button>
           <button

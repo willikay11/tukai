@@ -79,10 +79,10 @@ export const CreateBucketListModal = ({ open, onOpenChange }: CreateBucketListMo
           <Button
             variant="gradient"
             onClick={handleCreate}
-            disabled={isPending}
             className="w-full rounded-full"
+            isLoading={isPending}
           >
-            {isPending ? 'Creating…' : 'Create Bucket List'}
+            Create Bucket List
           </Button>
         </div>
       </DialogContent>

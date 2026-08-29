@@ -10,6 +10,12 @@ interface ExperienceCreatedModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   experienceId?: string;
+  /**
+   * Where the button goes, for callers whose subject is not an experience — a
+   * requested table reservation, say. Without it the destination is derived
+   * from `experienceId` as before.
+   */
+  href?: string;
   onViewExperience?: () => void;
   title?: string;
   description?: string;
@@ -21,12 +27,15 @@ export const ExperienceCreatedModal = ({
   open,
   onOpenChange,
   experienceId,
+  href,
   onViewExperience,
   title = 'Experience Created Successfully!',
   description = 'Your experience has been created and is now live. Share it with your community and start receiving bookings.',
   viewExperienceLabel = 'View Experience',
   illustrationSrc = '/images/friday-feeling.svg',
 }: ExperienceCreatedModalProps) => {
+  const target = href ?? (experienceId ? `/experiences/${experienceId}` : null);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[calc(100%-24px)] max-w-[440px] rounded-2xl p-6 sm:p-8">
@@ -49,7 +58,7 @@ export const ExperienceCreatedModal = ({
           </DialogDescription>
 
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:items-center">
-            {experienceId && onViewExperience ? (
+            {target && onViewExperience ? (
               <Button
                 type="button"
                 variant="gradient"
@@ -61,14 +70,14 @@ export const ExperienceCreatedModal = ({
               >
                 {viewExperienceLabel}
               </Button>
-            ) : experienceId ? (
+            ) : target ? (
               <Button
                 type="button"
                 variant="gradient"
                 className="h-12 rounded-full px-6 text-white"
                 asChild
               >
-                <Link href={`/experiences/${experienceId}`} onClick={() => onOpenChange(false)}>
+                <Link href={target} onClick={() => onOpenChange(false)}>
                   {viewExperienceLabel}
                 </Link>
               </Button>

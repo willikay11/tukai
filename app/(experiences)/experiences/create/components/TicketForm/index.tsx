@@ -266,11 +266,11 @@ export const TicketForm = ({
         <Button
           type="button"
           onClick={onSave}
-          disabled={isSaving}
           variant="gradient"
           className="rounded-[50px] text-xs font-medium"
+          isLoading={isSaving}
         >
-          {isSaving ? 'Saving...' : 'Save Ticket'}
+          Save Ticket
         </Button>
       </div>
     </div>

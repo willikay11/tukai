@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 
-import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
 import { ItineraryDayFormValue } from '@/types/itinerary';
 
@@ -178,27 +177,23 @@ export const ItineraryDaysStep = ({
         </button>
         <div className="flex gap-3">
           <Button
+            isLoading={pendingAction === 'exit'}
             type="button"
             variant="outline-primary"
             onClick={() => runAction('exit', onSaveAndExit)}
             disabled={pendingAction === 'exit'}
             className="text-xs font-semibold"
           >
-            {pendingAction === 'exit' && (
-              <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
-            )}
             Save & Exit
           </Button>
           <Button
+            isLoading={isSaving}
             type="button"
             onClick={onSaveContinue}
             disabled={isSaving || !allDaysHaveActivities}
             variant="gradient"
             className="rounded-full"
           >
-            {isSaving && (
-              <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
-            )}
             {isSaving ? 'Saving...' : 'Save & Continue'}
           </Button>
         </div>

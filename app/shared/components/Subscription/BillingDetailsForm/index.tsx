@@ -2,16 +2,22 @@
 
 import { useState } from 'react';
 
-import { HugeiconsIcon } from '@hugeicons/react';
 import {
   Location01Icon as Location01Twotone,
   SquareLock01Icon as SquareLock01Twotone,
 } from '@hugeicons-pro/core-twotone-rounded';
+import { HugeiconsIcon } from '@hugeicons/react';
 
 import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 // Dedicated billing-address form for the in-modal subscription flow:
 // country + town/city + postcode. Submits to the same billing-details API
@@ -130,8 +136,9 @@ export const BillingDetailsForm = ({
         className="w-full rounded-2xl"
         onClick={handleSubmit}
         disabled={!isValid || isSubmitting}
+        isLoading={isSubmitting}
       >
-        {isSubmitting ? 'Submitting...' : 'Continue to payment'}
+        Continue to payment
       </Button>
     </div>
   );

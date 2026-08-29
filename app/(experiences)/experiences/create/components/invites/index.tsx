@@ -227,15 +227,13 @@ export const CreateExperienceInvites = ({
           <div className="flex items-center gap-2 lg:gap-3">
             {!hideSaveAndExit && (
               <Button
+                isLoading={pendingAction === 'exit'}
                 type="button"
                 variant="outline-primary"
                 onClick={() => runAction('exit', onSaveAndExit)}
                 disabled={pendingAction === 'exit'}
                 className="px-6 text-xs font-semibold"
               >
-                {pendingAction === 'exit' && (
-                  <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
-                )}
                 {saveAndExitActionLabel}
               </Button>
             )}

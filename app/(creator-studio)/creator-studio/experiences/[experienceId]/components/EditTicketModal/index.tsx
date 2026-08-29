@@ -203,8 +203,8 @@ export const EditTicketModal = ({
             >
               Cancel
             </button>
-            <Button type="submit" disabled={isPending} className="rounded-full px-7 py-5">
-              {isPending ? 'Saving…' : 'Save Ticket'}
+            <Button type="submit" className="rounded-full px-7 py-5" isLoading={isPending}>
+              Save Ticket
             </Button>
           </div>
         </form>

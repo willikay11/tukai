@@ -1,4 +1,5 @@
 import { getAuthSession } from '@/lib/auth';
+import { ApiResponse } from '@/types/apiResponse';
 import { CommunityPostsQueryParams, CreateCommunity } from '@/types/community';
 import { assertValidImageFiles } from '@/utils/images';
 import { parseApiError } from '@/utils/parseApiError';
@@ -233,6 +234,61 @@ export async function createCommunity(data: CreateCommunity) {
       status: error.response?.status || 500,
       success: false,
       message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
+  }
+}
+
+/**
+ * Opens a verification application for a community. Proof-of-ownership
+ * documents hang off this, and it is what a place-ownership claim is reviewed
+ * against.
+ *
+ * Fails if a pending or under-review application already exists, so a caller
+ * that only needs "there is an open application" can treat that 400 as success.
+ */
+export async function submitCommunityVerification(communityId: string): Promise<ApiResponse> {
+  try {
+    const api = await apiWithToken();
+    const response = await api.post(`/v1/communities/${communityId}/verification/`, {});
+
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not start verification'),
+    };
+  }
+}
+
+/** One supporting document — PDF, JPEG or PNG, up to 10 MB. */
+export async function uploadVerificationDocument(
+  communityId: string,
+  documentType: string,
+  file: File,
+  notes?: string,
+): Promise<ApiResponse> {
+  try {
+    const api = await apiWithToken();
+    const formData = new FormData();
+    formData.append('document_type', documentType);
+    formData.append('file', file);
+    if (notes) formData.append('notes', notes);
+
+    const response = await api.post(
+      `/v1/communities/${communityId}/verification/documents/`,
+      formData,
+      { headers: { 'Content-Type': undefined } },
+    );
+
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not upload this document'),
     };
   }
 }

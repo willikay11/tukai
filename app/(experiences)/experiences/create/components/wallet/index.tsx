@@ -383,15 +383,13 @@ export const CreateExperienceWallet = ({
           <div className="flex gap-3">
             {!hideSaveAndExit && (
               <Button
+                isLoading={pendingAction === 'exit'}
                 type="button"
                 variant="outline-primary"
                 onClick={() => runAction('exit', onSaveAndExit)}
                 disabled={pendingAction === 'exit'}
                 className="px-6 text-xs font-semibold"
               >
-                {pendingAction === 'exit' && (
-                  <IconComponent iconName="Loading03Icon" size={16} className="animate-spin" />
-                )}
                 {saveAndExitActionLabel}
               </Button>
             )}

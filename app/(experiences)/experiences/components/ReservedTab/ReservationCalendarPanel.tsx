@@ -4,60 +4,25 @@ import { useMemo, useState } from 'react';
 
 import moment from 'moment';
 
+import { MonthDayFilter } from '@/app/shared/components/Calendar';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
 import { formatTimeRange } from '@/utils/date-utils';
+import {
+  ALL_DAYS,
+  buildActiveDays,
+  dayKey,
+  groupByDay,
+  initialMonthFor,
+} from '@/utils/reservation-calendar';
 
 import { PanelItem } from './panelItems';
 
-export const dayKey = (date: Date | string): string => moment(date).format('YYYY-MM-DD');
-
-// Only the days that actually have bookings — an empty day pill is noise, and a
-// full month of them buries the handful that matter
-export const buildActiveDays = (items: PanelItem[], monthCursor: moment.Moment): Date[] =>
-  Array.from(
-    new Set(
-      items
-        .filter((item) => item.start && moment(item.start).isSame(monthCursor, 'month'))
-        .map((item) => dayKey(item.start!)),
-    ),
-  )
-    .sort()
-    .map((key) => moment(key).toDate());
-
-export const groupByDay = (items: PanelItem[]): Record<string, PanelItem[]> =>
-  items.reduce<Record<string, PanelItem[]>>((accumulator, item) => {
-    if (!item.start) return accumulator;
-    const key = dayKey(item.start);
-    accumulator[key] = [...(accumulator[key] ?? []), item];
-    return accumulator;
-  }, {});
-
-/**
- * Which month the panel opens on.
- *
- * It used to open on the earliest item, which meant the oldest booking in the
- * user's history pinned the panel to a long-past month. The current month is
- * the useful default; the panel only jumps forward when there is nothing to
- * show now but something later on.
- */
-export const initialMonthFor = (items: PanelItem[], now: Date = new Date()): moment.Moment => {
-  const thisMonth = moment(now).startOf('month');
-
-  const starts = items
-    .map((item) => item.start)
-    .filter((start): start is string => Boolean(start))
-    .sort();
-
-  if (starts.some((start) => moment(start).isSame(thisMonth, 'month'))) return thisMonth;
-
-  const nextWithItems = starts.find((start) => moment(start).isAfter(thisMonth, 'month'));
-  return nextWithItems ? moment(nextWithItems).startOf('month') : thisMonth;
-};
-
-const ALL = 'all';
+// The date maths moved to utils so a place's reservations can lay out the same
+// way; re-exported because this module is where they were first imported from
+export { dayKey, buildActiveDays, groupByDay, initialMonthFor };
 
 const StatusPill = ({ kind }: { kind: PanelItem['kind'] }) =>
   kind === 'invite' ? (
@@ -89,7 +54,7 @@ export const ReservationCalendarPanel = ({
   const byDay = useMemo(() => groupByDay(items), [items]);
 
   const [monthCursor, setMonthCursor] = useState(() => initialMonthFor(items));
-  const [selectedKey, setSelectedKey] = useState<string>(ALL);
+  const [selectedKey, setSelectedKey] = useState<string>(ALL_DAYS);
 
   const days = useMemo(() => buildActiveDays(items, monthCursor), [items, monthCursor]);
 
@@ -98,84 +63,31 @@ export const ReservationCalendarPanel = ({
     [items, monthCursor],
   );
 
-  const visibleItems = selectedKey === ALL ? monthItems : (byDay[selectedKey] ?? []);
+  const visibleItems = selectedKey === ALL_DAYS ? monthItems : (byDay[selectedKey] ?? []);
 
   const changeMonth = (delta: number) => {
     setMonthCursor((cursor) => cursor.clone().add(delta, 'month'));
-    setSelectedKey(ALL);
+    setSelectedKey(ALL_DAYS);
   };
 
   return (
     <div className="mt-4 rounded-3xl bg-gray-50 p-5">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => changeMonth(-1)}
-            aria-label="Previous month"
-            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100"
-          >
-            <IconComponent iconName="ArrowLeft01Icon" size={16} color="currentColor" />
-          </button>
-          <span className="text-lg font-bold text-gray-900">{monthCursor.format('MMMM')}</span>
-          <button
-            type="button"
-            onClick={() => changeMonth(1)}
-            aria-label="Next month"
-            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100"
-          >
-            <IconComponent iconName="ArrowRight01Icon" size={16} color="currentColor" />
-          </button>
-        </div>
-
-        <span className="flex-shrink-0 text-sm text-gray-400">
-          {monthItems.length} {monthItems.length === 1 ? 'booking' : 'bookings'}
-        </span>
-      </div>
-
-      <div className="mt-4 flex items-center gap-2 overflow-x-auto scrollbar-hide">
-        <button
-          type="button"
-          onClick={() => setSelectedKey(ALL)}
-          aria-pressed={selectedKey === ALL}
-          className={`flex-shrink-0 rounded-full border px-5 py-2.5 text-sm ${
-            selectedKey === ALL
-              ? 'border-transparent bg-green-200 font-semibold text-gray-900'
-              : 'border-gray-200 bg-white text-gray-700'
-          }`}
-        >
-          All
-        </button>
-
-        {days.map((day) => {
-          const key = dayKey(day);
-          const isSelected = key === selectedKey;
-          const hasItems = (byDay[key]?.length ?? 0) > 0;
-
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setSelectedKey(key)}
-              aria-pressed={isSelected}
-              className={`flex flex-shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-sm ${
-                isSelected
-                  ? 'border-transparent bg-green-200 font-semibold text-gray-900'
-                  : 'border-gray-200 bg-white text-gray-700'
-              }`}
-            >
-              <span>{moment(day).format('ddd')}</span>
-              <span className="font-bold">{day.getDate()}</span>
-              {hasItems && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
-            </button>
-          );
-        })}
-      </div>
+      <MonthDayFilter
+        monthCursor={monthCursor}
+        days={days}
+        countLabel={`${monthItems.length} ${monthItems.length === 1 ? 'booking' : 'bookings'}`}
+        selectedKey={selectedKey}
+        daysWithItems={new Set(Object.keys(byDay).filter((key) => byDay[key].length > 0))}
+        onChangeMonth={changeMonth}
+        onSelectKey={setSelectedKey}
+      />
 
       <div className="mt-5 space-y-3">
         {visibleItems.length === 0 ? (
           <div className="py-8">
-            <NoData message={selectedKey === ALL ? 'Nothing this month' : 'Nothing on this day'} />
+            <NoData
+              message={selectedKey === ALL_DAYS ? 'Nothing this month' : 'Nothing on this day'}
+            />
           </div>
         ) : (
           visibleItems.map((item) => (

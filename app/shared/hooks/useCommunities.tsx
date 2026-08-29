@@ -9,6 +9,8 @@ import {
   getCommunities,
   joinCommunity,
   joinCommunityWithToken,
+  submitCommunityVerification,
+  uploadVerificationDocument,
 } from '@/services/community';
 import { CommunityPostsQueryParams, CreateCommunity } from '@/types/community';
 
@@ -136,5 +138,33 @@ export const useCreateCommunityPhotos = () => {
     mutationKey: ['createCommunityPhotos'],
     mutationFn: async ({ communityId, photos }: { communityId: string; photos: File[] }) =>
       await createCommunityPhotos(communityId, photos),
+  });
+};
+
+/**
+ * Opens the community's verification application. Proof-of-ownership documents
+ * hang off it, so this runs before any document upload. The API rejects a
+ * second application while one is PENDING or UNDER_REVIEW — the caller treats
+ * that as "already open" rather than as a failure.
+ */
+export const useSubmitCommunityVerification = () => {
+  return useMutation({
+    mutationFn: async (communityId: string) => await submitCommunityVerification(communityId),
+  });
+};
+
+export const useUploadVerificationDocument = () => {
+  return useMutation({
+    mutationFn: async ({
+      communityId,
+      documentType,
+      file,
+      notes,
+    }: {
+      communityId: string;
+      documentType: string;
+      file: File;
+      notes?: string;
+    }) => await uploadVerificationDocument(communityId, documentType, file, notes),
   });
 };

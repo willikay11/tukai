@@ -140,8 +140,8 @@ export default function Page() {
             </div>
 
             <div className="mb-2.5">
-              <Button className="h-[50px] w-full" disabled={isSubmitting}>
-                {isSubmitting ? 'Submitting...' : 'Submit'}
+              <Button className="h-[50px] w-full" isLoading={isSubmitting}>
+                Submit
               </Button>
             </div>
 
@@ -181,7 +181,7 @@ export default function Page() {
               {isResending ? 'Resending...' : 'Resend Code'}
             </Button>
           </div>
-          <Button className="h-[50px] w-full" onClick={onNext}>
+          <Button className="h-[50px] w-full" onClick={onNext} isLoading={isSubmitting}>
             Submit
           </Button>
         </div>

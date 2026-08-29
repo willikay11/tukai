@@ -12,7 +12,7 @@ import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { PlaceBookingRequest, PlaceReservationProfile } from '@/types/placeReservation';
 
-import { PlaceReservationCard } from './PlaceReservationCard';
+import { PlaceReservationsCalendar } from './PlaceReservationsCalendar';
 
 export const ReservationPanel = ({
   placeId,
@@ -79,15 +79,17 @@ export const ReservationPanel = ({
         )}
       </div>
 
-      <div className="flex items-center gap-3 rounded-2xl bg-white p-4">
-        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-primary">
-          <IconComponent iconName="Calendar03Icon" size={18} className="text-lime" />
+      {isBookable && (
+        <div className="flex items-center gap-3 rounded-2xl bg-white p-4">
+          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-primary">
+            <IconComponent iconName="Calendar03Icon" size={18} className="text-lime" />
+          </div>
+          <div className="min-w-0">
+            <p className="font-bold text-gray-900">Free to reserve</p>
+            <p className="text-sm text-gray-500">Hold your table - no charge to book</p>
+          </div>
         </div>
-        <div className="min-w-0">
-          <p className="font-bold text-gray-900">Free to reserve</p>
-          <p className="text-sm text-gray-500">Hold your table - no charge to book</p>
-        </div>
-      </div>
+      )}
 
       <p className="text-sm text-gray-500">
         {isBookable
@@ -116,19 +118,36 @@ export const ReservationPanel = ({
         )}
       </Button>
 
-      {reservations.length > 0 && (
-        <div className="space-y-3">
-          <p className="pt-2 font-bold text-gray-900">My Reservations</p>
-          {reservations.map((reservation) => (
-            <PlaceReservationCard
-              key={reservation.id}
-              reservation={reservation}
-              placeName={placeName}
-              onCancel={() => handleCancel(reservation.id)}
-              isCancelling={isCancelling}
-            />
-          ))}
+      {/* A place becomes bookable when its owning community claims it and sets
+          up a profile, so the way out of this state is to claim it */}
+      {!isBookable && (
+        <div className="flex items-start gap-3 rounded-2xl bg-white p-4">
+          <IconComponent
+            iconName="InformationCircleIcon"
+            size={18}
+            color="currentColor"
+            className="mt-0.5 flex-shrink-0 text-primary"
+          />
+          <p className="text-sm text-gray-600">
+            Own or manage this place?{' '}
+            <Link
+              href={`/places/claim?placeId=${placeId}`}
+              className="font-medium text-primary hover:underline"
+            >
+              Claim it
+            </Link>{' '}
+            to take reservations on Tukai.
+          </p>
         </div>
+      )}
+
+      {reservations.length > 0 && (
+        <PlaceReservationsCalendar
+          reservations={reservations}
+          placeName={placeName}
+          isCancelling={isCancelling}
+          onCancel={handleCancel}
+        />
       )}
     </div>
   );
