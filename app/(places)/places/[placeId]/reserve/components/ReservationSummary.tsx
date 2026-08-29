@@ -78,7 +78,12 @@ export const ReservationSummary = ({
       {/* Live even when the form is incomplete: pressing it is how the reader
           finds out what is still missing, marked on the section that asks for
           it rather than hidden behind a disabled button */}
-      <Button onClick={onSubmit} className="w-full rounded-full" isLoading={isSubmitting}>
+      <Button
+        variant="gradient"
+        onClick={onSubmit}
+        className="w-full rounded-full"
+        isLoading={isSubmitting}
+      >
         Request Reservation
       </Button>
 
