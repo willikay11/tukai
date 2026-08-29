@@ -100,7 +100,7 @@ export const SingleExperience = ({
             {experience.hostCommunity.title}
           </span>
         )}
-        <p className="mt-2 text-sm font-semibold text-primary">
+        <p className="mt-2 text-sm font-semibold text-gray-800">
           {experience.priceStartsFrom?.currency}{' '}
           {numeral(experience.priceStartsFrom?.amount).format('0,0')}/person
         </p>

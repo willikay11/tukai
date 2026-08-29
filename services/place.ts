@@ -50,6 +50,29 @@ export async function fetchPlaces(
   }
 }
 
+/**
+ * The places this user owns — `GET /places/?mine=true`.
+ *
+ * Ownership of a place is held by a community the user is an OWNER/ADMIN of
+ * (see claimPlaceOwnership), and the filter resolves that server-side. It is
+ * user-scoped, so unlike fetchPlaces it goes out with the token.
+ */
+export async function fetchMyPlaces(page = 1, perPage = 12): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(`/v1/places/?mine=true&page=${page}&page_size=${perPage}`);
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load your places'),
+    };
+  }
+}
+
 export async function fetchPlace(id?: string): Promise<ApiResponse> {
   try {
     const res = await api.get(`/v1/places/${id}`);

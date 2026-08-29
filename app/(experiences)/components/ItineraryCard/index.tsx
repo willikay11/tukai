@@ -74,7 +74,7 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
           </p>
         )}
         {price && (
-          <p className="mt-1 text-sm font-semibold text-primary">
+          <p className="mt-1 text-sm font-semibold text-gray-800">
             From {price.currency} {numeral(price.amount).format('0,0')}
           </p>
         )}

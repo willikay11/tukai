@@ -25,7 +25,7 @@ const city = (name: string, placesCount: number, group = 'cities'): PlaceCategor
   icon: '',
   group,
   placesCount,
-  image: '',
+  images: [{ id: `${name}-1`, imageUrl: `https://cdn.tukai.co/${name}.jpg` }],
 });
 
 // Only the two fields this component reads
@@ -46,7 +46,7 @@ describe('SeeAllCitiesContent', () => {
     expect(screen.getByRole('button', { name: /Back/ })).toBeInTheDocument();
   });
 
-  it('points each city at that city\'s experiences, not at places', () => {
+  it("points each city at that city's experiences, not at places", () => {
     mockResult([city('Nairobi', 42), city('Diani Beach', 7)]);
     render(<SeeAllCitiesContent />);
 

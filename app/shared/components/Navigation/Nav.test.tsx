@@ -58,14 +58,14 @@ describe('Nav', () => {
       });
     });
 
-    it('hides navigation below the lg breakpoint', () => {
+    it('hides navigation below the md breakpoint, where the bottom bar takes over', () => {
       mockUsePathname.mockReturnValue('/');
 
       const { container } = render(<Nav />);
       const nav = container.querySelector('nav');
 
       expect(nav).toHaveClass('hidden');
-      expect(nav).toHaveClass('lg:flex');
+      expect(nav).toHaveClass('md:flex');
     });
   });
 
@@ -173,6 +173,21 @@ describe('Nav', () => {
 
       expect(screen.getByRole('navigation')).toBeInTheDocument();
       expect(screen.getAllByRole('link').length).toBe(4);
+    });
+
+    // Only the current destination is named below xl, the way the mobile
+    // bottom bar does it — the rest keep their text in the DOM, hidden
+    it('names the current destination', () => {
+      mockUsePathname.mockReturnValue('/places');
+
+      render(<Nav />);
+
+      const active = screen.getByRole('link', { name: 'Places' });
+      expect(active.querySelector('span')).toHaveClass('inline');
+      expect(screen.getByRole('link', { name: 'Moments' }).querySelector('span')).toHaveClass(
+        'hidden',
+        'xl:inline',
+      );
     });
 
     it('uses readable link text (not just icons)', () => {

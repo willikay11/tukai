@@ -65,9 +65,12 @@ export const RotatingPlaceholder = ({
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-y-0 left-0 flex items-center"
+      // inset-0, not inset-y-0 + left-0: bounded on the left alone, the reel's
+      // whitespace-nowrap text ran past the field's right edge and painted over
+      // whatever followed it in the header
+      className="pointer-events-none absolute inset-0 flex items-center overflow-hidden"
     >
-      <div className="overflow-hidden" style={{ height: SLOT_HEIGHT }}>
+      <div className="w-full overflow-hidden" style={{ height: SLOT_HEIGHT }}>
         <div
           className={cn(
             'will-change-transform',
@@ -81,7 +84,7 @@ export const RotatingPlaceholder = ({
           {[...phrases, phrases[0]].map((phrase, slot) => (
             <div
               key={`${phrase}-${slot}`}
-              className="flex items-center whitespace-nowrap text-[14px] font-normal leading-[18px] text-gray-400"
+              className="flex items-center truncate whitespace-nowrap text-[14px] font-normal leading-[18px] text-gray-400"
               style={{ height: SLOT_HEIGHT }}
             >
               {phrase}

@@ -30,7 +30,7 @@ import { Experience } from '@/types/experience';
 import { Moment, momentPhotos } from '@/types/moment';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
-import { PlaceCategory } from '@/types/placeCategory';
+import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
 import { formatLongDateWithOrdinal, formatShortDate } from '@/utils/date-utils';
 import { haversineKm } from '@/utils/geo-utils';
 
@@ -241,8 +241,7 @@ export const DiscoverPageContent = () => {
                 <div key={category.id} className="snap-start">
                   <CityCard
                     city={category.name}
-                    experienceCount={category.placesCount}
-                    imageUrl={category.image ?? ''}
+                    imageUrl={categoryImageOf(category) ?? ''}
                     href={cityExperiencesHref(category.name)}
                   />
                 </div>
@@ -250,7 +249,7 @@ export const DiscoverPageContent = () => {
 
               <SeeAllCard
                 href="/experiences/see-all?type=cities"
-                previewPhotos={cities.slice(0, 3).map((city) => city.image ?? null)}
+                previewPhotos={cities.slice(0, 3).map(categoryImageOf)}
                 className="aspect-auto h-[130px] w-[240px]"
               />
             </ScrollRow>
@@ -358,11 +357,16 @@ export const DiscoverPageContent = () => {
                 <ItineraryCard key={itinerary.id} itinerary={itinerary} />
               ))}
 
-              <SeeAllCard
-                href="/experiences/see-all?type=itineraries"
-                previewPhotos={itineraries.slice(0, 3).map(coverPhotoOf)}
-                className="w-[300px]"
-              />
+              {/* Only when the row came back full: a partial row is already
+                  every itinerary there is, so "See all" would lead to the same
+                  cards the reader is looking at */}
+              {itineraries.length >= ROW_SIZE && (
+                <SeeAllCard
+                  href="/experiences/see-all?type=itineraries"
+                  previewPhotos={itineraries.slice(0, 3).map(coverPhotoOf)}
+                  className="w-[300px]"
+                />
+              )}
             </ScrollRow>
           )}
         </section>
