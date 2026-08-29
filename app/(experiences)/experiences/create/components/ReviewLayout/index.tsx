@@ -34,6 +34,8 @@ interface ReviewLayoutProps {
   // Slot times for a recurring experience, from its slot templates
   recurringTimeSlots?: { startTime: string | null; endTime: string | null }[];
   isPublishing?: boolean;
+  // Editing a live experience saves rather than publishes
+  isAlreadyPublished?: boolean;
   onEditSection?: (
     section:
       | 'about-title'
@@ -66,6 +68,7 @@ export const ReviewLayout = ({
   allCommunities = [],
   recurringTimeSlots = [],
   isPublishing = false,
+  isAlreadyPublished = false,
   onEditSection,
   onCancel,
   onSaveAndExit,
@@ -255,10 +258,10 @@ export const ReviewLayout = ({
             type="button"
             variant="gradient"
             onClick={() => onPublish?.()}
-            disabled={isPublishing}
+            isLoading={isPublishing}
             className="rounded-full"
           >
-            {isPublishing ? 'Publishing...' : 'Publish Experience'}
+            {isAlreadyPublished ? 'Save Changes' : 'Publish Experience'}
           </Button>
           <Button
             isLoading={pendingAction === 'exit'}

@@ -73,12 +73,15 @@ export const DateTimePicker = ({
                 aria-pressed={isSelected}
                 className={cn(
                   'flex h-[72px] w-[68px] flex-shrink-0 flex-col items-center justify-center gap-1 rounded-xl border transition-colors',
+                  // The light green the rest of the app selects with — the same
+                  // treatment as the name presets above and the reservations
+                  // calendar's day pills
                   isSelected
-                    ? 'border-primary bg-primary text-white'
+                    ? 'border-green-200 bg-green-200 font-medium text-primary'
                     : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300',
                 )}
               >
-                <span className={cn('text-xs', isSelected ? 'text-white/70' : 'text-gray-400')}>
+                <span className={cn('text-xs', isSelected ? 'text-primary/70' : 'text-gray-400')}>
                   {date.toLocaleDateString(undefined, { weekday: 'short' })}
                 </span>
                 <span className="text-lg font-bold">{date.getDate()}</span>
@@ -101,7 +104,7 @@ export const DateTimePicker = ({
                 className={cn(
                   'rounded-full border px-5 py-2.5 text-sm transition-colors',
                   selectedTime === time
-                    ? 'border-primary bg-primary text-white'
+                    ? 'border-green-200 bg-green-200 font-medium text-primary'
                     : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300',
                 )}
               >

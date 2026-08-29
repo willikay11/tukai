@@ -37,7 +37,7 @@ export const CreateExperienceInvites = ({
   onPreview,
   cancelActionLabel = 'Cancel',
   saveAndExitActionLabel = 'Save & Exit',
-  nextActionLabel = 'Next',
+  nextActionLabel = 'Save & Continue',
   hideSaveAndExit = false,
 }: CreateExperienceInvitesProps) => {
   const initialInvitedMembers = useMemo<InvitedMember[]>(() => {
@@ -249,10 +249,10 @@ export const CreateExperienceInvites = ({
               type="button"
               variant="gradient"
               onClick={handleNext}
-              disabled={isUpdatingCommunities}
+              isLoading={isUpdatingCommunities}
               className="rounded-full px-6 text-xs font-semibold text-white"
             >
-              {isUpdatingCommunities ? 'Saving...' : nextActionLabel}
+              {nextActionLabel}
             </Button>
           </div>
         </div>

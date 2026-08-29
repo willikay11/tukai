@@ -11,6 +11,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
 import { InvitedMember } from '@/components/ui/invite-members';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Interest } from '@/types/interest';
@@ -310,14 +311,21 @@ export const CreateExperienceSteps = ({
   // Publishing needs the saved experience, not the synthetic preview id
   const publishableExperienceId = experience?.id;
 
+  // An experience that is already live is being edited, not published: the
+  // publish endpoint would be a no-op at best, so the same button saves the
+  // changes through the update endpoint instead. The API has been seen to
+  // return either case.
+  const isAlreadyPublished = String(experience?.status ?? '').toLowerCase() === 'published';
+
   const handlePublishClick = async () => {
-    if (!handlers?.handlePublish || isPublishing) return;
+    const action = isAlreadyPublished ? handlers?.handleSaveAbout : handlers?.handlePublish;
+    if (!action || isPublishing) return;
 
     setIsPublishing(true);
     try {
       // Errors are toasted by the hook; only success opens the modal
-      const published = await handlers.handlePublish();
-      if (published) setIsPublishedModalOpen(true);
+      const saved = await action();
+      if (saved !== false) setIsPublishedModalOpen(true);
     } finally {
       setIsPublishing(false);
     }
@@ -780,8 +788,10 @@ export const CreateExperienceSteps = ({
                 </div>
 
                 {previewMode === 'captured' ? (
-                  /* The same section components the removed side panel used —
-                     each pencil jumps to the step that owns its data */
+                  /* The same section components the side panel uses. No
+                     onEditStep here: the preview is for reading back what was
+                     captured, and the step pills above are how you go and
+                     change it. */
                   <div className="max-w-2xl">
                     <SharedExperiencePreview
                       showAllSections
@@ -828,7 +838,6 @@ export const CreateExperienceSteps = ({
                       invitedCommunityIds={inviteFormData?.invitedCommunityIds}
                       allCommunities={communitiesForSelector}
                       selectedWallet={walletFormData?.selectedWallet}
-                      onEditStep={(step) => handleStepChange(step as ExperienceStepId)}
                     />
                   </div>
                 ) : (
@@ -840,21 +849,30 @@ export const CreateExperienceSteps = ({
                   <ViewExperiencePageContent experience={previewExperience} bookingMode="preview" />
                 )}
 
-                <div className="mt-8 flex justify-start">
+                {/* Right-aligned to the end of the preview column itself, not
+                    the page: in "captured" mode the content is capped at
+                    max-w-2xl, so the button tracks that edge */}
+                <div
+                  className={cn('mt-8 flex justify-end', previewMode === 'captured' && 'max-w-2xl')}
+                >
                   <Button
                     type="button"
                     variant="gradient"
                     onClick={handlePublishClick}
-                    disabled={!publishableExperienceId || isPublishing}
+                    disabled={!publishableExperienceId}
+                    isLoading={isPublishing}
                     className="flex w-fit items-center justify-center gap-2 rounded-full"
                   >
-                    <IconComponent
-                      iconName={isPublishing ? 'Loading03Icon' : 'RocketIcon'}
-                      size={16}
-                      color="currentColor"
-                      className={isPublishing ? 'animate-spin text-white' : 'text-white'}
-                    />
-                    {isPublishing ? 'Publishing...' : 'Publish Experience'}
+                    {/* No rocket on an experience that has already launched */}
+                    {!isPublishing && !isAlreadyPublished && (
+                      <IconComponent
+                        iconName="RocketIcon"
+                        size={16}
+                        color="currentColor"
+                        className="text-white"
+                      />
+                    )}
+                    {isAlreadyPublished ? 'Save Changes' : 'Publish Experience'}
                   </Button>
                 </div>
 
@@ -865,6 +883,16 @@ export const CreateExperienceSteps = ({
                     if (!open) handlePublishComplete();
                   }}
                   experienceId={publishableExperienceId}
+                  title={
+                    isAlreadyPublished
+                      ? 'Changes Saved Successfully'
+                      : 'Experience Created Successfully!'
+                  }
+                  description={
+                    isAlreadyPublished
+                      ? 'Your changes are live. Anyone looking at this experience will see them now.'
+                      : undefined
+                  }
                   onViewExperience={handlePublishComplete}
                 />
               </div>
