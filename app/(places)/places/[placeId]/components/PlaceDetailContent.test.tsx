@@ -16,7 +16,15 @@ jest.mock('@/app/shared/components/Images/SquarePhotoStrip', () => ({
 jest.mock('@/app/shared/components/Share', () => ({ Share: () => <button>Share</button> }));
 jest.mock('@/app/shared/components/Global', () => ({
   DescriptionShowMore: ({ text }: { text: string }) => <p>{text}</p>,
-  GoogleMapComponent: () => <div data-testid="map" />,
+  OpenInMapsLink: ({
+    lat,
+    lng,
+    children,
+  }: {
+    lat?: number;
+    lng?: number;
+    children: React.ReactNode;
+  }) => <a href={`maps:${lat},${lng}`}>{children}</a>,
 }));
 jest.mock('@/app/shared/components/Moments', () => ({
   MomentsMasonry: ({ moments }: { moments: unknown[] }) => <div>{`masonry-${moments.length}`}</div>,
@@ -98,7 +106,8 @@ describe('PlaceDetailContent', () => {
     it('reads category then city', () => {
       render(<PlaceDetailContent place={place()} />);
 
-      expect(screen.getByText('Restaurants · Karen')).toBeInTheDocument();
+      expect(screen.getByText('Restaurants ·')).toBeInTheDocument();
+      expect(screen.getByText('Karen')).toBeInTheDocument();
     });
 
     // The API returns no distance — it is only known once the reader has a
@@ -196,11 +205,14 @@ describe('PlaceDetailContent', () => {
       expect(screen.getByText('reviews-p1')).toBeInTheDocument();
     });
 
-    // Places do have coordinates, unlike communities
-    it('maps the place', () => {
+    // The embedded map never rendered — it was an unreachable branch behind an
+    // early return, so the page showed a stray pin icon and nothing else
+    it('sends the reader to Maps instead of embedding one', () => {
       render(<PlaceDetailContent place={place()} />);
 
-      expect(screen.getByTestId('map')).toBeInTheDocument();
+      expect(screen.queryByTestId('map')).not.toBeInTheDocument();
+      // The location line itself is the link
+      expect(screen.getByRole('link', { name: 'Karen' })).toBeInTheDocument();
     });
   });
 

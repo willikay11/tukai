@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 
 import { BackToExplore } from '@/app/(experiences)/experiences/components/BackToExplore';
-import { DescriptionShowMore, GoogleMapComponent } from '@/app/shared/components/Global';
+import { DescriptionShowMore, OpenInMapsLink } from '@/app/shared/components/Global';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
 import { PageContainer } from '@/app/shared/components/Layout';
@@ -61,11 +61,11 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
       ? haversineKm(lat, lng, placeLat, placeLng)
       : null;
 
-  const metaLine = [
-    category,
-    place.location?.city,
-    distanceKm !== null ? `${distanceKm} Kms away` : null,
-  ].filter(Boolean);
+  // The location half of the meta line is what links out to Maps, so it is
+  // built separately from the category that precedes it
+  const locationLine = [place.location?.city, distanceKm !== null ? `${distanceKm} Kms away` : null]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <PageContainer variant="detail" className="py-6">
@@ -82,7 +82,16 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
         <h1 className="text-3xl font-bold text-gray-900">{place.title}</h1>
         <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">
           <IconComponent iconName="Location01Icon" size={14} color="currentColor" />
-          <span>{metaLine.join(' · ')}</span>
+          {category && <span>{locationLine ? `${category} ·` : category}</span>}
+          {locationLine && (
+            <OpenInMapsLink
+              lat={placeLat}
+              lng={placeLng}
+              query={[place.title, place.location?.city].filter(Boolean).join(', ')}
+            >
+              {locationLine}
+            </OpenInMapsLink>
+          )}
           {place.averageRating > 0 && (
             <span className="flex items-center gap-1">
               · <Rating rating={place.averageRating} showCount />
@@ -124,12 +133,6 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
             rating={place.averageRating}
             reviewCount={place.totalReviews}
           />
-
-          {placeLat && placeLng && (
-            <div className="overflow-hidden rounded-2xl">
-              <GoogleMapComponent lat={placeLat} lng={placeLng} />
-            </div>
-          )}
         </div>
 
         <div className="lg:col-span-5">
