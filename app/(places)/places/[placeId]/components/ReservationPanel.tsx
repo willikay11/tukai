@@ -38,7 +38,10 @@ export const ReservationPanel = ({
     (entry) => entry.reservationType === 'restaurant_reservation' && entry.status === 'active',
   );
 
-  const { data: bookingsResponse } = usePlaceBookingRequests(placeId, profile?.id);
+  const { data: bookingsResponse, isLoading: isLoadingReservations } = usePlaceBookingRequests(
+    placeId,
+    profile?.id,
+  );
   const reservations: PlaceBookingRequest[] = bookingsResponse?.data?.results ?? [];
 
   const { mutate: cancelBooking, isPending: isCancelling } = useCancelPlaceBookingRequest(
@@ -100,6 +103,7 @@ export const ReservationPanel = ({
 
       <Button
         asChild={isBookable}
+        variant="gradient"
         disabled={!isBookable}
         title={isBookable ? undefined : 'This place does not take reservations yet'}
         className="w-full rounded-full"
@@ -152,10 +156,13 @@ export const ReservationPanel = ({
         onViewExperience={() => setIsCancelledModalOpen(false)}
       />
 
-      {reservations.length > 0 && (
+      {/* The bookings are a second request, so the section holds its shape
+          with skeletons rather than popping in once they land */}
+      {(isLoadingReservations || reservations.length > 0) && (
         <PlaceReservationsCalendar
           reservations={reservations}
           placeName={placeName}
+          isLoading={isLoadingReservations}
           isCancelling={isCancelling}
           onCancel={handleCancel}
         />
