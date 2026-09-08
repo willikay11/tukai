@@ -7,6 +7,7 @@ import moment from 'moment';
 import { FeaturedBanner } from '@/app/shared/components/Banners';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
+import { experiencePath } from '@/utils/detail-paths';
 
 interface FeaturedExperienceBannerProps {
   experience: Experience;
@@ -46,7 +47,7 @@ export const FeaturedExperienceBanner = ({ experience }: FeaturedExperienceBanne
       title={experience.title}
       metaItems={metaItems}
       ctaLabel={`Reserve a spot — ${experience.priceStartsFrom?.currency} ${experience.priceStartsFrom?.amount.toLocaleString()}`}
-      onCtaClick={() => router.push(`/experiences/${experience.id}`)}
+      onCtaClick={() => router.push(experiencePath(experience))}
     />
   );
 };

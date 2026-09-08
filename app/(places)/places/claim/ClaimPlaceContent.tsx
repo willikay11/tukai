@@ -21,6 +21,7 @@ import { SuccessDialog } from '@/components/ui/successDialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Community } from '@/types/community';
 import { Place } from '@/types/place';
+import { placePath } from '@/utils/detail-paths';
 
 import { ClaimCommunitySection } from './components/ClaimCommunitySection';
 import { ClaimPlaceSection, NewPlaceDraft, PlaceSource } from './components/ClaimPlaceSection';
@@ -64,7 +65,11 @@ export const ClaimPlaceContent = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   // The place the claim went in for, kept so the confirmation can name it and
   // send the reader on once they are done reading it
-  const [claimedPlace, setClaimedPlace] = useState<{ id: string; title: string } | null>(null);
+  const [claimedPlace, setClaimedPlace] = useState<{
+    id: string;
+    slug?: string;
+    title: string;
+  } | null>(null);
 
   const { data: communitiesResponse, isLoading: isLoadingCommunities } = useGetCommunities({
     page: 1,
@@ -140,6 +145,8 @@ export const ClaimPlaceContent = () => {
     try {
       // A place that is not on Tukai yet has to exist before it can be claimed
       let placeId = selectedPlace?.id;
+      // Its own address, for the confirmation to send the reader to
+      let placeSlug = selectedPlace?.slug;
       if (source === 'new') {
         const created = await createPlace({
           title: newPlace.title.trim(),
@@ -148,6 +155,7 @@ export const ClaimPlaceContent = () => {
           newPhotos: newPlace.photos,
         });
         placeId = created?.data?.id;
+        placeSlug = created?.data?.slug;
       }
 
       if (!placeId) throw new Error('Could not resolve the place being claimed');
@@ -174,6 +182,7 @@ export const ClaimPlaceContent = () => {
 
       setClaimedPlace({
         id: placeId,
+        slug: placeSlug,
         title: source === 'new' ? newPlace.title.trim() : (selectedPlace?.title ?? 'this place'),
       });
     } catch (error) {
@@ -291,7 +300,7 @@ export const ClaimPlaceContent = () => {
           }}
           title="Request Submitted Successfully"
           description={`Your request to link ${claimedPlace?.title ?? ''} to your community has been sent. We will review and revert within 2 days.`}
-          onAction={() => router.push(`/places/${claimedPlace?.id}`)}
+          onAction={() => router.push(claimedPlace ? placePath(claimedPlace) : '/places')}
         />
 
         <div className="flex flex-col-reverse gap-3 pb-4 sm:flex-row sm:justify-end">

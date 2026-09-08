@@ -18,6 +18,7 @@ import { Moment } from '@/types/moment';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
 import { PlaceCategory } from '@/types/placeCategory';
+import { placePath } from '@/utils/detail-paths';
 import { haversineKm } from '@/utils/geo-utils';
 
 import { PlaceCommunitySection } from './PlaceCommunitySection';
@@ -74,7 +75,7 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
         <Share
           coverPhoto={photos[0] ?? ''}
           title={place.title}
-          link={`${process.env.NEXT_PUBLIC_APP_URL}/places/${place.id}`}
+          link={`${process.env.NEXT_PUBLIC_APP_URL}${placePath(place)}`}
         />
       </div>
 

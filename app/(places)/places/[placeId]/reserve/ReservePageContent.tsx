@@ -28,6 +28,7 @@ import {
   PlaceAvailabilityRule,
   PlaceReservationProfile,
 } from '@/types/placeReservation';
+import { placePath } from '@/utils/detail-paths';
 import { zodErrorsToMap } from '@/utils/zod-errors';
 
 import { DateTimePicker } from './components/DateTimePicker';
@@ -161,7 +162,7 @@ export const ReservePageContent = ({ place }: { place: Place }) => {
   if (!profile) {
     return (
       <PageContainer variant="detail" className="py-6">
-        <BackToExplore href={`/places/${place.id}`} label={`Back to ${place.title}`} />
+        <BackToExplore href={placePath(place)} label={`Back to ${place.title}`} />
         <p className="py-16 text-center text-sm text-gray-400">
           {place.title} has not opened up reservations yet.
         </p>
@@ -171,7 +172,7 @@ export const ReservePageContent = ({ place }: { place: Place }) => {
 
   return (
     <PageContainer variant="detail" className="py-6">
-      <BackToExplore href={`/places/${place.id}`} label={`Back to ${place.title}`} />
+      <BackToExplore href={placePath(place)} label={`Back to ${place.title}`} />
 
       <div className="mt-4">
         <h1 className="text-3xl font-bold text-gray-900">Make a reservation</h1>
@@ -184,7 +185,7 @@ export const ReservePageContent = ({ place }: { place: Place }) => {
       <ExperienceCreatedModal
         open={isRequestedModalOpen}
         onOpenChange={setIsRequestedModalOpen}
-        href={`/places/${place.id}`}
+        href={placePath(place)}
         title="Reservation Requested Successfully!"
         description={`${place.title} has your request and will confirm your table shortly. You'll hear from us as soon as they respond.`}
         // No onViewExperience: given only an href the modal renders a real

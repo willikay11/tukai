@@ -18,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { PlaceCategory } from '@/types/placeCategory';
 import { SearchResultType } from '@/types/search';
+import { experiencePath, placePath } from '@/utils/detail-paths';
 
 import { CommunityResultRow } from './CommunityResultRow';
 import { ExperienceResultRow } from './ExperienceResultRow';
@@ -141,19 +142,15 @@ export const Search = () => {
     setShowSearchResults(true);
   };
 
-  const BASE_PATH: Record<SearchResultType, string> = {
-    experience: '/experiences',
-    place: '/places',
-    community: '/communities',
-  };
-
-  const go = (type: SearchResultType, id: string) => {
+  // Takes the whole path rather than a type and an id: experiences and places
+  // are addressed by slug, which only their own helper knows how to resolve
+  const go = (path: string) => {
     setShowSearchResults(false);
     // The query led the reader here, so it is worth offering again
     if (query?.trim()) {
       addRecentSearch(query);
     }
-    router.push(`${BASE_PATH[type]}/${id}`);
+    router.push(path);
   };
 
   return (
@@ -301,7 +298,7 @@ export const Search = () => {
                           <ExperienceResultRow
                             key={experience.id}
                             item={experience}
-                            onClick={() => go('experience', experience.id)}
+                            onClick={() => go(experiencePath(experience))}
                           />
                         ))}
                       </div>
@@ -318,7 +315,7 @@ export const Search = () => {
                           <PlaceResultRow
                             key={place.id}
                             item={place}
-                            onClick={() => go('place', place.id)}
+                            onClick={() => go(placePath(place))}
                           />
                         ))}
                       </div>
@@ -335,7 +332,7 @@ export const Search = () => {
                           <CommunityResultRow
                             key={community.id}
                             item={community}
-                            onClick={() => go('community', community.id)}
+                            onClick={() => go(`/communities/${community.id}`)}
                           />
                         ))}
                       </div>

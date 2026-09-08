@@ -5,6 +5,9 @@ import { PlaceCategory } from '@/types/placeCategory';
 
 export type Place = {
   id: string;
+  // Human-readable identifier, and what the detail URL uses. The API resolves
+  // either this or the UUID, so older id-based links keep working.
+  slug?: string;
   title: string;
   description: string;
   location: Location;

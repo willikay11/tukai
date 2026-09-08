@@ -10,6 +10,7 @@ import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Experience } from '@/types/experience';
+import { experiencePath } from '@/utils/detail-paths';
 
 interface ExperienceUnavailableProps {
   experienceName: string | null;
@@ -85,7 +86,7 @@ export const ExperienceUnavailable = ({
               {similarExperiences.map((experience) => (
                 <CarouselItem key={experience.id} className="basis-auto">
                   <div className="w-[280px]">
-                    <Link href={`/experiences/${experience.id}`}>
+                    <Link href={experiencePath(experience)}>
                       <SingleExperience type="discover" variant="row" experience={experience} />
                     </Link>
                   </div>

@@ -6,6 +6,7 @@ import { FeaturedBanner } from '@/app/shared/components/Banners';
 import { usePlaces } from '@/app/shared/hooks/usePlaces';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
+import { placePath } from '@/utils/detail-paths';
 
 // TODO(backend): no featured-places endpoint exists — the first place from the
 // default list stands in. The API also has no price data for places, so the
@@ -49,7 +50,7 @@ export const FeaturedPlaceSection = () => {
         rating={featuredPlace.averageRating || null}
         ctaLabel="Reserve a table"
         // No place reservation flow exists — route to the place detail page
-        onCtaClick={() => router.push(`/places/${featuredPlace.id}`)}
+        onCtaClick={() => router.push(placePath(featuredPlace))}
       />
     </div>
   );

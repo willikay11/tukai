@@ -17,6 +17,7 @@ import { Experience } from '@/types/experience';
 import { Interest } from '@/types/interest';
 import { ItineraryDayFormValue } from '@/types/itinerary';
 import { Wallet } from '@/types/payment';
+import { experiencePath } from '@/utils/detail-paths';
 
 import type { FormData, FormPhoto } from '../../hooks/useCreateExperienceFlow';
 import { type AboutFormValues } from '../../schemas';
@@ -334,7 +335,9 @@ export const CreateExperienceSteps = ({
   const handlePublishComplete = () => {
     setIsPublishedModalOpen(false);
     if (publishableExperienceId) {
-      router.push(`/experiences/${publishableExperienceId}`);
+      router.push(
+        experience ? experiencePath(experience) : `/experiences/${publishableExperienceId}`,
+      );
     }
   };
 

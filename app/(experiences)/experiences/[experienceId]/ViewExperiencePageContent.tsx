@@ -16,6 +16,7 @@ import {
   formatItineraryDateRange,
   inferUIExperienceType,
 } from '@/utils/date-utils';
+import { experiencePath } from '@/utils/detail-paths';
 
 import { BackToExplore } from '../components/BackToExplore';
 import { BookingPanel } from '../components/BookingPanel';
@@ -124,7 +125,7 @@ export const ViewExperiencePageContent = ({
           <Share
             coverPhoto={coverPhoto}
             title={experience.title}
-            link={`${process.env.NEXT_PUBLIC_APP_URL}/experiences/${experience.id}`}
+            link={`${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`}
           />
         </div>
       </div>

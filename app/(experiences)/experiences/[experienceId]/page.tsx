@@ -8,6 +8,7 @@ import { fetchExperience } from '@/services/experience';
 import { ApiResponse } from '@/types/apiResponse';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
+import { experiencePath } from '@/utils/detail-paths';
 import { getTicketBuyerPrice } from '@/utils/ticket-utils';
 
 import { ViewExperiencePageContent } from './ViewExperiencePageContent';
@@ -67,7 +68,7 @@ export async function generateMetadata({
   const title = `Tukai - ${experience.title}`;
   const description = buildDescription(experience);
   const coverPhoto = getCoverPhoto(experience);
-  const url = `${process.env.NEXT_PUBLIC_APP_URL}/experiences/${experience.id}`;
+  const url = `${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`;
 
   return {
     title,
@@ -94,7 +95,7 @@ export async function generateMetadata({
 }
 
 const buildEventJsonLd = (experience: Experience) => {
-  const url = `${process.env.NEXT_PUBLIC_APP_URL}/experiences/${experience.id}`;
+  const url = `${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`;
   const currency = normalizeCurrency(experience.currency);
 
   return {

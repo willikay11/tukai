@@ -10,6 +10,7 @@ import { NoData } from '@/components/ui/noData';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { Status } from '@/enums/status';
 import { Experience } from '@/types/experience';
+import { experiencePath } from '@/utils/detail-paths';
 
 type ListExperiencesProps = {
   className: string;
@@ -217,7 +218,7 @@ export const ListExperiences = ({
             transition={{ duration: 0.2, delay: index * 0.02 }}
             className="cursor-pointer"
           >
-            <Link target="_blank" href={`/experiences/${experience.id}`}>
+            <Link target="_blank" href={experiencePath(experience)}>
               <SingleExperience type={type} experience={experience} variant={variant} />
             </Link>
           </motion.div>

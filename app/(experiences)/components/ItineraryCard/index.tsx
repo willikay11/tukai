@@ -13,6 +13,7 @@ import { useBookmarkExperience } from '@/app/shared/hooks/useExperiences';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 import { getNumberOfDaysAndNights } from '@/utils/date-utils';
+import { experiencePath } from '@/utils/detail-paths';
 
 export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
   const { data: session } = useSession();
@@ -36,10 +37,7 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
   const price = itinerary.priceStartsFrom;
 
   return (
-    <Link
-      href={`/experiences/${itinerary.id}`}
-      className="block w-[300px] flex-shrink-0 snap-start"
-    >
+    <Link href={experiencePath(itinerary)} className="block w-[300px] flex-shrink-0 snap-start">
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
         <PhotoImage
           src={coverPhoto}
