@@ -38,6 +38,28 @@ const SHORT = 'This is a short description';
 const LONG = 'a'.repeat(150);
 
 describe('DescriptionShowMore', () => {
+  // Descriptions come from the rich text editor as HTML. Tailwind's preflight
+  // strips headings and lists of their styling, so the markup reached the page
+  // and read as flat text until `prose` was applied.
+  it('renders the editor’s formatting rather than flattening it', () => {
+    render(<DescriptionShowMore text="<h2>Day one</h2><p><strong>Early</strong> start</p>" />);
+
+    expect(screen.getByText('Day one').tagName).toBe('H2');
+    expect(screen.getByText('Early').tagName).toBe('STRONG');
+    expect(screen.getByText('Day one').closest('div')).toHaveClass('prose');
+  });
+
+  // The collapsed preview counts what the reader sees, not the tags: slicing
+  // HTML cuts through them, and markup can consume the whole budget
+  it('measures and truncates the text, not the markup', () => {
+    const text = `<p><strong>${'a'.repeat(40)}</strong></p>`;
+
+    render(<DescriptionShowMore text={text} maxLength={100} />);
+
+    expect(screen.queryByRole('button', { name: 'Show More' })).not.toBeInTheDocument();
+    expect(screen.getByText('a'.repeat(40))).toBeInTheDocument();
+  });
+
   describe('rendering', () => {
     it('renders text content', () => {
       render(<DescriptionShowMore text={SHORT} />);

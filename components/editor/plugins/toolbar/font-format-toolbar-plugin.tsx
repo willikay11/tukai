@@ -3,20 +3,25 @@
 import { useState } from 'react';
 
 import { $isRangeSelection, BaseSelection, FORMAT_TEXT_COMMAND, TextFormatType } from 'lexical';
-import { BoldIcon, ItalicIcon, UnderlineIcon } from 'lucide-react';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import { useToolbarContext } from '@/components/editor/context/toolbar-context';
 import { useUpdateToolbarHandler } from '@/components/editor/editor-hooks/use-update-toolbar';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { ToolbarToggleItem } from '@/components/editor/plugins/toolbar/toolbar-toggle-item';
+import { ToggleGroup } from '@/components/ui/toggle-group';
 
+// Both the strikethrough and the inline code format already have styling in
+// editor-theme.ts, so they render as themselves once the buttons dispatch them
 const FONT_FORMAT_OPTIONS: {
-  format: Extract<TextFormatType, 'bold' | 'italic' | 'underline'>;
-  icon: React.ReactNode;
+  format: Extract<TextFormatType, 'bold' | 'italic' | 'underline' | 'strikethrough' | 'code'>;
+  iconName: string;
   name: string;
 }[] = [
-  { format: 'bold', icon: <BoldIcon className="size-4" />, name: 'Bold' },
-  { format: 'italic', icon: <ItalicIcon className="size-4" />, name: 'Italic' },
-  { format: 'underline', icon: <UnderlineIcon className="size-4" />, name: 'Underline' },
+  { format: 'bold', iconName: 'TextBoldIcon', name: 'Bold' },
+  { format: 'italic', iconName: 'TextItalicIcon', name: 'Italic' },
+  { format: 'underline', iconName: 'TextUnderlineIcon', name: 'Underline' },
+  { format: 'strikethrough', iconName: 'TextStrikethroughIcon', name: 'Strikethrough' },
+  { format: 'code', iconName: 'SourceCodeIcon', name: 'Code' },
 ];
 
 export function FontFormatToolbarPlugin() {
@@ -28,10 +33,15 @@ export function FontFormatToolbarPlugin() {
   const $updateToolbar = (selection: BaseSelection) => {
     if (!$isRangeSelection(selection)) return;
 
-    setActiveFormats(
-      FONT_FORMAT_OPTIONS.filter(({ format }) => selection.hasFormat(format)).map(
-        ({ format }) => format,
-      ),
+    const next = FONT_FORMAT_OPTIONS.filter(({ format }) => selection.hasFormat(format)).map(
+      ({ format }) => format,
+    );
+
+    // Same formats, same array — a fresh one would re-render for nothing
+    setActiveFormats((current) =>
+      current.length === next.length && current.every((format, index) => format === next[index])
+        ? current
+        : next,
     );
   };
 
@@ -51,10 +61,11 @@ export function FontFormatToolbarPlugin() {
 
   return (
     <ToggleGroup type="multiple" value={activeFormats} onValueChange={handleValueChange}>
-      {FONT_FORMAT_OPTIONS.map(({ format, icon, name }) => (
-        <ToggleGroupItem key={format} value={format} variant="outline" size="sm" aria-label={name}>
-          {icon}
-        </ToggleGroupItem>
+      {FONT_FORMAT_OPTIONS.map(({ format, iconName, name }) => (
+        <ToolbarToggleItem key={format} value={format} aria-label={name}>
+          {/* currentColor so the icon follows the toggle's pressed state */}
+          <IconComponent iconName={iconName} size={16} color="currentColor" />
+        </ToolbarToggleItem>
       ))}
     </ToggleGroup>
   );

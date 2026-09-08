@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
@@ -11,8 +11,16 @@ import {
 import { useToolbarContext } from '@/components/editor/context/toolbar-context';
 
 export function useUpdateToolbarHandler(callback: (selection: BaseSelection) => void) {
-  const [editor] = useLexicalComposerContext();
+  useLexicalComposerContext();
   const { activeEditor } = useToolbarContext();
+
+  // Callers pass a fresh closure on every render. Depending on it made the
+  // effect below re-run each render and set state again — and because that
+  // state is a newly built array, React never bailed out, so the pair looped
+  // until it hit the update-depth limit. The ref keeps the latest callback
+  // without making it a dependency.
+  const callbackRef = useRef(callback);
+  callbackRef.current = callback;
 
   useEffect(() => {
     return activeEditor.registerCommand(
@@ -20,21 +28,20 @@ export function useUpdateToolbarHandler(callback: (selection: BaseSelection) => 
       () => {
         const selection = $getSelection();
         if (selection) {
-          callback(selection);
+          callbackRef.current(selection);
         }
         return false;
       },
       COMMAND_PRIORITY_CRITICAL,
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editor, callback]);
+  }, [activeEditor]);
 
   useEffect(() => {
     activeEditor.getEditorState().read(() => {
       const selection = $getSelection();
       if (selection) {
-        callback(selection);
+        callbackRef.current(selection);
       }
     });
-  }, [activeEditor, callback]);
+  }, [activeEditor]);
 }

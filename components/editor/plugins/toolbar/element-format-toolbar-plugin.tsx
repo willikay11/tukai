@@ -13,20 +13,19 @@ import {
   INDENT_CONTENT_COMMAND,
   OUTDENT_CONTENT_COMMAND,
 } from 'lexical';
-import {
-  AlignCenterIcon,
-  AlignJustifyIcon,
-  AlignLeftIcon,
-  AlignRightIcon,
-  IndentDecreaseIcon,
-  IndentIncreaseIcon,
-} from 'lucide-react';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import { useToolbarContext } from '@/components/editor/context/toolbar-context';
 import { useUpdateToolbarHandler } from '@/components/editor/editor-hooks/use-update-toolbar';
+import { ToolbarToggleItem } from '@/components/editor/plugins/toolbar/toolbar-toggle-item';
 import { getSelectedNode } from '@/components/editor/utils/get-selected-node';
 import { Separator } from '@/components/ui/separator';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { ToggleGroup } from '@/components/ui/toggle-group';
+
+// currentColor throughout, so each icon follows its toggle's pressed state
+const ToolbarIcon = ({ iconName }: { iconName: string }) => (
+  <IconComponent iconName={iconName} size={16} color="currentColor" />
+);
 
 const ELEMENT_FORMAT_OPTIONS: {
   [key in Exclude<ElementFormatType, 'start' | 'end' | ''>]: {
@@ -36,22 +35,22 @@ const ELEMENT_FORMAT_OPTIONS: {
   };
 } = {
   left: {
-    icon: <AlignLeftIcon className="size-4" />,
+    icon: <ToolbarIcon iconName="TextAlignLeftIcon" />,
     iconRTL: 'left-align',
     name: 'Left Align',
   },
   center: {
-    icon: <AlignCenterIcon className="size-4" />,
+    icon: <ToolbarIcon iconName="TextAlignCenterIcon" />,
     iconRTL: 'center-align',
     name: 'Center Align',
   },
   right: {
-    icon: <AlignRightIcon className="size-4" />,
+    icon: <ToolbarIcon iconName="TextAlignRightIcon" />,
     iconRTL: 'right-align',
     name: 'Right Align',
   },
   justify: {
-    icon: <AlignJustifyIcon className="size-4" />,
+    icon: <ToolbarIcon iconName="TextAlignJustifyCenterIcon" />,
     iconRTL: 'justify-align',
     name: 'Justify Align',
   },
@@ -110,18 +109,12 @@ export function ElementFormatToolbarPlugin({ separator = true }: { separator?: b
       >
         {/* Alignment toggles */}
         {Object.entries(ELEMENT_FORMAT_OPTIONS).map(([value, option]) => (
-          <ToggleGroupItem
-            key={value}
-            value={value}
-            variant={'outline'}
-            size="sm"
-            aria-label={option.name}
-          >
+          <ToolbarToggleItem key={value} value={value} aria-label={option.name}>
             {option.icon}
-          </ToggleGroupItem>
+          </ToolbarToggleItem>
         ))}
       </ToggleGroup>
-      {separator && <Separator orientation="vertical" className="!h-7" />}
+      {separator && <Separator orientation="vertical" className="mx-2 !h-4" />}
       {/* Indentation toggles */}
       <ToggleGroup
         type="single"
@@ -129,13 +122,13 @@ export function ElementFormatToolbarPlugin({ separator = true }: { separator?: b
         defaultValue={elementFormat}
         onValueChange={handleValueChange}
       >
-        <ToggleGroupItem value="outdent" aria-label="Outdent" variant={'outline'} size="sm">
-          <IndentDecreaseIcon className="size-4" />
-        </ToggleGroupItem>
+        <ToolbarToggleItem value="outdent" aria-label="Outdent">
+          <ToolbarIcon iconName="TextIndentLessIcon" />
+        </ToolbarToggleItem>
 
-        <ToggleGroupItem value="indent" variant={'outline'} aria-label="Indent" size="sm">
-          <IndentIncreaseIcon className="size-4" />
-        </ToggleGroupItem>
+        <ToolbarToggleItem value="indent" aria-label="Indent">
+          <ToolbarIcon iconName="TextIndentMoreIcon" />
+        </ToolbarToggleItem>
       </ToggleGroup>
     </>
   );
