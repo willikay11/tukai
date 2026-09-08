@@ -12,3 +12,4 @@ export { LocationMeetingSection } from './LocationMeetingSection';
 export { MetaRow } from './MetaRow';
 export { PaymentMethodTabs } from './PaymentMethodTabs';
 export { TicketQuantityRow } from './TicketQuantityRow';
+export { MobileBookingBar } from './MobileBookingBar';

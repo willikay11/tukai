@@ -208,6 +208,21 @@ describe('BookingPanel purchase flow', () => {
     expect(screen.getByText('Please select at least one ticket.')).toBeInTheDocument();
   });
 
+  // The mobile sheet opens one view directly, so the tab row is left out
+  it('shows both tabs by default', () => {
+    render(<BookingPanel experience={experience} />);
+
+    expect(screen.getByRole('tab', { name: 'Make Reservation' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Moments' })).toBeInTheDocument();
+  });
+
+  it('drops the tab row when asked for one view', () => {
+    render(<BookingPanel experience={experience} view="reservation" />);
+
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^pay/i })).toBeInTheDocument();
+  });
+
   it('reports every missing field on the inputs when Pay is pressed empty', async () => {
     const user = userEvent.setup();
     render(<BookingPanel experience={experience} />);

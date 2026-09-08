@@ -29,6 +29,7 @@ import { IncludedExcludedSection } from '../components/IncludedExcludedSection';
 import { ItineraryDayByDay } from '../components/ItineraryDayByDay';
 import { LocationMeetingSection } from '../components/LocationMeetingSection';
 import { MetaRow } from '../components/MetaRow';
+import { MobileBookingBar } from '../components/MobileBookingBar';
 import { ExperienceOrganiser } from '../components/experienceOrganiser';
 
 /**
@@ -240,8 +241,12 @@ export const ViewExperiencePageContent = ({
           </Button>
         </div>
 
-        {/* Right column: Sticky booking panel */}
-        <div className="col-span-12 lg:col-span-5">
+        {!isPreview && <MobileBookingBar experience={experience} />}
+
+        {/* Right column: Sticky booking panel.
+            Hidden below lg — there it would stack after every section, which is
+            what the floating bar and its sheet replace. */}
+        <div className="hidden lg:col-span-5 lg:block">
           {/* Sticky for customers, static in the preview — there the create
               flow's own sticky header owns the top of the viewport.
 

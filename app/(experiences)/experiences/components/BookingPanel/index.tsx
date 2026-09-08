@@ -38,6 +38,9 @@ interface BookingPanelProps {
   // previewing their own draft can never buy a ticket. Layout must NOT branch
   // on this; only the Pay action does.
   mode?: 'live' | 'preview';
+  // 'all' shows both tabs. The mobile sheet opens one or the other on its own,
+  // so it asks for that view and the tab row is left out.
+  view?: 'all' | 'reservation' | 'moments';
 }
 
 const formatSlotLabel = (startTime: string, durationMinutes: number): string => {
@@ -68,13 +71,16 @@ const occurrenceLabel = (occurrence: ExperienceOccurrence): string => {
 // Same rule PaymentForm's paymentFormSchema applies to mobile-money numbers
 const PHONE_REGEX = /^\+\d{6,15}$/;
 
-export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) => {
+export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: BookingPanelProps) => {
   const router = useRouter();
   const { data: session } = useSession();
   const isLoggedIn = Boolean(session?.user);
   const isPreview = mode === 'preview';
 
-  const [tab, setTab] = useState<'reservation' | 'moments'>('reservation');
+  const [tab, setTab] = useState<'reservation' | 'moments'>(
+    view === 'moments' ? 'moments' : 'reservation',
+  );
+  const showTabs = view === 'all';
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   // Kept as state, not a constant, so restoring the commented-out payment
   // method picker below needs no other change. M-Pesa is the only method today.
@@ -307,14 +313,16 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
     <div className="space-y-4 rounded-3xl bg-gray-50 p-5">
       {/* Tabs */}
       <Tabs value={tab} onValueChange={(val) => setTab(val as 'reservation' | 'moments')}>
-        {/* A two-column grid, not the primitive's `inline-flex`: that shrinks
+        {showTabs && (
+          <>
+            {/* A two-column grid, not the primitive's `inline-flex`: that shrinks
             to fit, so `flex-1` had no free space to share and each tab sized to
             its own label — "Make Reservation" far wider than "Moments". Equal
             columns are what let one pill cover either tab.
             `w-fit` keeps them equal without stretching the row across the
             panel: the two 1fr columns settle on the wider label's width. */}
-        <TabsList className="relative grid h-auto w-fit grid-cols-2 gap-0 rounded-full bg-white p-0.5">
-          {/* The green pill lives here rather than on the active trigger, so
+            <TabsList className="relative grid h-auto w-fit grid-cols-2 gap-0 rounded-full bg-white p-0.5">
+              {/* The green pill lives here rather than on the active trigger, so
               switching tabs slides it across instead of repainting one tab and
               then the other.
 
@@ -323,26 +331,28 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
               padding box, which already excludes `p-0.5`. With the list on a
               two-column grid, half that box is exactly one tab, so the pill
               moves by its own width. */}
-          <span
-            aria-hidden
-            className={cn(
-              'absolute inset-y-0 left-0 w-1/2 rounded-full bg-primary transition-transform duration-300 ease-out motion-reduce:transition-none',
-              tab === 'moments' && 'translate-x-full',
-            )}
-          />
-          <TabsTrigger
-            value="reservation"
-            className="relative z-10 w-full rounded-full border-0 bg-transparent px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-transparent data-[state=active]:text-white"
-          >
-            Make Reservation
-          </TabsTrigger>
-          <TabsTrigger
-            value="moments"
-            className="relative z-10 w-full rounded-full border-0 bg-transparent px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-transparent data-[state=active]:text-white"
-          >
-            Moments
-          </TabsTrigger>
-        </TabsList>
+              <span
+                aria-hidden
+                className={cn(
+                  'absolute inset-y-0 left-0 w-1/2 rounded-full bg-primary transition-transform duration-300 ease-out motion-reduce:transition-none',
+                  tab === 'moments' && 'translate-x-full',
+                )}
+              />
+              <TabsTrigger
+                value="reservation"
+                className="relative z-10 w-full rounded-full border-0 bg-transparent px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-transparent data-[state=active]:text-white"
+              >
+                Make Reservation
+              </TabsTrigger>
+              <TabsTrigger
+                value="moments"
+                className="relative z-10 w-full rounded-full border-0 bg-transparent px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-transparent data-[state=active]:text-white"
+              >
+                Moments
+              </TabsTrigger>
+            </TabsList>
+          </>
+        )}
 
         <TabsContent value="reservation" className="mt-4 space-y-4">
           {isRecurring ? (

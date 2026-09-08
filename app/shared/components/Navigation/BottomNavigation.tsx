@@ -19,6 +19,21 @@ const LINKS = [
   { label: 'Moments', href: '/moments', icon: 'DashboardSquare01Icon' },
 ];
 
+// The pages under /experiences that are not a single experience — everything
+// else with one path segment after it is an experience, addressed by slug
+const EXPERIENCE_SUBROUTES = ['create', 'type', 'see-all', 'booking-success'];
+
+const isSingleExperience = (pathname: string): boolean => {
+  const [, section, id, ...rest] = pathname.split('/');
+
+  return (
+    section === 'experiences' &&
+    Boolean(id) &&
+    rest.length === 0 &&
+    !EXPERIENCE_SUBROUTES.includes(id)
+  );
+};
+
 export const BottomNavigation = () => {
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
@@ -45,6 +60,10 @@ export const BottomNavigation = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
+
+  // A single experience puts its booking bar along the bottom edge, and that
+  // CTA is the point of the page — two bars would sit on top of each other
+  if (isSingleExperience(pathname)) return null;
 
   return (
     <div
