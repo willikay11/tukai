@@ -27,6 +27,7 @@ import { Experience, ExperienceOccurrence } from '@/types/experience';
 import { parseApiError } from '@/utils/parseApiError';
 import { getTicketBuyerPrice } from '@/utils/ticket-utils';
 
+import { ExperienceMoments } from './ExperienceMoments';
 import { RecurringDateSlotPicker } from './RecurringDateSlotPicker';
 
 interface BookingPanelProps {
@@ -588,8 +589,13 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
           )}
         </TabsContent>
 
-        <TabsContent value="moments" className="py-8 text-center">
-          <p className="text-sm text-gray-500">Moments coming soon</p>
+        <TabsContent value="moments" className="mt-4">
+          <ExperienceMoments
+            experienceId={experience.id}
+            experienceTitle={experience.title}
+            place={experience.place}
+            community={experience.hostCommunity}
+          />
         </TabsContent>
       </Tabs>
 
