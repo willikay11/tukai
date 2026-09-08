@@ -567,12 +567,12 @@ export async function createPlaceBookingRequest(
 /**
  * Cancelling a table booking goes through the SHARED purchase action, not a
  * place path — the spec is explicit that "accept/decline/pay/cancel stay on the
- * unified experiences-api:ticket-purchases-* actions - not duplicated here".
+ * unified purchase actions - not duplicated here".
  */
 export async function cancelPlaceBookingRequest(purchaseId: string): Promise<ApiResponse> {
   try {
     const axiosInstance = await apiWithToken();
-    const res = await axiosInstance.patch(`/v1/experiences/ticket-purchases/${purchaseId}/cancel/`);
+    const res = await axiosInstance.patch(`/v1/experiences/purchases/${purchaseId}/cancel/`);
 
     return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
   } catch (error: any) {

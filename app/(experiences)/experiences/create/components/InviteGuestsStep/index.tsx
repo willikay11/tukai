@@ -63,7 +63,7 @@ export const InviteGuestsStep = ({
       cancelActionLabel="Cancel"
       onSaveAndExit={onSaveAndExit}
       saveAndExitActionLabel="Save & Exit"
-      nextActionLabel="Next"
+      nextActionLabel="Save & Continue"
       hideSaveAndExit={false}
     />
   );

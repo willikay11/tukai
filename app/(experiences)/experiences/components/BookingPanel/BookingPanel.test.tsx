@@ -96,9 +96,6 @@ describe('BookingPanel purchase flow', () => {
     // valid address of its own
     await user.click(screen.getByRole('button', { name: 'Via Email' }));
     await user.type(screen.getByPlaceholderText('Enter email address'), 'guest@example.com');
-    // The payment method picker is commented out, so M-Pesa is always the
-    // method and a valid phone number is required
-    await user.type(screen.getByPlaceholderText('Enter M-Pesa number'), '712345678');
   };
 
   it('sends the occurrence id and opens Paystack with the authorization_url from the response', async () => {
@@ -158,8 +155,7 @@ describe('BookingPanel purchase flow', () => {
     // How the real Paystack component learns the payment went through
     fireEvent(window, new MessageEvent('message', { data: { status: 'success' } }));
 
-    await waitFor(() => expect(screen.getByPlaceholderText('Enter M-Pesa number')).toHaveValue(''));
-    expect(screen.getByPlaceholderText('Enter email address')).toHaveValue('');
+    await waitFor(() => expect(screen.getByPlaceholderText('Enter email address')).toHaveValue(''));
     // Quantity is uncontrolled, so this only passes because it is remounted
     expect(screen.getByText('0')).toBeInTheDocument();
   });
@@ -220,8 +216,9 @@ describe('BookingPanel purchase flow', () => {
 
     expect(mockMutate).not.toHaveBeenCalled();
     expect(screen.getByText('Please select at least one ticket.')).toBeInTheDocument();
-    // Delivery defaults to WhatsApp, and M-Pesa is the only payment method
-    expect(screen.getAllByText('Please enter a valid phone number.')).toHaveLength(2);
+    // One phone error, from the WhatsApp delivery contact — the M-Pesa field
+    // that produced the second one has been removed
+    expect(screen.getAllByText('Please enter a valid phone number.')).toHaveLength(1);
   });
 
   it('blocks anonymous purchase until contact details are valid, then includes them', async () => {

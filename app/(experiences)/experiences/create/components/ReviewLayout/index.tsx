@@ -266,10 +266,10 @@ export const ReviewLayout = ({
           <Button
             isLoading={pendingAction === 'exit'}
             type="button"
-            variant="outline-primary"
+            variant="gradient-outline"
             onClick={() => runAction('exit', onSaveAndExit ?? onCancel)}
             disabled={isPublishing || pendingAction === 'exit'}
-            className="text-xs font-semibold"
+            className="rounded-full text-xs font-semibold"
           >
             Save & Exit
           </Button>

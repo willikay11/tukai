@@ -179,10 +179,10 @@ export const ItineraryDaysStep = ({
           <Button
             isLoading={pendingAction === 'exit'}
             type="button"
-            variant="outline-primary"
+            variant="gradient-outline"
             onClick={() => runAction('exit', onSaveAndExit)}
             disabled={pendingAction === 'exit'}
-            className="text-xs font-semibold"
+            className="rounded-full text-xs font-semibold"
           >
             Save & Exit
           </Button>
@@ -191,7 +191,7 @@ export const ItineraryDaysStep = ({
             type="button"
             onClick={onSaveContinue}
             disabled={isSaving || !allDaysHaveActivities}
-            variant="gradient"
+            variant="lime"
             className="rounded-full"
           >
             {isSaving ? 'Saving...' : 'Save & Continue'}

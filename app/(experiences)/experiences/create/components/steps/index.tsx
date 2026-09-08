@@ -519,7 +519,7 @@ export const CreateExperienceSteps = ({
                   <Button
                     type="button"
                     onClick={handleSaveContinue}
-                    variant="gradient"
+                    variant="lime"
                     className="rounded-[50px]"
                   >
                     Save & Continue

@@ -243,13 +243,13 @@ export const AboutStep = ({
         <Button
           isLoading={pendingAction === 'exit'}
           type="button"
-          variant="outline-primary"
+          variant="gradient-outline"
           onClick={() => {
             console.log('[AboutStep] Save & Edit clicked');
             runAction('exit', onSaveEdit);
           }}
           disabled={isSaving}
-          className="text-xs font-semibold"
+          className="rounded-[50px] text-xs font-semibold"
         >
           Save & Exit
         </Button>
@@ -268,7 +268,7 @@ export const AboutStep = ({
             console.log('[AboutStep] Save & Continue clicked', { formData, errors });
             runAction('continue', onSaveContinue);
           }}
-          variant="gradient"
+          variant="lime"
           disabled={isSaving}
           className="rounded-[50px] text-xs font-medium"
         >

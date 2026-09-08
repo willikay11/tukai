@@ -31,8 +31,8 @@ import { RecurringDateSlotPicker } from './RecurringDateSlotPicker';
 
 interface BookingPanelProps {
   experience: Experience;
-  // 'preview' renders the identical panel — tabs, pickers, steppers, totals,
-  // payment method, phone — but hard-disables the purchase call so a creator
+  // 'preview' renders the identical panel — tabs, pickers, steppers, totals —
+  // but hard-disables the purchase call so a creator
   // previewing their own draft can never buy a ticket. Layout must NOT branch
   // on this; only the Pay action does.
   mode?: 'live' | 'preview';
@@ -77,8 +77,6 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
   // Kept as state, not a constant, so restoring the commented-out payment
   // method picker below needs no other change. M-Pesa is the only method today.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'card'>('mpesa');
-  const [phone, setPhone] = useState('');
   const [deliveryMethod, setDeliveryMethod] = useState<'email' | 'whatsapp'>('whatsapp');
   const [deliveryContact, setDeliveryContact] = useState('');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -203,10 +201,6 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
       }
     }
 
-    if (experience.isPaid && paymentMethod === 'mpesa' && !PHONE_REGEX.test(phone)) {
-      validationErrors.phone = 'Please enter a valid phone number.';
-    }
-
     if (deliveryMethod === 'whatsapp' && !PHONE_REGEX.test(deliveryContact)) {
       validationErrors.deliveryContact = 'Please enter a valid phone number.';
     }
@@ -229,7 +223,6 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
   const resetPanel = () => {
     setQuantities({});
     setErrors({});
-    setPhone('');
     setDeliveryContact('');
     setFirstName('');
     setLastName('');
@@ -363,8 +356,8 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
 
           {/* Ticket selector */}
           {(experience.tickets?.length ?? 0) > 0 && (
-            <div className="space-y-4">
-              <p className="text-base font-bold text-gray-900">Select your preferred ticket</p>
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-gray-900">Select ticket</p>
 
               {visibleTickets.length === 0 ? (
                 <p className="text-sm text-gray-500">No tickets available for this time slot.</p>
@@ -411,10 +404,14 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
             </span>
           </div>
 
+          {/* Closes the total off from what follows, the way the one above
+              separates it from the tickets */}
+          <div className="border-t border-gray-200" />
+
           {/* Contact details (anonymous purchasers only) */}
           {!isLoggedIn && (
             <div className="space-y-3">
-              <p className="text-base font-bold text-gray-900">Contact Details</p>
+              <p className="text-sm font-semibold text-gray-900">Contact Details</p>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -476,7 +473,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
 
           {/* Ticket delivery */}
           <div className="space-y-3">
-            <p className="text-base font-bold text-gray-900">
+            <p className="text-sm font-normal text-gray-900">
               How would you like to receive your tickets?
             </p>
 
@@ -543,69 +540,6 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
               </div>
             )}
           </div>
-
-          {/* Payment method picker — hidden for now; `paymentMethod` stays on
-              its 'mpesa' default, so the phone input and its validation below
-              behave exactly as they did with M-Pesa selected. Restore this
-              block to offer card payments again. */}
-          {/*
-          <p className="text-base font-bold text-gray-900">Payment method</p>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setPaymentMethod('mpesa')}
-              className={`flex items-center justify-center gap-2 rounded-xl bg-white py-3 text-sm font-medium transition-colors ${
-                paymentMethod === 'mpesa'
-                  ? 'border-2 border-primary text-primary'
-                  : 'border-2 border-transparent text-gray-500'
-              } `}
-            >
-              <IconComponent
-                iconName="Smartphone01Icon"
-                size={16}
-                className={paymentMethod === 'mpesa' ? 'text-primary' : 'text-gray-500'}
-              />
-              M-Pesa
-            </button>
-            <button
-              type="button"
-              onClick={() => setPaymentMethod('card')}
-              className={`flex items-center justify-center gap-2 rounded-xl bg-white py-3 text-sm font-medium transition-colors ${
-                paymentMethod === 'card'
-                  ? 'border-2 border-primary text-primary'
-                  : 'border-2 border-transparent text-gray-500'
-              } `}
-            >
-              <IconComponent
-                iconName="CreditCardIcon"
-                size={16}
-                className={paymentMethod === 'card' ? 'text-primary' : 'text-gray-500'}
-              />
-              Credit Card
-            </button>
-          </div>
-          */}
-
-          {/* Phone input (only for M-Pesa). Labelled explicitly because the
-              payment method picker above is commented out — without it the
-              field has nothing but a placeholder to explain itself. The wording
-              still reads correctly if that picker is restored. */}
-          {paymentMethod === 'mpesa' && (
-            <div>
-              <p className="text-sm font-bold text-gray-900">Pay with M-Pesa</p>
-              <p className="mt-0.5 text-sm text-gray-500">
-                Enter the M-Pesa number you want to pay from.
-              </p>
-              <div className="mt-3">
-                <PhoneNumber
-                  key={`mpesa-${formResetKey}`}
-                  onChange={(value) => setPhone(value)}
-                  placeholder="Enter M-Pesa number"
-                />
-                {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone}</p>}
-              </div>
-            </div>
-          )}
 
           {/* API error */}
           {errors.api && <p className="text-center text-sm text-red-500">{errors.api}</p>}

@@ -23,7 +23,6 @@ import {
   fetchSlotTemplates,
   fetchTicketPurchases,
   publishExperience,
-  purchaseExperienceTicket,
   purchaseExperienceTicketV2,
   searchUsers,
   updateExperience,
@@ -33,7 +32,6 @@ import {
 } from '@/services/experience';
 import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
 import { ItineraryDayPayload } from '@/types/itinerary';
-import { PurchaserDetails } from '@/types/purchaser';
 
 export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean) => {
   return useQuery({
@@ -68,16 +66,6 @@ export const useFetchSingleExperience = (id: string, withAuth: boolean = false) 
   });
 };
 
-export const usePurchaseExperienceTicket = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (data: PurchaserDetails) => await purchaseExperienceTicket(data),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['experience'] });
-    },
-  });
-};
-
 export const usePurchaseExperienceTicketV2 = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -97,7 +85,7 @@ export const useFetchExperienceOccurrences = (experienceId: string | null) =>
 
 export const useTicketPurchases = (userId: string | undefined, enabled: boolean = true) =>
   useQuery({
-    queryKey: ['ticket-purchases', userId],
+    queryKey: ['purchases', userId],
     queryFn: () => fetchTicketPurchases({ user: userId!, page_size: 100 }),
     enabled: enabled && !!userId,
   });
@@ -109,7 +97,7 @@ export const useExperienceTicketPurchases = (
   enabled: boolean = true,
 ) =>
   useQuery({
-    queryKey: ['ticket-purchases', 'experience', experienceId],
+    queryKey: ['purchases', 'experience', experienceId],
     queryFn: () => fetchTicketPurchases({ experience: experienceId!, page_size: 100 }),
     enabled: enabled && !!experienceId,
   });

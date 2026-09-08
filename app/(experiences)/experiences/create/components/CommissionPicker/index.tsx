@@ -25,7 +25,9 @@ export const CommissionPicker = ({ value, onChange, isSaving = false }: Commissi
           (Tukai charges a 4% commission, who should pay this commission?)
         </span>
       </label>
-      <div className="space-y-2">
+      {/* The pills are inline-flex, so `space-y-2` spaced nothing — vertical
+          margins between siblings do not separate items sharing a line */}
+      <div className="flex flex-wrap items-center gap-2">
         {commissionOptions.map(
           (option: { value: 'host' | 'customer' | 'split'; label: string }) => {
             const isSelected = value === option.value;

@@ -21,6 +21,12 @@ const buttonVariants = cva(
         text: 'hover:text-primary !p-0',
         'primary-text': 'text-primary !p-0',
         gradient: 'bg-gradient-to-b to-[#064E3B] from-[#047857] text-white',
+        // The outlined counterpart of `gradient`: the same two greens, but as
+        // the border on a white face. Two backgrounds do it — white clipped to
+        // the padding box over the gradient clipped to the border box — which
+        // is the only way a gradient border follows the corner radius.
+        'gradient-outline':
+          'border border-transparent text-primary [background:linear-gradient(#fff,#fff)_padding-box,linear-gradient(to_bottom,#047857,#064E3B)_border-box] hover:opacity-90',
         'outline-primary':
           'rounded-full border border-primary bg-white text-primary hover:bg-primary/5',
         lime: 'bg-lime text-teal-950 hover:bg-lime-600',

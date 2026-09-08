@@ -1107,9 +1107,9 @@ export const ExperienceDates = ({
                 {!hideSaveAndExit && (
                   <Button
                     type="button"
-                    variant="outline-primary"
+                    variant="gradient-outline"
                     disabled={isUpdatingExperience || !form.formState.isValid}
-                    className="text-xs font-semibold"
+                    className="rounded-full text-xs font-semibold"
                   >
                     {saveAndExitActionLabel}
                   </Button>
