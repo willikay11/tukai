@@ -1,3 +1,5 @@
+import { cn } from '@/lib/utils';
+
 export interface StatusConfig {
   label: string;
   dot: string;
@@ -25,11 +27,14 @@ const STATUS_CONFIG: Record<string, StatusConfig> = {
 export const PaymentStatusBadge = ({
   status,
   config: configMap = STATUS_CONFIG,
+  className,
 }: {
   status: string;
   // Optional override so other features (e.g. hosting statuses) can reuse the
   // same dot-badge with their own enum-driven map
   config?: Record<string, StatusConfig>;
+  // The surface it sits on. White by default, which disappears on a white card
+  className?: string;
 }) => {
   const config = configMap[status] ?? {
     label: status.charAt(0).toUpperCase() + status.slice(1),
@@ -38,7 +43,12 @@ export const PaymentStatusBadge = ({
   };
 
   return (
-    <div className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
+    <div
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm',
+        className,
+      )}
+    >
       <span className={`h-2 w-2 rounded-full ${config.dot}`} />
       <span className={`text-sm font-semibold ${config.text}`}>{config.label}</span>
     </div>

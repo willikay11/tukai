@@ -611,6 +611,23 @@ export const fetchTicketPurchases = async (params: {
   };
 };
 
+/**
+ * One purchase — "the purchase is the ticket", so this is a single ticket with
+ * its number, QR, occurrence and payment details.
+ *
+ * Requires the buyer's token: the endpoint scopes to purchases they can see.
+ */
+export const fetchPurchase = async (purchaseId: string): Promise<ApiResponse> => {
+  const axiosInstance = await apiWithToken();
+  const response = await axiosInstance.get(`/v1/experiences/purchases/${purchaseId}/`);
+
+  return {
+    status: response.status,
+    success: true,
+    data: parseSnakeToCamel(response.data),
+  };
+};
+
 // Returns the ticket PDF bytes — the URL requires the Bearer token, so a plain
 // link/new-tab navigation would 401; callers open the blob as an object URL.
 export const downloadTicketPdf = async (purchaseId: string): Promise<Blob> => {

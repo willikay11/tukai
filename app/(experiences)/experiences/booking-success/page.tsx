@@ -9,59 +9,17 @@ import { PaymentStatusBadge } from '@/app/(experiences)/experiences/components/P
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { Share } from '@/app/shared/components/Share';
+import {
+  useExperienceTicketPurchases,
+  useFetchSingleExperience,
+  usePurchase,
+} from '@/app/shared/hooks/useExperiences';
 import { Button } from '@/components/ui/button';
+import { TicketPurchase } from '@/types/ticket-purchase';
 import { formatBookingDateTime, formatPaidAt } from '@/utils/date-utils';
+import { experiencePath } from '@/utils/detail-paths';
 
-interface BookingConfirmation {
-  reference: string;
-  confirmationPhone: string;
-  experience: {
-    title: string;
-    thumbnail: string;
-    // ISO date; times are display strings as the confirmation presents them
-    date: string;
-    startTime: string;
-    endTime: string;
-  };
-  lineItems: Array<{
-    label: string;
-    quantity: number;
-    unitPrice: number;
-    lineTotal: number;
-  }>;
-  amountPaid: number;
-  currency: string;
-  paymentMethod: string;
-  sentVia: string;
-  paidAt: string;
-  // Keyed to PaymentStatusBadge's status map
-  status: string;
-}
-
-// TODO: replace with real confirmation data when the API exists. Everything on
-// the page reads from this one object, so the swap is a single fetch.
-const HARDCODED_CONFIRMATION: BookingConfirmation = {
-  reference: 'TKI-750OLG4A',
-  confirmationPhone: '+254 716 909 826',
-  experience: {
-    title: 'Ngong Hills Ridge',
-    thumbnail: '/images/hikers-walking.webp',
-    date: '2026-03-17',
-    startTime: '6:00 AM',
-    endTime: '12:00 PM',
-  },
-  lineItems: [
-    { label: 'Locals', quantity: 2, unitPrice: 10000, lineTotal: 20000 },
-    { label: 'Children', quantity: 1, unitPrice: 5000, lineTotal: 5000 },
-  ],
-  // Reconciled against lineItems (20,000 + 5,000)
-  amountPaid: 25000,
-  currency: 'Ksh.',
-  paymentMethod: 'M-Pesa · Paystack',
-  sentVia: 'WhatsApp · +254 716 909 826',
-  paidAt: '2026-08-11T09:07:00',
-  status: 'confirmed',
-};
+import { BookingConfirmation, purchasesFromSameCheckout, toConfirmation } from './confirmation';
 
 // Google Calendar wants UTC basic-format stamps: 20260317T060000Z
 const toCalendarStamp = (date: string, displayTime: string): string => {
@@ -96,10 +54,6 @@ const buildGoogleCalendarUrl = ({ experience }: BookingConfirmation): string => 
 
 // PaymentStatusBadge's default map has no 'confirmed' key, which would fall
 // back to a grey badge — this is the override hook it exposes for exactly that
-const CONFIRMATION_STATUS_CONFIG = {
-  confirmed: { label: 'Confirmed', dot: 'bg-primary', text: 'text-primary' },
-};
-
 const DetailRow = ({ label, value }: { label: string; value: string }) => (
   <div className="flex items-center justify-between gap-4">
     <span className="text-sm text-gray-500">{label}</span>
@@ -112,13 +66,67 @@ const BookingSuccessContent = () => {
   const searchParams = useSearchParams();
   const [copied, setCopied] = useState(false);
 
-  // The real Paystack reference arrives as ?ref= — prefer it over the
-  // placeholder so the page already shows truthful data before the API exists
+  // ?purchaseId is what this page runs on: the purchase names its own ticket,
+  // occurrence and experience, so nothing else has to be passed along.
+  //
+  // ?experienceId is still honoured for links already in the wild — and for
+  // the booking panel, which cannot send an id it does not have: the purchase
+  // POST returns an order and payment details, never a purchase.
   const reference = searchParams.get('ref');
-  const data: BookingConfirmation = {
-    ...HARDCODED_CONFIRMATION,
-    reference: reference || HARDCODED_CONFIRMATION.reference,
-  };
+  const purchaseId = searchParams.get('purchaseId') ?? undefined;
+  const experienceIdParam = searchParams.get('experienceId') ?? undefined;
+
+  // GET /v1/experiences/purchases/{purchase_id}/
+  const { data: purchaseResponse, isLoading: isLoadingPurchase } = usePurchase(purchaseId);
+  const purchase: TicketPurchase | undefined = purchaseResponse?.data;
+
+  // A purchase carries the experience's uuid on its ticket, so the id in the
+  // URL is only needed when there is no purchase to read it from
+  const experienceId = purchase?.ticket?.experience ?? experienceIdParam;
+
+  const { data: experienceResponse } = useFetchSingleExperience(experienceId ?? '', true);
+  const experience = experienceResponse?.data;
+
+  // The rest of the checkout, for the other line items — one purchase is one
+  // ticket, so a three-ticket booking is three rows
+  const { data: purchasesResponse, isLoading: isLoadingPurchases } = useExperienceTicketPurchases(
+    experienceId,
+    Boolean(experienceId),
+  );
+  const purchases: TicketPurchase[] = purchasesResponse?.data?.results ?? [];
+
+  const checkout = purchasesFromSameCheckout(purchases, reference, purchase);
+
+  // The detail call is authoritative for the row it describes; the rest of the
+  // checkout fills in the other line items
+  const confirmed = purchase
+    ? [purchase, ...checkout.filter((entry) => entry.id !== purchase.id)]
+    : checkout;
+
+  const data = toConfirmation(confirmed, experience, reference);
+  const isLoading = isLoadingPurchase || isLoadingPurchases;
+
+  if (isLoading) {
+    return (
+      <main className="mx-auto w-full max-w-lg px-4 py-8">
+        <div className="h-[600px] animate-pulse rounded-3xl bg-gray-100" />
+      </main>
+    );
+  }
+
+  // The purchase is the page — without it there is nothing truthful to render
+  if (!data) {
+    return (
+      <main className="mx-auto w-full max-w-lg px-4 py-16 text-center">
+        <p className="text-sm text-gray-500">
+          We could not find this booking. Check your tickets in your account.
+        </p>
+        <Button asChild className="mt-4 rounded-full">
+          <Link href="/experiences?tab=reserved">View my tickets</Link>
+        </Button>
+      </main>
+    );
+  }
 
   const handleCopyReference = async () => {
     try {
@@ -146,7 +154,7 @@ const BookingSuccessContent = () => {
 
           <h1 className="mt-4 text-2xl font-bold text-white">Payment successful</h1>
           <p className="mt-2 text-sm text-white/70">
-            Your spot is locked in. We have sent a confirmation to {data.confirmationPhone}.
+            Your spot is locked in. Your tickets are in your Tukai account.
           </p>
 
           <div className="mt-4 inline-flex items-center gap-3 rounded-full bg-white/10 px-4 py-2">
@@ -214,12 +222,14 @@ const BookingSuccessContent = () => {
           </div>
 
           <div className="space-y-3">
-            <DetailRow label="Payment method" value={data.paymentMethod} />
-            <DetailRow label="Sent via" value={data.sentVia} />
             <DetailRow label="Paid on" value={formatPaidAt(data.paidAt)} />
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-500">Status</span>
-              <PaymentStatusBadge status={data.status} config={CONFIRMATION_STATUS_CONFIG} />
+              {/* No config override: the badge's own map already covers the
+                  statuses purchases come back with (completed, pending,
+                  expired…), where the override only knew the mock's
+                  'confirmed' */}
+              <PaymentStatusBadge status={data.status} className="bg-green-200 shadow-none" />
             </div>
           </div>
 
@@ -231,8 +241,7 @@ const BookingSuccessContent = () => {
               className="mt-0.5 flex-shrink-0 text-primary"
             />
             <p className="text-xs leading-relaxed text-gray-600">
-              Your tickets are in your Tukai account and on their way to {data.confirmationPhone} on
-              WhatsApp. Show the QR code at the meeting point.
+              Your tickets are in your Tukai account. Show the QR code at the meeting point.
             </p>
           </div>
 
@@ -261,9 +270,11 @@ const BookingSuccessContent = () => {
             <Share
               coverPhoto={data.experience.thumbnail}
               title={data.experience.title}
-              link={`${process.env.NEXT_PUBLIC_APP_URL}/experiences/${
-                searchParams.get('experienceId') ?? ''
-              }`}
+              link={
+                experience
+                  ? `${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`
+                  : `${process.env.NEXT_PUBLIC_APP_URL}/experiences`
+              }
             />
           </div>
         </div>

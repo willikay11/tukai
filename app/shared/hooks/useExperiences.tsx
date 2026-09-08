@@ -20,6 +20,7 @@ import {
   fetchExperienceOccurrences,
   fetchExperiences,
   fetchItineraryDays,
+  fetchPurchase,
   fetchSlotTemplates,
   fetchTicketPurchases,
   publishExperience,
@@ -92,6 +93,14 @@ export const useTicketPurchases = (userId: string | undefined, enabled: boolean 
 
 // Host-facing counterpart of useTicketPurchases: every purchase made against
 // one experience, which is what the creator's Sales tab lists
+/** A single purchase, for the booking confirmation. */
+export const usePurchase = (purchaseId: string | undefined) =>
+  useQuery({
+    queryKey: ['purchases', purchaseId],
+    queryFn: async () => await fetchPurchase(purchaseId!),
+    enabled: Boolean(purchaseId),
+  });
+
 export const useExperienceTicketPurchases = (
   experienceId: string | undefined,
   enabled: boolean = true,
