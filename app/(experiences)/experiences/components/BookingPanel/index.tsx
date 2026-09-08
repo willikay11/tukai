@@ -22,6 +22,7 @@ import { Paystack } from '@/components/ui/paystack';
 import { PhoneNumber } from '@/components/ui/phoneNumber';
 import { Quantity } from '@/components/ui/quantity';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 import { TicketPurchasePayload } from '@/services/experience';
 import { Experience, ExperienceOccurrence } from '@/types/experience';
 import { parseApiError } from '@/utils/parseApiError';
@@ -306,16 +307,38 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
     <div className="space-y-4 rounded-3xl bg-gray-50 p-5">
       {/* Tabs */}
       <Tabs value={tab} onValueChange={(val) => setTab(val as 'reservation' | 'moments')}>
-        <TabsList className="h-auto gap-0 rounded-full bg-white p-0.5">
+        {/* A two-column grid, not the primitive's `inline-flex`: that shrinks
+            to fit, so `flex-1` had no free space to share and each tab sized to
+            its own label — "Make Reservation" far wider than "Moments". Equal
+            columns are what let one pill cover either tab.
+            `w-fit` keeps them equal without stretching the row across the
+            panel: the two 1fr columns settle on the wider label's width. */}
+        <TabsList className="relative grid h-auto w-fit grid-cols-2 gap-0 rounded-full bg-white p-0.5">
+          {/* The green pill lives here rather than on the active trigger, so
+              switching tabs slides it across instead of repainting one tab and
+              then the other.
+
+              `inset-y-0 left-0` with `w-1/2`, NOT an inset of the list's own
+              padding: an absolutely positioned child is placed against the
+              padding box, which already excludes `p-0.5`. With the list on a
+              two-column grid, half that box is exactly one tab, so the pill
+              moves by its own width. */}
+          <span
+            aria-hidden
+            className={cn(
+              'absolute inset-y-0 left-0 w-1/2 rounded-full bg-primary transition-transform duration-300 ease-out motion-reduce:transition-none',
+              tab === 'moments' && 'translate-x-full',
+            )}
+          />
           <TabsTrigger
             value="reservation"
-            className="flex-1 rounded-full border-0 bg-white px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-primary data-[state=active]:text-white"
+            className="relative z-10 w-full rounded-full border-0 bg-transparent px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-transparent data-[state=active]:text-white"
           >
             Make Reservation
           </TabsTrigger>
           <TabsTrigger
             value="moments"
-            className="flex-1 rounded-full border-0 bg-white px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-primary data-[state=active]:text-white"
+            className="relative z-10 w-full rounded-full border-0 bg-transparent px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-transparent data-[state=active]:text-white"
           >
             Moments
           </TabsTrigger>
@@ -396,7 +419,13 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
           {/* Total */}
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Total</span>
-            <span className="text-sm font-bold text-gray-900">
+            {/* Keyed on the amount so React remounts it — and the animation
+                replays — only when the figure actually changes, rather than on
+                every render of the panel */}
+            <span
+              key={total}
+              className="text-sm font-bold text-gray-900 duration-300 animate-in fade-in slide-in-from-bottom-1 motion-reduce:animate-none"
+            >
               {currency}{' '}
               {total.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
