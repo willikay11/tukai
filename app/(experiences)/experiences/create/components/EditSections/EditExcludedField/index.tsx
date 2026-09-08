@@ -2,8 +2,6 @@
 
 import { Editor } from '@/components/blocks/editor-00/editor';
 
-import { serializeEditorStateToHtml, toSerializedEditorState } from '../editorUtils';
-
 interface EditExcludedFieldProps {
   value: string;
   onChange: (value: string) => void;
@@ -17,13 +15,8 @@ export const EditExcludedField = ({ value, onChange, error }: EditExcludedFieldP
       <Editor
         className="text-xs"
         placeholderClassName="pointer-events-none absolute left-0 top-0 select-none overflow-hidden text-ellipsis px-3 py-[18px] text-xs text-gray-400"
-        editorSerializedState={toSerializedEditorState(value)}
-        onSerializedChange={(state) => {
-          const html = serializeEditorStateToHtml(state);
-          if (html) {
-            onChange(html);
-          }
-        }}
+        initialHtml={value}
+        onHtmlChange={onChange}
       />
       {error && <p className="text-xs text-red-500">{error}</p>}
     </div>

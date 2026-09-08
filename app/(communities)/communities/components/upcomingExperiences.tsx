@@ -9,6 +9,7 @@ import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { NoData } from '@/components/ui/noData';
 import { Experience } from '@/types/experience';
+import { experiencePath } from '@/utils/detail-paths';
 
 export const UpcomingExperiences = ({ category }: { category: string }) => {
   const { data: upcomingExperiences } = useExperiences(
@@ -44,7 +45,7 @@ export const UpcomingExperiences = ({ category }: { category: string }) => {
         >
           {upcomingExperiences?.data?.count > 0 ? (
             upcomingExperiences?.data?.results?.map((experience: Experience) => (
-              <Link key={experience.id} href={`/experiences/${experience.id}`} target="_blank">
+              <Link key={experience.id} href={experiencePath(experience)} target="_blank">
                 <SingleExperience key={experience.id} experience={experience} type="invited" />
               </Link>
             ))

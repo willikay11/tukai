@@ -12,6 +12,7 @@ import { useLocation } from '@/context/LocationContext';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { Status } from '@/enums/status';
 import { Place } from '@/types/place';
+import { placePath } from '@/utils/detail-paths';
 
 import { SinglePlace } from './place';
 
@@ -206,7 +207,7 @@ export const ListPlaces = () => {
             transition={{ duration: 0.2 }}
             className="cursor-pointer"
           >
-            <Link target="_blank" href={`/places/${place.id}`}>
+            <Link target="_blank" href={placePath(place)}>
               <SinglePlace place={place} />
             </Link>
           </motion.div>

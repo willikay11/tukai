@@ -62,7 +62,9 @@ export const MomentsMasonry = ({
               key={moment.id}
               type="button"
               onClick={() => onSelect(moment.id)}
-              className={`mb-4 block w-full break-inside-avoid overflow-hidden rounded-2xl ${
+              // Tiles fade in as each page lands, and lift under the cursor so
+              // they read as openable
+              className={`mb-4 block w-full break-inside-avoid overflow-hidden rounded-2xl transition duration-300 animate-in fade-in hover:-translate-y-0.5 hover:shadow-md motion-reduce:animate-none motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
                 moment.id === selectedId ? 'ring-2 ring-primary' : ''
               }`}
             >

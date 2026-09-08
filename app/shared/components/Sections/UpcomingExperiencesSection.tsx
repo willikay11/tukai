@@ -10,6 +10,7 @@ import { NoData } from '@/components/ui/noData';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 import { formatFirstExperienceDate } from '@/utils/date-utils';
+import { experiencePath } from '@/utils/detail-paths';
 
 import { SectionShell } from './SectionShell';
 
@@ -36,7 +37,7 @@ const ExperienceRow = ({ experience }: { experience: Experience }) => {
       {/* Straight to the experience page, which owns the existing booking flow —
           no second checkout entry point */}
       <Button asChild size="sm" className="flex-shrink-0 rounded-full px-5">
-        <Link href={`/experiences/${experience.id}`}>Buy Tickets</Link>
+        <Link href={experiencePath(experience)}>Buy Tickets</Link>
       </Button>
     </div>
   );

@@ -160,67 +160,6 @@ describe('Experience Service', () => {
     });
   });
 
-  describe('purchaseExperienceTicket', () => {
-    it('purchases ticket with purchaser details', async () => {
-      const purchaserData = {
-        experience_id: 'exp-1',
-        ticket_id: 'ticket-1',
-        email: 'user@example.com',
-        phone: '+254712345678',
-        quantity: 2,
-      };
-
-      const mockResponse = {
-        data: { order_id: 'order-123', status: 'confirmed' },
-        status: 201,
-      };
-      mockApi.post.mockResolvedValue(mockResponse);
-
-      const result = await experienceService.purchaseExperienceTicket(purchaserData as any);
-
-      expect(mockApi.post).toHaveBeenCalledWith('/v1/experiences/ticket-purchases/', purchaserData);
-      expect(result.success).toBe(true);
-      expect(result.status).toBe(201);
-    });
-
-    it('handles payment error', async () => {
-      const error = {
-        response: {
-          status: 402,
-          data: { message: 'Payment declined' },
-        },
-      };
-      mockApi.post.mockRejectedValue(error);
-
-      await expect(experienceService.purchaseExperienceTicket({} as any)).rejects.toEqual({
-        status: 402,
-        success: false,
-        message: 'Payment declined',
-        data: { message: 'Payment declined' },
-      });
-    });
-
-    it('includes error data in response', async () => {
-      const errorData = {
-        message: 'Ticket already purchased',
-        code: 'DUPLICATE_PURCHASE',
-      };
-      const error = {
-        response: {
-          status: 409,
-          data: errorData,
-        },
-      };
-      mockApi.post.mockRejectedValue(error);
-
-      try {
-        await experienceService.purchaseExperienceTicket({} as any);
-      } catch (e: any) {
-        expect(e.data).toEqual(errorData);
-      }
-    });
-  });
-
   describe('bookmarkExperience', () => {
     it('bookmarks experience with authentication', async () => {
       const mockResponse = { data: { bookmarked: true }, status: 200 };

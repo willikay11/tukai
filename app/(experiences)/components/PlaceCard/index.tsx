@@ -10,6 +10,7 @@ import { useBookmarkPlace } from '@/app/shared/hooks/usePlaces';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
 import { PlaceCategory } from '@/types/placeCategory';
+import { placePath } from '@/utils/detail-paths';
 
 export const PlaceCard = ({ place }: { place: Place }) => {
   const { data: session } = useSession();
@@ -30,7 +31,7 @@ export const PlaceCard = ({ place }: { place: Place }) => {
   const rating = place.averageRating > 0 ? place.averageRating : null;
 
   return (
-    <Link href={`/places/${place.id}`} className="block w-[280px] flex-shrink-0 snap-start">
+    <Link href={placePath(place)} className="block w-[280px] flex-shrink-0 snap-start">
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
         <PhotoImage
           src={coverPhoto}

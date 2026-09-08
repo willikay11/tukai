@@ -40,15 +40,19 @@ export const Button = ({
   return (
     <button
       disabled={loading || disabled}
-      className={clsx(`inline-flex justify-center rounded-[8px] text-xs`, {
-        'bg-primary font-medium text-white': type === 'primary',
-        'bg-blue-500 text-white': type === 'blue',
-        'bg-white px-0 py-0 text-primary': type === 'link',
-        'py-5': size === 'normal' && type !== 'link',
-        'py-2': size === 'small' && type !== 'link',
-        'w-full': block,
-        'px-3': !block && type !== 'link',
-      })}
+      className={clsx(
+        // Matches the shared ui Button's press feedback
+        `inline-flex justify-center rounded-[8px] text-xs transition duration-150 active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100`,
+        {
+          'bg-primary font-medium text-white': type === 'primary',
+          'bg-blue-500 text-white': type === 'blue',
+          'bg-white px-0 py-0 text-primary': type === 'link',
+          'py-5': size === 'normal' && type !== 'link',
+          'py-2': size === 'small' && type !== 'link',
+          'w-full': block,
+          'px-3': !block && type !== 'link',
+        },
+      )}
       onClick={() => onClick?.()}
       type={htmlType}
     >

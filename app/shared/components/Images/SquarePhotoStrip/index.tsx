@@ -108,7 +108,7 @@ export const SquarePhotoStrip = ({
           <button
             type="button"
             onClick={() => heroScrollTo(activeIndex - 1)}
-            className="absolute left-4 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm transition-colors hover:bg-white"
+            className="absolute left-4 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm transition duration-200 animate-in fade-in zoom-in-95 hover:scale-105 hover:bg-white active:scale-95 motion-reduce:animate-none motion-reduce:transition-none motion-reduce:hover:scale-100"
             aria-label="Previous photo"
           >
             <IconComponent iconName="ArrowLeft01Icon" size={18} className="text-gray-800" />
@@ -120,7 +120,7 @@ export const SquarePhotoStrip = ({
           <button
             type="button"
             onClick={() => heroScrollTo(activeIndex + 1)}
-            className="absolute right-4 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm transition-colors hover:bg-white"
+            className="absolute right-4 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm transition duration-200 animate-in fade-in zoom-in-95 hover:scale-105 hover:bg-white active:scale-95 motion-reduce:animate-none motion-reduce:transition-none motion-reduce:hover:scale-100"
             aria-label="Next photo"
           >
             <IconComponent iconName="ArrowRight01Icon" size={18} className="text-gray-800" />
@@ -134,8 +134,8 @@ export const SquarePhotoStrip = ({
               key={index}
               type="button"
               onClick={() => heroScrollTo(index)}
-              className={`h-2 w-2 rounded-full transition-all ${
-                index === activeIndex ? 'w-6 bg-white' : 'bg-white/50'
+              className={`h-2 w-2 rounded-full transition-[width,background-color] duration-300 ease-out motion-reduce:transition-none ${
+                index === activeIndex ? 'w-6 bg-white' : 'bg-white/50 hover:bg-white/80'
               }`}
               aria-label={`Photo ${index + 1}`}
             />

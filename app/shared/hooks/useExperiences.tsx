@@ -20,10 +20,10 @@ import {
   fetchExperienceOccurrences,
   fetchExperiences,
   fetchItineraryDays,
+  fetchPurchase,
   fetchSlotTemplates,
   fetchTicketPurchases,
   publishExperience,
-  purchaseExperienceTicket,
   purchaseExperienceTicketV2,
   searchUsers,
   updateExperience,
@@ -33,7 +33,6 @@ import {
 } from '@/services/experience';
 import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
 import { ItineraryDayPayload } from '@/types/itinerary';
-import { PurchaserDetails } from '@/types/purchaser';
 
 export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean) => {
   return useQuery({
@@ -68,16 +67,6 @@ export const useFetchSingleExperience = (id: string, withAuth: boolean = false) 
   });
 };
 
-export const usePurchaseExperienceTicket = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (data: PurchaserDetails) => await purchaseExperienceTicket(data),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['experience'] });
-    },
-  });
-};
-
 export const usePurchaseExperienceTicketV2 = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -97,19 +86,27 @@ export const useFetchExperienceOccurrences = (experienceId: string | null) =>
 
 export const useTicketPurchases = (userId: string | undefined, enabled: boolean = true) =>
   useQuery({
-    queryKey: ['ticket-purchases', userId],
+    queryKey: ['purchases', userId],
     queryFn: () => fetchTicketPurchases({ user: userId!, page_size: 100 }),
     enabled: enabled && !!userId,
   });
 
 // Host-facing counterpart of useTicketPurchases: every purchase made against
 // one experience, which is what the creator's Sales tab lists
+/** A single purchase, for the booking confirmation. */
+export const usePurchase = (purchaseId: string | undefined) =>
+  useQuery({
+    queryKey: ['purchases', purchaseId],
+    queryFn: async () => await fetchPurchase(purchaseId!),
+    enabled: Boolean(purchaseId),
+  });
+
 export const useExperienceTicketPurchases = (
   experienceId: string | undefined,
   enabled: boolean = true,
 ) =>
   useQuery({
-    queryKey: ['ticket-purchases', 'experience', experienceId],
+    queryKey: ['purchases', 'experience', experienceId],
     queryFn: () => fetchTicketPurchases({ experience: experienceId!, page_size: 100 }),
     enabled: enabled && !!experienceId,
   });

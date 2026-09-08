@@ -6,6 +6,7 @@ import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
+import { experiencePath } from '@/utils/detail-paths';
 
 import { RowSkeleton } from './RowSkeleton';
 
@@ -48,7 +49,7 @@ export const ExperienceRow = ({
         <ScrollRow>
           {experiences.map((experience) => (
             <div key={experience.id} className="w-[280px] flex-shrink-0 snap-start">
-              <Link target="_blank" href={`/experiences/${experience.id}`}>
+              <Link target="_blank" href={experiencePath(experience)}>
                 <SingleExperience type="discover" variant="row" experience={experience} />
               </Link>
             </div>

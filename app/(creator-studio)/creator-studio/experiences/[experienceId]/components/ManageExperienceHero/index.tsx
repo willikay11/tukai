@@ -7,6 +7,7 @@ import { PhotoImage } from '@/app/shared/components/Images';
 import { Share } from '@/app/shared/components/Share';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
+import { experiencePath } from '@/utils/detail-paths';
 
 import { ManageExperienceMetrics } from '../../utils/manage-metrics';
 
@@ -77,7 +78,7 @@ export const ManageExperienceHero = ({ experience, metrics }: ManageExperienceHe
             <Share
               coverPhoto={coverPhoto ?? ''}
               title={experience.title}
-              link={`${process.env.NEXT_PUBLIC_APP_URL}/experiences/${experience.id}`}
+              link={`${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`}
             />
           </div>
         </div>

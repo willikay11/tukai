@@ -1,78 +1,18 @@
 import { useState } from 'react';
 
-import { INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND } from '@lexical/list';
+import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { $setBlocksType } from '@lexical/selection';
-import { $createParagraphNode, $getSelection, $isRangeSelection } from 'lexical';
-import { ListIcon, ListOrderedIcon } from 'lucide-react';
 
-import { useToolbarContext } from '@/components/editor/context/toolbar-context';
 import { ContentEditable } from '@/components/editor/editor-ui/content-editable';
 import { ListMaxIndentLevelPlugin } from '@/components/editor/plugins/list-max-indent-level-plugin';
-import { BlockFormatDropDown } from '@/components/editor/plugins/toolbar/block-format-toolbar-plugin';
-import { FormatCheckList } from '@/components/editor/plugins/toolbar/block-format/format-check-list';
-import { FormatHeading } from '@/components/editor/plugins/toolbar/block-format/format-heading';
-import { FormatParagraph } from '@/components/editor/plugins/toolbar/block-format/format-paragraph';
-import { FormatQuote } from '@/components/editor/plugins/toolbar/block-format/format-quote';
 import { ElementFormatToolbarPlugin } from '@/components/editor/plugins/toolbar/element-format-toolbar-plugin';
 import { FontFormatToolbarPlugin } from '@/components/editor/plugins/toolbar/font-format-toolbar-plugin';
+import { HeadingFormatToolbarPlugin } from '@/components/editor/plugins/toolbar/heading-format-toolbar-plugin';
+import { ListFormatToolbarPlugin } from '@/components/editor/plugins/toolbar/list-format-toolbar-plugin';
 import { ToolbarPlugin } from '@/components/editor/plugins/toolbar/toolbar-plugin';
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-
-function ListFormatButtons() {
-  const { activeEditor, blockType } = useToolbarContext();
-
-  const formatParagraph = () => {
-    activeEditor.update(() => {
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        $setBlocksType(selection, () => $createParagraphNode());
-      }
-    });
-  };
-
-  const toggleBulletedList = () => {
-    if (blockType !== 'bullet') {
-      activeEditor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
-    } else {
-      formatParagraph();
-    }
-  };
-
-  const toggleNumberedList = () => {
-    if (blockType !== 'number') {
-      activeEditor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
-    } else {
-      formatParagraph();
-    }
-  };
-
-  return (
-    <div className="flex items-center gap-1">
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={toggleBulletedList}
-        aria-label="Bulleted list"
-      >
-        <ListIcon className="size-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={toggleNumberedList}
-        aria-label="Numbered list"
-      >
-        <ListOrderedIcon className="size-4" />
-      </Button>
-    </div>
-  );
-}
 
 export function Plugins({ placeholderClassName }: { placeholderClassName?: string }) {
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null);
@@ -88,23 +28,29 @@ export function Plugins({ placeholderClassName }: { placeholderClassName?: strin
       {/* toolbar plugins */}
       <ToolbarPlugin>
         {() => (
-          <div className="flex items-center gap-1 border-b bg-background p-2">
-            <BlockFormatDropDown>
-              <FormatParagraph />
-              <FormatHeading levels={['h1', 'h2', 'h3']} />
-              {/* <FormatCheckList /> */}
-              {/* <FormatQuote /> */}
-            </BlockFormatDropDown>
-
-            <Separator orientation="vertical" className="!h-7" />
-
+          // Scrolls rather than squashing: the editor sits in narrow columns
+          // (the create-experience side panel, the inline edit panels), where
+          // the controls used to compress into each other.
+          //
+          // `[&>*]:flex-shrink-0` is what makes it scroll — without it the
+          // children give up their width to fit and there is nothing to
+          // overflow. The dropdowns portal to the body, so the clipping this
+          // container introduces does not reach them.
+          <div className="flex items-center gap-1 overflow-x-auto border-b bg-gray-100 p-2 scrollbar-hide [&>*]:flex-shrink-0">
+            {/* The block-format dropdown that used to lead the toolbar is gone:
+                it offered Paragraph and H1–H3, which the heading toggles now
+                cover — pressing the active one drops back to a paragraph. */}
             <FontFormatToolbarPlugin />
 
-            <Separator orientation="vertical" className="!h-7" />
+            <Separator orientation="vertical" className="mx-2 !h-4" />
 
-            <ListFormatButtons />
+            <HeadingFormatToolbarPlugin />
 
-            <Separator orientation="vertical" className="!h-7" />
+            <Separator orientation="vertical" className="mx-2 !h-4" />
+
+            <ListFormatToolbarPlugin />
+
+            <Separator orientation="vertical" className="mx-2 !h-4" />
 
             <ElementFormatToolbarPlugin separator={false} />
           </div>
@@ -126,6 +72,8 @@ export function Plugins({ placeholderClassName }: { placeholderClassName?: strin
           ErrorBoundary={LexicalErrorBoundary}
         />
         <ListPlugin />
+        {/* Without this the boxes render but cannot be ticked */}
+        <CheckListPlugin />
         <ListMaxIndentLevelPlugin maxDepth={7} />
         {/* editor plugins */}
       </div>

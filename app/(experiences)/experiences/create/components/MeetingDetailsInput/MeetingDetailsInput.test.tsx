@@ -4,7 +4,13 @@ import { render as rtlRender } from '@testing-library/react';
 import { MeetingDetailsInput } from './index';
 
 jest.mock('@/app/shared/components/LocationPicker', () => ({
-  LocationAutocompleteField: () => <div data-testid="location-field">meeting point input</div>,
+  // Records the classes handed to the real field, which is where the sizing
+  // this component controls actually lands
+  LocationAutocompleteField: ({ inputClassName }: { inputClassName?: string }) => (
+    <div data-testid="location-field" data-input-class={inputClassName}>
+      meeting point input
+    </div>
+  ),
 }));
 
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
@@ -19,6 +25,23 @@ jest.mock('@/components/ui/time-picker', () => ({
 }));
 
 describe('MeetingDetailsInput', () => {
+  // The step around it is 12px throughout — the shared Input's 14.5px stood out
+  it('sizes the meeting point field like the rest of the step', () => {
+    render(
+      <MeetingDetailsInput
+        meetingPoint=""
+        meetingTime={null}
+        onMeetingPointChange={jest.fn()}
+        onMeetingTimeChange={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByTestId('location-field')).toHaveAttribute(
+      'data-input-class',
+      'text-xs leading-[18px]',
+    );
+  });
+
   describe('Rendering', () => {
     it('renders the component', () => {
       const { container } = rtlRender(

@@ -9,6 +9,7 @@ import { useMyPlaces } from '@/app/shared/hooks/usePlaces';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
 import { PlaceCategory } from '@/types/placeCategory';
+import { placePath } from '@/utils/detail-paths';
 
 const coverOf = (place: Place): string | undefined =>
   place.photos?.find((photo: Photo) => photo.isCover)?.photo || place.photos?.[0]?.photo;
@@ -74,7 +75,7 @@ export const YourPlaces = () => {
               return (
                 <Link
                   key={place.id}
-                  href={`/places/${place.id}`}
+                  href={placePath(place)}
                   className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-colors hover:border-gray-200"
                 >
                   <div className="relative aspect-[16/10] w-full">

@@ -6,9 +6,11 @@ import { DescriptionShowMore } from '@/app/shared/components/Global';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
 import { PageContainer } from '@/app/shared/components/Layout';
+import { RevealOnScroll, useHasScrolled } from '@/app/shared/components/Motion';
 import { Share } from '@/app/shared/components/Share';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 import {
@@ -16,6 +18,7 @@ import {
   formatItineraryDateRange,
   inferUIExperienceType,
 } from '@/utils/date-utils';
+import { experiencePath } from '@/utils/detail-paths';
 
 import { BackToExplore } from '../components/BackToExplore';
 import { BookingPanel } from '../components/BookingPanel';
@@ -26,6 +29,7 @@ import { IncludedExcludedSection } from '../components/IncludedExcludedSection';
 import { ItineraryDayByDay } from '../components/ItineraryDayByDay';
 import { LocationMeetingSection } from '../components/LocationMeetingSection';
 import { MetaRow } from '../components/MetaRow';
+import { MobileBookingBar } from '../components/MobileBookingBar';
 import { ExperienceOrganiser } from '../components/experienceOrganiser';
 
 /**
@@ -58,6 +62,8 @@ export const ViewExperiencePageContent = ({
   bookingMode = 'live',
 }: ViewExperiencePageContentProps) => {
   const isPreview = bookingMode === 'preview';
+  // Only the customer view scrolls under its own header
+  const isPanelLifted = useHasScrolled(200, !isPreview);
 
   // A form-derived experience can be missing anything the user has not filled
   // in yet, so every read below is guarded. Live data always populates these.
@@ -124,7 +130,7 @@ export const ViewExperiencePageContent = ({
           <Share
             coverPhoto={coverPhoto}
             title={experience.title}
-            link={`${process.env.NEXT_PUBLIC_APP_URL}/experiences/${experience.id}`}
+            link={`${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`}
           />
         </div>
       </div>
@@ -184,39 +190,47 @@ export const ViewExperiencePageContent = ({
           <Separator />
 
           {/* Day by day — renders only when the experience has itinerary days */}
-          <ItineraryDayByDay experienceId={experience.id} startDate={experience.startDate} />
+          <RevealOnScroll>
+            <ItineraryDayByDay experienceId={experience.id} startDate={experience.startDate} />
+          </RevealOnScroll>
 
           {/* Included/Excluded */}
           {(experience.whatsIncluded || experience.whatsNotIncluded) && (
             <>
-              <IncludedExcludedSection
-                included={experience.whatsIncluded}
-                excluded={experience.whatsNotIncluded}
-              />
+              <RevealOnScroll>
+                <IncludedExcludedSection
+                  included={experience.whatsIncluded}
+                  excluded={experience.whatsNotIncluded}
+                />
+              </RevealOnScroll>
               <Separator />
             </>
           )}
 
           {/* Location and Meeting Point */}
-          <LocationMeetingSection experience={experience} />
+          <RevealOnScroll>
+            <LocationMeetingSection experience={experience} />
+          </RevealOnScroll>
 
           {/* Host Community */}
           {experience.hostCommunity && (
             <>
               <Separator />
-              <HostCommunityCard community={experience.hostCommunity} />
+              <RevealOnScroll>
+                <HostCommunityCard community={experience.hostCommunity} />
+              </RevealOnScroll>
             </>
           )}
 
           <Separator />
 
           {/* Cancellation Policy */}
-          <div>
+          <RevealOnScroll>
             <p className="mb-2 text-xl font-bold text-gray-900">Cancellation Policy</p>
             <p className="text-sm leading-relaxed text-gray-600">
               Ticket sales close {closingDuration} {closingUnit} {closingConditionText}
             </p>
-          </div>
+          </RevealOnScroll>
 
           <Separator />
 
@@ -227,11 +241,25 @@ export const ViewExperiencePageContent = ({
           </Button>
         </div>
 
-        {/* Right column: Sticky booking panel */}
-        <div className="col-span-12 lg:col-span-5">
+        {!isPreview && <MobileBookingBar experience={experience} />}
+
+        {/* Right column: Sticky booking panel.
+            Hidden below lg — there it would stack after every section, which is
+            what the floating bar and its sheet replace. */}
+        <div className="hidden lg:col-span-5 lg:block">
           {/* Sticky for customers, static in the preview — there the create
-              flow's own sticky header owns the top of the viewport */}
-          <div className={isPreview ? undefined : 'sticky top-16'}>
+              flow's own sticky header owns the top of the viewport.
+
+              The shadow arrives once the reader has scrolled, so the panel
+              reads as lifting off the page rather than carrying a shadow it
+              never earned. `drop-shadow` follows the panel's rounded shape;
+              `shadow` would draw a rectangle around this transparent wrapper. */}
+          <div
+            className={cn(
+              !isPreview && 'sticky top-16 transition duration-300 motion-reduce:transition-none',
+              !isPreview && isPanelLifted && 'drop-shadow-xl',
+            )}
+          >
             <BookingPanel experience={experience} mode={bookingMode} />
           </div>
         </div>

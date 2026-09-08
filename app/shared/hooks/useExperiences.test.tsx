@@ -14,7 +14,6 @@ import {
   useExperiences,
   useFetchSingleExperience,
   usePublishExperience,
-  usePurchaseExperienceTicket,
   useUpdateExperience,
   useUpdateExperienceTicket,
 } from './useExperiences';
@@ -164,49 +163,6 @@ describe('Experience Hooks', () => {
 
       await waitFor(() => {
         expect(mockExperienceService.fetchExperience).toHaveBeenCalledWith('exp-123', true);
-      });
-    });
-  });
-
-  describe('usePurchaseExperienceTicket', () => {
-    it('purchases ticket successfully', async () => {
-      const mockPurchaseData = {
-        experienceId: 'exp-123',
-        ticketId: 'ticket-123',
-        email: 'user@example.com',
-        phone: '+254712345678',
-      } as any;
-
-      mockExperienceService.purchaseExperienceTicket.mockResolvedValue({ success: true });
-
-      const { result } = renderHook(() => usePurchaseExperienceTicket(), {
-        wrapper: createWrapper(),
-      });
-
-      act(() => {
-        result.current.mutate(mockPurchaseData);
-      });
-
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
-
-      expect(mockExperienceService.purchaseExperienceTicket).toHaveBeenCalledWith(mockPurchaseData);
-    });
-
-    it('handles purchase errors', async () => {
-      mockExperienceService.purchaseExperienceTicket.mockRejectedValue(new Error('Payment failed'));
-
-      const { result } = renderHook(() => usePurchaseExperienceTicket(), {
-        wrapper: createWrapper(),
-      });
-
-      act(() => {
-        result.current.mutate({} as any);
-      });
-
-      await waitFor(() => {
-        expect(result.current.isError).toBe(true);
       });
     });
   });

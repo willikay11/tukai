@@ -229,10 +229,10 @@ export const CreateExperienceInvites = ({
               <Button
                 isLoading={pendingAction === 'exit'}
                 type="button"
-                variant="outline-primary"
+                variant="gradient-outline"
                 onClick={() => runAction('exit', onSaveAndExit)}
                 disabled={pendingAction === 'exit'}
-                className="px-6 text-xs font-semibold"
+                className="rounded-full px-6 text-xs font-semibold"
               >
                 {saveAndExitActionLabel}
               </Button>
@@ -247,10 +247,10 @@ export const CreateExperienceInvites = ({
             </Button>
             <Button
               type="button"
-              variant="gradient"
+              variant="lime"
               onClick={handleNext}
               isLoading={isUpdatingCommunities}
-              className="rounded-full px-6 text-xs font-semibold text-white"
+              className="rounded-full px-6 text-xs font-semibold"
             >
               {nextActionLabel}
             </Button>

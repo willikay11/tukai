@@ -32,6 +32,7 @@ import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
 import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
 import { formatLongDateWithOrdinal, formatShortDate } from '@/utils/date-utils';
+import { experiencePath } from '@/utils/detail-paths';
 import { haversineKm } from '@/utils/geo-utils';
 
 const ROW_SIZE = 10;
@@ -190,9 +191,9 @@ export const DiscoverPageContent = () => {
             rating={null}
             ctaLabel={`Reserve a spot - ${price?.currency} ${Number(price?.amount ?? 0).toLocaleString()}`}
             // No reserve route exists — booking lives in the detail page panel
-            onCtaClick={() => router.push(`/experiences/${featured.id}`)}
+            onCtaClick={() => router.push(experiencePath(featured))}
             secondaryCtaLabel="View details"
-            onSecondaryCtaClick={() => router.push(`/experiences/${featured.id}`)}
+            onSecondaryCtaClick={() => router.push(experiencePath(featured))}
           />
         )
       )}
@@ -210,7 +211,7 @@ export const DiscoverPageContent = () => {
             <ScrollRow>
               {discoverExperiences.map((experience) => (
                 <div key={experience.id} className="w-[280px] flex-shrink-0 snap-start">
-                  <Link target="_blank" href={`/experiences/${experience.id}`}>
+                  <Link target="_blank" href={experiencePath(experience)}>
                     <SingleExperience type="discover" variant="row" experience={experience} />
                   </Link>
                 </div>

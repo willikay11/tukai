@@ -21,6 +21,26 @@ jest.mock('@/app/shared/components/Icons', () => ({
 const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>;
 
 describe('BottomNavigation', () => {
+  // The single experience page owns the bottom edge with its booking bar
+  it('stands down on a single experience', () => {
+    mockUsePathname.mockReturnValue('/experiences/karura-night-hike');
+
+    const { container } = render(<BottomNavigation />);
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it.each(['/experiences', '/experiences/create', '/experiences/see-all', '/experiences/type'])(
+    'still shows on %s',
+    (pathname) => {
+      mockUsePathname.mockReturnValue(pathname);
+
+      render(<BottomNavigation />);
+
+      expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument();
+    },
+  );
+
   beforeEach(() => {
     jest.clearAllMocks();
     // Reset scroll position

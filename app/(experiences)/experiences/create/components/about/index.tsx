@@ -650,7 +650,11 @@ export const CreateExperienceAbout = ({
               </Button>
               <div className="flex gap-3">
                 {!hideSaveAndExit && (
-                  <Button type="button" variant="outline-primary" className="text-xs font-semibold">
+                  <Button
+                    type="button"
+                    variant="gradient-outline"
+                    className="rounded-full text-xs font-semibold"
+                  >
                     {saveAndExitActionLabel}
                   </Button>
                 )}

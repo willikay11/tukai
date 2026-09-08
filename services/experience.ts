@@ -4,7 +4,6 @@ import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
 import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
 import { ItineraryDayPayload } from '@/types/itinerary';
-import { PurchaserDetails } from '@/types/purchaser';
 import { assertValidImageFiles } from '@/utils/images';
 import { parseApiError } from '@/utils/parseApiError';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
@@ -83,28 +82,6 @@ export async function fetchExperience(id: string, withAuth: boolean = false): Pr
       status: error.response?.status || 500,
       success: false,
       message: parseApiError(error.response?.data, 'An unexpected error occurred'),
-    };
-  }
-}
-
-export async function purchaseExperienceTicket(data: PurchaserDetails): Promise<ApiResponse> {
-  try {
-    const response = await api.post(`/v1/experiences/ticket-purchases/`, data);
-
-    return {
-      status: response.status,
-      success: true,
-      data: parseSnakeToCamel(response.data),
-    };
-  } catch (error: any) {
-    console.error('API Error:', error.response?.data || error.message);
-
-    throw {
-      status: error.response?.status || 500,
-      success: false,
-      message:
-        error.response?.data?.message || 'An error occurred while processing your ticket purchase.',
-      data: error.response?.data,
     };
   }
 }
@@ -591,7 +568,7 @@ export const purchaseExperienceTicketV2 = async (
 ): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();
-    const response = await axiosInstance.post(`/v2/experiences/ticket-purchases/`, data);
+    const response = await axiosInstance.post(`/v2/experiences/purchases/`, data);
 
     return {
       status: response.status,
@@ -625,7 +602,24 @@ export const fetchTicketPurchases = async (params: {
   page_size?: number;
 }): Promise<ApiResponse> => {
   const axiosInstance = await apiWithToken();
-  const response = await axiosInstance.get(`/v1/experiences/ticket-purchases/`, { params });
+  const response = await axiosInstance.get(`/v1/experiences/purchases/`, { params });
+
+  return {
+    status: response.status,
+    success: true,
+    data: parseSnakeToCamel(response.data),
+  };
+};
+
+/**
+ * One purchase — "the purchase is the ticket", so this is a single ticket with
+ * its number, QR, occurrence and payment details.
+ *
+ * Requires the buyer's token: the endpoint scopes to purchases they can see.
+ */
+export const fetchPurchase = async (purchaseId: string): Promise<ApiResponse> => {
+  const axiosInstance = await apiWithToken();
+  const response = await axiosInstance.get(`/v1/experiences/purchases/${purchaseId}/`);
 
   return {
     status: response.status,
@@ -639,7 +633,7 @@ export const fetchTicketPurchases = async (params: {
 export const downloadTicketPdf = async (purchaseId: string): Promise<Blob> => {
   const axiosInstance = await apiWithToken();
   const response = await axiosInstance.get(
-    `/v1/experiences/ticket-purchases/${purchaseId}/download-ticket-pdf/`,
+    `/v1/experiences/purchases/${purchaseId}/download-ticket-pdf/`,
     { responseType: 'blob' },
   );
 

@@ -22,20 +22,25 @@ import { Paystack } from '@/components/ui/paystack';
 import { PhoneNumber } from '@/components/ui/phoneNumber';
 import { Quantity } from '@/components/ui/quantity';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 import { TicketPurchasePayload } from '@/services/experience';
 import { Experience, ExperienceOccurrence } from '@/types/experience';
 import { parseApiError } from '@/utils/parseApiError';
 import { getTicketBuyerPrice } from '@/utils/ticket-utils';
 
+import { ExperienceMoments } from './ExperienceMoments';
 import { RecurringDateSlotPicker } from './RecurringDateSlotPicker';
 
 interface BookingPanelProps {
   experience: Experience;
-  // 'preview' renders the identical panel — tabs, pickers, steppers, totals,
-  // payment method, phone — but hard-disables the purchase call so a creator
+  // 'preview' renders the identical panel — tabs, pickers, steppers, totals —
+  // but hard-disables the purchase call so a creator
   // previewing their own draft can never buy a ticket. Layout must NOT branch
   // on this; only the Pay action does.
   mode?: 'live' | 'preview';
+  // 'all' shows both tabs. The mobile sheet opens one or the other on its own,
+  // so it asks for that view and the tab row is left out.
+  view?: 'all' | 'reservation' | 'moments';
 }
 
 const formatSlotLabel = (startTime: string, durationMinutes: number): string => {
@@ -66,19 +71,20 @@ const occurrenceLabel = (occurrence: ExperienceOccurrence): string => {
 // Same rule PaymentForm's paymentFormSchema applies to mobile-money numbers
 const PHONE_REGEX = /^\+\d{6,15}$/;
 
-export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) => {
+export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: BookingPanelProps) => {
   const router = useRouter();
   const { data: session } = useSession();
   const isLoggedIn = Boolean(session?.user);
   const isPreview = mode === 'preview';
 
-  const [tab, setTab] = useState<'reservation' | 'moments'>('reservation');
+  const [tab, setTab] = useState<'reservation' | 'moments'>(
+    view === 'moments' ? 'moments' : 'reservation',
+  );
+  const showTabs = view === 'all';
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   // Kept as state, not a constant, so restoring the commented-out payment
   // method picker below needs no other change. M-Pesa is the only method today.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'card'>('mpesa');
-  const [phone, setPhone] = useState('');
   const [deliveryMethod, setDeliveryMethod] = useState<'email' | 'whatsapp'>('whatsapp');
   const [deliveryContact, setDeliveryContact] = useState('');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -203,10 +209,6 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
       }
     }
 
-    if (experience.isPaid && paymentMethod === 'mpesa' && !PHONE_REGEX.test(phone)) {
-      validationErrors.phone = 'Please enter a valid phone number.';
-    }
-
     if (deliveryMethod === 'whatsapp' && !PHONE_REGEX.test(deliveryContact)) {
       validationErrors.deliveryContact = 'Please enter a valid phone number.';
     }
@@ -229,7 +231,6 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
   const resetPanel = () => {
     setQuantities({});
     setErrors({});
-    setPhone('');
     setDeliveryContact('');
     setFirstName('');
     setLastName('');
@@ -312,20 +313,46 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
     <div className="space-y-4 rounded-3xl bg-gray-50 p-5">
       {/* Tabs */}
       <Tabs value={tab} onValueChange={(val) => setTab(val as 'reservation' | 'moments')}>
-        <TabsList className="h-auto gap-0 rounded-full bg-white p-0.5">
-          <TabsTrigger
-            value="reservation"
-            className="flex-1 rounded-full border-0 bg-white px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-primary data-[state=active]:text-white"
-          >
-            Make Reservation
-          </TabsTrigger>
-          <TabsTrigger
-            value="moments"
-            className="flex-1 rounded-full border-0 bg-white px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-primary data-[state=active]:text-white"
-          >
-            Moments
-          </TabsTrigger>
-        </TabsList>
+        {showTabs && (
+          <>
+            {/* A two-column grid, not the primitive's `inline-flex`: that shrinks
+            to fit, so `flex-1` had no free space to share and each tab sized to
+            its own label — "Make Reservation" far wider than "Moments". Equal
+            columns are what let one pill cover either tab.
+            `w-fit` keeps them equal without stretching the row across the
+            panel: the two 1fr columns settle on the wider label's width. */}
+            <TabsList className="relative grid h-auto w-fit grid-cols-2 gap-0 rounded-full bg-white p-0.5">
+              {/* The green pill lives here rather than on the active trigger, so
+              switching tabs slides it across instead of repainting one tab and
+              then the other.
+
+              `inset-y-0 left-0` with `w-1/2`, NOT an inset of the list's own
+              padding: an absolutely positioned child is placed against the
+              padding box, which already excludes `p-0.5`. With the list on a
+              two-column grid, half that box is exactly one tab, so the pill
+              moves by its own width. */}
+              <span
+                aria-hidden
+                className={cn(
+                  'absolute inset-y-0 left-0 w-1/2 rounded-full bg-primary transition-transform duration-300 ease-out motion-reduce:transition-none',
+                  tab === 'moments' && 'translate-x-full',
+                )}
+              />
+              <TabsTrigger
+                value="reservation"
+                className="relative z-10 w-full rounded-full border-0 bg-transparent px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-transparent data-[state=active]:text-white"
+              >
+                Make Reservation
+              </TabsTrigger>
+              <TabsTrigger
+                value="moments"
+                className="relative z-10 w-full rounded-full border-0 bg-transparent px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-transparent data-[state=active]:text-white"
+              >
+                Moments
+              </TabsTrigger>
+            </TabsList>
+          </>
+        )}
 
         <TabsContent value="reservation" className="mt-4 space-y-4">
           {isRecurring ? (
@@ -363,8 +390,8 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
 
           {/* Ticket selector */}
           {(experience.tickets?.length ?? 0) > 0 && (
-            <div className="space-y-4">
-              <p className="text-base font-bold text-gray-900">Select your preferred ticket</p>
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-gray-900">Select ticket</p>
 
               {visibleTickets.length === 0 ? (
                 <p className="text-sm text-gray-500">No tickets available for this time slot.</p>
@@ -402,7 +429,13 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
           {/* Total */}
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Total</span>
-            <span className="text-sm font-bold text-gray-900">
+            {/* Keyed on the amount so React remounts it — and the animation
+                replays — only when the figure actually changes, rather than on
+                every render of the panel */}
+            <span
+              key={total}
+              className="text-sm font-bold text-gray-900 duration-300 animate-in fade-in slide-in-from-bottom-1 motion-reduce:animate-none"
+            >
               {currency}{' '}
               {total.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
@@ -411,10 +444,14 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
             </span>
           </div>
 
+          {/* Closes the total off from what follows, the way the one above
+              separates it from the tickets */}
+          <div className="border-t border-gray-200" />
+
           {/* Contact details (anonymous purchasers only) */}
           {!isLoggedIn && (
             <div className="space-y-3">
-              <p className="text-base font-bold text-gray-900">Contact Details</p>
+              <p className="text-sm font-semibold text-gray-900">Contact Details</p>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -476,7 +513,7 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
 
           {/* Ticket delivery */}
           <div className="space-y-3">
-            <p className="text-base font-bold text-gray-900">
+            <p className="text-sm font-normal text-gray-900">
               How would you like to receive your tickets?
             </p>
 
@@ -544,69 +581,6 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
             )}
           </div>
 
-          {/* Payment method picker — hidden for now; `paymentMethod` stays on
-              its 'mpesa' default, so the phone input and its validation below
-              behave exactly as they did with M-Pesa selected. Restore this
-              block to offer card payments again. */}
-          {/*
-          <p className="text-base font-bold text-gray-900">Payment method</p>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setPaymentMethod('mpesa')}
-              className={`flex items-center justify-center gap-2 rounded-xl bg-white py-3 text-sm font-medium transition-colors ${
-                paymentMethod === 'mpesa'
-                  ? 'border-2 border-primary text-primary'
-                  : 'border-2 border-transparent text-gray-500'
-              } `}
-            >
-              <IconComponent
-                iconName="Smartphone01Icon"
-                size={16}
-                className={paymentMethod === 'mpesa' ? 'text-primary' : 'text-gray-500'}
-              />
-              M-Pesa
-            </button>
-            <button
-              type="button"
-              onClick={() => setPaymentMethod('card')}
-              className={`flex items-center justify-center gap-2 rounded-xl bg-white py-3 text-sm font-medium transition-colors ${
-                paymentMethod === 'card'
-                  ? 'border-2 border-primary text-primary'
-                  : 'border-2 border-transparent text-gray-500'
-              } `}
-            >
-              <IconComponent
-                iconName="CreditCardIcon"
-                size={16}
-                className={paymentMethod === 'card' ? 'text-primary' : 'text-gray-500'}
-              />
-              Credit Card
-            </button>
-          </div>
-          */}
-
-          {/* Phone input (only for M-Pesa). Labelled explicitly because the
-              payment method picker above is commented out — without it the
-              field has nothing but a placeholder to explain itself. The wording
-              still reads correctly if that picker is restored. */}
-          {paymentMethod === 'mpesa' && (
-            <div>
-              <p className="text-sm font-bold text-gray-900">Pay with M-Pesa</p>
-              <p className="mt-0.5 text-sm text-gray-500">
-                Enter the M-Pesa number you want to pay from.
-              </p>
-              <div className="mt-3">
-                <PhoneNumber
-                  key={`mpesa-${formResetKey}`}
-                  onChange={(value) => setPhone(value)}
-                  placeholder="Enter M-Pesa number"
-                />
-                {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone}</p>}
-              </div>
-            </div>
-          )}
-
           {/* API error */}
           {errors.api && <p className="text-center text-sm text-red-500">{errors.api}</p>}
 
@@ -654,8 +628,13 @@ export const BookingPanel = ({ experience, mode = 'live' }: BookingPanelProps) =
           )}
         </TabsContent>
 
-        <TabsContent value="moments" className="py-8 text-center">
-          <p className="text-sm text-gray-500">Moments coming soon</p>
+        <TabsContent value="moments" className="mt-4">
+          <ExperienceMoments
+            experienceId={experience.id}
+            experienceTitle={experience.title}
+            place={experience.place}
+            community={experience.hostCommunity}
+          />
         </TabsContent>
       </Tabs>
 

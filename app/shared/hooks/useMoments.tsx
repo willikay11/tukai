@@ -1,8 +1,10 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
+  CreateMoment,
   MomentsQueryParams,
   addMomentComment,
+  createMoment,
   fetchFlagReasons,
   fetchMomentComments,
   fetchMoments,
@@ -16,10 +18,27 @@ export const useMoments = (params: MomentsQueryParams = {}, enabled: boolean = t
   useQuery({
     // Every param that changes the request belongs in the key — without
     // `community`, a community-filtered query serves the whole feed from cache
-    queryKey: ['moments', params.page, params.page_size, params.community, params.place],
+    queryKey: [
+      'moments',
+      params.page,
+      params.page_size,
+      params.community,
+      params.place,
+      params.experience,
+    ],
     queryFn: async () => await fetchMoments(params),
     enabled,
   });
+
+/** Shares a moment, then refreshes every feed that could now include it. */
+export const useCreateMoment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreateMoment) => await createMoment(data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['moments'] }),
+  });
+};
 
 const PAGE_SIZE = 20;
 

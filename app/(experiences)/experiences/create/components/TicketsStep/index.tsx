@@ -817,7 +817,7 @@ export const TicketsStep = ({
                 type="button"
                 onClick={() => runAction('continue', onSaveContinue)}
                 disabled={pendingAction === 'continue'}
-                variant="gradient"
+                variant="lime"
                 className="rounded-[50px]"
               >
                 {saveContinueLabel}
@@ -918,7 +918,7 @@ export const TicketsStep = ({
             type="button"
             onClick={() => runAction('continue', onSaveContinue)}
             disabled={pendingAction === 'continue'}
-            variant="gradient"
+            variant="lime"
             className="rounded-[50px]"
           >
             {saveContinueLabel}
