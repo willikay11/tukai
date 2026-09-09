@@ -72,6 +72,7 @@ beforeAll(() => {
 describe('EditPlaceContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    save.mockReset();
     isManager = true;
   });
 
@@ -123,6 +124,39 @@ describe('EditPlaceContent', () => {
     expect(draft.socialLinks).toBeUndefined();
   });
 
+  // A toast slides away while the reader is still reading it
+  it('confirms a save with the modal the rest of the app uses', async () => {
+    const user = userEvent.setup();
+    save.mockImplementation((_draft, options) => options?.onSuccess?.());
+    renderEdit();
+
+    await user.clear(screen.getByLabelText('Name'));
+    await user.type(screen.getByLabelText('Name'), 'Kraftory');
+    await user.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    expect(await screen.findByText('Changes Saved Successfully!')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'View place' })).toHaveAttribute(
+      'href',
+      '/places/kraftory',
+    );
+    // Nowhere yet — the reader is still looking at the confirmation
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it('lands back on the manage page once the confirmation is dismissed', async () => {
+    const user = userEvent.setup();
+    save.mockImplementation((_draft, options) => options?.onSuccess?.());
+    renderEdit();
+
+    await user.clear(screen.getByLabelText('Name'));
+    await user.type(screen.getByLabelText('Name'), 'Kraftory');
+    await user.click(screen.getByRole('button', { name: 'Save changes' }));
+    await screen.findByText('Changes Saved Successfully!');
+    await user.keyboard('{Escape}');
+
+    expect(push).toHaveBeenCalledWith('/creator-studio/places/p1');
+  });
+
   it('says so rather than calling the API when nothing was touched', async () => {
     const user = userEvent.setup();
     renderEdit();
@@ -151,7 +185,7 @@ describe('EditPlaceContent', () => {
     renderEdit();
 
     await user.click(screen.getByRole('tab', { name: /Social Links/ }));
-    await user.click(screen.getByRole('button', { name: /Add a link/ }));
+    await user.click(screen.getByRole('button', { name: /Add social link/ }));
     await user.type(screen.getByLabelText('Link 2 platform'), 'TikTok');
     await user.type(screen.getByLabelText('Link 2 URL'), 'tiktok.com/kraftory');
 

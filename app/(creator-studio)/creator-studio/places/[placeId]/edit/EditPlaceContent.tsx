@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
+import { ExperienceCreatedModal } from '@/app/(experiences)/experiences/create/components/ExperienceCreatedModal';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { usePlaceManager, useSavePlaceEdits } from '@/app/shared/hooks/usePlaces';
@@ -13,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Photo } from '@/types/photo';
 import { Place, PlaceProperty, PlaceSocialLink } from '@/types/place';
 import { PlaceEditDraft } from '@/types/placeEdit';
+import { placePath } from '@/utils/detail-paths';
 
 import { EditPlaceAboutStep } from './components/EditPlaceAboutStep';
 import { EditPlacePropertiesStep } from './components/EditPlacePropertiesStep';
@@ -97,6 +99,9 @@ export const EditPlaceContent = ({ place }: { place: Place }) => {
 
   const [step, setStep] = useState<StepId>('about');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  // Saving is confirmed with the same modal the rest of the app uses, not a
+  // toast that slides away while the reader is still reading it
+  const [isSavedModalOpen, setIsSavedModalOpen] = useState(false);
 
   const initial = useMemo(
     () => ({
@@ -274,10 +279,7 @@ export const EditPlaceContent = ({ place }: { place: Place }) => {
     }
 
     save(draft, {
-      onSuccess: () => {
-        toast({ title: 'Changes saved', description: `${title} has been updated.` });
-        router.push(`/creator-studio/places/${place.id}`);
-      },
+      onSuccess: () => setIsSavedModalOpen(true),
       onError: (error: Error) =>
         toast({
           title: 'Could not save',
@@ -350,6 +352,19 @@ export const EditPlaceContent = ({ place }: { place: Place }) => {
                 onChange={setSocialLinks}
               />
             </TabsContent>
+
+            <ExperienceCreatedModal
+              open={isSavedModalOpen}
+              onOpenChange={(open) => {
+                setIsSavedModalOpen(open);
+                // Closing it lands back where the place is managed from
+                if (!open) router.push(`/creator-studio/places/${place.id}`);
+              }}
+              title="Changes Saved Successfully!"
+              description={`${title} has been updated. Your changes are live on the listing.`}
+              viewExperienceLabel="View place"
+              href={placePath(place)}
+            />
 
             {/* One save for all three steps, laid out as every wizard step's
                 actions are: the way out on the left, the way on at the right */}
