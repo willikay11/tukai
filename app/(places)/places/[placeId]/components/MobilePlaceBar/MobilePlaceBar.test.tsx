@@ -18,8 +18,11 @@ let ownership: { success?: boolean; data: unknown } | undefined = {
   data: { id: 'o1' },
 };
 let isLoadingOwnership = false;
+// A reader, not the owner, unless a test says otherwise
+let isManager = false;
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   usePlaceOwnership: () => ({ data: ownership, isLoading: isLoadingOwnership }),
+  usePlaceManager: () => ({ isManager, isLoading: false }),
 }));
 
 jest.mock('../ClaimPlacePrompt', () => ({
@@ -39,6 +42,18 @@ describe('MobilePlaceBar', () => {
   beforeEach(() => {
     ownership = { success: true, data: { id: 'o1' } };
     isLoadingOwnership = false;
+    isManager = false;
+  });
+
+  // The sheet resolves an owner to the manage actions itself, so the button
+  // must not promise a reservation form they will not get
+  it('names the job an owner is actually opening', () => {
+    isManager = true;
+
+    renderBar();
+
+    expect(screen.getByRole('button', { name: 'Manage place' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Reserve' })).not.toBeInTheDocument();
   });
 
   it('offers both actions without a price', () => {

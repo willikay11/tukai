@@ -20,6 +20,8 @@ let ownership: { success?: boolean; data: unknown } | undefined = {
   data: { id: 'o1' },
 };
 let isLoadingOwnership = false;
+// A reader, not the owner, unless a test says otherwise
+let isManager = false;
 
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   usePlaceReservationProfiles: (id: string) => usePlaceReservationProfiles(id),
@@ -27,6 +29,13 @@ jest.mock('@/app/shared/hooks/usePlaces', () => ({
     usePlaceBookingRequests(id, profileId),
   useCancelPlaceBookingRequest: () => ({ mutate: cancelBooking, isPending: false }),
   usePlaceOwnership: () => ({ data: ownership, isLoading: isLoadingOwnership }),
+  usePlaceManager: () => ({ isManager, isLoading: false }),
+}));
+
+jest.mock('./PlaceOwnerPanel', () => ({
+  PlaceOwnerPanel: ({ placeName }: { placeName: string }) => (
+    <div data-testid="owner-panel">{placeName}</div>
+  ),
 }));
 
 jest.mock('./ClaimPlacePrompt', () => ({
@@ -60,8 +69,23 @@ describe('ReservationPanel', () => {
     jest.clearAllMocks();
     ownership = { success: true, data: { id: 'o1' } };
     isLoadingOwnership = false;
+    isManager = false;
     withProfiles([profile()]);
     withBookings([]);
+  });
+
+  // The column is one slot and the reader has one job in it. An owner's job is
+  // running the place, not booking a table at it.
+  describe('for the community that owns the place', () => {
+    it('replaces the reservation form with what an owner came to do', () => {
+      isManager = true;
+
+      renderPanel();
+
+      expect(screen.getByTestId('owner-panel')).toHaveTextContent('Kraftory');
+      expect(screen.queryByText('Make a Reservation')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('claim-prompt')).not.toBeInTheDocument();
+    });
   });
 
   it('offers a reservation when the place has an active profile', () => {

@@ -1,5 +1,8 @@
+import { useSession } from 'next-auth/react';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import {
   bookmarkPlace,
   cancelPlaceBookingRequest,
@@ -28,6 +31,7 @@ import {
   updatePlaceReview,
   uploadPlaceReviewImages,
 } from '@/services/place';
+import { Community } from '@/types/community';
 import { PlaceCategoryParams } from '@/types/networkParam';
 import { CreatePlaceBookingRequest } from '@/types/placeReservation';
 
@@ -266,6 +270,40 @@ export const usePlaceOwnership = (placeId: string, enabled = true) =>
     enabled: enabled && Boolean(placeId),
     staleTime: 5 * 60 * 1000,
   });
+
+/**
+ * Whether the reader manages this place.
+ *
+ * Ownership is held by a community, not a person, so this is true when the
+ * claiming community is one the reader created. It stays false while either
+ * question is unanswered — an owner-only strip must never flash for a visitor.
+ */
+export const usePlaceManager = (placeId: string) => {
+  const { data: session } = useSession();
+  // The session types it as possibly null; the hooks below take undefined
+  const userId = session?.user?.id ?? undefined;
+
+  const { data: ownership, isLoading: isLoadingOwnership } = usePlaceOwnership(
+    placeId,
+    Boolean(userId),
+  );
+  const owningCommunityId: string | undefined = ownership?.data?.community;
+
+  const { data: communitiesResponse, isLoading: isLoadingCommunities } = useGetCommunities({
+    page: 1,
+    enabled: Boolean(userId && owningCommunityId),
+    createdBy: userId,
+  });
+  const communities: Community[] = communitiesResponse?.data?.results ?? [];
+
+  return {
+    isManager: Boolean(
+      owningCommunityId && communities.some((community) => community.id === owningCommunityId),
+    ),
+    isLoading: isLoadingOwnership || isLoadingCommunities,
+    owningCommunityId,
+  };
+};
 
 /** The place's bookability profiles. Public — anyone may list them. */
 export const usePlaceReservationProfiles = (placeId: string, enabled = true) =>

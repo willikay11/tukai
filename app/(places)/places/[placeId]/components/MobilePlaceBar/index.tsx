@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 
 import { MomentComposer } from '@/app/shared/components/Moments';
-import { usePlaceOwnership } from '@/app/shared/hooks/usePlaces';
+import { usePlaceManager, usePlaceOwnership } from '@/app/shared/hooks/usePlaces';
 import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
 
@@ -26,6 +26,9 @@ type SheetView = 'reservation' | 'claim';
  * A place nobody has claimed cannot take reservations at all, so offering
  * "Reserve" there leads to a disabled button. It offers the way out of that
  * state instead, and explains what claiming is before asking for anything.
+ *
+ * To the community that owns the place the sheet is the manage panel, so the
+ * button names that job rather than one its reader will not do.
  */
 export const MobilePlaceBar = ({ placeId, placeName }: { placeId: string; placeName: string }) => {
   const [openView, setOpenView] = useState<SheetView | null>(null);
@@ -43,6 +46,10 @@ export const MobilePlaceBar = ({ placeId, placeName }: { placeId: string; placeN
   // failed, or was never made, leaves the bar on its usual label rather than
   // announcing the place is unclaimed.
   const isUnclaimed = !isLoadingOwnership && ownership?.success === true && !ownership.data;
+
+  // The sheet holds the reservation panel either way — it resolves an owner to
+  // the manage actions itself — so only the label has to know
+  const { isManager } = usePlaceManager(placeId);
 
   return (
     <>
@@ -63,7 +70,7 @@ export const MobilePlaceBar = ({ placeId, placeName }: { placeId: string; placeN
             onClick={() => setOpenView(isUnclaimed ? 'claim' : 'reservation')}
             className="h-11 rounded-full px-6"
           >
-            {isUnclaimed ? 'Claim this place' : 'Reserve'}
+            {isUnclaimed ? 'Claim this place' : isManager ? 'Manage place' : 'Reserve'}
           </Button>
         </div>
       </div>

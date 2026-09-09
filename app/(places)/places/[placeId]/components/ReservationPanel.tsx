@@ -10,6 +10,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import {
   useCancelPlaceBookingRequest,
   usePlaceBookingRequests,
+  usePlaceManager,
   usePlaceOwnership,
   usePlaceReservationProfiles,
 } from '@/app/shared/hooks/usePlaces';
@@ -18,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { PlaceBookingRequest, PlaceReservationProfile } from '@/types/placeReservation';
 
 import { ClaimPlacePrompt } from './ClaimPlacePrompt';
+import { PlaceOwnerPanel } from './PlaceOwnerPanel';
 import { PlaceReservationsCalendar } from './PlaceReservationsCalendar';
 
 export const ReservationPanel = ({
@@ -46,6 +48,10 @@ export const ReservationPanel = ({
   // failed, or was never made, is "we do not know" — and a place must never be
   // called unclaimed on that.
   const isUnclaimed = ownership?.success === true && !ownership.data;
+
+  // Reading the place as its owner is a different job from reading it as a
+  // customer, so the column answers whichever one applies
+  const { isManager, isLoading: isLoadingManager } = usePlaceManager(placeId);
   const profiles: PlaceReservationProfile[] = profilesResponse?.data?.results ?? [];
 
   // A place may hold up to two profiles (restaurant and cinema); only an active
@@ -77,8 +83,18 @@ export const ReservationPanel = ({
     });
   };
 
-  if (isLoading || isLoadingOwnership) {
+  if (isLoading || isLoadingOwnership || isLoadingManager) {
     return <div className="h-64 animate-pulse rounded-3xl bg-gray-50" />;
+  }
+
+  // An owner is not going to book their own table, so the panel offers what
+  // they came for instead — the same slot, a different job.
+  if (isManager) {
+    return (
+      <div className="rounded-3xl bg-gray-50 p-5">
+        <PlaceOwnerPanel placeId={placeId} placeName={placeName} />
+      </div>
+    );
   }
 
   // Nobody has claimed it, so it cannot take bookings and nobody can hold one.

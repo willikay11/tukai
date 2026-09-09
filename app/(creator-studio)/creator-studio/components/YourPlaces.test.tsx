@@ -38,14 +38,15 @@ describe('YourPlaces', () => {
     expect(screen.getByText('Beer Garden · Karen')).toBeInTheDocument();
   });
 
-  it('opens a place from its card', () => {
+  // The studio manages; the public listing is a click further on from there
+  it('opens a place for managing, not its public listing', () => {
     withPlaces([place()]);
 
     render(<YourPlaces />);
 
     expect(screen.getByRole('link', { name: /Kraftory Biergarten/ })).toHaveAttribute(
       'href',
-      '/places/p1',
+      '/creator-studio/places/p1',
     );
   });
 
