@@ -203,10 +203,11 @@ describe('ReservationSettingsContent', () => {
 
     const [draft] = save.mock.calls[0];
     expect(draft.profileId).toBe('rp1');
+    expect(draft.isActive).toBe(true);
     expect(draft.existingRules).toHaveLength(1);
   });
 
-  it('confirms with the modal once the settings are saved', async () => {
+  it('confirms with the modal once reservations are open', async () => {
     const user = userEvent.setup();
     save.mockImplementation((_draft, options) => options?.onSuccess?.());
     profiles = [
@@ -223,6 +224,6 @@ describe('ReservationSettingsContent', () => {
     await user.click(screen.getByRole('button', { name: 'Tuesday' }));
     await user.click(screen.getByRole('button', { name: 'Save Changes' }));
 
-    expect(await screen.findByText('Reservation Settings Saved!')).toBeInTheDocument();
+    expect(await screen.findByText('Reservations Are Open!')).toBeInTheDocument();
   });
 });

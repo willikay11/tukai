@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import {
+  activateReservationProfile,
   bookmarkPlace,
   cancelPlaceBookingRequest,
   claimPlaceOwnership,
@@ -476,20 +477,18 @@ export const useSavePlaceEdits = (placeId: string) => {
 /**
  * Saves a place's reservation settings, creating the profile if there is none.
  *
- * The profile has to exist before its weekly hours can hang off it, so it is
- * written first and the hours follow against the id it returns. Hours are
- * replaced rather than edited — the API creates and deletes rules but does not
- * update them — so a day whose times changed is removed and written again.
- *
- * Activating is deliberately not part of this: a profile stays as the API left
- * it, and opening it to bookings is a separate step.
+ * Three endpoints, in an order that matters: the profile has to exist before
+ * its weekly hours can hang off it, and it takes no bookings until it is
+ * activated. Hours are replaced rather than edited — the API creates and
+ * deletes rules but does not update them — so a day whose times changed is
+ * removed and written again.
  */
 export const useSaveReservationSettings = (placeId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (draft: ReservationSettingsDraft) => {
-      const { profileId, profile, rules, existingRules } = draft;
+      const { profileId, profile, rules, existingRules, isActive } = draft;
 
       const saved = profileId
         ? await updateReservationProfile(placeId, profileId, profile)
@@ -523,6 +522,9 @@ export const useSaveReservationSettings = (placeId: string) => {
 
         if (!isUnchanged) await createAvailabilityRule(placeId, id, rule);
       }
+
+      // A draft profile is invisible to diners, so saving settings opens it
+      if (!isActive) await activateReservationProfile(placeId, id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['placeReservationProfiles', placeId] });

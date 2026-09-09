@@ -128,6 +128,7 @@ export const ReservationSettingsContent = ({ place }: { place: Place }) => {
         ...(values.bufferMinutes ? { slotIntervalMinutes: Number(values.bufferMinutes) } : {}),
       })),
       existingRules,
+      isActive: profile?.status === 'active',
     };
 
     save(draft, {
@@ -344,8 +345,8 @@ export const ReservationSettingsContent = ({ place }: { place: Place }) => {
           setIsSavedModalOpen(open);
           if (!open) router.push(`/creator-studio/places/${place.id}`);
         }}
-        title="Reservation Settings Saved!"
-        description={`${place.title} is set up to take reservations on the days and hours you chose.`}
+        title="Reservations Are Open!"
+        description={`${place.title} now takes reservations on the days and hours you set. Requests will appear here for you to accept or decline.`}
         viewExperienceLabel="Done"
         onViewExperience={() => setIsSavedModalOpen(false)}
       />

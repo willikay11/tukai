@@ -106,4 +106,5 @@ export type ReservationSettingsDraft = {
     slotIntervalMinutes?: number;
   }[];
   existingRules: PlaceAvailabilityRule[];
+  isActive: boolean;
 };

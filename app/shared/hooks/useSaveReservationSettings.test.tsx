@@ -45,6 +45,7 @@ const draft = (extra: Partial<ReservationSettingsDraft> = {}): ReservationSettin
   profile: { reservationType: 'restaurant_reservation', seatingCapacity: 40 },
   rules: [{ dayOfWeek: 0, openTime: '11:00', closeTime: '23:00', slotIntervalMinutes: 30 }],
   existingRules: [rule()],
+  isActive: true,
   ...extra,
 });
 
@@ -65,12 +66,14 @@ describe('useSaveReservationSettings', () => {
     deleteAvailabilityRule.mockResolvedValue({});
   });
 
-  // A place with no profile has to get one before hours can hang off it
-  it('creates the profile, then its hours against the id it returned', async () => {
+  // A place with no profile has to get one before hours can hang off it, and
+  // it takes no bookings until it is activated
+  it('creates the profile, its hours and opens it, in that order', async () => {
     await save(
       draft({
         profileId: undefined,
         existingRules: [],
+        isActive: false,
         rules: [{ dayOfWeek: 0, openTime: '11:00', closeTime: '23:00' }],
       }),
     );
@@ -85,22 +88,23 @@ describe('useSaveReservationSettings', () => {
       openTime: '11:00',
       closeTime: '23:00',
     });
+    expect(activateReservationProfile).toHaveBeenCalledWith('p1', 'rp-new');
   });
 
-  // Opening a profile to bookings is a step of its own, not a side effect of
-  // saving its settings
-  it('never activates the profile', async () => {
-    await save(draft({ profileId: undefined, existingRules: [] }));
-    await save(draft());
-
-    expect(activateReservationProfile).not.toHaveBeenCalled();
-  });
-
-  it('updates the profile it already has rather than making another', async () => {
+  it('leaves an already-open profile alone', async () => {
     await save(draft());
 
     expect(createReservationProfile).not.toHaveBeenCalled();
     expect(updateReservationProfile).toHaveBeenCalledWith('p1', 'rp1', expect.any(Object));
+    expect(activateReservationProfile).not.toHaveBeenCalled();
+  });
+
+  // A profile that was saved while still a draft has to be opened, or the
+  // place page goes on saying it takes no reservations
+  it('opens a profile that is not active yet', async () => {
+    await save(draft({ isActive: false }));
+
+    expect(activateReservationProfile).toHaveBeenCalledWith('p1', 'rp1');
   });
 
   // Rules can only be created and deleted, so an unchanged day must be left
