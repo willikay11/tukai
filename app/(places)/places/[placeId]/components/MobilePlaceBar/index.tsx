@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { useSession } from 'next-auth/react';
+
 import { MomentComposer } from '@/app/shared/components/Moments';
 import { usePlaceOwnership } from '@/app/shared/hooks/usePlaces';
 import { Button } from '@/components/ui/button';
@@ -29,10 +31,18 @@ export const MobilePlaceBar = ({ placeId, placeName }: { placeId: string; placeN
   const [openView, setOpenView] = useState<SheetView | null>(null);
   const [isComposerOpen, setIsComposerOpen] = useState(false);
 
-  // `data` is null for a place the API returned 404 for — nobody owns it.
-  // While it loads the bar keeps its usual label rather than flickering.
-  const { data: ownership, isLoading: isLoadingOwnership } = usePlaceOwnership(placeId);
-  const isUnclaimed = !isLoadingOwnership && !ownership?.data;
+  // Asked only of a signed-in reader: the endpoint 401s without a token, and
+  // claiming needs an account anyway
+  const { data: session } = useSession();
+  const { data: ownership, isLoading: isLoadingOwnership } = usePlaceOwnership(
+    placeId,
+    Boolean(session?.user?.id),
+  );
+
+  // Only a 404 answered successfully means nobody owns it. A request that
+  // failed, or was never made, leaves the bar on its usual label rather than
+  // announcing the place is unclaimed.
+  const isUnclaimed = !isLoadingOwnership && ownership?.success === true && !ownership.data;
 
   return (
     <>

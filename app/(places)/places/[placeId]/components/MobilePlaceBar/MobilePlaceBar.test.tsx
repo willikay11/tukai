@@ -11,7 +11,12 @@ jest.mock('../ReservationPanel', () => ({
   ),
 }));
 
-let ownership: { data: unknown } | undefined = { data: { id: 'o1' } };
+jest.mock('next-auth/react', () => ({ useSession: () => ({ data: { user: { id: 'u1' } } }) }));
+
+let ownership: { success?: boolean; data: unknown } | undefined = {
+  success: true,
+  data: { id: 'o1' },
+};
 let isLoadingOwnership = false;
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   usePlaceOwnership: () => ({ data: ownership, isLoading: isLoadingOwnership }),
@@ -32,7 +37,7 @@ const renderBar = () => render(<MobilePlaceBar placeId="p1" placeName="Kraftory 
 
 describe('MobilePlaceBar', () => {
   beforeEach(() => {
-    ownership = { data: { id: 'o1' } };
+    ownership = { success: true, data: { id: 'o1' } };
     isLoadingOwnership = false;
   });
 
@@ -71,7 +76,7 @@ describe('MobilePlaceBar', () => {
   // reach a disabled button
   describe('a place nobody has claimed', () => {
     beforeEach(() => {
-      ownership = { data: null };
+      ownership = { success: true, data: null };
     });
 
     it('offers to claim it instead of reserving', () => {
@@ -90,6 +95,17 @@ describe('MobilePlaceBar', () => {
       expect(screen.getByTestId('claim-prompt')).toHaveTextContent('Kraftory Biergarten');
       expect(screen.queryByTestId('reservation-panel')).not.toBeInTheDocument();
     });
+  });
+
+  // A failed or skipped request is not an answer — the bar must not announce
+  // a place is unclaimed because it could not ask
+  it('keeps Reserve when the ownership request failed', () => {
+    ownership = undefined;
+    isLoadingOwnership = false;
+
+    renderBar();
+
+    expect(screen.getByRole('button', { name: 'Reserve' })).toBeInTheDocument();
   });
 
   // Flipping the label once the answer arrives would be worse than waiting

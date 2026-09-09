@@ -70,8 +70,8 @@ export const ClaimPlacePrompt = ({
     <div className="rounded-2xl bg-gray-50 p-4">
       <p className="text-sm text-gray-600">
         You will need a published community you run, and documents showing you own or manage the
-        business such as a licence, a certificate of incorporation, or similar. A claim is reviewed before
-        it goes live.
+        business such as a licence, a certificate of incorporation, or similar. A claim is reviewed
+        before it goes live.
       </p>
     </div>
 

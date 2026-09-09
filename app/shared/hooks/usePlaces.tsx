@@ -254,6 +254,10 @@ export const useGoogleMapsPlaceGeocode = (placeId: string | null, enabled: boole
 /**
  * Who owns this place, if anyone. `data` is null for an unclaimed place — the
  * API's 404 — which is what tells a claim prompt from a booking one.
+ *
+ * The endpoint is authenticated, so callers gate this on a session rather than
+ * firing a 401 on every place a signed-out reader opens. A failed request
+ * leaves `data` undefined, which is NOT the same as "nobody owns it".
  */
 export const usePlaceOwnership = (placeId: string, enabled = true) =>
   useQuery({

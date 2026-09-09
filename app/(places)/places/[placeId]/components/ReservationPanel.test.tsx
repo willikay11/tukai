@@ -12,8 +12,13 @@ jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) })
 const usePlaceReservationProfiles = jest.fn();
 const usePlaceBookingRequests = jest.fn();
 const cancelBooking = jest.fn();
+jest.mock('next-auth/react', () => ({ useSession: () => ({ data: { user: { id: 'u1' } } }) }));
+
 // Claimed by default: the unclaimed case is its own describe below
-let ownership: { data: unknown } | undefined = { data: { id: 'o1' } };
+let ownership: { success?: boolean; data: unknown } | undefined = {
+  success: true,
+  data: { id: 'o1' },
+};
 let isLoadingOwnership = false;
 
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
@@ -53,7 +58,7 @@ const renderPanel = () => render(<ReservationPanel placeId="p1" placeName="Kraft
 describe('ReservationPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    ownership = { data: { id: 'o1' } };
+    ownership = { success: true, data: { id: 'o1' } };
     isLoadingOwnership = false;
     withProfiles([profile()]);
     withBookings([]);
@@ -146,7 +151,7 @@ describe('ReservationPanel', () => {
     // Nobody owns it, so it cannot take bookings and nobody can hold one —
     // the panel offers the way out of that state instead of a dead button
     it('replaces the reservation panel when nobody has claimed the place', () => {
-      ownership = { data: null };
+      ownership = { success: true, data: null };
       withProfiles([]);
 
       renderPanel();
@@ -181,6 +186,19 @@ describe('ReservationPanel', () => {
 
       expect(screen.queryByTestId('claim-prompt')).not.toBeInTheDocument();
       expect(screen.queryByText('Make a Reservation')).not.toBeInTheDocument();
+    });
+
+    // The endpoint 401s without a token and can fail like any other. A place
+    // must never be called unclaimed because the question could not be asked.
+    it('does not call a place unclaimed when the request failed', () => {
+      ownership = undefined;
+      isLoadingOwnership = false;
+      withProfiles([]);
+
+      renderPanel();
+
+      expect(screen.queryByTestId('claim-prompt')).not.toBeInTheDocument();
+      expect(screen.getByText('Make a Reservation')).toBeInTheDocument();
     });
 
     // The free-to-reserve promise only holds where booking works

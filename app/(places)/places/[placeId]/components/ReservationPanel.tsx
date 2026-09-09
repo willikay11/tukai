@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
 import { ExperienceCreatedModal } from '@/app/(experiences)/experiences/create/components/ExperienceCreatedModal';
@@ -33,9 +34,18 @@ export const ReservationPanel = ({
 
   const { data: profilesResponse, isLoading } = usePlaceReservationProfiles(placeId);
 
-  // `data` is null where the API answered 404 — nobody owns this place
-  const { data: ownership, isLoading: isLoadingOwnership } = usePlaceOwnership(placeId);
-  const isUnclaimed = !ownership?.data;
+  // Asked only of a signed-in reader: the endpoint 401s without a token, and
+  // claiming needs an account anyway
+  const { data: session } = useSession();
+  const { data: ownership, isLoading: isLoadingOwnership } = usePlaceOwnership(
+    placeId,
+    Boolean(session?.user?.id),
+  );
+
+  // Only a 404 answered successfully means nobody owns it. A request that
+  // failed, or was never made, is "we do not know" — and a place must never be
+  // called unclaimed on that.
+  const isUnclaimed = ownership?.success === true && !ownership.data;
   const profiles: PlaceReservationProfile[] = profilesResponse?.data?.results ?? [];
 
   // A place may hold up to two profiles (restaurant and cinema); only an active

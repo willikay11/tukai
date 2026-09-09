@@ -611,13 +611,17 @@ export async function fetchFollowing(userId: string): Promise<ApiResponse> {
 /**
  * The ownership claim on a place, or null when nobody holds one.
  *
- * The API answers 404 for an unclaimed place, which is an answer rather than a
- * failure — the caller needs to tell "no owner" from "could not ask".
- * Unauthenticated, like the reservation profiles beside it.
+ * ⚠️ Authenticated: unlike the reservation profiles beside it, this 401s
+ * without a token. Called with the public client it looked unclaimed to
+ * everyone, including the community that had just claimed it.
+ *
+ * Only a 404 means "nobody owns this". Every other failure is "could not ask",
+ * and is thrown so callers do not read a broken request as an empty answer.
  */
 export async function fetchPlaceOwnership(placeId: string): Promise<ApiResponse> {
   try {
-    const res = await api.get(`/v1/places/${placeId}/ownership/`);
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(`/v1/places/${placeId}/ownership/`);
 
     return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
   } catch (error: any) {
