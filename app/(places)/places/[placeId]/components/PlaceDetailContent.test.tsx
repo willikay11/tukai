@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 
 import { Place } from '@/types/place';
 
@@ -236,5 +236,37 @@ describe('PlaceDetailContent', () => {
     render(<PlaceDetailContent place={place()} />);
 
     expect(screen.getByText('No community is linked to this place yet')).toBeInTheDocument();
+  });
+});
+
+// The same vocabulary the experience page uses: sections fade up as they are
+// reached, and the sticky panel earns its shadow by being scrolled past
+describe('PlaceDetailContent motion', () => {
+  afterEach(() => {
+    Object.defineProperty(window, 'scrollY', { value: 0, configurable: true });
+  });
+
+  // Without an IntersectionObserver — jsdom has none — RevealOnScroll starts
+  // revealed, so nothing on the page is ever left hidden by it
+  it('leaves every section readable when nothing can observe them', () => {
+    render(<PlaceDetailContent place={place()} />);
+
+    expect(screen.getByText('A beer garden')).toBeInTheDocument();
+    expect(screen.getByText('reviews-p1')).toBeInTheDocument();
+    expect(screen.getByTestId('hero')).toBeInTheDocument();
+  });
+
+  it('lifts the reservation panel once the reader has scrolled', () => {
+    const { container } = render(<PlaceDetailContent place={place()} />);
+    const sticky = () => container.querySelector('[class*="lg:sticky"]');
+
+    expect(sticky()).not.toHaveClass('lg:drop-shadow-xl');
+
+    act(() => {
+      Object.defineProperty(window, 'scrollY', { value: 400, configurable: true });
+      window.dispatchEvent(new Event('scroll'));
+    });
+
+    expect(sticky()).toHaveClass('lg:drop-shadow-xl');
   });
 });

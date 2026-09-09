@@ -7,12 +7,14 @@ import { DescriptionShowMore, OpenInMapsLink } from '@/app/shared/components/Glo
 import { IconComponent } from '@/app/shared/components/Icons';
 import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
 import { PageContainer } from '@/app/shared/components/Layout';
+import { RevealOnScroll, useHasScrolled } from '@/app/shared/components/Motion';
 import { Rating } from '@/app/shared/components/Rating/Rating';
 import { MomentsGridSection, UpcomingExperiencesSection } from '@/app/shared/components/Sections';
 import { Share } from '@/app/shared/components/Share';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useMoments } from '@/app/shared/hooks/useMoments';
 import { useLocation } from '@/context/LocationContext';
+import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { Moment } from '@/types/moment';
 import { Photo } from '@/types/photo';
@@ -31,6 +33,7 @@ import { ReservationPanel } from './ReservationPanel';
 export const PlaceDetailContent = ({ place }: { place: Place }) => {
   const router = useRouter();
   const { lat, lng } = useLocation();
+  const isPanelLifted = useHasScrolled(200);
 
   const { data: experiencesResponse, isLoading: isLoadingExperiences } = useExperiences(
     { place: place.id, page: 1, page_size: 10 },
@@ -121,34 +124,60 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
             <DescriptionShowMore text={place.description} maxLength={600} />
           </div>
 
-          <PlaceDetailsSection properties={place.properties ?? []} />
-          <PlaceSocialsSection links={place.socialLinks ?? []} />
-          <PlaceCommunitySection />
+          {/* Each section fades up as it is reached, as the experience page's
+              do. The gallery and description above are not wrapped — they are
+              on screen at load, so there is nothing to reveal. */}
+          <RevealOnScroll>
+            <PlaceDetailsSection properties={place.properties ?? []} />
+          </RevealOnScroll>
 
-          <UpcomingExperiencesSection
-            hostName={place.title}
-            experiences={experiences}
-            isLoading={isLoadingExperiences}
-          />
+          <RevealOnScroll>
+            <PlaceSocialsSection links={place.socialLinks ?? []} />
+          </RevealOnScroll>
 
-          <MomentsGridSection
-            hostName={place.title}
-            moments={moments}
-            isLoading={isLoadingMoments}
-          />
+          <RevealOnScroll>
+            <PlaceCommunitySection />
+          </RevealOnScroll>
 
-          <PlaceReviewsSection
-            placeId={place.id}
-            placeTitle={place.title}
-            rating={place.averageRating}
-            reviewCount={place.totalReviews}
-          />
+          <RevealOnScroll>
+            <UpcomingExperiencesSection
+              hostName={place.title}
+              experiences={experiences}
+              isLoading={isLoadingExperiences}
+            />
+          </RevealOnScroll>
+
+          <RevealOnScroll>
+            <MomentsGridSection
+              hostName={place.title}
+              moments={moments}
+              isLoading={isLoadingMoments}
+            />
+          </RevealOnScroll>
+
+          <RevealOnScroll>
+            <PlaceReviewsSection
+              placeId={place.id}
+              placeTitle={place.title}
+              rating={place.averageRating}
+              reviewCount={place.totalReviews}
+            />
+          </RevealOnScroll>
         </div>
 
         {/* Hidden below lg, where the bar's sheet is the way in — stacked
             under every section it was a long scroll from the top */}
         <div className="hidden lg:col-span-5 lg:block">
-          <div className="lg:sticky lg:top-20">
+          {/* The shadow arrives once the reader has scrolled, so the panel
+              reads as lifting off the page rather than carrying a shadow it
+              never earned. `drop-shadow` follows the panel's rounded shape;
+              `shadow` would draw a rectangle around this transparent wrapper. */}
+          <div
+            className={cn(
+              'motion-reduce:transition-none lg:sticky lg:top-20 lg:transition lg:duration-300',
+              isPanelLifted && 'lg:drop-shadow-xl',
+            )}
+          >
             <ReservationPanel placeId={place.id} placeName={place.title} />
           </div>
         </div>
