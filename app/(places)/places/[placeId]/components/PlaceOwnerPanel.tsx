@@ -21,7 +21,7 @@ const OWNER_ACTIONS: {
     icon: 'Edit02Icon',
     title: 'Edit place',
     detail: 'Update the photos, description and details readers see here.',
-    href: (id) => `/creator-studio/places/${id}`,
+    href: (id) => `/creator-studio/places/${id}/edit`,
   },
   {
     icon: 'PlusSignIcon',

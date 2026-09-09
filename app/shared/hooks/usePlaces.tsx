@@ -9,10 +9,15 @@ import {
   claimPlaceOwnership,
   createPlace,
   createPlaceBookingRequest,
+  createPlaceProperty,
   createPlaceReview,
   createPlaceReviewComment,
+  createPlaceSocialLink,
+  deletePlacePhoto,
+  deletePlaceProperty,
   deletePlaceReview,
   deletePlaceReviewImage,
+  deletePlaceSocialLink,
   fetchFollowing,
   fetchGoogleMapsAutocomplete,
   fetchGoogleMapsPlaceGeocode,
@@ -28,11 +33,16 @@ import {
   fetchPlaces,
   likePlaceReview,
   likePlaceReviewComment,
+  updatePlace,
+  updatePlaceProperty,
   updatePlaceReview,
+  updatePlaceSocialLink,
+  uploadPlacePhoto,
   uploadPlaceReviewImages,
 } from '@/services/place';
 import { Community } from '@/types/community';
 import { PlaceCategoryParams } from '@/types/networkParam';
+import { PlaceEditDraft } from '@/types/placeEdit';
 import { CreatePlaceBookingRequest } from '@/types/placeReservation';
 
 export const usePlaces = ({
@@ -389,5 +399,71 @@ export const useCreatePlace = () => {
   return useMutation({
     mutationFn: async (data: Parameters<typeof createPlace>[0]) => await createPlace(data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['places'] }),
+  });
+};
+
+/**
+ * Saves every change the edit screen collected, in one call.
+ *
+ * The place, its photos, its properties and its social links are four separate
+ * endpoints, so the draft is diffed against what was loaded and only what
+ * actually moved is sent. Photos are ordered deliberately: removals first, so a
+ * place at its photo limit can still take replacements.
+ *
+ * The whole thing is one mutation because it is one button. A partial failure
+ * surfaces as a failure — the caller re-reads the place either way.
+ */
+export const useSavePlaceEdits = (placeId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (draft: PlaceEditDraft) => {
+      const { about, photos, properties, socialLinks } = draft;
+
+      if (about) await updatePlace(placeId, about);
+
+      for (const photoId of photos?.removedIds ?? []) {
+        await deletePlacePhoto(placeId, photoId);
+      }
+
+      // Only the first photo of a place with none left can claim the cover;
+      // the API sets no cover flag on its own
+      const addedPhotos = photos?.added ?? [];
+      for (let index = 0; index < addedPhotos.length; index += 1) {
+        const added = addedPhotos[index];
+        await uploadPlacePhoto(placeId, {
+          photo: added.file,
+          isCover: added.isCover,
+          order: added.order ?? index,
+        });
+      }
+
+      for (const propertyId of properties?.removedIds ?? []) {
+        await deletePlaceProperty(placeId, propertyId);
+      }
+      for (const property of properties?.updated ?? []) {
+        await updatePlaceProperty(placeId, property.id, property.data);
+      }
+      for (const property of properties?.added ?? []) {
+        await createPlaceProperty(placeId, property);
+      }
+
+      for (const linkId of socialLinks?.removedIds ?? []) {
+        await deletePlaceSocialLink(placeId, linkId);
+      }
+      for (const link of socialLinks?.updated ?? []) {
+        await updatePlaceSocialLink(placeId, link.id, link.data);
+      }
+      for (const link of socialLinks?.added ?? []) {
+        await createPlaceSocialLink(placeId, link);
+      }
+    },
+    onSuccess: () => {
+      // The detail endpoint carries photos, properties and links together, so
+      // the public page and the form both re-read from one invalidation
+      queryClient.invalidateQueries({ queryKey: ['place', placeId] });
+      queryClient.invalidateQueries({ queryKey: ['places'] });
+      queryClient.invalidateQueries({ queryKey: ['myPlaces'] });
+    },
   });
 };

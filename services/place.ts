@@ -703,3 +703,231 @@ export async function createPlace(data: {
     };
   }
 }
+
+/**
+ * Edits a place's own fields.
+ *
+ * The endpoint takes multipart because it also accepts `new_photos`, so every
+ * field goes through FormData even when no file is attached. Photos added here
+ * cannot carry a cover flag or an order — `uploadPlacePhoto` is the way in when
+ * either matters.
+ */
+export async function updatePlace(
+  placeId: string,
+  data: {
+    title?: string;
+    description?: string;
+    googleMapPlaceId?: string;
+    categoriesIds?: string[];
+    status?: string;
+  },
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const formData = new FormData();
+
+    if (data.title !== undefined) formData.append('title', data.title);
+    if (data.description !== undefined) formData.append('description', data.description);
+    if (data.googleMapPlaceId) formData.append('google_map_place_id', data.googleMapPlaceId);
+    if (data.status !== undefined) formData.append('status', data.status);
+    (data.categoriesIds ?? []).forEach((categoryId) =>
+      formData.append('categories_ids', categoryId),
+    );
+
+    const res = await axiosInstance.patch(`/v1/places/${placeId}/`, formData, {
+      headers: { 'Content-Type': undefined },
+    });
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save these changes'),
+    };
+  }
+}
+
+/** Adds one photo. `isCover` and `order` can only be set as a photo is created. */
+export async function uploadPlacePhoto(
+  placeId: string,
+  data: { photo: File; caption?: string; isCover?: boolean; order?: number },
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const formData = new FormData();
+    formData.append('place', placeId);
+    formData.append('photo', data.photo, data.photo.name || `image_${Date.now()}`);
+    if (data.caption) formData.append('caption', data.caption);
+    if (data.isCover !== undefined) formData.append('is_cover', String(data.isCover));
+    if (data.order !== undefined) formData.append('order', String(data.order));
+
+    const res = await axiosInstance.post(`/v1/places/${placeId}/photos/`, formData, {
+      headers: { 'Content-Type': undefined },
+    });
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not upload this photo'),
+    };
+  }
+}
+
+export async function deletePlacePhoto(placeId: string, photoId: string): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.delete(`/v1/places/${placeId}/photos/${photoId}/`);
+
+    return { status: res.status, success: true, data: null };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not remove this photo'),
+    };
+  }
+}
+
+export type PlacePropertyPayload = {
+  key: string;
+  value: string;
+  icon?: string;
+  canCopy?: boolean;
+  order?: number;
+};
+
+export async function createPlaceProperty(
+  placeId: string,
+  data: PlacePropertyPayload,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(
+      `/v1/places/${placeId}/properties/`,
+      parseCamelToSnake({ ...data, placeId }),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save this detail'),
+    };
+  }
+}
+
+export async function updatePlaceProperty(
+  placeId: string,
+  propertyId: string,
+  data: PlacePropertyPayload,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.patch(
+      `/v1/places/${placeId}/properties/${propertyId}/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save this detail'),
+    };
+  }
+}
+
+export async function deletePlaceProperty(
+  placeId: string,
+  propertyId: string,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.delete(`/v1/places/${placeId}/properties/${propertyId}/`);
+
+    return { status: res.status, success: true, data: null };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not remove this detail'),
+    };
+  }
+}
+
+export type PlaceSocialLinkPayload = { platformName: string; url: string; icon?: string };
+
+export async function createPlaceSocialLink(
+  placeId: string,
+  data: PlaceSocialLinkPayload,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(
+      `/v1/places/${placeId}/social-links/`,
+      parseCamelToSnake({ ...data, placeId }),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save this link'),
+    };
+  }
+}
+
+export async function updatePlaceSocialLink(
+  placeId: string,
+  socialLinkId: string,
+  data: PlaceSocialLinkPayload,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.patch(
+      `/v1/places/${placeId}/social-links/${socialLinkId}/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save this link'),
+    };
+  }
+}
+
+export async function deletePlaceSocialLink(
+  placeId: string,
+  socialLinkId: string,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.delete(`/v1/places/${placeId}/social-links/${socialLinkId}/`);
+
+    return { status: res.status, success: true, data: null };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not remove this link'),
+    };
+  }
+}

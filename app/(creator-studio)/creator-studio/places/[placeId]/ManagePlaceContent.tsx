@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 import { BackToExplore } from '@/app/(experiences)/experiences/components/BackToExplore';
@@ -8,6 +9,7 @@ import { PageContainer } from '@/app/shared/components/Layout';
 import { UpcomingExperiencesSection } from '@/app/shared/components/Sections';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { usePlaceManager } from '@/app/shared/hooks/usePlaces';
+import { Button } from '@/components/ui/button';
 import { Experience } from '@/types/experience';
 import { Place } from '@/types/place';
 import { placePath } from '@/utils/detail-paths';
@@ -61,6 +63,15 @@ export const ManagePlaceContent = ({ place }: { place: Place }) => {
             Your listing, the experiences you run here, and how you take reservations.
           </p>
         </div>
+
+        <Button asChild variant="gradient-outline" className="rounded-full">
+          <Link href={`/creator-studio/places/${place.id}/edit`}>
+            <span className="flex items-center gap-2">
+              <IconComponent iconName="Edit02Icon" color="currentColor" size={16} />
+              Edit place
+            </span>
+          </Link>
+        </Button>
       </div>
 
       {/* Editing the listing and reservation settings arrive as tabs here.
@@ -79,19 +90,6 @@ export const ManagePlaceContent = ({ place }: { place: Place }) => {
           experiences={experiences}
           isLoading={isLoadingExperiences}
         />
-      </div>
-
-      <div className="mt-8 flex items-start gap-3 rounded-2xl bg-gray-50 p-4">
-        <IconComponent
-          iconName="InformationCircleIcon"
-          size={18}
-          color="currentColor"
-          className="mt-0.5 flex-shrink-0 text-primary"
-        />
-        <p className="text-sm text-gray-600">
-          Editing the listing itself is coming next — for now, changes to a place are made by the
-          Tukai team.
-        </p>
       </div>
     </PageContainer>
   );
