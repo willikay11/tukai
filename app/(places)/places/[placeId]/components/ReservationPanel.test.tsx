@@ -12,7 +12,16 @@ jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) })
 const usePlaceReservationProfiles = jest.fn();
 const usePlaceBookingRequests = jest.fn();
 const cancelBooking = jest.fn();
-jest.mock('next-auth/react', () => ({ useSession: () => ({ data: { user: { id: 'u1' } } }) }));
+let sessionState: { data: { user: { id: string } } | null } = { data: { user: { id: 'u1' } } };
+jest.mock('next-auth/react', () => ({ useSession: () => sessionState }));
+
+const push = jest.fn();
+jest.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
+
+const openSignInWithCallback = jest.fn();
+jest.mock('@/context/AuthDialogContext', () => ({
+  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+}));
 
 // Claimed by default: the unclaimed case is its own describe below
 let ownership: { success?: boolean; data: unknown } | undefined = {
@@ -67,6 +76,7 @@ const renderPanel = () => render(<ReservationPanel placeId="p1" placeName="Kraft
 describe('ReservationPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionState = { data: { user: { id: 'u1' } } };
     ownership = { success: true, data: { id: 'o1' } };
     isLoadingOwnership = false;
     isManager = false;
@@ -397,6 +407,41 @@ describe('ReservationPanel', () => {
       renderPanel();
 
       expect(screen.queryByRole('button', { name: 'Cancel Reservation' })).not.toBeInTheDocument();
+    });
+  });
+
+  // Sending a signed-out reader to the form meant filling the whole thing in
+  // before the API turned the booking away
+  describe('when the reader is not signed in', () => {
+    beforeEach(() => {
+      sessionState = { data: null };
+      withProfiles([profile()]);
+    });
+
+    it('asks them to sign in rather than opening the form', async () => {
+      const user = userEvent.setup();
+      renderPanel();
+
+      const reserve = screen.getByRole('button', { name: /Make Reservation/ });
+      expect(reserve).toBeInTheDocument();
+      // Not a link: nothing navigates until they are signed in
+      expect(screen.queryByRole('link', { name: /Make Reservation/ })).not.toBeInTheDocument();
+
+      await user.click(reserve);
+
+      expect(openSignInWithCallback).toHaveBeenCalled();
+      expect(push).not.toHaveBeenCalled();
+    });
+
+    it('carries on to the form once they are', async () => {
+      const user = userEvent.setup();
+      renderPanel();
+
+      await user.click(screen.getByRole('button', { name: /Make Reservation/ }));
+      // The dialog reports success by calling back
+      openSignInWithCallback.mock.calls[0][0]();
+
+      expect(push).toHaveBeenCalledWith('/places/p1/reserve');
     });
   });
 });

@@ -4,9 +4,9 @@ import { useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
+import { AuthCard, AuthDialogContent } from '@/app/shared/components/Auth';
 import { toast } from '@/app/shared/hooks/useToast';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { SignInForm } from '@/components/ui/form/sign-in';
+import { Dialog } from '@/components/ui/dialog';
 
 export const AuthGuard = () => {
   const [open, setOpen] = useState(true);
@@ -20,8 +20,8 @@ export const AuthGuard = () => {
         router.back();
       }}
     >
-      <DialogContent className="px-4 md:px-16">
-        <SignInForm
+      <AuthDialogContent>
+        <AuthCard
           onLogin={() => {
             toast({
               description: 'Welcome Back!',
@@ -31,7 +31,7 @@ export const AuthGuard = () => {
             router.refresh();
           }}
         />
-      </DialogContent>
+      </AuthDialogContent>
     </Dialog>
   );
 };

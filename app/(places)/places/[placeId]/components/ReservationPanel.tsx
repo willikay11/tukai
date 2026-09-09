@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { ExperienceCreatedModal } from '@/app/(experiences)/experiences/create/components/ExperienceCreatedModal';
 import { IconComponent } from '@/app/shared/components/Icons';
@@ -16,6 +17,7 @@ import {
 } from '@/app/shared/hooks/usePlaces';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 import { PlaceBookingRequest, PlaceReservationProfile } from '@/types/placeReservation';
 
 import { ClaimPlacePrompt } from './ClaimPlacePrompt';
@@ -39,6 +41,16 @@ export const ReservationPanel = ({
   // Asked only of a signed-in reader: the endpoint 401s without a token, and
   // claiming needs an account anyway
   const { data: session } = useSession();
+  const isSignedIn = Boolean(session?.user?.id);
+  const router = useRouter();
+  const { openSignInWithCallback } = useAuthDialog();
+
+  const reservePath = `/places/${placeId}/reserve`;
+
+  // Signing in lands on the form, so the one press the reader made is the one
+  // that gets them there
+  const startReservation = () => openSignInWithCallback(() => router.push(reservePath));
+
   const { data: ownership, isLoading: isLoadingOwnership } = usePlaceOwnership(
     placeId,
     Boolean(session?.user?.id),
@@ -144,15 +156,20 @@ export const ReservationPanel = ({
           : `${placeName} has not opened up reservations yet.`}
       </p>
 
+      {/* Signed out, this asks at the door rather than at the end: the dialog
+          opens over the place, and signing in carries straight on to the form.
+          Sending them to the form first meant filling the whole thing in
+          before the API turned the booking away. */}
       <Button
-        asChild={isBookable}
+        asChild={isBookable && isSignedIn}
         variant="gradient"
         disabled={!isBookable}
         title={isBookable ? undefined : 'This place does not take reservations yet'}
+        onClick={isBookable && !isSignedIn ? startReservation : undefined}
         className="w-full rounded-full"
       >
-        {isBookable ? (
-          <Link href={`/places/${placeId}/reserve`}>
+        {isBookable && isSignedIn ? (
+          <Link href={reservePath}>
             <span className="flex items-center justify-center gap-2">
               Make Reservation
               <IconComponent iconName="ArrowRight01Icon" size={16} color="currentColor" />

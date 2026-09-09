@@ -10,8 +10,6 @@ import {
 
 import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { SignInForm } from '@/components/ui/form/sign-in';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { cn } from '@/lib/utils';
 
@@ -43,8 +41,7 @@ export const Bookmark = ({
         className={cn(
           'h-fit',
           isBasket && 'flex h-9 w-9 items-center justify-center rounded-full',
-          isBasket &&
-            (isBookmarked ? 'bg-white hover:bg-white' : 'bg-black/40 backdrop-blur-sm'),
+          isBasket && (isBookmarked ? 'bg-white hover:bg-white' : 'bg-black/40 backdrop-blur-sm'),
         )}
         onClick={(e) => {
           e.stopPropagation();

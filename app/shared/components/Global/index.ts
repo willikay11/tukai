@@ -1,3 +1,4 @@
+export { ChromeGate } from './ChromeGate';
 export { GlobalLoading } from './GlobalLoading';
 export { AuthActions } from './AuthActions';
 export { DescriptionShowMore } from './DescriptionShowMore';
