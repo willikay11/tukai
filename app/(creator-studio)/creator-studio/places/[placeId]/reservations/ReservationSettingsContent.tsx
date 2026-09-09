@@ -212,7 +212,7 @@ export const ReservationSettingsContent = ({ place }: { place: Place }) => {
               <Divider />
 
               <section className="space-y-2">
-                <label className="block text-xs font-medium text-gray-800">
+                <label className="block text-sm font-medium text-gray-800">
                   Total Seating Capacity{' '}
                   <span className="text-muted-foreground">
                     (Maximum guests you can host at once)
@@ -236,7 +236,7 @@ export const ReservationSettingsContent = ({ place }: { place: Place }) => {
               </section>
 
               <section className="space-y-2">
-                <label className="block text-xs font-medium text-gray-800">
+                <label className="block text-sm font-medium text-gray-800">
                   Max Party Size Per Booking{' '}
                   <span className="text-muted-foreground">(Max party size per booking)</span>
                 </label>
@@ -266,7 +266,7 @@ export const ReservationSettingsContent = ({ place }: { place: Place }) => {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-xs font-medium text-gray-800">Opening and Closing Hours</p>
+                  <p className="text-sm font-medium text-gray-800">Opening and Closing Hours</p>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <TimePicker
                       value={values.opensAt}
@@ -294,7 +294,7 @@ export const ReservationSettingsContent = ({ place }: { place: Place }) => {
               <Divider />
 
               <section className="space-y-2">
-                <label className="block text-xs font-medium text-gray-800">
+                <label className="block text-sm font-medium text-gray-800">
                   Buffer between bookings{' '}
                   <span className="text-muted-foreground">
                     (Time to reset space/table e.g., 30 min)

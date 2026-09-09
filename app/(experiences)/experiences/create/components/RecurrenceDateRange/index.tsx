@@ -19,7 +19,7 @@ export const RecurrenceDateRange = ({
 }: RecurrenceDateRangeProps) => {
   return (
     <div className="space-y-2">
-      <label className="block text-xs font-medium text-gray-900">
+      <label className="block text-sm font-medium text-gray-900">
         Recurrence start and end dates
       </label>
 

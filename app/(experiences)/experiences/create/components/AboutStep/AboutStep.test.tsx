@@ -404,4 +404,23 @@ describe('AboutStep', () => {
       expect(screen.getByText(new RegExp(longTitle))).toBeInTheDocument();
     });
   });
+
+  // It opens the place picker rather than taking typing, but it sits in a
+  // column of fields and used to read at 12px with its own border and icons
+  describe('the place button', () => {
+    const placeButton = () => screen.getByRole('button', { name: /Select a place/ });
+
+    it('reads at the shared field size', () => {
+      rtlRender(<AboutStep {...defaultProps} />);
+
+      expect(screen.getByText('Select a place')).toHaveClass('text-[14.5px]');
+    });
+
+    it('takes the field box, not one of its own', () => {
+      rtlRender(<AboutStep {...defaultProps} />);
+
+      expect(placeButton()).toHaveClass('rounded-[14px]', 'border-gray-200');
+      expect(placeButton()).not.toHaveClass('rounded-[10px]', 'border-gray-700');
+    });
+  });
 });

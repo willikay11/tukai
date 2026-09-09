@@ -36,22 +36,23 @@ describe('Input', () => {
   });
 
   describe('text styling', () => {
-    it('sets 14.5px semibold in gray-800', () => {
+    it('sets 14.5px regular in gray-800', () => {
       render(<Input />);
 
       expect(screen.getByRole('textbox')).toHaveClass(
         'text-[14.5px]',
-        'font-medium',
+        'font-normal',
         'text-gray-800',
       );
     });
 
-    // A placeholder at the value's weight reads as a filled-in field
+    // The placeholder is told apart by colour alone now that the value is
+    // regular too — weighting it any lighter would only make it harder to read
     it('lightens the placeholder without shrinking it', () => {
       render(<Input placeholder="Email" />);
 
       const input = screen.getByRole('textbox');
-      expect(input).toHaveClass('placeholder:font-normal', 'placeholder:text-gray-400');
+      expect(input).toHaveClass('placeholder:text-gray-400');
       expect(input.className).not.toMatch(/placeholder:text-(xs|sm)/);
     });
   });
@@ -116,5 +117,38 @@ describe('Input', () => {
       expect(screen.getByRole('textbox')).toBeDisabled();
       expect(boxOf()).toHaveClass('cursor-not-allowed', 'opacity-50');
     });
+  });
+});
+
+// Call sites pass 14, 16 and 18 for the same kind of icon, so the field pins
+// the box itself rather than trusting each one
+describe('Input icons', () => {
+  const icon = <svg data-testid="lead" width={14} height={14} />;
+
+  it('gives a leading icon one size and one colour', () => {
+    render(<Input icon={icon} />);
+
+    const slot = screen.getByTestId('lead').parentElement;
+    expect(slot).toHaveClass('text-gray-400', '[&_svg]:h-[18px]', '[&_svg]:w-[18px]');
+  });
+
+  it('treats a suffix icon the same way', () => {
+    render(<Input suffixIcon={<svg data-testid="suffix" width={24} height={24} />} />);
+
+    const slot = screen.getByTestId('suffix').parentElement;
+    expect(slot).toHaveClass('text-gray-400', '[&_svg]:h-[18px]');
+  });
+
+  // Inherited, not forced: an icon that means something by being red still does
+  it('lets an icon keep a colour it set for itself', () => {
+    render(<Input suffixIcon={<button className="text-red-400">Clear</button>} />);
+
+    expect(screen.getByRole('button')).toHaveClass('text-red-400');
+  });
+
+  it('adds nothing when there is no icon', () => {
+    const { container } = render(<Input />);
+
+    expect(container.querySelectorAll('span')).toHaveLength(0);
   });
 });

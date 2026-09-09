@@ -2,6 +2,8 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
+import { FIELD_ICON, FIELD_PLACEHOLDER, FIELD_TEXT } from './field-text';
+
 interface InputProps extends React.ComponentProps<'input'> {
   icon?: React.ReactNode;
   suffixIcon?: React.ReactNode;
@@ -31,13 +33,20 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     { className, containerClassName, type, icon, suffixIcon, overlay, shape = 'default', ...props },
     ref,
   ) => {
+    // Wrapped rather than trusted: every field's icon then reads at one size
+    // and one colour, whatever the call site passed
+    const iconSlot = (node: React.ReactNode) =>
+      node ? <span className={FIELD_ICON}>{node}</span> : null;
+
     const field = (
       <input
         type={type}
         className={cn(
           // 14.5px/18px + 13px padding top and bottom lands the field on a
           // 44px height — the standard touch target
-          'w-full flex-1 border-none bg-transparent p-0 text-[14.5px] font-medium leading-[18px] text-gray-800 placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-0 disabled:cursor-not-allowed',
+          'w-full flex-1 border-none bg-transparent p-0 focus:outline-none focus:ring-0 disabled:cursor-not-allowed',
+          FIELD_TEXT,
+          FIELD_PLACEHOLDER,
           className,
         )}
         ref={ref}
@@ -56,7 +65,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           containerClassName,
         )}
       >
-        {icon}
+        {iconSlot(icon)}
 
         {overlay ? (
           <div className="relative min-w-0 flex-1">
@@ -67,7 +76,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           field
         )}
 
-        {suffixIcon}
+        {iconSlot(suffixIcon)}
       </div>
     );
   },

@@ -88,7 +88,7 @@ export const EditPlaceSocialLinksStep = ({
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-800">Platform</label>
+              <label className="text-sm font-medium text-gray-800">Platform</label>
               <Input
                 value={link.platformName}
                 onChange={(event) => update(index, { platformName: event.target.value })}
@@ -103,7 +103,7 @@ export const EditPlaceSocialLinksStep = ({
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-800">URL</label>
+              <label className="text-sm font-medium text-gray-800">URL</label>
               <Input
                 value={link.url}
                 onChange={(event) => update(index, { url: event.target.value })}

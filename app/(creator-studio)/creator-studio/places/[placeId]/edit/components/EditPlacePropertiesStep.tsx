@@ -117,7 +117,7 @@ export const EditPlacePropertiesStep = ({
 
       <div className="space-y-6">
         <div className="space-y-2">
-          <p className="text-xs font-medium text-gray-800">Phone Number</p>
+          <p className="text-sm font-medium text-gray-800">Phone Number</p>
           <PhoneNumber
             initialValue={valueFor(CONTACT_KEYS.phone)}
             aria-label="Phone Number"
@@ -131,7 +131,7 @@ export const EditPlacePropertiesStep = ({
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs font-medium text-gray-800">Email</p>
+          <p className="text-sm font-medium text-gray-800">Email</p>
           <Input
             type="email"
             aria-label="Email"
@@ -173,7 +173,7 @@ export const EditPlacePropertiesStep = ({
       <Divider />
 
       <div className="space-y-4">
-        <p className="text-xs font-medium text-gray-800">
+        <p className="text-sm font-medium text-gray-800">
           Other details{' '}
           <span className="text-muted-foreground">
             (Anything the list above doesn&apos;t cover)

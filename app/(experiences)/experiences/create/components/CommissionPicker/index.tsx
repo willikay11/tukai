@@ -19,7 +19,7 @@ const commissionOptions = [
 export const CommissionPicker = ({ value, onChange, isSaving = false }: CommissionPickerProps) => {
   return (
     <div className="space-y-3">
-      <label className="text-xs font-medium text-gray-800">
+      <label className="text-sm font-medium text-gray-800">
         Fees allocation{' '}
         <span className="font-normal text-gray-500">
           (Tukai charges a 4% commission, who should pay this commission?)

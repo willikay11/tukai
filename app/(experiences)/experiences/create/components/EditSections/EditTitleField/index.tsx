@@ -11,7 +11,7 @@ interface EditTitleFieldProps {
 export const EditTitleField = ({ value, onChange, error }: EditTitleFieldProps) => {
   return (
     <div className="space-y-2">
-      <label htmlFor="edit-title" className="text-xs font-medium text-gray-800">
+      <label htmlFor="edit-title" className="text-sm font-medium text-gray-800">
         Experience Title
       </label>
       <Input

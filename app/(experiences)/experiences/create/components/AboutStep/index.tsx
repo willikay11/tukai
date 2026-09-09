@@ -6,6 +6,8 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoUploader } from '@/app/shared/components/PhotoUploader';
 import { useDeleteExperiencePhoto } from '@/app/shared/hooks/useExperiences';
 import { Button } from '@/components/ui/button';
+import { FIELD_ICON, FIELD_TEXT } from '@/components/ui/field-text';
+import { cn } from '@/lib/utils';
 import { Interest } from '@/types/interest';
 
 import { usePendingAction } from '../../hooks/usePendingAction';
@@ -197,21 +199,27 @@ export const AboutStep = ({
       />
 
       <div className="space-y-2">
-        <label className="block text-xs font-medium text-gray-900">
+        <label className="block text-sm font-medium text-gray-900">
           Where will the experience take place?
         </label>
+        {/* A button rather than an input — it opens the place picker — so it
+            borrows the field's box, text and icons to read as one */}
         <button
           type="button"
           onClick={() => setIsPlaceModalOpen(true)}
-          className="flex h-11 w-full items-center gap-2 rounded-[10px] border border-gray-700 border-input px-3 text-left focus:border-primary focus:outline-none"
+          className="flex h-11 w-full items-center gap-2 rounded-[14px] border border-gray-200 px-4 text-left transition-colors focus:border-brand-green focus:outline-none"
         >
-          <IconComponent iconName="Location01Icon" size={18} className="text-gray-600" />
+          <span className={FIELD_ICON}>
+            <IconComponent iconName="Location01Icon" size={18} color="currentColor" />
+          </span>
           <span
-            className={`flex-1 truncate text-xs ${formData.location ? 'text-gray-900' : 'text-gray-400'}`}
+            className={cn('flex-1 truncate', FIELD_TEXT, !formData.location && 'text-gray-400')}
           >
             {formData.location || 'Select a place'}
           </span>
-          <IconComponent iconName="ArrowRight01Icon" size={16} className="text-gray-400" />
+          <span className={FIELD_ICON}>
+            <IconComponent iconName="ArrowRight01Icon" size={18} color="currentColor" />
+          </span>
         </button>
         {errors.location && <p className="mt-1 text-xs text-red-500">{errors.location}</p>}
       </div>

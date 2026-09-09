@@ -14,7 +14,7 @@ import { ListFormatToolbarPlugin } from '@/components/editor/plugins/toolbar/lis
 import { ToolbarPlugin } from '@/components/editor/plugins/toolbar/toolbar-plugin';
 import { Separator } from '@/components/ui/separator';
 
-export function Plugins({ placeholderClassName }: { placeholderClassName?: string }) {
+export function Plugins() {
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null);
 
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -62,10 +62,7 @@ export function Plugins({ placeholderClassName }: { placeholderClassName?: strin
           contentEditable={
             <div className="">
               <div className="" ref={onRef}>
-                <ContentEditable
-                  placeholder={'Start typing ...'}
-                  placeholderClassName={placeholderClassName}
-                />
+                <ContentEditable placeholder={'Start typing ...'} />
               </div>
             </div>
           }

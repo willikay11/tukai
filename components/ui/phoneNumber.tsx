@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { FIELD_TEXT } from '@/components/ui/field-text';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
@@ -60,11 +61,8 @@ const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberProps>(
         type={type}
         ref={ref}
         containerClassName={className}
-        // 14px rather than the shared field's 14.5px. `leading` must follow the
-        // size — tailwind-merge treats a text-* utility as also setting
-        // line-height, so written first it would be dropped and the field would
-        // lose its 44px height.
-        className="text-[14px] leading-[18px]"
+        // The shared field text, so the number matches every box beside it
+        className={FIELD_TEXT}
         defaultValue={initialNumber}
         onChange={(e) => setLocalNumber(e.target.value)}
         icon={
@@ -78,10 +76,8 @@ const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberProps>(
                   // input. Constrained to the same 18px line box the number sits
                   // in, the field lands on the standard 44px.
                   'h-auto [&_svg]:h-[18px] [&_svg]:w-[18px]',
-                  // Match the number beside it. `leading` has to come after the
-                  // font size: tailwind-merge treats a text-* utility as also
-                  // setting line-height, so an earlier leading-* is dropped.
-                  'text-[14px] font-medium leading-[18px] text-gray-800',
+                  // Match the number beside it
+                  FIELD_TEXT,
                 )}
                 prefixIcon={icon}
               >

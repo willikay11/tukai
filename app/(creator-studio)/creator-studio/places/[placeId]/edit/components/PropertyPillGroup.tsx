@@ -35,7 +35,7 @@ export const PropertyPillGroup = ({
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-medium text-gray-800">{label}</p>
+      <p className="text-sm font-medium text-gray-800">{label}</p>
 
       <div className="flex flex-wrap gap-2">
         {[...options, ...extras].map((option) => (

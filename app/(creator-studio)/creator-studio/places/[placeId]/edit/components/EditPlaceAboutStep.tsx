@@ -74,7 +74,6 @@ export const EditPlaceAboutStep = ({
         <Editor
           initialHtml={values.description}
           onHtmlChange={(description) => onChange({ description })}
-          placeholderClassName="text-sm"
         />
       </Field>
 
@@ -99,7 +98,7 @@ export const EditPlaceAboutStep = ({
 
       <div className="space-y-2">
         {/* Block, or the inline label and the inline-flex pills share a line */}
-        <label className="block text-xs font-medium text-gray-800">
+        <label className="block text-sm font-medium text-gray-800">
           Is entry to your business free or paid?
         </label>
         <PillRadioGroup
@@ -123,7 +122,7 @@ const Field = ({
   children: React.ReactNode;
 }) => (
   <div className="space-y-2">
-    <label className="text-xs font-medium text-gray-800">{label}</label>
+    <label className="text-sm font-medium text-gray-800">{label}</label>
     {children}
     {error && <p className="text-xs text-red-500">{error}</p>}
   </div>

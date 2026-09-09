@@ -8,6 +8,8 @@ import { Check } from 'lucide-react';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { cn } from '@/lib/utils';
 
+import { FIELD_TEXT } from './field-text';
+
 interface SelectTriggerProps extends React.ComponentPropsWithoutRef<
   typeof SelectPrimitive.Trigger
 > {
@@ -27,7 +29,8 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      'flex h-[50px] w-full items-center justify-between whitespace-nowrap rounded-lg border border-gray-200 border-input bg-transparent px-3 py-2 text-xs ring-offset-background focus-within:border-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-muted-foreground [&>span]:line-clamp-1',
+      'flex h-[50px] w-full items-center justify-between whitespace-nowrap rounded-lg border border-gray-200 border-input bg-transparent px-3 py-2 ring-offset-background focus-within:border-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-gray-400 [&>span]:line-clamp-1',
+      FIELD_TEXT,
       className,
     )}
     {...props}
@@ -35,7 +38,12 @@ const SelectTrigger = React.forwardRef<
     <div className="flex flex-row items-start">
       {typeof prefixIcon === 'string' ? (
         <div className="mr-2">
-          <IconComponent iconName={prefixIcon} size={18} color="#000" />
+          <IconComponent
+            iconName={prefixIcon}
+            size={18}
+            color="currentColor"
+            className="text-gray-400"
+          />
         </div>
       ) : prefixIcon ? (
         <div className="mr-2">{prefixIcon}</div>
@@ -43,7 +51,12 @@ const SelectTrigger = React.forwardRef<
       {children}
     </div>
     <SelectPrimitive.Icon asChild>
-      <IconComponent iconName="ArrowDown01Icon" size={20} color="#000" />
+      <IconComponent
+        iconName="ArrowDown01Icon"
+        size={18}
+        color="currentColor"
+        className="text-gray-400"
+      />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));
@@ -58,7 +71,12 @@ const SelectScrollUpButton = React.forwardRef<
     className={cn('flex cursor-default items-center justify-center py-1', className)}
     {...props}
   >
-    <IconComponent iconName="ArrowUp01Icon" size={20} color="#000" />
+    <IconComponent
+      iconName="ArrowUp01Icon"
+      size={18}
+      color="currentColor"
+      className="text-gray-400"
+    />
   </SelectPrimitive.ScrollUpButton>
 ));
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName;
@@ -72,7 +90,12 @@ const SelectScrollDownButton = React.forwardRef<
     className={cn('flex cursor-default items-center justify-center py-1', className)}
     {...props}
   >
-    <IconComponent iconName="ArrowDown01Icon" size={20} color="#000" />
+    <IconComponent
+      iconName="ArrowDown01Icon"
+      size={18}
+      color="currentColor"
+      className="text-gray-400"
+    />
   </SelectPrimitive.ScrollDownButton>
 ));
 SelectScrollDownButton.displayName = SelectPrimitive.ScrollDownButton.displayName;
@@ -128,7 +151,9 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-xs outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      // The option reads at the size it will take once chosen
+      'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      FIELD_TEXT,
       className,
     )}
     {...props}

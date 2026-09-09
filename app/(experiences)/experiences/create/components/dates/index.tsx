@@ -699,7 +699,7 @@ export const ExperienceDates = ({
               name="isPaid"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel className="block text-xs font-medium text-gray-900">
+                  <FormLabel className="block text-sm font-medium text-gray-900">
                     Is this a free or a paid experience?
                   </FormLabel>
                   <FormControl>
@@ -783,7 +783,7 @@ export const ExperienceDates = ({
                           onCheckedChange={(checked) => field.onChange(Boolean(checked))}
                           className="h-4 w-4 rounded-[4px]"
                         />
-                        <FormLabel className="cursor-pointer text-xs font-normal text-gray-900">
+                        <FormLabel className="cursor-pointer text-sm font-normal text-gray-900">
                           Create a recurring experience
                         </FormLabel>
                       </label>
@@ -817,7 +817,7 @@ export const ExperienceDates = ({
                 />
 
                 <div className="space-y-2">
-                  <FormLabel className="text-xs font-medium text-gray-800">
+                  <FormLabel className="text-sm font-medium text-gray-800">
                     Select itinerary date(s)
                   </FormLabel>
 
@@ -907,7 +907,7 @@ export const ExperienceDates = ({
                 />
 
                 <div className="space-y-2">
-                  <FormLabel className="text-xs font-semibold text-gray-800">
+                  <FormLabel className="text-sm font-semibold text-gray-800">
                     Recurrence start and end dates
                   </FormLabel>
 
@@ -961,7 +961,7 @@ export const ExperienceDates = ({
                 </div>
 
                 <div className="space-y-2">
-                  <FormLabel className="text-xs font-semibold text-gray-800">
+                  <FormLabel className="text-sm font-semibold text-gray-800">
                     Times/Time Slots
                   </FormLabel>
 
@@ -1033,7 +1033,7 @@ export const ExperienceDates = ({
               </div>
             ) : (
               <div className="space-y-2">
-                <FormLabel className="text-xs font-medium text-gray-800">
+                <FormLabel className="text-sm font-medium text-gray-800">
                   Select experience date(s)
                 </FormLabel>
 

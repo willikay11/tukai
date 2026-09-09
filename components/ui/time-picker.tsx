@@ -91,7 +91,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
           ref={ref}
           // 44px and a 14px radius, matching the Input and DatePicker fields
           // it sits beside
-          className={cn('h-11 rounded-[14px] text-xs', className)}
+          className={cn('h-11 rounded-[14px]', className)}
           aria-label={placeholder}
         >
           {/* No children here: given children, Radix renders those INSTEAD of
@@ -102,12 +102,12 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
 
         <SelectContent className="max-h-[280px]">
           {options.length === 0 ? (
-            <p className="px-3 py-4 text-center text-xs text-muted-foreground">
+            <p className="px-3 py-4 text-center text-muted-foreground">
               No times left after {minTime ? formatTimeLabel(minTime) : 'the start time'}
             </p>
           ) : (
             options.map((slot) => (
-              <SelectItem key={slot} value={slot} className="text-xs">
+              <SelectItem key={slot} value={slot}>
                 {formatTimeLabel(slot)}
               </SelectItem>
             ))

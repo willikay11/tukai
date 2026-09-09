@@ -49,7 +49,7 @@ export const TimeSlotList = ({ slots, onChange, errors }: TimeSlotListProps) => 
 
   return (
     <div className="space-y-2">
-      <label className="block text-xs font-medium text-gray-900">Times/Time Slots</label>
+      <label className="block text-sm font-medium text-gray-900">Times/Time Slots</label>
 
       <div className="space-y-2">
         {slots.map((slot, index) => {

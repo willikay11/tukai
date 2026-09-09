@@ -39,7 +39,7 @@ export const ExperienceTypeRadio = ({
 
   return (
     <div className="space-y-2">
-      <label className="text-xs font-medium text-gray-900">Experience Type</label>
+      <label className="text-sm font-medium text-gray-900">Experience Type</label>
 
       <div className="flex flex-wrap gap-2">
         {experienceTypeOptions.map((option: { value: string; label: string }) => {
@@ -67,7 +67,7 @@ export const ExperienceTypeRadio = ({
       {experienceType === 'one-time' && (
         <div className="flex items-center space-x-2 pt-4">
           <Switch id="recurring" checked={isRecurring} onCheckedChange={handleRecurringChange} />
-          <label htmlFor="recurring" className="cursor-pointer text-xs font-medium text-gray-900">
+          <label htmlFor="recurring" className="cursor-pointer text-sm font-medium text-gray-900">
             Make this a recurring experience
           </label>
         </div>

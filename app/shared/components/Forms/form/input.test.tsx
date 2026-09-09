@@ -270,7 +270,7 @@ describe('Input', () => {
       render(<Input {...defaultProps} />);
 
       const input = screen.getByRole('textbox');
-      expect(input).toHaveClass('w-full', 'text-[14.5px]', 'font-medium');
+      expect(input).toHaveClass('w-full', 'text-[14.5px]', 'font-normal');
     });
 
     it('applies text color classes', () => {
@@ -284,7 +284,7 @@ describe('Input', () => {
       render(<Input {...defaultProps} />);
 
       const input = screen.getByRole('textbox');
-      expect(input).toHaveClass('placeholder:font-normal', 'placeholder:text-gray-400');
+      expect(input).toHaveClass('placeholder:text-gray-400');
     });
 
     // The field used to render 16px text scaled to 0.875 to look like 14px.

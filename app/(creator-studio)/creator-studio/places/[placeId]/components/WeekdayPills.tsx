@@ -58,7 +58,7 @@ export const WeekdayPills = ({
   onChange: (days: string[]) => void;
 }) => (
   <div className="space-y-2">
-    <p className="text-xs font-medium text-gray-800">{label}</p>
+    <p className="text-sm font-medium text-gray-800">{label}</p>
     <div className="flex flex-wrap gap-2">
       {WEEKDAYS.map((day) => (
         <SelectablePill

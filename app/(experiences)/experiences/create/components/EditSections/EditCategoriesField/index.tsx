@@ -13,7 +13,7 @@ interface EditCategoriesFieldProps {
 export const EditCategoriesField = ({ value, onChange, error }: EditCategoriesFieldProps) => {
   return (
     <div className="space-y-2">
-      <label className="text-xs font-medium text-gray-800">Categories</label>
+      <label className="text-sm font-medium text-gray-800">Categories</label>
       <CategoryPicker
         selectedCategories={value}
         onChange={(newCategories) => {

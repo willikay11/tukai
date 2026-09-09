@@ -50,21 +50,13 @@ export const MeetingDetailsInput = ({
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <label htmlFor="meeting-point" className="text-xs font-medium text-gray-800">
+        <label htmlFor="meeting-point" className="text-sm font-medium text-gray-800">
           Meeting Details (Optional)
         </label>
         <LocationAutocompleteField
           containerRef={containerRef}
           value={inputValue}
           placeholder="Meeting/Pick-up Point"
-          // 12px, matching the rest of this step — the location button above,
-          // the description placeholder and the time picker below are all
-          // text-xs, and the shared Input's own 14.5px stood out between them.
-          //
-          // `leading` has to follow the size: tailwind-merge treats a text-*
-          // utility as also setting line-height, so written first the 18px
-          // would be dropped and the field would lose 2px of its 44px height.
-          inputClassName="text-xs leading-[18px]"
           showSuggestions={showSuggestions}
           suggestions={googlePlaces?.data || []}
           isLoading={isFetchingGooglePlaces}

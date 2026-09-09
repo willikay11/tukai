@@ -109,7 +109,7 @@ export const PlaceHoursFields = ({
       <WeekdayPills selected={value.days} onChange={(days) => onChange({ ...value, days })} />
 
       <div className="space-y-2">
-        <p className="text-xs font-medium text-gray-800">
+        <p className="text-sm font-medium text-gray-800">
           Opening and Closing Hours/Operating Hours
         </p>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

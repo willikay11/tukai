@@ -455,7 +455,7 @@ export const PhotoUploader = ({
     <>
       <div className="space-y-2">
         <div className="space-y-1">
-          <p className="text-xs font-medium text-gray-800">{label}</p>
+          <p className="text-sm font-medium text-gray-800">{label}</p>
           {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
         </div>
 

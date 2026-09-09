@@ -268,7 +268,7 @@ export const CreateExperienceWallet = ({
                           <RadioGroupItem value={w.id} id={w.id} />
                           <label
                             htmlFor={w.id}
-                            className="cursor-pointer text-xs font-medium text-gray-900"
+                            className="cursor-pointer text-sm font-medium text-gray-900"
                           >
                             <div className="flex flex-col">
                               {w.walletType === 'phone' ? (

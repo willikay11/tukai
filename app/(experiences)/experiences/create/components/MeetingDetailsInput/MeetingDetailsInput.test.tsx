@@ -25,8 +25,10 @@ jest.mock('@/components/ui/time-picker', () => ({
 }));
 
 describe('MeetingDetailsInput', () => {
-  // The step around it is 12px throughout — the shared Input's 14.5px stood out
-  it('sizes the meeting point field like the rest of the step', () => {
+  // It used to be shrunk to 12px to match a step that was text-xs throughout.
+  // The fields around it read at the shared size now, so overriding it here is
+  // what would stand out.
+  it('leaves the meeting point field at the shared field size', () => {
     render(
       <MeetingDetailsInput
         meetingPoint=""
@@ -36,10 +38,7 @@ describe('MeetingDetailsInput', () => {
       />,
     );
 
-    expect(screen.getByTestId('location-field')).toHaveAttribute(
-      'data-input-class',
-      'text-xs leading-[18px]',
-    );
+    expect(screen.getByTestId('location-field')).not.toHaveAttribute('data-input-class');
   });
 
   describe('Rendering', () => {

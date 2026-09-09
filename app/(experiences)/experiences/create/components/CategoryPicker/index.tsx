@@ -26,7 +26,7 @@ export const CategoryPicker = ({ selectedCategories, onChange }: CategoryPickerP
 
   return (
     <div className="space-y-2">
-      <label className="text-xs font-medium text-gray-800">
+      <label className="text-sm font-medium text-gray-800">
         Select a category the experience falls under
       </label>
       <div className="flex flex-wrap gap-2">
