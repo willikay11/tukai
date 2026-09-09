@@ -7,12 +7,6 @@ jest.mock('@/app/shared/components/Images', () => ({
   ImageCropDialog: () => <div data-testid="image-crop-dialog">crop dialog</div>,
 }));
 
-jest.mock('@/app/shared/hooks/useExperiences', () => ({
-  useDeleteExperiencePhoto: () => ({
-    mutateAsync: jest.fn(),
-  }),
-}));
-
 jest.mock('@/app/shared/hooks/useToast', () => ({
   useToast: () => ({
     toast: jest.fn(),
@@ -174,5 +168,106 @@ describe('PhotoUploader', () => {
       );
       expect(container).toBeInTheDocument();
     });
+  });
+});
+
+// One uploader serves both the create-experience poster grid and a place's
+// gallery, so what differs between them is configuration, not a second copy
+describe('PhotoUploader, configured', () => {
+  const photo = (extra: Partial<FormPhoto> = {}): FormPhoto => ({
+    id: 'ph1',
+    url: 'https://cdn.test/1.jpg',
+    ...extra,
+  });
+
+  it('opens on the experience poster copy', () => {
+    render(<PhotoUploader photos={[]} onPhotoChange={jest.fn()} />);
+
+    expect(screen.getByText(/Upload experience poster/)).toBeInTheDocument();
+  });
+
+  it("takes the caller's own label and hint", () => {
+    render(
+      <PhotoUploader
+        photos={[]}
+        onPhotoChange={jest.fn()}
+        label="Upload a few photos of the place"
+        hint={null}
+      />,
+    );
+
+    expect(screen.getByText('Upload a few photos of the place')).toBeInTheDocument();
+    expect(screen.queryByText(/cropped automatically/)).not.toBeInTheDocument();
+  });
+
+  it("stops offering the add tile at the caller's limit", () => {
+    const { rerender } = render(
+      <PhotoUploader photos={[photo()]} onPhotoChange={jest.fn()} maxPhotos={1} />,
+    );
+
+    expect(screen.queryByText('Add Photo(s)')).not.toBeInTheDocument();
+
+    rerender(<PhotoUploader photos={[photo()]} onPhotoChange={jest.fn()} maxPhotos={2} />);
+
+    expect(screen.getByText('Add Photo(s)')).toBeInTheDocument();
+  });
+
+  // A place's photos have no endpoint that would keep an order
+  it('drops the drag hint where the grid cannot be reordered', () => {
+    const photos = [photo(), photo({ id: 'ph2' })];
+
+    const { rerender } = render(<PhotoUploader photos={photos} onPhotoChange={jest.fn()} />);
+    expect(screen.getByText(/Drag photos to reorder/)).toBeInTheDocument();
+
+    rerender(<PhotoUploader photos={photos} onPhotoChange={jest.fn()} sortable={false} />);
+    expect(screen.queryByText(/Drag photos to reorder/)).not.toBeInTheDocument();
+  });
+
+  it('marks the cover the API named, not just the first photo', () => {
+    render(
+      <PhotoUploader
+        photos={[photo(), photo({ id: 'ph2', isCover: true })]}
+        onPhotoChange={jest.fn()}
+        sortable={false}
+      />,
+    );
+
+    expect(screen.getAllByText('Cover')).toHaveLength(1);
+  });
+
+  // The endpoint belongs to whatever the photos hang off, so the component
+  // must not reach for one of its own
+  it('removes locally when no delete is supplied', async () => {
+    const onPhotoFilesChange = jest.fn();
+    render(
+      <PhotoUploader
+        photos={[photo()]}
+        onPhotoChange={jest.fn()}
+        onPhotoFilesChange={onPhotoFilesChange}
+        sortable={false}
+      />,
+    );
+
+    screen.getByRole('button', { name: 'Remove image' }).click();
+
+    await Promise.resolve();
+    expect(onPhotoFilesChange).toHaveBeenCalledWith([]);
+  });
+
+  it('calls the delete it is given for a photo that already exists', async () => {
+    const onDeleteExisting = jest.fn().mockResolvedValue(undefined);
+    render(
+      <PhotoUploader
+        photos={[photo()]}
+        onPhotoChange={jest.fn()}
+        onDeleteExisting={onDeleteExisting}
+        sortable={false}
+      />,
+    );
+
+    screen.getByRole('button', { name: 'Remove image' }).click();
+
+    await Promise.resolve();
+    expect(onDeleteExisting).toHaveBeenCalledWith('ph1');
   });
 });

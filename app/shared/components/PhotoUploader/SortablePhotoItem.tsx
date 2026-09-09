@@ -1,12 +1,12 @@
 'use client';
 
-import Image from 'next/image';
-
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { cn } from '@/lib/utils';
 
+import { PhotoTile, type PhotoTileShape, TILE_SHAPE_CLASSES } from './PhotoTile';
 import type { FormPhoto } from './index';
 
 interface SortablePhotoItemProps {
@@ -17,9 +17,9 @@ interface SortablePhotoItemProps {
   isDeletingPhoto: boolean;
   getBlobUrl: (file: File) => string;
   isDragActive: boolean; // whether any photo is being dragged
+  shape?: PhotoTileShape;
+  isCover: boolean;
 }
-
-const isExternalUrl = (src: string) => src.startsWith('https://') || src.startsWith('http://');
 
 export const SortablePhotoItem = ({
   id,
@@ -29,6 +29,8 @@ export const SortablePhotoItem = ({
   isDeletingPhoto,
   getBlobUrl,
   isDragActive,
+  shape = 'poster',
+  isCover,
 }: SortablePhotoItemProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
@@ -39,15 +41,16 @@ export const SortablePhotoItem = ({
     transition: isDragging ? 'none' : transition,
   };
 
-  const src = photo.file ? getBlobUrl(photo.file) : photo.url;
-
   // Show dashed placeholder while dragging
   if (isDragging) {
     return (
       <div
         ref={setNodeRef}
         style={style as React.CSSProperties}
-        className="relative h-[105px] w-[155px] rounded-lg border-2 border-dashed border-primary/40 bg-primary/5"
+        className={cn(
+          'relative border-2 border-dashed border-primary/40 bg-primary/5',
+          TILE_SHAPE_CLASSES[shape],
+        )}
       />
     );
   }
@@ -58,50 +61,27 @@ export const SortablePhotoItem = ({
       style={style as React.CSSProperties}
       {...attributes}
       {...listeners}
-      className="group relative aspect-square h-[105px] w-[155px] cursor-grab overflow-hidden rounded-lg transition-transform duration-150 active:cursor-grabbing"
+      className={cn(
+        'group relative cursor-grab overflow-hidden transition-transform duration-150 active:cursor-grabbing',
+        TILE_SHAPE_CLASSES[shape],
+      )}
     >
-      {/* Hover overlay with Hold04Icon */}
-      <div
-        className={`pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/20 transition-opacity duration-150 ${isDragActive && !isDragging ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'} `}
+      <PhotoTile
+        photo={photo}
+        index={index}
+        shape={shape}
+        isCover={isCover}
+        isDeletingPhoto={isDeletingPhoto}
+        getBlobUrl={getBlobUrl}
+        onRemove={onRemove}
       >
-        <IconComponent iconName="Hold04Icon" size={32} className="text-white drop-shadow-md" />
-      </div>
-
-      {/* Cover badge on first photo */}
-      {index === 0 && (
-        <div className="absolute bottom-1 left-1 z-10 rounded bg-black/50 px-1.5 py-0.5 text-[10px] font-medium text-white">
-          Cover
+        {/* Hover overlay with Hold04Icon */}
+        <div
+          className={`pointer-events-none absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-150 ${isDragActive && !isDragging ? 'opacity-0' : 'bg-black/20 opacity-0 group-hover:opacity-100'} `}
+        >
+          <IconComponent iconName="Hold04Icon" size={32} className="text-white drop-shadow-md" />
         </div>
-      )}
-
-      {/* Image */}
-      {isExternalUrl(photo.url) ? (
-        <Image
-          src={photo.url}
-          alt={`Photo ${index + 1}`}
-          fill
-          sizes="155px"
-          className="rounded-lg object-cover"
-        />
-      ) : (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={src}
-          alt={`Photo ${index + 1}`}
-          className="h-full w-full rounded-lg object-cover"
-        />
-      )}
-
-      {/* Remove button */}
-      <button
-        type="button"
-        onClick={() => onRemove(index)}
-        disabled={isDeletingPhoto}
-        className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-700/70 transition-colors hover:bg-gray-800/80 disabled:cursor-not-allowed disabled:opacity-50"
-        aria-label="Remove image"
-      >
-        <IconComponent iconName="Cancel01Icon" color="#FFFFFF" size={18} />
-      </button>
+      </PhotoTile>
     </div>
   );
 };

@@ -22,12 +22,14 @@ import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import { ImageCropDialog } from '@/app/shared/components/Images';
-import { useDeleteExperiencePhoto } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
+import { cn } from '@/lib/utils';
 import { getImageDimensions, imageNeedsCrop } from '@/utils/image-crop-utils';
 import { validateExperienceImage } from '@/utils/image-utils';
 
+import { PhotoTile, type PhotoTileShape, TILE_SHAPE_CLASSES } from './PhotoTile';
 import { SortablePhotoItem } from './SortablePhotoItem';
 
 export interface FormPhoto {
@@ -35,6 +37,9 @@ export interface FormPhoto {
   url: string; // Photo URL or data URI
   file?: File; // Optional, only for new photos
   isTempId?: boolean; // Flag to know if we need to replace ID after save
+  // Set by the API. Without one the first photo is the cover, as the grid's
+  // order decides it.
+  isCover?: boolean;
 }
 
 interface PhotoUploaderProps {
@@ -43,7 +48,97 @@ interface PhotoUploaderProps {
   onPhotoFilesChange?: (photos: FormPhoto[]) => void;
   onPhotoDelete?: (photoId: string) => void;
   error?: string;
+  /** What the grid is for. Defaults to the experience poster copy. */
+  label?: React.ReactNode;
+  hint?: React.ReactNode;
+  maxPhotos?: number;
+  /** Off where an order cannot be persisted, as it cannot be for a place. */
+  sortable?: boolean;
+  shape?: PhotoTileShape;
+  /**
+   * Deletes a photo that already exists, the moment it is removed.
+   *
+   * The endpoint differs by what the photos belong to, so it is the caller's:
+   * this component knows nothing of experiences or places. Left out, removal is
+   * local only — which is what a form that applies its removals on its own save
+   * wants, as the edit-place form does.
+   */
+  onDeleteExisting?: (photoId: string) => Promise<unknown>;
 }
+
+/**
+ * The drag context, present only when the grid can be reordered. Without it the
+ * children render as they are — `useSortable` needs a `DndContext` above it, so
+ * a non-sortable grid must not be given one.
+ */
+const PhotoGridShell = ({
+  sortable,
+  sensors,
+  photoIds,
+  onDragStart,
+  onDragEnd,
+  onDragCancel,
+  activePhoto,
+  getBlobUrl,
+  shape,
+  children,
+}: {
+  sortable: boolean;
+  sensors: ReturnType<typeof useSensors>;
+  photoIds: string[];
+  onDragStart: (event: DragStartEvent) => void;
+  onDragEnd: (event: DragEndEvent) => void;
+  onDragCancel: () => void;
+  activePhoto: FormPhoto | null;
+  getBlobUrl: (file: File) => string;
+  shape: PhotoTileShape;
+  children: React.ReactNode;
+}) => {
+  if (!sortable) return <>{children}</>;
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onDragCancel={onDragCancel}
+    >
+      <SortableContext items={photoIds} strategy={rectSortingStrategy}>
+        {children}
+      </SortableContext>
+
+      {/* Drag overlay — shows floating photo while dragging */}
+      <DragOverlay dropAnimation={null}>
+        {activePhoto && (
+          <div
+            className={cn(
+              'relative rotate-6 scale-105 cursor-grabbing overflow-hidden shadow-2xl ring-2 ring-primary',
+              TILE_SHAPE_CLASSES[shape],
+            )}
+          >
+            {activePhoto.file ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={getBlobUrl(activePhoto.file)}
+                alt="Dragging"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <Image
+                src={activePhoto.url}
+                alt="Dragging"
+                fill
+                sizes="155px"
+                className="object-cover"
+              />
+            )}
+          </div>
+        )}
+      </DragOverlay>
+    </DndContext>
+  );
+};
 
 export const PhotoUploader = ({
   photos,
@@ -51,6 +146,12 @@ export const PhotoUploader = ({
   onPhotoFilesChange,
   onPhotoDelete,
   error,
+  label = 'Upload experience poster (JPEG, PNG or WebP · Square images · 500×500px or larger recommended · Max 10MB)',
+  hint = 'Non-square images will be cropped automatically',
+  maxPhotos = 6,
+  sortable = true,
+  shape = 'poster',
+  onDeleteExisting,
 }: PhotoUploaderProps) => {
   const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
   const [cropQueue, setCropQueue] = useState<Array<{ photo: FormPhoto; objectUrl: string }>>([]);
@@ -60,7 +161,6 @@ export const PhotoUploader = ({
   const [activeId, setActiveId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const blobUrlMap = useRef<Map<File, string>>(new Map());
-  const { mutateAsync: deletePhotoAsync } = useDeleteExperiencePhoto();
   const { toast } = useToast();
 
   // Find the currently dragged photo
@@ -313,11 +413,11 @@ export const PhotoUploader = ({
       if (!itemToRemove) return;
 
       // Check if it's an existing photo (real ID from DB) vs new photo (temp ID)
-      if (!itemToRemove.isTempId) {
+      if (!itemToRemove.isTempId && onDeleteExisting) {
         // It's an existing photo with real ID - call delete API
         setIsDeletingPhoto(true);
         try {
-          await deletePhotoAsync(itemToRemove.id);
+          await onDeleteExisting(itemToRemove.id);
           onPhotoDelete?.(itemToRemove.id);
         } catch {
           toast({
@@ -340,103 +440,92 @@ export const PhotoUploader = ({
         URL.revokeObjectURL(itemToRemove.url);
       }
     },
-    [photos, deletePhotoAsync, onPhotoDelete, onPhotoFilesChange, toast],
+    [photos, onDeleteExisting, onPhotoDelete, onPhotoFilesChange, toast],
   );
 
   // Generate stable IDs for dnd-kit — both existing and new photos have stable IDs
   const photoIds = photos.map((photo) => photo.id);
 
-  const hasReachedMax = photos.length >= 6;
+  const hasReachedMax = photos.length >= maxPhotos;
+
+  // Whichever photo the API flagged, and the first one where it flagged none
+  const coverId = photos.find((photo) => photo.isCover)?.id ?? photos[0]?.id;
 
   return (
     <>
       <div className="space-y-2">
         <div className="space-y-1">
-          <p className="text-xs font-medium text-gray-800">
-            Upload experience poster (JPEG, PNG or WebP · Square images · 500×500px or larger
-            recommended · Max 10MB)
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Non-square images will be cropped automatically
-          </p>
+          <p className="text-xs font-medium text-gray-800">{label}</p>
+          {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
         </div>
 
-        {/* Draggable photo grid */}
-        <DndContext
+        {/* The grid, wrapped in a drag context only where an order can be
+            persisted — a place's photos have no endpoint that would keep one */}
+        <PhotoGridShell
+          sortable={sortable}
           sensors={sensors}
-          collisionDetection={closestCenter}
+          photoIds={photoIds}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
+          activePhoto={activePhoto}
+          getBlobUrl={getBlobUrl}
+          shape={shape}
         >
-          <SortableContext items={photoIds} strategy={rectSortingStrategy}>
-            <div className="flex flex-wrap items-start gap-3">
-              {photos.map((photo, index) => (
+          <div
+            className={cn(
+              shape === 'square'
+                ? 'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4'
+                : 'flex flex-wrap items-start gap-3',
+            )}
+          >
+            {photos.map((photo, index) =>
+              sortable ? (
                 <SortablePhotoItem
                   key={photoIds[index]}
                   id={photoIds[index]}
                   photo={photo}
                   index={index}
+                  shape={shape}
+                  isCover={photo.id === coverId}
                   onRemove={handleRemovePreview}
                   isDeletingPhoto={isDeletingPhoto}
                   getBlobUrl={getBlobUrl}
                   isDragActive={activeId !== null}
                 />
-              ))}
-
-              {/* Add more photos button */}
-              {!hasReachedMax && (
-                <button
-                  type="button"
-                  onClick={() => inputRef.current?.click()}
-                  className="inline-flex h-[105px] w-[155px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-emerald-500/50 bg-emerald-50/50 text-center hover:border-emerald-600 hover:bg-emerald-100/50"
+              ) : (
+                <div
+                  key={photoIds[index]}
+                  className={cn('relative overflow-hidden bg-gray-100', TILE_SHAPE_CLASSES[shape])}
                 >
-                  {/* Icon */}
-                  <svg
-                    className="h-5 w-5 text-emerald-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  <span className="mt-1 text-[10px] font-medium text-emerald-700">
-                    Add Photo(s)
-                  </span>
-                </button>
-              )}
-            </div>
-          </SortableContext>
-
-          {/* Drag overlay — shows floating photo while dragging */}
-          <DragOverlay dropAnimation={null}>
-            {activePhoto && (
-              <div className="relative aspect-square h-[105px] w-[155px] rotate-6 scale-105 cursor-grabbing overflow-hidden rounded-lg shadow-2xl ring-2 ring-primary">
-                {activePhoto.file ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={getBlobUrl(activePhoto.file)}
-                    alt="Dragging"
-                    className="h-full w-full object-cover"
+                  <PhotoTile
+                    photo={photo}
+                    index={index}
+                    shape={shape}
+                    isCover={photo.id === coverId}
+                    isDeletingPhoto={isDeletingPhoto}
+                    getBlobUrl={getBlobUrl}
+                    onRemove={handleRemovePreview}
                   />
-                ) : (
-                  <Image
-                    src={activePhoto.url}
-                    alt="Dragging"
-                    fill
-                    sizes="155px"
-                    className="object-cover"
-                  />
-                )}
-              </div>
+                </div>
+              ),
             )}
-          </DragOverlay>
-        </DndContext>
+
+            {!hasReachedMax && (
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className={cn(
+                  'inline-flex cursor-pointer flex-col items-center justify-center border-2 border-dashed border-emerald-500/50 bg-emerald-50/50 text-center hover:border-emerald-600 hover:bg-emerald-100/50',
+                  TILE_SHAPE_CLASSES[shape],
+                )}
+              >
+                <IconComponent iconName="ImageAdd02Icon" color="#10B981" size={20} />
+                <span className="mt-1 text-[10px] font-medium text-emerald-700">Add Photo(s)</span>
+              </button>
+            )}
+          </div>
+        </PhotoGridShell>
 
         <input
           ref={inputRef}
@@ -458,7 +547,7 @@ export const PhotoUploader = ({
         </div> */}
 
         {/* Drag hint — only show if 2+ photos */}
-        {photos.length > 1 && (
+        {sortable && photos.length > 1 && (
           <p className="text-xs text-muted-foreground">
             Drag photos to reorder · First photo is the cover
           </p>

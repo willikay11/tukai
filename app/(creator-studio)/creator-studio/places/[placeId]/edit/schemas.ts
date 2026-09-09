@@ -10,12 +10,18 @@ import { z } from 'zod';
  */
 export { zodErrorsToMap } from '@/utils/zod-errors';
 
-/** A photo already on the place, or one picked in this session. */
+/**
+ * A photo already on the place, or one picked in this session.
+ *
+ * Mirrors the shared uploader's `FormPhoto`, which is what fills this list —
+ * a photo it adds carries a `temp-` id and `isTempId`.
+ */
 const editPhotoSchema = z.object({
-  // The API id for a photo that exists, `new-{n}` for one that does not yet
+  // The API id for a photo that exists, `temp-{n}` for one that does not yet
   id: z.string(),
   url: z.string(),
   file: z.custom<File>().optional(),
+  isTempId: z.boolean().optional(),
   isCover: z.boolean().optional(),
 });
 

@@ -231,15 +231,17 @@ describe('EditPlaceContent', () => {
 
   it('marks a removed photo for deletion and a picked one for upload', async () => {
     const user = userEvent.setup();
-    renderEdit();
+    const { container } = renderEdit();
 
-    await user.click(screen.getByRole('button', { name: 'Remove photo' }));
+    // The shared uploader's own controls — this form uses the same one the
+    // create-experience flow does
+    await user.click(screen.getByRole('button', { name: 'Remove image' }));
     await user.upload(
-      screen.getByLabelText('Add photos'),
+      container.querySelector('input[type="file"]') as HTMLInputElement,
       new File(['x'], 'new.png', { type: 'image/png' }),
     );
 
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Remove photo' })).toBeVisible());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Remove image' })).toBeVisible());
 
     await user.click(screen.getByRole('button', { name: 'Save changes' }));
 
@@ -250,5 +252,16 @@ describe('EditPlaceContent', () => {
     expect(draft.photos.added).toHaveLength(1);
     // Nothing of the original is left, so the replacement becomes the cover
     expect(draft.photos.added[0].isCover).toBe(true);
+  });
+
+  // Removing an existing photo must not hit the API until Save changes does
+  it('does not delete a photo the moment it is taken off the grid', async () => {
+    const user = userEvent.setup();
+    renderEdit();
+
+    await user.click(screen.getByRole('button', { name: 'Remove image' }));
+
+    expect(save).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Remove image' })).not.toBeInTheDocument();
   });
 });

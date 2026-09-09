@@ -15,7 +15,7 @@ export { ExperienceLocationInput } from './ExperienceLocationInput';
 export { MeetingDetailsInput } from './MeetingDetailsInput';
 export { CategoryPicker } from './CategoryPicker';
 export { VisibilityPicker } from './VisibilityPicker';
-export { PhotoUploader } from './PhotoUploader';
+export { PhotoUploader } from '@/app/shared/components/PhotoUploader';
 
 // Tickets Components
 export { CommissionPicker } from './CommissionPicker';

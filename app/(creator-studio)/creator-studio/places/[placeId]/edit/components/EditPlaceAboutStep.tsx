@@ -3,13 +3,13 @@
 import { useRef, useState } from 'react';
 
 import { LocationAutocompleteField } from '@/app/shared/components/LocationPicker/LocationAutocompleteField';
+import { PhotoUploader } from '@/app/shared/components/PhotoUploader';
 import { useGoogleMapsAutocomplete } from '@/app/shared/hooks/usePlaces';
 import { Editor } from '@/components/blocks/editor-00/editor';
 import { Input } from '@/components/ui/input';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 
 import { AboutStepValues, EditPhoto } from '../schemas';
-import { PlacePhotoField } from './PlacePhotoField';
 
 const ENTRY_OPTIONS = [
   { value: 'free', label: 'Free Entry' },
@@ -35,10 +35,28 @@ export const EditPlaceAboutStep = ({
 
   return (
     <div className="space-y-6">
-      <PlacePhotoField
+      {/* The same uploader the create-experience flow writes photos with.
+          Reordering is off: the API sets a place photo's order and cover as it
+          is created and offers no way to move either afterwards, so a drag here
+          would not survive the save. */}
+      <PhotoUploader
         photos={values.photos}
         error={errors.photos}
-        onChange={(photos: EditPhoto[]) => onChange({ photos })}
+        label={
+          <>
+            Upload a few photos of the place{' '}
+            <span className="text-muted-foreground">(Dimensions: 540*540, Max 10 MB)</span>
+          </>
+        }
+        hint={null}
+        maxPhotos={15}
+        sortable={false}
+        shape="square"
+        // Removals are applied by Save changes, along with everything else, so
+        // taking a photo off the grid must not delete it there and then
+        onDeleteExisting={async () => undefined}
+        onPhotoChange={() => undefined}
+        onPhotoFilesChange={(photos: EditPhoto[]) => onChange({ photos })}
       />
 
       <Field label="Name" error={errors.title}>

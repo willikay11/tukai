@@ -67,7 +67,7 @@ jest.mock('../MeetingDetailsInput', () => ({
   ),
 }));
 
-jest.mock('../PhotoUploader', () => ({
+jest.mock('@/app/shared/components/PhotoUploader', () => ({
   PhotoUploader: ({ photos, onPhotoChange, error }: any) => (
     <div data-testid="photo-uploader">
       Photos: {photos?.length || 0}

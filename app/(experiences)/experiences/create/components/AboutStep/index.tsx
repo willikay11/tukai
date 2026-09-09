@@ -3,6 +3,8 @@
 import { useCallback, useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoUploader } from '@/app/shared/components/PhotoUploader';
+import { useDeleteExperiencePhoto } from '@/app/shared/hooks/useExperiences';
 import { Button } from '@/components/ui/button';
 import { Interest } from '@/types/interest';
 
@@ -13,7 +15,6 @@ import { CategoryPicker } from '../CategoryPicker';
 import { DescriptionFields } from '../DescriptionFields';
 import { ExperienceTitleInput } from '../ExperienceTitleInput';
 import { MeetingDetailsInput } from '../MeetingDetailsInput';
-import { PhotoUploader } from '../PhotoUploader';
 import { VisibilityPicker } from '../VisibilityPicker';
 
 type FormPhoto = {
@@ -50,6 +51,7 @@ export const AboutStep = ({
 }: AboutStepProps) => {
   const [isPlaceModalOpen, setIsPlaceModalOpen] = useState(false);
   const { pendingAction, runAction } = usePendingAction<'exit' | 'continue'>();
+  const { mutateAsync: deleteExperiencePhoto } = useDeleteExperiencePhoto();
 
   const handlePhotoChange = useCallback(
     (photo: FormPhoto | null) => {
@@ -163,6 +165,8 @@ export const AboutStep = ({
 
       <PhotoUploader
         photos={formData.photos}
+        // The endpoint belongs to what the photos hang off, so it is passed in
+        onDeleteExisting={deleteExperiencePhoto}
         onPhotoChange={handlePhotoChange}
         onPhotoFilesChange={handlePhotoFilesChange}
         onPhotoDelete={(photoId: string) => {
