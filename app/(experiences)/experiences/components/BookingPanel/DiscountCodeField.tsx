@@ -10,6 +10,11 @@ export type AppliedDiscount = {
   code: string;
   /** What comes off the order, in the order's own currency */
   amount: number;
+  /**
+   * What the API says is left to pay. Preferred over subtracting the discount
+   * locally, because it is the figure the purchase will actually charge.
+   */
+  netTotal?: number;
   /** The API's own wording, where it gives one */
   description?: string;
 };

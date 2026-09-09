@@ -26,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { TicketPurchasePayload } from '@/services/experience';
 import { Experience, ExperienceOccurrence } from '@/types/experience';
+import { moneyAmount } from '@/utils/money';
 import { parseApiError } from '@/utils/parseApiError';
 import { getTicketBuyerPrice } from '@/utils/ticket-utils';
 
@@ -177,7 +178,9 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
 
   // A discount can never take an order below nothing
   const discountAmount = discount ? Math.min(discount.amount, total) : 0;
-  const payableTotal = total - discountAmount;
+  // The API's own net figure where it gave one, since that is what will be
+  // charged; the subtraction is only the fallback
+  const payableTotal = discount?.netTotal ?? total - discountAmount;
 
   const { mutate: previewPromo, isPending: isCheckingDiscount } = usePreviewPromoCode();
 
@@ -214,15 +217,14 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
               return;
             }
 
-            // The success body is not documented; these are the names it uses
-            // for the same figure, and the order's own subtotal is the floor
-            const amount = Number(
-              result.discountAmount ?? result.discount ?? result.amountOff ?? 0,
-            );
-
+            // Money comes back as `{ amount, currency }`, and `netAmount` is
+            // the API's own figure for what is left to pay — preferred over
+            // subtracting locally, since it is what the purchase will charge
             setDiscount({
-              code,
-              amount: Number.isFinite(amount) ? amount : 0,
+              // The API echoes the code as it stores it
+              code: result.code ?? code,
+              amount: moneyAmount(result.discountAmount) ?? 0,
+              netTotal: moneyAmount(result.netAmount) ?? undefined,
               description: result.description,
             });
           },

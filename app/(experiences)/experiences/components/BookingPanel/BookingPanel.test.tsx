@@ -52,8 +52,28 @@ const mockMutate = jest.fn(
   },
 );
 
+// The API's own success body, camel-cased as the service leaves it. Money is
+// an { amount, currency } object, and `netAmount` is what is left to pay.
+const promoPreviewSuccess = {
+  data: {
+    valid: true,
+    code: 'SAVE10',
+    kind: 'promotion',
+    grossAmount: { amount: '1500.00', currency: 'KES' },
+    discountAmount: { amount: '240.00', currency: 'KES' },
+    netAmount: { amount: '1260.00', currency: 'KES' },
+    perTicket: [
+      {
+        ticketId: 'ticket-1',
+        unitGross: { amount: '1500.00', currency: 'KES' },
+        unitNet: { amount: '1260.00', currency: 'KES' },
+      },
+    ],
+  },
+};
+
 // A code the API takes, unless a test says otherwise
-let promoPreviewResponse: unknown = { data: { valid: true, discountAmount: 240 } };
+let promoPreviewResponse: unknown = promoPreviewSuccess;
 const mockPreviewPromo = jest.fn(
   (_payload: unknown, options?: { onSuccess?: (response: unknown) => void }) => {
     options?.onSuccess?.(promoPreviewResponse);
@@ -97,7 +117,7 @@ describe('BookingPanel purchase flow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSession = { data: { user: { id: 'u1' } } };
-    promoPreviewResponse = { data: { valid: true, discountAmount: 240 } };
+    promoPreviewResponse = promoPreviewSuccess;
   });
 
   const selectTicketAndSafePaymentOptions = async (user: ReturnType<typeof userEvent.setup>) => {
@@ -156,6 +176,8 @@ describe('BookingPanel purchase flow', () => {
       );
     });
 
+    // Money arrives as { amount, currency }, so reading it as a number would
+    // silently discount nothing
     it('takes the discount off the total and the Pay button', async () => {
       const user = userEvent.setup();
       render(<BookingPanel experience={experience} />);
@@ -165,8 +187,53 @@ describe('BookingPanel purchase flow', () => {
 
       expect(await screen.findByText('SAVE10 applied')).toBeInTheDocument();
       expect(screen.getByText('-Ksh. 240.00')).toBeInTheDocument();
-      // 1500 less the 240 that came off
       expect(screen.getByRole('button', { name: /^pay/i })).toHaveTextContent('1,260.00');
+    });
+
+    // The API's own net figure is what the purchase will charge, so it wins
+    // over subtracting the discount from the local subtotal
+    it('charges the net amount the API worked out', async () => {
+      const user = userEvent.setup();
+      promoPreviewResponse = {
+        data: {
+          ...promoPreviewSuccess.data,
+          discountAmount: { amount: '240.00', currency: 'KES' },
+          // Deliberately not 1500 - 240: only the API knows how it rounds
+          netAmount: { amount: '1255.00', currency: 'KES' },
+        },
+      };
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user);
+
+      expect(await screen.findByRole('button', { name: /^pay/i })).toHaveTextContent('1,255.00');
+    });
+
+    it('falls back to subtracting when the API sends no net amount', async () => {
+      const user = userEvent.setup();
+      promoPreviewResponse = {
+        data: { valid: true, code: 'SAVE10', discountAmount: { amount: '240.00' } },
+      };
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user);
+
+      expect(await screen.findByRole('button', { name: /^pay/i })).toHaveTextContent('1,260.00');
+    });
+
+    it('shows the code as the API stores it, not as it was typed', async () => {
+      const user = userEvent.setup();
+      promoPreviewResponse = {
+        data: { ...promoPreviewSuccess.data, code: 'G30RG3R4L' },
+      };
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user, 'g30rg3r4l');
+
+      expect(await screen.findByText('G30RG3R4L applied')).toBeInTheDocument();
     });
 
     it('sends the applied code with the purchase', async () => {
