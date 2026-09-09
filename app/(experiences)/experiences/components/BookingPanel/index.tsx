@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -13,6 +13,7 @@ import { z } from 'zod';
 import { IconComponent } from '@/app/shared/components/Icons';
 import {
   useFetchExperienceOccurrences,
+  usePreviewPromoCode,
   usePurchaseExperienceTicketV2,
 } from '@/app/shared/hooks/useExperiences';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ import { Experience, ExperienceOccurrence } from '@/types/experience';
 import { parseApiError } from '@/utils/parseApiError';
 import { getTicketBuyerPrice } from '@/utils/ticket-utils';
 
+import { type AppliedDiscount, DiscountCodeField } from './DiscountCodeField';
 import { ExperienceMoments } from './ExperienceMoments';
 import { RecurringDateSlotPicker } from './RecurringDateSlotPicker';
 
@@ -82,6 +84,8 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
   );
   const showTabs = view === 'all';
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [discount, setDiscount] = useState<AppliedDiscount | null>(null);
+  const [discountError, setDiscountError] = useState<string | undefined>();
   // Kept as state, not a constant, so restoring the commented-out payment
   // method picker below needs no other change. M-Pesa is the only method today.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -170,6 +174,80 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
     (sum, ticket) => sum + (quantities[ticket.id] ?? 0),
     0,
   );
+
+  // A discount can never take an order below nothing
+  const discountAmount = discount ? Math.min(discount.amount, total) : 0;
+  const payableTotal = total - discountAmount;
+
+  const { mutate: previewPromo, isPending: isCheckingDiscount } = usePreviewPromoCode();
+
+  // What the code is being judged against. A code is only valid for a given
+  // order, so this is also what has to change for an applied one to be rechecked.
+  const orderForPromo = useMemo(
+    () =>
+      visibleTickets
+        .filter((ticket) => (quantities[ticket.id] ?? 0) > 0)
+        .map((ticket) => ({ ticket_id: ticket.id, quantity: quantities[ticket.id] })),
+    [visibleTickets, quantities],
+  );
+
+  const applyDiscount = useCallback(
+    (code: string, { silent = false }: { silent?: boolean } = {}) => {
+      if (!selectedSlotId || orderForPromo.length === 0) {
+        setDiscountError('Pick your tickets first');
+        return;
+      }
+
+      setDiscountError(undefined);
+
+      previewPromo(
+        { code, occurrence: selectedSlotId, ticket_purchases: orderForPromo },
+        {
+          onSuccess: (response) => {
+            const result = response.data ?? {};
+
+            // The endpoint answers 200 for a code it will not take, so it is
+            // `valid` that decides — not the status
+            if (result.valid === false) {
+              setDiscount(null);
+              setDiscountError(result.reason ?? 'This code is not valid for this order.');
+              return;
+            }
+
+            // The success body is not documented; these are the names it uses
+            // for the same figure, and the order's own subtotal is the floor
+            const amount = Number(
+              result.discountAmount ?? result.discount ?? result.amountOff ?? 0,
+            );
+
+            setDiscount({
+              code,
+              amount: Number.isFinite(amount) ? amount : 0,
+              description: result.description,
+            });
+          },
+          onError: (error: any) => {
+            setDiscount(null);
+            if (!silent) {
+              setDiscountError(error?.message ?? 'Could not check this code. Try again.');
+            }
+          },
+        },
+      );
+    },
+    [previewPromo, selectedSlotId, orderForPromo],
+  );
+
+  // An applied code is only good for the order it was checked against, so a
+  // changed slot or basket sends it back to the API rather than quietly
+  // discounting something it was never valid for
+  const appliedCode = discount?.code;
+  useEffect(() => {
+    if (!appliedCode) return;
+
+    applyDiscount(appliedCode, { silent: true });
+    // `applyDiscount` closes over the order, which is what this watches
+  }, [appliedCode, applyDiscount]);
 
   // Mirrors the reserve page's paymentFormSchema rules and messages
   const validatePurchase = (): Record<string, string> => {
@@ -276,6 +354,7 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
       ...(deliveryMethod === 'whatsapp' && PHONE_REGEX.test(deliveryContact)
         ? { whatsapp_phone: deliveryContact }
         : {}),
+      ...(discount ? { promo_code: discount.code } : {}),
     };
 
     purchaseTicket(payload, {
@@ -426,6 +505,36 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
           {/* Divider */}
           <div className="border-t border-gray-200" />
 
+          <DiscountCodeField
+            applied={discount}
+            isChecking={isCheckingDiscount}
+            error={discountError}
+            isDisabled={isPreview}
+            currency={currency}
+            onApply={(code) => applyDiscount(code)}
+            onRemove={() => {
+              setDiscount(null);
+              setDiscountError(undefined);
+            }}
+          />
+
+          {/* Divider */}
+          <div className="border-t border-gray-200" />
+
+          {/* What the code took off, so the Total below is accounted for */}
+          {discountAmount > 0 && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-500">Discount</span>
+              <span className="text-sm font-semibold text-primary">
+                -{currency}{' '}
+                {discountAmount.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
+            </div>
+          )}
+
           {/* Total */}
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Total</span>
@@ -433,11 +542,11 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
                 replays — only when the figure actually changes, rather than on
                 every render of the panel */}
             <span
-              key={total}
+              key={payableTotal}
               className="text-sm font-bold text-gray-900 duration-300 animate-in fade-in slide-in-from-bottom-1 motion-reduce:animate-none"
             >
               {currency}{' '}
-              {total.toLocaleString(undefined, {
+              {payableTotal.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}
@@ -601,7 +710,7 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
               <span className={isPreview ? 'text-gray-400' : 'text-primary/40'}>|</span>
               <span>
                 {currency}{' '}
-                {total.toLocaleString(undefined, {
+                {payableTotal.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}

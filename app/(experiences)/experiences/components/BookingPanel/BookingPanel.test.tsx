@@ -52,6 +52,14 @@ const mockMutate = jest.fn(
   },
 );
 
+// A code the API takes, unless a test says otherwise
+let promoPreviewResponse: unknown = { data: { valid: true, discountAmount: 240 } };
+const mockPreviewPromo = jest.fn(
+  (_payload: unknown, options?: { onSuccess?: (response: unknown) => void }) => {
+    options?.onSuccess?.(promoPreviewResponse);
+  },
+);
+
 // Mutable so a test can model an experience with no bookable occurrences
 let occurrencesState: { data: unknown; isLoading: boolean } = {
   data: { data: occurrences },
@@ -65,6 +73,7 @@ jest.mock('@/app/shared/hooks/useExperiences', () => ({
     isPending: false,
     data: purchaseResponse,
   }),
+  usePreviewPromoCode: () => ({ mutate: mockPreviewPromo, isPending: false }),
 }));
 
 const experience = {
@@ -88,6 +97,7 @@ describe('BookingPanel purchase flow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSession = { data: { user: { id: 'u1' } } };
+    promoPreviewResponse = { data: { valid: true, discountAmount: 240 } };
   });
 
   const selectTicketAndSafePaymentOptions = async (user: ReturnType<typeof userEvent.setup>) => {
@@ -97,6 +107,140 @@ describe('BookingPanel purchase flow', () => {
     await user.click(screen.getByRole('button', { name: 'Via Email' }));
     await user.type(screen.getByPlaceholderText('Enter email address'), 'guest@example.com');
   };
+
+  describe('discount codes', () => {
+    // The fixture's occurrences are dated 27 Aug 2026, so the panel only offers
+    // them from a day before that. Only the clock is faked — the timers
+    // userEvent needs are left alone.
+    beforeEach(() => {
+      jest.useFakeTimers({
+        doNotFake: [
+          'setTimeout',
+          'clearTimeout',
+          'setInterval',
+          'clearInterval',
+          'setImmediate',
+          'clearImmediate',
+          'queueMicrotask',
+          'requestAnimationFrame',
+          'cancelAnimationFrame',
+          'nextTick',
+          'performance',
+        ],
+      });
+      jest.setSystemTime(new Date('2026-08-20T09:00:00Z'));
+    });
+
+    afterEach(() => jest.useRealTimers());
+
+    const applyCode = async (user: ReturnType<typeof userEvent.setup>, code = 'SAVE10') => {
+      await user.type(screen.getByLabelText('Discount Code'), code);
+      await user.click(screen.getByRole('button', { name: 'Apply' }));
+    };
+
+    // The code is only valid against a given order, so that is what is sent
+    it('checks the code against the order on screen', async () => {
+      const user = userEvent.setup();
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user);
+
+      expect(mockPreviewPromo).toHaveBeenCalledWith(
+        {
+          code: 'SAVE10',
+          occurrence: 'bed13941-c542-4468-925c-b8da94842bd0',
+          ticket_purchases: [{ ticket_id: 'ticket-1', quantity: 1 }],
+        },
+        expect.any(Object),
+      );
+    });
+
+    it('takes the discount off the total and the Pay button', async () => {
+      const user = userEvent.setup();
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user);
+
+      expect(await screen.findByText('SAVE10 applied')).toBeInTheDocument();
+      expect(screen.getByText('-Ksh. 240.00')).toBeInTheDocument();
+      // 1500 less the 240 that came off
+      expect(screen.getByRole('button', { name: /^pay/i })).toHaveTextContent('1,260.00');
+    });
+
+    it('sends the applied code with the purchase', async () => {
+      const user = userEvent.setup();
+      render(<BookingPanel experience={experience} />);
+
+      await selectTicketAndSafePaymentOptions(user);
+      await applyCode(user);
+      await user.click(screen.getByRole('button', { name: /^pay/i }));
+
+      expect(mockMutate).toHaveBeenCalledWith(
+        expect.objectContaining({ promo_code: 'SAVE10' }),
+        expect.any(Object),
+      );
+    });
+
+    // The endpoint answers 200 for a code it will not take
+    it('says why a code was refused rather than discounting anything', async () => {
+      const user = userEvent.setup();
+      promoPreviewResponse = {
+        data: { valid: false, reason: "This code isn't valid for this order." },
+      };
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user, 'NOPE');
+
+      expect(await screen.findByText("This code isn't valid for this order.")).toBeInTheDocument();
+      expect(screen.queryByText(/applied/)).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^pay/i })).toHaveTextContent('1,500.00');
+    });
+
+    it('will not check a code before any tickets are picked', async () => {
+      const user = userEvent.setup();
+      render(<BookingPanel experience={experience} />);
+
+      await applyCode(user);
+
+      expect(mockPreviewPromo).not.toHaveBeenCalled();
+      expect(screen.getByText('Pick your tickets first')).toBeInTheDocument();
+    });
+
+    it('drops the discount when it is removed', async () => {
+      const user = userEvent.setup();
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user);
+      await user.click(await screen.findByRole('button', { name: 'Remove' }));
+
+      expect(screen.getByRole('button', { name: /^pay/i })).toHaveTextContent('1,500.00');
+      expect(screen.getByLabelText('Discount Code')).toBeInTheDocument();
+    });
+
+    // A code checked against one basket must not silently discount another
+    it('rechecks the code when the order changes', async () => {
+      const user = userEvent.setup();
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user);
+      mockPreviewPromo.mockClear();
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+
+      expect(mockPreviewPromo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: 'SAVE10',
+          ticket_purchases: [{ ticket_id: 'ticket-1', quantity: 2 }],
+        }),
+        expect.any(Object),
+      );
+    });
+  });
 
   it('sends the occurrence id and opens Paystack with the authorization_url from the response', async () => {
     const user = userEvent.setup();
