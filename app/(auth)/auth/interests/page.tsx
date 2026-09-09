@@ -6,13 +6,11 @@ import { useSelector } from 'react-redux';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
-import clsx from 'clsx';
 import moment from 'moment-timezone';
 
-import { Button } from '@/app/shared/components/Forms';
-import { Loader } from '@/app/shared/components/Forms/form/loader';
-import { IconComponent } from '@/app/shared/components/Icons';
 import { toast } from '@/app/shared/hooks/useToast';
+import { Button } from '@/components/ui/button';
+import { CategoryPill } from '@/components/ui/categoryPill';
 import { removeUser } from '@/slices/userSlice';
 
 export default function Page() {
@@ -110,49 +108,36 @@ export default function Page() {
 
   return (
     <>
-      <div className="mb-2">
-        <p className="text-xl font-black text-gray-700">Select your interests</p>
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Select your interests</h2>
+        <p className="mt-1 text-base text-gray-500">What are some of your favorite experiences?</p>
       </div>
 
-      <div className="mb-2">
-        <p className="text-xs text-gray-700">What are some of your favorite experiences?</p>
-      </div>
-
-      <div className="mb-4 inline-flex w-full flex-wrap gap-x-2 gap-y-2">
-        {loading ? (
-          <div className="my-2.5 inline-flex w-full items-center justify-center">
-            <Loader size="large" />
-          </div>
-        ) : interests.length ? (
-          interests.map((interest) => {
-            const active = selectedInterests.includes(interest.id);
-            return (
-              <div
+      {/* The same pill the create flows pick categories with, rather than the
+          copy of it this page used to carry */}
+      <div className="mb-6 flex w-full flex-wrap gap-2">
+        {loading
+          ? Array.from({ length: 12 }).map((_, index) => (
+              <div key={index} className="h-10 w-28 animate-pulse rounded-full bg-gray-100" />
+            ))
+          : interests.map((interest) => (
+              <CategoryPill
                 key={interest.id}
+                category={interest}
+                isSelected={selectedInterests.includes(interest.id)}
                 onClick={() => addOrRemoveInterest(interest.id)}
-                className={clsx(
-                  'inline-flex w-fit cursor-pointer items-center rounded-full px-4 py-2',
-                  {
-                    'bg-primary text-white': active,
-                    'bg-gray-100': !active,
-                  },
-                )}
-              >
-                <div className="mr-2">
-                  <IconComponent iconName={interest.icon} size={16} />
-                </div>
-                <span className="text-xs font-medium">{interest.name}</span>
-              </div>
-            );
-          })
-        ) : null}
+              />
+            ))}
       </div>
 
-      <div>
-        <Button block loading={isSubmitting} onClick={onSubmit}>
-          Submit
-        </Button>
-      </div>
+      <Button
+        variant="gradient"
+        isLoading={isSubmitting}
+        onClick={onSubmit}
+        className="h-[52px] w-full rounded-full text-base font-semibold"
+      >
+        Submit
+      </Button>
     </>
   );
 }

@@ -1,15 +1,27 @@
+import { useSession } from 'next-auth/react';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import {
+  activateReservationProfile,
   bookmarkPlace,
   cancelPlaceBookingRequest,
   claimPlaceOwnership,
+  createAvailabilityRule,
   createPlace,
   createPlaceBookingRequest,
+  createPlaceProperty,
   createPlaceReview,
   createPlaceReviewComment,
+  createPlaceSocialLink,
+  createReservationProfile,
+  deleteAvailabilityRule,
+  deletePlacePhoto,
+  deletePlaceProperty,
   deletePlaceReview,
   deletePlaceReviewImage,
+  deletePlaceSocialLink,
   fetchFollowing,
   fetchGoogleMapsAutocomplete,
   fetchGoogleMapsPlaceGeocode,
@@ -18,16 +30,25 @@ import {
   fetchPlaceAvailability,
   fetchPlaceBookingRequests,
   fetchPlaceCategories,
+  fetchPlaceOwnership,
   fetchPlaceReservationProfiles,
   fetchPlaceReviewComments,
   fetchPlaceReviews,
   fetchPlaces,
   likePlaceReview,
   likePlaceReviewComment,
+  updatePlace,
+  updatePlaceProperty,
   updatePlaceReview,
+  updatePlaceSocialLink,
+  updateReservationProfile,
+  uploadPlacePhoto,
   uploadPlaceReviewImages,
 } from '@/services/place';
+import { Community } from '@/types/community';
 import { PlaceCategoryParams } from '@/types/networkParam';
+import { PlaceEditDraft } from '@/types/placeEdit';
+import { ReservationSettingsDraft } from '@/types/placeReservation';
 import { CreatePlaceBookingRequest } from '@/types/placeReservation';
 
 export const usePlaces = ({
@@ -250,6 +271,56 @@ export const useGoogleMapsPlaceGeocode = (placeId: string | null, enabled: boole
 
 // ─── Place reservations ────────────────────────────────────────────────────
 
+/**
+ * Who owns this place, if anyone. `data` is null for an unclaimed place — the
+ * API's 404 — which is what tells a claim prompt from a booking one.
+ *
+ * The endpoint is authenticated, so callers gate this on a session rather than
+ * firing a 401 on every place a signed-out reader opens. A failed request
+ * leaves `data` undefined, which is NOT the same as "nobody owns it".
+ */
+export const usePlaceOwnership = (placeId: string, enabled = true) =>
+  useQuery({
+    queryKey: ['placeOwnership', placeId],
+    queryFn: async () => await fetchPlaceOwnership(placeId),
+    enabled: enabled && Boolean(placeId),
+    staleTime: 5 * 60 * 1000,
+  });
+
+/**
+ * Whether the reader manages this place.
+ *
+ * Ownership is held by a community, not a person, so this is true when the
+ * claiming community is one the reader created. It stays false while either
+ * question is unanswered — an owner-only strip must never flash for a visitor.
+ */
+export const usePlaceManager = (placeId: string) => {
+  const { data: session } = useSession();
+  // The session types it as possibly null; the hooks below take undefined
+  const userId = session?.user?.id ?? undefined;
+
+  const { data: ownership, isLoading: isLoadingOwnership } = usePlaceOwnership(
+    placeId,
+    Boolean(userId),
+  );
+  const owningCommunityId: string | undefined = ownership?.data?.community;
+
+  const { data: communitiesResponse, isLoading: isLoadingCommunities } = useGetCommunities({
+    page: 1,
+    enabled: Boolean(userId && owningCommunityId),
+    createdBy: userId,
+  });
+  const communities: Community[] = communitiesResponse?.data?.results ?? [];
+
+  return {
+    isManager: Boolean(
+      owningCommunityId && communities.some((community) => community.id === owningCommunityId),
+    ),
+    isLoading: isLoadingOwnership || isLoadingCommunities,
+    owningCommunityId,
+  };
+};
+
 /** The place's bookability profiles. Public — anyone may list them. */
 export const usePlaceReservationProfiles = (placeId: string, enabled = true) =>
   useQuery({
@@ -268,12 +339,21 @@ export const usePlaceAvailability = (placeId: string, profileId: string | undefi
     staleTime: 5 * 60 * 1000,
   });
 
-export const usePlaceBookingRequests = (placeId: string, profileId: string | undefined) =>
-  useQuery({
+/**
+ * The reader's own requests against this place.
+ *
+ * Asked only of someone signed in: the endpoint 401s otherwise, and an
+ * anonymous reader has no reservations to list.
+ */
+export const usePlaceBookingRequests = (placeId: string, profileId: string | undefined) => {
+  const { data: session } = useSession();
+
+  return useQuery({
     queryKey: ['placeBookingRequests', placeId, profileId],
     queryFn: async () => await fetchPlaceBookingRequests(placeId, profileId!),
-    enabled: Boolean(placeId && profileId),
+    enabled: Boolean(placeId && profileId && session?.user?.id),
   });
+};
 
 export const useCreatePlaceBookingRequest = (placeId: string, profileId: string | undefined) => {
   const queryClient = useQueryClient();
@@ -334,5 +414,130 @@ export const useCreatePlace = () => {
   return useMutation({
     mutationFn: async (data: Parameters<typeof createPlace>[0]) => await createPlace(data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['places'] }),
+  });
+};
+
+/**
+ * Saves every change the edit screen collected, in one call.
+ *
+ * The place, its photos, its properties and its social links are four separate
+ * endpoints, so the draft is diffed against what was loaded and only what
+ * actually moved is sent. Photos are ordered deliberately: removals first, so a
+ * place at its photo limit can still take replacements.
+ *
+ * The whole thing is one mutation because it is one button. A partial failure
+ * surfaces as a failure — the caller re-reads the place either way.
+ */
+export const useSavePlaceEdits = (placeId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (draft: PlaceEditDraft) => {
+      const { about, photos, properties, socialLinks } = draft;
+
+      if (about) await updatePlace(placeId, about);
+
+      for (const photoId of photos?.removedIds ?? []) {
+        await deletePlacePhoto(placeId, photoId);
+      }
+
+      // Only the first photo of a place with none left can claim the cover;
+      // the API sets no cover flag on its own
+      const addedPhotos = photos?.added ?? [];
+      for (let index = 0; index < addedPhotos.length; index += 1) {
+        const added = addedPhotos[index];
+        await uploadPlacePhoto(placeId, {
+          photo: added.file,
+          isCover: added.isCover,
+          order: added.order ?? index,
+        });
+      }
+
+      for (const propertyId of properties?.removedIds ?? []) {
+        await deletePlaceProperty(placeId, propertyId);
+      }
+      for (const property of properties?.updated ?? []) {
+        await updatePlaceProperty(placeId, property.id, property.data);
+      }
+      for (const property of properties?.added ?? []) {
+        await createPlaceProperty(placeId, property);
+      }
+
+      for (const linkId of socialLinks?.removedIds ?? []) {
+        await deletePlaceSocialLink(placeId, linkId);
+      }
+      for (const link of socialLinks?.updated ?? []) {
+        await updatePlaceSocialLink(placeId, link.id, link.data);
+      }
+      for (const link of socialLinks?.added ?? []) {
+        await createPlaceSocialLink(placeId, link);
+      }
+    },
+    onSuccess: () => {
+      // The detail endpoint carries photos, properties and links together, so
+      // the public page and the form both re-read from one invalidation
+      queryClient.invalidateQueries({ queryKey: ['place', placeId] });
+      queryClient.invalidateQueries({ queryKey: ['places'] });
+      queryClient.invalidateQueries({ queryKey: ['myPlaces'] });
+    },
+  });
+};
+
+/**
+ * Saves a place's reservation settings, creating the profile if there is none.
+ *
+ * Three endpoints, in an order that matters: the profile has to exist before
+ * its weekly hours can hang off it, and it takes no bookings until it is
+ * activated. Hours are replaced rather than edited — the API creates and
+ * deletes rules but does not update them — so a day whose times changed is
+ * removed and written again.
+ */
+export const useSaveReservationSettings = (placeId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (draft: ReservationSettingsDraft) => {
+      const { profileId, profile, rules, existingRules, isActive } = draft;
+
+      const saved = profileId
+        ? await updateReservationProfile(placeId, profileId, profile)
+        : await createReservationProfile(placeId, profile);
+
+      const id: string | undefined = profileId ?? saved.data?.id;
+      if (!id) throw new Error('The reservation profile could not be created');
+
+      // Every rule whose day is gone, or whose times moved, is rewritten
+      const keptDays = new Set(rules.map((rule) => rule.dayOfWeek));
+      for (const existing of existingRules) {
+        const replacement = rules.find((rule) => rule.dayOfWeek === existing.dayOfWeek);
+        const isUnchanged =
+          replacement &&
+          replacement.openTime === existing.openTime &&
+          replacement.closeTime === existing.closeTime &&
+          (replacement.slotIntervalMinutes ?? null) === (existing.slotIntervalMinutes ?? null);
+
+        if (!keptDays.has(existing.dayOfWeek) || !isUnchanged) {
+          await deleteAvailabilityRule(placeId, id, existing.id);
+        }
+      }
+
+      for (const rule of rules) {
+        const existing = existingRules.find((entry) => entry.dayOfWeek === rule.dayOfWeek);
+        const isUnchanged =
+          existing &&
+          existing.openTime === rule.openTime &&
+          existing.closeTime === rule.closeTime &&
+          (existing.slotIntervalMinutes ?? null) === (rule.slotIntervalMinutes ?? null);
+
+        if (!isUnchanged) await createAvailabilityRule(placeId, id, rule);
+      }
+
+      // A draft profile is invisible to diners, so saving settings opens it
+      if (!isActive) await activateReservationProfile(placeId, id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeReservationProfiles', placeId] });
+      queryClient.invalidateQueries({ queryKey: ['placeAvailability', placeId] });
+    },
   });
 };

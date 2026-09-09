@@ -46,7 +46,6 @@ export function Editor({
   onSerializedChange,
   onHtmlChange,
   className,
-  placeholderClassName,
 }: {
   editorState?: EditorState;
   editorSerializedState?: SerializedEditorState;
@@ -56,7 +55,6 @@ export function Editor({
   onSerializedChange?: (editorSerializedState: SerializedEditorState) => void;
   onHtmlChange?: (html: string) => void;
   className?: string;
-  placeholderClassName?: string;
 }) {
   return (
     <div className={`overflow-hidden rounded-lg border bg-background ${className || ''}`}>
@@ -69,7 +67,7 @@ export function Editor({
         }}
       >
         <TooltipProvider>
-          <Plugins placeholderClassName={placeholderClassName} />
+          <Plugins />
 
           <OnChangePlugin
             ignoreSelectionChange={true}

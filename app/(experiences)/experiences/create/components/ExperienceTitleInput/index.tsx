@@ -11,7 +11,7 @@ interface ExperienceTitleInputProps {
 export const ExperienceTitleInput = ({ value, onChange, error }: ExperienceTitleInputProps) => {
   return (
     <div className="space-y-2">
-      <label htmlFor="experience-title" className="text-xs font-medium text-gray-800">
+      <label htmlFor="experience-title" className="text-sm font-medium text-gray-800">
         Experience Title
       </label>
       <Input

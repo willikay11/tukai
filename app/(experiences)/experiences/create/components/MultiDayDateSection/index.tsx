@@ -37,10 +37,10 @@ export const MultiDayDateSection = ({
 
   return (
     <div className="space-y-2">
-      <label className="block text-xs font-medium text-gray-900">Select Experience date(s)</label>
+      <label className="block text-sm font-medium text-gray-900">Select Experience date(s)</label>
       <div className="grid grid-cols-2 gap-2">
         <div>
-          {/* <label className="block text-xs font-medium text-gray-900 mb-2">Start Date</label> */}
+          {/* <label className="block text-sm font-medium text-gray-900 mb-2">Start Date</label> */}
           <DatePicker
             value={startDate || undefined}
             onChange={onStartDateChange}
@@ -53,7 +53,7 @@ export const MultiDayDateSection = ({
         </div>
 
         <div>
-          {/* <label className="block text-xs font-medium text-gray-900 mb-2">Start Time</label> */}
+          {/* <label className="block text-sm font-medium text-gray-900 mb-2">Start Time</label> */}
           <TimePicker
             value={startTime || undefined}
             onChange={onStartTimeChange}
@@ -67,7 +67,7 @@ export const MultiDayDateSection = ({
 
       <div className="grid grid-cols-2 gap-2">
         <div>
-          {/* <label className="block text-xs font-medium text-gray-900 mb-2">End Date</label> */}
+          {/* <label className="block text-sm font-medium text-gray-900 mb-2">End Date</label> */}
           <DatePicker
             value={endDate || undefined}
             onChange={onEndDateChange}
@@ -82,7 +82,7 @@ export const MultiDayDateSection = ({
         </div>
 
         <div>
-          {/* <label className="block text-xs font-medium text-gray-900 mb-2">End Time</label> */}
+          {/* <label className="block text-sm font-medium text-gray-900 mb-2">End Time</label> */}
           <TimePicker
             value={endTime || undefined}
             onChange={onEndTimeChange}

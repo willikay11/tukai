@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 
+import { PhotoUploader } from '@/app/shared/components/PhotoUploader';
 import {
   useAddExperiencePhotos,
   useDeleteExperiencePhoto,
@@ -9,8 +10,6 @@ import {
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Photo } from '@/types/photo';
-
-import { PhotoUploader } from '../../PhotoUploader';
 
 interface LocalPhoto {
   id?: string; // Present if it's an existing photo
@@ -151,6 +150,8 @@ export const EditPhotosPanel = ({
           url: p.photo,
           isTempId: !p.id,
         }))}
+        // The endpoint belongs to what the photos hang off, so it is passed in
+        onDeleteExisting={deletePhotoAsync}
         onPhotoChange={() => {}} // Not used in edit context
         onPhotoFilesChange={(photos) => {
           handleAddPhotos(photos.filter((p) => p.file).map((p) => p.file!));

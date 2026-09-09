@@ -29,15 +29,17 @@ describe('PhoneNumber', () => {
       expect(fieldBox()).toHaveClass('focus-within:border-brand-green', 'bg-transparent');
     });
 
-    it('sets the number in 14px medium gray-800', () => {
+    // It used to run 14px against the shared field's 14.5px, so a phone box
+    // sat beside an email box with visibly smaller text
+    it('reads at the shared field size, in gray-800', () => {
       render(<PhoneNumber />);
 
       const field = screen.getByRole('textbox');
-      expect(field).toHaveClass('text-[14px]', 'font-medium', 'text-gray-800');
+      expect(field).toHaveClass('text-[14.5px]', 'font-normal', 'text-gray-800');
       // The line box has to survive the merge alongside the size, or the field
       // stops matching the 44px of the inputs beside it
       expect(field).toHaveClass('leading-[18px]');
-      expect(field).not.toHaveClass('text-[14.5px]');
+      expect(field).not.toHaveClass('text-[14px]');
     });
 
     it('is not a pill — only search fields are', () => {
@@ -72,6 +74,24 @@ describe('PhoneNumber', () => {
       render(<PhoneNumber />);
 
       expect(screen.getByText('+254')).toBeInTheDocument();
+    });
+
+    // An inline onChange is a new function every render. Reporting on that, not
+    // on the value, loops forever against a caller that sets state.
+    it('reports only when the value changes, not on every render', () => {
+      const onChange = jest.fn();
+      const { rerender } = render(<PhoneNumber onChange={onChange} />);
+      const callsAfterMount = onChange.mock.calls.length;
+
+      rerender(<PhoneNumber onChange={() => onChange('rerendered')} />);
+
+      expect(onChange).toHaveBeenCalledTimes(callsAfterMount);
+    });
+
+    it('opens on a stored number, split across the picker and the field', () => {
+      render(<PhoneNumber initialValue="+254721920820" />);
+
+      expect(screen.getByRole('textbox')).toHaveValue('721920820');
     });
 
     it('reports the code and number as one value', () => {

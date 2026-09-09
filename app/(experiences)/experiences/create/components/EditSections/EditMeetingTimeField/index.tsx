@@ -11,7 +11,7 @@ interface EditMeetingTimeFieldProps {
 export const EditMeetingTimeField = ({ value, onChange, error }: EditMeetingTimeFieldProps) => {
   return (
     <div className="space-y-2">
-      <label className="text-xs font-medium text-gray-800">Meeting Time</label>
+      <label className="text-sm font-medium text-gray-800">Meeting Time</label>
       <TimePicker
         value={value}
         onChange={(time) => {

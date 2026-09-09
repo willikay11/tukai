@@ -13,7 +13,9 @@ export const editorTheme: EditorThemeClasses = {
     h5: 'scroll-m-20 text-lg font-semibold tracking-tight',
     h6: 'scroll-m-20 text-base font-semibold tracking-tight',
   },
-  paragraph: 'leading-7 [&:not(:first-child)]:mt-6',
+  // mt-2, not the mt-6 an article would use: Enter here is the writer starting
+  // the next line of a field, and a 24px chasm made it read as a section break
+  paragraph: 'leading-7 [&:not(:first-child)]:mt-2',
   quote: 'mt-6 border-l-2 pl-6 italic',
   link: 'text-blue-600 hover:underline hover:cursor-pointer',
   list: {

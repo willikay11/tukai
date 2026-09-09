@@ -245,7 +245,7 @@ export const DateTypeStep = ({
       ) : !formData.isRecurring ? (
         <>
           <div>
-            <label className="mb-2 block text-xs font-medium text-gray-900">
+            <label className="mb-2 block text-sm font-medium text-gray-900">
               Select Experience date(s)
             </label>
             <DatePicker
@@ -258,7 +258,7 @@ export const DateTypeStep = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-2 block text-xs font-medium text-gray-900">Start Time</label>
+              <label className="mb-2 block text-sm font-medium text-gray-900">Start Time</label>
               <TimePicker
                 value={formData.startTime || undefined}
                 onChange={handleStartTimeChange}
@@ -268,7 +268,7 @@ export const DateTypeStep = ({
             </div>
 
             <div>
-              <label className="mb-2 block text-xs font-medium text-gray-900">End Time</label>
+              <label className="mb-2 block text-sm font-medium text-gray-900">End Time</label>
               <TimePicker
                 value={formData.endTime || undefined}
                 onChange={handleEndTimeChange}

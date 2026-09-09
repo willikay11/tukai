@@ -14,7 +14,7 @@ export const VisibilityPicker = ({ value, onChange }: VisibilityPickerProps) => 
   ];
   return (
     <div className="space-y-2">
-      <label className="text-xs font-medium text-gray-800">
+      <label className="text-sm font-medium text-gray-800">
         Experience visibility (who can see or access the experience)
       </label>
       <div className="w-fit">

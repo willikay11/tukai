@@ -321,7 +321,7 @@ export const ActivityCard = ({
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-700">Start Time</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">Start Time</label>
                 <TimePicker
                   value={activity.startTime ?? undefined}
                   onChange={(time) => {
@@ -334,7 +334,7 @@ export const ActivityCard = ({
                 )}
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-700">End Time</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">End Time</label>
                 <TimePicker
                   value={activity.endTime ?? undefined}
                   onChange={(time) => {

@@ -561,7 +561,49 @@ export interface TicketPurchasePayload {
   last_name?: string;
   confirmation_email?: string;
   whatsapp_phone?: string;
+  /**
+   * Checked by the API before anything else about the order — a code it will
+   * not take comes back as a validation error against this field, so a preview
+   * is what keeps that off the Pay button.
+   */
+  promo_code?: string;
 }
+
+export interface PromoCodePreviewPayload {
+  code: string;
+  occurrence: string;
+  ticket_purchases: Array<{ ticket_id: string; quantity: number }>;
+}
+
+/**
+ * What a code is worth against this order, before anything is paid.
+ *
+ * The endpoint is public and takes the purchase body plus the code; it answers
+ * `{ valid: false, reason }` for a code it will not take, and the discount for
+ * one it will. Its documented body is the promo-code viewset's own serializer,
+ * which is not what it accepts — this shape was read off the API itself.
+ */
+export const previewPromoCode = async (
+  data: PromoCodePreviewPayload,
+): Promise<ApiResponse> => {
+  try {
+    const response = await api.post(`/v1/experiences/promo-codes/preview/`, data);
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not check this code'),
+    };
+  }
+};
 
 export const purchaseExperienceTicketV2 = async (
   data: TicketPurchasePayload,

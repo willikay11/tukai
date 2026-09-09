@@ -9,7 +9,7 @@ interface EditMeetingPointFieldProps {
 export const EditMeetingPointField = ({ value, onChange, error }: EditMeetingPointFieldProps) => {
   return (
     <div className="space-y-2">
-      <label className="text-xs font-medium text-gray-800">Meeting Point</label>
+      <label className="text-sm font-medium text-gray-800">Meeting Point</label>
       <textarea
         value={value}
         onChange={(e) => {

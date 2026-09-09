@@ -2,19 +2,26 @@
 
 import { useState } from 'react';
 
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { ExperienceCreatedModal } from '@/app/(experiences)/experiences/create/components/ExperienceCreatedModal';
 import { IconComponent } from '@/app/shared/components/Icons';
 import {
   useCancelPlaceBookingRequest,
   usePlaceBookingRequests,
+  usePlaceManager,
+  usePlaceOwnership,
   usePlaceReservationProfiles,
 } from '@/app/shared/hooks/usePlaces';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 import { PlaceBookingRequest, PlaceReservationProfile } from '@/types/placeReservation';
 
+import { ClaimPlacePrompt } from './ClaimPlacePrompt';
+import { PlaceOwnerPanel } from './PlaceOwnerPanel';
 import { PlaceReservationsCalendar } from './PlaceReservationsCalendar';
 
 export const ReservationPanel = ({
@@ -30,6 +37,33 @@ export const ReservationPanel = ({
   const [isCancelledModalOpen, setIsCancelledModalOpen] = useState(false);
 
   const { data: profilesResponse, isLoading } = usePlaceReservationProfiles(placeId);
+
+  // Asked only of a signed-in reader: the endpoint 401s without a token, and
+  // claiming needs an account anyway
+  const { data: session } = useSession();
+  const isSignedIn = Boolean(session?.user?.id);
+  const router = useRouter();
+  const { openSignInWithCallback } = useAuthDialog();
+
+  const reservePath = `/places/${placeId}/reserve`;
+
+  // Signing in lands on the form, so the one press the reader made is the one
+  // that gets them there
+  const startReservation = () => openSignInWithCallback(() => router.push(reservePath));
+
+  const { data: ownership, isLoading: isLoadingOwnership } = usePlaceOwnership(
+    placeId,
+    Boolean(session?.user?.id),
+  );
+
+  // Only a 404 answered successfully means nobody owns it. A request that
+  // failed, or was never made, is "we do not know" — and a place must never be
+  // called unclaimed on that.
+  const isUnclaimed = ownership?.success === true && !ownership.data;
+
+  // Reading the place as its owner is a different job from reading it as a
+  // customer, so the column answers whichever one applies
+  const { isManager, isLoading: isLoadingManager } = usePlaceManager(placeId);
   const profiles: PlaceReservationProfile[] = profilesResponse?.data?.results ?? [];
 
   // A place may hold up to two profiles (restaurant and cinema); only an active
@@ -61,8 +95,29 @@ export const ReservationPanel = ({
     });
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingOwnership || isLoadingManager) {
     return <div className="h-64 animate-pulse rounded-3xl bg-gray-50" />;
+  }
+
+  // An owner is not going to book their own table, so the panel offers what
+  // they came for instead — the same slot, a different job.
+  if (isManager) {
+    return (
+      <div className="rounded-3xl bg-gray-50 p-5">
+        <PlaceOwnerPanel placeId={placeId} placeName={placeName} />
+      </div>
+    );
+  }
+
+  // Nobody has claimed it, so it cannot take bookings and nobody can hold one.
+  // Offering a reservation here would only ever reach a disabled button, so the
+  // panel offers the way out of the state instead.
+  if (isUnclaimed) {
+    return (
+      <div className="rounded-3xl bg-gray-50 p-5">
+        <ClaimPlacePrompt placeId={placeId} placeName={placeName} />
+      </div>
+    );
   }
 
   // A place only takes bookings once its owning community sets up a reservation
@@ -101,15 +156,20 @@ export const ReservationPanel = ({
           : `${placeName} has not opened up reservations yet.`}
       </p>
 
+      {/* Signed out, this asks at the door rather than at the end: the dialog
+          opens over the place, and signing in carries straight on to the form.
+          Sending them to the form first meant filling the whole thing in
+          before the API turned the booking away. */}
       <Button
-        asChild={isBookable}
+        asChild={isBookable && isSignedIn}
         variant="gradient"
         disabled={!isBookable}
         title={isBookable ? undefined : 'This place does not take reservations yet'}
+        onClick={isBookable && !isSignedIn ? startReservation : undefined}
         className="w-full rounded-full"
       >
-        {isBookable ? (
-          <Link href={`/places/${placeId}/reserve`}>
+        {isBookable && isSignedIn ? (
+          <Link href={reservePath}>
             <span className="flex items-center justify-center gap-2">
               Make Reservation
               <IconComponent iconName="ArrowRight01Icon" size={16} color="currentColor" />
@@ -123,29 +183,6 @@ export const ReservationPanel = ({
         )}
       </Button>
 
-      {/* A place becomes bookable when its owning community claims it and sets
-          up a profile, so the way out of this state is to claim it */}
-      {!isBookable && (
-        <div className="flex items-start gap-3 rounded-2xl bg-white p-4">
-          <IconComponent
-            iconName="InformationCircleIcon"
-            size={18}
-            color="currentColor"
-            className="mt-0.5 flex-shrink-0 text-primary"
-          />
-          <p className="text-sm text-gray-600">
-            Own or manage this place?{' '}
-            <Link
-              href={`/places/claim?placeId=${placeId}`}
-              className="font-medium text-primary hover:underline"
-            >
-              Claim it
-            </Link>{' '}
-            to take reservations on Tukai.
-          </p>
-        </div>
-      )}
-
       <ExperienceCreatedModal
         open={isCancelledModalOpen}
         onOpenChange={setIsCancelledModalOpen}
@@ -156,8 +193,6 @@ export const ReservationPanel = ({
         onViewExperience={() => setIsCancelledModalOpen(false)}
       />
 
-      {/* The bookings are a second request, so the section holds its shape
-          with skeletons rather than popping in once they land */}
       {(isLoadingReservations || reservations.length > 0) && (
         <PlaceReservationsCalendar
           reservations={reservations}

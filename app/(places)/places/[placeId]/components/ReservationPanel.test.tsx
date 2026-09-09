@@ -12,11 +12,45 @@ jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) })
 const usePlaceReservationProfiles = jest.fn();
 const usePlaceBookingRequests = jest.fn();
 const cancelBooking = jest.fn();
+let sessionState: { data: { user: { id: string } } | null } = { data: { user: { id: 'u1' } } };
+jest.mock('next-auth/react', () => ({ useSession: () => sessionState }));
+
+const push = jest.fn();
+jest.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
+
+const openSignInWithCallback = jest.fn();
+jest.mock('@/context/AuthDialogContext', () => ({
+  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+}));
+
+// Claimed by default: the unclaimed case is its own describe below
+let ownership: { success?: boolean; data: unknown } | undefined = {
+  success: true,
+  data: { id: 'o1' },
+};
+let isLoadingOwnership = false;
+// A reader, not the owner, unless a test says otherwise
+let isManager = false;
+
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   usePlaceReservationProfiles: (id: string) => usePlaceReservationProfiles(id),
   usePlaceBookingRequests: (id: string, profileId?: string) =>
     usePlaceBookingRequests(id, profileId),
   useCancelPlaceBookingRequest: () => ({ mutate: cancelBooking, isPending: false }),
+  usePlaceOwnership: () => ({ data: ownership, isLoading: isLoadingOwnership }),
+  usePlaceManager: () => ({ isManager, isLoading: false }),
+}));
+
+jest.mock('./PlaceOwnerPanel', () => ({
+  PlaceOwnerPanel: ({ placeName }: { placeName: string }) => (
+    <div data-testid="owner-panel">{placeName}</div>
+  ),
+}));
+
+jest.mock('./ClaimPlacePrompt', () => ({
+  ClaimPlacePrompt: ({ placeName }: { placeName: string }) => (
+    <div data-testid="claim-prompt">{placeName}</div>
+  ),
 }));
 
 const profile = (extra: Record<string, unknown> = {}) => ({
@@ -42,8 +76,26 @@ const renderPanel = () => render(<ReservationPanel placeId="p1" placeName="Kraft
 describe('ReservationPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionState = { data: { user: { id: 'u1' } } };
+    ownership = { success: true, data: { id: 'o1' } };
+    isLoadingOwnership = false;
+    isManager = false;
     withProfiles([profile()]);
     withBookings([]);
+  });
+
+  // The column is one slot and the reader has one job in it. An owner's job is
+  // running the place, not booking a table at it.
+  describe('for the community that owns the place', () => {
+    it('replaces the reservation form with what an owner came to do', () => {
+      isManager = true;
+
+      renderPanel();
+
+      expect(screen.getByTestId('owner-panel')).toHaveTextContent('Kraftory');
+      expect(screen.queryByText('Make a Reservation')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('claim-prompt')).not.toBeInTheDocument();
+    });
   });
 
   it('offers a reservation when the place has an active profile', () => {
@@ -130,32 +182,57 @@ describe('ReservationPanel', () => {
   // Claiming the place is how it becomes bookable, so that is the way out of
   // the not-yet-open state
   describe('claiming', () => {
-    it('offers to claim a place that is not open for reservations', () => {
+    // Nobody owns it, so it cannot take bookings and nobody can hold one —
+    // the panel offers the way out of that state instead of a dead button
+    it('replaces the reservation panel when nobody has claimed the place', () => {
+      ownership = { success: true, data: null };
       withProfiles([]);
 
       renderPanel();
 
-      expect(screen.getByText(/Own or manage this place\?/)).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'Claim it' })).toBeInTheDocument();
+      expect(screen.getByTestId('claim-prompt')).toHaveTextContent('Kraftory');
+      expect(screen.queryByText('Make a Reservation')).not.toBeInTheDocument();
     });
 
-    // Claiming is a page of its own, seeded with the place being claimed
-    it('links to the claim page for this place', () => {
+    // Its owner has a profile to set up; this reader is not the one to claim it
+    it('still offers a reservation on a claimed place that is not set up yet', () => {
       withProfiles([]);
 
       renderPanel();
 
-      expect(screen.getByRole('link', { name: 'Claim it' })).toHaveAttribute(
-        'href',
-        '/places/claim?placeId=p1',
-      );
+      expect(screen.getByText('Make a Reservation')).toBeInTheDocument();
+      expect(screen.queryByTestId('claim-prompt')).not.toBeInTheDocument();
     });
 
     // Already bookable — nothing to claim
     it('does not offer a claim once the place takes reservations', () => {
       renderPanel();
 
-      expect(screen.queryByRole('link', { name: 'Claim it' })).not.toBeInTheDocument();
+      expect(screen.queryByTestId('claim-prompt')).not.toBeInTheDocument();
+    });
+
+    // Flipping the panel once the answer arrives would be worse than waiting
+    it('waits for the ownership answer rather than guessing', () => {
+      ownership = undefined;
+      isLoadingOwnership = true;
+
+      renderPanel();
+
+      expect(screen.queryByTestId('claim-prompt')).not.toBeInTheDocument();
+      expect(screen.queryByText('Make a Reservation')).not.toBeInTheDocument();
+    });
+
+    // The endpoint 401s without a token and can fail like any other. A place
+    // must never be called unclaimed because the question could not be asked.
+    it('does not call a place unclaimed when the request failed', () => {
+      ownership = undefined;
+      isLoadingOwnership = false;
+      withProfiles([]);
+
+      renderPanel();
+
+      expect(screen.queryByTestId('claim-prompt')).not.toBeInTheDocument();
+      expect(screen.getByText('Make a Reservation')).toBeInTheDocument();
     });
 
     // The free-to-reserve promise only holds where booking works
@@ -330,6 +407,41 @@ describe('ReservationPanel', () => {
       renderPanel();
 
       expect(screen.queryByRole('button', { name: 'Cancel Reservation' })).not.toBeInTheDocument();
+    });
+  });
+
+  // Sending a signed-out reader to the form meant filling the whole thing in
+  // before the API turned the booking away
+  describe('when the reader is not signed in', () => {
+    beforeEach(() => {
+      sessionState = { data: null };
+      withProfiles([profile()]);
+    });
+
+    it('asks them to sign in rather than opening the form', async () => {
+      const user = userEvent.setup();
+      renderPanel();
+
+      const reserve = screen.getByRole('button', { name: /Make Reservation/ });
+      expect(reserve).toBeInTheDocument();
+      // Not a link: nothing navigates until they are signed in
+      expect(screen.queryByRole('link', { name: /Make Reservation/ })).not.toBeInTheDocument();
+
+      await user.click(reserve);
+
+      expect(openSignInWithCallback).toHaveBeenCalled();
+      expect(push).not.toHaveBeenCalled();
+    });
+
+    it('carries on to the form once they are', async () => {
+      const user = userEvent.setup();
+      renderPanel();
+
+      await user.click(screen.getByRole('button', { name: /Make Reservation/ }));
+      // The dialog reports success by calling back
+      openSignInWithCallback.mock.calls[0][0]();
+
+      expect(push).toHaveBeenCalledWith('/places/p1/reserve');
     });
   });
 });

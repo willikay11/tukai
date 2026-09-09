@@ -403,7 +403,7 @@ export const CreateExperienceAbout = ({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <label htmlFor="title" className="block text-xs font-medium text-gray-800">
+                  <label htmlFor="title" className="block text-sm font-medium text-gray-800">
                     Experience Title
                   </label>
                   <FormControl>

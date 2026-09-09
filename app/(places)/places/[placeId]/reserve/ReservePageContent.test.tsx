@@ -9,7 +9,14 @@ import { ReservePageContent } from './ReservePageContent';
 
 const push = jest.fn();
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push, back: jest.fn() }) }));
-jest.mock('next-auth/react', () => ({ useSession: () => ({ data: null }) }));
+// Signed in unless a test says otherwise — the sign-in detour is its own case
+let sessionState: { data: { user: { id: string } } | null } = { data: { user: { id: 'u1' } } };
+jest.mock('next-auth/react', () => ({ useSession: () => sessionState }));
+
+const openSignInWithCallback = jest.fn();
+jest.mock('@/context/AuthDialogContext', () => ({
+  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+}));
 
 jest.mock('@/app/shared/components/Images', () => ({
   PhotoImage: ({ fallback }: Record<string, unknown>) => <span>{fallback as React.ReactNode}</span>,
@@ -70,6 +77,7 @@ const pickFirstSlot = async (user: ReturnType<typeof userEvent.setup>) => {
 describe('ReservePageContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionState = { data: { user: { id: 'u1' } } };
     withProfile(activeProfile);
     usePlaceAvailability.mockReturnValue({ data: { data: { rules, exceptions: [] } } });
   });
@@ -204,6 +212,56 @@ describe('ReservePageContent', () => {
 
       await user.click(screen.getByRole('button', { name: 'Fewer guests' }));
       expect(screen.getByRole('button', { name: 'Fewer guests' })).toBeDisabled();
+    });
+  });
+
+  /**
+   * A session can lapse while a long form is being filled in, and someone can
+   * land on this page directly. Neither should cost the reader their work.
+   */
+  describe('submitting while signed out', () => {
+    beforeEach(() => {
+      sessionState = { data: null };
+    });
+
+    it('asks them to sign in instead of sending a request that would be refused', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await user.type(screen.getByPlaceholderText("e.g. Valentine's Dinner Date"), 'Date Night');
+      await pickFirstSlot(user);
+      await user.click(screen.getByRole('button', { name: 'Request Reservation' }));
+
+      expect(openSignInWithCallback).toHaveBeenCalled();
+      expect(requestBooking).not.toHaveBeenCalled();
+    });
+
+    it('sends what was already filled in once they are signed in', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await user.type(screen.getByPlaceholderText("e.g. Valentine's Dinner Date"), 'Date Night');
+      await pickFirstSlot(user);
+      await user.click(screen.getByRole('button', { name: 'Request Reservation' }));
+
+      openSignInWithCallback.mock.calls[0][0]();
+
+      expect(requestBooking).toHaveBeenCalledWith(
+        expect.objectContaining({ specialRequests: 'Date Night' }),
+        expect.any(Object),
+      );
+    });
+
+    // The form is still on screen behind the dialog
+    it('keeps the form as it was', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await user.type(screen.getByPlaceholderText("e.g. Valentine's Dinner Date"), 'Date Night');
+      await pickFirstSlot(user);
+      await user.click(screen.getByRole('button', { name: 'Request Reservation' }));
+
+      expect(screen.getByPlaceholderText("e.g. Valentine's Dinner Date")).toHaveValue('Date Night');
     });
   });
 

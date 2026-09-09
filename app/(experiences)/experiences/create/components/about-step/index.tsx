@@ -4,7 +4,7 @@ export { DescriptionFields } from '../DescriptionFields';
 export { ExperienceLocationInput } from '../ExperienceLocationInput';
 export { ExperienceTitleInput } from '../ExperienceTitleInput';
 export { MeetingDetailsInput } from '../MeetingDetailsInput';
-export { PhotoUploader } from '../PhotoUploader';
+export { PhotoUploader } from '@/app/shared/components/PhotoUploader';
 export { PreviewCommunitySection } from '../PreviewCommunitySection';
 export { PreviewDateSection } from '../PreviewDateSection';
 export { VisibilityPicker } from '../VisibilityPicker';

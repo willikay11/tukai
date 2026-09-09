@@ -307,7 +307,7 @@ export const FileUploadField = ({
 
   return (
     <div>
-      <p className="text-xs font-medium text-gray-800">{label}</p>
+      <p className="text-sm font-medium text-gray-800">{label}</p>
       <div className="mt-2 flex flex-wrap items-start gap-3">
         {previewUrls.map((previewUrl, index) => {
           const isDragging = draggedIndex === index;

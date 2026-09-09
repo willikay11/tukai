@@ -19,19 +19,21 @@ const LINKS = [
   { label: 'Moments', href: '/moments', icon: 'DashboardSquare01Icon' },
 ];
 
-// The pages under /experiences that are not a single experience — everything
-// else with one path segment after it is an experience, addressed by slug
-const EXPERIENCE_SUBROUTES = ['create', 'type', 'see-all', 'booking-success'];
+// A detail page owns the bottom of its own screen: both carry a floating bar
+// of their own actions, and two floating rows would sit on top of each other.
+//
+// Anything else with a single segment after the section is a record addressed
+// by slug; these are the pages that are not.
+const DETAIL_SUBROUTES: Record<string, string[]> = {
+  experiences: ['create', 'type', 'see-all', 'booking-success'],
+  places: ['claim', 'see-all'],
+};
 
-const isSingleExperience = (pathname: string): boolean => {
+const isDetailPage = (pathname: string): boolean => {
   const [, section, id, ...rest] = pathname.split('/');
+  const subroutes = DETAIL_SUBROUTES[section];
 
-  return (
-    section === 'experiences' &&
-    Boolean(id) &&
-    rest.length === 0 &&
-    !EXPERIENCE_SUBROUTES.includes(id)
-  );
+  return Boolean(subroutes) && Boolean(id) && rest.length === 0 && !subroutes.includes(id);
 };
 
 export const BottomNavigation = () => {
@@ -63,7 +65,7 @@ export const BottomNavigation = () => {
 
   // A single experience puts its booking bar along the bottom edge, and that
   // CTA is the point of the page — two bars would sit on top of each other
-  if (isSingleExperience(pathname)) return null;
+  if (isDetailPage(pathname)) return null;
 
   return (
     <div

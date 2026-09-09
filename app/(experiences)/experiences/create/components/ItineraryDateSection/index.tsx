@@ -20,7 +20,7 @@ export const ItineraryDateSection = ({
 }: ItineraryDateSectionProps) => {
   return (
     <div className="space-y-3">
-      <label className="block text-xs font-medium text-gray-800">Select itinerary date(s)</label>
+      <label className="block text-sm font-medium text-gray-800">Select itinerary date(s)</label>
 
       {/* Start + End date pickers side by side */}
       <div className="grid grid-cols-2 gap-3">

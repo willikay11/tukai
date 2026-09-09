@@ -2,7 +2,10 @@
 import React, { Suspense, useEffect, useRef, useState } from 'react';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+
+import { IconComponent } from '@/app/shared/components/Icons';
 
 const backgroundImages = [
   {
@@ -71,6 +74,22 @@ function AuthLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="h-full">
+      {/* The way out. Without it the auth screens were a dead end on the web —
+          a reader who opened one had only the browser's back button. */}
+      <header className="fixed inset-x-0 top-0 z-20 flex items-center justify-between bg-white px-6 py-4">
+        <Link href="/" aria-label="Tukai home">
+          <Image src="/images/logo.svg" alt="Tukai" width={96} height={28} priority />
+        </Link>
+
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-base font-medium text-gray-900 hover:text-gray-600"
+        >
+          <IconComponent iconName="Cancel01Icon" size={20} color="currentColor" />
+          Close
+        </Link>
+      </header>
+
       <Image
         alt="Mountains"
         src={
@@ -91,7 +110,7 @@ function AuthLayoutContent({ children }: { children: React.ReactNode }) {
           zIndex: -1,
         }}
       />
-      <div className="mt-4 flex flex-col items-center justify-center md:mt-12">
+      <div className="mt-24 flex flex-col items-center justify-center pb-12 md:mt-32">
         <div className="mb-4 text-center">
           <p className="mb-2 text-4xl font-black text-white">Plan & Discover</p>
           <p

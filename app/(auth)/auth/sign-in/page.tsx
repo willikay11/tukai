@@ -2,14 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 
+import { AuthCard } from '@/app/shared/components/Auth';
 import { toast } from '@/app/shared/hooks/useToast';
-import { SignInForm } from '@/components/ui/form/sign-in';
 
 export default function Page() {
   const router = useRouter();
 
   return (
-    <SignInForm
+    <AuthCard
       onLogin={() => {
         toast({
           description: 'Welcome Back!',

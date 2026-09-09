@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { useSession } from 'next-auth/react';
+
 import moment from 'moment';
 
 import { BackToExplore } from '@/app/(experiences)/experiences/components/BackToExplore';
@@ -19,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { InviteMembers, InvitedMember } from '@/components/ui/invite-members';
 import { Textarea } from '@/components/ui/textarea';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 import { cn } from '@/lib/utils';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
@@ -33,7 +36,11 @@ import { zodErrorsToMap } from '@/utils/zod-errors';
 
 import { DateTimePicker } from './components/DateTimePicker';
 import { ReservationSummary } from './components/ReservationSummary';
-import { RESERVATION_FIELD_SECTIONS, reservationSchema } from './schema';
+import {
+  RESERVATION_FIELD_SECTIONS,
+  type ReservationFormValues,
+  reservationSchema,
+} from './schema';
 
 const NAME_PRESETS = [
   'Birthday Dinner',
@@ -72,6 +79,9 @@ export const ReservePageContent = ({ place }: { place: Place }) => {
   const exceptions: PlaceAvailabilityException[] = availability?.data?.exceptions ?? [];
 
   const { mutate: requestBooking, isPending } = useCreatePlaceBookingRequest(place.id, profile?.id);
+  const { data: session } = useSession();
+  const isSignedIn = Boolean(session?.user?.id);
+  const { openSignInWithCallback } = useAuthDialog();
 
   const coverPhoto =
     place.photos?.find((photo: Photo) => photo.isCover)?.photo || place.photos?.[0]?.photo;
@@ -126,16 +136,28 @@ export const ReservePageContent = ({ place }: { place: Place }) => {
 
     setErrors({});
 
+    // A session can lapse while a long form is being filled in, and someone can
+    // land here directly. Either way the dialog opens over the form and the
+    // request goes out on the other side — nothing typed is lost.
+    if (!isSignedIn) {
+      openSignInWithCallback(() => submitBooking(result.data));
+      return;
+    }
+
+    submitBooking(result.data);
+  };
+
+  const submitBooking = (data: ReservationFormValues) => {
     requestBooking(
       {
         // `result.data` is the parsed form, so the date is a real Date and the
         // required fields are known present
-        requestedDate: moment(result.data.date).format('YYYY-MM-DD'),
-        requestedTime: result.data.time,
-        partySize: result.data.partySize,
+        requestedDate: moment(data.date).format('YYYY-MM-DD'),
+        requestedTime: data.time,
+        partySize: data.partySize,
         // The serializer has no field for what the reader called the booking,
         // so it rides in special_requests, where the venue sees it
-        specialRequests: result.data.name,
+        specialRequests: data.name,
         message: message.trim() || undefined,
       },
       {

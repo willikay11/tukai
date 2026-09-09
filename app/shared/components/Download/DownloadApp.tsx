@@ -25,7 +25,7 @@ export const DownloadApp = () => {
       <div className="p-4">
         <div className="mb-2 inline-flex w-full items-center justify-between">
           <p className="text-xl font-black text-gray-700">Tukai is better on the app</p>
-          <div onClick={() => setShowDownloadApp(false)}>
+          <div onClick={() => setShowDownloadApp(false)} className="cursor-pointer">
             <IconComponent iconName="Cancel01Icon" size={24} color="gray" />
           </div>
         </div>

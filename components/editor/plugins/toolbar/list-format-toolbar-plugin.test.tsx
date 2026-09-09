@@ -14,8 +14,13 @@ const dispatchCommand = jest.fn();
 const update = jest.fn();
 let blockType = 'paragraph';
 
+// `read` is left inert: this suite is about which command the toolbar sends,
+// and the document it sends it to is the integration suite's subject
 jest.mock('@/components/editor/context/toolbar-context', () => ({
-  useToolbarContext: () => ({ activeEditor: { dispatchCommand, update }, blockType }),
+  useToolbarContext: () => ({
+    activeEditor: { dispatchCommand, update, getEditorState: () => ({ read: () => undefined }) },
+    blockType,
+  }),
 }));
 
 describe('ListFormatToolbarPlugin', () => {

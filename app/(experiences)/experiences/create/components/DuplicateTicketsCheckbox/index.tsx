@@ -17,7 +17,7 @@ export const DuplicateTicketsCheckbox = ({ value, onChange }: DuplicateTicketsCh
       />
       <label
         htmlFor="duplicate-tickets"
-        className="flex cursor-pointer items-center gap-2 text-xs font-medium text-gray-900"
+        className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-900"
       >
         Duplicate ticket(s) for the entire period
       </label>

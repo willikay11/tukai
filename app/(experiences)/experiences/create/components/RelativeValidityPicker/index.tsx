@@ -51,7 +51,7 @@ export const RelativeValidityPicker = ({
 }: RelativeValidityPickerProps) => {
   return (
     <div className="space-y-2">
-      <label className="text-xs font-medium text-gray-800">
+      <label className="text-sm font-medium text-gray-800">
         Ticket Sales Validity{' '}
         <span className="font-normal text-gray-700">
           (When should the sales of these tickets end?)

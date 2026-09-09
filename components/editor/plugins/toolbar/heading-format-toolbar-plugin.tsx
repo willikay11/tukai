@@ -9,39 +9,47 @@ import { useToolbarContext } from '@/components/editor/context/toolbar-context';
 import { ToolbarToggleItem } from '@/components/editor/plugins/toolbar/toolbar-toggle-item';
 import { ToggleGroup } from '@/components/ui/toggle-group';
 
-const HEADING_OPTIONS: { level: HeadingTagType; iconName: string; name: string }[] = [
+// 'paragraph' is Lexical's own name for a plain block, which is what
+// `blockType` reports — so the toggle matches it without translation
+const BLOCK_OPTIONS: { level: HeadingTagType | 'paragraph'; iconName: string; name: string }[] = [
+  { level: 'paragraph', iconName: 'ParagraphIcon', name: 'Paragraph' },
   { level: 'h1', iconName: 'Heading01Icon', name: 'Heading 1' },
   { level: 'h2', iconName: 'Heading02Icon', name: 'Heading 2' },
   { level: 'h3', iconName: 'Heading03Icon', name: 'Heading 3' },
 ];
 
 /**
- * H1–H3 as toggles rather than a dropdown, so the level in use is visible
- * without opening anything. Pressing the active one returns the block to a
- * paragraph, which is how the reader gets back out of a heading.
+ * Paragraph and H1–H3 as toggles rather than a dropdown, so the block in use is
+ * visible without opening anything.
+ *
+ * Paragraph is offered outright rather than left to "press the active heading
+ * again": a writer leaving a list, or coming from a quote, has no active
+ * heading to press, and had no way back to plain text from the toolbar.
  */
 export function HeadingFormatToolbarPlugin() {
   const { activeEditor, blockType } = useToolbarContext();
 
-  const isHeading = HEADING_OPTIONS.some(({ level }) => level === blockType);
+  const isKnownBlock = BLOCK_OPTIONS.some(({ level }) => level === blockType);
 
-  const setBlock = (level: HeadingTagType | null) =>
+  const setBlock = (level: HeadingTagType | 'paragraph' | null) =>
     activeEditor.update(() => {
       const selection = $getSelection();
       if (!$isRangeSelection(selection)) return;
 
-      $setBlocksType(selection, () => (level ? $createHeadingNode(level) : $createParagraphNode()));
+      $setBlocksType(selection, () =>
+        level && level !== 'paragraph' ? $createHeadingNode(level) : $createParagraphNode(),
+      );
     });
 
   return (
     <ToggleGroup
       type="single"
-      // Empty rather than the block type itself: a paragraph or a list must
-      // leave every heading unpressed
-      value={isHeading ? blockType : ''}
-      onValueChange={(value) => setBlock((value as HeadingTagType) || null)}
+      // Empty rather than the block type itself, so a list or a quote leaves
+      // all of these unpressed
+      value={isKnownBlock ? blockType : ''}
+      onValueChange={(value) => setBlock((value as HeadingTagType | 'paragraph') || null)}
     >
-      {HEADING_OPTIONS.map(({ level, iconName, name }) => (
+      {BLOCK_OPTIONS.map(({ level, iconName, name }) => (
         <ToolbarToggleItem key={level} value={level} aria-label={name}>
           {/* currentColor so the icon follows the toggle's pressed state */}
           <IconComponent iconName={iconName} size={16} color="currentColor" />

@@ -61,7 +61,7 @@ export const CreateBucketListModal = ({ open, onOpenChange }: CreateBucketListMo
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-medium text-gray-800">
+            <label className="text-sm font-medium text-gray-800">
               Visibility (who can see this bucket list)
             </label>
             <div className="w-fit">

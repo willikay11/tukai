@@ -24,34 +24,19 @@ export const DescriptionFields = ({
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <label className="text-xs font-medium text-gray-800">Add your experience description</label>
-        <Editor
-          className="text-xs"
-          placeholderClassName="pointer-events-none absolute left-0 top-0 select-none overflow-hidden text-ellipsis px-3 py-[18px] text-xs text-gray-400"
-          initialHtml={description}
-          onHtmlChange={onDescriptionChange}
-        />
+        <label className="text-sm font-medium text-gray-800">Add your experience description</label>
+        <Editor initialHtml={description} onHtmlChange={onDescriptionChange} />
         {descriptionError && <p className="text-xs text-red-500">{descriptionError}</p>}
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-medium text-gray-800">What's included</label>
-        <Editor
-          className="text-xs"
-          placeholderClassName="pointer-events-none absolute left-0 top-0 select-none overflow-hidden text-ellipsis px-3 py-[18px] text-xs text-gray-400"
-          initialHtml={whatsIncluded}
-          onHtmlChange={onWhatsIncludedChange}
-        />
+        <label className="text-sm font-medium text-gray-800">What's included</label>
+        <Editor initialHtml={whatsIncluded} onHtmlChange={onWhatsIncludedChange} />
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-medium text-gray-800">What's NOT included</label>
-        <Editor
-          className="text-xs"
-          placeholderClassName="pointer-events-none absolute left-0 top-0 select-none overflow-hidden text-ellipsis px-3 py-[18px] text-xs text-gray-400"
-          initialHtml={whatsNotIncluded}
-          onHtmlChange={onWhatsNotIncludedChange}
-        />
+        <label className="text-sm font-medium text-gray-800">What's NOT included</label>
+        <Editor initialHtml={whatsNotIncluded} onHtmlChange={onWhatsNotIncludedChange} />
       </div>
     </div>
   );

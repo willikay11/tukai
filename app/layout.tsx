@@ -9,6 +9,7 @@ import { hugeiconsLicense } from '@hugeicons/react-pro';
 import { PillsSkeleton } from '@/app/shared/components/Cards';
 import { DownloadApp } from '@/app/shared/components/Download';
 import { AuthActions } from '@/app/shared/components/Global';
+import { ChromeGate } from '@/app/shared/components/Global';
 import { satoshi } from '@/app/shared/components/Global';
 import { GlobalLoading } from '@/app/shared/components/Global';
 import { LocationPrompt } from '@/app/shared/components/LocationPicker';
@@ -58,73 +59,84 @@ export default function RootLayout({
                   <AuthDialogProvider>
                     <SelectedCategoryProvider>
                       <div className="relative flex min-h-screen flex-col">
-                        <div className="z-50 border-b border-gray-100 bg-white/95 backdrop-opacity-50 md:sticky md:top-0">
-                          {/* Mobile */}
-                          <div className="mx-4 mt-5 inline-flex w-[calc(100%-2rem)] justify-between md:hidden">
-                            <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
-                              <Link href="/" className="inline-flex items-center">
-                                <Image
-                                  src="/images/logo.svg"
-                                  alt="Tukai logo"
-                                  width={100}
-                                  height={100}
-                                />
-                              </Link>
+                        {/* The auth screens draw their own bar, so the app's
+                            chrome stands down there rather than stacking on it */}
+                        <ChromeGate>
+                          <div className="z-50 border-b border-gray-100 bg-white/95 backdrop-opacity-50 md:sticky md:top-0">
+                            {/* Mobile */}
+                            <div className="mx-4 mt-5 inline-flex w-[calc(100%-2rem)] justify-between md:hidden">
+                              <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
+                                <Link href="/" className="inline-flex items-center">
+                                  <Image
+                                    src="/images/logo.svg"
+                                    alt="Tukai logo"
+                                    width={100}
+                                    height={100}
+                                  />
+                                </Link>
+                              </div>
+                              <UserLocation />
+                              <AuthActions />
                             </div>
-                            <UserLocation />
-                            <AuthActions />
-                          </div>
-                          <div className="mx-4 md:hidden">
-                            <Suspense
-                              fallback={
-                                <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
-                              }
-                            >
-                              <Search />
-                            </Suspense>
-                          </div>
-                          {/* Browser */}
-                          <div className="hidden md:grid md:grid-cols-12 md:gap-x-4">
-                            <header className="flex items-center gap-4 py-3 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
-                              <Link href="/" className="flex-shrink-0">
-                                <Image
-                                  src="/images/logo.svg"
-                                  alt="Tukai logo"
-                                  width={100}
-                                  height={40}
-                                  className="h-10 w-[100px] shrink-0"
-                                />
-                              </Link>
-                              <Nav />
-                              {/* Capped: on flex-1 alone the field absorbed every
+                            <div className="mx-4 md:hidden">
+                              <Suspense
+                                fallback={
+                                  <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
+                                }
+                              >
+                                <Search />
+                              </Suspense>
+                            </div>
+                            {/* Browser */}
+                            <div className="hidden md:grid md:grid-cols-12 md:gap-x-4">
+                              <header className="flex items-center gap-4 py-3 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+                                <Link href="/" className="flex-shrink-0">
+                                  <Image
+                                    src="/images/logo.svg"
+                                    alt="Tukai logo"
+                                    width={100}
+                                    height={40}
+                                    className="h-10 w-[100px] shrink-0"
+                                  />
+                                </Link>
+                                <Nav />
+                                {/* Capped: on flex-1 alone the field absorbed every
                                   pixel the rest of the header did not use, so it
                                   stretched far wider than a search bar needs on a
                                   large screen */}
-                              <div className="min-w-[200px] max-w-xl flex-1">
-                                <Suspense
-                                  fallback={
-                                    <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
-                                  }
-                                >
-                                  <Search />
-                                </Suspense>
-                              </div>
-                              {/* Keeps the trailing controls on the right edge once
+                                <div className="min-w-[200px] max-w-xl flex-1">
+                                  <Suspense
+                                    fallback={
+                                      <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
+                                    }
+                                  >
+                                    <Search />
+                                  </Suspense>
+                                </div>
+                                {/* Keeps the trailing controls on the right edge once
                                   the search stops growing */}
-                              <AskTukaiButton className="ml-auto" />
-                              <AuthActions />
-                            </header>
+                                <AskTukaiButton className="ml-auto" />
+                                <AuthActions />
+                              </header>
+                            </div>
                           </div>
-                        </div>
-                        <Suspense fallback={<PillsSkeleton />}>
-                          <PageFilters />
-                        </Suspense>
-                        <LocationPrompt />
+
+                          <Suspense fallback={<PillsSkeleton />}>
+                            <PageFilters />
+                          </Suspense>
+                          <LocationPrompt />
+                        </ChromeGate>
+
                         <div className="mb-20 flex-grow md:mb-0">{children}</div>
-                        <Footer />
+
+                        <ChromeGate>
+                          <Footer />
+                        </ChromeGate>
                       </div>
-                      <DownloadApp />
-                      <BottomNavigation />
+                      <ChromeGate>
+                        <DownloadApp />
+                        <BottomNavigation />
+                      </ChromeGate>
                     </SelectedCategoryProvider>
                   </AuthDialogProvider>
                 </LocationProvider>

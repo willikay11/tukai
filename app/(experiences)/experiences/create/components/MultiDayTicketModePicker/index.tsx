@@ -20,7 +20,7 @@ export const MultiDayTicketModePicker = ({ value, onChange }: MultiDayTicketMode
 
   return (
     <div className="space-y-3">
-      <label className="block text-xs text-gray-900">
+      <label className="block text-sm text-gray-900">
         How would you like to create tickets for this experience?
       </label>
 

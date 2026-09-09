@@ -67,7 +67,7 @@ export const ExperienceLocationInput = ({
 
   return (
     <div className="space-y-2">
-      <label htmlFor="experience-location" className="text-xs font-medium text-gray-800">
+      <label htmlFor="experience-location" className="text-sm font-medium text-gray-800">
         Where will the experience take place?
       </label>
       <LocationAutocompleteField

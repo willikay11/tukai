@@ -1,16 +1,13 @@
 import type { CreateExperienceTicket } from '@/types/experience';
 import type { Ticket } from '@/types/ticket';
 import type { Reservation, TicketPurchase } from '@/types/ticket-purchase';
+import { moneyAmount } from '@/utils/money';
 
 export type RelativeUnit = 'hour' | 'day' | 'week';
 export type ApiTicketUnit = 'days' | 'hours' | 'minutes';
 export type ApiTicketCondition = 'before_start' | 'before_end';
 
-const toNumber = (value: number | string | null | undefined): number | null => {
-  if (value === null || value === undefined || value === '') return null;
-  const parsed = typeof value === 'string' ? parseFloat(value) : value;
-  return Number.isFinite(parsed) ? parsed : null;
-};
+const toNumber = moneyAmount;
 
 /**
  * The buyer amount the API sent, or null when the payload carries none —
