@@ -118,6 +118,9 @@ export const EditPlaceContent = ({ place }: { place: Place }) => {
   const [properties, setProperties] = useState<PropertyValue[]>(initial.properties);
   const [socialLinks, setSocialLinks] = useState<SocialLinkValue[]>(initial.socialLinks);
 
+  // Shown as the source of the pill groups, exactly as the API lists them
+  const categoryNames = (place.categories ?? []).map((category) => category.name).filter(Boolean);
+
   const entryProperty = properties.find(
     (property) => property.key.trim().toLowerCase() === ENTRY_KEY.toLowerCase(),
   );
@@ -326,13 +329,14 @@ export const EditPlaceContent = ({ place }: { place: Place }) => {
         {/* The same column the create-experience steps write in: the tab row
             spans the page, the form itself stays a readable width */}
         <div className="grid grid-cols-12 gap-4">
-          <div className="col-span-12 lg:col-span-8 xl:col-span-7">
+          <div className="col-span-12 lg:col-span-6">
             <TabsContent value="about" className="mt-6">
               <EditPlaceAboutStep values={values} errors={errors} onChange={handleAboutChange} />
             </TabsContent>
 
             <TabsContent value="properties" className="mt-6">
               <EditPlacePropertiesStep
+                categoryNames={categoryNames}
                 properties={properties}
                 errors={errors}
                 onChange={setProperties}

@@ -11,7 +11,23 @@ interface PhoneNumberProps extends Omit<React.ComponentProps<'input'>, 'onChange
   onChange?: (value: string) => void;
   // Styles the field box, as it did when this component drew its own shell
   className?: string;
+  /**
+   * A stored number to open on, e.g. "+254721920820". Split across the picker
+   * and the field, so editing a saved number starts from what was saved rather
+   * than from an empty box.
+   */
+  initialValue?: string;
 }
+
+const COUNTRY_CODES = ['+254', '+255', '+256'];
+
+/** "+254721920820" → ['+254', '721920820'] */
+const splitNumber = (value?: string): [string, string] => {
+  const trimmed = (value ?? '').replace(/\s+/g, '');
+  const code = COUNTRY_CODES.find((entry) => trimmed.startsWith(entry));
+
+  return code ? [code, trimmed.slice(code.length)] : ['+254', trimmed];
+};
 
 /**
  * A phone field: a country-code picker and a divider sit inside the field,
@@ -19,15 +35,25 @@ interface PhoneNumberProps extends Omit<React.ComponentProps<'input'>, 'onChange
  * same border, radius, padding, type and focus treatment as every other field.
  */
 const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberProps>(
-  ({ className, type = 'tel', icon, onChange, ...props }, ref) => {
-    const [countryCode, setCountryCode] = React.useState('+254');
-    const [localNumber, setLocalNumber] = React.useState('');
+  ({ className, type = 'tel', icon, onChange, initialValue, ...props }, ref) => {
+    const [initialCode, initialNumber] = React.useMemo(
+      () => splitNumber(initialValue),
+      [initialValue],
+    );
+    const [countryCode, setCountryCode] = React.useState(initialCode);
+    const [localNumber, setLocalNumber] = React.useState(initialNumber);
+
+    // Held in a ref so the report below keys on the value alone. Depending on
+    // `onChange` itself re-fires on every render for any caller that passes an
+    // inline arrow — and if that caller sets state, the two loop forever.
+    const onChangeRef = React.useRef(onChange);
+    React.useEffect(() => {
+      onChangeRef.current = onChange;
+    });
 
     React.useEffect(() => {
-      if (onChange) {
-        onChange(`${countryCode}${localNumber}`);
-      }
-    }, [countryCode, localNumber, onChange]);
+      onChangeRef.current?.(`${countryCode}${localNumber}`);
+    }, [countryCode, localNumber]);
 
     return (
       <Input
@@ -39,10 +65,11 @@ const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberProps>(
         // line-height, so written first it would be dropped and the field would
         // lose its 44px height.
         className="text-[14px] leading-[18px]"
+        defaultValue={initialNumber}
         onChange={(e) => setLocalNumber(e.target.value)}
         icon={
           <div className="flex items-center">
-            <Select onValueChange={(val) => setCountryCode(val)}>
+            <Select value={countryCode} onValueChange={(val) => setCountryCode(val)}>
               <SelectTrigger
                 className={cn(
                   'w-fit border-none p-0 pr-2 shadow-none ring-transparent focus:ring-0',
@@ -61,9 +88,11 @@ const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberProps>(
                 <SelectValue placeholder="+254" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="+254">+254</SelectItem>
-                <SelectItem value="+255">+255</SelectItem>
-                <SelectItem value="+256">+256</SelectItem>
+                {COUNTRY_CODES.map((code) => (
+                  <SelectItem key={code} value={code}>
+                    {code}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Separator orientation="vertical" className="mr-1 h-4 w-px bg-gray-200" />

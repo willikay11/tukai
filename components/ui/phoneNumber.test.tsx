@@ -74,6 +74,24 @@ describe('PhoneNumber', () => {
       expect(screen.getByText('+254')).toBeInTheDocument();
     });
 
+    // An inline onChange is a new function every render. Reporting on that, not
+    // on the value, loops forever against a caller that sets state.
+    it('reports only when the value changes, not on every render', () => {
+      const onChange = jest.fn();
+      const { rerender } = render(<PhoneNumber onChange={onChange} />);
+      const callsAfterMount = onChange.mock.calls.length;
+
+      rerender(<PhoneNumber onChange={() => onChange('rerendered')} />);
+
+      expect(onChange).toHaveBeenCalledTimes(callsAfterMount);
+    });
+
+    it('opens on a stored number, split across the picker and the field', () => {
+      render(<PhoneNumber initialValue="+254721920820" />);
+
+      expect(screen.getByRole('textbox')).toHaveValue('721920820');
+    });
+
     it('reports the code and number as one value', () => {
       const onChange = jest.fn();
       render(<PhoneNumber onChange={onChange} />);
