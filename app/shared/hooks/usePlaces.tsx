@@ -339,12 +339,21 @@ export const usePlaceAvailability = (placeId: string, profileId: string | undefi
     staleTime: 5 * 60 * 1000,
   });
 
-export const usePlaceBookingRequests = (placeId: string, profileId: string | undefined) =>
-  useQuery({
+/**
+ * The reader's own requests against this place.
+ *
+ * Asked only of someone signed in: the endpoint 401s otherwise, and an
+ * anonymous reader has no reservations to list.
+ */
+export const usePlaceBookingRequests = (placeId: string, profileId: string | undefined) => {
+  const { data: session } = useSession();
+
+  return useQuery({
     queryKey: ['placeBookingRequests', placeId, profileId],
     queryFn: async () => await fetchPlaceBookingRequests(placeId, profileId!),
-    enabled: Boolean(placeId && profileId),
+    enabled: Boolean(placeId && profileId && session?.user?.id),
   });
+};
 
 export const useCreatePlaceBookingRequest = (placeId: string, profileId: string | undefined) => {
   const queryClient = useQueryClient();

@@ -17,6 +17,7 @@ import { CategoryPicker } from '../CategoryPicker';
 import { DescriptionFields } from '../DescriptionFields';
 import { ExperienceTitleInput } from '../ExperienceTitleInput';
 import { MeetingDetailsInput } from '../MeetingDetailsInput';
+import { PricingModelPicker } from '../PricingModelPicker';
 import { VisibilityPicker } from '../VisibilityPicker';
 
 type FormPhoto = {
@@ -185,6 +186,8 @@ export const AboutStep = ({
         onChange={handleTitleChange}
         error={errors.title}
       />
+
+      <PricingModelPicker />
 
       <VisibilityPicker value={formData.visibility} onChange={handleVisibilityChange} />
 

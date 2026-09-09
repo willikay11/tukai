@@ -71,7 +71,15 @@ authenticatedApi.interceptors.response.use(
         const session = await getSession();
         const newToken = session?.user?.accessToken;
 
-        if (!newToken || session?.error === 'RefreshAccessTokenError') {
+        // Nobody to sign out: a visitor who was never signed in gets the 401
+        // to handle, not a redirect to a login page they did not ask for. This
+        // is what bounced anonymous readers off pages that make one
+        // authenticated call among many public ones.
+        if (!session) {
+          return Promise.reject(error);
+        }
+
+        if (!newToken || session.error === 'RefreshAccessTokenError') {
           signOut({ redirect: true, callbackUrl: '/auth/sign-in' });
           return Promise.reject(error);
         }
