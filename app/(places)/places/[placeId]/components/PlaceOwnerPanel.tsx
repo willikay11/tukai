@@ -35,7 +35,7 @@ const OWNER_ACTIONS: {
     icon: 'Calendar03Icon',
     title: 'Reservation settings',
     detail: 'Open your tables, set the hours you take them, and answer requests.',
-    href: (id) => `/creator-studio/places/${id}?tab=reservations`,
+    href: (id) => `/creator-studio/places/${id}/reservations`,
   },
 ];
 

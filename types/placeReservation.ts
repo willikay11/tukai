@@ -5,6 +5,9 @@ export type PlaceReservationProfile = {
   reservationType: 'restaurant_reservation' | 'cinema_reservation';
   status: 'draft' | 'active' | 'paused';
   seatingCapacity?: number;
+  // Not in the documented serializer yet — read back if the API starts
+  // returning it, so the form opens on what was saved
+  maxPartySize?: number;
   // Creating a profile auto-provisions a draft "anchor" experience; bookings
   // hang off it server-side. Diners never see it.
   experienceId?: string;
@@ -80,4 +83,27 @@ export type CreatePlaceBookingRequest = {
   partySize: number;
   specialRequests?: string;
   message?: string;
+};
+
+/**
+ * What the reservation settings screen sends when it saves.
+ *
+ * `existingRules` comes along so the save can work out which weekly hours have
+ * to be rewritten: the API creates and deletes rules but never updates one.
+ */
+export type ReservationSettingsDraft = {
+  /** Absent until the place has been opened to reservations at all */
+  profileId?: string;
+  profile: {
+    reservationType: PlaceReservationProfile['reservationType'];
+    seatingCapacity?: number;
+    maxPartySize?: number;
+  };
+  rules: {
+    dayOfWeek: number;
+    openTime: string;
+    closeTime: string;
+    slotIntervalMinutes?: number;
+  }[];
+  existingRules: PlaceAvailabilityRule[];
 };

@@ -931,3 +931,148 @@ export async function deletePlaceSocialLink(
     };
   }
 }
+
+export type ReservationProfilePayload = {
+  reservationType: 'restaurant_reservation' | 'cinema_reservation';
+  seatingCapacity?: number;
+  /**
+   * Not a field the documented serializer carries. It is sent so it lands the
+   * moment the API grows one; until then DRF drops it and nothing is stored.
+   */
+  maxPartySize?: number;
+  experienceTitle?: string;
+  experienceDescription?: string;
+};
+
+/**
+ * Opens a place up to reservations.
+ *
+ * Creating a profile provisions a draft "anchor" experience server-side that
+ * bookings hang off; it is never shown to diners. The profile itself starts as
+ * a draft — `activateReservationProfile` is what makes the place bookable.
+ */
+export async function createReservationProfile(
+  placeId: string,
+  data: ReservationProfilePayload,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(
+      `/v1/places/${placeId}/reservation-profile/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not set up reservations'),
+    };
+  }
+}
+
+export async function updateReservationProfile(
+  placeId: string,
+  profileId: string,
+  data: ReservationProfilePayload,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.patch(
+      `/v1/places/${placeId}/reservation-profile/${profileId}/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save these settings'),
+    };
+  }
+}
+
+/** A draft profile takes no bookings; this is what opens the doors. */
+export async function activateReservationProfile(
+  placeId: string,
+  profileId: string,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(
+      `/v1/places/${placeId}/reservation-profile/${profileId}/activate/`,
+      {},
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not open reservations'),
+    };
+  }
+}
+
+export type AvailabilityRulePayload = {
+  // 0 = Monday .. 6 = Sunday
+  dayOfWeek: number;
+  // 'HH:MM'
+  openTime: string;
+  closeTime: string;
+  slotIntervalMinutes?: number;
+};
+
+export async function createAvailabilityRule(
+  placeId: string,
+  profileId: string,
+  data: AvailabilityRulePayload,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(
+      `/v1/places/${placeId}/reservation-profile/${profileId}/availability-rules/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save these hours'),
+    };
+  }
+}
+
+/**
+ * Rules can only be created and removed — the API offers no update — so
+ * changing a day's hours means removing its rule and writing a new one.
+ */
+export async function deleteAvailabilityRule(
+  placeId: string,
+  profileId: string,
+  ruleId: string,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.delete(
+      `/v1/places/${placeId}/reservation-profile/${profileId}/availability-rules/${ruleId}/`,
+    );
+
+    return { status: res.status, success: true, data: null };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not remove these hours'),
+    };
+  }
+}

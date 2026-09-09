@@ -7,12 +7,15 @@ import {
   bookmarkPlace,
   cancelPlaceBookingRequest,
   claimPlaceOwnership,
+  createAvailabilityRule,
   createPlace,
   createPlaceBookingRequest,
   createPlaceProperty,
   createPlaceReview,
   createPlaceReviewComment,
   createPlaceSocialLink,
+  createReservationProfile,
+  deleteAvailabilityRule,
   deletePlacePhoto,
   deletePlaceProperty,
   deletePlaceReview,
@@ -37,12 +40,14 @@ import {
   updatePlaceProperty,
   updatePlaceReview,
   updatePlaceSocialLink,
+  updateReservationProfile,
   uploadPlacePhoto,
   uploadPlaceReviewImages,
 } from '@/services/place';
 import { Community } from '@/types/community';
 import { PlaceCategoryParams } from '@/types/networkParam';
 import { PlaceEditDraft } from '@/types/placeEdit';
+import { ReservationSettingsDraft } from '@/types/placeReservation';
 import { CreatePlaceBookingRequest } from '@/types/placeReservation';
 
 export const usePlaces = ({
@@ -464,6 +469,64 @@ export const useSavePlaceEdits = (placeId: string) => {
       queryClient.invalidateQueries({ queryKey: ['place', placeId] });
       queryClient.invalidateQueries({ queryKey: ['places'] });
       queryClient.invalidateQueries({ queryKey: ['myPlaces'] });
+    },
+  });
+};
+
+/**
+ * Saves a place's reservation settings, creating the profile if there is none.
+ *
+ * The profile has to exist before its weekly hours can hang off it, so it is
+ * written first and the hours follow against the id it returns. Hours are
+ * replaced rather than edited — the API creates and deletes rules but does not
+ * update them — so a day whose times changed is removed and written again.
+ *
+ * Activating is deliberately not part of this: a profile stays as the API left
+ * it, and opening it to bookings is a separate step.
+ */
+export const useSaveReservationSettings = (placeId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (draft: ReservationSettingsDraft) => {
+      const { profileId, profile, rules, existingRules } = draft;
+
+      const saved = profileId
+        ? await updateReservationProfile(placeId, profileId, profile)
+        : await createReservationProfile(placeId, profile);
+
+      const id: string | undefined = profileId ?? saved.data?.id;
+      if (!id) throw new Error('The reservation profile could not be created');
+
+      // Every rule whose day is gone, or whose times moved, is rewritten
+      const keptDays = new Set(rules.map((rule) => rule.dayOfWeek));
+      for (const existing of existingRules) {
+        const replacement = rules.find((rule) => rule.dayOfWeek === existing.dayOfWeek);
+        const isUnchanged =
+          replacement &&
+          replacement.openTime === existing.openTime &&
+          replacement.closeTime === existing.closeTime &&
+          (replacement.slotIntervalMinutes ?? null) === (existing.slotIntervalMinutes ?? null);
+
+        if (!keptDays.has(existing.dayOfWeek) || !isUnchanged) {
+          await deleteAvailabilityRule(placeId, id, existing.id);
+        }
+      }
+
+      for (const rule of rules) {
+        const existing = existingRules.find((entry) => entry.dayOfWeek === rule.dayOfWeek);
+        const isUnchanged =
+          existing &&
+          existing.openTime === rule.openTime &&
+          existing.closeTime === rule.closeTime &&
+          (existing.slotIntervalMinutes ?? null) === (rule.slotIntervalMinutes ?? null);
+
+        if (!isUnchanged) await createAvailabilityRule(placeId, id, rule);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeReservationProfiles', placeId] });
+      queryClient.invalidateQueries({ queryKey: ['placeAvailability', placeId] });
     },
   });
 };

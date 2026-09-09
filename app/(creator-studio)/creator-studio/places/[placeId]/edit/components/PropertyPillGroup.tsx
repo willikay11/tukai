@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { SelectablePill } from '../../components/WeekdayPills';
 
 /**
  * One property, chosen from pills.
@@ -38,26 +38,14 @@ export const PropertyPillGroup = ({
       <p className="text-xs font-medium text-gray-800">{label}</p>
 
       <div className="flex flex-wrap gap-2">
-        {[...options, ...extras].map((option) => {
-          const isSelected = selected.includes(option);
-
-          return (
-            <button
-              key={option}
-              type="button"
-              aria-pressed={isSelected}
-              onClick={() => toggle(option)}
-              className={cn(
-                'rounded-full px-4 py-2 text-xs font-medium transition-colors',
-                isSelected
-                  ? 'bg-primary text-white'
-                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200',
-              )}
-            >
-              {option}
-            </button>
-          );
-        })}
+        {[...options, ...extras].map((option) => (
+          <SelectablePill
+            key={option}
+            label={option}
+            isSelected={selected.includes(option)}
+            onClick={() => toggle(option)}
+          />
+        ))}
       </div>
     </div>
   );

@@ -64,23 +64,39 @@ export const ManagePlaceContent = ({ place }: { place: Place }) => {
           </p>
         </div>
 
-        <Button asChild variant="gradient-outline" className="rounded-full">
-          <Link href={`/creator-studio/places/${place.id}/edit`}>
-            <span className="flex items-center gap-2">
-              <IconComponent iconName="Edit02Icon" color="currentColor" size={16} />
-              Edit place
-            </span>
-          </Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="gradient-outline" className="rounded-full">
+            <Link href={`/creator-studio/places/${place.id}/edit`}>
+              <span className="flex items-center gap-2">
+                <IconComponent iconName="Edit02Icon" color="currentColor" size={16} />
+                Edit place
+              </span>
+            </Link>
+          </Button>
+
+          <Button asChild variant="gradient-outline" className="rounded-full">
+            <Link href={`/creator-studio/places/${place.id}/reservations`}>
+              <span className="flex items-center gap-2">
+                <IconComponent iconName="Calendar03Icon" color="currentColor" size={16} />
+                Reservation settings
+              </span>
+            </Link>
+          </Button>
+        </div>
       </div>
 
-      {/* Editing the listing and reservation settings arrive as tabs here.
-          `?tab=` already selects one so the links that point at them keep
-          working when they land. */}
+      {/* `?tab=reservations` was where these settings lived before they had a
+          screen of their own, so links that still carry it land there */}
       {searchParams.get('tab') === 'reservations' && (
         <p className="mt-6 rounded-2xl bg-gray-50 p-4 text-sm text-gray-600">
-          Reservation settings are not open yet. Until they are, a place becomes bookable once its
-          reservation profile is created.
+          Reservation settings have moved to{' '}
+          <Link
+            href={`/creator-studio/places/${place.id}/reservations`}
+            className="font-medium text-primary underline"
+          >
+            their own page
+          </Link>
+          .
         </p>
       )}
 

@@ -1,17 +1,8 @@
 'use client';
 
 import { TimePicker, formatTimeLabel } from '@/components/ui/time-picker';
-import { cn } from '@/lib/utils';
 
-const DAYS = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday',
-] as const;
+import { WEEKDAYS as DAYS, WeekdayPills } from '../../components/WeekdayPills';
 
 export type HoursValue = { days: string[]; opensAt: string; closesAt: string };
 
@@ -113,41 +104,9 @@ export const PlaceHoursFields = ({
 }) => {
   const preview = formatOpenHours(value);
 
-  const toggleDay = (day: string) =>
-    onChange({
-      ...value,
-      days: value.days.includes(day)
-        ? value.days.filter((entry) => entry !== day)
-        : [...value.days, day],
-    });
-
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <p className="text-xs font-medium text-gray-800">Active days of the week</p>
-        <div className="flex flex-wrap gap-2">
-          {DAYS.map((day) => {
-            const isSelected = value.days.includes(day);
-
-            return (
-              <button
-                key={day}
-                type="button"
-                aria-pressed={isSelected}
-                onClick={() => toggleDay(day)}
-                className={cn(
-                  'rounded-full px-4 py-2 text-xs font-medium transition-colors',
-                  isSelected
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200',
-                )}
-              >
-                {day}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <WeekdayPills selected={value.days} onChange={(days) => onChange({ ...value, days })} />
 
       <div className="space-y-2">
         <p className="text-xs font-medium text-gray-800">

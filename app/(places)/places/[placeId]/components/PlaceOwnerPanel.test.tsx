@@ -17,7 +17,7 @@ describe('PlaceOwnerPanel', () => {
     );
     expect(screen.getByRole('link', { name: /Reservation settings/ })).toHaveAttribute(
       'href',
-      '/creator-studio/places/p1?tab=reservations',
+      '/creator-studio/places/p1/reservations',
     );
     expect(screen.getByRole('link', { name: /New experience/ })).toHaveAttribute(
       'href',
