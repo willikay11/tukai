@@ -21,6 +21,7 @@ import { PlaceCategory } from '@/types/placeCategory';
 import { placePath } from '@/utils/detail-paths';
 import { haversineKm } from '@/utils/geo-utils';
 
+import { MobilePlaceBar } from './MobilePlaceBar';
 import { PlaceCommunitySection } from './PlaceCommunitySection';
 import { PlaceDetailsSection } from './PlaceDetailsSection';
 import { PlaceReviewsSection } from './PlaceReviewsSection';
@@ -70,7 +71,14 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
 
   return (
     <PageContainer variant="detail" className="py-6">
-      <div className="flex items-center justify-between gap-4">
+      {/* Sticky on a phone only: there the app header scrolls away, so without
+          this the way back and the way to share are reachable only at the very
+          top of a long page. From lg the header stays put and the page is
+          short enough beside the panel, so the row scrolls with the content.
+
+          The negative margins let the background span the gutter while the row
+          keeps the column's padding. */}
+      <div className="sticky top-0 z-30 -mx-4 flex items-center justify-between gap-4 bg-white/95 px-4 py-3 backdrop-blur-sm lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:py-0 lg:backdrop-blur-none">
         <BackToExplore href="/places" label="Back to Places" />
         <Share
           coverPhoto={photos[0] ?? ''}
@@ -131,17 +139,21 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
 
           <PlaceReviewsSection
             placeId={place.id}
+            placeTitle={place.title}
             rating={place.averageRating}
             reviewCount={place.totalReviews}
           />
         </div>
 
-        <div className="lg:col-span-5">
-          {/* Below the content on mobile, pinned alongside from lg up */}
+        {/* Hidden below lg, where the bar's sheet is the way in — stacked
+            under every section it was a long scroll from the top */}
+        <div className="hidden lg:col-span-5 lg:block">
           <div className="lg:sticky lg:top-20">
             <ReservationPanel placeId={place.id} placeName={place.title} />
           </div>
         </div>
+
+        <MobilePlaceBar placeId={place.id} placeName={place.title} />
       </div>
     </PageContainer>
   );

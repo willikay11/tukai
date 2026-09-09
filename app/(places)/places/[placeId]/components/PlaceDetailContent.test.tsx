@@ -46,6 +46,15 @@ jest.mock('@/app/shared/hooks/useExperiences', () => ({
 
 // The reservation panel is its own unit — stubbed here so this suite stays
 // about the page
+// Their own units — this suite is about the page's layout and content
+jest.mock('./AddPlaceReviewAction', () => ({
+  AddPlaceReviewAction: () => <button>Write a review</button>,
+}));
+
+jest.mock('./MobilePlaceBar', () => ({
+  MobilePlaceBar: () => <div data-testid="mobile-place-bar" />,
+}));
+
 jest.mock('./ReservationPanel', () => ({
   ReservationPanel: ({ placeName }: { placeName: string }) => (
     <div data-testid="reservation-panel">{placeName}</div>

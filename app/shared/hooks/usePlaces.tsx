@@ -18,6 +18,7 @@ import {
   fetchPlaceAvailability,
   fetchPlaceBookingRequests,
   fetchPlaceCategories,
+  fetchPlaceOwnership,
   fetchPlaceReservationProfiles,
   fetchPlaceReviewComments,
   fetchPlaceReviews,
@@ -249,6 +250,18 @@ export const useGoogleMapsPlaceGeocode = (placeId: string | null, enabled: boole
 };
 
 // ─── Place reservations ────────────────────────────────────────────────────
+
+/**
+ * Who owns this place, if anyone. `data` is null for an unclaimed place — the
+ * API's 404 — which is what tells a claim prompt from a booking one.
+ */
+export const usePlaceOwnership = (placeId: string, enabled = true) =>
+  useQuery({
+    queryKey: ['placeOwnership', placeId],
+    queryFn: async () => await fetchPlaceOwnership(placeId),
+    enabled: enabled && Boolean(placeId),
+    staleTime: 5 * 60 * 1000,
+  });
 
 /** The place's bookability profiles. Public — anyone may list them. */
 export const usePlaceReservationProfiles = (placeId: string, enabled = true) =>

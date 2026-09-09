@@ -9,12 +9,14 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import {
   useCancelPlaceBookingRequest,
   usePlaceBookingRequests,
+  usePlaceOwnership,
   usePlaceReservationProfiles,
 } from '@/app/shared/hooks/usePlaces';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { PlaceBookingRequest, PlaceReservationProfile } from '@/types/placeReservation';
 
+import { ClaimPlacePrompt } from './ClaimPlacePrompt';
 import { PlaceReservationsCalendar } from './PlaceReservationsCalendar';
 
 export const ReservationPanel = ({
@@ -30,6 +32,10 @@ export const ReservationPanel = ({
   const [isCancelledModalOpen, setIsCancelledModalOpen] = useState(false);
 
   const { data: profilesResponse, isLoading } = usePlaceReservationProfiles(placeId);
+
+  // `data` is null where the API answered 404 — nobody owns this place
+  const { data: ownership, isLoading: isLoadingOwnership } = usePlaceOwnership(placeId);
+  const isUnclaimed = !ownership?.data;
   const profiles: PlaceReservationProfile[] = profilesResponse?.data?.results ?? [];
 
   // A place may hold up to two profiles (restaurant and cinema); only an active
@@ -61,8 +67,19 @@ export const ReservationPanel = ({
     });
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingOwnership) {
     return <div className="h-64 animate-pulse rounded-3xl bg-gray-50" />;
+  }
+
+  // Nobody has claimed it, so it cannot take bookings and nobody can hold one.
+  // Offering a reservation here would only ever reach a disabled button, so the
+  // panel offers the way out of the state instead.
+  if (isUnclaimed) {
+    return (
+      <div className="rounded-3xl bg-gray-50 p-5">
+        <ClaimPlacePrompt placeId={placeId} placeName={placeName} />
+      </div>
+    );
   }
 
   // A place only takes bookings once its owning community sets up a reservation
@@ -123,29 +140,6 @@ export const ReservationPanel = ({
         )}
       </Button>
 
-      {/* A place becomes bookable when its owning community claims it and sets
-          up a profile, so the way out of this state is to claim it */}
-      {!isBookable && (
-        <div className="flex items-start gap-3 rounded-2xl bg-white p-4">
-          <IconComponent
-            iconName="InformationCircleIcon"
-            size={18}
-            color="currentColor"
-            className="mt-0.5 flex-shrink-0 text-primary"
-          />
-          <p className="text-sm text-gray-600">
-            Own or manage this place?{' '}
-            <Link
-              href={`/places/claim?placeId=${placeId}`}
-              className="font-medium text-primary hover:underline"
-            >
-              Claim it
-            </Link>{' '}
-            to take reservations on Tukai.
-          </p>
-        </div>
-      )}
-
       <ExperienceCreatedModal
         open={isCancelledModalOpen}
         onOpenChange={setIsCancelledModalOpen}
@@ -156,8 +150,6 @@ export const ReservationPanel = ({
         onViewExperience={() => setIsCancelledModalOpen(false)}
       />
 
-      {/* The bookings are a second request, so the section holds its shape
-          with skeletons rather than popping in once they land */}
       {(isLoadingReservations || reservations.length > 0) && (
         <PlaceReservationsCalendar
           reservations={reservations}

@@ -609,6 +609,32 @@ export async function fetchFollowing(userId: string): Promise<ApiResponse> {
 }
 
 /**
+ * The ownership claim on a place, or null when nobody holds one.
+ *
+ * The API answers 404 for an unclaimed place, which is an answer rather than a
+ * failure — the caller needs to tell "no owner" from "could not ask".
+ * Unauthenticated, like the reservation profiles beside it.
+ */
+export async function fetchPlaceOwnership(placeId: string): Promise<ApiResponse> {
+  try {
+    const res = await api.get(`/v1/places/${placeId}/ownership/`);
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      return { status: 404, success: true, data: null };
+    }
+
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not check who owns this place'),
+    };
+  }
+}
+
+/**
  * Ownership of a place is held by a COMMUNITY, not a person — the claimant must
  * be an owner or admin of a published community, and a place can only have one
  * approved owner.

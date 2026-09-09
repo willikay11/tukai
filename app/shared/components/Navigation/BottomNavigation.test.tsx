@@ -21,25 +21,34 @@ jest.mock('@/app/shared/components/Icons', () => ({
 const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>;
 
 describe('BottomNavigation', () => {
-  // The single experience page owns the bottom edge with its booking bar
-  it('stands down on a single experience', () => {
-    mockUsePathname.mockReturnValue('/experiences/karura-night-hike');
-
-    const { container } = render(<BottomNavigation />);
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it.each(['/experiences', '/experiences/create', '/experiences/see-all', '/experiences/type'])(
-    'still shows on %s',
+  // Both detail pages own the bottom edge with a floating bar of their own
+  it.each(['/experiences/karura-night-hike', '/places/kraftory-biergarten'])(
+    'stands down on %s',
     (pathname) => {
       mockUsePathname.mockReturnValue(pathname);
 
-      render(<BottomNavigation />);
+      const { container } = render(<BottomNavigation />);
 
-      expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument();
+      expect(container).toBeEmptyDOMElement();
     },
   );
+
+  it.each([
+    '/experiences',
+    '/experiences/create',
+    '/experiences/see-all',
+    '/experiences/type',
+    '/places',
+    '/places/claim',
+    // A sub-route of a place, not the place itself
+    '/places/kraftory-biergarten/reserve',
+  ])('still shows on %s', (pathname) => {
+    mockUsePathname.mockReturnValue(pathname);
+
+    render(<BottomNavigation />);
+
+    expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -178,8 +187,10 @@ describe('BottomNavigation', () => {
       expect(screen.getByRole('link', { name: /places/i })).toHaveClass('bg-lime');
     });
 
+    // A single place hides the nav entirely, so the deepest route that still
+    // shows it is a sub-route of one
     it('marks Places as active for /places subpaths', () => {
-      mockUsePathname.mockReturnValue('/places/123');
+      mockUsePathname.mockReturnValue('/places/123/reserve');
 
       render(<BottomNavigation />);
 

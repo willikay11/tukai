@@ -170,7 +170,7 @@ export const AddReview = ({
   return (
     <Drawer isOpen={isOpen} setIsOpen={closeModal}>
       <div className="flex flex-col p-12">
-        <p className="mb-4 text-xl font-semibold text-gray-700">Rate Your Experience</p>
+        <p className="mb-4 text-xl font-semibold text-gray-700">Write a Review</p>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
