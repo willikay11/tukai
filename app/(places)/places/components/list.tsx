@@ -6,11 +6,13 @@ import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 
+import { CARD_LIFT } from '@/app/shared/components/Motion';
 import { usePlaces } from '@/app/shared/hooks/usePlaces';
 import { NoData } from '@/components/ui/noData';
 import { useLocation } from '@/context/LocationContext';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { Status } from '@/enums/status';
+import { cn } from '@/lib/utils';
 import { Place } from '@/types/place';
 import { placePath } from '@/utils/detail-paths';
 
@@ -207,7 +209,10 @@ export const ListPlaces = () => {
             transition={{ duration: 0.2 }}
             className="cursor-pointer"
           >
-            <Link target="_blank" href={placePath(place)}>
+            {/* `group` here rather than inside the card: the card's photo and
+                its title sit in separate wrappers, and both respond to a hover
+                anywhere on the card */}
+            <Link target="_blank" href={placePath(place)} className={cn('group block', CARD_LIFT)}>
               <SinglePlace place={place} />
             </Link>
           </motion.div>

@@ -93,7 +93,7 @@ export const BottomNavigation = () => {
               href={link.href}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                'inline-flex items-center justify-center gap-2 rounded-full transition-colors',
+                'inline-flex items-center justify-center gap-2 rounded-full transition-colors duration-200 active:scale-95 motion-reduce:transform-none',
                 // Only the current destination is named; the rest are icons, so
                 // four fit across a phone
                 active ? 'bg-lime px-4 py-2.5 text-primary' : 'px-3 py-2.5 text-gray-500',

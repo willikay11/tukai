@@ -6,9 +6,11 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
+import { CARD_LIFT } from '@/app/shared/components/Motion';
 import { NoData } from '@/components/ui/noData';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { Status } from '@/enums/status';
+import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { experiencePath } from '@/utils/detail-paths';
 
@@ -218,7 +220,13 @@ export const ListExperiences = ({
             transition={{ duration: 0.2, delay: index * 0.02 }}
             className="cursor-pointer"
           >
-            <Link target="_blank" href={experiencePath(experience)}>
+            {/* `group` so the card's own photo and title can respond to a
+                hover anywhere on the card, not just over themselves */}
+            <Link
+              target="_blank"
+              href={experiencePath(experience)}
+              className={cn('group block', CARD_LIFT)}
+            >
               <SingleExperience type={type} experience={experience} variant={variant} />
             </Link>
           </motion.div>

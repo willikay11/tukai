@@ -7,6 +7,7 @@ import {
   type AvatarStackUser,
 } from '@/app/(experiences)/experiences/components/AvatarStack';
 import { PhotoImage } from '@/app/shared/components/Images';
+import { CARD_LIFT, MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motion';
 import { useCommunityDetail } from '@/app/shared/hooks/useCommunities';
 import { cn } from '@/lib/utils';
 import { Community, CommunityMember, CommunityOwner } from '@/types/community';
@@ -70,7 +71,7 @@ export const CommunityDiscoverCard = ({
   return (
     <Link
       href={communityPath(community)}
-      className={cn('w-[320px] flex-shrink-0 snap-start', className)}
+      className={cn('group w-[320px] flex-shrink-0 snap-start', CARD_LIFT, className)}
     >
       <div className="relative h-[180px] w-full overflow-hidden rounded-2xl">
         <PhotoImage
@@ -78,7 +79,7 @@ export const CommunityDiscoverCard = ({
           alt={community.title}
           fill
           sizes="320px"
-          className="object-cover"
+          className={cn('object-cover', MEDIA_ZOOM)}
         />
 
         {/* Same translucent treatment as the bookmark circle over an experience
@@ -91,7 +92,7 @@ export const CommunityDiscoverCard = ({
       </div>
 
       <div className="pt-3">
-        <p className="text-base font-bold text-gray-900">{community.title}</p>
+        <p className={cn('text-base font-bold text-gray-900', TITLE_TINT)}>{community.title}</p>
         {/* Descriptions come back as HTML; this card shows a text excerpt */}
         <p className="mt-1 line-clamp-2 text-sm text-gray-500">
           {toPlainText(community.description)}

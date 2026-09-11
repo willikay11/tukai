@@ -4,6 +4,8 @@ import { SectionHeader } from '@/app/(experiences)/experiences/components/Sectio
 import { shouldShowSeeAll } from '@/app/(experiences)/experiences/see-all/config';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
+import { CARD_LIFT } from '@/app/shared/components/Motion';
+import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 import { experiencePath } from '@/utils/detail-paths';
@@ -49,7 +51,11 @@ export const ExperienceRow = ({
         <ScrollRow>
           {experiences.map((experience) => (
             <div key={experience.id} className="w-[280px] flex-shrink-0 snap-start">
-              <Link target="_blank" href={experiencePath(experience)}>
+              <Link
+                target="_blank"
+                href={experiencePath(experience)}
+                className={cn('group block', CARD_LIFT)}
+              >
                 <SingleExperience type="discover" variant="row" experience={experience} />
               </Link>
             </div>

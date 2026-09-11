@@ -1,8 +1,10 @@
 'use client';
 
 import { PhotoImage } from '@/app/shared/components/Images';
+import { MEDIA_ZOOM } from '@/app/shared/components/Motion';
 import { useJoinBucketList } from '@/app/shared/hooks/useBucketLists';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { BucketList, bucketListCoverPhoto } from '@/types/bucket-list';
 import { linkedUserName } from '@/types/user';
 
@@ -17,14 +19,14 @@ export const SharedBucketListCard = ({ bucketList }: SharedBucketListCardProps) 
   const isJoined = Boolean(bucketList.isMember) && bucketList.isMember !== 'false';
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+    <div className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow duration-300 hover:shadow-md">
       <div className="relative h-[200px]">
         <PhotoImage
           src={bucketListCoverPhoto(bucketList)}
           alt={bucketList.name}
           fill
           sizes="(max-width: 768px) 100vw, 400px"
-          className="object-cover"
+          className={cn('object-cover', MEDIA_ZOOM)}
         />
       </div>
 

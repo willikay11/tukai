@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { ShoppingBasketAdd02Icon, ShoppingBasketDone02Icon } from '@hugeicons/react-pro';
 
 import { BucketListPicker } from '@/app/shared/components/BucketList';
+import { POP_ONCE } from '@/app/shared/components/Motion';
 import { Button } from '@/components/ui/button';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { cn } from '@/lib/utils';
@@ -42,6 +43,9 @@ export const Bookmark = ({
 }) => {
   const [isBookmarked, setIsBookmarked] = useState(bookmarked);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  // Only a save the reader just made gets the confirmation beat. Keying it off
+  // `isBookmarked` alone would pop every already-saved card on page load.
+  const [hasJustSaved, setHasJustSaved] = useState(false);
 
   // Seeded once at mount, so a card that re-read its experience after a save
   // kept showing the empty basket until it was unmounted and built again
@@ -72,6 +76,7 @@ export const Bookmark = ({
     if (isBookmarked) onUnbookmark?.();
     else onBookmark?.();
     setIsBookmarked(!isBookmarked);
+    setHasJustSaved(!isBookmarked);
   };
 
   return (
@@ -81,8 +86,13 @@ export const Bookmark = ({
         aria-label={isBookmarked ? 'Saved to bucket list' : 'Add to bucket list'}
         className={cn(
           'flex h-9 w-9 items-center justify-center rounded-full',
-          isBookmarked ? 'bg-white hover:bg-white' : 'bg-black/40 backdrop-blur-sm',
+          isBookmarked
+            ? 'bg-white hover:bg-white'
+            : 'bg-black/40 backdrop-blur-sm hover:bg-black/60',
+          hasJustSaved && POP_ONCE,
         )}
+        // The beat plays once; clearing it here lets the next save replay it
+        onAnimationEnd={() => setHasJustSaved(false)}
         onClick={handleClick}
       >
         {isBookmarked ? (
@@ -104,7 +114,10 @@ export const Bookmark = ({
           experienceId={experienceId}
           placeId={placeId}
           itemName={itemName}
-          onSaved={() => setIsBookmarked(true)}
+          onSaved={() => {
+            setIsBookmarked(true);
+            setHasJustSaved(true);
+          }}
         />
       )}
     </>

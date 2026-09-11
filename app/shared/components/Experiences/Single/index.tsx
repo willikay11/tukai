@@ -12,6 +12,7 @@ import { EventSkeleton } from '@/app/shared/components/Cards';
 import { Pills } from '@/app/shared/components/Filters';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
+import { MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motion';
 import { Button } from '@/components/ui/button';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
 import { useLocation } from '@/context/LocationContext';
@@ -75,7 +76,7 @@ export const SingleExperience = ({
             alt={experience.title}
             fill
             sizes="280px"
-            className="object-cover"
+            className={cn('object-cover', MEDIA_ZOOM)}
             onError={() => setHasError(true)}
           />
           <div className="absolute right-2 top-2">
@@ -89,7 +90,9 @@ export const SingleExperience = ({
           </div>
         </div>
 
-        <p className="mt-2 text-base font-bold text-gray-900">{experience.title}</p>
+        <p className={cn('mt-2 text-base font-bold text-gray-900', TITLE_TINT)}>
+          {experience.title}
+        </p>
         {metaLine && <p className="mt-0.5 text-sm text-gray-400">{metaLine}</p>}
         {experience.hostCommunity && (
           <span className="mt-2 inline-flex items-center gap-1.5 text-sm text-primary">
@@ -154,7 +157,7 @@ export const SingleExperience = ({
       </div>
       <div className="flex flex-col items-start justify-start bg-transparent">
         <div className="mb-1 flex">
-          <p className="text-xs font-bold text-gray-800">{experience.title}</p>
+          <p className={cn('text-xs font-bold text-gray-800', TITLE_TINT)}>{experience.title}</p>
         </div>
         <div className="mb-1 inline-flex items-center">
           <span className="text-xs font-medium text-gray-700">

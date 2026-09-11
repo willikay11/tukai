@@ -4,9 +4,11 @@ import { useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
+import { PRESSABLE } from '@/app/shared/components/Motion';
 import { Share } from '@/app/shared/components/Share';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 import { ReservationTicket } from '@/types/ticket-purchase';
 import { formatReservationDateTime } from '@/utils/date-utils';
 
@@ -148,7 +150,10 @@ export const TicketModal = ({
                 onClick={prevTicket}
                 disabled={activeIndex === 0}
                 aria-label="Previous ticket"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 disabled:opacity-40"
+                className={cn(
+                  'flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 hover:border-gray-400 disabled:opacity-40',
+                  PRESSABLE,
+                )}
               >
                 <IconComponent iconName="ArrowLeft01Icon" size={16} className="text-gray-800" />
               </button>
@@ -165,7 +170,10 @@ export const TicketModal = ({
                 onClick={nextTicket}
                 disabled={activeIndex === tickets.length - 1}
                 aria-label="Next ticket"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 disabled:opacity-40"
+                className={cn(
+                  'flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 hover:border-gray-400 disabled:opacity-40',
+                  PRESSABLE,
+                )}
               >
                 <IconComponent iconName="ArrowRight01Icon" size={16} className="text-gray-800" />
               </button>
