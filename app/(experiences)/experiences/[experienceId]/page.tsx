@@ -24,9 +24,6 @@ const getExperience = cache(async (experienceId: string): Promise<Experience | n
   }
 });
 
-const getCoverPhoto = (experience: Experience): string | undefined =>
-  experience.photos?.find((photo: Photo) => photo.isCover)?.photo || experience.photos?.[0]?.photo;
-
 const buildDescription = (experience: Experience): string => {
   // Descriptions are stored as HTML — strip to plain text for meta tags
   const plain = sanitizeHtml(experience.description || '', {
@@ -67,7 +64,6 @@ export async function generateMetadata({
 
   const title = `Tukai - ${experience.title}`;
   const description = buildDescription(experience);
-  const coverPhoto = getCoverPhoto(experience);
   const url = `${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`;
 
   return {
@@ -82,13 +78,15 @@ export async function generateMetadata({
       siteName: 'Tukai',
       type: 'website',
       locale: 'en_KE',
-      images: coverPhoto ? [{ url: coverPhoto, alt: experience.title }] : [],
+      // No `images` here on purpose: opengraph-image.tsx supplies a 1200×630
+      // card, and an explicit list in generateMetadata would override it with
+      // the raw upload — which is what WhatsApp was refusing.
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: coverPhoto ? [coverPhoto] : [],
+      // Same: the generated card is used, via the file convention
     },
     robots: experience.isPublic ? undefined : { index: false, follow: false },
   };

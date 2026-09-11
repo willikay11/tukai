@@ -18,14 +18,18 @@ describe('buildShareMetadata', () => {
     expect((metadata.openGraph as { url?: string })?.url).toBe(base.url);
   });
 
-  // A crawler fetches from its own servers, so a large card needs a real image
-  it('asks for a large card only when there is an image for it', () => {
+  /**
+   * Every detail route ships an `opengraph-image.tsx`, so a 1200×630 card
+   * exists whether or not one is passed here — asking for a small card would
+   * waste it.
+   */
+  it('always asks for the large card', () => {
     // `twitter` is a union in Next's types; only some members carry `card`
     const cardOf = (image?: string) =>
       (buildShareMetadata({ ...base, image }).twitter as { card?: string })?.card;
 
     expect(cardOf('https://cdn/x.jpg')).toBe('summary_large_image');
-    expect(cardOf()).toBe('summary');
+    expect(cardOf()).toBe('summary_large_image');
   });
 
   it('carries the image through to both previews', () => {

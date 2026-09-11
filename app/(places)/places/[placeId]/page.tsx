@@ -24,7 +24,6 @@ export async function generateMetadata({
       name: place.title,
       description: place.description?.replace(/<[^>]*>/g, '').slice(0, 200),
       url: `${APP_ORIGIN}${placePath(place)}`,
-      image: place.photos?.find((photo) => photo.isCover)?.photo ?? place.photos?.[0]?.photo,
       keywords: place.categories?.map((category) => category.name),
     });
   } catch {
