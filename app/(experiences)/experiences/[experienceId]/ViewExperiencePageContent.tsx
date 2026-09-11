@@ -132,6 +132,7 @@ export const ViewExperiencePageContent = ({
             coverPhoto={coverPhoto}
             title={experience.title}
             link={`${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`}
+            kind="experience"
           />
         </div>
       </div>

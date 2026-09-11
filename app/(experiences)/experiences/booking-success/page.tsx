@@ -275,6 +275,7 @@ const BookingSuccessContent = () => {
                   ? `${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`
                   : `${process.env.NEXT_PUBLIC_APP_URL}/experiences`
               }
+              kind="experience"
             />
           </div>
         </div>

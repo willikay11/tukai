@@ -87,6 +87,7 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
           coverPhoto={photos[0] ?? ''}
           title={place.title}
           link={`${process.env.NEXT_PUBLIC_APP_URL}${placePath(place)}`}
+          kind="place"
         />
       </div>
 

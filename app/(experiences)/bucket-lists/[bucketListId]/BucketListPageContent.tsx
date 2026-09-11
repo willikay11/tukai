@@ -128,6 +128,7 @@ export const BucketListPageContent = ({ bucketListId }: { bucketListId: string }
             coverPhoto={bucketListCoverPhoto(bucketList) ?? ''}
             title={bucketList.name}
             link={`${process.env.NEXT_PUBLIC_APP_URL}/bucket-lists/${bucketList.id}`}
+            kind="bucket list"
           />
         </div>
       </div>

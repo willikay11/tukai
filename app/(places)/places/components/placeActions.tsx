@@ -55,6 +55,7 @@ export const PlaceActions = ({
           coverPhoto={coverPhoto}
           title={placeTitle}
           link={`Check out this place ${placeTitle} on Tukai, ${process.env.NEXT_PUBLIC_APP_URL}/places/${placeId}`}
+          kind="place"
         />
         <div className="mr-2" />
         <Button
