@@ -6,6 +6,7 @@ import { getAuthSession } from '@/lib/auth';
 import { fetchCommunity } from '@/services/community';
 import { ApiResponse } from '@/types/apiResponse';
 import { Community } from '@/types/community';
+import { buildShareMetadata } from '@/utils/share-metadata';
 
 import { CommunityDetailContent } from './components/CommunityDetailContent';
 import { AuthGuard } from './components/authGuard';
@@ -19,7 +20,15 @@ export async function generateMetadata({
     const response: ApiResponse = await fetchCommunity(params.communityId);
     const community: Community | undefined = response.data;
 
-    return community ? { title: `Tukai - ${community.title}` } : { title: 'Tukai' };
+    if (!community) return { title: 'Tukai' };
+
+    return buildShareMetadata({
+      name: community.title,
+      description: community.description?.replace(/<[^>]*>/g, '').slice(0, 200),
+      url: `${process.env.NEXT_PUBLIC_APP_URL}/communities/${community.id}`,
+      image:
+        community.photos?.find((photo) => photo.isCover)?.photo ?? community.photos?.[0]?.photo,
+    });
   } catch {
     return { title: 'Tukai' };
   }

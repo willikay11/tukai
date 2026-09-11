@@ -228,7 +228,12 @@ export const TicketModal = ({
               {isDownloading ? 'Downloading…' : `Download all (${downloadableCount})`}
             </Button>
             <div className="flex-1 [&_button]:w-full [&_button]:justify-center">
-              <Share coverPhoto={coverPhoto ?? ''} title={experienceTitle} link={shareLink} />
+              <Share
+                coverPhoto={coverPhoto ?? ''}
+                title={experienceTitle}
+                link={shareLink}
+                kind="experience"
+              />
             </div>
           </div>
         </div>

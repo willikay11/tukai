@@ -90,6 +90,7 @@ export const CommunityDetailContent = ({
             coverPhoto={coverPhoto}
             title={community.title}
             link={`${process.env.NEXT_PUBLIC_APP_URL}/communities/${community.id}`}
+            kind="community"
           />
         </div>
       </div>

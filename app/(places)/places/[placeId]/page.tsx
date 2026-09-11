@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation';
 import { fetchPlace } from '@/services/place';
 import { ApiResponse } from '@/types/apiResponse';
 import { Place } from '@/types/place';
+import { placePath } from '@/utils/detail-paths';
+import { buildShareMetadata } from '@/utils/share-metadata';
 
 import { PlaceDetailContent } from './components/PlaceDetailContent';
 
@@ -16,7 +18,15 @@ export async function generateMetadata({
     const response: ApiResponse = await fetchPlace(params.placeId);
     const place: Place | undefined = response.data;
 
-    return place ? { title: `Tukai - ${place.title}` } : { title: 'Tukai' };
+    if (!place) return { title: 'Tukai' };
+
+    return buildShareMetadata({
+      name: place.title,
+      description: place.description?.replace(/<[^>]*>/g, '').slice(0, 200),
+      url: `${process.env.NEXT_PUBLIC_APP_URL}${placePath(place)}`,
+      image: place.photos?.find((photo) => photo.isCover)?.photo ?? place.photos?.[0]?.photo,
+      keywords: place.categories?.map((category) => category.name),
+    });
   } catch {
     return { title: 'Tukai' };
   }
