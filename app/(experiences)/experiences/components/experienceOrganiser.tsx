@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { useSession } from 'next-auth/react';
+
 import { CheckmarkBadge02Icon } from '@hugeicons/react-pro';
 
 import { IconComponent } from '@/app/shared/components';
@@ -12,10 +14,17 @@ import { Experience } from '@/types/experience';
 
 export const ExperienceOrganiser = ({ experience }: { experience: Experience }) => {
   const [open, setOpen] = useState(false);
+  const { data: session } = useSession();
+
+  // Nobody needs to message themselves, and the dialog would open a thread
+  // with the reader as both sender and recipient
+  const isOwnExperience = Boolean(session?.user?.id && session.user.id === experience.host?.id);
 
   return (
     <>
-      <SendMessage open={open} setOpen={setOpen} recipientId={experience.host.id} />
+      {!isOwnExperience && (
+        <SendMessage open={open} setOpen={setOpen} recipientId={experience.host.id} />
+      )}
       <div className="inline-flex w-full rounded-[15px] bg-gray-50 px-3 py-3.5">
         <div className="inline-flex w-full justify-between">
           <div className="inline-flex">
@@ -36,19 +45,23 @@ export const ExperienceOrganiser = ({ experience }: { experience: Experience }) 
               </p>
             </div>
           </div>
-          <Button
-            variant="outline-primary"
-            className="h-full rounded-full"
-            onClick={() => setOpen(true)}
-          >
-            Message Organiser
-            <IconComponent
-              iconName="MessageCircle01Icon"
-              size={18}
-              color="currentColor"
-              className="text-primary"
-            />
-          </Button>
+          {!isOwnExperience && (
+            <Button
+              variant="gradient"
+              className="h-full rounded-full"
+              onClick={() => setOpen(true)}
+            >
+              {/* Two bubbles, the smaller one in front. White to read against
+                  the gradient. */}
+              <IconComponent
+                iconName="MessageMultiple02Icon"
+                size={18}
+                color="#FFFFFF"
+                className="mr-2"
+              />
+              Message host
+            </Button>
+          )}
         </div>
       </div>
     </>
