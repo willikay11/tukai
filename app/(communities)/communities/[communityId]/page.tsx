@@ -6,7 +6,7 @@ import { getAuthSession } from '@/lib/auth';
 import { fetchCommunity } from '@/services/community';
 import { ApiResponse } from '@/types/apiResponse';
 import { Community } from '@/types/community';
-import { buildShareMetadata } from '@/utils/share-metadata';
+import { APP_ORIGIN, buildShareMetadata } from '@/utils/share-metadata';
 
 import { CommunityDetailContent } from './components/CommunityDetailContent';
 import { AuthGuard } from './components/authGuard';
@@ -25,7 +25,7 @@ export async function generateMetadata({
     return buildShareMetadata({
       name: community.title,
       description: community.description?.replace(/<[^>]*>/g, '').slice(0, 200),
-      url: `${process.env.NEXT_PUBLIC_APP_URL}/communities/${community.id}`,
+      url: `${APP_ORIGIN}/communities/${community.id}`,
       image:
         community.photos?.find((photo) => photo.isCover)?.photo ?? community.photos?.[0]?.photo,
     });
