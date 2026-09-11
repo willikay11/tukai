@@ -358,7 +358,7 @@ export const EditPlaceContent = ({ place }: { place: Place }) => {
               onOpenChange={(open) => {
                 setIsSavedModalOpen(open);
                 // Closing it lands back where the place is managed from
-                if (!open) router.push(`/creator-studio/places/${place.id}`);
+                if (!open) router.push(`/control-center/places/${place.id}`);
               }}
               title="Changes Saved Successfully!"
               description={`${title} has been updated. Your changes are live on the listing.`}
@@ -371,7 +371,7 @@ export const EditPlaceContent = ({ place }: { place: Place }) => {
             <div className="flex gap-2 pt-6 lg:gap-3">
               <button
                 type="button"
-                onClick={() => router.push(`/creator-studio/places/${place.id}`)}
+                onClick={() => router.push(`/control-center/places/${place.id}`)}
                 className="text-xs font-medium text-destructive hover:text-destructive/80"
               >
                 Cancel

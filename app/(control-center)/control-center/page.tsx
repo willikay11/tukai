@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
-import { CreatorStudioContent } from './CreatorStudioContent';
+import { ControlCenterContent } from './ControlCenterContent';
 
 export const metadata: Metadata = {
-  title: 'Tukai - Creator Studio',
+  title: 'Tukai - Control Center',
   description: 'See how your experiences are performing',
 };
 
-export default function CreatorStudioPage() {
-  return <CreatorStudioContent />;
+export default function ControlCenterPage() {
+  return <ControlCenterContent />;
 }

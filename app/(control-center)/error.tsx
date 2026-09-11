@@ -13,7 +13,7 @@ export default function SegmentError({
     <ErrorState
       error={error}
       reset={reset}
-      title="Creator Studio could not load"
+      title="Control Center could not load"
       description="Something went wrong loading this page. Try again, or head back to Discover."
       homeHref="/"
       homeLabel="Back to Discover"

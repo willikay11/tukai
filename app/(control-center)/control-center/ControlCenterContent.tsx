@@ -14,19 +14,19 @@ import { fetchTicketPurchases } from '@/services/experience';
 import { Experience } from '@/types/experience';
 import { TicketPurchase } from '@/types/ticket-purchase';
 
+import { ControlCenterHero } from './components/ControlCenterHero';
+import { ControlCenterStatCard } from './components/ControlCenterStatCard';
 import { ExperienceProgressRow } from './components/ExperienceProgressRow';
 import { MyExperiences } from './components/MyExperiences';
-import { RecentReservations, StudioReservation } from './components/RecentReservations';
+import { ControlCenterReservation, RecentReservations } from './components/RecentReservations';
 import { RevenueChart } from './components/RevenueChart';
-import { StudioHero } from './components/StudioHero';
-import { StudioStatCard } from './components/StudioStatCard';
 import { YourPlaces } from './components/YourPlaces';
 import {
-  buildStudioMetrics,
+  buildControlCenterMetrics,
   isActive,
   isHostedBy,
   upcomingExperiences,
-} from './utils/studio-metrics';
+} from './utils/control-center-metrics';
 
 // Purchases are only queryable one experience at a time, so the feed is capped
 const RESERVATION_SOURCE_LIMIT = 5;
@@ -40,8 +40,8 @@ const guestName = (purchase: TicketPurchase): string => {
 /** One row per guest per experience, with their tickets and spend summed. */
 export const groupReservations = (
   purchases: { purchase: TicketPurchase; experience: Experience }[],
-): StudioReservation[] => {
-  const rows = new Map<string, StudioReservation>();
+): ControlCenterReservation[] => {
+  const rows = new Map<string, ControlCenterReservation>();
 
   purchases.forEach(({ purchase, experience }) => {
     const key = `${purchase.user?.id ?? 'anon'}|${experience.id}`;
@@ -71,7 +71,7 @@ export const groupReservations = (
   return Array.from(rows.values());
 };
 
-export const CreatorStudioContent = () => {
+export const ControlCenterContent = () => {
   const { data: session } = useSession();
   const userId = session?.user?.id;
 
@@ -86,9 +86,9 @@ export const CreatorStudioContent = () => {
     (experience: Experience) => isHostedBy(experience, userId),
   );
 
-  const metrics = useMemo(() => buildStudioMetrics(experiences), [experiences]);
+  const metrics = useMemo(() => buildControlCenterMetrics(experiences), [experiences]);
   const upcoming = useMemo(() => upcomingExperiences(experiences), [experiences]);
-  // The studio lists what is live; drafts and expired runs are not "my
+  // The control center lists what is live; drafts and expired runs are not "my
   // experiences" a host is currently offering
   const published = useMemo(() => experiences.filter(isActive), [experiences]);
 
@@ -103,7 +103,7 @@ export const CreatorStudioContent = () => {
     })),
   });
 
-  const reservations: StudioReservation[] = useMemo(() => {
+  const reservations: ControlCenterReservation[] = useMemo(() => {
     const joined = purchaseQueries.flatMap((query, index) =>
       ((query.data?.data?.results ?? []) as TicketPurchase[]).map((purchase) => ({
         purchase,
@@ -130,10 +130,10 @@ export const CreatorStudioContent = () => {
 
   return (
     <PageContainer className="space-y-10 py-6">
-      <StudioHero name={session?.user?.name ?? 'there'} metrics={metrics} />
+      <ControlCenterHero name={session?.user?.name ?? 'there'} metrics={metrics} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StudioStatCard
+        <ControlCenterStatCard
           icon="Ticket01Icon"
           value={numeral(metrics.ticketsSold).format('0,0')}
           label="Tickets sold"
@@ -153,7 +153,7 @@ export const CreatorStudioContent = () => {
             ],
           }}
         />
-        <StudioStatCard
+        <ControlCenterStatCard
           icon="ViewIcon"
           value={numeral(metrics.profileViews).format('0,0')}
           label="Profile views"
@@ -173,7 +173,7 @@ export const CreatorStudioContent = () => {
             ],
           }}
         />
-        <StudioStatCard
+        <ControlCenterStatCard
           icon="CheckmarkCircle02Icon"
           value={String(metrics.activeExperiences)}
           label="Active experiences"
@@ -193,7 +193,7 @@ export const CreatorStudioContent = () => {
             ],
           }}
         />
-        <StudioStatCard
+        <ControlCenterStatCard
           icon="StarIcon"
           value={String(metrics.averageRating)}
           label="Average rating"

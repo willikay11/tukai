@@ -66,7 +66,7 @@ export const ManagePlaceContent = ({ place }: { place: Place }) => {
 
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="gradient-outline" className="rounded-full">
-            <Link href={`/creator-studio/places/${place.id}/edit`}>
+            <Link href={`/control-center/places/${place.id}/edit`}>
               <span className="flex items-center gap-2">
                 <IconComponent iconName="Edit02Icon" color="currentColor" size={16} />
                 Edit place
@@ -75,7 +75,7 @@ export const ManagePlaceContent = ({ place }: { place: Place }) => {
           </Button>
 
           <Button asChild variant="gradient-outline" className="rounded-full">
-            <Link href={`/creator-studio/places/${place.id}/reservations`}>
+            <Link href={`/control-center/places/${place.id}/reservations`}>
               <span className="flex items-center gap-2">
                 <IconComponent iconName="Calendar03Icon" color="currentColor" size={16} />
                 Reservation settings
@@ -91,7 +91,7 @@ export const ManagePlaceContent = ({ place }: { place: Place }) => {
         <p className="mt-6 rounded-2xl bg-gray-50 p-4 text-sm text-gray-600">
           Reservation settings have moved to{' '}
           <Link
-            href={`/creator-studio/places/${place.id}/reservations`}
+            href={`/control-center/places/${place.id}/reservations`}
             className="font-medium text-primary underline"
           >
             their own page

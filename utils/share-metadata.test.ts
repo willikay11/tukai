@@ -20,10 +20,12 @@ describe('buildShareMetadata', () => {
 
   // A crawler fetches from its own servers, so a large card needs a real image
   it('asks for a large card only when there is an image for it', () => {
-    expect(buildShareMetadata({ ...base, image: 'https://cdn/x.jpg' }).twitter?.card).toBe(
-      'summary_large_image',
-    );
-    expect(buildShareMetadata(base).twitter?.card).toBe('summary');
+    // `twitter` is a union in Next's types; only some members carry `card`
+    const cardOf = (image?: string) =>
+      (buildShareMetadata({ ...base, image }).twitter as { card?: string })?.card;
+
+    expect(cardOf('https://cdn/x.jpg')).toBe('summary_large_image');
+    expect(cardOf()).toBe('summary');
   });
 
   it('carries the image through to both previews', () => {

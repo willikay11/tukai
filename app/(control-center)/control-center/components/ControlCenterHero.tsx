@@ -6,7 +6,7 @@ import numeral from 'numeral';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 
-import { StudioMetrics } from '../utils/studio-metrics';
+import { ControlCenterMetrics } from '../utils/control-center-metrics';
 
 const HeroStat = ({ value, label, accent }: { value: string; label: string; accent?: boolean }) => (
   <div>
@@ -15,7 +15,7 @@ const HeroStat = ({ value, label, accent }: { value: string; label: string; acce
   </div>
 );
 
-export const StudioHero = ({ name, metrics }: { name: string; metrics: StudioMetrics }) => {
+export const ControlCenterHero = ({ name, metrics }: { name: string; metrics: ControlCenterMetrics }) => {
   const router = useRouter();
   const money = (amount: number) => `${metrics.currency} ${numeral(amount).format('0,0')}`;
 
@@ -26,7 +26,7 @@ export const StudioHero = ({ name, metrics }: { name: string; metrics: StudioMet
           <div className="flex items-center gap-1.5">
             <IconComponent iconName="SparklesIcon" size={14} className="text-lime" />
             <span className="text-xs font-bold uppercase tracking-wider text-lime">
-              Creator Studio
+              Control Center
             </span>
           </div>
 

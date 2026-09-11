@@ -46,11 +46,11 @@ describe('MyExperiences', () => {
 
     expect(screen.getByRole('link', { name: /Manage/ })).toHaveAttribute(
       'href',
-      '/creator-studio/experiences/e1',
+      '/control-center/experiences/e1',
     );
   });
 
-  // Every published experience is listed; the studio is the full list now
+  // Every published experience is listed; the control center is the full list now
   it('shows all of them and counts them, without capping to a single row', () => {
     const many = Array.from({ length: 7 }, (_, index) =>
       experience(`e${index}`, `Experience ${index}`),

@@ -1,6 +1,6 @@
 import { IconComponent } from '@/app/shared/components/Icons';
 
-interface StudioStatCardProps {
+interface ControlCenterStatCardProps {
   icon: string;
   value: string;
   label: string;
@@ -10,14 +10,14 @@ interface StudioStatCardProps {
   tone: { rule: string; tile: string; icon: string; bars: string[] };
 }
 
-export const StudioStatCard = ({
+export const ControlCenterStatCard = ({
   icon,
   value,
   label,
   delta,
   deltaTone = 'positive',
   tone,
-}: StudioStatCardProps) => (
+}: ControlCenterStatCardProps) => (
   <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
     <div className={`h-1 w-full ${tone.rule}`} />
 

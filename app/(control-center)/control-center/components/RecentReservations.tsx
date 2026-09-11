@@ -3,7 +3,7 @@ import numeral from 'numeral';
 import { PaymentStatusBadge } from '@/app/(experiences)/experiences/components/PaymentStatusBadge';
 import { PhotoImage } from '@/app/shared/components/Images';
 
-export interface StudioReservation {
+export interface ControlCenterReservation {
   id: string;
   guestName: string;
   guestPicture: string | null;
@@ -19,7 +19,11 @@ const Cell = ({ children, className = '' }: { children: React.ReactNode; classNa
   <td className={`py-4 pr-4 align-middle ${className}`}>{children}</td>
 );
 
-export const RecentReservations = ({ reservations }: { reservations: StudioReservation[] }) => (
+export const RecentReservations = ({
+  reservations,
+}: {
+  reservations: ControlCenterReservation[];
+}) => (
   <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
     <div className="flex items-center justify-between gap-4">
       <h2 className="text-lg font-bold text-gray-900">Recent reservations</h2>

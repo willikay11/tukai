@@ -4,7 +4,7 @@ import { PhotoImage } from '@/app/shared/components/Images';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 
-import { experienceProgress } from '../utils/studio-metrics';
+import { experienceProgress } from '../utils/control-center-metrics';
 
 export const StatusBadge = ({ isSellingFast }: { isSellingFast: boolean }) =>
   isSellingFast ? (

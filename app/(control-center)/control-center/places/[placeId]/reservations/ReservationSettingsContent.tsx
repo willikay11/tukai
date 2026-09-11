@@ -180,7 +180,7 @@ export const ReservationSettingsContent = ({ place }: { place: Place }) => {
         </TabsList>
 
         <div className="grid grid-cols-12 gap-4">
-          <div className="col-span-12 lg:col-span-6">
+          <div className="col-span-12 lg:col-span-5">
             <TabsContent value="reservation-type" className="mt-6 space-y-8">
               <section className="space-y-3">
                 <div>
@@ -318,7 +318,7 @@ export const ReservationSettingsContent = ({ place }: { place: Place }) => {
               <div className="flex gap-2 pt-2 lg:gap-3">
                 <button
                   type="button"
-                  onClick={() => router.push(`/creator-studio/places/${place.id}`)}
+                  onClick={() => router.push(`/control-center/places/${place.id}`)}
                   className="text-xs font-medium text-destructive hover:text-destructive/80"
                 >
                   Cancel
@@ -343,7 +343,7 @@ export const ReservationSettingsContent = ({ place }: { place: Place }) => {
         open={isSavedModalOpen}
         onOpenChange={(open) => {
           setIsSavedModalOpen(open);
-          if (!open) router.push(`/creator-studio/places/${place.id}`);
+          if (!open) router.push(`/control-center/places/${place.id}`);
         }}
         title="Reservations Are Open!"
         description={`${place.title} now takes reservations on the days and hours you set. Requests will appear here for you to accept or decline.`}

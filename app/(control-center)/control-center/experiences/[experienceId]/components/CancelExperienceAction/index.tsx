@@ -105,10 +105,10 @@ export const CancelExperienceAction = ({
       <ExperienceCreatedModal
         open={isCancelledModalOpen}
         onOpenChange={setIsCancelledModalOpen}
-        href="/creator-studio"
+        href="/control-center"
         title="Experience Cancelled Successfully"
         description={`"${experienceTitle}" has been cancelled and anyone who paid is being refunded. Your guests will be notified.`}
-        viewExperienceLabel="Back to Creator Studio"
+        viewExperienceLabel="Back to Control Center"
       />
     </div>
   );

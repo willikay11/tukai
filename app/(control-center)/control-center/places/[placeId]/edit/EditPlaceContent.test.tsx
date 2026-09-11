@@ -154,7 +154,7 @@ describe('EditPlaceContent', () => {
     await screen.findByText('Changes Saved Successfully!');
     await user.keyboard('{Escape}');
 
-    expect(push).toHaveBeenCalledWith('/creator-studio/places/p1');
+    expect(push).toHaveBeenCalledWith('/control-center/places/p1');
   });
 
   it('says so rather than calling the API when nothing was touched', async () => {

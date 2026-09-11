@@ -1,13 +1,13 @@
 import { Experience } from '@/types/experience';
 
 import {
-  buildStudioMetrics,
+  buildControlCenterMetrics,
   experienceProgress,
   isActive,
   isHostedBy,
   toAmount,
   upcomingExperiences,
-} from './studio-metrics';
+} from './control-center-metrics';
 
 // Shaped like the real hosted-experience payload, where money is a decimal
 // string and host counters only appear on experiences you own
@@ -37,9 +37,9 @@ describe('toAmount', () => {
   });
 });
 
-describe('buildStudioMetrics', () => {
+describe('buildControlCenterMetrics', () => {
   it('sums real revenue and tickets across hosted experiences', () => {
-    const metrics = buildStudioMetrics([
+    const metrics = buildControlCenterMetrics([
       hosted(),
       hosted({ id: 'e2', ticketsSold: 6, totalAmountSold: { amount: '2000.00', currency: 'KES' } }),
     ]);
@@ -49,7 +49,7 @@ describe('buildStudioMetrics', () => {
   });
 
   it('counts only published experiences as active', () => {
-    const metrics = buildStudioMetrics([
+    const metrics = buildControlCenterMetrics([
       hosted(),
       hosted({ id: 'e2', status: 'draft' }),
       hosted({ id: 'e3', status: 'expired' }),
@@ -59,7 +59,7 @@ describe('buildStudioMetrics', () => {
   });
 
   it('copes with a host who has no experiences', () => {
-    const metrics = buildStudioMetrics([]);
+    const metrics = buildControlCenterMetrics([]);
 
     expect(metrics.totalRevenue).toBe(0);
     expect(metrics.ticketsSold).toBe(0);
@@ -68,7 +68,7 @@ describe('buildStudioMetrics', () => {
   });
 
   it('ignores experiences with no host counters', () => {
-    const metrics = buildStudioMetrics([
+    const metrics = buildControlCenterMetrics([
       hosted({ ticketsSold: undefined, totalAmountSold: undefined }),
     ]);
 
@@ -78,7 +78,7 @@ describe('buildStudioMetrics', () => {
 
   // The chart has no endpoint; it must still line up with the real total
   it('produces eight labelled months that stay proportional to the total', () => {
-    const metrics = buildStudioMetrics([hosted()]);
+    const metrics = buildControlCenterMetrics([hosted()]);
 
     expect(metrics.monthlyRevenue).toHaveLength(8);
     metrics.monthlyRevenue.forEach((point) => {
@@ -142,7 +142,7 @@ describe('isActive', () => {
 });
 
 // Regression: the hosted_by filter also returns experiences the user only
-// CO-HOSTS, so the studio listed other people's experiences and folded their
+// CO-HOSTS, so the control center listed other people's experiences and folded their
 // sales into the host's own figures.
 describe('isHostedBy', () => {
   const owned = { host: { id: 'me' }, coHosts: [] } as unknown as Experience;
@@ -174,7 +174,7 @@ describe('isHostedBy', () => {
     const theirs = { ...coHosted, ticketsSold: 99, status: 'published' } as unknown as Experience;
 
     const ownedOnly = [mine, theirs].filter((item) => isHostedBy(item, 'me'));
-    const metrics = buildStudioMetrics(ownedOnly);
+    const metrics = buildControlCenterMetrics(ownedOnly);
 
     expect(metrics.ticketsSold).toBe(4);
     expect(metrics.activeExperiences).toBe(1);

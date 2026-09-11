@@ -61,9 +61,9 @@ describe('CancelExperienceAction', () => {
     await user.click(screen.getByRole('button', { name: 'Cancel experience' }));
 
     expect(await screen.findByText('Experience Cancelled Successfully')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Back to Creator Studio' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Back to Control Center' })).toHaveAttribute(
       'href',
-      '/creator-studio',
+      '/control-center',
     );
     expect(toast).not.toHaveBeenCalled();
   });

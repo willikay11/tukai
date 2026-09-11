@@ -4,7 +4,7 @@ import { Status } from '@/enums/status';
 import { Experience } from '@/types/experience';
 import { TicketPurchase } from '@/types/ticket-purchase';
 
-import { experienceProgress } from '../../../utils/studio-metrics';
+import { experienceProgress } from '../../../utils/control-center-metrics';
 
 /**
  * Host-facing metrics for the Manage Experience dashboard.

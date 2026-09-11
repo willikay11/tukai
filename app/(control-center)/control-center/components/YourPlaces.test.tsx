@@ -11,6 +11,8 @@ jest.mock('@/app/shared/hooks/usePlaces', () => ({
 
 const place = (extra: Record<string, unknown> = {}) => ({
   id: 'p1',
+  // Real places carry one, and the detail URL prefers it over the uuid
+  slug: 'kraftory-biergarten',
   title: 'Kraftory Biergarten',
   photos: [{ id: 'ph1', photo: 'https://cdn.tukai.co/a.jpg', isCover: true }],
   categories: [{ id: 'c1', name: 'Beer Garden', group: 'interests' }],
@@ -38,15 +40,28 @@ describe('YourPlaces', () => {
     expect(screen.getByText('Beer Garden · Karen')).toBeInTheDocument();
   });
 
-  // The studio manages; the public listing is a click further on from there
-  it('opens a place for managing, not its public listing', () => {
+  // The owner panel on the place page is where managing happens, so the card
+  // goes straight there rather than to a separate console
+  it('opens the place as everyone sees it', () => {
     withPlaces([place()]);
 
     render(<YourPlaces />);
 
     expect(screen.getByRole('link', { name: /Kraftory Biergarten/ })).toHaveAttribute(
       'href',
-      '/creator-studio/places/p1',
+      '/places/kraftory-biergarten',
+    );
+  });
+
+  // Older places predate slugs; the uuid still resolves
+  it('falls back to the id where a place has no slug', () => {
+    withPlaces([place({ slug: undefined })]);
+
+    render(<YourPlaces />);
+
+    expect(screen.getByRole('link', { name: /Kraftory Biergarten/ })).toHaveAttribute(
+      'href',
+      '/places/p1',
     );
   });
 

@@ -9,6 +9,7 @@ import { useMyPlaces } from '@/app/shared/hooks/usePlaces';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
 import { PlaceCategory } from '@/types/placeCategory';
+import { placePath } from '@/utils/detail-paths';
 
 const coverOf = (place: Place): string | undefined =>
   place.photos?.find((photo: Photo) => photo.isCover)?.photo || place.photos?.[0]?.photo;
@@ -74,8 +75,10 @@ export const YourPlaces = () => {
               return (
                 <Link
                   key={place.id}
-                  // The studio manages; the public page is a click further on
-                  href={`/creator-studio/places/${place.id}`}
+                  // Straight to the place as everyone sees it. The owner panel
+                  // on that page is where editing, reservations and new
+                  // experiences are reached from.
+                  href={placePath(place)}
                   className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-colors hover:border-gray-200"
                 >
                   <div className="relative aspect-[16/10] w-full">
@@ -102,7 +105,7 @@ export const YourPlaces = () => {
                         <span className="text-sm text-gray-400">No reviews yet</span>
                       )}
                       <span className="flex items-center gap-1 text-sm font-semibold text-gray-900 group-hover:text-primary">
-                        Manage
+                        View
                         <IconComponent iconName="ArrowRight01Icon" size={14} color="currentColor" />
                       </span>
                     </div>

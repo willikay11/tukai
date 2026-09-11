@@ -4,7 +4,7 @@ import { Status } from '@/enums/status';
 import { Experience } from '@/types/experience';
 
 /**
- * Metrics for the Creator Studio landing page.
+ * Metrics for the Control Center landing page.
  *
  * Revenue, tickets sold and experience counts are REAL — the experiences
  * endpoint returns per-experience host figures (tickets_sold, total_amount_sold)
@@ -21,7 +21,7 @@ export const toAmount = (value: { amount: string | number } | undefined): number
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-export interface StudioMetrics {
+export interface ControlCenterMetrics {
   // ─── Derived from real host data ───
   totalRevenue: number;
   currency: string;
@@ -69,7 +69,7 @@ const placeholderMonthlyRevenue = (total: number): { month: string; amount: numb
  * Whether this user actually owns the experience.
  *
  * The API's hosted_by filter also returns experiences you are a CO-HOST on, so
- * the studio was listing other people's experiences — and counting their sales
+ * the control center was listing other people's experiences — and counting their sales
  * in the host's own figures. Ownership is the host id, not co-host membership.
  */
 export const isHostedBy = (experience: Experience, userId: string | null | undefined): boolean =>
@@ -78,7 +78,7 @@ export const isHostedBy = (experience: Experience, userId: string | null | undef
 export const isActive = (experience: Experience): boolean =>
   experience.status === ('published' as Status) || experience.status === ('PUBLISHED' as Status);
 
-export const buildStudioMetrics = (experiences: Experience[]): StudioMetrics => {
+export const buildControlCenterMetrics = (experiences: Experience[]): ControlCenterMetrics => {
   const totalRevenue = experiences.reduce(
     (sum, experience) => sum + toAmount(experience.totalAmountSold),
     0,

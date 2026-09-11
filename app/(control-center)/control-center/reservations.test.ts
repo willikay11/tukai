@@ -1,7 +1,7 @@
 import { Experience } from '@/types/experience';
 import { TicketPurchase } from '@/types/ticket-purchase';
 
-import { groupReservations } from './CreatorStudioContent';
+import { groupReservations } from './ControlCenterContent';
 
 const experience = (id: string, title: string) => ({ id, title }) as unknown as Experience;
 
