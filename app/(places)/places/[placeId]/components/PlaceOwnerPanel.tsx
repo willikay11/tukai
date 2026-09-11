@@ -9,7 +9,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
  *
  * Takes the reservation panel's slot rather than sitting above the page: an
  * owner is not going to book their own table, so the column is theirs. The work
- * itself happens in Creator Studio, where there is room for the forms.
+ * itself happens in Control Center, where there is room for the forms.
  */
 const OWNER_ACTIONS: {
   icon: string;
@@ -21,7 +21,7 @@ const OWNER_ACTIONS: {
     icon: 'Edit02Icon',
     title: 'Edit place',
     detail: 'Update the photos, description and details readers see here.',
-    href: (id) => `/creator-studio/places/${id}/edit`,
+    href: (id) => `/control-center/places/${id}/edit`,
   },
   {
     icon: 'PlusSignIcon',
@@ -35,7 +35,7 @@ const OWNER_ACTIONS: {
     icon: 'Calendar03Icon',
     title: 'Reservation settings',
     detail: 'Open your tables, set the hours you take them, and answer requests.',
-    href: (id) => `/creator-studio/places/${id}/reservations`,
+    href: (id) => `/control-center/places/${id}/reservations`,
   },
 ];
 
@@ -48,7 +48,7 @@ export const PlaceOwnerPanel = ({ placeId, placeName }: { placeId: string; place
       </p>
       <h2 className="mt-2 text-xl font-bold text-gray-900">{placeName}</h2>
       <p className="mt-1 text-sm text-gray-500">
-        Everything for this listing lives in Creator Studio.
+        Everything for this listing lives in Control Center.
       </p>
     </div>
 

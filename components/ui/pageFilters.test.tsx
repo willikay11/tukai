@@ -72,7 +72,7 @@ describe('PageFilters', () => {
       '/places/123',
       '/experiences/456',
       '/communities/789',
-      '/creator-studio/experiences/456',
+      '/control-center/experiences/456',
       '/moments',
       '/moments?momentId=abc',
       '/auth/login',

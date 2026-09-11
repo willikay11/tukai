@@ -26,8 +26,6 @@ export async function generateMetadata({
       name: community.title,
       description: community.description?.replace(/<[^>]*>/g, '').slice(0, 200),
       url: `${APP_ORIGIN}/communities/${community.id}`,
-      image:
-        community.photos?.find((photo) => photo.isCover)?.photo ?? community.photos?.[0]?.photo,
     });
   } catch {
     return { title: 'Tukai' };

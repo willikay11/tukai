@@ -10,6 +10,22 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Creator Studio became Control Center. Links already handed out — bookmarks,
+  // emails, anything shared — keep working rather than 404ing.
+  async redirects() {
+    return [
+      {
+        source: '/creator-studio',
+        destination: '/control-center',
+        permanent: true,
+      },
+      {
+        source: '/creator-studio/:path*',
+        destination: '/control-center/:path*',
+        permanent: true,
+      },
+    ];
+  },
   images: {
     unoptimized: true,
     remotePatterns: [

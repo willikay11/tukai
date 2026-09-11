@@ -75,11 +75,11 @@ export const HostingCard = ({ experience }: HostingCardProps) => {
   const status = normalizeStatus(experience.status);
   const isDraft = status === Status.Draft;
   // A draft has nothing to manage yet, so it reopens in the create wizard.
-  // Anything published goes to the host's Creator Studio dashboard — this card
+  // Anything published goes to the host's Control Center dashboard — this card
   // only ever renders in host contexts (Hosting tab, pre-wizard listing).
   const manageHref = isDraft
     ? `/experiences/create?experienceId=${experience.id}`
-    : `/creator-studio/experiences/${experience.id}`;
+    : `/control-center/experiences/${experience.id}`;
 
   const metaLine = buildHostingMetaLine(experience);
   const footerText = buildHostingFooterText(experience);

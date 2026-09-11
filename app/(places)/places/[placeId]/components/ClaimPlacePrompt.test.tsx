@@ -16,7 +16,7 @@ describe('ClaimPlacePrompt', () => {
   it('names who it is for and what it unlocks', () => {
     expect(screen.getByText(/If you own or manage it/)).toBeInTheDocument();
     expect(screen.getByText('Take reservations')).toBeInTheDocument();
-    expect(screen.getByText('Manage it from Creator Studio')).toBeInTheDocument();
+    expect(screen.getByText('Manage it from Control Center')).toBeInTheDocument();
     expect(screen.getByText('Own it as a community')).toBeInTheDocument();
   });
 

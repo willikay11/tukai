@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
  *
  * "Claim" on its own reads as claiming a reward, so this names the audience,
  * what it unlocks and what it takes. Everything listed here is something the
- * product does today — reservations, the listing in Creator Studio, ownership
+ * product does today — reservations, the listing in Control Center, ownership
  * sitting with a community rather than a person.
  */
 const WHAT_YOU_GET: { icon: string; title: string; detail: string }[] = [
@@ -21,7 +21,7 @@ const WHAT_YOU_GET: { icon: string; title: string; detail: string }[] = [
   },
   {
     icon: 'ChartLineData01Icon',
-    title: 'Manage it from Creator Studio',
+    title: 'Manage it from Control Center',
     detail: 'The listing joins Your Places, alongside the experiences your community runs.',
   },
   {

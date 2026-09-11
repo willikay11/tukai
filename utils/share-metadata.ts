@@ -59,7 +59,9 @@ export const buildShareMetadata = ({
       images,
     },
     twitter: {
-      card: image ? 'summary_large_image' : 'summary',
+      // Large by default: every detail route ships an opengraph-image.tsx, so
+      // there is always a 1200×630 card even when no `image` is passed here
+      card: 'summary_large_image',
       title,
       description,
       images: image ? [image] : [],

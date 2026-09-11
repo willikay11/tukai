@@ -13,11 +13,11 @@ describe('PlaceOwnerPanel', () => {
 
     expect(screen.getByRole('link', { name: /Edit place/ })).toHaveAttribute(
       'href',
-      '/creator-studio/places/p1/edit',
+      '/control-center/places/p1/edit',
     );
     expect(screen.getByRole('link', { name: /Reservation settings/ })).toHaveAttribute(
       'href',
-      '/creator-studio/places/p1/reservations',
+      '/control-center/places/p1/reservations',
     );
     expect(screen.getByRole('link', { name: /New experience/ })).toHaveAttribute(
       'href',

@@ -18,11 +18,10 @@ export const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
     icon: 'UserMultipleIcon',
     href: '/communities?category=my-communities',
   },
-  { label: 'My Places', icon: 'Location01Icon' },
   { label: 'Bucket List', icon: 'ShoppingBasket01Icon', href: '/bucket-lists' },
   { label: 'Notifications', icon: 'Notification03Icon', showsUnreadDot: true },
   { label: 'Messages', icon: 'BubbleChatIcon' },
-  { label: 'Creator Studio', icon: 'Analytics01Icon', href: '/creator-studio' },
+  { label: 'Control Center', icon: 'Analytics01Icon', href: '/control-center' },
 ];
 
 export const UNAVAILABLE_TITLE = 'Coming soon';

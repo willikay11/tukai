@@ -58,21 +58,21 @@ describe('ProfileMenu', () => {
       'href',
       '/communities?category=my-communities',
     );
-    expect(screen.getByRole('link', { name: /Creator Studio/ })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Control Center/ })).toHaveAttribute(
       'href',
-      '/creator-studio',
+      '/control-center',
     );
   });
 
-  it('links Creator Studio now that the page exists', () => {
+  it('links Control Center now that the page exists', () => {
     render(<ProfileMenu {...defaults} />);
 
-    const control = screen.getByText('Creator Studio').closest('a');
-    expect(control).toHaveAttribute('href', '/creator-studio');
-    expect(screen.getByText('Creator Studio').closest('button')).toBeNull();
+    const control = screen.getByText('Control Center').closest('a');
+    expect(control).toHaveAttribute('href', '/control-center');
+    expect(screen.getByText('Control Center').closest('button')).toBeNull();
   });
 
-  // Bucket List, Notifications, Messages and Creator Studio have no page yet
+  // Bucket List, Notifications, Messages and Control Center have no page yet
   it('disables items whose destination does not exist rather than linking to a 404', () => {
     render(<ProfileMenu {...defaults} />);
 

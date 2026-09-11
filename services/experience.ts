@@ -402,7 +402,7 @@ export const publishExperience = async (id: string): Promise<ApiResponse> => {
 //
 // Per the spec this "cancels the experience, refunding any completed
 // purchases", so it serves both callers: clearing an unfinished draft on the
-// resume screen, and cancelling a live experience from Creator Studio. The
+// resume screen, and cancelling a live experience from Control Center. The
 // refunds are the API's business, not the client's.
 export const cancelExperience = async (id: string): Promise<ApiResponse> => {
   try {
@@ -583,9 +583,7 @@ export interface PromoCodePreviewPayload {
  * one it will. Its documented body is the promo-code viewset's own serializer,
  * which is not what it accepts — this shape was read off the API itself.
  */
-export const previewPromoCode = async (
-  data: PromoCodePreviewPayload,
-): Promise<ApiResponse> => {
+export const previewPromoCode = async (data: PromoCodePreviewPayload): Promise<ApiResponse> => {
   try {
     const response = await api.post(`/v1/experiences/promo-codes/preview/`, data);
 

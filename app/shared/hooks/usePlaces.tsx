@@ -73,7 +73,7 @@ export const usePlaces = ({
   });
 };
 
-/** The places this user owns, for Creator Studio. */
+/** The places this user owns, for Control Center. */
 export const useMyPlaces = (enabled: boolean = true) =>
   useQuery({
     queryKey: ['myPlaces'],
