@@ -3,19 +3,17 @@
 import { useSession } from 'next-auth/react';
 
 import { Bookmark } from '@/app/shared/components/Bookmark';
-import { useBookmarkExperience } from '@/app/shared/hooks/useExperiences';
 import { Experience } from '@/types/experience';
 
 export const BookmarkExperience = ({ experience }: { experience: Experience }) => {
-  const { mutate: bookmarkExperience } = useBookmarkExperience();
   const { data: session } = useSession();
 
   return (
     <Bookmark
       userId={session?.user?.id}
       bookmarked={experience.isBookmarked}
-      onBookmark={() => bookmarkExperience(experience.id)}
-      onUnbookmark={() => bookmarkExperience(experience.id)}
+      experienceId={experience.id}
+      itemName={experience.title}
     />
   );
 };

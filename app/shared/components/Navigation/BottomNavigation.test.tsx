@@ -22,16 +22,17 @@ const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>;
 
 describe('BottomNavigation', () => {
   // Both detail pages own the bottom edge with a floating bar of their own
-  it.each(['/experiences/karura-night-hike', '/places/kraftory-biergarten'])(
-    'stands down on %s',
-    (pathname) => {
-      mockUsePathname.mockReturnValue(pathname);
+  it.each([
+    '/experiences/karura-night-hike',
+    '/places/kraftory-biergarten',
+    '/bucket-lists/weekend-hikes',
+  ])('stands down on %s', (pathname) => {
+    mockUsePathname.mockReturnValue(pathname);
 
-      const { container } = render(<BottomNavigation />);
+    const { container } = render(<BottomNavigation />);
 
-      expect(container).toBeEmptyDOMElement();
-    },
-  );
+    expect(container).toBeEmptyDOMElement();
+  });
 
   it.each([
     '/experiences',
@@ -40,6 +41,8 @@ describe('BottomNavigation', () => {
     '/experiences/type',
     '/places',
     '/places/claim',
+    // The index of lists carries no floating bar of its own
+    '/bucket-lists',
     // A sub-route of a place, not the place itself
     '/places/kraftory-biergarten/reserve',
   ])('still shows on %s', (pathname) => {

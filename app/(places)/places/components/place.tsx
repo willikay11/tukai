@@ -8,14 +8,12 @@ import clsx from 'clsx';
 
 import { BookmarkPlace } from '@/app/shared/components/Bookmark';
 import { EventSkeleton } from '@/app/shared/components/Cards';
-import { useBookmarkPlace } from '@/app/shared/hooks/usePlaces';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
 import { Place } from '@/types/place';
 
 export const SinglePlace = ({ place }: { place: Place }) => {
   const [hasError, setHasError] = useState(false);
   const { data: session } = useSession();
-  const { mutate: bookmarkPlace } = useBookmarkPlace(place.id, session?.user?.id || '');
 
   if (place.id.startsWith('placeholder-')) {
     return <EventSkeleton />;
@@ -39,8 +37,8 @@ export const SinglePlace = ({ place }: { place: Place }) => {
           <BookmarkPlace
             userId={session?.user?.id}
             bookmarked={place.isBookmarked}
-            onBookmark={() => bookmarkPlace()}
-            onUnbookmark={() => bookmarkPlace()}
+            placeId={place.id}
+            itemName={place.title}
             className="text-white"
           />
         </div>

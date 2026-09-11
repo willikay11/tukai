@@ -1,121 +1,230 @@
+import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
-import { BucketList, CreateBucketListPayload } from '@/types/bucket-list';
+import { AddBucketListItemPayload, CreateBucketListPayload } from '@/types/bucket-list';
+import { parseApiError } from '@/utils/parseApiError';
+import { parseCamelToSnake, parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 /**
- * ⚠️ MOCK SERVICE — the bucket-list API does not exist yet (all candidate
- * endpoints 404 on staging as of 2026-07-14). Every function below returns
- * in-memory data shaped like the real service layer (ApiResponse + camelCase)
- * so the UI, hooks, and types are ready.
+ * Bucket lists — a reader's saved experiences and places, and the people they
+ * share them with.
  *
- * TODO(backend): replace each mock body with the real call, e.g.
- *   const axiosInstance = await apiWithToken();
- *   const response = await axiosInstance.get(`/v1/bucket-lists/`);
- *   return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+ * These were mocked in-memory while the endpoints 404'd. They answer now (401
+ * without a token, where a route that does not exist still gives 404), so the
+ * mock is gone and every call below is the real one.
  */
+export const fetchMyBucketLists = async (page = 1, pageSize = 24): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(`/v1/accounts/bucket-lists/`, {
+      params: { page, page_size: pageSize },
+    });
 
-const MOCK_LATENCY_MS = 400;
-
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const mockMembers = [
-  { id: 'member-1', name: 'Tony Ouma', picture: null },
-  { id: 'member-2', name: 'Wanjiku Kamau', picture: null },
-  { id: 'member-3', name: 'Brian Otieno', picture: null },
-  { id: 'member-4', name: 'Achieng Odhiambo', picture: null },
-];
-
-// Module-level store so create/join survive React Query refetches within a session
-const myBucketLists: BucketList[] = [
-  {
-    id: 'bucket-1',
-    title: 'Weekend Hikes',
-    isPublic: true,
-    coverPhoto: '/images/kilimanjaro.webp',
-    savedCount: 12,
-    previewPhotos: ['/images/one.jpg', '/images/two.jpg', '/images/three.jpg', '/images/four.jpg'],
-    members: mockMembers.slice(0, 3),
-    owner: { id: 'me', name: 'You' },
-    isOwner: true,
-    hasJoined: true,
-  },
-  {
-    id: 'bucket-2',
-    title: 'Coast Getaways',
-    isPublic: false,
-    coverPhoto: '/images/infinite-pool.webp',
-    savedCount: 3,
-    previewPhotos: ['/images/five.jpg', '/images/seven.jpg', '/images/eight.jpg'],
-    members: mockMembers.slice(0, 2),
-    owner: { id: 'me', name: 'You' },
-    isOwner: true,
-    hasJoined: true,
-  },
-];
-
-const sharedBucketLists: BucketList[] = [
-  {
-    id: 'bucket-shared-1',
-    title: 'Nairobi Nightlife',
-    isPublic: true,
-    coverPhoto: '/images/santorini.webp',
-    savedCount: 8,
-    previewPhotos: [],
-    members: mockMembers,
-    owner: { id: 'member-1', name: 'Tony Ouma' },
-    isOwner: false,
-    hasJoined: false,
-  },
-  {
-    id: 'bucket-shared-2',
-    title: 'Trail Running Crew',
-    isPublic: true,
-    coverPhoto: '/images/man-bridge-running.webp',
-    savedCount: 5,
-    previewPhotos: [],
-    members: mockMembers.slice(1),
-    owner: { id: 'member-2', name: 'Wanjiku Kamau' },
-    isOwner: false,
-    hasJoined: false,
-  },
-];
-
-// TODO(backend): GET /v1/bucket-lists/
-export const fetchMyBucketLists = async (): Promise<ApiResponse> => {
-  await wait(MOCK_LATENCY_MS);
-  return { status: 200, success: true, data: { results: [...myBucketLists] } };
-};
-
-// TODO(backend): GET /v1/bucket-lists/shared/
-export const fetchSharedBucketLists = async (): Promise<ApiResponse> => {
-  await wait(MOCK_LATENCY_MS);
-  return { status: 200, success: true, data: { results: [...sharedBucketLists] } };
-};
-
-// TODO(backend): POST /v1/bucket-lists/
-export const createBucketList = async (payload: CreateBucketListPayload): Promise<ApiResponse> => {
-  await wait(MOCK_LATENCY_MS);
-  const created: BucketList = {
-    id: `bucket-${Date.now()}`,
-    title: payload.title,
-    isPublic: payload.isPublic,
-    coverPhoto: null,
-    savedCount: 0,
-    previewPhotos: [],
-    members: [],
-    owner: { id: 'me', name: 'You' },
-    isOwner: true,
-    hasJoined: true,
-  };
-  myBucketLists.push(created);
-  return { status: 201, success: true, data: created };
-};
-
-// TODO(backend): POST /v1/bucket-lists/{id}/join/
-export const joinBucketList = async (bucketListId: string): Promise<ApiResponse> => {
-  await wait(MOCK_LATENCY_MS);
-  const bucketList = sharedBucketLists.find((list) => list.id === bucketListId);
-  if (bucketList) {
-    bucketList.hasJoined = true;
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load your bucket lists'),
+    };
   }
-  return { status: 200, success: true, data: bucketList ?? null };
+};
+
+/** One list, with the items it holds and the people on it. */
+export const fetchBucketList = async (bucketListId: string): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(`/v1/accounts/bucket-lists/${bucketListId}/`);
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load this bucket list'),
+    };
+  }
+};
+
+export const createBucketList = async (data: CreateBucketListPayload): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(`/v1/accounts/bucket-lists/`, parseCamelToSnake(data));
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not create this bucket list'),
+    };
+  }
+};
+
+export const updateBucketList = async (
+  bucketListId: string,
+  data: Partial<CreateBucketListPayload>,
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.patch(
+      `/v1/accounts/bucket-lists/${bucketListId}/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save these changes'),
+    };
+  }
+};
+
+export const deleteBucketList = async (bucketListId: string): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.delete(`/v1/accounts/bucket-lists/${bucketListId}/`);
+
+    return { status: res.status, success: true, data: null };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not delete this bucket list'),
+    };
+  }
+};
+
+/** Saves an experience or a place onto a list. Send one or the other. */
+export const addBucketListItem = async (
+  bucketListId: string,
+  data: AddBucketListItemPayload,
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(
+      `/v1/accounts/bucket-lists/${bucketListId}/items/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not add this to the list'),
+    };
+  }
+};
+
+export const removeBucketListItem = async (
+  bucketListId: string,
+  itemId: string,
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.delete(
+      `/v1/accounts/bucket-lists/${bucketListId}/items/${itemId}/`,
+    );
+
+    return { status: res.status, success: true, data: null };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not remove this from the list'),
+    };
+  }
+};
+
+/**
+ * Opens a shared list by its token.
+ *
+ * Public — the whole point of a share link is that it works before the reader
+ * has an account.
+ */
+export const fetchSharedBucketList = async (shareToken: string): Promise<ApiResponse> => {
+  try {
+    const res = await api.get(`/v1/accounts/bucket-lists/join/${shareToken}/`);
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not open this bucket list'),
+    };
+  }
+};
+
+/** Takes the reader up on a share link. */
+export const joinBucketList = async (shareToken: string): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(`/v1/accounts/bucket-lists/join/${shareToken}/`, {});
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not join this bucket list'),
+    };
+  }
+};
+
+/** The link to hand out, minted on demand. */
+export const fetchBucketListShare = async (bucketListId: string): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(`/v1/accounts/bucket-lists/${bucketListId}/share/`);
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not get a link for this list'),
+    };
+  }
+};
+
+/**
+ * Sets the order items appear in, as a list of item ids.
+ *
+ * The whole order is sent rather than a moved id and a destination — the API
+ * takes the final sequence, so a reorder is one request however many things
+ * moved.
+ */
+export const reorderBucketListItems = async (
+  bucketListId: string,
+  order: string[],
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.patch(
+      `/v1/accounts/bucket-lists/${bucketListId}/items/reorder/`,
+      { order },
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save this order'),
+    };
+  }
 };

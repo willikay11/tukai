@@ -1,8 +1,18 @@
 import { PhotoImage } from '@/app/shared/components/Images';
-import { BucketListMember } from '@/types/bucket-list';
+
+/**
+ * Just enough to draw a face. This used to borrow the bucket-list member type,
+ * which tied a stack of community avatars to a feature it has nothing to do
+ * with — and broke the moment that type matched the API.
+ */
+export interface AvatarStackUser {
+  id: string;
+  name: string;
+  picture?: string | null;
+}
 
 interface AvatarStackProps {
-  users: BucketListMember[];
+  users: AvatarStackUser[];
   max?: number;
   // Overrides the overflow derived from `users`, for callers that hold a total
   // count larger than the handful of avatars they were given

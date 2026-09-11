@@ -324,3 +324,34 @@ export const formatPaidAt = (isoString: string): string => {
 
   return `${parsed.getDate()} ${month} ${parsed.getFullYear()}, ${displayHour}:${minutes} ${period}`;
 };
+
+/**
+ * "Sep 11, 11:00 AM - 8:00 PM" — the date once, then the hours it runs.
+ *
+ * Shorter than {@link formatReservationDateTime}, which spells the weekday and
+ * month out in full; this sits under a card title where the room is a line.
+ */
+export const formatDateAndTimeRange = (
+  start: string | null | undefined,
+  end: string | null | undefined,
+): string | null => {
+  if (!start) return null;
+
+  const startDate = new Date(start);
+  if (Number.isNaN(startDate.getTime())) return null;
+
+  // en-US for "Sep 11" — en-GB renders "11 Sept", which is not the shape this
+  // sits in on a card
+  const day = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+  const time = (date: Date) => {
+    const hours = date.getHours();
+    const period = hours >= 12 ? 'PM' : 'AM';
+    return `${hours % 12 || 12}:${String(date.getMinutes()).padStart(2, '0')} ${period}`;
+  };
+
+  const endDate = end ? new Date(end) : null;
+  const hasEnd = endDate && !Number.isNaN(endDate.getTime());
+
+  return `${day}, ${time(startDate)}${hasEnd ? ` - ${time(endDate)}` : ''}`;
+};

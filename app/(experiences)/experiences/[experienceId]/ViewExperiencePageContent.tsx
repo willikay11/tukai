@@ -123,6 +123,7 @@ export const ViewExperiencePageContent = ({
         <div className="flex items-center gap-2">
           <BucketListButton
             experienceId={experience.id}
+            experienceTitle={experience.title}
             isBookmarked={experience.isBookmarked}
             // Visible but inert in preview, so the creator sees the real chrome
             inert={isPreview}
