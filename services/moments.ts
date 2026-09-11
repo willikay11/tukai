@@ -67,8 +67,9 @@ export async function createMoment(data: CreateMoment): Promise<ApiResponse> {
 
 export async function fetchMoments(params: MomentsQueryParams = {}): Promise<ApiResponse> {
   try {
-    // /v1/moments/ is authenticated — it 401s without a bearer token, unlike
-    // the public experiences and places lists
+    // Public: the list reads without a bearer token. It used to 401, which is
+    // why this note said otherwise. The instance still sends a token when
+    // there is a session, so `is_liked` comes back for a signed-in reader.
     const api = await apiWithToken();
     const response = await api.get('/v1/moments/', { params });
 

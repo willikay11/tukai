@@ -11,8 +11,18 @@ const mockToggleCommentLike = jest.fn();
 let commentsPages: unknown[] = [];
 let isLoading = false;
 
+let sessionUser: Record<string, unknown> | null = {
+  id: 'me',
+  name: 'George Ralak',
+  image: null,
+};
 jest.mock('next-auth/react', () => ({
-  useSession: () => ({ data: { user: { name: 'George Ralak', image: null } } }),
+  useSession: () => ({ data: sessionUser ? { user: sessionUser } : null }),
+}));
+
+const openSignInWithCallback = jest.fn();
+jest.mock('@/context/AuthDialogContext', () => ({
+  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
 }));
 jest.mock('@/app/shared/hooks/useMoments', () => ({
   useMomentComments: () => ({
@@ -53,6 +63,7 @@ const setComments = (comments: MomentComment[]) => {
 beforeEach(() => {
   jest.clearAllMocks();
   isLoading = false;
+  sessionUser = { id: 'me', name: 'George Ralak', image: null };
   setComments([makeComment()]);
 });
 
@@ -301,5 +312,61 @@ describe('comment actions', () => {
 
     const row = screen.getByText('Beautiful shot').closest('div')?.parentElement;
     expect(row?.querySelectorAll('button')).toHaveLength(1);
+  });
+});
+
+/**
+ * Comments are public to read. Posting one and liking one are not, and both
+ * ask at the point of the press — the draft the reader typed is carried
+ * through the sign-in rather than thrown away.
+ */
+describe('a reader who is not signed in', () => {
+  beforeEach(() => {
+    sessionUser = null;
+  });
+
+  it('still sees the comments', () => {
+    setComments([makeComment({ content: 'Lovely shot' })]);
+    render(<MomentComments momentId="m1" />);
+
+    expect(screen.getByText('Lovely shot')).toBeInTheDocument();
+  });
+
+  // A box they cannot post from would invite them to type and lose it
+  it('is offered no comment field', () => {
+    render(<MomentComments momentId="m1" />);
+
+    expect(screen.queryByLabelText('Leave a comment')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Post comment' })).not.toBeInTheDocument();
+  });
+
+  it('is invited to sign in instead', () => {
+    render(<MomentComments momentId="m1" />);
+
+    expect(screen.getByText('Sign in to join the conversation')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+
+    expect(openSignInWithCallback).toHaveBeenCalled();
+  });
+
+  it('gets the field once signed in', () => {
+    const { rerender } = render(<MomentComments momentId="m1" />);
+    expect(screen.queryByLabelText('Leave a comment')).not.toBeInTheDocument();
+
+    sessionUser = { id: 'me', name: 'George Ralak', image: null };
+    rerender(<MomentComments momentId="m1" />);
+
+    expect(screen.getByLabelText('Leave a comment')).toBeInTheDocument();
+    expect(screen.queryByText('Sign in to join the conversation')).not.toBeInTheDocument();
+  });
+
+  it('is asked to sign in rather than liking a comment', () => {
+    render(<MomentComments momentId="m1" />);
+
+    fireEvent.click(screen.getByText('4').closest('button') as HTMLElement);
+
+    expect(mockToggleCommentLike).not.toHaveBeenCalled();
+    expect(openSignInWithCallback).toHaveBeenCalled();
   });
 });

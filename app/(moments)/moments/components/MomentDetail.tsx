@@ -12,6 +12,7 @@ import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStri
 import { useFlagMoment, useToggleMomentLike } from '@/app/shared/hooks/useMoments';
 import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 import { Moment, momentAuthorName, momentPhotos } from '@/types/moment';
 
 import { FlagReasonPicker } from './FlagReasonPicker';
@@ -24,6 +25,8 @@ const contextLabel = (item: Moment): string | null =>
 
 export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
   const { data: session } = useSession();
+  const isSignedIn = Boolean(session?.user?.id);
+  const { openSignInWithCallback } = useAuthDialog();
   const { mutate: toggleLike } = useToggleMomentLike();
   const { mutate: flag, isPending: isFlagging } = useFlagMoment();
   const [isFlagOpen, setIsFlagOpen] = useState(false);
@@ -39,7 +42,7 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
   const context = contextLabel(item);
   const isOwnMoment = session?.user?.id === item.author.id;
 
-  const onLike = () => {
+  const like = () => {
     const next = !isLiked;
     setIsLiked(next);
     setLikeCount((count) => count + (next ? 1 : -1));
@@ -51,6 +54,12 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
       },
     });
   };
+
+  // Anyone can read a moment; liking one needs an account. Signing in carries
+  // straight on to the like, so the one press they made is the one that lands.
+  // `like` is handed over rather than this handler: the callback runs with the
+  // closure it was created in, where `isSignedIn` is still false.
+  const onLike = () => (isSignedIn ? like() : openSignInWithCallback(like));
 
   const onFlag = (reasonId: string) =>
     flag(
@@ -146,7 +155,9 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
 
         <button
           type="button"
-          onClick={() => setIsFlagOpen(true)}
+          onClick={() =>
+            isSignedIn ? setIsFlagOpen(true) : openSignInWithCallback(() => setIsFlagOpen(true))
+          }
           className="ml-auto text-gray-300 hover:text-gray-500"
           aria-label="Report this moment"
         >

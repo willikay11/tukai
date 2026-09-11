@@ -21,6 +21,10 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/auth') ||
     isExcludedExperienceRoute ||
     isExcludedCommunityRoute ||
+    // Moments are public: the feed, a moment and its comments all read without
+    // a token. Posting, liking and flagging still need one, and each prompts
+    // for sign-in where it is pressed rather than at the door.
+    pathname.startsWith('/moments') ||
     pathname.startsWith('/place') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/privacy') ||
