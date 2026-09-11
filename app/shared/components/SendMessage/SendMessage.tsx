@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { useSendMessage } from '@/app/(experiences)/hooks/useComms';
 import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -71,28 +71,40 @@ export const SendMessage = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="min-w-[300px] px-4 md:min-w-[400px] md:px-6">
-        <div className="flex flex-col gap-4">
-          <p className="text-2xl font-black text-gray-700">Message Organizer</p>
+      {/* The shared dialog is 720px from md — a page width for one field. Both
+          caps are set because the base declares only the md one. */}
+      <DialogContent className="max-w-[420px] gap-0 rounded-2xl p-5 md:max-w-[420px]">
+        <div className="flex min-w-0 flex-col">
+          <DialogTitle className="pr-8 text-lg font-bold text-gray-900">Message host</DialogTitle>
+          <DialogDescription className="mt-1 text-xs text-gray-500">
+            They will see this alongside your name, and can reply to you directly.
+          </DialogDescription>
+
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4">
               <FormField
                 control={form.control}
                 name="content"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-normal text-gray-700">
-                      Please enter your message below
+                    <FormLabel className="text-sm font-medium text-gray-800">
+                      Your message
                     </FormLabel>
                     <FormControl>
-                      <Textarea rows={5} placeholder="Enter Message..." {...field} />
+                      <Textarea rows={5} placeholder="What would you like to ask?" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button size="lg" className="mt-2.5 w-full" type="submit" isLoading={isPending}>
-                Submit
+
+              <Button
+                variant="gradient"
+                className="mt-4 w-full rounded-full"
+                type="submit"
+                isLoading={isPending}
+              >
+                Send message
               </Button>
             </form>
           </Form>
