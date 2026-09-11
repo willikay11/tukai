@@ -27,6 +27,7 @@ import { LocationProvider } from '@/context/LocationContext';
 import { SelectedCategoryProvider } from '@/context/SelectedCategoryContext';
 import ReactQueryClientProvider from '@/providers/ReactQueryProvider';
 import SessionProvider from '@/providers/SessionProvider';
+import { metadataBase } from '@/utils/share-metadata';
 
 import './globals.css';
 import { ReduxProvider } from './redux-provider';
@@ -36,6 +37,9 @@ hugeiconsLicense(
 );
 
 export const metadata: Metadata = {
+  // Next resolves every relative metadata URL against this. Without it a
+  // relative og:image is emitted as-is, and no crawler can resolve it.
+  metadataBase,
   title: 'Tukai',
   description:
     "Tukai is your go-to app for discovering exciting events and experiences happening around you. Whether you're looking for live concerts, festivals, social gatherings, or cultural events, Tukai makes it easy to stay connected and find the best activities in your area. Explore and enjoy real-time updates on local experiences tailored to your interests, and never miss out on the fun again.",

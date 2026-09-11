@@ -1,5 +1,19 @@
 import type { Metadata } from 'next';
 
+/**
+ * The origin links and Open Graph images are resolved against.
+ *
+ * A crawler fetches a shared link from its own servers, so every URL it reads
+ * has to be absolute. `NEXT_PUBLIC_APP_URL` is localhost in development, where
+ * no crawler can reach it — that is a property of localhost, not a
+ * misconfiguration, and previews can only be checked against a tunnel or a
+ * deployed URL.
+ */
+export const APP_ORIGIN = process.env.NEXT_PUBLIC_APP_URL || 'https://tukai.co';
+
+/** For `metadataBase`, which Next uses to make relative metadata URLs absolute. */
+export const metadataBase = new URL(APP_ORIGIN);
+
 /** What is being shared. Reads in the share sheet and in the link preview. */
 export type ShareKind = 'experience' | 'place' | 'community' | 'bucket list' | 'itinerary';
 
