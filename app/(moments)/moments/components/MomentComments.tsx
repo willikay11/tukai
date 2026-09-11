@@ -13,12 +13,17 @@ import {
   useToggleCommentLike,
 } from '@/app/shared/hooks/useMoments';
 import { toast } from '@/app/shared/hooks/useToast';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 import { MomentComment, momentAuthorName } from '@/types/moment';
 
 import { MomentAvatar } from './MomentAvatar';
 
 const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: string }) => {
+  const { data: session } = useSession();
+  const isSignedIn = Boolean(session?.user?.id);
+  const { openSignInWithCallback } = useAuthDialog();
   const { mutate: toggleLike } = useToggleCommentLike(momentId);
 
   /**
@@ -79,12 +84,15 @@ const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: s
     });
   };
 
-  const onLike = () => {
+  const like = () => {
     const intent = !isLiked;
     setLikedOverride(intent);
     setPendingDelta(intent ? 1 : -1);
     runToggle(intent, true);
   };
+
+  // Reading a comment needs no account; liking one does
+  const onLike = () => (isSignedIn ? like() : openSignInWithCallback(like));
 
   return (
     <div className="flex gap-3">
@@ -115,6 +123,8 @@ const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: s
 
 export const MomentComments = ({ momentId }: { momentId: string }) => {
   const { data: session } = useSession();
+  const isSignedIn = Boolean(session?.user?.id);
+  const { openSignInWithCallback } = useAuthDialog();
   const currentUserName = session?.user?.name ?? '';
   const currentUserImage = session?.user?.image ?? null;
 
@@ -178,28 +188,43 @@ export const MomentComments = ({ momentId }: { momentId: string }) => {
       )}
 
       <div className="mt-4 border-t border-gray-100 pt-4">
-        <Input
-          shape="pill"
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={(event) => event.key === 'Enter' && submit()}
-          placeholder="Leave a comment..."
-          aria-label="Leave a comment"
-          // Tighter than the standard 13px/16px: a 40px avatar sits inside
-          containerClassName="gap-3 bg-white py-2 pl-2 pr-4 shadow-sm"
-          icon={<MomentAvatar src={currentUserImage} name={currentUserName} size={40} />}
-          suffixIcon={
-            <button
-              type="button"
-              onClick={submit}
-              disabled={!draft.trim() || isPosting}
-              aria-label="Post comment"
-              className="flex-shrink-0 text-primary transition-opacity disabled:opacity-40"
+        {!isSignedIn ? (
+          // No field at all rather than one that bounces on submit: a comment
+          // box a reader cannot post from is an invitation to type something
+          // and lose it
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-gray-50 px-4 py-3">
+            <p className="text-sm text-gray-600">Sign in to join the conversation</p>
+            <Button
+              onClick={() => openSignInWithCallback(() => undefined)}
+              className="flex-shrink-0 rounded-full px-6"
             >
-              <IconComponent iconName="Sent02Icon" size={24} color="currentColor" />
-            </button>
-          }
-        />
+              Sign in
+            </Button>
+          </div>
+        ) : (
+          <Input
+            shape="pill"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={(event) => event.key === 'Enter' && submit()}
+            placeholder="Leave a comment..."
+            aria-label="Leave a comment"
+            // Tighter than the standard 13px/16px: a 40px avatar sits inside
+            containerClassName="gap-3 bg-white py-2 pl-2 pr-4 shadow-sm"
+            icon={<MomentAvatar src={currentUserImage} name={currentUserName} size={40} />}
+            suffixIcon={
+              <button
+                type="button"
+                onClick={submit}
+                disabled={!draft.trim() || isPosting}
+                aria-label="Post comment"
+                className="flex-shrink-0 text-primary transition-opacity disabled:opacity-40"
+              >
+                <IconComponent iconName="Sent02Icon" size={24} color="currentColor" />
+              </button>
+            }
+          />
+        )}
       </div>
     </div>
   );

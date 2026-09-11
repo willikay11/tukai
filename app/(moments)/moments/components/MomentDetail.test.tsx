@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { Moment } from '@/types/moment';
 
@@ -8,7 +8,15 @@ import { MomentDetail } from './MomentDetail';
 
 const mockToggleLike = jest.fn();
 
-jest.mock('next-auth/react', () => ({ useSession: () => ({ data: { user: { id: 'me' } } }) }));
+let sessionUser: Record<string, unknown> | null = { id: 'me' };
+jest.mock('next-auth/react', () => ({
+  useSession: () => ({ data: sessionUser ? { user: sessionUser } : null }),
+}));
+
+const openSignInWithCallback = jest.fn();
+jest.mock('@/context/AuthDialogContext', () => ({
+  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+}));
 jest.mock('@/app/shared/hooks/useMoments', () => ({
   useToggleMomentLike: () => ({ mutate: mockToggleLike }),
   useFlagMoment: () => ({ mutate: jest.fn(), isPending: false }),
@@ -125,7 +133,7 @@ describe('MomentDetail', () => {
     );
 
     expect(screen.queryByAltText('Sunrise on the Mara')).not.toBeInTheDocument();
-    expect(screen.getByText('Sunrise on the Mara')).toBeInTheDocument();
+    expect(screen.getByText('Worth the 4am start.')).toBeInTheDocument();
   });
 
   it('shows like and comment counts', () => {
@@ -171,5 +179,87 @@ describe('moment like state on load', () => {
     render(<MomentDetail moment={makeMoment()} />);
 
     expect(heart()?.querySelector('.text-red-500')).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * Moments read without an account — the feed, a moment and its comments are
+ * all public. The actions that write are not, and each asks at the point it is
+ * pressed rather than bouncing the reader at the door.
+ */
+describe('a reader who is not signed in', () => {
+  const heart = () => screen.getByText('12').closest('button') as HTMLElement;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    sessionUser = null;
+  });
+
+  afterEach(() => {
+    sessionUser = { id: 'me' };
+  });
+
+  it('still sees the moment', () => {
+    render(<MomentDetail moment={makeMoment()} />);
+
+    expect(screen.getByText('Worth the 4am start.')).toBeInTheDocument();
+    expect(screen.getByText('12')).toBeInTheDocument();
+  });
+
+  it('is asked to sign in rather than liking', () => {
+    render(<MomentDetail moment={makeMoment()} />);
+
+    fireEvent.click(heart());
+
+    expect(mockToggleLike).not.toHaveBeenCalled();
+    expect(openSignInWithCallback).toHaveBeenCalled();
+    // Nothing moves until they are actually signed in
+    expect(heart().querySelector('.text-red-500')).not.toBeInTheDocument();
+  });
+
+  it('likes it once signing in is done, so the press is not wasted', () => {
+    render(<MomentDetail moment={makeMoment()} />);
+
+    fireEvent.click(heart());
+    openSignInWithCallback.mock.calls[0][0]();
+
+    expect(mockToggleLike).toHaveBeenCalledWith('m1', expect.anything());
+  });
+
+  it('is asked to sign in rather than opening the report picker', () => {
+    render(<MomentDetail moment={makeMoment()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /report/i }));
+
+    expect(openSignInWithCallback).toHaveBeenCalled();
+  });
+});
+
+/**
+ * The composer asks one question and sends the first line as `title` and the
+ * whole text as `description`. Every moment on the API therefore carries the
+ * same words twice, and the detail pane printed both.
+ */
+describe('a moment body', () => {
+  it('is shown once, not as a bold title above the same words again', () => {
+    render(
+      <MomentDetail moment={makeMoment({ title: 'Same words', description: 'Same words' })} />,
+    );
+
+    expect(screen.getAllByText('Same words')).toHaveLength(1);
+  });
+
+  it('is the description, which carries the whole text', () => {
+    render(<MomentDetail moment={makeMoment()} />);
+
+    expect(screen.getByText('Worth the 4am start.')).toBeInTheDocument();
+    expect(screen.queryByText('Sunrise on the Mara')).not.toBeInTheDocument();
+  });
+
+  // Another client could post a title with no body
+  it('falls back to the title when there is no description', () => {
+    render(<MomentDetail moment={makeMoment({ description: '' })} />);
+
+    expect(screen.getByText('Sunrise on the Mara')).toBeInTheDocument();
   });
 });
