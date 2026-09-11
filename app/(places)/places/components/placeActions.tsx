@@ -8,7 +8,6 @@ import { AddReview } from '@/app/(places)/components/Review/AddReview';
 import { Bookmark } from '@/app/shared/components/Bookmark';
 import { Share } from '@/app/shared/components/Share';
 import {
-  useBookmarkPlace,
   useCreatePlaceReview,
   useDeletePlaceReviewImage,
   useUploadPlaceReviewImages,
@@ -41,7 +40,6 @@ export const PlaceActions = ({
     useUploadPlaceReviewImages();
   const { mutate: deletePlaceReviewImage, isSuccess: isDeleteReviewImageSuccess } =
     useDeletePlaceReviewImage();
-  const { mutate: bookmarkPlace } = useBookmarkPlace(placeId, session?.user?.id || '');
 
   return (
     <>
@@ -49,8 +47,7 @@ export const PlaceActions = ({
         <Bookmark
           userId={session?.user?.id}
           bookmarked={bookmarked}
-          onBookmark={() => bookmarkPlace()}
-          onUnbookmark={() => bookmarkPlace()}
+          placeId={placeId}
           className="text-primary"
         />
         <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" />

@@ -92,3 +92,25 @@ describe('PhotoImage', () => {
     expect(container.firstChild).toHaveClass('rounded-full');
   });
 });
+
+describe('PhotoImage with an unusable src', () => {
+  /**
+   * next/image throws during render on a bare storage key rather than firing
+   * onError, so the whole page goes down with it. The API hands these back for
+   * some bookmark photos.
+   */
+  it.each(['experiences/photos/abc.jpg', 'abc.jpg'])('falls back on %s', (src) => {
+    render(<PhotoImage src={src} alt="Saved" fill fallbackLabel="No photo" />);
+
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
+
+  it.each(['https://cdn.test/a.jpg', '/images/local.webp', 'data:image/png;base64,AAAA'])(
+    'still renders %s',
+    (src) => {
+      render(<PhotoImage src={src} alt="Saved" fill />);
+
+      expect(screen.getByRole('img')).toBeInTheDocument();
+    },
+  );
+});

@@ -1,89 +1,112 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import {
-  Bookmark02Icon,
-  ShoppingBasketAdd02Icon,
-  ShoppingBasketDone02Icon,
-} from '@hugeicons/react-pro';
+import { ShoppingBasketAdd02Icon, ShoppingBasketDone02Icon } from '@hugeicons/react-pro';
 
-import { toast } from '@/app/shared/hooks/useToast';
+import { BucketListPicker } from '@/app/shared/components/BucketList';
 import { Button } from '@/components/ui/button';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { cn } from '@/lib/utils';
 
+/**
+ * Saves an experience or a place onto one of the reader's bucket lists.
+ *
+ * One treatment everywhere: the basket over a photo, which fills in once the
+ * thing is saved. The bookmark-pin variant this used to carry is gone — two
+ * icons for one action read as two different features.
+ *
+ * Which list is a choice, so pressing it opens the picker rather than toggling
+ * on the spot. A caller with neither id falls back to `onBookmark`, for the
+ * surfaces that still bookmark without a list.
+ */
 export const Bookmark = ({
   bookmarked,
   onBookmark,
   onUnbookmark,
   userId,
   className = 'text-gray-500',
-  icon = 'bookmark',
+  experienceId,
+  placeId,
+  itemName,
 }: {
   bookmarked: boolean;
-  onBookmark: () => void;
-  onUnbookmark: () => void;
+  onBookmark?: () => void;
+  onUnbookmark?: () => void;
   userId?: string | null;
   className?: string;
-  // 'basket' is the add-to-bucket-list treatment used over an experience photo:
-  // it owns its own circular container so the container can react to the added
-  // state, which a wrapper outside this component cannot do
-  icon?: 'bookmark' | 'basket';
+  experienceId?: string;
+  placeId?: string;
+  /** Named in the confirmation once it is saved */
+  itemName?: string;
 }) => {
   const [isBookmarked, setIsBookmarked] = useState(bookmarked);
-  const { setOpenSignIn } = useAuthDialog();
-  const isBasket = icon === 'basket';
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+
+  // Seeded once at mount, so a card that re-read its experience after a save
+  // kept showing the empty basket until it was unmounted and built again
+  useEffect(() => setIsBookmarked(bookmarked), [bookmarked]);
+  const { openSignInWithCallback } = useAuthDialog();
+
+  const savesToList = Boolean(experienceId || placeId);
+
+  const open = () => setIsPickerOpen(true);
+
+  const handleClick = (event: React.MouseEvent) => {
+    // The control sits over a card that is itself a link
+    event.stopPropagation();
+    event.preventDefault();
+    event.nativeEvent.stopImmediatePropagation();
+
+    // Signing in carries on to whatever they pressed for
+    if (!userId) {
+      openSignInWithCallback(savesToList ? open : () => undefined);
+      return;
+    }
+
+    if (savesToList) {
+      open();
+      return;
+    }
+
+    if (isBookmarked) onUnbookmark?.();
+    else onBookmark?.();
+    setIsBookmarked(!isBookmarked);
+  };
+
   return (
     <>
       <Button
         variant="text"
+        aria-label={isBookmarked ? 'Saved to bucket list' : 'Add to bucket list'}
         className={cn(
-          'h-fit',
-          isBasket && 'flex h-9 w-9 items-center justify-center rounded-full',
-          isBasket && (isBookmarked ? 'bg-white hover:bg-white' : 'bg-black/40 backdrop-blur-sm'),
+          'flex h-9 w-9 items-center justify-center rounded-full',
+          isBookmarked ? 'bg-white hover:bg-white' : 'bg-black/40 backdrop-blur-sm',
         )}
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          e.nativeEvent.stopImmediatePropagation();
-          if (userId) {
-            if (isBookmarked) {
-              onUnbookmark();
-            } else {
-              onBookmark();
-            }
-            setIsBookmarked(!isBookmarked);
-          } else {
-            setOpenSignIn(true);
-          }
-        }}
+        onClick={handleClick}
       >
-        {isBasket ? (
-          isBookmarked ? (
-            <ShoppingBasketDone02Icon
-              id="bookmark"
-              size={18}
-              variant="solid"
-              className="text-lime"
-            />
-          ) : (
-            <ShoppingBasketAdd02Icon
-              id="bookmark"
-              size={18}
-              variant="twotone"
-              className={className}
-            />
-          )
+        {isBookmarked ? (
+          <ShoppingBasketDone02Icon id="bookmark" size={18} variant="solid" className="text-lime" />
         ) : (
-          <Bookmark02Icon
+          <ShoppingBasketAdd02Icon
             id="bookmark"
             size={18}
-            variant={isBookmarked ? 'solid' : 'twotone'}
-            className={`${isBookmarked ? 'text-red-500' : className}`}
+            variant="twotone"
+            className={className}
           />
         )}
       </Button>
+
+      {savesToList && (
+        <BucketListPicker
+          isOpen={isPickerOpen}
+          setIsOpen={setIsPickerOpen}
+          experienceId={experienceId}
+          placeId={placeId}
+          itemName={itemName}
+          onSaved={() => setIsBookmarked(true)}
+        />
+      )}
     </>
   );
 };

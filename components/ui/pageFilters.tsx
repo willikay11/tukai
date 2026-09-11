@@ -48,15 +48,16 @@ export const PageFilters = () => {
   }, [categories, pathname, categoryFromQuery, setSelectedCategoryId]);
 
   // Hide filters on Discover, Experiences and Communities (which render their
-  // own tabs), Moments
-  // (a photo feed with no categories — it would otherwise sit on the skeleton
-  // forever, since no branch above ever clears isLoading), detail pages (with
-  // IDs), and Creator Studio (a host dashboard, not browsable content)
+  // own tabs), Moments and Bucket Lists (no categories to filter by — either
+  // would otherwise sit on the skeleton forever, since only the /places branch
+  // ever clears isLoading), detail pages (with IDs), and Creator Studio (a host
+  // dashboard, not browsable content)
   if (
     pathname === '/' ||
     pathname === '/experiences' ||
     pathname === '/communities' ||
     pathname.startsWith('/moments') ||
+    pathname.startsWith('/bucket-lists') ||
     pathname.startsWith('/places/') ||
     pathname.startsWith('/experiences/') ||
     pathname.startsWith('/communities/') ||

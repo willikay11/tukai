@@ -12,7 +12,6 @@ import { EventSkeleton } from '@/app/shared/components/Cards';
 import { Pills } from '@/app/shared/components/Filters';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
-import { useBookmarkExperience } from '@/app/shared/hooks/useExperiences';
 import { Button } from '@/components/ui/button';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
 import { useLocation } from '@/context/LocationContext';
@@ -32,7 +31,6 @@ export const SingleExperience = ({
 }) => {
   const [hasError, setHasError] = useState(false);
   const { data: session } = useSession();
-  const { mutate: bookmarkExperience } = useBookmarkExperience();
   const { lat, lng } = useLocation();
 
   if (experience.id.startsWith('placeholder-')) {
@@ -82,11 +80,10 @@ export const SingleExperience = ({
           />
           <div className="absolute right-2 top-2">
             <Bookmark
-              icon="basket"
               bookmarked={experience.isBookmarked}
               userId={session?.user?.id}
-              onBookmark={() => bookmarkExperience(experience.id)}
-              onUnbookmark={() => bookmarkExperience(experience.id)}
+              experienceId={experience.id}
+              itemName={experience.title}
               className="text-white"
             />
           </div>
@@ -147,11 +144,10 @@ export const SingleExperience = ({
         </div>
         <div className="absolute right-2 top-2">
           <Bookmark
-            icon="basket"
             bookmarked={experience.isBookmarked}
             userId={session?.user?.id}
-            onBookmark={() => bookmarkExperience(experience.id)}
-            onUnbookmark={() => bookmarkExperience(experience.id)}
+            experienceId={experience.id}
+            itemName={experience.title}
             className="text-white"
           />
         </div>

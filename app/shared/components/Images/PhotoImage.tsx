@@ -35,9 +35,15 @@ export const PhotoImage = ({
 }) => {
   const [hasError, setHasError] = useState(false);
 
+  // A bare storage key — "experiences/photos/abc.jpg" — is neither a URL nor a
+  // rooted path, and next/image throws on it during render rather than firing
+  // onError, taking the page down with it. Treated as a missing photo instead.
+  const isUnusablePath =
+    typeof src === 'string' && src !== '' && !/^(https?:\/\/|\/|data:|blob:)/.test(src);
+
   // Narrowed inline rather than via a helper so TypeScript can see that `src`
   // is non-null on the rendering path below
-  if (hasError || src === null || src === undefined || src === '') {
+  if (hasError || isUnusablePath || src === null || src === undefined || src === '') {
     if (fallback) return <>{fallback}</>;
 
     // A `fill` image is taken out of flow and stretched over its positioned

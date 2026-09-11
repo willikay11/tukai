@@ -1,23 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { useCreateBucketList } from '@/app/shared/hooks/useBucketLists';
+import { useCreateBucketList, useUpdateBucketList } from '@/app/shared/hooks/useBucketLists';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
+import { Textarea } from '@/components/ui/textarea';
+import { BucketList } from '@/types/bucket-list';
 
 interface CreateBucketListModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Given one, the dialog edits it rather than making a new list */
+  bucketList?: BucketList;
 }
 
-export const CreateBucketListModal = ({ open, onOpenChange }: CreateBucketListModalProps) => {
-  const [title, setTitle] = useState('');
-  const [visibility, setVisibility] = useState<'public' | 'private'>('public');
+export const CreateBucketListModal = ({
+  open,
+  onOpenChange,
+  bucketList,
+}: CreateBucketListModalProps) => {
+  const isEditing = Boolean(bucketList);
+
+  const [title, setTitle] = useState(bucketList?.name ?? '');
+  const [description, setDescription] = useState(bucketList?.description ?? '');
+  const [visibility, setVisibility] = useState<'public' | 'private'>(
+    bucketList?.visibility ?? 'public',
+  );
   const [error, setError] = useState('');
-  const { mutate: createBucketList, isPending } = useCreateBucketList();
+
+  const { mutate: createBucketList, isPending: isCreating } = useCreateBucketList();
+  const { mutate: updateBucketList, isPending: isUpdating } = useUpdateBucketList(
+    bucketList?.id ?? '',
+  );
+
+  const isPending = isCreating || isUpdating;
+
+  // Reopening on a different list, or after a rename elsewhere, starts from
+  // what that list is called now rather than what it was at first mount
+  useEffect(() => {
+    if (!open || !bucketList) return;
+
+    setTitle(bucketList.name);
+    setDescription(bucketList.description ?? '');
+    setVisibility(bucketList.visibility);
+    setError('');
+  }, [open, bucketList]);
 
   const handleCreate = () => {
     if (!title.trim()) {
@@ -25,24 +55,30 @@ export const CreateBucketListModal = ({ open, onOpenChange }: CreateBucketListMo
       return;
     }
 
-    createBucketList(
-      { title: title.trim(), isPublic: visibility === 'public' },
-      {
-        onSuccess: () => {
-          setTitle('');
-          setVisibility('public');
-          setError('');
-          onOpenChange(false);
-        },
-      },
-    );
+    // Sent even when emptied, so clearing a description actually clears it
+    const payload = { name: title.trim(), description: description.trim(), visibility };
+
+    const onSuccess = () => {
+      if (!isEditing) {
+        setTitle('');
+        setDescription('');
+        setVisibility('public');
+      }
+      setError('');
+      onOpenChange(false);
+    };
+
+    if (isEditing) updateBucketList(payload, { onSuccess });
+    else createBucketList(payload, { onSuccess });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="px-6 md:w-[24rem]">
         <div className="flex flex-col gap-4">
-          <DialogTitle className="text-xl font-black text-gray-700">Create Bucket List</DialogTitle>
+          <DialogTitle className="text-xl font-black text-gray-700">
+            {isEditing ? 'Edit Bucket List' : 'Create Bucket List'}
+          </DialogTitle>
           <DialogDescription className="sr-only">
             Name your bucket list and choose who can see it
           </DialogDescription>
@@ -58,6 +94,17 @@ export const CreateBucketListModal = ({ open, onOpenChange }: CreateBucketListMo
               }}
             />
             {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-800">Description (optional)</label>
+            <Textarea
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="What is this list for? e.g. Places to try this year"
+              aria-label="Description"
+              rows={3}
+            />
           </div>
 
           <div className="space-y-2">
@@ -77,12 +124,12 @@ export const CreateBucketListModal = ({ open, onOpenChange }: CreateBucketListMo
           </div>
 
           <Button
-            variant="gradient"
+            variant="lime"
             onClick={handleCreate}
             className="w-full rounded-full"
             isLoading={isPending}
           >
-            Create Bucket List
+            {isEditing ? 'Save Changes' : 'Create Bucket List'}
           </Button>
         </div>
       </DialogContent>

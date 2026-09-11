@@ -26,7 +26,7 @@ import {
 import { IconComponent } from '@/app/shared/components/Icons';
 import { ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
 import { PillTabs } from '@/app/shared/components/Tabs';
-import { useMyBucketLists, useSharedBucketLists } from '@/app/shared/hooks/useBucketLists';
+import { isSharedWithMe, useMyBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useExperiences, useTicketPurchases } from '@/app/shared/hooks/useExperiences';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { toast } from '@/app/shared/hooks/useToast';
@@ -64,10 +64,14 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const userId = session?.user?.id;
 
   // ⚠️ Bucket lists are served by a MOCK service — no backend endpoints exist yet
-  const { data: myBucketListsResponse, isLoading: isLoadingMine } = useMyBucketLists(isSaved);
-  const { data: sharedBucketListsResponse } = useSharedBucketLists(isSaved);
-  const myBucketLists: BucketList[] = myBucketListsResponse?.data?.results ?? [];
-  const sharedBucketLists: BucketList[] = sharedBucketListsResponse?.data?.results ?? [];
+  // One endpoint returns both the lists the reader owns and the ones they were
+  // invited onto; the owner is what tells them apart
+  const { data: bucketListsResponse, isLoading: isLoadingMine } = useMyBucketLists(isSaved);
+  const allBucketLists: BucketList[] = bucketListsResponse?.data?.results ?? [];
+  const myBucketLists = allBucketLists.filter((list) => !isSharedWithMe(list, session?.user?.id));
+  const sharedBucketLists = allBucketLists.filter((list) =>
+    isSharedWithMe(list, session?.user?.id),
+  );
 
   // Reservations: one purchase record per ticket, grouped into cards; the
   // purchase only carries the experience uuid, so join against the user's
@@ -311,7 +315,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                       <BucketListCard
                         key={bucketList.id}
                         bucketList={bucketList}
-                        onClick={() => router.push(`/bucket-lists/${bucketList.id}`)}
+                        href={`/bucket-lists/${bucketList.id}`}
                       />
                     ))}
                   </div>

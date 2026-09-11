@@ -1,8 +1,6 @@
 import { render, screen } from '@testing-library/react';
 
-import { BucketListMember } from '@/types/bucket-list';
-
-import { AvatarStack } from './index';
+import { AvatarStack, type AvatarStackUser } from './index';
 
 jest.mock('next/image', () => {
   function MockImage({ alt }: { alt: string }) {
@@ -12,7 +10,7 @@ jest.mock('next/image', () => {
   return MockImage;
 });
 
-const users: BucketListMember[] = Array.from({ length: 5 }, (_, index) => ({
+const users: AvatarStackUser[] = Array.from({ length: 5 }, (_, index) => ({
   id: `u${index}`,
   name: `User ${index}`,
   picture: null,

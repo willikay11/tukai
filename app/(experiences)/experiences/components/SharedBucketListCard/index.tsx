@@ -3,7 +3,8 @@
 import { PhotoImage } from '@/app/shared/components/Images';
 import { useJoinBucketList } from '@/app/shared/hooks/useBucketLists';
 import { Button } from '@/components/ui/button';
-import { BucketList } from '@/types/bucket-list';
+import { BucketList, bucketListCoverPhoto } from '@/types/bucket-list';
+import { linkedUserName } from '@/types/user';
 
 interface SharedBucketListCardProps {
   bucketList: BucketList;
@@ -12,12 +13,15 @@ interface SharedBucketListCardProps {
 export const SharedBucketListCard = ({ bucketList }: SharedBucketListCardProps) => {
   const { mutate: joinBucketList, isPending } = useJoinBucketList();
 
+  // The list serializer sends this as a string, so it is read loosely
+  const isJoined = Boolean(bucketList.isMember) && bucketList.isMember !== 'false';
+
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
       <div className="relative h-[200px]">
         <PhotoImage
-          src={bucketList.coverPhoto}
-          alt={bucketList.title}
+          src={bucketListCoverPhoto(bucketList)}
+          alt={bucketList.name}
           fill
           sizes="(max-width: 768px) 100vw, 400px"
           className="object-cover"
@@ -26,18 +30,19 @@ export const SharedBucketListCard = ({ bucketList }: SharedBucketListCardProps) 
 
       <div className="flex items-center justify-between p-4">
         <div>
-          <p className="text-base font-bold text-gray-900">{bucketList.title}</p>
+          <p className="text-base font-bold text-gray-900">{bucketList.name}</p>
           <p className="mt-0.5 text-sm text-gray-400">
-            By {bucketList.owner.name} · {bucketList.savedCount} saved
+            By {linkedUserName(bucketList.owner)} · {bucketList.itemCount} saved
           </p>
         </div>
 
+        {/* Joining is done with the share token the list was handed out on */}
         <Button
-          onClick={() => joinBucketList(bucketList.id)}
-          disabled={isPending || bucketList.hasJoined}
+          onClick={() => bucketList.shareToken && joinBucketList(bucketList.shareToken)}
+          disabled={isPending || isJoined || !bucketList.shareToken}
           className="flex-shrink-0 rounded-full px-6"
         >
-          {bucketList.hasJoined ? 'Joined' : 'Join'}
+          {isJoined ? 'Joined' : 'Join'}
         </Button>
       </div>
     </div>

@@ -2,11 +2,13 @@
 
 import Link from 'next/link';
 
-import { AvatarStack } from '@/app/(experiences)/experiences/components/AvatarStack';
+import {
+  AvatarStack,
+  type AvatarStackUser,
+} from '@/app/(experiences)/experiences/components/AvatarStack';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { useCommunityDetail } from '@/app/shared/hooks/useCommunities';
 import { cn } from '@/lib/utils';
-import { BucketListMember } from '@/types/bucket-list';
 import { Community, CommunityMember, CommunityOwner } from '@/types/community';
 import { Photo } from '@/types/photo';
 import { toPlainText } from '@/utils/safe-text-utils';
@@ -48,7 +50,7 @@ export const CommunityDiscoverCard = ({
     ? listMembers
     : (detail?.data?.members ?? []);
 
-  const avatarUsers: BucketListMember[] = members.length
+  const avatarUsers: AvatarStackUser[] = members.length
     ? members.slice(0, AVATAR_LIMIT).map((member) => ({
         id: member.id,
         name:

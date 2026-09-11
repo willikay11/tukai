@@ -1,66 +1,72 @@
+import Link from 'next/link';
+
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
-import { BucketList } from '@/types/bucket-list';
-
-import { AvatarStack } from '../AvatarStack';
+import { BucketList, bucketListCoverPhoto } from '@/types/bucket-list';
+import { linkedUserName } from '@/types/user';
 
 interface BucketListCardProps {
   bucketList: BucketList;
-  onClick: () => void;
+  /** Given one, the card is a link; otherwise the caller handles the press. */
+  href?: string;
+  onClick?: () => void;
 }
 
-export const BucketListCard = ({ bucketList, onClick }: BucketListCardProps) => (
-  <div
-    onClick={onClick}
-    className="cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
-  >
-    {/* Cover */}
+const CardBody = ({ bucketList }: { bucketList: BucketList }) => (
+  <>
     <div className="relative h-[220px]">
       <PhotoImage
-        src={bucketList.coverPhoto}
-        alt={bucketList.title}
+        src={bucketListCoverPhoto(bucketList)}
+        alt={bucketList.name}
         fill
         sizes="(max-width: 768px) 100vw, 400px"
         className="object-cover"
       />
 
-      {/* Public/Private badge */}
       <div className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-900">
-        {bucketList.isPublic ? 'Public' : 'Private'}
+        {bucketList.visibility === 'public' ? 'Public' : 'Private'}
       </div>
-
-      {/* Preview thumbnails */}
-      {bucketList.previewPhotos.length > 0 && (
-        <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
-          {bucketList.previewPhotos.slice(0, 4).map((photo, index) => (
-            <div
-              key={index}
-              className="relative h-11 w-11 overflow-hidden rounded-lg ring-2 ring-white/90"
-            >
-              <PhotoImage src={photo} alt="" fill sizes="44px" className="object-cover" />
-            </div>
-          ))}
-          {bucketList.savedCount > 4 && (
-            <span className="ml-1 text-sm font-medium text-white drop-shadow">
-              +{bucketList.savedCount - 4}
-            </span>
-          )}
-        </div>
-      )}
     </div>
 
-    {/* Footer */}
     <div className="p-4">
-      <p className="text-base font-bold text-gray-900">{bucketList.title}</p>
+      <p className="text-base font-bold text-gray-900">{bucketList.name}</p>
+
+      {bucketList.owner && (
+        <p className="mt-0.5 text-xs text-gray-400">by {linkedUserName(bucketList.owner)}</p>
+      )}
 
       <div className="mt-2 flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
+        <span className="flex items-center gap-1.5 text-sm text-gray-600">
           <IconComponent iconName="ShoppingBasket01Icon" size={14} className="text-primary" />
-          <span className="text-sm text-gray-600">{bucketList.savedCount} saved</span>
-        </div>
+          {bucketList.itemCount} saved
+        </span>
 
-        <AvatarStack users={bucketList.members} max={3} />
+        {bucketList.memberCount > 0 && (
+          <span className="flex items-center gap-1.5 text-sm text-gray-500">
+            <IconComponent iconName="UserMultipleIcon" size={14} color="currentColor" />
+            {bucketList.memberCount}
+          </span>
+        )}
       </div>
     </div>
-  </div>
+  </>
 );
+
+export const BucketListCard = ({ bucketList, href, onClick }: BucketListCardProps) => {
+  const shell =
+    'block cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md';
+
+  if (href) {
+    return (
+      <Link href={href} className={shell}>
+        <CardBody bucketList={bucketList} />
+      </Link>
+    );
+  }
+
+  return (
+    <div onClick={onClick} className={shell}>
+      <CardBody bucketList={bucketList} />
+    </div>
+  );
+};

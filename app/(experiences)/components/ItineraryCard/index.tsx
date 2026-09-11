@@ -9,7 +9,6 @@ import { Bookmark } from '@/app/shared/components/Bookmark';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { FannedPhotos } from '@/app/shared/components/Images';
-import { useBookmarkExperience } from '@/app/shared/hooks/useExperiences';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 import { getNumberOfDaysAndNights } from '@/utils/date-utils';
@@ -17,7 +16,6 @@ import { experiencePath } from '@/utils/detail-paths';
 
 export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
   const { data: session } = useSession();
-  const { mutate: bookmarkExperience } = useBookmarkExperience();
 
   const photos = (itinerary.photos ?? []).filter((photo: Photo) => photo.photo);
   const coverPhoto = photos.find((photo: Photo) => photo.isCover)?.photo || photos[0]?.photo;
@@ -49,11 +47,10 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
 
         <div className="absolute right-2 top-2">
           <Bookmark
-            icon="basket"
             bookmarked={itinerary.isBookmarked}
             userId={session?.user?.id}
-            onBookmark={() => bookmarkExperience(itinerary.id)}
-            onUnbookmark={() => bookmarkExperience(itinerary.id)}
+            experienceId={itinerary.id}
+            itemName={itinerary.title}
             className="text-white"
           />
         </div>

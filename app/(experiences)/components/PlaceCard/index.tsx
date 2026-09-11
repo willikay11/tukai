@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Bookmark } from '@/app/shared/components/Bookmark';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
-import { useBookmarkPlace } from '@/app/shared/hooks/usePlaces';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
 import { PlaceCategory } from '@/types/placeCategory';
@@ -14,7 +13,6 @@ import { placePath } from '@/utils/detail-paths';
 
 export const PlaceCard = ({ place }: { place: Place }) => {
   const { data: session } = useSession();
-  const { mutate: bookmarkPlace } = useBookmarkPlace(place.id, session?.user?.id || '');
 
   const coverPhoto =
     place.photos?.find((photo: Photo) => photo.isCover)?.photo || place.photos?.[0]?.photo;
@@ -43,11 +41,10 @@ export const PlaceCard = ({ place }: { place: Place }) => {
 
         <div className="absolute right-2 top-2">
           <Bookmark
-            icon="basket"
             bookmarked={place.isBookmarked}
             userId={session?.user?.id}
-            onBookmark={() => bookmarkPlace()}
-            onUnbookmark={() => bookmarkPlace()}
+            placeId={place.id}
+            itemName={place.title}
             className="text-white"
           />
         </div>

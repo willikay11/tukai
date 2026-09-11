@@ -1,11 +1,13 @@
 'use client';
 
-import { AvatarStack } from '@/app/(experiences)/experiences/components/AvatarStack';
+import {
+  AvatarStack,
+  type AvatarStackUser,
+} from '@/app/(experiences)/experiences/components/AvatarStack';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { useJoinCommunity } from '@/app/shared/hooks/useCommunities';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
-import { BucketListMember } from '@/types/bucket-list';
 import { Community, CommunityMember } from '@/types/community';
 
 const AVATAR_LIMIT = 3;
@@ -31,7 +33,7 @@ export const JoinCommunityPanel = ({
   const isMember = members.some((member) => member.user?.id === currentUserId);
   const owner = members.find((member) => member.role === 'owner');
 
-  const avatarUsers: BucketListMember[] = members.slice(0, AVATAR_LIMIT).map((member) => ({
+  const avatarUsers: AvatarStackUser[] = members.slice(0, AVATAR_LIMIT).map((member) => ({
     id: member.id,
     name: nameOf(member),
     picture: member.user?.picture || null,

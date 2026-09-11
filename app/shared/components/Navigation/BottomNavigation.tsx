@@ -27,6 +27,9 @@ const LINKS = [
 const DETAIL_SUBROUTES: Record<string, string[]> = {
   experiences: ['create', 'type', 'see-all', 'booking-success'],
   places: ['claim', 'see-all'],
+  // A single list floats its owner's actions along the bottom edge; the index
+  // of lists has no such bar and keeps the nav
+  'bucket-lists': [],
 };
 
 const isDetailPage = (pathname: string): boolean => {
