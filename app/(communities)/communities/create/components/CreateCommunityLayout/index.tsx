@@ -18,6 +18,7 @@ export const CreateCommunityLayout = () => {
     invitedCommunities,
     isSuccessDialogOpen,
     createdCommunityId,
+    createdCommunitySlug,
     setUploadedFiles,
     setCityInput,
     setShowCitySuggestions,
@@ -59,6 +60,7 @@ export const CreateCommunityLayout = () => {
           invitedCommunities={invitedCommunities}
           isSuccessDialogOpen={isSuccessDialogOpen}
           createdCommunityId={createdCommunityId}
+          createdCommunitySlug={createdCommunitySlug}
           setUploadedFiles={setUploadedFiles}
           setCityInput={setCityInput}
           setShowCitySuggestions={setShowCitySuggestions}

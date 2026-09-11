@@ -8,6 +8,17 @@ import { Community } from '@/types/community';
 import { CommunitiesPageContent } from './CommunitiesPageContent';
 
 const push = jest.fn();
+let sessionState: { data: { user: { id: string } } | null; status: string } = {
+  data: { user: { id: 'u1' } },
+  status: 'authenticated',
+};
+jest.mock('next-auth/react', () => ({ useSession: () => sessionState }));
+
+const openSignInWithCallback = jest.fn();
+jest.mock('@/context/AuthDialogContext', () => ({
+  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+}));
+
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push }),
 }));
@@ -44,6 +55,7 @@ const respondWith = (results: Community[], isLoading = false) =>
 describe('CommunitiesPageContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionState = { data: { user: { id: 'u1' } }, status: 'authenticated' };
     useCommunityDetail.mockReturnValue({ data: undefined });
     respondWith([community('1', 'Nairobi Hikers'), community('2', 'Mall Rats', [SHOPPING])]);
   });
@@ -76,18 +88,19 @@ describe('CommunitiesPageContent', () => {
       render(<CommunitiesPageContent />);
 
       expect(useGetCommunities).toHaveBeenLastCalledWith(
-        expect.objectContaining({ following: true, recommendedCommunities: false }),
+        expect.objectContaining({ following: true }),
       );
     });
 
-    it('switches to the recommendation feed on the other tab', async () => {
+    // The other tab is everything there is to join, not a narrowed feed
+    it('drops the membership filter on the other tab', async () => {
       const user = userEvent.setup();
       render(<CommunitiesPageContent />);
 
       await user.click(screen.getByRole('tab', { name: 'Recommended' }));
 
       expect(useGetCommunities).toHaveBeenLastCalledWith(
-        expect.objectContaining({ following: false, recommendedCommunities: true }),
+        expect.objectContaining({ following: false }),
       );
     });
   });
@@ -164,5 +177,68 @@ describe('CommunitiesPageContent', () => {
 
       expect(screen.getByText('No recommendations right now')).toBeInTheDocument();
     });
+  });
+
+  describe('signed out', () => {
+    beforeEach(() => {
+      sessionState = { data: null, status: 'unauthenticated' };
+    });
+
+    /**
+     * An empty "My Communities" signed out means we do not know who the reader
+     * is, not that they have joined nothing.
+     */
+    it('asks the reader to sign in rather than saying they have joined nothing', async () => {
+      const user = userEvent.setup();
+      respondWith([]);
+
+      render(<CommunitiesPageContent />);
+
+      expect(screen.getByText('Sign in to see your communities')).toBeInTheDocument();
+      expect(screen.queryByText("You haven't joined any communities yet")).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Sign in' }));
+      expect(openSignInWithCallback).toHaveBeenCalled();
+    });
+
+    it('does not ask the API who the reader follows', () => {
+      respondWith([]);
+
+      render(<CommunitiesPageContent />);
+
+      expect(useGetCommunities).toHaveBeenCalledWith(
+        expect.objectContaining({ following: true, enabled: false }),
+      );
+    });
+
+    // Recommendations are browsable by anyone
+    it('still shows communities on the Recommended tab', async () => {
+      const user = userEvent.setup();
+
+      render(<CommunitiesPageContent />);
+
+      await user.click(screen.getByRole('tab', { name: 'Recommended' }));
+
+      expect(screen.queryByText('Sign in to see your communities')).not.toBeInTheDocument();
+      expect(useGetCommunities).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: true, following: false }),
+      );
+    });
+  });
+
+  /**
+   * The tab is meant to be everything there is to join. `recommended=true`
+   * narrows it to a handful for a signed-in reader, and 500s for anyone else.
+   */
+  it('lists every community on Recommended, not a narrowed feed', async () => {
+    const user = userEvent.setup();
+
+    render(<CommunitiesPageContent />);
+
+    await user.click(screen.getByRole('tab', { name: 'Recommended' }));
+
+    expect(useGetCommunities).toHaveBeenCalledWith(
+      expect.not.objectContaining({ recommendedCommunities: true }),
+    );
   });
 });

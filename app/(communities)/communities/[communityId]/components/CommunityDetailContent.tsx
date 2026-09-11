@@ -13,6 +13,7 @@ import { useScrollSpy } from '@/app/shared/hooks/useScrollSpy';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Moment } from '@/types/moment';
+import { communityPath } from '@/utils/detail-paths';
 
 import { CommunityAnchorTabs } from './CommunityAnchorTabs';
 import { JoinCommunityPanel } from './JoinCommunityPanel';
@@ -89,7 +90,7 @@ export const CommunityDetailContent = ({
           <Share
             coverPhoto={coverPhoto}
             title={community.title}
-            link={`${process.env.NEXT_PUBLIC_APP_URL}/communities/${community.id}`}
+            link={`${process.env.NEXT_PUBLIC_APP_URL}${communityPath(community)}`}
             kind="community"
           />
         </div>

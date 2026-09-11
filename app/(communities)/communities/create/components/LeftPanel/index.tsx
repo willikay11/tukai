@@ -19,6 +19,7 @@ import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { Textarea } from '@/components/ui/textarea';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';
+import { communityPath } from '@/utils/detail-paths';
 
 interface LeftPanelProps {
   form: UseFormReturn<CreateCommunityFormValues>;
@@ -30,6 +31,7 @@ interface LeftPanelProps {
   invitedCommunities: Array<Record<string, unknown>>;
   isSuccessDialogOpen: boolean;
   createdCommunityId: string | null;
+  createdCommunitySlug: string | null;
   setUploadedFiles: (files: File[]) => void;
   setCityInput: (input: string) => void;
   setShowCitySuggestions: (show: boolean) => void;
@@ -59,6 +61,7 @@ export const LeftPanel = ({
   invitedCommunities,
   isSuccessDialogOpen,
   createdCommunityId,
+  createdCommunitySlug,
   setUploadedFiles,
   setCityInput,
   setShowCitySuggestions,
@@ -95,7 +98,10 @@ export const LeftPanel = ({
         open={isSuccessDialogOpen}
         onOpenChange={setIsSuccessDialogOpen}
         viewCommunityHref={
-          returnHref ?? (createdCommunityId ? `/communities/${createdCommunityId}` : '/communities')
+          returnHref ??
+          (createdCommunityId
+            ? communityPath({ id: createdCommunityId, slug: createdCommunitySlug ?? undefined })
+            : '/communities')
         }
         viewCommunityLabel={returnHref ? 'Continue' : undefined}
         description={

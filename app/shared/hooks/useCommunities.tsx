@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
   createCommunity,
@@ -9,6 +9,7 @@ import {
   getCommunities,
   joinCommunity,
   joinCommunityWithToken,
+  leaveCommunity,
   submitCommunityVerification,
   uploadVerificationDocument,
 } from '@/services/community';
@@ -88,10 +89,37 @@ export const useGetCommunities = (
   });
 };
 
+/**
+ * Membership lives on the community detail record, which the community page
+ * renders on the server. Invalidating the cached copies keeps client-side
+ * readers (cards, the members list) in step; the page itself is refreshed by
+ * the caller.
+ */
+const invalidateCommunity = (queryClient: ReturnType<typeof useQueryClient>) => {
+  // The whole prefix, not one id: a community is cached under whichever key
+  // addressed it, and the detail route takes its slug as readily as its UUID
+  queryClient.invalidateQueries({ queryKey: ['community'] });
+  queryClient.invalidateQueries({ queryKey: ['communities'] });
+};
+
 export const useJoinCommunity = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationKey: ['joinCommunity'],
     mutationFn: async (communityId: string) => await joinCommunity(communityId),
+    onSuccess: () => invalidateCommunity(queryClient),
+  });
+};
+
+export const useLeaveCommunity = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['leaveCommunity'],
+    mutationFn: async ({ communityId, userId }: { communityId: string; userId: string }) =>
+      await leaveCommunity(communityId, userId),
+    onSuccess: () => invalidateCommunity(queryClient),
   });
 };
 

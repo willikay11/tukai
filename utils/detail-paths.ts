@@ -1,5 +1,5 @@
 /**
- * Where a place or an experience lives on the site.
+ * Where a place, an experience or a community lives on the site.
  *
  * The detail routes carry the API's `slug` rather than its UUID, which reads
  * better and is what gets shared. The API accepts either on the detail route
@@ -11,3 +11,6 @@ export const placePath = (place: { id: string; slug?: string }): string =>
 
 export const experiencePath = (experience: { id: string; slug?: string }): string =>
   `/experiences/${experience.slug || experience.id}`;
+
+export const communityPath = (community: { id: string; slug?: string }): string =>
+  `/communities/${community.slug || community.id}`;

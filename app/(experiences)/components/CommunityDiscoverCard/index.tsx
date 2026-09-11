@@ -11,6 +11,7 @@ import { useCommunityDetail } from '@/app/shared/hooks/useCommunities';
 import { cn } from '@/lib/utils';
 import { Community, CommunityMember, CommunityOwner } from '@/types/community';
 import { Photo } from '@/types/photo';
+import { communityPath } from '@/utils/detail-paths';
 import { toPlainText } from '@/utils/safe-text-utils';
 
 const AVATAR_LIMIT = 3;
@@ -68,7 +69,7 @@ export const CommunityDiscoverCard = ({
 
   return (
     <Link
-      href={`/communities/${community.id}`}
+      href={communityPath(community)}
       className={cn('w-[320px] flex-shrink-0 snap-start', className)}
     >
       <div className="relative h-[180px] w-full overflow-hidden rounded-2xl">

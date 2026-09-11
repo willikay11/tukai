@@ -7,7 +7,8 @@ export type CommunityMember = {
   user: User;
   role: 'owner' | 'admin' | 'moderator' | 'regular' | 'guest';
   dateCreated: string;
-  inviteStatus: 'accepted' | 'requested' | 'declined';
+  /** The API enum, from `CommunityMember.invite_status` in the swagger. */
+  inviteStatus: 'pending' | 'requested' | 'accepted' | 'rejected' | 'ignored';
 };
 
 export type CommunityCategory = {
@@ -31,6 +32,8 @@ export type CommunityOwner = {
 
 export type Community = {
   id: string;
+  /** URL key. The detail route and every nested one resolve it or the UUID. */
+  slug?: string;
   title: string;
   description: string;
   categories: CommunityCategory[];

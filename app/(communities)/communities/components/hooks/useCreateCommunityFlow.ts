@@ -59,6 +59,9 @@ export const useCreateCommunityFlow = () => {
   const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   const [createdCommunityId, setCreatedCommunityId] = useState<string | null>(null);
+  // Kept beside the id rather than replacing it: the community page is
+  // addressed by slug, but a `returnTo` flow hands the id back to an API
+  const [createdCommunitySlug, setCreatedCommunitySlug] = useState<string | null>(null);
 
   // Data fetching hooks
   const { data: categories } = useGetInterestCategories();
@@ -167,6 +170,7 @@ export const useCreateCommunityFlow = () => {
         onSuccess: (response: any) => {
           const communityId = response?.data?.id || null;
           setCreatedCommunityId(communityId);
+          setCreatedCommunitySlug(response?.data?.slug || null);
           setIsSuccessDialogOpen(true);
           form.reset();
           setSelectedCategories([]);
@@ -204,6 +208,7 @@ export const useCreateCommunityFlow = () => {
     invitedCommunities,
     isSuccessDialogOpen,
     createdCommunityId,
+    createdCommunitySlug,
 
     // State setters
     setSelectedCategories,
