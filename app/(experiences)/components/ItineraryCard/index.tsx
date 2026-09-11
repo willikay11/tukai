@@ -9,6 +9,8 @@ import { Bookmark } from '@/app/shared/components/Bookmark';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { FannedPhotos } from '@/app/shared/components/Images';
+import { CARD_LIFT, MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motion';
+import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
 import { getNumberOfDaysAndNights } from '@/utils/date-utils';
@@ -35,14 +37,17 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
   const price = itinerary.priceStartsFrom;
 
   return (
-    <Link href={experiencePath(itinerary)} className="block w-[300px] flex-shrink-0 snap-start">
+    <Link
+      href={experiencePath(itinerary)}
+      className={cn('group block w-[300px] flex-shrink-0 snap-start', CARD_LIFT)}
+    >
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
         <PhotoImage
           src={coverPhoto}
           alt={itinerary.title}
           fill
           sizes="300px"
-          className="object-cover"
+          className={cn('object-cover', MEDIA_ZOOM)}
         />
 
         <div className="absolute right-2 top-2">
@@ -59,7 +64,7 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
       </div>
 
       <div className="mt-3">
-        <p className="text-base font-bold text-gray-900">{itinerary.title}</p>
+        <p className={cn('text-base font-bold text-gray-900', TITLE_TINT)}>{itinerary.title}</p>
         {/* ⚠️ No "N stops": the list response carries no activity/stop count.
             It would take one /itinerary-days/ request per card to get it. */}
         {daysLabel && (

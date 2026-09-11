@@ -32,7 +32,7 @@ export const CategoryPill = ({
         setActive((prev) => !prev);
       }}
       className={clsx(
-        'inline-flex w-fit cursor-pointer items-center rounded-full px-4 py-2 transition-all duration-300 ease-in-out',
+        'inline-flex w-fit cursor-pointer items-center rounded-full px-4 py-2 transition-all duration-300 ease-in-out active:scale-95 motion-reduce:transform-none',
         {
           // The same gradient a chosen pill takes everywhere else — the pill
           // radio group, the property pills and the gradient button

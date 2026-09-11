@@ -16,7 +16,9 @@ export const StepIndicator = ({
           <div className="flex w-full flex-row items-center overflow-hidden">
             <div className="flex flex-col items-center justify-center">
               <div
-                className={`flex h-[28px] w-[28px] items-center justify-center rounded-full border-[1px] border-primary p-[2px] ${
+                // Fills in as the step is completed rather than flicking to
+                // green, so progress reads as progress
+                className={`flex h-[28px] w-[28px] items-center justify-center rounded-full border-[1px] border-primary p-[2px] transition-colors duration-300 ease-out ${
                   currentStep > idx ? 'bg-primary' : 'border-gray-300'
                 } text-white`}
               >
@@ -27,7 +29,7 @@ export const StepIndicator = ({
           </div>
           <span
             className={clsx(
-              'text-xs',
+              'text-xs transition-colors duration-300 ease-out',
               idx === currentStep || currentStep > idx
                 ? 'font-medium text-primary'
                 : 'text-gray-500',

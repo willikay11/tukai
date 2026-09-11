@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PRESSABLE } from '@/app/shared/components/Motion';
 import { cn } from '@/lib/utils';
 
 interface BackToExploreProps {
@@ -31,7 +32,7 @@ export const BackToExplore = ({
         // this spanned the full width. flex-shrink-0 does not prevent that.
         'flex w-fit items-center gap-2 text-sm transition-colors',
         variant === 'pill'
-          ? 'flex-shrink-0 rounded-full border border-gray-200 px-5 py-2.5 font-medium text-gray-800 hover:border-gray-300'
+          ? `flex-shrink-0 rounded-full border border-gray-200 px-5 py-2.5 font-medium text-gray-800 hover:border-gray-300 ${PRESSABLE}`
           : 'text-gray-700 hover:text-gray-900',
       )}
     >

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
+import { ROW_HOVER } from '@/app/shared/components/Motion';
 import { useAddBucketListItem, useMyBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
@@ -122,7 +123,10 @@ export const BucketListPicker = ({
                       type="button"
                       onClick={() => handlePick(bucketList)}
                       disabled={Boolean(savingTo)}
-                      className="flex w-full items-center gap-3 py-3 text-left disabled:opacity-60"
+                      className={cn(
+                        'flex w-full items-center gap-3 rounded-xl px-2 py-3 text-left disabled:opacity-60',
+                        ROW_HOVER,
+                      )}
                     >
                       <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
                         <PhotoImage

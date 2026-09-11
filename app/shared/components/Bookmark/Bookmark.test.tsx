@@ -11,13 +11,17 @@ jest.mock('@/context/AuthDialogContext', () => ({
 }));
 
 jest.mock('@/app/shared/components/BucketList', () => ({
-  BucketListPicker: ({ isOpen, experienceId, placeId }: Record<string, unknown>) =>
+  BucketListPicker: ({ isOpen, experienceId, placeId, onSaved }: Record<string, unknown>) =>
     isOpen ? (
       <div
         data-testid="picker"
         data-experience={experienceId as string}
         data-place={placeId as string}
-      />
+      >
+        <button type="button" onClick={onSaved as () => void}>
+          save it
+        </button>
+      </div>
     ) : null,
 }));
 
@@ -119,5 +123,40 @@ describe('Bookmark', () => {
     rerender(<Bookmark userId={USER} bookmarked experienceId="exp-1" />);
 
     expect(screen.getByTestId('ShoppingBasketDone02Icon')).toBeInTheDocument();
+  });
+  /**
+   * The confirmation beat. `animate-pop` is a one-shot, so it has to be absent
+   * on arrival — otherwise every already-saved card on a page would pop at once
+   * on load — and it has to be cleared afterwards so a second save replays it.
+   */
+  describe('the save beat', () => {
+    it('does not play for something that arrived already saved', () => {
+      render(<Bookmark userId={USER} bookmarked experienceId="exp-1" />);
+
+      expect(screen.getByRole('button')).not.toHaveClass('motion-safe:animate-pop');
+    });
+
+    it('plays once the reader saves it', () => {
+      render(<Bookmark userId={USER} bookmarked={false} experienceId="exp-1" />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add to bucket list' }));
+      fireEvent.click(screen.getByRole('button', { name: 'save it' }));
+
+      expect(screen.getByRole('button', { name: 'Saved to bucket list' })).toHaveClass(
+        'motion-safe:animate-pop',
+      );
+    });
+
+    it('clears itself when the animation ends, so the next save replays it', () => {
+      render(<Bookmark userId={USER} bookmarked={false} experienceId="exp-1" />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add to bucket list' }));
+      fireEvent.click(screen.getByRole('button', { name: 'save it' }));
+
+      const saved = screen.getByRole('button', { name: 'Saved to bucket list' });
+      fireEvent.animationEnd(saved);
+
+      expect(saved).not.toHaveClass('motion-safe:animate-pop');
+    });
   });
 });

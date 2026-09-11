@@ -104,6 +104,41 @@ input[type='number'] {
 }
 
 @layer base {
+  /**
+   * Every interactive element eases between its states.
+   *
+   * Hover, focus and active colours were snapping app-wide because each
+   * component had to remember to add `transition-*` itself, and most did not.
+   * Doing it once here covers the ~80 surfaces that were missing it without
+   * touching 80 class strings, and any component that wants a different feel
+   * still overrides it: these are element selectors, so every Tailwind utility
+   * (`transition-none`, `duration-500`, …) outranks them on specificity.
+   *
+   * `transform` is deliberately NOT in the list. Framer Motion animates
+   * transforms from JavaScript on some of these same elements, and a CSS
+   * transition underneath it fights the animation. Movement stays opt-in
+   * through the tokens in `app/shared/components/Motion`.
+   *
+   * The `prefers-reduced-motion` block below collapses all of this to an
+   * instant change.
+   */
+  a,
+  button,
+  summary,
+  input,
+  select,
+  textarea,
+  [role='button'],
+  [role='tab'],
+  [role='menuitem'],
+  [role='option'] {
+    transition-property:
+      color, background-color, border-color, text-decoration-color, fill, stroke, box-shadow,
+      opacity;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
   :root {
     --background: 0 0% 100%;
     --foreground: 224 71.4% 4.1%;
@@ -183,4 +218,27 @@ input[type='number'] {
 
 .rich-text li + li {
   margin-top: 0.25rem;
+}
+
+/**
+ * Readers who ask their OS for less motion get none of it.
+ *
+ * Individual components carry `motion-reduce:` escapes, but this is the net
+ * under all of them: any animation or transition added anywhere in the app —
+ * including ones inside third-party components we do not style — collapses to
+ * an instant state change rather than being skipped altogether, so nothing
+ * ends up stuck mid-transition or invisible.
+ *
+ * `!important` is deliberate: it has to beat utility classes, which is the one
+ * place in this stylesheet where that is the right tool.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

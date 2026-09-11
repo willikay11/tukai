@@ -2,6 +2,8 @@ import Link from 'next/link';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
+import { CARD_LIFT, MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motion';
+import { cn } from '@/lib/utils';
 import { BucketList, bucketListCoverPhoto } from '@/types/bucket-list';
 import { linkedUserName } from '@/types/user';
 
@@ -20,7 +22,7 @@ const CardBody = ({ bucketList }: { bucketList: BucketList }) => (
         alt={bucketList.name}
         fill
         sizes="(max-width: 768px) 100vw, 400px"
-        className="object-cover"
+        className={cn('object-cover', MEDIA_ZOOM)}
       />
 
       <div className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-900">
@@ -29,7 +31,7 @@ const CardBody = ({ bucketList }: { bucketList: BucketList }) => (
     </div>
 
     <div className="p-4">
-      <p className="text-base font-bold text-gray-900">{bucketList.name}</p>
+      <p className={cn('text-base font-bold text-gray-900', TITLE_TINT)}>{bucketList.name}</p>
 
       {bucketList.owner && (
         <p className="mt-0.5 text-xs text-gray-400">by {linkedUserName(bucketList.owner)}</p>
@@ -53,8 +55,10 @@ const CardBody = ({ bucketList }: { bucketList: BucketList }) => (
 );
 
 export const BucketListCard = ({ bucketList, href, onClick }: BucketListCardProps) => {
-  const shell =
-    'block cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md';
+  const shell = cn(
+    'group block cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md',
+    CARD_LIFT,
+  );
 
   if (href) {
     return (

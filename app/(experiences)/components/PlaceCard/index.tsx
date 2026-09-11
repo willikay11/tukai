@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { Bookmark } from '@/app/shared/components/Bookmark';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
+import { CARD_LIFT, MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motion';
+import { cn } from '@/lib/utils';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
 import { PlaceCategory } from '@/types/placeCategory';
@@ -29,14 +31,17 @@ export const PlaceCard = ({ place }: { place: Place }) => {
   const rating = place.averageRating > 0 ? place.averageRating : null;
 
   return (
-    <Link href={placePath(place)} className="block w-[280px] flex-shrink-0 snap-start">
+    <Link
+      href={placePath(place)}
+      className={cn('group block w-[280px] flex-shrink-0 snap-start', CARD_LIFT)}
+    >
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
         <PhotoImage
           src={coverPhoto}
           alt={place.title}
           fill
           sizes="280px"
-          className="object-cover"
+          className={cn('object-cover', MEDIA_ZOOM)}
         />
 
         <div className="absolute right-2 top-2">
@@ -52,7 +57,7 @@ export const PlaceCard = ({ place }: { place: Place }) => {
 
       <div className="mt-3">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-base font-bold text-gray-900">{place.title}</p>
+          <p className={cn('text-base font-bold text-gray-900', TITLE_TINT)}>{place.title}</p>
           {rating !== null && (
             <span className="flex flex-shrink-0 items-center gap-1">
               <IconComponent iconName="StarIcon" size={14} className="text-yellow-400" />

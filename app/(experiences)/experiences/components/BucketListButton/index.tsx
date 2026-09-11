@@ -6,8 +6,10 @@ import { useSession } from 'next-auth/react';
 
 import { IconComponent } from '@/app/shared/components';
 import { BucketListPicker } from '@/app/shared/components/BucketList';
+import { POP_ONCE } from '@/app/shared/components/Motion';
 import { Button } from '@/components/ui/button';
 import { useAuthDialog } from '@/context/AuthDialogContext';
+import { cn } from '@/lib/utils';
 
 interface BucketListButtonProps {
   experienceId: string;
@@ -32,6 +34,9 @@ export const BucketListButton = ({
   inert = false,
 }: BucketListButtonProps) => {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  // The beat belongs to a save the reader just made, not to arriving on a page
+  // where the experience was already saved
+  const [hasJustSaved, setHasJustSaved] = useState(false);
   const { data: session } = useSession();
   const { openSignInWithCallback } = useAuthDialog();
 
@@ -54,7 +59,8 @@ export const BucketListButton = ({
         type="button"
         onClick={handleClick}
         variant={isBookmarked ? 'default' : 'outline'}
-        className="rounded-full"
+        className={cn('rounded-full', hasJustSaved && POP_ONCE)}
+        onAnimationEnd={() => setHasJustSaved(false)}
       >
         <span>{isBookmarked ? 'Saved to Bucket List' : 'Add to Bucket List'}</span>
         <IconComponent iconName="ShoppingBasket01Icon" size={16} className="ml-2" />
@@ -65,6 +71,7 @@ export const BucketListButton = ({
         setIsOpen={setIsPickerOpen}
         experienceId={experienceId}
         itemName={experienceTitle}
+        onSaved={() => setHasJustSaved(true)}
       />
     </>
   );
