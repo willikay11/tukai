@@ -18,7 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { PlaceCategory } from '@/types/placeCategory';
 import { SearchResultType } from '@/types/search';
-import { experiencePath, placePath } from '@/utils/detail-paths';
+import { communityPath, experiencePath, placePath } from '@/utils/detail-paths';
 
 import { CommunityResultRow } from './CommunityResultRow';
 import { ExperienceResultRow } from './ExperienceResultRow';
@@ -332,7 +332,7 @@ export const Search = () => {
                           <CommunityResultRow
                             key={community.id}
                             item={community}
-                            onClick={() => go(`/communities/${community.id}`)}
+                            onClick={() => go(communityPath(community))}
                           />
                         ))}
                       </div>

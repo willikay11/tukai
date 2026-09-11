@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
 import { CommunityPost } from '@/types/community';
 import { Photo } from '@/types/photo';
+import { communityPath } from '@/utils/detail-paths';
 
 export const Post = ({
   post,
@@ -54,7 +55,7 @@ export const Post = ({
                 <>
                   <span className="hidden text-gray-400 md:inline">in</span>
                   <Link
-                    href={`/communities/${post.community.id}`}
+                    href={communityPath(post.community)}
                     className="flex items-center gap-1 font-medium text-primary hover:underline"
                   >
                     <span>{post.community.title}</span>

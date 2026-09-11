@@ -9,6 +9,7 @@ import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { NoData } from '@/components/ui/noData';
 import { Status } from '@/enums/status';
 import { Community } from '@/types/community';
+import { communityPath } from '@/utils/detail-paths';
 
 import { SingleCommunity } from './community';
 
@@ -67,7 +68,7 @@ export const Communities = () => {
           transition={{ duration: 0.2 }}
           className="cursor-pointer"
         >
-          <Link href={`/communities/${community.id}`} target="_blank">
+          <Link href={communityPath(community)} target="_blank">
             <SingleCommunity community={community} aspectRatio="aspect-3/2" />
           </Link>
         </motion.div>

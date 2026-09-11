@@ -1,4 +1,4 @@
-import { experiencePath, placePath } from './detail-paths';
+import { communityPath, experiencePath, placePath } from './detail-paths';
 
 describe('detail paths', () => {
   // The slug is what the API returns for these and what reads well in a URL
@@ -14,10 +14,17 @@ describe('detail paths', () => {
     );
   });
 
+  it('addresses a community by its slug', () => {
+    expect(communityPath({ id: '0914d67d-21a4', slug: 'city-scapes' })).toBe(
+      '/communities/city-scapes',
+    );
+  });
+
   // A record the API has not slugged yet still has to be reachable — and the
   // detail endpoints resolve the UUID just as happily
   it('falls back to the id when there is no slug', () => {
     expect(placePath({ id: 'p1' })).toBe('/places/p1');
     expect(experiencePath({ id: 'e1', slug: '' })).toBe('/experiences/e1');
+    expect(communityPath({ id: 'c1' })).toBe('/communities/c1');
   });
 });

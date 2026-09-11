@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 import { PageContainer } from '@/app/shared/components/Layout';
@@ -9,6 +10,7 @@ import { PillTabs } from '@/app/shared/components/Tabs';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 import { Community } from '@/types/community';
 import { buildCommunityGroups } from '@/utils/community-grouping';
 
@@ -54,12 +56,23 @@ export const CommunitiesPageContent = () => {
 
   // One endpoint, two flags. `following` is the user's own memberships;
   // `recommended` is the suggestion feed. Both are auth-only — anonymously the
-  // API raises rather than returning 401, but this page is behind AuthGuard.
+  // API raises rather than returning 401, so the query is only enabled for a
+  // reader we know.
+  // "My Communities" is the reader's own, so an empty list signed out means
+  // "we do not know who you are", not "you have joined nothing". Recommended
+  // is browsable by anyone.
+  const { data: session, status } = useSession();
+  const isSignedIn = Boolean(session?.user?.id);
+  const { openSignInWithCallback } = useAuthDialog();
+
   const { data, isLoading } = useGetCommunities({
     page: 1,
-    enabled: true,
+    // Only the reader's own memberships need them signed in
+    enabled: isMine ? isSignedIn : true,
     following: isMine,
-    recommendedCommunities: !isMine,
+    // No `recommended` flag either way. Signed out it is a 500 — there is
+    // nobody to recommend for — and signed in it narrows to a handful, where
+    // this tab is meant to be everything there is to join.
   });
 
   const communities: Community[] = data?.data?.results ?? [];
@@ -79,8 +92,18 @@ export const CommunitiesPageContent = () => {
       </div>
 
       <div className="mt-8">
-        {isLoading ? (
+        {isLoading || status === 'loading' ? (
           <GroupsSkeleton />
+        ) : isMine && !isSignedIn ? (
+          <div className="flex flex-col items-center gap-4 py-16">
+            <NoData message="Sign in to see your communities" />
+            <Button
+              onClick={() => openSignInWithCallback(() => undefined)}
+              className="rounded-full px-6"
+            >
+              Sign in
+            </Button>
+          </div>
         ) : groups.length === 0 ? (
           <div className="flex flex-col items-center gap-4 py-16">
             <NoData

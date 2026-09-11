@@ -37,6 +37,27 @@ const community = (extra: Record<string, unknown>) =>
 
 const facepile = (container: HTMLElement) => container.querySelector('.-space-x-2');
 
+describe('CommunityDiscoverCard link', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useCommunityDetail.mockReturnValue({ data: undefined });
+  });
+
+  it('addresses the community by its slug', () => {
+    const { container } = render(
+      <CommunityDiscoverCard community={community({ slug: 'nairobi-hikers' })} />,
+    );
+
+    expect(container.querySelector('a')).toHaveAttribute('href', '/communities/nairobi-hikers');
+  });
+
+  it('falls back to the id for a community the API has not slugged', () => {
+    const { container } = render(<CommunityDiscoverCard community={community({})} />);
+
+    expect(container.querySelector('a')).toHaveAttribute('href', `/communities/${base.id}`);
+  });
+});
+
 describe('CommunityDiscoverCard facepile', () => {
   beforeEach(() => {
     jest.clearAllMocks();

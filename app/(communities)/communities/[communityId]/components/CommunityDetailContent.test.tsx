@@ -9,7 +9,7 @@ import { CommunityDetailContent } from './CommunityDetailContent';
 
 const push = jest.fn();
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({ push, back: jest.fn() }),
+  useRouter: () => ({ push, back: jest.fn(), refresh: jest.fn() }),
 }));
 
 jest.mock('@/app/shared/components/Images', () => ({
@@ -45,6 +45,7 @@ jest.mock('@/app/shared/hooks/useMoments', () => ({
 
 jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useJoinCommunity: () => ({ mutate: jest.fn(), isPending: false }),
+  useLeaveCommunity: () => ({ mutate: jest.fn(), isPending: false }),
 }));
 jest.mock('@/app/shared/hooks/useToast', () => ({
   useToast: () => ({ toast: jest.fn() }),
@@ -244,11 +245,11 @@ describe('CommunityDetailContent', () => {
       expect(screen.getByRole('button', { name: 'Request to Join' })).toBeInTheDocument();
     });
 
-    it('shows an existing member as joined', () => {
+    it('offers an existing member the way out', () => {
       renderPage({}, 'u2');
 
-      const joined = screen.getByRole('button', { name: 'Joined' });
-      expect(joined).toBeDisabled();
+      expect(screen.getByRole('button', { name: /Leave community/ })).toBeEnabled();
+      expect(screen.queryByRole('button', { name: 'Join Community' })).not.toBeInTheDocument();
     });
 
     // The owner also appears in the Members list, so scope to the panel's card

@@ -94,6 +94,30 @@ export async function joinCommunity(communityId: string) {
   }
 }
 
+/**
+ * Leaving is done through `remove-member` — the API has no dedicated leave or
+ * unfollow route (both 404). The endpoint is documented as owner/admin only,
+ * so a regular member removing themselves may be rejected by the backend; the
+ * error is surfaced to the caller rather than swallowed.
+ */
+export async function leaveCommunity(communityId: string, userId: string) {
+  try {
+    const api = await apiWithToken();
+
+    const response = await api.post(`/v1/communities/${communityId}/remove-member/`, {
+      user: userId,
+    });
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(parseApiError(error.response?.data, 'An unexpected error occurred'));
+  }
+}
+
 export async function joinCommunityWithToken(communityId: string, token?: string) {
   try {
     const api = await apiWithToken();

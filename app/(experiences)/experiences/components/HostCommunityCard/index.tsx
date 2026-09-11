@@ -2,10 +2,12 @@ import Link from 'next/link';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
+import { communityPath } from '@/utils/detail-paths';
 
 interface HostCommunityCardProps {
   community: {
     id: string;
+    slug?: string;
     title: string;
     photos?: Array<{ photo?: string; url?: string }>;
     experiencesHostedCount?: number;
@@ -18,7 +20,7 @@ export const HostCommunityCard = ({ community }: HostCommunityCardProps) => {
   return (
     <div>
       <h3 className="mb-3 text-xl font-bold text-gray-900">Host Community</h3>
-      <Link target="_blank" href={`/communities/${community.id}`}>
+      <Link target="_blank" href={communityPath(community)}>
         <div className="flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-75">
           {photoUrl && (
             <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">

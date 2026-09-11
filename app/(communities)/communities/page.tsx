@@ -1,9 +1,5 @@
-import { Session } from 'next-auth';
 import type { Metadata } from 'next';
 
-import { getAuthSession } from '@/lib/auth';
-
-import { AuthGuard } from './[communityId]/components/authGuard';
 import { CommunitiesPageContent } from './components/CommunitiesPageContent';
 
 export const metadata: Metadata = {
@@ -11,14 +7,10 @@ export const metadata: Metadata = {
   description: 'The crews that make every adventure better',
 };
 
-export default async function CommunitiesPage() {
-  const session: Session | null = await getAuthSession();
-
-  // Both views are the signed-in user's own — their memberships and the
-  // suggestions built from them
-  if (!session) {
-    return <AuthGuard />;
-  }
-
+// No auth gate: arriving here signed out used to open the sign-in dialog
+// straight away, before the reader had seen anything. The page says who it is
+// for instead — recommendations are browsable by anyone, and "My Communities"
+// asks them to sign in where the sign-in actually buys them something.
+export default function CommunitiesPage() {
   return <CommunitiesPageContent />;
 }

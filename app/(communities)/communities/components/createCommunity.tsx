@@ -14,6 +14,7 @@ import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { Textarea } from '@/components/ui/textarea';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';
+import { communityPath } from '@/utils/detail-paths';
 
 import { useCreateCommunityFlow } from './hooks/useCreateCommunityFlow';
 
@@ -31,6 +32,7 @@ export const CreateCommunity = () => {
     invitedCommunities,
     isSuccessDialogOpen,
     createdCommunityId,
+    createdCommunitySlug,
     setUploadedFiles,
     setCityInput,
     setShowCitySuggestions,
@@ -55,7 +57,9 @@ export const CreateCommunity = () => {
         open={isSuccessDialogOpen}
         onOpenChange={setIsSuccessDialogOpen}
         viewCommunityHref={
-          createdCommunityId ? `/communities/${createdCommunityId}` : '/communities'
+          createdCommunityId
+            ? communityPath({ id: createdCommunityId, slug: createdCommunitySlug ?? undefined })
+            : '/communities'
         }
         createExperienceHref="/experiences/create"
       />

@@ -6,6 +6,7 @@ import { getAuthSession } from '@/lib/auth';
 import { fetchCommunity } from '@/services/community';
 import { ApiResponse } from '@/types/apiResponse';
 import { Community } from '@/types/community';
+import { communityPath } from '@/utils/detail-paths';
 import { APP_ORIGIN, buildShareMetadata } from '@/utils/share-metadata';
 
 import { CommunityDetailContent } from './components/CommunityDetailContent';
@@ -25,7 +26,7 @@ export async function generateMetadata({
     return buildShareMetadata({
       name: community.title,
       description: community.description?.replace(/<[^>]*>/g, '').slice(0, 200),
-      url: `${APP_ORIGIN}/communities/${community.id}`,
+      url: `${APP_ORIGIN}${communityPath(community)}`,
     });
   } catch {
     return { title: 'Tukai' };
