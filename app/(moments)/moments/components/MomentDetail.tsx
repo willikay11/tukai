@@ -132,10 +132,14 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
         />
       ) : null}
 
-      <p className="mt-4 text-xl font-bold text-gray-900">{item.title}</p>
-      {item.description && (
-        <p className="mt-2 text-base leading-relaxed text-gray-700">{item.description}</p>
-      )}
+      {/* One body of text, not two. The composer asks a single question and
+          sends the first line as `title` and the whole thing as `description`,
+          so showing both printed the same words twice — bold, then again in
+          full. The description is always the longer of the two; the title is
+          only a fallback for a moment posted without one. */}
+      <p className="mt-4 text-base leading-relaxed text-gray-700">
+        {item.description || item.title}
+      </p>
 
       <div className="mt-4 flex items-center gap-6">
         <button type="button" onClick={onLike} className="flex items-center gap-2">

@@ -133,7 +133,7 @@ describe('MomentDetail', () => {
     );
 
     expect(screen.queryByAltText('Sunrise on the Mara')).not.toBeInTheDocument();
-    expect(screen.getByText('Sunrise on the Mara')).toBeInTheDocument();
+    expect(screen.getByText('Worth the 4am start.')).toBeInTheDocument();
   });
 
   it('shows like and comment counts', () => {
@@ -202,7 +202,7 @@ describe('a reader who is not signed in', () => {
   it('still sees the moment', () => {
     render(<MomentDetail moment={makeMoment()} />);
 
-    expect(screen.getByText('Sunrise on the Mara')).toBeInTheDocument();
+    expect(screen.getByText('Worth the 4am start.')).toBeInTheDocument();
     expect(screen.getByText('12')).toBeInTheDocument();
   });
 
@@ -232,5 +232,34 @@ describe('a reader who is not signed in', () => {
     fireEvent.click(screen.getByRole('button', { name: /report/i }));
 
     expect(openSignInWithCallback).toHaveBeenCalled();
+  });
+});
+
+/**
+ * The composer asks one question and sends the first line as `title` and the
+ * whole text as `description`. Every moment on the API therefore carries the
+ * same words twice, and the detail pane printed both.
+ */
+describe('a moment body', () => {
+  it('is shown once, not as a bold title above the same words again', () => {
+    render(
+      <MomentDetail moment={makeMoment({ title: 'Same words', description: 'Same words' })} />,
+    );
+
+    expect(screen.getAllByText('Same words')).toHaveLength(1);
+  });
+
+  it('is the description, which carries the whole text', () => {
+    render(<MomentDetail moment={makeMoment()} />);
+
+    expect(screen.getByText('Worth the 4am start.')).toBeInTheDocument();
+    expect(screen.queryByText('Sunrise on the Mara')).not.toBeInTheDocument();
+  });
+
+  // Another client could post a title with no body
+  it('falls back to the title when there is no description', () => {
+    render(<MomentDetail moment={makeMoment({ description: '' })} />);
+
+    expect(screen.getByText('Sunrise on the Mara')).toBeInTheDocument();
   });
 });
