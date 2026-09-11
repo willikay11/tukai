@@ -12,7 +12,7 @@ import { Share } from '@/app/shared/components/Share';
 import { useBucketList, useDeleteBucketList } from '@/app/shared/hooks/useBucketLists';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
-import { BucketListDetail, BucketListItem } from '@/types/bucket-list';
+import { BucketListDetail, BucketListItem, bucketListCoverPhoto } from '@/types/bucket-list';
 import { linkedUserName } from '@/types/user';
 
 import { ReorderItemsDialog } from './components/ReorderItemsDialog';
@@ -125,7 +125,7 @@ export const BucketListPageContent = ({ bucketListId }: { bucketListId: string }
           {isOwner && <div className="hidden items-center gap-2 md:flex">{ownerActions}</div>}
 
           <Share
-            coverPhoto={bucketList.coverImage ?? ''}
+            coverPhoto={bucketListCoverPhoto(bucketList) ?? ''}
             title={bucketList.name}
             link={`${process.env.NEXT_PUBLIC_APP_URL}/bucket-lists/${bucketList.id}`}
           />

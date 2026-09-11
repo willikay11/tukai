@@ -113,3 +113,45 @@ describe('SharedBucketListCard', () => {
     expect(screen.getByRole('button', { name: 'Join' })).toBeDisabled();
   });
 });
+
+/**
+ * `cover_image` is documented as a string and arrives as the Photo object on
+ * some responses — the same split that left the saved items blank on the
+ * detail page.
+ */
+describe('the cover, however it arrives', () => {
+  const srcOf = (container: HTMLElement) =>
+    decodeURIComponent(container.querySelector('img')?.getAttribute('src') ?? '');
+
+  it('takes a plain URL', () => {
+    const { container } = render(
+      <BucketListCard
+        bucketList={{ ...bucketList, coverImage: 'https://cdn.test/cover.jpg' }}
+        onClick={jest.fn()}
+      />,
+    );
+
+    expect(srcOf(container)).toContain('cdn.test/cover.jpg');
+  });
+
+  it.each([
+    ['photo', { photo: 'https://cdn.test/obj.jpg' }],
+    ['photoUrl', { photoUrl: 'https://cdn.test/obj.jpg' }],
+    ['photoWebpMdUrl', { photoWebpMdUrl: 'https://cdn.test/obj.jpg' }],
+  ])('takes an object carrying %s', (_label, coverImage) => {
+    const { container } = render(
+      <BucketListCard bucketList={{ ...bucketList, coverImage } as never} onClick={jest.fn()} />,
+    );
+
+    expect(srcOf(container)).toContain('cdn.test/obj.jpg');
+  });
+
+  it('falls back rather than breaking when a list has no cover', () => {
+    const { container } = render(
+      <BucketListCard bucketList={{ ...bucketList, coverImage: null }} onClick={jest.fn()} />,
+    );
+
+    expect(container.querySelector('img')).not.toBeInTheDocument();
+    expect(screen.getByText('Weekend Hikes')).toBeInTheDocument();
+  });
+});

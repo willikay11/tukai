@@ -9,7 +9,7 @@ import { useAddBucketListItem, useMyBucketLists } from '@/app/shared/hooks/useBu
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { BucketList } from '@/types/bucket-list';
+import { BucketList, bucketListCoverPhoto } from '@/types/bucket-list';
 
 /**
  * Which list to save this onto.
@@ -126,7 +126,7 @@ export const BucketListPicker = ({
                     >
                       <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
                         <PhotoImage
-                          src={bucketList.coverImage}
+                          src={bucketListCoverPhoto(bucketList)}
                           alt={bucketList.name}
                           fill
                           sizes="48px"

@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
-import { BucketList } from '@/types/bucket-list';
+import { BucketList, bucketListCoverPhoto } from '@/types/bucket-list';
 import { linkedUserName } from '@/types/user';
 
 interface BucketListCardProps {
@@ -16,7 +16,7 @@ const CardBody = ({ bucketList }: { bucketList: BucketList }) => (
   <>
     <div className="relative h-[220px]">
       <PhotoImage
-        src={bucketList.coverImage}
+        src={bucketListCoverPhoto(bucketList)}
         alt={bucketList.name}
         fill
         sizes="(max-width: 768px) 100vw, 400px"

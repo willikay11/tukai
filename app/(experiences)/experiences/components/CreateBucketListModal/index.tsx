@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
+import { Textarea } from '@/components/ui/textarea';
 import { BucketList } from '@/types/bucket-list';
 
 interface CreateBucketListModalProps {
@@ -24,6 +25,7 @@ export const CreateBucketListModal = ({
   const isEditing = Boolean(bucketList);
 
   const [title, setTitle] = useState(bucketList?.name ?? '');
+  const [description, setDescription] = useState(bucketList?.description ?? '');
   const [visibility, setVisibility] = useState<'public' | 'private'>(
     bucketList?.visibility ?? 'public',
   );
@@ -42,6 +44,7 @@ export const CreateBucketListModal = ({
     if (!open || !bucketList) return;
 
     setTitle(bucketList.name);
+    setDescription(bucketList.description ?? '');
     setVisibility(bucketList.visibility);
     setError('');
   }, [open, bucketList]);
@@ -52,11 +55,13 @@ export const CreateBucketListModal = ({
       return;
     }
 
-    const payload = { name: title.trim(), visibility };
+    // Sent even when emptied, so clearing a description actually clears it
+    const payload = { name: title.trim(), description: description.trim(), visibility };
 
     const onSuccess = () => {
       if (!isEditing) {
         setTitle('');
+        setDescription('');
         setVisibility('public');
       }
       setError('');
@@ -89,6 +94,17 @@ export const CreateBucketListModal = ({
               }}
             />
             {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-800">Description (optional)</label>
+            <Textarea
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="What is this list for? e.g. Places to try this year"
+              aria-label="Description"
+              rows={3}
+            />
           </div>
 
           <div className="space-y-2">

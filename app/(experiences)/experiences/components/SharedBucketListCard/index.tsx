@@ -3,7 +3,7 @@
 import { PhotoImage } from '@/app/shared/components/Images';
 import { useJoinBucketList } from '@/app/shared/hooks/useBucketLists';
 import { Button } from '@/components/ui/button';
-import { BucketList } from '@/types/bucket-list';
+import { BucketList, bucketListCoverPhoto } from '@/types/bucket-list';
 import { linkedUserName } from '@/types/user';
 
 interface SharedBucketListCardProps {
@@ -20,7 +20,7 @@ export const SharedBucketListCard = ({ bucketList }: SharedBucketListCardProps) 
     <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
       <div className="relative h-[200px]">
         <PhotoImage
-          src={bucketList.coverImage}
+          src={bucketListCoverPhoto(bucketList)}
           alt={bucketList.name}
           fill
           sizes="(max-width: 768px) 100vw, 400px"

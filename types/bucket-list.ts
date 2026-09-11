@@ -48,7 +48,7 @@ export interface BucketList {
   name: string;
   description?: string;
   visibility: 'public' | 'private';
-  coverImage?: string | null;
+  coverImage?: PhotoLike;
   shareToken?: string;
   owner?: LinkedUser;
   itemCount: number;
@@ -87,7 +87,7 @@ export type PhotoLike =
   | { photo?: string; url?: string; photoUrl?: string; photoWebpMdUrl?: string }
   | null;
 
-const photoUrl = (photo?: PhotoLike): string | undefined => {
+export const resolvePhotoUrl = (photo?: PhotoLike): string | undefined => {
   if (!photo) return undefined;
   if (typeof photo === 'string') return photo || undefined;
 
@@ -96,7 +96,17 @@ const photoUrl = (photo?: PhotoLike): string | undefined => {
 
 /** The photo a saved item shows, whichever kind it is. */
 export const bucketListItemPhoto = (item: BucketListItem): string | undefined =>
-  photoUrl(item.experienceBookmark?.photo) ?? photoUrl(item.placeBookmark?.photo);
+  resolvePhotoUrl(item.experienceBookmark?.photo) ?? resolvePhotoUrl(item.placeBookmark?.photo);
+
+/**
+ * A list's cover, read the same way an item's photo is.
+ *
+ * `cover_image` is documented as a string and arrives as one on some
+ * responses and as the Photo object on others — the same split that left the
+ * saved items blank.
+ */
+export const bucketListCoverPhoto = (bucketList: { coverImage?: PhotoLike }): string | undefined =>
+  resolvePhotoUrl(bucketList.coverImage);
 
 /** What the saved item is called, whichever kind it is. */
 export const bucketListItemName = (item: BucketListItem): string =>
