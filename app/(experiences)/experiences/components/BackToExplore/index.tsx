@@ -12,8 +12,9 @@ interface BackToExploreProps {
   // history, which is right for a detail page reached from anywhere.
   href?: string;
   // 'pill' is the outlined button used in page headers; 'link' is the bare
-  // inline treatment used on the experience detail page
-  variant?: 'link' | 'pill';
+  // inline treatment used on the experience detail page; 'icon' is the grey
+  // circle beside a page title, where the label becomes the accessible name
+  variant?: 'link' | 'pill' | 'icon';
 }
 
 export const BackToExplore = ({
@@ -22,6 +23,21 @@ export const BackToExplore = ({
   variant = 'link',
 }: BackToExploreProps) => {
   const router = useRouter();
+
+  if (variant === 'icon') {
+    return (
+      <button
+        onClick={() => (href ? router.push(href) : router.back())}
+        aria-label={label}
+        className={cn(
+          'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200',
+          PRESSABLE,
+        )}
+      >
+        <IconComponent iconName="ArrowLeft01Icon" size={18} color="currentColor" />
+      </button>
+    );
+  }
 
   return (
     <button
