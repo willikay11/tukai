@@ -45,6 +45,23 @@ export const metadata: Metadata = {
     "Tukai is your go-to app for discovering exciting events and experiences happening around you. Whether you're looking for live concerts, festivals, social gatherings, or cultural events, Tukai makes it easy to stay connected and find the best activities in your area. Explore and enjoy real-time updates on local experiences tailored to your interests, and never miss out on the fun again.",
 };
 
+/**
+ * Where the photos live.
+ *
+ * Both hosts are declared in `next.config.mjs` as remote patterns; the naming
+ * is not a clean prefix swap (`staging-api` pairs with `cdn-staging`), so the
+ * two are mapped explicitly rather than derived with a regex that would
+ * quietly resolve to a host that does not exist. A local API has no CDN, and
+ * warms nothing.
+ */
+const MEDIA_ORIGIN_BY_API: Record<string, string> = {
+  'https://api.tukai.co': 'https://cdn.tukai.co',
+  'https://staging-api.tukai.co': 'https://cdn-staging.tukai.co',
+};
+
+const MEDIA_ORIGIN =
+  MEDIA_ORIGIN_BY_API[(process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '')];
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -52,6 +69,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/*
+          Every photo in the app comes from the media CDN, and none of it is
+          referenced by the HTML — the lists are fetched client-side, so the
+          browser only learns the origin exists once React has rendered a card.
+          Warming the connection here means the first image request does not
+          also pay for DNS and a TLS handshake.
+        */}
+        {MEDIA_ORIGIN && (
+          <>
+            <link rel="preconnect" href={MEDIA_ORIGIN} crossOrigin="" />
+            <link rel="dns-prefetch" href={MEDIA_ORIGIN} />
+          </>
+        )}
+      </head>
       <body className={`${satoshi.className} flex min-h-screen flex-col`}>
         <ReduxProvider>
           <SessionProvider>

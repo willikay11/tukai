@@ -11,7 +11,7 @@ import { CARD_LIFT, MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motio
 import { useCommunityDetail } from '@/app/shared/hooks/useCommunities';
 import { cn } from '@/lib/utils';
 import { Community, CommunityMember, CommunityOwner } from '@/types/community';
-import { Photo } from '@/types/photo';
+import { coverPhotoUrl } from '@/types/photo';
 import { communityPath } from '@/utils/detail-paths';
 import { toPlainText } from '@/utils/safe-text-utils';
 
@@ -21,8 +21,12 @@ export const CommunityDiscoverCard = ({
   community,
   className,
   showMemberAvatars = false,
+  priority = false,
 }: {
   community: Community;
+  // Above the fold: fetched straight away rather than waiting for the
+  // lazy-load observer, which cannot fire until React has painted
+  priority?: boolean;
   // Defaults to the fixed width the Discover row needs; grids pass w-full
   className?: string;
   // Fetches the community's members so the facepile shows real member faces
@@ -30,8 +34,7 @@ export const CommunityDiscoverCard = ({
   // the Discover row leaves it off, the communities grid turns it on.
   showMemberAvatars?: boolean;
 }) => {
-  const coverPhoto =
-    community.photos?.find((photo: Photo) => photo.isCover)?.photo || community.photos?.[0]?.photo;
+  const coverPhoto = coverPhotoUrl(community.photos, 'md');
 
   const category = community.categories?.[0]?.name;
 
@@ -79,6 +82,7 @@ export const CommunityDiscoverCard = ({
           alt={community.title}
           fill
           sizes="320px"
+          priority={priority}
           className={cn('object-cover', MEDIA_ZOOM)}
         />
 

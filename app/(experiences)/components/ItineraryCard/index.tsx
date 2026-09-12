@@ -12,7 +12,7 @@ import { FannedPhotos } from '@/app/shared/components/Images';
 import { CARD_LIFT, MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motion';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
-import { Photo } from '@/types/photo';
+import { Photo, coverPhotoUrl } from '@/types/photo';
 import { getNumberOfDaysAndNights } from '@/utils/date-utils';
 import { experiencePath } from '@/utils/detail-paths';
 
@@ -20,7 +20,7 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
   const { data: session } = useSession();
 
   const photos = (itinerary.photos ?? []).filter((photo: Photo) => photo.photo);
-  const coverPhoto = photos.find((photo: Photo) => photo.isCover)?.photo || photos[0]?.photo;
+  const coverPhoto = coverPhotoUrl(photos, 'md');
   const previewPhotos = photos
     .map((photo: Photo) => photo.photo!)
     .filter((photo) => photo !== coverPhoto)

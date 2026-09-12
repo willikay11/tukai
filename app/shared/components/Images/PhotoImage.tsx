@@ -9,6 +9,28 @@ import { cn } from '@/lib/utils';
 import { ImageFallback } from './ImageFallback';
 
 /**
+ * What a photo looks like before it arrives: a 4×4 PNG of a soft neutral
+ * gradient, 88 bytes, which `next/image` blows up behind a Gaussian blur.
+ *
+ * It is the same for every photo because nothing on the client can know a
+ * remote image's colours without downloading it first, and the API sends no
+ * dominant colour or LQIP. A real blur-up would come from the API's
+ * `photo_webp_thumb_url`, which is generated for almost nothing in the library
+ * today — when that is backfilled, a caller can pass it as `blurDataURL` and
+ * this constant stops being used for that surface.
+ *
+ * Lighter at the top than the bottom: it reads as a photograph rather than as
+ * a grey box, without leaning on a colour that would clash once the real image
+ * lands.
+ */
+export const PHOTO_PLACEHOLDER_BLUR =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAH0lEQVR42mN4+fwJHDE8enAXjhhu3bgKRwyXL56DIwBGLCkx6HiKjQAAAABJRU5ErkJggg==';
+
+// Below this, `next/image` warns that a placeholder costs more than it saves —
+// and blurring something the size of an avatar is a flicker, not a fade
+const MIN_AREA_FOR_BLUR = 1600;
+
+/**
  * `next/image` that degrades to {@link ImageFallback} when the photo fails to
  * load, for the user-supplied photos that make up most of the app's imagery.
  *
@@ -23,6 +45,8 @@ export const PhotoImage = ({
   fallbackIconSize,
   fallbackClassName,
   onError,
+  placeholder,
+  blurDataURL,
   ...props
 }: Omit<ImageProps, 'src'> & {
   src: ImageProps['src'] | null | undefined;
@@ -72,6 +96,19 @@ export const PhotoImage = ({
     );
   }
 
+  // Anything with real dimensions that are too small to blur usefully — an
+  // avatar, an icon — keeps the plain treatment
+  const area =
+    typeof props.width === 'number' && typeof props.height === 'number'
+      ? props.width * props.height
+      : undefined;
+  const canBlur = area === undefined || area >= MIN_AREA_FOR_BLUR;
+
+  const blur =
+    placeholder || !canBlur
+      ? { placeholder, blurDataURL }
+      : { placeholder: 'blur' as const, blurDataURL: blurDataURL ?? PHOTO_PLACEHOLDER_BLUR };
+
   return (
     <Image
       src={src}
@@ -80,6 +117,7 @@ export const PhotoImage = ({
         setHasError(true);
         onError?.(event);
       }}
+      {...blur}
       {...props}
     />
   );

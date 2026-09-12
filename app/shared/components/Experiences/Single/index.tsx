@@ -18,7 +18,7 @@ import { ImageCarousel } from '@/components/ui/imageCarousel';
 import { useLocation } from '@/context/LocationContext';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
-import { Photo } from '@/types/photo';
+import { Photo, coverPhotoUrl, photoUrl } from '@/types/photo';
 import { haversineKm } from '@/utils/geo-utils';
 
 export const SingleExperience = ({
@@ -53,9 +53,7 @@ export const SingleExperience = ({
   // Compact card for horizontal discover rows: single 4:3 image, dark
   // bookmark circle, title, "City · N Kms", community and price lines
   if (variant === 'row') {
-    const coverPhoto =
-      experience.photos?.find((photo: Photo) => photo.isCover)?.photo ||
-      experience.photos?.[0]?.photo;
+    const coverPhoto = coverPhotoUrl(experience.photos, 'md');
 
     const experienceLat = experience.location?.pointLat;
     const experienceLng = experience.location?.pointLong;
@@ -132,7 +130,9 @@ export const SingleExperience = ({
               images={experience.photos
                 .filter((photo: Photo) => photo.mediaType === 'photo' && photo.photo)
                 .sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0))
-                .map((photo) => photo.photo!)}
+                // A card in a grid, not a gallery — the card rendition is
+                // plenty, and the original can be several megabytes
+                .map((photo) => photoUrl(photo, 'md')!)}
               aspectRatio={type === 'discover' ? 'aspect-square' : 'aspect-[16/9]'}
             />
           ) : (
