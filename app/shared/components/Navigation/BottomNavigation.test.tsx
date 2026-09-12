@@ -8,8 +8,10 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 
 import { BottomNavigation } from './BottomNavigation';
 
+let currentQuery = '';
 jest.mock('next/navigation', () => ({
   usePathname: jest.fn(),
+  useSearchParams: () => new URLSearchParams(currentQuery),
 }));
 
 jest.mock('@/app/shared/components/Icons', () => ({
@@ -435,6 +437,35 @@ describe('BottomNavigation', () => {
       const nav = container.firstChild;
 
       expect(nav).toHaveClass('z-50');
+    });
+  });
+
+  /**
+   * "My Communities" floats its own Create Community button along the bottom
+   * edge. Two bars stacked on each other is the same problem a detail page's
+   * booking bar has — and the tab is in the URL so this can see it.
+   */
+  describe('the communities tabs', () => {
+    afterEach(() => {
+      currentQuery = '';
+    });
+
+    it('stands down for the create button on My Communities', () => {
+      currentQuery = 'tab=mine';
+      usePathname.mockReturnValue('/communities');
+
+      const { container } = render(<BottomNavigation />);
+
+      expect(container).toBeEmptyDOMElement();
+    });
+
+    it.each(['', 'tab=following'])('still shows on the other tabs (%s)', (query) => {
+      currentQuery = query;
+      usePathname.mockReturnValue('/communities');
+
+      const { container } = render(<BottomNavigation />);
+
+      expect(container).not.toBeEmptyDOMElement();
     });
   });
 });

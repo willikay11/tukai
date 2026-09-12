@@ -33,7 +33,7 @@ export const CreateCommunityCta = ({
         <Link
           href="/communities/create"
           className={cn(
-            'flex items-center gap-2 whitespace-nowrap rounded-full bg-lime px-6 py-3.5 text-sm font-semibold text-primary shadow-lg ring-4 ring-white',
+            'flex items-center gap-2 whitespace-nowrap rounded-full bg-lime px-6 py-3.5 text-sm font-medium text-primary shadow-lg ring-4 ring-white',
             PRESSABLE,
           )}
         >
@@ -47,7 +47,7 @@ export const CreateCommunityCta = ({
     <Link
       href="/communities/create"
       className={cn(
-        'flex flex-shrink-0 items-center gap-2 rounded-full bg-lime px-5 py-2.5 text-sm font-semibold text-primary hover:bg-lime/90',
+        'flex flex-shrink-0 items-center gap-2 rounded-full bg-lime px-5 py-2.5 text-sm font-medium text-primary hover:bg-lime/90',
         PRESSABLE,
         className,
       )}

@@ -19,8 +19,17 @@ jest.mock('@/context/AuthDialogContext', () => ({
   useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
 }));
 
+// The tab lives in the URL, so the mock has to round-trip it: `replace` writes
+// the query string and `useSearchParams` reads it back
+let currentQuery = '';
+const replace = jest.fn((url: string) => {
+  currentQuery = url.includes('?') ? url.slice(url.indexOf('?') + 1) : '';
+});
+
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({ push }),
+  useRouter: () => ({ push, replace }),
+  usePathname: () => '/communities',
+  useSearchParams: () => new URLSearchParams(currentQuery),
 }));
 
 jest.mock('@/app/shared/components/Images', () => ({
@@ -31,6 +40,12 @@ jest.mock('@/app/shared/components/Images', () => ({
 jest.mock('./FollowingTab', () => ({
   FollowingTab: ({ isSignedIn }: { isSignedIn: boolean }) => (
     <div data-testid="following-tab" data-signed-in={String(isSignedIn)} />
+  ),
+}));
+
+jest.mock('./MyCommunitiesTab', () => ({
+  MyCommunitiesTab: ({ isSignedIn }: { isSignedIn: boolean }) => (
+    <div data-testid="mine-tab" data-signed-in={String(isSignedIn)} />
   ),
 }));
 
@@ -91,6 +106,7 @@ const typePill = (name: string) =>
 describe('CommunitiesPageContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    currentQuery = '';
     sessionState = { data: { user: { id: 'u1' } }, status: 'authenticated' };
     useCommunityDetail.mockReturnValue({ data: undefined });
     useGetInterestCategories.mockReturnValue({ data: [HIKING, SHOPPING], isLoading: false });
@@ -120,22 +136,58 @@ describe('CommunitiesPageContent', () => {
     });
   });
 
-  describe('the tab that is not built yet', () => {
-    it('says My Communities is coming', async () => {
+  describe('the tabs the reader owns', () => {
+    it('hands over to the Following view', async () => {
       const user = userEvent.setup();
       render(<CommunitiesPageContent />);
 
-      await user.click(screen.getByRole('tab', { name: /My Communities/ }));
+      await user.click(screen.getByRole('tab', { name: /Following/ }));
 
-      expect(await screen.findByText('My Communities is coming soon')).toBeInTheDocument();
+      expect(replace).toHaveBeenCalledWith('/communities?tab=following', expect.anything());
     });
 
-    // Nothing to fetch for a view that renders no list
-    it('asks the API for nothing while it is open', async () => {
+    it('hands over to My Communities', async () => {
       const user = userEvent.setup();
       render(<CommunitiesPageContent />);
 
       await user.click(screen.getByRole('tab', { name: /My Communities/ }));
+
+      expect(replace).toHaveBeenCalledWith('/communities?tab=mine', expect.anything());
+    });
+
+    // The tab is in the URL so it can be linked, survives a refresh, and the
+    // main bottom navigation can see it
+    it.each([
+      ['tab=following', 'following-tab'],
+      ['tab=mine', 'mine-tab'],
+    ])('opens straight onto %s from the URL', (query, testId) => {
+      currentQuery = query;
+      render(<CommunitiesPageContent />);
+
+      expect(screen.getByTestId(testId)).toBeInTheDocument();
+    });
+
+    it('drops the parameter again on Discover', async () => {
+      currentQuery = 'tab=mine';
+      const user = userEvent.setup();
+      render(<CommunitiesPageContent />);
+
+      await user.click(screen.getByRole('tab', { name: /Discover/ }));
+
+      expect(replace).toHaveBeenCalledWith('/communities', expect.anything());
+    });
+
+    it('falls back to Discover for a tab that does not exist', () => {
+      currentQuery = 'tab=nonsense';
+      render(<CommunitiesPageContent />);
+
+      expect(screen.getByRole('heading', { name: 'All Communities' })).toBeInTheDocument();
+    });
+
+    // Nothing to fetch for a view that renders no list of its own
+    it('asks the API for nothing while they are open', () => {
+      currentQuery = 'tab=mine';
+      render(<CommunitiesPageContent />);
 
       expect(useGetCommunities).toHaveBeenLastCalledWith(
         expect.objectContaining({ enabled: false }),
@@ -143,24 +195,49 @@ describe('CommunitiesPageContent', () => {
     });
   });
 
-  describe('the Following tab', () => {
-    it('hands over to the Following view', async () => {
-      const user = userEvent.setup();
+  describe('creating a community', () => {
+    it('offers it in the header on My Communities', () => {
+      currentQuery = 'tab=mine';
       render(<CommunitiesPageContent />);
 
-      await user.click(screen.getByRole('tab', { name: /Following/ }));
-
-      expect(await screen.findByTestId('following-tab')).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /Create Community/ })).toHaveAttribute(
+        'href',
+        '/communities/create',
+      );
     });
 
-    it('tells it whether the reader is signed in', async () => {
-      sessionState = { data: null, status: 'unauthenticated' };
-      const user = userEvent.setup();
+    // The phone gets the floating one inside the tab instead
+    it('keeps the header button off small screens', () => {
+      currentQuery = 'tab=mine';
       render(<CommunitiesPageContent />);
 
-      await user.click(screen.getByRole('tab', { name: /Following/ }));
+      expect(screen.getByRole('link', { name: /Create Community/ }).className).toContain(
+        'hidden md:flex',
+      );
+    });
 
-      expect(await screen.findByTestId('following-tab')).toHaveAttribute('data-signed-in', 'false');
+    it('does not offer it on the other tabs', () => {
+      render(<CommunitiesPageContent />);
+
+      expect(screen.queryByRole('link', { name: /Create Community/ })).not.toBeInTheDocument();
+    });
+
+    it('does not offer it to a reader who is not signed in', () => {
+      currentQuery = 'tab=mine';
+      sessionState = { data: null, status: 'unauthenticated' };
+      render(<CommunitiesPageContent />);
+
+      expect(screen.queryByRole('link', { name: /Create Community/ })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('what the Following view is told', () => {
+    it('is told whether the reader is signed in', () => {
+      currentQuery = 'tab=following';
+      sessionState = { data: null, status: 'unauthenticated' };
+      render(<CommunitiesPageContent />);
+
+      expect(screen.getByTestId('following-tab')).toHaveAttribute('data-signed-in', 'false');
     });
   });
 
