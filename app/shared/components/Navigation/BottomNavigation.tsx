@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { cn } from '@/lib/utils';
@@ -41,6 +41,7 @@ const isDetailPage = (pathname: string): boolean => {
 
 export const BottomNavigation = () => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -69,6 +70,11 @@ export const BottomNavigation = () => {
   // A single experience puts its booking bar along the bottom edge, and that
   // CTA is the point of the page — two bars would sit on top of each other
   if (isDetailPage(pathname)) return null;
+
+  // Same reason, for a tab rather than a route: "My Communities" floats its
+  // own Create Community button there. The tab is in the URL precisely so this
+  // can see it.
+  if (pathname === '/communities' && searchParams.get('tab') === 'mine') return null;
 
   return (
     <div

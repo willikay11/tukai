@@ -8,7 +8,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft01Icon, ArrowRight01Icon } from '@hugeicons/react-pro';
 import clsx from 'clsx';
 
-import { IconComponent } from '@/app/shared/components/Icons';
+import { FilterPill } from '@/app/shared/components/Filters/FilterPill';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 
@@ -142,28 +142,14 @@ export const ScrollFilters = ({
         onMouseMove={handleMouseMove}
       >
         {filters?.map((filter, index) => (
-          <button
+          <FilterPill
             key={filter.value}
-            className={clsx(
-              'flex h-[2.5rem] flex-row items-center justify-center rounded-[2.5rem] px-4 py-2',
-              {
-                'bg-emerald-100 text-primary': selectedOption === filter.value,
-                'bg-gray-100 text-gray-500': selectedOption !== filter.value,
-                'mr-[10px]': index !== filters.length - 1,
-              },
-            )}
+            label={filter.label}
+            icon={filter.icon}
+            isSelected={selectedOption === filter.value}
             onClick={() => handleCategoryChange(filter.value)}
-          >
-            <IconComponent iconName={filter.icon} size={18} />
-            <span
-              className={clsx('ml-2 text-nowrap text-xs', {
-                'font-medium text-gray-700': selectedOption !== filter.value,
-                'font-semibold text-primary': selectedOption === filter.value,
-              })}
-            >
-              {filter.label}
-            </span>
-          </button>
+            className={clsx({ 'mr-[10px]': index !== filters.length - 1 })}
+          />
         ))}
       </div>
       <button

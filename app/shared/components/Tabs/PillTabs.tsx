@@ -1,11 +1,14 @@
 'use client';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
 export interface PillTab {
   value: string;
   label: string;
+  /** Hugeicons name, shown before the label. Optional — most tab rows are text. */
+  icon?: string;
 }
 
 /**
@@ -33,8 +36,9 @@ export const PillTabs = ({
         <TabsTrigger
           key={tab.value}
           value={tab.value}
-          className="rounded-full border-0 px-5 py-2 text-sm font-normal text-gray-500 data-[state=active]:border-b-0 data-[state=active]:bg-white data-[state=active]:font-normal data-[state=active]:text-primary"
+          className="gap-2 rounded-full border-0 px-5 py-2 text-sm font-normal text-gray-500 data-[state=active]:border-b-0 data-[state=active]:bg-white data-[state=active]:font-normal data-[state=active]:text-primary"
         >
+          {tab.icon && <IconComponent iconName={tab.icon} size={16} color="currentColor" />}
           {tab.label}
         </TabsTrigger>
       ))}
