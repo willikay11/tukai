@@ -46,6 +46,16 @@ const coverPhotoOf = (experience: Experience | undefined): string | null =>
 const placePhotoOf = (place: Place | undefined): string | null =>
   place?.photos?.find((photo: Photo) => photo.isCover)?.photo || place?.photos?.[0]?.photo || null;
 
+/**
+ * How many cards in a horizontal row are fetched eagerly.
+ *
+ * A scroll row shows about three at once on a laptop and two on a phone;
+ * anything past that is off-screen and stays lazy. Marking them `priority`
+ * skips the lazy-load observer, which cannot fire until React has painted —
+ * the reason the first row used to trickle in a card at a time.
+ */
+const EAGER_IN_ROW = 3;
+
 export const DiscoverPageContent = () => {
   const router = useRouter();
   const { city, lat, lng } = useLocation();
@@ -306,8 +316,12 @@ export const DiscoverPageContent = () => {
             <RowSkeleton cardClassName="h-[180px] w-[320px]" />
           ) : (
             <ScrollRow>
-              {communities.map((community) => (
-                <CommunityDiscoverCard key={community.id} community={community} />
+              {communities.map((community, index) => (
+                <CommunityDiscoverCard
+                  key={community.id}
+                  community={community}
+                  priority={index < EAGER_IN_ROW}
+                />
               ))}
 
               <SeeAllCard
@@ -387,8 +401,8 @@ export const DiscoverPageContent = () => {
             <RowSkeleton />
           ) : (
             <ScrollRow>
-              {popularPlaces.map((place) => (
-                <PlaceCard key={place.id} place={place} />
+              {popularPlaces.map((place, index) => (
+                <PlaceCard key={place.id} place={place} priority={index < EAGER_IN_ROW} />
               ))}
 
               <SeeAllCard
@@ -414,8 +428,8 @@ export const DiscoverPageContent = () => {
             <RowSkeleton />
           ) : (
             <ScrollRow>
-              {nearbyRestaurants.map((place) => (
-                <PlaceCard key={place.id} place={place} />
+              {nearbyRestaurants.map((place, index) => (
+                <PlaceCard key={place.id} place={place} priority={index < EAGER_IN_ROW} />
               ))}
 
               <SeeAllCard

@@ -7,13 +7,15 @@ import Image, { ImageProps } from 'next/image';
 import clsx from 'clsx';
 
 import { AvatarSkeleton } from '@/app/shared/components/Cards/Skeletons';
-import { ImageFallback } from '@/app/shared/components/Images';
+import { ImageFallback, PHOTO_PLACEHOLDER_BLUR } from '@/app/shared/components/Images';
 
 export const TukaiImage = ({
   src,
   alt,
   showNotFoundText = true,
   className: passedClassName,
+  placeholder,
+  blurDataURL,
   ...props
 }: ImageProps & { showNotFoundText?: boolean }) => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -21,6 +23,8 @@ export const TukaiImage = ({
 
   return (
     <>
+      {/* The blur below stands in for the photo itself; the skeleton stays for
+          the moment before next/image has painted anything at all */}
       {!isLoaded && !hasError && <AvatarSkeleton />}
       {!hasError && (
         <Image
@@ -32,6 +36,10 @@ export const TukaiImage = ({
             'carousel-image object-cover opacity-0 transition-opacity duration-300',
             passedClassName,
           )}
+          // The same soft placeholder the rest of the app's photos use, so a
+          // card in the carousel and a card beside it resolve the same way
+          placeholder={placeholder ?? 'blur'}
+          blurDataURL={blurDataURL ?? PHOTO_PLACEHOLDER_BLUR}
           onLoad={(e) => {
             e.currentTarget.classList.remove('opacity-0');
             setIsLoaded(true);
@@ -40,7 +48,10 @@ export const TukaiImage = ({
             setHasError(true);
             setIsLoaded(true);
           }}
-          loading="lazy"
+          // `priority` and `loading="lazy"` together throw, and props spread
+          // after this line — so the default only applies when nothing above
+          // the fold has asked for the opposite
+          {...(props.priority ? {} : { loading: 'lazy' as const })}
           {...props}
         />
       )}

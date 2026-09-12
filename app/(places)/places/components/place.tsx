@@ -9,6 +9,7 @@ import clsx from 'clsx';
 import { BookmarkPlace } from '@/app/shared/components/Bookmark';
 import { EventSkeleton } from '@/app/shared/components/Cards';
 import { ImageCarousel } from '@/components/ui/imageCarousel';
+import { photoUrl } from '@/types/photo';
 import { Place } from '@/types/place';
 
 export const SinglePlace = ({ place }: { place: Place }) => {
@@ -27,7 +28,9 @@ export const SinglePlace = ({ place }: { place: Place }) => {
             <ImageCarousel
               images={place.photos
                 .sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0))
-                .map((photo) => photo.photo)}
+                // Card-sized, not the original: this is a grid tile
+                .map((photo) => photoUrl(photo, 'md'))
+                .filter((url): url is string => Boolean(url))}
             />
           ) : (
             <div className="h-full w-full bg-gray-50" />

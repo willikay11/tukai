@@ -2,7 +2,7 @@ import React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import { PhotoImage } from './PhotoImage';
+import { PHOTO_PLACEHOLDER_BLUR, PhotoImage } from './PhotoImage';
 
 jest.mock('next/image', () => {
   function MockImage({ alt, src, onError, fill: _fill, ...rest }: Record<string, unknown>) {
@@ -113,4 +113,62 @@ describe('PhotoImage with an unusable src', () => {
       expect(screen.getByRole('img')).toBeInTheDocument();
     },
   );
+});
+
+/**
+ * The blur is what a photo looks like before it arrives. jsdom renders none of
+ * it — `next/image` turns these props into a CSS background it strips on load
+ * — so what is checked here is that the right props reach it, and that the
+ * surfaces where a blur would be a flicker rather than a fade opt out.
+ */
+describe('the placeholder blur', () => {
+  const img = () => screen.getByRole('img', { name: 'A hike' });
+
+  it('blurs a photo that fills its parent', () => {
+    render(<PhotoImage src="https://cdn.tukai.co/a.jpg" alt="A hike" fill />);
+
+    expect(img()).toHaveAttribute('placeholder', 'blur');
+    expect(img()).toHaveAttribute('blurdataurl', PHOTO_PLACEHOLDER_BLUR);
+  });
+
+  it('blurs a photo big enough to be worth it', () => {
+    render(<PhotoImage src="https://cdn.tukai.co/a.jpg" alt="A hike" width={400} height={300} />);
+
+    expect(img()).toHaveAttribute('placeholder', 'blur');
+  });
+
+  // next/image warns below 40x40, and an avatar resolving from a grey smudge
+  // reads as a glitch
+  it('leaves something avatar-sized alone', () => {
+    render(<PhotoImage src="https://cdn.tukai.co/a.jpg" alt="A hike" width={32} height={32} />);
+
+    expect(img()).not.toHaveAttribute('placeholder');
+  });
+
+  // The real blur-up, once the API generates thumbnails for more than a
+  // handful of photos
+  it('prefers a blur the caller supplies', () => {
+    render(
+      <PhotoImage
+        src="https://cdn.tukai.co/a.jpg"
+        alt="A hike"
+        fill
+        blurDataURL="data:image/png;base64,ZZZ"
+      />,
+    );
+
+    expect(img()).toHaveAttribute('blurdataurl', 'data:image/png;base64,ZZZ');
+  });
+
+  it('does not argue with a caller that asked for no placeholder', () => {
+    render(<PhotoImage src="https://cdn.tukai.co/a.jpg" alt="A hike" fill placeholder="empty" />);
+
+    expect(img()).toHaveAttribute('placeholder', 'empty');
+  });
+
+  it('never reaches the fallback path', () => {
+    render(<PhotoImage src={null} alt="A hike" fill />);
+
+    expect(screen.getByTestId(FALLBACK)).toBeInTheDocument();
+  });
 });

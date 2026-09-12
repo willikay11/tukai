@@ -7,15 +7,13 @@ import { ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
 import { CARD_LIFT } from '@/app/shared/components/Motion';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
-import { Photo } from '@/types/photo';
+import { coverPhotoUrl } from '@/types/photo';
 import { experiencePath } from '@/utils/detail-paths';
 
 import { RowSkeleton } from './RowSkeleton';
 
 const coverOf = (experience: Experience | undefined): string | null =>
-  experience?.photos?.find((photo: Photo) => photo.isCover)?.photo ||
-  experience?.photos?.[0]?.photo ||
-  null;
+  coverPhotoUrl(experience?.photos, 'md') ?? null;
 
 interface ExperienceRowProps {
   title: string;

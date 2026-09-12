@@ -17,6 +17,9 @@ interface MomentsMasonryProps {
   columnsClassName?: string;
 }
 
+// Roughly the first screenful across the two- and three-column layouts
+const EAGER_TILES = 6;
+
 export const MomentsMasonry = ({
   moments,
   selectedId,
@@ -53,7 +56,7 @@ export const MomentsMasonry = ({
       {/* CSS columns keep each tile at its natural height, which is what makes
           the layout masonry rather than a grid */}
       <div className={columnsClassName}>
-        {moments.map((moment) => {
+        {moments.map((moment, index) => {
           const media = momentPhotos(moment)[0];
           if (!media) return null;
 
@@ -75,6 +78,9 @@ export const MomentsMasonry = ({
                 width={media.width || 400}
                 height={media.height || 400}
                 sizes="(max-width: 768px) 50vw, 300px"
+                // The tiles above the fold, fetched without waiting for the
+                // lazy-load observer to fire after the first paint
+                priority={index < EAGER_TILES}
                 className="h-auto w-full object-cover"
               />
             </button>

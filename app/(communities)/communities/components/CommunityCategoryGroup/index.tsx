@@ -19,7 +19,7 @@ export const CommunityCategoryGroup = ({ group }: { group: CommunityGroup }) => 
       />
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {group.communities.map((community) => (
+        {group.communities.map((community, index) => (
           <CommunityDiscoverCard
             key={community.id}
             community={community}
@@ -28,6 +28,9 @@ export const CommunityCategoryGroup = ({ group }: { group: CommunityGroup }) => 
             // The list endpoint returns only the owner, so the facepile would
             // otherwise be a single face; this fetches the real members
             showMemberAvatars
+            // The grid is four wide from lg; the first row is what a reader
+            // sees before scrolling
+            priority={index < 4}
           />
         ))}
       </div>

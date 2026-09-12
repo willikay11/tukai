@@ -8,16 +8,14 @@ import { PhotoImage } from '@/app/shared/components/Images';
 import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
 import { Experience } from '@/types/experience';
-import { Photo } from '@/types/photo';
+import { coverPhotoUrl } from '@/types/photo';
 import { formatFirstExperienceDate } from '@/utils/date-utils';
 import { experiencePath } from '@/utils/detail-paths';
 
 import { SectionShell } from './SectionShell';
 
 const ExperienceRow = ({ experience }: { experience: Experience }) => {
-  const cover =
-    experience.photos?.find((photo: Photo) => photo.isCover)?.photo ||
-    experience.photos?.[0]?.photo;
+  const cover = coverPhotoUrl(experience.photos, 'md');
   const price = experience.priceStartsFrom;
 
   return (
