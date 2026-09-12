@@ -171,7 +171,14 @@ export default function RootLayout({
                       </div>
                       <ChromeGate>
                         <DownloadApp />
-                        <BottomNavigation />
+                        {/* It reads the `tab` parameter to stand aside for the
+                            create button on My Communities, and `useSearchParams`
+                            in a component this layout renders on every page opts
+                            the whole app out of static rendering without this —
+                            the same boundary PageFilters sits behind above. */}
+                        <Suspense fallback={null}>
+                          <BottomNavigation />
+                        </Suspense>
                       </ChromeGate>
                     </SelectedCategoryProvider>
                   </AuthDialogProvider>
