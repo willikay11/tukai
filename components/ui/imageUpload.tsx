@@ -2,12 +2,14 @@
 
 import { type ChangeEvent, type DragEvent, useEffect, useRef, useState } from 'react';
 
-import IconComponent from '@/app/components/iconComponent';
+import Image from 'next/image';
+
+import { IconComponent } from '@/app/shared/components/Icons';
 import { Photo } from '@/types/photo';
 
 import { Button } from './button';
 
-export default function ImageUpload({
+export const ImageUpload = ({
   onImagesChange,
   currentImages,
   onDeleteImage,
@@ -15,7 +17,7 @@ export default function ImageUpload({
   onImagesChange: (images: File[]) => void;
   currentImages?: Photo[];
   onDeleteImage: (image: Photo) => void;
-}) {
+}) => {
   const [images, setImages] = useState<File[]>(
     currentImages ? currentImages.map((image) => new File([], image.photo)) : [],
   );
@@ -23,6 +25,8 @@ export default function ImageUpload({
     currentImages?.map((image) => image.photo) || [],
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const isExternalUrl = (src: string) => src.startsWith('https://') || src.startsWith('http://');
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -87,11 +91,22 @@ export default function ImageUpload({
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {previews.map((preview, index) => (
               <div key={index} className="group relative">
-                <img
-                  src={preview || '/placeholder.svg'}
-                  alt={`Preview ${index + 1}`}
-                  className="h-32 w-full rounded-lg object-cover"
-                />
+                {isExternalUrl(preview) ? (
+                  <Image
+                    src={preview}
+                    alt={`Preview ${index + 1}`}
+                    fill
+                    sizes="(max-width: 640px) 150px, 300px"
+                    className="rounded-lg object-cover"
+                  />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={preview || '/placeholder.svg'}
+                    alt={`Preview ${index + 1}`}
+                    className="h-32 w-full rounded-lg object-cover"
+                  />
+                )}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -142,4 +157,4 @@ export default function ImageUpload({
       />
     </div>
   );
-}
+};

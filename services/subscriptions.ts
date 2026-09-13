@@ -1,5 +1,6 @@
 import { api } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
+import { parseApiError } from '@/utils/parseApiError';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 export async function fetchSubscriptionPlans(): Promise<ApiResponse> {
@@ -17,7 +18,7 @@ export async function fetchSubscriptionPlans(): Promise<ApiResponse> {
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }

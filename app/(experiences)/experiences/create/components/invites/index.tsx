@@ -1,0 +1,262 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { IconComponent } from '@/app/shared/components/Icons';
+import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
+import { useAddGuestToExperience, useUpdateExperience } from '@/app/shared/hooks/useExperiences';
+import { toast } from '@/app/shared/hooks/useToast';
+import { Button } from '@/components/ui/button';
+import { InviteCommunities } from '@/components/ui/invite-communities';
+import { InviteMembers, InvitedMember } from '@/components/ui/invite-members';
+import { Community } from '@/types/community';
+import { Experience } from '@/types/experience';
+
+import { usePendingAction } from '../../hooks/usePendingAction';
+
+interface CreateExperienceInvitesProps {
+  experienceId?: string | null;
+  experience?: Experience;
+  onInvitesChange?: (members: InvitedMember[], communities: Community[]) => void;
+  onNext?: () => void;
+  // Resolves once the save settles, so the button can stop its spinner
+  onSaveAndExit?: () => void | Promise<void>;
+  onPreview?: () => void;
+  cancelActionLabel?: string;
+  saveAndExitActionLabel?: string;
+  nextActionLabel?: string;
+  hideSaveAndExit?: boolean;
+}
+
+export const CreateExperienceInvites = ({
+  experienceId,
+  experience,
+  onInvitesChange,
+  onNext,
+  onSaveAndExit,
+  onPreview,
+  cancelActionLabel = 'Cancel',
+  saveAndExitActionLabel = 'Save & Exit',
+  nextActionLabel = 'Save & Continue',
+  hideSaveAndExit = false,
+}: CreateExperienceInvitesProps) => {
+  const initialInvitedMembers = useMemo<InvitedMember[]>(() => {
+    if (!experience?.guests?.length) {
+      return [];
+    }
+
+    return experience.guests
+      .filter((guest) => !!guest.email)
+      .map((guest) => ({
+        id: guest.id,
+        name: guest.email,
+        email: guest.email,
+        image: '',
+      }));
+  }, [experience?.guests]);
+
+  const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>(initialInvitedMembers);
+  const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
+  // This starts empty and is only filled by the picker, so passing through the
+  // step untouched used to PATCH invitedCommunityIds: [] — wiping any
+  // previously invited communities — and announce "Communities saved" for a
+  // save that never needed to happen. That toast was still the one on screen by
+  // the time the reader reached Publish.
+  const [hasEditedCommunities, setHasEditedCommunities] = useState(false);
+
+  useEffect(() => {
+    setInvitedMembers(initialInvitedMembers);
+  }, [initialInvitedMembers]);
+
+  useEffect(() => {
+    onInvitesChange?.(invitedMembers, invitedCommunities);
+  }, [invitedMembers, invitedCommunities, onInvitesChange]);
+
+  const { pendingAction, runAction } = usePendingAction<'exit'>();
+
+  const { data: userCommunities, isFetching: isFetchingCommunities } = useGetCommunities({
+    page: 1,
+    enabled: true,
+    following: true,
+  });
+
+  const { mutateAsync: addGuestToExperience } = useAddGuestToExperience(experienceId || '');
+  const { mutateAsync: updateExperience, isPending: isUpdatingCommunities } = useUpdateExperience(
+    experienceId || '',
+  );
+
+  const handleNext = async () => {
+    // Nothing to save if the reader never touched the picker — just move on
+    if (experienceId && experience && hasEditedCommunities) {
+      try {
+        await updateExperience({
+          title: experience.title,
+          description: experience.description || '',
+          googleMapPlaceId: (experience as any).googleMapPlaceId || 'ChIJkYb7L8EXLxgRWogSMeTPg8M',
+          startDate: experience.startDate || '',
+          endDate: experience.endDate || '',
+          recurrence_rule:
+            (experience as any).recurrenceRule || (experience as any).recurrence_rule || '',
+          categoriesIds: experience.categories?.map((c) => c.id) || [],
+          isPublic: experience.isPublic,
+          invitedCommunityIds: invitedCommunities.map((c) => c.id),
+          invitedGuestsEmails: [],
+        });
+        toast({
+          title: 'Communities saved',
+          description: 'Invited communities have been updated.',
+          variant: 'success',
+        });
+      } catch (error: any) {
+        toast({
+          title: 'Error',
+          description: error?.message || 'Failed to update invited communities.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+    onNext?.();
+  };
+
+  const handleMemberInvited = async (members: InvitedMember[]) => {
+    // Comma-separated entry can add several at once, so every newcomer is
+    // invited — not just the first
+    const newMembers = members.filter(
+      (member) => !invitedMembers.some((existing) => existing.id === member.id),
+    );
+
+    // Update local state first
+    setInvitedMembers(members);
+
+    const invitable = newMembers.filter((member) => member.email);
+    if (invitable.length === 0 || !experienceId) return;
+
+    const failed: string[] = [];
+
+    for (const member of invitable) {
+      try {
+        await addGuestToExperience(member.email!);
+      } catch (error) {
+        failed.push(member.email!);
+        console.error('[invites] Failed to invite guest:', error);
+      }
+    }
+
+    const invited = invitable.length - failed.length;
+
+    if (invited > 0) {
+      toast({
+        title: invited === 1 ? 'Guest invited' : 'Guests invited',
+        description:
+          invited === 1
+            ? `${invitable[0].name} has been invited to the experience.`
+            : `${invited} guests have been invited to the experience.`,
+        variant: 'success',
+      });
+    }
+
+    if (failed.length > 0) {
+      toast({
+        title: 'Error',
+        description: `Could not invite ${failed.join(', ')}.`,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const availableCommunities = useMemo<Community[]>(() => {
+    if (!userCommunities?.data) {
+      return [];
+    }
+
+    return userCommunities?.data?.results?.map((community: any) => ({
+      id: community.id,
+      title: community.title,
+      photos: community.photos,
+      members: community.members,
+    }));
+  }, [userCommunities]);
+
+  return (
+    <div className="w-full">
+      <div className="bg-white">
+        <h1 className="text-base font-semibold leading-tight text-gray-900">
+          Invite your friends and communities
+        </h1>
+
+        <p className="mt-4 text-xs text-gray-800">
+          You can share invites individually or invite members of a given Communities that you own
+          or are a member of.
+        </p>
+
+        {/* No backend lookup here — guests are invited by typing addresses,
+            comma-separated for several at once */}
+        <InviteMembers
+          invitedMembers={invitedMembers}
+          onMembersChange={handleMemberInvited}
+          placeholder="Add guest emails, separated by commas"
+          className="mt-3"
+        />
+
+        <p className="mt-6 text-xs font-semibold text-gray-800">Your communities</p>
+        <p className="mt-2 text-xs text-gray-700">
+          Select your communities you would like to invite:
+        </p>
+
+        <InviteCommunities
+          invitedCommunities={invitedCommunities}
+          onCommunitiesChange={(communities: Community[]) => {
+            setHasEditedCommunities(true);
+            setInvitedCommunities(communities);
+          }}
+          availableCommunities={availableCommunities}
+          isLoading={isFetchingCommunities}
+        />
+
+        <div className="mt-8 flex items-center gap-2 lg:gap-3">
+          <Button
+            variant="destructive"
+            type="button"
+            className="bg-white p-0 text-sm text-red-500 hover:bg-white hover:text-red-600"
+          >
+            {cancelActionLabel}
+          </Button>
+
+          <div className="flex-1" />
+          <div className="flex items-center gap-2 lg:gap-3">
+            {!hideSaveAndExit && (
+              <Button
+                isLoading={pendingAction === 'exit'}
+                type="button"
+                variant="gradient-outline"
+                onClick={() => runAction('exit', onSaveAndExit)}
+                disabled={pendingAction === 'exit'}
+                className="rounded-full px-6 text-xs font-semibold"
+              >
+                {saveAndExitActionLabel}
+              </Button>
+            )}
+            <Button
+              type="button"
+              onClick={onPreview}
+              variant="outline"
+              className="text-xs font-medium lg:hidden"
+            >
+              Preview
+            </Button>
+            <Button
+              type="button"
+              variant="lime"
+              onClick={handleNext}
+              isLoading={isUpdatingCommunities}
+              className="rounded-full px-6 text-xs font-semibold"
+            >
+              {nextActionLabel}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

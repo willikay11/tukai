@@ -1,0 +1,51 @@
+import Link from 'next/link';
+
+import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
+import { communityPath } from '@/utils/detail-paths';
+
+interface HostCommunityCardProps {
+  community: {
+    id: string;
+    slug?: string;
+    title: string;
+    photos?: Array<{ photo?: string; url?: string }>;
+    experiencesHostedCount?: number;
+  };
+}
+
+export const HostCommunityCard = ({ community }: HostCommunityCardProps) => {
+  const photoUrl = community.photos?.[0]?.photo || community.photos?.[0]?.url || '';
+
+  return (
+    <div>
+      <h3 className="mb-3 text-xl font-bold text-gray-900">Host Community</h3>
+      <Link target="_blank" href={communityPath(community)}>
+        <div className="flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-75">
+          {photoUrl && (
+            <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
+              <PhotoImage
+                src={photoUrl}
+                alt={community.title}
+                fill
+                sizes="48px"
+                className="object-cover"
+              />
+            </div>
+          )}
+          <div>
+            <div className="flex items-center gap-1">
+              <p className="text-sm font-semibold">{community.title}</p>
+              <IconComponent iconName="ArrowUpRight01Icon" size={13} className="text-primary" />
+            </div>
+            {community.experiencesHostedCount !== undefined && (
+              <p className="text-sm text-gray-500">
+                {community.experiencesHostedCount} Experiences hosted
+              </p>
+            )}
+          </div>
+        </div>
+      </Link>
+    </div>
+  );
+};

@@ -1,6 +1,8 @@
 import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
 import { PlaceCategoryParams } from '@/types/networkParam';
+import { CreatePlaceBookingRequest } from '@/types/placeReservation';
+import { parseApiError } from '@/utils/parseApiError';
 import { parseCamelToSnake, parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 export async function fetchPlaces(
@@ -43,7 +45,30 @@ export async function fetchPlaces(
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
+  }
+}
+
+/**
+ * The places this user owns — `GET /places/?mine=true`.
+ *
+ * Ownership of a place is held by a community the user is an OWNER/ADMIN of
+ * (see claimPlaceOwnership), and the filter resolves that server-side. It is
+ * user-scoped, so unlike fetchPlaces it goes out with the token.
+ */
+export async function fetchMyPlaces(page = 1, perPage = 12): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(`/v1/places/?mine=true&page=${page}&page_size=${perPage}`);
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load your places'),
     };
   }
 }
@@ -63,7 +88,7 @@ export async function fetchPlace(id?: string): Promise<ApiResponse> {
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -83,7 +108,7 @@ export async function fetchPlaceCategories(params?: PlaceCategoryParams): Promis
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -103,7 +128,7 @@ export async function fetchPlaceProperties(id: string): Promise<ApiResponse> {
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -123,7 +148,7 @@ export async function fetchPlaceSocialLinks(id: string): Promise<ApiResponse> {
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -143,7 +168,7 @@ export async function fetchPlaceReviews(id: string): Promise<ApiResponse> {
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -163,7 +188,7 @@ export async function fetchPlaceReviewComments(id: string, reviewId: string): Pr
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -188,7 +213,7 @@ export async function createPlaceReviewComment(
     return {
       status: error.response?.status || 500,
       success: false,
-      message: error.response?.data?.message || 'An unexpected error occurred',
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -377,6 +402,677 @@ export async function deletePlaceReviewImage(
     return {
       status: error.response?.status || 500,
       success: false,
+    };
+  }
+}
+
+export async function fetchGoogleMapsAutocomplete(input: string): Promise<ApiResponse> {
+  try {
+    const res = await fetch(`/api/places/autocomplete?input=${encodeURIComponent(input)}`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      return {
+        status: res.status,
+        success: false,
+        message: data.message || 'Failed to fetch autocomplete results',
+      };
+    }
+
+    return {
+      status: res.status,
+      success: true,
+      data: data.data,
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
+  }
+}
+
+export async function fetchGoogleMapsPlaceGeocode(placeId: string): Promise<ApiResponse> {
+  try {
+    const res = await fetch(`/api/places/geocode?placeId=${encodeURIComponent(placeId)}`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      return {
+        status: res.status,
+        success: false,
+        message: data.message || 'Failed to geocode place',
+      };
+    }
+
+    return {
+      status: res.status,
+      success: true,
+      data: data.data,
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
+  }
+}
+
+// ─── Reservations ──────────────────────────────────────────────────────────
+//
+// A place becomes bookable when its owning community creates a reservation
+// PROFILE. Diners then post a booking REQUEST against that profile, which the
+// API turns into a Purchase with status "requested" for the venue to accept.
+//
+// Note these are deliberately NOT the experiences ticket-purchase endpoints —
+// per the API spec, places have their own path precisely so the two do not
+// share a booking flow.
+
+export async function fetchPlaceReservationProfiles(placeId: string): Promise<ApiResponse> {
+  try {
+    const res = await api.get(`/v1/places/${placeId}/reservation-profile/`);
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
+  }
+}
+
+export async function fetchPlaceAvailability(
+  placeId: string,
+  profileId: string,
+): Promise<ApiResponse> {
+  try {
+    // Rules are the weekly hours; exceptions are one-off closures and overrides
+    const [rules, exceptions] = await Promise.all([
+      api.get(`/v1/places/${placeId}/reservation-profile/${profileId}/availability-rules/`),
+      api.get(`/v1/places/${placeId}/reservation-profile/${profileId}/availability-exceptions/`),
+    ]);
+
+    return {
+      status: rules.status,
+      success: true,
+      data: {
+        rules: parseSnakeToCamel(rules.data)?.results ?? [],
+        exceptions: parseSnakeToCamel(exceptions.data)?.results ?? [],
+      },
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
+  }
+}
+
+export async function fetchPlaceBookingRequests(
+  placeId: string,
+  profileId: string,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(
+      `/v1/places/${placeId}/reservation-profile/${profileId}/booking-requests/`,
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
+  }
+}
+
+export async function createPlaceBookingRequest(
+  placeId: string,
+  profileId: string,
+  data: CreatePlaceBookingRequest,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    // Flat body — requested_date, requested_time and party_size — not the
+    // ticket_purchases array the experience purchase paths take
+    const res = await axiosInstance.post(
+      `/v1/places/${placeId}/reservation-profile/${profileId}/booking-requests/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not request this reservation'),
+    };
+  }
+}
+
+/**
+ * Cancelling a table booking goes through the SHARED purchase action, not a
+ * place path — the spec is explicit that "accept/decline/pay/cancel stay on the
+ * unified purchase actions - not duplicated here".
+ */
+export async function cancelPlaceBookingRequest(purchaseId: string): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.patch(`/v1/experiences/purchases/${purchaseId}/cancel/`);
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not cancel this reservation'),
+    };
+  }
+}
+
+/**
+ * The people the reader follows — the source for the reservation invite list.
+ * `GET /accounts/users/?following=<id>` is the only friend-shaped query the API
+ * offers; there is no dedicated friends endpoint.
+ */
+export async function fetchFollowing(userId: string): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(`/v1/accounts/users/`, {
+      params: { following: userId, page_size: 50 },
+    });
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load your friends'),
+    };
+  }
+}
+
+/**
+ * The ownership claim on a place, or null when nobody holds one.
+ *
+ * ⚠️ Authenticated: unlike the reservation profiles beside it, this 401s
+ * without a token. Called with the public client it looked unclaimed to
+ * everyone, including the community that had just claimed it.
+ *
+ * Only a 404 means "nobody owns this". Every other failure is "could not ask",
+ * and is thrown so callers do not read a broken request as an empty answer.
+ */
+export async function fetchPlaceOwnership(placeId: string): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(`/v1/places/${placeId}/ownership/`);
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      return { status: 404, success: true, data: null };
+    }
+
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not check who owns this place'),
+    };
+  }
+}
+
+/**
+ * Ownership of a place is held by a COMMUNITY, not a person — the claimant must
+ * be an owner or admin of a published community, and a place can only have one
+ * approved owner.
+ */
+export async function claimPlaceOwnership(
+  placeId: string,
+  communityId: string,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(`/v1/places/${placeId}/ownership/`, {
+      community_id: communityId,
+    });
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not claim this place'),
+    };
+  }
+}
+
+/**
+ * Adds a place that is not on Tukai yet, so it can then be claimed. The API
+ * requires a Google Maps place id and at least one photo, which is why the
+ * "new place" branch of the claim form asks for both.
+ */
+export async function createPlace(data: {
+  title: string;
+  description: string;
+  googleMapPlaceId: string;
+  categoriesIds?: string[];
+  newPhotos: File[];
+}): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const formData = new FormData();
+    formData.append('title', data.title);
+    formData.append('description', data.description);
+    formData.append('google_map_place_id', data.googleMapPlaceId);
+    (data.categoriesIds ?? []).forEach((categoryId) =>
+      formData.append('categories_ids', categoryId),
+    );
+    data.newPhotos.forEach((photo, index) =>
+      formData.append('new_photos', photo, photo.name || `image_${Date.now()}_${index}`),
+    );
+
+    const res = await axiosInstance.post(`/v1/places/`, formData, {
+      headers: { 'Content-Type': undefined },
+    });
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not add this place'),
+    };
+  }
+}
+
+/**
+ * Edits a place's own fields.
+ *
+ * The endpoint takes multipart because it also accepts `new_photos`, so every
+ * field goes through FormData even when no file is attached. Photos added here
+ * cannot carry a cover flag or an order — `uploadPlacePhoto` is the way in when
+ * either matters.
+ */
+export async function updatePlace(
+  placeId: string,
+  data: {
+    title?: string;
+    description?: string;
+    googleMapPlaceId?: string;
+    categoriesIds?: string[];
+    status?: string;
+  },
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const formData = new FormData();
+
+    if (data.title !== undefined) formData.append('title', data.title);
+    if (data.description !== undefined) formData.append('description', data.description);
+    if (data.googleMapPlaceId) formData.append('google_map_place_id', data.googleMapPlaceId);
+    if (data.status !== undefined) formData.append('status', data.status);
+    (data.categoriesIds ?? []).forEach((categoryId) =>
+      formData.append('categories_ids', categoryId),
+    );
+
+    const res = await axiosInstance.patch(`/v1/places/${placeId}/`, formData, {
+      headers: { 'Content-Type': undefined },
+    });
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save these changes'),
+    };
+  }
+}
+
+/** Adds one photo. `isCover` and `order` can only be set as a photo is created. */
+export async function uploadPlacePhoto(
+  placeId: string,
+  data: { photo: File; caption?: string; isCover?: boolean; order?: number },
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const formData = new FormData();
+    formData.append('place', placeId);
+    formData.append('photo', data.photo, data.photo.name || `image_${Date.now()}`);
+    if (data.caption) formData.append('caption', data.caption);
+    if (data.isCover !== undefined) formData.append('is_cover', String(data.isCover));
+    if (data.order !== undefined) formData.append('order', String(data.order));
+
+    const res = await axiosInstance.post(`/v1/places/${placeId}/photos/`, formData, {
+      headers: { 'Content-Type': undefined },
+    });
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not upload this photo'),
+    };
+  }
+}
+
+export async function deletePlacePhoto(placeId: string, photoId: string): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.delete(`/v1/places/${placeId}/photos/${photoId}/`);
+
+    return { status: res.status, success: true, data: null };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not remove this photo'),
+    };
+  }
+}
+
+export type PlacePropertyPayload = {
+  key: string;
+  value: string;
+  icon?: string;
+  canCopy?: boolean;
+  order?: number;
+};
+
+export async function createPlaceProperty(
+  placeId: string,
+  data: PlacePropertyPayload,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(
+      `/v1/places/${placeId}/properties/`,
+      parseCamelToSnake({ ...data, placeId }),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save this detail'),
+    };
+  }
+}
+
+export async function updatePlaceProperty(
+  placeId: string,
+  propertyId: string,
+  data: PlacePropertyPayload,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.patch(
+      `/v1/places/${placeId}/properties/${propertyId}/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save this detail'),
+    };
+  }
+}
+
+export async function deletePlaceProperty(
+  placeId: string,
+  propertyId: string,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.delete(`/v1/places/${placeId}/properties/${propertyId}/`);
+
+    return { status: res.status, success: true, data: null };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not remove this detail'),
+    };
+  }
+}
+
+export type PlaceSocialLinkPayload = { platformName: string; url: string; icon?: string };
+
+export async function createPlaceSocialLink(
+  placeId: string,
+  data: PlaceSocialLinkPayload,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(
+      `/v1/places/${placeId}/social-links/`,
+      parseCamelToSnake({ ...data, placeId }),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save this link'),
+    };
+  }
+}
+
+export async function updatePlaceSocialLink(
+  placeId: string,
+  socialLinkId: string,
+  data: PlaceSocialLinkPayload,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.patch(
+      `/v1/places/${placeId}/social-links/${socialLinkId}/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save this link'),
+    };
+  }
+}
+
+export async function deletePlaceSocialLink(
+  placeId: string,
+  socialLinkId: string,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.delete(`/v1/places/${placeId}/social-links/${socialLinkId}/`);
+
+    return { status: res.status, success: true, data: null };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not remove this link'),
+    };
+  }
+}
+
+export type ReservationProfilePayload = {
+  reservationType: 'restaurant_reservation' | 'cinema_reservation';
+  seatingCapacity?: number;
+  /**
+   * Not a field the documented serializer carries. It is sent so it lands the
+   * moment the API grows one; until then DRF drops it and nothing is stored.
+   */
+  maxPartySize?: number;
+  experienceTitle?: string;
+  experienceDescription?: string;
+};
+
+/**
+ * Opens a place up to reservations.
+ *
+ * Creating a profile provisions a draft "anchor" experience server-side that
+ * bookings hang off; it is never shown to diners. The profile itself starts as
+ * a draft — `activateReservationProfile` is what makes the place bookable.
+ */
+export async function createReservationProfile(
+  placeId: string,
+  data: ReservationProfilePayload,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(
+      `/v1/places/${placeId}/reservation-profile/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not set up reservations'),
+    };
+  }
+}
+
+export async function updateReservationProfile(
+  placeId: string,
+  profileId: string,
+  data: ReservationProfilePayload,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.patch(
+      `/v1/places/${placeId}/reservation-profile/${profileId}/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save these settings'),
+    };
+  }
+}
+
+/** A draft profile takes no bookings; this is what opens the doors. */
+export async function activateReservationProfile(
+  placeId: string,
+  profileId: string,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(
+      `/v1/places/${placeId}/reservation-profile/${profileId}/activate/`,
+      {},
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not open reservations'),
+    };
+  }
+}
+
+export type AvailabilityRulePayload = {
+  // 0 = Monday .. 6 = Sunday
+  dayOfWeek: number;
+  // 'HH:MM'
+  openTime: string;
+  closeTime: string;
+  slotIntervalMinutes?: number;
+};
+
+export async function createAvailabilityRule(
+  placeId: string,
+  profileId: string,
+  data: AvailabilityRulePayload,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(
+      `/v1/places/${placeId}/reservation-profile/${profileId}/availability-rules/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not save these hours'),
+    };
+  }
+}
+
+/**
+ * Rules can only be created and removed — the API offers no update — so
+ * changing a day's hours means removing its rule and writing a new one.
+ */
+export async function deleteAvailabilityRule(
+  placeId: string,
+  profileId: string,
+  ruleId: string,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.delete(
+      `/v1/places/${placeId}/reservation-profile/${profileId}/availability-rules/${ruleId}/`,
+    );
+
+    return { status: res.status, success: true, data: null };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not remove these hours'),
     };
   }
 }

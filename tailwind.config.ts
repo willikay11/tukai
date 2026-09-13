@@ -12,6 +12,9 @@ const config: Config = {
     './public/**/*.{js,ts,jsx,tsx}',
     './src/**/*.{js,ts,jsx,tsx}',
     './styles/**/*.{js,ts,jsx,tsx}',
+    // safeText generates Tailwind classes at runtime; without this they are
+    // only emitted when the same utility happens to be used elsewhere
+    './utils/**/*.{js,ts}',
   ],
   theme: {
     extend: {
@@ -27,6 +30,12 @@ const config: Config = {
         secondary: {
           DEFAULT: 'rgba(var(--color-secondary) / <alpha-value>)',
           foreground: 'hsl(var(--secondary-foreground))',
+        },
+        lime: {
+          DEFAULT: '#B0E800',
+        },
+        'brand-green': {
+          DEFAULT: 'rgba(var(--color-brand-green) / <alpha-value>)',
         },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
@@ -76,6 +85,21 @@ const config: Config = {
             transform: 'translateX(100%)',
           },
         },
+        // A single confirmation beat — overshoot and settle. Used when
+        // something is saved or toggled on, never on a loop.
+        pop: {
+          '0%': { transform: 'scale(1)' },
+          '45%': { transform: 'scale(1.18)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        'fade-in-up': {
+          '0%': { opacity: '0', transform: 'translateY(4px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        pop: 'pop 300ms ease-out',
+        'fade-in-up': 'fade-in-up 200ms ease-out',
       },
       borderRadius: {
         lg: 'var(--radius)',

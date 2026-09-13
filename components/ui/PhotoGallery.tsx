@@ -8,9 +8,9 @@ import clsx from 'clsx';
 import { Photo } from '@/types/photo';
 
 // This only needs to be imported once in your app
-import TukaiImage from './image';
+import { TukaiImage } from './image';
 
-const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
+export const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -121,5 +121,3 @@ const PhotoGallery = ({ photos }: { photos: Photo[] }) => {
     </>
   );
 };
-
-export default PhotoGallery;

@@ -9,10 +9,10 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import TukaiImage from '@/components/ui/image';
+import { TukaiImage } from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 
-const ImageCarousel = ({
+export const ImageCarousel = ({
   images,
   width = 'w-full',
   aspectRatio = 'aspect-square',
@@ -84,7 +84,7 @@ const ImageCarousel = ({
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index}>
-              <div className={cn('relative', width, className, aspectRatio)}>
+              <div className={cn('relative h-full overflow-hidden', width, className, aspectRatio)}>
                 <TukaiImage src={image} alt={`Image ${index + 1}`} className="rounded-[8px]" />
               </div>
             </CarouselItem>
@@ -144,5 +144,3 @@ const ImageCarousel = ({
     </div>
   );
 };
-
-export default ImageCarousel;

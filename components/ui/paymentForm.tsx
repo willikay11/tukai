@@ -97,7 +97,7 @@ export const paymentFormSchema = z
     }
   });
 
-const PaymentForm = forwardRef(
+export const PaymentForm = forwardRef(
   (
     {
       onSubmit,
@@ -391,5 +391,3 @@ const PaymentForm = forwardRef(
     );
   },
 );
-
-export default PaymentForm;

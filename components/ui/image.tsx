@@ -6,31 +6,40 @@ import Image, { ImageProps } from 'next/image';
 
 import clsx from 'clsx';
 
-import { ImageSkeleton } from '@/app/components/skeletons';
+import { AvatarSkeleton } from '@/app/shared/components/Cards/Skeletons';
+import { ImageFallback, PHOTO_PLACEHOLDER_BLUR } from '@/app/shared/components/Images';
 
-export default function TukaiImage({
+export const TukaiImage = ({
   src,
   alt,
   showNotFoundText = true,
+  className: passedClassName,
+  placeholder,
+  blurDataURL,
   ...props
-}: ImageProps & { showNotFoundText?: boolean }) {
+}: ImageProps & { showNotFoundText?: boolean }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   return (
     <>
-      {!isLoaded && !hasError && <ImageSkeleton />}
+      {/* The blur below stands in for the photo itself; the skeleton stays for
+          the moment before next/image has painted anything at all */}
+      {!isLoaded && !hasError && <AvatarSkeleton />}
       {!hasError && (
         <Image
           src={src}
           alt={alt}
           quality={100}
-          layout="fill"
-          objectFit="cover"
+          fill
           className={clsx(
-            'carousel-image opacity-0 transition-opacity duration-300',
-            props?.className,
+            'carousel-image object-cover opacity-0 transition-opacity duration-300',
+            passedClassName,
           )}
+          // The same soft placeholder the rest of the app's photos use, so a
+          // card in the carousel and a card beside it resolve the same way
+          placeholder={placeholder ?? 'blur'}
+          blurDataURL={blurDataURL ?? PHOTO_PLACEHOLDER_BLUR}
           onLoad={(e) => {
             e.currentTarget.classList.remove('opacity-0');
             setIsLoaded(true);
@@ -39,20 +48,19 @@ export default function TukaiImage({
             setHasError(true);
             setIsLoaded(true);
           }}
-          loading="lazy"
+          // `priority` and `loading="lazy"` together throw, and props spread
+          // after this line — so the default only applies when nothing above
+          // the fold has asked for the opposite
+          {...(props.priority ? {} : { loading: 'lazy' as const })}
           {...props}
         />
       )}
       {hasError && (
-        <div
-          className={clsx(
-            'absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-500',
-            props.className,
-          )}
-        >
-          {showNotFoundText && <span className="text-center text-sm">Image not available</span>}
-        </div>
+        <ImageFallback
+          label={showNotFoundText ? 'Image not available' : undefined}
+          className={clsx('absolute inset-0', passedClassName)}
+        />
       )}
     </>
   );
-}
+};

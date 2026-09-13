@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 
 import { usePathname, useSearchParams } from 'next/navigation';
 
-import ScrollFilters from '@/app/components/scrollFilters';
-import { PillsSkeleton } from '@/app/components/skeletons';
+import { PillsSkeleton } from '@/app/shared/components/Cards';
+import { ScrollFilters } from '@/app/shared/components/Filters';
+import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
-import { usePlaceCategories } from '@/hooks/places';
 import { PlaceCategory } from '@/types/placeCategory';
 
-export default function PageFilters() {
+export const PageFilters = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { setSelectedCategoryId } = useSelectedCategory();
@@ -45,46 +45,23 @@ export default function PageFilters() {
       setIsLoading(false);
       setSelectedCategoryId(selectedCategoryId);
     }
-
-    if (pathname === '/' || pathname === '/experiences') {
-      setFilters([
-        { label: 'All Experiences', value: 'all', icon: 'WorkoutStretchingIcon' },
-        {
-          label: 'Reserved Experiences',
-          value: 'reserved',
-          icon: 'CalendarAdd01Icon',
-          shouldBeLoggedIn: true,
-        },
-        { label: 'Saved', value: 'saved', icon: 'Bookmark02Icon', shouldBeLoggedIn: true },
-        { label: 'Hosting', value: 'hosting', icon: 'WavingHand02Icon', shouldBeLoggedIn: true },
-      ]);
-      setIsLoading(false);
-      if (categoryFromQuery == null) {
-        setSelectedCategoryId('all');
-      } else {
-        setSelectedCategoryId(categoryFromQuery);
-      }
-    }
-    if (pathname === '/communities') {
-      setFilters([
-        { label: 'Recommended', value: 'recommended', icon: 'UserSearch01Icon' },
-        { label: 'My Communities', value: 'my-communities', icon: 'UserGroupIcon' },
-        { label: 'Posts', value: 'posts', icon: 'GridViewIcon' },
-      ]);
-      setIsLoading(false);
-      if (categoryFromQuery == null) {
-        setSelectedCategoryId('recommended');
-      } else {
-        setSelectedCategoryId(categoryFromQuery);
-      }
-    }
   }, [categories, pathname, categoryFromQuery, setSelectedCategoryId]);
 
-  // Hide filters on detail pages (with IDs)
+  // Hide filters on Discover, Experiences and Communities (which render their
+  // own tabs), Moments and Bucket Lists (no categories to filter by — either
+  // would otherwise sit on the skeleton forever, since only the /places branch
+  // ever clears isLoading), detail pages (with IDs), and Control Center (a host
+  // dashboard, not browsable content)
   if (
+    pathname === '/' ||
+    pathname === '/experiences' ||
+    pathname === '/communities' ||
+    pathname.startsWith('/moments') ||
+    pathname.startsWith('/bucket-lists') ||
     pathname.startsWith('/places/') ||
     pathname.startsWith('/experiences/') ||
     pathname.startsWith('/communities/') ||
+    pathname.startsWith('/control-center') ||
     pathname.startsWith('/auth/') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/privacy') ||
@@ -95,7 +72,7 @@ export default function PageFilters() {
   }
 
   return (
-    <div className="sticky top-0 z-[9] border-b-[1px] border-t-[1px] border-gray-100 bg-gray-50 md:top-[8.313rem] 3xl:top-[8.313rem] 4xl:top-[7.8rem]">
+    <div className="">
       <div className="col-span-12 gap-4 px-4 md:px-0">
         <div className="w-full">
           <div className="grid grid-cols-12 gap-4">
@@ -111,4 +88,4 @@ export default function PageFilters() {
       </div>
     </div>
   );
-}
+};

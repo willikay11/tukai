@@ -1,6 +1,6 @@
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
-import { api } from './apiService';
+import { api, apiWithToken } from './apiService';
 
 export const signIn = async (email: string, password: string) => {
   try {
@@ -89,6 +89,40 @@ export const refreshToken = async (refreshToken: string) => {
     const response = await api.post('/v1/accounts/login/refresh/', { refresh: refreshToken });
     return parseSnakeToCamel(response.data);
   } catch (error: any) {
+    throw error;
+  }
+};
+
+export const getInterestCategories = async (page = 1, pageSize = 10) => {
+  try {
+    const response = await api.get(`/v1/accounts/interests/?page=${page}&page_size=${pageSize}`);
+    return parseSnakeToCamel(response.data?.results);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const getUsers = async (
+  page = 1,
+  pageSize = 10,
+  email?: string,
+  followers?: string,
+  following?: string,
+  blocked?: string,
+) => {
+  try {
+    let query = `/v1/accounts/users/?page=${page}&page_size=${pageSize}`;
+    if (email) query += `&email=${email}`;
+    if (followers) query += `&followers=${followers}`;
+    if (following) query += `&following=${following}`;
+    if (blocked) query += `&blocked=${blocked}`;
+
+    const api = await apiWithToken();
+    const response = await api.get(query);
+    return parseSnakeToCamel(response.data?.results);
+  } catch (error) {
+    console.error(error);
     throw error;
   }
 };

@@ -1,0 +1,610 @@
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+import { Experience } from '@/types/experience';
+
+import { BookingPanel } from './index';
+
+let mockSession: { data: { user: { id: string } } | null } = { data: { user: { id: 'u1' } } };
+jest.mock('next-auth/react', () => ({
+  useSession: () => mockSession,
+}));
+
+const mockPush = jest.fn();
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
+// Camel-cased shape of the real v2 ticket-purchases 201 response
+const purchaseResponse = {
+  status: 201,
+  success: true,
+  data: {
+    detail: "Purchased tickets for the experience 'Gikuyu na Mumbi' successfully.",
+    order: { id: 'd45da06f-18e9-443f-9f86-f6054fa1213a', status: 'pending' },
+    paymentDetails: {
+      authorizationUrl: 'https://checkout.paystack.com/mgk99hs4wr21ejb',
+      accessCode: 'mgk99hs4wr21ejb',
+      reference: 'TRN-20260714-4OIK5LDP',
+    },
+  },
+};
+
+// Camel-cased occurrences as returned by /v1/experiences/{id}/occurrences/
+const occurrences = [
+  {
+    id: 'bed13941-c542-4468-925c-b8da94842bd0',
+    startDate: '2026-08-27T14:00:00Z',
+    endDate: '2026-08-27T17:00:00Z',
+    slotTemplate: { id: 'c093ca3e', startTime: '14:00:00', durationMinutes: 180 },
+  },
+  {
+    id: 'b643f113-8500-4589-9f22-15e7de6736e6',
+    startDate: '2026-08-27T18:00:00Z',
+    endDate: '2026-08-27T21:00:00Z',
+    slotTemplate: { id: 'ba199d91', startTime: '18:00:00', durationMinutes: 180 },
+  },
+];
+
+const mockMutate = jest.fn(
+  (_payload: unknown, options?: { onSuccess?: (response: typeof purchaseResponse) => void }) => {
+    options?.onSuccess?.(purchaseResponse);
+  },
+);
+
+// The API's own success body, camel-cased as the service leaves it. Money is
+// an { amount, currency } object, and `netAmount` is what is left to pay.
+const promoPreviewSuccess = {
+  data: {
+    valid: true,
+    code: 'SAVE10',
+    kind: 'promotion',
+    grossAmount: { amount: '1500.00', currency: 'KES' },
+    discountAmount: { amount: '240.00', currency: 'KES' },
+    netAmount: { amount: '1260.00', currency: 'KES' },
+    perTicket: [
+      {
+        ticketId: 'ticket-1',
+        unitGross: { amount: '1500.00', currency: 'KES' },
+        unitNet: { amount: '1260.00', currency: 'KES' },
+      },
+    ],
+  },
+};
+
+// A code the API takes, unless a test says otherwise
+let promoPreviewResponse: unknown = promoPreviewSuccess;
+const mockPreviewPromo = jest.fn(
+  (_payload: unknown, options?: { onSuccess?: (response: unknown) => void }) => {
+    options?.onSuccess?.(promoPreviewResponse);
+  },
+);
+
+// Mutable so a test can model an experience with no bookable occurrences
+let occurrencesState: { data: unknown; isLoading: boolean } = {
+  data: { data: occurrences },
+  isLoading: false,
+};
+
+jest.mock('@/app/shared/hooks/useExperiences', () => ({
+  useFetchExperienceOccurrences: () => occurrencesState,
+  usePurchaseExperienceTicketV2: () => ({
+    mutate: mockMutate,
+    isPending: false,
+    data: purchaseResponse,
+  }),
+  usePreviewPromoCode: () => ({ mutate: mockPreviewPromo, isPending: false }),
+}));
+
+const experience = {
+  id: 'a97edd4f-763f-49ef-a9bc-fea0a36c1dbe',
+  title: 'Gikuyu na Mumbi',
+  recurrenceRule:
+    'DTSTART:20260827T110000Z\nRRULE:FREQ=WEEKLY;UNTIL=20260829T205959Z;BYDAY=TH,SA,FR',
+  startDate: '2026-08-27T14:00:00Z',
+  endDate: '2026-08-29T21:00:00Z',
+  currency: 'Ksh.',
+  isPaid: true,
+  priceStartsFrom: { amount: 1500, currency: 'KES' },
+  // Mirrors live data: one ticket per slot template
+  tickets: [
+    { id: 'ticket-1', name: 'Normal', price: '1500.00', quantity: 10, slotTemplate: 'c093ca3e' },
+    { id: 'ticket-2', name: 'VIP', price: '2500.00', quantity: 5, slotTemplate: 'ba199d91' },
+  ],
+} as unknown as Experience;
+
+describe('BookingPanel purchase flow', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockSession = { data: { user: { id: 'u1' } } };
+    promoPreviewResponse = promoPreviewSuccess;
+  });
+
+  const selectTicketAndSafePaymentOptions = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+    // Email delivery avoids the WhatsApp phone requirement, but still needs a
+    // valid address of its own
+    await user.click(screen.getByRole('button', { name: 'Via Email' }));
+    await user.type(screen.getByPlaceholderText('Enter email address'), 'guest@example.com');
+  };
+
+  describe('discount codes', () => {
+    // The fixture's occurrences are dated 27 Aug 2026, so the panel only offers
+    // them from a day before that. Only the clock is faked — the timers
+    // userEvent needs are left alone.
+    beforeEach(() => {
+      jest.useFakeTimers({
+        doNotFake: [
+          'setTimeout',
+          'clearTimeout',
+          'setInterval',
+          'clearInterval',
+          'setImmediate',
+          'clearImmediate',
+          'queueMicrotask',
+          'requestAnimationFrame',
+          'cancelAnimationFrame',
+          'nextTick',
+          'performance',
+        ],
+      });
+      jest.setSystemTime(new Date('2026-08-20T09:00:00Z'));
+    });
+
+    afterEach(() => jest.useRealTimers());
+
+    const applyCode = async (user: ReturnType<typeof userEvent.setup>, code = 'SAVE10') => {
+      await user.type(screen.getByLabelText('Discount Code'), code);
+      await user.click(screen.getByRole('button', { name: 'Apply' }));
+    };
+
+    // The code is only valid against a given order, so that is what is sent
+    it('checks the code against the order on screen', async () => {
+      const user = userEvent.setup();
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user);
+
+      expect(mockPreviewPromo).toHaveBeenCalledWith(
+        {
+          code: 'SAVE10',
+          occurrence: 'bed13941-c542-4468-925c-b8da94842bd0',
+          ticket_purchases: [{ ticket_id: 'ticket-1', quantity: 1 }],
+        },
+        expect.any(Object),
+      );
+    });
+
+    // Money arrives as { amount, currency }, so reading it as a number would
+    // silently discount nothing
+    it('takes the discount off the total and the Pay button', async () => {
+      const user = userEvent.setup();
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user);
+
+      expect(await screen.findByText('SAVE10 applied')).toBeInTheDocument();
+      expect(screen.getByText('-Ksh. 240.00')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^pay/i })).toHaveTextContent('1,260.00');
+    });
+
+    // The API's own net figure is what the purchase will charge, so it wins
+    // over subtracting the discount from the local subtotal
+    it('charges the net amount the API worked out', async () => {
+      const user = userEvent.setup();
+      promoPreviewResponse = {
+        data: {
+          ...promoPreviewSuccess.data,
+          discountAmount: { amount: '240.00', currency: 'KES' },
+          // Deliberately not 1500 - 240: only the API knows how it rounds
+          netAmount: { amount: '1255.00', currency: 'KES' },
+        },
+      };
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user);
+
+      expect(await screen.findByRole('button', { name: /^pay/i })).toHaveTextContent('1,255.00');
+    });
+
+    it('falls back to subtracting when the API sends no net amount', async () => {
+      const user = userEvent.setup();
+      promoPreviewResponse = {
+        data: { valid: true, code: 'SAVE10', discountAmount: { amount: '240.00' } },
+      };
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user);
+
+      expect(await screen.findByRole('button', { name: /^pay/i })).toHaveTextContent('1,260.00');
+    });
+
+    it('shows the code as the API stores it, not as it was typed', async () => {
+      const user = userEvent.setup();
+      promoPreviewResponse = {
+        data: { ...promoPreviewSuccess.data, code: 'G30RG3R4L' },
+      };
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user, 'g30rg3r4l');
+
+      expect(await screen.findByText('G30RG3R4L applied')).toBeInTheDocument();
+    });
+
+    it('sends the applied code with the purchase', async () => {
+      const user = userEvent.setup();
+      render(<BookingPanel experience={experience} />);
+
+      await selectTicketAndSafePaymentOptions(user);
+      await applyCode(user);
+      await user.click(screen.getByRole('button', { name: /^pay/i }));
+
+      expect(mockMutate).toHaveBeenCalledWith(
+        expect.objectContaining({ promo_code: 'SAVE10' }),
+        expect.any(Object),
+      );
+    });
+
+    // The endpoint answers 200 for a code it will not take
+    it('says why a code was refused rather than discounting anything', async () => {
+      const user = userEvent.setup();
+      promoPreviewResponse = {
+        data: { valid: false, reason: "This code isn't valid for this order." },
+      };
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user, 'NOPE');
+
+      expect(await screen.findByText("This code isn't valid for this order.")).toBeInTheDocument();
+      expect(screen.queryByText(/applied/)).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^pay/i })).toHaveTextContent('1,500.00');
+    });
+
+    it('will not check a code before any tickets are picked', async () => {
+      const user = userEvent.setup();
+      render(<BookingPanel experience={experience} />);
+
+      await applyCode(user);
+
+      expect(mockPreviewPromo).not.toHaveBeenCalled();
+      expect(screen.getByText('Pick your tickets first')).toBeInTheDocument();
+    });
+
+    it('drops the discount when it is removed', async () => {
+      const user = userEvent.setup();
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user);
+      await user.click(await screen.findByRole('button', { name: 'Remove' }));
+
+      expect(screen.getByRole('button', { name: /^pay/i })).toHaveTextContent('1,500.00');
+      expect(screen.getByLabelText('Discount Code')).toBeInTheDocument();
+    });
+
+    // A code checked against one basket must not silently discount another
+    it('rechecks the code when the order changes', async () => {
+      const user = userEvent.setup();
+      render(<BookingPanel experience={experience} />);
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+      await applyCode(user);
+      mockPreviewPromo.mockClear();
+
+      await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+
+      expect(mockPreviewPromo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: 'SAVE10',
+          ticket_purchases: [{ ticket_id: 'ticket-1', quantity: 2 }],
+        }),
+        expect.any(Object),
+      );
+    });
+  });
+
+  it('sends the occurrence id and opens Paystack with the authorization_url from the response', async () => {
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} />);
+
+    await selectTicketAndSafePaymentOptions(user);
+    await user.click(screen.getByRole('button', { name: /^pay/i }));
+
+    expect(mockMutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ticket_purchases: [{ ticket_id: 'ticket-1', quantity: 1 }],
+        occurrence: 'bed13941-c542-4468-925c-b8da94842bd0',
+      }),
+      expect.anything(),
+    );
+
+    // Logged in → no anonymous purchaser fields in the payload
+    expect(mockMutate.mock.calls[0][0]).not.toHaveProperty('first_name');
+
+    // The Paystack pop-up shows the checkout url from payment_details.authorization_url
+    await waitFor(() => {
+      const iframe = document.querySelector('iframe');
+      expect(iframe).toBeInTheDocument();
+      expect(iframe).toHaveAttribute('src', 'https://checkout.paystack.com/mgk99hs4wr21ejb');
+    });
+  });
+
+  it('redirects to the confirmation page with ref and experienceId on success', async () => {
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} />);
+
+    await selectTicketAndSafePaymentOptions(user);
+    await user.click(screen.getByRole('button', { name: /^pay/i }));
+
+    await waitFor(() => expect(document.querySelector('iframe')).toBeInTheDocument());
+    expect(mockPush).not.toHaveBeenCalled();
+
+    fireEvent(window, new MessageEvent('message', { data: { status: 'success' } }));
+
+    await waitFor(() =>
+      expect(mockPush).toHaveBeenCalledWith(
+        `/experiences/booking-success?experienceId=${experience.id}&ref=TRN-20260714-4OIK5LDP`,
+      ),
+    );
+  });
+
+  it('clears the purchaser’s details once Paystack reports success', async () => {
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} />);
+
+    await selectTicketAndSafePaymentOptions(user);
+    await user.click(screen.getByRole('button', { name: /^pay/i }));
+
+    await waitFor(() => expect(document.querySelector('iframe')).toBeInTheDocument());
+
+    // How the real Paystack component learns the payment went through
+    fireEvent(window, new MessageEvent('message', { data: { status: 'success' } }));
+
+    await waitFor(() => expect(screen.getByPlaceholderText('Enter email address')).toHaveValue(''));
+    // Quantity is uncontrolled, so this only passes because it is remounted
+    expect(screen.getByText('0')).toBeInTheDocument();
+  });
+
+  // The checkout lives in a dialog now; it used to render inline and unguarded,
+  // leaving an empty iframe under the panel before any purchase
+  it('does not mount the checkout iframe before a purchase', () => {
+    render(<BookingPanel experience={experience} />);
+
+    expect(document.querySelector('iframe')).not.toBeInTheDocument();
+  });
+
+  it('shows both occurrence slots for the auto-selected first date', () => {
+    render(<BookingPanel experience={experience} />);
+
+    expect(screen.getByText('2:00 PM - 5:00 PM')).toBeInTheDocument();
+    expect(screen.getByText('6:00 PM - 9:00 PM')).toBeInTheDocument();
+  });
+
+  it('lists only the selected slot’s tickets and swaps them on slot change', async () => {
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} />);
+
+    // First slot (template c093ca3e) auto-selected → only "Normal" shows
+    expect(screen.getByText('Normal')).toBeInTheDocument();
+    expect(screen.queryByText('VIP')).not.toBeInTheDocument();
+
+    await user.click(screen.getByText('6:00 PM - 9:00 PM'));
+
+    expect(screen.getByText('VIP')).toBeInTheDocument();
+    expect(screen.queryByText('Normal')).not.toBeInTheDocument();
+  });
+
+  it('keeps quantities picked on another slot out of the total and blocks Pay', async () => {
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} />);
+
+    // Pick a "Normal" ticket on the first slot, then switch slots
+    await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
+    await user.click(screen.getByText('6:00 PM - 9:00 PM'));
+
+    // Pay stays clickable; the hidden slot's quantity is inert, so pressing it
+    // reports the missing ticket rather than submitting
+    const payButton = screen.getByRole('button', { name: /^pay/i });
+    expect(payButton).not.toBeDisabled();
+
+    await user.click(payButton);
+
+    expect(mockMutate).not.toHaveBeenCalled();
+    expect(screen.getByText('Please select at least one ticket.')).toBeInTheDocument();
+  });
+
+  // The mobile sheet opens one view directly, so the tab row is left out
+  it('shows both tabs by default', () => {
+    render(<BookingPanel experience={experience} />);
+
+    expect(screen.getByRole('tab', { name: 'Make Reservation' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Moments' })).toBeInTheDocument();
+  });
+
+  it('drops the tab row when asked for one view', () => {
+    render(<BookingPanel experience={experience} view="reservation" />);
+
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^pay/i })).toBeInTheDocument();
+  });
+
+  it('reports every missing field on the inputs when Pay is pressed empty', async () => {
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} />);
+
+    await user.click(screen.getByRole('button', { name: /^pay/i }));
+
+    expect(mockMutate).not.toHaveBeenCalled();
+    expect(screen.getByText('Please select at least one ticket.')).toBeInTheDocument();
+    // One phone error, from the WhatsApp delivery contact — the M-Pesa field
+    // that produced the second one has been removed
+    expect(screen.getAllByText('Please enter a valid phone number.')).toHaveLength(1);
+  });
+
+  it('blocks anonymous purchase until contact details are valid, then includes them', async () => {
+    mockSession = { data: null };
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} />);
+
+    await selectTicketAndSafePaymentOptions(user);
+    await user.click(screen.getByRole('button', { name: /^pay/i }));
+
+    expect(mockMutate).not.toHaveBeenCalled();
+    expect(screen.getByText('Please enter your first name.')).toBeInTheDocument();
+    expect(screen.getByText('Please enter your last name.')).toBeInTheDocument();
+    expect(screen.getByText('Please enter a valid email address.')).toBeInTheDocument();
+
+    await user.type(screen.getByPlaceholderText('First Name'), 'Tony');
+    await user.type(screen.getByPlaceholderText('Last Name'), 'Ouma');
+    await user.type(screen.getByPlaceholderText('Email'), 'tony@example.com');
+    await user.click(screen.getByRole('button', { name: /^pay/i }));
+
+    expect(mockMutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        first_name: 'Tony',
+        last_name: 'Ouma',
+        confirmation_email: 'tony@example.com',
+        occurrence: 'bed13941-c542-4468-925c-b8da94842bd0',
+      }),
+      expect.anything(),
+    );
+  });
+});
+
+// Itinerary experiences have no slot templates — the occurrence arrives with
+// slotTemplate: null, which used to crash on `slotTemplate.startTime`
+describe('BookingPanel for an experience without slot templates', () => {
+  const itineraryExperience = {
+    id: 'itinerary-1',
+    title: 'Mount Kenya Trek',
+    recurrenceRule: null,
+    startDate: '2026-09-10T08:00:00Z',
+    endDate: '2026-09-12T17:00:00Z',
+    currency: 'Ksh.',
+    isPaid: true,
+    priceStartsFrom: { amount: 5000, currency: 'KES' },
+    tickets: [{ id: 'ticket-1', name: 'Standard', price: '5000.00', quantity: 10 }],
+  } as unknown as Experience;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockSession = { data: { user: { id: 'u1' } } };
+    occurrences.length = 0;
+    occurrences.push({
+      id: 'occurrence-1',
+      startDate: '2026-09-10T08:00:00Z',
+      endDate: '2026-09-10T17:00:00Z',
+      slotTemplate: null,
+    } as unknown as (typeof occurrences)[number]);
+  });
+
+  it('renders without throwing and still lists the ticket', () => {
+    expect(() => render(<BookingPanel experience={itineraryExperience} />)).not.toThrow();
+    expect(screen.getByText('Standard')).toBeInTheDocument();
+  });
+});
+
+describe('BookingPanel preview mode', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockSession = { data: { user: { id: 'u1' } } };
+  });
+
+  it('keeps the real Pay label and total, greyed out and disabled', () => {
+    render(<BookingPanel experience={experience} mode="preview" />);
+
+    const payButton = screen.getByRole('button', { name: /^pay/i });
+
+    expect(payButton).toBeDisabled();
+    expect(payButton).toHaveTextContent('Pay');
+    expect(payButton).toHaveTextContent('Ksh. 0.00');
+  });
+
+  it('explains why booking is unavailable instead of the Paystack note', () => {
+    render(<BookingPanel experience={experience} mode="preview" />);
+
+    expect(
+      screen.getByText(
+        'Booking is disabled in preview. Guests can reserve once you publish this experience.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/handled externally via Paystack/)).not.toBeInTheDocument();
+  });
+
+  it('shows the Paystack note and no preview notice in live mode', () => {
+    render(<BookingPanel experience={experience} />);
+
+    expect(screen.getByText(/handled externally via Paystack/)).toBeInTheDocument();
+    expect(screen.queryByText(/Booking is disabled in preview/)).not.toBeInTheDocument();
+  });
+
+  it('cannot start a purchase', async () => {
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} mode="preview" />);
+
+    await user.click(screen.getByRole('button', { name: /^pay/i }));
+
+    expect(mockMutate).not.toHaveBeenCalled();
+  });
+});
+
+describe('pay button styling', () => {
+  it('uses the lime variant with primary text, not the dark gradient', () => {
+    render(<BookingPanel experience={experience} />);
+
+    const pay = screen.getByRole('button', { name: /Pay/ });
+    expect(pay).toHaveClass('bg-lime', 'text-primary');
+    expect(pay).not.toHaveClass('bg-gradient-to-b');
+  });
+});
+
+// Regression: only recurring experiences show a date/time picker. An itinerary
+// with no occurrences got "Please select a date and time." with nothing on
+// screen to select, so the user was stuck.
+describe('when there is no occurrence to select', () => {
+  afterEach(() => {
+    occurrencesState = { data: { data: occurrences }, isLoading: false };
+  });
+
+  it('explains that no dates are bookable rather than asking for a selection', async () => {
+    occurrencesState = { data: { data: [] }, isLoading: false };
+    render(<BookingPanel experience={experience} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Pay/ }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText('This experience has no dates available to book right now.'),
+      ).toBeInTheDocument(),
+    );
+    expect(screen.queryByText('Please select a date and time.')).not.toBeInTheDocument();
+  });
+
+  it('says so while the dates are still loading', async () => {
+    occurrencesState = { data: undefined, isLoading: true };
+    render(<BookingPanel experience={experience} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Pay/ }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText('Just a moment — still loading available dates.'),
+      ).toBeInTheDocument(),
+    );
+  });
+
+  it('auto-selects the occurrence when one exists, so no slot error appears', async () => {
+    render(<BookingPanel experience={experience} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Pay/ }));
+
+    await waitFor(() => expect(screen.queryByText(/available dates/)).not.toBeInTheDocument());
+    expect(screen.queryByText('Please select a date and time.')).not.toBeInTheDocument();
+  });
+});

@@ -1,0 +1,198 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+import {
+  createCommunity,
+  createCommunityPhotos,
+  fetchCommunity,
+  fetchCommunityPostPhotos,
+  fetchCommunityPosts,
+  getCommunities,
+  joinCommunity,
+  joinCommunityWithToken,
+  leaveCommunity,
+  submitCommunityVerification,
+  uploadVerificationDocument,
+} from '@/services/community';
+import { CommunityPostsQueryParams, CreateCommunity } from '@/types/community';
+
+/**
+ * A single community, for the membership records the LIST endpoint leaves out.
+ * Only the detail endpoint returns `members` with their user objects — the list
+ * carries just `members_count` and `owners`.
+ *
+ * Cached long, and keyed by id: a grid of cards each asks for its own, and the
+ * same community is not re-fetched when the reader switches tabs or opens it.
+ */
+export const useCommunityDetail = (communityId: string, enabled: boolean) => {
+  return useQuery({
+    queryKey: ['community', communityId],
+    queryFn: async () => await fetchCommunity(communityId),
+    enabled: enabled && Boolean(communityId),
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
+export const useGetCommunities = (
+  {
+    page,
+    enabled,
+    category,
+    search,
+    showUpComingExperiences,
+    recommendedCommunities,
+    popularCommunities,
+    following,
+    createdBy,
+  }: {
+    page: number;
+    enabled: boolean;
+    category?: string[];
+    search?: string;
+    showUpComingExperiences?: boolean;
+    recommendedCommunities?: boolean;
+    popularCommunities?: boolean;
+    following?: boolean;
+    createdBy?: string;
+  } = {
+    page: 1,
+    enabled: true,
+  },
+) => {
+  return useQuery({
+    // Every flag that changes the request must be in the key. Without the
+    // boolean flags, a popular/recommended/following query shares a cache entry
+    // with a plain one and they serve each other's results.
+    queryKey: [
+      'communities',
+      page,
+      category,
+      search,
+      createdBy,
+      showUpComingExperiences,
+      recommendedCommunities,
+      popularCommunities,
+      following,
+    ],
+    queryFn: async () =>
+      await getCommunities(
+        category,
+        page,
+        12,
+        search,
+        showUpComingExperiences,
+        recommendedCommunities,
+        popularCommunities,
+        following,
+        createdBy,
+      ),
+    enabled: enabled,
+  });
+};
+
+/**
+ * Membership lives on the community detail record, which the community page
+ * renders on the server. Invalidating the cached copies keeps client-side
+ * readers (cards, the members list) in step; the page itself is refreshed by
+ * the caller.
+ */
+const invalidateCommunity = (queryClient: ReturnType<typeof useQueryClient>) => {
+  // The whole prefix, not one id: a community is cached under whichever key
+  // addressed it, and the detail route takes its slug as readily as its UUID
+  queryClient.invalidateQueries({ queryKey: ['community'] });
+  queryClient.invalidateQueries({ queryKey: ['communities'] });
+};
+
+export const useJoinCommunity = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['joinCommunity'],
+    mutationFn: async (communityId: string) => await joinCommunity(communityId),
+    onSuccess: () => invalidateCommunity(queryClient),
+  });
+};
+
+export const useLeaveCommunity = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['leaveCommunity'],
+    mutationFn: async ({ communityId, userId }: { communityId: string; userId: string }) =>
+      await leaveCommunity(communityId, userId),
+    onSuccess: () => invalidateCommunity(queryClient),
+  });
+};
+
+export const useJoinCommunityViaInvite = () => {
+  return useMutation({
+    mutationKey: ['joinCommunityViaInvite'],
+    mutationFn: async ({ communityId, token }: { communityId: string; token: string }) =>
+      await joinCommunityWithToken(communityId, token),
+  });
+};
+
+export const useCommunityPosts = (params: CommunityPostsQueryParams, enabled: boolean) => {
+  return useQuery({
+    queryKey: [
+      'communityPosts',
+      params.page,
+      params.page_size,
+      params.author,
+      params.is_liked,
+      params.page,
+    ],
+    queryFn: async () => await fetchCommunityPosts(params),
+    enabled: enabled,
+  });
+};
+
+export const useCommunityPostPhotos = (communityId: string, enabled: boolean) => {
+  return useQuery({
+    queryKey: ['communityPostPhotos', communityId],
+    queryFn: async () => await fetchCommunityPostPhotos(communityId),
+    enabled: enabled,
+  });
+};
+
+export const useCreateCommunity = () => {
+  return useMutation({
+    mutationKey: ['createCommunity'],
+    mutationFn: async (data: CreateCommunity) => await createCommunity(data),
+  });
+};
+
+export const useCreateCommunityPhotos = () => {
+  return useMutation({
+    mutationKey: ['createCommunityPhotos'],
+    mutationFn: async ({ communityId, photos }: { communityId: string; photos: File[] }) =>
+      await createCommunityPhotos(communityId, photos),
+  });
+};
+
+/**
+ * Opens the community's verification application. Proof-of-ownership documents
+ * hang off it, so this runs before any document upload. The API rejects a
+ * second application while one is PENDING or UNDER_REVIEW — the caller treats
+ * that as "already open" rather than as a failure.
+ */
+export const useSubmitCommunityVerification = () => {
+  return useMutation({
+    mutationFn: async (communityId: string) => await submitCommunityVerification(communityId),
+  });
+};
+
+export const useUploadVerificationDocument = () => {
+  return useMutation({
+    mutationFn: async ({
+      communityId,
+      documentType,
+      file,
+      notes,
+    }: {
+      communityId: string;
+      documentType: string;
+      file: File;
+      notes?: string;
+    }) => await uploadVerificationDocument(communityId, documentType, file, notes),
+  });
+};

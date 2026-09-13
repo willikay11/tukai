@@ -5,13 +5,26 @@ import { NextResponse } from 'next/server';
 export async function middleware(request: NextRequest) {
   const token: any = await getToken({ req: request });
   const { pathname } = request.nextUrl;
+  const isExperienceCreateRoute =
+    pathname === '/experiences/create' || pathname.startsWith('/experiences/create/');
+  const isCommunityCreateRoute =
+    pathname === '/communities/create' || pathname.startsWith('/communities/create/');
+  const isExperienceTypeRoute =
+    pathname === '/experiences/type' || pathname.startsWith('/experiences/type');
+  const isExcludedExperienceRoute =
+    pathname.startsWith('/experiences') && !isExperienceCreateRoute && !isExperienceTypeRoute;
+  const isExcludedCommunityRoute = pathname.startsWith('/communities') && !isCommunityCreateRoute;
 
   // Exclude auth routes from middleware
   if (
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/auth') ||
-    pathname.startsWith('/experiences') ||
-    pathname.startsWith('/communities') ||
+    isExcludedExperienceRoute ||
+    isExcludedCommunityRoute ||
+    // Moments are public: the feed, a moment and its comments all read without
+    // a token. Posting, liking and flagging still need one, and each prompts
+    // for sign-in where it is pressed rather than at the door.
+    pathname.startsWith('/moments') ||
     pathname.startsWith('/place') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/privacy') ||

@@ -4,11 +4,11 @@ import React, { useRef } from 'react';
 
 import { z } from 'zod';
 
+import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
-import PaymentForm, { paymentFormSchema } from '@/components/ui/paymentForm';
-import { toast } from '@/hooks/use-toast';
+import { PaymentForm, paymentFormSchema } from '@/components/ui/paymentForm';
 
-export default function PaymentDetails({
+export const PaymentDetails = ({
   onSuccess,
 }: {
   onSuccess: (paymentMethod: {
@@ -17,7 +17,7 @@ export default function PaymentDetails({
     paymentOption: string;
     verificationResponse: string;
   }) => void;
-}) {
+}) => {
   const formRef = useRef<any>();
 
   async function onSubmit(values: z.infer<typeof paymentFormSchema>, paymentOption: string) {
@@ -87,4 +87,4 @@ export default function PaymentDetails({
       </Button>
     </>
   );
-}
+};

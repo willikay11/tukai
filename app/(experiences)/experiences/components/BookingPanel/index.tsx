@@ -1,0 +1,781 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+
+import { Mail02TwotoneRounded, UserTwotoneRounded } from '@hugeicons-pro/core-twotone-rounded';
+import { HugeiconsIcon } from '@hugeicons/react';
+import moment from 'moment';
+import { z } from 'zod';
+
+import { IconComponent } from '@/app/shared/components/Icons';
+import {
+  useFetchExperienceOccurrences,
+  usePreviewPromoCode,
+  usePurchaseExperienceTicketV2,
+} from '@/app/shared/hooks/useExperiences';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Paystack } from '@/components/ui/paystack';
+import { PhoneNumber } from '@/components/ui/phoneNumber';
+import { Quantity } from '@/components/ui/quantity';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
+import { TicketPurchasePayload } from '@/services/experience';
+import { Experience, ExperienceOccurrence } from '@/types/experience';
+import { moneyAmount } from '@/utils/money';
+import { parseApiError } from '@/utils/parseApiError';
+import { getTicketBuyerPrice } from '@/utils/ticket-utils';
+
+import { type AppliedDiscount, DiscountCodeField } from './DiscountCodeField';
+import { ExperienceMoments } from './ExperienceMoments';
+import { RecurringDateSlotPicker } from './RecurringDateSlotPicker';
+
+interface BookingPanelProps {
+  experience: Experience;
+  // 'preview' renders the identical panel — tabs, pickers, steppers, totals —
+  // but hard-disables the purchase call so a creator
+  // previewing their own draft can never buy a ticket. Layout must NOT branch
+  // on this; only the Pay action does.
+  mode?: 'live' | 'preview';
+  // 'all' shows both tabs. The mobile sheet opens one or the other on its own,
+  // so it asks for that view and the tab row is left out.
+  view?: 'all' | 'reservation' | 'moments';
+}
+
+const formatSlotLabel = (startTime: string, durationMinutes: number): string => {
+  const [hour, min] = startTime.split(':').map(Number);
+  const start = moment({ hour, minute: min });
+  const end = start.clone().add(durationMinutes, 'minutes');
+  return `${start.format('h:mm A')} - ${end.format('h:mm A')}`;
+};
+
+// Itinerary occurrences carry no slot template, so fall back to the times on
+// the occurrence itself rather than reading through a null template
+const occurrenceLabel = (occurrence: ExperienceOccurrence): string => {
+  const { startTime, durationMinutes } = occurrence.slotTemplate ?? {};
+
+  if (startTime && durationMinutes != null) {
+    return formatSlotLabel(startTime, durationMinutes);
+  }
+
+  const start = moment(occurrence.startDate);
+  const end = moment(occurrence.endDate);
+
+  if (!start.isValid()) return '';
+  if (!end.isValid()) return start.format('h:mm A');
+
+  return `${start.format('h:mm A')} - ${end.format('h:mm A')}`;
+};
+
+// Same rule PaymentForm's paymentFormSchema applies to mobile-money numbers
+const PHONE_REGEX = /^\+\d{6,15}$/;
+
+export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: BookingPanelProps) => {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const isLoggedIn = Boolean(session?.user);
+  const isPreview = mode === 'preview';
+
+  const [tab, setTab] = useState<'reservation' | 'moments'>(
+    view === 'moments' ? 'moments' : 'reservation',
+  );
+  const showTabs = view === 'all';
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [discount, setDiscount] = useState<AppliedDiscount | null>(null);
+  const [discountError, setDiscountError] = useState<string | undefined>();
+  // Kept as state, not a constant, so restoring the commented-out payment
+  // method picker below needs no other change. M-Pesa is the only method today.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [deliveryMethod, setDeliveryMethod] = useState<'email' | 'whatsapp'>('whatsapp');
+  const [deliveryContact, setDeliveryContact] = useState('');
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  // Bumped by resetPanel to remount the uncontrolled inputs (PhoneNumber, Quantity)
+  const [formResetKey, setFormResetKey] = useState(0);
+  const [isPaystackOpen, setIsPaystackOpen] = useState(false);
+
+  const isRecurring = Boolean(experience.recurrenceRule);
+
+  const { data: occurrencesResponse, isLoading: isLoadingOccurrences } =
+    useFetchExperienceOccurrences(experience.id);
+  const occurrences: ExperienceOccurrence[] = useMemo(
+    () => occurrencesResponse?.data ?? [],
+    [occurrencesResponse],
+  );
+
+  const {
+    mutate: purchaseTicket,
+    isPending: isPaying,
+    data: purchaseData,
+  } = usePurchaseExperienceTicketV2();
+
+  // Slot options are occurrences: id is the OCCURRENCE uuid the v2 API requires.
+  // Recurring experiences narrow to the picker's selected date; non-recurring
+  // experiences have a single occurrence.
+  const timeSlots: { id: string; label: string }[] = useMemo(() => {
+    const source = isRecurring
+      ? occurrences.filter(
+          (occurrence) => moment(occurrence.startDate).format('YYYY-MM-DD') === selectedDate,
+        )
+      : occurrences;
+
+    return source.map((occurrence) => ({
+      id: occurrence.id,
+      label: occurrenceLabel(occurrence),
+    }));
+  }, [occurrences, isRecurring, selectedDate]);
+
+  // Keep an occurrence selected: default to the first slot, and re-default
+  // when the selected date changes and the previous occurrence no longer applies
+  useEffect(() => {
+    const stillValid = selectedSlotId && timeSlots.some((slot) => slot.id === selectedSlotId);
+    if (!stillValid) {
+      setSelectedSlotId(timeSlots[0]?.id ?? null);
+    }
+  }, [timeSlots, selectedSlotId]);
+
+  // Tickets are linked to a slot template — list only the selected slot's
+  // tickets. Tickets without a slot template (one-time experiences) always
+  // show. Total and payload are scoped the same way, so quantities picked on
+  // another slot stay inert.
+  const selectedTemplateId = useMemo(
+    () => occurrences.find((occurrence) => occurrence.id === selectedSlotId)?.slotTemplate?.id,
+    [occurrences, selectedSlotId],
+  );
+
+  const visibleTickets = useMemo(
+    () =>
+      (experience.tickets ?? []).filter(
+        (ticket) => !ticket.slotTemplate || ticket.slotTemplate === selectedTemplateId,
+      ),
+    [experience.tickets, selectedTemplateId],
+  );
+
+  const updateQuantity = (ticketId: string, qty: number) => {
+    setQuantities((prev) => ({ ...prev, [ticketId]: qty }));
+  };
+
+  // Totalled on the buyer price so the figure matches what is charged
+  const total = visibleTickets.reduce((sum, ticket) => {
+    const qty = quantities[ticket.id] ?? 0;
+    return sum + qty * getTicketBuyerPrice(ticket);
+  }, 0);
+
+  // Counted rather than derived from `total`, which is 0 for a free experience
+  // even when tickets have been picked
+  const selectedTicketCount = visibleTickets.reduce(
+    (sum, ticket) => sum + (quantities[ticket.id] ?? 0),
+    0,
+  );
+
+  // A discount can never take an order below nothing
+  const discountAmount = discount ? Math.min(discount.amount, total) : 0;
+  // The API's own net figure where it gave one, since that is what will be
+  // charged; the subtraction is only the fallback
+  const payableTotal = discount?.netTotal ?? total - discountAmount;
+
+  const { mutate: previewPromo, isPending: isCheckingDiscount } = usePreviewPromoCode();
+
+  // What the code is being judged against. A code is only valid for a given
+  // order, so this is also what has to change for an applied one to be rechecked.
+  const orderForPromo = useMemo(
+    () =>
+      visibleTickets
+        .filter((ticket) => (quantities[ticket.id] ?? 0) > 0)
+        .map((ticket) => ({ ticket_id: ticket.id, quantity: quantities[ticket.id] })),
+    [visibleTickets, quantities],
+  );
+
+  const applyDiscount = useCallback(
+    (code: string, { silent = false }: { silent?: boolean } = {}) => {
+      if (!selectedSlotId || orderForPromo.length === 0) {
+        setDiscountError('Pick your tickets first');
+        return;
+      }
+
+      setDiscountError(undefined);
+
+      previewPromo(
+        { code, occurrence: selectedSlotId, ticket_purchases: orderForPromo },
+        {
+          onSuccess: (response) => {
+            const result = response.data ?? {};
+
+            // The endpoint answers 200 for a code it will not take, so it is
+            // `valid` that decides — not the status
+            if (result.valid === false) {
+              setDiscount(null);
+              setDiscountError(result.reason ?? 'This code is not valid for this order.');
+              return;
+            }
+
+            // Money comes back as `{ amount, currency }`, and `netAmount` is
+            // the API's own figure for what is left to pay — preferred over
+            // subtracting locally, since it is what the purchase will charge
+            setDiscount({
+              // The API echoes the code as it stores it
+              code: result.code ?? code,
+              amount: moneyAmount(result.discountAmount) ?? 0,
+              netTotal: moneyAmount(result.netAmount) ?? undefined,
+              description: result.description,
+            });
+          },
+          onError: (error: any) => {
+            setDiscount(null);
+            if (!silent) {
+              setDiscountError(error?.message ?? 'Could not check this code. Try again.');
+            }
+          },
+        },
+      );
+    },
+    [previewPromo, selectedSlotId, orderForPromo],
+  );
+
+  // An applied code is only good for the order it was checked against, so a
+  // changed slot or basket sends it back to the API rather than quietly
+  // discounting something it was never valid for
+  const appliedCode = discount?.code;
+  useEffect(() => {
+    if (!appliedCode) return;
+
+    applyDiscount(appliedCode, { silent: true });
+    // `applyDiscount` closes over the order, which is what this watches
+  }, [appliedCode, applyDiscount]);
+
+  // Mirrors the reserve page's paymentFormSchema rules and messages
+  const validatePurchase = (): Record<string, string> => {
+    const validationErrors: Record<string, string> = {};
+
+    if (selectedTicketCount === 0) {
+      validationErrors.tickets = 'Please select at least one ticket.';
+    }
+
+    if (!selectedSlotId) {
+      /*
+       * Only a recurring experience shows a date/time picker. Everything else —
+       * single-day, multi-day and itineraries — gets a read-only date pill and
+       * has its occurrence selected automatically, so telling those users to
+       * "select a date and time" asks for something the panel never offers.
+       * The occurrence is required by the purchase payload, so the sale still
+       * cannot go ahead; the message just has to say why.
+       */
+      if (isLoadingOccurrences) {
+        validationErrors.slot = 'Just a moment — still loading available dates.';
+      } else if (timeSlots.length === 0) {
+        validationErrors.slot = 'This experience has no dates available to book right now.';
+      } else {
+        validationErrors.slot = 'Please select a date and time.';
+      }
+    }
+
+    if (!isLoggedIn) {
+      if (firstName.trim().length < 2) {
+        validationErrors.firstName = 'Please enter your first name.';
+      }
+      if (lastName.trim().length < 2) {
+        validationErrors.lastName = 'Please enter your last name.';
+      }
+      if (!z.string().email().safeParse(email.trim()).success) {
+        validationErrors.email = 'Please enter a valid email address.';
+      }
+    }
+
+    if (deliveryMethod === 'whatsapp' && !PHONE_REGEX.test(deliveryContact)) {
+      validationErrors.deliveryContact = 'Please enter a valid phone number.';
+    }
+
+    if (
+      deliveryMethod === 'email' &&
+      !z.string().email().safeParse(deliveryContact.trim()).success
+    ) {
+      validationErrors.deliveryContact = 'Please enter a valid email address.';
+    }
+
+    return validationErrors;
+  };
+
+  // Clears everything the purchaser typed once the payment lands, so the panel
+  // is not left holding their details. PhoneNumber and Quantity are both
+  // uncontrolled — they seed from their props once and ignore later changes —
+  // so clearing the state alone leaves the old values on screen. Bumping the
+  // key remounts them.
+  const resetPanel = () => {
+    setQuantities({});
+    setErrors({});
+    setDeliveryContact('');
+    setFirstName('');
+    setLastName('');
+    setEmail('');
+    setFormResetKey((key) => key + 1);
+  };
+
+  // Both success paths land on the confirmation page. The reference and
+  // experience id travel as query params so the page can fetch the real
+  // confirmation once that API exists, with no further wiring here.
+  const goToBookingSuccess = (reference?: string) => {
+    resetPanel();
+
+    const params = new URLSearchParams({ experienceId: experience.id });
+    if (reference) params.set('ref', reference);
+
+    router.push(`/experiences/booking-success?${params.toString()}`);
+  };
+
+  const handlePay = () => {
+    // Second guard behind the disabled button — the purchase API must be
+    // unreachable from preview even if the button is somehow activated
+    if (isPreview) return;
+
+    const validationErrors = validatePurchase();
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      return;
+    }
+
+    const payload: TicketPurchasePayload = {
+      ticket_purchases: visibleTickets
+        .filter((ticket) => (quantities[ticket.id] ?? 0) > 0)
+        .map((ticket) => ({ ticket_id: ticket.id, quantity: quantities[ticket.id] })),
+      occurrence: selectedSlotId!,
+      ...(isLoggedIn
+        ? {}
+        : {
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+            confirmation_email: email.trim(),
+          }),
+      ...(deliveryMethod === 'whatsapp' && PHONE_REGEX.test(deliveryContact)
+        ? { whatsapp_phone: deliveryContact }
+        : {}),
+      ...(discount ? { promo_code: discount.code } : {}),
+    };
+
+    purchaseTicket(payload, {
+      onSuccess: (response) => {
+        const authorizationUrl = response.data?.paymentDetails?.authorizationUrl;
+        if (authorizationUrl) {
+          setIsPaystackOpen(true);
+        } else {
+          // Nothing to charge — the purchase is already complete
+          goToBookingSuccess(response.data?.paymentDetails?.reference);
+        }
+      },
+      onError: (error: any) => {
+        const status = error?.status ?? error?.response?.status;
+        // Prefer the API's own detail — a 400 can also mean the occurrence
+        // belongs to a different experience, not just sold-out tickets
+        const apiDetail = error?.data?.errors?.[0]?.detail;
+        if (status === 400) {
+          setErrors({ api: apiDetail || 'Not enough tickets available.' });
+        } else if (status === 404) {
+          setErrors({ api: 'Ticket not found.' });
+        } else if (status === 503) {
+          setErrors({ api: 'Payment service unavailable. Please try again.' });
+        } else {
+          setErrors({ api: parseApiError(error, 'Failed to complete your purchase.') });
+        }
+      },
+    });
+  };
+
+  const dateRange = `${moment(experience.startDate).format('ddd D MMM')} · ${moment(experience.startDate).format('h:mm A')} — ${moment(experience.endDate).format('h:mm A')}`;
+  const currency = experience.currency ?? 'Ksh.';
+
+  return (
+    <div className="space-y-4 rounded-3xl bg-gray-50 p-5">
+      {/* Tabs */}
+      <Tabs value={tab} onValueChange={(val) => setTab(val as 'reservation' | 'moments')}>
+        {showTabs && (
+          <>
+            {/* A two-column grid, not the primitive's `inline-flex`: that shrinks
+            to fit, so `flex-1` had no free space to share and each tab sized to
+            its own label — "Make Reservation" far wider than "Moments". Equal
+            columns are what let one pill cover either tab.
+            `w-fit` keeps them equal without stretching the row across the
+            panel: the two 1fr columns settle on the wider label's width. */}
+            <TabsList className="relative grid h-auto w-fit grid-cols-2 gap-0 rounded-full bg-white p-0.5">
+              {/* The green pill lives here rather than on the active trigger, so
+              switching tabs slides it across instead of repainting one tab and
+              then the other.
+
+              `inset-y-0 left-0` with `w-1/2`, NOT an inset of the list's own
+              padding: an absolutely positioned child is placed against the
+              padding box, which already excludes `p-0.5`. With the list on a
+              two-column grid, half that box is exactly one tab, so the pill
+              moves by its own width. */}
+              <span
+                aria-hidden
+                className={cn(
+                  'absolute inset-y-0 left-0 w-1/2 rounded-full bg-primary transition-transform duration-300 ease-out motion-reduce:transition-none',
+                  tab === 'moments' && 'translate-x-full',
+                )}
+              />
+              <TabsTrigger
+                value="reservation"
+                className="relative z-10 w-full rounded-full border-0 bg-transparent px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-transparent data-[state=active]:text-white"
+              >
+                Make Reservation
+              </TabsTrigger>
+              <TabsTrigger
+                value="moments"
+                className="relative z-10 w-full rounded-full border-0 bg-transparent px-4 py-2 text-sm text-gray-700 data-[state=active]:border-b-0 data-[state=active]:bg-transparent data-[state=active]:text-white"
+              >
+                Moments
+              </TabsTrigger>
+            </TabsList>
+          </>
+        )}
+
+        <TabsContent value="reservation" className="mt-4 space-y-4">
+          {isRecurring ? (
+            /* Date & slot picker (recurring experiences) */
+            <RecurringDateSlotPicker
+              recurrenceRule={experience.recurrenceRule!}
+              timeSlots={timeSlots}
+              selectedDate={selectedDate}
+              onDateChange={setSelectedDate}
+              selectedSlotId={selectedSlotId}
+              onSlotChange={setSelectedSlotId}
+            />
+          ) : (
+            /* Date pill (single / multi-day experiences) */
+            <div className="flex items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3">
+              <div className="flex items-start gap-3">
+                <IconComponent
+                  iconName="Calendar03Icon"
+                  size={20}
+                  className="mt-0.5 flex-shrink-0 text-primary"
+                />
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-gray-900">{dateRange}</p>
+                  {experience.priceStartsFrom?.amount != null && (
+                    <p className="text-sm text-gray-500">
+                      From {currency} {experience.priceStartsFrom.amount.toLocaleString()}/Guest
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {errors.slot && <p className="text-sm text-red-500">{errors.slot}</p>}
+
+          {/* Ticket selector */}
+          {(experience.tickets?.length ?? 0) > 0 && (
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-gray-900">Select ticket</p>
+
+              {visibleTickets.length === 0 ? (
+                <p className="text-sm text-gray-500">No tickets available for this time slot.</p>
+              ) : (
+                <div className="space-y-3">
+                  {visibleTickets.map((ticket) => (
+                    <div key={ticket.id} className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-bold text-gray-900">
+                          {currency} {getTicketBuyerPrice(ticket).toLocaleString()}/person
+                        </p>
+                        <p className="mt-0.5 text-sm text-gray-500">{ticket.name}</p>
+                      </div>
+                      <Quantity
+                        // Uncontrolled like PhoneNumber — it seeds from
+                        // initialValue once, so a reset needs a remount
+                        key={`${ticket.id}-${formResetKey}`}
+                        initialValue={quantities[ticket.id] ?? 0}
+                        min={0}
+                        max={ticket.quantity}
+                        onChange={(qty) => updateQuantity(ticket.id, qty)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {errors.tickets && <p className="text-sm text-red-500">{errors.tickets}</p>}
+            </div>
+          )}
+
+          {/* Divider */}
+          <div className="border-t border-gray-200" />
+
+          <DiscountCodeField
+            applied={discount}
+            isChecking={isCheckingDiscount}
+            error={discountError}
+            isDisabled={isPreview}
+            currency={currency}
+            onApply={(code) => applyDiscount(code)}
+            onRemove={() => {
+              setDiscount(null);
+              setDiscountError(undefined);
+            }}
+          />
+
+          {/* Divider */}
+          <div className="border-t border-gray-200" />
+
+          {/* What the code took off, so the Total below is accounted for */}
+          {discountAmount > 0 && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-500">Discount</span>
+              <span className="text-sm font-semibold text-primary">
+                -{currency}{' '}
+                {discountAmount.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
+            </div>
+          )}
+
+          {/* Total */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-500">Total</span>
+            {/* Keyed on the amount so React remounts it — and the animation
+                replays — only when the figure actually changes, rather than on
+                every render of the panel */}
+            <span
+              key={payableTotal}
+              className="text-sm font-bold text-gray-900 duration-300 animate-in fade-in slide-in-from-bottom-1 motion-reduce:animate-none"
+            >
+              {currency}{' '}
+              {payableTotal.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+          </div>
+
+          {/* Closes the total off from what follows, the way the one above
+              separates it from the tickets */}
+          <div className="border-t border-gray-200" />
+
+          {/* Contact details (anonymous purchasers only) */}
+          {!isLoggedIn && (
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-gray-900">Contact Details</p>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Input
+                    placeholder="First Name"
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    icon={
+                      <HugeiconsIcon
+                        icon={UserTwotoneRounded}
+                        size={20}
+                        className="text-gray-600"
+                      />
+                    }
+                  />
+                  {errors.firstName && (
+                    <p className="mt-1 text-sm text-red-500">{errors.firstName}</p>
+                  )}
+                </div>
+                <div>
+                  <Input
+                    placeholder="Last Name"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    icon={
+                      <HugeiconsIcon
+                        icon={UserTwotoneRounded}
+                        size={20}
+                        className="text-gray-600"
+                      />
+                    }
+                  />
+                  {errors.lastName && (
+                    <p className="mt-1 text-sm text-red-500">{errors.lastName}</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  icon={
+                    <HugeiconsIcon
+                      icon={Mail02TwotoneRounded}
+                      size={20}
+                      className="text-gray-600"
+                    />
+                  }
+                />
+                {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Ticket delivery */}
+          <div className="space-y-3">
+            <p className="text-sm font-normal text-gray-900">
+              How would you like to receive your tickets?
+            </p>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  if (deliveryMethod !== 'email') setDeliveryContact('');
+                  setDeliveryMethod('email');
+                }}
+                className={`rounded-full px-4 py-3 text-sm font-medium transition-colors ${
+                  deliveryMethod === 'email'
+                    ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
+                    : 'bg-white text-gray-500'
+                } `}
+              >
+                Via Email
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (deliveryMethod !== 'whatsapp') setDeliveryContact('');
+                  setDeliveryMethod('whatsapp');
+                }}
+                className={`rounded-full px-4 py-3 text-sm font-medium transition-colors ${
+                  deliveryMethod === 'whatsapp'
+                    ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
+                    : 'bg-white text-gray-500'
+                } `}
+              >
+                Via Whatsapp
+              </button>
+            </div>
+
+            {deliveryMethod === 'whatsapp' ? (
+              <div>
+                <PhoneNumber
+                  key={`delivery-${formResetKey}`}
+                  onChange={(value) => setDeliveryContact(value)}
+                  placeholder="Enter Whatsapp number"
+                />
+                {errors.deliveryContact && (
+                  <p className="mt-1 text-sm text-red-500">{errors.deliveryContact}</p>
+                )}
+              </div>
+            ) : (
+              <div>
+                <Input
+                  type="email"
+                  value={deliveryContact}
+                  onChange={(e) => setDeliveryContact(e.target.value)}
+                  placeholder="Enter email address"
+                  icon={
+                    <IconComponent
+                      iconName="Mail01Icon"
+                      size={16}
+                      className="flex-shrink-0 text-gray-700"
+                    />
+                  }
+                />
+                {errors.deliveryContact && (
+                  <p className="mt-1 text-sm text-red-500">{errors.deliveryContact}</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* API error */}
+          {errors.api && <p className="text-center text-sm text-red-500">{errors.api}</p>}
+
+          {/* Pay button — the creator sees the real label and total, greyed out,
+              so the preview still shows what a customer would see */}
+          <Button
+            variant="lime"
+            onClick={handlePay}
+            // Stays enabled when the form is incomplete — pressing it surfaces
+            // an error on each offending input instead of silently doing nothing
+            disabled={isPreview || isPaying}
+            className={`h-12 w-full rounded-full py-3 text-primary ${
+              isPreview ? 'bg-gray-200 bg-none text-gray-500 disabled:opacity-100' : ''
+            }`}
+          >
+            <span className="flex items-center justify-center gap-3 text-sm">
+              <span>{isPaying ? 'Processing…' : 'Pay'}</span>
+              <span className={isPreview ? 'text-gray-400' : 'text-primary/40'}>|</span>
+              <span>
+                {currency}{' '}
+                {payableTotal.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
+            </span>
+          </Button>
+
+          {isPreview ? (
+            <div className="flex items-start gap-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3">
+              <IconComponent
+                iconName="SquareLock01Icon"
+                size={16}
+                color="currentColor"
+                className="mt-0.5 flex-shrink-0 text-orange-500"
+              />
+              <p className="text-sm leading-relaxed text-orange-700">
+                Booking is disabled in preview. Guests can reserve once you publish this experience.
+              </p>
+            </div>
+          ) : (
+            <p className="text-center text-xs italic text-gray-500">
+              *Payments are handled externally via Paystack
+            </p>
+          )}
+        </TabsContent>
+
+        <TabsContent value="moments" className="mt-4">
+          <ExperienceMoments
+            experienceId={experience.id}
+            experienceTitle={experience.title}
+            place={experience.place}
+            community={experience.hostCommunity}
+          />
+        </TabsContent>
+      </Tabs>
+
+      {/* Same post-purchase flow as the reserve page. The checkout is an
+          overlay so it covers the panel instead of appending an iframe below
+          it — Radix also unmounts it while closed, so the iframe never mounts
+          against an empty url. */}
+      <Dialog
+        open={isPaystackOpen}
+        onOpenChange={(open) => {
+          if (!open) setIsPaystackOpen(false);
+        }}
+      >
+        <DialogContent className="max-w-2xl gap-0 p-0">
+          <DialogTitle className="px-6 pb-4 pt-6 text-base font-bold text-gray-900">
+            Complete your payment
+          </DialogTitle>
+          <div className="h-[70vh] w-full overflow-hidden px-6 pb-6">
+            <Paystack
+              onPaymentSuccess={(paymentSuccess) => {
+                setIsPaystackOpen(false);
+                if (paymentSuccess) {
+                  goToBookingSuccess(purchaseData?.data?.paymentDetails?.reference);
+                }
+              }}
+              url={purchaseData?.data?.paymentDetails?.authorizationUrl || ''}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};

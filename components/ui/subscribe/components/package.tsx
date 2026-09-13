@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation';
 
 import clsx from 'clsx';
 
-import IconComponent from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
+import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
 import { SubscriptionPlan } from '@/types/subscription';
 
-export default function Package({
+export const Package = ({
   subscriptionPlans,
   selectedSubscriptionPlan,
   setSelectedSubscriptionPlan,
@@ -22,7 +22,7 @@ export default function Package({
   setSelectedSubscriptionPlan: (subscriptionPlan: string) => void;
   onEdit: () => void;
   paymentMethod: { paymentMethodId: string; phoneNumber: string; paymentOption: string } | null;
-}) {
+}) => {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -155,4 +155,4 @@ export default function Package({
       </Button>
     </div>
   );
-}
+};

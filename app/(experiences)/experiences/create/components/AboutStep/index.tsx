@@ -1,0 +1,295 @@
+'use client';
+
+import { useCallback, useState } from 'react';
+
+import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoUploader } from '@/app/shared/components/PhotoUploader';
+import { useDeleteExperiencePhoto } from '@/app/shared/hooks/useExperiences';
+import { Button } from '@/components/ui/button';
+import { FIELD_ICON, FIELD_TEXT } from '@/components/ui/field-text';
+import { cn } from '@/lib/utils';
+import { Interest } from '@/types/interest';
+
+import { usePendingAction } from '../../hooks/usePendingAction';
+import { type AboutFormValues } from '../../schemas';
+import { AddPlaceModal } from '../AddPlaceModal';
+import { CategoryPicker } from '../CategoryPicker';
+import { DescriptionFields } from '../DescriptionFields';
+import { ExperienceTitleInput } from '../ExperienceTitleInput';
+import { MeetingDetailsInput } from '../MeetingDetailsInput';
+import { PricingModelPicker } from '../PricingModelPicker';
+import { VisibilityPicker } from '../VisibilityPicker';
+
+type FormPhoto = {
+  id: string;
+  url: string;
+  file?: File;
+  isTempId?: boolean;
+};
+
+// Derived from the zod schema — never redeclare this shape by hand
+type AboutFormData = AboutFormValues;
+
+interface AboutStepProps {
+  formData: AboutFormData;
+  errors: Record<string, string>;
+  onFormDataChange: (data: Partial<AboutFormData>) => void;
+  onCancel: () => void;
+  // Both resolve once the save settles, so the button can stop its spinner
+  onSaveEdit: () => void | Promise<void>;
+  onSaveContinue: () => void | Promise<void>;
+  isSaving?: boolean;
+  onPreview?: () => void;
+}
+
+export const AboutStep = ({
+  formData,
+  errors,
+  onFormDataChange,
+  onCancel,
+  onSaveEdit,
+  onSaveContinue,
+  isSaving = false,
+  onPreview,
+}: AboutStepProps) => {
+  const [isPlaceModalOpen, setIsPlaceModalOpen] = useState(false);
+  const { pendingAction, runAction } = usePendingAction<'exit' | 'continue'>();
+  const { mutateAsync: deleteExperiencePhoto } = useDeleteExperiencePhoto();
+
+  const handlePhotoChange = useCallback(
+    (photo: FormPhoto | null) => {
+      if (photo) {
+        // Add photo to the array if not already present
+        const photos = formData.photos.find((p) => p.id === photo.id)
+          ? formData.photos
+          : [...formData.photos, photo];
+        onFormDataChange({ photos });
+      }
+    },
+    [onFormDataChange, formData.photos],
+  );
+
+  const handlePhotoFilesChange = useCallback(
+    (photos: FormPhoto[]) => {
+      onFormDataChange({ photos });
+    },
+    [onFormDataChange],
+  );
+
+  const handleTitleChange = useCallback(
+    (title: string) => {
+      onFormDataChange({ title });
+    },
+    [onFormDataChange],
+  );
+
+  const handleVisibilityChange = useCallback(
+    (visibility: 'public' | 'private') => {
+      onFormDataChange({ visibility });
+    },
+    [onFormDataChange],
+  );
+
+  const handleDescriptionChange = useCallback(
+    (description: string) => {
+      onFormDataChange({ description });
+    },
+    [onFormDataChange],
+  );
+
+  const handleWhatsIncludedChange = useCallback(
+    (whatsIncluded: string) => {
+      onFormDataChange({ whatsIncluded });
+    },
+    [onFormDataChange],
+  );
+
+  const handleWhatsNotIncludedChange = useCallback(
+    (whatsNotIncluded: string) => {
+      onFormDataChange({ whatsNotIncluded });
+    },
+    [onFormDataChange],
+  );
+
+  const handlePlaceSelected = useCallback(
+    (place: {
+      id: string;
+      name: string;
+      imageUrl: string | null;
+      city: string | null;
+      source: 'tukai' | 'google';
+    }) => {
+      if (place.source === 'google') {
+        // Google pick — submitted as google_map_place_id (current behaviour)
+        onFormDataChange({
+          location: place.name,
+          locationPlaceId: place.id,
+          placeId: null,
+          placeImageUrl: null,
+        });
+      } else {
+        // Tukai place — submitted as place_id
+        onFormDataChange({
+          location: [place.name, place.city].filter(Boolean).join(', '),
+          placeId: place.id,
+          placeImageUrl: place.imageUrl ?? null,
+          locationPlaceId: '',
+        });
+      }
+      setIsPlaceModalOpen(false);
+    },
+    [onFormDataChange],
+  );
+
+  const handleMeetingPointChange = useCallback(
+    (meetingPoint: string) => {
+      onFormDataChange({ meetingPoint });
+    },
+    [onFormDataChange],
+  );
+
+  const handleMeetingTimeChange = useCallback(
+    (meetingTime: string) => {
+      onFormDataChange({ meetingTime });
+    },
+    [onFormDataChange],
+  );
+
+  const handleCategoriesChange = useCallback(
+    (categories: Interest[]) => {
+      onFormDataChange({ categories });
+    },
+    [onFormDataChange],
+  );
+
+  return (
+    <div className="space-y-6">
+      <p className="mb-2 text-sm font-semibold text-gray-800">Add details about the experience</p>
+
+      <PhotoUploader
+        photos={formData.photos}
+        // The endpoint belongs to what the photos hang off, so it is passed in
+        onDeleteExisting={deleteExperiencePhoto}
+        onPhotoChange={handlePhotoChange}
+        onPhotoFilesChange={handlePhotoFilesChange}
+        onPhotoDelete={(photoId: string) => {
+          // Remove from form data when deleted
+          onFormDataChange({
+            photos: formData.photos.filter((p) => p.id !== photoId),
+          });
+        }}
+        error={errors.photos}
+      />
+
+      <ExperienceTitleInput
+        value={formData.title}
+        onChange={handleTitleChange}
+        error={errors.title}
+      />
+
+      <PricingModelPicker />
+
+      <VisibilityPicker value={formData.visibility} onChange={handleVisibilityChange} />
+
+      <DescriptionFields
+        description={formData.description}
+        whatsIncluded={formData.whatsIncluded}
+        whatsNotIncluded={formData.whatsNotIncluded}
+        onDescriptionChange={handleDescriptionChange}
+        onWhatsIncludedChange={handleWhatsIncludedChange}
+        onWhatsNotIncludedChange={handleWhatsNotIncludedChange}
+        descriptionError={errors.description}
+      />
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-900">
+          Where will the experience take place?
+        </label>
+        {/* A button rather than an input — it opens the place picker — so it
+            borrows the field's box, text and icons to read as one */}
+        <button
+          type="button"
+          onClick={() => setIsPlaceModalOpen(true)}
+          className="flex h-11 w-full items-center gap-2 rounded-[14px] border border-gray-200 px-4 text-left transition-colors focus:border-brand-green focus:outline-none"
+        >
+          <span className={FIELD_ICON}>
+            <IconComponent iconName="Location01Icon" size={18} color="currentColor" />
+          </span>
+          <span
+            className={cn('flex-1 truncate', FIELD_TEXT, !formData.location && 'text-gray-400')}
+          >
+            {formData.location || 'Select a place'}
+          </span>
+          <span className={FIELD_ICON}>
+            <IconComponent iconName="ArrowRight01Icon" size={18} color="currentColor" />
+          </span>
+        </button>
+        {errors.location && <p className="mt-1 text-xs text-red-500">{errors.location}</p>}
+      </div>
+
+      <AddPlaceModal
+        isOpen={isPlaceModalOpen}
+        onClose={() => setIsPlaceModalOpen(false)}
+        onSelect={handlePlaceSelected}
+        selectedPlaceIds={formData.placeId ? [formData.placeId] : []}
+      />
+
+      <MeetingDetailsInput
+        meetingPoint={formData.meetingPoint}
+        meetingTime={formData.meetingTime}
+        onMeetingPointChange={handleMeetingPointChange}
+        onMeetingTimeChange={handleMeetingTimeChange}
+      />
+
+      <CategoryPicker selectedCategories={formData.categories} onChange={handleCategoriesChange} />
+
+      <div className="flex gap-2 pt-6 lg:gap-3">
+        <button
+          type="button"
+          onClick={() => {
+            console.log('[AboutStep] Cancel clicked');
+            onCancel();
+          }}
+          className="text-xs font-medium text-destructive hover:text-destructive/80"
+        >
+          Cancel
+        </button>
+        <div className="flex-1" />
+        <Button
+          isLoading={pendingAction === 'exit'}
+          type="button"
+          variant="gradient-outline"
+          onClick={() => {
+            console.log('[AboutStep] Save & Edit clicked');
+            runAction('exit', onSaveEdit);
+          }}
+          disabled={isSaving}
+          className="rounded-[50px] text-xs font-semibold"
+        >
+          Save & Exit
+        </Button>
+        <Button
+          type="button"
+          onClick={onPreview}
+          variant="outline"
+          className="text-xs font-medium lg:hidden"
+        >
+          Preview
+        </Button>
+        <Button
+          isLoading={pendingAction === 'continue'}
+          type="button"
+          onClick={() => {
+            console.log('[AboutStep] Save & Continue clicked', { formData, errors });
+            runAction('continue', onSaveContinue);
+          }}
+          variant="lime"
+          disabled={isSaving}
+          className="rounded-[50px] text-xs font-medium"
+        >
+          Save & Continue
+        </Button>
+      </div>
+    </div>
+  );
+};

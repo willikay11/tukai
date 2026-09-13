@@ -6,9 +6,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 
-import { usePlaceCategories } from '@/hooks/places';
+import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 
-import PageFilters from './pageFilters';
+import { PageFilters } from './pageFilters';
 
 // Mock dependencies
 jest.mock('next/navigation', () => ({
@@ -16,13 +16,12 @@ jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(),
 }));
 
-jest.mock('@/hooks/places', () => ({
+jest.mock('@/app/shared/hooks/usePlaces', () => ({
   usePlaceCategories: jest.fn(),
 }));
 
-jest.mock('@/app/components/scrollFilters', () => ({
-  __esModule: true,
-  default: ({ filters }: { filters: any[] }) => (
+jest.mock('@/app/shared/components/Filters/ScrollFilters', () => ({
+  ScrollFilters: ({ filters }: { filters: any[] }) => (
     <div data-testid="scroll-filters">
       {filters.map((filter) => (
         <div key={filter.value} data-testid={`filter-${filter.value}`}>
@@ -33,7 +32,7 @@ jest.mock('@/app/components/scrollFilters', () => ({
   ),
 }));
 
-jest.mock('@/app/components/skeletons', () => ({
+jest.mock('@/app/shared/components/Cards/Skeletons', () => ({
   PillsSkeleton: () => <div data-testid="pills-skeleton">Loading...</div>,
 }));
 
@@ -73,6 +72,9 @@ describe('PageFilters', () => {
       '/places/123',
       '/experiences/456',
       '/communities/789',
+      '/control-center/experiences/456',
+      '/moments',
+      '/moments?momentId=abc',
       '/auth/login',
       '/terms',
       '/privacy',
@@ -86,6 +88,18 @@ describe('PageFilters', () => {
 
       const { container } = renderWithProviders(<PageFilters />);
       expect(container.firstChild).toBeNull();
+    });
+
+    // Regression: /moments matched no branch of the effect, so isLoading never
+    // cleared and the pill skeleton sat at the top of the page permanently
+    it('should not leave a pill skeleton on /moments', () => {
+      (nextNavigation.usePathname as jest.Mock).mockReturnValue('/moments');
+      (nextNavigation.useSearchParams as jest.Mock).mockReturnValue({
+        get: jest.fn().mockReturnValue(null),
+      });
+
+      renderWithProviders(<PageFilters />);
+      expect(screen.queryByTestId('pills-skeleton')).not.toBeInTheDocument();
     });
   });
 
@@ -182,40 +196,15 @@ describe('PageFilters', () => {
       });
     });
 
-    it.each(['/', '/experiences'])('should render experience filters on %s', async (pathname) => {
+    // The experience tabs moved to ExperiencesPageContent — PageFilters is
+    // deliberately absent on these paths now.
+    it.each(['/', '/experiences'])('renders nothing on %s', async (pathname) => {
       (nextNavigation.usePathname as jest.Mock).mockReturnValue(pathname);
 
-      renderWithProviders(<PageFilters />);
+      const { container } = renderWithProviders(<PageFilters />);
 
       await waitFor(() => {
-        expect(screen.getByText('All Experiences')).toBeInTheDocument();
-      });
-
-      expect(screen.getByText('Reserved Experiences')).toBeInTheDocument();
-      expect(screen.getByText('Saved')).toBeInTheDocument();
-      expect(screen.getByText('Hosting')).toBeInTheDocument();
-    });
-
-    it("should set 'all' as selected category when no query param", async () => {
-      (nextNavigation.usePathname as jest.Mock).mockReturnValue('/experiences');
-
-      renderWithProviders(<PageFilters />);
-
-      await waitFor(() => {
-        expect(mockSetSelectedCategoryId).toHaveBeenCalledWith('all');
-      });
-    });
-
-    it('should set selected category from query param', async () => {
-      (nextNavigation.usePathname as jest.Mock).mockReturnValue('/experiences');
-      (nextNavigation.useSearchParams as jest.Mock).mockReturnValue({
-        get: jest.fn().mockReturnValue('saved'),
-      });
-
-      renderWithProviders(<PageFilters />);
-
-      await waitFor(() => {
-        expect(mockSetSelectedCategoryId).toHaveBeenCalledWith('saved');
+        expect(container).toBeEmptyDOMElement();
       });
     });
   });
@@ -232,15 +221,14 @@ describe('PageFilters', () => {
       });
     });
 
-    it('should render community filters', async () => {
-      renderWithProviders(<PageFilters />);
+    // The My Communities / Recommended toggle moved onto the page itself, so
+    // PageFilters is deliberately absent here — same as on /experiences.
+    it('renders nothing on /communities', async () => {
+      const { container } = renderWithProviders(<PageFilters />);
 
       await waitFor(() => {
-        expect(screen.getByText('My Communities')).toBeInTheDocument();
+        expect(container).toBeEmptyDOMElement();
       });
-
-      expect(screen.getByText('Recommended')).toBeInTheDocument();
-      expect(screen.getByText('Posts')).toBeInTheDocument();
     });
   });
 });

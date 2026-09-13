@@ -70,13 +70,14 @@ function getAuthErrorMessage(error: any) {
   return 'Invalid credentials, please check your email and password.';
 }
 
-
 // ✅ Extend NextAuth Session type
 declare module 'next-auth' {
   interface Session {
     user: {
       id?: string | null;
       name?: string | null;
+      // The user's @handle, when they have set one
+      displayName?: string | null;
       email?: string | null;
       image?: string | null;
       accessToken?: string | null;
@@ -218,6 +219,9 @@ export const authOptions = {
         const decoded = jwt.decode(user.accessToken) as JwtPayload;
         token.id = user.id;
         token.name = user.displayName ?? `${user.firstName} ${user.lastName}`;
+        // The @handle shown in the profile menu. Null for users who never set
+        // one, in which case the menu simply omits the line.
+        token.displayName = user.displayName ?? null;
         token.email = user.email;
         token.picture = user.picture;
         token.interests = user.interests;
@@ -244,6 +248,7 @@ export const authOptions = {
       session.user = {
         id: token.id,
         name: token.name,
+        displayName: token.displayName ?? null,
         email: token.email,
         image: token.picture,
         interests: token.interests,

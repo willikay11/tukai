@@ -1,0 +1,182 @@
+'use client';
+
+import { useState } from 'react';
+
+import { useSession } from 'next-auth/react';
+
+import moment from 'moment';
+
+import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
+import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
+import { useFlagMoment, useToggleMomentLike } from '@/app/shared/hooks/useMoments';
+import { toast } from '@/app/shared/hooks/useToast';
+import { Button } from '@/components/ui/button';
+import { useAuthDialog } from '@/context/AuthDialogContext';
+import { Moment, momentAuthorName, momentPhotos } from '@/types/moment';
+
+import { FlagReasonPicker } from './FlagReasonPicker';
+import { MomentAvatar } from './MomentAvatar';
+import { MomentComments } from './MomentComments';
+
+// Whatever the moment was posted against, in the order the design shows it
+const contextLabel = (item: Moment): string | null =>
+  item.community?.title || item.experience?.title || item.place?.title || null;
+
+export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
+  const { data: session } = useSession();
+  const isSignedIn = Boolean(session?.user?.id);
+  const { openSignInWithCallback } = useAuthDialog();
+  const { mutate: toggleLike } = useToggleMomentLike();
+  const { mutate: flag, isPending: isFlagging } = useFlagMoment();
+  const [isFlagOpen, setIsFlagOpen] = useState(false);
+
+  // Seeded from the server so a moment the user already liked shows lit on
+  // load; falls back to false when the serializer omits is_liked
+  const [isLiked, setIsLiked] = useState(item.isLiked ?? false);
+  const [likeCount, setLikeCount] = useState(item.totalLikes);
+
+  // Only media that can actually be rendered — a null photo throws in next/image
+  const photos = momentPhotos(item);
+  const authorName = momentAuthorName(item.author);
+  const context = contextLabel(item);
+  const isOwnMoment = session?.user?.id === item.author.id;
+
+  const like = () => {
+    const next = !isLiked;
+    setIsLiked(next);
+    setLikeCount((count) => count + (next ? 1 : -1));
+    toggleLike(item.id, {
+      onSuccess: (result) => setIsLiked(result.isLiked),
+      onError: () => {
+        setIsLiked(!next);
+        setLikeCount((count) => count + (next ? -1 : 1));
+      },
+    });
+  };
+
+  // Anyone can read a moment; liking one needs an account. Signing in carries
+  // straight on to the like, so the one press they made is the one that lands.
+  // `like` is handed over rather than this handler: the callback runs with the
+  // closure it was created in, where `isSignedIn` is still false.
+  const onLike = () => (isSignedIn ? like() : openSignInWithCallback(like));
+
+  const onFlag = (reasonId: string) =>
+    flag(
+      { momentId: item.id, reasonId },
+      {
+        onSuccess: (result) => {
+          setIsFlagOpen(false);
+          toast({
+            title: result.status === 204 ? 'Already reported' : 'Reported',
+            description:
+              result.status === 204
+                ? 'You have already reported this moment.'
+                : 'Thanks — our team will take a look.',
+          });
+        },
+        onError: () =>
+          toast({
+            title: 'Could not report',
+            description: 'Please try again.',
+            variant: 'destructive',
+          }),
+      },
+    );
+
+  return (
+    <div>
+      {/* The pane is a quarter of the page, so the name has to yield rather
+          than push the Follow button out */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <MomentAvatar src={item.author.picture} name={authorName} size={44} />
+          <div className="min-w-0">
+            <p className="truncate font-bold text-gray-900">{authorName}</p>
+            <p className="truncate text-sm text-gray-400">
+              {moment(item.dateCreated).fromNow()}
+              {context && ` · ${context}`}
+            </p>
+          </div>
+        </div>
+
+        {!isOwnMoment && (
+          // ⚠️ Disabled: no follow endpoint exists on the API yet
+          <Button
+            variant={item.author.isFollowing ? 'outline' : 'default'}
+            disabled
+            title="Following is not available yet"
+            className="flex-shrink-0 rounded-full px-5"
+          >
+            {item.author.isFollowing ? 'Following' : 'Follow'}
+          </Button>
+        )}
+      </div>
+
+      {photos.length === 1 ? (
+        <div className="mt-4 overflow-hidden rounded-2xl">
+          <PhotoImage
+            src={photos[0].photo}
+            alt={item.title}
+            width={photos[0].width || 800}
+            height={photos[0].height || 800}
+            sizes="(max-width: 1024px) 100vw, 600px"
+            className="h-auto w-full object-cover"
+          />
+        </div>
+      ) : photos.length > 1 ? (
+        <SquarePhotoStrip
+          photos={photos.map((media) => media.photo)}
+          variant="hero"
+          className="mt-4"
+        />
+      ) : null}
+
+      {/* One body of text, not two. The composer asks a single question and
+          sends the first line as `title` and the whole thing as `description`,
+          so showing both printed the same words twice — bold, then again in
+          full. The description is always the longer of the two; the title is
+          only a fallback for a moment posted without one. */}
+      <p className="mt-4 text-base leading-relaxed text-gray-700">
+        {item.description || item.title}
+      </p>
+
+      <div className="mt-4 flex items-center gap-6">
+        <button type="button" onClick={onLike} className="flex items-center gap-2">
+          <IconComponent
+            iconName="FavouriteIcon"
+            size={20}
+            variant={isLiked ? 'solid' : 'twotone'}
+            className={isLiked ? 'text-red-500' : 'text-gray-500'}
+          />
+          <span className="text-sm text-gray-700">{likeCount}</span>
+        </button>
+
+        <div className="flex items-center gap-2">
+          <IconComponent iconName="Comment01Icon" size={20} className="text-gray-500" />
+          <span className="text-sm text-gray-700">{item.totalComments}</span>
+        </div>
+
+        <button
+          type="button"
+          onClick={() =>
+            isSignedIn ? setIsFlagOpen(true) : openSignInWithCallback(() => setIsFlagOpen(true))
+          }
+          className="ml-auto text-gray-300 hover:text-gray-500"
+          aria-label="Report this moment"
+        >
+          <IconComponent iconName="Flag01Icon" size={18} color="currentColor" />
+        </button>
+      </div>
+
+      <MomentComments momentId={item.id} />
+
+      <FlagReasonPicker
+        open={isFlagOpen}
+        onOpenChange={setIsFlagOpen}
+        onSelect={onFlag}
+        isSubmitting={isFlagging}
+      />
+    </div>
+  );
+};

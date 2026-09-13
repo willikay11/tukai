@@ -1,54 +1,59 @@
 'use client';
 
-import { ReactNode, createContext, useContext, useRef, useState } from 'react';
+import { ReactNode, createContext, useContext, useState } from 'react';
 
-import { useRouter } from 'next/navigation';
-
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import SignInForm from '@/components/ui/form/sign-in';
-import { toast } from '@/hooks/use-toast';
+import { AuthCard, AuthDialogContent } from '@/app/shared/components/Auth';
+import { toast } from '@/app/shared/hooks/useToast';
+import { Dialog } from '@/components/ui/dialog';
 
 type AuthDialogType = {
-  setOpenSignIn: (open: boolean, onLoginSuccess?: () => void) => void;
+  setOpenSignIn: (open: boolean) => void;
+  openSignInWithCallback: (onLoginSuccess: () => void) => void;
 };
 
 const AuthDialogContext = createContext<AuthDialogType | undefined>(undefined);
 
 export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
   const [openSignIn, setOpenSignIn] = useState(false);
-  const onLoginSuccessRef = useRef<(() => void) | null>(null);
-  const router = useRouter();
+  const [onLoginSuccess, setOnLoginSuccess] = useState<(() => void) | null>(null);
 
   return (
     <AuthDialogContext.Provider
       value={{
-        setOpenSignIn: (open: boolean, onLoginSuccess?: () => void) => {
-          onLoginSuccessRef.current = onLoginSuccess || null;
+        setOpenSignIn: (open: boolean) => {
           setOpenSignIn(open);
+          if (!open) setOnLoginSuccess(null);
+        },
+        openSignInWithCallback: (callback: () => void) => {
+          setOnLoginSuccess(() => callback);
+          setOpenSignIn(true);
         },
       }}
     >
+      {/* Closing only closes. It used to call router.back(), so a reader who
+          opened this from a place page and changed their mind was navigated
+          off the page they were reading. */}
       <Dialog
         open={openSignIn}
-        onOpenChange={() => {
+        onOpenChange={(open) => {
+          if (open) return;
           setOpenSignIn(false);
-          onLoginSuccessRef.current = null;
-          router.back();
+          setOnLoginSuccess(null);
         }}
       >
-        <DialogContent className="gap-0 px-4 md:px-16">
-          <SignInForm
+        <AuthDialogContent>
+          <AuthCard
             onLogin={() => {
-              onLoginSuccessRef.current?.();
-              onLoginSuccessRef.current = null;
               setOpenSignIn(false);
+              onLoginSuccess?.();
+              setOnLoginSuccess(null);
               toast({
                 description: 'Welcome Back!',
                 variant: 'success',
               });
             }}
           />
-        </DialogContent>
+        </AuthDialogContent>
       </Dialog>
       {children}
     </AuthDialogContext.Provider>

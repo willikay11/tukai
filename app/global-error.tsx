@@ -2,6 +2,27 @@
 
 import { useEffect } from 'react';
 
+// Last line of defence: this replaces the root layout, so it renders its own
+// document and must not depend on any provider, context or shared component
+// from the tree that just failed.
+const primaryButton = {
+  borderRadius: '9999px',
+  border: 'none',
+  background: '#047857',
+  color: '#ffffff',
+  padding: '10px 24px',
+  fontSize: '14px',
+  fontWeight: 600,
+  cursor: 'pointer',
+} as const;
+
+const secondaryButton = {
+  ...primaryButton,
+  background: '#ffffff',
+  color: '#111827',
+  border: '1px solid #e5e7eb',
+} as const;
+
 export default function GlobalError({
   error,
   reset,
@@ -10,7 +31,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Global application error:', error);
+    console.error('Unhandled root error:', error);
   }, [error]);
 
   return (
@@ -23,95 +44,48 @@ export default function GlobalError({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            gap: '12px',
+            padding: '24px',
+            textAlign: 'center',
             fontFamily: 'system-ui, sans-serif',
+            color: '#111827',
           }}
         >
-          <div style={{ maxWidth: '28rem', textAlign: 'center' }}>
-            <div
-              style={{
-                width: '4rem',
-                height: '4rem',
-                margin: '0 auto 1.5rem',
-                borderRadius: '50%',
-                backgroundColor: '#FEE2E2',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+          <h1 style={{ fontSize: '20px', fontWeight: 700 }}>Something went wrong</h1>
+          <p style={{ fontSize: '14px', color: '#6b7280', maxWidth: '420px' }}>
+            Tukai ran into an unexpected problem. Try again, and if it keeps happening please come
+            back shortly.
+          </p>
+          {error?.digest && (
+            <p style={{ fontSize: '12px', color: '#d1d5db' }}>Reference: {error.digest}</p>
+          )}
+          {/* Three ways out rather than one: if the root layout itself is
+              what failed, retrying in place may not be enough. Plain DOM
+              navigation, since the router is part of what just broke. */}
+          <div
+            style={{
+              marginTop: '8px',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px',
+              justifyContent: 'center',
+            }}
+          >
+            <button type="button" onClick={reset} style={primaryButton}>
+              Try again
+            </button>
+            <button type="button" onClick={() => window.history.back()} style={secondaryButton}>
+              Go back
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = '/';
               }}
+              style={secondaryButton}
             >
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#EF4444"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-            </div>
-
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827', marginBottom: '0.5rem' }}>
-              Something went wrong
-            </h1>
-            <p style={{ fontSize: '0.875rem', color: '#6B7280', marginBottom: '2rem' }}>
-              We encountered an unexpected error. Don&apos;t worry, you can try again or navigate back to safety.
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <button
-                onClick={reset}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '9999px',
-                  background: 'linear-gradient(to right, #059669, #10B981)',
-                  color: 'white',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                Try Again
-              </button>
-
-              <button
-                onClick={() => window.history.back()}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '9999px',
-                  backgroundColor: 'white',
-                  color: '#374151',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  border: '1px solid #E5E7EB',
-                  cursor: 'pointer',
-                }}
-              >
-                Go Back
-              </button>
-
-              <button
-                onClick={() => (window.location.href = '/')}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '9999px',
-                  backgroundColor: 'white',
-                  color: '#374151',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  border: '1px solid #E5E7EB',
-                  cursor: 'pointer',
-                }}
-              >
-                Go Home
-              </button>
-            </div>
+              Go home
+            </button>
           </div>
         </div>
       </body>

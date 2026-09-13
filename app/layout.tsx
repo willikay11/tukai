@@ -5,15 +5,21 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { hugeiconsLicense } from '@hugeicons/react-pro';
-import { User } from 'lucide-react';
 
-import AuthActions from '@/app/components/authActions';
-import BottomNavigation from '@/app/components/bottomNavigation';
-import DownloadApp from '@/app/components/downloadApp';
-import { satoshi } from '@/app/components/fonts';
-import GlobalLoading from '@/app/components/globalLoading';
-import IconRadioButtonGroup from '@/app/components/iconRadioButtonGroup';
-import PageFilters from '@/components/ui/pageFilters';
+import { PillsSkeleton } from '@/app/shared/components/Cards';
+import { DownloadApp } from '@/app/shared/components/Download';
+import { AuthActions } from '@/app/shared/components/Global';
+import { ChromeGate } from '@/app/shared/components/Global';
+import { satoshi } from '@/app/shared/components/Global';
+import { GlobalLoading } from '@/app/shared/components/Global';
+import { LocationPrompt } from '@/app/shared/components/LocationPicker';
+import { UserLocation } from '@/app/shared/components/LocationPicker';
+import { AskTukaiButton } from '@/app/shared/components/Navigation';
+import { BottomNavigation } from '@/app/shared/components/Navigation';
+import { Nav } from '@/app/shared/components/Navigation';
+import { Search } from '@/app/shared/components/Search';
+import { Footer } from '@/app/shared/components/Share';
+import { PageFilters } from '@/components/ui/pageFilters';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthDialogProvider } from '@/context/AuthDialogContext';
 import { DownloadAppProvider } from '@/context/DownloadAppContext';
@@ -21,14 +27,8 @@ import { LocationProvider } from '@/context/LocationContext';
 import { SelectedCategoryProvider } from '@/context/SelectedCategoryContext';
 import ReactQueryClientProvider from '@/providers/ReactQueryProvider';
 import SessionProvider from '@/providers/SessionProvider';
+import { metadataBase } from '@/utils/share-metadata';
 
-import IconComponent from './components/iconComponent';
-import LocationPrompt from './components/locationPrompt';
-import Nav from './components/nav';
-import Search from './components/search';
-import Footer from './components/share/footer';
-import { PillsSkeleton } from './components/skeletons';
-import UserLocation from './components/userLocation';
 import './globals.css';
 import { ReduxProvider } from './redux-provider';
 
@@ -37,10 +37,30 @@ hugeiconsLicense(
 );
 
 export const metadata: Metadata = {
+  // Next resolves every relative metadata URL against this. Without it a
+  // relative og:image is emitted as-is, and no crawler can resolve it.
+  metadataBase,
   title: 'Tukai',
   description:
     "Tukai is your go-to app for discovering exciting events and experiences happening around you. Whether you're looking for live concerts, festivals, social gatherings, or cultural events, Tukai makes it easy to stay connected and find the best activities in your area. Explore and enjoy real-time updates on local experiences tailored to your interests, and never miss out on the fun again.",
 };
+
+/**
+ * Where the photos live.
+ *
+ * Both hosts are declared in `next.config.mjs` as remote patterns; the naming
+ * is not a clean prefix swap (`staging-api` pairs with `cdn-staging`), so the
+ * two are mapped explicitly rather than derived with a regex that would
+ * quietly resolve to a host that does not exist. A local API has no CDN, and
+ * warms nothing.
+ */
+const MEDIA_ORIGIN_BY_API: Record<string, string> = {
+  'https://api.tukai.co': 'https://cdn.tukai.co',
+  'https://staging-api.tukai.co': 'https://cdn-staging.tukai.co',
+};
+
+const MEDIA_ORIGIN =
+  MEDIA_ORIGIN_BY_API[(process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '')];
 
 export default function RootLayout({
   children,
@@ -49,6 +69,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/*
+          Every photo in the app comes from the media CDN, and none of it is
+          referenced by the HTML — the lists are fetched client-side, so the
+          browser only learns the origin exists once React has rendered a card.
+          Warming the connection here means the first image request does not
+          also pay for DNS and a TLS handshake.
+        */}
+        {MEDIA_ORIGIN && (
+          <>
+            <link rel="preconnect" href={MEDIA_ORIGIN} crossOrigin="" />
+            <link rel="dns-prefetch" href={MEDIA_ORIGIN} />
+          </>
+        )}
+      </head>
       <body className={`${satoshi.className} flex min-h-screen flex-col`}>
         <ReduxProvider>
           <SessionProvider>
@@ -60,74 +95,91 @@ export default function RootLayout({
                   <AuthDialogProvider>
                     <SelectedCategoryProvider>
                       <div className="relative flex min-h-screen flex-col">
-                        <div className="z-50 grid grid-cols-12 bg-gray-50 md:sticky md:top-0 md:gap-x-4">
-                          {/* Mobile */}
-                          <div className="col-span-12 mx-4 mt-5 inline-flex justify-between md:hidden lg:hidden 2xl:hidden">
-                            <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
-                              <Link href="/" className="inline-flex items-center">
-                                <Image
-                                  src="/images/logo.svg"
-                                  alt="Tukai logo"
-                                  width={100}
-                                  height={100}
-                                />
-                              </Link>
+                        {/* The auth screens draw their own bar, so the app's
+                            chrome stands down there rather than stacking on it */}
+                        <ChromeGate>
+                          <div className="z-50 border-b border-gray-100 bg-white/95 backdrop-opacity-50 md:sticky md:top-0">
+                            {/* Mobile */}
+                            <div className="mx-4 mt-5 inline-flex w-[calc(100%-2rem)] justify-between md:hidden">
+                              <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
+                                <Link href="/" className="inline-flex items-center">
+                                  <Image
+                                    src="/images/logo.svg"
+                                    alt="Tukai logo"
+                                    width={100}
+                                    height={100}
+                                  />
+                                </Link>
+                              </div>
+                              <UserLocation />
+                              <AuthActions />
                             </div>
-                            <UserLocation />
-                            <AuthActions />
-                          </div>
-                          {/* Browser */}
-                          <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
-                            <div className="inline-flex grid w-full grid-cols-12 items-center justify-between md:mt-6 md:h-fit">
-                              <div className="flex hidden h-full items-start md:col-span-3 md:inline-flex lg:col-span-4 lg:inline-flex">
-                                <Link
-                                  href="/"
-                                  className="hidden h-full shrink-0 items-start md:mr-6 md:flex lg:mr-3 xl:mr-6"
-                                >
+                            <div className="mx-4 md:hidden">
+                              <Suspense
+                                fallback={
+                                  <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
+                                }
+                              >
+                                <Search />
+                              </Suspense>
+                            </div>
+                            {/* Browser */}
+                            <div className="hidden md:grid md:grid-cols-12 md:gap-x-4">
+                              <header className="flex items-center gap-4 py-3 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+                                <Link href="/" className="flex-shrink-0">
                                   <Image
                                     src="/images/logo.svg"
                                     alt="Tukai logo"
                                     width={100}
                                     height={40}
-                                    className="mt-2 h-10 w-[100px] shrink-0"
+                                    className="h-10 w-[100px] shrink-0"
                                   />
                                 </Link>
-                                <UserLocation />
-                              </div>
-                              <div className="col-span-12 md:col-span-6 lg:col-span-4">
-                                <div className="flex flex-col items-center space-y-6">
-                                  <div className="flex w-full items-center gap-2 md:max-w-sm">
-                                    <div className="flex-1">
-                                      <Suspense
-                                        fallback={
-                                          <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
-                                        }
-                                      >
-                                        <Search />
-                                      </Suspense>
-                                    </div>
-                                    <IconRadioButtonGroup />
-                                  </div>
-                                  <div className="flex w-full items-center justify-center md:max-w-sm">
-                                    <Nav />
-                                  </div>
+                                <Nav />
+                                {/* Capped: on flex-1 alone the field absorbed every
+                                  pixel the rest of the header did not use, so it
+                                  stretched far wider than a search bar needs on a
+                                  large screen */}
+                                <div className="min-w-[200px] max-w-xl flex-1">
+                                  <Suspense
+                                    fallback={
+                                      <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
+                                    }
+                                  >
+                                    <Search />
+                                  </Suspense>
                                 </div>
-                              </div>
-                              <div className="mt-2 flex hidden h-full items-start justify-end md:col-span-3 md:inline-flex lg:col-span-4 lg:inline-flex">
+                                {/* Keeps the trailing controls on the right edge once
+                                  the search stops growing */}
+                                <AskTukaiButton className="ml-auto" />
                                 <AuthActions />
-                              </div>
+                              </header>
                             </div>
                           </div>
-                        </div>
-                        <Suspense fallback={<PillsSkeleton />}>
-                          <PageFilters />
-                        </Suspense>
-                        <LocationPrompt />
-                        <div className="mb-20 flex-grow md:mb-4">{children}</div>
-                        <Footer />
+
+                          <Suspense fallback={<PillsSkeleton />}>
+                            <PageFilters />
+                          </Suspense>
+                          <LocationPrompt />
+                        </ChromeGate>
+
+                        <div className="mb-20 flex-grow md:mb-0">{children}</div>
+
+                        <ChromeGate>
+                          <Footer />
+                        </ChromeGate>
                       </div>
-                      <DownloadApp />
-                      <BottomNavigation />
+                      <ChromeGate>
+                        <DownloadApp />
+                        {/* It reads the `tab` parameter to stand aside for the
+                            create button on My Communities, and `useSearchParams`
+                            in a component this layout renders on every page opts
+                            the whole app out of static rendering without this —
+                            the same boundary PageFilters sits behind above. */}
+                        <Suspense fallback={null}>
+                          <BottomNavigation />
+                        </Suspense>
+                      </ChromeGate>
                     </SelectedCategoryProvider>
                   </AuthDialogProvider>
                 </LocationProvider>

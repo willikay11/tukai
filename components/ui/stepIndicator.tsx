@@ -1,14 +1,14 @@
 import clsx from 'clsx';
 
-import IconComponent from '@/app/components/iconComponent';
+import { IconComponent } from '@/app/shared/components/Icons';
 
-export default function StepIndicator({
+export const StepIndicator = ({
   currentStep = 0,
   steps,
 }: {
   currentStep: number;
   steps: { label: string; completed: boolean }[];
-}) {
+}) => {
   return (
     <div className="flex w-full items-center">
       {steps.map((step, idx) => (
@@ -16,7 +16,9 @@ export default function StepIndicator({
           <div className="flex w-full flex-row items-center overflow-hidden">
             <div className="flex flex-col items-center justify-center">
               <div
-                className={`flex h-[28px] w-[28px] items-center justify-center rounded-full border-[1px] border-primary p-[2px] ${
+                // Fills in as the step is completed rather than flicking to
+                // green, so progress reads as progress
+                className={`flex h-[28px] w-[28px] items-center justify-center rounded-full border-[1px] border-primary p-[2px] transition-colors duration-300 ease-out ${
                   currentStep > idx ? 'bg-primary' : 'border-gray-300'
                 } text-white`}
               >
@@ -27,7 +29,7 @@ export default function StepIndicator({
           </div>
           <span
             className={clsx(
-              'text-xs',
+              'text-xs transition-colors duration-300 ease-out',
               idx === currentStep || currentStep > idx
                 ? 'font-medium text-primary'
                 : 'text-gray-500',
@@ -39,4 +41,4 @@ export default function StepIndicator({
       ))}
     </div>
   );
-}
+};

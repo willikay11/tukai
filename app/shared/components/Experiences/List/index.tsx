@@ -1,0 +1,252 @@
+'use client';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import Link from 'next/link';
+
+import { motion } from 'framer-motion';
+
+import { SingleExperience } from '@/app/shared/components/Experiences/Single';
+import { CARD_LIFT } from '@/app/shared/components/Motion';
+import { NoData } from '@/components/ui/noData';
+import { useSelectedCategory } from '@/context/SelectedCategoryContext';
+import { Status } from '@/enums/status';
+import { cn } from '@/lib/utils';
+import { Experience } from '@/types/experience';
+import { experiencePath } from '@/utils/detail-paths';
+
+type ListExperiencesProps = {
+  className: string;
+  isLoading: boolean;
+  count: number;
+  experiences: Experience[];
+  invitedExperiences?: Experience[];
+  page: number;
+  setPage: (page: number) => void;
+  skeletonCount?: number;
+  type: 'discover' | 'invited';
+  noDataMessage?: string;
+  // Forwarded to SingleExperience — 'row' is the compact 4:3 discover card
+  variant?: 'default' | 'row';
+};
+
+// Cards past this one all start together
+const STAGGER_CAP = 11;
+
+const createPlaceholders = (count: number): Experience[] => {
+  return Array.from({ length: count }, (_, index) => ({
+    id: `placeholder-${index}`,
+    title: 'Loading...',
+    description: '',
+    location: {
+      id: '',
+      name: '',
+      pointLat: 0,
+      pointLong: 0,
+      point: { type: 'Point', coordinates: [0, 0] },
+      formattedAddress: '',
+      street: '',
+      city: '',
+      state: '',
+      country: '',
+    },
+    dateCreated: '',
+    startDate: '',
+    endDate: '',
+    currency: '',
+    priceStartsFrom: { amount: 0, currency: '' },
+    ticketsAvailable: 0,
+    isSoldOut: false,
+    isPublic: false,
+    isBookmarked: false,
+    status: 'DRAFT' as Status,
+    photos: [],
+    totalReviews: 0,
+    averageRating: 0,
+    categories: [],
+    tickets: [],
+    host: {
+      id: '',
+      firstName: '',
+      lastName: '',
+      displayName: '',
+      picture: '',
+    },
+    coHosts: [],
+  })) as unknown as Experience[];
+};
+
+export const ListExperiences = ({
+  type,
+  experiences,
+  isLoading,
+  count,
+  className,
+  skeletonCount = 12,
+  page,
+  setPage,
+  noDataMessage,
+  variant = 'default',
+}: ListExperiencesProps) => {
+  const { selectedCategoryId } = useSelectedCategory();
+
+  const initialPlaceholders = useMemo(() => createPlaceholders(skeletonCount), [skeletonCount]);
+  const [experienceList, setExperienceList] = useState<Experience[]>(initialPlaceholders);
+  const [endPage, setEndPage] = useState<number | null>(null);
+
+  // Pages whose placeholders are on screen, and pages whose real results have
+  // already been merged in. These must be tracked separately: the loading pass
+  // and the results pass of the effect below both run with the same `page`, so
+  // a single "last page seen" ref gets consumed by the first and starves the
+  // second, leaving the skeletons on screen forever.
+  const hasAddedPlaceholdersRef = useRef<Set<number>>(new Set());
+  const appendedPagesRef = useRef<Set<number>>(new Set());
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // Calculate end page when count changes
+  useEffect(() => {
+    if (count > 0) {
+      setEndPage(Math.ceil(count / skeletonCount));
+    }
+  }, [count, skeletonCount]);
+
+  // Reset on category change
+  useEffect(() => {
+    setPage(1);
+    setExperienceList(initialPlaceholders);
+    setEndPage(null);
+    hasAddedPlaceholdersRef.current.clear();
+    appendedPagesRef.current.clear();
+  }, [selectedCategoryId, setPage, initialPlaceholders]);
+
+  // Handle experience updates
+  useEffect(() => {
+    const isFirstPage = page === 1;
+    const hasExperiences = experiences && experiences.length > 0;
+    const isEmpty = experiences && experiences.length === 0;
+
+    if (isLoading) {
+      // Only add placeholders for subsequent pages if not already added
+      if (page > 1 && !hasAddedPlaceholdersRef.current.has(page)) {
+        hasAddedPlaceholdersRef.current.add(page);
+        setExperienceList((prev) => [
+          ...prev.filter((exp) => !exp.id.startsWith('placeholder-')),
+          ...createPlaceholders(skeletonCount),
+        ]);
+      }
+    } else {
+      if (hasExperiences) {
+        if (isFirstPage) {
+          setExperienceList(experiences);
+          hasAddedPlaceholdersRef.current.clear();
+          appendedPagesRef.current = new Set([1]);
+        } else if (!appendedPagesRef.current.has(page)) {
+          // Only append a page once, however many times the effect re-runs
+          appendedPagesRef.current.add(page);
+          setExperienceList((prev) => [
+            ...prev.filter((exp) => !exp.id.startsWith('placeholder-')),
+            ...experiences,
+          ]);
+        }
+      } else if (isEmpty && isFirstPage) {
+        setExperienceList([]);
+        hasAddedPlaceholdersRef.current.clear();
+        appendedPagesRef.current.clear();
+      } else if (isEmpty && hasAddedPlaceholdersRef.current.has(page)) {
+        // A later page came back with nothing. Its placeholders are already on
+        // screen and no results will replace them, so they have to be cleared
+        // here or the skeletons sit at the foot of the list forever.
+        setExperienceList((prev) => prev.filter((exp) => !exp.id.startsWith('placeholder-')));
+        hasAddedPlaceholdersRef.current.delete(page);
+        appendedPagesRef.current.add(page);
+      }
+    }
+  }, [experiences, isLoading, page, skeletonCount]);
+
+  // Intersection observer for infinite scroll
+  const lastExperienceElementRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      // Cleanup previous observer
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+
+      // Don't observe while loading or if no more pages
+      if (isLoading || !node || endPage === null || page >= endPage) return;
+
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            setPage(page + 1);
+          }
+        },
+        { threshold: 0.1, rootMargin: '100px' },
+      );
+
+      observerRef.current.observe(node);
+    },
+    [isLoading, page, endPage, setPage],
+  );
+
+  // Cleanup observer on unmount
+  useEffect(() => {
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []);
+
+  // Show no data message
+  if (!isLoading && experienceList.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+      >
+        <NoData message={noDataMessage || 'No experiences found'} />
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      key={selectedCategoryId}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className={className}
+    >
+      {experienceList.map((experience: Experience, index: number) => {
+        const isLastElement = index === experienceList.length - 1;
+        const isPlaceholder = experience.id.startsWith('placeholder-');
+
+        return (
+          <motion.div
+            key={experience.id}
+            ref={isLastElement && !isPlaceholder ? lastExperienceElementRef : undefined}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            // Capped, not `index * 0.02`: the index runs over the whole
+            // accumulated list, so by the fifth page the last card was waiting
+            // more than a second before it even began to fade in — which is
+            // what made the grid look like it was loading in a slow cascade.
+            // A stagger is only worth anything across the first screenful.
+            transition={{ duration: 0.2, delay: Math.min(index, STAGGER_CAP) * 0.02 }}
+            className="cursor-pointer"
+          >
+            {/* `group` so the card's own photo and title can respond to a
+                hover anywhere on the card, not just over themselves */}
+            <Link
+              target="_blank"
+              href={experiencePath(experience)}
+              className={cn('group block', CARD_LIFT)}
+            >
+              <SingleExperience type={type} experience={experience} variant={variant} />
+            </Link>
+          </motion.div>
+        );
+      })}
+    </motion.div>
+  );
+};

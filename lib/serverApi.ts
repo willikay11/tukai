@@ -25,4 +25,4 @@ export async function post(path: string, data: any, opts?: { requireAuth?: boole
   return axios.post(url, data, { headers });
 }
 
-export default { post };
+export const serverApi = { post };
