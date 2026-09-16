@@ -1,6 +1,81 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "relation_extensions": {
+      "delegate_permission/common.handle_all_urls": {
+        "dynamic_app_link_components": [
+          {
+            "/": "/api/*",
+            "exclude": true
+          },
+          {
+            "/": "/auth",
+            "exclude": true
+          },
+          {
+            "/": "/auth/*",
+            "exclude": true
+          },
+          {
+            "/": "/help",
+            "exclude": true
+          },
+          {
+            "/": "/help/*",
+            "exclude": true
+          },
+          {
+            "/": "/privacy",
+            "exclude": true
+          },
+          {
+            "/": "/privacy/*",
+            "exclude": true
+          },
+          {
+            "/": "/terms",
+            "exclude": true
+          },
+          {
+            "/": "/terms/*",
+            "exclude": true
+          },
+          {
+            "/": "/unsubscribe",
+            "exclude": true
+          },
+          {
+            "/": "/unsubscribe/*",
+            "exclude": true
+          },
+          {
+            "/": "/experiences/booking-success",
+            "exclude": true
+          },
+          {
+            "/": "/experiences/booking-success/*",
+            "exclude": true
+          },
+          {
+            "/": "/_next/*",
+            "exclude": true
+          },
+          {
+            "/": "/images/*",
+            "exclude": true
+          },
+          {
+            "/": "/.well-known/*",
+            "exclude": true
+          },
+          {
+            "/": "*"
+          }
+        ]
+      }
+    },
     "target": {
       "namespace": "android_app",
       "package_name": "com.tukaitravels.preview",
@@ -10,7 +85,82 @@
     }
   },
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "relation_extensions": {
+      "delegate_permission/common.handle_all_urls": {
+        "dynamic_app_link_components": [
+          {
+            "/": "/api/*",
+            "exclude": true
+          },
+          {
+            "/": "/auth",
+            "exclude": true
+          },
+          {
+            "/": "/auth/*",
+            "exclude": true
+          },
+          {
+            "/": "/help",
+            "exclude": true
+          },
+          {
+            "/": "/help/*",
+            "exclude": true
+          },
+          {
+            "/": "/privacy",
+            "exclude": true
+          },
+          {
+            "/": "/privacy/*",
+            "exclude": true
+          },
+          {
+            "/": "/terms",
+            "exclude": true
+          },
+          {
+            "/": "/terms/*",
+            "exclude": true
+          },
+          {
+            "/": "/unsubscribe",
+            "exclude": true
+          },
+          {
+            "/": "/unsubscribe/*",
+            "exclude": true
+          },
+          {
+            "/": "/experiences/booking-success",
+            "exclude": true
+          },
+          {
+            "/": "/experiences/booking-success/*",
+            "exclude": true
+          },
+          {
+            "/": "/_next/*",
+            "exclude": true
+          },
+          {
+            "/": "/images/*",
+            "exclude": true
+          },
+          {
+            "/": "/.well-known/*",
+            "exclude": true
+          },
+          {
+            "/": "*"
+          }
+        ]
+      }
+    },
     "target": {
       "namespace": "android_app",
       "package_name": "com.tukaitravels.app",
@@ -20,7 +170,82 @@
     }
   },
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "relation_extensions": {
+      "delegate_permission/common.handle_all_urls": {
+        "dynamic_app_link_components": [
+          {
+            "/": "/api/*",
+            "exclude": true
+          },
+          {
+            "/": "/auth",
+            "exclude": true
+          },
+          {
+            "/": "/auth/*",
+            "exclude": true
+          },
+          {
+            "/": "/help",
+            "exclude": true
+          },
+          {
+            "/": "/help/*",
+            "exclude": true
+          },
+          {
+            "/": "/privacy",
+            "exclude": true
+          },
+          {
+            "/": "/privacy/*",
+            "exclude": true
+          },
+          {
+            "/": "/terms",
+            "exclude": true
+          },
+          {
+            "/": "/terms/*",
+            "exclude": true
+          },
+          {
+            "/": "/unsubscribe",
+            "exclude": true
+          },
+          {
+            "/": "/unsubscribe/*",
+            "exclude": true
+          },
+          {
+            "/": "/experiences/booking-success",
+            "exclude": true
+          },
+          {
+            "/": "/experiences/booking-success/*",
+            "exclude": true
+          },
+          {
+            "/": "/_next/*",
+            "exclude": true
+          },
+          {
+            "/": "/images/*",
+            "exclude": true
+          },
+          {
+            "/": "/.well-known/*",
+            "exclude": true
+          },
+          {
+            "/": "*"
+          }
+        ]
+      }
+    },
     "target": {
       "namespace": "android_app",
       "package_name": "com.tukaitravels.dev",
