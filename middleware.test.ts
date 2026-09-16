@@ -41,6 +41,13 @@ describe('middleware', () => {
       },
     );
 
+    it.each(['/.well-known/apple-app-site-association', '/.well-known/assetlinks.json'])(
+      'serves the app link file %s without sign-in so iOS and Android can verify the app',
+      async (path) => {
+        expect(await go(path)).toEqual({ kind: 'next' });
+      },
+    );
+
     it('still sends them to sign in for a page that needs an account', async () => {
       expect(await go('/communities/create')).toEqual({
         kind: 'redirect',
