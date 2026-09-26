@@ -8,8 +8,6 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { cn } from '@/lib/utils';
 
-import { AskTukaiButton } from './AskTukaiButton';
-
 // The same four destinations the desktop nav offers, in the same order, so the
 // two do not drift
 const LINKS = [
@@ -116,10 +114,6 @@ export const BottomNavigation = () => {
           );
         })}
       </nav>
-
-      {/* TukAI sits apart from the destinations — it opens an assistant, not a
-          page of content. Same button the desktop header carries. */}
-      <AskTukaiButton className="h-12 w-12 shadow-lg" iconSize={22} />
     </div>
   );
 };

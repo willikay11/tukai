@@ -14,7 +14,6 @@ import { satoshi } from '@/app/shared/components/Global';
 import { GlobalLoading } from '@/app/shared/components/Global';
 import { LocationPrompt } from '@/app/shared/components/LocationPicker';
 import { UserLocation } from '@/app/shared/components/LocationPicker';
-import { AskTukaiButton } from '@/app/shared/components/Navigation';
 import { BottomNavigation } from '@/app/shared/components/Navigation';
 import { Nav } from '@/app/shared/components/Navigation';
 import { Search } from '@/app/shared/components/Search';
@@ -151,8 +150,9 @@ export default function RootLayout({
                                 </div>
                                 {/* Keeps the trailing controls on the right edge once
                                   the search stops growing */}
-                                <AskTukaiButton className="ml-auto" />
-                                <AuthActions />
+                                <div className="ml-auto flex items-center gap-2">
+                                  <AuthActions />
+                                </div>
                               </header>
                             </div>
                           </div>

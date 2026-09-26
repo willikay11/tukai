@@ -63,14 +63,6 @@ export const ExperienceUnavailable = ({
           <Button onClick={() => router.push('/experiences')} className="rounded-full px-6">
             Explore experiences
           </Button>
-          {/* Placeholder like the nav's AskTukaiButton — no assistant exists yet */}
-          <button
-            type="button"
-            className="flex items-center gap-2 rounded-full border border-gray-200 px-6 py-2.5 text-sm font-medium text-gray-800 hover:border-gray-300"
-          >
-            <IconComponent iconName="SparklesIcon" size={16} className="text-primary" />
-            Ask TukAI
-          </button>
         </div>
       </div>
 

@@ -349,26 +349,18 @@ describe('BottomNavigation', () => {
       expect(screen.getByText('Moments')).toBeInTheDocument();
     });
 
-    // Sits outside the nav landmark: it opens an assistant, not a page of
-    // content
-    describe('TukAI', () => {
-      it('offers the assistant alongside the destinations', () => {
-        mockUsePathname.mockReturnValue('/');
-
-        render(<BottomNavigation />);
-
-        expect(screen.getByRole('button', { name: 'Ask TukAI' })).toBeInTheDocument();
-      });
-
-      it('is not one of the destinations', () => {
+    describe('the bar', () => {
+      // The TukAI button used to sit here, outside the nav landmark. It has
+      // been removed, so the bar is destinations and nothing else.
+      it('carries destinations only', () => {
         mockUsePathname.mockReturnValue('/');
 
         render(<BottomNavigation />);
 
         const navLinks = within(screen.getByRole('navigation')).getAllByRole('link');
         expect(navLinks).toHaveLength(4);
-        // Every link on the bar is a destination — TukAI is a button
         expect(screen.getAllByRole('link')).toHaveLength(4);
+        expect(screen.queryByRole('button')).not.toBeInTheDocument();
       });
 
       it('shows no account avatar', () => {
