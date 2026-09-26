@@ -60,4 +60,60 @@ describe('ExperienceOrganiser', () => {
 
     expect(screen.getByRole('button', { name: /Message host/ })).toBeInTheDocument();
   });
+
+  /**
+   * On a phone the host name and the button shared one narrow row, so a long
+   * name wrapped to two lines and the button — sized `h-full` — stretched down
+   * the side of it.
+   */
+  describe('the layout on a narrow screen', () => {
+    const longName = (host: string) => ({
+      ...experience(host),
+      host: { ...experience(host).host, displayName: 'Timeless Groove Productions' },
+    });
+
+    it('stacks the button under the host below sm', () => {
+      const { container } = render(
+        <ExperienceOrganiser experience={longName('host-1') as never} />,
+      );
+
+      const card = container.querySelector('.rounded-\\[15px\\]');
+      expect(card?.className).toContain('flex-col');
+      expect(card?.className).toContain('sm:flex-row');
+    });
+
+    it('truncates a long host name rather than wrapping it', () => {
+      render(<ExperienceOrganiser experience={longName('host-1') as never} />);
+
+      expect(screen.getByText('Timeless Groove Productions')).toHaveClass('truncate');
+    });
+
+    it('gives the button its own height, not the row’s', () => {
+      render(<ExperienceOrganiser experience={longName('host-1') as never} />);
+
+      const button = screen.getByRole('button', { name: /Message host/ });
+      expect(button.className).toContain('h-10');
+      expect(button.className).not.toContain('h-full');
+    });
+  });
+
+  // "1 Experiences organised" read as a typo on every host with one
+  describe('the experiences-organised count', () => {
+    const withCount = (count: number) => {
+      const base = experience('host-1');
+      return { ...base, host: { ...base.host, experienceHostedCount: count } } as never;
+    };
+
+    it('says Experience for one', () => {
+      render(<ExperienceOrganiser experience={withCount(1)} />);
+
+      expect(screen.getByText('1 Experience organised')).toBeInTheDocument();
+    });
+
+    it.each([0, 4])('says Experiences for %i', (count) => {
+      render(<ExperienceOrganiser experience={withCount(count)} />);
+
+      expect(screen.getByText(`${count} Experiences organised`)).toBeInTheDocument();
+    });
+  });
 });
