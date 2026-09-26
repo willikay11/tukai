@@ -39,7 +39,7 @@ export const MobileBookingBar = ({ experience }: { experience: Experience }) => 
             onClick={() => setOpenView('reservation')}
             className="h-11 rounded-full px-6"
           >
-            Reserve
+            Buy Tickets
           </Button>
         </div>
       </div>
