@@ -162,3 +162,41 @@ describe('column count', () => {
     expect(container.querySelector('.lg\\:columns-4')).toBeInTheDocument();
   });
 });
+
+/**
+ * iOS Safari showed one tile with an empty column beside it. Two WebKit
+ * behaviours account for that, and both are structural — jsdom renders neither
+ * CSS columns nor animations, so what is pinned here is the markup that avoids
+ * them rather than the visual result.
+ */
+describe('surviving WebKit', () => {
+  const render1 = () =>
+    render(<MomentsMasonry {...defaults} moments={[makeMoment('m1', 400, 600)]} />);
+
+  // WebKit does not measure a `button` correctly as a multi-column child
+  it('makes the column item a plain element, not the button', () => {
+    const { container } = render1();
+
+    const item = container.querySelector('.break-inside-avoid');
+    expect(item?.tagName).toBe('DIV');
+    expect(item?.querySelector('button')).toBeInTheDocument();
+  });
+
+  it('keeps the column break and its spacing off the button', () => {
+    render1();
+
+    const button = screen.getByRole('button');
+    expect(button.className).not.toContain('break-inside-avoid');
+    expect(button.className).not.toContain('mb-4');
+  });
+
+  // `animate-in fade-in` starts the tile at opacity 0, so anywhere the
+  // animation does not run the photo never appears at all
+  it('does not depend on an animation to become visible', () => {
+    render1();
+
+    const button = screen.getByRole('button');
+    expect(button.className).not.toContain('animate-in');
+    expect(button.className).not.toContain('fade-in');
+  });
+});

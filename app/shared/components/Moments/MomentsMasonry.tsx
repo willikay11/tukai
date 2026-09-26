@@ -61,29 +61,39 @@ export const MomentsMasonry = ({
           if (!media) return null;
 
           return (
-            <button
-              key={moment.id}
-              type="button"
-              onClick={() => onSelect(moment.id)}
-              // Tiles fade in as each page lands, and lift under the cursor so
-              // they read as openable
-              className={`mb-4 block w-full break-inside-avoid overflow-hidden rounded-2xl transition duration-300 animate-in fade-in hover:-translate-y-0.5 hover:shadow-md motion-reduce:animate-none motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
-                moment.id === selectedId ? 'ring-2 ring-primary' : ''
-              }`}
-            >
-              <PhotoImage
-                src={media.photo}
-                alt={moment.title}
-                // Real intrinsic dimensions, so each tile keeps its aspect ratio
-                width={media.width || 400}
-                height={media.height || 400}
-                sizes="(max-width: 768px) 50vw, 300px"
-                // The tiles above the fold, fetched without waiting for the
-                // lazy-load observer to fire after the first paint
-                priority={index < EAGER_TILES}
-                className="h-auto w-full object-cover"
-              />
-            </button>
+            // The column item is a plain div, not the button. WebKit does not
+            // measure a `button` correctly as a multi-column child, which left
+            // iOS Safari piling the tiles into the first column and leaving
+            // the rest of the row blank.
+            <div key={moment.id} className="mb-4 break-inside-avoid">
+              <button
+                type="button"
+                onClick={() => onSelect(moment.id)}
+                // Lifts under the cursor so it reads as openable. No entrance
+                // animation: `animate-in fade-in` starts the tile at opacity 0,
+                // so anywhere the animation does not run the photo never
+                // appears at all — which is the other half of what broke here.
+                className={`block w-full overflow-hidden rounded-2xl transition duration-300 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
+                  moment.id === selectedId ? 'ring-2 ring-primary' : ''
+                }`}
+              >
+                <PhotoImage
+                  src={media.photo}
+                  alt={moment.title}
+                  // Real intrinsic dimensions, so each tile keeps its aspect
+                  // ratio and holds its space before the photo arrives
+                  width={media.width || 400}
+                  height={media.height || 400}
+                  sizes="(max-width: 768px) 50vw, 300px"
+                  // The tiles above the fold, fetched without waiting for the
+                  // lazy-load observer to fire after the first paint
+                  priority={index < EAGER_TILES}
+                  // `block` so the image is not an inline box sitting on a text
+                  // baseline, which adds a few stray pixels under every tile
+                  className="block h-auto w-full object-cover"
+                />
+              </button>
+            </div>
           );
         })}
       </div>
