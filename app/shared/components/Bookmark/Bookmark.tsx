@@ -83,7 +83,18 @@ export const Bookmark = ({
     <>
       <Button
         variant="text"
-        aria-label={isBookmarked ? 'Saved to bucket list' : 'Add to bucket list'}
+        // The canvas names the thing being saved. A dozen cards on a page all
+        // announcing "Add to bucket list" tells a screen-reader reader nothing
+        // about which one they are on.
+        aria-label={
+          itemName
+            ? isBookmarked
+              ? `Saved. Choose bucket lists for ${itemName}`
+              : `Save ${itemName} to a bucket list`
+            : isBookmarked
+              ? 'Saved to bucket list'
+              : 'Add to bucket list'
+        }
         className={cn(
           'flex h-9 w-9 items-center justify-center rounded-full',
           isBookmarked

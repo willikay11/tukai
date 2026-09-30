@@ -159,4 +159,36 @@ describe('Bookmark', () => {
       expect(saved).not.toHaveClass('motion-safe:animate-pop');
     });
   });
+
+  /**
+   * The canvas names the thing being saved. A page of cards each announcing
+   * "Add to bucket list" tells a screen-reader reader nothing about which card
+   * they are on.
+   */
+  describe('what it announces', () => {
+    it('names the item it would save', () => {
+      render(
+        <Bookmark userId={USER} bookmarked={false} experienceId="exp-1" itemName="Karura Hike" />,
+      );
+
+      expect(
+        screen.getByRole('button', { name: 'Save Karura Hike to a bucket list' }),
+      ).toBeInTheDocument();
+    });
+
+    it('names it once saved too', () => {
+      render(<Bookmark userId={USER} bookmarked experienceId="exp-1" itemName="Karura Hike" />);
+
+      expect(
+        screen.getByRole('button', { name: 'Saved. Choose bucket lists for Karura Hike' }),
+      ).toBeInTheDocument();
+    });
+
+    // Some callers have no name to give
+    it('falls back to the plain label without one', () => {
+      render(<Bookmark userId={USER} bookmarked={false} experienceId="exp-1" />);
+
+      expect(screen.getByRole('button', { name: 'Add to bucket list' })).toBeInTheDocument();
+    });
+  });
 });

@@ -64,7 +64,9 @@ describe('MomentDetail', () => {
     render(<MomentDetail moment={makeMoment()} />);
 
     expect(screen.getByText('Asha Mwangi')).toBeInTheDocument();
-    expect(screen.getByText(/2 days ago · Trails And Us/)).toBeInTheDocument();
+    // The context is its own node now, with an icon between it and the time
+    expect(screen.getByText('2 days ago')).toBeInTheDocument();
+    expect(screen.getByText('Trails And Us')).toBeInTheDocument();
   });
 
   it('prefers displayName for the author', () => {
@@ -261,5 +263,44 @@ describe('a moment body', () => {
     render(<MomentDetail moment={makeMoment({ description: '' })} />);
 
     expect(screen.getByText('Sunrise on the Mara')).toBeInTheDocument();
+  });
+});
+
+/**
+ * The canvas pairs a moment's parent with its own icon and a word for the
+ * kind. "Trails And Us" on its own does not say whether it is a community, an
+ * experience or a place.
+ */
+describe('what the moment was posted against', () => {
+  it.each([
+    [
+      'community',
+      { community: { id: 'c1', title: 'Trails And Us' } },
+      'UserMultipleIcon',
+      'Community',
+    ],
+    [
+      'experience',
+      { community: null, experience: { id: 'e1', title: 'Mara Trip' } },
+      'Ticket01Icon',
+      'Experience',
+    ],
+    [
+      'place',
+      { community: null, experience: null, place: { id: 'p1', title: 'Kraftory' } },
+      'Location01Icon',
+      'Place',
+    ],
+  ])('marks a %s with its own icon and kind', (_name, parent, icon, kind) => {
+    render(<MomentDetail moment={makeMoment(parent as never)} />);
+
+    expect(screen.getByTestId(icon)).toBeInTheDocument();
+    expect(screen.getByText(`(${kind})`)).toBeInTheDocument();
+  });
+
+  it('shows no context for a moment posted against nothing', () => {
+    render(<MomentDetail moment={makeMoment({ community: null } as never)} />);
+
+    expect(screen.queryByText('(Community)')).not.toBeInTheDocument();
   });
 });

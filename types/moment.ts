@@ -49,6 +49,50 @@ export const isRenderablePhoto = (photo: string | null | undefined): photo is st
 export const momentPhotos = (item: Pick<Moment, 'media'>): MomentMedia[] =>
   (item.media ?? []).filter((media) => isRenderablePhoto(media.photo));
 
+/**
+ * What a moment was posted against, and what kind of thing that is.
+ *
+ * The canvas pairs each parent with its own icon and a word for the kind:
+ * a title on its own does not say whether "Trails And Us" is a community, an
+ * experience or a place.
+ */
+export type MomentContext = {
+  label: string;
+  kind: 'Community' | 'Experience' | 'Place';
+  /** A key in CANVAS_ICONS */
+  icon: 'users' | 'ticket' | 'pin';
+  id: string;
+};
+
+/** In the order the canvas shows them. */
+export const momentContext = (item: Pick<Moment, 'community' | 'experience' | 'place'>) => {
+  if (item.community)
+    return {
+      label: item.community.title,
+      kind: 'Community',
+      icon: 'users',
+      id: item.community.id,
+    } as MomentContext;
+
+  if (item.experience)
+    return {
+      label: item.experience.title,
+      kind: 'Experience',
+      icon: 'ticket',
+      id: item.experience.id,
+    } as MomentContext;
+
+  if (item.place)
+    return {
+      label: item.place.title,
+      kind: 'Place',
+      icon: 'pin',
+      id: item.place.id,
+    } as MomentContext;
+
+  return null;
+};
+
 // display_name is optional on the API, so fall back to the real name
 export const momentAuthorName = (author: MomentAuthor): string =>
   author.displayName?.trim() || `${author.firstName} ${author.lastName}`.trim();
