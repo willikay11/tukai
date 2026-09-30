@@ -153,6 +153,18 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
       formData.append('meeting_time', data.meetingTime);
     }
 
+    if (data.ticketSalesClosingDuration !== undefined) {
+      formData.append('ticket_sales_closing_duration', String(data.ticketSalesClosingDuration));
+    }
+
+    if (data.ticketSalesClosingUnit !== undefined) {
+      formData.append('ticket_sales_closing_unit', data.ticketSalesClosingUnit);
+    }
+
+    if (data.ticketSalesClosingCondition !== undefined) {
+      formData.append('ticket_sales_closing_condition', data.ticketSalesClosingCondition);
+    }
+
     if (data.experienceType) {
       formData.append('experience_type', data.experienceType);
     }

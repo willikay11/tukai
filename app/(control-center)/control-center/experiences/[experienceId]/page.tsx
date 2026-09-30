@@ -115,13 +115,7 @@ export default function ManageExperiencePage() {
           metrics={metrics}
         />
       )}
-      {tab === 'tickets' && (
-        <TicketsCreatedTab
-          experienceId={experienceId}
-          tickets={experience.tickets ?? []}
-          currency={experience.currency ?? 'Ksh.'}
-        />
-      )}
+      {tab === 'tickets' && <TicketsCreatedTab experience={experience} />}
       {tab === 'guests' && (
         <InvitedGuestsTab
           experienceId={experienceId}

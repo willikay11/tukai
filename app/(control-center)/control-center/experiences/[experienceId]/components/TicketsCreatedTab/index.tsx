@@ -7,16 +7,16 @@ import { useSetTicketSales } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { NoData } from '@/components/ui/noData';
 import { cn } from '@/lib/utils';
+import { Experience } from '@/types/experience';
 import { Ticket, isTicketPaused } from '@/types/ticket';
 
 import { DiscountCodesSection } from '../DiscountCodesSection';
 import { EditTicketModal } from '../EditTicketModal';
+import { SalesDeadlineSection } from '../SalesDeadlineSection';
 import { TicketStat, splitBySales, ticketPrice, ticketStats } from './ticket-stats';
 
 interface TicketsCreatedTabProps {
-  experienceId: string;
-  tickets: Ticket[];
-  currency: string;
+  experience: Experience;
 }
 
 /**
@@ -173,7 +173,10 @@ const TicketCard = ({
   );
 };
 
-export const TicketsCreatedTab = ({ experienceId, tickets, currency }: TicketsCreatedTabProps) => {
+export const TicketsCreatedTab = ({ experience }: TicketsCreatedTabProps) => {
+  const experienceId = experience.id;
+  const tickets = experience.tickets ?? [];
+  const currency = experience.currency ?? 'Ksh.';
   const [editing, setEditing] = useState<Ticket | null>(null);
   const { toast } = useToast();
   const { mutate: setSales, isPending, variables } = useSetTicketSales(experienceId);
@@ -236,6 +239,10 @@ export const TicketsCreatedTab = ({ experienceId, tickets, currency }: TicketsCr
           {paused.map(card)}
         </>
       )}
+
+      {/* The canvas's order on this tab: the tickets, then when sales close,
+          then the codes that discount them */}
+      <SalesDeadlineSection experience={experience} />
 
       <DiscountCodesSection experienceId={experienceId} currency={currency} />
 

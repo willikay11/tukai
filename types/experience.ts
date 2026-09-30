@@ -122,6 +122,11 @@ export type CreateExperience = {
   experienceType?: 'standard' | 'itinerary';
   itineraryMode?: 'fixed' | 'flexible';
   itineraryDurationDays?: number;
+  // When ticket sales stop, relative to the experience. One setting for the
+  // whole experience, which every ticket's expiry is then read from.
+  ticketSalesClosingDuration?: number;
+  ticketSalesClosingUnit?: 'days' | 'hours' | 'minutes';
+  ticketSalesClosingCondition?: 'before_start' | 'before_end';
 };
 
 export type CreateExperienceTicket = {

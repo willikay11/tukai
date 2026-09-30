@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { Experience } from '@/types/experience';
 import { Ticket } from '@/types/ticket';
 
 import { TicketsCreatedTab } from './index';
@@ -18,6 +19,7 @@ jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) })
 
 jest.mock('../EditTicketModal', () => ({ EditTicketModal: () => null }));
 jest.mock('../DiscountCodesSection', () => ({ DiscountCodesSection: () => null }));
+jest.mock('../SalesDeadlineSection', () => ({ SalesDeadlineSection: () => null }));
 
 const ticket = (overrides: Partial<Ticket> = {}): Ticket =>
   ({
@@ -31,7 +33,11 @@ const ticket = (overrides: Partial<Ticket> = {}): Ticket =>
   }) as unknown as Ticket;
 
 const renderTab = (tickets: Ticket[]) =>
-  render(<TicketsCreatedTab experienceId="e1" tickets={tickets} currency="KES" />);
+  render(
+    <TicketsCreatedTab
+      experience={{ id: 'e1', currency: 'KES', tickets } as unknown as Experience}
+    />,
+  );
 
 /**
  * A host could not stop selling a ticket type at all. Both endpoints existed
