@@ -17,6 +17,7 @@ const toast = jest.fn();
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
 
 jest.mock('../EditTicketModal', () => ({ EditTicketModal: () => null }));
+jest.mock('../DiscountCodesSection', () => ({ DiscountCodesSection: () => null }));
 
 const ticket = (overrides: Partial<Ticket> = {}): Ticket =>
   ({

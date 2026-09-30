@@ -12,6 +12,7 @@ import { NoData } from '@/components/ui/noData';
 import { cn } from '@/lib/utils';
 import { Ticket, isTicketPaused } from '@/types/ticket';
 
+import { DiscountCodesSection } from '../DiscountCodesSection';
 import { EditTicketModal } from '../EditTicketModal';
 
 interface TicketsCreatedTabProps {
@@ -60,8 +61,12 @@ export const TicketsCreatedTab = ({ experienceId, tickets, currency }: TicketsCr
 
   if (tickets.length === 0) {
     return (
-      <div className="py-10">
-        <NoData message="No tickets created for this experience yet" />
+      <div className="space-y-6">
+        <div className="py-10">
+          <NoData message="No tickets created for this experience yet" />
+        </div>
+
+        <DiscountCodesSection experienceId={experienceId} currency={currency} />
       </div>
     );
   }
@@ -151,16 +156,6 @@ export const TicketsCreatedTab = ({ experienceId, tickets, currency }: TicketsCr
             <div className="mt-5 flex flex-wrap items-center justify-end gap-4 border-t border-gray-100 pt-4">
               <button
                 type="button"
-                disabled
-                title="Pausing ticket sales is not available yet"
-                className="inline-flex items-center gap-2 rounded-full px-2 py-2 text-sm font-medium text-orange-600 transition-colors hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
-              >
-                <IconComponent iconName="PauseIcon" size={16} color="currentColor" />
-                Pause Ticket Sales
-              </button>
-
-              <button
-                type="button"
                 onClick={() => setEditing(ticket)}
                 className="inline-flex items-center gap-2 rounded-full px-2 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50"
               >
@@ -171,6 +166,11 @@ export const TicketsCreatedTab = ({ experienceId, tickets, currency }: TicketsCr
           </div>
         );
       })}
+
+      {/* The canvas puts a host's codes below the tickets, under a divider */}
+      <div className="border-t border-gray-100 pt-6">
+        <DiscountCodesSection experienceId={experienceId} currency={currency} />
+      </div>
 
       <EditTicketModal
         experienceId={experienceId}
