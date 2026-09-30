@@ -31,8 +31,45 @@ const config: Config = {
           DEFAULT: 'rgba(var(--color-secondary) / <alpha-value>)',
           foreground: 'hsl(var(--secondary-foreground))',
         },
+        /**
+         * Design-canvas tokens, named by the job they do rather than the hue.
+         * Values are taken verbatim from the canvas; the number beside each is
+         * how many times it appears there, which is what earned it a token.
+         *
+         * These are additive. `primary` (#047857) is deliberately untouched:
+         * the canvas leads on `brand` (#066349), which this repo has only ever
+         * used as a form-focus green, so swapping `primary` would repaint every
+         * screen at once. Screens adopt `brand` as their task reaches them.
+         */
+        brand: {
+          DEFAULT: '#066349', // 458 — the canvas's dominant green
+          deep: '#044B36', // 86 — pressed, and text on pale green
+          mid: '#0C7A50', // 53 — secondary actions
+          ink: '#013334', // 368 — text sitting on lime
+        },
         lime: {
-          DEFAULT: '#B0E800',
+          DEFAULT: '#B0E800', // 69
+          dark: '#A3D900', // 27 — hover and pressed
+        },
+        surface: {
+          DEFAULT: '#F3F4F2', // 298 — resting chip and card ground
+          brand: '#E8F1ED', // 280 — a chosen chip
+          muted: '#EDF0EE', // 82 — a quieter panel
+        },
+        line: {
+          DEFAULT: '#DDE3DF', // 176 — hairline borders and dividers
+        },
+        ink: {
+          DEFAULT: '#3F4B47', // 42 — strong body text
+          muted: '#5B6B66', // 488 — secondary text, the canvas's workhorse
+          subtle: '#8A9793', // 37 — hints and placeholders
+        },
+        danger: {
+          // ⚠️ The canvas carries three reds — #E02D3C (22), #D92D20 (15) and
+          // #FE4A49 (14). This takes the most used; the others are left out
+          // rather than tokenised, so a screen that needs one asks first.
+          DEFAULT: '#E02D3C',
+          surface: '#FEF3F2', // 15 — the ground a danger message sits on
         },
         'brand-green': {
           DEFAULT: 'rgba(var(--color-brand-green) / <alpha-value>)',
