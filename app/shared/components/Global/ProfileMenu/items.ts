@@ -12,7 +12,9 @@ export interface ProfileMenuItem {
  * land in, so Messages points there too. Everything with an href routes.
  */
 export const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
-  { label: 'My Profile', icon: 'UserIcon', href: '/auth/profile' },
+  // Not /auth/profile: everything under /auth draws the sign-in shell, and a
+  // profile is a page of the app rather than a way into it
+  { label: 'My Profile', icon: 'UserIcon', href: '/profile' },
   {
     label: 'My Communities',
     icon: 'UserMultipleIcon',

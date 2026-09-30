@@ -50,10 +50,7 @@ describe('ProfileMenu', () => {
   it('links the items that have a destination', () => {
     render(<ProfileMenu {...defaults} />);
 
-    expect(screen.getByRole('link', { name: /My Profile/ })).toHaveAttribute(
-      'href',
-      '/auth/profile',
-    );
+    expect(screen.getByRole('link', { name: /My Profile/ })).toHaveAttribute('href', '/profile');
     expect(screen.getByRole('link', { name: /My Communities/ })).toHaveAttribute(
       'href',
       '/communities?category=my-communities',

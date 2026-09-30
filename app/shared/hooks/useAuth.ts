@@ -1,6 +1,12 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { getInterestCategories, getUsers, userExists } from '@/services/auth';
+import {
+  fetchMyProfile,
+  getInterestCategories,
+  getUsers,
+  updateMyProfile,
+  userExists,
+} from '@/services/auth';
 
 export const useUserExists = () => {
   return useMutation({
@@ -26,5 +32,23 @@ export const useGetUsers = (
   return useQuery({
     queryKey: ['users', page, pageSize, email, followers, following, blocked],
     queryFn: async () => await getUsers(page, pageSize, email, followers, following, blocked),
+  });
+};
+
+/** The signed-in reader's own profile. */
+export const useMyProfile = (userId?: string | null) =>
+  useQuery({
+    queryKey: ['profile', userId],
+    queryFn: async () => await fetchMyProfile(userId as string),
+    enabled: Boolean(userId),
+  });
+
+export const useUpdateMyProfile = (userId?: string | null) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (changes: Parameters<typeof updateMyProfile>[1]) =>
+      await updateMyProfile(userId as string, changes),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['profile', userId] }),
   });
 };
