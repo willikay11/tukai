@@ -12,7 +12,10 @@ let isLoading = false;
 
 jest.mock('@/app/shared/hooks/useExperiences', () => ({
   useExperienceRatings: () => ({ data: { data: ratings }, isLoading }),
+  useCreateExperienceRating: () => ({ mutate: jest.fn(), isPending: false }),
 }));
+
+jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast: jest.fn() }) }));
 
 let userId: string | undefined = 'me';
 jest.mock('next-auth/react', () => ({
@@ -39,14 +42,14 @@ describe('reviews on an experience', () => {
    */
   it('works the average and the count out of the reviews', () => {
     ratings = [rating(5), rating(4)];
-    render(<ExperienceReviews experienceId="e1" />);
+    render(<ExperienceReviews experienceId="e1" experienceTitle="Sunrise hike" />);
 
     expect(screen.getByText('4.5 · 2 reviews')).toBeInTheDocument();
   });
 
   it('shows what each reviewer said', () => {
     ratings = [rating(5, { review: 'Worth the early start.' })];
-    render(<ExperienceReviews experienceId="e1" />);
+    render(<ExperienceReviews experienceId="e1" experienceTitle="Sunrise hike" />);
 
     expect(screen.getByText('Amina')).toBeInTheDocument();
     expect(screen.getByText('Worth the early start.')).toBeInTheDocument();
@@ -54,20 +57,22 @@ describe('reviews on an experience', () => {
 
   it('copes with a score left without any words', () => {
     ratings = [rating(4)];
-    render(<ExperienceReviews experienceId="e1" />);
+    render(<ExperienceReviews experienceId="e1" experienceTitle="Sunrise hike" />);
 
     expect(screen.getByText('4 · 1 review')).toBeInTheDocument();
   });
 
   it('shows the photos a reviewer added', () => {
     ratings = [rating(5, { photos: [{ id: 'p1', photoWebpThumbUrl: 'https://cdn.test/t.webp' }] })];
-    const { container } = render(<ExperienceReviews experienceId="e1" />);
+    const { container } = render(
+      <ExperienceReviews experienceId="e1" experienceTitle="Sunrise hike" />,
+    );
 
     expect(container.querySelector('img')).toBeInTheDocument();
   });
 
   it('says plainly when nothing has been reviewed', () => {
-    render(<ExperienceReviews experienceId="e1" />);
+    render(<ExperienceReviews experienceId="e1" experienceTitle="Sunrise hike" />);
 
     expect(
       screen.getByText(
@@ -79,7 +84,7 @@ describe('reviews on an experience', () => {
   // Four at a time, then the rest on request
   it('holds the rest back behind one press', async () => {
     ratings = [1, 2, 3, 4, 5].map((score) => rating(score, { review: `Review ${score}` }));
-    render(<ExperienceReviews experienceId="e1" />);
+    render(<ExperienceReviews experienceId="e1" experienceTitle="Sunrise hike" />);
 
     expect(screen.queryByText('Review 5')).not.toBeInTheDocument();
 
@@ -90,7 +95,7 @@ describe('reviews on an experience', () => {
 
   it('does not offer to show more when there is no more', () => {
     ratings = [rating(5)];
-    render(<ExperienceReviews experienceId="e1" />);
+    render(<ExperienceReviews experienceId="e1" experienceTitle="Sunrise hike" />);
 
     expect(screen.queryByRole('button', { name: /Show all/ })).not.toBeInTheDocument();
   });
@@ -100,14 +105,18 @@ describe('reviews on an experience', () => {
   it('shows nothing to a reader who is not signed in', () => {
     userId = undefined;
     ratings = [rating(5)];
-    const { container } = render(<ExperienceReviews experienceId="e1" />);
+    const { container } = render(
+      <ExperienceReviews experienceId="e1" experienceTitle="Sunrise hike" />,
+    );
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it('shows nothing while the reviews are still coming', () => {
     isLoading = true;
-    const { container } = render(<ExperienceReviews experienceId="e1" />);
+    const { container } = render(
+      <ExperienceReviews experienceId="e1" experienceTitle="Sunrise hike" />,
+    );
 
     expect(container).toBeEmptyDOMElement();
   });
@@ -115,7 +124,7 @@ describe('reviews on an experience', () => {
   // A refusal comes back as { success: false } with no data at all
   it('reads a refusal as no reviews rather than breaking', () => {
     ratings = undefined as unknown as ExperienceRating[];
-    render(<ExperienceReviews experienceId="e1" />);
+    render(<ExperienceReviews experienceId="e1" experienceTitle="Sunrise hike" />);
 
     expect(screen.getByText(/No one has reviewed this experience yet/)).toBeInTheDocument();
   });

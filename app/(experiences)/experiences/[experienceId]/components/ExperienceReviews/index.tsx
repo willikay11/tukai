@@ -20,6 +20,9 @@ import {
 } from '@/types/experienceRating';
 import { linkedUserName } from '@/types/user';
 
+import { LeaveReviewDrawer } from './LeaveReviewDrawer';
+import { canOfferReviewForm, ownReview } from './review-eligibility';
+
 /** How many reviews are shown before the rest are asked for. */
 const FIRST_PAGE = 4;
 
@@ -97,9 +100,18 @@ const ReviewRow = ({ review }: { review: ExperienceRating }) => {
  * outright, so a reader who is not signed in is simply not shown the section
  * rather than shown an error they cannot act on.
  */
-export const ExperienceReviews = ({ experienceId }: { experienceId: string }) => {
+export const ExperienceReviews = ({
+  experienceId,
+  experienceTitle,
+  endDate,
+}: {
+  experienceId: string;
+  experienceTitle: string;
+  endDate?: string | null;
+}) => {
   const { data: session } = useSession();
   const [showAll, setShowAll] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const { data: response, isLoading } = useExperienceRatings(
     experienceId,
@@ -113,6 +125,9 @@ export const ExperienceReviews = ({ experienceId }: { experienceId: string }) =>
   const average = averageRating(ratings);
   const summary = ratingSummary(ratings);
   const visible = showAll ? ratings : ratings.slice(0, FIRST_PAGE);
+  const userId = session.user.id;
+  const mine = ownReview(ratings, userId);
+  const canReview = canOfferReviewForm({ ratings, userId, endDate });
 
   return (
     <section>
@@ -125,6 +140,22 @@ export const ExperienceReviews = ({ experienceId }: { experienceId: string }) =>
           </span>
         )}
       </div>
+
+      {/* The API decides who may review; this only decides who is offered the
+          form — someone who was there, after it happened, who has not already
+          said their piece */}
+      {canReview && (
+        <button
+          type="button"
+          onClick={() => setIsFormOpen(true)}
+          className="mt-2 inline-flex h-11 items-center gap-2 rounded-full bg-surface px-4 text-15 font-medium text-brand transition-colors hover:bg-surface-brand"
+        >
+          <IconComponent iconName="StarIcon" size={18} color="currentColor" />
+          Leave a review
+        </button>
+      )}
+
+      {mine && <p className="mt-2 text-13 text-ink-muted">You have reviewed this experience.</p>}
 
       {ratings.length === 0 ? (
         <p className="mt-2 text-sm text-gray-500">
@@ -165,6 +196,13 @@ export const ExperienceReviews = ({ experienceId }: { experienceId: string }) =>
           )}
         </>
       )}
+
+      <LeaveReviewDrawer
+        experienceId={experienceId}
+        experienceTitle={experienceTitle}
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+      />
     </section>
   );
 };

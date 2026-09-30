@@ -234,7 +234,11 @@ export const ViewExperiencePageContent = ({
           {!isPreview && (
             <>
               <RevealOnScroll>
-                <ExperienceReviews experienceId={experience.id} />
+                <ExperienceReviews
+                  experienceId={experience.id}
+                  experienceTitle={experience.title}
+                  endDate={experience.endDate}
+                />
               </RevealOnScroll>
               <Separator />
             </>

@@ -6,10 +6,12 @@ import {
   TicketPurchasePayload,
   addCoHosts,
   addExperiencePhotos,
+  addExperienceRatingPhoto,
   addGuestToExperience,
   bookmarkExperience,
   cancelExperience,
   createExperience,
+  createExperienceRating,
   createExperienceTicket,
   createItineraryDay,
   createSlotTemplate,
@@ -252,6 +254,36 @@ export const useDeleteExperiencePhoto = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['experience'] });
     },
+  });
+};
+
+export const useCreateExperienceRating = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { rating: number; review?: string; photos?: File[] }) =>
+      await createExperienceRating(experienceId, data),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['experience-ratings', experienceId] }),
+  });
+};
+
+/** A photo added to a review that is already posted. */
+export const useAddExperienceRatingPhoto = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      ratingId,
+      photo,
+      caption,
+    }: {
+      ratingId: string;
+      photo: File;
+      caption?: string;
+    }) => await addExperienceRatingPhoto(experienceId, ratingId, photo, caption),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['experience-ratings', experienceId] }),
   });
 };
 

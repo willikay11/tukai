@@ -571,6 +571,68 @@ export const fetchExperienceRatings = async (experienceId: string): Promise<ApiR
 };
 
 /**
+ * Leave a review.
+ *
+ * Sent as multipart because the photos ride along on the same request as
+ * `new_photos`. The API decides who may: an attendee of an experience that has
+ * ended, who has not already rated it, and it says which of those failed — so
+ * its own message is what the reader is shown.
+ */
+export const createExperienceRating = async (
+  experienceId: string,
+  data: { rating: number; review?: string; photos?: File[] },
+) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const formData = new FormData();
+
+    formData.append('rating', String(data.rating));
+    if (data.review) formData.append('review', data.review);
+    (data.photos ?? []).forEach((photo) => formData.append('new_photos', photo));
+
+    const response = await axiosInstance.post(
+      `/v1/experiences/${experienceId}/ratings/`,
+      formData,
+      { headers: { 'Content-Type': undefined } },
+    );
+
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'Could not post this review'));
+  }
+};
+
+/** A photo added to a review that is already posted. */
+export const addExperienceRatingPhoto = async (
+  experienceId: string,
+  ratingId: string,
+  photo: File,
+  caption?: string,
+) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const formData = new FormData();
+
+    formData.append('photo', photo);
+    if (caption) formData.append('caption', caption);
+
+    const response = await axiosInstance.post(
+      `/v1/experiences/${experienceId}/ratings/${ratingId}/photos/`,
+      formData,
+      { headers: { 'Content-Type': undefined } },
+    );
+
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'Could not add this photo'));
+  }
+};
+
+/**
  * Co-hosting.
  *
  * Adding a co-host sends them an invite; the API records it PENDING and they
