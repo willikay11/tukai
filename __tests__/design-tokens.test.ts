@@ -51,3 +51,28 @@ describe('design tokens', () => {
     expect(read('brand.DEFAULT')).not.toBe(read('primary.DEFAULT'));
   });
 });
+
+/**
+ * The canvas uses 29 font sizes, half-pixels included. These five are the
+ * peaks Tailwind has no default for; the half-steps round to their nearest
+ * neighbour rather than each earning a token.
+ */
+describe('type scale', () => {
+  const sizes = config.theme?.extend?.fontSize as Record<string, [string, string]>;
+
+  it.each([
+    ['13', '13px', '18px'],
+    ['15', '15px', '22px'],
+    ['17', '17px', '24px'],
+    ['19', '19px', '26px'],
+    ['22', '22px', '28px'],
+  ])('text-%s is %s with %s leading', (token, size, leading) => {
+    expect(sizes[token]).toEqual([size, leading]);
+  });
+
+  // 15px is the canvas's body size and `text-base` is 16px. Moving `base`
+  // would resize every screen at once, so they stay separate.
+  it('leaves text-base alone', () => {
+    expect(sizes.base).toBeUndefined();
+  });
+});

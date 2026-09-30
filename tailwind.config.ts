@@ -18,6 +18,24 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      /**
+       * The canvas uses 29 distinct font sizes, half-pixels included — it was
+       * drawn freehand, not off a scale. These are the five peaks Tailwind has
+       * no default for; the half-steps beside them (12.5, 13.5, 14.5, 15.5)
+       * round to their nearest neighbour rather than each earning a token.
+       *
+       * Additive, like the colours: `text-base` stays 16px. The canvas's body
+       * size is 15px, and moving `base` would resize every screen at once.
+       * Line heights follow the canvas's own ~1.5 ratio.
+       */
+      fontSize: {
+        '13': ['13px', '18px'], // 103 uses — dense captions and meta lines
+        '15': ['15px', '22px'], // 411 — the canvas's body size
+        '17': ['17px', '24px'], // 65 — a heavy body line
+        '19': ['19px', '26px'], // 118 — section headings
+        '22': ['22px', '28px'], // 88 — screen titles
+      },
+
       screens: {
         '3xl': '1920px',
         '4xl': '2560px',
