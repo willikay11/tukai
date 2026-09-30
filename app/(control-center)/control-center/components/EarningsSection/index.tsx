@@ -1,9 +1,12 @@
 'use client';
 
+import { useState } from 'react';
+
 import moment from 'moment';
 
 import { useEarningsSummary, usePayouts } from '@/app/(experiences)/hooks/usePayment';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
 import { cn } from '@/lib/utils';
 import {
@@ -14,6 +17,9 @@ import {
   payoutAmount,
   payoutDestinationLabel,
 } from '@/types/payment';
+
+import { WalletsSection } from '../WalletsSection';
+import { WithdrawDrawer } from '../WithdrawDrawer';
 
 /** Settled is done, failed and reversed are not, the rest are in flight. */
 const STATUS_TONE: Record<string, string> = {
@@ -104,6 +110,7 @@ const PayoutRow = ({ payout }: { payout: HostPayout }) => (
  * withdrawn now.
  */
 export const EarningsSection = ({ currency = 'Ksh.' }: { currency?: string }) => {
+  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
   const { data: summaryResponse, isLoading: isSummaryLoading } = useEarningsSummary();
   const { data: payoutsResponse, isLoading: arePayoutsLoading } = usePayouts();
 
@@ -119,11 +126,26 @@ export const EarningsSection = ({ currency = 'Ksh.' }: { currency?: string }) =>
 
   return (
     <section className="space-y-4">
-      <div>
-        <h2 className="text-lg font-bold text-gray-900">Earnings</h2>
-        <p className="mt-0.5 text-sm text-gray-500">
-          What your experiences have taken, and what has been paid out to you.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">Earnings</h2>
+          <p className="mt-0.5 text-sm text-gray-500">
+            What your experiences have taken, and what has been paid out to you.
+          </p>
+        </div>
+
+        {/* Only money that has settled can be taken out, so there is nothing to
+            offer until there is some */}
+        {payoutAmount(summary?.availableBalance) > 0 && (
+          <Button
+            type="button"
+            variant="lime"
+            onClick={() => setIsWithdrawOpen(true)}
+            className="rounded-full px-5"
+          >
+            Withdraw
+          </Button>
+        )}
       </div>
 
       {summary ? (
@@ -167,6 +189,15 @@ export const EarningsSection = ({ currency = 'Ksh.' }: { currency?: string }) =>
           </div>
         )}
       </div>
+
+      <WalletsSection />
+
+      <WithdrawDrawer
+        currency={currency}
+        availableBalance={summary?.availableBalance ?? '0'}
+        isOpen={isWithdrawOpen}
+        onClose={() => setIsWithdrawOpen(false)}
+      />
     </section>
   );
 };

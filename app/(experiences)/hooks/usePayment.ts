@@ -4,10 +4,13 @@ import {
   createBankWallet,
   createPhoneWallet,
   fetchEarningsSummary,
+  fetchPayoutQuote,
   fetchPayouts,
   fetchWallets,
   patchBankWallet,
   patchPhoneWallet,
+  requestWithdrawal,
+  setActiveWallet,
 } from '@/services/payment';
 import {
   CreateBankWallet,
@@ -85,3 +88,39 @@ export const usePayouts = (enabled = true) =>
     queryFn: async () => await fetchPayouts({ page: 1, page_size: 50 }),
     enabled,
   });
+
+/**
+ * The fees on a withdrawal of this amount.
+ *
+ * Kept as a query rather than a mutation so it follows the amount as it is
+ * typed, and held back until there is an amount worth quoting.
+ */
+export const usePayoutQuote = (amount: string, currency = 'KES', walletId?: string) =>
+  useQuery({
+    queryKey: ['payout-quote', amount, currency, walletId ?? null],
+    queryFn: async () =>
+      await fetchPayoutQuote({ amount, currency, ...(walletId ? { wallet_id: walletId } : {}) }),
+    enabled: Number(amount) > 0,
+  });
+
+export const useRequestWithdrawal = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { amount: string; currency: string }) => await requestWithdrawal(data),
+    onSuccess: () => {
+      // The balance and the payout list both move on a withdrawal
+      queryClient.invalidateQueries({ queryKey: ['earnings-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['payouts'] });
+    },
+  });
+};
+
+export const useSetActiveWallet = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (walletId: string) => await setActiveWallet(walletId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['wallets'] }),
+  });
+};

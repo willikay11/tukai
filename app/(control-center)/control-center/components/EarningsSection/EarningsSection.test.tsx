@@ -16,6 +16,10 @@ jest.mock('@/app/(experiences)/hooks/usePayment', () => ({
   usePayouts: () => ({ data: { data: payouts }, isLoading: arePayoutsLoading }),
 }));
 
+// Both open below the figures and are covered by their own tests
+jest.mock('../WalletsSection', () => ({ WalletsSection: () => null }));
+jest.mock('../WithdrawDrawer', () => ({ WithdrawDrawer: () => null }));
+
 const earnings = (overrides: Partial<HostEarningsSummary> = {}): HostEarningsSummary => ({
   totalTicketSales: '120000.00',
   availableBalance: '45000.00',
@@ -118,5 +122,22 @@ describe('the earnings section', () => {
     render(<EarningsSection currency="KES" />);
 
     expect(screen.getByText('No payouts yet')).toBeInTheDocument();
+  });
+
+  /**
+   * Only money that has settled can be taken out, so there is nothing to offer
+   * until there is some.
+   */
+  it('offers a withdrawal when there is money available', () => {
+    render(<EarningsSection currency="KES" />);
+
+    expect(screen.getByRole('button', { name: 'Withdraw' })).toBeInTheDocument();
+  });
+
+  it('does not offer one when the available balance is nothing', () => {
+    summary = earnings({ availableBalance: '0.00' });
+    render(<EarningsSection currency="KES" />);
+
+    expect(screen.queryByRole('button', { name: 'Withdraw' })).not.toBeInTheDocument();
   });
 });
