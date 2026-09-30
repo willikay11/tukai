@@ -24,16 +24,25 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
         text: 'hover:text-primary !p-0',
         'primary-text': 'text-primary !p-0',
-        gradient: 'bg-gradient-to-b to-[#064E3B] from-[#047857] text-white',
+        // The canvas's primary: linear-gradient(180deg,#0C7A50,#044B36). It was
+        // on #047857 -> #064E3B, which is a different pair of greens.
+        gradient: 'bg-gradient-to-b from-brand-mid to-brand-deep text-white',
         // The outlined counterpart of `gradient`: the same two greens, but as
         // the border on a white face. Two backgrounds do it — white clipped to
         // the padding box over the gradient clipped to the border box — which
         // is the only way a gradient border follows the corner radius.
         'gradient-outline':
-          'border border-transparent text-primary [background:linear-gradient(#fff,#fff)_padding-box,linear-gradient(to_bottom,#047857,#064E3B)_border-box] hover:opacity-90',
+          'border border-transparent text-brand [background:linear-gradient(#fff,#fff)_padding-box,linear-gradient(to_bottom,#0C7A50,#044B36)_border-box] hover:opacity-90',
         'outline-primary':
           'rounded-full border border-primary bg-white text-primary hover:bg-primary/5',
-        lime: 'bg-lime text-teal-950 hover:bg-lime-600',
+        // Canvas lime chip: #013334 on #B0E800, pressing to #A3D900. The hover
+        // was Tailwind's lime-600 (#65A30D), a different colour entirely.
+        lime: 'bg-lime text-brand-ink hover:bg-lime-dark',
+        // The canvas's resting button: a white face, deep-teal label, hairline
+        // border. Its default, where ours is a filled `default`.
+        'canvas-outline': 'border border-line bg-white text-brand-ink hover:bg-surface',
+        // The canvas's "already done" state — joined a community, saved a list
+        joined: 'border border-line-brand bg-surface-brand text-brand-deep',
       },
       size: {
         default: 'h-9 px-4 py-2',

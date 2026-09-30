@@ -76,6 +76,7 @@ const config: Config = {
         },
         line: {
           DEFAULT: '#DDE3DF', // 176 — hairline borders and dividers
+          brand: '#CBDDD4', // 15 — the hairline on a green-faced control
         },
         ink: {
           DEFAULT: '#3F4B47', // 42 — strong body text
