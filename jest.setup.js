@@ -15,3 +15,21 @@ if (typeof Element !== 'undefined') {
   if (!Element.prototype.releasePointerCapture) Element.prototype.releasePointerCapture = () => {};
   if (!Element.prototype.scrollIntoView) Element.prototype.scrollIntoView = () => {};
 }
+
+/**
+ * jsdom implements no `matchMedia`, so any component that asks the viewport a
+ * question throws on render. Defaults to "does not match", which is the wide
+ * layout for a max-width query — tests that care set their own return value.
+ */
+if (typeof window !== 'undefined' && !window.matchMedia) {
+  window.matchMedia = (query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    addListener: () => {},
+    removeListener: () => {},
+    dispatchEvent: () => false,
+  });
+}
