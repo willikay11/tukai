@@ -70,6 +70,9 @@ export type Experience = {
     dateCreated: string;
     status: 'invited' | 'accepted' | 'declined';
   }[];
+  // The communities this experience was shared with. Read-only on the detail
+  // serializer; the create flow sends them as `invitedCommunityIds`.
+  communities?: { id: string; title: string; photos?: Photo[] }[];
 };
 
 export type ExperienceOccurrence = {

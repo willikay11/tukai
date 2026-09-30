@@ -123,7 +123,11 @@ export default function ManageExperiencePage() {
         />
       )}
       {tab === 'guests' && (
-        <InvitedGuestsTab experienceId={experienceId} guests={experience.guests ?? []} />
+        <InvitedGuestsTab
+          experienceId={experienceId}
+          guests={experience.guests ?? []}
+          communities={experience.communities ?? []}
+        />
       )}
       {tab === 'moments' && <ComingSoon feature="Moments" iconName="GridIcon" />}
       {tab === 'analytics' && <ComingSoon feature="Analytics" iconName="PieChartIcon" />}

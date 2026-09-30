@@ -407,6 +407,23 @@ export const addGuestToExperience = async (id: string, email: string) => {
   }
 };
 
+/**
+ * Take a guest off the experience. Their invite stops working; anything they
+ * have already bought is a purchase and is untouched.
+ */
+export const removeGuestFromExperience = async (id: string, guestId: string) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    await axiosInstance.delete(`/v1/experiences/${id}/guests/${guestId}/`);
+
+    return { status: 204, success: true };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'Could not remove this guest'));
+  }
+};
+
 export const publishExperience = async (id: string): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();

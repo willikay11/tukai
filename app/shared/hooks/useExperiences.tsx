@@ -27,6 +27,7 @@ import {
   previewPromoCode,
   publishExperience,
   purchaseExperienceTicketV2,
+  removeGuestFromExperience,
   resumeTicketSales,
   searchUsers,
   updateExperience,
@@ -188,6 +189,15 @@ export const useAddGuestToExperience = (experienceId: string) => {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
     },
+  });
+};
+
+export const useRemoveExperienceGuest = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (guestId: string) => await removeGuestFromExperience(experienceId, guestId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['experience', experienceId] }),
   });
 };
 
