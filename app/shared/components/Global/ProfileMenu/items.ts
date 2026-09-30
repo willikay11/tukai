@@ -19,6 +19,7 @@ export const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
     href: '/communities?category=my-communities',
   },
   { label: 'Bucket List', icon: 'ShoppingBasket01Icon', href: '/bucket-lists' },
+  { label: 'My Plans', icon: 'MapsIcon', href: '/plans' },
   { label: 'Notifications', icon: 'Notification03Icon', href: '/inbox', showsUnreadDot: true },
   { label: 'Messages', icon: 'BubbleChatIcon', href: '/inbox' },
   { label: 'Control Center', icon: 'Analytics01Icon', href: '/control-center' },
