@@ -81,4 +81,30 @@ describe('PlaceCard', () => {
 
     expect(screen.getByText('Restaurants · Karen Rd')).toBeInTheDocument();
   });
+
+  /**
+   * The canvas's reviewLine is the score with its count, or "No reviews yet".
+   * An empty corner reads as missing data rather than as a place nobody has
+   * been to.
+   */
+  describe('the review line', () => {
+    it('shows the score with how many reviews it came from', () => {
+      render(<PlaceCard place={makePlace({ averageRating: 4.5, totalReviews: 23 })} />);
+
+      expect(screen.getByText('4.5')).toBeInTheDocument();
+      expect(screen.getByText('(23 reviews)')).toBeInTheDocument();
+    });
+
+    it('says one review in the singular', () => {
+      render(<PlaceCard place={makePlace({ averageRating: 5, totalReviews: 1 })} />);
+
+      expect(screen.getByText('(1 review)')).toBeInTheDocument();
+    });
+
+    it('says so when nobody has reviewed it', () => {
+      render(<PlaceCard place={makePlace({ averageRating: 0, totalReviews: 0 })} />);
+
+      expect(screen.getByText('No reviews yet')).toBeInTheDocument();
+    });
+  });
 });

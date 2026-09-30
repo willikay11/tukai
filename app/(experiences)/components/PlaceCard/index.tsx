@@ -28,6 +28,13 @@ export const PlaceCard = ({ place, priority = false }: { place: Place; priority?
   // Most places have no reviews yet, so 0 means "unrated" rather than a score
   const rating = place.averageRating > 0 ? place.averageRating : null;
 
+  /**
+   * The canvas's reviewLine: the score with its count, or "No reviews yet".
+   * Saying so beats showing nothing — an empty corner reads as missing data
+   * rather than as a place nobody has been to yet.
+   */
+  const reviewCount = place.totalReviews ?? 0;
+
   return (
     <CardShell
       href={placePath(place)}
@@ -53,11 +60,21 @@ export const PlaceCard = ({ place, priority = false }: { place: Place; priority?
       <div className="mt-3">
         <div className="flex items-start justify-between gap-2">
           <p className={cn('text-base font-bold text-gray-900', TITLE_TINT)}>{place.title}</p>
-          {rating !== null && (
+          {rating !== null ? (
             <span className="flex flex-shrink-0 items-center gap-1">
               <IconComponent iconName="StarIcon" size={14} className="text-yellow-400" />
-              <span className="text-sm font-medium text-gray-800">{rating}</span>
+              <span className="text-sm font-medium text-gray-800">
+                {rating}
+                {reviewCount > 0 && (
+                  <span className="font-normal text-ink-muted">
+                    {' '}
+                    ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
+                  </span>
+                )}
+              </span>
             </span>
+          ) : (
+            <span className="flex-shrink-0 text-sm text-ink-subtle">No reviews yet</span>
           )}
         </div>
         {metaLine && <p className="mt-0.5 text-sm text-gray-400">{metaLine}</p>}
