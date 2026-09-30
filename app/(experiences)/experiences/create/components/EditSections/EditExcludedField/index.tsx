@@ -12,7 +12,7 @@ export const EditExcludedField = ({ value, onChange, error }: EditExcludedFieldP
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium text-gray-800">What's NOT included</label>
-      <Editor initialHtml={value} onHtmlChange={onChange} />
+      <Editor initialHtml={value} onHtmlChange={onChange} minHeight={96} />
       {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
   );

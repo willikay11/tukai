@@ -46,6 +46,7 @@ export function Editor({
   onSerializedChange,
   onHtmlChange,
   className,
+  minHeight,
 }: {
   editorState?: EditorState;
   editorSerializedState?: SerializedEditorState;
@@ -55,9 +56,17 @@ export function Editor({
   onSerializedChange?: (editorSerializedState: SerializedEditorState) => void;
   onHtmlChange?: (html: string) => void;
   className?: string;
+  /**
+   * How tall the writing area starts, in pixels. The canvas asks for three:
+   * 120 for a description, 96 for the included and excluded lists.
+   */
+  minHeight?: number;
 }) {
   return (
-    <div className={`overflow-hidden rounded-lg border bg-background ${className || ''}`}>
+    <div
+      className={`overflow-hidden rounded-lg border bg-background ${className || ''}`}
+      style={minHeight ? { minHeight } : undefined}
+    >
       <LexicalComposer
         initialConfig={{
           ...editorConfig,
