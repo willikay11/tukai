@@ -27,9 +27,14 @@ export const MessagesTab = ({ myId }: { myId: string }) => {
   const { mutate: markRead } = useMarkMessageRead();
 
   const payload = response?.data;
-  const messages: Message[] = Array.isArray(payload) ? payload : (payload?.results ?? []);
 
-  const threads = useMemo(() => toThreads(messages, myId), [messages, myId]);
+  // Read inside the memo: a fresh array every render would rebuild the threads
+  // every render too
+  const threads = useMemo(() => {
+    const messages: Message[] = Array.isArray(payload) ? payload : (payload?.results ?? []);
+
+    return toThreads(messages, myId);
+  }, [payload, myId]);
   const open = threads.find((thread) => thread.personId === openPersonId) ?? null;
 
   // Opening a conversation is reading it, so what was sent to the reader stops
