@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { SubscriptionModalFlow } from '@/app/shared/components/Subscription';
+import { useUnreadNotificationCount } from '@/app/shared/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { TukaiImage } from '@/components/ui/image';
@@ -25,6 +26,11 @@ export const AuthActions = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const hasSubscribed = Boolean(session?.user?.hasSubscribed);
+
+  // The dot on the Notifications row was hardcoded true, so it was on for
+  // everybody forever
+  const { data: unreadResponse } = useUnreadNotificationCount(Boolean(session?.user?.id));
+  const unreadCount = Number(unreadResponse?.data?.count ?? 0);
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
@@ -115,7 +121,7 @@ export const AuthActions = () => {
               name={session.user.name ?? ''}
               handle={session.user.displayName}
               image={session.user.image}
-              hasUnreadNotifications
+              hasUnreadNotifications={unreadCount > 0}
               onSignOut={handleLogout}
               // Client navigation leaves the popover mounted, so choosing a row
               // has to close it explicitly

@@ -34,6 +34,10 @@ jest.mock('@/context/AuthDialogContext', () => ({
 jest.mock('@/app/shared/components/Subscription', () => ({
   SubscriptionModalFlow: () => null,
 }));
+// The dot on Notifications is driven by the real unread count now
+jest.mock('@/app/shared/hooks/useNotifications', () => ({
+  useUnreadNotificationCount: () => ({ data: { data: { count: 0 } } }),
+}));
 
 // The trigger is the button wrapping the user's avatar
 const openMenu = () => {

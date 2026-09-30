@@ -72,20 +72,31 @@ describe('ProfileMenu', () => {
     expect(screen.getByText('Control Center').closest('button')).toBeNull();
   });
 
-  // Bucket List, Notifications, Messages and Control Center have no page yet
-  it('disables items whose destination does not exist rather than linking to a 404', () => {
+  /**
+   * Every row routes now that the inbox exists. The disabled branch stays as a
+   * guard for the next item added before its page.
+   */
+  it('routes every row', () => {
     render(<ProfileMenu {...defaults} />);
 
-    PROFILE_MENU_ITEMS.filter((item) => !item.href).forEach((item) => {
-      const control = screen.getByText(item.label).closest('button');
-      expect(control).toBeDisabled();
+    PROFILE_MENU_ITEMS.forEach((item) => {
+      expect(item.href).toBeTruthy();
+      expect(screen.getByText(item.label).closest('a')).toHaveAttribute('href', item.href!);
     });
+  });
+
+  it('sends Notifications and Messages to the inbox', () => {
+    render(<ProfileMenu {...defaults} />);
+
+    expect(screen.getByText('Notifications').closest('a')).toHaveAttribute('href', '/inbox');
+    expect(screen.getByText('Messages').closest('a')).toHaveAttribute('href', '/inbox');
   });
 
   it('shows the unread dot on Notifications only', () => {
     const { container } = render(<ProfileMenu {...defaults} hasUnreadNotifications />);
 
-    const notifications = screen.getByText('Notifications').closest('button');
+    // Notifications routes to the inbox now, so its row is a link
+    const notifications = screen.getByText('Notifications').closest('a');
     expect(notifications?.querySelector('.bg-red-500')).toBeInTheDocument();
     expect(container.querySelectorAll('.bg-red-500')).toHaveLength(1);
   });
@@ -127,19 +138,6 @@ describe('ProfileMenu', () => {
 
       expect(onItemSelect).toHaveBeenCalled();
       expect(onSignOut).toHaveBeenCalled();
-    });
-
-    // A disabled row goes nowhere, so nothing should close
-    it('does not report a selection from an unavailable item', () => {
-      const unavailable = PROFILE_MENU_ITEMS.find((item) => !item.href);
-      expect(unavailable).toBeDefined();
-
-      const onItemSelect = jest.fn();
-      render(<ProfileMenu {...defaults} onItemSelect={onItemSelect} />);
-
-      fireEvent.click(screen.getByText(unavailable!.label));
-
-      expect(onItemSelect).not.toHaveBeenCalled();
     });
 
     it('works without the callback', () => {
