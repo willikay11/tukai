@@ -20,6 +20,7 @@ import {
   fetchCoHostInvites,
   fetchExperience,
   fetchExperienceOccurrences,
+  fetchExperienceRatings,
   fetchExperiences,
   fetchItineraryDays,
   fetchPurchase,
@@ -253,6 +254,14 @@ export const useDeleteExperiencePhoto = () => {
     },
   });
 };
+
+/** Every review on an experience. The average and the count come off these. */
+export const useExperienceRatings = (experienceId: string, enabled = true) =>
+  useQuery({
+    queryKey: ['experience-ratings', experienceId],
+    queryFn: async () => await fetchExperienceRatings(experienceId),
+    enabled: enabled && Boolean(experienceId),
+  });
 
 export const useCoHostInvites = (experienceId: string, enabled = true) =>
   useQuery({

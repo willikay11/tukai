@@ -543,6 +543,34 @@ export const deleteExperiencePhoto = async (photoId: string): Promise<ApiRespons
 };
 
 /**
+ * What attendees said about an experience.
+ *
+ * The endpoint answers with a bare array rather than a page, and can refuse
+ * outright (403) on an experience whose ratings the reader may not see — which
+ * is a quiet empty state, not an error to shout about.
+ */
+export const fetchExperienceRatings = async (experienceId: string): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.get(`/v1/experiences/${experienceId}/ratings/`);
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load reviews'),
+    };
+  }
+};
+
+/**
  * Co-hosting.
  *
  * Adding a co-host sends them an invite; the API records it PENDING and they

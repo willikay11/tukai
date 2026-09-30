@@ -31,6 +31,7 @@ import { LocationMeetingSection } from '../components/LocationMeetingSection';
 import { MetaRow } from '../components/MetaRow';
 import { MobileBookingBar } from '../components/MobileBookingBar';
 import { ExperienceOrganiser } from '../components/experienceOrganiser';
+import { ExperienceReviews } from './components/ExperienceReviews';
 
 /**
  * SINGLE SOURCE OF TRUTH for the experience detail view.
@@ -227,6 +228,17 @@ export const ViewExperiencePageContent = ({
           )}
 
           <Separator />
+
+          {/* What attendees said. Hidden for a reader who is not signed in: the
+              ratings endpoint needs a token and can refuse outright. */}
+          {!isPreview && (
+            <>
+              <RevealOnScroll>
+                <ExperienceReviews experienceId={experience.id} />
+              </RevealOnScroll>
+              <Separator />
+            </>
+          )}
 
           {/* Cancellation Policy */}
           <RevealOnScroll>
