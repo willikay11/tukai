@@ -38,15 +38,18 @@ export const FilterPill = ({
     className={clsx(
       'flex h-[2.5rem] flex-row items-center justify-center rounded-[2.5rem] px-4 py-2',
       PRESSABLE,
-      isSelected ? 'bg-green-100 text-primary' : 'bg-gray-100 text-gray-500',
+      // Canvas values, via the tokens: a chosen chip is #E8F1ED behind #066349,
+      // a resting one #F3F4F2 behind #1F2937
+      isSelected ? 'bg-surface-brand text-brand' : 'bg-surface text-gray-800',
       className,
     )}
   >
     {icon && <IconComponent iconName={icon} size={18} />}
     <span
+      // 600 chosen, 500 resting — the canvas's own weights for a chip
       className={clsx('text-nowrap text-xs', icon && 'ml-2', {
-        'font-semibold text-primary': isSelected,
-        'font-medium text-gray-700': !isSelected,
+        'font-semibold text-brand': isSelected,
+        'font-medium text-gray-800': !isSelected,
       })}
     >
       {label}
