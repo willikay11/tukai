@@ -16,6 +16,7 @@ import { TicketPurchase } from '@/types/ticket-purchase';
 
 import { ControlCenterHero } from './components/ControlCenterHero';
 import { ControlCenterStatCard } from './components/ControlCenterStatCard';
+import { EarningsSection } from './components/EarningsSection';
 import { ExperienceProgressRow } from './components/ExperienceProgressRow';
 import { MyExperiences } from './components/MyExperiences';
 import { ControlCenterReservation, RecentReservations } from './components/RecentReservations';
@@ -235,6 +236,9 @@ export const ControlCenterContent = () => {
           )}
         </div>
       </div>
+
+      {/* The money, which the control centre could not show at all */}
+      <EarningsSection currency={metrics.currency} />
 
       <MyExperiences experiences={published} />
 

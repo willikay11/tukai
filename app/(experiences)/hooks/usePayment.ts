@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createBankWallet,
   createPhoneWallet,
+  fetchEarningsSummary,
+  fetchPayouts,
   fetchWallets,
   patchBankWallet,
   patchPhoneWallet,
@@ -64,3 +66,22 @@ export const usePatchBankWallet = () => {
     },
   });
 };
+
+/**
+ * What the host has earned. Its own query rather than part of the wallets one:
+ * the balances move with every sale, the wallets themselves hardly ever change.
+ */
+export const useEarningsSummary = (enabled = true) =>
+  useQuery({
+    queryKey: ['earnings-summary'],
+    queryFn: async () => await fetchEarningsSummary(),
+    enabled,
+  });
+
+/** Every payout the host has been sent. */
+export const usePayouts = (enabled = true) =>
+  useQuery({
+    queryKey: ['payouts'],
+    queryFn: async () => await fetchPayouts({ page: 1, page_size: 50 }),
+    enabled,
+  });
