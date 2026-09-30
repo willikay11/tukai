@@ -23,9 +23,11 @@ import {
   fetchPurchase,
   fetchSlotTemplates,
   fetchTicketPurchases,
-  publishExperience,
+  pauseTicketSales,
   previewPromoCode,
+  publishExperience,
   purchaseExperienceTicketV2,
+  resumeTicketSales,
   searchUsers,
   updateExperience,
   updateExperienceTicket,
@@ -372,3 +374,23 @@ export const usePreviewPromoCode = () =>
     mutationFn: async (data: Parameters<typeof previewPromoCode>[0]) =>
       await previewPromoCode(data),
   });
+
+/**
+ * Stop or restart selling one ticket type.
+ *
+ * The host's own view has to re-read afterwards: paused state lives on the
+ * ticket as `ticket_sales_paused_at`, and the experience carries its tickets,
+ * so both caches are dropped.
+ */
+export const useSetTicketSales = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ ticketId, paused }: { ticketId: string; paused: boolean }) =>
+      paused ? await pauseTicketSales(ticketId) : await resumeTicketSales(ticketId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
+      queryClient.invalidateQueries({ queryKey: ['experience-tickets', experienceId] });
+    },
+  });
+};

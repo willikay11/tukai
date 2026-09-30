@@ -5,8 +5,12 @@ import { useState } from 'react';
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { useSetTicketSales } from '@/app/shared/hooks/useExperiences';
+import { useToast } from '@/app/shared/hooks/useToast';
+import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
-import { Ticket } from '@/types/ticket';
+import { cn } from '@/lib/utils';
+import { Ticket, isTicketPaused } from '@/types/ticket';
 
 import { EditTicketModal } from '../EditTicketModal';
 
@@ -25,6 +29,34 @@ const MetricCell = ({ label, value }: { label: string; value: string }) => (
 
 export const TicketsCreatedTab = ({ experienceId, tickets, currency }: TicketsCreatedTabProps) => {
   const [editing, setEditing] = useState<Ticket | null>(null);
+  const { toast } = useToast();
+  const { mutate: setSales, isPending, variables } = useSetTicketSales(experienceId);
+
+  const toggleSales = (ticket: Ticket) => {
+    const paused = !isTicketPaused(ticket);
+
+    setSales(
+      { ticketId: ticket.id, paused },
+      {
+        onSuccess: () =>
+          toast({
+            title: paused ? 'Sales paused' : 'Sales resumed',
+            // The canvas says this outright, and it is the first thing a host
+            // worries about before pressing pause
+            description: paused
+              ? `No new purchases of ${ticket.name}. People who already bought keep their tickets.`
+              : `${ticket.name} is on sale again.`,
+            variant: 'success',
+          }),
+        onError: (error: Error) =>
+          toast({
+            title: paused ? 'Could not pause sales' : 'Could not resume sales',
+            description: error.message,
+            variant: 'destructive',
+          }),
+      },
+    );
+  };
 
   if (tickets.length === 0) {
     return (
@@ -47,20 +79,45 @@ export const TicketsCreatedTab = ({ experienceId, tickets, currency }: TicketsCr
         const amountSold = sold * price;
 
         const expiry = ticket.salesEndDate ? moment(ticket.salesEndDate).format('D MMM YYYY') : '—';
+        const paused = isTicketPaused(ticket);
 
         return (
           <div
             key={ticket.id}
-            className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
+            // A paused type is still the host's to manage, so it stays
+            // readable rather than being dimmed out of the way
+            className={cn(
+              'rounded-2xl border bg-white p-5 shadow-sm',
+              paused ? 'border-line' : 'border-gray-100',
+            )}
           >
             <div className="flex items-center justify-between gap-3">
-              <p className="text-base font-bold text-gray-900">{ticket.name}</p>
-              <IconComponent
-                iconName="Share08Icon"
-                size={16}
-                color="currentColor"
-                className="text-gray-400"
-              />
+              <div className="flex min-w-0 items-center gap-2">
+                <p className="truncate text-base font-bold text-gray-900">{ticket.name}</p>
+                {paused && (
+                  <span className="flex-shrink-0 rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-ink-muted">
+                    Paused
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-shrink-0 items-center gap-2">
+                <Button
+                  variant={paused ? 'lime' : 'canvas-outline'}
+                  size="sm"
+                  className="rounded-full"
+                  isLoading={isPending && variables?.ticketId === ticket.id}
+                  onClick={() => toggleSales(ticket)}
+                >
+                  {paused ? 'Resume sales' : 'Pause sales'}
+                </Button>
+                <IconComponent
+                  iconName="Share08Icon"
+                  size={16}
+                  color="currentColor"
+                  className="text-gray-400"
+                />
+              </div>
             </div>
 
             <div className="mt-4 flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">

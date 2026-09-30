@@ -330,6 +330,37 @@ export async function updateExperienceTicket(
   }
 }
 
+/**
+ * Stop or restart selling one ticket type.
+ *
+ * Pausing blocks new purchases and booking requests and hides the type from
+ * anyone but the host. It does not touch tickets already bought.
+ */
+const setTicketSales = async (
+  ticketId: string,
+  action: 'pause' | 'resume',
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.post(
+      `/v1/experiences/tickets/${ticketId}/${action}-sales/`,
+    );
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'An unexpected error occurred'));
+  }
+};
+
+export const pauseTicketSales = (ticketId: string) => setTicketSales(ticketId, 'pause');
+export const resumeTicketSales = (ticketId: string) => setTicketSales(ticketId, 'resume');
+
 export const deleteExperienceTicket = async (
   experienceId: string,
   ticketId: string,

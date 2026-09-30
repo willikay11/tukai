@@ -36,4 +36,16 @@ export type Ticket = {
     unit: 'hour' | 'day' | 'week';
     anchor: 'start' | 'end';
   } | null;
+  /**
+   * When the host stopped selling this type. Null while it is on sale.
+   * Pausing blocks new purchases and hides the type from anyone but the host;
+   * people who already bought keep their tickets.
+   */
+  ticketSalesPausedAt?: string | null;
+  ticket_sales_paused_at?: string | null;
 };
+
+/** Both spellings reach the client depending on which serializer answered. */
+export const isTicketPaused = (
+  ticket: Pick<Ticket, 'ticketSalesPausedAt' | 'ticket_sales_paused_at'>,
+): boolean => Boolean(ticket.ticketSalesPausedAt ?? ticket.ticket_sales_paused_at);
