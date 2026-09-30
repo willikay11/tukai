@@ -137,15 +137,24 @@ describe('BucketListPicker', () => {
   });
 
   /**
-   * The shared Drawer positions with `fixed` and no portal, so an ancestor
-   * carrying a transform or a backdrop-filter becomes its containing block and
-   * it lands off-viewport. Radix portals to the body, so where the picker is
-   * opened from cannot move it.
+   * The canvas opens everything about bucket lists in the side panel. This was
+   * on a Radix dialog because the old Drawer positioned with `fixed` and no
+   * portal, so an ancestor carrying a transform or a backdrop-filter became
+   * its containing block and it landed off-viewport. The Drawer portals now.
    */
   it('renders through a portal, not inside whatever opened it', () => {
     const { container } = renderPicker();
 
     expect(container).toBeEmptyDOMElement();
     expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('opens in the drawer, as the canvas has it', () => {
+    renderPicker();
+
+    // The drawer's own panel, rather than a centred dialog box
+    const panel = document.body.querySelector('[role="dialog"]') as HTMLElement;
+    expect(panel.className).toContain('right-0');
+    expect(panel.style.width).toBe('560px');
   });
 });

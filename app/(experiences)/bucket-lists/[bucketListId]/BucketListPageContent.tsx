@@ -14,6 +14,7 @@ import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { BucketListDetail, BucketListItem, bucketListCoverPhoto } from '@/types/bucket-list';
 import { linkedUserName } from '@/types/user';
+import { CANVAS_ICONS } from '@/utils/canvas-icons';
 
 import { ReorderItemsDialog } from './components/ReorderItemsDialog';
 import { SavedExperienceCard, SavedPlaceCard } from './components/SavedItemCard';
@@ -136,7 +137,9 @@ export const BucketListPageContent = ({ bucketListId }: { bucketListId: string }
       <div className="mt-4 flex items-center justify-between gap-4">
         <span className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm text-gray-700">
           <IconComponent
-            iconName={isPublic ? 'Globe02Icon' : 'ViewOffIcon'}
+            // The canvas's own pair: a globe for public, a lock for private.
+            // ViewOffIcon read as "hidden from you" rather than "private".
+            iconName={isPublic ? CANVAS_ICONS.globe : CANVAS_ICONS.lock}
             color="currentColor"
             size={16}
           />
