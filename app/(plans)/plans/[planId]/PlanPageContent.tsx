@@ -13,6 +13,7 @@ import { usePlans } from '@/context/PlanContext';
 import { planMeta, planWarnings, stopWarning } from '@/types/plan';
 import { experiencePath, placePath } from '@/utils/detail-paths';
 
+import { AddStopDrawer } from './components/AddStopDrawer';
 import { PlanStopRow } from './components/PlanStopRow';
 
 /**
@@ -39,6 +40,7 @@ export const PlanPageContent = ({ planId }: { planId: string }) => {
   const plan = plans.find((one) => one.id === planId);
   const [isRenaming, setIsRenaming] = useState(false);
   const [draftTitle, setDraftTitle] = useState('');
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   if (!isReady) {
     return (
@@ -151,21 +153,37 @@ export const PlanPageContent = ({ planId }: { planId: string }) => {
         <div className="flex items-center justify-between gap-3 border-b border-gray-100 py-3">
           <h2 className="text-base font-bold text-gray-900">Stops</h2>
 
-          {plan.stops.length > 1 && (
-            <button
+          <div className="flex items-center gap-1">
+            {plan.stops.length > 1 && (
+              <button
+                type="button"
+                onClick={() => sortStopsByTime(plan.id)}
+                className="flex h-10 items-center gap-1.5 rounded-full px-3 text-13 font-medium text-brand transition-colors hover:bg-surface-brand"
+              >
+                <IconComponent iconName="SortingAZ01Icon" size={16} color="currentColor" />
+                Sort by time
+              </button>
+            )}
+
+            <Button
               type="button"
-              onClick={() => sortStopsByTime(plan.id)}
-              className="flex h-10 items-center gap-1.5 rounded-full px-3 text-13 font-medium text-brand transition-colors hover:bg-surface-brand"
+              variant="canvas-outline"
+              size="sm"
+              onClick={() => setIsAddOpen(true)}
+              className="rounded-full"
             >
-              <IconComponent iconName="SortingAZ01Icon" size={16} color="currentColor" />
-              Sort by time
-            </button>
-          )}
+              <span className="flex items-center gap-1.5">
+                <IconComponent iconName="PlusSignIcon" size={14} color="currentColor" />
+                Add a stop
+              </span>
+            </Button>
+          </div>
         </div>
 
         {plan.stops.length === 0 ? (
           <p className="py-8 text-center text-sm text-ink-subtle">
-            No stops yet. Add one from an experience or a place, with &ldquo;Plan this&rdquo;.
+            No stops yet. Add one here, or from any experience or place with &ldquo;Plan
+            this&rdquo;.
           </p>
         ) : (
           <ul>
@@ -203,6 +221,8 @@ export const PlanPageContent = ({ planId }: { planId: string }) => {
       >
         Delete this plan
       </button>
+
+      <AddStopDrawer plan={plan} isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} />
     </PageContainer>
   );
 };

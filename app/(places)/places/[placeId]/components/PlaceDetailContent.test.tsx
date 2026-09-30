@@ -94,6 +94,11 @@ const place = (extra: Record<string, unknown> = {}): Place =>
     ...extra,
   }) as unknown as Place;
 
+// Planning has its own tests; it needs the plan store, which this page does not
+jest.mock('@/app/shared/components/Plans', () => ({
+  PlanThisButton: () => null,
+}));
+
 describe('PlaceDetailContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();

@@ -7,12 +7,14 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { RevealOnScroll, useHasScrolled } from '@/app/shared/components/Motion';
+import { PlanThisButton } from '@/app/shared/components/Plans';
 import { Share } from '@/app/shared/components/Share';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
+import { coverPhotoUrl } from '@/types/photo';
 import {
   formatFirstExperienceDate,
   formatItineraryDateRange,
@@ -253,6 +255,23 @@ export const ViewExperiencePageContent = ({
           </RevealOnScroll>
 
           <Separator />
+
+          {/* Stringing a day together out of what is on Tukai. Not a primary
+              action: it sits near a ticket price, and anything that reads like
+              buying would be read as buying. */}
+          {!isPreview && (
+            <PlanThisButton
+              subject={{
+                kind: 'experience',
+                refId: experience.id,
+                title: experience.title,
+                subtitle: experience.location?.city ?? undefined,
+                photo: coverPhotoUrl(experience.photos, 'thumb'),
+                refDate: experience.startDate,
+                soldOut: Boolean(experience.isSoldOut),
+              }}
+            />
+          )}
 
           {/* Report */}
           <Button variant="text" className="justify-start">

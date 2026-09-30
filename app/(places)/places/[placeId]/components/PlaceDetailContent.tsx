@@ -8,6 +8,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { RevealOnScroll, useHasScrolled } from '@/app/shared/components/Motion';
+import { PlanThisButton } from '@/app/shared/components/Plans';
 import { Rating } from '@/app/shared/components/Rating/Rating';
 import { MomentsGridSection, UpcomingExperiencesSection } from '@/app/shared/components/Sections';
 import { Share } from '@/app/shared/components/Share';
@@ -83,12 +84,26 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
           keeps the column's padding. */}
       <div className="sticky top-0 z-30 -mx-4 flex items-center justify-between gap-4 bg-white/95 px-4 py-3 backdrop-blur-sm lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:py-0 lg:backdrop-blur-none">
         <BackToExplore href="/places" label="Back to Places" />
-        <Share
-          coverPhoto={photos[0] ?? ''}
-          title={place.title}
-          link={`${process.env.NEXT_PUBLIC_APP_URL}${placePath(place)}`}
-          kind="place"
-        />
+        <div className="flex items-center gap-2">
+          {/* A place is the other half of a plan: somewhere to be between the
+              things that are ticketed */}
+          <PlanThisButton
+            subject={{
+              kind: 'place',
+              refId: place.id,
+              title: place.title,
+              subtitle: [category, place.location?.city].filter(Boolean).join(', ') || undefined,
+              photo: photos[0] ?? null,
+            }}
+            className="hidden sm:inline-flex"
+          />
+          <Share
+            coverPhoto={photos[0] ?? ''}
+            title={place.title}
+            link={`${process.env.NEXT_PUBLIC_APP_URL}${placePath(place)}`}
+            kind="place"
+          />
+        </div>
       </div>
 
       <div className="mt-4">

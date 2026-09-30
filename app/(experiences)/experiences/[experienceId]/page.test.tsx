@@ -185,6 +185,11 @@ const mockExperienceData = {
   },
 };
 
+// Planning has its own tests; it needs the plan store, which this page does not
+jest.mock('@/app/shared/components/Plans', () => ({
+  PlanThisButton: () => null,
+}));
+
 describe('ViewExperiencePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();

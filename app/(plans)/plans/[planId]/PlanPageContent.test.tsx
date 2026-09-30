@@ -27,6 +27,9 @@ jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) })
 const push = jest.fn();
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
 
+// Adding a stop has its own tests; here it only matters that it can be opened
+jest.mock('./components/AddStopDrawer', () => ({ AddStopDrawer: () => null }));
+
 const plan = (overrides: Partial<Plan> = {}): Plan => ({
   id: 'p1',
   title: 'Saturday out',
@@ -203,6 +206,6 @@ describe('one plan', () => {
     render(<PlanPageContent planId="p1" />);
 
     // Once in the meta line, once as the empty state telling them where to add
-    expect(screen.getByText(/Add one from an experience or a place/)).toBeInTheDocument();
+    expect(screen.getByText(/Add one here, or from any experience or place/)).toBeInTheDocument();
   });
 });
