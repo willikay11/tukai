@@ -35,7 +35,15 @@ const ticket = (overrides: Partial<Ticket> = {}): Ticket =>
 const renderTab = (tickets: Ticket[]) =>
   render(
     <TicketsCreatedTab
-      experience={{ id: 'e1', currency: 'KES', tickets } as unknown as Experience}
+      experience={
+        {
+          id: 'e1',
+          slug: 'sunrise-hike',
+          title: 'Sunrise hike',
+          currency: 'KES',
+          tickets,
+        } as unknown as Experience
+      }
     />,
   );
 
@@ -191,5 +199,72 @@ describe('the per-ticket stat block', () => {
     renderTab([ticket({ ticketSalesPausedAt: '2026-09-30T10:00:00Z' })]);
 
     expect(screen.queryByRole('button', { name: 'Edit ticket' })).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * There is no per-ticket page and no per-ticket link on the API, so this shares
+ * the experience's own page and says which type is on sale there.
+ */
+describe('sharing a ticket type', () => {
+  const writeText = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    pending = false;
+    writeText.mockResolvedValue(undefined);
+    // jsdom exposes `clipboard` as a getter, so it has to be redefined
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+    });
+  });
+
+  it('copies the link to the experience', async () => {
+    renderTab([ticket()]);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Share Early Bird' }));
+
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('/experiences/sunrise-hike'));
+  });
+
+  it('names the type that is on sale there', async () => {
+    renderTab([ticket()]);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Share Early Bird' }));
+
+    expect(toast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Link copied',
+        description: 'Early Bird is on sale on the Sunrise hike page.',
+      }),
+    );
+  });
+
+  // Sharing a type nobody can buy would waste whoever received it
+  it('refuses to share a paused type', async () => {
+    renderTab([ticket({ ticketSalesPausedAt: '2026-09-30T10:00:00Z' })]);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Share Early Bird' }));
+
+    expect(writeText).not.toHaveBeenCalled();
+    expect(toast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Early Bird is paused',
+        description: 'Resume sales before you share it.',
+        variant: 'destructive',
+      }),
+    );
+  });
+
+  it('gives the link in the open when the clipboard is refused', async () => {
+    writeText.mockRejectedValue(new Error('denied'));
+    renderTab([ticket()]);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Share Early Bird' }));
+
+    expect(toast).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'Copy this link to share it.' }),
+    );
   });
 });

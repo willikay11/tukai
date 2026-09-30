@@ -13,7 +13,14 @@ import { Ticket, isTicketPaused } from '@/types/ticket';
 import { DiscountCodesSection } from '../DiscountCodesSection';
 import { EditTicketModal } from '../EditTicketModal';
 import { SalesDeadlineSection } from '../SalesDeadlineSection';
-import { TicketStat, splitBySales, ticketPrice, ticketStats } from './ticket-stats';
+import {
+  TicketStat,
+  splitBySales,
+  ticketPrice,
+  ticketShareLink,
+  ticketShareMessage,
+  ticketStats,
+} from './ticket-stats';
 
 interface TicketsCreatedTabProps {
   experience: Experience;
@@ -78,12 +85,14 @@ const TicketCard = ({
   isBusy,
   onToggleSales,
   onEdit,
+  onShare,
 }: {
   ticket: Ticket;
   currency: string;
   isBusy: boolean;
   onToggleSales: () => void;
   onEdit: () => void;
+  onShare: () => void;
 }) => {
   const paused = isTicketPaused(ticket);
   const price = ticketPrice(ticket);
@@ -119,7 +128,7 @@ const TicketCard = ({
 
       <div
         className={cn(
-          'grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.7fr)] gap-x-3.5 gap-y-1.5 rounded-14 border-[1.5px] border-dashed px-4 py-2.5',
+          'grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.7fr)_44px] gap-x-3.5 gap-y-1.5 rounded-14 border-[1.5px] border-dashed py-2.5 pl-4 pr-1.5',
           paused
             ? 'border-line bg-surface'
             : 'border-blue-200 bg-gradient-to-b from-blue-50 to-blue-100',
@@ -139,6 +148,19 @@ const TicketCard = ({
             <span className="text-13 text-ink-muted">{cell.label}</span>
           </div>
         ))}
+
+        {/* The canvas greys this while sales are off rather than hiding it */}
+        <button
+          type="button"
+          onClick={onShare}
+          aria-label={`Share ${ticket.name}`}
+          className={cn(
+            'col-start-3 row-start-1 ml-auto flex h-11 w-11 items-center justify-center self-center rounded-full transition-colors hover:bg-white/70',
+            paused ? 'text-ink-subtle' : 'text-brand',
+          )}
+        >
+          <IconComponent iconName="Share08Icon" size={20} color="currentColor" />
+        </button>
       </div>
 
       <div className="grid grid-cols-3 gap-0.5 overflow-hidden rounded-14">
@@ -207,6 +229,29 @@ export const TicketsCreatedTab = ({ experience }: TicketsCreatedTabProps) => {
     );
   };
 
+  const share = async (ticket: Ticket) => {
+    if (isTicketPaused(ticket)) {
+      toast({
+        title: `${ticket.name} is paused`,
+        description: 'Resume sales before you share it.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(ticketShareLink(experience));
+      toast({
+        title: 'Link copied',
+        description: ticketShareMessage(ticket, experience.title),
+        variant: 'success',
+      });
+    } catch {
+      // Clipboard access can be refused; the link itself is still the answer
+      toast({ title: ticketShareLink(experience), description: 'Copy this link to share it.' });
+    }
+  };
+
   const { active, paused } = splitBySales(tickets);
 
   const card = (ticket: Ticket) => (
@@ -217,6 +262,7 @@ export const TicketsCreatedTab = ({ experience }: TicketsCreatedTabProps) => {
         isBusy={isPending && variables?.ticketId === ticket.id}
         onToggleSales={() => toggleSales(ticket)}
         onEdit={() => setEditing(ticket)}
+        onShare={() => share(ticket)}
       />
     </div>
   );

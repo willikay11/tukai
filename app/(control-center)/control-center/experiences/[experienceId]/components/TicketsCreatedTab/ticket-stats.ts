@@ -1,6 +1,8 @@
 import moment from 'moment';
 
+import { Experience } from '@/types/experience';
 import { Ticket, isTicketPaused } from '@/types/ticket';
+import { experiencePath } from '@/utils/detail-paths';
 import { currencyFullName } from '@/utils/money';
 
 /**
@@ -55,3 +57,16 @@ export const splitBySales = (tickets: Ticket[]) => ({
   active: tickets.filter((ticket) => !isTicketPaused(ticket)),
   paused: tickets.filter(isTicketPaused),
 });
+
+/**
+ * The link a host shares to sell a ticket type.
+ *
+ * There is no per-ticket page, and no per-ticket link on the API: tickets are
+ * chosen on the experience's own page. So this is that page's link, and what is
+ * said about it names the type without pretending it points straight at it.
+ */
+export const ticketShareLink = (experience: Pick<Experience, 'id' | 'slug'>): string =>
+  `${process.env.NEXT_PUBLIC_APP_URL ?? ''}${experiencePath(experience)}`;
+
+export const ticketShareMessage = (ticket: Ticket, experienceTitle: string): string =>
+  `${ticket.name} is on sale on the ${experienceTitle} page.`;

@@ -1,6 +1,12 @@
 import { Ticket } from '@/types/ticket';
 
-import { splitBySales, ticketStats, ticketsSold } from './ticket-stats';
+import {
+  splitBySales,
+  ticketShareLink,
+  ticketShareMessage,
+  ticketStats,
+  ticketsSold,
+} from './ticket-stats';
 
 const ticket = (overrides: Partial<Ticket> = {}): Ticket =>
   ({
@@ -97,5 +103,26 @@ describe('splitBySales', () => {
     const off = ticket({ ticket_sales_paused_at: '2026-09-30T10:00:00Z' } as Partial<Ticket>);
 
     expect(splitBySales([off]).paused).toHaveLength(1);
+  });
+});
+
+describe('ticketShareLink', () => {
+  it('points at the experience, by slug', () => {
+    expect(ticketShareLink({ id: 'e1', slug: 'sunrise-hike' })).toContain(
+      '/experiences/sunrise-hike',
+    );
+  });
+
+  // A record made before slugs, or one still without one, still resolves by id
+  it('falls back to the id', () => {
+    expect(ticketShareLink({ id: 'e1' })).toContain('/experiences/e1');
+  });
+});
+
+describe('ticketShareMessage', () => {
+  it('names the type and where it is sold', () => {
+    expect(ticketShareMessage(ticket(), 'Sunrise hike')).toBe(
+      'Early Bird is on sale on the Sunrise hike page.',
+    );
   });
 });
