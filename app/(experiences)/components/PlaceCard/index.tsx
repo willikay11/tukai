@@ -1,12 +1,11 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 
 import { Bookmark } from '@/app/shared/components/Bookmark';
+import { CardShell } from '@/app/shared/components/Cards/CardShell';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { PhotoImage } from '@/app/shared/components/Images';
-import { CARD_LIFT, MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motion';
+import { TITLE_TINT } from '@/app/shared/components/Motion';
 import { cn } from '@/lib/utils';
 import { coverPhotoUrl } from '@/types/photo';
 import { Place } from '@/types/place';
@@ -30,22 +29,16 @@ export const PlaceCard = ({ place, priority = false }: { place: Place; priority?
   const rating = place.averageRating > 0 ? place.averageRating : null;
 
   return (
-    <Link
+    <CardShell
       href={placePath(place)}
-      className={cn('group block w-[280px] flex-shrink-0 snap-start', CARD_LIFT)}
-    >
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
-        <PhotoImage
-          src={coverPhoto}
-          alt={place.title}
-          fill
-          sizes="280px"
-          // Above the fold: fetched straight away instead of waiting for the
-          // lazy-load observer, which cannot fire until React has painted
-          priority={priority}
-          className={cn('object-cover', MEDIA_ZOOM)}
-        />
-
+      src={coverPhoto}
+      alt={place.title}
+      sizes="280px"
+      // Above the fold: fetched straight away instead of waiting for the
+      // lazy-load observer, which cannot fire until React has painted
+      priority={priority}
+      className="w-[280px] flex-shrink-0 snap-start"
+      overlay={
         <div className="absolute right-2 top-2">
           <Bookmark
             bookmarked={place.isBookmarked}
@@ -55,8 +48,8 @@ export const PlaceCard = ({ place, priority = false }: { place: Place; priority?
             className="text-white"
           />
         </div>
-      </div>
-
+      }
+    >
       <div className="mt-3">
         <div className="flex items-start justify-between gap-2">
           <p className={cn('text-base font-bold text-gray-900', TITLE_TINT)}>{place.title}</p>
@@ -71,6 +64,6 @@ export const PlaceCard = ({ place, priority = false }: { place: Place; priority?
         {/* ⚠️ No average-price line: the places API returns no price field of
             any kind (no price / avg_price / price_level) */}
       </div>
-    </Link>
+    </CardShell>
   );
 };

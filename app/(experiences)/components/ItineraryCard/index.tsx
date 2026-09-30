@@ -1,15 +1,14 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 
 import numeral from 'numeral';
 
 import { Bookmark } from '@/app/shared/components/Bookmark';
+import { CardShell } from '@/app/shared/components/Cards/CardShell';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { PhotoImage } from '@/app/shared/components/Images';
 import { FannedPhotos } from '@/app/shared/components/Images';
-import { CARD_LIFT, MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motion';
+import { TITLE_TINT } from '@/app/shared/components/Motion';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { Photo, coverPhotoUrl } from '@/types/photo';
@@ -37,32 +36,28 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
   const price = itinerary.priceStartsFrom;
 
   return (
-    <Link
+    <CardShell
       href={experiencePath(itinerary)}
-      className={cn('group block w-[300px] flex-shrink-0 snap-start', CARD_LIFT)}
+      src={coverPhoto}
+      alt={itinerary.title}
+      sizes="300px"
+      className="w-[300px] flex-shrink-0 snap-start"
+      overlay={
+        <>
+          <div className="absolute right-2 top-2">
+            <Bookmark
+              bookmarked={itinerary.isBookmarked}
+              userId={session?.user?.id}
+              experienceId={itinerary.id}
+              itemName={itinerary.title}
+              className="text-white"
+            />
+          </div>
+
+          <FannedPhotos photos={previewPhotos} size="sm" className="absolute bottom-3 left-3" />
+        </>
+      }
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
-        <PhotoImage
-          src={coverPhoto}
-          alt={itinerary.title}
-          fill
-          sizes="300px"
-          className={cn('object-cover', MEDIA_ZOOM)}
-        />
-
-        <div className="absolute right-2 top-2">
-          <Bookmark
-            bookmarked={itinerary.isBookmarked}
-            userId={session?.user?.id}
-            experienceId={itinerary.id}
-            itemName={itinerary.title}
-            className="text-white"
-          />
-        </div>
-
-        <FannedPhotos photos={previewPhotos} size="sm" className="absolute bottom-3 left-3" />
-      </div>
-
       <div className="mt-3">
         <p className={cn('text-base font-bold text-gray-900', TITLE_TINT)}>{itinerary.title}</p>
         {/* ⚠️ No "N stops": the list response carries no activity/stop count.
@@ -79,6 +74,6 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
           </p>
         )}
       </div>
-    </Link>
+    </CardShell>
   );
 };
