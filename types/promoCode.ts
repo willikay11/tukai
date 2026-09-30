@@ -22,6 +22,17 @@ export type PromoCode = {
   discountAmount?: string | null;
   isActive: boolean;
   redeemedCount: number;
+  /**
+   * The limits the API keeps on a code. The canvas's form sets none of them, so
+   * they are only ever read — but a code made from the mobile app or by an
+   * admin can carry them, and a host looking at redemptions needs to see them.
+   */
+  maxRedemptions?: number | null;
+  maxRedemptionsPerUser?: number | null;
+  minTickets?: number | null;
+  minOrderAmount?: string | null;
+  startsAt?: string | null;
+  endsAt?: string | null;
   dateCreated?: string;
 };
 
@@ -65,3 +76,13 @@ export const normalisePromoCode = (value: string): string =>
     .toUpperCase()
     .replace(/[^A-Z0-9]/g, '')
     .slice(0, PROMO_CODE_MAX);
+
+/**
+ * How many uses are left, or null when the code has no cap.
+ *
+ * A cap already passed reads as none left rather than as a negative.
+ */
+export const redemptionsRemaining = (code: PromoCode): number | null =>
+  typeof code.maxRedemptions === 'number' && code.maxRedemptions > 0
+    ? Math.max(code.maxRedemptions - (code.redeemedCount ?? 0), 0)
+    : null;

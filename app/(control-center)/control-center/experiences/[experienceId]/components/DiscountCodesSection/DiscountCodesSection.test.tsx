@@ -22,6 +22,17 @@ jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) })
 
 jest.mock('../DiscountCodeForm', () => ({ DiscountCodeForm: () => null }));
 
+// Both open over the list; here it only matters which code they were handed
+jest.mock('../DiscountCodeRedemptions', () => ({
+  DiscountCodeRedemptions: ({ code }: { code: { code: string } | null }) =>
+    code ? <div>redemptions for {code.code}</div> : null,
+}));
+
+jest.mock('../DeleteDiscountCodeDialog', () => ({
+  DeleteDiscountCodeDialog: ({ code }: { code: { code: string } | null }) =>
+    code ? <div>delete {code.code}?</div> : null,
+}));
+
 const promo = (overrides: Partial<PromoCode> = {}): PromoCode =>
   ({
     id: 'p1',
@@ -159,24 +170,20 @@ describe('the discount codes list', () => {
     );
   });
 
-  it('reports how often a code has been used', async () => {
+  it('opens the redemptions for the code that was asked about', async () => {
     renderSection();
 
     await userEvent.click(screen.getByRole('button', { name: /Redemptions/ }));
 
-    expect(toast).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'TRVL2024', description: 'Used 32 times.' }),
-    );
+    expect(screen.getByText('redemptions for TRVL2024')).toBeInTheDocument();
   });
 
-  it('says plainly when a code has never been used', async () => {
-    codes = [promo({ redeemedCount: 0 })];
+  // Deleting is not reversible, so it asks first rather than acting on the click
+  it('confirms before deleting a code', async () => {
     renderSection();
 
-    await userEvent.click(screen.getByRole('button', { name: /Redemptions/ }));
+    await userEvent.click(screen.getByRole('button', { name: /Delete/ }));
 
-    expect(toast).toHaveBeenCalledWith(
-      expect.objectContaining({ description: 'No one has used this code yet.' }),
-    );
+    expect(screen.getByText('delete TRVL2024?')).toBeInTheDocument();
   });
 });

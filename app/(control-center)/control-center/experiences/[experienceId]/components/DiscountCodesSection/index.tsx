@@ -8,7 +8,9 @@ import { useToast } from '@/app/shared/hooks/useToast';
 import { cn } from '@/lib/utils';
 import { PromoCode } from '@/types/promoCode';
 
+import { DeleteDiscountCodeDialog } from '../DeleteDiscountCodeDialog';
 import { DiscountCodeForm } from '../DiscountCodeForm';
+import { DiscountCodeRedemptions } from '../DiscountCodeRedemptions';
 
 interface DiscountCodesSectionProps {
   experienceId: string;
@@ -79,6 +81,8 @@ export const DiscountCodesSection = ({ experienceId, currency }: DiscountCodesSe
   const { toast } = useToast();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editing, setEditing] = useState<PromoCode | null>(null);
+  const [viewing, setViewing] = useState<PromoCode | null>(null);
+  const [deleting, setDeleting] = useState<PromoCode | null>(null);
 
   const { data: response, isLoading } = useMyPromoCodes();
   const { mutate: updateCode, isPending, variables } = useUpdatePromoCode();
@@ -226,14 +230,7 @@ export const DiscountCodesSection = ({ experienceId, currency }: DiscountCodesSe
               <RowAction
                 icon="ChartLineData01Icon"
                 label="Redemptions"
-                onClick={() =>
-                  toast({
-                    title: code.code,
-                    description: code.redeemedCount
-                      ? `Used ${redeemedLabel(code.redeemedCount)}.`
-                      : 'No one has used this code yet.',
-                  })
-                }
+                onClick={() => setViewing(code)}
               />
               <Dot />
               <RowAction
@@ -245,10 +242,25 @@ export const DiscountCodesSection = ({ experienceId, currency }: DiscountCodesSe
               />
               <Dot />
               <RowAction icon="PencilEdit02Icon" label="Edit code" onClick={() => open(code)} />
+              <Dot />
+              <RowAction
+                icon="Delete02Icon"
+                label="Delete"
+                tone="danger"
+                onClick={() => setDeleting(code)}
+              />
             </div>
           </div>
         );
       })}
+
+      <DiscountCodeRedemptions
+        code={viewing}
+        currency={currency}
+        onClose={() => setViewing(null)}
+      />
+
+      <DeleteDiscountCodeDialog code={deleting} onClose={() => setDeleting(null)} />
 
       <DiscountCodeForm
         experienceId={experienceId}
