@@ -17,15 +17,44 @@ export interface DatePickerProps {
   disabled?: boolean;
   minDate?: Date;
   maxDate?: Date;
+  /**
+   * The span this field is one end of. Given either, the calendar shades the
+   * days between them, so a pair of fields reads as one range rather than as
+   * two unrelated days — the canvas's `range-start` and `range-end`.
+   */
+  rangeStart?: string;
+  rangeEnd?: string;
 }
+
+/** The two dates of a span, as Dates, or nothing when the span is incomplete. */
+const spanOf = (rangeStart?: string, rangeEnd?: string) => {
+  const from = rangeStart ? new Date(rangeStart) : undefined;
+  const to = rangeEnd ? new Date(rangeEnd) : undefined;
+
+  if (!from || !to || Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) return null;
+  if (to < from) return null;
+
+  return { from, to };
+};
 
 const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
   (
-    { className, value, onChange, placeholder = 'Select Date', disabled, minDate, maxDate },
+    {
+      className,
+      value,
+      onChange,
+      placeholder = 'Select Date',
+      disabled,
+      minDate,
+      maxDate,
+      rangeStart,
+      rangeEnd,
+    },
     ref,
   ) => {
     const [date, setDate] = React.useState<Date | undefined>(value ? new Date(value) : undefined);
     const [open, setOpen] = React.useState(false);
+    const span = spanOf(rangeStart, rangeEnd);
 
     React.useEffect(() => {
       if (value) {
@@ -54,10 +83,9 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             type="button"
             disabled={disabled}
             className={cn(
-              // 44px, the height every field in the app settled on. It sits
-              // beside the TimePicker in a two-column grid, so the pair have to
-              // agree.
-              'flex h-11 w-full items-center justify-between rounded-[14px] border border-gray-200 px-3 py-2.5 text-left text-xs placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+              // 56px, the canvas's own field height. It sits beside the
+              // TimePicker in a two-column grid, so the pair have to agree.
+              'flex h-14 w-full items-center justify-between rounded-[14px] border border-gray-200 px-3 py-2.5 text-left text-xs placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
               !date && 'text-gray-400',
               date && 'text-gray-700',
               className,
@@ -73,6 +101,23 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             selected={date}
             onSelect={handleSelect}
             initialFocus
+            // The span is shaded through modifiers rather than range mode: this
+            // field still picks one day, it just shows which span that day is
+            // an end of
+            modifiers={
+              span
+                ? {
+                    spanStart: span.from,
+                    spanEnd: span.to,
+                    spanMiddle: { after: span.from, before: span.to },
+                  }
+                : undefined
+            }
+            modifiersClassNames={{
+              spanStart: 'rounded-l-md bg-surface-brand',
+              spanMiddle: 'rounded-none bg-surface-brand',
+              spanEnd: 'rounded-r-md bg-surface-brand',
+            }}
             disabled={[
               ...(minDate ? [{ before: minDate }] : []),
               ...(maxDate ? [{ after: maxDate }] : []),

@@ -30,6 +30,10 @@ export const RecurrenceDateRange = ({
             onChange={onStartDateChange}
             placeholder="Start Date"
             minDate={new Date()}
+            // Both ends shade the span between them, so the pair reads as one
+            // range rather than as two unrelated days
+            rangeStart={startDate || undefined}
+            rangeEnd={endDate || undefined}
           />
           {errors.recurrenceStartDate && (
             <p className="mt-1 text-xs text-red-500">{errors.recurrenceStartDate}</p>
@@ -44,6 +48,8 @@ export const RecurrenceDateRange = ({
             // The recurrence window can't end before it starts — same
             // constraint as the itinerary date pickers
             minDate={startDate ? new Date(startDate) : new Date()}
+            rangeStart={startDate || undefined}
+            rangeEnd={endDate || undefined}
           />
           {errors.recurrenceEndDate && (
             <p className="mt-1 text-xs text-red-500">{errors.recurrenceEndDate}</p>

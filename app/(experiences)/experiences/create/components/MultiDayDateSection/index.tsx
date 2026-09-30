@@ -46,6 +46,10 @@ export const MultiDayDateSection = ({
             onChange={onStartDateChange}
             minDate={new Date()}
             placeholder="Start date"
+            // Both ends shade the span between them, so the pair reads as one
+            // range rather than as two unrelated days
+            rangeStart={startDate || undefined}
+            rangeEnd={endDate || undefined}
           />
           {errors.multiDayStartDate && (
             <p className="mt-1 text-xs text-red-500">{errors.multiDayStartDate}</p>
@@ -75,6 +79,8 @@ export const MultiDayDateSection = ({
             // the itinerary and recurrence date pickers
             minDate={startDate ? new Date(startDate) : new Date()}
             placeholder="End date"
+            rangeStart={startDate || undefined}
+            rangeEnd={endDate || undefined}
           />
           {errors.multiDayEndDate && (
             <p className="mt-1 text-xs text-red-500">{errors.multiDayEndDate}</p>

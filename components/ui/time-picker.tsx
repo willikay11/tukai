@@ -91,7 +91,8 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
           ref={ref}
           // 44px and a 14px radius, matching the Input and DatePicker fields
           // it sits beside
-          className={cn('h-11 rounded-[14px]', className)}
+          // 56px, to agree with the DatePicker it sits beside
+          className={cn('h-14 rounded-[14px]', className)}
           aria-label={placeholder}
         >
           {/* No children here: given children, Radix renders those INSTEAD of
