@@ -16,3 +16,14 @@ export const moneyAmount = (value: MoneyLike): number | null => {
   const parsed = typeof value === 'string' ? parseFloat(value) : value;
   return Number.isFinite(parsed) ? parsed : null;
 };
+
+/**
+ * The currency written out in words, the way the canvas says it: "Ticket
+ * currency — Kenya shillings", and the note under a discount amount.
+ *
+ * Tukai prices in shillings, and the API's only other currency is the dollar;
+ * the app writes either as `KES`, `Ksh.`, `USD` or `$` depending on where the
+ * value came from.
+ */
+export const currencyFullName = (currency: string): string =>
+  /usd|\$/i.test(currency) ? 'US dollars' : 'Kenya shillings';

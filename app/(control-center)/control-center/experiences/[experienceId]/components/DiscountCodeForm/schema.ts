@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { PROMO_CODE_MAX, PROMO_CODE_MIN, PromoDiscountType } from '@/types/promoCode';
+import { currencyFullName } from '@/utils/money';
 
 /**
  * Generating or editing a discount code.
@@ -79,9 +80,5 @@ export const valueCopy = (discountType: PromoDiscountType, currencyName: string)
         note: `In ${currencyName}, taken off each ticket.`,
       };
 
-/**
- * The canvas names the currency in full in that note, and only ever handles
- * these two.
- */
-export const currencyName = (currency: string): string =>
-  /usd|\$/i.test(currency) ? 'US dollars' : 'Kenya shillings';
+/** The canvas names the currency in full in that note. */
+export const currencyName = currencyFullName;

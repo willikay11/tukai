@@ -46,14 +46,14 @@ describe('pausing ticket sales', () => {
   it('offers to pause a type that is on sale', () => {
     renderTab([ticket()]);
 
-    expect(screen.getByRole('button', { name: 'Pause sales' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Pause ticket sales' })).toBeInTheDocument();
     expect(screen.queryByText('Paused')).not.toBeInTheDocument();
   });
 
   it('offers to resume one that is paused, and says so', () => {
     renderTab([ticket({ ticketSalesPausedAt: '2026-09-30T10:00:00Z' })]);
 
-    expect(screen.getByRole('button', { name: 'Resume sales' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Resume ticket sales' })).toBeInTheDocument();
     expect(screen.getByText('Paused')).toBeInTheDocument();
   });
 
@@ -61,14 +61,14 @@ describe('pausing ticket sales', () => {
   it('reads the snake_case spelling too', () => {
     renderTab([ticket({ ticket_sales_paused_at: '2026-09-30T10:00:00Z' } as Partial<Ticket>)]);
 
-    expect(screen.getByRole('button', { name: 'Resume sales' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Resume ticket sales' })).toBeInTheDocument();
   });
 
   it('pauses the ticket it was pressed on', async () => {
     const user = userEvent.setup();
     renderTab([ticket()]);
 
-    await user.click(screen.getByRole('button', { name: 'Pause sales' }));
+    await user.click(screen.getByRole('button', { name: 'Pause ticket sales' }));
 
     expect(setSales).toHaveBeenCalledWith({ ticketId: 't1', paused: true }, expect.anything());
   });
@@ -77,7 +77,7 @@ describe('pausing ticket sales', () => {
     const user = userEvent.setup();
     renderTab([ticket({ ticketSalesPausedAt: '2026-09-30T10:00:00Z' })]);
 
-    await user.click(screen.getByRole('button', { name: 'Resume sales' }));
+    await user.click(screen.getByRole('button', { name: 'Resume ticket sales' }));
 
     expect(setSales).toHaveBeenCalledWith({ ticketId: 't1', paused: false }, expect.anything());
   });
@@ -91,7 +91,7 @@ describe('pausing ticket sales', () => {
     setSales.mockImplementation((_vars, { onSuccess }) => onSuccess());
     renderTab([ticket()]);
 
-    await user.click(screen.getByRole('button', { name: 'Pause sales' }));
+    await user.click(screen.getByRole('button', { name: 'Pause ticket sales' }));
 
     expect(toast).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -105,10 +105,85 @@ describe('pausing ticket sales', () => {
     setSales.mockImplementation((_vars, { onError }) => onError(new Error('Sales already closed')));
     renderTab([ticket()]);
 
-    await user.click(screen.getByRole('button', { name: 'Pause sales' }));
+    await user.click(screen.getByRole('button', { name: 'Pause ticket sales' }));
 
     expect(toast).toHaveBeenCalledWith(
       expect.objectContaining({ description: 'Sales already closed', variant: 'destructive' }),
     );
+  });
+});
+
+/**
+ * The canvas shows seven figures under each ticket type, in its own order and
+ * wording — "Ticket currency", not "Currency", and the currency written out.
+ */
+describe('the per-ticket stat block', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    pending = false;
+  });
+
+  it('names every figure the canvas asks for', () => {
+    renderTab([ticket()]);
+
+    [
+      'Ticket currency',
+      'Tickets created',
+      'Amount per ticket',
+      'Tickets sold',
+      'Amount sold',
+      'Available tickets',
+      'Estimated sales expiry',
+      // "Amount per ticket" reads on the stub as well as in the block
+    ].forEach((label) => expect(screen.getAllByText(label).length).toBeGreaterThan(0));
+  });
+
+  it('writes the currency out in words', () => {
+    renderTab([ticket()]);
+
+    expect(screen.getByText('Kenya shillings')).toBeInTheDocument();
+  });
+
+  // Created minus available is the only honest count of what buyers hold
+  it('counts what has sold from what is left', () => {
+    renderTab([ticket({ quantity: 50, availableQuantity: 20 })]);
+
+    expect(screen.getByText('Tickets sold').nextSibling).toHaveTextContent('30');
+    expect(screen.getByText('Amount sold').nextSibling).toHaveTextContent('KES 45,000');
+  });
+
+  it('calls a free ticket free rather than showing a zero', () => {
+    renderTab([ticket({ price: 0 })]);
+
+    expect(screen.getAllByText('Free').length).toBeGreaterThan(0);
+  });
+
+  // A host needs to see that sales are off before reading when they would end
+  it('replaces the expiry with the words when sales are paused', () => {
+    renderTab([ticket({ ticketSalesPausedAt: '2026-09-30T10:00:00Z' })]);
+
+    expect(screen.getByText('Ticket sales')).toBeInTheDocument();
+    expect(screen.queryByText('Estimated sales expiry')).not.toBeInTheDocument();
+  });
+
+  it('gathers the paused types under their own heading', () => {
+    renderTab([
+      ticket(),
+      ticket({ id: 't2', name: 'Gate', ticketSalesPausedAt: '2026-09-30T10:00:00Z' }),
+    ]);
+
+    expect(screen.getByText('Paused tickets')).toBeInTheDocument();
+  });
+
+  it('leaves the heading out when nothing is paused', () => {
+    renderTab([ticket()]);
+
+    expect(screen.queryByText('Paused tickets')).not.toBeInTheDocument();
+  });
+
+  it('does not offer to edit a paused type', () => {
+    renderTab([ticket({ ticketSalesPausedAt: '2026-09-30T10:00:00Z' })]);
+
+    expect(screen.queryByRole('button', { name: 'Edit ticket' })).not.toBeInTheDocument();
   });
 });

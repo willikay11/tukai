@@ -2,18 +2,16 @@
 
 import { useState } from 'react';
 
-import moment from 'moment';
-
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useSetTicketSales } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
-import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
 import { cn } from '@/lib/utils';
 import { Ticket, isTicketPaused } from '@/types/ticket';
 
 import { DiscountCodesSection } from '../DiscountCodesSection';
 import { EditTicketModal } from '../EditTicketModal';
+import { TicketStat, splitBySales, ticketPrice, ticketStats } from './ticket-stats';
 
 interface TicketsCreatedTabProps {
   experienceId: string;
@@ -21,12 +19,159 @@ interface TicketsCreatedTabProps {
   currency: string;
 }
 
-const MetricCell = ({ label, value }: { label: string; value: string }) => (
-  <div>
-    <p className="text-xs text-gray-400">{label}</p>
-    <p className="mt-0.5 text-sm font-semibold text-gray-900">{value}</p>
+/**
+ * One tile in the canvas's stat block: a three-column grid of light tiles,
+ * label above value, the last one spanning the row.
+ */
+const StatTile = ({ stat, muted }: { stat: TicketStat; muted: boolean }) => (
+  <div
+    className={cn('flex min-w-0 flex-col gap-1 bg-surface px-4 py-3', stat.full && 'col-span-3')}
+  >
+    <span className="text-13 leading-snug text-ink-muted">{stat.label}</span>
+    <span
+      className={cn(
+        'break-words text-base font-semibold leading-snug',
+        muted ? 'text-ink-muted' : 'text-gray-900',
+      )}
+    >
+      {stat.value}
+    </span>
   </div>
 );
+
+const RowAction = ({
+  icon,
+  label,
+  tone = 'brand',
+  onClick,
+  disabled,
+}: {
+  icon: string;
+  label: string;
+  tone?: 'brand' | 'danger';
+  onClick: () => void;
+  disabled?: boolean;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className={cn(
+      'inline-flex h-11 flex-shrink-0 items-center gap-2 rounded-full px-2.5 text-15 font-medium transition-colors disabled:opacity-50',
+      tone === 'danger'
+        ? 'text-danger hover:bg-danger-surface'
+        : 'text-brand hover:bg-surface-brand',
+    )}
+  >
+    <IconComponent iconName={icon} size={20} color="currentColor" />
+    {label}
+  </button>
+);
+
+const Dot = () => (
+  <span aria-hidden="true" className="h-[5px] w-[5px] flex-shrink-0 rounded-full bg-blue-400" />
+);
+
+const TicketCard = ({
+  ticket,
+  currency,
+  isBusy,
+  onToggleSales,
+  onEdit,
+}: {
+  ticket: Ticket;
+  currency: string;
+  isBusy: boolean;
+  onToggleSales: () => void;
+  onEdit: () => void;
+}) => {
+  const paused = isTicketPaused(ticket);
+  const price = ticketPrice(ticket);
+
+  // Reads across the stub, as the canvas has it
+  const stub = [
+    { value: ticket.name, label: 'Ticket name', truncate: true },
+    {
+      value: price ? `${currency} ${price.toLocaleString()}` : 'Free',
+      label: 'Amount per ticket',
+    },
+    { value: String(Number(ticket.quantity) || 0), label: 'Quantity' },
+  ];
+
+  return (
+    <div className="flex flex-col gap-3.5">
+      <div className="flex items-start gap-3">
+        <IconComponent
+          iconName="Ticket01Icon"
+          size={24}
+          color="currentColor"
+          className={cn('mt-0.5 flex-shrink-0', paused ? 'text-ink-subtle' : 'text-brand')}
+        />
+        <h3
+          className={cn(
+            'min-w-0 text-xl font-bold leading-snug tracking-tight',
+            paused ? 'text-ink-muted' : 'text-gray-900',
+          )}
+        >
+          {ticket.name}
+        </h3>
+      </div>
+
+      <div
+        className={cn(
+          'grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.7fr)] gap-x-3.5 gap-y-1.5 rounded-14 border-[1.5px] border-dashed px-4 py-2.5',
+          paused
+            ? 'border-line bg-surface'
+            : 'border-blue-200 bg-gradient-to-b from-blue-50 to-blue-100',
+        )}
+      >
+        {stub.map((cell) => (
+          <div key={cell.label} className="flex min-w-0 flex-col gap-0.5">
+            <span
+              className={cn(
+                'text-base font-bold',
+                cell.truncate && 'truncate',
+                paused ? 'text-ink-muted' : 'text-gray-900',
+              )}
+            >
+              {cell.value}
+            </span>
+            <span className="text-13 text-ink-muted">{cell.label}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-3 gap-0.5 overflow-hidden rounded-14">
+        {ticketStats(ticket, currency).map((stat) => (
+          <StatTile key={stat.label} stat={stat} muted={paused} />
+        ))}
+      </div>
+
+      <div className="-mt-1 flex flex-wrap items-center justify-end gap-x-1.5 gap-y-1">
+        {paused ? (
+          <RowAction
+            icon="PlayIcon"
+            label="Resume ticket sales"
+            onClick={onToggleSales}
+            disabled={isBusy}
+          />
+        ) : (
+          <>
+            <RowAction
+              icon="StopCircleIcon"
+              label="Pause ticket sales"
+              tone="danger"
+              onClick={onToggleSales}
+              disabled={isBusy}
+            />
+            <Dot />
+            <RowAction icon="PencilEdit02Icon" label="Edit ticket" onClick={onEdit} />
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export const TicketsCreatedTab = ({ experienceId, tickets, currency }: TicketsCreatedTabProps) => {
   const [editing, setEditing] = useState<Ticket | null>(null);
@@ -59,118 +204,40 @@ export const TicketsCreatedTab = ({ experienceId, tickets, currency }: TicketsCr
     );
   };
 
-  if (tickets.length === 0) {
-    return (
-      <div className="space-y-6">
+  const { active, paused } = splitBySales(tickets);
+
+  const card = (ticket: Ticket) => (
+    <div key={ticket.id} className="border-b border-gray-200 pb-6">
+      <TicketCard
+        ticket={ticket}
+        currency={currency}
+        isBusy={isPending && variables?.ticketId === ticket.id}
+        onToggleSales={() => toggleSales(ticket)}
+        onEdit={() => setEditing(ticket)}
+      />
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      {tickets.length === 0 && (
         <div className="py-10">
           <NoData message="No tickets created for this experience yet" />
         </div>
+      )}
 
-        <DiscountCodesSection experienceId={experienceId} currency={currency} />
-      </div>
-    );
-  }
+      {active.map(card)}
 
-  return (
-    <div className="space-y-4">
-      {tickets.map((ticket) => {
-        const created = ticket.quantity ?? 0;
-        const available = ticket.availableQuantity ?? 0;
-        // No per-ticket sold count exists on the API; the difference between
-        // the created and available counts is the closest honest signal
-        const sold = Math.max(created - available, 0);
-        const price = parseFloat(String(ticket.price)) || 0;
-        // Gross of any fees or refunds — there is no revenue endpoint to net it
-        const amountSold = sold * price;
+      {/* The canvas gathers the paused types under their own heading rather than
+          mixing them in with what is still on sale */}
+      {paused.length > 0 && (
+        <>
+          <h3 className="text-15 font-semibold text-ink-muted">Paused tickets</h3>
+          {paused.map(card)}
+        </>
+      )}
 
-        const expiry = ticket.salesEndDate ? moment(ticket.salesEndDate).format('D MMM YYYY') : '—';
-        const paused = isTicketPaused(ticket);
-
-        return (
-          <div
-            key={ticket.id}
-            // A paused type is still the host's to manage, so it stays
-            // readable rather than being dimmed out of the way
-            className={cn(
-              'rounded-2xl border bg-white p-5 shadow-sm',
-              paused ? 'border-line' : 'border-gray-100',
-            )}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-2">
-                <p className="truncate text-base font-bold text-gray-900">{ticket.name}</p>
-                {paused && (
-                  <span className="flex-shrink-0 rounded-full bg-surface px-2.5 py-0.5 text-xs font-medium text-ink-muted">
-                    Paused
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-shrink-0 items-center gap-2">
-                <Button
-                  variant={paused ? 'lime' : 'canvas-outline'}
-                  size="sm"
-                  className="rounded-full"
-                  isLoading={isPending && variables?.ticketId === ticket.id}
-                  onClick={() => toggleSales(ticket)}
-                >
-                  {paused ? 'Resume sales' : 'Pause sales'}
-                </Button>
-                <IconComponent
-                  iconName="Share08Icon"
-                  size={16}
-                  color="currentColor"
-                  className="text-gray-400"
-                />
-              </div>
-            </div>
-
-            <div className="mt-4 flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
-              <IconComponent
-                iconName="Ticket01Icon"
-                size={20}
-                color="currentColor"
-                className="flex-shrink-0 text-primary"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-gray-900">{ticket.name}</p>
-                <p className="mt-0.5 text-xs text-gray-500">
-                  {currency} {price.toLocaleString()} Per Ticket · {created} Quantity
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
-              <MetricCell label="Tickets Created" value={String(created)} />
-              <MetricCell label="Tickets Sold" value={String(sold)} />
-              <MetricCell label="Available" value={String(available)} />
-              <MetricCell
-                label="Amount Sold"
-                value={`${currency} ${amountSold.toLocaleString()}`}
-              />
-              {/* Tickets carry no currency of their own — the experience's applies */}
-              <MetricCell label="Currency" value={currency} />
-              <MetricCell label="Estimated Date of Expiry" value={expiry} />
-            </div>
-
-            <div className="mt-5 flex flex-wrap items-center justify-end gap-4 border-t border-gray-100 pt-4">
-              <button
-                type="button"
-                onClick={() => setEditing(ticket)}
-                className="inline-flex items-center gap-2 rounded-full px-2 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50"
-              >
-                <IconComponent iconName="Edit02Icon" size={16} color="currentColor" />
-                Edit Ticket
-              </button>
-            </div>
-          </div>
-        );
-      })}
-
-      {/* The canvas puts a host's codes below the tickets, under a divider */}
-      <div className="border-t border-gray-100 pt-6">
-        <DiscountCodesSection experienceId={experienceId} currency={currency} />
-      </div>
+      <DiscountCodesSection experienceId={experienceId} currency={currency} />
 
       <EditTicketModal
         experienceId={experienceId}
