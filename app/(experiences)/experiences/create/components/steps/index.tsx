@@ -54,7 +54,7 @@ const STEPS_DEFAULT = [
   {
     id: 'dates-type',
     label: 'Dates & Type',
-    icon: 'CalendarIcon',
+    icon: 'CalendarAdd01Icon',
   },
   {
     id: 'about',
@@ -64,10 +64,10 @@ const STEPS_DEFAULT = [
   {
     id: 'tickets',
     label: 'Tickets',
-    icon: 'Ticket02Icon',
+    icon: 'Ticket01Icon',
   },
-  { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
-  { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
+  { id: 'guests', label: 'Invite Guests', icon: 'UserAdd01Icon' },
+  { id: 'wallet', label: 'Wallet Details', icon: 'Wallet01Icon' },
   { id: 'preview', label: 'Preview', icon: 'Monocle01Icon' },
 ];
 
@@ -75,7 +75,7 @@ const STEPS_MULTI_DAY = [
   {
     id: 'dates-type',
     label: 'Dates & Type',
-    icon: 'CalendarIcon',
+    icon: 'CalendarAdd01Icon',
   },
   {
     id: 'about',
@@ -85,10 +85,10 @@ const STEPS_MULTI_DAY = [
   {
     id: 'tickets',
     label: 'Tickets',
-    icon: 'Ticket02Icon',
+    icon: 'Ticket01Icon',
   },
-  { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
-  { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
+  { id: 'guests', label: 'Invite Guests', icon: 'UserAdd01Icon' },
+  { id: 'wallet', label: 'Wallet Details', icon: 'Wallet01Icon' },
   { id: 'preview', label: 'Preview', icon: 'Monocle01Icon' },
 ];
 
@@ -96,7 +96,7 @@ const STEPS_ITINERARY = [
   {
     id: 'dates-type',
     label: 'Dates & Type',
-    icon: 'CalendarIcon',
+    icon: 'CalendarAdd01Icon',
   },
   {
     id: 'about',
@@ -106,15 +106,15 @@ const STEPS_ITINERARY = [
   {
     id: 'itinerary-days',
     label: 'Itinerary',
-    icon: 'RouteBlockIcon',
+    icon: 'Location01Icon',
   },
   {
     id: 'tickets',
     label: 'Tickets',
-    icon: 'Ticket02Icon',
+    icon: 'Ticket01Icon',
   },
-  { id: 'guests', label: 'Invite Guests', icon: 'AddTeamIcon' },
-  { id: 'wallet', label: 'Wallet Details', icon: 'WalletAdd02Icon' },
+  { id: 'guests', label: 'Invite Guests', icon: 'UserAdd01Icon' },
+  { id: 'wallet', label: 'Wallet Details', icon: 'Wallet01Icon' },
   { id: 'preview', label: 'Preview', icon: 'Monocle01Icon' },
 ];
 
@@ -462,8 +462,10 @@ export const CreateExperienceSteps = ({
               key={step.id}
               value={step.id}
               disabled={isDisabled}
-              className={`inline-flex flex-shrink-0 gap-1 rounded-full px-2 py-1.5 text-xs transition-colors data-[state=active]:border-b-[0px] data-[state=active]:border-emerald-600 data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 sm:gap-2 sm:px-4 sm:py-2 ${
-                isFilled ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-800'
+              className={`inline-flex flex-shrink-0 gap-1 rounded-full px-2 py-1.5 text-xs transition-colors data-[state=active]:border-b-[0px] data-[state=active]:border-emerald-600 data-[state=active]:bg-emerald-200 data-[state=active]:font-bold data-[state=active]:text-brand-deep sm:gap-2 sm:px-4 sm:py-2 ${
+                // Canvas: a reached step is #A7F3D0 behind #044B36, an
+                // unreached one #F3F4F6 behind #1F2937
+                isFilled ? 'bg-emerald-200 text-brand-deep' : 'bg-gray-100 text-gray-800'
               }`}
             >
               <div className="flex-shrink-0">
