@@ -76,3 +76,36 @@ describe('type scale', () => {
     expect(sizes.base).toBeUndefined();
   });
 });
+
+/**
+ * The canvas leans hardest on two radii Tailwind already has — 999px is
+ * `rounded-full` (587 uses) and 12px is `rounded-xl` (255). These three fill
+ * the gaps between.
+ */
+describe('radii', () => {
+  const radii = config.theme?.extend?.borderRadius as Record<string, string>;
+
+  it.each([
+    ['10', '10px'],
+    ['14', '14px'],
+    ['18', '18px'],
+  ])('rounded-%s is %s', (token, value) => {
+    expect(radii[token]).toBe(value);
+  });
+
+  it('leaves the existing radius chain alone', () => {
+    expect(radii.lg).toBe('var(--radius)');
+  });
+});
+
+/**
+ * Weights need no tokens — the canvas uses 400, 500, 600 and 700, and Tailwind
+ * has all four. What matters is the convention: 600 is the canvas's default
+ * emphasis at 551 uses against 700's 302 and 500's 89. The app's Button base
+ * is `font-medium` (500), which is lighter than the canvas everywhere.
+ */
+describe('weights', () => {
+  it('needs no token of its own', () => {
+    expect((config.theme?.extend as Record<string, unknown>).fontWeight).toBeUndefined();
+  });
+});

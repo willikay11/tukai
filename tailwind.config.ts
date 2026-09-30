@@ -160,6 +160,14 @@ const config: Config = {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        /**
+         * Canvas radii Tailwind has no default for. The two it leans on
+         * hardest already exist: 999px is `rounded-full` (587 uses) and 12px
+         * is `rounded-xl` (255). These three fill the gaps between.
+         */
+        '10': '10px', // 25 uses
+        '14': '14px', // 61 — cards and sheets
+        '18': '18px', // 23 — the larger tiles
       },
     },
   },
