@@ -18,6 +18,10 @@ jest.mock('./components/NotificationsTab', () => ({
   NotificationsTab: () => <div>notifications go here</div>,
 }));
 
+jest.mock('./components/MessagesTab', () => ({
+  MessagesTab: ({ myId }: { myId: string }) => <div>messages for {myId}</div>,
+}));
+
 describe('the inbox', () => {
   beforeEach(() => {
     session = { user: { id: 'u1' } };
@@ -56,20 +60,14 @@ describe('the inbox', () => {
     expect(screen.getByRole('tab', { name: 'Notifications' })).toBeInTheDocument();
   });
 
-  /**
-   * Messages are not built yet. The canvas puts them beside notifications, so
-   * the tab says where they will be rather than hiding and leaving a reader
-   * who came looking for them with nothing.
-   */
-  it('says where messages will be', async () => {
+  // The canvas puts the two side by side
+  it('switches to the messages, for the reader whose they are', async () => {
     render(<InboxPageContent />);
 
     await userEvent.click(screen.getByRole('tab', { name: 'Messages' }));
 
-    expect(screen.getByText('Messages are not here yet.')).toBeInTheDocument();
-    expect(
-      screen.getByText('You can still message a host from their experience.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('messages for u1')).toBeInTheDocument();
+    expect(screen.queryByText('notifications go here')).not.toBeInTheDocument();
   });
 
   it('asks a signed-out reader to sign in', () => {

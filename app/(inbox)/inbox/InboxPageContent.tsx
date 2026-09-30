@@ -5,13 +5,13 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
-import { IconComponent } from '@/app/shared/components/Icons';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { useUnreadNotificationCount } from '@/app/shared/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { unreadBadge } from '@/types/notification';
 
+import { MessagesTab } from './components/MessagesTab';
 import { NotificationsTab } from './components/NotificationsTab';
 
 type InboxTab = 'notifications' | 'messages';
@@ -19,13 +19,12 @@ type InboxTab = 'notifications' | 'messages';
 /**
  * The inbox the profile menu pointed at nothing.
  *
- * Two tabs, as the canvas has it. Messages are not built yet, so that tab says
- * so rather than being hidden — the canvas puts them side by side and a reader
- * who came looking for messages should find out where they will be.
+ * Two tabs, as the canvas has it: what happened, and what was said.
  */
 export const InboxPageContent = () => {
   const { data: session, status } = useSession();
-  const isSignedIn = Boolean(session?.user?.id);
+  const userId = session?.user?.id;
+  const isSignedIn = Boolean(userId);
   const [tab, setTab] = useState<InboxTab>('notifications');
 
   const { data: countResponse } = useUnreadNotificationCount(isSignedIn);
@@ -93,18 +92,8 @@ export const InboxPageContent = () => {
       {tab === 'notifications' ? (
         <NotificationsTab />
       ) : (
-        <div className="flex flex-col items-center gap-2 rounded-2xl bg-surface py-16 text-center">
-          <IconComponent
-            iconName="BubbleChatIcon"
-            size={28}
-            color="currentColor"
-            className="text-ink-subtle"
-          />
-          <p className="text-sm text-ink">Messages are not here yet.</p>
-          <p className="text-13 text-ink-muted">
-            You can still message a host from their experience.
-          </p>
-        </div>
+        // Reached only past the signed-out branch above, so the id is there
+        <MessagesTab myId={userId as string} />
       )}
     </PageContainer>
   );

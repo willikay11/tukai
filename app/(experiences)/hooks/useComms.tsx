@@ -1,17 +1,12 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 
-import { sendMessage, unsubscribe } from '@/services/comm';
+import { unsubscribe } from '@/services/comm';
 
-export const useSendMessage = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (data: { content: string; recipientId: string }) => await sendMessage(data),
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['messages'] });
-    },
-  });
-};
-
+/**
+ * Sending a message moved to `useSendMessageTo` in shared hooks: the inbox's
+ * composer and the dialog on a host's page both send through it, and two hooks
+ * doing the same thing is how they drift apart.
+ */
 export const useUnsubscribe = () => {
   return useMutation({
     mutationFn: async (data: { token: string }) => await unsubscribe(data),

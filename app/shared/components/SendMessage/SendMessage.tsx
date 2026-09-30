@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-import { useSendMessage } from '@/app/(experiences)/hooks/useComms';
+import { useSendMessageTo } from '@/app/shared/hooks/useMessages';
 import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
@@ -40,7 +40,9 @@ export const SendMessage = ({
     },
   });
 
-  const { mutate: sendMessage, isPending, isSuccess, isError } = useSendMessage();
+  // The same hook the inbox's conversation composer sends through, so the two
+  // cannot drift apart — and a message sent here shows up in that conversation
+  const { mutate: sendMessage, isPending, isSuccess, isError } = useSendMessageTo();
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     sendMessage({
@@ -77,7 +79,8 @@ export const SendMessage = ({
         <div className="flex min-w-0 flex-col">
           <DialogTitle className="pr-8 text-lg font-bold text-gray-900">Message host</DialogTitle>
           <DialogDescription className="mt-1 text-xs text-gray-500">
-            They will see this alongside your name, and can reply to you directly.
+            They will see this alongside your name, and can reply to you directly. The conversation
+            carries on in your inbox.
           </DialogDescription>
 
           <Form {...form}>

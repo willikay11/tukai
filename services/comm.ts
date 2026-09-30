@@ -134,3 +134,60 @@ export const markAllNotificationsRead = async () => {
     throw new Error(parseApiError(error.response?.data, 'Could not mark these as read'));
   }
 };
+
+/**
+ * Messages.
+ *
+ * There are no threads on the API: this is every message the reader is party
+ * to, so the conversations are worked out from it. `between` fetches one
+ * conversation directly, which is what an open conversation polls.
+ */
+export const fetchMessages = async (
+  params: { search?: string; page?: number; page_size?: number } = {},
+) => {
+  try {
+    const api = await apiWithToken();
+    const response = await api.get('/v1/comms/messages/', { params });
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load your messages'),
+    };
+  }
+};
+
+export const markMessageRead = async (messageId: string) => {
+  try {
+    const api = await apiWithToken();
+    const response = await api.patch(`/v1/comms/messages/${messageId}/read/`);
+
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'Could not mark this as read'));
+  }
+};
+
+/** Deletes the whole conversation, both sides of it, for good. */
+export const deleteConversation = async (senderId: string, recipientId: string) => {
+  try {
+    const api = await apiWithToken();
+    const response = await api.delete(`/v1/comms/messages/between/${senderId}/${recipientId}/`);
+
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'Could not delete this conversation'));
+  }
+};
