@@ -6,7 +6,6 @@ import { useSession } from 'next-auth/react';
 
 import { BucketListCard } from '@/app/(experiences)/experiences/components/BucketListCard';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
-import { SharedBucketListCard } from '@/app/(experiences)/experiences/components/SharedBucketListCard';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { isSharedWithMe, useMyBucketLists } from '@/app/shared/hooks/useBucketLists';
@@ -110,7 +109,11 @@ export const BucketListsPageContent = () => {
               <h2 className="text-xl font-bold text-gray-900">Shared with you</h2>
               <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {shared.map((bucketList) => (
-                  <SharedBucketListCard key={bucketList.id} bucketList={bucketList} />
+                  <BucketListCard
+                    key={bucketList.id}
+                    bucketList={bucketList}
+                    href={`/bucket-lists/${bucketList.id}`}
+                  />
                 ))}
               </div>
             </section>

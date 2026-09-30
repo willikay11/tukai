@@ -18,7 +18,6 @@ import { FeaturedExperienceBanner } from '@/app/(experiences)/experiences/compon
 import { HostingCard } from '@/app/(experiences)/experiences/components/HostingCard';
 import { ReservedTab } from '@/app/(experiences)/experiences/components/ReservedTab';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
-import { SharedBucketListCard } from '@/app/(experiences)/experiences/components/SharedBucketListCard';
 import {
   cityExperiencesHref,
   shouldShowSeeAll,
@@ -330,7 +329,11 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                   </h2>
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {sharedBucketLists.map((bucketList) => (
-                      <SharedBucketListCard key={bucketList.id} bucketList={bucketList} />
+                      <BucketListCard
+                        key={bucketList.id}
+                        bucketList={bucketList}
+                        href={`/bucket-lists/${bucketList.id}`}
+                      />
                     ))}
                   </div>
                 </section>

@@ -5,6 +5,8 @@ import { useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
+import { AvatarStack } from '@/app/(experiences)/experiences/components/AvatarStack';
+import { countLine } from '@/app/(experiences)/experiences/components/BucketListCard/bucket-list-card';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PageContainer } from '@/app/shared/components/Layout';
@@ -68,6 +70,11 @@ export const BucketListPageContent = ({ bucketListId }: { bucketListId: string }
   }
 
   const isOwner = bucketList.owner?.id === session?.user?.id;
+  // Only the people who actually joined get a face; an unanswered invite is not
+  // a member yet
+  const acceptedMembers = (bucketList.members ?? []).filter(
+    (member) => member.status === 'accepted',
+  );
   const isPublic = bucketList.visibility === 'public';
 
   const handleDelete = () =>
@@ -159,6 +166,31 @@ export const BucketListPageContent = ({ bucketListId }: { bucketListId: string }
           </button>
         )}
       </div>
+
+      {/* The canvas's own byline for a list's own page: who keeps it, how many
+          ideas are on it, and how many people are on it. A card has no room for
+          all that and says "N saved" instead. */}
+      <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
+        {bucketList.owner && <span>By {linkedUserName(bucketList.owner)}</span>}
+        <span aria-hidden="true">·</span>
+        <span>{countLine(bucketList)}</span>
+      </p>
+
+      {acceptedMembers.length > 0 && (
+        <div className="mt-2">
+          <AvatarStack
+            users={acceptedMembers.map((member) => ({
+              id: member.id,
+              name: linkedUserName(member.user),
+              picture: member.user?.picture,
+            }))}
+            extraCount={Math.max(
+              (bucketList.memberCount ?? 0) - Math.min(acceptedMembers.length, 3),
+              0,
+            )}
+          />
+        </div>
+      )}
 
       <p className="mt-3 text-sm text-gray-500">{bucketList.description || 'Untagged saves'}</p>
 

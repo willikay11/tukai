@@ -20,6 +20,7 @@ jest.mock('@/app/shared/hooks/useBucketLists', () => ({
   isSharedWithMe: (list: { owner?: { id: string } }, userId?: string | null) =>
     Boolean(list.owner?.id && userId && list.owner.id !== userId),
   useJoinBucketList: () => ({ mutate: jest.fn(), isPending: false }),
+  useLeaveBucketList: () => ({ mutate: jest.fn(), isPending: false }),
   useCreateBucketList: () => ({ mutate: jest.fn(), isPending: false }),
   useUpdateBucketList: () => ({ mutate: jest.fn(), isPending: false }),
 }));
@@ -71,7 +72,9 @@ describe('BucketListsPageContent', () => {
     render(<BucketListsPageContent />);
 
     expect(screen.getByText('Shared with you')).toBeInTheDocument();
-    expect(screen.getByText(/By Tony Ouma/)).toBeInTheDocument();
+    // One card serves both sections now, and it credits the owner the same way
+    expect(screen.getByText('by Tony Ouma')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Join list' })).toBeInTheDocument();
   });
 
   it('says nothing is shared when nothing is', () => {

@@ -1,17 +1,25 @@
 import React from 'react';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { BucketList } from '@/types/bucket-list';
+import { BucketList, BucketListDetail } from '@/types/bucket-list';
 
-import { SharedBucketListCard } from '../SharedBucketListCard';
 import { BucketListCard } from './index';
 
-const mockJoin = jest.fn();
+const join = jest.fn();
+const leave = jest.fn();
 jest.mock('@/app/shared/hooks/useBucketLists', () => ({
-  useJoinBucketList: () => ({ mutate: mockJoin, isPending: false }),
+  useJoinBucketList: () => ({ mutate: join, isPending: false }),
+  useLeaveBucketList: () => ({ mutate: leave, isPending: false }),
+}));
+
+const toast = jest.fn();
+jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
+
+let userId: string | undefined = 'me';
+jest.mock('next-auth/react', () => ({
+  useSession: () => ({ data: userId ? { user: { id: userId } } : null }),
 }));
 
 // The API's own shape: `name`, `visibility`, counts rather than embedded lists
@@ -25,13 +33,20 @@ const bucketList: BucketList = {
   owner: { id: 'me', displayName: 'You' },
 };
 
-const renderWithQueryClient = (component: React.ReactElement) => {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={queryClient}>{component}</QueryClientProvider>);
+const shared: BucketList = {
+  ...bucketList,
+  id: 'bucket-shared-1',
+  owner: { id: 'm1', displayName: 'Tony Ouma' },
+  itemCount: 8,
+  shareToken: 'share-abc',
+  isMember: false,
 };
 
 describe('BucketListCard', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    userId = 'me';
+  });
 
   it('renders the name, who it belongs to, and what it holds', () => {
     render(<BucketListCard bucketList={bucketList} onClick={jest.fn()} />);
@@ -55,62 +70,188 @@ describe('BucketListCard', () => {
   it('opens the list when it is given somewhere to go', () => {
     render(<BucketListCard bucketList={bucketList} href="/bucket-lists/bucket-1" />);
 
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/bucket-lists/bucket-1');
+    // Both the card and its Open list button are that link
+    expect(screen.getAllByRole('link')[0]).toHaveAttribute('href', '/bucket-lists/bucket-1');
   });
 
   it('falls back to a press handler where there is no href', async () => {
     const onClick = jest.fn();
-    const user = userEvent.setup();
     render(<BucketListCard bucketList={bucketList} onClick={onClick} />);
 
-    await user.click(screen.getByText('Weekend Hikes'));
+    await userEvent.click(screen.getByText('Weekend Hikes'));
 
     expect(onClick).toHaveBeenCalled();
   });
 });
 
-describe('SharedBucketListCard', () => {
-  beforeEach(() => jest.clearAllMocks());
-
-  const shared: BucketList = {
-    ...bucketList,
-    id: 'bucket-shared-1',
-    owner: { id: 'm1', displayName: 'Tony Ouma' },
-    itemCount: 8,
-    shareToken: 'share-abc',
-    isMember: false,
-  };
-
-  it('names the owner and joins with the share token, not the list id', async () => {
-    const user = userEvent.setup();
-    renderWithQueryClient(<SharedBucketListCard bucketList={shared} />);
-
-    expect(screen.getByText('By Tony Ouma · 8 saved')).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: 'Join' }));
-
-    expect(mockJoin).toHaveBeenCalledWith('share-abc');
+/**
+ * The canvas gives one card three states — a list you own, one you are on, and
+ * a public one you could join. Two cards used to say this, and neither covered
+ * all three.
+ */
+describe('the three states of a list card', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    userId = 'me';
   });
 
-  it('shows a disabled Joined button once the reader is on the list', () => {
-    renderWithQueryClient(<SharedBucketListCard bucketList={{ ...shared, isMember: true }} />);
+  // Opening is the same link the card is, so it is an anchor rather than a button
+  it('offers to open a list you own', () => {
+    render(<BucketListCard bucketList={bucketList} href="/bucket-lists/bucket-1" />);
 
-    expect(screen.getByRole('button', { name: 'Joined' })).toBeDisabled();
+    expect(screen.getByRole('link', { name: 'Open list' })).toHaveAttribute(
+      'href',
+      '/bucket-lists/bucket-1',
+    );
+  });
+
+  it('falls back to a button where the card has no href', () => {
+    render(<BucketListCard bucketList={bucketList} onClick={jest.fn()} />);
+
+    expect(screen.getByRole('button', { name: 'Open list' })).toBeInTheDocument();
+  });
+
+  it('offers to join one that is not yours', () => {
+    render(<BucketListCard bucketList={shared} href="/bucket-lists/bucket-shared-1" />);
+
+    expect(screen.getByRole('button', { name: 'Join list' })).toBeInTheDocument();
+  });
+
+  it('joins with the share token, not the list id', async () => {
+    render(<BucketListCard bucketList={shared} href="/x" />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Join list' }));
+
+    expect(join).toHaveBeenCalledWith('share-abc', expect.anything());
+  });
+
+  it('says so when a list arrived without a share link', async () => {
+    render(<BucketListCard bucketList={{ ...shared, shareToken: undefined }} href="/x" />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Join list' }));
+
+    expect(join).not.toHaveBeenCalled();
+    expect(toast).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'This list has no share link' }),
+    );
+  });
+
+  it('says you are on a list you have joined', () => {
+    render(<BucketListCard bucketList={{ ...shared, isMember: true }} href="/x" />);
+
+    expect(screen.getByRole('button', { name: 'Joined' })).toBeInTheDocument();
   });
 
   // The list serializer sends this as a string
   it('reads membership sent as a string', () => {
-    renderWithQueryClient(<SharedBucketListCard bucketList={{ ...shared, isMember: 'true' }} />);
+    render(<BucketListCard bucketList={{ ...shared, isMember: 'true' }} href="/x" />);
 
-    expect(screen.getByRole('button', { name: 'Joined' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Joined' })).toBeInTheDocument();
   });
 
-  it('cannot join a list that came without a token', () => {
-    renderWithQueryClient(
-      <SharedBucketListCard bucketList={{ ...shared, shareToken: undefined }} />,
+  it('ignores the string "false"', () => {
+    render(<BucketListCard bucketList={{ ...shared, isMember: 'false' }} href="/x" />);
+
+    expect(screen.getByRole('button', { name: 'Join list' })).toBeInTheDocument();
+  });
+
+  // Pressing "Joined" is how the canvas leaves a list
+  it('leaves a list you are on', async () => {
+    render(<BucketListCard bucketList={{ ...shared, isMember: true }} href="/x" />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Joined' }));
+
+    expect(leave).toHaveBeenCalledWith('bucket-shared-1', expect.anything());
+  });
+
+  it('promises a public list stays readable after you leave', async () => {
+    leave.mockImplementation((_id, { onSuccess }) => onSuccess());
+    render(<BucketListCard bucketList={{ ...shared, isMember: true }} href="/x" />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Joined' }));
+
+    expect(toast).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'The public list stays readable.' }),
+    );
+  });
+
+  it('warns that a private one needs another invite', async () => {
+    leave.mockImplementation((_id, { onSuccess }) => onSuccess());
+    render(
+      <BucketListCard
+        bucketList={{ ...shared, isMember: true, visibility: 'private' }}
+        href="/x"
+      />,
     );
 
-    expect(screen.getByRole('button', { name: 'Join' })).toBeDisabled();
+    await userEvent.click(screen.getByRole('button', { name: 'Joined' }));
+
+    expect(toast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: 'You will need another invite to open it again.',
+      }),
+    );
+  });
+
+  // Signed out, nothing is yours
+  it('offers to join when no one is signed in', () => {
+    userId = undefined;
+    render(<BucketListCard bucketList={bucketList} href="/x" />);
+
+    expect(screen.getByRole('button', { name: 'Join list' })).toBeInTheDocument();
+  });
+});
+
+/**
+ * The canvas stacks three faces with a "+N". Members ride on the detail
+ * serializer only, so a card built from the collection shows the count instead.
+ */
+describe('members on the card', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    userId = 'me';
+  });
+
+  it('shows the count when no people came with the list', () => {
+    render(<BucketListCard bucketList={bucketList} href="/x" />);
+
+    expect(screen.getByText('4')).toBeInTheDocument();
+  });
+
+  it('stacks the faces when they did', () => {
+    const detail = {
+      ...bucketList,
+      memberCount: 5,
+      members: [
+        { id: 'm1', status: 'accepted', user: { id: 'u1', displayName: 'Amina' } },
+        { id: 'm2', status: 'accepted', user: { id: 'u2', displayName: 'Kevo' } },
+      ],
+    } as unknown as BucketListDetail;
+
+    render(<BucketListCard bucketList={detail} href="/x" />);
+
+    expect(screen.getByTitle('Amina')).toBeInTheDocument();
+    expect(screen.getByText('+3')).toBeInTheDocument();
+  });
+
+  // Someone who was asked and has not answered is not a member yet
+  it('ignores an invite that has not been accepted', () => {
+    const detail = {
+      ...bucketList,
+      memberCount: 1,
+      members: [{ id: 'm1', status: 'pending', user: { id: 'u1', displayName: 'Amina' } }],
+    } as unknown as BucketListDetail;
+
+    render(<BucketListCard bucketList={detail} href="/x" />);
+
+    expect(screen.queryByTitle('Amina')).not.toBeInTheDocument();
+    expect(screen.getByText('1')).toBeInTheDocument();
+  });
+
+  it('shows nothing where a list has no members at all', () => {
+    render(<BucketListCard bucketList={{ ...bucketList, memberCount: 0 }} href="/x" />);
+
+    expect(screen.queryByText('0')).not.toBeInTheDocument();
   });
 });
 

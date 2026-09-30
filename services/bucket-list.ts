@@ -184,6 +184,25 @@ export const joinBucketList = async (shareToken: string): Promise<ApiResponse> =
 };
 
 /** The link to hand out, minted on demand. */
+/**
+ * Step off a list someone shared with you.
+ *
+ * The list itself is untouched: a public one stays readable, it simply stops
+ * being one of yours.
+ */
+export const leaveBucketList = async (bucketListId: string): Promise<ApiResponse> => {
+  try {
+    const api = await apiWithToken();
+    await api.delete(`/v1/accounts/bucket-lists/${bucketListId}/members/leave/`);
+
+    return { status: 204, success: true } as ApiResponse;
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'Could not leave this list'));
+  }
+};
+
 export const fetchBucketListShare = async (bucketListId: string): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();

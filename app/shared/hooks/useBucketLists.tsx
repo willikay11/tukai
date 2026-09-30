@@ -7,6 +7,7 @@ import {
   fetchBucketList,
   fetchMyBucketLists,
   joinBucketList,
+  leaveBucketList,
   removeBucketListItem,
   reorderBucketListItems,
   updateBucketList,
@@ -104,6 +105,16 @@ export const useJoinBucketList = () => {
 
   return useMutation({
     mutationFn: (shareToken: string) => joinBucketList(shareToken),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bucket-lists'] }),
+  });
+};
+
+/** Steps off a shared list. The list stays; the reader is no longer a member. */
+export const useLeaveBucketList = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (bucketListId: string) => leaveBucketList(bucketListId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bucket-lists'] }),
   });
 };
