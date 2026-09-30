@@ -4,6 +4,7 @@ import {
   ExperiencesQueryParams,
   SlotTemplatePayload,
   TicketPurchasePayload,
+  addCoHosts,
   addExperiencePhotos,
   addGuestToExperience,
   bookmarkExperience,
@@ -16,6 +17,7 @@ import {
   deleteExperienceTicket,
   deleteItineraryDay,
   deleteSlotTemplate,
+  fetchCoHostInvites,
   fetchExperience,
   fetchExperienceOccurrences,
   fetchExperiences,
@@ -27,7 +29,9 @@ import {
   previewPromoCode,
   publishExperience,
   purchaseExperienceTicketV2,
+  removeCoHost,
   removeGuestFromExperience,
+  respondToCoHostInvite,
   resumeTicketSales,
   searchUsers,
   updateExperience,
@@ -246,6 +250,50 @@ export const useDeleteExperiencePhoto = () => {
     mutationFn: async (photoId: string) => await deleteExperiencePhoto(photoId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['experience'] });
+    },
+  });
+};
+
+export const useCoHostInvites = (experienceId: string, enabled = true) =>
+  useQuery({
+    queryKey: ['co-host-invites', experienceId],
+    queryFn: async () => await fetchCoHostInvites(experienceId),
+    enabled: enabled && Boolean(experienceId),
+  });
+
+export const useAddCoHosts = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (userIds: string[]) => await addCoHosts(experienceId, userIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['co-host-invites', experienceId] });
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
+    },
+  });
+};
+
+export const useRemoveCoHost = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (coHostId: string) => await removeCoHost(experienceId, coHostId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['co-host-invites', experienceId] });
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
+    },
+  });
+};
+
+export const useRespondToCoHostInvite = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ inviteId, answer }: { inviteId: number; answer: 'accept' | 'decline' }) =>
+      await respondToCoHostInvite(experienceId, inviteId, answer),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['co-host-invites', experienceId] });
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
     },
   });
 };

@@ -542,6 +542,84 @@ export const deleteExperiencePhoto = async (photoId: string): Promise<ApiRespons
   }
 };
 
+/**
+ * Co-hosting.
+ *
+ * Adding a co-host sends them an invite; the API records it PENDING and they
+ * become a co-host when they accept. The invites endpoint is the only way to see
+ * that an invite was ever sent, since the experience lists accepted co-hosts
+ * only.
+ */
+export const fetchCoHostInvites = async (experienceId: string): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.get(`/v1/experiences/${experienceId}/co-hosts/invites/`);
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load co-host invites'),
+    };
+  }
+};
+
+export const addCoHosts = async (experienceId: string, userIds: string[]) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.post(`/v1/experiences/${experienceId}/co-hosts/`, {
+      co_hosts: userIds,
+    });
+
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'Could not invite this co-host'));
+  }
+};
+
+export const removeCoHost = async (experienceId: string, coHostId: string) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    await axiosInstance.delete(`/v1/experiences/${experienceId}/co-hosts/${coHostId}/`);
+
+    return { status: 204, success: true };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'Could not remove this co-host'));
+  }
+};
+
+/** The invited person's own answer. Both take an empty body. */
+export const respondToCoHostInvite = async (
+  experienceId: string,
+  inviteId: number,
+  answer: 'accept' | 'decline',
+) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.post(
+      `/v1/experiences/${experienceId}/co-hosts/invites/${inviteId}/${answer}/`,
+      {},
+    );
+
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, `Could not ${answer} this co-host invite`));
+  }
+};
+
 export const searchUsers = async (query: string): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();

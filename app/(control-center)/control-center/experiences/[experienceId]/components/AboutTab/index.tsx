@@ -9,6 +9,7 @@ import { safeText } from '@/utils/safe-text-utils';
 
 import { ManageExperienceMetrics } from '../../utils/manage-metrics';
 import { CancelExperienceAction } from '../CancelExperienceAction';
+import { CoHostsSection } from '../CoHostsSection';
 import { SalesProgressDonut } from '../SalesProgressDonut';
 
 interface AboutTabProps {
@@ -112,6 +113,8 @@ export const AboutTab = ({ experience, metrics }: AboutTabProps) => {
             </div>
           </div>
         )}
+
+        <CoHostsSection experience={experience} />
 
         <CancelExperienceAction experienceId={experience.id} experienceTitle={experience.title} />
       </div>
