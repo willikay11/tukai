@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { useAuthDialog } from '@/context/AuthDialogContext';
+import { cn } from '@/lib/utils';
 import { Community, CommunityMember } from '@/types/community';
 
 const AVATAR_LIMIT = 3;
@@ -90,8 +91,11 @@ export const JoinCommunityPanel = ({
         router.refresh();
         toast({
           title: community.isPublic ? 'Joined' : 'Request sent',
+          // The canvas spells out that joining is not booking. Worth keeping:
+          // a community runs ticketed experiences, and "Joined" alone reads
+          // like a seat has been held.
           description: community.isPublic
-            ? `You are now a member of ${community.title}`
+            ? `You are now a member of ${community.title}. Membership does not reserve a seat.`
             : 'An administrator will review your request',
           variant: 'success',
         });
@@ -116,7 +120,7 @@ export const JoinCommunityPanel = ({
           router.refresh();
           toast({
             title: 'Left community',
-            description: `You are no longer a member of ${community.title}`,
+            description: `You are no longer a member of ${community.title}. Anything you booked is still yours.`,
             variant: 'success',
           });
         },
@@ -133,13 +137,23 @@ export const JoinCommunityPanel = ({
           {membership === 'member' ? 'Your membership' : 'Join this community'}
         </p>
         {/* The API exposes only `is_public`; there is no separate invite-only
-            flag, so a private community is labelled as such */}
-        {!community.isPublic && (
-          <span className="flex flex-shrink-0 items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            Private
-          </span>
-        )}
+            flag, so the two states are private and open-to-anyone. The canvas
+            states the policy either way rather than only flagging the
+            exception, so a reader knows where they stand before pressing. */}
+        <span
+          className={cn(
+            'flex flex-shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium',
+            community.isPublic ? 'bg-surface-brand text-brand' : 'bg-primary/10 text-primary',
+          )}
+        >
+          <span
+            className={cn(
+              'h-1.5 w-1.5 rounded-full',
+              community.isPublic ? 'bg-brand' : 'bg-primary',
+            )}
+          />
+          {community.isPublic ? 'Anyone can join' : 'Private'}
+        </span>
       </div>
 
       <div className="flex items-center gap-3 rounded-2xl bg-white p-4">

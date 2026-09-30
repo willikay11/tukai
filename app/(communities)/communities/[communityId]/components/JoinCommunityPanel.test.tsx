@@ -127,6 +127,63 @@ describe('JoinCommunityPanel', () => {
   });
 
   /**
+   * The canvas states the join policy either way rather than only flagging
+   * the exception, so a reader knows where they stand before pressing.
+   */
+  describe('the policy chip', () => {
+    it('says anyone can join an open community', () => {
+      render(<JoinCommunityPanel community={community()} currentUserId="u1" />);
+
+      expect(screen.getByText('Anyone can join')).toBeInTheDocument();
+    });
+
+    it('says private for a closed one', () => {
+      render(<JoinCommunityPanel community={community({ isPublic: false })} currentUserId="u1" />);
+
+      expect(screen.getByText('Private')).toBeInTheDocument();
+      expect(screen.queryByText('Anyone can join')).not.toBeInTheDocument();
+    });
+  });
+
+  // Joining a community is not booking a seat in its experiences, and the
+  // canvas says so where "Joined" alone would imply otherwise
+  describe('what the toasts promise', () => {
+    it('does not let joining read as a reservation', async () => {
+      const user = userEvent.setup();
+      joinMutate.mockImplementation((_id, { onSuccess }) => onSuccess());
+
+      render(<JoinCommunityPanel community={community()} currentUserId="u1" />);
+      await user.click(screen.getByRole('button', { name: 'Join Community' }));
+
+      expect(toast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: expect.stringContaining('does not reserve a seat'),
+        }),
+      );
+    });
+
+    it('reassures on the way out', async () => {
+      const user = userEvent.setup();
+      leaveMutate.mockImplementation((_vars, { onSuccess }) => onSuccess());
+
+      render(
+        <JoinCommunityPanel
+          community={community({ members: [member('u1', 'accepted')] })}
+          currentUserId="u1"
+        />,
+      );
+      await user.click(screen.getByRole('button', { name: /Leave community/ }));
+      await user.click(screen.getByRole('button', { name: 'Leave community' }));
+
+      expect(toast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: expect.stringContaining('still yours'),
+        }),
+      );
+    });
+  });
+
+  /**
    * The community page lost its auth gate in the merge — it is public to read
    * now — so a reader without an account reaches this button.
    */
