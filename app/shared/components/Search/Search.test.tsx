@@ -14,6 +14,10 @@ jest.mock('next/navigation', () => ({
 
 // Radix renders its content in a portal behind an open flag; swapping it for
 // plain markup keeps these tests about the popover's CONTENT
+// The popover is flattened below, which would otherwise render the city panel
+// and its own copy of every city alongside the trending list
+jest.mock('./CityPicker', () => ({ CityPicker: () => null }));
+
 jest.mock('@/components/ui/popover', () => ({
   Popover: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   PopoverTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

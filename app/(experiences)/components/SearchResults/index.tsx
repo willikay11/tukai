@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { PlaceCategory } from '@/types/placeCategory';
 import { communityPath, experiencePath, placePath } from '@/utils/detail-paths';
 
-import { EditFiltersDrawer } from './EditFiltersDrawer';
+import { FiltersDialog } from './FiltersDialog';
 import { ResultsFilterBar } from './ResultsFilterBar';
 import {
   FilterChip,
@@ -27,6 +27,7 @@ import {
   paramsFromFilters,
   withoutFilter,
 } from './filters';
+import { matchesShapes } from './shapes';
 
 const RowSkeleton = () => (
   <div className="flex items-center gap-3 py-2">
@@ -73,10 +74,18 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
   };
 
   const chips = activeChips(filters, categoryName);
-  const experiences = results?.experiences ?? [];
+  // The API cannot filter by day-shape, so those picks narrow the rows here —
+  // and the counts below are taken from the same rows, so the two agree
+  const experiences = (results?.experiences ?? []).filter((experience) =>
+    matchesShapes(experience, filters.experienceShapes),
+  );
   const places = results?.places ?? [];
   const communities = results?.communities ?? [];
-  const total = results?.counts.total ?? 0;
+  const narrowedByShape = filters.experienceShapes.length > 0;
+  const experienceCount = narrowedByShape ? experiences.length : (results?.counts.experience ?? 0);
+  const total = narrowedByShape
+    ? experiences.length + places.length + communities.length
+    : (results?.counts.total ?? 0);
 
   const heading = filters.query.trim()
     ? `Results for “${filters.query.trim()}”`
@@ -96,7 +105,7 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
       <ResultsFilterBar
         chips={chips}
         onEdit={() => setIsEditOpen(true)}
-        onRemove={(chip: FilterChip) => apply(withoutFilter(filters, chip.key))}
+        onRemove={(chip: FilterChip) => apply(withoutFilter(filters, chip.key, chip.value))}
         onClearAll={() => apply(clearedFilters(filters))}
         sortLabel={filters.popularFirst ? 'Most popular' : 'Most relevant'}
         onToggleSort={() => apply({ ...filters, popularFirst: !filters.popularFirst })}
@@ -137,9 +146,7 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
           {experiences.length > 0 && (
             <ResultGroup
               title="Experiences"
-              count={`${results?.counts.experience} ${
-                results?.counts.experience === 1 ? 'experience' : 'experiences'
-              }`}
+              count={`${experienceCount} ${experienceCount === 1 ? 'experience' : 'experiences'}`}
             >
               {experiences.map((experience) => (
                 <ExperienceResultRow
@@ -185,7 +192,7 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
         </div>
       )}
 
-      <EditFiltersDrawer
+      <FiltersDialog
         filters={filters}
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}

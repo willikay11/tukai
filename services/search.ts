@@ -97,8 +97,10 @@ export const searchAll = async (filters: SearchFilters, perPage = 24): Promise<S
           // which is what we want, but `sold_out=false` matches nothing
           ...(filters.freeOnly ? { is_paid: false } : {}),
           ...(filters.availableOnly ? { sold_out: false } : {}),
-          ...(filters.experienceType
-            ? { experience_type: filters.experienceType as 'standard' | 'itinerary' }
+          // Only an itinerary-only pick is something the API can narrow; the
+          // other shapes are read off the rows that come back
+          ...(filters.experienceShapes.length === 1 && filters.experienceShapes[0] === 'itinerary'
+            ? { experience_type: 'itinerary' as const }
             : {}),
         })
       : Promise.resolve({ data: { count: 0, results: [] } }),

@@ -2,16 +2,10 @@ import { ReadonlyURLSearchParams } from 'next/navigation';
 
 import { EMPTY_FILTERS, ResultType, SearchFilters } from '@/types/search';
 
+import { EXPERIENCE_SHAPES } from './shapes';
+
 export type { ResultType, SearchFilters };
 export { EMPTY_FILTERS };
-
-export const EXPERIENCE_TYPES: Array<{ value: string; label: string }> = [
-  { value: 'standard', label: 'One day' },
-  { value: 'itinerary', label: 'Itinerary' },
-  { value: 'restaurant_reservation', label: 'Restaurant' },
-  { value: 'cinema_reservation', label: 'Cinema' },
-  { value: 'guide_booking', label: 'Guided' },
-];
 
 export const RESULT_TYPES: Array<{ value: ResultType; label: string }> = [
   { value: 'all', label: 'All' },
@@ -31,7 +25,7 @@ export const filtersFromParams = (
   date: params.get('date') ?? undefined,
   freeOnly: params.get('free') === '1',
   availableOnly: params.get('available') === '1',
-  experienceType: params.get('xtype') ?? undefined,
+  experienceShapes: (params.get('xtype') ?? '').split(',').filter(Boolean),
   popularFirst: params.get('sort') === 'popular',
 });
 
@@ -45,7 +39,7 @@ export const paramsFromFilters = (filters: SearchFilters): URLSearchParams => {
   if (filters.date) params.set('date', filters.date);
   if (filters.freeOnly) params.set('free', '1');
   if (filters.availableOnly) params.set('available', '1');
-  if (filters.experienceType) params.set('xtype', filters.experienceType);
+  if (filters.experienceShapes.length) params.set('xtype', filters.experienceShapes.join(','));
   if (filters.popularFirst) params.set('sort', 'popular');
 
   return params;
@@ -55,6 +49,8 @@ export type FilterChip = {
   /** The filter this chip stands for, so removing it knows what to clear. */
   key: keyof SearchFilters;
   label: string;
+  /** For a filter holding several values, which one this chip is. */
+  value?: string;
 };
 
 /**
@@ -80,14 +76,13 @@ export const activeChips = (filters: SearchFilters, categoryName?: string): Filt
   if (filters.freeOnly) chips.push({ key: 'freeOnly', label: 'Free' });
   if (filters.availableOnly) chips.push({ key: 'availableOnly', label: 'Has spots' });
 
-  if (filters.experienceType) {
+  filters.experienceShapes.forEach((shape) => {
     chips.push({
-      key: 'experienceType',
-      label:
-        EXPERIENCE_TYPES.find((one) => one.value === filters.experienceType)?.label ??
-        filters.experienceType,
+      key: 'experienceShapes',
+      label: EXPERIENCE_SHAPES.find((one) => one.value === shape)?.label ?? shape,
+      value: shape,
     });
-  }
+  });
 
   if (filters.popularFirst) chips.push({ key: 'popularFirst', label: 'Most popular' });
 
@@ -95,8 +90,18 @@ export const activeChips = (filters: SearchFilters, categoryName?: string): Filt
 };
 
 /** Clearing one chip, without disturbing the rest. */
-export const withoutFilter = (filters: SearchFilters, key: keyof SearchFilters): SearchFilters => {
+export const withoutFilter = (
+  filters: SearchFilters,
+  key: keyof SearchFilters,
+  value?: string,
+): SearchFilters => {
   switch (key) {
+    case 'experienceShapes':
+      return {
+        ...filters,
+        // One chip per shape, so removing one leaves the others
+        experienceShapes: value ? filters.experienceShapes.filter((shape) => shape !== value) : [],
+      };
     case 'type':
       return { ...filters, type: 'all' };
     case 'freeOnly':

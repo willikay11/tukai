@@ -48,7 +48,12 @@ export type SearchFilters = {
   date?: string;
   freeOnly: boolean;
   availableOnly: boolean;
-  experienceType?: string;
+  /**
+   * The shapes a reader picked, one or more. Only `itinerary` is a value the
+   * API filters on; the rest describe how an experience sits in the calendar,
+   * which no endpoint exposes — see `matchesShapes`.
+   */
+  experienceShapes: string[];
   /** Places ranked by rating rather than relevance. */
   popularFirst: boolean;
 };
@@ -56,6 +61,7 @@ export type SearchFilters = {
 export const EMPTY_FILTERS: SearchFilters = {
   query: '',
   type: 'all',
+  experienceShapes: [],
   freeOnly: false,
   availableOnly: false,
   popularFirst: false,

@@ -38,7 +38,7 @@ describe('reading filters out of the URL', () => {
       date: '2026-10-05',
       freeOnly: true,
       availableOnly: true,
-      experienceType: 'itinerary',
+      experienceShapes: ['itinerary'],
       popularFirst: true,
     });
   });
@@ -107,21 +107,34 @@ describe('activeChips', () => {
     expect(activeChips(filters({ category: 'c1' }))[0].label).toBe('Category');
   });
 
-  it('names an experience type in words', () => {
-    expect(activeChips(filters({ experienceType: 'itinerary' }))[0].label).toBe('Itinerary');
+  // One chip per shape, since a reader can pick several
+  it('names each experience shape in words', () => {
+    const chips = activeChips(filters({ experienceShapes: ['one', 'itinerary'] }));
+
+    expect(chips.map((chip) => chip.label)).toEqual(['One day', 'Itinerary']);
   });
 });
 
 describe('removing one narrowing', () => {
   it.each([
-    ['type' as const, { type: 'places' as const }, 'type'],
-    ['freeOnly' as const, { freeOnly: true }, 'freeOnly'],
-    ['availableOnly' as const, { availableOnly: true }, 'availableOnly'],
-    ['popularFirst' as const, { popularFirst: true }, 'popularFirst'],
-    ['category' as const, { category: 'c1' }, 'category'],
-    ['date' as const, { date: '2026-10-05' }, 'date'],
-  ])('clears %s', (key, on) => {
+    ['type', { type: 'places' as const }],
+    ['freeOnly', { freeOnly: true }],
+    ['availableOnly', { availableOnly: true }],
+    ['popularFirst', { popularFirst: true }],
+    ['category', { category: 'c1' }],
+    ['date', { date: '2026-10-05' }],
+  ] as Array<[keyof SearchFilters, Partial<SearchFilters>]>)('clears %s', (key, on) => {
     expect(countActive(withoutFilter(filters(on), key))).toBe(0);
+  });
+
+  it('clears one shape and leaves the others', () => {
+    const next = withoutFilter(
+      filters({ experienceShapes: ['one', 'itinerary'] }),
+      'experienceShapes',
+      'one',
+    );
+
+    expect(next.experienceShapes).toEqual(['itinerary']);
   });
 
   it('leaves the others alone', () => {

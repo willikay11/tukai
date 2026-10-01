@@ -35,8 +35,8 @@ jest.mock('@/context/LocationContext', () => ({
   useLocation: () => ({ lat: undefined, lng: undefined }),
 }));
 
-jest.mock('./EditFiltersDrawer', () => ({
-  EditFiltersDrawer: ({ isOpen }: { isOpen: boolean }) => (isOpen ? <div>filters open</div> : null),
+jest.mock('./FiltersDialog', () => ({
+  FiltersDialog: ({ isOpen }: { isOpen: boolean }) => (isOpen ? <div>filters open</div> : null),
 }));
 
 const filters = (overrides: Partial<SearchFilters> = {}): SearchFilters => ({

@@ -40,7 +40,7 @@ export const Search = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setSelectedCitySearchId } = useSelectedCategory();
-  const { city, status, requestLocation } = useLocation();
+  const { city, status } = useLocation();
   const { data: placeCategories } = usePlaceCategories({ pageSize: 100, group: 'cities' }, true);
   const [query, setQuery] = useState<string>();
   const [tag, setTag] = useState<PlaceCategory | undefined>();
@@ -174,7 +174,6 @@ export const Search = () => {
             // and names the city otherwise
             cityLabel={status === 'granted' ? 'Near me' : (city ?? 'Nairobi')}
             isLocationOn={status === 'granted'}
-            onCity={requestLocation}
             onFilters={() => setShowSearchResults(true)}
             filterCount={tag ? 1 : 0}
             isFilterOpen={showSearchResults}
