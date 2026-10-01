@@ -133,12 +133,23 @@ export const Search = () => {
     setShowSearchResults(true);
   };
 
+  /**
+   * Submitting takes the reader to the results, which live on Discover and
+   * read their filters out of the URL. The popover is for type-ahead; this is
+   * the whole answer.
+   */
   const handleSubmitSearch = () => {
     const typed = inputElRef.current?.value ?? '';
-    if (typed.trim()) {
-      addRecentSearch(typed);
-    }
-    setShowSearchResults(true);
+    if (!typed.trim()) return;
+
+    addRecentSearch(typed);
+    setShowSearchResults(false);
+
+    const params = new URLSearchParams();
+    params.set('q', typed.trim());
+    if (tag) params.set('category', tag.id);
+
+    router.push(`/?${params.toString()}`);
   };
 
   // Takes the whole path rather than a type and an id: experiences and places
@@ -202,6 +213,9 @@ export const Search = () => {
               onChange={(event) => {
                 setIsFieldEmpty(event.target.value.length === 0);
                 debouncedSetQuery(event.target.value);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') handleSubmitSearch();
               }}
             />
           </SearchBarShell>

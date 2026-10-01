@@ -1,13 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import moment from 'moment';
 
 import { CommunityDiscoverCard } from '@/app/(experiences)/components/CommunityDiscoverCard';
 import { ItineraryCard } from '@/app/(experiences)/components/ItineraryCard';
 import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
+import { SearchResults } from '@/app/(experiences)/components/SearchResults';
+import { filtersFromParams, hasSearch } from '@/app/(experiences)/components/SearchResults/filters';
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
 import {
   ExperienceRow,
@@ -58,7 +60,14 @@ const EAGER_IN_ROW = 3;
 
 export const DiscoverPageContent = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { city, lat, lng } = useLocation();
+
+  // A search or a filter replaces the rails outright, as the canvas has it —
+  // and it lives in the URL, so a result list is somewhere you can send
+  // someone and the back button still means something
+  const filters = filtersFromParams(searchParams);
+  const isSearching = hasSearch(filters);
 
   // ⚠️ No featured endpoint and no is_featured param exist — the first row of
   // the default list stands in, matching what /experiences and the Places
@@ -182,6 +191,14 @@ export const DiscoverPageContent = () => {
   ].filter(Boolean) as string[];
 
   const price = featured?.priceStartsFrom;
+
+  if (isSearching) {
+    return (
+      <PageContainer className="py-6">
+        <SearchResults filters={filters} />
+      </PageContainer>
+    );
+  }
 
   return (
     <PageContainer className="space-y-10 py-6">

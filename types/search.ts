@@ -28,3 +28,35 @@ export type SearchResults = {
     total: number;
   };
 };
+
+/**
+ * What a reader can narrow a search by.
+ *
+ * ⚠️ The canvas offers more — time of day, duration, a distance radius, price,
+ * open now, drop-in, reservable, offers, step-free access, parking, a minimum
+ * rating. None are filterable: `/experiences/` takes 19 query parameters and
+ * `/places/` 11, and this is what the two have between them.
+ */
+export type ResultType = 'all' | 'experiences' | 'places' | 'communities';
+
+export type SearchFilters = {
+  query: string;
+  type: ResultType;
+  /** A category id, which both experiences and places accept. */
+  category?: string;
+  /** `YYYY-MM-DD`, experiences only. */
+  date?: string;
+  freeOnly: boolean;
+  availableOnly: boolean;
+  experienceType?: string;
+  /** Places ranked by rating rather than relevance. */
+  popularFirst: boolean;
+};
+
+export const EMPTY_FILTERS: SearchFilters = {
+  query: '',
+  type: 'all',
+  freeOnly: false,
+  availableOnly: false,
+  popularFirst: false,
+};
