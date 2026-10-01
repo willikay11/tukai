@@ -16,7 +16,6 @@ import {
   RowSkeleton,
 } from '@/app/(experiences)/experiences/components/ExperienceRow';
 import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
-import { FeaturedBanner } from '@/app/shared/components/Banners';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { CardRail, SeeAllCard } from '@/app/shared/components/Lists';
@@ -36,9 +35,8 @@ import { Moment, momentPhotos } from '@/types/moment';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
 import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
-import { formatLongDateWithOrdinal, formatShortDate } from '@/utils/date-utils';
+import { formatLongDateWithOrdinal } from '@/utils/date-utils';
 import { experiencePath } from '@/utils/detail-paths';
-import { haversineKm } from '@/utils/geo-utils';
 
 const ROW_SIZE = 10;
 
@@ -75,15 +73,6 @@ export const DiscoverPageContent = () => {
   const { data: promotedResponse, isLoading: isLoadingPromoted } =
     usePlacesWithExperiences(!isSearching);
   const promotedPlaces: Place[] = promotedResponse?.data?.results ?? [];
-
-  // ⚠️ No featured endpoint and no is_featured param exist — the first row of
-  // the default list stands in, matching what /experiences and the Places
-  // featured banner already do.
-  const { data: featuredResponse, isLoading: isLoadingFeatured } = useExperiences(
-    { page: 1, page_size: 1 },
-    true,
-  );
-  const featured: Experience | undefined = featuredResponse?.data?.results?.[0];
 
   // ⚠️ No handpicked/recommended/for-you endpoint exists. Geo-scoped published
   // experiences are the closest available query; coordinates are omitted until
@@ -178,27 +167,6 @@ export const DiscoverPageContent = () => {
   const nearbyRestaurants: Place[] = restaurantsResponse?.data?.results ?? [];
   const isLoadingRestaurants = isLoadingInterests || isFetchingRestaurants;
 
-  const coverPhoto =
-    featured?.photos?.find((photo: Photo) => photo.isCover)?.photo ||
-    featured?.photos?.[0]?.photo ||
-    null;
-
-  const featuredLat = featured?.location?.pointLat;
-  const featuredLng = featured?.location?.pointLong;
-  const distanceKm =
-    lat !== undefined && lng !== undefined && featuredLat && featuredLng
-      ? haversineKm(lat, lng, featuredLat, featuredLng)
-      : null;
-
-  // Every piece is dropped rather than faked when the API omits it
-  const metaItems = [
-    featured?.location?.city,
-    distanceKm !== null ? `${distanceKm} Kms` : null,
-    featured?.startDate ? formatShortDate(featured.startDate) : null,
-  ].filter(Boolean) as string[];
-
-  const price = featured?.priceStartsFrom;
-
   if (isSearching) {
     return (
       <PageContainer className="py-6">
@@ -209,29 +177,6 @@ export const DiscoverPageContent = () => {
 
   return (
     <PageContainer className="space-y-10 py-6">
-      {isLoadingFeatured ? (
-        <div className="aspect-[16/9] w-full animate-pulse rounded-2xl bg-gray-200 md:aspect-[3/1]" />
-      ) : (
-        featured && (
-          <FeaturedBanner
-            badgeLabel="Featured This Weekend"
-            badgeIcon="SparklesIcon"
-            coverPhoto={coverPhoto}
-            title={featured.title}
-            metaItems={metaItems}
-            // ⚠️ No rating: the Experience type carries no averageRating /
-            // totalReviews field (only Place does), so the star in the design
-            // has no backing data. FeaturedBanner omits it when null.
-            rating={null}
-            ctaLabel={`Reserve a spot - ${price?.currency} ${Number(price?.amount ?? 0).toLocaleString()}`}
-            // No reserve route exists — booking lives in the detail page panel
-            onCtaClick={() => router.push(experiencePath(featured))}
-            secondaryCtaLabel="View details"
-            onSecondaryCtaClick={() => router.push(experiencePath(featured))}
-          />
-        )
-      )}
-
       {/* The canvas opens Discover with this row. There is no promoted flag on
           the API; a place with experiences is one a community is running
           something at, which is what "handpicked by the communities that run
