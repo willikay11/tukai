@@ -11,7 +11,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { useRecentSearches } from '@/app/shared/hooks/useRecentSearches';
 import { useSearch } from '@/app/shared/hooks/useSearch';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover';
 import { useLocation } from '@/context/LocationContext';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { PlaceCategory } from '@/types/placeCategory';
@@ -51,6 +51,7 @@ export const Search = () => {
   const { data: searchResults, isFetching: isSearching } = useSearch(query, tag?.id);
   const { recentSearches, addRecentSearch } = useRecentSearches();
   const inputElRef = useRef<HTMLInputElement | null>(null);
+  const barRef = useRef<HTMLDivElement | null>(null);
 
   const hasQuery = Boolean(query?.trim());
 
@@ -165,10 +166,12 @@ export const Search = () => {
 
   return (
     <Popover open={showSearchResults} onOpenChange={(isOpen) => setShowSearchResults(isOpen)}>
-      <PopoverTrigger asChild className="my-4 md:my-0">
-        {/* Plain box so the popover has a whole-field element to anchor to,
-            rather than the <input> inside it */}
-        <div className="w-full">
+      {/* An anchor, not a trigger. The bar holds the city button, which opens
+          a popover of its own — nesting one trigger inside another meant a
+          click on the city opened the results panel instead. The field opens
+          this one itself, on focus. */}
+      <PopoverAnchor asChild className="my-4 md:my-0">
+        <div ref={barRef} className="w-full">
           <SearchBarShell
             // Where the reader actually is, once that is known — "Near me"
             // only while it is still being worked out
@@ -219,7 +222,7 @@ export const Search = () => {
             />
           </SearchBarShell>
         </div>
-      </PopoverTrigger>
+      </PopoverAnchor>
       {/* Anchored to the field's right edge and grown leftwards: the field sits
           at the right of the header, so aligning left would push the panel off
           screen. `collisionPadding` keeps it clear of the viewport edge, and the
@@ -227,6 +230,13 @@ export const Search = () => {
       <PopoverContent
         align="end"
         collisionPadding={16}
+        // The bar is an anchor rather than a trigger, so Radix counts it as
+        // outside this panel: without these, clicking the field opens the
+        // panel and the same click dismisses it again
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        onInteractOutside={(event) => {
+          if (barRef.current?.contains(event.target as Node)) event.preventDefault();
+        }}
         className="z-50 max-h-[80vh] w-[860px] max-w-[calc(100vw-3rem)] overflow-y-auto rounded-3xl border-gray-100 p-0 shadow-xl"
       >
         {/* Idle — what the reader sees before typing anything */}
