@@ -14,7 +14,7 @@ export async function fetchPlaces(
   lng?: number,
   // `sort_by` is the only ordering the API offers, and only 'popular' is
   // accepted. An object so the next one does not become an eighth argument.
-  options?: { sortBy?: 'popular' },
+  options?: { sortBy?: 'popular'; hasExperiences?: boolean },
 ): Promise<ApiResponse> {
   try {
     const queryParams = new URLSearchParams();
@@ -35,6 +35,9 @@ export async function fetchPlaces(
     if (lat !== undefined) queryParams.append('lat', String(lat));
     if (lng !== undefined) queryParams.append('long', String(lng));
     if (options?.sortBy) queryParams.append('sort_by', options.sortBy);
+    // The API reads a parameter's presence as the filter, so this goes in only
+    // when it is wanted
+    if (options?.hasExperiences) queryParams.append('has_experiences', 'true');
 
     const res = await api.get(`/v1/places/?${queryParams.toString()}`);
 

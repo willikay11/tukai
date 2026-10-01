@@ -24,7 +24,11 @@ import { MomentsMasonry } from '@/app/shared/components/Moments';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useMoments } from '@/app/shared/hooks/useMoments';
-import { usePlaceCategories, usePlaces } from '@/app/shared/hooks/usePlaces';
+import {
+  usePlaceCategories,
+  usePlaces,
+  usePlacesWithExperiences,
+} from '@/app/shared/hooks/usePlaces';
 import { useLocation } from '@/context/LocationContext';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
@@ -67,6 +71,10 @@ export const DiscoverPageContent = () => {
   // someone and the back button still means something
   const filters = filtersFromParams(searchParams);
   const isSearching = hasSearch(filters);
+
+  const { data: promotedResponse, isLoading: isLoadingPromoted } =
+    usePlacesWithExperiences(!isSearching);
+  const promotedPlaces: Place[] = promotedResponse?.data?.results ?? [];
 
   // ⚠️ No featured endpoint and no is_featured param exist — the first row of
   // the default list stands in, matching what /experiences and the Places
@@ -222,6 +230,29 @@ export const DiscoverPageContent = () => {
             onSecondaryCtaClick={() => router.push(experiencePath(featured))}
           />
         )
+      )}
+
+      {/* The canvas opens Discover with this row. There is no promoted flag on
+          the API; a place with experiences is one a community is running
+          something at, which is what "handpicked by the communities that run
+          them" describes. */}
+      {(isLoadingPromoted || promotedPlaces.length > 0) && (
+        <CardRail title="Promoted places" subtitle="Handpicked by the communities that run them">
+          {isLoadingPromoted ? (
+            <RowSkeleton cardClassName="aspect-square w-[184px]" />
+          ) : (
+            <>
+              {promotedPlaces.map((place, index) => (
+                <PlaceCard key={place.id} place={place} priority={index < EAGER_IN_ROW} />
+              ))}
+
+              <SeeAllCard
+                href="/places"
+                previewPhotos={promotedPlaces.slice(0, 3).map(placePhotoOf)}
+              />
+            </>
+          )}
+        </CardRail>
       )}
 
       {(isLoadingRow || discoverExperiences.length > 0) && (

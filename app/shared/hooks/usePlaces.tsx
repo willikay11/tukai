@@ -541,3 +541,21 @@ export const useSaveReservationSettings = (placeId: string) => {
     },
   });
 };
+
+/**
+ * Places with something on.
+ *
+ * The canvas calls this row "Promoted places — handpicked by the communities
+ * that run them". There is no promoted flag on the API; `has_experiences` is
+ * the honest reading of it, since a place with experiences is one a community
+ * is running something at.
+ */
+export const usePlacesWithExperiences = (enabled = true, perPage = 10) =>
+  useQuery({
+    queryKey: ['places', 'with-experiences', perPage],
+    queryFn: async () =>
+      await fetchPlaces(1, perPage, undefined, undefined, undefined, undefined, {
+        hasExperiences: true,
+      }),
+    enabled,
+  });

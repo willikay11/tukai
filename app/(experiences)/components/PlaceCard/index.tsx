@@ -9,77 +9,73 @@ import { TITLE_TINT } from '@/app/shared/components/Motion';
 import { cn } from '@/lib/utils';
 import { coverPhotoUrl } from '@/types/photo';
 import { Place } from '@/types/place';
-import { PlaceCategory } from '@/types/placeCategory';
 import { placePath } from '@/utils/detail-paths';
 
+import { placeFact, placeLocality } from './place-fact';
+
+const FACT_TONE: Record<string, string> = {
+  event: 'text-brand',
+  plain: 'text-gray-900',
+  muted: 'text-ink-muted',
+};
+
+/**
+ * A place, as the canvas draws it: a square photo at 184px, the save control
+ * over its corner, then the name, where it is, and one line of substance.
+ */
 export const PlaceCard = ({ place, priority = false }: { place: Place; priority?: boolean }) => {
   const { data: session } = useSession();
 
-  const coverPhoto = coverPhotoUrl(place.photos, 'md');
-
-  // categories mix city and interest groups — only the interest one names the
-  // kind of place ("Restaurants", "Nyama Choma"); the city ones are the area
-  const category = place.categories?.find(
-    (item: PlaceCategory) => item.group === 'interests',
-  )?.name;
-  const area = place.location?.city || place.location?.name;
-  const metaLine = [category, area].filter(Boolean).join(' · ');
-
-  // Most places have no reviews yet, so 0 means "unrated" rather than a score
-  const rating = place.averageRating > 0 ? place.averageRating : null;
-
-  /**
-   * The canvas's reviewLine: the score with its count, or "No reviews yet".
-   * Saying so beats showing nothing — an empty corner reads as missing data
-   * rather than as a place nobody has been to yet.
-   */
-  const reviewCount = place.totalReviews ?? 0;
+  const fact = placeFact(place);
+  const locality = placeLocality(place);
 
   return (
     <CardShell
       href={placePath(place)}
-      src={coverPhoto}
+      src={coverPhotoUrl(place.photos, 'md')}
       alt={place.title}
-      sizes="280px"
+      sizes="184px"
       // Above the fold: fetched straight away instead of waiting for the
       // lazy-load observer, which cannot fire until React has painted
       priority={priority}
-      className="w-[280px] flex-shrink-0 snap-start"
+      ratio="square"
+      radius="rounded-xl"
+      className="w-[184px] flex-shrink-0 snap-start"
       overlay={
-        <div className="absolute right-2 top-2">
+        // Top-right, over the photo. The drop shadow is what keeps a white
+        // icon legible on a pale one.
+        <div className="absolute right-0 top-0">
           <Bookmark
             bookmarked={place.isBookmarked}
             userId={session?.user?.id}
             placeId={place.id}
             itemName={place.title}
-            className="text-white"
+            className="h-11 w-11 text-white [filter:drop-shadow(0_1px_3px_rgba(1,51,52,.55))]"
           />
         </div>
       }
     >
-      <div className="mt-3">
-        <div className="flex items-start justify-between gap-2">
-          <p className={cn('text-base font-bold text-gray-900', TITLE_TINT)}>{place.title}</p>
-          {rating !== null ? (
-            <span className="flex flex-shrink-0 items-center gap-1">
-              <IconComponent iconName="StarIcon" size={14} className="text-yellow-400" />
-              <span className="text-sm font-medium text-gray-800">
-                {rating}
-                {reviewCount > 0 && (
-                  <span className="font-normal text-ink-muted">
-                    {' '}
-                    ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
-                  </span>
-                )}
-              </span>
-            </span>
-          ) : (
-            <span className="flex-shrink-0 text-sm text-ink-subtle">No reviews yet</span>
+      <div className="mt-[9px] flex flex-col gap-0.5">
+        <p className={cn('text-sm font-semibold leading-snug text-brand-ink', TITLE_TINT)}>
+          {place.title}
+        </p>
+
+        {locality && <p className="text-[12.5px] text-ink-muted">{locality}</p>}
+
+        <p
+          className={cn(
+            'mt-0.5 flex items-start gap-1.5 text-xs font-semibold leading-4',
+            FACT_TONE[fact.tone],
           )}
-        </div>
-        {metaLine && <p className="mt-0.5 text-sm text-gray-400">{metaLine}</p>}
-        {/* ⚠️ No average-price line: the places API returns no price field of
-            any kind (no price / avg_price / price_level) */}
+        >
+          <IconComponent
+            iconName={fact.icon}
+            size={15}
+            color="currentColor"
+            className="flex-shrink-0"
+          />
+          {fact.text}
+        </p>
       </div>
     </CardShell>
   );

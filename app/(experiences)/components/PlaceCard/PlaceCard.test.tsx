@@ -21,8 +21,13 @@ jest.mock('next/image', () => {
   return MockImage;
 });
 jest.mock('next/link', () => {
-  function MockLink({ children, href }: { children: React.ReactNode; href: string }) {
-    return <a href={href}>{children}</a>;
+  // Forwards every prop, so class-based assertions see what the card renders
+  function MockLink({ children, href, ...rest }: Record<string, unknown>) {
+    return (
+      <a href={href as string} {...rest}>
+        {children as React.ReactNode}
+      </a>
+    );
   }
   MockLink.displayName = 'MockLink';
   return MockLink;
@@ -46,7 +51,7 @@ const makePlace = (overrides: Partial<Place> = {}): Place =>
   }) as unknown as Place;
 
 describe('PlaceCard', () => {
-  it('renders cover, title and rating', () => {
+  it('renders the cover and the title', () => {
     render(<PlaceCard place={makePlace()} />);
 
     expect(screen.getByAltText('Talisman')).toHaveAttribute(
@@ -54,20 +59,19 @@ describe('PlaceCard', () => {
       'https://cdn.tukai.co/cover.jpg',
     );
     expect(screen.getByText('Talisman')).toBeInTheDocument();
-    expect(screen.getByText('4.6')).toBeInTheDocument();
   });
 
-  // Regression: categories[0] is often a city, which is not the kind of place
-  it('shows the interest category, not the city category, before the area', () => {
+  // The canvas puts the area on its own line under the name, not beside the kind
+  it('shows the area under the name', () => {
     render(<PlaceCard place={makePlace()} />);
 
-    expect(screen.getByText('Restaurants · Karen')).toBeInTheDocument();
+    expect(screen.getByText('Karen')).toBeInTheDocument();
   });
 
-  it('omits the rating when the place is unrated', () => {
-    render(<PlaceCard place={makePlace({ averageRating: 0 })} />);
+  it('falls back to the location name when there is no city', () => {
+    render(<PlaceCard place={makePlace({ location: { name: 'Karen Rd' } as never })} />);
 
-    expect(screen.queryByText('0')).not.toBeInTheDocument();
+    expect(screen.getByText('Karen Rd')).toBeInTheDocument();
   });
 
   it('links to the place detail page', () => {
@@ -76,33 +80,45 @@ describe('PlaceCard', () => {
     expect(screen.getByRole('link')).toHaveAttribute('href', '/places/p1');
   });
 
-  it('falls back to the location name when there is no city', () => {
-    render(<PlaceCard place={makePlace({ location: { name: 'Karen Rd' } as never })} />);
+  // The canvas draws its place media square, at 184px
+  it('is a square tile at the canvas width', () => {
+    const { container } = render(<PlaceCard place={makePlace()} />);
 
-    expect(screen.getByText('Restaurants · Karen Rd')).toBeInTheDocument();
+    expect(screen.getByRole('link')).toHaveClass('w-[184px]');
+    expect(container.querySelector('.aspect-square')).toBeInTheDocument();
   });
 
   /**
-   * The canvas's reviewLine is the score with its count, or "No reviews yet".
-   * An empty corner reads as missing data rather than as a place nobody has
-   * been to.
+   * One line of substance under the name. The canvas leads with something
+   * happening at the place; we have no such field, so it leads with what
+   * people made of it — see `place-fact`.
    */
-  describe('the review line', () => {
-    it('shows the score with how many reviews it came from', () => {
+  describe('the fact line', () => {
+    it('leads with the score and how many reviews it came from', () => {
       render(<PlaceCard place={makePlace({ averageRating: 4.5, totalReviews: 23 })} />);
 
-      expect(screen.getByText('4.5')).toBeInTheDocument();
-      expect(screen.getByText('(23 reviews)')).toBeInTheDocument();
+      expect(screen.getByText('4.5 · 23 reviews')).toBeInTheDocument();
     });
 
     it('says one review in the singular', () => {
       render(<PlaceCard place={makePlace({ averageRating: 5, totalReviews: 1 })} />);
 
-      expect(screen.getByText('(1 review)')).toBeInTheDocument();
+      expect(screen.getByText('5 · 1 review')).toBeInTheDocument();
     });
 
-    it('says so when nobody has reviewed it', () => {
+    // Regression: categories[0] is often a city, which is not the kind of place
+    it('falls back to the kind of place, not the city', () => {
       render(<PlaceCard place={makePlace({ averageRating: 0, totalReviews: 0 })} />);
+
+      expect(screen.getByText('Restaurants')).toBeInTheDocument();
+    });
+
+    it('says so when there is nothing else to say', () => {
+      render(
+        <PlaceCard
+          place={makePlace({ averageRating: 0, totalReviews: 0, categories: [] as never })}
+        />,
+      );
 
       expect(screen.getByText('No reviews yet')).toBeInTheDocument();
     });
