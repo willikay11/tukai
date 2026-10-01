@@ -16,11 +16,23 @@ import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
  * it back off.
  */
 export const CityPicker = ({ onClose }: { onClose: () => void }) => {
-  const { city, status, requestLocation, setCity } = useLocation();
+  const { city, area, status, isUsingLocation, setUsingLocation, setCity } = useLocation();
   const { data: response, isLoading } = usePlaceCategories({ pageSize: 50, group: 'cities' }, true);
 
   const cities: PlaceCategory[] = response?.data?.results ?? [];
-  const isLocationOn = status === 'granted';
+  const isResolving = isUsingLocation && (status === 'loading' || (status === 'granted' && !area));
+
+  // What the location row says underneath, which is the whole point of turning
+  // it on: where the reader actually is
+  const locationNote = () => {
+    if (status === 'denied') return 'Your browser is blocking it. Allow location and try again.';
+    if (status === 'unavailable') return 'This device cannot give a location.';
+    if (isResolving) return 'Finding you…';
+    if (isUsingLocation && area) return area;
+    if (isUsingLocation && city) return city;
+
+    return "See what's closest to you first";
+  };
 
   return (
     <div className="flex w-[340px] max-w-[calc(100vw-2rem)] flex-col gap-2 p-2">
@@ -31,22 +43,20 @@ export const CityPicker = ({ onClose }: { onClose: () => void }) => {
 
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="text-[14.5px] font-semibold text-gray-900">Use my location</span>
-          <span className="text-[12.5px] leading-snug text-ink-muted">
-            {status === 'denied'
-              ? 'Your browser is blocking it. Allow location and try again.'
-              : "See what's closest to you first"}
+          <span
+            className={cn(
+              'text-[12.5px] leading-snug',
+              isUsingLocation && area ? 'font-semibold text-brand' : 'text-ink-muted',
+            )}
+          >
+            {locationNote()}
           </span>
         </span>
 
         <Switch
-          checked={isLocationOn}
+          checked={isUsingLocation}
           aria-label="Use my location"
-          onCheckedChange={(next) => {
-            // There is no way to un-grant from here, so turning it off just
-            // puts the reader back on a city
-            if (next) requestLocation();
-            else if (city) setCity(city);
-          }}
+          onCheckedChange={setUsingLocation}
         />
       </div>
 
@@ -65,9 +75,9 @@ export const CityPicker = ({ onClose }: { onClose: () => void }) => {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-1">
+        <div className="grid max-h-[232px] grid-cols-2 gap-1 overflow-y-auto overscroll-contain pr-0.5">
           {cities.map((option) => {
-            const isCurrent = !isLocationOn && option.name === city;
+            const isCurrent = !isUsingLocation && option.name === city;
 
             return (
               <button
@@ -75,6 +85,8 @@ export const CityPicker = ({ onClose }: { onClose: () => void }) => {
                 type="button"
                 aria-pressed={isCurrent}
                 onClick={() => {
+                  // Choosing a city is the other half of the switch above
+                  setUsingLocation(false);
                   setCity(option.name);
                   onClose();
                 }}

@@ -124,7 +124,11 @@ export default function RootLayout({
                               </div>
                               {/* Browser */}
                               <div className="hidden md:grid md:grid-cols-12 md:gap-x-4">
-                                <header className="flex items-center gap-4 py-3 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+                                {/* The tabs are centred on the row itself, not
+                                in the gap between the logo and the actions:
+                                those two are different widths, so sharing the
+                                leftover space put the tabs off-centre. */}
+                                <header className="relative flex items-center gap-4 py-3 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
                                   <Link href="/" className="flex-shrink-0">
                                     <Image
                                       src="/images/logo.svg"
@@ -134,13 +138,14 @@ export default function RootLayout({
                                       className="h-10 w-[100px] shrink-0"
                                     />
                                   </Link>
-                                  {/* The canvas centres the tabs between the logo
-                                  and the actions, and gives the search a row of
-                                  its own beneath them */}
-                                  <div className="flex flex-1 justify-center">
-                                    <Nav />
+
+                                  <div className="pointer-events-none absolute inset-x-0 flex justify-center">
+                                    <div className="pointer-events-auto">
+                                      <Nav />
+                                    </div>
                                   </div>
-                                  <div className="flex flex-shrink-0 items-center gap-2">
+
+                                  <div className="ml-auto flex flex-shrink-0 items-center gap-2">
                                     <AuthActions />
                                   </div>
                                 </header>

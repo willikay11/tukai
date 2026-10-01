@@ -40,7 +40,7 @@ export const Search = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setSelectedCitySearchId } = useSelectedCategory();
-  const { city, status } = useLocation();
+  const { city, area, isUsingLocation } = useLocation();
   const { data: placeCategories } = usePlaceCategories({ pageSize: 100, group: 'cities' }, true);
   const [query, setQuery] = useState<string>();
   const [tag, setTag] = useState<PlaceCategory | undefined>();
@@ -170,10 +170,10 @@ export const Search = () => {
             rather than the <input> inside it */}
         <div className="w-full">
           <SearchBarShell
-            // The canvas says "Near me" once the reader's own location is on,
-            // and names the city otherwise
-            cityLabel={status === 'granted' ? 'Near me' : (city ?? 'Nairobi')}
-            isLocationOn={status === 'granted'}
+            // Where the reader actually is, once that is known — "Near me"
+            // only while it is still being worked out
+            cityLabel={isUsingLocation ? (area ?? city ?? 'Near me') : (city ?? 'Nairobi')}
+            isLocationOn={isUsingLocation}
             onFilters={() => setShowSearchResults(true)}
             filterCount={tag ? 1 : 0}
             isFilterOpen={showSearchResults}

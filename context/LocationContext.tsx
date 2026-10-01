@@ -9,6 +9,21 @@ type LocationState = {
 };
 
 type LocationContextType = LocationState & {
+  /**
+   * Whether the reader asked to be sorted by where they are.
+   *
+   * Held apart from `status`: a page cannot un-grant a permission, so deriving
+   * this from `status` left a switch that could be turned on and never off.
+   */
+  isUsingLocation: boolean;
+  /**
+   * Turns that preference on or off, asking for permission the first time.
+   * Deliberately not named `use…`: it is a setter, and the hooks lint rule
+   * reads that prefix as a hook wherever it is called.
+   */
+  setUsingLocation: (on: boolean) => void;
+  /** "Westlands, Nairobi" — the reader's own location, once resolved. */
+  area?: string;
   // Reverse-geocoded city name. Resolved here rather than by whichever
   // component happened to be on screen: the search bar names the city, and it
   // cannot be the thing that fetches it.
@@ -27,10 +42,12 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [lng, setLng] = useState<number | undefined>(undefined);
   const [status, setStatus] = useState<LocationState['status']>('idle');
   const [city, setCity] = useState<string | undefined>(undefined);
+  const [area, setArea] = useState<string | undefined>(undefined);
+  const [isUsingLocation, setIsUsingLocation] = useState(false);
 
   const save = (lat?: number, lng?: number, st?: LocationState['status']) => {
     if (lat !== undefined && lng !== undefined) {
-      const payload = { lat, lng, status: st ?? 'granted' };
+      const payload = { lat, lng, status: st ?? 'granted', using: true };
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
       } catch (e) {
@@ -79,6 +96,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
           setLat(parsed.lat);
           setLng(parsed.lng);
           setStatus(parsed.status ?? 'granted');
+          setIsUsingLocation(parsed.using !== false);
           return;
         }
       }
@@ -104,11 +122,18 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
         const data = await response.json();
         const components = data?.results?.[0]?.address_components ?? [];
 
-        const locality = components.find((part: { types: string[] }) =>
-          part.types.includes('locality'),
-        );
+        const named = (type: string) =>
+          components.find((part: { types: string[] }) => part.types.includes(type))?.long_name;
 
-        if (!cancelled && locality?.long_name) setCity(locality.long_name);
+        const locality = named('locality');
+        // The neighbourhood is what makes "where I am" read as a place rather
+        // than as a city the reader already knew they were in
+        const neighbourhood = named('sublocality') ?? named('neighborhood');
+
+        if (cancelled) return;
+
+        if (locality) setCity(locality);
+        setArea([neighbourhood, locality].filter(Boolean).join(', ') || undefined);
       } catch (error) {
         // A city we cannot resolve is a label that stays as it was, not a
         // failure worth showing anyone
@@ -123,9 +148,40 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [lat, lng, status]);
 
+  /**
+   * Asking for the reader's location, or stepping back off it.
+   *
+   * Turning it off keeps the permission and the coordinates — there is nothing
+   * to give back — and simply stops sorting by them.
+   */
+  const setUsingLocation = (on: boolean) => {
+    setIsUsingLocation(on);
+
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...parsed, using: on }));
+    } catch {
+      // Storage can be refused; the preference still holds for this session
+    }
+
+    if (on && status !== 'granted') requestLocation();
+  };
+
   return (
     <LocationContext.Provider
-      value={{ lat, lng, status, city, setCity, requestLocation, setLocation }}
+      value={{
+        lat,
+        lng,
+        status,
+        city,
+        area,
+        isUsingLocation,
+        setUsingLocation,
+        setCity,
+        requestLocation,
+        setLocation,
+      }}
     >
       {children}
     </LocationContext.Provider>

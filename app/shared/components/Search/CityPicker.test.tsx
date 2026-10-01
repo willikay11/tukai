@@ -6,12 +6,14 @@ import userEvent from '@testing-library/user-event';
 import { CityPicker } from './CityPicker';
 
 const setCity = jest.fn();
-const requestLocation = jest.fn();
+const setUsingLocation = jest.fn();
 let status = 'idle';
 let city: string | undefined = 'Nairobi';
+let area: string | undefined;
+let isUsingLocation = false;
 
 jest.mock('@/context/LocationContext', () => ({
-  useLocation: () => ({ city, status, setCity, requestLocation }),
+  useLocation: () => ({ city, area, status, isUsingLocation, setUsingLocation, setCity }),
 }));
 
 let isLoading = false;
@@ -34,6 +36,8 @@ describe('the city picker', () => {
     jest.clearAllMocks();
     status = 'idle';
     city = 'Nairobi';
+    area = undefined;
+    isUsingLocation = false;
     isLoading = false;
   });
 
@@ -52,14 +56,50 @@ describe('the city picker', () => {
 
     await userEvent.click(screen.getByRole('switch', { name: 'Use my location' }));
 
-    expect(requestLocation).toHaveBeenCalled();
+    expect(setUsingLocation).toHaveBeenCalledWith(true);
   });
 
-  it('shows the switch on once location is granted', () => {
+  /**
+   * A page cannot un-grant a permission, so the switch follows the reader's
+   * own preference rather than the browser's answer — otherwise it could be
+   * turned on and never off.
+   */
+  it('turns back off, though the permission stays granted', async () => {
     status = 'granted';
+    isUsingLocation = true;
     render(<CityPicker onClose={jest.fn()} />);
 
-    expect(screen.getByRole('switch', { name: 'Use my location' })).toBeChecked();
+    const toggle = screen.getByRole('switch', { name: 'Use my location' });
+    expect(toggle).toBeChecked();
+
+    await userEvent.click(toggle);
+
+    expect(setUsingLocation).toHaveBeenCalledWith(false);
+  });
+
+  it('shows where the reader is once it is known', () => {
+    status = 'granted';
+    isUsingLocation = true;
+    area = 'Westlands, Nairobi';
+    render(<CityPicker onClose={jest.fn()} />);
+
+    expect(screen.getByText('Westlands, Nairobi')).toBeInTheDocument();
+  });
+
+  it('says it is working while it finds them', () => {
+    status = 'loading';
+    isUsingLocation = true;
+    render(<CityPicker onClose={jest.fn()} />);
+
+    expect(screen.getByText('Finding you…')).toBeInTheDocument();
+  });
+
+  // The list runs well past a panel's height
+  it('scrolls the cities rather than growing', () => {
+    const { container } = render(<CityPicker onClose={jest.fn()} />);
+
+    const grid = container.querySelector('.grid-cols-2');
+    expect(grid).toHaveClass('max-h-[232px]', 'overflow-y-auto');
   });
 
   // The browser is the only thing that can un-block it, so say so
@@ -89,12 +129,15 @@ describe('the city picker', () => {
     await userEvent.click(screen.getByRole('button', { name: /Mombasa/ }));
 
     expect(setCity).toHaveBeenCalledWith('Mombasa');
+    // Choosing a city is the other half of the switch
+    expect(setUsingLocation).toHaveBeenCalledWith(false);
     expect(onClose).toHaveBeenCalled();
   });
 
   // Location and a city are alternatives: with location on, no city is current
   it('marks no city while the reader is using their location', () => {
     status = 'granted';
+    isUsingLocation = true;
     render(<CityPicker onClose={jest.fn()} />);
 
     expect(screen.getByRole('button', { name: /Nairobi/ })).toHaveAttribute(
