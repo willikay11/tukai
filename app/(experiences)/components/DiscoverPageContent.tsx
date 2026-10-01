@@ -15,12 +15,11 @@ import {
   ExperienceRow,
   RowSkeleton,
 } from '@/app/(experiences)/experiences/components/ExperienceRow';
-import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
 import { FeaturedBanner } from '@/app/shared/components/Banners';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { PageContainer } from '@/app/shared/components/Layout';
-import { ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
+import { CardRail, SeeAllCard } from '@/app/shared/components/Lists';
 import { MomentsMasonry } from '@/app/shared/components/Moments';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
@@ -226,16 +225,11 @@ export const DiscoverPageContent = () => {
       )}
 
       {(isLoadingRow || discoverExperiences.length > 0) && (
-        <section>
-          <SectionHeader
-            icon="Compass01Icon"
-            title="Discover Experiences"
-            subtitle="Handpicked for you"
-          />
+        <CardRail title="Discover Experiences" subtitle="Handpicked for you">
           {isLoadingRow ? (
             <RowSkeleton />
           ) : (
-            <ScrollRow>
+            <>
               {discoverExperiences.map((experience) => (
                 <div key={experience.id} className="w-[280px] flex-shrink-0 snap-start">
                   <Link target="_blank" href={experiencePath(experience)}>
@@ -248,23 +242,18 @@ export const DiscoverPageContent = () => {
                 href="/experiences/see-all?type=near-me"
                 previewPhotos={discoverExperiences.slice(0, 3).map(coverPhotoOf)}
               />
-            </ScrollRow>
+            </>
           )}
-        </section>
+        </CardRail>
       )}
 
       {/* Discover by City */}
       {(isLoadingCities || cities.length > 0) && (
-        <section>
-          <SectionHeader
-            icon="Location01Icon"
-            title="Discover by City"
-            subtitle="Where will you go next?"
-          />
+        <CardRail title="Discover by City" subtitle="Where will you go next?">
           {isLoadingCities ? (
             <RowSkeleton cardClassName="h-[130px] w-[240px]" />
           ) : (
-            <ScrollRow>
+            <>
               {cities.map((category) => (
                 <div key={category.id} className="snap-start">
                   <CityCard
@@ -280,21 +269,14 @@ export const DiscoverPageContent = () => {
                 previewPhotos={cities.slice(0, 3).map(categoryImageOf)}
                 className="aspect-auto h-[130px] w-[240px]"
               />
-            </ScrollRow>
+            </>
           )}
-        </section>
+        </CardRail>
       )}
 
       {/* Moments */}
       {(isLoadingMoments || moments.length > 0) && (
-        <section>
-          <SectionHeader
-            icon="Camera01Icon"
-            title="Moments"
-            subtitle="Fresh from the community"
-            // ⚠️ /moments does not exist yet — the nav already links there too
-            seeAllHref="/moments"
-          />
+        <CardRail title="Moments" subtitle="Fresh from the community" seeAllHref="/moments">
           {isLoadingMoments ? (
             <div className="columns-2 gap-4 md:columns-3 lg:columns-4">
               {[220, 300, 180, 260].map((height, index) => (
@@ -318,21 +300,16 @@ export const DiscoverPageContent = () => {
               columnsClassName="columns-2 gap-4 md:columns-3 lg:columns-4"
             />
           )}
-        </section>
+        </CardRail>
       )}
 
       {/* Discover Communities */}
       {(isLoadingCommunities || communities.length > 0) && (
-        <section>
-          <SectionHeader
-            icon="UserGroupIcon"
-            title="Discover Communities"
-            subtitle="Find your crew"
-          />
+        <CardRail title="Discover Communities" subtitle="Find your crew">
           {isLoadingCommunities ? (
             <RowSkeleton cardClassName="h-[180px] w-[320px]" />
           ) : (
-            <ScrollRow>
+            <>
               {communities.map((community, index) => (
                 <CommunityDiscoverCard
                   key={community.id}
@@ -348,9 +325,9 @@ export const DiscoverPageContent = () => {
                   .map((community) => community.photos?.[0]?.photo ?? null)}
                 className="aspect-auto h-[180px] w-[320px]"
               />
-            </ScrollRow>
+            </>
           )}
-        </section>
+        </CardRail>
       )}
 
       <ExperienceRow
@@ -373,18 +350,11 @@ export const DiscoverPageContent = () => {
 
       {/* Discover Itineraries */}
       {(isLoadingItineraries || itineraries.length > 0) && (
-        <section>
-          <SectionHeader
-            icon="SparklesIcon"
-            iconBgClass="bg-purple-100"
-            iconColorClass="text-purple-600"
-            title="Discover Itineraries"
-            subtitle="Ready-to-book plans from TukAI"
-          />
+        <CardRail title="Discover Itineraries" subtitle="Ready-to-book plans from TukAI">
           {isLoadingItineraries ? (
             <RowSkeleton cardClassName="aspect-[4/3] w-[300px]" />
           ) : (
-            <ScrollRow>
+            <>
               {itineraries.map((itinerary) => (
                 <ItineraryCard key={itinerary.id} itinerary={itinerary} />
               ))}
@@ -399,25 +369,18 @@ export const DiscoverPageContent = () => {
                   className="w-[300px]"
                 />
               )}
-            </ScrollRow>
+            </>
           )}
-        </section>
+        </CardRail>
       )}
 
       {/* Popular Places */}
       {(isLoadingPopularPlaces || popularPlaces.length > 0) && (
-        <section>
-          <SectionHeader
-            icon="Fire03Icon"
-            iconBgClass="bg-red-100"
-            iconColorClass="text-red-500"
-            title={`Popular Places in ${userCity}`}
-            subtitle="Loved by the community"
-          />
+        <CardRail title={`Popular Places in ${userCity}`} subtitle="Loved by the community">
           {isLoadingPopularPlaces ? (
             <RowSkeleton />
           ) : (
-            <ScrollRow>
+            <>
               {popularPlaces.map((place, index) => (
                 <PlaceCard key={place.id} place={place} priority={index < EAGER_IN_ROW} />
               ))}
@@ -426,25 +389,18 @@ export const DiscoverPageContent = () => {
                 href="/places"
                 previewPhotos={popularPlaces.slice(0, 3).map(placePhotoOf)}
               />
-            </ScrollRow>
+            </>
           )}
-        </section>
+        </CardRail>
       )}
 
       {/* Nearby Restaurants */}
       {(isLoadingRestaurants || nearbyRestaurants.length > 0) && (
-        <section>
-          <SectionHeader
-            icon="Restaurant02Icon"
-            iconBgClass="bg-orange-100"
-            iconColorClass="text-orange-500"
-            title="Nearby Restaurants"
-            subtitle="Within 20 km of you"
-          />
+        <CardRail title="Nearby Restaurants" subtitle="Within 20 km of you">
           {isLoadingRestaurants ? (
             <RowSkeleton />
           ) : (
-            <ScrollRow>
+            <>
               {nearbyRestaurants.map((place, index) => (
                 <PlaceCard key={place.id} place={place} priority={index < EAGER_IN_ROW} />
               ))}
@@ -453,9 +409,9 @@ export const DiscoverPageContent = () => {
                 href="/places"
                 previewPhotos={nearbyRestaurants.slice(0, 3).map(placePhotoOf)}
               />
-            </ScrollRow>
+            </>
           )}
-        </section>
+        </CardRail>
       )}
     </PageContainer>
   );

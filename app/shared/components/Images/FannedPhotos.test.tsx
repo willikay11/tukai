@@ -22,29 +22,26 @@ describe('FannedPhotos', () => {
   it('centres the first photo and fans the next two behind it', () => {
     const { container } = render(<FannedPhotos photos={['/a.jpg', '/b.jpg', '/c.jpg']} />);
 
+    // Rendered left flank, centre, right flank — the tilt classes carry
+    // arbitrary values, which are not worth escaping into a selector
     expect(container.querySelector('.z-10 img')).toHaveAttribute('src', '/a.jpg');
-    expect(container.querySelector('.-rotate-12 img')).toHaveAttribute('src', '/b.jpg');
-    expect(container.querySelector('.rotate-12:not(.-rotate-12) img')).toHaveAttribute(
-      'src',
-      '/c.jpg',
-    );
+    expect(sourcesIn(container)).toEqual(['/b.jpg', '/a.jpg', '/c.jpg']);
   });
 
   // Two photos lean left rather than leaving a gap on one side
   it('fills the left side first when there are only two', () => {
     const { container } = render(<FannedPhotos photos={['/a.jpg', '/b.jpg']} />);
 
-    expect(sourcesIn(container)).toHaveLength(2);
+    // The flank that is there sits to the left of the centre
+    expect(sourcesIn(container)).toEqual(['/b.jpg', '/a.jpg']);
     expect(container.querySelector('.z-10 img')).toHaveAttribute('src', '/a.jpg');
-    expect(container.querySelector('.-rotate-12 img')).toHaveAttribute('src', '/b.jpg');
-    expect(container.querySelector('.rotate-12:not(.-rotate-12)')).not.toBeInTheDocument();
   });
 
   it('renders a single photo on its own, with no fan', () => {
     const { container } = render(<FannedPhotos photos={['/a.jpg']} />);
 
     expect(sourcesIn(container)).toEqual(['/a.jpg']);
-    expect(container.querySelector('.-rotate-12')).not.toBeInTheDocument();
+    expect(container.querySelector('.z-0')).not.toBeInTheDocument();
   });
 
   it('ignores photos beyond the third', () => {
@@ -92,6 +89,6 @@ describe('FannedPhotos', () => {
   it('defaults to the large size', () => {
     const { container } = render(<FannedPhotos photos={['/a.jpg']} />);
 
-    expect(container.querySelector('.z-10')).toHaveClass('h-20', 'w-20');
+    expect(container.querySelector('.z-10')).toHaveClass('h-[60px]', 'w-[60px]');
   });
 });

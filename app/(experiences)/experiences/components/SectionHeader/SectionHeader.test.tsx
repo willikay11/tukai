@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { SectionHeader } from './index';
 
@@ -23,17 +24,17 @@ describe('SectionHeader', () => {
 
   // Beside the title from sm up, stacked under it on a phone — a long title
   // and subtitle side by side overflow a narrow screen
-  it('puts the subtitle beside the title from sm up, stacked below it', () => {
+  // The canvas always sets the subtitle under the title, at any width
+  it('sets the subtitle under the title', () => {
     const { container } = render(
-      <SectionHeader icon="Compass01Icon" title="Moments" subtitle="Fresh from the community" />,
+      <SectionHeader title="Moments" subtitle="Fresh from the community" />,
     );
 
     const titleGroup = container.querySelector('.flex.flex-col');
     expect(titleGroup).toContainElement(screen.getByRole('heading', { level: 2 }));
     expect(titleGroup).toContainElement(screen.getByText('Fresh from the community'));
 
-    // Stacked by default, inline once there is room
-    expect(titleGroup).toHaveClass('sm:flex-row', 'sm:items-baseline');
+    expect(titleGroup).not.toHaveClass('sm:flex-row');
   });
 
   // Without min-w-0 a long title pushes the "See all" link off the row
@@ -45,7 +46,11 @@ describe('SectionHeader', () => {
     expect(container.querySelector('.min-w-0')).toBeInTheDocument();
   });
 
-  it('renders a leading icon in a pale circle when given', () => {
+  /**
+   * The canvas's header carries no icon. The tile survives only for the
+   * communities category groups, which stack one above their title.
+   */
+  it('draws no icon on a row section, even when one is passed', () => {
     render(
       <SectionHeader
         icon="Compass01Icon"
@@ -54,13 +59,15 @@ describe('SectionHeader', () => {
       />,
     );
 
-    expect(screen.getByTestId('Compass01Icon')).toHaveClass('text-primary');
+    expect(screen.queryByTestId('Compass01Icon')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Discover Experiences');
     expect(screen.getByText('Handpicked for you')).toBeInTheDocument();
   });
 
   it('defaults the icon circle to the brand tint', () => {
-    const { container } = render(<SectionHeader icon="Compass01Icon" title="Discover" />);
+    const { container } = render(
+      <SectionHeader icon="Compass01Icon" title="Discover" layout="stacked" />,
+    );
 
     expect(container.querySelector('.bg-primary\\/10')).toBeInTheDocument();
     expect(screen.getByTestId('Compass01Icon')).toHaveClass('text-primary');
@@ -73,6 +80,7 @@ describe('SectionHeader', () => {
         iconBgClass="bg-red-100"
         iconColorClass="text-red-500"
         title="Popular Places"
+        layout="stacked"
       />,
     );
 
@@ -85,5 +93,66 @@ describe('SectionHeader', () => {
     render(<SectionHeader icon="Compass01Icon" title="Discover Experiences" />);
 
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  /**
+   * The canvas replaces the "See all" link with two circular arrows that page
+   * the rail, and greys each one at its end.
+   */
+  describe('paging arrows', () => {
+    const paging = {
+      onBack: jest.fn(),
+      onNext: jest.fn(),
+      railLabel: 'promoted places',
+    };
+
+    beforeEach(() => jest.clearAllMocks());
+
+    it('draws arrows when the rail can be paged', () => {
+      render(<SectionHeader title="Promoted places" {...paging} atStart atEnd={false} />);
+
+      expect(screen.getByRole('button', { name: 'Previous promoted places' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Next promoted places' })).toBeInTheDocument();
+    });
+
+    it('greys the back arrow at the start and the next one at the end', () => {
+      const { rerender } = render(
+        <SectionHeader title="Promoted places" {...paging} atStart atEnd={false} />,
+      );
+
+      expect(screen.getByRole('button', { name: /^Previous/ })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /^Next/ })).toBeEnabled();
+
+      rerender(<SectionHeader title="Promoted places" {...paging} atStart={false} atEnd />);
+
+      expect(screen.getByRole('button', { name: /^Previous/ })).toBeEnabled();
+      expect(screen.getByRole('button', { name: /^Next/ })).toBeDisabled();
+    });
+
+    it('pages the rail', async () => {
+      render(<SectionHeader title="Promoted places" {...paging} atStart={false} atEnd={false} />);
+
+      await userEvent.click(screen.getByRole('button', { name: /^Next/ }));
+      expect(paging.onNext).toHaveBeenCalled();
+
+      await userEvent.click(screen.getByRole('button', { name: /^Previous/ }));
+      expect(paging.onBack).toHaveBeenCalled();
+    });
+
+    // The link moves to the card at the end of the rail, where the reader runs
+    // out of cards
+    it('drops the See all link once there are arrows', () => {
+      render(
+        <SectionHeader title="Promoted places" seeAllHref="/experiences/see-all" {...paging} />,
+      );
+
+      expect(screen.queryByRole('link', { name: 'See all' })).not.toBeInTheDocument();
+    });
+
+    it('keeps the link on a section with no arrows', () => {
+      render(<SectionHeader title="Moments" seeAllHref="/moments" />);
+
+      expect(screen.getByRole('link', { name: 'See all' })).toHaveAttribute('href', '/moments');
+    });
   });
 });

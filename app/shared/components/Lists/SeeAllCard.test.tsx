@@ -24,10 +24,10 @@ jest.mock('next/link', () => {
 });
 
 describe('SeeAllCard', () => {
-  it('links to the destination with a See All label', () => {
+  it('links to the destination with a See all label', () => {
     render(<SeeAllCard href="/experiences/see-all?type=today" />);
 
-    const link = screen.getByRole('link', { name: /See All/ });
+    const link = screen.getByRole('link', { name: /See all/ });
     expect(link).toHaveAttribute('href', '/experiences/see-all?type=today');
   });
 
@@ -73,7 +73,7 @@ describe('SeeAllCard', () => {
     const { container } = render(<SeeAllCard href="/places" previewPhotos={[]} />);
 
     expect(container.querySelector('img')).not.toBeInTheDocument();
-    expect(screen.getByText('See All')).toBeInTheDocument();
+    expect(screen.getByText('See all')).toBeInTheDocument();
   });
 
   // Rows have different card widths, so the tile has to match its neighbours
@@ -86,7 +86,7 @@ describe('SeeAllCard', () => {
   it('defaults to the standard row card width', () => {
     render(<SeeAllCard href="/places" />);
 
-    expect(screen.getByRole('link')).toHaveClass('w-[280px]');
+    expect(screen.getByRole('link')).toHaveClass('w-[184px]');
   });
 
   // It must match the height of the cards' IMAGES, not the whole card —
@@ -95,7 +95,7 @@ describe('SeeAllCard', () => {
     render(<SeeAllCard href="/places" />);
     const link = screen.getByRole('link');
 
-    expect(link).toHaveClass('aspect-[4/3]', 'self-start');
+    expect(link).toHaveClass('aspect-square', 'self-start');
   });
 
   it('lets a row with a different image height override the aspect', () => {
@@ -103,7 +103,7 @@ describe('SeeAllCard', () => {
     const link = screen.getByRole('link');
 
     expect(link).toHaveClass('aspect-auto', 'h-[130px]', 'w-[240px]');
-    expect(link).not.toHaveClass('aspect-[4/3]');
+    expect(link).not.toHaveClass('aspect-square');
   });
 
   it('carries a drop shadow', () => {
