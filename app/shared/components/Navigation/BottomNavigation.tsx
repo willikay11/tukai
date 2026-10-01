@@ -8,14 +8,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { cn } from '@/lib/utils';
 
-// The same four destinations the desktop nav offers, in the same order, so the
-// two do not drift
-const LINKS = [
-  { label: 'Discover', href: '/', icon: 'CompassIcon' },
-  { label: 'Experiences', href: '/experiences', icon: 'Ticket01Icon' },
-  { label: 'Places', href: '/places', icon: 'Location01Icon' },
-  { label: 'Moments', href: '/moments', icon: 'DashboardSquare01Icon' },
-];
+import { DESTINATIONS, isDestinationActive } from './destinations';
 
 // A detail page owns the bottom of its own screen: both carry a floating bar
 // of their own actions, and two floating rows would sit on top of each other.
@@ -42,9 +35,6 @@ export const BottomNavigation = () => {
   const searchParams = useSearchParams();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-
-  const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -88,8 +78,8 @@ export const BottomNavigation = () => {
         // only needs enough to keep the active lime chip off its edge
         className="flex items-center gap-1 rounded-full bg-white p-1 shadow-lg"
       >
-        {LINKS.map((link) => {
-          const active = isActive(link.href);
+        {DESTINATIONS.map((link) => {
+          const active = isDestinationActive(link.href, pathname);
 
           return (
             <Link
@@ -99,7 +89,7 @@ export const BottomNavigation = () => {
               className={cn(
                 'inline-flex items-center justify-center gap-2 rounded-full transition-colors duration-200 active:scale-95 motion-reduce:transform-none',
                 // Only the current destination is named; the rest are icons, so
-                // four fit across a phone
+                // five fit across a phone
                 active ? 'bg-lime px-4 py-2.5 text-primary' : 'px-3 py-2.5 text-gray-500',
               )}
             >

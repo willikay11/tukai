@@ -7,6 +7,9 @@ import userEvent from '@testing-library/user-event';
 
 import { Nav } from './Nav';
 
+// "You" wears the reader's face when there is one
+jest.mock('next-auth/react', () => ({ useSession: () => ({ data: null }) }));
+
 jest.mock('next/navigation', () => ({
   usePathname: jest.fn(),
 }));
@@ -25,9 +28,10 @@ describe('Nav', () => {
       render(<Nav />);
 
       expect(screen.getByRole('link', { name: /discover/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /experiences/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /places/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /moments/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /bucket lists/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /communities/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /plans/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /you/i })).toBeInTheDocument();
     });
 
     it('renders with correct href attributes', () => {
@@ -36,12 +40,16 @@ describe('Nav', () => {
       render(<Nav />);
 
       expect(screen.getByRole('link', { name: /discover/i })).toHaveAttribute('href', '/');
-      expect(screen.getByRole('link', { name: /experiences/i })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /communities/i })).toHaveAttribute(
         'href',
-        '/experiences',
+        '/communities',
       );
-      expect(screen.getByRole('link', { name: /places/i })).toHaveAttribute('href', '/places');
-      expect(screen.getByRole('link', { name: /moments/i })).toHaveAttribute('href', '/moments');
+      expect(screen.getByRole('link', { name: /plans/i })).toHaveAttribute('href', '/plans');
+      expect(screen.getByRole('link', { name: /you/i })).toHaveAttribute('href', '/profile');
+      expect(screen.getByRole('link', { name: /bucket lists/i })).toHaveAttribute(
+        'href',
+        '/bucket-lists',
+      );
     });
 
     it('renders navigation icons', () => {
@@ -50,7 +58,7 @@ describe('Nav', () => {
       render(<Nav />);
 
       const linkElements = screen.getAllByRole('link');
-      expect(linkElements).toHaveLength(4);
+      expect(linkElements).toHaveLength(5);
       linkElements.forEach((link) => {
         // Each link should have an SVG (icon)
         const svg = link.querySelector('svg');
@@ -76,57 +84,57 @@ describe('Nav', () => {
       render(<Nav />);
 
       const discoverLink = screen.getByRole('link', { name: /discover/i });
-      expect(discoverLink).toHaveClass('bg-white');
-      expect(discoverLink).toHaveClass('shadow-sm');
+      expect(discoverLink).toHaveClass('bg-surface-brand');
+      expect(discoverLink).toHaveClass('text-brand-ink');
     });
 
-    it('marks Experiences link as active when pathname is /experiences', () => {
-      mockUsePathname.mockReturnValue('/experiences');
+    it('marks Communities as active when pathname is /communities', () => {
+      mockUsePathname.mockReturnValue('/communities');
 
       render(<Nav />);
 
-      const experiencesLink = screen.getByRole('link', { name: /experiences/i });
-      expect(experiencesLink).toHaveClass('bg-white');
+      const communitiesLink = screen.getByRole('link', { name: /communities/i });
+      expect(communitiesLink).toHaveClass('bg-surface-brand');
     });
 
-    it('marks Experiences link as active for /experiences subpaths', () => {
-      mockUsePathname.mockReturnValue('/experiences/123');
+    it('marks Communities as active for /communities subpaths', () => {
+      mockUsePathname.mockReturnValue('/communities/123');
 
       render(<Nav />);
 
-      const experiencesLink = screen.getByRole('link', { name: /experiences/i });
-      expect(experiencesLink).toHaveClass('bg-white');
+      const communitiesLink = screen.getByRole('link', { name: /communities/i });
+      expect(communitiesLink).toHaveClass('bg-surface-brand');
     });
 
-    it('marks Places link as active when pathname is /places', () => {
-      mockUsePathname.mockReturnValue('/places');
+    it('marks Plans as active when pathname is /plans', () => {
+      mockUsePathname.mockReturnValue('/plans');
 
       render(<Nav />);
 
-      const placesLink = screen.getByRole('link', { name: /places/i });
-      expect(placesLink).toHaveClass('bg-white');
+      const plansLink = screen.getByRole('link', { name: /plans/i });
+      expect(plansLink).toHaveClass('bg-surface-brand');
     });
 
     it('does not mark Discover as active on subroutes', () => {
-      mockUsePathname.mockReturnValue('/places');
+      mockUsePathname.mockReturnValue('/plans');
 
       render(<Nav />);
 
       const discoverLink = screen.getByRole('link', { name: /discover/i });
-      expect(discoverLink).not.toHaveClass('bg-white');
+      expect(discoverLink).not.toHaveClass('bg-surface-brand');
     });
 
     it('only marks one link as active at a time', () => {
-      mockUsePathname.mockReturnValue('/places');
+      mockUsePathname.mockReturnValue('/plans');
 
       render(<Nav />);
 
       const activeLinks = screen
         .getAllByRole('link')
-        .filter((link) => link.classList.contains('bg-white'));
+        .filter((link) => link.classList.contains('bg-surface-brand'));
 
       expect(activeLinks).toHaveLength(1);
-      expect(activeLinks[0]).toHaveTextContent('Places');
+      expect(activeLinks[0]).toHaveTextContent('Plans');
     });
 
     it('applies non-active styling to inactive links', () => {
@@ -134,9 +142,9 @@ describe('Nav', () => {
 
       render(<Nav />);
 
-      const placesLink = screen.getByRole('link', { name: /places/i });
-      expect(placesLink).toHaveClass('text-gray-700');
-      expect(placesLink).not.toHaveClass('bg-white');
+      const plansLink = screen.getByRole('link', { name: /plans/i });
+      expect(plansLink).toHaveClass('text-ink-muted');
+      expect(plansLink).not.toHaveClass('bg-surface-brand');
     });
   });
 
@@ -158,10 +166,10 @@ describe('Nav', () => {
 
       render(<Nav />);
 
-      const experiencesLink = screen.getByRole('link', { name: /experiences/i });
+      const communitiesLink = screen.getByRole('link', { name: /communities/i });
 
-      await user.click(experiencesLink);
-      expect(experiencesLink).toHaveAttribute('href', '/experiences');
+      await user.click(communitiesLink);
+      expect(communitiesLink).toHaveAttribute('href', '/communities');
     });
   });
 
@@ -172,19 +180,19 @@ describe('Nav', () => {
       render(<Nav />);
 
       expect(screen.getByRole('navigation')).toBeInTheDocument();
-      expect(screen.getAllByRole('link').length).toBe(4);
+      expect(screen.getAllByRole('link').length).toBe(5);
     });
 
     // Only the current destination is named below xl, the way the mobile
     // bottom bar does it — the rest keep their text in the DOM, hidden
     it('names the current destination', () => {
-      mockUsePathname.mockReturnValue('/places');
+      mockUsePathname.mockReturnValue('/plans');
 
       render(<Nav />);
 
-      const active = screen.getByRole('link', { name: 'Places' });
+      const active = screen.getByRole('link', { name: 'Plans' });
       expect(active.querySelector('span')).toHaveClass('inline');
-      expect(screen.getByRole('link', { name: 'Moments' }).querySelector('span')).toHaveClass(
+      expect(screen.getByRole('link', { name: 'You' }).querySelector('span')).toHaveClass(
         'hidden',
         'xl:inline',
       );
@@ -196,9 +204,10 @@ describe('Nav', () => {
       render(<Nav />);
 
       expect(screen.getByText('Discover')).toBeInTheDocument();
-      expect(screen.getByText('Experiences')).toBeInTheDocument();
-      expect(screen.getByText('Places')).toBeInTheDocument();
-      expect(screen.getByText('Moments')).toBeInTheDocument();
+      expect(screen.getByText('Bucket lists')).toBeInTheDocument();
+      expect(screen.getByText('Communities')).toBeInTheDocument();
+      expect(screen.getByText('Plans')).toBeInTheDocument();
+      expect(screen.getByText('You')).toBeInTheDocument();
     });
 
     it('maintains link order: Discover, Experiences, Places, Moments', () => {
@@ -208,9 +217,10 @@ describe('Nav', () => {
 
       const links = screen.getAllByRole('link');
       expect(links[0]).toHaveTextContent('Discover');
-      expect(links[1]).toHaveTextContent('Experiences');
-      expect(links[2]).toHaveTextContent('Places');
-      expect(links[3]).toHaveTextContent('Moments');
+      expect(links[1]).toHaveTextContent('Bucket lists');
+      expect(links[2]).toHaveTextContent('Communities');
+      expect(links[3]).toHaveTextContent('Plans');
+      expect(links[4]).toHaveTextContent('You');
     });
   });
 });

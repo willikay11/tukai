@@ -51,10 +51,10 @@ describe('ProfileMenu', () => {
     render(<ProfileMenu {...defaults} />);
 
     expect(screen.getByRole('link', { name: /My Profile/ })).toHaveAttribute('href', '/profile');
-    expect(screen.getByRole('link', { name: /My Communities/ })).toHaveAttribute(
-      'href',
-      '/communities?category=my-communities',
-    );
+    // Communities, Bucket lists and Plans left this menu for the primary nav
+    expect(screen.queryByRole('link', { name: /My Communities/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Bucket List/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /My Plans/ })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Control Center/ })).toHaveAttribute(
       'href',
       '/control-center',
