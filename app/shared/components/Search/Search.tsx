@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import { Search01Icon } from '@hugeicons/react-pro';
 import { debounce } from 'lodash';
 
 import { SimplePillFilters } from '@/app/shared/components/Filters';
@@ -12,9 +11,8 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { useRecentSearches } from '@/app/shared/hooks/useRecentSearches';
 import { useSearch } from '@/app/shared/hooks/useSearch';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useLocation } from '@/context/LocationContext';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { PlaceCategory } from '@/types/placeCategory';
 import { SearchResultType } from '@/types/search';
@@ -25,7 +23,7 @@ import { ExperienceResultRow } from './ExperienceResultRow';
 import { PlaceResultRow } from './PlaceResultRow';
 import { RecentSearchPill } from './RecentSearchPill';
 import { ResultGroup } from './ResultGroup';
-import { RotatingPlaceholder } from './RotatingPlaceholder';
+import { SearchBarShell } from './SearchBarShell';
 import { SearchSectionHeading } from './SearchSectionHeading';
 import { SuggestionRow } from './SuggestionRow';
 
@@ -42,6 +40,7 @@ export const Search = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setSelectedCitySearchId } = useSelectedCategory();
+  const { city, status, requestLocation } = useLocation();
   const { data: placeCategories } = usePlaceCategories({ pageSize: 100, group: 'cities' }, true);
   const [query, setQuery] = useState<string>();
   const [tag, setTag] = useState<PlaceCategory | undefined>();
@@ -159,54 +158,53 @@ export const Search = () => {
         {/* Plain box so the popover has a whole-field element to anchor to,
             rather than the <input> inside it */}
         <div className="w-full">
-          <Input
-            shape="pill"
-            ref={inputElRef}
-            // No `placeholder` attribute: it cannot be animated, so the reel is
-            // drawn over the empty field and this names the input instead
-            aria-label="Search places or activities"
-            overlay={<RotatingPlaceholder visible={isFieldEmpty} />}
-            // 14px here rather than the shared field's 14.5px. `leading` has to
-            // follow the size: tailwind-merge treats a text-* utility as also
-            // setting line-height, so written first it would be dropped and the
-            // placeholder reel would fall out of line with the text.
-            className="text-[14px] leading-[18px]"
-            // Tighter than the standard 13px/16px because a full-height button
-            // sits inside the pill
-            containerClassName="w-full bg-white py-1 pl-4 pr-1 shadow-search-bar"
-            icon={
-              <>
-                <Search01Icon size={18} className="flex-shrink-0 text-gray-400" variant="twotone" />
-                {tag && (
-                  <span
-                    className="inline-flex flex-shrink-0 cursor-pointer items-center gap-1 rounded-full bg-gray-100 py-1 pl-2 pr-1 text-sm"
-                    onClick={() => removeTag()}
-                  >
-                    {tag.name}
-                    <div className="flex items-center justify-center rounded-full bg-gray-400 p-1">
-                      <IconComponent iconName="Cancel01Icon" size={12} color="white" />
-                    </div>
-                  </span>
-                )}
-              </>
-            }
-            suffixIcon={
-              <Button
-                variant="gradient"
-                size="sm"
-                onClick={handleSubmitSearch}
-                className="flex-shrink-0 rounded-full px-6"
-              >
-                Search
-              </Button>
-            }
-            onClick={() => setShowSearchResults(true)}
-            onFocus={() => setShowSearchResults(true)}
-            onChange={(e) => {
-              setIsFieldEmpty(e.target.value.length === 0);
-              debouncedSetQuery(e.target.value);
-            }}
-          />
+          <SearchBarShell
+            // The canvas says "Near me" once the reader's own location is on,
+            // and names the city otherwise
+            cityLabel={status === 'granted' ? 'Near me' : (city ?? 'Nairobi')}
+            isLocationOn={status === 'granted'}
+            onCity={requestLocation}
+            onFilters={() => setShowSearchResults(true)}
+            filterCount={tag ? 1 : 0}
+            isFilterOpen={showSearchResults}
+            canSearch={!isFieldEmpty}
+            onSearch={handleSubmitSearch}
+          >
+            {/* The canvas clears a filter from its Filters dialog, which is
+                D4 and not built. Until it is, the chip stays: it was the only
+                way to drop a city filter, and the button beside it only opens
+                the panel. */}
+            {tag && (
+              <span className="mr-2 inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-surface py-1 pl-2.5 pr-1 text-[13px] font-medium text-brand-ink">
+                {tag.name}
+                <button
+                  type="button"
+                  aria-label={`Clear ${tag.name}`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    removeTag();
+                  }}
+                  className="flex h-5 w-5 items-center justify-center rounded-full text-ink-subtle transition-colors hover:text-brand-ink"
+                >
+                  <IconComponent iconName="Cancel01Icon" size={12} color="currentColor" />
+                </button>
+              </span>
+            )}
+
+            <input
+              ref={inputElRef}
+              type="text"
+              aria-label="Search Tukai"
+              placeholder="Experiences, places, lists, communities"
+              className="min-w-0 flex-1 border-none bg-transparent text-[13.5px] font-medium text-gray-900 outline-none placeholder:text-ink-subtle"
+              onClick={() => setShowSearchResults(true)}
+              onFocus={() => setShowSearchResults(true)}
+              onChange={(event) => {
+                setIsFieldEmpty(event.target.value.length === 0);
+                debouncedSetQuery(event.target.value);
+              }}
+            />
+          </SearchBarShell>
         </div>
       </PopoverTrigger>
       {/* Anchored to the field's right edge and grown leftwards: the field sits

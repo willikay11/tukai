@@ -2,7 +2,7 @@
 export { Nav, BottomNavigation } from './Navigation';
 
 // Location Picker
-export { UserLocation, LocationAutocompleteField, LocationPrompt } from './LocationPicker';
+export { LocationAutocompleteField, LocationPrompt } from './LocationPicker';
 
 // Forms
 export { Button, Input, OtpInput, Anchor, Loader, FileUploadField } from './Forms';

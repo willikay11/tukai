@@ -13,7 +13,6 @@ import { ChromeGate } from '@/app/shared/components/Global';
 import { satoshi } from '@/app/shared/components/Global';
 import { GlobalLoading } from '@/app/shared/components/Global';
 import { LocationPrompt } from '@/app/shared/components/LocationPicker';
-import { UserLocation } from '@/app/shared/components/LocationPicker';
 import { BottomNavigation } from '@/app/shared/components/Navigation';
 import { Nav } from '@/app/shared/components/Navigation';
 import { Search } from '@/app/shared/components/Search';
@@ -112,7 +111,6 @@ export default function RootLayout({
                                     />
                                   </Link>
                                 </div>
-                                <UserLocation />
                                 <AuthActions />
                               </div>
                               <div className="mx-4 md:hidden">
@@ -136,26 +134,26 @@ export default function RootLayout({
                                       className="h-10 w-[100px] shrink-0"
                                     />
                                   </Link>
-                                  <Nav />
-                                  {/* Capped: on flex-1 alone the field absorbed every
-                                  pixel the rest of the header did not use, so it
-                                  stretched far wider than a search bar needs on a
-                                  large screen */}
-                                  <div className="min-w-[200px] max-w-xl flex-1">
-                                    <Suspense
-                                      fallback={
-                                        <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
-                                      }
-                                    >
-                                      <Search />
-                                    </Suspense>
+                                  {/* The canvas centres the tabs between the logo
+                                  and the actions, and gives the search a row of
+                                  its own beneath them */}
+                                  <div className="flex flex-1 justify-center">
+                                    <Nav />
                                   </div>
-                                  {/* Keeps the trailing controls on the right edge once
-                                  the search stops growing */}
-                                  <div className="ml-auto flex items-center gap-2">
+                                  <div className="flex flex-shrink-0 items-center gap-2">
                                     <AuthActions />
                                   </div>
                                 </header>
+
+                                <div className="flex justify-center pb-5 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+                                  <Suspense
+                                    fallback={
+                                      <div className="h-[54px] w-full max-w-[600px] animate-pulse rounded-full bg-gray-200" />
+                                    }
+                                  >
+                                    <Search />
+                                  </Suspense>
+                                </div>
                               </div>
                             </div>
 

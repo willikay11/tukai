@@ -30,7 +30,13 @@ jest.mock('@/context/SelectedCategoryContext', () => ({
   useSelectedCategory: () => ({ setSelectedCitySearchId: jest.fn() }),
 }));
 jest.mock('@/context/LocationContext', () => ({
-  useLocation: () => ({ lat: undefined, lng: undefined }),
+  useLocation: () => ({
+    lat: undefined,
+    lng: undefined,
+    status: 'idle',
+    city: 'Nairobi',
+    requestLocation: jest.fn(),
+  }),
 }));
 
 const mockRecent = jest.fn(() => ['Hiking', 'Nyama choma']);
@@ -101,18 +107,18 @@ describe('Search popover', () => {
       expect(screen.getByText('Recent searches')).toBeInTheDocument();
       expect(screen.getByText('Hiking')).toBeInTheDocument();
       expect(screen.getByText('Trending destinations')).toBeInTheDocument();
-      expect(screen.getByText('Nairobi')).toBeInTheDocument();
+      // The city button in the bar names the city too, so this asks for the
+      // suggestion rows rather than any text that happens to match
+      expect(screen.getAllByText('Nairobi').length).toBeGreaterThan(1);
       expect(screen.getByText('Diani')).toBeInTheDocument();
     });
 
-    // 14px, not the shared field's 14.5px. The leading has to survive the merge
-    // alongside it or the placeholder reel drifts off the text baseline.
-    it('sets the field text to 14px over an 18px line box', () => {
+    // The canvas sets the query at 13.5px/500 inside the bar
+    it('sets the field text to the canvas size', () => {
       render(<Search />);
 
-      const field = screen.getByRole('textbox', { name: 'Search places or activities' });
-      expect(field).toHaveClass('text-[14px]', 'leading-[18px]');
-      expect(field).not.toHaveClass('text-[14.5px]');
+      const field = screen.getByRole('textbox', { name: 'Search Tukai' });
+      expect(field).toHaveClass('text-[13.5px]', 'font-medium');
     });
 
     it('hides the recent block when there is nothing to show', () => {
@@ -139,7 +145,9 @@ describe('Search popover', () => {
       const user = userEvent.setup();
 
       render(<Search />);
-      await user.click(screen.getByText('Nairobi'));
+      // The last match is the suggestion row; the first is the bar's city button
+      const rows = screen.getAllByText('Nairobi');
+      await user.click(rows[rows.length - 1]);
 
       expect(push).toHaveBeenCalledWith('/places?city=c1');
     });
@@ -149,10 +157,7 @@ describe('Search popover', () => {
     const typeQuery = async () => {
       const user = userEvent.setup();
       render(<Search />);
-      await user.type(
-        screen.getByRole('textbox', { name: 'Search places or activities' }),
-        'karura',
-      );
+      await user.type(screen.getByRole('textbox', { name: 'Search Tukai' }), 'karura');
       return user;
     };
 

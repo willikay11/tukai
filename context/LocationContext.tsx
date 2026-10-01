@@ -9,7 +9,9 @@ type LocationState = {
 };
 
 type LocationContextType = LocationState & {
-  // Reverse-geocoded city name, populated by UserLocation once resolved
+  // Reverse-geocoded city name. Resolved here rather than by whichever
+  // component happened to be on screen: the search bar names the city, and it
+  // cannot be the thing that fetches it.
   city?: string;
   setCity: (city: string) => void;
   requestLocation: () => void;
@@ -86,6 +88,40 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
     // Do not auto-request location here; the UI should prompt the user first.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Turn the coordinates into a city once they land. This used to live in
+  // UserLocation, so the city only resolved while that chip was mounted.
+  useEffect(() => {
+    if (status !== 'granted' || !lat || !lng) return;
+
+    let cancelled = false;
+
+    const resolveCity = async () => {
+      try {
+        const response = await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`,
+        );
+        const data = await response.json();
+        const components = data?.results?.[0]?.address_components ?? [];
+
+        const locality = components.find((part: { types: string[] }) =>
+          part.types.includes('locality'),
+        );
+
+        if (!cancelled && locality?.long_name) setCity(locality.long_name);
+      } catch (error) {
+        // A city we cannot resolve is a label that stays as it was, not a
+        // failure worth showing anyone
+        console.error('Could not resolve the city:', error);
+      }
+    };
+
+    resolveCity();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [lat, lng, status]);
 
   return (
     <LocationContext.Provider
