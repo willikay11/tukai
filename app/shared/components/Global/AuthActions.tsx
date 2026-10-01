@@ -70,18 +70,18 @@ export const AuthActions = () => {
       {hasSubscribed ? (
         <Link
           href="/experiences/create"
-          className="mr-2 hidden h-10 flex-shrink-0 items-center gap-1.5 rounded-full bg-lime px-6 text-sm text-gray-900 lg:inline-flex"
+          className="mr-2 hidden h-11 flex-shrink-0 items-center gap-2 rounded-full bg-lime px-4 text-sm font-semibold text-brand-ink transition-colors hover:bg-lime-dark lg:inline-flex"
         >
-          <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />
+          <IconComponent iconName="Add01Icon" size={18} color="currentColor" />
           Create
         </Link>
       ) : (
         <Button
           variant="lime"
-          className="mr-2 hidden h-10 flex-shrink-0 items-center gap-1.5 rounded-full bg-lime px-6 text-sm text-gray-900 lg:inline-flex"
+          className="mr-2 hidden h-11 flex-shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold lg:inline-flex"
           onClick={handleCreateExperience}
         >
-          <IconComponent iconName="PlusSignIcon" size={16} className="text-gray-900" />
+          <IconComponent iconName="Add01Icon" size={18} color="currentColor" />
           Create
         </Button>
       )}
@@ -91,24 +91,30 @@ export const AuthActions = () => {
         // way to align it per usage, so a 300px panel ran off-screen. Popover
         // aligns to the trigger's end and handles collisions.
         <Popover open={isProfileOpen} onOpenChange={setIsProfileOpen}>
-          <PopoverTrigger className="flex h-10 flex-shrink-0 items-center gap-1.5 rounded-full outline-none">
-            <div className="relative aspect-square h-9 w-9">
+          {/* The canvas's account chip: one bordered pill carrying the menu
+              and the reader's face. The menu icon is what says the rest of the
+              app is behind it, which a bare avatar does not. */}
+          <PopoverTrigger
+            aria-label="Account menu"
+            className="flex h-11 flex-shrink-0 items-center gap-2 rounded-full border border-line-soft bg-white pl-3 pr-[5px] outline-none transition-shadow hover:shadow-[0_2px_10px_rgba(1,51,52,.09)]"
+          >
+            <IconComponent
+              iconName="Menu02Icon"
+              size={18}
+              color="currentColor"
+              className="hidden text-gray-800 md:block"
+            />
+            <div className="relative aspect-square h-8 w-8">
               <TukaiImage
                 src={session?.user?.image || ''}
                 alt={session?.user?.name || ''}
-                className="h-9 w-9 rounded-full"
+                className="h-8 w-8 rounded-full"
                 quality={100}
                 fill
                 style={{ objectFit: 'cover' }}
                 showNotFoundText={false}
               />
             </div>
-            <IconComponent
-              iconName="ArrowDown01Icon"
-              size={16}
-              color="currentColor"
-              className="text-gray-600"
-            />
           </PopoverTrigger>
 
           <PopoverContent

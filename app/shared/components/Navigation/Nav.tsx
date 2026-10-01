@@ -1,74 +1,56 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import clsx from 'clsx';
-
 import { IconComponent } from '@/app/shared/components/Icons';
-import { PhotoImage } from '@/app/shared/components/Images';
+import { cn } from '@/lib/utils';
 
-import { DESTINATIONS, isDestinationActive } from './destinations';
+import { DISCOVER_TABS, isTabActive } from './tabs';
 
+/**
+ * The tab strip the canvas centres in the top bar.
+ *
+ * These read as tabs and behave as links: each face of Discover keeps the URL
+ * it already had, so a deep link still lands and the back button still means
+ * something. The app's actual destinations are in the account menu, and on a
+ * phone in the bottom bar.
+ */
 export const Nav = () => {
   const pathname = usePathname();
-  const { data: session } = useSession();
-
-  const face = session?.user?.image;
 
   return (
     // From md, not lg: the floating bottom navigation stops at md, so between
-    // 768px and 1024px the app had no primary navigation at all.
-    //
-    // Below xl only the current destination is named, exactly as the mobile
-    // bottom bar does it — five labelled items are wider than the header can
-    // give, which left the search field too narrow to hold its own contents.
+    // 768px and 1024px the app had no navigation at all.
     <nav
-      aria-label="Primary"
-      className="hidden flex-shrink-0 items-center gap-1 rounded-full bg-gray-50 p-1 md:flex"
+      role="tablist"
+      aria-label="Discover"
+      className="hidden min-h-11 flex-shrink-0 items-center gap-2 md:flex"
     >
-      {DESTINATIONS.map((item) => {
-        const active = isDestinationActive(item.href, pathname);
-        // The canvas puts the reader's own face in place of the icon on "You",
-        // which is how that item reads as theirs rather than as a settings page
-        const showFace = item.showsFace && Boolean(face);
+      {DISCOVER_TABS.map((tab) => {
+        const active = isTabActive(tab.href, pathname);
 
         return (
           <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? 'page' : undefined}
-            // Inactive labels are hidden rather than dropped, so every link
-            // keeps its accessible name from its own text
-            aria-label={item.label}
-            title={item.label}
-            className={clsx(
-              'flex items-center gap-2 rounded-full py-2.5 text-sm transition-colors xl:px-5',
-              // The named item needs the room its label takes
+            key={tab.href}
+            href={tab.href}
+            role="tab"
+            aria-selected={active}
+            className={cn(
+              'inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm transition-colors',
               active
-                ? 'bg-surface-brand px-4 font-bold text-brand-ink'
-                : 'px-3 font-medium text-ink-muted hover:text-brand-ink',
+                ? 'bg-surface-tab font-semibold text-brand'
+                : 'bg-surface font-medium text-gray-900 hover:brightness-[0.97]',
             )}
           >
-            {showFace ? (
-              <span
-                className={clsx(
-                  'relative h-5 w-5 flex-shrink-0 overflow-hidden rounded-full ring-2',
-                  active ? 'ring-brand' : 'ring-white',
-                )}
-              >
-                <PhotoImage src={face} alt="" fill sizes="20px" className="object-cover" />
-              </span>
-            ) : (
-              <IconComponent
-                iconName={item.icon}
-                size={18}
-                color="currentColor"
-                className={active ? 'text-brand' : 'text-ink-muted'}
-              />
-            )}
-            <span className={clsx(active ? 'inline' : 'hidden xl:inline')}>{item.label}</span>
+            <IconComponent
+              iconName={tab.icon}
+              size={20}
+              color="currentColor"
+              // The canvas fills the chosen tab's icon and outlines the rest
+              variant={active ? 'solid' : 'twotone'}
+            />
+            {tab.label}
           </Link>
         );
       })}

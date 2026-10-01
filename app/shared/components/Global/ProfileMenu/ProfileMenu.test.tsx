@@ -50,23 +50,24 @@ describe('ProfileMenu', () => {
   it('links the items that have a destination', () => {
     render(<ProfileMenu {...defaults} />);
 
-    expect(screen.getByRole('link', { name: /My Profile/ })).toHaveAttribute('href', '/profile');
+    // The header row is the way to the profile now, not a listed item
+    expect(screen.getByRole('link', { name: /George Ralak/ })).toHaveAttribute('href', '/profile');
     // Communities, Bucket lists and Plans left this menu for the primary nav
     expect(screen.queryByRole('link', { name: /My Communities/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /Bucket List/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /My Plans/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Control Center/ })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Control centre/ })).toHaveAttribute(
       'href',
       '/control-center',
     );
   });
 
-  it('links Control Center now that the page exists', () => {
+  it('links Control centre now that the page exists', () => {
     render(<ProfileMenu {...defaults} />);
 
-    const control = screen.getByText('Control Center').closest('a');
+    const control = screen.getByText('Control centre').closest('a');
     expect(control).toHaveAttribute('href', '/control-center');
-    expect(screen.getByText('Control Center').closest('button')).toBeNull();
+    expect(screen.getByText('Control centre').closest('button')).toBeNull();
   });
 
   /**

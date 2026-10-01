@@ -5,7 +5,12 @@ import Link from 'next/link';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { TukaiImage } from '@/components/ui/image';
 
-import { PROFILE_MENU_ITEMS, ProfileMenuItem, UNAVAILABLE_TITLE } from './items';
+import {
+  PROFILE_MENU_DIVIDER_AFTER,
+  PROFILE_MENU_ITEMS,
+  ProfileMenuItem,
+  UNAVAILABLE_TITLE,
+} from './items';
 
 interface ProfileMenuProps {
   name: string;
@@ -75,12 +80,18 @@ export const ProfileMenu = ({
   onItemSelect,
 }: ProfileMenuProps) => (
   <div className="w-[300px] p-2">
-    <div className="flex items-center gap-3 px-3 py-3">
-      <div className="relative aspect-square h-12 w-12 flex-shrink-0">
+    {/* The canvas makes the whole header the way to the profile, rather than
+        listing "My Profile" as one row among the rest */}
+    <Link
+      href="/profile"
+      onClick={onItemSelect}
+      className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-gray-50"
+    >
+      <div className="relative aspect-square h-11 w-11 flex-shrink-0">
         <TukaiImage
           src={image || ''}
           alt={name}
-          className="h-12 w-12 rounded-full"
+          className="h-11 w-11 rounded-full"
           quality={100}
           fill
           style={{ objectFit: 'cover' }}
@@ -89,20 +100,23 @@ export const ProfileMenu = ({
       </div>
       <div className="min-w-0">
         <p className="truncate text-base font-bold text-gray-900">{name}</p>
-        {handle && <p className="truncate text-sm text-gray-400">@{handle}</p>}
+        <p className="truncate text-sm text-ink-muted">{handle ? `@${handle}` : 'View profile'}</p>
       </div>
-    </div>
+    </Link>
 
     <div className="my-1 h-px bg-gray-100" />
 
     <div className="flex flex-col">
-      {PROFILE_MENU_ITEMS.map((item) => (
-        <MenuRow
-          key={item.label}
-          item={item}
-          hasUnreadNotifications={hasUnreadNotifications}
-          onSelect={onItemSelect}
-        />
+      {PROFILE_MENU_ITEMS.map((item, index) => (
+        <div key={item.label}>
+          <MenuRow
+            item={item}
+            hasUnreadNotifications={hasUnreadNotifications}
+            onSelect={onItemSelect}
+          />
+          {/* A rule after the three that are yours, as the canvas groups them */}
+          {index === PROFILE_MENU_DIVIDER_AFTER - 1 && <div className="my-1 h-px bg-gray-100" />}
+        </div>
       ))}
     </div>
 

@@ -1,5 +1,3 @@
-'use client';
-
 import { usePathname } from 'next/navigation';
 
 import { render, screen } from '@testing-library/react';
@@ -7,220 +5,110 @@ import userEvent from '@testing-library/user-event';
 
 import { Nav } from './Nav';
 
-// "You" wears the reader's face when there is one
-jest.mock('next-auth/react', () => ({ useSession: () => ({ data: null }) }));
-
-jest.mock('next/navigation', () => ({
-  usePathname: jest.fn(),
-}));
+jest.mock('next/navigation', () => ({ usePathname: jest.fn() }));
 
 const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>;
 
-describe('Nav', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+const at = (pathname: string) => {
+  mockUsePathname.mockReturnValue(pathname);
+  render(<Nav />);
+};
+
+/**
+ * The canvas holds these four as tabs on one route and switches them in state.
+ * Here they stay four addressable routes, so the strip reads as a tablist and
+ * behaves as links — a deep link still lands, and back still means something.
+ */
+describe('the Discover tab strip', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('is a tablist, named for what it switches', () => {
+    at('/');
+
+    expect(screen.getByRole('tablist', { name: 'Discover' })).toBeInTheDocument();
   });
 
-  describe('rendering', () => {
-    it('renders all navigation links', () => {
-      mockUsePathname.mockReturnValue('/');
+  it('offers the four faces of Discover, in order', () => {
+    at('/');
 
-      render(<Nav />);
-
-      expect(screen.getByRole('link', { name: /discover/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /bucket lists/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /communities/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /plans/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /you/i })).toBeInTheDocument();
-    });
-
-    it('renders with correct href attributes', () => {
-      mockUsePathname.mockReturnValue('/');
-
-      render(<Nav />);
-
-      expect(screen.getByRole('link', { name: /discover/i })).toHaveAttribute('href', '/');
-      expect(screen.getByRole('link', { name: /communities/i })).toHaveAttribute(
-        'href',
-        '/communities',
-      );
-      expect(screen.getByRole('link', { name: /plans/i })).toHaveAttribute('href', '/plans');
-      expect(screen.getByRole('link', { name: /you/i })).toHaveAttribute('href', '/profile');
-      expect(screen.getByRole('link', { name: /bucket lists/i })).toHaveAttribute(
-        'href',
-        '/bucket-lists',
-      );
-    });
-
-    it('renders navigation icons', () => {
-      mockUsePathname.mockReturnValue('/');
-
-      render(<Nav />);
-
-      const linkElements = screen.getAllByRole('link');
-      expect(linkElements).toHaveLength(5);
-      linkElements.forEach((link) => {
-        // Each link should have an SVG (icon)
-        const svg = link.querySelector('svg');
-        expect(svg).toBeInTheDocument();
-      });
-    });
-
-    it('hides navigation below the md breakpoint, where the bottom bar takes over', () => {
-      mockUsePathname.mockReturnValue('/');
-
-      const { container } = render(<Nav />);
-      const nav = container.querySelector('nav');
-
-      expect(nav).toHaveClass('hidden');
-      expect(nav).toHaveClass('md:flex');
-    });
+    expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
+      'Discover',
+      'Experiences',
+      'Places',
+      'Moments',
+    ]);
   });
 
-  describe('active link styling', () => {
-    it('marks Discover link as active when pathname is /', () => {
-      mockUsePathname.mockReturnValue('/');
+  it('keeps each one at the URL it already had', () => {
+    at('/');
 
-      render(<Nav />);
+    const href = (name: string) => screen.getByRole('tab', { name }).getAttribute('href');
 
-      const discoverLink = screen.getByRole('link', { name: /discover/i });
-      expect(discoverLink).toHaveClass('bg-surface-brand');
-      expect(discoverLink).toHaveClass('text-brand-ink');
-    });
-
-    it('marks Communities as active when pathname is /communities', () => {
-      mockUsePathname.mockReturnValue('/communities');
-
-      render(<Nav />);
-
-      const communitiesLink = screen.getByRole('link', { name: /communities/i });
-      expect(communitiesLink).toHaveClass('bg-surface-brand');
-    });
-
-    it('marks Communities as active for /communities subpaths', () => {
-      mockUsePathname.mockReturnValue('/communities/123');
-
-      render(<Nav />);
-
-      const communitiesLink = screen.getByRole('link', { name: /communities/i });
-      expect(communitiesLink).toHaveClass('bg-surface-brand');
-    });
-
-    it('marks Plans as active when pathname is /plans', () => {
-      mockUsePathname.mockReturnValue('/plans');
-
-      render(<Nav />);
-
-      const plansLink = screen.getByRole('link', { name: /plans/i });
-      expect(plansLink).toHaveClass('bg-surface-brand');
-    });
-
-    it('does not mark Discover as active on subroutes', () => {
-      mockUsePathname.mockReturnValue('/plans');
-
-      render(<Nav />);
-
-      const discoverLink = screen.getByRole('link', { name: /discover/i });
-      expect(discoverLink).not.toHaveClass('bg-surface-brand');
-    });
-
-    it('only marks one link as active at a time', () => {
-      mockUsePathname.mockReturnValue('/plans');
-
-      render(<Nav />);
-
-      const activeLinks = screen
-        .getAllByRole('link')
-        .filter((link) => link.classList.contains('bg-surface-brand'));
-
-      expect(activeLinks).toHaveLength(1);
-      expect(activeLinks[0]).toHaveTextContent('Plans');
-    });
-
-    it('applies non-active styling to inactive links', () => {
-      mockUsePathname.mockReturnValue('/');
-
-      render(<Nav />);
-
-      const plansLink = screen.getByRole('link', { name: /plans/i });
-      expect(plansLink).toHaveClass('text-ink-muted');
-      expect(plansLink).not.toHaveClass('bg-surface-brand');
-    });
+    expect(href('Discover')).toBe('/');
+    expect(href('Experiences')).toBe('/experiences');
+    expect(href('Places')).toBe('/places');
+    expect(href('Moments')).toBe('/moments');
   });
 
-  describe('interactions', () => {
-    it('is keyboard accessible - all links are focusable', () => {
-      mockUsePathname.mockReturnValue('/');
+  it.each([
+    ['/', 'Discover'],
+    ['/experiences', 'Experiences'],
+    ['/places', 'Places'],
+    ['/moments', 'Moments'],
+  ])('marks the tab for %s as selected', (pathname, label) => {
+    at(pathname);
 
-      render(<Nav />);
-
-      const links = screen.getAllByRole('link');
-      links.forEach((link) => {
-        expect(link).toHaveAttribute('href');
-      });
-    });
-
-    it('links are clickable', async () => {
-      const user = userEvent.setup();
-      mockUsePathname.mockReturnValue('/');
-
-      render(<Nav />);
-
-      const communitiesLink = screen.getByRole('link', { name: /communities/i });
-
-      await user.click(communitiesLink);
-      expect(communitiesLink).toHaveAttribute('href', '/communities');
-    });
+    expect(screen.getByRole('tab', { name: label })).toHaveAttribute('aria-selected', 'true');
   });
 
-  describe('accessibility', () => {
-    it('has semantic nav and link structure', () => {
-      mockUsePathname.mockReturnValue('/');
+  it('keeps a tab selected on a path beneath it', () => {
+    at('/places/kraftory-biergarten');
 
-      render(<Nav />);
+    expect(screen.getByRole('tab', { name: 'Places' })).toHaveAttribute('aria-selected', 'true');
+  });
 
-      expect(screen.getByRole('navigation')).toBeInTheDocument();
-      expect(screen.getAllByRole('link').length).toBe(5);
-    });
+  /**
+   * Discover is the root. Matching by prefix would select it everywhere, which
+   * is the bug this guards.
+   */
+  it('selects Discover on the root alone', () => {
+    at('/experiences/sunrise-hike');
 
-    // Only the current destination is named below xl, the way the mobile
-    // bottom bar does it — the rest keep their text in the DOM, hidden
-    it('names the current destination', () => {
-      mockUsePathname.mockReturnValue('/plans');
+    expect(screen.getByRole('tab', { name: 'Discover' })).toHaveAttribute('aria-selected', 'false');
+  });
 
-      render(<Nav />);
+  it('selects exactly one at a time', () => {
+    at('/places');
 
-      const active = screen.getByRole('link', { name: 'Plans' });
-      expect(active.querySelector('span')).toHaveClass('inline');
-      expect(screen.getByRole('link', { name: 'You' }).querySelector('span')).toHaveClass(
-        'hidden',
-        'xl:inline',
-      );
-    });
+    const selected = screen
+      .getAllByRole('tab')
+      .filter((tab) => tab.getAttribute('aria-selected') === 'true');
 
-    it('uses readable link text (not just icons)', () => {
-      mockUsePathname.mockReturnValue('/');
+    expect(selected).toHaveLength(1);
+    expect(selected[0]).toHaveTextContent('Places');
+  });
 
-      render(<Nav />);
+  // The canvas gives the chosen tab a deeper green ground and green text
+  it('gives the chosen tab the canvas pill, and the rest the resting one', () => {
+    at('/');
 
-      expect(screen.getByText('Discover')).toBeInTheDocument();
-      expect(screen.getByText('Bucket lists')).toBeInTheDocument();
-      expect(screen.getByText('Communities')).toBeInTheDocument();
-      expect(screen.getByText('Plans')).toBeInTheDocument();
-      expect(screen.getByText('You')).toBeInTheDocument();
-    });
+    expect(screen.getByRole('tab', { name: 'Discover' })).toHaveClass('bg-surface-tab');
+    expect(screen.getByRole('tab', { name: 'Places' })).toHaveClass('bg-surface');
+    expect(screen.getByRole('tab', { name: 'Places' })).not.toHaveClass('bg-surface-tab');
+  });
 
-    it('maintains link order: Discover, Experiences, Places, Moments', () => {
-      mockUsePathname.mockReturnValue('/');
+  it('hides below md, where the bottom bar takes over', () => {
+    at('/');
 
-      render(<Nav />);
+    expect(screen.getByRole('tablist')).toHaveClass('hidden');
+    expect(screen.getByRole('tablist')).toHaveClass('md:flex');
+  });
 
-      const links = screen.getAllByRole('link');
-      expect(links[0]).toHaveTextContent('Discover');
-      expect(links[1]).toHaveTextContent('Bucket lists');
-      expect(links[2]).toHaveTextContent('Communities');
-      expect(links[3]).toHaveTextContent('Plans');
-      expect(links[4]).toHaveTextContent('You');
-    });
+  it('is reachable from the keyboard', async () => {
+    at('/');
+
+    await userEvent.tab();
+
+    expect(screen.getByRole('tab', { name: 'Discover' })).toHaveFocus();
   });
 });

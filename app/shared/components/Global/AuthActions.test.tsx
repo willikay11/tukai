@@ -49,11 +49,11 @@ describe('AuthActions profile menu', () => {
   it('opens the menu from the avatar trigger', () => {
     render(<AuthActions />);
 
-    expect(screen.queryByText('My Profile')).not.toBeInTheDocument();
+    expect(screen.queryByText('Control centre')).not.toBeInTheDocument();
 
     openMenu();
 
-    expect(screen.getByText('My Profile')).toBeInTheDocument();
+    expect(screen.getByText('Control centre')).toBeInTheDocument();
     expect(screen.getByText('Sign Out')).toBeInTheDocument();
   });
 
@@ -65,13 +65,13 @@ describe('AuthActions profile menu', () => {
 
     openMenu();
 
-    const panel = screen.getByText('My Profile').closest('[data-align]');
+    const panel = screen.getByText('Control centre').closest('[data-align]');
     expect(panel).toHaveAttribute('data-align', 'end');
   });
 });
 
 // Every control in the header row is 40px, set by the search bar: py-1 around
-// an h-8 button. AskTukaiButton matches at h-10 w-10.
+// an h-8 button. The canvas puts both at 44px, which is h-11.
 describe('navbar control heights', () => {
   it('gives Create and the profile trigger the search bar height', () => {
     render(<AuthActions />);
@@ -79,8 +79,8 @@ describe('navbar control heights', () => {
     const create = screen.getByRole('link', { name: /Create/ });
     const trigger = screen.getByAltText('George Ralak').closest('button');
 
-    expect(create).toHaveClass('h-10');
-    expect(trigger).toHaveClass('h-10');
+    expect(create).toHaveClass('h-11');
+    expect(trigger).toHaveClass('h-11');
   });
 
   it('no longer sizes Create by padding alone', () => {
