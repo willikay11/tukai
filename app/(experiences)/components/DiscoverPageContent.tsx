@@ -18,12 +18,13 @@ import {
 } from '@/app/(experiences)/experiences/components/ExperienceRow';
 import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
 import { PageContainer } from '@/app/shared/components/Layout';
-import { CardRail, SeeAllCard } from '@/app/shared/components/Lists';
+import { CardGrid, CardRail, SeeAllCard } from '@/app/shared/components/Lists';
 import { MomentsMasonry } from '@/app/shared/components/Moments';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useMoments } from '@/app/shared/hooks/useMoments';
 import {
+  useFeaturedPlaces,
   usePlaceCategories,
   usePlaces,
   usePlacesWithExperiences,
@@ -45,6 +46,12 @@ const ROW_SIZE = 10;
  * asked for a date range and sorts by distance, not by date.
  */
 const SOON_PAGE_SIZE = 50;
+
+/** The canvas fills the "Places with experiences" grid five at a time. */
+const PLACES_PER_PAGE = 5;
+
+/** Read in one go, then paged locally — the API pages by request. */
+const PLACES_WITH_EXPERIENCES_SIZE = 30;
 
 // First photo of a row's leading item, used as the See All tile's preview
 const coverPhotoOf = (experience: Experience | undefined): string | null =>
@@ -76,9 +83,12 @@ export const DiscoverPageContent = () => {
   const filters = filtersFromParams(searchParams);
   const isSearching = hasSearch(filters);
 
-  const { data: promotedResponse, isLoading: isLoadingPromoted } =
-    usePlacesWithExperiences(!isSearching);
+  const { data: promotedResponse, isLoading: isLoadingPromoted } = useFeaturedPlaces(!isSearching);
   const promotedPlaces: Place[] = promotedResponse?.data?.results ?? [];
+
+  const { data: withExperiencesResponse, isLoading: isLoadingWithExperiences } =
+    usePlacesWithExperiences(!isSearching, PLACES_WITH_EXPERIENCES_SIZE);
+  const placesWithExperiences: Place[] = withExperiencesResponse?.data?.results ?? [];
 
   // ⚠️ `GET /experiences/` takes a single `date`, not a range, so "next 14
   // days" cannot be asked for — a wider page is read and narrowed by
@@ -184,10 +194,9 @@ export const DiscoverPageContent = () => {
 
   return (
     <PageContainer className="space-y-10 py-6">
-      {/* The canvas opens Discover with this row. There is no promoted flag on
-          the API; a place with experiences is one a community is running
-          something at, which is what "handpicked by the communities that run
-          them" describes. */}
+      {/* The canvas opens Discover with this row, off its own `featured`
+          flag. The row stays out of the way entirely when nothing is
+          featured — see useFeaturedPlaces. */}
       {(isLoadingPromoted || promotedPlaces.length > 0) && (
         <CardRail title="Promoted places" subtitle="Handpicked by the communities that run them">
           {isLoadingPromoted ? (
@@ -228,6 +237,38 @@ export const DiscoverPageContent = () => {
             </>
           )}
         </CardRail>
+      )}
+
+      {/* The canvas lays this one out as a grid the header's arrows page,
+          not as a rail. `has_experiences=true` is exactly what the heading
+          says, so the section is the honest one of the two.
+
+          ⚠️ The canvas also draws a "Closed · Opens 10 AM" pill over each
+          photo here. Hours are not on the place list serializer — they hang
+          off a reservation profile, two requests per place — so the pill is
+          left to the detail page, where PlaceOpenStatus can afford them. */}
+      {(isLoadingWithExperiences || placesWithExperiences.length > 0) && (
+        <section>
+          {isLoadingWithExperiences ? (
+            <CardRail
+              title="Places with experiences"
+              subtitle="Each one shows what is happening inside"
+            >
+              <RowSkeleton cardClassName="aspect-square w-[184px]" />
+            </CardRail>
+          ) : (
+            <CardGrid
+              title="Places with experiences"
+              subtitle="Each one shows what is happening inside"
+              items={placesWithExperiences}
+              pageSize={PLACES_PER_PAGE}
+              getKey={(place) => place.id}
+              renderItem={(place, index) => (
+                <PlaceCard place={place} priority={index < EAGER_IN_ROW} className="w-full" />
+              )}
+            />
+          )}
+        </section>
       )}
 
       {/* Discover by City */}

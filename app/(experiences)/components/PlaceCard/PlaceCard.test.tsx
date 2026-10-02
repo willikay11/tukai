@@ -88,6 +88,15 @@ describe('PlaceCard', () => {
     expect(container.querySelector('.aspect-square')).toBeInTheDocument();
   });
 
+  // The same card fills a cell in the "Places with experiences" grid, where a
+  // fixed width would leave gaps
+  it('fills its cell when the width is overridden', () => {
+    render(<PlaceCard place={makePlace()} className="w-full" />);
+
+    expect(screen.getByRole('link')).toHaveClass('w-full');
+    expect(screen.getByRole('link')).not.toHaveClass('w-[184px]');
+  });
+
   /**
    * One line of substance under the name. The canvas leads with something
    * happening at the place; we have no such field, so it leads with what

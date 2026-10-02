@@ -47,6 +47,7 @@ import {
 } from '@/services/place';
 import { Community } from '@/types/community';
 import { PlaceCategoryParams } from '@/types/networkParam';
+import { Place } from '@/types/place';
 import { PlaceEditDraft } from '@/types/placeEdit';
 import { ReservationSettingsDraft } from '@/types/placeReservation';
 import { CreatePlaceBookingRequest } from '@/types/placeReservation';
@@ -543,12 +544,7 @@ export const useSaveReservationSettings = (placeId: string) => {
 };
 
 /**
- * Places with something on.
- *
- * The canvas calls this row "Promoted places — handpicked by the communities
- * that run them". There is no promoted flag on the API; `has_experiences` is
- * the honest reading of it, since a place with experiences is one a community
- * is running something at.
+ * Places with something on — the "Places with experiences" section.
  */
 export const usePlacesWithExperiences = (enabled = true, perPage = 10) =>
   useQuery({
@@ -558,4 +554,26 @@ export const usePlacesWithExperiences = (enabled = true, perPage = 10) =>
         hasExperiences: true,
       }),
     enabled,
+  });
+
+/**
+ * The places the API marks `featured` — the canvas's "Promoted places" row.
+ *
+ * ⚠️ `featured` is on the list serializer but there is no `featured` query
+ * param, so the filter happens here over a wider page. That also means the
+ * row is honestly empty when nothing is featured, rather than showing an
+ * arbitrary ten places under a word that promises editorial choice.
+ */
+export const useFeaturedPlaces = (enabled = true, perPage = 50) =>
+  useQuery({
+    queryKey: ['places', 'featured', perPage],
+    queryFn: async () => await fetchPlaces(1, perPage),
+    enabled,
+    select: (response) => ({
+      ...response,
+      data: {
+        ...response.data,
+        results: (response.data?.results ?? []).filter((place: Place) => place.featured),
+      },
+    }),
   });

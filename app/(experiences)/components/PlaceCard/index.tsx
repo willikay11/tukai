@@ -19,11 +19,23 @@ const FACT_TONE: Record<string, string> = {
   muted: 'text-ink-muted',
 };
 
+/** The width a card takes in a rail. In a grid it fills the cell instead. */
+const RAIL_WIDTH = 'w-[184px] flex-shrink-0 snap-start';
+
 /**
  * A place, as the canvas draws it: a square photo at 184px, the save control
  * over its corner, then the name, where it is, and one line of substance.
  */
-export const PlaceCard = ({ place, priority = false }: { place: Place; priority?: boolean }) => {
+export const PlaceCard = ({
+  place,
+  priority = false,
+  className = RAIL_WIDTH,
+}: {
+  place: Place;
+  priority?: boolean;
+  /** Overridden where the card fills a grid cell instead of sitting in a rail. */
+  className?: string;
+}) => {
   const { data: session } = useSession();
 
   const fact = placeFact(place);
@@ -40,7 +52,7 @@ export const PlaceCard = ({ place, priority = false }: { place: Place; priority?
       priority={priority}
       ratio="square"
       radius="rounded-xl"
-      className="w-[184px] flex-shrink-0 snap-start"
+      className={className}
       overlay={
         // Top-right, over the photo. The drop shadow is what keeps a white
         // icon legible on a pale one.

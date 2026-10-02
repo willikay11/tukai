@@ -11,6 +11,7 @@ import {
   useCreatePlaceReviewComment,
   useDeletePlaceReview,
   useDeletePlaceReviewImage,
+  useFeaturedPlaces,
   useGoogleMapsAutocomplete,
   useLikePlaceReview,
   useLikePlaceReviewComment,
@@ -495,5 +496,62 @@ describe('Place Hooks', () => {
 
       expect(mockPlaceService.updatePlaceReview).toHaveBeenCalled();
     });
+  });
+});
+
+describe('useFeaturedPlaces', () => {
+  const respond = (results: unknown[]) =>
+    mockPlaceService.fetchPlaces.mockResolvedValue({
+      status: 200,
+      success: true,
+      data: { results },
+    } as never);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  // There is no `featured` query param, so the filter has to happen here
+  it('keeps only the places the API marks featured', async () => {
+    respond([
+      { ...mockPlace, id: 'p1', featured: true },
+      { ...mockPlace, id: 'p2', featured: false },
+      { ...mockPlace, id: 'p3' },
+    ]);
+
+    const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.data?.results.map((place: { id: string }) => place.id)).toEqual([
+      'p1',
+    ]);
+  });
+
+  // Better an empty row than ten arbitrary places under a word that promises
+  // editorial choice
+  it('is empty when nothing is featured', async () => {
+    respond([{ ...mockPlace, id: 'p1' }]);
+
+    const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.data?.results).toEqual([]);
+  });
+
+  it('asks for a wide page, since it has to filter locally', async () => {
+    respond([]);
+
+    const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockPlaceService.fetchPlaces).toHaveBeenCalledWith(1, 50);
+  });
+
+  it('does not fetch while disabled', () => {
+    respond([]);
+
+    renderHook(() => useFeaturedPlaces(false), { wrapper: createWrapper() });
+
+    expect(mockPlaceService.fetchPlaces).not.toHaveBeenCalled();
   });
 });
