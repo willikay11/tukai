@@ -61,6 +61,10 @@ jest.mock('./ReservationPanel', () => ({
   ),
 }));
 
+jest.mock('./PlaceOpenStatus', () => ({
+  PlaceOpenStatus: () => <span data-testid="place-open-status" />,
+}));
+
 const useMoments = jest.fn();
 jest.mock('@/app/shared/hooks/useMoments', () => ({
   useMoments: (params: unknown) => useMoments(params),

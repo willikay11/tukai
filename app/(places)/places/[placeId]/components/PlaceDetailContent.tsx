@@ -27,6 +27,7 @@ import { haversineKm } from '@/utils/geo-utils';
 import { MobilePlaceBar } from './MobilePlaceBar';
 import { PlaceCommunitySection } from './PlaceCommunitySection';
 import { PlaceDetailsSection } from './PlaceDetailsSection';
+import { PlaceOpenStatus } from './PlaceOpenStatus';
 import { PlaceReviewsSection } from './PlaceReviewsSection';
 import { PlaceSocialsSection } from './PlaceSocialsSection';
 import { ReservationPanel } from './ReservationPanel';
@@ -126,6 +127,7 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
               {place.totalReviews ? `(${place.totalReviews} Reviews)` : null}
             </span>
           )}
+          <PlaceOpenStatus placeId={place.id} />
         </div>
       </div>
 
