@@ -8,6 +8,7 @@ import { CommunityDiscoverCard } from '@/app/(experiences)/components/CommunityD
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
 import { happeningSoon } from '@/app/(experiences)/components/ExperienceCard/happening-soon';
 import { ItineraryCard } from '@/app/(experiences)/components/ItineraryCard';
+import { MomentCard } from '@/app/(experiences)/components/MomentCard';
 import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
 import { SearchResults } from '@/app/(experiences)/components/SearchResults';
 import { filtersFromParams, hasSearch } from '@/app/(experiences)/components/SearchResults/filters';
@@ -19,7 +20,6 @@ import {
 import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { CardGrid, CardRail, SeeAllCard } from '@/app/shared/components/Lists';
-import { MomentsMasonry } from '@/app/shared/components/Moments';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useMoments } from '@/app/shared/hooks/useMoments';
@@ -49,6 +49,11 @@ const SOON_PAGE_SIZE = 50;
 
 /** The canvas fills the "Places with experiences" grid five at a time. */
 const PLACES_PER_PAGE = 5;
+
+/** And the moments grid four at a time. */
+const MOMENTS_PER_PAGE = 4;
+
+const MOMENTS_SUBTITLE = 'Every moment is attached to a community, place or experience.';
 
 /** Read in one go, then paged locally — the API pages by request. */
 const PLACES_WITH_EXPERIENCES_SIZE = 30;
@@ -298,33 +303,32 @@ export const DiscoverPageContent = () => {
         </CardRail>
       )}
 
-      {/* Moments */}
+      {/* The canvas lays moments out as a square grid the header's arrows
+          page — not the masonry the Moments page uses, which was going into a
+          horizontally scrolling rail here. */}
       {(isLoadingMoments || moments.length > 0) && (
-        <CardRail title="Moments" subtitle="Fresh from the community" seeAllHref="/moments">
+        <section>
           {isLoadingMoments ? (
-            <div className="columns-2 gap-4 md:columns-3 lg:columns-4">
-              {[220, 300, 180, 260].map((height, index) => (
-                <div
-                  key={index}
-                  style={{ height }}
-                  className="mb-4 w-full animate-pulse break-inside-avoid rounded-2xl bg-gray-200"
-                />
-              ))}
-            </div>
+            <CardRail title="Recent moments" subtitle={MOMENTS_SUBTITLE}>
+              <RowSkeleton cardClassName="aspect-square w-[184px]" />
+            </CardRail>
           ) : (
-            /* The same masonry the Moments page uses, given a wider column
-               count because this section spans the full content width */
-            <MomentsMasonry
-              moments={moments}
-              selectedId={null}
-              onSelect={(id) => router.push(`/moments?momentId=${id}`)}
-              onLoadMore={() => {}}
-              hasMore={false}
-              isLoadingMore={false}
-              columnsClassName="columns-2 gap-4 md:columns-3 lg:columns-4"
+            <CardGrid
+              title="Recent moments"
+              subtitle={MOMENTS_SUBTITLE}
+              items={moments}
+              pageSize={MOMENTS_PER_PAGE}
+              getKey={(moment) => moment.id}
+              renderItem={(moment, index) => (
+                <MomentCard
+                  moment={moment}
+                  priority={index < EAGER_IN_ROW}
+                  onClick={() => router.push(`/moments?momentId=${moment.id}`)}
+                />
+              )}
             />
           )}
-        </CardRail>
+        </section>
       )}
 
       {/* Discover Communities */}
