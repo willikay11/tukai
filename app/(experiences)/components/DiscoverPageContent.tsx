@@ -1,11 +1,12 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import moment from 'moment';
 
 import { CommunityDiscoverCard } from '@/app/(experiences)/components/CommunityDiscoverCard';
+import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
+import { happeningSoon } from '@/app/(experiences)/components/ExperienceCard/happening-soon';
 import { ItineraryCard } from '@/app/(experiences)/components/ItineraryCard';
 import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
 import { SearchResults } from '@/app/(experiences)/components/SearchResults';
@@ -16,7 +17,6 @@ import {
   RowSkeleton,
 } from '@/app/(experiences)/experiences/components/ExperienceRow';
 import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
-import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { CardRail, SeeAllCard } from '@/app/shared/components/Lists';
 import { MomentsMasonry } from '@/app/shared/components/Moments';
@@ -36,9 +36,15 @@ import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
 import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
 import { formatLongDateWithOrdinal } from '@/utils/date-utils';
-import { experiencePath } from '@/utils/detail-paths';
 
 const ROW_SIZE = 10;
+
+/**
+ * How many experiences the "Happening soon" rail reads before narrowing to the
+ * next fortnight. Wider than the nine it shows, because the API cannot be
+ * asked for a date range and sorts by distance, not by date.
+ */
+const SOON_PAGE_SIZE = 50;
 
 // First photo of a row's leading item, used as the See All tile's preview
 const coverPhotoOf = (experience: Experience | undefined): string | null =>
@@ -74,14 +80,15 @@ export const DiscoverPageContent = () => {
     usePlacesWithExperiences(!isSearching);
   const promotedPlaces: Place[] = promotedResponse?.data?.results ?? [];
 
-  // ⚠️ No handpicked/recommended/for-you endpoint exists. Geo-scoped published
-  // experiences are the closest available query; coordinates are omitted until
-  // the user grants location, so the row still renders unscoped if they decline.
+  // ⚠️ `GET /experiences/` takes a single `date`, not a range, so "next 14
+  // days" cannot be asked for — a wider page is read and narrowed by
+  // happeningSoon(). Coordinates are omitted until the user grants location,
+  // so the rail still renders unscoped if they decline.
   const { data: rowResponse, isLoading: isLoadingRow } = useExperiences(
-    { page: 1, page_size: ROW_SIZE, status: 'published', lat, long: lng },
+    { page: 1, page_size: SOON_PAGE_SIZE, status: 'published', lat, long: lng },
     true,
   );
-  const discoverExperiences: Experience[] = rowResponse?.data?.results ?? [];
+  const soonExperiences: Experience[] = happeningSoon(rowResponse?.data?.results ?? []);
 
   const { data: citiesResponse, isLoading: isLoadingCities } = usePlaceCategories(
     { pageSize: 100, group: 'cities' },
@@ -200,23 +207,23 @@ export const DiscoverPageContent = () => {
         </CardRail>
       )}
 
-      {(isLoadingRow || discoverExperiences.length > 0) && (
-        <CardRail title="Discover Experiences" subtitle="Handpicked for you">
+      {(isLoadingRow || soonExperiences.length > 0) && (
+        <CardRail title="Happening soon" subtitle={`In ${userCity}, next 14 days`}>
           {isLoadingRow ? (
-            <RowSkeleton />
+            <RowSkeleton cardClassName="aspect-square w-[184px]" />
           ) : (
             <>
-              {discoverExperiences.map((experience) => (
-                <div key={experience.id} className="w-[280px] flex-shrink-0 snap-start">
-                  <Link target="_blank" href={experiencePath(experience)}>
-                    <SingleExperience type="discover" variant="row" experience={experience} />
-                  </Link>
-                </div>
+              {soonExperiences.map((experience, index) => (
+                <ExperienceCard
+                  key={experience.id}
+                  experience={experience}
+                  priority={index < EAGER_IN_ROW}
+                />
               ))}
 
               <SeeAllCard
-                href="/experiences/see-all?type=near-me"
-                previewPhotos={discoverExperiences.slice(0, 3).map(coverPhotoOf)}
+                href="/experiences"
+                previewPhotos={soonExperiences.slice(0, 3).map(coverPhotoOf)}
               />
             </>
           )}

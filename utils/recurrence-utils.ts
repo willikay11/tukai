@@ -108,3 +108,18 @@ export const parseRecurrenceRule = (
     return null;
   }
 };
+
+/**
+ * When a recurring experience next runs, at or after `from`.
+ *
+ * Returns null for an unparseable rule, and for a series whose UNTIL has
+ * passed — a finished series has no next run, and callers must not treat it as
+ * if it were still on.
+ */
+export const nextOccurrence = (recurrenceRule: string, from: Date = new Date()): Date | null => {
+  try {
+    return new RRule(RRule.parseString(recurrenceRule)).after(from, true) ?? null;
+  } catch {
+    return null;
+  }
+};
