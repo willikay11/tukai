@@ -38,6 +38,7 @@ before a task relies on it.
 |---|---|
 | `todo` | Clear, buildable now |
 | `verify` | Probably built. Check it, then close or reopen |
+| `awaiting approval` | Inventoried, waiting for the owner to approve before building |
 | `decision` | Needs an answer from you before it can be built |
 | `blocked` | Needs something outside this repo, usually the API |
 | `done` | Built and merged |
