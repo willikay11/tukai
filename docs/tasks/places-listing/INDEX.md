@@ -9,7 +9,7 @@ Source: `docs/design/screens/places-listing.html`.
 | PL-00 | Decide the rules every Places segment shares | decision | decided | none |
 | PL-01 | Category row with arrows | build | built, pending owner review | PL-00 |
 | PL-02 | Promoted places | build | built, pending owner review | PL-00 |
-| PL-03 | Discover by city (places) | build | awaiting approval | PL-00 |
+| PL-03 | Discover by city (places) | build | built, pending owner review | PL-00 |
 | PL-04 | Nearby places | build | awaiting approval | PL-00 |
 | PL-05 | Places with experiences | build | awaiting approval | PL-00 |
 | PL-06 | Popular places | decision | awaiting approval | PL-00 |
