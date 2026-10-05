@@ -9,6 +9,8 @@ import moment from 'moment';
 
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
 import { BucketListCard } from '@/app/(experiences)/experiences/components/BucketListCard';
+import { CategoryChipRow } from '@/app/(experiences)/experiences/components/CategoryChipRow';
+import type { CategoryChip } from '@/app/(experiences)/experiences/components/CategoryChipRow';
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
 import {
@@ -55,6 +57,10 @@ const TABS = [
 /** Cards in a horizontal row that are fetched straight away rather than lazily. */
 const EAGER_IN_ROW = 3;
 
+/** The place-category group the experience category chips are read from. */
+const CATEGORY_CHIP_GROUP = 'interests';
+const ALL_CATEGORIES = 'all';
+
 export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: string }) => {
   const router = useRouter();
   const { data: session } = useSession();
@@ -63,6 +69,9 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
     TABS.some((tab) => tab.value === initialCategory) ? initialCategory : 'all',
   );
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  // 'all' is no filter. Kept out of the URL: `category` there already names the tab.
+  const [categoryId, setCategoryId] = useState(ALL_CATEGORIES);
+  const categoryFilter = categoryId === ALL_CATEGORIES ? undefined : categoryId;
 
   const isAll = activeTab === 'all';
   const isSaved = activeTab === 'saved';
@@ -143,7 +152,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   // The list serializer carries `featured`, but there is no query param for it,
   // so one page is read and filtered here (as Promoted places is)
   const { data: featuredResponse, isLoading: isLoadingFeatured } = useExperiences(
-    { page: 1, page_size: FEATURED_PAGE_SIZE, status: 'published' },
+    { page: 1, page_size: FEATURED_PAGE_SIZE, status: 'published', category: categoryFilter },
     isAll,
   );
   const featuredExperiences: Experience[] = featuredOnly(featuredResponse?.data?.results ?? []);
@@ -152,17 +161,24 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   // coordinates the LocationContext resolved. Coordinates are omitted until the
   // user grants location, so the row still renders (unscoped) if they decline.
   const { data: nearbyResponse, isLoading: isLoadingNearby } = useExperiences(
-    { page: 1, page_size: 10, status: 'published', lat, long: lng },
+    {
+      page: 1,
+      page_size: 10,
+      status: 'published',
+      lat,
+      long: lng,
+      category: categoryFilter,
+    },
     isAll,
   );
   const nearbyExperiences: Experience[] = nearbyResponse?.data?.results ?? [];
 
   const { data: todayResponse, isLoading: isLoadingToday } = useExperiences(
-    { page: 1, page_size: 8, date: today },
+    { page: 1, page_size: 8, date: today, category: categoryFilter },
     isAll,
   );
   const { data: tomorrowResponse, isLoading: isLoadingTomorrow } = useExperiences(
-    { page: 1, page_size: 8, date: tomorrow },
+    { page: 1, page_size: 8, date: tomorrow, category: categoryFilter },
     isAll,
   );
 
@@ -170,6 +186,20 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
     { pageSize: 100, group: 'cities' },
     isAll,
   );
+  // The chips. Interest-group place categories stand in for the experience
+  // categories until the API exposes its own list (see EL-01).
+  const { data: interestsResponse } = usePlaceCategories(
+    { pageSize: 100, group: CATEGORY_CHIP_GROUP },
+    isAll,
+  );
+  const categoryChips: CategoryChip[] = [
+    { value: ALL_CATEGORIES, label: 'All' },
+    ...(interestsResponse?.data?.results ?? []).map((category: PlaceCategory) => ({
+      value: category.id,
+      label: category.name,
+    })),
+  ];
+
   const cities: PlaceCategory[] = (citiesResponse?.data?.results ?? [])
     .filter((category: PlaceCategory) => category.group === 'cities')
     .sort((a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount);
@@ -179,7 +209,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const topCity = cities[0];
   const visibleCities = cities.slice(0, 10);
   const { data: topCityResponse, isLoading: isLoadingTopCity } = useExperiences(
-    { page: 1, page_size: 8, search: topCity?.name },
+    { page: 1, page_size: 8, search: topCity?.name, category: categoryFilter },
     isAll && Boolean(topCity),
   );
 
@@ -201,6 +231,12 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
 
       {isAll ? (
         <div className="col-span-12 space-y-10 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+          {/* Category filter: narrows the experience rails below. Hidden until
+              there is more than the All chip, so no lone chip shows. */}
+          {categoryChips.length > 1 && (
+            <CategoryChipRow chips={categoryChips} value={categoryId} onChange={setCategoryId} />
+          )}
+
           {/* Featured experiences: a paged rail of cards, as the design has it.
               Hidden when nothing is featured, so no empty heading shows. */}
           {(isLoadingFeatured || featuredExperiences.length > 0) && (
