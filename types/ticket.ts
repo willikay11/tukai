@@ -9,7 +9,7 @@ export type Ticket = {
   quantity: number;
   // The host's base amount, before Tukai's commission is allocated
   price: number | string;
-  // What the buyer is charged — the API derives it from the experience's
+  // What the buyer is charged - the API derives it from the experience's
   // fees_allocation, so it is the only price a buyer should be shown
   buyerPrice?: TicketPrice | null;
   buyer_price?: TicketPrice | null;
@@ -36,4 +36,16 @@ export type Ticket = {
     unit: 'hour' | 'day' | 'week';
     anchor: 'start' | 'end';
   } | null;
+  /**
+   * When the host stopped selling this type. Null while it is on sale.
+   * Pausing blocks new purchases and hides the type from anyone but the host;
+   * people who already bought keep their tickets.
+   */
+  ticketSalesPausedAt?: string | null;
+  ticket_sales_paused_at?: string | null;
 };
+
+/** Both spellings reach the client depending on which serializer answered. */
+export const isTicketPaused = (
+  ticket: Pick<Ticket, 'ticketSalesPausedAt' | 'ticket_sales_paused_at'>,
+): boolean => Boolean(ticket.ticketSalesPausedAt ?? ticket.ticket_sales_paused_at);

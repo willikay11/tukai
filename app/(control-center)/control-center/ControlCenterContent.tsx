@@ -16,6 +16,7 @@ import { TicketPurchase } from '@/types/ticket-purchase';
 
 import { ControlCenterHero } from './components/ControlCenterHero';
 import { ControlCenterStatCard } from './components/ControlCenterStatCard';
+import { EarningsSection } from './components/EarningsSection';
 import { ExperienceProgressRow } from './components/ExperienceProgressRow';
 import { MyExperiences } from './components/MyExperiences';
 import { ControlCenterReservation, RecentReservations } from './components/RecentReservations';
@@ -63,7 +64,7 @@ export const groupReservations = (
       amount,
       currency: purchase.ticket?.currency ?? 'Ksh.',
       // ⚠️ The purchase record carries no payment method
-      method: '—',
+      method: '-',
       status: purchase.status,
     });
   });
@@ -80,7 +81,7 @@ export const ControlCenterContent = () => {
     Boolean(userId),
   );
   // hosted_by also matches experiences this user only co-hosts, so ownership is
-  // enforced here — everything downstream (metrics, purchases, sections) then
+  // enforced here - everything downstream (metrics, purchases, sections) then
   // sees only the host's own experiences
   const experiences: Experience[] = (hostedResponse?.data?.results ?? []).filter(
     (experience: Experience) => isHostedBy(experience, userId),
@@ -235,6 +236,9 @@ export const ControlCenterContent = () => {
           )}
         </div>
       </div>
+
+      {/* The money, which the control centre could not show at all */}
+      <EarningsSection currency={metrics.currency} />
 
       <MyExperiences experiences={published} />
 

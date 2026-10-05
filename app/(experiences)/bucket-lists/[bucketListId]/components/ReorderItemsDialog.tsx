@@ -25,7 +25,7 @@ import { PhotoImage } from '@/app/shared/components/Images';
 import { useReorderBucketListItems } from '@/app/shared/hooks/useBucketLists';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { Drawer } from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
 import { BucketListItem, bucketListItemName, bucketListItemPhoto } from '@/types/bucket-list';
 
@@ -37,7 +37,7 @@ import { BucketListItem, bucketListItemName, bucketListItemPhoto } from '@/types
  * would rather nudge a row than aim at one. dnd-kit's keyboard sensor also
  * makes the drag itself reachable without a mouse.
  *
- * The order is saved on request rather than on every drop — a drag is a rough
+ * The order is saved on request rather than on every drop - a drag is a rough
  * gesture and often takes two or three tries to land, which would otherwise be
  * two or three requests.
  */
@@ -103,12 +103,13 @@ export const ReorderItemsDialog = ({
     );
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-h-[85vh] max-w-[520px] gap-0 overflow-y-auto rounded-2xl p-5 md:max-w-[520px]">
-        <DialogTitle className="text-base font-semibold text-gray-900">Reorder items</DialogTitle>
-        <DialogDescription className="mt-1 text-xs text-gray-500">
+    // The canvas opens everything about bucket lists in the side panel
+    <Drawer isOpen={isOpen} setIsOpen={setIsOpen} width="narrow">
+      <div className="p-5">
+        <h2 className="text-base font-semibold text-gray-900">Reorder items</h2>
+        <p className="mt-1 text-xs text-gray-500">
           Drag a row, or use the arrows, to set the order items appear in this bucket list.
-        </DialogDescription>
+        </p>
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext
@@ -149,8 +150,8 @@ export const ReorderItemsDialog = ({
             Save order
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </Drawer>
   );
 };
 

@@ -6,7 +6,7 @@
  * exactly this, but it comes back empty for all 59 categories on staging, so
  * there is nothing to read yet. `groupsForCategories` takes an override so the
  * day the backend populates `tags`, the wiring is one call site rather than a
- * rewrite — the shape below is what it should return.
+ * rewrite - the shape below is what it should return.
  *
  * The vocabulary matches what places already store: a property's value is the
  * selected options joined with ", ", which is the format the place page reads
@@ -278,8 +278,8 @@ export const CATEGORY_PROPERTY_GROUPS: Record<string, PropertyGroup[]> = {
 /**
  * The groups to offer a place, in the order its categories are listed.
  *
- * A key shared by two of a place's categories — Payment Options across both
- * Landmarks and Restaurants — is offered once, where it first appears.
+ * A key shared by two of a place's categories - Payment Options across both
+ * Landmarks and Restaurants - is offered once, where it first appears.
  *
  * `overrides` is where the API's own catalogue goes once `tags` is populated:
  * anything it names wins over the local list for that category.

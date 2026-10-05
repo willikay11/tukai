@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 
 import { InviteMembers, type InvitedMember } from './invite-members';
 
-// Controlled, like the real callers — the component reads back what it added,
+// Controlled, like the real callers - the component reads back what it added,
 // which is what makes duplicate detection and batching observable
 const Harness = ({
   initial = [],
@@ -42,7 +42,7 @@ const setup = (props: Partial<React.ComponentProps<typeof Harness>> = {}) => {
 const emailsFrom = (mock: jest.Mock) =>
   (mock.mock.calls.at(-1)?.[0] as InvitedMember[]).map((member) => member.email);
 
-describe('InviteMembers — entering emails', () => {
+describe('InviteMembers - entering emails', () => {
   it('adds an address on Enter', async () => {
     const user = userEvent.setup();
     const { onMembersChange, input } = setup();
@@ -129,5 +129,49 @@ describe('InviteMembers — entering emails', () => {
     await user.type(input, 'tony');
 
     expect(await screen.findByText('Tony Ouma')).toBeInTheDocument();
+  });
+});
+
+/**
+ * From inviteVm: Enter takes the first suggestion, and a search that finds
+ * nobody says what to do about it rather than only that it failed.
+ */
+describe('InviteMembers - searching for people', () => {
+  const RESULTS = [
+    { id: 'u1', name: 'Kimberly Achieng', email: 'kim@example.com' },
+    { id: 'u2', name: 'Kevin Mwangi', email: 'kevin@example.com' },
+  ];
+
+  it('adds the first match on Enter, rather than the half-typed name', async () => {
+    const user = userEvent.setup();
+    const { onMembersChange, input } = setup({ searchResults: RESULTS });
+
+    await user.type(input, 'Kim');
+    await user.keyboard('{Enter}');
+
+    const added = onMembersChange.mock.calls.at(-1)?.[0] as InvitedMember[];
+    expect(added.map((member) => member.name)).toContain('Kimberly Achieng');
+  });
+
+  // Nobody matched, so the typed text is the email it looks like
+  it('still takes an email when nothing matches', async () => {
+    const user = userEvent.setup();
+    const { onMembersChange, input } = setup({ searchResults: [] });
+
+    await user.type(input, 'someone@example.com');
+    await user.keyboard('{Enter}');
+
+    expect(emailsFrom(onMembersChange)).toContain('someone@example.com');
+  });
+
+  it('tells the reader what to do when nobody matches', async () => {
+    const user = userEvent.setup();
+    const { input } = setup({ searchResults: [], onSearch: jest.fn() });
+
+    await user.type(input, 'Zzz');
+
+    expect(
+      screen.getByText(/No one on Tukai matches .*Zzz.*\. Add their email address instead\./),
+    ).toBeInTheDocument();
   });
 });

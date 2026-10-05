@@ -20,8 +20,8 @@ const isExternalUrl = (src: string) => src.startsWith('https://') || src.startsW
 /**
  * One photo in the grid.
  *
- * Split out from the sortable wrapper so a grid that cannot be reordered — a
- * place's, where the API offers no way to persist an order — renders the same
+ * Split out from the sortable wrapper so a grid that cannot be reordered - a
+ * place's, where the API offers no way to persist an order - renders the same
  * tile without a drag context around it.
  */
 export const PhotoTile = ({

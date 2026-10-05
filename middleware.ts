@@ -17,6 +17,7 @@ export async function middleware(request: NextRequest) {
 
   // Exclude auth routes from middleware
   if (
+    pathname.startsWith('/.well-known') ||
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/auth') ||
     isExcludedExperienceRoute ||

@@ -23,7 +23,7 @@ export const SquarePhotoStrip = ({
 
   // Every hook has to run before the early returns below. These used to sit
   // inside the variant branches, past `photos.length === 0`, so the hook count
-  // changed the moment a photo appeared — which crashes any caller whose photo
+  // changed the moment a photo appeared - which crashes any caller whose photo
   // list starts empty and fills in later (the create-flow preview).
   const heroScrollTo = useCallback((index: number) => {
     if (!scrollRef.current) return;
@@ -52,7 +52,7 @@ export const SquarePhotoStrip = ({
 
   // ─── Hero variant (full-width square carousel) ────────────────
   if (variant === 'hero') {
-    // Single image — no arrows or dots
+    // Single image - no arrows or dots
     // if (photos.length === 1) {
     //   return (
     //     <div
@@ -70,7 +70,7 @@ export const SquarePhotoStrip = ({
     //   );
     // }
 
-    // Multiple images — carousel with arrows and dots
+    // Multiple images - carousel with arrows and dots
     return (
       <div className={`relative ${className}`}>
         {/* 4:3 scroll container */}
@@ -127,7 +127,7 @@ export const SquarePhotoStrip = ({
           </button>
         )}
 
-        {/* Dots — bottom center */}
+        {/* Dots - bottom center */}
         <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
           {photos.map((_, index) => (
             <button

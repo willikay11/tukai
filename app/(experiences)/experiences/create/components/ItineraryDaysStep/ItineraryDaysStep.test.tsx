@@ -62,7 +62,7 @@ const renderStep = (props: Partial<React.ComponentProps<typeof ItineraryDaysStep
   };
 };
 
-describe('ItineraryDaysStep — day deletion', () => {
+describe('ItineraryDaysStep - day deletion', () => {
   it('delegates deletion to onDeleteDay using the day id', async () => {
     const onDeleteDay = jest.fn().mockResolvedValue(true);
     const onChange = jest.fn();

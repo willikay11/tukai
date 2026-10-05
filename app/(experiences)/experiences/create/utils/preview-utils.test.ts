@@ -44,7 +44,7 @@ const formData = (aboutOverrides: Record<string, unknown> = {}): FormData =>
     itineraryDays: [],
   }) as unknown as FormData;
 
-describe('buildPreviewExperience — location', () => {
+describe('buildPreviewExperience - location', () => {
   // The map renders from point.coordinates; without them the detail view shows
   // "Waiting for location..." in the preview while the published page works
   it('carries coordinates through to the preview location', () => {

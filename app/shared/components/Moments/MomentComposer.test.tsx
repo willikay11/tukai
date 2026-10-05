@@ -3,7 +3,18 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { MomentComposer, titleFrom } from './MomentComposer';
+import { MomentComposer } from './MomentComposer';
+
+/**
+ * A moment is a photo with a line under it, so the share button only wakes up
+ * once there is one. The file input is driven directly: the gallery button
+ * opens a native picker jsdom cannot answer.
+ */
+const attachPhoto = async (user: ReturnType<typeof userEvent.setup>) => {
+  const file = new File(['x'], 'bowl.jpg', { type: 'image/jpeg' });
+  const inputs = document.querySelectorAll('input[type="file"]');
+  await user.upload(inputs[0] as HTMLInputElement, file);
+};
 
 const toast = jest.fn();
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
@@ -15,6 +26,12 @@ const shareMoment = jest.fn();
 jest.mock('@/app/shared/hooks/useMoments', () => ({
   useCreateMoment: () => ({ mutate: shareMoment, isPending: false }),
 }));
+
+// jsdom has no object URLs
+beforeAll(() => {
+  URL.createObjectURL = jest.fn(() => 'blob:preview');
+  URL.revokeObjectURL = jest.fn();
+});
 
 const onOpenChange = jest.fn();
 
@@ -31,21 +48,6 @@ const renderComposer = () =>
       communityLabel="Nairobi Runners"
     />,
   );
-
-describe('titleFrom', () => {
-  // The API demands a title as well as a description, but the composer asks
-  // one question — so the first line stands in
-  it('takes the first line', () => {
-    expect(titleFrom('Sunrise hike\nWe left at six')).toBe('Sunrise hike');
-  });
-
-  it('trims a long opening line rather than sending it whole', () => {
-    const title = titleFrom('a'.repeat(90));
-
-    expect(title).toHaveLength(61);
-    expect(title.endsWith('…')).toBe(true);
-  });
-});
 
 describe('MomentComposer', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -67,7 +69,29 @@ describe('MomentComposer', () => {
   it('cannot be shared while empty', () => {
     renderComposer();
 
-    expect(screen.getByRole('button', { name: /Share Moment/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /share moment/i })).toBeDisabled();
+    expect(screen.getByText('Add at least one photo.')).toBeInTheDocument();
+  });
+
+  // The feeds that show moments are photo-led: one with no photo would be
+  // filtered straight back out of them
+  it('cannot be shared on words alone', async () => {
+    const user = userEvent.setup();
+    renderComposer();
+
+    await user.type(screen.getByLabelText('What are you up to?'), 'Sunrise hike');
+
+    expect(screen.getByRole('button', { name: /share moment/i })).toBeDisabled();
+  });
+
+  it('cannot be shared on a photo alone', async () => {
+    const user = userEvent.setup();
+    renderComposer();
+
+    await attachPhoto(user);
+
+    expect(screen.getByRole('button', { name: /share moment/i })).toBeDisabled();
+    expect(screen.queryByText('Add at least one photo.')).not.toBeInTheDocument();
   });
 
   it('posts the text against this experience', async () => {
@@ -75,7 +99,8 @@ describe('MomentComposer', () => {
     renderComposer();
 
     await user.type(screen.getByLabelText('What are you up to?'), 'Sunrise hike');
-    await user.click(screen.getByRole('button', { name: /Share Moment/ }));
+    await attachPhoto(user);
+    await user.click(screen.getByRole('button', { name: /share moment/i }));
 
     expect(shareMoment).toHaveBeenCalledWith(
       // The ids go with it, so the moment really does reach those feeds
@@ -85,7 +110,7 @@ describe('MomentComposer', () => {
         experienceId: 'e1',
         placeId: 'pl1',
         communityId: 'c1',
-        photos: [],
+        photos: [expect.any(File)],
       }),
       expect.anything(),
     );
@@ -99,7 +124,8 @@ describe('MomentComposer', () => {
     renderComposer();
 
     await user.type(screen.getByLabelText('What are you up to?'), 'Sunrise hike');
-    await user.click(screen.getByRole('button', { name: /Share Moment/ }));
+    await attachPhoto(user);
+    await user.click(screen.getByRole('button', { name: /share moment/i }));
 
     await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
     expect(toast).toHaveBeenCalledWith(expect.objectContaining({ variant: 'success' }));
@@ -114,7 +140,8 @@ describe('MomentComposer', () => {
     renderComposer();
 
     await user.type(screen.getByLabelText('What are you up to?'), 'Sunrise hike');
-    await user.click(screen.getByRole('button', { name: /Share Moment/ }));
+    await attachPhoto(user);
+    await user.click(screen.getByRole('button', { name: /share moment/i }));
 
     await waitFor(() =>
       expect(toast).toHaveBeenCalledWith(

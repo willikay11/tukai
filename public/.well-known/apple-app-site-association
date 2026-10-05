@@ -1,20 +1,80 @@
 {
   "applinks": {
-    "apps": [],
     "details": [
       {
         "appIDs": [
+          "XFF564365A.com.tukaitravels.app",
           "XFF564365A.com.tukaitravels.preview",
-          "XFF564365A.com.tukaitravels.dev",
-          "XFF564365A.com.tukaitravels.app"
+          "XFF564365A.com.tukaitravels.dev"
         ],
-        "paths": [
-          "/experiences/*",
-          "/community/*",
-          "/places/*",
-          "/user-profile/*",
-          "/local-guides/*",
-          "/inbox/message/*"
+        "components": [
+          {
+            "/": "/api/*",
+            "exclude": true
+          },
+          {
+            "/": "/auth",
+            "exclude": true
+          },
+          {
+            "/": "/auth/*",
+            "exclude": true
+          },
+          {
+            "/": "/help",
+            "exclude": true
+          },
+          {
+            "/": "/help/*",
+            "exclude": true
+          },
+          {
+            "/": "/privacy",
+            "exclude": true
+          },
+          {
+            "/": "/privacy/*",
+            "exclude": true
+          },
+          {
+            "/": "/terms",
+            "exclude": true
+          },
+          {
+            "/": "/terms/*",
+            "exclude": true
+          },
+          {
+            "/": "/unsubscribe",
+            "exclude": true
+          },
+          {
+            "/": "/unsubscribe/*",
+            "exclude": true
+          },
+          {
+            "/": "/experiences/booking-success",
+            "exclude": true
+          },
+          {
+            "/": "/experiences/booking-success/*",
+            "exclude": true
+          },
+          {
+            "/": "/_next/*",
+            "exclude": true
+          },
+          {
+            "/": "/images/*",
+            "exclude": true
+          },
+          {
+            "/": "/.well-known/*",
+            "exclude": true
+          },
+          {
+            "/": "*"
+          }
         ]
       }
     ]

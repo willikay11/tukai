@@ -72,12 +72,13 @@ describe('BottomNavigation', () => {
       render(<BottomNavigation />);
 
       const links = within(screen.getByRole('navigation')).getAllByRole('link');
-      expect(links).toHaveLength(4);
+      expect(links).toHaveLength(5);
 
       expect(links[0]).toHaveAttribute('href', '/');
-      expect(links[1]).toHaveAttribute('href', '/experiences');
-      expect(links[2]).toHaveAttribute('href', '/places');
-      expect(links[3]).toHaveAttribute('href', '/moments');
+      expect(links[1]).toHaveAttribute('href', '/bucket-lists');
+      expect(links[2]).toHaveAttribute('href', '/communities');
+      expect(links[3]).toHaveAttribute('href', '/plans');
+      expect(links[4]).toHaveAttribute('href', '/profile');
     });
 
     it('renders with correct href attributes', () => {
@@ -88,9 +89,10 @@ describe('BottomNavigation', () => {
       const links = within(screen.getByRole('navigation')).getAllByRole('link');
 
       expect(links[0]).toHaveAttribute('href', '/');
-      expect(links[1]).toHaveAttribute('href', '/experiences');
-      expect(links[2]).toHaveAttribute('href', '/places');
-      expect(links[3]).toHaveAttribute('href', '/moments');
+      expect(links[1]).toHaveAttribute('href', '/bucket-lists');
+      expect(links[2]).toHaveAttribute('href', '/communities');
+      expect(links[3]).toHaveAttribute('href', '/plans');
+      expect(links[4]).toHaveAttribute('href', '/profile');
     });
 
     it('renders navigation icons for all links', () => {
@@ -99,7 +101,7 @@ describe('BottomNavigation', () => {
       render(<BottomNavigation />);
 
       const linkElements = within(screen.getByRole('navigation')).getAllByRole('link');
-      expect(linkElements).toHaveLength(4);
+      expect(linkElements).toHaveLength(5);
 
       // Each link should have an icon
       linkElements.forEach((link) => {
@@ -129,14 +131,14 @@ describe('BottomNavigation', () => {
 
   describe('active link styling and labels', () => {
     it('shows label only for active link', () => {
-      mockUsePathname.mockReturnValue('/experiences');
+      mockUsePathname.mockReturnValue('/communities');
 
       render(<BottomNavigation />);
 
-      const experiencesLink = screen.getByRole('link', { name: /experiences/i });
+      const communitiesLink = screen.getByRole('link', { name: /communities/i });
 
       // Active link should show the label
-      expect(experiencesLink).toHaveTextContent('Experiences');
+      expect(communitiesLink).toHaveTextContent('Communities');
     });
 
     it('hides label for non-active links', () => {
@@ -145,21 +147,21 @@ describe('BottomNavigation', () => {
       render(<BottomNavigation />);
 
       const links = screen.getAllByRole('link');
-      const exploreLinkElement = links.find((link) => link.getAttribute('href') === '/places');
+      const exploreLinkElement = links.find((link) => link.getAttribute('href') === '/plans');
 
       // Non-active links should only have icons, not text
       expect(exploreLinkElement).not.toHaveTextContent('Explore');
     });
 
     it('applies active styling (background and color)', () => {
-      mockUsePathname.mockReturnValue('/experiences');
+      mockUsePathname.mockReturnValue('/communities');
 
       render(<BottomNavigation />);
 
-      const experiencesLink = screen.getByRole('link', { name: /experiences/i });
+      const communitiesLink = screen.getByRole('link', { name: /communities/i });
 
-      expect(experiencesLink).toHaveClass('bg-lime');
-      expect(experiencesLink).toHaveClass('text-primary');
+      expect(communitiesLink).toHaveClass('bg-lime');
+      expect(communitiesLink).toHaveClass('text-primary');
     });
 
     it('applies inactive styling (text color)', () => {
@@ -168,51 +170,51 @@ describe('BottomNavigation', () => {
       render(<BottomNavigation />);
 
       const links = screen.getAllByRole('link');
-      const exploreLink = links.find((link) => link.getAttribute('href') === '/places');
+      const exploreLink = links.find((link) => link.getAttribute('href') === '/plans');
 
       expect(exploreLink).toHaveClass('text-gray-500');
       expect(exploreLink).not.toHaveClass('bg-lime');
     });
 
     it('marks Experiences link as active when pathname is /experiences', () => {
-      mockUsePathname.mockReturnValue('/experiences');
+      mockUsePathname.mockReturnValue('/communities');
 
       render(<BottomNavigation />);
 
-      const experiencesLink = screen.getByRole('link', { name: /experiences/i });
+      const communitiesLink = screen.getByRole('link', { name: /communities/i });
 
-      expect(experiencesLink).toHaveClass('bg-lime');
+      expect(communitiesLink).toHaveClass('bg-lime');
     });
 
-    it('marks Places as active when pathname is /places', () => {
-      mockUsePathname.mockReturnValue('/places');
+    it('marks Plans as active when pathname is /plans', () => {
+      mockUsePathname.mockReturnValue('/plans');
 
       render(<BottomNavigation />);
 
-      expect(screen.getByRole('link', { name: /places/i })).toHaveClass('bg-lime');
+      expect(screen.getByRole('link', { name: /plans/i })).toHaveClass('bg-lime');
     });
 
     // A single place hides the nav entirely, so the deepest route that still
     // shows it is a sub-route of one
-    it('marks Places as active for /places subpaths', () => {
-      mockUsePathname.mockReturnValue('/places/123/reserve');
+    it('marks Plans as active for /plans subpaths', () => {
+      mockUsePathname.mockReturnValue('/plans/123');
 
       render(<BottomNavigation />);
 
-      expect(screen.getByRole('link', { name: /places/i })).toHaveClass('bg-lime');
+      expect(screen.getByRole('link', { name: /plans/i })).toHaveClass('bg-lime');
     });
 
-    it('marks Moments as active when pathname is /moments', () => {
-      mockUsePathname.mockReturnValue('/moments');
+    it('marks You as active when pathname is /profile', () => {
+      mockUsePathname.mockReturnValue('/profile');
 
       render(<BottomNavigation />);
 
-      expect(screen.getByRole('link', { name: /moments/i })).toHaveClass('bg-lime');
+      expect(screen.getByRole('link', { name: /you/i })).toHaveClass('bg-lime');
     });
 
-    // Only '/' exactly — every other route starts with it
+    // Only '/' exactly - every other route starts with it
     it('marks Discover as active only on the root', () => {
-      mockUsePathname.mockReturnValue('/experiences');
+      mockUsePathname.mockReturnValue('/communities');
 
       render(<BottomNavigation />);
 
@@ -220,7 +222,7 @@ describe('BottomNavigation', () => {
     });
 
     it('only shows one active link at a time', () => {
-      mockUsePathname.mockReturnValue('/places');
+      mockUsePathname.mockReturnValue('/plans');
 
       render(<BottomNavigation />);
 
@@ -229,7 +231,7 @@ describe('BottomNavigation', () => {
         .filter((link) => link.className.includes('bg-lime'));
 
       expect(activeLinks).toHaveLength(1);
-      expect(activeLinks[0]).toHaveTextContent('Places');
+      expect(activeLinks[0]).toHaveTextContent('Plans');
     });
   });
 
@@ -325,7 +327,7 @@ describe('BottomNavigation', () => {
       render(<BottomNavigation />);
 
       const links = within(screen.getByRole('navigation')).getAllByRole('link');
-      expect(links.length).toBe(4);
+      expect(links.length).toBe(5);
     });
 
     it('maintains link order', () => {
@@ -336,39 +338,32 @@ describe('BottomNavigation', () => {
       // Same order as the desktop nav
       const links = within(screen.getByRole('navigation')).getAllByRole('link');
       expect(links[0]).toHaveAttribute('href', '/');
-      expect(links[1]).toHaveAttribute('href', '/experiences');
-      expect(links[2]).toHaveAttribute('href', '/places');
-      expect(links[3]).toHaveAttribute('href', '/moments');
+      expect(links[1]).toHaveAttribute('href', '/bucket-lists');
+      expect(links[2]).toHaveAttribute('href', '/communities');
+      expect(links[3]).toHaveAttribute('href', '/plans');
+      expect(links[4]).toHaveAttribute('href', '/profile');
     });
 
     it('shows meaningful label for active link', () => {
-      mockUsePathname.mockReturnValue('/moments');
+      mockUsePathname.mockReturnValue('/profile');
 
       render(<BottomNavigation />);
 
-      expect(screen.getByText('Moments')).toBeInTheDocument();
+      expect(screen.getByText('You')).toBeInTheDocument();
     });
 
-    // Sits outside the nav landmark: it opens an assistant, not a page of
-    // content
-    describe('TukAI', () => {
-      it('offers the assistant alongside the destinations', () => {
-        mockUsePathname.mockReturnValue('/');
-
-        render(<BottomNavigation />);
-
-        expect(screen.getByRole('button', { name: 'Ask TukAI' })).toBeInTheDocument();
-      });
-
-      it('is not one of the destinations', () => {
+    describe('the bar', () => {
+      // The TukAI button used to sit here, outside the nav landmark. It has
+      // been removed, so the bar is destinations and nothing else.
+      it('carries destinations only', () => {
         mockUsePathname.mockReturnValue('/');
 
         render(<BottomNavigation />);
 
         const navLinks = within(screen.getByRole('navigation')).getAllByRole('link');
-        expect(navLinks).toHaveLength(4);
-        // Every link on the bar is a destination — TukAI is a button
-        expect(screen.getAllByRole('link')).toHaveLength(4);
+        expect(navLinks).toHaveLength(5);
+        expect(screen.getAllByRole('link')).toHaveLength(5);
+        expect(screen.queryByRole('button')).not.toBeInTheDocument();
       });
 
       it('shows no account avatar', () => {
@@ -412,7 +407,7 @@ describe('BottomNavigation', () => {
   });
 
   describe('styling', () => {
-    // The pill styling sits on the nav itself now — the outer element only
+    // The pill styling sits on the nav itself now - the outer element only
     // positions it, because the profile button floats beside it
     it('has rounded full appearance', () => {
       mockUsePathname.mockReturnValue('/');
@@ -443,7 +438,7 @@ describe('BottomNavigation', () => {
   /**
    * "My Communities" floats its own Create Community button along the bottom
    * edge. Two bars stacked on each other is the same problem a detail page's
-   * booking bar has — and the tab is in the URL so this can see it.
+   * booking bar has - and the tab is in the URL so this can see it.
    */
   describe('the communities tabs', () => {
     afterEach(() => {

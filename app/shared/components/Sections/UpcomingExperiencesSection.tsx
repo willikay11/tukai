@@ -32,7 +32,7 @@ const ExperienceRow = ({ experience }: { experience: Experience }) => {
         </p>
       </div>
 
-      {/* Straight to the experience page, which owns the existing booking flow —
+      {/* Straight to the experience page, which owns the existing booking flow -
           no second checkout entry point */}
       <Button asChild size="sm" className="flex-shrink-0 rounded-full px-5">
         <Link href={experiencePath(experience)}>Buy Tickets</Link>
@@ -46,7 +46,7 @@ export const UpcomingExperiencesSection = ({
   experiences,
   isLoading,
 }: {
-  // Whoever hosts them — a community, or a place
+  // Whoever hosts them - a community, or a place
   hostName: string;
   experiences: Experience[];
   isLoading: boolean;

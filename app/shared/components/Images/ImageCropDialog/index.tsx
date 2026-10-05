@@ -69,7 +69,7 @@ export const ImageCropDialog = ({
         </Button>
       </div>
 
-      {/* Crop area — takes remaining height */}
+      {/* Crop area - takes remaining height */}
       <div className="relative flex-1">
         <Cropper
           image={imageSrc}

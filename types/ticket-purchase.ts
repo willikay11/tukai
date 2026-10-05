@@ -17,7 +17,7 @@ export interface TicketPurchase {
     name: string;
     price: string;
     currency: string;
-    experience: string; // experience uuid only — details need a join
+    experience: string; // experience uuid only - details need a join
   };
   occurrence: {
     id: string;
@@ -30,10 +30,10 @@ export interface TicketPurchase {
   dateCreated: string;
 }
 
-// One entry per individual ticket inside a reservation — drives the
+// One entry per individual ticket inside a reservation - drives the
 // ticket modal's paginated QR view
 export interface ReservationTicket {
-  id: string; // purchase record id — used for the per-ticket PDF download
+  id: string; // purchase record id - used for the per-ticket PDF download
   ticketNumber: string;
   qrCodeImage: string | null;
   hasPdf: boolean;

@@ -33,7 +33,7 @@ const TABS = [
   { value: 'mine', label: 'My Communities', icon: 'UserMultipleIcon' },
 ];
 
-// The grid is four wide from xl, so this is the first row — what a reader sees
+// The grid is four wide from xl, so this is the first row - what a reader sees
 // before scrolling. Fetched without waiting for the lazy-load observer.
 const EAGER_CARDS = 4;
 
@@ -56,8 +56,8 @@ export const CommunitiesPageContent = () => {
   const [categoryId, setCategoryId] = useState<string | null>(null);
 
   // The tab lives in the URL rather than in state: it makes each one linkable,
-  // it survives a refresh, and the main bottom navigation — which only sees the
-  // route — can step aside for the create button on "My Communities".
+  // it survives a refresh, and the main bottom navigation - which only sees the
+  // route - can step aside for the create button on "My Communities".
   const requested = searchParams.get('tab') as View | null;
   const view: View = requested && VIEWS.includes(requested) ? requested : 'discover';
 
@@ -77,8 +77,8 @@ export const CommunitiesPageContent = () => {
   const { data: categories, isLoading: isLoadingCategories } = useGetInterestCategories();
 
   // Discover is browsable signed out, so the list is never gated on a session.
-  // `recommended` is deliberately absent: signed out it is a 500 — there is
-  // nobody to recommend for — and signed in it narrows to a handful, where
+  // `recommended` is deliberately absent: signed out it is a 500 - there is
+  // nobody to recommend for - and signed in it narrows to a handful, where
   // this tab is meant to be everything there is to join.
   const { data, isLoading, isFetching, refetch } = useGetCommunities({
     page: 1,
@@ -89,7 +89,7 @@ export const CommunitiesPageContent = () => {
   // `getCommunities` catches its own errors and resolves with `success: false`
   // rather than throwing, so React Query reports the query as successful and
   // `isError` is never true. Without reading the flag, a throttled or failed
-  // request renders as "there are no communities" — which is what a 429 from
+  // request renders as "there are no communities" - which is what a 429 from
   // the API looked like on this page.
   const hasFailed = data?.success === false;
   const communities: Community[] = data?.data?.results ?? [];

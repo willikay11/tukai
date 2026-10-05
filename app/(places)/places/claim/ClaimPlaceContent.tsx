@@ -97,7 +97,7 @@ export const ClaimPlaceContent = () => {
   const createCommunityHref = `/communities/create?returnTo=${encodeURIComponent(returnHref)}`;
 
   // Ownership is held by a community, so someone who hosts none has nothing to
-  // claim with — they make one first and come straight back here
+  // claim with - they make one first and come straight back here
   const hasNoCommunities =
     sessionStatus === 'authenticated' && !isLoadingCommunities && communities.length === 0;
 
@@ -132,7 +132,7 @@ export const ClaimPlaceContent = () => {
 
   const handleAttach = (document: OwnershipDocument) =>
     setDocuments((current) => [
-      // One document per type — attaching again replaces it
+      // One document per type - attaching again replaces it
       ...current.filter((entry) => entry.documentType !== document.documentType),
       document,
     ]);
@@ -168,7 +168,7 @@ export const ClaimPlaceContent = () => {
       try {
         await submitVerification(selectedCommunityId);
       } catch {
-        // An application is already open — the documents still belong on it
+        // An application is already open - the documents still belong on it
       }
 
       for (const document of documents) {

@@ -50,42 +50,51 @@ describe('ProfileMenu', () => {
   it('links the items that have a destination', () => {
     render(<ProfileMenu {...defaults} />);
 
-    expect(screen.getByRole('link', { name: /My Profile/ })).toHaveAttribute(
-      'href',
-      '/auth/profile',
-    );
-    expect(screen.getByRole('link', { name: /My Communities/ })).toHaveAttribute(
-      'href',
-      '/communities?category=my-communities',
-    );
-    expect(screen.getByRole('link', { name: /Control Center/ })).toHaveAttribute(
+    // The header row is the way to the profile now, not a listed item
+    expect(screen.getByRole('link', { name: /George Ralak/ })).toHaveAttribute('href', '/profile');
+    // Communities, Bucket lists and Plans left this menu for the primary nav
+    expect(screen.queryByRole('link', { name: /My Communities/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Bucket List/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /My Plans/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Control centre/ })).toHaveAttribute(
       'href',
       '/control-center',
     );
   });
 
-  it('links Control Center now that the page exists', () => {
+  it('links Control centre now that the page exists', () => {
     render(<ProfileMenu {...defaults} />);
 
-    const control = screen.getByText('Control Center').closest('a');
+    const control = screen.getByText('Control centre').closest('a');
     expect(control).toHaveAttribute('href', '/control-center');
-    expect(screen.getByText('Control Center').closest('button')).toBeNull();
+    expect(screen.getByText('Control centre').closest('button')).toBeNull();
   });
 
-  // Bucket List, Notifications, Messages and Control Center have no page yet
-  it('disables items whose destination does not exist rather than linking to a 404', () => {
+  /**
+   * Every row routes now that the inbox exists. The disabled branch stays as a
+   * guard for the next item added before its page.
+   */
+  it('routes every row', () => {
     render(<ProfileMenu {...defaults} />);
 
-    PROFILE_MENU_ITEMS.filter((item) => !item.href).forEach((item) => {
-      const control = screen.getByText(item.label).closest('button');
-      expect(control).toBeDisabled();
+    PROFILE_MENU_ITEMS.forEach((item) => {
+      expect(item.href).toBeTruthy();
+      expect(screen.getByText(item.label).closest('a')).toHaveAttribute('href', item.href!);
     });
+  });
+
+  it('sends Notifications and Messages to the inbox', () => {
+    render(<ProfileMenu {...defaults} />);
+
+    expect(screen.getByText('Notifications').closest('a')).toHaveAttribute('href', '/inbox');
+    expect(screen.getByText('Messages').closest('a')).toHaveAttribute('href', '/inbox');
   });
 
   it('shows the unread dot on Notifications only', () => {
     const { container } = render(<ProfileMenu {...defaults} hasUnreadNotifications />);
 
-    const notifications = screen.getByText('Notifications').closest('button');
+    // Notifications routes to the inbox now, so its row is a link
+    const notifications = screen.getByText('Notifications').closest('a');
     expect(notifications?.querySelector('.bg-red-500')).toBeInTheDocument();
     expect(container.querySelectorAll('.bg-red-500')).toHaveLength(1);
   });
@@ -127,19 +136,6 @@ describe('ProfileMenu', () => {
 
       expect(onItemSelect).toHaveBeenCalled();
       expect(onSignOut).toHaveBeenCalled();
-    });
-
-    // A disabled row goes nowhere, so nothing should close
-    it('does not report a selection from an unavailable item', () => {
-      const unavailable = PROFILE_MENU_ITEMS.find((item) => !item.href);
-      expect(unavailable).toBeDefined();
-
-      const onItemSelect = jest.fn();
-      render(<ProfileMenu {...defaults} onItemSelect={onItemSelect} />);
-
-      fireEvent.click(screen.getByText(unavailable!.label));
-
-      expect(onItemSelect).not.toHaveBeenCalled();
     });
 
     it('works without the callback', () => {

@@ -51,7 +51,7 @@ describe('searchPlaces', () => {
     expect(result.communities).toEqual([{ id: 'c1' }]);
   });
 
-  // Counts are the API's totals, not the page length — the popover asks for a
+  // Counts are the API's totals, not the page length - the popover asks for a
   // few rows but must report how many matched
   it('reports the API totals rather than the page length', async () => {
     mockExperiences.mockResolvedValue(page(24, [{ id: 'e1' }]));

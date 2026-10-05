@@ -1,12 +1,18 @@
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { Place } from '@/types/place';
 
 import { PlaceCard } from './index';
 
 jest.mock('next-auth/react', () => ({ useSession: () => ({ data: null }) }));
+
+const openPlace = jest.fn();
+const usePlaceDrawer = jest.fn();
+jest.mock('@/context/PlaceDrawerContext', () => ({
+  usePlaceDrawer: () => usePlaceDrawer(),
+}));
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   useBookmarkPlace: () => ({ mutate: jest.fn() }),
 }));
@@ -21,8 +27,13 @@ jest.mock('next/image', () => {
   return MockImage;
 });
 jest.mock('next/link', () => {
-  function MockLink({ children, href }: { children: React.ReactNode; href: string }) {
-    return <a href={href}>{children}</a>;
+  // Forwards every prop, so class-based assertions see what the card renders
+  function MockLink({ children, href, ...rest }: Record<string, unknown>) {
+    return (
+      <a href={href as string} {...rest}>
+        {children as React.ReactNode}
+      </a>
+    );
   }
   MockLink.displayName = 'MockLink';
   return MockLink;
@@ -46,7 +57,12 @@ const makePlace = (overrides: Partial<Place> = {}): Place =>
   }) as unknown as Place;
 
 describe('PlaceCard', () => {
-  it('renders cover, title and rating', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    usePlaceDrawer.mockReturnValue({ openPlace, closePlace: jest.fn(), openPlaceId: null });
+  });
+
+  it('renders the cover and the title', () => {
     render(<PlaceCard place={makePlace()} />);
 
     expect(screen.getByAltText('Talisman')).toHaveAttribute(
@@ -54,31 +70,108 @@ describe('PlaceCard', () => {
       'https://cdn.tukai.co/cover.jpg',
     );
     expect(screen.getByText('Talisman')).toBeInTheDocument();
-    expect(screen.getByText('4.6')).toBeInTheDocument();
   });
 
-  // Regression: categories[0] is often a city, which is not the kind of place
-  it('shows the interest category, not the city category, before the area', () => {
+  // The canvas puts the area on its own line under the name, not beside the kind
+  it('shows the area under the name', () => {
     render(<PlaceCard place={makePlace()} />);
 
-    expect(screen.getByText('Restaurants · Karen')).toBeInTheDocument();
-  });
-
-  it('omits the rating when the place is unrated', () => {
-    render(<PlaceCard place={makePlace({ averageRating: 0 })} />);
-
-    expect(screen.queryByText('0')).not.toBeInTheDocument();
-  });
-
-  it('links to the place detail page', () => {
-    render(<PlaceCard place={makePlace()} />);
-
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/places/p1');
+    expect(screen.getByText('Karen')).toBeInTheDocument();
   });
 
   it('falls back to the location name when there is no city', () => {
     render(<PlaceCard place={makePlace({ location: { name: 'Karen Rd' } as never })} />);
 
-    expect(screen.getByText('Restaurants · Karen Rd')).toBeInTheDocument();
+    expect(screen.getByText('Karen Rd')).toBeInTheDocument();
+  });
+
+  // A place opens in the drawer, not on a page of its own
+  it('is not a link while the drawer is there to open', () => {
+    render(<PlaceCard place={makePlace()} />);
+
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  // The canvas draws its place media square, at 184px
+  it('is a square tile at the canvas width', () => {
+    const { container } = render(<PlaceCard place={makePlace()} />);
+
+    expect(screen.getByRole('button', { name: 'Talisman' })).toHaveClass('w-[184px]');
+    expect(container.querySelector('.aspect-square')).toBeInTheDocument();
+  });
+
+  // The same card fills a cell in the "Places with experiences" grid, where a
+  // fixed width would leave gaps
+  it('fills its cell when the width is overridden', () => {
+    render(<PlaceCard place={makePlace()} className="w-full" />);
+
+    const card = screen.getByRole('button', { name: 'Talisman' });
+    expect(card).toHaveClass('w-full');
+    expect(card).not.toHaveClass('w-[184px]');
+  });
+
+  /**
+   * One line of substance under the name. The canvas leads with something
+   * happening at the place; we have no such field, so it leads with what
+   * people made of it - see `place-fact`.
+   */
+  describe('the fact line', () => {
+    it('leads with the score and how many reviews it came from', () => {
+      render(<PlaceCard place={makePlace({ averageRating: 4.5, totalReviews: 23 })} />);
+
+      expect(screen.getByText('4.5 · 23 reviews')).toBeInTheDocument();
+    });
+
+    it('says one review in the singular', () => {
+      render(<PlaceCard place={makePlace({ averageRating: 5, totalReviews: 1 })} />);
+
+      expect(screen.getByText('5 · 1 review')).toBeInTheDocument();
+    });
+
+    // Regression: categories[0] is often a city, which is not the kind of place
+    it('falls back to the kind of place, not the city', () => {
+      render(<PlaceCard place={makePlace({ averageRating: 0, totalReviews: 0 })} />);
+
+      expect(screen.getByText('Restaurants')).toBeInTheDocument();
+    });
+
+    it('says so when there is nothing else to say', () => {
+      render(
+        <PlaceCard
+          place={makePlace({ averageRating: 0, totalReviews: 0, categories: [] as never })}
+        />,
+      );
+
+      expect(screen.getByText('No reviews yet')).toBeInTheDocument();
+    });
+  });
+
+  describe('opening the drawer', () => {
+    it('opens the place', () => {
+      render(<PlaceCard place={makePlace()} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Talisman' }));
+
+      expect(openPlace).toHaveBeenCalledWith('p1');
+    });
+
+    it('opens on the keyboard too', () => {
+      render(<PlaceCard place={makePlace()} />);
+
+      fireEvent.keyDown(screen.getByRole('button', { name: 'Talisman' }), { key: 'Enter' });
+
+      expect(openPlace).toHaveBeenCalledWith('p1');
+    });
+
+    // A card rendered somewhere with no drawer above it falls back to the
+    // place's own page, which is the only thing left that can show it
+    it('links to the page with no drawer in the tree', () => {
+      usePlaceDrawer.mockReturnValue(null);
+
+      render(<PlaceCard place={makePlace()} />);
+
+      expect(screen.getByRole('link')).toHaveAttribute('href', '/places/p1');
+      expect(openPlace).not.toHaveBeenCalled();
+    });
   });
 });

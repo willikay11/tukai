@@ -8,6 +8,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { RevealOnScroll, useHasScrolled } from '@/app/shared/components/Motion';
+import { PlanThisButton } from '@/app/shared/components/Plans';
 import { Rating } from '@/app/shared/components/Rating/Rating';
 import { MomentsGridSection, UpcomingExperiencesSection } from '@/app/shared/components/Sections';
 import { Share } from '@/app/shared/components/Share';
@@ -26,6 +27,7 @@ import { haversineKm } from '@/utils/geo-utils';
 import { MobilePlaceBar } from './MobilePlaceBar';
 import { PlaceCommunitySection } from './PlaceCommunitySection';
 import { PlaceDetailsSection } from './PlaceDetailsSection';
+import { PlaceOpenStatus } from './PlaceOpenStatus';
 import { PlaceReviewsSection } from './PlaceReviewsSection';
 import { PlaceSocialsSection } from './PlaceSocialsSection';
 import { ReservationPanel } from './ReservationPanel';
@@ -51,7 +53,7 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
     .map((photo: Photo) => photo.photo)
     .filter((photo): photo is string => Boolean(photo));
 
-  // Categories mix city and interest groups — the interest one names the kind
+  // Categories mix city and interest groups - the interest one names the kind
   // of place, as it does on the place cards
   const category = place.categories?.find(
     (entry: PlaceCategory) => entry.group === 'interests',
@@ -83,12 +85,26 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
           keeps the column's padding. */}
       <div className="sticky top-0 z-30 -mx-4 flex items-center justify-between gap-4 bg-white/95 px-4 py-3 backdrop-blur-sm lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:py-0 lg:backdrop-blur-none">
         <BackToExplore href="/places" label="Back to Places" />
-        <Share
-          coverPhoto={photos[0] ?? ''}
-          title={place.title}
-          link={`${process.env.NEXT_PUBLIC_APP_URL}${placePath(place)}`}
-          kind="place"
-        />
+        <div className="flex items-center gap-2">
+          {/* A place is the other half of a plan: somewhere to be between the
+              things that are ticketed */}
+          <PlanThisButton
+            subject={{
+              kind: 'place',
+              refId: place.id,
+              title: place.title,
+              subtitle: [category, place.location?.city].filter(Boolean).join(', ') || undefined,
+              photo: photos[0] ?? null,
+            }}
+            className="hidden sm:inline-flex"
+          />
+          <Share
+            coverPhoto={photos[0] ?? ''}
+            title={place.title}
+            link={`${process.env.NEXT_PUBLIC_APP_URL}${placePath(place)}`}
+            kind="place"
+          />
+        </div>
       </div>
 
       <div className="mt-4">
@@ -111,6 +127,7 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
               {place.totalReviews ? `(${place.totalReviews} Reviews)` : null}
             </span>
           )}
+          <PlaceOpenStatus placeId={place.id} />
         </div>
       </div>
 
@@ -126,7 +143,7 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
           </div>
 
           {/* Each section fades up as it is reached, as the experience page's
-              do. The gallery and description above are not wrapped — they are
+              do. The gallery and description above are not wrapped - they are
               on screen at load, so there is nothing to reveal. */}
           <RevealOnScroll>
             <PlaceDetailsSection properties={place.properties ?? []} />
@@ -166,7 +183,7 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
           </RevealOnScroll>
         </div>
 
-        {/* Hidden below lg, where the bar's sheet is the way in — stacked
+        {/* Hidden below lg, where the bar's sheet is the way in - stacked
             under every section it was a long scroll from the top */}
         <div className="hidden lg:col-span-5 lg:block">
           {/* The shadow arrives once the reader has scrolled, so the panel

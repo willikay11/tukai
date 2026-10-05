@@ -9,7 +9,7 @@ import { ReservePageContent } from './ReservePageContent';
 
 const push = jest.fn();
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push, back: jest.fn() }) }));
-// Signed in unless a test says otherwise — the sign-in detour is its own case
+// Signed in unless a test says otherwise - the sign-in detour is its own case
 let sessionState: { data: { user: { id: string } } | null } = { data: { user: { id: 'u1' } } };
 jest.mock('next-auth/react', () => ({ useSession: () => sessionState }));
 
@@ -42,7 +42,7 @@ const place = {
   location: { city: 'Kilifi' },
 } as unknown as Place;
 
-// Open every day, 12:00–15:00 in 90-minute steps
+// Open every day, 12:00-15:00 in 90-minute steps
 const rules = Array.from({ length: 7 }, (_, day) => ({
   id: `r${day}`,
   reservationProfile: 'rp1',

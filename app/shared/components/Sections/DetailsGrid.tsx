@@ -6,7 +6,7 @@ export interface DetailRow {
   icon: string;
   label: string;
   value: string;
-  // Rendered as a tel: link — the place API marks phone rows this way
+  // Rendered as a tel: link - the place API marks phone rows this way
   href?: string;
 }
 

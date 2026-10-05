@@ -8,22 +8,23 @@ import { PhotoImage } from '@/app/shared/components/Images';
 import { ROW_HOVER } from '@/app/shared/components/Motion';
 import { useAddBucketListItem, useMyBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useToast } from '@/app/shared/hooks/useToast';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { Drawer } from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
 import { BucketList, bucketListCoverPhoto } from '@/types/bucket-list';
 
 /**
  * Which list to save this onto.
  *
- * Saving is a two-step choice — the reader picks the list, then it goes on —
+ * Saving is a two-step choice - the reader picks the list, then it goes on -
  * so this asks rather than toggling. A reader with no lists can make one
  * without leaving it.
  *
- * Radix's dialog rather than the shared Drawer: the Drawer positions itself
- * with `fixed` and no portal, so any ancestor carrying a transform or a
- * backdrop-filter becomes its containing block and it lands somewhere other
- * than the viewport. This portals to the body, so where it is opened from
- * cannot move it.
+ * Opens in the shared Drawer, which is the canvas's rule for bucket lists:
+ * everything about them opens in the side panel. It was on a Radix dialog
+ * because the old Drawer positioned itself with `fixed` and no portal, so any
+ * ancestor carrying a transform or a backdrop-filter became its containing
+ * block and it landed somewhere other than the viewport. The Drawer portals
+ * now, so that reason is gone.
  */
 export const BucketListPicker = ({
   isOpen,
@@ -82,15 +83,11 @@ export const BucketListPicker = ({
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-[460px] gap-0 rounded-2xl p-5 md:max-w-[460px]">
+      <Drawer isOpen={isOpen} setIsOpen={setIsOpen} width="narrow">
+        <div className="p-5">
           <div className="flex items-center justify-between gap-4">
-            <DialogTitle className="text-base font-semibold text-gray-900">
-              Your Bucket Lists
-            </DialogTitle>
-            <DialogDescription className="sr-only">
-              Choose which bucket list to save this to
-            </DialogDescription>
+            <h2 className="text-base font-semibold text-gray-900">Your Bucket Lists</h2>
+            <span className="sr-only">Choose which bucket list to save this to</span>
 
             <button
               type="button"
@@ -167,8 +164,8 @@ export const BucketListPicker = ({
               })}
             </ul>
           )}
-        </DialogContent>
-      </Dialog>
+        </div>
+      </Drawer>
 
       <CreateBucketListModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
     </>

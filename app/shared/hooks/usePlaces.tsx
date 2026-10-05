@@ -47,6 +47,7 @@ import {
 } from '@/services/place';
 import { Community } from '@/types/community';
 import { PlaceCategoryParams } from '@/types/networkParam';
+import { Place } from '@/types/place';
 import { PlaceEditDraft } from '@/types/placeEdit';
 import { ReservationSettingsDraft } from '@/types/placeReservation';
 import { CreatePlaceBookingRequest } from '@/types/placeReservation';
@@ -81,7 +82,7 @@ export const useMyPlaces = (enabled: boolean = true) =>
     enabled,
   });
 
-// A single place, used where only its id is known — e.g. resolving the
+// A single place, used where only its id is known - e.g. resolving the
 // coordinates of a Tukai place picked during experience creation
 export const usePlace = (id: string | null, enabled: boolean = true) =>
   useQuery({
@@ -272,8 +273,8 @@ export const useGoogleMapsPlaceGeocode = (placeId: string | null, enabled: boole
 // ─── Place reservations ────────────────────────────────────────────────────
 
 /**
- * Who owns this place, if anyone. `data` is null for an unclaimed place — the
- * API's 404 — which is what tells a claim prompt from a booking one.
+ * Who owns this place, if anyone. `data` is null for an unclaimed place - the
+ * API's 404 - which is what tells a claim prompt from a booking one.
  *
  * The endpoint is authenticated, so callers gate this on a session rather than
  * firing a 401 on every place a signed-out reader opens. A failed request
@@ -292,7 +293,7 @@ export const usePlaceOwnership = (placeId: string, enabled = true) =>
  *
  * Ownership is held by a community, not a person, so this is true when the
  * claiming community is one the reader created. It stays false while either
- * question is unanswered — an owner-only strip must never flash for a visitor.
+ * question is unanswered - an owner-only strip must never flash for a visitor.
  */
 export const usePlaceManager = (placeId: string) => {
   const { data: session } = useSession();
@@ -312,16 +313,19 @@ export const usePlaceManager = (placeId: string) => {
   });
   const communities: Community[] = communitiesResponse?.data?.results ?? [];
 
+  // The community itself, not just its id: a manager is told which of their
+  // communities holds the place, and an id is not something to show anyone
+  const owningCommunity = communities.find((community) => community.id === owningCommunityId);
+
   return {
-    isManager: Boolean(
-      owningCommunityId && communities.some((community) => community.id === owningCommunityId),
-    ),
+    isManager: Boolean(owningCommunityId && owningCommunity),
     isLoading: isLoadingOwnership || isLoadingCommunities,
     owningCommunityId,
+    owningCommunity,
   };
 };
 
-/** The place's bookability profiles. Public — anyone may list them. */
+/** The place's bookability profiles. Public - anyone may list them. */
 export const usePlaceReservationProfiles = (placeId: string, enabled = true) =>
   useQuery({
     queryKey: ['placeReservationProfiles', placeId],
@@ -330,7 +334,7 @@ export const usePlaceReservationProfiles = (placeId: string, enabled = true) =>
     staleTime: 5 * 60 * 1000,
   });
 
-/** Weekly hours plus one-off overrides, fetched together — both drive one picker. */
+/** Weekly hours plus one-off overrides, fetched together - both drive one picker. */
 export const usePlaceAvailability = (placeId: string, profileId: string | undefined) =>
   useQuery({
     queryKey: ['placeAvailability', placeId, profileId],
@@ -426,7 +430,7 @@ export const useCreatePlace = () => {
  * place at its photo limit can still take replacements.
  *
  * The whole thing is one mutation because it is one button. A partial failure
- * surfaces as a failure — the caller re-reads the place either way.
+ * surfaces as a failure - the caller re-reads the place either way.
  */
 export const useSavePlaceEdits = (placeId: string) => {
   const queryClient = useQueryClient();
@@ -488,8 +492,8 @@ export const useSavePlaceEdits = (placeId: string) => {
  *
  * Three endpoints, in an order that matters: the profile has to exist before
  * its weekly hours can hang off it, and it takes no bookings until it is
- * activated. Hours are replaced rather than edited — the API creates and
- * deletes rules but does not update them — so a day whose times changed is
+ * activated. Hours are replaced rather than edited - the API creates and
+ * deletes rules but does not update them - so a day whose times changed is
  * removed and written again.
  */
 export const useSaveReservationSettings = (placeId: string) => {
@@ -541,3 +545,44 @@ export const useSaveReservationSettings = (placeId: string) => {
     },
   });
 };
+
+/**
+ * Places with something on - the "Places with experiences" section.
+ */
+export const usePlacesWithExperiences = (enabled = true, perPage = 10) =>
+  useQuery({
+    queryKey: ['places', 'with-experiences', perPage],
+    queryFn: async () =>
+      await fetchPlaces(1, perPage, undefined, undefined, undefined, undefined, {
+        hasExperiences: true,
+      }),
+    enabled,
+  });
+
+/**
+ * The places the API marks `featured` - the "Promoted places" row.
+ *
+ * ⚠️ `featured` is on the list serializer but there is no `featured` query
+ * param, so the filter happens here over a wider page. That also means the
+ * row is honestly empty when nothing is featured, rather than showing an
+ * arbitrary ten places under a word that promises editorial choice.
+ *
+ * ⚠️ And it means there is no answer to "are there more?". `count` is the
+ * number of PLACES, not of featured ones, so a page that did not hold the
+ * whole table says nothing about whether more featured places exist. The row
+ * shows what it found and offers no See all - which is right anyway, since
+ * /places lists every place rather than more of these.
+ */
+export const useFeaturedPlaces = (enabled = true, perPage = 50) =>
+  useQuery({
+    queryKey: ['places', 'featured', perPage],
+    queryFn: async () => await fetchPlaces(1, perPage),
+    enabled,
+    select: (response) => ({
+      ...response,
+      data: {
+        ...response.data,
+        results: (response.data?.results ?? []).filter((place: Place) => place.featured),
+      },
+    }),
+  });

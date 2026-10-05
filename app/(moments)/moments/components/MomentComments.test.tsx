@@ -90,7 +90,7 @@ describe('MomentComments', () => {
     setComments([]);
     render(<MomentComments momentId="m1" />);
 
-    expect(screen.getByText('No comments yet — be the first.')).toBeInTheDocument();
+    expect(screen.getByText('No comments yet. Be the first.')).toBeInTheDocument();
   });
 
   it('keeps the send button disabled until the draft has content', () => {
@@ -217,7 +217,7 @@ describe('liking a comment', () => {
 });
 
 // Regression: clicking "like" on a comment the user had already liked removed
-// the like instead — the heart flashed red then went clear.
+// the like instead - the heart flashed red then went clear.
 describe('when the starting like state is wrong', () => {
   const heartOf = (text: string) => {
     const row = screen.getByText(text).closest('div')?.parentElement;
@@ -258,7 +258,7 @@ describe('when the starting like state is wrong', () => {
 });
 
 // Regression: the heart always started unlit, so a comment the user had
-// already liked looked unliked, and the first click unliked it — the red
+// already liked looked unliked, and the first click unliked it - the red
 // flash then revert people were seeing.
 describe('like state on load', () => {
   const heartOf = (text: string) => {
@@ -317,7 +317,7 @@ describe('comment actions', () => {
 
 /**
  * Comments are public to read. Posting one and liking one are not, and both
- * ask at the point of the press — the draft the reader typed is carried
+ * ask at the point of the press - the draft the reader typed is carried
  * through the sign-in rather than thrown away.
  */
 describe('a reader who is not signed in', () => {

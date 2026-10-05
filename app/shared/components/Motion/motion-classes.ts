@@ -2,7 +2,7 @@
  * The app's micro-animation vocabulary, as Tailwind class strings.
  *
  * These are shared rather than retyped per component so the whole app moves at
- * the same speed and with the same easing — a card that lifts in 150ms next to
+ * the same speed and with the same easing - a card that lifts in 150ms next to
  * one that takes 400ms reads as a bug, not as polish.
  *
  * Every token pairs its motion with a `motion-reduce:` escape. `globals.css`
@@ -36,5 +36,5 @@ export const ROW_HOVER = 'transition-colors duration-200 ease-out hover:bg-gray-
 /** Confirmation beat: plays once when something is saved or toggled on. */
 export const POP_ONCE = 'motion-safe:animate-pop';
 
-/** Content that has just appeared in place — an inline error, a revealed panel. */
+/** Content that has just appeared in place - an inline error, a revealed panel. */
 export const FADE_IN = 'motion-safe:animate-fade-in-up';

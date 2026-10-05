@@ -37,7 +37,7 @@ export function FontFormatToolbarPlugin() {
       ({ format }) => format,
     );
 
-    // Same formats, same array — a fresh one would re-render for nothing
+    // Same formats, same array - a fresh one would re-render for nothing
     setActiveFormats((current) =>
       current.length === next.length && current.every((format, index) => format === next[index])
         ? current
@@ -48,7 +48,7 @@ export function FontFormatToolbarPlugin() {
   useUpdateToolbarHandler($updateToolbar);
 
   const handleValueChange = (values: string[]) => {
-    // Dispatch only what actually changed — FORMAT_TEXT_COMMAND toggles, so
+    // Dispatch only what actually changed - FORMAT_TEXT_COMMAND toggles, so
     // re-sending a format that is already on would switch it back off
     FONT_FORMAT_OPTIONS.forEach(({ format }) => {
       if (values.includes(format) !== activeFormats.includes(format)) {

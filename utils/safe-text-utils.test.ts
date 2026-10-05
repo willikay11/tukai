@@ -1,4 +1,4 @@
-import { toPlainText } from './safe-text-utils';
+import { titleFrom, toPlainText } from './safe-text-utils';
 
 describe('toPlainText', () => {
   it('strips HTML tags', () => {
@@ -30,7 +30,7 @@ describe('toPlainText', () => {
     expect(toPlainText('')).toBe('');
   });
 
-  // The result is rendered as React text, so script content is inert — but it
+  // The result is rendered as React text, so script content is inert - but it
   // must not silently vanish or become markup
   it('renders escaped script markup as literal text', () => {
     expect(toPlainText('&lt;script&gt;alert(1)&lt;/script&gt;')).toBe('<script>alert(1)</script>');
@@ -38,5 +38,24 @@ describe('toPlainText', () => {
 
   it('drops real script tags entirely', () => {
     expect(toPlainText('<script>alert(1)</script>Hello')).toBe('Hello');
+  });
+});
+
+describe('titleFrom', () => {
+  // Several API writes demand a title as well as a body where the form asks
+  // one question - so the first line stands in
+  it('takes the first line', () => {
+    expect(titleFrom('Sunrise hike\nWe left at six')).toBe('Sunrise hike');
+  });
+
+  it('trims a long opening line rather than sending it whole', () => {
+    const title = titleFrom('a'.repeat(90));
+
+    expect(title).toHaveLength(61);
+    expect(title.endsWith('…')).toBe(true);
+  });
+
+  it('uses the whole text when there is only one line', () => {
+    expect(titleFrom('  Lovely light in the afternoon  ')).toBe('Lovely light in the afternoon');
   });
 });

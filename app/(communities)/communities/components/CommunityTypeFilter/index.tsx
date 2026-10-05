@@ -8,11 +8,11 @@ import { Interest } from '@/types/interest';
  * under, as a single-choice filter over the list below it.
  *
  * The categories are the same `/accounts/interests/` set the create flows pick
- * from — there is no separate community taxonomy — so a pill here maps
+ * from - there is no separate community taxonomy - so a pill here maps
  * straight onto the list endpoint's `category` parameter.
  *
  * The chip is the shared {@link FilterPill}, the same one the category bar over
- * Explore and Discover uses — a filter looks the same wherever it appears.
+ * Explore and Discover uses - a filter looks the same wherever it appears.
  */
 export const CommunityTypeFilter = ({
   categories,
@@ -21,7 +21,7 @@ export const CommunityTypeFilter = ({
   isLoading = false,
 }: {
   categories: Interest[];
-  /** `null` is "everything" — the row opens with nothing narrowed. */
+  /** `null` is "everything" - the row opens with nothing narrowed. */
   selectedId: string | null;
   onSelect: (id: string | null) => void;
   isLoading?: boolean;

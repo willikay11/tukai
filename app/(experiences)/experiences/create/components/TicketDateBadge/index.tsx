@@ -54,7 +54,7 @@ const formatDays = (days: string[]): string => {
 
 export const TicketDateBadge = (props: TicketDateBadgeProps) => {
   if (props.mode === 'single') {
-    const timeRange = `${formatTime(props.startTime)} – ${formatTime(props.endTime)}`;
+    const timeRange = `${formatTime(props.startTime)} - ${formatTime(props.endTime)}`;
     return (
       <div className="inline-flex items-center gap-2 rounded-full border border-dashed border-emerald-500 bg-emerald-100 px-5 py-3">
         <IconComponent
@@ -75,7 +75,7 @@ export const TicketDateBadge = (props: TicketDateBadgeProps) => {
   }
 
   if (props.mode === 'recurring') {
-    const timeRange = `${formatTime(props.startTime)} – ${formatTime(props.endTime)}`;
+    const timeRange = `${formatTime(props.startTime)} - ${formatTime(props.endTime)}`;
     return (
       <div className="inline-flex items-center gap-2 rounded-full border border-dashed border-emerald-500 bg-emerald-100 px-5 py-3">
         <IconComponent
@@ -103,7 +103,7 @@ export const TicketDateBadge = (props: TicketDateBadgeProps) => {
         className="flex-shrink-0 text-emerald-700"
       />
       <p className="whitespace-nowrap text-xs font-medium text-primary">
-        Date: {formatDateDDMMYYYY(props.startDate)} – {formatDateDDMMYYYY(props.endDate)}
+        Date: {formatDateDDMMYYYY(props.startDate)} - {formatDateDDMMYYYY(props.endDate)}
       </p>
       <IconComponent
         iconName="CheckCircle2Icon"

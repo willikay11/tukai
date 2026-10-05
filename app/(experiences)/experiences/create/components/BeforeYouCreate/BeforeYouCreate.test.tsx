@@ -108,7 +108,7 @@ describe('BeforeYouCreate', () => {
     await user.type(screen.getByLabelText('Search your experiences by name'), 'kilimanjaro');
 
     await waitFor(() =>
-      expect(screen.getByText(/doesn't exist yet — go ahead and create it/)).toBeInTheDocument(),
+      expect(screen.getByText(/doesn't exist yet, go ahead and create it/)).toBeInTheDocument(),
     );
   });
 

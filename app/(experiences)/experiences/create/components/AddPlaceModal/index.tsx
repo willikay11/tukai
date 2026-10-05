@@ -63,7 +63,7 @@ export const AddPlaceModal = ({
   const hasTukaiResults = !isPlacesLoading && places.length > 0;
   const showGoogleFallback = !isPlacesLoading && places.length === 0 && search.trim().length >= 2;
 
-  // Google Places fallback — only fetch when Tukai has no results
+  // Google Places fallback - only fetch when Tukai has no results
   const { data: googleResponse, isLoading: isLoadingGoogle } = useGoogleMapsAutocomplete(
     search,
     showGoogleFallback,

@@ -7,12 +7,14 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { RevealOnScroll, useHasScrolled } from '@/app/shared/components/Motion';
+import { PlanThisButton } from '@/app/shared/components/Plans';
 import { Share } from '@/app/shared/components/Share';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
+import { coverPhotoUrl } from '@/types/photo';
 import {
   formatFirstExperienceDate,
   formatItineraryDateRange,
@@ -31,6 +33,7 @@ import { LocationMeetingSection } from '../components/LocationMeetingSection';
 import { MetaRow } from '../components/MetaRow';
 import { MobileBookingBar } from '../components/MobileBookingBar';
 import { ExperienceOrganiser } from '../components/experienceOrganiser';
+import { ExperienceReviews } from './components/ExperienceReviews';
 
 /**
  * SINGLE SOURCE OF TRUTH for the experience detail view.
@@ -41,18 +44,18 @@ import { ExperienceOrganiser } from '../components/experienceOrganiser';
  *
  * The preview feeds it a form-derived Experience via buildPreviewExperience
  * (utils/preview-utils.ts) instead of a fetched one. Do NOT create a
- * preview-specific copy of any section below — edit it here and both surfaces
+ * preview-specific copy of any section below - edit it here and both surfaces
  * change together. The only permitted divergence is behaviour keyed off
  * `bookingMode`, never layout.
  *
  * It is presentational: it does not fetch the experience. (Children still do
- * their own I/O — BookingPanel loads occurrences, BucketListButton mutates
- * bookmarks — which is why both take a preview mode.)
+ * their own I/O - BookingPanel loads occurrences, BucketListButton mutates
+ * bookmarks - which is why both take a preview mode.)
  */
 interface ViewExperiencePageContentProps {
   experience: Experience;
   // 'preview' keeps the full layout but blocks purchase and bookmarking. It
-  // also drops the "Back to Explore" link, which is meaningless mid-create —
+  // also drops the "Back to Explore" link, which is meaningless mid-create -
   // BackToExplore owns its own router.back(), so there is no onBack to thread.
   bookingMode?: 'live' | 'preview';
 }
@@ -68,7 +71,7 @@ export const ViewExperiencePageContent = ({
   // A form-derived experience can be missing anything the user has not filled
   // in yet, so every read below is guarded. Live data always populates these.
   const photos = experience.photos ?? [];
-  // Copy before sorting — sort() mutates, and in preview this array belongs to
+  // Copy before sorting - sort() mutates, and in preview this array belongs to
   // a memoised object that would be reordered on every render
   const sortedPhotos = [...photos].sort((a, b) => Number(b.isCover) - Number(a.isCover));
   const coverPhoto = photos.find((photo: Photo) => photo.isCover)?.photo || photos[0]?.photo || '';
@@ -116,7 +119,7 @@ export const ViewExperiencePageContent = ({
 
   return (
     <PageContainer variant="detail" className="py-6">
-      {/* Top row — Back link on left, actions on right */}
+      {/* Top row - Back link on left, actions on right */}
       <div className="mb-6 flex items-center justify-between">
         {isPreview ? <div /> : <BackToExplore />}
 
@@ -172,7 +175,7 @@ export const ViewExperiencePageContent = ({
               <div className="flex flex-wrap gap-2">
                 {categories.map((category) => (
                   <div
-                    className="inline-flex w-fit rounded-full bg-gray-100 px-4 py-2"
+                    className="inline-flex max-w-full rounded-full bg-gray-100 px-4 py-2"
                     key={category.id}
                   >
                     <div className="inline-flex items-center gap-2">
@@ -181,7 +184,9 @@ export const ViewExperiencePageContent = ({
                         size={16}
                         color="gray-700"
                       />
-                      <p className="text-sm text-gray-700">{category.name}</p>
+                      {/* A long category name wraps inside the pill rather
+                          than pushing the row off the side of the page */}
+                      <p className="break-words text-sm text-gray-700">{category.name}</p>
                     </div>
                   </div>
                 ))}
@@ -191,7 +196,7 @@ export const ViewExperiencePageContent = ({
 
           <Separator />
 
-          {/* Day by day — renders only when the experience has itinerary days */}
+          {/* Day by day - renders only when the experience has itinerary days */}
           <RevealOnScroll>
             <ItineraryDayByDay experienceId={experience.id} startDate={experience.startDate} />
           </RevealOnScroll>
@@ -226,6 +231,21 @@ export const ViewExperiencePageContent = ({
 
           <Separator />
 
+          {/* What attendees said. Hidden for a reader who is not signed in: the
+              ratings endpoint needs a token and can refuse outright. */}
+          {!isPreview && (
+            <>
+              <RevealOnScroll>
+                <ExperienceReviews
+                  experienceId={experience.id}
+                  experienceTitle={experience.title}
+                  endDate={experience.endDate}
+                />
+              </RevealOnScroll>
+              <Separator />
+            </>
+          )}
+
           {/* Cancellation Policy */}
           <RevealOnScroll>
             <p className="mb-2 text-xl font-bold text-gray-900">Cancellation Policy</p>
@@ -235,6 +255,23 @@ export const ViewExperiencePageContent = ({
           </RevealOnScroll>
 
           <Separator />
+
+          {/* Stringing a day together out of what is on Tukai. Not a primary
+              action: it sits near a ticket price, and anything that reads like
+              buying would be read as buying. */}
+          {!isPreview && (
+            <PlanThisButton
+              subject={{
+                kind: 'experience',
+                refId: experience.id,
+                title: experience.title,
+                subtitle: experience.location?.city ?? undefined,
+                photo: coverPhotoUrl(experience.photos, 'thumb'),
+                refDate: experience.startDate,
+                soldOut: Boolean(experience.isSoldOut),
+              }}
+            />
+          )}
 
           {/* Report */}
           <Button variant="text" className="justify-start">
@@ -246,10 +283,10 @@ export const ViewExperiencePageContent = ({
         {!isPreview && <MobileBookingBar experience={experience} />}
 
         {/* Right column: Sticky booking panel.
-            Hidden below lg — there it would stack after every section, which is
+            Hidden below lg - there it would stack after every section, which is
             what the floating bar and its sheet replace. */}
         <div className="hidden lg:col-span-5 lg:block">
-          {/* Sticky for customers, static in the preview — there the create
+          {/* Sticky for customers, static in the preview - there the create
               flow's own sticky header owns the top of the viewport.
 
               The shadow arrives once the reader has scrolled, so the panel

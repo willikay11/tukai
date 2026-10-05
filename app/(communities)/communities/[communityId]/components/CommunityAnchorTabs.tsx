@@ -11,7 +11,7 @@ export interface AnchorTab {
 }
 
 /**
- * In-page navigation, not routing — each pill scrolls to its section and fills
+ * In-page navigation, not routing - each pill scrolls to its section and fills
  * in as the reader passes it.
  *
  * Buttons rather than links, and no `Tabs` primitive: that manages which panel

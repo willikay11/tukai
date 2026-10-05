@@ -56,7 +56,7 @@ const getAuthErrorMessage = (res: Awaited<ReturnType<typeof signIn>>) => {
  * each rather than two.
  *
  * Fields are the shared {@link Input}, not the auth-only copy that used to live
- * in the Forms folder — they sit at the same size and weight as every other
+ * in the Forms folder - they sit at the same size and weight as every other
  * field in the app.
  */
 export const EmailSignInForm = ({ onLogin }: { onLogin: () => void }) => {

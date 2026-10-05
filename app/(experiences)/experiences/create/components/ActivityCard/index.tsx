@@ -124,7 +124,7 @@ export const ActivityCard = ({
 
   return (
     <>
-      {/* Compact display view — only for saved activities not editing */}
+      {/* Compact display view - only for saved activities not editing */}
       {!showEditForm && isSaved && (
         <div className="flex items-start gap-3 rounded-xl border border-dashed border-gray-200 bg-gray-50 p-3">
           {/* Place photo or placeholder */}
@@ -212,7 +212,7 @@ export const ActivityCard = ({
             timeError ? 'border-red-300' : 'border-gray-200'
           }`}
         >
-          {/* Place header — with Change place button */}
+          {/* Place header - with Change place button */}
           {activity.placeId && (
             <div className="flex items-center gap-3 border-b border-gray-100 p-2">
               {activity.placeImageUrl ? (
@@ -268,7 +268,7 @@ export const ActivityCard = ({
             </div>
           )}
 
-          {/* No place attached — show "Add place" option */}
+          {/* No place attached - show "Add place" option */}
           {!activity.placeId && (
             <div className="flex items-center justify-between border-b border-gray-100 px-3 py-2">
               <button

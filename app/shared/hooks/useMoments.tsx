@@ -16,7 +16,7 @@ import {
 
 export const useMoments = (params: MomentsQueryParams = {}, enabled: boolean = true) =>
   useQuery({
-    // Every param that changes the request belongs in the key — without
+    // Every param that changes the request belongs in the key - without
     // `community`, a community-filtered query serves the whole feed from cache
     queryKey: [
       'moments',
@@ -47,7 +47,7 @@ const nextPageFrom = (next: string | null | undefined, currentPage: number): num
   next ? currentPage + 1 : undefined;
 
 // Kept separate from useMoments, which the Discover row consumes as a plain
-// query — switching that one to an infinite query would change its shape.
+// query - switching that one to an infinite query would change its shape.
 export const useInfiniteMoments = (pageSize: number = PAGE_SIZE) =>
   useInfiniteQuery({
     queryKey: ['moments', 'infinite', pageSize],

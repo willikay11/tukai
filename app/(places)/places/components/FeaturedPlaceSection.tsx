@@ -4,17 +4,19 @@ import { useRouter } from 'next/navigation';
 
 import { FeaturedBanner } from '@/app/shared/components/Banners';
 import { usePlaces } from '@/app/shared/hooks/usePlaces';
+import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
 import { placePath } from '@/utils/detail-paths';
 
-// TODO(backend): no featured-places endpoint exists — the first place from the
+// TODO(backend): no featured-places endpoint exists - the first place from the
 // default list stands in. The API also has no price data for places, so the
 // average price below is FAKE placeholder copy until a price field ships.
 const FAKE_AVERAGE_PRICE = 'Ksh. 3,500 avg';
 
 export const FeaturedPlaceSection = () => {
   const router = useRouter();
+  const drawer = usePlaceDrawer();
 
   const { data: placesResponse, isLoading } = usePlaces({ page: 1, enabled: true });
   const featuredPlace: Place | undefined = placesResponse?.data?.results?.[0];
@@ -49,8 +51,10 @@ export const FeaturedPlaceSection = () => {
         metaItems={metaItems}
         rating={featuredPlace.averageRating || null}
         ctaLabel="Reserve a table"
-        // No place reservation flow exists — route to the place detail page
-        onCtaClick={() => router.push(placePath(featuredPlace))}
+        // No place reservation flow exists - open the place itself
+        onCtaClick={() =>
+          drawer ? drawer.openPlace(featuredPlace.id) : router.push(placePath(featuredPlace))
+        }
       />
     </div>
   );

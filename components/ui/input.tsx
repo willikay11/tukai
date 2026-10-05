@@ -7,7 +7,7 @@ import { FIELD_ICON, FIELD_PLACEHOLDER, FIELD_TEXT } from './field-text';
 interface InputProps extends React.ComponentProps<'input'> {
   icon?: React.ReactNode;
   suffixIcon?: React.ReactNode;
-  // Drawn over the field itself — an animated placeholder, say. Given one, the
+  // Drawn over the field itself - an animated placeholder, say. Given one, the
   // input is wrapped so the overlay has something to position against; without
   // one the markup is unchanged.
   overlay?: React.ReactNode;
@@ -43,7 +43,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         type={type}
         className={cn(
           // 14.5px/18px + 13px padding top and bottom lands the field on a
-          // 44px height — the standard touch target
+          // 44px height - the standard touch target
           'w-full flex-1 border-none bg-transparent p-0 focus:outline-none focus:ring-0 disabled:cursor-not-allowed',
           FIELD_TEXT,
           FIELD_PLACEHOLDER,

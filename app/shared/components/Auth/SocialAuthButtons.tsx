@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
  * The two one-tap ways in, which is what most readers use.
  *
  * Kept apart from the rest of the card so the sign-up page and the sign-in
- * dialog offer exactly the same thing — they used to declare these separately
+ * dialog offer exactly the same thing - they used to declare these separately
  * and had drifted in shape and order.
  */
 export const SocialAuthButtons = ({ callbackUrl = '/' }: { callbackUrl?: string }) => (

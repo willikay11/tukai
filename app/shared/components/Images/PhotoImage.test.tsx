@@ -64,7 +64,7 @@ describe('PhotoImage', () => {
   // A masonry column is sized by its tiles, so a fallback with no height would
   // pull the layout in around it.
   // ⚠️ The ratio itself rides on an inline `aspect-ratio`, which jsdom does not
-  // implement and drops on render — only the sizing classes are assertable here.
+  // implement and drops on render - only the sizing classes are assertable here.
   it('holds the photo shape open when it is sized by its own dimensions', () => {
     const { container } = render(<PhotoImage src="" alt="A hike" width={400} height={300} />);
 
@@ -117,8 +117,8 @@ describe('PhotoImage with an unusable src', () => {
 
 /**
  * The blur is what a photo looks like before it arrives. jsdom renders none of
- * it — `next/image` turns these props into a CSS background it strips on load
- * — so what is checked here is that the right props reach it, and that the
+ * it - `next/image` turns these props into a CSS background it strips on load
+ * - so what is checked here is that the right props reach it, and that the
  * surfaces where a blur would be a flicker rather than a fade opt out.
  */
 describe('the placeholder blur', () => {

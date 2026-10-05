@@ -45,7 +45,7 @@ export const SalesProgressDonut = ({ sold, total, percent }: SalesProgressDonutP
         </PieChart>
       </ResponsiveContainer>
 
-      {/* Centre label — recharts has no built-in centre content for a donut */}
+      {/* Centre label - recharts has no built-in centre content for a donut */}
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
         <p className="text-2xl font-bold text-gray-900">{percent}%</p>
         <p className="mt-0.5 text-xs text-gray-500">

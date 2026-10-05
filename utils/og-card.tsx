@@ -4,12 +4,12 @@ import { ImageResponse } from 'next/og';
  * The card every shared Tukai link previews with.
  *
  * Raw uploads cannot be used directly: photos come off the CDN at whatever size
- * they were uploaded — one that prompted this was 2.4MB and 1920×2560 portrait,
+ * they were uploaded - one that prompted this was 2.4MB and 1920×2560 portrait,
  * which WhatsApp drops outright. No resized variant exists either, since
  * `photo_webp_*_url` come back null. So the card is composed at the 1200×630
  * every platform expects, and `next/og` rasterises the photo down to fit.
  *
- * Kept edge-safe on purpose — these routes run on the edge runtime, so nothing
+ * Kept edge-safe on purpose - these routes run on the edge runtime, so nothing
  * here may reach for axios, next-auth or node built-ins.
  */
 export const OG_SIZE = { width: 1200, height: 630 };

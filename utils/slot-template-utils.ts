@@ -90,13 +90,13 @@ export const diffSlotTemplates = (
   currentSlots.forEach((slot, index) => {
     const existing = existingRecords[index];
     if (!existing) {
-      // New slot — create
+      // New slot - create
       toCreate.push(slot);
     } else if (existing.startTime !== slot.startTime || existing.endTime !== slot.endTime) {
-      // Changed slot — update
+      // Changed slot - update
       toUpdate.push({ record: existing, ...slot });
     }
-    // else: unchanged — skip
+    // else: unchanged - skip
   });
 
   // Find records that no longer have a matching slot

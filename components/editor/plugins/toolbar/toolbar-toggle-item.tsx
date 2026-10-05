@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 /**
  * One toolbar button.
  *
- * A rounded white chip on the grey bar — no `variant="outline"`, since a border
+ * A rounded white chip on the grey bar - no `variant="outline"`, since a border
  * on each one makes the row read as fields rather than a toolbar. The active
  * state takes the light green the app selects with everywhere else (the date
  * and time pickers, the reservations calendar's day pills, the name presets);
@@ -22,7 +22,7 @@ export const ToolbarToggleItem = ({
     size="sm"
     // Keeps the caret in the editor. Without this the click blurs the
     // contenteditable, and because the toolbar re-reads the editor's selection
-    // on every render it reads one that has not taken the format yet — so the
+    // on every render it reads one that has not taken the format yet - so the
     // button lit up and then flipped straight back off.
     onMouseDown={(event) => event.preventDefault()}
     className={cn(

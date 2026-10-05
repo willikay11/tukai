@@ -16,7 +16,7 @@ import { ImageFallback } from './ImageFallback';
  * remote image's colours without downloading it first, and the API sends no
  * dominant colour or LQIP. A real blur-up would come from the API's
  * `photo_webp_thumb_url`, which is generated for almost nothing in the library
- * today — when that is backfilled, a caller can pass it as `blurDataURL` and
+ * today - when that is backfilled, a caller can pass it as `blurDataURL` and
  * this constant stops being used for that surface.
  *
  * Lighter at the top than the bottom: it reads as a photograph rather than as
@@ -26,7 +26,7 @@ import { ImageFallback } from './ImageFallback';
 export const PHOTO_PLACEHOLDER_BLUR =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAH0lEQVR42mN4+fwJHDE8enAXjhhu3bgKRwyXL56DIwBGLCkx6HiKjQAAAABJRU5ErkJggg==';
 
-// Below this, `next/image` warns that a placeholder costs more than it saves —
+// Below this, `next/image` warns that a placeholder costs more than it saves -
 // and blurring something the size of an avatar is a flicker, not a fade
 const MIN_AREA_FOR_BLUR = 1600;
 
@@ -50,7 +50,7 @@ export const PhotoImage = ({
   ...props
 }: Omit<ImageProps, 'src'> & {
   src: ImageProps['src'] | null | undefined;
-  // Something better than a broken-image icon, where the surface has one —
+  // Something better than a broken-image icon, where the surface has one -
   // an avatar's initial, say. Takes precedence over the label and icon.
   fallback?: ReactNode;
   fallbackLabel?: string;
@@ -59,7 +59,7 @@ export const PhotoImage = ({
 }) => {
   const [hasError, setHasError] = useState(false);
 
-  // A bare storage key — "experiences/photos/abc.jpg" — is neither a URL nor a
+  // A bare storage key - "experiences/photos/abc.jpg" - is neither a URL nor a
   // rooted path, and next/image throws on it during render rather than firing
   // onError, taking the page down with it. Treated as a missing photo instead.
   const isUnusablePath =
@@ -71,11 +71,11 @@ export const PhotoImage = ({
     if (fallback) return <>{fallback}</>;
 
     // A `fill` image is taken out of flow and stretched over its positioned
-    // parent, so the fallback has to be too — left in flow it would push the
+    // parent, so the fallback has to be too - left in flow it would push the
     // parent's other content down instead of sitting behind it.
     //
     // An image sized from its own intrinsic dimensions has the opposite need:
-    // keep that shape, or the layout around it collapses — a masonry column,
+    // keep that shape, or the layout around it collapses - a masonry column,
     // for instance.
     const ratio =
       !props.fill && typeof props.width === 'number' && typeof props.height === 'number'
@@ -96,8 +96,8 @@ export const PhotoImage = ({
     );
   }
 
-  // Anything with real dimensions that are too small to blur usefully — an
-  // avatar, an icon — keeps the plain treatment
+  // Anything with real dimensions that are too small to blur usefully - an
+  // avatar, an icon - keeps the plain treatment
   const area =
     typeof props.width === 'number' && typeof props.height === 'number'
       ? props.width * props.height

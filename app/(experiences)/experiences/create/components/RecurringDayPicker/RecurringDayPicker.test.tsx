@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 
 import { RecurringDayPicker } from '.';
 
-// The days are toggle pills now, not checkboxes — selection shows as a filled
+// The days are toggle pills now, not checkboxes - selection shows as a filled
 // pill rather than a checked box.
 const dayPill = (label: string) => screen.getByRole('button', { name: label });
 const isSelected = (label: string) => dayPill(label).className.includes('text-white');

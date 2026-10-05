@@ -18,7 +18,7 @@ export type MomentsQueryParams = {
 export type CreateMoment = {
   title: string;
   description: string;
-  // Whatever the moment was posted at — all optional, and the API takes any
+  // Whatever the moment was posted at - all optional, and the API takes any
   // combination
   experienceId?: string;
   placeId?: string;
@@ -28,7 +28,7 @@ export type CreateMoment = {
 
 /**
  * Posts a moment. `title` and `description` are both required by the
- * serializer even though the composer asks one question — see the composer for
+ * serializer even though the composer asks one question - see the composer for
  * how the title is derived.
  */
 export async function createMoment(data: CreateMoment): Promise<ApiResponse> {

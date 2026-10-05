@@ -68,7 +68,7 @@ describe('SEE_ALL_CONFIG queries', () => {
     });
   });
 
-  it('scopes near-me by coordinates only — there is no radius param', () => {
+  it('scopes near-me by coordinates only - there is no radius param', () => {
     expect(SEE_ALL_CONFIG['near-me'].query(context)).toEqual({
       status: 'published',
       lat: -1.29,
@@ -82,7 +82,7 @@ describe('SEE_ALL_CONFIG queries', () => {
 });
 
 describe('cityExperiencesHref', () => {
-  it('points a city card at that city\'s experiences', () => {
+  it("points a city card at that city's experiences", () => {
     expect(cityExperiencesHref('Lamu')).toBe('/experiences/see-all?type=city&city=Lamu');
   });
 
@@ -116,7 +116,7 @@ describe('shouldShowSeeAll', () => {
     expect(shouldShowSeeAll(120)).toBe(true);
   });
 
-  // Rows fetch a page_size of 8-10, so an absent total means "not known yet" —
+  // Rows fetch a page_size of 8-10, so an absent total means "not known yet" -
   // showing the link then would make it flicker away once the count arrives
   it('hides the link while the total is still unknown', () => {
     expect(shouldShowSeeAll(undefined)).toBe(false);

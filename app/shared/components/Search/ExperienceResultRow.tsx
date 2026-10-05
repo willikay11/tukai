@@ -11,12 +11,12 @@ import { ResultThumbnail } from './ResultThumbnail';
 const MS_PER_DAY = 86_400_000;
 
 // A multi-day experience is described by its span, a single-day one by how long
-// it runs. There is no duration field on the API — both are derived from the
+// it runs. There is no duration field on the API - both are derived from the
 // start and end timestamps.
 //
 // Note this deliberately does NOT use getNumberOfDaysAndNights: that helper is
 // written for date-only itinerary ranges and adds an inclusive day, so a
-// 09:00–12:00 experience comes back as two days.
+// 09:00-12:00 experience comes back as two days.
 const durationOf = (experience: Experience): string | null => {
   if (!experience.startDate || !experience.endDate) return null;
 

@@ -102,7 +102,7 @@ export const ItineraryDaysStep = ({
     }
 
     // Dropping a persisted day locally would leave the row orphaned in the DB
-    // — the exact bug this handler exists to fix — so refuse rather than lie
+    // - the exact bug this handler exists to fix - so refuse rather than lie
     if (!onDeleteDay) {
       console.error('ItineraryDaysStep: onDeleteDay is not wired; refusing to remove a saved day');
       return;
@@ -154,7 +154,7 @@ export const ItineraryDaysStep = ({
       {/* Progress indicator */}
       {!allDaysHaveActivities && (
         <p className="text-center text-xs text-muted-foreground">
-          {daysWithActivities} of {totalDays} days have activities — add at least one activity to{' '}
+          {daysWithActivities} of {totalDays} days have activities. Add at least one activity to{' '}
           <button
             type="button"
             onClick={() => incompleteDays.length > 0 && scrollToDay(incompleteDays[0])}

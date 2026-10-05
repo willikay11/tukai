@@ -10,7 +10,7 @@ import { ToolbarToggleItem } from '@/components/editor/plugins/toolbar/toolbar-t
 import { ToggleGroup } from '@/components/ui/toggle-group';
 
 // 'paragraph' is Lexical's own name for a plain block, which is what
-// `blockType` reports — so the toggle matches it without translation
+// `blockType` reports - so the toggle matches it without translation
 const BLOCK_OPTIONS: { level: HeadingTagType | 'paragraph'; iconName: string; name: string }[] = [
   { level: 'paragraph', iconName: 'ParagraphIcon', name: 'Paragraph' },
   { level: 'h1', iconName: 'Heading01Icon', name: 'Heading 1' },
@@ -19,7 +19,7 @@ const BLOCK_OPTIONS: { level: HeadingTagType | 'paragraph'; iconName: string; na
 ];
 
 /**
- * Paragraph and H1–H3 as toggles rather than a dropdown, so the block in use is
+ * Paragraph and H1-H3 as toggles rather than a dropdown, so the block in use is
  * visible without opening anything.
  *
  * Paragraph is offered outright rather than left to "press the active heading

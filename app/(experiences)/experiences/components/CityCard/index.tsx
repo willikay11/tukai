@@ -9,36 +9,70 @@ interface CityCardProps {
   experienceCount?: number;
   imageUrl: string;
   href: string;
-  // Overrides the fixed row sizing — the cities grid wants full-width cards
+  /**
+   * `banner` is the Discover rail's shape: a wide, short tile with the name
+   * centred over it and the photo left bright. `default` is the taller card
+   * the experiences rail and the see-all grid use, which carries a count
+   * under the name and so needs the corner to itself.
+   */
+  variant?: 'default' | 'banner';
+  // Overrides the fixed row sizing - the cities grid wants full-width cards
   className?: string;
 }
 
-export const CityCard = ({ city, experienceCount, imageUrl, href, className }: CityCardProps) => (
-  <Link
-    href={href}
-    className={cn(
-      'relative block h-[130px] w-[240px] flex-shrink-0 overflow-hidden rounded-xl',
-      className,
-    )}
-  >
-    <PhotoImage
-      src={imageUrl}
-      alt={city}
-      fill
-      sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 300px"
-      className="object-cover"
-    />
+export const CityCard = ({
+  city,
+  experienceCount,
+  imageUrl,
+  href,
+  variant = 'default',
+  className,
+}: CityCardProps) => {
+  const isBanner = variant === 'banner';
 
-    {/* Dark overlay for text legibility */}
-    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/10" />
-
-    <div className="absolute bottom-3 left-4">
-      <p className="text-base font-bold text-white">{city}</p>
-      {experienceCount !== undefined && (
-        <p className="text-xs text-white/70">
-          {experienceCount >= 100 ? '100+ experiences' : `${experienceCount} experiences`}
-        </p>
+  return (
+    <Link
+      href={href}
+      className={cn(
+        'relative block flex-shrink-0 overflow-hidden rounded-xl',
+        isBanner ? 'aspect-[8/3] w-[184px]' : 'h-[130px] w-[240px]',
+        className,
       )}
-    </div>
-  </Link>
-);
+    >
+      <PhotoImage
+        src={imageUrl}
+        alt={city}
+        fill
+        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 300px"
+        className="object-cover"
+      />
+
+      {/* The banner keeps the photo bright and leans on a light scrim plus the
+          label's own shadow; the taller card has two lines to carry, so it
+          takes the gradient */}
+      <div
+        className={cn(
+          'absolute inset-0',
+          isBanner ? 'bg-black/20' : 'bg-gradient-to-t from-black/70 to-black/10',
+        )}
+      />
+
+      {isBanner ? (
+        <div className="absolute inset-0 flex items-center justify-center px-3">
+          <p className="truncate text-base font-bold text-white [text-shadow:0_1px_4px_rgba(1,51,52,.55)]">
+            {city}
+          </p>
+        </div>
+      ) : (
+        <div className="absolute bottom-3 left-4">
+          <p className="text-base font-bold text-white">{city}</p>
+          {experienceCount !== undefined && (
+            <p className="text-xs text-white/70">
+              {experienceCount >= 100 ? '100+ experiences' : `${experienceCount} experiences`}
+            </p>
+          )}
+        </div>
+      )}
+    </Link>
+  );
+};

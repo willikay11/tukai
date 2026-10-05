@@ -2,20 +2,29 @@
 
 import { useEffect, useState } from 'react';
 
-import { ShoppingBasketAdd02Icon, ShoppingBasketDone02Icon } from '@hugeicons/react-pro';
-
 import { BucketListPicker } from '@/app/shared/components/BucketList';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { POP_ONCE } from '@/app/shared/components/Motion';
 import { Button } from '@/components/ui/button';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { cn } from '@/lib/utils';
 
 /**
+ * What keeps a white basket legible on a pale photo now that there is no disc
+ * behind it. Harmless on a dark icon over a white panel, where it reads as a
+ * hairline rather than a shadow.
+ */
+const ICON_SHADOW = '[filter:drop-shadow(0_1px_3px_rgba(1,51,52,.55))]';
+
+/**
  * Saves an experience or a place onto one of the reader's bucket lists.
  *
  * One treatment everywhere: the basket over a photo, which fills in once the
- * thing is saved. The bookmark-pin variant this used to carry is gone — two
+ * thing is saved. The bookmark-pin variant this used to carry is gone - two
  * icons for one action read as two different features.
+ *
+ * `className` styles the ICON, not the button - it is where a caller sets the
+ * colour the basket needs against whatever it is sitting on.
  *
  * Which list is a choice, so pressing it opens the picker rather than toggling
  * on the spot. A caller with neither id falls back to `onBookmark`, for the
@@ -83,26 +92,47 @@ export const Bookmark = ({
     <>
       <Button
         variant="text"
-        aria-label={isBookmarked ? 'Saved to bucket list' : 'Add to bucket list'}
+        // The canvas names the thing being saved. A dozen cards on a page all
+        // announcing "Add to bucket list" tells a screen-reader reader nothing
+        // about which one they are on.
+        aria-label={
+          itemName
+            ? isBookmarked
+              ? `Saved. Choose bucket lists for ${itemName}`
+              : `Save ${itemName} to a bucket list`
+            : isBookmarked
+              ? 'Saved to bucket list'
+              : 'Add to bucket list'
+        }
+        // 44px to hit, nothing to look at: the basket sits straight on the
+        // photo, with a drop shadow instead of a disc behind it. The disc it
+        // used to wear read as a second control over every card.
         className={cn(
-          'flex h-9 w-9 items-center justify-center rounded-full',
-          isBookmarked
-            ? 'bg-white hover:bg-white'
-            : 'bg-black/40 backdrop-blur-sm hover:bg-black/60',
+          'flex h-11 w-11 items-center justify-center bg-transparent hover:bg-transparent',
           hasJustSaved && POP_ONCE,
         )}
         // The beat plays once; clearing it here lets the next save replay it
         onAnimationEnd={() => setHasJustSaved(false)}
         onClick={handleClick}
       >
+        {/* Bulk once it is saved and twotone until then, as the canvas draws
+            the pair: the filled basket is the switched-on state of the same
+            icon rather than a different one */}
         {isBookmarked ? (
-          <ShoppingBasketDone02Icon id="bookmark" size={18} variant="solid" className="text-lime" />
+          <IconComponent
+            iconName="ShoppingBasketDone02Icon"
+            size={21}
+            variant="bulk"
+            color="currentColor"
+            className={cn('text-lime', ICON_SHADOW)}
+          />
         ) : (
-          <ShoppingBasketAdd02Icon
-            id="bookmark"
-            size={18}
+          <IconComponent
+            iconName="ShoppingBasketAdd02Icon"
+            size={21}
             variant="twotone"
-            className={className}
+            color="currentColor"
+            className={cn(className, ICON_SHADOW)}
           />
         )}
       </Button>

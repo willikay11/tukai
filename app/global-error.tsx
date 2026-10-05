@@ -5,6 +5,24 @@ import { useEffect } from 'react';
 // Last line of defence: this replaces the root layout, so it renders its own
 // document and must not depend on any provider, context or shared component
 // from the tree that just failed.
+const primaryButton = {
+  borderRadius: '9999px',
+  border: 'none',
+  background: '#047857',
+  color: '#ffffff',
+  padding: '10px 24px',
+  fontSize: '14px',
+  fontWeight: 600,
+  cursor: 'pointer',
+} as const;
+
+const secondaryButton = {
+  ...primaryButton,
+  background: '#ffffff',
+  color: '#111827',
+  border: '1px solid #e5e7eb',
+} as const;
+
 export default function GlobalError({
   error,
   reset,
@@ -41,23 +59,34 @@ export default function GlobalError({
           {error?.digest && (
             <p style={{ fontSize: '12px', color: '#d1d5db' }}>Reference: {error.digest}</p>
           )}
-          <button
-            type="button"
-            onClick={reset}
+          {/* Three ways out rather than one: if the root layout itself is
+              what failed, retrying in place may not be enough. Plain DOM
+              navigation, since the router is part of what just broke. */}
+          <div
             style={{
               marginTop: '8px',
-              borderRadius: '9999px',
-              border: 'none',
-              background: '#047857',
-              color: '#ffffff',
-              padding: '10px 24px',
-              fontSize: '14px',
-              fontWeight: 600,
-              cursor: 'pointer',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px',
+              justifyContent: 'center',
             }}
           >
-            Try again
-          </button>
+            <button type="button" onClick={reset} style={primaryButton}>
+              Try again
+            </button>
+            <button type="button" onClick={() => window.history.back()} style={secondaryButton}>
+              Go back
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = '/';
+              }}
+              style={secondaryButton}
+            >
+              Go home
+            </button>
+          </div>
         </div>
       </body>
     </html>

@@ -57,7 +57,7 @@ export const ReservationPanel = ({
   );
 
   // Only a 404 answered successfully means nobody owns it. A request that
-  // failed, or was never made, is "we do not know" — and a place must never be
+  // failed, or was never made, is "we do not know" - and a place must never be
   // called unclaimed on that.
   const isUnclaimed = ownership?.success === true && !ownership.data;
 
@@ -100,7 +100,7 @@ export const ReservationPanel = ({
   }
 
   // An owner is not going to book their own table, so the panel offers what
-  // they came for instead — the same slot, a different job.
+  // they came for instead - the same slot, a different job.
   if (isManager) {
     return (
       <div className="rounded-3xl bg-gray-50 p-5">
@@ -121,8 +121,8 @@ export const ReservationPanel = ({
   }
 
   // A place only takes bookings once its owning community sets up a reservation
-  // profile. Until then the panel still shows — hiding it would leave the whole
-  // column empty on every place — but the button is disabled rather than
+  // profile. Until then the panel still shows - hiding it would leave the whole
+  // column empty on every place - but the button is disabled rather than
   // pointed at an endpoint that cannot serve it.
   const isBookable = Boolean(profile);
 
@@ -189,7 +189,7 @@ export const ReservationPanel = ({
         title="Reservation Cancelled Successfully"
         description={`Your table at ${placeName} has been released. You can request another one whenever you like.`}
         viewExperienceLabel="Done"
-        // Nowhere to go — the reader is already on the place
+        // Nowhere to go - the reader is already on the place
         onViewExperience={() => setIsCancelledModalOpen(false)}
       />
 

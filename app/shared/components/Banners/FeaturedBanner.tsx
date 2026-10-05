@@ -11,7 +11,7 @@ interface FeaturedBannerProps {
   title: string;
   metaItems: string[]; // ["Beach Club", "Diani", "Ksh. 3,500 avg"]
   rating?: number | null;
-  ctaLabel: string; // "Reserve a spot — Ksh. X" | "Reserve a table"
+  ctaLabel: string; // "Reserve a spot - Ksh. X" | "Reserve a table"
   onCtaClick: () => void;
   // Optional outlined companion action, e.g. "View details" beside "Reserve"
   secondaryCtaLabel?: string;

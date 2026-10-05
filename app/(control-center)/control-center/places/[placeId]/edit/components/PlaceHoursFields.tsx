@@ -28,7 +28,7 @@ const describeDays = (days: string[]): string => {
 
 /**
  * Composes the stored "Open Hours" value, e.g.
- * "Monday - Sunday: 11:00 AM - 11:00 PM" — the shape places already hold.
+ * "Monday - Sunday: 11:00 AM - 11:00 PM" - the shape places already hold.
  */
 export const formatOpenHours = ({ days, opensAt, closesAt }: HoursValue): string => {
   const dayLabel = describeDays(days);
@@ -56,8 +56,8 @@ const toTimeValue = (label: string): string => {
 /**
  * Reads a stored value back into the form.
  *
- * Only the shape this field writes is understood. Anything else — the free-form
- * hours some places carry, several ranges split by "|" — is left alone by
+ * Only the shape this field writes is understood. Anything else - the free-form
+ * hours some places carry, several ranges split by "|" - is left alone by
  * returning nothing, so the caller keeps the stored text rather than
  * overwriting it with a half-parse.
  */

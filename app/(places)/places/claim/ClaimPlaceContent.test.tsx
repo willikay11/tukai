@@ -76,7 +76,7 @@ describe('ClaimPlaceContent', () => {
   });
 
   // Ownership belongs to a community, so someone who hosts none has nothing to
-  // claim with — they are sent to make one and brought straight back
+  // claim with - they are sent to make one and brought straight back
   it('sends a reader with no communities to create one first', async () => {
     withCommunities([]);
 
@@ -169,7 +169,7 @@ describe('ClaimPlaceContent', () => {
   });
 
   // The API rejects a second application while one is under review, which says
-  // the application already exists — the documents still belong on it
+  // the application already exists - the documents still belong on it
   it('still uploads the documents when a verification is already open', async () => {
     submitVerification.mockRejectedValue({ message: 'already pending' });
     const user = userEvent.setup();

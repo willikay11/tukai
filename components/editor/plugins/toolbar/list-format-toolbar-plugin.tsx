@@ -71,14 +71,14 @@ export function ListFormatToolbarPlugin() {
    * Makes a list of the selected blocks, one item per line.
    *
    * A soft line break (Shift+Enter) keeps both lines in a single paragraph, and
-   * a paragraph becomes a single list item — so numbering the second line
+   * a paragraph becomes a single list item - so numbering the second line
    * numbered the first one with it, inside item 1. Splitting at the breaks
    * first gives each line its own block, and the command then lists only the
    * one the caret is in.
    *
    * Note this does not try to keep the new list apart from a list directly
    * above or below it. `@lexical/list` merges adjacent lists of the same type
-   * as a structural invariant — they re-merge even when split by hand — and
+   * as a structural invariant - they re-merge even when split by hand - and
    * continuing the list there is what other editors do too.
    */
   const splitSelectedBlocksAtLineBreaks = () => {
@@ -99,7 +99,7 @@ export function ListFormatToolbarPlugin() {
           const children = block.getChildren();
           if (!children.some($isLineBreakNode)) return;
 
-          // Grouped before anything moves — mutating while walking the
+          // Grouped before anything moves - mutating while walking the
           // children would drop half of them
           const lines: LexicalNode[][] = [[]];
           children.forEach((child) => {

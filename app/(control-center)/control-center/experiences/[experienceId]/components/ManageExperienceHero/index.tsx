@@ -34,7 +34,7 @@ export const ManageExperienceHero = ({ experience, metrics }: ManageExperienceHe
   const dateLine = start?.isValid()
     ? [
         start.format('ddd D MMM YYYY'),
-        end?.isValid() ? `${start.format('h:mm A')} — ${end.format('h:mm A')}` : null,
+        end?.isValid() ? `${start.format('h:mm A')} - ${end.format('h:mm A')}` : null,
       ]
         .filter(Boolean)
         .join(' · ')

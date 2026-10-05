@@ -18,7 +18,7 @@ import { communityPath, experiencePath } from '@/utils/detail-paths';
  * An experience, shown under the community running it.
  *
  * The community leads because the section is about what is happening inside
- * the crews a reader follows — the experience is the news, the community is
+ * the crews a reader follows - the experience is the news, the community is
  * the reason they are being told.
  */
 export const CommunityHappeningCard = ({

@@ -51,6 +51,11 @@ jest.mock('@/app/shared/hooks/useToast', () => ({
   useToast: () => ({ toast: jest.fn() }),
 }));
 
+const openSignInWithCallback = jest.fn();
+jest.mock('@/context/AuthDialogContext', () => ({
+  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+}));
+
 const community = (extra: Record<string, unknown> = {}): Community =>
   ({
     id: 'c1',
@@ -114,7 +119,7 @@ describe('CommunityDetailContent', () => {
       expect(screen.getByRole('tab', { name: 'About' })).toHaveAttribute('aria-selected', 'false');
     });
 
-    // In-page anchors, not routes — picking one scrolls rather than navigates
+    // In-page anchors, not routes - picking one scrolls rather than navigates
     it('scrolls to a section instead of navigating', async () => {
       const user = userEvent.setup();
       renderPage();
@@ -125,7 +130,7 @@ describe('CommunityDetailContent', () => {
       expect(push).not.toHaveBeenCalled();
     });
 
-    // Pills, not underlined tabs — the active one takes a green ground and
+    // Pills, not underlined tabs - the active one takes a green ground and
     // brand-coloured label
     it('fills the pill for the section being read', () => {
       useScrollSpy.mockReturnValue({ activeId: 'members', scrollTo });
@@ -159,7 +164,7 @@ describe('CommunityDetailContent', () => {
       });
     });
 
-    // Sticky, and parked below the global navbar rather than under it — the
+    // Sticky, and parked below the global navbar rather than under it - the
     // navbar is sticky from md up at a higher z-index
     it('pins the pill row below the navbar', () => {
       renderPage();
@@ -201,7 +206,7 @@ describe('CommunityDetailContent', () => {
       });
     });
 
-    // Headings must clear whatever is pinned above them when jumped to — the
+    // Headings must clear whatever is pinned above them when jumped to - the
     // pill row on mobile, the navbar and the pill row from md up
     it('gives each section scroll margin for the pinned bars', () => {
       const { container } = renderPage();

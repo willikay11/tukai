@@ -1,6 +1,6 @@
 /**
  * Great-circle distance between two coordinates in kilometres, rounded to
- * the nearest whole km. Used to show "N Kms" on experience cards — the API
+ * the nearest whole km. Used to show "N Kms" on experience cards - the API
  * does not return a distance field.
  */
 export const haversineKm = (lat1: number, lng1: number, lat2: number, lng2: number): number => {

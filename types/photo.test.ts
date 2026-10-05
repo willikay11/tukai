@@ -36,7 +36,7 @@ describe('photoUrl', () => {
     expect(photoUrl(make(), 'lg')).toBe('https://cdn.tukai.co/original.webp');
   });
 
-  it('steps up, never down — a card takes the large file over the thumbnail', () => {
+  it('steps up, never down - a card takes the large file over the thumbnail', () => {
     const thumbOnly = make({ photo: undefined, photoUrl: undefined });
     expect(photoUrl({ ...thumbOnly, photoWebpLgUrl: 'lg' }, 'md')).toBe('lg');
 

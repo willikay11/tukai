@@ -77,4 +77,20 @@ describe('AddPlaceReviewAction', () => {
     expect(setOpenSignIn).toHaveBeenCalledWith(true);
     expect(screen.queryByTestId('add-review')).not.toBeInTheDocument();
   });
+
+  // The drawer's footer asks for it in its own words and its own shape
+  describe('how it is labelled', () => {
+    it('asks to write one by default', () => {
+      render(<AddPlaceReviewAction placeId="place-1" placeTitle="Talisman" />);
+
+      expect(screen.getByRole('button', { name: /write a review/i })).toBeInTheDocument();
+    });
+
+    it('takes a caller’s own label', () => {
+      render(<AddPlaceReviewAction placeId="place-1" placeTitle="Talisman" label="Add a review" />);
+
+      expect(screen.getByRole('button', { name: /add a review/i })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /write a review/i })).not.toBeInTheDocument();
+    });
+  });
 });

@@ -150,10 +150,20 @@ export function InviteMembers({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchQuery) {
-      e.preventDefault();
-      handleAddEmail(searchQuery);
+    if (e.key !== 'Enter' || !searchQuery) return;
+
+    e.preventDefault();
+
+    // The canvas takes the first suggestion on Enter. Typing "Kim" against a
+    // matching "Kimberly" used to try to add "Kim" as an email address and
+    // fail, with the person sitting right there in the list.
+    const [firstMatch] = searchResults;
+    if (firstMatch) {
+      handleAddUser(firstMatch);
+      return;
     }
+
+    handleAddEmail(searchQuery);
   };
 
   // Anything still typed when focus leaves would otherwise be lost
@@ -180,10 +190,16 @@ export function InviteMembers({
           <IconComponent iconName="Search01Icon" size={22} color="gray" />
         </span>
 
-        {/* Search Results Dropdown — only when a backend search is wired up */}
+        {/* Search Results Dropdown - only when a backend search is wired up.
+            The "nobody matches" line lives in here, so the panel has to open
+            for a query that found nothing too: it used to require results or
+            a valid email, which is the opposite of when that line applies, so
+            the message could never appear. */}
         {isSearchEnabled &&
           showResults &&
-          (searchResults.length > 0 || isValidEmail(searchQuery)) && (
+          (searchResults.length > 0 ||
+            isValidEmail(searchQuery) ||
+            searchQuery.trim().length > 1) && (
             <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg">
               {searchResults.map((user) => (
                 <button
@@ -223,7 +239,12 @@ export function InviteMembers({
                 )}
 
               {searchResults.length === 0 && !isValidEmail(searchQuery) && !isSearching && (
-                <div className="px-4 py-3 text-center text-sm text-gray-500">No results found</div>
+                // The canvas says what to do next rather than only that the
+                // search failed
+                <div className="px-4 py-3 text-center text-sm text-gray-500">
+                  No one on Tukai matches &ldquo;{searchQuery}&rdquo;. Add their email address
+                  instead.
+                </div>
               )}
 
               {isSearching && (

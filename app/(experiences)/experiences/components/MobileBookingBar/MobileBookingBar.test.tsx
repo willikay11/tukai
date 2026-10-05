@@ -26,18 +26,18 @@ describe('MobileBookingBar', () => {
     render(<MobileBookingBar experience={experience()} />);
 
     expect(screen.getByRole('button', { name: 'Share Moment' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Reserve' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Buy Tickets' })).toBeInTheDocument();
     expect(screen.queryByText(/2,500/)).not.toBeInTheDocument();
   });
 
-  // Each button lands on what it promised — not on a tab row to choose again
-  it('opens the reservation view from Reserve', async () => {
+  // Each button lands on what it promised - not on a tab row to choose again
+  it('opens the reservation view from Buy Tickets', async () => {
     const user = userEvent.setup();
     render(<MobileBookingBar experience={experience()} />);
 
     expect(screen.queryByTestId('booking-panel')).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Reserve' }));
+    await user.click(screen.getByRole('button', { name: 'Buy Tickets' }));
 
     expect(screen.getByTestId('booking-panel')).toHaveTextContent('reservation');
   });

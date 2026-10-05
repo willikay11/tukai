@@ -8,7 +8,7 @@ import { CreateCommunityCta } from '../CreateCommunityCta';
 /**
  * The communities a reader runs.
  *
- * `created_by` is the only filter the list endpoint offers for this — `role`
+ * `created_by` is the only filter the list endpoint offers for this - `role`
  * exists too but needs a member id alongside it, and the owner is the creator
  * on every community the app makes.
  */

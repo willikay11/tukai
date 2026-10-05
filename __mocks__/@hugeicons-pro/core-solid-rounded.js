@@ -6,7 +6,9 @@ module.exports = new Proxy(
     has: () => true,
     get: (_, name) => {
       if (name === '__esModule') return true;
-      return { name: String(name) };
+      // `variant` lets a test assert WHICH package the icon came from,
+      // which is the only thing that distinguishes one style from another
+      return { name: String(name), variant: 'solid' };
     },
   },
 );

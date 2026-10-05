@@ -12,6 +12,10 @@ jest.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }));
 
 const toast = jest.fn();
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
+const openSignInWithCallback = jest.fn();
+jest.mock('@/context/AuthDialogContext', () => ({
+  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+}));
 
 const joinMutate = jest.fn();
 const leaveMutate = jest.fn();
@@ -120,5 +124,89 @@ describe('JoinCommunityPanel', () => {
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Join Community' })).toBeInTheDocument(),
     );
+  });
+
+  /**
+   * The canvas states the join policy either way rather than only flagging
+   * the exception, so a reader knows where they stand before pressing.
+   */
+  describe('the policy chip', () => {
+    it('says anyone can join an open community', () => {
+      render(<JoinCommunityPanel community={community()} currentUserId="u1" />);
+
+      expect(screen.getByText('Anyone can join')).toBeInTheDocument();
+    });
+
+    it('says private for a closed one', () => {
+      render(<JoinCommunityPanel community={community({ isPublic: false })} currentUserId="u1" />);
+
+      expect(screen.getByText('Private')).toBeInTheDocument();
+      expect(screen.queryByText('Anyone can join')).not.toBeInTheDocument();
+    });
+  });
+
+  // Joining a community is not booking a seat in its experiences, and the
+  // canvas says so where "Joined" alone would imply otherwise
+  describe('what the toasts promise', () => {
+    it('does not let joining read as a reservation', async () => {
+      const user = userEvent.setup();
+      joinMutate.mockImplementation((_id, { onSuccess }) => onSuccess());
+
+      render(<JoinCommunityPanel community={community()} currentUserId="u1" />);
+      await user.click(screen.getByRole('button', { name: 'Join Community' }));
+
+      expect(toast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: expect.stringContaining('does not reserve a seat'),
+        }),
+      );
+    });
+
+    it('reassures on the way out', async () => {
+      const user = userEvent.setup();
+      leaveMutate.mockImplementation((_vars, { onSuccess }) => onSuccess());
+
+      render(
+        <JoinCommunityPanel
+          community={community({ members: [member('u1', 'accepted')] })}
+          currentUserId="u1"
+        />,
+      );
+      await user.click(screen.getByRole('button', { name: /Leave community/ }));
+      await user.click(screen.getByRole('button', { name: 'Leave community' }));
+
+      expect(toast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: expect.stringContaining('still yours'),
+        }),
+      );
+    });
+  });
+
+  /**
+   * The community page lost its auth gate in the merge - it is public to read
+   * now - so a reader without an account reaches this button.
+   */
+  describe('a reader who is not signed in', () => {
+    it('is asked to sign in rather than joining', async () => {
+      const user = userEvent.setup();
+      render(<JoinCommunityPanel community={community()} currentUserId="" />);
+
+      await user.click(screen.getByRole('button', { name: 'Join Community' }));
+
+      expect(joinMutate).not.toHaveBeenCalled();
+      expect(openSignInWithCallback).toHaveBeenCalled();
+    });
+
+    it('joins once signing in is done, so the press is not wasted', async () => {
+      const user = userEvent.setup();
+      joinMutate.mockImplementation((_id, { onSuccess }) => onSuccess());
+
+      render(<JoinCommunityPanel community={community()} currentUserId="" />);
+      await user.click(screen.getByRole('button', { name: 'Join Community' }));
+      openSignInWithCallback.mock.calls[0][0]();
+
+      expect(joinMutate).toHaveBeenCalledWith('c1', expect.anything());
+    });
   });
 });

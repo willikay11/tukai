@@ -47,7 +47,7 @@ describe('InviteGuestsStep', () => {
   });
 
   // The invite step lists communities the user follows, while the rest of the
-  // flow only knows the ones they created — so the invited community itself has
+  // flow only knows the ones they created - so the invited community itself has
   // to be carried through for the preview to render it
   it('stores the invited communities alongside their ids', () => {
     const onChange = jest.fn();

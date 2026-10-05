@@ -1,13 +1,17 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { SectionShell } from '@/app/shared/components/Sections';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NoData } from '@/components/ui/noData';
 import { CommunityMember } from '@/types/community';
+
+// Four rows of the two-column grid
+const PAGE_SIZE = 8;
 
 const nameOf = (member: CommunityMember) =>
   member.user?.displayName ||
@@ -54,6 +58,7 @@ const MemberRow = ({ member, action }: { member: CommunityMember; action: string
 
 export const MembersSection = ({ members }: { members: CommunityMember[] }) => {
   const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
 
   const { admins, regulars } = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -66,6 +71,16 @@ export const MembersSection = ({ members }: { members: CommunityMember[] }) => {
       regulars: matching.filter((member) => member.role !== 'admin' && member.role !== 'owner'),
     };
   }, [members, query]);
+
+  // Administrators are a handful and head the section, so only the member list
+  // pages. The community detail endpoint hands over every member at once, so
+  // this pages what is already here rather than fetching.
+  const pageCount = Math.max(Math.ceil(regulars.length / PAGE_SIZE), 1);
+  const currentPage = Math.min(page, pageCount);
+  const visibleRegulars = regulars.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  // A narrowing search can strand the reader past the end of the new results
+  useEffect(() => setPage(1), [query]);
 
   return (
     <SectionShell id="members" title="Members">
@@ -101,10 +116,41 @@ export const MembersSection = ({ members }: { members: CommunityMember[] }) => {
                 Members ({regulars.length})
               </p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {regulars.map((member) => (
+                {visibleRegulars.map((member) => (
                   <MemberRow key={member.id} member={member} action="Follow" />
                 ))}
               </div>
+
+              {pageCount > 1 && (
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <p className="text-sm text-gray-400" aria-live="polite">
+                    Page {currentPage} of {pageCount}
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      aria-label="Previous page of members"
+                      disabled={currentPage === 1}
+                      onClick={() => setPage(currentPage - 1)}
+                      className="rounded-full"
+                    >
+                      <IconComponent iconName="ArrowLeft01Icon" size={16} color="currentColor" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      aria-label="Next page of members"
+                      disabled={currentPage === pageCount}
+                      onClick={() => setPage(currentPage + 1)}
+                      className="rounded-full"
+                    >
+                      <IconComponent iconName="ArrowRight01Icon" size={16} color="currentColor" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

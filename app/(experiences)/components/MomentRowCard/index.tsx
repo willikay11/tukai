@@ -33,7 +33,7 @@ export const MomentRowCard = ({ moment, onClick }: MomentRowCardProps) => {
             fill
             sizes="32px"
             className="object-cover"
-            // No placeholder avatar asset exists — fall back to the initial,
+            // No placeholder avatar asset exists - fall back to the initial,
             // the same treatment AvatarStack uses
             fallback={
               <div className="flex h-full w-full items-center justify-center text-xs font-medium text-gray-600">

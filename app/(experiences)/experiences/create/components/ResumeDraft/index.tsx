@@ -30,7 +30,7 @@ interface ResumeDraftProps {
 // "Yesterday, 6:42 PM" for anything within the last week, absolute beyond that
 const formatLastSaved = (isoString: string): string => {
   const saved = moment(isoString);
-  if (!saved.isValid()) return '—';
+  if (!saved.isValid()) return '-';
 
   return saved.isAfter(moment().subtract(6, 'days'))
     ? saved.calendar(null, {
@@ -79,8 +79,8 @@ export const ResumeDraft = ({
     <div className="mx-auto max-w-2xl px-6 py-10">
       <h1 className="text-2xl font-bold text-gray-900">Pick up where you left off</h1>
       <p className="mt-2 text-sm text-gray-500">
-        You have an unfinished experience saved. Continue it, or clear it to start something new —
-        only one draft can be saved at a time.
+        You have an unfinished experience saved. Continue it, or clear it to start something new.
+        Only one draft can be saved at a time.
       </p>
 
       <div className="mt-6 rounded-2xl border border-gray-200 p-6">

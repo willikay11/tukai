@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react';
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { MomentAvatar } from '@/app/shared/components/Moments';
 import {
   useAddComment,
   useMomentComments,
@@ -18,8 +19,6 @@ import { Input } from '@/components/ui/input';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { MomentComment, momentAuthorName } from '@/types/moment';
 
-import { MomentAvatar } from './MomentAvatar';
-
 const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: string }) => {
   const { data: session } = useSession();
   const isSignedIn = Boolean(session?.user?.id);
@@ -30,7 +29,7 @@ const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: s
    * The server does not tell us whether the signed-in user has liked a comment
    * (no is_liked on the serializer), so the heart has to start from a guess.
    * When that guess is wrong the toggle does the opposite of what the reader
-   * asked for — clicking "like" on an already-liked comment removed the like
+   * asked for - clicking "like" on an already-liked comment removed the like
    * and the heart flashed red then went clear.
    *
    * The like endpoint does report the resulting state (201 liked / 204
@@ -67,7 +66,7 @@ const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: s
         }
 
         // The starting guess was wrong. Toggle again so the reader's intent
-        // wins — the two calls cancel out, leaving the total unchanged.
+        // wins - the two calls cancel out, leaving the total unchanged.
         if (allowRetry) {
           setPendingDelta(0);
           runToggle(intent, false);
@@ -167,7 +166,7 @@ export const MomentComments = ({ momentId }: { momentId: string }) => {
           ))}
         </div>
       ) : comments.length === 0 ? (
-        <p className="text-sm text-gray-400">No comments yet — be the first.</p>
+        <p className="text-sm text-gray-400">No comments yet. Be the first.</p>
       ) : (
         <div className="space-y-4">
           {comments.map((comment) => (

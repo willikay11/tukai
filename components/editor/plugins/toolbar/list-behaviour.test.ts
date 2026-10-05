@@ -7,7 +7,7 @@ import { nodes } from '@/components/blocks/editor-00/nodes';
 /**
  * What making a list actually does to the blocks around it.
  *
- * These drive a real Lexical editor rather than a mocked one — the toolbar's
+ * These drive a real Lexical editor rather than a mocked one - the toolbar's
  * own tests assert that the command is dispatched, which cannot tell you what
  * the command then does to the document.
  */

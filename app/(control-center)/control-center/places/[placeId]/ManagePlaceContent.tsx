@@ -25,7 +25,7 @@ export const ManagePlaceContent = ({ place }: { place: Place }) => {
   const searchParams = useSearchParams();
   const { isManager, isLoading } = usePlaceManager(place.id);
 
-  // Experiences held at this place — a verified filter on the list endpoint
+  // Experiences held at this place - a verified filter on the list endpoint
   const { data: experiencesResponse, isLoading: isLoadingExperiences } = useExperiences(
     { page: 1, page_size: 12, place: place.id },
     true,

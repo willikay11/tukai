@@ -6,6 +6,10 @@ import {
   AvatarStack,
   type AvatarStackUser,
 } from '@/app/(experiences)/experiences/components/AvatarStack';
+import {
+  AVATAR_LIMIT,
+  ownerFaces,
+} from '@/app/(experiences)/experiences/components/AvatarStack/community-faces';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { CARD_LIFT, MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motion';
 import { useCommunityDetail } from '@/app/shared/hooks/useCommunities';
@@ -14,8 +18,6 @@ import { Community, CommunityMember, CommunityOwner } from '@/types/community';
 import { coverPhotoUrl } from '@/types/photo';
 import { communityPath } from '@/utils/detail-paths';
 import { toPlainText } from '@/utils/safe-text-utils';
-
-const AVATAR_LIMIT = 3;
 
 export const CommunityDiscoverCard = ({
   community,
@@ -38,7 +40,7 @@ export const CommunityDiscoverCard = ({
 
   const category = community.categories?.[0]?.name;
 
-  // ⚠️ The list endpoint returns NO membership records — only `members_count`
+  // ⚠️ The list endpoint returns NO membership records - only `members_count`
   // and `owners`. So the faces shown are the community's OWNERS, and the "+N"
   // is everyone else counted but not described. The detail endpoint does return
   // `members`, so prefer those when they are present.
@@ -46,7 +48,7 @@ export const CommunityDiscoverCard = ({
   const owners: CommunityOwner[] = community.owners ?? [];
 
   // Only worth asking when the caller wants faces and the row it was given has
-  // none — the detail endpoint is the only source of membership records
+  // none - the detail endpoint is the only source of membership records
   const { data: detail } = useCommunityDetail(
     community.id,
     showMemberAvatars && listMembers.length === 0,
@@ -63,11 +65,7 @@ export const CommunityDiscoverCard = ({
           `${member.user?.firstName ?? ''} ${member.user?.lastName ?? ''}`.trim(),
         picture: member.user?.picture || null,
       }))
-    : owners.slice(0, AVATAR_LIMIT).map((owner) => ({
-        id: owner.id,
-        name: owner.displayName || `${owner.firstName ?? ''} ${owner.lastName ?? ''}`.trim(),
-        picture: owner.picture || null,
-      }));
+    : ownerFaces(owners);
 
   const totalMembers = community.membersCount ?? members.length;
 

@@ -20,49 +20,59 @@ export const ExperienceOrganiser = ({ experience }: { experience: Experience }) 
   // with the reader as both sender and recipient
   const isOwnExperience = Boolean(session?.user?.id && session.user.id === experience.host?.id);
 
+  // "1 Experiences organised" was reading as a typo on every host with one
+  const hostedCount = experience.host.experienceHostedCount ?? 0;
+  const hostedLabel = `${hostedCount} ${hostedCount === 1 ? 'Experience' : 'Experiences'} organised`;
+
   return (
     <>
       {!isOwnExperience && (
         <SendMessage open={open} setOpen={setOpen} recipientId={experience.host.id} />
       )}
-      <div className="inline-flex w-full rounded-[15px] bg-gray-50 px-3 py-3.5">
-        <div className="inline-flex w-full justify-between">
-          <div className="inline-flex">
-            <Avatar className={`mr-2.5 h-[40px] w-[40px]`}>
-              <AvatarImage src={experience.host.picture} />
-              <AvatarFallback />
-            </Avatar>
-            <div className="flex flex-col">
-              <div className="inline-flex items-center">
-                <p className="mr-1 text-sm font-semibold text-gray-700">
-                  {experience.host.displayName ||
-                    `${experience.host.firstName} ${experience.host.lastName}`}
-                </p>
-                <CheckmarkBadge02Icon size={16} variant="solid" className="text-primary" />
-              </div>
-              <p className="text-sm font-normal text-gray-600">
-                {experience.host.experienceHostedCount} Experiences organised
+      {/* Stacked on a phone, side by side from sm. A long host name and a
+          button on one narrow row left the name wrapping to two lines with the
+          button stretched down the side of it. */}
+      <div className="flex w-full flex-col gap-3 rounded-[15px] bg-gray-50 px-3 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center">
+          <Avatar className="mr-2.5 h-[40px] w-[40px] flex-shrink-0">
+            <AvatarImage src={experience.host.picture} />
+            <AvatarFallback />
+          </Avatar>
+          {/* min-w-0 so the name truncates rather than forcing the row wider */}
+          <div className="flex min-w-0 flex-col">
+            <div className="flex min-w-0 items-center gap-1">
+              <p className="truncate text-sm font-semibold text-gray-700">
+                {experience.host.displayName ||
+                  `${experience.host.firstName} ${experience.host.lastName}`}
               </p>
-            </div>
-          </div>
-          {!isOwnExperience && (
-            <Button
-              variant="gradient"
-              className="h-full rounded-full"
-              onClick={() => setOpen(true)}
-            >
-              {/* Two bubbles, the smaller one in front. White to read against
-                  the gradient. */}
-              <IconComponent
-                iconName="MessageMultiple02Icon"
-                size={18}
-                color="#FFFFFF"
-                className="mr-2"
+              <CheckmarkBadge02Icon
+                size={16}
+                variant="solid"
+                className="flex-shrink-0 text-primary"
               />
-              Message host
-            </Button>
-          )}
+            </div>
+            <p className="text-sm font-normal text-gray-600">{hostedLabel}</p>
+          </div>
         </div>
+        {!isOwnExperience && (
+          <Button
+            variant="gradient"
+            // A fixed height, not `h-full`: that stretched the button to the
+            // height of a wrapped name beside it
+            className="h-10 w-full flex-shrink-0 rounded-full sm:w-auto"
+            onClick={() => setOpen(true)}
+          >
+            {/* Two bubbles, the smaller one in front. White to read against
+                the gradient. */}
+            <IconComponent
+              iconName="MessageMultiple02Icon"
+              size={18}
+              color="#FFFFFF"
+              className="mr-2"
+            />
+            Message host
+          </Button>
+        )}
       </div>
     </>
   );

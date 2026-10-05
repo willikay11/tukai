@@ -74,7 +74,7 @@ function AuthLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="h-full">
-      {/* The way out. Without it the auth screens were a dead end on the web —
+      {/* The way out. Without it the auth screens were a dead end on the web -
           a reader who opened one had only the browser's back button. */}
       <header className="fixed inset-x-0 top-0 z-20 flex items-center justify-between bg-white px-6 py-4">
         <Link href="/" aria-label="Tukai home">

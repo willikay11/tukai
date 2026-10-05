@@ -19,7 +19,7 @@ import { useCreateExperienceFlow } from './hooks/useCreateExperienceFlow';
 import { pickLatestDraft, selectDrafts } from './utils/draft-progress';
 
 // An unfinished draft is offered for resuming before the wizard opens. It is
-// not a stepper step — the step pills belong to the wizard only.
+// not a stepper step - the step pills belong to the wizard only.
 type CreateEntryState = 'gate' | 'wizard';
 
 export default function CreateExperiencePage() {
@@ -38,7 +38,7 @@ function CreateExperiencePageContent() {
   const userId = session?.user?.id ?? undefined;
 
   // Editing a specific draft (Hosting "Manage", or Continue draft) must land in
-  // the wizard directly — the resume screen would be a detour back to where
+  // the wizard directly - the resume screen would be a detour back to where
   // they just came from
   const experienceIdParam = searchParams.get('experienceId');
 
@@ -70,7 +70,7 @@ function CreateExperiencePageContent() {
     entryState === 'gate' && (sessionStatus === 'loading' || isLoadingDrafts);
 
   // The wizard is on screen either because the user chose to proceed, or
-  // because there is no draft to resume — the community guard applies to both
+  // because there is no draft to resume - the community guard applies to both
   const isWizardVisible = !isResolvingEntry && (entryState === 'wizard' || !latestDraft);
 
   const {
@@ -118,7 +118,7 @@ function CreateExperiencePageContent() {
     setEntryState('wizard');
   };
 
-  // No delete endpoint exists — cancelling takes the draft out of the draft
+  // No delete endpoint exists - cancelling takes the draft out of the draft
   // list, which is what "clear" needs to mean here
   const handleClearDraft = async () => {
     if (!latestDraft) return;
@@ -139,7 +139,7 @@ function CreateExperiencePageContent() {
     }
   };
 
-  // Wait before deciding — showing the wizard first and swapping to the resume
+  // Wait before deciding - showing the wizard first and swapping to the resume
   // screen once drafts arrive would be a jarring flash
   if (isResolvingEntry) {
     return (
@@ -239,7 +239,7 @@ function CreateExperiencePageContent() {
                 return;
               }
 
-              // The standalone review page is gone — the Preview step is where
+              // The standalone review page is gone - the Preview step is where
               // the creator checks their experience before publishing
               handlers.handleStepChange('preview');
             }}

@@ -25,7 +25,7 @@ const getExperience = cache(async (experienceId: string): Promise<Experience | n
 });
 
 const buildDescription = (experience: Experience): string => {
-  // Descriptions are stored as HTML — strip to plain text for meta tags
+  // Descriptions are stored as HTML - strip to plain text for meta tags
   const plain = sanitizeHtml(experience.description || '', {
     allowedTags: [],
     allowedAttributes: {},
@@ -80,7 +80,7 @@ export async function generateMetadata({
       locale: 'en_KE',
       // No `images` here on purpose: opengraph-image.tsx supplies a 1200×630
       // card, and an explicit list in generateMetadata would override it with
-      // the raw upload — which is what WhatsApp was refusing.
+      // the raw upload - which is what WhatsApp was refusing.
     },
     twitter: {
       card: 'summary_large_image',

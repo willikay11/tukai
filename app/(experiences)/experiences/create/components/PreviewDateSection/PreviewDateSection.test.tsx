@@ -66,7 +66,7 @@ describe('PreviewDateSection', () => {
       />,
     );
 
-    // Three days either side of the 15th–20th run, dimmed rather than active
+    // Three days either side of the 15th-20th run, dimmed rather than active
     expect(screen.getByText('12')).toBeInTheDocument();
     expect(screen.getByText('14')).toBeInTheDocument();
     expect(screen.getByText('21')).toBeInTheDocument();
@@ -182,7 +182,15 @@ describe('PreviewDateSection', () => {
       expect(screen.getByText('Recurs Every Monday, Wednesday & Friday')).toBeInTheDocument();
     });
 
+    /**
+     * A recurring strip lists only dates a customer could still book, so this
+     * one needs a clock from before its range - otherwise it starts failing the
+     * day those dates go by, which is what happened.
+     */
     it('renders a date strip with the matching weekdays available', () => {
+      jest.useFakeTimers({ doNotFake: ['performance'] });
+      jest.setSystemTime(new Date('2026-08-20T09:00:00Z'));
+
       render(
         <PreviewDateSection
           mode="recurring"
@@ -193,11 +201,13 @@ describe('PreviewDateSection', () => {
         />,
       );
 
-      // 27 Aug 2026 is a Thursday, so the strip runs Thu 27 – Sat 29
+      // 27 Aug 2026 is a Thursday, so the strip runs Thu 27 - Sat 29
       expect(screen.getByText('27')).toBeInTheDocument();
       expect(screen.getByText('28')).toBeInTheDocument();
       expect(screen.getByText('29')).toBeInTheDocument();
       expect(screen.getByText('August 2026')).toBeInTheDocument();
+
+      jest.useRealTimers();
     });
 
     it('displays "Not selected yet" when no slot is complete', () => {

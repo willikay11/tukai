@@ -10,7 +10,6 @@ import numeral from 'numeral';
 import { Bookmark } from '@/app/shared/components/Bookmark';
 import { EventSkeleton } from '@/app/shared/components/Cards';
 import { Pills } from '@/app/shared/components/Filters';
-import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motion';
 import { Button } from '@/components/ui/button';
@@ -19,6 +18,7 @@ import { useLocation } from '@/context/LocationContext';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { Photo, coverPhotoUrl, photoUrl } from '@/types/photo';
+import { formatDateAndTimeRange } from '@/utils/date-utils';
 import { haversineKm } from '@/utils/geo-utils';
 
 export const SingleExperience = ({
@@ -51,7 +51,7 @@ export const SingleExperience = ({
   }
 
   // Compact card for horizontal discover rows: single 4:3 image, dark
-  // bookmark circle, title, "City · N Kms", community and price lines
+  // bookmark circle, title, "City · N Kms", community, price and when it runs
   if (variant === 'row') {
     const coverPhoto = coverPhotoUrl(experience.photos, 'md');
 
@@ -65,6 +65,9 @@ export const SingleExperience = ({
     const metaLine = [experience.location?.city, distanceKm !== null ? `${distanceKm} Kms` : null]
       .filter(Boolean)
       .join(' · ');
+
+    // Null for an experience with no start date, rather than a stray comma
+    const when = formatDateAndTimeRange(experience.startDate, experience.endDate);
 
     return (
       <div className="flex flex-col">
@@ -88,20 +91,35 @@ export const SingleExperience = ({
           </div>
         </div>
 
-        <p className={cn('mt-2 text-base font-bold text-gray-900', TITLE_TINT)}>
-          {experience.title}
-        </p>
-        {metaLine && <p className="mt-0.5 text-sm text-gray-400">{metaLine}</p>}
+        {/* The community leads: it is who is running this, and it reads as the
+            line the rest of the card hangs off - the same order the community
+            feed's card uses */}
         {experience.hostCommunity && (
-          <span className="mt-2 inline-flex items-center gap-1.5 text-sm text-primary">
-            <IconComponent iconName="UserMultipleIcon" size={18} className="text-primary" />
+          <span className="mt-2 truncate text-sm text-primary">
             {experience.hostCommunity.title}
           </span>
         )}
+        <p
+          className={cn(
+            'text-base font-bold text-gray-900',
+            // Tight under the community line, but it still needs room of its
+            // own when there is no community above it
+            experience.hostCommunity ? 'mt-0.5' : 'mt-2',
+            TITLE_TINT,
+          )}
+        >
+          {experience.title}
+        </p>
+        {metaLine && <p className="mt-0.5 text-sm text-gray-400">{metaLine}</p>}
+        {/* `price_starts_from` is the cheapest ticket by definition, so this is
+            a floor whether or not the row tells us there are dearer ones - the
+            list endpoint returns no ticket data to judge that by */}
         <p className="mt-2 text-sm font-semibold text-gray-800">
+          <span className="font-normal text-gray-400">from </span>
           {experience.priceStartsFrom?.currency}{' '}
           {numeral(experience.priceStartsFrom?.amount).format('0,0')}/person
         </p>
+        {when && <p className="mt-0.5 text-sm text-gray-400">{when}</p>}
       </div>
     );
   }
@@ -130,7 +148,7 @@ export const SingleExperience = ({
               images={experience.photos
                 .filter((photo: Photo) => photo.mediaType === 'photo' && photo.photo)
                 .sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0))
-                // A card in a grid, not a gallery — the card rendition is
+                // A card in a grid, not a gallery - the card rendition is
                 // plenty, and the original can be several megabytes
                 .map((photo) => photoUrl(photo, 'md')!)}
               aspectRatio={type === 'discover' ? 'aspect-square' : 'aspect-[16/9]'}

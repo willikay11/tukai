@@ -46,7 +46,7 @@ export const FeaturedExperienceBanner = ({ experience }: FeaturedExperienceBanne
       coverPhoto={coverPhoto}
       title={experience.title}
       metaItems={metaItems}
-      ctaLabel={`Reserve a spot — ${experience.priceStartsFrom?.currency} ${experience.priceStartsFrom?.amount.toLocaleString()}`}
+      ctaLabel={`Reserve a spot - ${experience.priceStartsFrom?.currency} ${experience.priceStartsFrom?.amount.toLocaleString()}`}
       onCtaClick={() => router.push(experiencePath(experience))}
     />
   );

@@ -30,7 +30,7 @@ describe('PageContainer', () => {
   it('keeps the inset at every breakpoint', () => {
     render(<PageContainer variant="detail">content</PageContainer>);
 
-    // browse: 8/start-3 and 6/start-4 — detail steps in one column further
+    // browse: 8/start-3 and 6/start-4 - detail steps in one column further
     expect(column()).toHaveClass(
       '3xl:col-span-6',
       '3xl:col-start-4',

@@ -50,8 +50,8 @@ export const MomentsView = () => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const isDesktop = useIsDesktop();
 
-  // The masonry is photo-led. A moment with no media — or whose only media is a
-  // video / still-processing upload with photo: null — has nothing to show, and
+  // The masonry is photo-led. A moment with no media - or whose only media is a
+  // video / still-processing upload with photo: null - has nothing to show, and
   // would crash next/image if it reached one.
   const moments: Moment[] = useMemo(
     () =>

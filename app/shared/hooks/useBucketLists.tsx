@@ -6,7 +6,9 @@ import {
   deleteBucketList,
   fetchBucketList,
   fetchMyBucketLists,
+  fetchPublicBucketLists,
   joinBucketList,
+  leaveBucketList,
   removeBucketListItem,
   reorderBucketListItems,
   updateBucketList,
@@ -14,7 +16,7 @@ import {
 import { AddBucketListItemPayload, BucketList, CreateBucketListPayload } from '@/types/bucket-list';
 
 /**
- * Every list the reader can see — the ones they own and the ones they were
+ * Every list the reader can see - the ones they own and the ones they were
  * invited onto. The API returns them together; `isMember` is what tells the two
  * apart, so the split is made here rather than in a second request.
  */
@@ -23,6 +25,18 @@ export const useMyBucketLists = (enabled: boolean = true) =>
     queryKey: ['bucket-lists', 'mine'],
     queryFn: () => fetchMyBucketLists(),
     enabled,
+  });
+
+/**
+ * Every public list, for the Discover section. Needs no sign-in, so it is
+ * asked for whether or not there is a session.
+ */
+export const usePublicBucketLists = (enabled: boolean = true, pageSize = 16) =>
+  useQuery({
+    queryKey: ['bucket-lists', 'public', pageSize],
+    queryFn: () => fetchPublicBucketLists(1, pageSize),
+    enabled,
+    staleTime: 5 * 60 * 1000,
   });
 
 /** One list, with its items. */
@@ -67,7 +81,7 @@ export const useDeleteBucketList = () => {
 /**
  * A saved item is a bookmark that also belongs to a list, so saving one flips
  * `is_bookmarked` on the experience or place it points at. The lists holding it
- * are not the only thing that went stale — every card showing that experience
+ * are not the only thing that went stale - every card showing that experience
  * or place is now wrong until its query is re-read.
  */
 const invalidateSaved = (queryClient: ReturnType<typeof useQueryClient>, bucketListId: string) => {
@@ -104,6 +118,16 @@ export const useJoinBucketList = () => {
 
   return useMutation({
     mutationFn: (shareToken: string) => joinBucketList(shareToken),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bucket-lists'] }),
+  });
+};
+
+/** Steps off a shared list. The list stays; the reader is no longer a member. */
+export const useLeaveBucketList = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (bucketListId: string) => leaveBucketList(bucketListId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bucket-lists'] }),
   });
 };

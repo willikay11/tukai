@@ -53,7 +53,7 @@ const buildGoogleCalendarUrl = ({ experience }: BookingConfirmation): string => 
 };
 
 // PaymentStatusBadge's default map has no 'confirmed' key, which would fall
-// back to a grey badge — this is the override hook it exposes for exactly that
+// back to a grey badge - this is the override hook it exposes for exactly that
 const DetailRow = ({ label, value }: { label: string; value: string }) => (
   <div className="flex items-center justify-between gap-4">
     <span className="text-sm text-gray-500">{label}</span>
@@ -69,7 +69,7 @@ const BookingSuccessContent = () => {
   // ?purchaseId is what this page runs on: the purchase names its own ticket,
   // occurrence and experience, so nothing else has to be passed along.
   //
-  // ?experienceId is still honoured for links already in the wild — and for
+  // ?experienceId is still honoured for links already in the wild - and for
   // the booking panel, which cannot send an id it does not have: the purchase
   // POST returns an order and payment details, never a purchase.
   const reference = searchParams.get('ref');
@@ -87,7 +87,7 @@ const BookingSuccessContent = () => {
   const { data: experienceResponse } = useFetchSingleExperience(experienceId ?? '', true);
   const experience = experienceResponse?.data;
 
-  // The rest of the checkout, for the other line items — one purchase is one
+  // The rest of the checkout, for the other line items - one purchase is one
   // ticket, so a three-ticket booking is three rows
   const { data: purchasesResponse, isLoading: isLoadingPurchases } = useExperienceTicketPurchases(
     experienceId,
@@ -114,7 +114,7 @@ const BookingSuccessContent = () => {
     );
   }
 
-  // The purchase is the page — without it there is nothing truthful to render
+  // The purchase is the page - without it there is nothing truthful to render
   if (!data) {
     return (
       <main className="mx-auto w-full max-w-lg px-4 py-16 text-center">
@@ -134,7 +134,7 @@ const BookingSuccessContent = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard can be blocked by permissions — leave the label unchanged
+      // Clipboard can be blocked by permissions - leave the label unchanged
     }
   };
 

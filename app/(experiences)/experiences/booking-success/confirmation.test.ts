@@ -23,7 +23,7 @@ const experience = {
 } as unknown as Experience;
 
 describe('purchasesFromSameCheckout', () => {
-  // One purchase per ticket, and no order id on the row — the occurrence and
+  // One purchase per ticket, and no order id on the row - the occurrence and
   // the second they were created in are what tie a batch together
   it('keeps the rows bought together and drops an older booking', () => {
     const batch = [

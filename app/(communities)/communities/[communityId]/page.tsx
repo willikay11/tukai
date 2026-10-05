@@ -10,7 +10,6 @@ import { communityPath } from '@/utils/detail-paths';
 import { APP_ORIGIN, buildShareMetadata } from '@/utils/share-metadata';
 
 import { CommunityDetailContent } from './components/CommunityDetailContent';
-import { AuthGuard } from './components/authGuard';
 
 export async function generateMetadata({
   params,
@@ -34,11 +33,9 @@ export async function generateMetadata({
 }
 
 export default async function ViewCommunityPage({ params }: { params: { communityId: string } }) {
+  // No auth gate. A community is public to read - the actions inside it ask
+  // for a sign-in where they are pressed, rather than at the door.
   const session: Session | null = await getAuthSession();
-
-  if (!session) {
-    return <AuthGuard />;
-  }
 
   const communityResponse: ApiResponse = await fetchCommunity(params.communityId);
   const community: Community | undefined = communityResponse.data;
@@ -49,5 +46,5 @@ export default async function ViewCommunityPage({ params }: { params: { communit
     notFound();
   }
 
-  return <CommunityDetailContent community={community} currentUserId={session.user?.id ?? ''} />;
+  return <CommunityDetailContent community={community} currentUserId={session?.user?.id ?? ''} />;
 }

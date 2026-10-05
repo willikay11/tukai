@@ -5,4 +5,4 @@ export { DescriptionShowMore } from './DescriptionShowMore';
 export { GoogleMapComponent } from './GoogleMap';
 export { OpenInMapsLink } from './OpenInMapsLink';
 export { SocialLinks } from './SocialLinks';
-export { satoshi } from './fonts';
+export { appFont } from './fonts';

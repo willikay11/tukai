@@ -10,8 +10,9 @@ let isPending = false;
 let isSuccess = false;
 let isError = false;
 
-jest.mock('@/app/(experiences)/hooks/useComms', () => ({
-  useSendMessage: () => ({ mutate: sendMessage, isPending, isSuccess, isError }),
+// The dialog sends through the same hook as the inbox's composer
+jest.mock('@/app/shared/hooks/useMessages', () => ({
+  useSendMessageTo: () => ({ mutate: sendMessage, isPending, isSuccess, isError }),
 }));
 
 const toast = jest.fn();

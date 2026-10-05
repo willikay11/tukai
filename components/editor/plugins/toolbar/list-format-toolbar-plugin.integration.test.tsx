@@ -76,7 +76,7 @@ describe('ListFormatToolbarPlugin against a real editor', () => {
 
   /**
    * The reported bug. Shift+Enter keeps both lines in one paragraph, and a
-   * paragraph becomes one list item — so the line above was numbered along
+   * paragraph becomes one list item - so the line above was numbered along
    * with the one the writer picked.
    */
   it('numbers only the line the caret is in, not the one above the break', async () => {
@@ -118,7 +118,7 @@ describe('ListFormatToolbarPlugin against a real editor', () => {
     ]);
   });
 
-  // Splitting is for soft breaks only — a heading holding one is one block
+  // Splitting is for soft breaks only - a heading holding one is one block
   it('leaves a paragraph without line breaks whole', async () => {
     const user = userEvent.setup();
     seed('<p>First paragraph</p><p>A single unbroken paragraph</p>');
@@ -131,7 +131,7 @@ describe('ListFormatToolbarPlugin against a real editor', () => {
 
   /**
    * `@lexical/list` merges adjacent lists of the same type as a structural
-   * invariant — two of them re-merge even when split by hand — so numbering a
+   * invariant - two of them re-merge even when split by hand - so numbering a
    * paragraph under a list continues that list, as it does in other editors.
    */
   it('continues a list directly above it', async () => {

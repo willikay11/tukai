@@ -73,7 +73,7 @@ export const DateTimePicker = ({
                 aria-pressed={isSelected}
                 className={cn(
                   'flex h-[72px] w-[68px] flex-shrink-0 flex-col items-center justify-center gap-1 rounded-xl border transition-colors',
-                  // The light green the rest of the app selects with — the same
+                  // The light green the rest of the app selects with - the same
                   // treatment as the name presets above and the reservations
                   // calendar's day pills
                   isSelected

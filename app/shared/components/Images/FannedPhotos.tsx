@@ -17,6 +17,9 @@ const FAN_SIZES: Record<
     flankSizes: string;
     centreIcon: number;
     flankIcon: number;
+    /** The canvas tilts the flanks by 14°; the small fan sits at 12°. */
+    tiltLeft: string;
+    tiltRight: string;
   }
 > = {
   sm: {
@@ -27,15 +30,21 @@ const FAN_SIZES: Record<
     flankSizes: '28px',
     centreIcon: 16,
     flankIcon: 13,
+    tiltLeft: '-rotate-12',
+    tiltRight: 'rotate-12',
   },
+  // The canvas's own numbers for the card that closes a rail: a 60px centre
+  // over two 52px flanks, each tilted 14°
   md: {
-    overlap: '-space-x-[22px]',
-    centre: 'h-20 w-20 rounded-2xl',
-    flank: 'h-14 w-14 rounded-xl',
-    centreSizes: '80px',
-    flankSizes: '56px',
-    centreIcon: 28,
+    overlap: '-space-x-[18px]',
+    centre: 'h-[60px] w-[60px] rounded-[13px]',
+    flank: 'h-[52px] w-[52px] rounded-[11px]',
+    centreSizes: '60px',
+    flankSizes: '52px',
+    centreIcon: 24,
     flankIcon: 20,
+    tiltLeft: '-rotate-[14deg]',
+    tiltRight: 'rotate-[14deg]',
   },
 };
 
@@ -69,7 +78,7 @@ export const FannedPhotos = ({
   return (
     <div className={cn('flex items-center', style.overlap, className)}>
       {left && (
-        <div className={cn(tile, style.flank, 'z-0 -rotate-12')}>
+        <div className={cn(tile, style.flank, 'z-0', style.tiltLeft)}>
           <PhotoImage
             src={left}
             alt=""
@@ -93,7 +102,7 @@ export const FannedPhotos = ({
       </div>
 
       {right && (
-        <div className={cn(tile, style.flank, 'z-0 rotate-12')}>
+        <div className={cn(tile, style.flank, 'z-0', style.tiltRight)}>
           <PhotoImage
             src={right}
             alt=""

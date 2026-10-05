@@ -29,6 +29,10 @@ jest.mock('@hugeicons-pro/core-solid-rounded', () => ({
   Location01Icon: { name: 'Location01Icon' },
 }));
 
+jest.mock('@hugeicons-pro/core-bulk-rounded', () => ({
+  ShoppingBasketDone02Icon: { name: 'ShoppingBasketDone02Icon' },
+}));
+
 describe('IconComponent', () => {
   describe('rendering with twotone variant (default)', () => {
     it('renders valid twotone icon', () => {
@@ -204,6 +208,55 @@ describe('IconComponent', () => {
 
       const icon = screen.getByTestId('hugeicons-icon');
       expect(icon).toBeInTheDocument();
+    });
+  });
+
+  /**
+   * The style is the package an icon comes from, not a prop on the icon - so a
+   * variant only exists here once its package is a dependency.
+   */
+  describe('rendering with bulk variant', () => {
+    it('renders a bulk icon', () => {
+      render(<IconComponent iconName="ShoppingBasketDone02Icon" variant="bulk" />);
+
+      expect(screen.getByTestId('hugeicons-icon')).toHaveAttribute(
+        'data-icon',
+        'ShoppingBasketDone02Icon',
+      );
+    });
+
+    /**
+     * Bulk lists the icons it carries by name rather than importing the whole
+     * package, which the bundler cannot tree-shake. Anything not on that list
+     * draws nothing until a line is added for it.
+     */
+    it('returns null for a name the bulk list does not carry', () => {
+      const { container } = render(<IconComponent iconName="Calendar01Icon" variant="bulk" />);
+
+      expect(container.firstChild).toBeNull();
+    });
+
+    // Rather than quietly falling back to another style, which would draw the
+    // wrong glyph and look deliberate
+    it('does not fall back to another style', () => {
+      const { container } = render(<IconComponent iconName="Cancel01Icon" variant="bulk" />);
+
+      expect(container.firstChild).toBeNull();
+    });
+
+    it('takes the same size and colour as the others', () => {
+      render(
+        <IconComponent
+          iconName="ShoppingBasketDone02Icon"
+          variant="bulk"
+          size={21}
+          color="currentColor"
+        />,
+      );
+
+      const icon = screen.getByTestId('hugeicons-icon');
+      expect(icon).toHaveAttribute('data-size', '21');
+      expect(icon).toHaveAttribute('data-color', 'currentColor');
     });
   });
 });

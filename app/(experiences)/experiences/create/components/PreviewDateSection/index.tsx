@@ -48,8 +48,8 @@ const formatTime = (time: string | null) => {
 };
 
 // The date strip mirrors the customer's booking picker
-// (RecurringDateSlotPicker): it starts today — or the experience start,
-// whichever is later — and runs to the end date, capped at 30 days.
+// (RecurringDateSlotPicker): it starts today - or the experience start,
+// whichever is later - and runs to the end date, capped at 30 days.
 const MAX_STRIP_DAYS = 30;
 
 // Days shown either side of a multi-day run, for context
@@ -65,7 +65,7 @@ const buildStrip = (
   endDate: string | null,
   isEnabled: (date: moment.Moment) => boolean,
   // Recurring experiences run open-ended, so their strip lists upcoming dates
-  // only — the same window the customer can book. A multi-day experience is a
+  // only - the same window the customer can book. A multi-day experience is a
   // fixed run, so it shows all of its dates whether or not they have passed.
   { fromToday = false }: { fromToday?: boolean } = {},
 ): StripDay[] => {
@@ -180,7 +180,7 @@ const EmptyDateSection = ({ onEdit }: { onEdit?: () => void }) => (
 );
 
 /**
- * A fixed run of consecutive days — multi-day and itinerary experiences. Every
+ * A fixed run of consecutive days - multi-day and itinerary experiences. Every
  * date in the run is active, padded either side with a few surrounding days for
  * context, the way the off-days read in the recurring strip.
  */

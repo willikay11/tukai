@@ -5,7 +5,7 @@ import { parseApiError } from '@/utils/parseApiError';
 import { parseCamelToSnake, parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 /**
- * Bucket lists — a reader's saved experiences and places, and the people they
+ * Bucket lists - a reader's saved experiences and places, and the people they
  * share them with.
  *
  * These were mocked in-memory while the endpoints 404'd. They answer now (401
@@ -26,6 +26,29 @@ export const fetchMyBucketLists = async (page = 1, pageSize = 24): Promise<ApiRe
       status: error.response?.status || 500,
       success: false,
       message: parseApiError(error.response?.data, 'Could not load your bucket lists'),
+    };
+  }
+};
+
+/**
+ * Every list anyone has made public.
+ *
+ * Unauthenticated by design - the endpoint says so - so this uses the plain
+ * `api` instance. A reader who is not signed in still sees the section.
+ */
+export const fetchPublicBucketLists = async (page = 1, pageSize = 16): Promise<ApiResponse> => {
+  try {
+    const res = await api.get(`/v1/accounts/bucket-lists/public/`, {
+      params: { page, page_size: pageSize },
+    });
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load public bucket lists'),
     };
   }
 };
@@ -148,7 +171,7 @@ export const removeBucketListItem = async (
 /**
  * Opens a shared list by its token.
  *
- * Public — the whole point of a share link is that it works before the reader
+ * Public - the whole point of a share link is that it works before the reader
  * has an account.
  */
 export const fetchSharedBucketList = async (shareToken: string): Promise<ApiResponse> => {
@@ -184,6 +207,25 @@ export const joinBucketList = async (shareToken: string): Promise<ApiResponse> =
 };
 
 /** The link to hand out, minted on demand. */
+/**
+ * Step off a list someone shared with you.
+ *
+ * The list itself is untouched: a public one stays readable, it simply stops
+ * being one of yours.
+ */
+export const leaveBucketList = async (bucketListId: string): Promise<ApiResponse> => {
+  try {
+    const api = await apiWithToken();
+    await api.delete(`/v1/accounts/bucket-lists/${bucketListId}/members/leave/`);
+
+    return { status: 204, success: true } as ApiResponse;
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'Could not leave this list'));
+  }
+};
+
 export const fetchBucketListShare = async (bucketListId: string): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();
@@ -203,7 +245,7 @@ export const fetchBucketListShare = async (bucketListId: string): Promise<ApiRes
 /**
  * Sets the order items appear in, as a list of item ids.
  *
- * The whole order is sent rather than a moved id and a destination — the API
+ * The whole order is sent rather than a moved id and a destination - the API
  * takes the final sequence, so a reorder is one request however many things
  * moved.
  */

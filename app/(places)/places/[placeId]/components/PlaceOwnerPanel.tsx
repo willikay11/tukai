@@ -27,7 +27,7 @@ const OWNER_ACTIONS: {
     icon: 'PlusSignIcon',
     title: 'New experience',
     detail: 'Run something at this place and list it for people to book.',
-    // TODO: seed the create flow with this place — it holds `about.placeId`
+    // TODO: seed the create flow with this place - it holds `about.placeId`
     // but does not read one from the URL yet
     href: () => '/experiences/create',
   },

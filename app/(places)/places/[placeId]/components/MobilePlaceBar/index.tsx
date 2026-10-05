@@ -19,7 +19,7 @@ type SheetView = 'reservation' | 'claim';
  * scroll position.
  *
  * Below `lg` the reservation column is hidden entirely, so this bar is the
- * only way in to booking. Sharing a moment opens the composer itself — the
+ * only way in to booking. Sharing a moment opens the composer itself - the
  * moments posted here are already a section of the page, so a list in between
  * would be a step to nowhere.
  *
@@ -47,8 +47,8 @@ export const MobilePlaceBar = ({ placeId, placeName }: { placeId: string; placeN
   // announcing the place is unclaimed.
   const isUnclaimed = !isLoadingOwnership && ownership?.success === true && !ownership.data;
 
-  // The sheet holds the reservation panel either way — it resolves an owner to
-  // the manage actions itself — so only the label has to know
+  // The sheet holds the reservation panel either way - it resolves an owner to
+  // the manage actions itself - so only the label has to know
   const { isManager } = usePlaceManager(placeId);
 
   return (

@@ -1,7 +1,7 @@
 import moment from 'moment';
 
 /**
- * The date maths behind the reservations calendar — shared by the experiences
+ * The date maths behind the reservations calendar - shared by the experiences
  * reserved tab and a place's own reservations, which show the same month
  * stepper and day pills over different rows.
  *
@@ -11,7 +11,7 @@ export type CalendarItem = { start: string | null };
 
 export const dayKey = (date: Date | string): string => moment(date).format('YYYY-MM-DD');
 
-// Only the days that actually have bookings — an empty day pill is noise, and a
+// Only the days that actually have bookings - an empty day pill is noise, and a
 // full month of them buries the handful that matter
 export const buildActiveDays = <T extends CalendarItem>(
   items: T[],

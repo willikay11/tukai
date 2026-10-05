@@ -28,7 +28,7 @@ describe('SavedExperienceCard', () => {
   /**
    * `price_starts_from` is documented as a string but comes back as
    * { amount, currency }, like every other money field. Rendering it straight
-   * put an object into JSX, which React refuses — and took the whole page down
+   * put an object into JSX, which React refuses - and took the whole page down
    * with "Experiences could not load".
    */
   it('reads the price out of the money object it actually gets', () => {

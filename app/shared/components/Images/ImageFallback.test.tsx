@@ -12,7 +12,7 @@ describe('ImageFallback', () => {
     expect(container.firstChild).toHaveClass('bg-gray-50');
   });
 
-  // The photo is missing, not the meaning — the surrounding card or link
+  // The photo is missing, not the meaning - the surrounding card or link
   // already carries the accessible name
   it('hides itself from assistive tech', () => {
     const { container } = render(<ImageFallback />);

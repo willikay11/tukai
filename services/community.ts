@@ -1,4 +1,3 @@
-import { getAuthSession } from '@/lib/auth';
 import { ApiResponse } from '@/types/apiResponse';
 import { CommunityPostsQueryParams, CreateCommunity } from '@/types/community';
 import { assertValidImageFiles } from '@/utils/images';
@@ -53,13 +52,9 @@ export async function getCommunities(
 
 export async function fetchCommunity(communityId: string) {
   try {
-    const session: any = await getAuthSession();
-
-    const response = await api.get(`/v1/communities/${communityId}`, {
-      headers: {
-        Authorization: `Bearer ${session?.user?.accessToken}`,
-      },
-    });
+    // No Authorization header: signed out this sent "Bearer undefined", which
+    // the API rejects - and the community page is public now.
+    const response = await api.get(`/v1/communities/${communityId}`);
     return {
       status: response.status,
       success: true,
@@ -95,7 +90,7 @@ export async function joinCommunity(communityId: string) {
 }
 
 /**
- * Leaving is done through `remove-member` — the API has no dedicated leave or
+ * Leaving is done through `remove-member` - the API has no dedicated leave or
  * unfollow route (both 404). The endpoint is documented as owner/admin only,
  * so a regular member removing themselves may be rejected by the backend; the
  * error is surfaced to the caller rather than swallowed.
@@ -286,7 +281,7 @@ export async function submitCommunityVerification(communityId: string): Promise<
   }
 }
 
-/** One supporting document — PDF, JPEG or PNG, up to 10 MB. */
+/** One supporting document - PDF, JPEG or PNG, up to 10 MB. */
 export async function uploadVerificationDocument(
   communityId: string,
   documentType: string,

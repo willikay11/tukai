@@ -90,7 +90,7 @@ export const ReservationSummary = ({
       {/* ⚠️ The design shows a deposit taken up front. The API cannot support
           that: no deposit amount exists on a place or its reservation profile,
           and its own pay endpoint is documented as "Pay for an ACCEPTED booking
-          request" — so payment can only follow the venue's acceptance. */}
+          request" - so payment can only follow the venue's acceptance. */}
       <p className="flex items-start gap-2 text-xs text-gray-400">
         <IconComponent
           iconName="InformationCircleIcon"

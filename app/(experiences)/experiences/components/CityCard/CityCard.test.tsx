@@ -34,4 +34,23 @@ describe('CityCard', () => {
 
     expect(screen.getByText('100+ experiences')).toBeInTheDocument();
   });
+
+  // The Discover rail's shape: a wide, short tile with the name centred over
+  // a photo left bright
+  describe('the banner variant', () => {
+    it('is wide and short rather than the taller card', () => {
+      const { container } = renderCard({ variant: 'banner' });
+
+      expect(container.querySelector('a')).toHaveClass('aspect-[8/3]');
+      expect(container.querySelector('a')).not.toHaveClass('h-[130px]');
+    });
+
+    // It is a way into the city, with no room for a second line
+    it('leaves the count out even when one is given', () => {
+      renderCard({ variant: 'banner', experienceCount: 7 });
+
+      expect(screen.getByText('Nairobi')).toBeInTheDocument();
+      expect(screen.queryByText('7 experiences')).not.toBeInTheDocument();
+    });
+  });
 });

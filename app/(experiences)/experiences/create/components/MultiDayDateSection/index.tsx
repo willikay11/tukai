@@ -29,7 +29,7 @@ export const MultiDayDateSection = ({
   onEndTimeChange,
   errors,
 }: MultiDaySectionProps) => {
-  // Times only need ordering when both ends fall on the same day — across
+  // Times only need ordering when both ends fall on the same day - across
   // different days an earlier end time is perfectly valid
   const isSameDay = !!startDate && !!endDate && startDate === endDate;
   const endTimeOrderError =
@@ -46,6 +46,10 @@ export const MultiDayDateSection = ({
             onChange={onStartDateChange}
             minDate={new Date()}
             placeholder="Start date"
+            // Both ends shade the span between them, so the pair reads as one
+            // range rather than as two unrelated days
+            rangeStart={startDate || undefined}
+            rangeEnd={endDate || undefined}
           />
           {errors.multiDayStartDate && (
             <p className="mt-1 text-xs text-red-500">{errors.multiDayStartDate}</p>
@@ -71,10 +75,12 @@ export const MultiDayDateSection = ({
           <DatePicker
             value={endDate || undefined}
             onChange={onEndDateChange}
-            // The experience can't end before it starts — same constraint as
+            // The experience can't end before it starts - same constraint as
             // the itinerary and recurrence date pickers
             minDate={startDate ? new Date(startDate) : new Date()}
             placeholder="End date"
+            rangeStart={startDate || undefined}
+            rangeEnd={endDate || undefined}
           />
           {errors.multiDayEndDate && (
             <p className="mt-1 text-xs text-red-500">{errors.multiDayEndDate}</p>

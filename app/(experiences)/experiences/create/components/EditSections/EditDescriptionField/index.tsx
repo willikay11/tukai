@@ -12,7 +12,7 @@ export const EditDescriptionField = ({ value, onChange, error }: EditDescription
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium text-gray-800">Add your experience description</label>
-      <Editor initialHtml={value} onHtmlChange={onChange} />
+      <Editor initialHtml={value} onHtmlChange={onChange} minHeight={120} />
       {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
   );

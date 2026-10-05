@@ -1,0 +1,14 @@
+// Mock for @hugeicons-pro/core-bulk-rounded (ESM package jest can't parse).
+// See core-twotone-rounded.js for why the Proxy is shaped this way.
+module.exports = new Proxy(
+  {},
+  {
+    has: () => true,
+    get: (_, name) => {
+      if (name === '__esModule') return true;
+      // `variant` lets a test assert WHICH package the icon came from,
+      // which is the only thing that distinguishes one style from another
+      return { name: String(name), variant: 'bulk' };
+    },
+  },
+);

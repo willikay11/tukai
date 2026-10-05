@@ -120,6 +120,34 @@ describe('BookingPanel purchase flow', () => {
     promoPreviewResponse = promoPreviewSuccess;
   });
 
+  /**
+   * The fixture's occurrences are dated 27 Aug 2026, and the panel only offers
+   * a date that has not passed - so without a fixed clock every test here
+   * starts failing the day those dates go by, which is what happened.
+   *
+   * Only the clock is faked; the timers userEvent needs are left alone.
+   */
+  beforeEach(() => {
+    jest.useFakeTimers({
+      doNotFake: [
+        'setTimeout',
+        'clearTimeout',
+        'setInterval',
+        'clearInterval',
+        'setImmediate',
+        'clearImmediate',
+        'queueMicrotask',
+        'requestAnimationFrame',
+        'cancelAnimationFrame',
+        'nextTick',
+        'performance',
+      ],
+    });
+    jest.setSystemTime(new Date('2026-08-20T09:00:00Z'));
+  });
+
+  afterEach(() => jest.useRealTimers());
+
   const selectTicketAndSafePaymentOptions = async (user: ReturnType<typeof userEvent.setup>) => {
     await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
     // Email delivery avoids the WhatsApp phone requirement, but still needs a
@@ -129,30 +157,6 @@ describe('BookingPanel purchase flow', () => {
   };
 
   describe('discount codes', () => {
-    // The fixture's occurrences are dated 27 Aug 2026, so the panel only offers
-    // them from a day before that. Only the clock is faked — the timers
-    // userEvent needs are left alone.
-    beforeEach(() => {
-      jest.useFakeTimers({
-        doNotFake: [
-          'setTimeout',
-          'clearTimeout',
-          'setInterval',
-          'clearInterval',
-          'setImmediate',
-          'clearImmediate',
-          'queueMicrotask',
-          'requestAnimationFrame',
-          'cancelAnimationFrame',
-          'nextTick',
-          'performance',
-        ],
-      });
-      jest.setSystemTime(new Date('2026-08-20T09:00:00Z'));
-    });
-
-    afterEach(() => jest.useRealTimers());
-
     const applyCode = async (user: ReturnType<typeof userEvent.setup>, code = 'SAVE10') => {
       await user.type(screen.getByLabelText('Discount Code'), code);
       await user.click(screen.getByRole('button', { name: 'Apply' }));
@@ -442,7 +446,7 @@ describe('BookingPanel purchase flow', () => {
 
     expect(mockMutate).not.toHaveBeenCalled();
     expect(screen.getByText('Please select at least one ticket.')).toBeInTheDocument();
-    // One phone error, from the WhatsApp delivery contact — the M-Pesa field
+    // One phone error, from the WhatsApp delivery contact - the M-Pesa field
     // that produced the second one has been removed
     expect(screen.getAllByText('Please enter a valid phone number.')).toHaveLength(1);
   });
@@ -477,7 +481,7 @@ describe('BookingPanel purchase flow', () => {
   });
 });
 
-// Itinerary experiences have no slot templates — the occurrence arrives with
+// Itinerary experiences have no slot templates - the occurrence arrives with
 // slotTemplate: null, which used to crash on `slotTemplate.startTime`
 describe('BookingPanel for an experience without slot templates', () => {
   const itineraryExperience = {
@@ -593,9 +597,7 @@ describe('when there is no occurrence to select', () => {
     fireEvent.click(screen.getByRole('button', { name: /Pay/ }));
 
     await waitFor(() =>
-      expect(
-        screen.getByText('Just a moment — still loading available dates.'),
-      ).toBeInTheDocument(),
+      expect(screen.getByText('Just a moment, still loading available dates.')).toBeInTheDocument(),
     );
   });
 

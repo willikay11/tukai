@@ -16,7 +16,7 @@ export type User = {
 };
 
 /**
- * A user as another record links to them — an owner, a member, whoever added
+ * A user as another record links to them - an owner, a member, whoever added
  * something. The API returns this shape wherever a person is referenced rather
  * than fully described.
  */

@@ -219,7 +219,7 @@ export const ItineraryDayPill = ({
     }
   };
 
-  // Cleanup — flush on unmount (unless parent is already saving)
+  // Cleanup - flush on unmount (unless parent is already saving)
   useEffect(() => {
     return () => {
       if (saveTimerRef.current) {
@@ -558,7 +558,7 @@ export const ItineraryDayPill = ({
             .map((a) => a.placeId!)}
         />
 
-        {/* Delete confirmation — the day and its activities go with it */}
+        {/* Delete confirmation - the day and its activities go with it */}
         <AlertDialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>

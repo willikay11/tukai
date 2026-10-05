@@ -60,7 +60,7 @@ interface PhotoUploaderProps {
    *
    * The endpoint differs by what the photos belong to, so it is the caller's:
    * this component knows nothing of experiences or places. Left out, removal is
-   * local only — which is what a form that applies its removals on its own save
+   * local only - which is what a form that applies its removals on its own save
    * wants, as the edit-place form does.
    */
   onDeleteExisting?: (photoId: string) => Promise<unknown>;
@@ -68,7 +68,7 @@ interface PhotoUploaderProps {
 
 /**
  * The drag context, present only when the grid can be reordered. Without it the
- * children render as they are — `useSortable` needs a `DndContext` above it, so
+ * children render as they are - `useSortable` needs a `DndContext` above it, so
  * a non-sortable grid must not be given one.
  */
 const PhotoGridShell = ({
@@ -108,7 +108,7 @@ const PhotoGridShell = ({
         {children}
       </SortableContext>
 
-      {/* Drag overlay — shows floating photo while dragging */}
+      {/* Drag overlay - shows floating photo while dragging */}
       <DragOverlay dropAnimation={null}>
         {activePhoto && (
           <div
@@ -166,7 +166,7 @@ export const PhotoUploader = ({
   // Find the currently dragged photo
   const activePhoto = activeId ? (photos.find((p) => p.id === activeId) ?? null) : null;
 
-  // Drag sensors — 8px threshold prevents accidental drag on tap
+  // Drag sensors - 8px threshold prevents accidental drag on tap
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -200,7 +200,7 @@ export const PhotoUploader = ({
     setActiveId(event.active.id as string);
   };
 
-  // Handle drag end — reorder the array
+  // Handle drag end - reorder the array
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveId(null);
 
@@ -260,7 +260,7 @@ export const PhotoUploader = ({
         );
       }
 
-      // Advisory only — these files still upload
+      // Advisory only - these files still upload
       if (warnings.length > 0) {
         warnings.forEach((warning) =>
           toast({
@@ -283,10 +283,10 @@ export const PhotoUploader = ({
           const tempId = `temp-${Date.now()}-${Math.random()}`;
 
           if (imageNeedsCrop(width, height)) {
-            // Queue for cropping — will convert to data URL after adding to preview
+            // Queue for cropping - will convert to data URL after adding to preview
             toCrop.push({ file, objectUrl, tempId });
           } else {
-            // Already landscape — add directly with data URL
+            // Already landscape - add directly with data URL
             URL.revokeObjectURL(objectUrl);
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -323,7 +323,7 @@ export const PhotoUploader = ({
         }
       }
 
-      // Process portrait images — convert to data URLs and add to preview
+      // Process portrait images - convert to data URLs and add to preview
       if (toCrop.length > 0) {
         const portraitPhotos: FormPhoto[] = [];
 
@@ -443,7 +443,7 @@ export const PhotoUploader = ({
     [photos, onDeleteExisting, onPhotoDelete, onPhotoFilesChange, toast],
   );
 
-  // Generate stable IDs for dnd-kit — both existing and new photos have stable IDs
+  // Generate stable IDs for dnd-kit - both existing and new photos have stable IDs
   const photoIds = photos.map((photo) => photo.id);
 
   const hasReachedMax = photos.length >= maxPhotos;
@@ -460,7 +460,7 @@ export const PhotoUploader = ({
         </div>
 
         {/* The grid, wrapped in a drag context only where an order can be
-            persisted — a place's photos have no endpoint that would keep one */}
+            persisted - a place's photos have no endpoint that would keep one */}
         <PhotoGridShell
           sortable={sortable}
           sensors={sensors}
@@ -546,7 +546,7 @@ export const PhotoUploader = ({
           <p>Best results with landscape photos (16:9 or 4:3)</p>
         </div> */}
 
-        {/* Drag hint — only show if 2+ photos */}
+        {/* Drag hint - only show if 2+ photos */}
         {sortable && photos.length > 1 && (
           <p className="text-xs text-muted-foreground">
             Drag photos to reorder · First photo is the cover
@@ -556,7 +556,7 @@ export const PhotoUploader = ({
         {error && <p className="text-xs text-red-500">{error}</p>}
       </div>
 
-      {/* Crop dialog — renders on top when a portrait image is selected */}
+      {/* Crop dialog - renders on top when a portrait image is selected */}
       {currentCrop && (
         <ImageCropDialog
           imageSrc={currentCrop.objectUrl}

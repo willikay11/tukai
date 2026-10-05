@@ -9,8 +9,8 @@ import { PlaceBookingRequest } from '@/types/placeReservation';
 // A reservation is a Purchase, so it carries the same lifecycle a ticket does.
 // The reader needs to know whether the venue has actually said yes.
 //
-// Declined, cancelled and expired all mean the same thing to the reader —
-// there is no table — so they share one treatment.
+// Declined, cancelled and expired all mean the same thing to the reader -
+// there is no table - so they share one treatment.
 const NO_TABLE = 'bg-red-100 text-red-600';
 
 const STATUS_STYLE: Record<string, { label: string; className: string }> = {
@@ -74,7 +74,7 @@ export const PlaceReservationCard = ({
         </div>
       </div>
 
-      {/* ⚠️ No edit endpoint exists — the API offers accept/decline/pay/cancel
+      {/* ⚠️ No edit endpoint exists - the API offers accept/decline/pay/cancel
           only, so a change means cancelling and requesting again. */}
       {CANCELLABLE.has(reservation.status) && (
         <Button

@@ -24,6 +24,54 @@ const nextConfig = {
         destination: '/control-center/:path*',
         permanent: true,
       },
+      {
+        source: '/control-centre',
+        destination: '/control-center',
+        permanent: false,
+      },
+      {
+        source: '/control-centre/:path*',
+        destination: '/control-center/:path*',
+        permanent: false,
+      },
+      {
+        source: '/community/:path*',
+        destination: '/communities/:path*',
+        permanent: false,
+      },
+      {
+        source: '/discover',
+        destination: '/',
+        permanent: false,
+      },
+      {
+        source: '/moments/:momentId',
+        destination: '/moments?momentId=:momentId',
+        permanent: false,
+      },
+      {
+        source: '/experiences/:experienceId/reserve',
+        destination: '/experiences/:experienceId',
+        permanent: false,
+      },
+      {
+        source: '/experiences/:experienceId/rate',
+        destination: '/experiences/:experienceId',
+        permanent: false,
+      },
+      {
+        source: '/places/:placeId/reviews/:reviewId',
+        destination: '/places/:placeId',
+        permanent: false,
+      },
+    ];
+  },
+  async headers() {
+    return [
+      {
+        source: '/.well-known/apple-app-site-association',
+        headers: [{ key: 'Content-Type', value: 'application/json' }],
+      },
     ];
   },
   images: {

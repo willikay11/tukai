@@ -17,7 +17,7 @@ interface SubscriptionModalFlowProps {
 }
 
 // The whole subscription journey inside one modal: intro → billing →
-// connecting → checkout. Step wiring only — the billing API call lives
+// connecting → checkout. Step wiring only - the billing API call lives
 // unchanged in PaymentDetails and payment runs through the existing Paystack
 // authorization-url iframe.
 export const SubscriptionModalFlow = ({ onClose }: SubscriptionModalFlowProps) => {
@@ -69,9 +69,7 @@ export const SubscriptionModalFlow = ({ onClose }: SubscriptionModalFlowProps) =
       {step === 'connecting' && (
         <div className="flex flex-col items-center py-12 text-center">
           <Loader size="large" />
-          <p className="mt-4 text-base font-bold text-gray-900">
-            Creating your secure checkout...
-          </p>
+          <p className="mt-4 text-base font-bold text-gray-900">Creating your secure checkout...</p>
           <p className="mt-1 text-sm text-gray-500">Connecting to Paystack</p>
         </div>
       )}

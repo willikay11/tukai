@@ -6,6 +6,14 @@ import { User } from '@/types/user';
 import { Photo } from './photo';
 import { Ticket } from './ticket';
 
+/** The five kinds the API's `experience_type` filter accepts. */
+export type ExperienceType =
+  | 'standard'
+  | 'itinerary'
+  | 'restaurant_reservation'
+  | 'cinema_reservation'
+  | 'guide_booking';
+
 export type Experience = {
   id: string;
   // Human-readable identifier, and what the detail URL uses. The API resolves
@@ -19,14 +27,14 @@ export type Experience = {
   recurrenceRule?: string | null;
   // Returned by the API alongside the dates; drives the itinerary vs standard
   // split (see inferUIExperienceType)
-  experienceType?: 'standard' | 'itinerary';
+  experienceType?: ExperienceType;
   currency: string;
   isPaid: boolean;
   ticketSalesClosingDuration: number;
   ticketSalesClosingUnit: 'minutes' | 'hours' | 'days';
   ticketSalesClosingCondition: 'before_end' | 'before_start';
   priceStartsFrom: { amount: number; currency: string };
-  // Remaining inventory, not a flag — the API sends a count here (and the same
+  // Remaining inventory, not a flag - the API sends a count here (and the same
   // count again as available_tickets)
   ticketsAvailable: number;
   availableTickets?: number;
@@ -60,7 +68,7 @@ export type Experience = {
   // Who absorbs Tukai's commission. Drives each ticket's buyer_price.
   feesAllocation?: 'host_pays' | 'customer_pays' | 'split' | null;
   dateCreated: string;
-  // Not documented on every response — parseSnakeToCamel maps `date_updated`
+  // Not documented on every response - parseSnakeToCamel maps `date_updated`
   // when the API sends it. Read it through getLastSavedAt(), which falls back
   // to dateCreated so callers never depend on it being present.
   dateUpdated?: string;
@@ -70,6 +78,9 @@ export type Experience = {
     dateCreated: string;
     status: 'invited' | 'accepted' | 'declined';
   }[];
+  // The communities this experience was shared with. Read-only on the detail
+  // serializer; the create flow sends them as `invitedCommunityIds`.
+  communities?: { id: string; title: string; photos?: Photo[] }[];
 };
 
 export type ExperienceOccurrence = {
@@ -119,6 +130,11 @@ export type CreateExperience = {
   experienceType?: 'standard' | 'itinerary';
   itineraryMode?: 'fixed' | 'flexible';
   itineraryDurationDays?: number;
+  // When ticket sales stop, relative to the experience. One setting for the
+  // whole experience, which every ticket's expiry is then read from.
+  ticketSalesClosingDuration?: number;
+  ticketSalesClosingUnit?: 'days' | 'hours' | 'minutes';
+  ticketSalesClosingCondition?: 'before_start' | 'before_end';
 };
 
 export type CreateExperienceTicket = {

@@ -8,7 +8,7 @@ export type Photo = {
   order?: number;
   /**
    * Pre-rendered sizes the API generates alongside the upload. All four can be
-   * null — most of the library predates them — so every read falls back to the
+   * null - most of the library predates them - so every read falls back to the
    * original, which is always there.
    *
    * `photo` and `photo_url` are the same original file under two names.
@@ -23,14 +23,14 @@ export type PhotoItem = { type: 'existing'; id: string; url: string } | { type: 
 
 /**
  * Which rendition a surface wants:
- *  - `thumb` — avatars, search rows, strips: roughly 100px wide
- *  - `md`    — cards in a grid or a scroll row: roughly 300–400px wide
- *  - `lg`    — heroes and detail galleries: full width
+ *  - `thumb` - avatars, search rows, strips: roughly 100px wide
+ *  - `md`    - cards in a grid or a scroll row: roughly 300-400px wide
+ *  - `lg`    - heroes and detail galleries: full width
  */
 export type PhotoSize = 'thumb' | 'md' | 'lg';
 
 /** What each size falls back to. Only ever upwards: a request for `md` may be
- *  served the large file or the original, but never the thumbnail — a blurred
+ *  served the large file or the original, but never the thumbnail - a blurred
  *  card is worse than a slow one. The original ends every chain. */
 const FALLBACKS: Record<PhotoSize, (keyof Photo)[]> = {
   thumb: ['photoWebpThumbUrl', 'photoWebpMdUrl', 'photoWebpLgUrl', 'photoUrl', 'photo'],

@@ -19,7 +19,7 @@ import { moneyAmount } from '@/utils/money';
  * One saved thing, drawn from the bookmark the list item wraps.
  *
  * Not the discover cards: those take a whole Experience or Place, where an item
- * carries only the handful of fields the bookmark inlines — title, photo,
+ * carries only the handful of fields the bookmark inlines - title, photo,
  * price, dates, city. Enough for a card, and one request rather than one per
  * saved thing.
  */
@@ -104,7 +104,7 @@ const SavedCard = ({
           className="object-cover"
         />
 
-        {/* Already on a list, so the basket reads as done — and still opens the
+        {/* Already on a list, so the basket reads as done - and still opens the
             picker, which is how it is moved onto another one */}
         <div className="absolute right-2 top-2">
           <Bookmark

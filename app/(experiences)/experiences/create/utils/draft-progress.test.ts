@@ -18,7 +18,7 @@ const draft = (overrides: Partial<Experience> = {}) =>
   }) as unknown as Experience;
 
 describe('buildDraftSteps', () => {
-  it('omits wallet — completion belongs to the user, not the draft', () => {
+  it('omits wallet - completion belongs to the user, not the draft', () => {
     const ids = buildDraftSteps(draft()).map((step) => step.id);
 
     expect(ids).not.toContain('wallet');
@@ -38,7 +38,7 @@ describe('buildDraftSteps', () => {
 
     expect(byId['dates-type']).toBe('done');
     expect(byId.about).toBe('done');
-    // No tickets yet — this is where the creator left off
+    // No tickets yet - this is where the creator left off
     expect(byId['tickets']).toBe('current');
     expect(byId.guests).toBe('pending');
     expect(byId.preview).toBe('pending');

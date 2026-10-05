@@ -4,7 +4,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { cn } from '@/lib/utils';
 
 /**
- * Shown in place of a photo that failed to load — a broken CDN link, a deleted
+ * Shown in place of a photo that failed to load - a broken CDN link, a deleted
  * upload, an offline client. Deliberately quiet: it fills the space the photo
  * would have taken so the layout does not collapse, without drawing attention
  * to a failure the reader can do nothing about.
@@ -20,7 +20,7 @@ export const ImageFallback = ({
   label?: string;
   iconSize?: number;
   className?: string;
-  // Only for a runtime aspect ratio Tailwind cannot express statically — see
+  // Only for a runtime aspect ratio Tailwind cannot express statically - see
   // PhotoImage, which uses it to hold a masonry tile's shape open
   style?: CSSProperties;
 }) => (
@@ -30,7 +30,7 @@ export const ImageFallback = ({
       className,
     )}
     style={style}
-    // The photo is missing, not the meaning — callers carry their own labels
+    // The photo is missing, not the meaning - callers carry their own labels
     aria-hidden="true"
   >
     <IconComponent iconName="ImageNotFound01Icon" size={iconSize} color="currentColor" />

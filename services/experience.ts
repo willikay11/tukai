@@ -2,6 +2,7 @@ import { ca } from 'date-fns/locale';
 
 import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
+import { ExperienceType } from '@/types/experience';
 import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
 import { ItineraryDayPayload } from '@/types/itinerary';
 import { assertValidImageFiles } from '@/utils/images';
@@ -19,18 +20,20 @@ export type ExperiencesQueryParams = {
   reserved_by?: string;
   hosted_by?: string;
   // Experiences belonging to one community. NOTE: `host_community` and
-  // `hosted_by_community` are silently ignored by the API — only `community`
+  // `hosted_by_community` are silently ignored by the API - only `community`
   // actually filters.
   community?: string;
-  // Experiences held at one place — verified filtering
+  // Experiences held at one place - verified filtering
   place?: string;
   page?: number;
   page_size?: number;
   invited?: boolean;
   date?: string;
-  // Server-side filter; the list response does not echo the field back
-  experience_type?: 'standard' | 'itinerary';
-  // Geo scoping — the API expects `lat`/`long` (see fetchPlaces for the same pair)
+  // Server-side filter; the list response does not echo the field back.
+  // `guide_booking` is a tour led by a guide, `*_reservation` a table or a
+  // seat - each one is an experience auto-provisioned behind a profile.
+  experience_type?: ExperienceType;
+  // Geo scoping - the API expects `lat`/`long` (see fetchPlaces for the same pair)
   lat?: number;
   long?: number;
 };
@@ -38,7 +41,7 @@ export type ExperiencesQueryParams = {
 export async function fetchExperiences(params: ExperiencesQueryParams): Promise<ApiResponse> {
   try {
     // User-scoped queries need the bearer token. Anonymously, the list endpoint
-    // can only return public/published rows — so a host's own drafts (and their
+    // can only return public/published rows - so a host's own drafts (and their
     // reservations) are invisible without it.
     const needsAuth = Boolean(params.invited || params.hosted_by || params.reserved_by);
 
@@ -151,6 +154,18 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
 
     if (data.meetingTime !== undefined && data.meetingTime !== null) {
       formData.append('meeting_time', data.meetingTime);
+    }
+
+    if (data.ticketSalesClosingDuration !== undefined) {
+      formData.append('ticket_sales_closing_duration', String(data.ticketSalesClosingDuration));
+    }
+
+    if (data.ticketSalesClosingUnit !== undefined) {
+      formData.append('ticket_sales_closing_unit', data.ticketSalesClosingUnit);
+    }
+
+    if (data.ticketSalesClosingCondition !== undefined) {
+      formData.append('ticket_sales_closing_condition', data.ticketSalesClosingCondition);
     }
 
     if (data.experienceType) {
@@ -330,6 +345,37 @@ export async function updateExperienceTicket(
   }
 }
 
+/**
+ * Stop or restart selling one ticket type.
+ *
+ * Pausing blocks new purchases and booking requests and hides the type from
+ * anyone but the host. It does not touch tickets already bought.
+ */
+const setTicketSales = async (
+  ticketId: string,
+  action: 'pause' | 'resume',
+): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.post(
+      `/v1/experiences/tickets/${ticketId}/${action}-sales/`,
+    );
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'An unexpected error occurred'));
+  }
+};
+
+export const pauseTicketSales = (ticketId: string) => setTicketSales(ticketId, 'pause');
+export const resumeTicketSales = (ticketId: string) => setTicketSales(ticketId, 'resume');
+
 export const deleteExperienceTicket = async (
   experienceId: string,
   ticketId: string,
@@ -376,6 +422,23 @@ export const addGuestToExperience = async (id: string, email: string) => {
   }
 };
 
+/**
+ * Take a guest off the experience. Their invite stops working; anything they
+ * have already bought is a purchase and is untouched.
+ */
+export const removeGuestFromExperience = async (id: string, guestId: string) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    await axiosInstance.delete(`/v1/experiences/${id}/guests/${guestId}/`);
+
+    return { status: 204, success: true };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'Could not remove this guest'));
+  }
+};
+
 export const publishExperience = async (id: string): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();
@@ -397,7 +460,7 @@ export const publishExperience = async (id: string): Promise<ApiResponse> => {
 };
 
 // There is no delete-experience endpoint, so discarding a draft means
-// cancelling it — it stops being an unfinished draft without destroying the
+// cancelling it - it stops being an unfinished draft without destroying the
 // row. Mirrors publishExperience: same verb, same shape, different action.
 //
 // Per the spec this "cancels the experience, refunding any completed
@@ -482,6 +545,174 @@ export const deleteExperiencePhoto = async (photoId: string): Promise<ApiRespons
   }
 };
 
+/**
+ * What attendees said about an experience.
+ *
+ * The endpoint answers with a bare array rather than a page, and can refuse
+ * outright (403) on an experience whose ratings the reader may not see - which
+ * is a quiet empty state, not an error to shout about.
+ */
+export const fetchExperienceRatings = async (experienceId: string): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.get(`/v1/experiences/${experienceId}/ratings/`);
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load reviews'),
+    };
+  }
+};
+
+/**
+ * Leave a review.
+ *
+ * Sent as multipart because the photos ride along on the same request as
+ * `new_photos`. The API decides who may: an attendee of an experience that has
+ * ended, who has not already rated it, and it says which of those failed - so
+ * its own message is what the reader is shown.
+ */
+export const createExperienceRating = async (
+  experienceId: string,
+  data: { rating: number; review?: string; photos?: File[] },
+) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const formData = new FormData();
+
+    formData.append('rating', String(data.rating));
+    if (data.review) formData.append('review', data.review);
+    (data.photos ?? []).forEach((photo) => formData.append('new_photos', photo));
+
+    const response = await axiosInstance.post(
+      `/v1/experiences/${experienceId}/ratings/`,
+      formData,
+      { headers: { 'Content-Type': undefined } },
+    );
+
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'Could not post this review'));
+  }
+};
+
+/** A photo added to a review that is already posted. */
+export const addExperienceRatingPhoto = async (
+  experienceId: string,
+  ratingId: string,
+  photo: File,
+  caption?: string,
+) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const formData = new FormData();
+
+    formData.append('photo', photo);
+    if (caption) formData.append('caption', caption);
+
+    const response = await axiosInstance.post(
+      `/v1/experiences/${experienceId}/ratings/${ratingId}/photos/`,
+      formData,
+      { headers: { 'Content-Type': undefined } },
+    );
+
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'Could not add this photo'));
+  }
+};
+
+/**
+ * Co-hosting.
+ *
+ * Adding a co-host sends them an invite; the API records it PENDING and they
+ * become a co-host when they accept. The invites endpoint is the only way to see
+ * that an invite was ever sent, since the experience lists accepted co-hosts
+ * only.
+ */
+export const fetchCoHostInvites = async (experienceId: string): Promise<ApiResponse> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.get(`/v1/experiences/${experienceId}/co-hosts/invites/`);
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load co-host invites'),
+    };
+  }
+};
+
+export const addCoHosts = async (experienceId: string, userIds: string[]) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.post(`/v1/experiences/${experienceId}/co-hosts/`, {
+      co_hosts: userIds,
+    });
+
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'Could not invite this co-host'));
+  }
+};
+
+export const removeCoHost = async (experienceId: string, coHostId: string) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    await axiosInstance.delete(`/v1/experiences/${experienceId}/co-hosts/${coHostId}/`);
+
+    return { status: 204, success: true };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'Could not remove this co-host'));
+  }
+};
+
+/** The invited person's own answer. Both take an empty body. */
+export const respondToCoHostInvite = async (
+  experienceId: string,
+  inviteId: number,
+  answer: 'accept' | 'decline',
+) => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.post(
+      `/v1/experiences/${experienceId}/co-hosts/invites/${inviteId}/${answer}/`,
+      {},
+    );
+
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, `Could not ${answer} this co-host invite`));
+  }
+};
+
 export const searchUsers = async (query: string): Promise<ApiResponse> => {
   try {
     const axiosInstance = await apiWithToken();
@@ -562,7 +793,7 @@ export interface TicketPurchasePayload {
   confirmation_email?: string;
   whatsapp_phone?: string;
   /**
-   * Checked by the API before anything else about the order — a code it will
+   * Checked by the API before anything else about the order - a code it will
    * not take comes back as a validation error against this field, so a preview
    * is what keeps that off the Pay button.
    */
@@ -581,7 +812,7 @@ export interface PromoCodePreviewPayload {
  * The endpoint is public and takes the purchase body plus the code; it answers
  * `{ valid: false, reason }` for a code it will not take, and the discount for
  * one it will. Its documented body is the promo-code viewset's own serializer,
- * which is not what it accepts — this shape was read off the API itself.
+ * which is not what it accepts - this shape was read off the API itself.
  */
 export const previewPromoCode = async (data: PromoCodePreviewPayload): Promise<ApiResponse> => {
   try {
@@ -633,7 +864,7 @@ export const purchaseExperienceTicketV2 = async (
 export const fetchTicketPurchases = async (params: {
   user?: string;
   // The documented filters are `ticket`, `experience`, `user` and `status`.
-  // This used to send `ticket__experience`, which the API does not recognise —
+  // This used to send `ticket__experience`, which the API does not recognise -
   // and DRF drops unknown query params silently, so a host's Sales tab was
   // listing every purchase they could see rather than this experience's.
   experience?: string;
@@ -652,7 +883,7 @@ export const fetchTicketPurchases = async (params: {
 };
 
 /**
- * One purchase — "the purchase is the ticket", so this is a single ticket with
+ * One purchase - "the purchase is the ticket", so this is a single ticket with
  * its number, QR, occurrence and payment details.
  *
  * Requires the buyer's token: the endpoint scopes to purchases they can see.
@@ -668,7 +899,7 @@ export const fetchPurchase = async (purchaseId: string): Promise<ApiResponse> =>
   };
 };
 
-// Returns the ticket PDF bytes — the URL requires the Bearer token, so a plain
+// Returns the ticket PDF bytes - the URL requires the Bearer token, so a plain
 // link/new-tab navigation would 401; callers open the blob as an object URL.
 export const downloadTicketPdf = async (purchaseId: string): Promise<Blob> => {
   const axiosInstance = await apiWithToken();

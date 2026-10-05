@@ -26,11 +26,11 @@ interface EditTicketModalProps {
 
 /**
  * A labelled row around the shared {@link Input}. `prefix` renders inside the
- * field, before the value — the currency on the amount row.
+ * field, before the value - the currency on the amount row.
  */
 /**
  * A labelled row around the shared {@link Input}. `prefix` renders inside the
- * field, before the value — the currency on the amount row.
+ * field, before the value - the currency on the amount row.
  *
  * Forwards its ref: these fields are wired with react-hook-form's `register`,
  * whose ref React would otherwise drop on a plain function component, leaving

@@ -81,7 +81,7 @@ describe('buildCommunityGroups', () => {
 });
 
 describe('tintForCategory', () => {
-  // The API gives categories an icon but no colour, so it is derived — and must
+  // The API gives categories an icon but no colour, so it is derived - and must
   // not change between renders or pages
   it('is stable for the same category', () => {
     expect(tintForCategory('cat-hiking')).toEqual(tintForCategory('cat-hiking'));

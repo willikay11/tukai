@@ -4,11 +4,14 @@ import {
   ExperiencesQueryParams,
   SlotTemplatePayload,
   TicketPurchasePayload,
+  addCoHosts,
   addExperiencePhotos,
+  addExperienceRatingPhoto,
   addGuestToExperience,
   bookmarkExperience,
   cancelExperience,
   createExperience,
+  createExperienceRating,
   createExperienceTicket,
   createItineraryDay,
   createSlotTemplate,
@@ -16,16 +19,23 @@ import {
   deleteExperienceTicket,
   deleteItineraryDay,
   deleteSlotTemplate,
+  fetchCoHostInvites,
   fetchExperience,
   fetchExperienceOccurrences,
+  fetchExperienceRatings,
   fetchExperiences,
   fetchItineraryDays,
   fetchPurchase,
   fetchSlotTemplates,
   fetchTicketPurchases,
-  publishExperience,
+  pauseTicketSales,
   previewPromoCode,
+  publishExperience,
   purchaseExperienceTicketV2,
+  removeCoHost,
+  removeGuestFromExperience,
+  respondToCoHostInvite,
+  resumeTicketSales,
   searchUsers,
   updateExperience,
   updateExperienceTicket,
@@ -54,6 +64,10 @@ export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean)
       params.lat,
       params.long,
       params.experience_type,
+      // Without these two, every place's experiences shared one cache entry
+      // and each served the last one's results
+      params.place,
+      params.community,
     ],
     queryFn: async () => await fetchExperiences(params),
     enabled: enabled,
@@ -189,6 +203,15 @@ export const useAddGuestToExperience = (experienceId: string) => {
   });
 };
 
+export const useRemoveExperienceGuest = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (guestId: string) => await removeGuestFromExperience(experienceId, guestId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['experience', experienceId] }),
+  });
+};
+
 export const usePublishExperience = (id: string) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -234,6 +257,88 @@ export const useDeleteExperiencePhoto = () => {
     mutationFn: async (photoId: string) => await deleteExperiencePhoto(photoId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['experience'] });
+    },
+  });
+};
+
+export const useCreateExperienceRating = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { rating: number; review?: string; photos?: File[] }) =>
+      await createExperienceRating(experienceId, data),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['experience-ratings', experienceId] }),
+  });
+};
+
+/** A photo added to a review that is already posted. */
+export const useAddExperienceRatingPhoto = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      ratingId,
+      photo,
+      caption,
+    }: {
+      ratingId: string;
+      photo: File;
+      caption?: string;
+    }) => await addExperienceRatingPhoto(experienceId, ratingId, photo, caption),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['experience-ratings', experienceId] }),
+  });
+};
+
+/** Every review on an experience. The average and the count come off these. */
+export const useExperienceRatings = (experienceId: string, enabled = true) =>
+  useQuery({
+    queryKey: ['experience-ratings', experienceId],
+    queryFn: async () => await fetchExperienceRatings(experienceId),
+    enabled: enabled && Boolean(experienceId),
+  });
+
+export const useCoHostInvites = (experienceId: string, enabled = true) =>
+  useQuery({
+    queryKey: ['co-host-invites', experienceId],
+    queryFn: async () => await fetchCoHostInvites(experienceId),
+    enabled: enabled && Boolean(experienceId),
+  });
+
+export const useAddCoHosts = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (userIds: string[]) => await addCoHosts(experienceId, userIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['co-host-invites', experienceId] });
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
+    },
+  });
+};
+
+export const useRemoveCoHost = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (coHostId: string) => await removeCoHost(experienceId, coHostId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['co-host-invites', experienceId] });
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
+    },
+  });
+};
+
+export const useRespondToCoHostInvite = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ inviteId, answer }: { inviteId: number; answer: 'accept' | 'decline' }) =>
+      await respondToCoHostInvite(experienceId, inviteId, answer),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['co-host-invites', experienceId] });
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
     },
   });
 };
@@ -363,8 +468,8 @@ export const useFetchItineraryDays = (experienceId: string | null) =>
  *
  * A mutation rather than a query: applying a code is something the reader does,
  * and re-running it is what re-checks a code after the order changes. The
- * endpoint answers 200 either way — an unusable code comes back as
- * `{ valid: false, reason }` rather than an error — so the caller reads
+ * endpoint answers 200 either way - an unusable code comes back as
+ * `{ valid: false, reason }` rather than an error - so the caller reads
  * `valid`, not the status.
  */
 export const usePreviewPromoCode = () =>
@@ -372,3 +477,23 @@ export const usePreviewPromoCode = () =>
     mutationFn: async (data: Parameters<typeof previewPromoCode>[0]) =>
       await previewPromoCode(data),
   });
+
+/**
+ * Stop or restart selling one ticket type.
+ *
+ * The host's own view has to re-read afterwards: paused state lives on the
+ * ticket as `ticket_sales_paused_at`, and the experience carries its tickets,
+ * so both caches are dropped.
+ */
+export const useSetTicketSales = (experienceId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ ticketId, paused }: { ticketId: string; paused: boolean }) =>
+      paused ? await pauseTicketSales(ticketId) : await resumeTicketSales(ticketId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['experience', experienceId] });
+      queryClient.invalidateQueries({ queryKey: ['experience-tickets', experienceId] });
+    },
+  });
+};

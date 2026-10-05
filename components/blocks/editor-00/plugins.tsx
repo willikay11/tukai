@@ -32,14 +32,14 @@ export function Plugins() {
           // (the create-experience side panel, the inline edit panels), where
           // the controls used to compress into each other.
           //
-          // `[&>*]:flex-shrink-0` is what makes it scroll — without it the
+          // `[&>*]:flex-shrink-0` is what makes it scroll - without it the
           // children give up their width to fit and there is nothing to
           // overflow. The dropdowns portal to the body, so the clipping this
           // container introduces does not reach them.
           <div className="flex items-center gap-1 overflow-x-auto border-b bg-gray-100 p-2 scrollbar-hide [&>*]:flex-shrink-0">
             {/* The block-format dropdown that used to lead the toolbar is gone:
-                it offered Paragraph and H1–H3, which the heading toggles now
-                cover — pressing the active one drops back to a paragraph. */}
+                it offered Paragraph and H1-H3, which the heading toggles now
+                cover - pressing the active one drops back to a paragraph. */}
             <FontFormatToolbarPlugin />
 
             <Separator orientation="vertical" className="mx-2 !h-4" />

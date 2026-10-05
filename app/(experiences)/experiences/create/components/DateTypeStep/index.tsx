@@ -189,7 +189,7 @@ export const DateTypeStep = ({
   );
 
   // The picker blocks an end time before the start time, but moving the start
-  // time afterwards can still leave the pair out of order — flag it right away
+  // time afterwards can still leave the pair out of order - flag it right away
   // instead of waiting for the step to be submitted
   const endTimeOrderError = isEndAfterStart(formData.startTime, formData.endTime)
     ? null

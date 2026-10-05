@@ -18,7 +18,6 @@ import { FeaturedExperienceBanner } from '@/app/(experiences)/experiences/compon
 import { HostingCard } from '@/app/(experiences)/experiences/components/HostingCard';
 import { ReservedTab } from '@/app/(experiences)/experiences/components/ReservedTab';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
-import { SharedBucketListCard } from '@/app/(experiences)/experiences/components/SharedBucketListCard';
 import {
   cityExperiencesHref,
   shouldShowSeeAll,
@@ -42,7 +41,7 @@ import { formatLongDateWithOrdinal } from '@/utils/date-utils';
 import { groupTicketPurchases } from '@/utils/ticket-utils';
 
 // Saved and Hosting are no longer surfaced. Their components and render
-// branches below are intentionally left in place — only the tabs are gone, so
+// branches below are intentionally left in place - only the tabs are gone, so
 // nothing routes to them.
 const TABS = [
   { value: 'all', label: 'All' },
@@ -63,7 +62,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const isReserved = activeTab === 'reserved';
   const userId = session?.user?.id;
 
-  // ⚠️ Bucket lists are served by a MOCK service — no backend endpoints exist yet
+  // ⚠️ Bucket lists are served by a MOCK service - no backend endpoints exist yet
   // One endpoint returns both the lists the reader owns and the ones they were
   // invited onto; the owner is what tells them apart
   const { data: bucketListsResponse, isLoading: isLoadingMine } = useMyBucketLists(isSaved);
@@ -88,7 +87,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const reservations: Reservation[] = groupTicketPurchases(purchasesResponse?.data?.results ?? []);
   const reservedExperiences: Experience[] = reservedExperiencesResponse?.data?.results ?? [];
 
-  // "N invites waiting" — experiences the user was invited to. Same query
+  // "N invites waiting" - experiences the user was invited to. Same query
   // InvitedExperiences uses; the count is the API total, not the page length.
   const { data: invitedResponse } = useExperiences(
     { page: 1, page_size: 50, invited: isReserved ? true : undefined },
@@ -107,7 +106,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
 
   const [downloadingKey, setDownloadingKey] = useState<string | null>(null);
 
-  // Per-ticket PDFs only — no bulk endpoint, so download each in sequence
+  // Per-ticket PDFs only - no bulk endpoint, so download each in sequence
   const handleDownloadAll = async (reservation: Reservation) => {
     setDownloadingKey(reservation.key);
     try {
@@ -134,7 +133,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const today = moment().format('YYYY-MM-DD');
   const tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
 
-  // No featured endpoint exists — the default list is the closest available
+  // No featured endpoint exists - the default list is the closest available
   // query, and its first result stands in as the featured hero
   const { data: discoverResponse, isLoading: isLoadingDiscover } = useExperiences(
     { page: 1, page_size: 9 },
@@ -273,7 +272,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
           )}
         </div>
       ) : (
-        /* Reserved / Saved / Hosting — the Experiences wrapper positions
+        /* Reserved / Saved / Hosting - the Experiences wrapper positions
            itself inside this 12-col grid; the Saved tab has its own layout. */
         <>
           {activeTab === 'saved' && (
@@ -322,7 +321,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                 )}
               </section>
 
-              {/* Shared with you — hidden entirely when empty */}
+              {/* Shared with you - hidden entirely when empty */}
               {sharedBucketLists.length > 0 && (
                 <section>
                   <h2 className="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">
@@ -330,7 +329,11 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                   </h2>
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {sharedBucketLists.map((bucketList) => (
-                      <SharedBucketListCard key={bucketList.id} bucketList={bucketList} />
+                      <BucketListCard
+                        key={bucketList.id}
+                        bucketList={bucketList}
+                        href={`/bucket-lists/${bucketList.id}`}
+                      />
                     ))}
                   </div>
                 </section>

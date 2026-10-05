@@ -23,7 +23,7 @@ interface SalesTabProps {
 }
 
 // A completed purchase is settled in full. There is no partial-payment field on
-// the purchase record, so "Partially Paid" cannot be represented — see the
+// the purchase record, so "Partially Paid" cannot be represented - see the
 // filter comment below.
 // Overrides the badge's default map entirely, so every status the list can show
 // has to be listed here or it falls back to a neutral grey badge

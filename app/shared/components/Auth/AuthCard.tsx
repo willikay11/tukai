@@ -14,7 +14,7 @@ import { SocialAuthButtons } from './SocialAuthButtons';
  * The way in, wherever it is asked for.
  *
  * Social first, because it is one tap, with email a step behind it rather than
- * a page away — the reader stays on the card either way. The dialog over a
+ * a page away - the reader stays on the card either way. The dialog over a
  * place and the sign-up page render this same component, so the two cannot
  * drift apart again.
  */
@@ -55,7 +55,7 @@ export const AuthCard = ({
             <span className="h-px flex-1 bg-gray-200" />
           </div>
 
-          {/* A step on the same card, not a page away — the reader keeps
+          {/* A step on the same card, not a page away - the reader keeps
               whatever brought them here */}
           <button
             type="button"

@@ -109,7 +109,7 @@ describe('TimePicker', () => {
   });
 
   // A time saved before this picker existed, or set through the API, is not on
-  // the half hour — opening the list must not silently drop or round it
+  // the half hour - opening the list must not silently drop or round it
   it('keeps an off-step value selectable', async () => {
     const user = setup();
     render(<TimePicker value="09:15" />);

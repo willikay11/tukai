@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
  * The way into the composer: the same pill field the moments feed uses for
  * comments, rather than a button.
  *
- * The field is read-only — pressing it opens the composer, which owns the text
+ * The field is read-only - pressing it opens the composer, which owns the text
  * and the photos, so there is only ever one draft.
  */
 export const MomentComposerTrigger = ({

@@ -5,8 +5,8 @@ import { Ticket } from '@/types/ticket';
 /**
  * Editing a ticket that has already sold.
  *
- * The name is locked once anything has sold — buyers hold tickets under that
- * name — so only the amount and quantity are editable, which is what the write
+ * The name is locked once anything has sold - buyers hold tickets under that
+ * name - so only the amount and quantity are editable, which is what the write
  * serializer accepts anyway (name is sent back unchanged).
  */
 export const editTicketSchema = (soldCount: number) =>

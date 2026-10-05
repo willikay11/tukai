@@ -1,4 +1,4 @@
-import { formatShortDate, inferUIExperienceType } from './date-utils';
+import { formatCardDateTime, formatShortDate, inferUIExperienceType } from './date-utils';
 
 describe('inferUIExperienceType', () => {
   it('maps itinerary API type to itinerary UI type', () => {
@@ -56,7 +56,7 @@ describe('inferUIExperienceType', () => {
   });
 
   it('maps a recurring experience spanning multiple days to one-time, not multi-day', () => {
-    // Recurring experiences span first-to-last occurrence (here 27–29 Aug) but
+    // Recurring experiences span first-to-last occurrence (here 27-29 Aug) but
     // must stay on the one-time base type so the recurring tickets layout renders.
     expect(
       inferUIExperienceType('standard', '2026-08-27T14:00:00', '2026-08-29T21:00:00', true),
@@ -79,16 +79,16 @@ describe('inferUIExperienceType', () => {
 describe('formatReservationDateTime', () => {
   const { formatReservationDateTime } = jest.requireActual('./date-utils');
 
-  it('formats a same-day range as "Sat 4 July · 6:00 AM — 4:00 PM"', () => {
+  it('formats a same-day range as "Sat 4 July · 6:00 AM - 4:00 PM"', () => {
     // Local timestamps (no Z) so the assertion is timezone-independent
     expect(formatReservationDateTime('2026-07-04T06:00:00', '2026-07-04T16:00:00')).toBe(
-      'Sat 4 July · 6:00 AM — 4:00 PM',
+      'Sat 4 July · 6:00 AM - 4:00 PM',
     );
   });
 
   it('formats midnight and noon correctly', () => {
     expect(formatReservationDateTime('2026-07-06T00:00:00', '2026-07-06T12:30:00')).toBe(
-      'Mon 6 July · 12:00 AM — 12:30 PM',
+      'Mon 6 July · 12:00 AM - 12:30 PM',
     );
   });
 });
@@ -104,5 +104,34 @@ describe('formatShortDate', () => {
 
   it('returns an empty string for an unparseable date', () => {
     expect(formatShortDate('not-a-date')).toBe('');
+  });
+});
+
+describe('formatCardDateTime', () => {
+  // The weekday matters on a card: a tour on Saturday reads differently from
+  // one on Tuesday, and the 24-hour clock is how the times are entered
+  it('is the weekday, the date and a 24-hour range', () => {
+    expect(formatCardDateTime('2026-10-07T10:00:00', '2026-10-07T12:00:00')).toBe(
+      'Wed 7 Oct, 10:00 - 12:00',
+    );
+  });
+
+  it('pads a single-digit hour and minute', () => {
+    expect(formatCardDateTime('2026-10-11T06:30:00', '2026-10-11T09:00:00')).toBe(
+      'Sun 11 Oct, 06:30 - 09:00',
+    );
+  });
+
+  it('gives just the start when there is no end', () => {
+    expect(formatCardDateTime('2026-10-07T10:00:00', null)).toBe('Wed 7 Oct, 10:00');
+  });
+
+  it('ignores an end that cannot be read', () => {
+    expect(formatCardDateTime('2026-10-07T10:00:00', 'later')).toBe('Wed 7 Oct, 10:00');
+  });
+
+  it('is null without a usable start', () => {
+    expect(formatCardDateTime(null, '2026-10-07T12:00:00')).toBeNull();
+    expect(formatCardDateTime('whenever', null)).toBeNull();
   });
 });

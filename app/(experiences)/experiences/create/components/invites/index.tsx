@@ -58,8 +58,8 @@ export const CreateExperienceInvites = ({
   const [invitedMembers, setInvitedMembers] = useState<InvitedMember[]>(initialInvitedMembers);
   const [invitedCommunities, setInvitedCommunities] = useState<Community[]>([]);
   // This starts empty and is only filled by the picker, so passing through the
-  // step untouched used to PATCH invitedCommunityIds: [] — wiping any
-  // previously invited communities — and announce "Communities saved" for a
+  // step untouched used to PATCH invitedCommunityIds: [] - wiping any
+  // previously invited communities - and announce "Communities saved" for a
   // save that never needed to happen. That toast was still the one on screen by
   // the time the reader reached Publish.
   const [hasEditedCommunities, setHasEditedCommunities] = useState(false);
@@ -86,7 +86,7 @@ export const CreateExperienceInvites = ({
   );
 
   const handleNext = async () => {
-    // Nothing to save if the reader never touched the picker — just move on
+    // Nothing to save if the reader never touched the picker - just move on
     if (experienceId && experience && hasEditedCommunities) {
       try {
         await updateExperience({
@@ -121,7 +121,7 @@ export const CreateExperienceInvites = ({
 
   const handleMemberInvited = async (members: InvitedMember[]) => {
     // Comma-separated entry can add several at once, so every newcomer is
-    // invited — not just the first
+    // invited - not just the first
     const newMembers = members.filter(
       (member) => !invitedMembers.some((existing) => existing.id === member.id),
     );
@@ -190,7 +190,7 @@ export const CreateExperienceInvites = ({
           or are a member of.
         </p>
 
-        {/* No backend lookup here — guests are invited by typing addresses,
+        {/* No backend lookup here - guests are invited by typing addresses,
             comma-separated for several at once */}
         <InviteMembers
           invitedMembers={invitedMembers}

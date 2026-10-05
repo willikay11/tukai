@@ -18,7 +18,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
 
 const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: Wrapper });
 
-// `cache` is a server-only React API — the page uses it to share one fetch
+// `cache` is a server-only React API - the page uses it to share one fetch
 // between generateMetadata and the render. The client build jsdom loads does
 // not export it, so stand it in as a pass-through.
 jest.mock('react', () => ({
@@ -184,6 +184,11 @@ const mockExperienceData = {
     },
   },
 };
+
+// Planning has its own tests; it needs the plan store, which this page does not
+jest.mock('@/app/shared/components/Plans', () => ({
+  PlanThisButton: () => null,
+}));
 
 describe('ViewExperiencePage', () => {
   beforeEach(() => {

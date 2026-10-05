@@ -86,7 +86,7 @@ describe('CommunityDiscoverCard facepile', () => {
     expect(pile).toHaveClass('-space-x-2');
   });
 
-  // The count is everyone not pictured, taken from the API total — not from the
+  // The count is everyone not pictured, taken from the API total - not from the
   // handful of records the row happened to carry
   it('counts the remaining members from the API total', () => {
     const { container } = render(
@@ -144,7 +144,7 @@ describe('CommunityDiscoverCard facepile', () => {
     expect(facepile(container)).toHaveTextContent('+2');
   });
 
-  // One request per card — worth it on the grid, wasteful on the Discover row
+  // One request per card - worth it on the grid, wasteful on the Discover row
   it('does not fetch unless asked to', () => {
     render(<CommunityDiscoverCard community={community({ membersCount: 4 })} />);
 

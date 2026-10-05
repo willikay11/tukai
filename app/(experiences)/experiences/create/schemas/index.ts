@@ -4,7 +4,7 @@ import { z } from 'zod';
  * Validation for the create-experience wizard.
  *
  * These schemas are the single source of truth for both the rules and the
- * form's shape — step form types are derived with `z.infer` rather than
+ * form's shape - step form types are derived with `z.infer` rather than
  * declared by hand, which is what previously let duplicate declarations drift
  * from each other and from runtime.
  *
@@ -70,7 +70,7 @@ const dateTypeShape = z.object({
 export type DateTypeFormValues = z.infer<typeof dateTypeShape>;
 
 /**
- * Rules only — the shape is already guaranteed by TypeScript. Wrapping in
+ * Rules only - the shape is already guaranteed by TypeScript. Wrapping in
  * `z.custom` matters: a strict object schema that fails on shape would skip
  * `superRefine` entirely and silently report no business-rule errors.
  */
@@ -110,7 +110,7 @@ export const dateTypeSchema = z.custom<DateTypeFormValues>().superRefine((value,
       require(['multiDayEndDate'], 'End date must be after start date');
     }
 
-    // Only meaningful on a single day — across days an earlier end time is fine
+    // Only meaningful on a single day - across days an earlier end time is fine
     if (
       value.multiDayStartDate &&
       value.multiDayStartDate === value.multiDayEndDate &&
@@ -244,7 +244,7 @@ export const buildTicketsSchema = ({ experiencePricing, experienceType }: Ticket
     const require = (path: (string | number)[], message: string) =>
       ctx.addIssue({ code: z.ZodIssueCode.custom, path, message });
 
-    // Both of these short-circuit in the original validator — nothing per-item
+    // Both of these short-circuit in the original validator - nothing per-item
     // is reported until there is at least one ticket and a chosen mode
     if (value.items.length === 0) {
       require(['items'], 'At least one ticket is required');
@@ -265,7 +265,7 @@ export const buildTicketsSchema = ({ experiencePricing, experienceType }: Ticket
         require(['tickets', index, 'quantity'], 'Quantity must be greater than 0');
       }
 
-      // A zero-cost ticket is allowed on a paid experience — the amount must
+      // A zero-cost ticket is allowed on a paid experience - the amount must
       // be entered, but 0 is a valid price
       if (experiencePricing === 'paid') {
         if (ticket.amount === null || ticket.amount === undefined) {
@@ -321,7 +321,7 @@ export const buildTicketDraftSchema = ({ isPaid }: { isPaid: boolean }) =>
       require(['quantity'], 'Quantity must be greater than 0');
     }
 
-    // 0 is a valid price — a free ticket on an otherwise paid experience
+    // 0 is a valid price - a free ticket on an otherwise paid experience
     if (isPaid) {
       if (draft.amount === null || draft.amount === undefined) {
         require(['amount'], 'Amount is required');

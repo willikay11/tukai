@@ -29,7 +29,7 @@ describe('motion tokens', () => {
     expect(token).toContain('motion-safe:');
   });
 
-  // Colour is not motion — a hover that only recolours stays on for everyone,
+  // Colour is not motion - a hover that only recolours stays on for everyone,
   // and the global reduced-motion rule shortens it to an instant change
   it.each(Object.entries(colourOnly))('%s is a colour change, not a movement', (_name, token) => {
     expect(token).toMatch(/transition-colors/);

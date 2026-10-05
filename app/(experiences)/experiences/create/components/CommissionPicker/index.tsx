@@ -5,7 +5,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 interface CommissionPickerProps {
   value: 'host' | 'customer' | 'split';
   onChange: (value: 'host' | 'customer' | 'split') => void;
-  // Each pick is saved to the experience — locked while that is in flight so
+  // Each pick is saved to the experience - locked while that is in flight so
   // two rapid picks cannot land out of order
   isSaving?: boolean;
 }
@@ -25,7 +25,7 @@ export const CommissionPicker = ({ value, onChange, isSaving = false }: Commissi
           (Tukai charges a 4% commission, who should pay this commission?)
         </span>
       </label>
-      {/* The pills are inline-flex, so `space-y-2` spaced nothing — vertical
+      {/* The pills are inline-flex, so `space-y-2` spaced nothing - vertical
           margins between siblings do not separate items sharing a line */}
       <div className="flex flex-wrap items-center gap-2">
         {commissionOptions.map(

@@ -183,6 +183,43 @@
         }
       ]
     },
+    "/accounts/bucket-lists/public/": {
+      "get": {
+        "operationId": "accounts_bucket-lists_public",
+        "description": "List all bucket lists with public visibility. No authentication required.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BucketList"
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      },
+      "parameters": []
+    },
     "/accounts/bucket-lists/{id}/": {
       "get": {
         "operationId": "accounts_bucket-lists_read",
@@ -422,7 +459,7 @@
     "/accounts/bucket-lists/{id}/members/accept/": {
       "post": {
         "operationId": "accounts_bucket-lists_members_members_accept",
-        "description": "Accept a pending invitation to join a bucket list.",
+        "description": "Accept a pending invitation to join a bucket list. Self-service join requests (made via a share link to a private list) aren't invitations and can't be self-accepted - the owner must approve those via members/{user_id}/approve.",
         "parameters": [
           {
             "name": "data",
@@ -559,6 +596,47 @@
         }
       ]
     },
+    "/accounts/bucket-lists/{id}/members/me/": {
+      "get": {
+        "operationId": "accounts_bucket-lists_members_members_me",
+        "description": "Return the requesting user's own membership record for a bucket list, including invitations that are pending, declined, or removed, and join requests awaiting the owner's approval. Works even if the list itself is private and otherwise invisible to the requester. Returns 404 if the user has no membership record for this list.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/BucketListMember"
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
     "/accounts/bucket-lists/{id}/members/{member_user_id}/": {
       "delete": {
         "operationId": "accounts_bucket-lists_member_remove",
@@ -567,6 +645,47 @@
         "responses": {
           "204": {
             "description": ""
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "member_user_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/accounts/bucket-lists/{id}/members/{member_user_id}/approve/": {
+      "post": {
+        "operationId": "accounts_bucket-lists_members_member_approve",
+        "description": "Approve a pending join request for a bucket list (e.g. from someone who joined a private list via its share link). Only the list owner may perform this action.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Empty"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/BucketListMember"
+            }
           }
         },
         "tags": [
@@ -1001,7 +1120,7 @@
                 "results": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/ReadOnlyUserSerializer"
+                    "$ref": "#/definitions/ReadOnlyPublicUserSerializer"
                   }
                 }
               }
@@ -1114,7 +1233,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/ReadOnlyUserSerializer"
+              "$ref": "#/definitions/ReadOnlyPublicUserSerializer"
             }
           }
         },
@@ -2087,7 +2206,7 @@
     },
     "/comms/messages/between/{sender}/{recipient}/": {
       "get": {
-        "operationId": "comms_messages_between",
+        "operationId": "comms_messages_between_read",
         "description": "",
         "parameters": [
           {
@@ -2169,6 +2288,27 @@
                   "items": {
                     "$ref": "#/definitions/ReadOnlyMessageSerializer"
                   }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "comms"
+        ]
+      },
+      "delete": {
+        "operationId": "comms_messages_between_delete",
+        "description": "Delete the conversation between the two users from the requesting user's side only. The other participant still sees it.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Conversation deleted",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "deleted": {
+                  "type": "integer"
                 }
               }
             }
@@ -2312,6 +2452,30 @@
                   "items": {
                     "$ref": "#/definitions/ReadOnlyNotificationSerializer"
                   }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "comms"
+        ]
+      },
+      "parameters": []
+    },
+    "/comms/notifications/read-all/": {
+      "patch": {
+        "operationId": "comms_notifications_read_all",
+        "description": "Mark every unread notification for the authenticated user as read.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Notifications marked as read",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "updated": {
+                  "type": "integer"
                 }
               }
             }
@@ -4427,6 +4591,106 @@
         }
       ]
     },
+    "/communities/{id}/ratings/": {
+      "get": {
+        "operationId": "communities_ratings_list",
+        "summary": "Ratings/reviews left on any experience this community hosts.",
+        "description": "Read-only: ratings are created via ExperienceViewSet.ratings (POST),\nwhich is scoped to the attendee submitting a review for an experience\nthey attended. This just surfaces them on the community's page.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "start_index": {
+                  "type": "integer"
+                },
+                "end_index": {
+                  "type": "integer"
+                },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/ReadOnlyExperienceRatingSerializer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "communities"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/communities/{id}/ratings/{id}/": {
+      "get": {
+        "operationId": "communities_ratings_read",
+        "summary": "Ratings/reviews left on any experience this community hosts.",
+        "description": "Read-only: ratings are created via ExperienceViewSet.ratings (POST),\nwhich is scoped to the attendee submitting a review for an experience\nthey attended. This just surfaces them on the community's page.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ReadOnlyExperienceRatingSerializer"
+            }
+          }
+        },
+        "tags": [
+          "communities"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
     "/communities/{id}/remove-member/": {
       "post": {
         "operationId": "communities_remove_member",
@@ -5187,6 +5451,18 @@
               "format": "email",
               "minLength": 1
             }
+          },
+          {
+            "name": "invited_guests_ids",
+            "in": "formData",
+            "description": "IDs of Tukai users to invite to the experience",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
           },
           {
             "name": "invited_communities_ids",
@@ -10373,7 +10649,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/GuideEmptySerializer"
+              "$ref": "#/definitions/Empty"
             }
           }
         ],
@@ -10972,7 +11248,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/GuideEmptySerializer"
+              "$ref": "#/definitions/Empty"
             }
           }
         ],
@@ -11575,10 +11851,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-
-              }
+              "$ref": "#/definitions/Empty"
             }
           }
         ],
@@ -11663,10 +11936,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-
-              }
+              "$ref": "#/definitions/Empty"
             }
           }
         ],
@@ -12796,6 +13066,190 @@
       },
       "parameters": []
     },
+    "/payments/wallets/fee-schedule/": {
+      "get": {
+        "operationId": "payments_wallets_fee_schedule",
+        "description": "The published per-transfer fee tiers for both payout methods, plus the current Tukai payout fee, so the app can show 'Payout to M-PESA: KES 20-60 - Payout to bank: KES 80-140' before a wallet is even chosen.",
+        "parameters": [
+          {
+            "name": "wallet_type",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "description": "Defaults to KES.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": [
+                "count",
+                "results"
+              ],
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "start_index": {
+                  "type": "integer"
+                },
+                "end_index": {
+                  "type": "integer"
+                },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/ReadOnlyWalletSerializer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "payments"
+        ]
+      },
+      "parameters": []
+    },
+    "/payments/wallets/payout-quote/": {
+      "get": {
+        "operationId": "payments_wallets_payout_quote",
+        "description": "The fee breakdown for a would-be payout of the chosen (or active) wallet's available balance, or a specific amount. The withdraw endpoint always recomputes this server-side rather than trusting a quote.",
+        "parameters": [
+          {
+            "name": "wallet_type",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "amount",
+            "in": "query",
+            "description": "Defaults to the full available balance.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "wallet_id",
+            "in": "query",
+            "description": "Defaults to the user's active wallet.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/PayoutQuote"
+            }
+          }
+        },
+        "tags": [
+          "payments"
+        ]
+      },
+      "parameters": []
+    },
+    "/payments/wallets/payouts/": {
+      "get": {
+        "operationId": "payments_wallets_payouts",
+        "description": "The authenticated host's HostPayout history, with the per-payout fee breakdown, newest first.",
+        "parameters": [
+          {
+            "name": "wallet_type",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/HostPayout"
+              }
+            }
+          }
+        },
+        "tags": [
+          "payments"
+        ]
+      },
+      "parameters": []
+    },
     "/payments/wallets/phone/": {
       "post": {
         "operationId": "payments_wallets_create_phone_number",
@@ -12821,6 +13275,37 @@
                 }
               }
             }
+          }
+        },
+        "tags": [
+          "payments"
+        ]
+      },
+      "parameters": []
+    },
+    "/payments/wallets/withdraw/": {
+      "post": {
+        "operationId": "payments_wallets_withdraw",
+        "description": "Request a payout of the authenticated host's available balance (or a specific amount) to their synced wallet. Processed immediately if WITHDRAWAL_AUTO_APPROVE is on, otherwise held PENDING for admin approval.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/WithdrawalRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/HostPayout"
+            }
+          },
+          "400": {
+            "description": "Validation error"
           }
         },
         "tags": [
@@ -12941,7 +13426,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/WriteOnlyWalletSerializer"
+              "$ref": "#/definitions/Empty"
             }
           }
         ],
@@ -12949,7 +13434,44 @@
           "201": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/ReadOnlyWalletSerializer"
+              "$ref": "#/definitions/Empty"
+            }
+          }
+        },
+        "tags": [
+          "payments"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A UUID string identifying this Wallet.",
+          "required": true,
+          "type": "string",
+          "format": "uuid"
+        }
+      ]
+    },
+    "/payments/wallets/{id}/sync/": {
+      "post": {
+        "operationId": "payments_wallets_sync",
+        "description": "(Re)trigger the Paystack subaccount / transfer-recipient sync for this wallet. Enqueues sync_wallet_provider_identity_task and returns immediately - poll this wallet (or GET /wallets/) for the resulting sync_status.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Empty"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Wallet"
             }
           }
         },
@@ -14074,7 +14596,7 @@
         {
           "name": "id",
           "in": "path",
-          "description": "A UUID string identifying this Photo.",
+          "description": "A UUID string identifying this Place Photo.",
           "required": true,
           "type": "string",
           "format": "uuid"
@@ -14103,7 +14625,7 @@
         {
           "name": "id",
           "in": "path",
-          "description": "A UUID string identifying this Photo.",
+          "description": "A UUID string identifying this Place Photo.",
           "required": true,
           "type": "string",
           "format": "uuid"
@@ -14509,7 +15031,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/PlaceEmptySerializer"
+              "$ref": "#/definitions/Empty"
             }
           }
         ],
@@ -16144,7 +16666,8 @@
     "/subscriptions/{id}/cancel/": {
       "post": {
         "operationId": "subscriptions_cancel",
-        "description": "",
+        "summary": "Stop future billing for this subscription.",
+        "description": "This doesn't end access immediately or refund the current cycle -\nthe customer already paid for it. It disables auto-renewal on the\npayment provider so no further charge happens; the subscription\nstays active until the current paid period lapses (see\n``Subscription.cancel_renewal``).",
         "parameters": [
           {
             "name": "data",
@@ -16268,6 +16791,14 @@
           "format": "uuid",
           "readOnly": true
         },
+        "slug": {
+          "title": "Slug",
+          "type": "string",
+          "format": "slug",
+          "pattern": "^[-a-zA-Z0-9_]+$",
+          "readOnly": true,
+          "minLength": 1
+        },
         "name": {
           "title": "Name",
           "type": "string",
@@ -16296,7 +16827,6 @@
         "share_token": {
           "title": "Share token",
           "type": "string",
-          "format": "uuid",
           "readOnly": true
         },
         "owner": {
@@ -16314,6 +16844,11 @@
         },
         "is_member": {
           "title": "Is member",
+          "type": "string",
+          "readOnly": true
+        },
+        "cover_photos": {
+          "title": "Cover photos",
           "type": "string",
           "readOnly": true
         },
@@ -16437,6 +16972,93 @@
         },
         "date_created": {
           "title": "Date created",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    },
+    "BucketList": {
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "slug": {
+          "title": "Slug",
+          "type": "string",
+          "format": "slug",
+          "pattern": "^[-a-zA-Z0-9_]+$",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "visibility": {
+          "title": "Visibility",
+          "type": "string",
+          "enum": [
+            "public",
+            "private"
+          ]
+        },
+        "cover_image": {
+          "title": "Cover image",
+          "type": "string",
+          "readOnly": true,
+          "x-nullable": true,
+          "format": "uri"
+        },
+        "share_token": {
+          "title": "Share token",
+          "type": "string",
+          "readOnly": true
+        },
+        "owner": {
+          "$ref": "#/definitions/LinkedUser"
+        },
+        "item_count": {
+          "title": "Item count",
+          "type": "integer",
+          "readOnly": true
+        },
+        "member_count": {
+          "title": "Member count",
+          "type": "integer",
+          "readOnly": true
+        },
+        "is_member": {
+          "title": "Is member",
+          "type": "string",
+          "readOnly": true
+        },
+        "cover_photos": {
+          "title": "Cover photos",
+          "type": "string",
+          "readOnly": true
+        },
+        "date_created": {
+          "title": "Date created",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "date_modified": {
+          "title": "Date modified",
           "type": "string",
           "format": "date-time",
           "readOnly": true
@@ -16596,6 +17218,14 @@
           "format": "uuid",
           "readOnly": true
         },
+        "slug": {
+          "title": "Slug",
+          "type": "string",
+          "format": "slug",
+          "pattern": "^[-a-zA-Z0-9_]+$",
+          "readOnly": true,
+          "minLength": 1
+        },
         "name": {
           "title": "Name",
           "type": "string",
@@ -16624,7 +17254,6 @@
         "share_token": {
           "title": "Share token",
           "type": "string",
-          "format": "uuid",
           "readOnly": true
         },
         "owner": {
@@ -16642,6 +17271,11 @@
         },
         "is_member": {
           "title": "Is member",
+          "type": "string",
+          "readOnly": true
+        },
+        "cover_photos": {
+          "title": "Cover photos",
           "type": "string",
           "readOnly": true
         },
@@ -17029,7 +17663,7 @@
         }
       }
     },
-    "ReadOnlyUserSerializer": {
+    "ReadOnlyPublicUserSerializer": {
       "type": "object",
       "properties": {
         "id": {
@@ -17066,24 +17700,6 @@
           "title": "Bio",
           "type": "string",
           "maxLength": 200,
-          "x-nullable": true
-        },
-        "email": {
-          "title": "Email",
-          "type": "string",
-          "format": "email",
-          "readOnly": true,
-          "minLength": 1
-        },
-        "email_verified": {
-          "title": "Email verified",
-          "type": "boolean",
-          "readOnly": true
-        },
-        "phone": {
-          "title": "Phone",
-          "type": "string",
-          "maxLength": 128,
           "x-nullable": true
         },
         "status": {
@@ -17128,11 +17744,6 @@
         "has_subscribed": {
           "title": "Has subscribed",
           "type": "string",
-          "readOnly": true
-        },
-        "accepted_terms": {
-          "title": "Accepted terms",
-          "type": "boolean",
           "readOnly": true
         },
         "picture": {
@@ -17187,28 +17798,6 @@
             "$ref": "#/definitions/Interest"
           },
           "readOnly": true
-        },
-        "timezone": {
-          "title": "Timezone",
-          "type": "string",
-          "minLength": 1
-        },
-        "billing_address_id": {
-          "title": "Billing address id",
-          "type": "string",
-          "readOnly": true
-        },
-        "payment_method_id": {
-          "title": "Payment method id",
-          "type": "string",
-          "readOnly": true
-        },
-        "last_login": {
-          "title": "Last login",
-          "type": "string",
-          "format": "date-time",
-          "readOnly": true,
-          "x-nullable": true
         },
         "date_created": {
           "title": "Date created",
@@ -17437,6 +18026,195 @@
             "type": "string",
             "format": "uuid"
           }
+        },
+        "timezone": {
+          "title": "Timezone",
+          "type": "string",
+          "minLength": 1
+        },
+        "billing_address_id": {
+          "title": "Billing address id",
+          "type": "string",
+          "readOnly": true
+        },
+        "payment_method_id": {
+          "title": "Payment method id",
+          "type": "string",
+          "readOnly": true
+        },
+        "last_login": {
+          "title": "Last login",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "date_created": {
+          "title": "Date created",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    },
+    "ReadOnlyUserSerializer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "first_name": {
+          "title": "First name",
+          "type": "string",
+          "maxLength": 32
+        },
+        "last_name": {
+          "title": "Last name",
+          "type": "string",
+          "maxLength": 32
+        },
+        "display_name": {
+          "title": "Display name",
+          "type": "string",
+          "maxLength": 32,
+          "x-nullable": true
+        },
+        "gender": {
+          "title": "Gender",
+          "type": "string",
+          "enum": [
+            "male",
+            "female"
+          ]
+        },
+        "bio": {
+          "title": "Bio",
+          "type": "string",
+          "maxLength": 200,
+          "x-nullable": true
+        },
+        "email": {
+          "title": "Email",
+          "type": "string",
+          "format": "email",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "email_verified": {
+          "title": "Email verified",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "phone": {
+          "title": "Phone",
+          "type": "string",
+          "maxLength": 128,
+          "x-nullable": true
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "enum": [
+            "active",
+            "inactive",
+            "suspended",
+            "pending",
+            "banned",
+            "deactivated",
+            "deleted"
+          ],
+          "readOnly": true
+        },
+        "followers_count": {
+          "title": "Followers count",
+          "type": "string",
+          "readOnly": true
+        },
+        "following_count": {
+          "title": "Following count",
+          "type": "string",
+          "readOnly": true
+        },
+        "is_following": {
+          "title": "Is following",
+          "type": "string",
+          "readOnly": true
+        },
+        "is_followed_by": {
+          "title": "Is followed by",
+          "type": "string",
+          "readOnly": true
+        },
+        "is_blocked": {
+          "title": "Is blocked",
+          "type": "string",
+          "readOnly": true
+        },
+        "has_subscribed": {
+          "title": "Has subscribed",
+          "type": "string",
+          "readOnly": true
+        },
+        "accepted_terms": {
+          "title": "Accepted terms",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "picture": {
+          "title": "Picture",
+          "type": "string",
+          "readOnly": true,
+          "format": "uri"
+        },
+        "picture_webp_url": {
+          "title": "Picture webp url",
+          "type": "string",
+          "readOnly": true
+        },
+        "picture_webp_sm_url": {
+          "title": "Picture webp sm url",
+          "type": "string",
+          "readOnly": true
+        },
+        "website_url": {
+          "title": "Website url",
+          "type": "string",
+          "format": "uri",
+          "maxLength": 200
+        },
+        "instagram_url": {
+          "title": "Instagram url",
+          "type": "string",
+          "format": "uri",
+          "maxLength": 200
+        },
+        "tiktok_url": {
+          "title": "Tiktok url",
+          "type": "string",
+          "format": "uri",
+          "maxLength": 200
+        },
+        "youtube_url": {
+          "title": "Youtube url",
+          "type": "string",
+          "format": "uri",
+          "maxLength": 200
+        },
+        "x_url": {
+          "title": "X url",
+          "type": "string",
+          "format": "uri",
+          "maxLength": 200
+        },
+        "interests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Interest"
+          },
+          "readOnly": true
         },
         "timezone": {
           "title": "Timezone",
@@ -19570,6 +20348,105 @@
           "items": {
             "$ref": "#/definitions/PostPhotoList"
           },
+          "readOnly": true
+        }
+      }
+    },
+    "ExperienceRatingPhoto": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "rating": {
+          "title": "Rating",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "photo": {
+          "title": "Photo",
+          "type": "string",
+          "readOnly": true,
+          "format": "uri"
+        },
+        "photo_webp_md_url": {
+          "title": "Photo webp md url",
+          "type": "string",
+          "readOnly": true
+        },
+        "photo_webp_thumb_url": {
+          "title": "Photo webp thumb url",
+          "type": "string",
+          "readOnly": true
+        },
+        "caption": {
+          "title": "Caption",
+          "type": "string",
+          "maxLength": 255,
+          "x-nullable": true
+        },
+        "date_created": {
+          "title": "Date created",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "date_modified": {
+          "title": "Date modified",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    },
+    "ReadOnlyExperienceRatingSerializer": {
+      "required": [
+        "experience",
+        "rating"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "experience": {
+          "title": "Experience",
+          "type": "string",
+          "format": "uuid"
+        },
+        "attendee": {
+          "$ref": "#/definitions/LinkedUser"
+        },
+        "rating": {
+          "title": "Rating",
+          "description": "Rating from 1 (poor) to 5 (excellent).",
+          "type": "integer",
+          "maximum": 5,
+          "minimum": 1
+        },
+        "review": {
+          "title": "Review",
+          "description": "Optional written review of the experience.",
+          "type": "string"
+        },
+        "photos": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ExperienceRatingPhoto"
+          },
+          "readOnly": true
+        },
+        "date_created": {
+          "title": "Date created",
+          "type": "string",
+          "format": "date-time",
           "readOnly": true
         }
       }
@@ -22033,8 +22910,316 @@
         "price_currency": {
           "title": "Price currency",
           "type": "string",
+          "enum": [
+            "XUA",
+            "AFN",
+            "AFA",
+            "ALL",
+            "ALK",
+            "DZD",
+            "ADP",
+            "AOA",
+            "AOK",
+            "AON",
+            "AOR",
+            "ARA",
+            "ARS",
+            "ARM",
+            "ARP",
+            "ARL",
+            "AMD",
+            "AWG",
+            "AUD",
+            "ATS",
+            "AZN",
+            "AZM",
+            "BSD",
+            "BHD",
+            "BDT",
+            "BBD",
+            "BYN",
+            "BYB",
+            "BYR",
+            "BEF",
+            "BEC",
+            "BEL",
+            "BZD",
+            "BMD",
+            "BTN",
+            "BOB",
+            "BOL",
+            "BOV",
+            "BOP",
+            "VED",
+            "BAM",
+            "BAD",
+            "BAN",
+            "BWP",
+            "BRC",
+            "BRZ",
+            "BRE",
+            "BRR",
+            "BRN",
+            "BRB",
+            "BRL",
+            "GBP",
+            "BND",
+            "BGL",
+            "BGN",
+            "BGO",
+            "BGM",
+            "BUK",
+            "BIF",
+            "XPF",
+            "KHR",
+            "CAD",
+            "CVE",
+            "KYD",
+            "XAF",
+            "CLE",
+            "CLP",
+            "CLF",
+            "CNX",
+            "CNY",
+            "CNH",
+            "COP",
+            "COU",
+            "KMF",
+            "CDF",
+            "CRC",
+            "HRD",
+            "HRK",
+            "CUC",
+            "CUP",
+            "CYP",
+            "CZK",
+            "CSK",
+            "DKK",
+            "DJF",
+            "DOP",
+            "NLG",
+            "XCD",
+            "DDM",
+            "ECS",
+            "ECV",
+            "EGP",
+            "GQE",
+            "ERN",
+            "EEK",
+            "ETB",
+            "EUR",
+            "XBA",
+            "XEU",
+            "XBB",
+            "XBC",
+            "XBD",
+            "FKP",
+            "FJD",
+            "FIM",
+            "FRF",
+            "XFO",
+            "XFU",
+            "GMD",
+            "GEK",
+            "GEL",
+            "DEM",
+            "GHS",
+            "GHC",
+            "GIP",
+            "XAU",
+            "GRD",
+            "GTQ",
+            "GWP",
+            "GNF",
+            "GNS",
+            "GYD",
+            "HTG",
+            "HNL",
+            "HKD",
+            "HUF",
+            "IMP",
+            "ISK",
+            "ISJ",
+            "INR",
+            "IDR",
+            "IRR",
+            "IQD",
+            "IEP",
+            "ILS",
+            "ILP",
+            "ILR",
+            "ITL",
+            "JMD",
+            "JPY",
+            "JOD",
+            "KZT",
+            "KES",
+            "KWD",
+            "KGS",
+            "LAK",
+            "LVL",
+            "LVR",
+            "LBP",
+            "LSL",
+            "LRD",
+            "LYD",
+            "LTL",
+            "LTT",
+            "LUL",
+            "LUC",
+            "LUF",
+            "MOP",
+            "MKD",
+            "MKN",
+            "MGA",
+            "MGF",
+            "MWK",
+            "MYR",
+            "MVR",
+            "MVP",
+            "MLF",
+            "MTL",
+            "MTP",
+            "MRU",
+            "MRO",
+            "MUR",
+            "MXV",
+            "MXN",
+            "MXP",
+            "MDC",
+            "MDL",
+            "MCF",
+            "MNT",
+            "MAD",
+            "MAF",
+            "MZE",
+            "MZN",
+            "MZM",
+            "MMK",
+            "NAD",
+            "NPR",
+            "ANG",
+            "TWD",
+            "NZD",
+            "NIO",
+            "NIC",
+            "NGN",
+            "KPW",
+            "NOK",
+            "OMR",
+            "PKR",
+            "XPD",
+            "PAB",
+            "PGK",
+            "PYG",
+            "PEI",
+            "PEN",
+            "PES",
+            "PHP",
+            "XPT",
+            "PLN",
+            "PLZ",
+            "PTE",
+            "GWE",
+            "QAR",
+            "XRE",
+            "RHD",
+            "RON",
+            "ROL",
+            "RUB",
+            "RUR",
+            "RWF",
+            "SVC",
+            "WST",
+            "SAR",
+            "RSD",
+            "CSD",
+            "SCR",
+            "SLE",
+            "SLL",
+            "XAG",
+            "SGD",
+            "SKK",
+            "SIT",
+            "SBD",
+            "SOS",
+            "ZAR",
+            "ZAL",
+            "KRH",
+            "KRW",
+            "KRO",
+            "SSP",
+            "SUR",
+            "ESP",
+            "ESA",
+            "ESB",
+            "XDR",
+            "LKR",
+            "SHP",
+            "XSU",
+            "SDD",
+            "SDG",
+            "SDP",
+            "SRD",
+            "SRG",
+            "SZL",
+            "SEK",
+            "CHF",
+            "SYP",
+            "STN",
+            "STD",
+            "TVD",
+            "TJR",
+            "TJS",
+            "TZS",
+            "XTS",
+            "THB",
+            "TPE",
+            "TOP",
+            "TTD",
+            "TND",
+            "TRY",
+            "TRL",
+            "TMT",
+            "TMM",
+            "USD",
+            "USN",
+            "USS",
+            "UGX",
+            "UGS",
+            "UAH",
+            "UAK",
+            "AED",
+            "UYW",
+            "UYU",
+            "UYP",
+            "UYI",
+            "UZS",
+            "VUV",
+            "VES",
+            "VEB",
+            "VEF",
+            "VND",
+            "VNN",
+            "CHE",
+            "CHW",
+            "XOF",
+            "YDD",
+            "YER",
+            "YUN",
+            "YUD",
+            "YUM",
+            "YUR",
+            "ZWN",
+            "ZRN",
+            "ZRZ",
+            "ZMW",
+            "ZMK",
+            "ZWD",
+            "ZWR",
+            "ZWL"
+          ],
           "readOnly": true,
-          "minLength": 1,
           "x-nullable": true
         },
         "buyer_price": {
@@ -22900,17 +24085,20 @@
       }
     },
     "AddGuest": {
-      "required": [
-        "email"
-      ],
       "type": "object",
       "properties": {
         "email": {
           "title": "Email",
-          "description": "Email of the guest to invite to the experience",
+          "description": "Email of the guest to invite to the experience. Exactly one of 'email' or 'user_id' must be provided.",
           "type": "string",
           "format": "email",
           "minLength": 1
+        },
+        "user_id": {
+          "title": "User id",
+          "description": "ID of the Tukai user to invite to the experience. Exactly one of 'email' or 'user_id' must be provided.",
+          "type": "string",
+          "format": "uuid"
         }
       }
     },
@@ -23316,57 +24504,6 @@
         "promo_code": {
           "title": "Promo code",
           "type": "string"
-        }
-      }
-    },
-    "ExperienceRatingPhoto": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "title": "Id",
-          "type": "string",
-          "format": "uuid",
-          "readOnly": true
-        },
-        "rating": {
-          "title": "Rating",
-          "type": "string",
-          "format": "uuid",
-          "readOnly": true
-        },
-        "photo": {
-          "title": "Photo",
-          "type": "string",
-          "readOnly": true,
-          "format": "uri"
-        },
-        "photo_webp_md_url": {
-          "title": "Photo webp md url",
-          "type": "string",
-          "readOnly": true
-        },
-        "photo_webp_thumb_url": {
-          "title": "Photo webp thumb url",
-          "type": "string",
-          "readOnly": true
-        },
-        "caption": {
-          "title": "Caption",
-          "type": "string",
-          "maxLength": 255,
-          "x-nullable": true
-        },
-        "date_created": {
-          "title": "Date created",
-          "type": "string",
-          "format": "date-time",
-          "readOnly": true
-        },
-        "date_modified": {
-          "title": "Date modified",
-          "type": "string",
-          "format": "date-time",
-          "readOnly": true
         }
       }
     },
@@ -24088,12 +25225,6 @@
         }
       }
     },
-    "GuideEmptySerializer": {
-      "type": "object",
-      "properties": {
-
-      }
-    },
     "ReadOnlyGuideReviewSerializer": {
       "required": [
         "rating",
@@ -24528,6 +25659,11 @@
           "type": "integer",
           "readOnly": true
         },
+        "is_liked": {
+          "title": "Is liked",
+          "type": "string",
+          "readOnly": true
+        },
         "date_created": {
           "title": "Date created",
           "type": "string",
@@ -24651,6 +25787,11 @@
           "type": "integer",
           "readOnly": true
         },
+        "is_liked": {
+          "title": "Is liked",
+          "type": "string",
+          "readOnly": true
+        },
         "date_created": {
           "title": "Date created",
           "type": "string",
@@ -24727,6 +25868,11 @@
         "total_flags": {
           "title": "Total flags",
           "type": "integer",
+          "readOnly": true
+        },
+        "is_liked": {
+          "title": "Is liked",
+          "type": "string",
           "readOnly": true
         },
         "date_created": {
@@ -26468,6 +27614,30 @@
           "type": "string",
           "format": "date-time",
           "readOnly": true
+        },
+        "sync_status": {
+          "title": "Sync status",
+          "type": "string",
+          "enum": [
+            "unsynced",
+            "syncing",
+            "synced",
+            "failed"
+          ],
+          "readOnly": true
+        },
+        "resolved_account_name": {
+          "title": "Resolved account name",
+          "description": "Account name returned by Paystack bank/resolve.",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "destination_type": {
+          "title": "Destination type",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
         }
       }
     },
@@ -26801,7 +27971,9 @@
         "total_ticket_sales",
         "available_balance",
         "pending_balance",
-        "current_balance"
+        "current_balance",
+        "commission_deducted",
+        "estimated_payout_fee"
       ],
       "type": "object",
       "properties": {
@@ -26820,6 +27992,170 @@
         "current_balance": {
           "title": "Current balance",
           "type": "string"
+        },
+        "commission_deducted": {
+          "title": "Commission deducted",
+          "type": "string"
+        },
+        "estimated_payout_fee": {
+          "title": "Estimated payout fee",
+          "type": "string",
+          "x-nullable": true
+        }
+      }
+    },
+    "PayoutQuote": {
+      "required": [
+        "currency",
+        "destination_type",
+        "available_balance",
+        "requested_amount",
+        "paystack_transfer_fee",
+        "tukai_payout_fee",
+        "net_amount",
+        "tukai_commission_deducted",
+        "max_payout_amount",
+        "limit_message"
+      ],
+      "type": "object",
+      "properties": {
+        "currency": {
+          "title": "Currency",
+          "type": "string",
+          "minLength": 1
+        },
+        "destination_type": {
+          "title": "Destination type",
+          "type": "string",
+          "minLength": 1
+        },
+        "available_balance": {
+          "title": "Available balance",
+          "type": "string"
+        },
+        "requested_amount": {
+          "title": "Requested amount",
+          "type": "string"
+        },
+        "paystack_transfer_fee": {
+          "title": "Paystack transfer fee",
+          "type": "string"
+        },
+        "tukai_payout_fee": {
+          "title": "Tukai payout fee",
+          "type": "string"
+        },
+        "net_amount": {
+          "title": "Net amount",
+          "type": "string"
+        },
+        "tukai_commission_deducted": {
+          "title": "Tukai commission deducted",
+          "type": "string"
+        },
+        "max_payout_amount": {
+          "title": "Max payout amount",
+          "type": "string",
+          "x-nullable": true
+        },
+        "limit_message": {
+          "title": "Limit message",
+          "type": "string",
+          "minLength": 1,
+          "x-nullable": true
+        }
+      }
+    },
+    "HostPayout": {
+      "required": [
+        "gross_amount",
+        "paystack_fee",
+        "tukai_fee",
+        "net_amount"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string",
+          "enum": [
+            "split_advance",
+            "transfer",
+            "withdrawal",
+            "clawback"
+          ],
+          "readOnly": true
+        },
+        "destination_type": {
+          "title": "Destination type",
+          "description": "Snapshot of wallet.destination_type at payout time; drives the fee tier.",
+          "type": "string",
+          "enum": [
+            "bank",
+            "mobile_money"
+          ],
+          "readOnly": true
+        },
+        "currency": {
+          "title": "Currency",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "enum": [
+            "pending",
+            "processing",
+            "awaiting_settlement",
+            "settled",
+            "failed",
+            "reversed"
+          ],
+          "readOnly": true
+        },
+        "gross_amount": {
+          "title": "Gross amount",
+          "type": "string"
+        },
+        "paystack_fee": {
+          "title": "Paystack fee",
+          "type": "string"
+        },
+        "tukai_fee": {
+          "title": "Tukai fee",
+          "type": "string"
+        },
+        "net_amount": {
+          "title": "Net amount",
+          "type": "string"
+        },
+        "fee_estimated": {
+          "title": "Fee estimated",
+          "description": "True until the fee is reconciled against the provider payload; always False for SPLIT_ADVANCE (shares.paystack is the actual fee).",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "date_requested": {
+          "title": "Date requested",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "date_settled": {
+          "title": "Date settled",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true,
+          "x-nullable": true
         }
       }
     },
@@ -26853,6 +28189,26 @@
             "bank"
           ],
           "readOnly": true
+        }
+      }
+    },
+    "WithdrawalRequest": {
+      "required": [
+        "currency"
+      ],
+      "type": "object",
+      "properties": {
+        "currency": {
+          "title": "Currency",
+          "type": "string",
+          "maxLength": 3,
+          "minLength": 1
+        },
+        "amount": {
+          "title": "Amount",
+          "type": "string",
+          "format": "decimal",
+          "x-nullable": true
         }
       }
     },
@@ -27176,6 +28532,365 @@
         "is_active": {
           "title": "Is active",
           "type": "boolean"
+        }
+      }
+    },
+    "Wallet": {
+      "required": [
+        "user",
+        "wallet_type",
+        "country"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "user": {
+          "title": "User",
+          "type": "string",
+          "format": "uuid"
+        },
+        "wallet_type": {
+          "title": "Wallet type",
+          "type": "string",
+          "enum": [
+            "phone",
+            "bank"
+          ]
+        },
+        "phone": {
+          "title": "Phone",
+          "type": "string",
+          "maxLength": 128,
+          "x-nullable": true
+        },
+        "bank_name": {
+          "title": "Bank name",
+          "type": "string",
+          "maxLength": 100
+        },
+        "bank_branch": {
+          "title": "Bank branch",
+          "type": "string",
+          "maxLength": 100
+        },
+        "branch_code": {
+          "title": "Branch code",
+          "type": "string",
+          "maxLength": 20
+        },
+        "account_holder_name": {
+          "title": "Account holder name",
+          "type": "string",
+          "maxLength": 100
+        },
+        "account_number": {
+          "title": "Account number",
+          "type": "string",
+          "maxLength": 20
+        },
+        "country": {
+          "title": "Country",
+          "type": "string",
+          "enum": [
+            "AF",
+            "AX",
+            "AL",
+            "DZ",
+            "AS",
+            "AD",
+            "AO",
+            "AI",
+            "AQ",
+            "AG",
+            "AR",
+            "AM",
+            "AW",
+            "AU",
+            "AT",
+            "AZ",
+            "BS",
+            "BH",
+            "BD",
+            "BB",
+            "BY",
+            "BE",
+            "BZ",
+            "BJ",
+            "BM",
+            "BT",
+            "BO",
+            "BQ",
+            "BA",
+            "BW",
+            "BV",
+            "BR",
+            "IO",
+            "BN",
+            "BG",
+            "BF",
+            "BI",
+            "CV",
+            "KH",
+            "CM",
+            "CA",
+            "KY",
+            "CF",
+            "TD",
+            "CL",
+            "CN",
+            "CX",
+            "CC",
+            "CO",
+            "KM",
+            "CG",
+            "CK",
+            "CR",
+            "CI",
+            "HR",
+            "CU",
+            "CW",
+            "CY",
+            "CZ",
+            "CD",
+            "DK",
+            "DJ",
+            "DM",
+            "DO",
+            "EC",
+            "EG",
+            "SV",
+            "GQ",
+            "ER",
+            "EE",
+            "SZ",
+            "ET",
+            "FK",
+            "FO",
+            "FJ",
+            "FI",
+            "FR",
+            "GF",
+            "PF",
+            "TF",
+            "GA",
+            "GM",
+            "GE",
+            "DE",
+            "GH",
+            "GI",
+            "GR",
+            "GL",
+            "GD",
+            "GP",
+            "GU",
+            "GT",
+            "GG",
+            "GN",
+            "GW",
+            "GY",
+            "HT",
+            "HM",
+            "HN",
+            "HK",
+            "HU",
+            "IS",
+            "IN",
+            "ID",
+            "IR",
+            "IQ",
+            "IE",
+            "IM",
+            "IL",
+            "IT",
+            "JM",
+            "JP",
+            "JE",
+            "JO",
+            "KZ",
+            "KE",
+            "KI",
+            "KW",
+            "KG",
+            "LA",
+            "LV",
+            "LB",
+            "LS",
+            "LR",
+            "LY",
+            "LI",
+            "LT",
+            "LU",
+            "MO",
+            "MG",
+            "MW",
+            "MY",
+            "MV",
+            "ML",
+            "MT",
+            "MH",
+            "MQ",
+            "MR",
+            "MU",
+            "YT",
+            "MX",
+            "FM",
+            "MD",
+            "MC",
+            "MN",
+            "ME",
+            "MS",
+            "MA",
+            "MZ",
+            "MM",
+            "NA",
+            "NR",
+            "NP",
+            "NL",
+            "NC",
+            "NZ",
+            "NI",
+            "NE",
+            "NG",
+            "NU",
+            "NF",
+            "KP",
+            "MK",
+            "MP",
+            "NO",
+            "OM",
+            "PK",
+            "PW",
+            "PS",
+            "PA",
+            "PG",
+            "PY",
+            "PE",
+            "PH",
+            "PN",
+            "PL",
+            "PT",
+            "PR",
+            "QA",
+            "RE",
+            "RO",
+            "RU",
+            "RW",
+            "BL",
+            "SH",
+            "KN",
+            "LC",
+            "MF",
+            "PM",
+            "VC",
+            "WS",
+            "SM",
+            "ST",
+            "SA",
+            "SN",
+            "RS",
+            "SC",
+            "SL",
+            "SG",
+            "SX",
+            "SK",
+            "SI",
+            "SB",
+            "SO",
+            "ZA",
+            "GS",
+            "KR",
+            "SS",
+            "ES",
+            "LK",
+            "SD",
+            "SR",
+            "SJ",
+            "SE",
+            "CH",
+            "SY",
+            "TW",
+            "TJ",
+            "TZ",
+            "TH",
+            "TL",
+            "TG",
+            "TK",
+            "TO",
+            "TT",
+            "TN",
+            "TR",
+            "TM",
+            "TC",
+            "TV",
+            "UG",
+            "UA",
+            "AE",
+            "GB",
+            "UM",
+            "US",
+            "UY",
+            "UZ",
+            "VU",
+            "VA",
+            "VE",
+            "VN",
+            "VG",
+            "VI",
+            "WF",
+            "EH",
+            "YE",
+            "ZM",
+            "ZW"
+          ]
+        },
+        "swift_code": {
+          "title": "Swift code",
+          "type": "string",
+          "maxLength": 20
+        },
+        "address": {
+          "title": "Address",
+          "type": "string",
+          "maxLength": 100
+        },
+        "is_active": {
+          "title": "Is active",
+          "type": "boolean"
+        },
+        "date_created": {
+          "title": "Date created",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "sync_status": {
+          "title": "Sync status",
+          "type": "string",
+          "enum": [
+            "unsynced",
+            "syncing",
+            "synced",
+            "failed"
+          ],
+          "readOnly": true
+        },
+        "resolved_account_name": {
+          "title": "Resolved account name",
+          "description": "Account name returned by Paystack bank/resolve.",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "destination_type": {
+          "title": "Destination type",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
         }
       }
     },
@@ -29032,12 +30747,6 @@
           },
           "readOnly": true
         }
-      }
-    },
-    "PlaceEmptySerializer": {
-      "type": "object",
-      "properties": {
-
       }
     },
     "ReadOnlyPlaceAvailabilityExceptionSerializer": {

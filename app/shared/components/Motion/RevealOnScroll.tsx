@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils';
  * Fades its children up as they come into view, once.
  *
  * CSS does the animating; the observer only decides when. Anything already on
- * screen when it mounts reveals immediately — the observer reports that on its
- * first callback — so this never leaves above-the-fold content hidden.
+ * screen when it mounts reveals immediately - the observer reports that on its
+ * first callback - so this never leaves above-the-fold content hidden.
  *
  * Without IntersectionObserver (older browsers, jsdom) it starts revealed
  * rather than never appearing at all.
@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 export const RevealOnScroll = ({
   children,
   className,
-  // Staggers a run of siblings; keep it small — a reader should not wait
+  // Staggers a run of siblings; keep it small - a reader should not wait
   delayMs = 0,
 }: {
   children: ReactNode;
@@ -36,7 +36,7 @@ export const RevealOnScroll = ({
         if (!entries[0].isIntersecting) return;
 
         setIsRevealed(true);
-        // Once revealed it stays revealed — re-animating on the way back up
+        // Once revealed it stays revealed - re-animating on the way back up
         // reads as a glitch, not an effect
         observerRef.current?.disconnect();
       },

@@ -1,4 +1,9 @@
-import { formatDayLabel, formatFullDayLabel, parseRecurrenceRule } from './recurrence-utils';
+import {
+  formatDayLabel,
+  formatFullDayLabel,
+  nextOccurrence,
+  parseRecurrenceRule,
+} from './recurrence-utils';
 
 describe('recurrence-utils', () => {
   describe('formatDayLabel', () => {
@@ -26,7 +31,7 @@ describe('recurrence-utils', () => {
   });
 
   describe('parseRecurrenceRule', () => {
-    // RRule weekday numbers start at Monday, not Sunday — MO=0 must map to 'mon'
+    // RRule weekday numbers start at Monday, not Sunday - MO=0 must map to 'mon'
     it('maps RRule weekdays to the right day keys', () => {
       const parsed = parseRecurrenceRule(
         'DTSTART:20260601T090000Z\nRRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;UNTIL=20260831T235959Z',
@@ -54,6 +59,38 @@ describe('recurrence-utils', () => {
 
     it('returns null for an unparseable rule', () => {
       expect(parseRecurrenceRule('not-a-rule')).toBeNull();
+    });
+  });
+
+  describe('nextOccurrence', () => {
+    // A Thursday
+    const NOW = new Date(Date.UTC(2026, 9, 1, 12));
+
+    it('is the next date the series runs', () => {
+      const next = nextOccurrence('DTSTART:20260103T100000Z\nRRULE:FREQ=WEEKLY;BYDAY=SA', NOW);
+
+      // The first Saturday after Thursday 1 Oct 2026 is the 3rd
+      expect(next?.toISOString()).toBe('2026-10-03T10:00:00.000Z');
+    });
+
+    // Otherwise a weekly thing would be hidden by the date its series began
+    it('looks past a start date months in the past', () => {
+      const next = nextOccurrence('DTSTART:20260103T100000Z\nRRULE:FREQ=WEEKLY;BYDAY=SA', NOW);
+
+      expect(next!.getTime()).toBeGreaterThan(NOW.getTime());
+    });
+
+    it('is null once the series has ended', () => {
+      expect(
+        nextOccurrence(
+          'DTSTART:20260103T100000Z\nRRULE:FREQ=WEEKLY;BYDAY=SA;UNTIL=20260301T100000Z',
+          NOW,
+        ),
+      ).toBeNull();
+    });
+
+    it('is null for an unparseable rule', () => {
+      expect(nextOccurrence('not-a-rule', NOW)).toBeNull();
     });
   });
 });

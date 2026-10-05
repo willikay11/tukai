@@ -28,8 +28,8 @@ describe('buildManageExperienceMetrics', () => {
     expect(metrics.fillRatePercent).toBe(60);
   });
 
-  // Regression: sold came from reserved_tickets_count — the host's OWN
-  // bookings, normally 0 — so the dashboard reported almost no sales and the
+  // Regression: sold came from reserved_tickets_count - the host's OWN
+  // bookings, normally 0 - so the dashboard reported almost no sales and the
   // donut barely moved
   it('reads sales from the host figures, not the viewer own reservations', () => {
     const metrics = buildManageExperienceMetrics(
@@ -99,7 +99,7 @@ const purchase = (id: string, userId?: string): TicketPurchase =>
   ({ id, user: userId ? { id: userId } : null }) as unknown as TicketPurchase;
 
 describe('countBuyers', () => {
-  // People, not tickets — one person buying four is one buyer
+  // People, not tickets - one person buying four is one buyer
   it('counts each person once however many tickets they hold', () => {
     expect(countBuyers([purchase('1', 'u1'), purchase('2', 'u1'), purchase('3', 'u1')])).toBe(1);
   });

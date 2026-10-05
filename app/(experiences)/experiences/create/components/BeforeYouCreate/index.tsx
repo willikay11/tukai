@@ -44,8 +44,8 @@ export const BeforeYouCreate = ({ onCreateNew, onStartFromScratch }: BeforeYouCr
     return () => clearTimeout(timer);
   }, [search]);
 
-  // Same call the Hosting tab makes — every experience the user created, in
-  // all statuses — narrowed by the API's own search param
+  // Same call the Hosting tab makes - every experience the user created, in
+  // all statuses - narrowed by the API's own search param
   const { data: hostedResponse, isLoading } = useExperiences(
     {
       page: 1,
@@ -85,7 +85,7 @@ export const BeforeYouCreate = ({ onCreateNew, onStartFromScratch }: BeforeYouCr
         </Button>
       </div>
 
-      {/* Search — full width on small screens, a third of the container on large */}
+      {/* Search - full width on small screens, a third of the container on large */}
       <div className="mt-6 w-full lg:w-[30%]">
         <Input
           type="search"
@@ -118,7 +118,7 @@ export const BeforeYouCreate = ({ onCreateNew, onStartFromScratch }: BeforeYouCr
           <NoData
             message={
               hasSearch
-                ? `“${submittedSearch}” doesn't exist yet — go ahead and create it.`
+                ? `“${submittedSearch}” doesn't exist yet, go ahead and create it.`
                 : "You haven't created any experiences yet."
             }
           />
@@ -139,7 +139,7 @@ export const BeforeYouCreate = ({ onCreateNew, onStartFromScratch }: BeforeYouCr
         </div>
       )}
 
-      {/* Duplicate note — informational until a duplicate endpoint exists */}
+      {/* Duplicate note - informational until a duplicate endpoint exists */}
       <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-2xl bg-gray-50 px-5 py-4 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3">
           <IconComponent
@@ -150,7 +150,7 @@ export const BeforeYouCreate = ({ onCreateNew, onStartFromScratch }: BeforeYouCr
           />
           <p className="text-sm text-gray-600">
             Running the same experience again? Duplicate an existing one instead of starting from
-            scratch — dates and tickets stay editable.
+            scratch. Dates and tickets stay editable.
           </p>
         </div>
 

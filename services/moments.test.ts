@@ -103,7 +103,7 @@ describe('moment comments', () => {
    * The client is ready for is_liked the moment the serializer sends it: this
    * asserts a raw snake_case payload carrying it survives the camel-case pass
    * and reaches callers as isLiked. Without the field the heart cannot show a
-   * prior like after a reload — there is no other source for that state.
+   * prior like after a reload - there is no other source for that state.
    */
   it('carries is_liked through to the caller when the serializer sends it', async () => {
     mockGet.mockResolvedValue({

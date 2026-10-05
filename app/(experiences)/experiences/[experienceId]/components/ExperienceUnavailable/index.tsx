@@ -24,7 +24,7 @@ export const ExperienceUnavailable = ({
 }: ExperienceUnavailableProps) => {
   const router = useRouter();
 
-  // No similar/recommended endpoint exists — the default list (same source
+  // No similar/recommended endpoint exists - the default list (same source
   // as "Happening Near You") is the closest available query
   const { data: similarResponse } = useExperiences({ page: 1, page_size: 9 }, true);
   const similarExperiences: Experience[] = (similarResponse?.data?.results ?? [])
@@ -34,14 +34,14 @@ export const ExperienceUnavailable = ({
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
       <div className="text-center">
-        {/* 404 heading — middle 0 is lime */}
+        {/* 404 heading - middle 0 is lime */}
         <h1 className="text-8xl font-extrabold leading-none">
           <span className="text-primary">4</span>
           <span className="text-lime">0</span>
           <span className="text-primary">4</span>
         </h1>
 
-        {/* Compass icon in grey circle — same icon as the Discover nav item */}
+        {/* Compass icon in grey circle - same icon as the Discover nav item */}
         <div className="mt-6 flex justify-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
             <IconComponent iconName="CompassIcon" size={22} className="text-primary" />
@@ -63,14 +63,6 @@ export const ExperienceUnavailable = ({
           <Button onClick={() => router.push('/experiences')} className="rounded-full px-6">
             Explore experiences
           </Button>
-          {/* Placeholder like the nav's AskTukaiButton — no assistant exists yet */}
-          <button
-            type="button"
-            className="flex items-center gap-2 rounded-full border border-gray-200 px-6 py-2.5 text-sm font-medium text-gray-800 hover:border-gray-300"
-          >
-            <IconComponent iconName="SparklesIcon" size={16} className="text-primary" />
-            Ask TukAI
-          </button>
         </div>
       </div>
 

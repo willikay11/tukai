@@ -48,7 +48,7 @@ export const PageFilters = () => {
   }, [categories, pathname, categoryFromQuery, setSelectedCategoryId]);
 
   // Hide filters on Discover, Experiences and Communities (which render their
-  // own tabs), Moments and Bucket Lists (no categories to filter by — either
+  // own tabs), Moments and Bucket Lists (no categories to filter by - either
   // would otherwise sit on the skeleton forever, since only the /places branch
   // ever clears isLoading), detail pages (with IDs), and Control Center (a host
   // dashboard, not browsable content)

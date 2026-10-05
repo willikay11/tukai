@@ -104,7 +104,7 @@ describe('ScrollFilters', () => {
       render(<ScrollFilters filters={defaultFilters} />);
 
       const sportsButton = screen.getByText('Sports').closest('button');
-      expect(sportsButton).toHaveClass('bg-green-100', 'text-primary');
+      expect(sportsButton).toHaveClass('bg-surface-brand', 'text-brand');
     });
 
     it('applies inactive styling to unselected filters', () => {
@@ -116,7 +116,7 @@ describe('ScrollFilters', () => {
       render(<ScrollFilters filters={defaultFilters} />);
 
       const allButton = screen.getByText('All').closest('button');
-      expect(allButton).toHaveClass('bg-gray-100', 'text-gray-500');
+      expect(allButton).toHaveClass('bg-surface', 'text-gray-800');
     });
 
     it('changes styling when selected category changes', () => {
@@ -130,7 +130,7 @@ describe('ScrollFilters', () => {
       rerender(<ScrollFilters filters={defaultFilters} />);
 
       const musicButton = screen.getByText('Music').closest('button');
-      expect(musicButton).toHaveClass('bg-green-100');
+      expect(musicButton).toHaveClass('bg-surface-brand');
     });
   });
 
@@ -306,7 +306,7 @@ describe('ScrollFilters', () => {
       rerender(<ScrollFilters filters={defaultFilters} />);
 
       const musicButton = screen.getByText('Music').closest('button');
-      expect(musicButton).toHaveClass('bg-green-100');
+      expect(musicButton).toHaveClass('bg-surface-brand');
     });
   });
 

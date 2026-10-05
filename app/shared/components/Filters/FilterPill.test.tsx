@@ -31,13 +31,13 @@ describe('FilterPill', () => {
   it('takes the light green when it is the chosen filter', () => {
     render(<FilterPill label="Restaurants" onClick={jest.fn()} isSelected />);
 
-    expect(screen.getByRole('button')).toHaveClass('bg-green-100', 'text-primary');
+    expect(screen.getByRole('button')).toHaveClass('bg-surface-brand', 'text-brand');
   });
 
   it('sits grey when it is not', () => {
     render(<FilterPill label="Restaurants" onClick={jest.fn()} />);
 
-    expect(screen.getByRole('button')).toHaveClass('bg-gray-100', 'text-gray-500');
+    expect(screen.getByRole('button')).toHaveClass('bg-surface', 'text-gray-800');
   });
 
   // The selected state is what the chip means, so it is announced, not just drawn

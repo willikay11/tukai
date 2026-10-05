@@ -64,7 +64,7 @@ describe('SharedExperiencePreview', () => {
   };
 
   describe('Rendering', () => {
-    // The "Preview Experience" heading was removed from the panel — the step
+    // The "Preview Experience" heading was removed from the panel - the step
     // side panel labels it now. What matters is that the preview renders the
     // experience it was handed.
     it('renders the experience being previewed', () => {
@@ -83,7 +83,7 @@ describe('SharedExperiencePreview', () => {
 
     it('displays tickets section when step is tickets', () => {
       const { container } = render(<SharedExperiencePreview {...defaultProps} step="tickets" />);
-      // The date section renders "Mon, Jun 15" — the year only ever appeared via
+      // The date section renders "Mon, Jun 15" - the year only ever appeared via
       // the ticket validity line, which is commented out in TicketCard
       expect(container.textContent).toContain('Jun');
       expect(container.textContent).toContain('15');

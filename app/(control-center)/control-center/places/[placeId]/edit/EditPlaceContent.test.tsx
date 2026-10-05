@@ -139,7 +139,7 @@ describe('EditPlaceContent', () => {
       'href',
       '/places/kraftory',
     );
-    // Nowhere yet — the reader is still looking at the confirmation
+    // Nowhere yet - the reader is still looking at the confirmation
     expect(push).not.toHaveBeenCalled();
   });
 
@@ -203,7 +203,7 @@ describe('EditPlaceContent', () => {
   });
 
   // A place has no free/paid column, so the pill edits the property of that
-  // name — the same row the Properties step lists
+  // name - the same row the Properties step lists
   it('saves free or paid entry as a property', async () => {
     const user = userEvent.setup();
     renderEdit();
@@ -233,7 +233,7 @@ describe('EditPlaceContent', () => {
     const user = userEvent.setup();
     const { container } = renderEdit();
 
-    // The shared uploader's own controls — this form uses the same one the
+    // The shared uploader's own controls - this form uses the same one the
     // create-experience flow does
     await user.click(screen.getByRole('button', { name: 'Remove image' }));
     await user.upload(

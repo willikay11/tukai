@@ -10,7 +10,7 @@ jest.mock('next/navigation', () => ({ useRouter: () => ({ back, push: jest.fn() 
 
 const onLoginHolder: { fire?: () => void } = {};
 // Only the card is stubbed: the box around it is the real one, so the dialog
-// still behaves like a dialog — Escape closes it, and it carries its own role
+// still behaves like a dialog - Escape closes it, and it carries its own role
 jest.mock('@/app/shared/components/Auth', () => ({
   ...jest.requireActual('@/app/shared/components/Auth'),
   AuthCard: ({ onLogin }: { onLogin: () => void }) => {

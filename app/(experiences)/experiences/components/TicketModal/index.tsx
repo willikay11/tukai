@@ -60,7 +60,7 @@ export const TicketModal = ({
       <DialogContent className="max-h-[90vh] w-[calc(100%-32px)] max-w-sm overflow-y-auto rounded-3xl border-0 p-0 md:max-w-[560px]">
         <DialogTitle className="sr-only">Tickets for {experienceTitle}</DialogTitle>
         <DialogDescription className="sr-only">
-          Your ticket QR codes for {experienceTitle} — scan at entry
+          Your ticket QR codes for {experienceTitle}. Scan at entry
         </DialogDescription>
 
         {/* Header image with overlay */}

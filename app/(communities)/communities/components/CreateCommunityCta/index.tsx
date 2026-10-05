@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
  * Starting a community.
  *
  * Two placements, one control: a button in the page header from md up, and a
- * floating pill along the bottom edge on a phone — where it stands in for the
+ * floating pill along the bottom edge on a phone - where it stands in for the
  * main navigation, which this tab hides.
  */
 export const CreateCommunityCta = ({

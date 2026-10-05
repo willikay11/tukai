@@ -25,7 +25,7 @@ type ListExperiencesProps = {
   skeletonCount?: number;
   type: 'discover' | 'invited';
   noDataMessage?: string;
-  // Forwarded to SingleExperience — 'row' is the compact 4:3 discover card
+  // Forwarded to SingleExperience - 'row' is the compact 4:3 discover card
   variant?: 'default' | 'row';
 };
 
@@ -151,6 +151,13 @@ export const ListExperiences = ({
         setExperienceList([]);
         hasAddedPlaceholdersRef.current.clear();
         appendedPagesRef.current.clear();
+      } else if (isEmpty && hasAddedPlaceholdersRef.current.has(page)) {
+        // A later page came back with nothing. Its placeholders are already on
+        // screen and no results will replace them, so they have to be cleared
+        // here or the skeletons sit at the foot of the list forever.
+        setExperienceList((prev) => prev.filter((exp) => !exp.id.startsWith('placeholder-')));
+        hasAddedPlaceholdersRef.current.delete(page);
+        appendedPagesRef.current.add(page);
       }
     }
   }, [experiences, isLoading, page, skeletonCount]);
@@ -222,7 +229,7 @@ export const ListExperiences = ({
             animate={{ opacity: 1, y: 0 }}
             // Capped, not `index * 0.02`: the index runs over the whole
             // accumulated list, so by the fifth page the last card was waiting
-            // more than a second before it even began to fade in — which is
+            // more than a second before it even began to fade in - which is
             // what made the grid look like it was loading in a slow cascade.
             // A stagger is only worth anything across the first screenful.
             transition={{ duration: 0.2, delay: Math.min(index, STAGGER_CAP) * 0.02 }}

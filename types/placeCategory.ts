@@ -12,7 +12,7 @@ export type PlaceCategory = {
   icon: string;
   group: string;
   placesCount: number;
-  // The API returns an array (`images`), not a single `image` — the first one
+  // The API returns an array (`images`), not a single `image` - the first one
   // is what the city cards show
   images?: CategoryImage[];
 };

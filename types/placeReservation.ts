@@ -5,7 +5,7 @@ export type PlaceReservationProfile = {
   reservationType: 'restaurant_reservation' | 'cinema_reservation';
   status: 'draft' | 'active' | 'paused';
   seatingCapacity?: number;
-  // Not in the documented serializer yet — read back if the API starts
+  // Not in the documented serializer yet - read back if the API starts
   // returning it, so the form opens on what was saved
   maxPartySize?: number;
   // Creating a profile auto-provisions a draft "anchor" experience; bookings
@@ -44,7 +44,7 @@ export type RestaurantReservationDetail = {
 
 /**
  * A table request. The API returns a Purchase, so a reservation carries the
- * same lifecycle as a ticket — the venue's owner accepts or declines it.
+ * same lifecycle as a ticket - the venue's owner accepts or declines it.
  */
 export type PlaceBookingRequest = {
   id: string;
@@ -71,8 +71,8 @@ export type PlaceBookingRequest = {
 
 /**
  * The body of POST …/booking-requests/, per
- * `WriteOnlyRestaurantBookingRequestCreateSerializer`. It is flat — not the
- * `ticket_purchases` array the experience purchase paths take — and the first
+ * `WriteOnlyRestaurantBookingRequestCreateSerializer`. It is flat - not the
+ * `ticket_purchases` array the experience purchase paths take - and the first
  * three fields are required.
  */
 export type CreatePlaceBookingRequest = {

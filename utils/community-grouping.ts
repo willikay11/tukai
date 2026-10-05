@@ -3,7 +3,7 @@ import { Community, CommunityCategory } from '@/types/community';
 export interface CommunityGroup {
   categoryId: string;
   categoryName: string;
-  // Hugeicons name — comes from the API's own category record, so new
+  // Hugeicons name - comes from the API's own category record, so new
   // categories get an icon without a code change
   icon: string;
   iconBgClass: string;
@@ -12,7 +12,7 @@ export interface CommunityGroup {
 }
 
 // Paired background/foreground tints. The API gives every category an icon but
-// no colour, so one is assigned from this palette — deterministically, by id,
+// no colour, so one is assigned from this palette - deterministically, by id,
 // rather than from a hardcoded list of category names that goes stale the
 // moment someone adds a category.
 const TINTS: { bg: string; color: string }[] = [
@@ -46,7 +46,7 @@ export const tintForCategory = (categoryId: string) => {
  *
  * A community can carry several categories, so grouping by all of them would
  * list the same community two or three times on one page. It is filed under its
- * FIRST category — the one its card already shows as a badge — so each appears
+ * FIRST category - the one its card already shows as a badge - so each appears
  * exactly once and the card agrees with the group it sits in.
  *
  * Groups are ordered by size, largest first; ties fall back to name so the

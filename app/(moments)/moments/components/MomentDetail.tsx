@@ -9,19 +9,16 @@ import moment from 'moment';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
+import { MomentAvatar } from '@/app/shared/components/Moments';
 import { useFlagMoment, useToggleMomentLike } from '@/app/shared/hooks/useMoments';
 import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { useAuthDialog } from '@/context/AuthDialogContext';
-import { Moment, momentAuthorName, momentPhotos } from '@/types/moment';
+import { Moment, momentAuthorName, momentContext, momentPhotos } from '@/types/moment';
+import { CANVAS_ICONS } from '@/utils/canvas-icons';
 
 import { FlagReasonPicker } from './FlagReasonPicker';
-import { MomentAvatar } from './MomentAvatar';
 import { MomentComments } from './MomentComments';
-
-// Whatever the moment was posted against, in the order the design shows it
-const contextLabel = (item: Moment): string | null =>
-  item.community?.title || item.experience?.title || item.place?.title || null;
 
 export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
   const { data: session } = useSession();
@@ -36,10 +33,10 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
   const [isLiked, setIsLiked] = useState(item.isLiked ?? false);
   const [likeCount, setLikeCount] = useState(item.totalLikes);
 
-  // Only media that can actually be rendered — a null photo throws in next/image
+  // Only media that can actually be rendered - a null photo throws in next/image
   const photos = momentPhotos(item);
   const authorName = momentAuthorName(item.author);
-  const context = contextLabel(item);
+  const context = momentContext(item);
   const isOwnMoment = session?.user?.id === item.author.id;
 
   const like = () => {
@@ -72,7 +69,7 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
             description:
               result.status === 204
                 ? 'You have already reported this moment.'
-                : 'Thanks — our team will take a look.',
+                : 'Thanks, our team will take a look.',
           });
         },
         onError: () =>
@@ -93,9 +90,22 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
           <MomentAvatar src={item.author.picture} name={authorName} size={44} />
           <div className="min-w-0">
             <p className="truncate font-bold text-gray-900">{authorName}</p>
-            <p className="truncate text-sm text-gray-400">
+            <p className="flex min-w-0 items-center gap-1.5 truncate text-sm text-gray-400">
               {moment(item.dateCreated).fromNow()}
-              {context && ` · ${context}`}
+              {context && (
+                <>
+                  <span aria-hidden="true">·</span>
+                  {/* The canvas pairs the parent with its own icon: a title
+                      alone does not say what kind of thing it is */}
+                  <IconComponent
+                    iconName={CANVAS_ICONS[context.icon]}
+                    size={14}
+                    color="currentColor"
+                  />
+                  <span className="truncate">{context.label}</span>
+                  <span className="sr-only">({context.kind})</span>
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -134,7 +144,7 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
 
       {/* One body of text, not two. The composer asks a single question and
           sends the first line as `title` and the whole thing as `description`,
-          so showing both printed the same words twice — bold, then again in
+          so showing both printed the same words twice - bold, then again in
           full. The description is always the longer of the two; the title is
           only a fallback for a moment posted without one. */}
       <p className="mt-4 text-base leading-relaxed text-gray-700">

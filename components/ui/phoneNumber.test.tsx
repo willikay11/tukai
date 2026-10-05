@@ -42,7 +42,7 @@ describe('PhoneNumber', () => {
       expect(field).not.toHaveClass('text-[14px]');
     });
 
-    it('is not a pill — only search fields are', () => {
+    it('is not a pill - only search fields are', () => {
       render(<PhoneNumber />);
 
       expect(fieldBox()).not.toHaveClass('rounded-full');

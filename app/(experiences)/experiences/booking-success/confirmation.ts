@@ -30,14 +30,14 @@ export interface BookingConfirmation {
  * The purchases that belong to one checkout.
  *
  * "The purchase is the ticket", so buying three tickets creates three rows.
- * They are gathered by occurrence and by the second they were created in —
+ * They are gathered by occurrence and by the second they were created in -
  * the API exposes no order id on a purchase, so the timestamp is what ties a
  * batch together.
  */
 export const purchasesFromSameCheckout = (
   purchases: TicketPurchase[],
   reference: string | null,
-  // The purchase the page was opened for, when the URL named one — it is the
+  // The purchase the page was opened for, when the URL named one - it is the
   // most reliable anchor there is
   named?: TicketPurchase,
 ): TicketPurchase[] => {
@@ -97,11 +97,11 @@ export const toConfirmation = (
 
   return {
     // The payment reference the buyer arrived with, falling back to the ticket
-    // number — both are what support would ask them for
+    // number - both are what support would ask them for
     reference: reference || first.ticketNumber,
     experience: {
       title: experience?.title ?? 'Your experience',
-      // Cover first, then whatever the experience leads with — an experience
+      // Cover first, then whatever the experience leads with - an experience
       // whose photos carry no isCover flag was showing nothing at all
       thumbnail:
         experience?.photos?.find((photo) => photo.isCover)?.photo ||

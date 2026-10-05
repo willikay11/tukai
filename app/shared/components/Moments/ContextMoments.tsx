@@ -5,22 +5,24 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import { MomentComposer } from '@/app/shared/components/Moments/MomentComposer';
-import { MomentComposerTrigger } from '@/app/shared/components/Moments/MomentComposerTrigger';
 import { MomentsMasonry } from '@/app/shared/components/Moments/MomentsMasonry';
 import { useMoments } from '@/app/shared/hooks/useMoments';
-import { NoData } from '@/components/ui/noData';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 import { Moment } from '@/types/moment';
 
 /**
  * What people posted at one experience, place or community, with the composer
  * above it.
  *
- * It lives in a narrow column — the booking panel, or a bottom sheet on a
- * phone — so the masonry runs two columns at every width rather than widening
+ * It lives in a narrow column - the booking panel, or a bottom sheet on a
+ * phone - so the masonry runs two columns at every width rather than widening
  * to three the way the full feed does.
  */
 export const ContextMoments = ({
+  title,
+  onShare,
   contextLabel,
   emptyMessage,
   experienceId,
@@ -29,6 +31,14 @@ export const ContextMoments = ({
   communityId,
   communityLabel,
 }: {
+  /** A heading over the section. Omitted where a tab already names it. */
+  title?: string;
+  /**
+   * Given one, pressing Share moment calls this instead of opening the
+   * composer dialog - for a surface that shows the form in place rather than
+   * stacking a second panel over itself.
+   */
+  onShare?: () => void;
   // What the moments belong to, named in the composer
   contextLabel: string;
   emptyMessage: string;
@@ -42,6 +52,7 @@ export const ContextMoments = ({
 }) => {
   const router = useRouter();
   const { status: sessionStatus } = useSession();
+  const { setOpenSignIn } = useAuthDialog();
   const [isComposerOpen, setIsComposerOpen] = useState(false);
 
   const { data, isLoading } = useMoments({
@@ -51,15 +62,33 @@ export const ContextMoments = ({
   });
   const moments: Moment[] = data?.data?.results ?? [];
 
-  // Posting needs an account — the moments endpoints are all authenticated
+  // Posting needs an account - the moments endpoints are all authenticated.
+  // The invitation still shows either way: hiding it from a signed-out reader
+  // leaves the section looking like nothing can be done with it.
   const canPost = sessionStatus === 'authenticated';
 
-  // The same pill field the moments feed comments with, rather than a button
-  const shareButton = canPost ? (
-    <MomentComposerTrigger onOpen={() => setIsComposerOpen(true)} />
-  ) : null;
+  const shareButton = (
+    <button
+      type="button"
+      onClick={() => {
+        if (!canPost) {
+          setOpenSignIn(true);
+          return;
+        }
+        if (onShare) onShare();
+        else setIsComposerOpen(true);
+      }}
+      className="inline-flex h-12 flex-shrink-0 items-center gap-2.5 rounded-full bg-lime px-6 text-[15px] font-bold text-brand-ink transition-colors hover:bg-lime-dark"
+    >
+      <IconComponent iconName="DashboardCircleAddIcon" size={20} color="currentColor" />
+      Share moment
+    </button>
+  );
 
-  const composer = (
+  const heading = title ? <h3 className="text-[22px] font-bold text-brand-ink">{title}</h3> : null;
+
+  // The caller owns the form where it asked to, so there is no second one here
+  const composer = onShare ? null : (
     <MomentComposer
       open={isComposerOpen}
       onOpenChange={setIsComposerOpen}
@@ -85,10 +114,11 @@ export const ContextMoments = ({
   if (moments.length === 0) {
     return (
       <div className="space-y-4">
+        {heading}
         {shareButton}
-        <div className="py-6">
-          <NoData message={emptyMessage} />
-        </div>
+        {/* A line, not an illustrated empty card: the invitation above it is
+            what the reader is meant to act on */}
+        <p className="text-[15px] text-ink-muted">{emptyMessage}</p>
         {composer}
       </div>
     );
@@ -96,6 +126,7 @@ export const ContextMoments = ({
 
   return (
     <div className="space-y-4">
+      {heading}
       {shareButton}
       <MomentsMasonry
         moments={moments}

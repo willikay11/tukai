@@ -14,7 +14,7 @@ type SheetView = 'reservation' | 'moments';
  * position.
  *
  * Below `lg` the panel column is hidden entirely, so this bar is the only way
- * in — each button opens the panel in a sheet showing just that view, rather
+ * in - each button opens the panel in a sheet showing just that view, rather
  * than dropping the reader on a tab row to choose again.
  */
 export const MobileBookingBar = ({ experience }: { experience: Experience }) => {
@@ -39,7 +39,7 @@ export const MobileBookingBar = ({ experience }: { experience: Experience }) => 
             onClick={() => setOpenView('reservation')}
             className="h-11 rounded-full px-6"
           >
-            Reserve
+            Buy Tickets
           </Button>
         </div>
       </div>

@@ -5,7 +5,7 @@ import { PlaceCategory } from '@/types/placeCategory';
 import { ResultThumbnail } from './ResultThumbnail';
 
 export const PlaceResultRow = ({ item, onClick }: { item: Place; onClick: () => void }) => {
-  // Categories mix city and interest groups — only the interest one names the
+  // Categories mix city and interest groups - only the interest one names the
   // kind of place ("Restaurants"); the city ones repeat the area
   const category = item.categories?.find(
     (entry: PlaceCategory) => entry.group === 'interests',

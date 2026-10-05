@@ -25,7 +25,7 @@ export interface Moment {
   community: { id: string; title: string } | null;
   experience: { id: string; title: string } | null;
   place: { id: string; title: string } | null;
-  // May be empty — a moment can be posted without media
+  // May be empty - a moment can be posted without media
   media: MomentMedia[];
   totalLikes: number;
   totalComments: number;
@@ -39,7 +39,7 @@ export interface Moment {
 // next/image hard-throws on a null src (it treats a non-string as a static
 // import and reads .default off it) and on a relative path without a leading
 // slash. Media items carry a media_type, so a video or a still-processing
-// upload can legitimately have photo: null — those must never reach an <Image>.
+// upload can legitimately have photo: null - those must never reach an <Image>.
 export const isRenderablePhoto = (photo: string | null | undefined): photo is string =>
   typeof photo === 'string' &&
   photo.trim().length > 0 &&
@@ -48,6 +48,50 @@ export const isRenderablePhoto = (photo: string | null | undefined): photo is st
 // The media on a moment that can actually be rendered as a photo
 export const momentPhotos = (item: Pick<Moment, 'media'>): MomentMedia[] =>
   (item.media ?? []).filter((media) => isRenderablePhoto(media.photo));
+
+/**
+ * What a moment was posted against, and what kind of thing that is.
+ *
+ * The canvas pairs each parent with its own icon and a word for the kind:
+ * a title on its own does not say whether "Trails And Us" is a community, an
+ * experience or a place.
+ */
+export type MomentContext = {
+  label: string;
+  kind: 'Community' | 'Experience' | 'Place';
+  /** A key in CANVAS_ICONS */
+  icon: 'users' | 'ticket' | 'pin';
+  id: string;
+};
+
+/** In the order the canvas shows them. */
+export const momentContext = (item: Pick<Moment, 'community' | 'experience' | 'place'>) => {
+  if (item.community)
+    return {
+      label: item.community.title,
+      kind: 'Community',
+      icon: 'users',
+      id: item.community.id,
+    } as MomentContext;
+
+  if (item.experience)
+    return {
+      label: item.experience.title,
+      kind: 'Experience',
+      icon: 'ticket',
+      id: item.experience.id,
+    } as MomentContext;
+
+  if (item.place)
+    return {
+      label: item.place.title,
+      kind: 'Place',
+      icon: 'pin',
+      id: item.place.id,
+    } as MomentContext;
+
+  return null;
+};
 
 // display_name is optional on the API, so fall back to the real name
 export const momentAuthorName = (author: MomentAuthor): string =>

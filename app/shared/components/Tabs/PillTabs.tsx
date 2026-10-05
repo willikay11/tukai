@@ -7,12 +7,12 @@ import { cn } from '@/lib/utils';
 export interface PillTab {
   value: string;
   label: string;
-  /** Hugeicons name, shown before the label. Optional — most tab rows are text. */
+  /** Hugeicons name, shown before the label. Optional - most tab rows are text. */
   icon?: string;
 }
 
 /**
- * The segmented control used to switch between views of the same page — a
+ * The segmented control used to switch between views of the same page - a
  * grey track with the active option raised as a white pill.
  *
  * Extracted from the experiences page, where this class string was written

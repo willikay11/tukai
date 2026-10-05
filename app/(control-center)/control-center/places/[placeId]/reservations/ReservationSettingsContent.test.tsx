@@ -117,7 +117,7 @@ describe('ReservationSettingsContent', () => {
   });
 
   // The closing picker refuses anything before the opening time, but the
-  // opening picker is not held back the same way — so it is the direction the
+  // opening picker is not held back the same way - so it is the direction the
   // schema has to catch
   it('refuses an opening time dragged past the closing one', async () => {
     const user = userEvent.setup();

@@ -350,7 +350,7 @@ export const TicketsStep = ({
 
           const createdId = slotResponse.data?.id;
           if (!createdId) {
-            throw new Error('Slot template creation failed — no id returned');
+            throw new Error('Slot template creation failed, no id returned');
           }
 
           slotTemplateId = createdId;
@@ -392,7 +392,7 @@ export const TicketsStep = ({
         }
 
         const apiId = response.data?.id;
-        // The API allocates the commission and returns what the buyer pays —
+        // The API allocates the commission and returns what the buyer pays -
         // the saved card shows that rather than the amount typed in
         const buyerPrice = response.data ? getTicketBuyerAmount(response.data) : null;
 
@@ -622,7 +622,7 @@ export const TicketsStep = ({
                         quantity={ticket.quantity}
                         amount={ticket.amount}
                         buyerPrice={ticket.buyerPrice}
-                        validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
+                        validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} - ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
                         coverPhoto={photos?.[0]}
                         onEdit={() => handleEditTicket(index)}
                         onDelete={() => handleDeleteTicket(ticket.id)}
@@ -684,7 +684,7 @@ export const TicketsStep = ({
                               quantity={ticket.quantity}
                               amount={ticket.amount}
                               buyerPrice={ticket.buyerPrice}
-                              validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
+                              validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} - ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
                               coverPhoto={photos?.[0]}
                               onEdit={() => handleEditTicket(formData.items.indexOf(ticket))}
                               onDelete={() => handleDeleteTicket(ticket.id)}
@@ -717,7 +717,7 @@ export const TicketsStep = ({
             </div>
           ) : (
             // Both multi-day layouts need the full date range and times before
-            // tickets can be attached to anything — say so rather than render
+            // tickets can be attached to anything - say so rather than render
             // an empty step
             <p className="text-xs text-muted-foreground">
               Add the experience start and end dates and times before creating tickets.
@@ -827,7 +827,7 @@ export const TicketsStep = ({
 
           {isRecurring && !allSlotsHaveTickets && validSlots.length > 0 && (
             <p className="mt-4 text-center text-xs text-muted-foreground">
-              {savedTicketsCount} of {validSlots.length} time slots have tickets — add a ticket to
+              {savedTicketsCount} of {validSlots.length} time slots have tickets. Add a ticket to
               each slot to continue
             </p>
           )}
@@ -872,7 +872,7 @@ export const TicketsStep = ({
                     quantity={ticket.quantity}
                     amount={ticket.amount}
                     buyerPrice={ticket.buyerPrice}
-                    validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} – ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
+                    validity={`${moment(ticket.salesStartDate).format('MMM D, YYYY,')} ${moment(ticket.salesStartTime, 'HH:mm').format('h:mm A')} - ${moment(ticket.salesEndDate).format('MMM D, YYYY,')} ${moment(ticket.salesEndTime, 'HH:mm').format('h:mm A')}`}
                     coverPhoto={photos?.[0]}
                     onEdit={() => handleEditTicket(index)}
                     onDelete={() => handleDeleteTicket(ticket.id)}

@@ -23,7 +23,7 @@ export const ScrollFilters = ({
   const pathname = usePathname();
   const { data: session } = useSession();
   const { selectedCategoryId, setSelectedCategoryId } = useSelectedCategory();
-  const { setOpenSignIn } = useAuthDialog();
+  const { setOpenSignIn, openSignInWithCallback } = useAuthDialog();
   const [showPrevBtn, setShowPrevBtn] = useState<boolean>(false);
   const [showNextBtn, setShowNextBtn] = useState<boolean>(false);
   const [selectedOption, setSelectedOption] = useState<string | undefined>(selectedCategoryId);
@@ -105,8 +105,24 @@ export const ScrollFilters = ({
 
   // Handle filter change and update URL with categoryId
   const handleCategoryChange = (categoryId: string) => {
-    if (filters.find((filter) => filter.value === categoryId)?.shouldBeLoggedIn && !session) {
-      setOpenSignIn(true);
+    const isMyCommunities = categoryId === 'my-communities';
+    const requiresAuth =
+      isMyCommunities || filters.find((filter) => filter.value === categoryId)?.shouldBeLoggedIn;
+
+    if (requiresAuth && !session) {
+      if (isMyCommunities) {
+        // Signing in carries on to the filter they pressed for
+        openSignInWithCallback(() => {
+          setSelectedOption(categoryId);
+          setSelectedCategoryId(categoryId);
+
+          const params = new URLSearchParams(searchParams.toString());
+          params.set('category', categoryId);
+          router.replace(`${pathname}?${params.toString()}`, { scroll: true });
+        });
+      } else {
+        setOpenSignIn(true);
+      }
       return;
     }
     setSelectedOption(categoryId);

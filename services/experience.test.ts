@@ -287,7 +287,7 @@ describe('Experience Service', () => {
     });
   });
 
-  // Photos are no longer part of the create payload — they are posted to their
+  // Photos are no longer part of the create payload - they are posted to their
   // own endpoint afterwards, which is where the file validation now lives.
   describe('addExperiencePhotos', () => {
     it('validates the files, then posts them against the experience', async () => {
@@ -464,7 +464,7 @@ describe('Experience Service', () => {
       });
     });
 
-    // The API's real error shape — this used to be swallowed and replaced with
+    // The API's real error shape - this used to be swallowed and replaced with
     // "An unexpected error occurred"
     it('surfaces the API detail from the errors array', async () => {
       const error = {

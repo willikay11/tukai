@@ -46,7 +46,7 @@ export const parseApiError = (
       return err.message;
     }
 
-    // Least useful — "Bad Request" tells the user nothing, so it comes last
+    // Least useful - "Bad Request" tells the user nothing, so it comes last
     if (err.response?.statusText) {
       return err.response.statusText;
     }

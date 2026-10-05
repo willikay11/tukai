@@ -1,52 +1,67 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 
 import { Bookmark } from '@/app/shared/components/Bookmark';
+import { CardShell } from '@/app/shared/components/Cards/CardShell';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { PhotoImage } from '@/app/shared/components/Images';
-import { CARD_LIFT, MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motion';
+import { TITLE_TINT } from '@/app/shared/components/Motion';
+import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { cn } from '@/lib/utils';
 import { coverPhotoUrl } from '@/types/photo';
 import { Place } from '@/types/place';
-import { PlaceCategory } from '@/types/placeCategory';
 import { placePath } from '@/utils/detail-paths';
 
-export const PlaceCard = ({ place, priority = false }: { place: Place; priority?: boolean }) => {
+import { placeFact, placeLocality } from './place-fact';
+
+const FACT_TONE: Record<string, string> = {
+  event: 'text-brand',
+  plain: 'text-gray-900',
+  muted: 'text-ink-muted',
+};
+
+/** The width a card takes in a rail. In a grid it fills the cell instead. */
+const RAIL_WIDTH = 'w-[184px] flex-shrink-0 snap-start';
+
+/**
+ * A place, as the canvas draws it: a square photo at 184px, the save control
+ * over its corner, then the name, where it is, and one line of substance.
+ */
+export const PlaceCard = ({
+  place,
+  priority = false,
+  className = RAIL_WIDTH,
+}: {
+  place: Place;
+  priority?: boolean;
+  /** Overridden where the card fills a grid cell instead of sitting in a rail. */
+  className?: string;
+}) => {
   const { data: session } = useSession();
+  const drawer = usePlaceDrawer();
 
-  const coverPhoto = coverPhotoUrl(place.photos, 'md');
-
-  // categories mix city and interest groups — only the interest one names the
-  // kind of place ("Restaurants", "Nyama Choma"); the city ones are the area
-  const category = place.categories?.find(
-    (item: PlaceCategory) => item.group === 'interests',
-  )?.name;
-  const area = place.location?.city || place.location?.name;
-  const metaLine = [category, area].filter(Boolean).join(' · ');
-
-  // Most places have no reviews yet, so 0 means "unrated" rather than a score
-  const rating = place.averageRating > 0 ? place.averageRating : null;
+  const fact = placeFact(place);
+  const locality = placeLocality(place);
 
   return (
-    <Link
-      href={placePath(place)}
-      className={cn('group block w-[280px] flex-shrink-0 snap-start', CARD_LIFT)}
-    >
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
-        <PhotoImage
-          src={coverPhoto}
-          alt={place.title}
-          fill
-          sizes="280px"
-          // Above the fold: fetched straight away instead of waiting for the
-          // lazy-load observer, which cannot fire until React has painted
-          priority={priority}
-          className={cn('object-cover', MEDIA_ZOOM)}
-        />
-
-        <div className="absolute right-2 top-2">
+    <CardShell
+      // A place opens in the drawer, not on a page of its own - so no href,
+      // and nothing to open in a new tab. Without a drawer above it the card
+      // falls back to the place's own page.
+      href={drawer ? undefined : placePath(place)}
+      onClick={drawer ? () => drawer.openPlace(place.id) : undefined}
+      src={coverPhotoUrl(place.photos, 'md')}
+      alt={place.title}
+      sizes="184px"
+      // Above the fold: fetched straight away instead of waiting for the
+      // lazy-load observer, which cannot fire until React has painted
+      priority={priority}
+      ratio="square"
+      radius="rounded-xl"
+      className={className}
+      overlay={
+        // Top-right, over the photo
+        <div className="absolute right-0 top-0">
           <Bookmark
             bookmarked={place.isBookmarked}
             userId={session?.user?.id}
@@ -55,22 +70,30 @@ export const PlaceCard = ({ place, priority = false }: { place: Place; priority?
             className="text-white"
           />
         </div>
-      </div>
+      }
+    >
+      <div className="mt-[9px] flex flex-col gap-0.5">
+        <p className={cn('text-sm font-semibold leading-snug text-brand-ink', TITLE_TINT)}>
+          {place.title}
+        </p>
 
-      <div className="mt-3">
-        <div className="flex items-start justify-between gap-2">
-          <p className={cn('text-base font-bold text-gray-900', TITLE_TINT)}>{place.title}</p>
-          {rating !== null && (
-            <span className="flex flex-shrink-0 items-center gap-1">
-              <IconComponent iconName="StarIcon" size={14} className="text-yellow-400" />
-              <span className="text-sm font-medium text-gray-800">{rating}</span>
-            </span>
+        {locality && <p className="text-[12.5px] text-ink-muted">{locality}</p>}
+
+        <p
+          className={cn(
+            'mt-0.5 flex items-start gap-1.5 text-xs font-semibold leading-4',
+            FACT_TONE[fact.tone],
           )}
-        </div>
-        {metaLine && <p className="mt-0.5 text-sm text-gray-400">{metaLine}</p>}
-        {/* ⚠️ No average-price line: the places API returns no price field of
-            any kind (no price / avg_price / price_level) */}
+        >
+          <IconComponent
+            iconName={fact.icon}
+            size={15}
+            color="currentColor"
+            className="flex-shrink-0"
+          />
+          {fact.text}
+        </p>
       </div>
-    </Link>
+    </CardShell>
   );
 };

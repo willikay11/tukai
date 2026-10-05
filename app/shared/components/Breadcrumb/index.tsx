@@ -11,7 +11,7 @@ export interface BreadcrumbItem {
 interface BreadcrumbProps {
   items: BreadcrumbItem[];
   className?: string;
-  // 'accent' renders ancestors in the brand colour and mutes the current page —
+  // 'accent' renders ancestors in the brand colour and mutes the current page -
   // the treatment used above a page's own title (e.g. "Discover › Happening Today")
   variant?: 'default' | 'accent';
 }

@@ -33,7 +33,7 @@ export async function generateMetadata({
 
 export default async function ViewPlacePage({ params }: { params: { placeId: string } }) {
   // The detail response embeds `properties` and `social_links`, so the separate
-  // /properties and /social-links calls this page used to make were redundant —
+  // /properties and /social-links calls this page used to make were redundant -
   // and both hit paths without a trailing slash, costing a 301 each.
   const placeResponse: ApiResponse = await fetchPlace(params.placeId);
   const place: Place | undefined = placeResponse.data;

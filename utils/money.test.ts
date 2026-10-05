@@ -1,4 +1,4 @@
-import { moneyAmount } from './money';
+import { currencyFullName, moneyAmount } from './money';
 
 describe('moneyAmount', () => {
   // What the API actually sends for a promo discount, a buyer price, a total
@@ -11,7 +11,7 @@ describe('moneyAmount', () => {
     expect(moneyAmount(1500)).toBe(1500);
   });
 
-  // Nothing is not zero — the caller decides what an absent amount means
+  // Nothing is not zero - the caller decides what an absent amount means
   it('answers null for nothing at all', () => {
     expect(moneyAmount(null)).toBeNull();
     expect(moneyAmount(undefined)).toBeNull();
@@ -25,5 +25,16 @@ describe('moneyAmount', () => {
 
   it('keeps a real zero', () => {
     expect(moneyAmount({ amount: '0.00', currency: 'KES' })).toBe(0);
+  });
+});
+
+describe('currencyFullName', () => {
+  // The app writes the currency four ways depending on where it came from
+  it.each([['KES'], ['Ksh.'], ['kes'], ['']])('reads %s as shillings', (currency) => {
+    expect(currencyFullName(currency)).toBe('Kenya shillings');
+  });
+
+  it.each([['USD'], ['$'], ['usd']])('reads %s as dollars', (currency) => {
+    expect(currencyFullName(currency)).toBe('US dollars');
   });
 });

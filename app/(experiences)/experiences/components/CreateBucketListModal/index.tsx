@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { useCreateBucketList, useUpdateBucketList } from '@/app/shared/hooks/useBucketLists';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { Drawer } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { Textarea } from '@/components/ui/textarea';
@@ -73,15 +73,14 @@ export const CreateBucketListModal = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="px-6 md:w-[24rem]">
+    // The canvas opens everything about bucket lists in the side panel
+    <Drawer isOpen={open} setIsOpen={onOpenChange} width="narrow">
+      <div className="px-6 py-6">
         <div className="flex flex-col gap-4">
-          <DialogTitle className="text-xl font-black text-gray-700">
+          <h2 className="text-xl font-black text-gray-700">
             {isEditing ? 'Edit Bucket List' : 'Create Bucket List'}
-          </DialogTitle>
-          <DialogDescription className="sr-only">
-            Name your bucket list and choose who can see it
-          </DialogDescription>
+          </h2>
+          <span className="sr-only">Name your bucket list and choose who can see it</span>
 
           <div>
             <Input
@@ -132,7 +131,7 @@ export const CreateBucketListModal = ({
             {isEditing ? 'Save Changes' : 'Create Bucket List'}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </Drawer>
   );
 };

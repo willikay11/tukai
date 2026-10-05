@@ -117,7 +117,7 @@ export function MpesaDetailsForm({
           }}
         >
           <SelectTrigger
-            // 44px and a 14px radius, matching the Input fields around it —
+            // 44px and a 14px radius, matching the Input fields around it -
             // the trigger's own defaults are 50px and rounded-lg
             className="h-11 rounded-[14px] text-sm shadow-none data-[placeholder]:text-sm data-[placeholder]:text-gray-400"
             prefixIcon={<IconComponent iconName="Location01Icon" size={18} color="#374151" />}

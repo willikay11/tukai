@@ -121,7 +121,7 @@ function formatTicketValidity(
   salesEndTime: string,
 ) {
   if (!salesStartDate || !salesStartTime || !salesEndDate || !salesEndTime) {
-    return '—';
+    return '-';
   }
 
   const formatDate = (date: string) => {
