@@ -313,12 +313,15 @@ export const usePlaceManager = (placeId: string) => {
   });
   const communities: Community[] = communitiesResponse?.data?.results ?? [];
 
+  // The community itself, not just its id: a manager is told which of their
+  // communities holds the place, and an id is not something to show anyone
+  const owningCommunity = communities.find((community) => community.id === owningCommunityId);
+
   return {
-    isManager: Boolean(
-      owningCommunityId && communities.some((community) => community.id === owningCommunityId),
-    ),
+    isManager: Boolean(owningCommunityId && owningCommunity),
     isLoading: isLoadingOwnership || isLoadingCommunities,
     owningCommunityId,
+    owningCommunity,
   };
 };
 

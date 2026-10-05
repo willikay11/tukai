@@ -7,9 +7,23 @@ import { PlaceDrawer } from './index';
 const usePlace = jest.fn();
 const usePlaceOwnership = jest.fn();
 
+const usePlaceManager = jest.fn();
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   usePlace: (id: string | null, enabled: boolean) => usePlace(id, enabled),
   usePlaceOwnership: (id: string, enabled: boolean) => usePlaceOwnership(id, enabled),
+  usePlaceManager: (id: string) => usePlaceManager(id),
+  usePlaceReservationProfiles: () => ({ data: { data: { results: [] } } }),
+  usePlaceAvailability: () => ({ data: undefined }),
+}));
+jest.mock('./PlaceManagerBanner', () => ({
+  PlaceManagerBanner: ({ onOpenSettings }: { onOpenSettings: () => void }) => (
+    <button type="button" onClick={onOpenSettings}>
+      Reservation settings
+    </button>
+  ),
+}));
+jest.mock('./PlaceReservationSettings', () => ({
+  PlaceReservationSettings: () => <div data-testid="reservation-settings" />,
 }));
 
 // Each of these is its own unit; this suite is about the drawer's shell
@@ -106,6 +120,7 @@ describe('PlaceDrawer', () => {
     jest.clearAllMocks();
     usePlace.mockReturnValue({ data: { data: place }, isLoading: false });
     usePlaceOwnership.mockReturnValue({ data: { success: true, data: null } });
+    usePlaceManager.mockReturnValue({ isManager: false, owningCommunity: undefined });
   });
 
   it('shows the place and its sections', () => {
@@ -263,6 +278,45 @@ describe('PlaceDrawer', () => {
       fireEvent.click(screen.getByRole('button', { name: 'shared' }));
 
       expect(screen.getByTestId('about')).toBeInTheDocument();
+    });
+  });
+
+  /**
+   * A manager is shown their own setup at the top of the place, and the way
+   * into it, without leaving the drawer.
+   */
+  describe('managing the place', () => {
+    it('shows nothing of the sort to anyone else', () => {
+      render(<PlaceDrawer placeId="p1" isOpen onClose={jest.fn()} />);
+
+      expect(
+        screen.queryByRole('button', { name: 'Reservation settings' }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('offers the banner to a manager', () => {
+      usePlaceManager.mockReturnValue({
+        isManager: true,
+        owningCommunity: { title: 'Weekend Readers' },
+      });
+
+      render(<PlaceDrawer placeId="p1" isOpen onClose={jest.fn()} />);
+
+      expect(screen.getByRole('button', { name: 'Reservation settings' })).toBeInTheDocument();
+    });
+
+    it('opens the settings in place', () => {
+      usePlaceManager.mockReturnValue({
+        isManager: true,
+        owningCommunity: { title: 'Weekend Readers' },
+      });
+
+      render(<PlaceDrawer placeId="p1" isOpen onClose={jest.fn()} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Reservation settings' }));
+
+      expect(screen.getByTestId('reservation-settings')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Reservation settings' })).toBeInTheDocument();
+      expect(screen.queryByTestId('about')).not.toBeInTheDocument();
     });
   });
 });

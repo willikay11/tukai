@@ -67,16 +67,27 @@ export const ClaimPlacePrompt = ({
     </ul>
 
     {/* Said plainly here rather than discovered on the form */}
-    <div className="rounded-2xl bg-gray-50 p-4">
-      <p className="text-sm text-gray-600">
+    <div className="flex items-start gap-3 rounded-2xl bg-surface p-5">
+      <IconComponent
+        iconName="InformationCircleIcon"
+        size={22}
+        color="currentColor"
+        className="mt-0.5 flex-shrink-0 text-brand"
+      />
+      <p className="text-[15px] leading-relaxed text-ink">
         You will need a published community you run, and documents showing you own or manage the
         business such as a licence, a certificate of incorporation, or similar. A claim is reviewed
         before it goes live.
       </p>
     </div>
 
-    <Button asChild variant="lime" className="h-12 w-full rounded-full">
-      <Link href={`/places/claim?placeId=${placeId}`}>Start claim</Link>
+    {/* Sized to itself and left-aligned: it is one way on from here, not the
+        only thing the section is for */}
+    <Button asChild variant="lime" className="h-12 w-fit rounded-full px-6 text-[15px] font-bold">
+      <Link href={`/places/claim?placeId=${placeId}`}>
+        <IconComponent iconName="StoreVerified01Icon" size={20} color="currentColor" />
+        Start claim
+      </Link>
     </Button>
   </div>
 );

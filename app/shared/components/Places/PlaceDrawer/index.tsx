@@ -5,15 +5,24 @@ import { useEffect, useMemo, useState } from 'react';
 import { ClaimPlacePrompt } from '@/app/(places)/places/[placeId]/components/ClaimPlacePrompt';
 import { PlaceReviewsSection } from '@/app/(places)/places/[placeId]/components/PlaceReviewsSection';
 import { ContextMoments, MomentComposerForm } from '@/app/shared/components/Moments';
-import { usePlace, usePlaceOwnership } from '@/app/shared/hooks/usePlaces';
+import {
+  usePlace,
+  usePlaceAvailability,
+  usePlaceManager,
+  usePlaceOwnership,
+  usePlaceReservationProfiles,
+} from '@/app/shared/hooks/usePlaces';
 import { useScrollSpy } from '@/app/shared/hooks/useScrollSpy';
 import { Drawer } from '@/components/ui/drawer';
 import { Place } from '@/types/place';
+import { PlaceAvailabilityRule, PlaceReservationProfile } from '@/types/placeReservation';
 
 import { PlaceAboutSection } from './PlaceAboutSection';
 import { PlaceDrawerFooter } from './PlaceDrawerFooter';
 import { PlaceDrawerHeader } from './PlaceDrawerHeader';
 import { PlaceDrawerTabs } from './PlaceDrawerTabs';
+import { PlaceManagerBanner } from './PlaceManagerBanner';
+import { PlaceReservationSettings } from './PlaceReservationSettings';
 import { PlaceReviewForm } from './PlaceReviewForm';
 import { UpcomingExperiences } from './UpcomingExperiences';
 import { PLACE_SECTIONS, PLACE_SECTION_IDS, placeDrawerTabs } from './tabs';
@@ -26,6 +35,7 @@ const VIEW_TITLES: Record<string, string | undefined> = {
   place: undefined,
   review: 'Add a review',
   moment: 'New moment',
+  reservations: 'Reservation settings',
 };
 
 const Loading = () => (
@@ -62,7 +72,7 @@ export const PlaceDrawer = ({
    * than opening a second one on top of it. Both reset whenever the drawer
    * opens on a different place.
    */
-  const [view, setView] = useState<'place' | 'review' | 'moment'>('place');
+  const [view, setView] = useState<'place' | 'review' | 'moment' | 'reservations'>('place');
 
   const { data, isLoading } = usePlace(placeId, isOpen && Boolean(placeId));
   const place: Place | undefined = data?.data;
@@ -72,6 +82,21 @@ export const PlaceDrawer = ({
   // called unclaimed on that.
   const { data: ownership } = usePlaceOwnership(placeId ?? '', isOpen && Boolean(placeId));
   const isUnclaimed = ownership?.success === true && !ownership.data;
+
+  // A manager sees their own setup at the top, and the way into the settings
+  const { isManager, owningCommunity } = usePlaceManager(isOpen && placeId ? placeId : '');
+
+  const { data: profilesResponse } = usePlaceReservationProfiles(placeId ?? '', isManager);
+  const profiles: PlaceReservationProfile[] = profilesResponse?.data?.results ?? [];
+  // A place may hold two (restaurant and cinema); the live one is the one a
+  // manager is being told about
+  const profile = profiles.find((entry) => entry.status === 'active') ?? profiles[0];
+
+  const { data: availability } = usePlaceAvailability(
+    placeId ?? '',
+    isManager ? profile?.id : undefined,
+  );
+  const rules: PlaceAvailabilityRule[] = availability?.data?.rules ?? [];
 
   useEffect(() => setView('place'), [placeId]);
 
@@ -111,6 +136,10 @@ export const PlaceDrawer = ({
             <div className="flex-1 px-6">
               <PlaceReviewForm place={place} onDone={() => setView('place')} />
             </div>
+          ) : view === 'reservations' ? (
+            <div className="flex-1 px-6">
+              <PlaceReservationSettings place={place} profile={profile} rules={rules} />
+            </div>
           ) : view === 'moment' ? (
             <div className="flex-1 px-6 py-6">
               <MomentComposerForm
@@ -124,7 +153,16 @@ export const PlaceDrawer = ({
             <>
               <div className="flex-1 divide-y divide-line px-6">
                 {/* scroll-mt clears the two sticky bars above */}
-                <section id={PLACE_SECTIONS.about} className="scroll-mt-[148px] py-6">
+                <section id={PLACE_SECTIONS.about} className="scroll-mt-[148px] space-y-6 py-6">
+                  {isManager && (
+                    <PlaceManagerBanner
+                      communityName={owningCommunity?.title}
+                      profile={profile}
+                      rules={rules}
+                      onOpenSettings={() => setView('reservations')}
+                    />
+                  )}
+
                   <PlaceAboutSection place={place} />
                 </section>
 
