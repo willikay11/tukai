@@ -17,7 +17,7 @@ Source: `docs/design/screens/experiences-listing.html`.
 | EL-07 | Communities | build | built, pending owner review | EL-00, D-14 |
 | EL-08 | Guided tours | build | built, pending owner review | EL-00 |
 | EL-09 | Experiences by city | build | built, pending owner review | EL-00 |
-| EL-10 | Discover experiences: all experiences in a grid | build | awaiting approval | EL-00, EL-01 |
+| EL-10 | Discover experiences: all experiences in a grid | build | built, sort control blocked | EL-00, EL-01 |
 | EL-11 | Remove the 'Experiences in {city}' curated row | cleanup | awaiting approval | none |
 | EL-12 | Empty states | build | awaiting approval | EL-00 |
 | EL-13 | Account tabs on /experiences | decision | awaiting approval | EL-00 |

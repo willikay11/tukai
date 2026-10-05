@@ -16,6 +16,10 @@ import { CitiesRail } from '@/app/(experiences)/experiences/components/CitiesRai
 import { CommunitiesSection } from '@/app/(experiences)/experiences/components/CommunitiesSection';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
 import {
+  DISCOVER_GRID_PAGE_SIZE,
+  DiscoverGrid,
+} from '@/app/(experiences)/experiences/components/DiscoverGrid';
+import {
   ExperienceRow,
   RowSkeleton,
 } from '@/app/(experiences)/experiences/components/ExperienceRow';
@@ -85,6 +89,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   // 'all' is no filter. Kept out of the URL: `category` there already names the tab.
   const [categoryId, setCategoryId] = useState(ALL_CATEGORIES);
   const categoryFilter = categoryId === ALL_CATEGORIES ? undefined : categoryId;
+  const [discoverPage, setDiscoverPage] = useState(1);
 
   const isAll = activeTab === 'all';
   const isSaved = activeTab === 'saved';
@@ -279,6 +284,26 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const tours: Experience[] = toursResponse?.data?.results ?? [];
   const tourTotal = toursResponse?.data?.count ?? tours.length;
 
+  // Discover experiences: every published experience, one page at a time. Not
+  // scoped to the location, so the count is the whole published total.
+  const { data: discoverResponse, isLoading: isLoadingDiscover } = useExperiences(
+    {
+      page: discoverPage,
+      page_size: DISCOVER_GRID_PAGE_SIZE,
+      status: 'published',
+      category: categoryFilter,
+    },
+    isAll,
+  );
+  const discoverExperiences: Experience[] = discoverResponse?.data?.results ?? [];
+  const discoverTotal = discoverResponse?.data?.count ?? 0;
+
+  // A different category is a different list, so paging starts again at the top
+  const handleCategoryChange = (value: string) => {
+    setCategoryId(value);
+    setDiscoverPage(1);
+  };
+
   const { data: topCityResponse, isLoading: isLoadingTopCity } = useExperiences(
     { page: 1, page_size: 8, search: topCity?.name, category: categoryFilter },
     isAll && Boolean(topCity),
@@ -305,7 +330,11 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
           {/* Category filter: narrows the experience rails below. Hidden until
               there is more than the All chip, so no lone chip shows. */}
           {categoryChips.length > 1 && (
-            <CategoryChipRow chips={categoryChips} value={categoryId} onChange={setCategoryId} />
+            <CategoryChipRow
+              chips={categoryChips}
+              value={categoryId}
+              onChange={handleCategoryChange}
+            />
           )}
 
           {/* Featured experiences: a paged rail of cards, as the design has it.
@@ -404,6 +433,14 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             total={tourTotal}
             isLoading={isLoadingTours}
             hasLocation={lat !== undefined && lng !== undefined}
+          />
+
+          <DiscoverGrid
+            experiences={discoverExperiences}
+            total={discoverTotal}
+            page={discoverPage}
+            onPageChange={setDiscoverPage}
+            isLoading={isLoadingDiscover}
           />
 
           {topCity && (
