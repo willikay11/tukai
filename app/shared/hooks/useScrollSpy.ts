@@ -1,6 +1,6 @@
 'use client';
 
-import { RefObject, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * Tracks which of several in-page sections the reader is currently looking at,
@@ -13,15 +13,16 @@ import { RefObject, useCallback, useEffect, useRef, useState } from 'react';
  * @param sectionIds  element ids to watch, in page order
  * @param offset      distance from the top a section must clear to count as
  *                    current — match the sticky header it scrolls under
- * @param containerRef  the element that scrolls, where that is not the page.
- *                    A drawer scrolls its own body, and the window fires no
+ * @param container   the element that scrolls, where that is not the page. A
+ *                    drawer scrolls its own body, and the window fires no
  *                    scroll event for it at all.
+ *
+ *                    The ELEMENT, not a ref to it: a ref object never changes
+ *                    identity, so the effect below would run once — against
+ *                    whatever the ref held at first render — and a panel that
+ *                    mounts later would never be watched at all.
  */
-export const useScrollSpy = (
-  sectionIds: string[],
-  offset = 96,
-  containerRef?: RefObject<HTMLElement | null>,
-) => {
+export const useScrollSpy = (sectionIds: string[], offset = 96, container?: HTMLElement | null) => {
   const [activeId, setActiveId] = useState<string>(sectionIds[0] ?? '');
   // A tab the reader picked, held active until the smooth scroll actually
   // arrives. Without this the scroll events fired on the way there recompute
@@ -33,7 +34,6 @@ export const useScrollSpy = (
   useEffect(() => {
     if (sectionIds.length === 0) return;
 
-    const container = containerRef?.current ?? null;
     // Ids are looked up inside the container when there is one: a drawer can
     // be open over a page carrying the same section ids
     const find = (id: string) =>
@@ -89,11 +89,10 @@ export const useScrollSpy = (
       scroller.removeEventListener('scroll', pickActive);
       window.removeEventListener('resize', pickActive);
     };
-  }, [sectionIds, offset, containerRef]);
+  }, [sectionIds, offset, container]);
 
   const scrollTo = useCallback(
     (id: string) => {
-      const container = containerRef?.current ?? null;
       const element = container
         ? container.querySelector(`#${CSS.escape(id)}`)
         : document.getElementById(id);
@@ -112,7 +111,7 @@ export const useScrollSpy = (
       // `scroll-mt-*` on the section supplies the sticky-header offset
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     },
-    [containerRef],
+    [container],
   );
 
   useEffect(

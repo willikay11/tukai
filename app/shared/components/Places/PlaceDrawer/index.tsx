@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef } from 'react';
+import { useMemo, useState } from 'react';
 
 import { ClaimPlacePrompt } from '@/app/(places)/places/[placeId]/components/ClaimPlacePrompt';
 import { PlaceReviewsSection } from '@/app/(places)/places/[placeId]/components/PlaceReviewsSection';
@@ -45,7 +45,9 @@ export const PlaceDrawer = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
-  const panelRef = useRef<HTMLDivElement>(null);
+  // The panel itself, held in state rather than a ref: it mounts only once the
+  // drawer opens, and a ref would never tell the scroll spy it had arrived
+  const [panel, setPanel] = useState<HTMLDivElement | null>(null);
 
   const { data, isLoading } = usePlace(placeId, isOpen && Boolean(placeId));
   const place: Place | undefined = data?.data;
@@ -57,14 +59,14 @@ export const PlaceDrawer = ({
   const isUnclaimed = ownership?.success === true && !ownership.data;
 
   const tabs = useMemo(() => placeDrawerTabs(place?.totalReviews ?? null), [place?.totalReviews]);
-  const { activeId, scrollTo } = useScrollSpy(PLACE_SECTION_IDS, TAB_OFFSET, panelRef);
+  const { activeId, scrollTo } = useScrollSpy(PLACE_SECTION_IDS, TAB_OFFSET, panel);
 
   return (
     <Drawer
       isOpen={isOpen}
       setIsOpen={(next) => !next && onClose()}
       width="wide"
-      panelRef={panelRef}
+      panelRef={setPanel}
     >
       {isLoading || !place ? (
         <Loading />
@@ -74,7 +76,7 @@ export const PlaceDrawer = ({
             <PlaceDrawerHeader place={place} onClose={onClose} />
           </div>
 
-          <div className="sticky top-[76px] z-20 border-b border-line bg-white px-6 py-3">
+          <div className="sticky top-[76px] z-20 bg-white px-6 py-3">
             <PlaceDrawerTabs tabs={tabs} activeId={activeId} onSelect={scrollTo} />
           </div>
 
@@ -109,6 +111,9 @@ export const PlaceDrawer = ({
                 placeTitle={place.title}
                 rating={place.averageRating}
                 reviewCount={place.totalReviews}
+                // The footer pins Add review; a second one here would read as
+                // a different control
+                showAddReview={false}
               />
             </section>
           </div>

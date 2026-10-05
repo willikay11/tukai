@@ -25,7 +25,13 @@ export const PlaceDrawerFooter = ({ place }: { place: Place }) => {
   return (
     <>
       <div className="flex items-center gap-3">
-        <AddPlaceReviewAction placeId={place.id} placeTitle={place.title} />
+        <AddPlaceReviewAction
+          placeId={place.id}
+          placeTitle={place.title}
+          label="Add review"
+          variant="gradient"
+          className="h-12 flex-shrink-0 rounded-full px-6 text-[15px] font-bold"
+        />
 
         {directions && (
           <a

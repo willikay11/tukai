@@ -11,7 +11,7 @@ import {
   useDeletePlaceReviewImage,
   useUploadPlaceReviewImages,
 } from '@/app/shared/hooks/usePlaces';
-import { Button } from '@/components/ui/button';
+import { Button, ButtonProps } from '@/components/ui/button';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 
 /**
@@ -25,9 +25,16 @@ import { useAuthDialog } from '@/context/AuthDialogContext';
 export const AddPlaceReviewAction = ({
   placeId,
   placeTitle,
+  label = 'Write a review',
+  variant = 'outline',
+  className = 'flex-shrink-0 rounded-full px-5',
 }: {
   placeId: string;
   placeTitle: string;
+  /** The drawer's footer calls it "Add a review"; a section header asks. */
+  label?: string;
+  variant?: ButtonProps['variant'];
+  className?: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
@@ -41,7 +48,7 @@ export const AddPlaceReviewAction = ({
   return (
     <>
       <Button
-        variant="outline"
+        variant={variant}
         onClick={() => {
           // Reviewing needs an account; the dialog returns them here rather
           // than to a sign-in page they have to navigate back from
@@ -52,10 +59,10 @@ export const AddPlaceReviewAction = ({
 
           setIsOpen(true);
         }}
-        className="flex-shrink-0 rounded-full px-5"
+        className={className}
       >
         <IconComponent iconName="StarIcon" size={16} color="currentColor" />
-        Write a review
+        {label}
       </Button>
 
       <AddReview
