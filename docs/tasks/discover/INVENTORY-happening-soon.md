@@ -4,12 +4,13 @@ Source: `docs/design/screens/discover-happening-soon.html`. Built against:
 `app/(experiences)/components/DiscoverPageContent.tsx` (section),
 `app/(experiences)/components/ExperienceCard/` (card).
 
-For review before any code.
+For review before any code. Items 2, 13 and 14 are decided from the redesign
+brief (`docs/design/screens/discover-guest-brief.md`), not the prototype.
 
 | # | Design item | Built? | Notes |
 |---|---|---|---|
 | 1 | Heading: "Happening soon" | built | |
-| 2 | Subtitle: "In {city}, next 14 days" | differs | The API cannot filter by city, so the rail is location-ordered. See HS-03 |
+| 2 | Subtitle: "In {city}, next 14 days" | differs, decided | Brief: no fixed window, and no city claim the results do not support. Subtitle becomes "Near you" once location is shared, otherwise none. HS-02, HS-03 |
 | 3 | Back and next arrows, disabled at each end | built | `CardRail`. Hidden where nothing overflows, a rule the design does not state |
 | 4 | Card: cover photo, square | built | `ExperienceCard`, 184px |
 | 5 | Card: save (basket) opens the list picker | built | Verify, D-12 |
@@ -20,8 +21,8 @@ For review before any code.
 | 10 | Card: price line ("Free" or "KES x/person") | built | |
 | 11 | Card click opens the experience summary drawer | built | `ExperienceCard` calls `openExperience` on a plain click and keeps its href for modifier clicks. D-03 is done. Check the drawer's View experience footer under D-03 |
 | 12 | See all card with three fanned photos | differs | The design sets the Experiences tab in-app. We link to `/experiences`. See D-13 |
-| 13 | Pool: the first nine experiences, in fixture order | differs | We filter to 14 days, sort by start, and show nine. See HS-02 |
-| 14 | Empty state | differs | The design has no empty copy. We hide the section. See HS-02 |
+| 13 | Pool: upcoming experiences, soonest first | differs, decided | Brief: upcoming, no fixed window. Today and This weekend only under the When filter (DS-02). Nine shown, count not set by the brief. HS-02 |
+| 14 | Empty state | matches, decided | Brief: no empty section headings, show fewer modules. We hide the section. HS-02 |
 
 ## Summary
 
