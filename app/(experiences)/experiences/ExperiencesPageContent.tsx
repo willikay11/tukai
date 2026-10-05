@@ -17,6 +17,7 @@ import {
   ExperienceRow,
   RowSkeleton,
 } from '@/app/(experiences)/experiences/components/ExperienceRow';
+import { HappeningNearYou } from '@/app/(experiences)/experiences/components/HappeningNearYou';
 import { HostingCard } from '@/app/(experiences)/experiences/components/HostingCard';
 import { ReservedTab } from '@/app/(experiences)/experiences/components/ReservedTab';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
@@ -157,7 +158,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   );
   const featuredExperiences: Experience[] = featuredOnly(featuredResponse?.data?.results ?? []);
 
-  // "Happening Near You": the first 10 published experiences, scoped to the
+  // "Happening near you": the first 10 published experiences, scoped to the
   // coordinates the LocationContext resolved. Coordinates are omitted until the
   // user grants location, so the row still renders (unscoped) if they decline.
   const { data: nearbyResponse, isLoading: isLoadingNearby } = useExperiences(
@@ -172,6 +173,27 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
     isAll,
   );
   const nearbyExperiences: Experience[] = nearbyResponse?.data?.results ?? [];
+  const nearbyTotal = nearbyResponse?.data?.count ?? 0;
+  const hasMoreNearby = nearbyTotal > nearbyExperiences.length;
+
+  // The full list is only read once the reader expands the row, so the page
+  // does not pay for every match up front
+  const [isNearbyExpanded, setIsNearbyExpanded] = useState(false);
+  const { data: nearbyAllResponse, isLoading: isLoadingNearbyAll } = useExperiences(
+    {
+      page: 1,
+      page_size: nearbyTotal,
+      status: 'published',
+      lat,
+      long: lng,
+      category: categoryFilter,
+    },
+    isAll && isNearbyExpanded && hasMoreNearby,
+  );
+  const allNearbyExperiences: Experience[] = nearbyAllResponse?.data?.results ?? [];
+  // Until the full list lands, the first page stays on screen rather than a blank grid
+  const shownNearbyExperiences =
+    isNearbyExpanded && allNearbyExperiences.length > 0 ? allNearbyExperiences : nearbyExperiences;
 
   const { data: todayResponse, isLoading: isLoadingToday } = useExperiences(
     { page: 1, page_size: 8, date: today, category: categoryFilter },
@@ -255,13 +277,13 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             </CardRail>
           )}
 
-          <ExperienceRow
-            title="Happening Near You"
-            subtitle={`Within 25 km of ${userCity}`}
-            seeAllHref="/experiences/see-all?type=near-me"
-            total={nearbyResponse?.data?.count}
-            experiences={nearbyExperiences}
-            isLoading={isLoadingNearby}
+          <HappeningNearYou
+            experiences={shownNearbyExperiences}
+            total={nearbyTotal}
+            hasMore={hasMoreNearby}
+            isLoading={isLoadingNearby || (isNearbyExpanded && isLoadingNearbyAll)}
+            isExpanded={isNearbyExpanded}
+            onToggle={() => setIsNearbyExpanded((current) => !current)}
           />
 
           {/* Experiences by City */}

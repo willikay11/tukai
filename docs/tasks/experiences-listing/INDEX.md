@@ -10,7 +10,7 @@ Source: `docs/design/screens/experiences-listing.html`.
 | EL-00 | Decide the rules every segment shares | decision | awaiting approval | none |
 | EL-01 | Category row with arrows | build | built, pending review | EL-00 |
 | EL-02 | Featured experiences | build | done | none |
-| EL-03 | Happening near you | build | awaiting approval | EL-00 |
+| EL-03 | Happening near you | build | built, pending review | EL-00 |
 | EL-04 | Happening today | build | awaiting approval | EL-00 |
 | EL-05 | Happening tomorrow | build | awaiting approval | EL-00 |
 | EL-06 | Discover itineraries | build | awaiting approval | EL-00 |
