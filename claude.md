@@ -585,6 +585,22 @@ Before working on any component in this flow:
 
 ---
 
+## Design source
+
+The redesign's own notes live in `docs/design/`, copied from the design
+project. Read them before measuring anything off a screenshot — they carry the
+exact values.
+
+- `docs/design/CONVENTIONS.md` — palette, copy style, radii, hit targets
+- `docs/design/HANDOFF.md` — brand basics, product rules, component specs
+- `docs/design/PENDING.md` — what is settled, and why
+- `docs/design/nextjs-export/` — two Discover sections as real components
+
+The prototype itself (`Tukai Web.dc.html`, 1.45 MB) stays in the design project
+and is the authoritative source. Grep it for a component's markup rather than
+working from a screenshot: it carries the hex, padding, weight and hover state
+that a picture only implies.
+
 ## Figma-to-Code Process
 
 ### Handoff prompt format
