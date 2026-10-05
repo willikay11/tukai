@@ -35,10 +35,7 @@ import {
   FEATURED_PAGE_SIZE,
   featuredOnly,
 } from '@/app/(experiences)/experiences/components/featured-experiences';
-import {
-  cityExperiencesHref,
-  shouldShowSeeAll,
-} from '@/app/(experiences)/experiences/see-all/config';
+import { shouldShowSeeAll } from '@/app/(experiences)/experiences/see-all/config';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { CardRail, SeeAllCard } from '@/app/shared/components/Lists';
 import { PillTabs } from '@/app/shared/components/Tabs';
@@ -245,10 +242,6 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
     .filter((category: PlaceCategory) => category.group === 'cities')
     .sort((a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount);
 
-  // Curated destination row: no featured-destination field exists, so use the
-  // top city by count; experiences have no city filter, so search by city name
-  const topCity = cities[0];
-
   // Discover itineraries: published itinerary-type experiences. The rail is
   // hidden when there are none, so no empty heading shows.
   const { data: itinerariesResponse, isLoading: isLoadingItineraries } = useExperiences(
@@ -303,11 +296,6 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
     setCategoryId(value);
     setDiscoverPage(1);
   };
-
-  const { data: topCityResponse, isLoading: isLoadingTopCity } = useExperiences(
-    { page: 1, page_size: 8, search: topCity?.name, category: categoryFilter },
-    isAll && Boolean(topCity),
-  );
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -442,17 +430,6 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             onPageChange={setDiscoverPage}
             isLoading={isLoadingDiscover}
           />
-
-          {topCity && (
-            <ExperienceRow
-              title={`Experiences in ${topCity.name}`}
-              subtitle="Curated destination"
-              seeAllHref={cityExperiencesHref(topCity.name)}
-              total={topCityResponse?.data?.count}
-              experiences={topCityResponse?.data?.results ?? []}
-              isLoading={isLoadingTopCity}
-            />
-          )}
         </div>
       ) : (
         /* Reserved / Saved / Hosting - the Experiences wrapper positions

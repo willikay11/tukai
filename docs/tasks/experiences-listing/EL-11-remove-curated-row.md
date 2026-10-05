@@ -1,6 +1,6 @@
 # EL-11 Remove the 'Experiences in {city}' curated row
 
-- **Status:** awaiting approval
+- **Status:** built, pending owner review
 - **Type:** cleanup
 - **Depends on:** none
 - **Design:** `docs/design/screens/experiences-listing.html`, not in the design.
@@ -14,8 +14,8 @@
 
 ## Done when
 
-- [ ] Row removed
-- [ ] The 'curated' claim is gone with it
+- [x] Row removed
+- [x] The 'curated' claim is gone with it
 
 ## Notes
 
