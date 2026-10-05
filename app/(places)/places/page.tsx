@@ -1,5 +1,6 @@
 import { DiscoverByCity } from './components/DiscoverByCity';
 import { NearbyPlaces } from './components/NearbyPlaces';
+import { PlacesWithExperiences } from './components/PlacesWithExperiences';
 import { PromotedPlaces } from './components/PromotedPlaces';
 import { ListPlaces } from './components/list';
 
@@ -10,6 +11,7 @@ export default async function Home() {
         <PromotedPlaces />
         <DiscoverByCity />
         <NearbyPlaces />
+        <PlacesWithExperiences />
         <ListPlaces />
       </div>
     </main>
