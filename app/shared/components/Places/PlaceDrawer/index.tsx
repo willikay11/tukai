@@ -92,6 +92,7 @@ export const PlaceDrawer = ({
 
             <section id={PLACE_SECTIONS.moments} className="scroll-mt-[148px] py-6">
               <ContextMoments
+                title="Moments"
                 contextLabel={place.title}
                 emptyMessage={`No moments from ${place.title} yet. Yours could be the first.`}
                 placeId={place.id}

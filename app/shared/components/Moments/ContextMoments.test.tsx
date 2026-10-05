@@ -33,12 +33,13 @@ jest.mock('./MomentComposer', () => ({
     ) : null,
 }));
 
-jest.mock('./MomentComposerTrigger', () => ({
-  MomentComposerTrigger: ({ onOpen }: { onOpen: () => void }) => (
-    <button type="button" onClick={onOpen}>
-      What are you up to?
-    </button>
-  ),
+const setOpenSignIn = jest.fn();
+jest.mock('@/context/AuthDialogContext', () => ({
+  useAuthDialog: () => ({ setOpenSignIn }),
+}));
+
+jest.mock('@/app/shared/components/Icons', () => ({
+  IconComponent: ({ iconName }: { iconName: string }) => <span data-testid={iconName} />,
 }));
 
 jest.mock('./MomentsMasonry', () => ({
@@ -135,24 +136,64 @@ describe('ContextMoments', () => {
     expect(screen.getByText('No moments from this experience yet')).toBeInTheDocument();
   });
 
-  it('opens the composer from the field, naming everywhere the moment lands', async () => {
+  it('opens the composer, naming everywhere the moment lands', async () => {
     const user = userEvent.setup();
 
     renderForExperience();
-    await user.click(screen.getByRole('button', { name: 'What are you up to?' }));
+    await user.click(screen.getByRole('button', { name: /share moment/i }));
 
     expect(screen.getByTestId('composer')).toHaveTextContent(
       'Karura Entry Fees | Karura Forest | Nairobi Runners',
     );
   });
 
-  // Posting a moment needs an account — every moments endpoint is authenticated
-  it('does not offer to post when signed out', () => {
-    sessionStatus = 'unauthenticated';
+  /**
+   * Posting needs an account — every moments endpoint is authenticated — but
+   * the invitation still shows, or the section looks like nothing can be done
+   * with it.
+   */
+  describe('signed out', () => {
+    beforeEach(() => {
+      sessionStatus = 'unauthenticated';
+    });
 
-    renderForExperience();
+    it('still offers to share one', () => {
+      renderForExperience();
 
-    expect(screen.queryByRole('button', { name: 'What are you up to?' })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /share moment/i })).toBeInTheDocument();
+    });
+
+    it('asks them to sign in rather than opening the composer', async () => {
+      const user = userEvent.setup();
+
+      renderForExperience();
+      await user.click(screen.getByRole('button', { name: /share moment/i }));
+
+      expect(setOpenSignIn).toHaveBeenCalledWith(true);
+      expect(screen.queryByTestId('composer')).not.toBeInTheDocument();
+    });
+  });
+
+  // The booking panel's tab already names the section; the drawer's does not
+  describe('the heading', () => {
+    it('is left out unless a caller asks for one', () => {
+      renderForExperience();
+
+      expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+    });
+
+    it('is shown where one is given', () => {
+      render(
+        <ContextMoments
+          title="Moments"
+          contextLabel="Kazuri"
+          emptyMessage="None yet"
+          placeId="p1"
+        />,
+      );
+
+      expect(screen.getByRole('heading', { name: 'Moments' })).toBeInTheDocument();
+    });
   });
 
   it('holds its shape while loading', () => {

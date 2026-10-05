@@ -27,6 +27,7 @@ export const PlaceDrawerHeader = ({ place, onClose }: { place: Place; onClose: (
             title={place.title}
             link={`${process.env.NEXT_PUBLIC_APP_URL}${placePath(place)}`}
             kind="place"
+            variant="icon"
           />
         </div>
 

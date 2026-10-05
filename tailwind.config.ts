@@ -69,6 +69,12 @@ const config: Config = {
           DEFAULT: '#B0E800', // 69
           dark: '#A3D900', // 27 — hover and pressed
         },
+        // The two accents a meta line is made of: a rating's star, and the
+        // dot between one fact and the next. Both sampled from the designs —
+        // neither is a shade of the brand green, and both recur wherever a
+        // rating or a "city • distance" line does.
+        star: '#F2C14B',
+        dot: '#70A3F3',
         surface: {
           DEFAULT: '#F3F4F2', // 298 — resting chip and card ground
           brand: '#E8F1ED', // 280 — a chosen chip

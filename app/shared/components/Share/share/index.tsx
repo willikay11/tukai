@@ -74,12 +74,19 @@ export const Share = ({
   title,
   link,
   kind = 'place',
+  variant = 'button',
 }: {
   coverPhoto: string;
   title: string;
   link: string;
   /** What is being shared, so the sheet can say so */
   kind?: ShareKind;
+  /**
+   * `icon` is the bare glyph, for a row of circular controls that supply
+   * their own disc — the place drawer's header, where a labelled pill beside
+   * two icon buttons reads as a different kind of control.
+   */
+  variant?: 'button' | 'icon';
 }) => {
   const [open, setOpen] = useState(false);
   const [hasCopied, setHasCopied] = useState(false);
@@ -122,15 +129,26 @@ export const Share = ({
 
   return (
     <>
-      <Button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="rounded-full"
-        variant="outline"
-      >
-        <span>Share</span>
-        <Share08Icon size={16} variant="twotone" className="ml-2" />
-      </Button>
+      {variant === 'icon' ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label={`Share this ${kind}`}
+          className="flex h-full w-full items-center justify-center text-brand transition-opacity hover:opacity-70"
+        >
+          <Share08Icon size={20} variant="twotone" />
+        </button>
+      ) : (
+        <Button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="rounded-full"
+          variant="outline"
+        >
+          <span>Share</span>
+          <Share08Icon size={16} variant="twotone" className="ml-2" />
+        </Button>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         {/* `min-w-0` on the body: DialogContent lays its children out on a

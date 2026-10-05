@@ -50,7 +50,7 @@ export const PlaceAboutSection = ({ place }: { place: Place }) => {
             {/* Distance only once the reader has shared where they are */}
             {distanceKm !== null && (
               <>
-                <span className="text-ink-subtle">•</span>
+                <span className="text-dot">•</span>
                 {`${distanceKm} km`}
               </>
             )}
@@ -58,16 +58,17 @@ export const PlaceAboutSection = ({ place }: { place: Place }) => {
         )}
 
         {place.averageRating > 0 && (
-          <span className="flex items-center gap-2 text-[15px]">
+          <span className="flex items-center gap-2 text-[15px] text-gray-800">
             <IconComponent
               iconName="StarIcon"
               size={18}
-              variant="solid"
-              className="text-[#FFC93C]"
+              variant="twotone"
+              color="currentColor"
+              className="text-star"
             />
-            <span className="font-bold text-brand-ink">{place.averageRating}</span>
-            <span className="text-ink-subtle">•</span>
-            <span className="text-ink-muted">
+            <span className="font-bold">{place.averageRating}</span>
+            <span className="text-dot">•</span>
+            <span>
               {reviews} {reviews === 1 ? 'review' : 'reviews'}
             </span>
           </span>
