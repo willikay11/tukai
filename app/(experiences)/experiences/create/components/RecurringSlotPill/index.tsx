@@ -61,7 +61,7 @@ export const RecurringSlotPill = ({
 }: RecurringSlotPillProps) => {
   const [isExpanded, setIsExpanded] = useState(!ticket);
 
-  const pillLabel = `Every ${dayLabel} ${formatTime(startTime)} — ${formatTime(endTime)}`;
+  const pillLabel = `Every ${dayLabel} ${formatTime(startTime)} - ${formatTime(endTime)}`;
   const hasTicket = ticket !== null;
 
   return (

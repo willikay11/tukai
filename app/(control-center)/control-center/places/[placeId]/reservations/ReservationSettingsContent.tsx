@@ -166,8 +166,8 @@ export const ReservationSettingsContent = ({ place }: { place: Place }) => {
     <PageContainer className="py-6">
       <h1 className="text-2xl font-bold text-gray-900">Reservation Settings</h1>
 
-      {/* One step today, laid out as the wizard's steps are so the next one —
-          blocked-out dates, which the API already takes — drops straight in */}
+      {/* One step today, laid out as the wizard's steps are so the next one -
+          blocked-out dates, which the API already takes - drops straight in */}
       <Tabs value="reservation-type" className="mt-6">
         <TabsList className="h-auto w-full justify-start gap-2 overflow-x-auto bg-transparent p-0 scrollbar-hide">
           <TabsTrigger

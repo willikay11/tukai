@@ -18,7 +18,7 @@ const draft = (overrides: Partial<Experience> = {}) =>
   }) as unknown as Experience;
 
 describe('buildDraftSteps', () => {
-  it('omits wallet — completion belongs to the user, not the draft', () => {
+  it('omits wallet - completion belongs to the user, not the draft', () => {
     const ids = buildDraftSteps(draft()).map((step) => step.id);
 
     expect(ids).not.toContain('wallet');

@@ -122,7 +122,7 @@ export const TicketCard = ({
               )}
             </div>
             {/*
-              Hidden alongside the Ticket Sales Validity section in TicketForm —
+              Hidden alongside the Ticket Sales Validity section in TicketForm -
               with no sales window captured this only ever reads "Not set".
 
             <div>

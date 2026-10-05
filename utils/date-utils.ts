@@ -110,7 +110,7 @@ export const formatReservationDateTime = (start: string, end: string): string =>
     return `${hour}:${String(minutes).padStart(2, '0')} ${period}`;
   };
 
-  return `${dayName} ${day} ${month} · ${time(startDate)} — ${time(endDate)}`;
+  return `${dayName} ${day} ${month} · ${time(startDate)} - ${time(endDate)}`;
 };
 
 export const getDaysBetween = (startDate: string, endDate: string): string[] => {
@@ -142,7 +142,7 @@ export const formatMultiDayRange = (startDate: string | null, endDate: string | 
   try {
     const start = getOrdinalDate(startDate);
     const end = getOrdinalDate(endDate);
-    return `${start} – ${end}`;
+    return `${start} - ${end}`;
   } catch {
     return '';
   }
@@ -312,7 +312,7 @@ export const formatBookingDateTime = (date: string, startTime: string, endTime: 
   const weekday = parsed.toLocaleDateString('en-GB', { weekday: 'short' });
   const month = parsed.toLocaleDateString('en-GB', { month: 'short' });
 
-  return `${weekday} ${parsed.getDate()} ${month} ${parsed.getFullYear()} · ${startTime} – ${endTime}`;
+  return `${weekday} ${parsed.getDate()} ${month} ${parsed.getFullYear()} · ${startTime} - ${endTime}`;
 };
 
 // → "11 Aug 2026, 9:07 AM"

@@ -30,7 +30,7 @@ export const planOptionNote = (plan: Plan): string => {
   const count = plan.stops.length;
   const stops = `${count} ${count === 1 ? 'stop' : 'stops'}`;
 
-  return plan.date ? `${plan.date}, ${stops}` : `Draft, no day yet — ${stops}`;
+  return plan.date ? `${plan.date}, ${stops}` : `Draft, no day yet, ${stops}`;
 };
 
 export const alreadyInPlan = (plan: Plan | undefined, refId: string): boolean =>

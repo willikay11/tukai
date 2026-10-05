@@ -32,8 +32,8 @@ const Probe = () => {
     <div>
       <p data-testid="ready">{String(isReady)}</p>
       <p data-testid="count">{plans.length}</p>
-      <p data-testid="title">{plan?.title ?? '—'}</p>
-      <p data-testid="date">{plan?.date ?? '—'}</p>
+      <p data-testid="title">{plan?.title ?? '-'}</p>
+      <p data-testid="date">{plan?.date ?? '-'}</p>
       <p data-testid="stops">{(plan?.stops ?? []).map((one) => one.title).join(',')}</p>
       <p data-testid="durations">
         {(plan?.stops ?? []).map((one) => one.durationMinutes).join(',')}

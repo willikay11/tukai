@@ -69,7 +69,7 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
             description:
               result.status === 204
                 ? 'You have already reported this moment.'
-                : 'Thanks — our team will take a look.',
+                : 'Thanks, our team will take a look.',
           });
         },
         onError: () =>
@@ -144,7 +144,7 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
 
       {/* One body of text, not two. The composer asks a single question and
           sends the first line as `title` and the whole thing as `description`,
-          so showing both printed the same words twice — bold, then again in
+          so showing both printed the same words twice - bold, then again in
           full. The description is always the longer of the two; the title is
           only a fallback for a moment posted without one. */}
       <p className="mt-4 text-base leading-relaxed text-gray-700">

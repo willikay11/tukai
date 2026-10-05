@@ -68,7 +68,7 @@ describe('SEE_ALL_CONFIG queries', () => {
     });
   });
 
-  it('scopes near-me by coordinates only — there is no radius param', () => {
+  it('scopes near-me by coordinates only - there is no radius param', () => {
     expect(SEE_ALL_CONFIG['near-me'].query(context)).toEqual({
       status: 'published',
       lat: -1.29,
@@ -82,7 +82,7 @@ describe('SEE_ALL_CONFIG queries', () => {
 });
 
 describe('cityExperiencesHref', () => {
-  it('points a city card at that city\'s experiences', () => {
+  it("points a city card at that city's experiences", () => {
     expect(cityExperiencesHref('Lamu')).toBe('/experiences/see-all?type=city&city=Lamu');
   });
 

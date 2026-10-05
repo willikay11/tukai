@@ -58,7 +58,7 @@ export const PreviewTicketsSection = ({
             let validity = 'Not set';
 
             if (salesStartDateStr && salesEndDateStr) {
-              validity = `${moment(salesStartDateStr).format('MMM D, YYYY,')} ${moment(salesStartDateStr).format('h:mm A')} – ${moment(salesEndDateStr).format('MMM D, YYYY,')} ${moment(salesEndDateStr).format('h:mm A')}`;
+              validity = `${moment(salesStartDateStr).format('MMM D, YYYY,')} ${moment(salesStartDateStr).format('h:mm A')} - ${moment(salesEndDateStr).format('MMM D, YYYY,')} ${moment(salesEndDateStr).format('h:mm A')}`;
             } else if (ticket.salesEndRelative) {
               const { amount, unit, anchor } = ticket.salesEndRelative;
               validity = `${amount} ${unit} before the experience ${anchor === 'start' ? 'starts' : 'ends'}`;

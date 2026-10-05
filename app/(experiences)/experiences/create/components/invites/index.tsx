@@ -190,7 +190,7 @@ export const CreateExperienceInvites = ({
           or are a member of.
         </p>
 
-        {/* No backend lookup here — guests are invited by typing addresses,
+        {/* No backend lookup here - guests are invited by typing addresses,
             comma-separated for several at once */}
         <InviteMembers
           invitedMembers={invitedMembers}

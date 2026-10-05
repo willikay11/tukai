@@ -233,7 +233,7 @@ export const BucketListPageContent = ({ bucketListId }: { bucketListId: string }
         <p className="mt-8 text-sm text-gray-400">by {linkedUserName(bucketList.owner)}</p>
       )}
 
-      {/* Phones only — from md these live in the header */}
+      {/* Phones only - from md these live in the header */}
       {isOwner && (
         <div className="fixed inset-x-0 bottom-6 z-40 flex justify-center px-4 md:hidden">
           <div className="flex items-center gap-2 rounded-full bg-white p-[5px] shadow-top-md">

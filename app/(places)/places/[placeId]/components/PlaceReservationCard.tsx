@@ -74,7 +74,7 @@ export const PlaceReservationCard = ({
         </div>
       </div>
 
-      {/* ⚠️ No edit endpoint exists — the API offers accept/decline/pay/cancel
+      {/* ⚠️ No edit endpoint exists - the API offers accept/decline/pay/cancel
           only, so a change means cancelling and requesting again. */}
       {CANCELLABLE.has(reservation.status) && (
         <Button

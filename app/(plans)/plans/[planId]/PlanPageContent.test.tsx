@@ -54,7 +54,7 @@ describe('one plan', () => {
 
     expect(screen.getByRole('heading', { name: 'Saturday out' })).toBeInTheDocument();
     expect(screen.getByText('Karura Forest')).toBeInTheDocument();
-    expect(screen.getByText('9:00 AM – 10:30 AM')).toBeInTheDocument();
+    expect(screen.getByText('9:00 AM - 10:30 AM')).toBeInTheDocument();
   });
 
   it('renames a plan', async () => {

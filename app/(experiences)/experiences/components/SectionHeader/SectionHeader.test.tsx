@@ -214,13 +214,16 @@ describe('SectionHeader', () => {
       expect(next).not.toHaveClass('border');
     });
 
+    // The design's own values: white behind a hairline at 35%, and it stops
+    // taking the pointer rather than only looking inert
     it('empties the one that cannot', () => {
       renderArrows(true, false);
 
       const back = screen.getByRole('button', { name: /previous/i });
       expect(back).toHaveClass('bg-white');
-      expect(back).toHaveClass('border-line-soft');
-      expect(back).toHaveClass('text-ink-subtle');
+      expect(back).toHaveClass('border-line');
+      expect(back).toHaveClass('opacity-35');
+      expect(back).toHaveClass('pointer-events-none');
       expect(back).toBeDisabled();
     });
   });

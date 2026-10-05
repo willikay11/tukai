@@ -32,7 +32,7 @@ describe('RevealOnScroll', () => {
     global.IntersectionObserver = originalObserver;
   });
 
-  it('renders its children either way — the animation is decoration', () => {
+  it('renders its children either way - the animation is decoration', () => {
     render(
       <RevealOnScroll>
         <p>Cancellation Policy</p>

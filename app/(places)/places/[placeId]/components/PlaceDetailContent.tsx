@@ -143,7 +143,7 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
           </div>
 
           {/* Each section fades up as it is reached, as the experience page's
-              do. The gallery and description above are not wrapped — they are
+              do. The gallery and description above are not wrapped - they are
               on screen at load, so there is nothing to reveal. */}
           <RevealOnScroll>
             <PlaceDetailsSection properties={place.properties ?? []} />
@@ -183,7 +183,7 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
           </RevealOnScroll>
         </div>
 
-        {/* Hidden below lg, where the bar's sheet is the way in — stacked
+        {/* Hidden below lg, where the bar's sheet is the way in - stacked
             under every section it was a long scroll from the top */}
         <div className="hidden lg:col-span-5 lg:block">
           {/* The shadow arrives once the reader has scrolled, so the panel

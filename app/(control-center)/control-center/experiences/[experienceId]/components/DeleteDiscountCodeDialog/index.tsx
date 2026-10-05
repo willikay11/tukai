@@ -75,8 +75,8 @@ export const DeleteDiscountCodeDialog = ({
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm leading-relaxed text-gray-500">
               {redeemed > 0
-                ? `${redeemed} ${redeemed === 1 ? 'person has' : 'people have'} already used this code. They keep their tickets, but the code will stop working for everyone else. This cannot be undone — pause it instead if you may want it back.`
-                : 'This code will stop working for anyone who has it. This cannot be undone — pause it instead if you may want it back.'}
+                ? `${redeemed} ${redeemed === 1 ? 'person has' : 'people have'} already used this code. They keep their tickets, but the code will stop working for everyone else. This cannot be undone. Pause it instead if you may want it back.`
+                : 'This code will stop working for anyone who has it. This cannot be undone. Pause it instead if you may want it back.'}
             </AlertDialogDescription>
           </div>
         </AlertDialogHeader>

@@ -119,7 +119,7 @@ export const ViewExperiencePageContent = ({
 
   return (
     <PageContainer variant="detail" className="py-6">
-      {/* Top row — Back link on left, actions on right */}
+      {/* Top row - Back link on left, actions on right */}
       <div className="mb-6 flex items-center justify-between">
         {isPreview ? <div /> : <BackToExplore />}
 
@@ -196,7 +196,7 @@ export const ViewExperiencePageContent = ({
 
           <Separator />
 
-          {/* Day by day — renders only when the experience has itinerary days */}
+          {/* Day by day - renders only when the experience has itinerary days */}
           <RevealOnScroll>
             <ItineraryDayByDay experienceId={experience.id} startDate={experience.startDate} />
           </RevealOnScroll>
@@ -283,10 +283,10 @@ export const ViewExperiencePageContent = ({
         {!isPreview && <MobileBookingBar experience={experience} />}
 
         {/* Right column: Sticky booking panel.
-            Hidden below lg — there it would stack after every section, which is
+            Hidden below lg - there it would stack after every section, which is
             what the floating bar and its sheet replace. */}
         <div className="hidden lg:col-span-5 lg:block">
-          {/* Sticky for customers, static in the preview — there the create
+          {/* Sticky for customers, static in the preview - there the create
               flow's own sticky header owns the top of the viewport.
 
               The shadow arrives once the reader has scrolled, so the panel

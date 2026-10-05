@@ -13,7 +13,7 @@ const Probe = () => {
   return (
     <div>
       <p data-testid="state">{`${status}|${isUsingLocation}`}</p>
-      <p data-testid="where">{area ?? city ?? '—'}</p>
+      <p data-testid="where">{area ?? city ?? '-'}</p>
       <button onClick={() => setUsingLocation(true)}>on</button>
       <button onClick={() => setUsingLocation(false)}>off</button>
     </div>

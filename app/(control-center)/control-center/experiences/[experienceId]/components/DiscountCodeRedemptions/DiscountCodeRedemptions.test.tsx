@@ -81,7 +81,7 @@ describe('redemptionRows', () => {
 
   it('reads an open-ended window as such', () => {
     expect(rowFor(promo({ startsAt: '2026-07-01T00:00:00Z' }), 'Can be used')?.value).toBe(
-      '1 Jul 2026 — no end date',
+      '1 Jul 2026 - no end date',
     );
   });
 });

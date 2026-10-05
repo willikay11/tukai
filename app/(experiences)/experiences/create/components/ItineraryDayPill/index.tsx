@@ -558,7 +558,7 @@ export const ItineraryDayPill = ({
             .map((a) => a.placeId!)}
         />
 
-        {/* Delete confirmation — the day and its activities go with it */}
+        {/* Delete confirmation - the day and its activities go with it */}
         <AlertDialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>

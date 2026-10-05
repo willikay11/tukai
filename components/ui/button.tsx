@@ -83,7 +83,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         // may be a link with no disabled state to set.
         {...(asChild ? {} : { disabled: isLoading || props.disabled })}
       >
-        {/* asChild leaves the child's markup alone — there is nothing of ours
+        {/* asChild leaves the child's markup alone - there is nothing of ours
             to put a spinner beside */}
         {isLoading && !asChild ? (
           <span role="status" aria-label="Loading..." className="flex items-center gap-2">

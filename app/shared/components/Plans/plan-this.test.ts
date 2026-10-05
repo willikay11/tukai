@@ -78,7 +78,7 @@ describe('planOptionNote', () => {
 
   it('calls a plan with no day a draft', () => {
     expect(planOptionNote(plan({ date: null, stops: [stop(), stop({ id: 's2' })] }))).toBe(
-      'Draft, no day yet — 2 stops',
+      'Draft, no day yet, 2 stops',
     );
   });
 });

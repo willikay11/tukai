@@ -172,7 +172,7 @@ export const TicketForm = ({
       )}
 
       {/*
-        Ticket Sales Validity — hidden for now so a ticket can be saved without
+        Ticket Sales Validity - hidden for now so a ticket can be saved without
         a sales window. The matching checks are commented out in validateTicket
         (TicketsStep) and validateTickets (useCreateExperienceFlow); restore all
         three together. The payload builders already emit null for these fields

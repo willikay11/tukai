@@ -105,7 +105,7 @@ describe('Search popover', () => {
     mockSearch.mockReturnValue({ data: undefined, isFetching: false });
   });
 
-  describe('State A — nothing typed', () => {
+  describe('State A - nothing typed', () => {
     it('offers recent searches and trending destinations', () => {
       render(<Search />);
 
@@ -158,7 +158,7 @@ describe('Search popover', () => {
     });
   });
 
-  describe('State B — results returned', () => {
+  describe('State B - results returned', () => {
     const typeQuery = async () => {
       const user = userEvent.setup();
       render(<Search />);

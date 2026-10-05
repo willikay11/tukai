@@ -69,7 +69,7 @@ export const EditPlaceAboutStep = ({
       </Field>
 
       <Field label="Description" error={errors.description}>
-        {/* The stored value is HTML, and the editor is what round-trips it —
+        {/* The stored value is HTML, and the editor is what round-trips it -
             the same one the create-experience flow writes descriptions in */}
         <Editor
           initialHtml={values.description}

@@ -47,7 +47,7 @@ export const YourPlaces = () => {
           </p>
         </div>
 
-        {/* Claiming is how a place becomes yours — there is no separate
+        {/* Claiming is how a place becomes yours - there is no separate
             create-and-own path */}
         <Link
           href="/places/claim"

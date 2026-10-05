@@ -190,7 +190,7 @@ export function InviteMembers({
           <IconComponent iconName="Search01Icon" size={22} color="gray" />
         </span>
 
-        {/* Search Results Dropdown — only when a backend search is wired up.
+        {/* Search Results Dropdown - only when a backend search is wired up.
             The "nobody matches" line lives in here, so the panel has to open
             for a query that found nothing too: it used to require results or
             a valid email, which is the opposite of when that line applies, so

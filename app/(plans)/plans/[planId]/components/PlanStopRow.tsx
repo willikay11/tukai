@@ -79,7 +79,7 @@ export const PlanStopRow = ({
           >
             {start === null
               ? 'Add a time'
-              : `${timeLabel(start)}${end === null ? '' : ` – ${timeLabel(end)}`}`}
+              : `${timeLabel(start)}${end === null ? '' : ` - ${timeLabel(end)}`}`}
           </p>
         </div>
 

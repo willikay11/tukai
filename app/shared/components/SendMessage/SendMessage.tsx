@@ -73,7 +73,7 @@ export const SendMessage = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {/* The shared dialog is 720px from md — a page width for one field. Both
+      {/* The shared dialog is 720px from md - a page width for one field. Both
           caps are set because the base declares only the md one. */}
       <DialogContent className="max-w-[420px] gap-0 rounded-2xl p-5 md:max-w-[420px]">
         <div className="flex min-w-0 flex-col">

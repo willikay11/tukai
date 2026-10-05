@@ -92,7 +92,7 @@ export const SingleExperience = ({
         </div>
 
         {/* The community leads: it is who is running this, and it reads as the
-            line the rest of the card hangs off — the same order the community
+            line the rest of the card hangs off - the same order the community
             feed's card uses */}
         {experience.hostCommunity && (
           <span className="mt-2 truncate text-sm text-primary">
@@ -112,7 +112,7 @@ export const SingleExperience = ({
         </p>
         {metaLine && <p className="mt-0.5 text-sm text-gray-400">{metaLine}</p>}
         {/* `price_starts_from` is the cheapest ticket by definition, so this is
-            a floor whether or not the row tells us there are dearer ones — the
+            a floor whether or not the row tells us there are dearer ones - the
             list endpoint returns no ticket data to judge that by */}
         <p className="mt-2 text-sm font-semibold text-gray-800">
           <span className="font-normal text-gray-400">from </span>

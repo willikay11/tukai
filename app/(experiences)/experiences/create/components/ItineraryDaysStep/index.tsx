@@ -154,7 +154,7 @@ export const ItineraryDaysStep = ({
       {/* Progress indicator */}
       {!allDaysHaveActivities && (
         <p className="text-center text-xs text-muted-foreground">
-          {daysWithActivities} of {totalDays} days have activities — add at least one activity to{' '}
+          {daysWithActivities} of {totalDays} days have activities. Add at least one activity to{' '}
           <button
             type="button"
             onClick={() => incompleteDays.length > 0 && scrollToDay(incompleteDays[0])}

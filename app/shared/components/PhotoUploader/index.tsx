@@ -108,7 +108,7 @@ const PhotoGridShell = ({
         {children}
       </SortableContext>
 
-      {/* Drag overlay — shows floating photo while dragging */}
+      {/* Drag overlay - shows floating photo while dragging */}
       <DragOverlay dropAnimation={null}>
         {activePhoto && (
           <div
@@ -460,7 +460,7 @@ export const PhotoUploader = ({
         </div>
 
         {/* The grid, wrapped in a drag context only where an order can be
-            persisted — a place's photos have no endpoint that would keep one */}
+            persisted - a place's photos have no endpoint that would keep one */}
         <PhotoGridShell
           sortable={sortable}
           sensors={sensors}
@@ -546,7 +546,7 @@ export const PhotoUploader = ({
           <p>Best results with landscape photos (16:9 or 4:3)</p>
         </div> */}
 
-        {/* Drag hint — only show if 2+ photos */}
+        {/* Drag hint - only show if 2+ photos */}
         {sortable && photos.length > 1 && (
           <p className="text-xs text-muted-foreground">
             Drag photos to reorder · First photo is the cover
@@ -556,7 +556,7 @@ export const PhotoUploader = ({
         {error && <p className="text-xs text-red-500">{error}</p>}
       </div>
 
-      {/* Crop dialog — renders on top when a portrait image is selected */}
+      {/* Crop dialog - renders on top when a portrait image is selected */}
       {currentCrop && (
         <ImageCropDialog
           imageSrc={currentCrop.objectUrl}

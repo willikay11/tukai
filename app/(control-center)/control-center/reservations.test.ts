@@ -64,7 +64,7 @@ describe('groupReservations', () => {
   it('shows a placeholder for the payment method', () => {
     const rows = groupReservations([{ purchase: purchase('p1', 'u1', 'Wanjiru'), experience: e1 }]);
 
-    expect(rows[0].method).toBe('—');
+    expect(rows[0].method).toBe('-');
   });
 
   it('carries the purchase status through for the badge', () => {

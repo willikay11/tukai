@@ -80,6 +80,9 @@ const config: Config = {
           brand: '#E8F1ED', // 280 — a chosen chip
           muted: '#EDF0EE', // 82 — a quieter panel
           tab: '#DCEAE3', // 13 — the selected tab pill, a shade deeper than brand
+          // The hover on a brand-soft control, per the design's carousel-arrow
+          // spec in docs/design/HANDOFF.md
+          'brand-hover': '#D5E7DE',
         },
         line: {
           DEFAULT: '#DDE3DF', // 176 — hairline borders and dividers

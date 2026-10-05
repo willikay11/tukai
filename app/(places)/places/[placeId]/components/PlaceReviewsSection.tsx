@@ -41,7 +41,7 @@ export const PlaceReviewsSection = ({
       showAddReview ? <AddPlaceReviewAction placeId={placeId} placeTitle={placeTitle} /> : undefined
     }
   >
-    {/* Already wired for photos, likes and comments — see app/(places)/components/Review */}
+    {/* Already wired for photos, likes and comments - see app/(places)/components/Review */}
     <Reviews placeId={placeId} />
   </SectionShell>
 );

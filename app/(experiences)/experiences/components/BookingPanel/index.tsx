@@ -269,7 +269,7 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
        * cannot go ahead; the message just has to say why.
        */
       if (isLoadingOccurrences) {
-        validationErrors.slot = 'Just a moment — still loading available dates.';
+        validationErrors.slot = 'Just a moment, still loading available dates.';
       } else if (timeSlots.length === 0) {
         validationErrors.slot = 'This experience has no dates available to book right now.';
       } else {
@@ -387,7 +387,7 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
     });
   };
 
-  const dateRange = `${moment(experience.startDate).format('ddd D MMM')} · ${moment(experience.startDate).format('h:mm A')} — ${moment(experience.endDate).format('h:mm A')}`;
+  const dateRange = `${moment(experience.startDate).format('ddd D MMM')} · ${moment(experience.startDate).format('h:mm A')} - ${moment(experience.endDate).format('h:mm A')}`;
   const currency = experience.currency ?? 'Ksh.';
 
   return (
@@ -398,7 +398,7 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
           <>
             {/* A two-column grid, not the primitive's `inline-flex`: that shrinks
             to fit, so `flex-1` had no free space to share and each tab sized to
-            its own label — "Make Reservation" far wider than "Moments". Equal
+            its own label - "Make Reservation" far wider than "Moments". Equal
             columns are what let one pill cover either tab.
             `w-fit` keeps them equal without stretching the row across the
             panel: the two 1fr columns settle on the wider label's width. */}
@@ -540,8 +540,8 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
           {/* Total */}
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Total</span>
-            {/* Keyed on the amount so React remounts it — and the animation
-                replays — only when the figure actually changes, rather than on
+            {/* Keyed on the amount so React remounts it - and the animation
+                replays - only when the figure actually changes, rather than on
                 every render of the panel */}
             <span
               key={payableTotal}
@@ -695,7 +695,7 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
           {/* API error */}
           {errors.api && <p className="text-center text-sm text-red-500">{errors.api}</p>}
 
-          {/* Pay button — the creator sees the real label and total, greyed out,
+          {/* Pay button - the creator sees the real label and total, greyed out,
               so the preview still shows what a customer would see */}
           <Button
             variant="lime"
@@ -751,7 +751,7 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
 
       {/* Same post-purchase flow as the reserve page. The checkout is an
           overlay so it covers the panel instead of appending an iframe below
-          it — Radix also unmounts it while closed, so the iframe never mounts
+          it - Radix also unmounts it while closed, so the iframe never mounts
           against an empty url. */}
       <Dialog
         open={isPaystackOpen}

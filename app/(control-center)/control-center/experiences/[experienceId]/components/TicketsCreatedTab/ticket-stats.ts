@@ -43,7 +43,7 @@ export const ticketStats = (ticket: Ticket, currency: string): TicketStat[] => {
           label: 'Estimated sales expiry',
           value: ticket.salesEndDate
             ? moment(ticket.salesEndDate).format('D MMM YYYY, h:mm A')
-            : '—',
+            : '-',
           full: true,
         },
   ];

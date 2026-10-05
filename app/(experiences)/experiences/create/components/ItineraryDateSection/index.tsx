@@ -48,7 +48,7 @@ export const ItineraryDateSection = ({
         </div>
       </div>
 
-      {/* Preview label — only when both dates set */}
+      {/* Preview label - only when both dates set */}
       {startDate && endDate && (
         <div className="inline-flex items-center space-x-2 rounded-full bg-blue-50 px-4 py-2 text-xs italic text-gray-500">
           <span className="font-medium">Experience Duration:</span>

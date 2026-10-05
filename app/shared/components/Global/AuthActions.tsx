@@ -169,7 +169,7 @@ export const AuthActions = () => {
 
       <Dialog open={showJoinPremium} onOpenChange={setShowJoinPremium}>
         <DialogContent className="w-[calc(100%-35px)] max-w-[620px] border-0 bg-transparent p-0 shadow-none">
-          {/* Steps reset automatically — Radix unmounts content on close */}
+          {/* Steps reset automatically - Radix unmounts content on close */}
           <SubscriptionModalFlow onClose={() => setShowJoinPremium(false)} />
         </DialogContent>
       </Dialog>

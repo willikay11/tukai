@@ -34,14 +34,14 @@ export const ExperienceUnavailable = ({
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
       <div className="text-center">
-        {/* 404 heading — middle 0 is lime */}
+        {/* 404 heading - middle 0 is lime */}
         <h1 className="text-8xl font-extrabold leading-none">
           <span className="text-primary">4</span>
           <span className="text-lime">0</span>
           <span className="text-primary">4</span>
         </h1>
 
-        {/* Compass icon in grey circle — same icon as the Discover nav item */}
+        {/* Compass icon in grey circle - same icon as the Discover nav item */}
         <div className="mt-6 flex justify-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
             <IconComponent iconName="CompassIcon" size={22} className="text-primary" />

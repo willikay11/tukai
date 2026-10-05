@@ -181,7 +181,7 @@ export const Search = () => {
   return (
     <Popover open={showSearchResults} onOpenChange={(isOpen) => setShowSearchResults(isOpen)}>
       {/* An anchor, not a trigger. The bar holds the city button, which opens
-          a popover of its own — nesting one trigger inside another meant a
+          a popover of its own - nesting one trigger inside another meant a
           click on the city opened the results panel instead. The field opens
           this one itself, on focus. */}
       <PopoverAnchor asChild className="my-4 md:my-0">
@@ -253,7 +253,7 @@ export const Search = () => {
         }}
         className="z-50 max-h-[80vh] w-[860px] max-w-[calc(100vw-3rem)] overflow-y-auto rounded-3xl border-gray-100 p-0 shadow-xl"
       >
-        {/* Idle — what the reader sees before typing anything */}
+        {/* Idle - what the reader sees before typing anything */}
         {!hasQuery && (
           <div className="space-y-6 p-5">
             {recentSearches.length > 0 && (
@@ -286,7 +286,7 @@ export const Search = () => {
           </div>
         )}
 
-        {/* Typing — a results header, type tabs, then results grouped by type */}
+        {/* Typing - a results header, type tabs, then results grouped by type */}
         {hasQuery && (
           <div className="p-5">
             {isSearching ? (

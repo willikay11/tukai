@@ -135,7 +135,7 @@ export const PlaceReservationSettings = ({
             <div className="border-t border-line pt-6">
               <p className="text-[15px] text-ink-muted">Opening hours</p>
               <p className="mt-1 text-[17px] text-ink-muted">
-                They vary by day — the settings show each one.
+                They vary by day. The settings show each one.
               </p>
             </div>
           )}

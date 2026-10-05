@@ -90,7 +90,7 @@ describe('MomentComments', () => {
     setComments([]);
     render(<MomentComments momentId="m1" />);
 
-    expect(screen.getByText('No comments yet — be the first.')).toBeInTheDocument();
+    expect(screen.getByText('No comments yet. Be the first.')).toBeInTheDocument();
   });
 
   it('keeps the send button disabled until the draft has content', () => {

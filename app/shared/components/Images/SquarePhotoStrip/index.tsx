@@ -127,7 +127,7 @@ export const SquarePhotoStrip = ({
           </button>
         )}
 
-        {/* Dots — bottom center */}
+        {/* Dots - bottom center */}
         <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
           {photos.map((_, index) => (
             <button

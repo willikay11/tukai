@@ -42,7 +42,7 @@ export const ItineraryPlaceCard = ({
     <div className="space-y-3">
       {/* Place card */}
       <div className="flex items-center gap-3 rounded-xl border border-dashed border-gray-200 bg-gray-50 p-2">
-        {/* Photo — rounded, fixed size, not full bleed */}
+        {/* Photo - rounded, fixed size, not full bleed */}
         {place.imageUrl ? (
           <div className="relative h-16 w-36 flex-shrink-0 overflow-hidden rounded-lg">
             <PhotoImage
@@ -103,7 +103,7 @@ export const ItineraryPlaceCard = ({
         </div>
       </div>
 
-      {/* Time form — shown when editing (no date picker) */}
+      {/* Time form - shown when editing (no date picker) */}
       {isEditingTime && (
         <div className="space-y-3 px-1">
           <p className="text-sm text-gray-600">

@@ -41,7 +41,7 @@ describe('deleting a discount code', () => {
   it('points at pausing instead', () => {
     render(<DeleteDiscountCodeDialog code={promo()} onClose={jest.fn()} />);
 
-    expect(screen.getByText(/pause it instead/)).toBeInTheDocument();
+    expect(screen.getByText(/pause it instead/i)).toBeInTheDocument();
   });
 
   it('says how many people already used it', () => {

@@ -142,7 +142,7 @@ export const ExperienceReviews = ({
       </div>
 
       {/* The API decides who may review; this only decides who is offered the
-          form — someone who was there, after it happened, who has not already
+          form - someone who was there, after it happened, who has not already
           said their piece */}
       {canReview && (
         <button

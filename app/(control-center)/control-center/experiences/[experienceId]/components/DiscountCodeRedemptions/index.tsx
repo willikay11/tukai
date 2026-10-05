@@ -72,7 +72,7 @@ export const redemptionRows = (code: PromoCode, currency: string): Row[] => {
   if (code.startsAt || code.endsAt) {
     const from = code.startsAt ? moment(code.startsAt).format('D MMM YYYY') : 'now';
     const until = code.endsAt ? moment(code.endsAt).format('D MMM YYYY') : 'no end date';
-    rows.push({ label: 'Can be used', value: `${from} — ${until}` });
+    rows.push({ label: 'Can be used', value: `${from} - ${until}` });
   }
 
   if (code.dateCreated) {

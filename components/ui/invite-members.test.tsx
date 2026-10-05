@@ -42,7 +42,7 @@ const setup = (props: Partial<React.ComponentProps<typeof Harness>> = {}) => {
 const emailsFrom = (mock: jest.Mock) =>
   (mock.mock.calls.at(-1)?.[0] as InvitedMember[]).map((member) => member.email);
 
-describe('InviteMembers — entering emails', () => {
+describe('InviteMembers - entering emails', () => {
   it('adds an address on Enter', async () => {
     const user = userEvent.setup();
     const { onMembersChange, input } = setup();
@@ -136,7 +136,7 @@ describe('InviteMembers — entering emails', () => {
  * From inviteVm: Enter takes the first suggestion, and a search that finds
  * nobody says what to do about it rather than only that it failed.
  */
-describe('InviteMembers — searching for people', () => {
+describe('InviteMembers - searching for people', () => {
   const RESULTS = [
     { id: 'u1', name: 'Kimberly Achieng', email: 'kim@example.com' },
     { id: 'u2', name: 'Kevin Mwangi', email: 'kevin@example.com' },

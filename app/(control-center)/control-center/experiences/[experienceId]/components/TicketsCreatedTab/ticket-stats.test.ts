@@ -78,7 +78,7 @@ describe('ticketStats', () => {
   });
 
   it('leaves a dash when no expiry is set', () => {
-    expect(statFor(ticket(), 'Estimated sales expiry')?.value).toBe('—');
+    expect(statFor(ticket(), 'Estimated sales expiry')?.value).toBe('-');
   });
 
   // Pause is the more important fact, so it takes that place in the block

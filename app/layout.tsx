@@ -72,7 +72,7 @@ export default function RootLayout({
       <head>
         {/*
           Every photo in the app comes from the media CDN, and none of it is
-          referenced by the HTML — the lists are fetched client-side, so the
+          referenced by the HTML - the lists are fetched client-side, so the
           browser only learns the origin exists once React has rendered a card.
           Warming the connection here means the first image request does not
           also pay for DNS and a TLS handshake.
@@ -181,7 +181,7 @@ export default function RootLayout({
                             {/* It reads the `tab` parameter to stand aside for the
                             create button on My Communities, and `useSearchParams`
                             in a component this layout renders on every page opts
-                            the whole app out of static rendering without this —
+                            the whole app out of static rendering without this -
                             the same boundary PageFilters sits behind above. */}
                             <Suspense fallback={null}>
                               <BottomNavigation />

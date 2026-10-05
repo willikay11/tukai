@@ -204,7 +204,7 @@ export const DiscoverPageContent = () => {
     <PageContainer className="space-y-10 py-6">
       {/* The canvas opens Discover with this row, off its own `featured`
           flag. The row stays out of the way entirely when nothing is
-          featured — see useFeaturedPlaces. */}
+          featured - see useFeaturedPlaces. */}
       {(isLoadingPromoted || promotedPlaces.length > 0) && (
         <CardRail title="Promoted places" subtitle="Handpicked by the communities that run them">
           {isLoadingPromoted ? (
@@ -259,7 +259,7 @@ export const DiscoverPageContent = () => {
       )}
 
       {/* Tours are experiences the API provisions behind a guide's profile,
-          so `experience_type=guide_booking` is the whole query — there is no
+          so `experience_type=guide_booking` is the whole query - there is no
           separate tours endpoint, and GET /guides/ returns profiles with no
           title, photo or date to put on a card. */}
       {(isLoadingTours || guidedTours.length > 0) && (
@@ -283,8 +283,8 @@ export const DiscoverPageContent = () => {
           says, so the section is the honest one of the two.
 
           ⚠️ The canvas also draws a "Closed · Opens 10 AM" pill over each
-          photo here. Hours are not on the place list serializer — they hang
-          off a reservation profile, two requests per place — so the pill is
+          photo here. Hours are not on the place list serializer - they hang
+          off a reservation profile, two requests per place - so the pill is
           left to the detail page, where PlaceOpenStatus can afford them. */}
       {(isLoadingWithExperiences || placesWithExperiences.length > 0) && (
         <section>
@@ -331,7 +331,7 @@ export const DiscoverPageContent = () => {
       )}
 
       {/* A rail of tall cards closed by an invitation to post one, with See
-          all in the header — not the masonry the Moments page uses, which was
+          all in the header - not the masonry the Moments page uses, which was
           going into this rail as a column layout. */}
       {(isLoadingMoments || moments.length > 0) && (
         <CardRail

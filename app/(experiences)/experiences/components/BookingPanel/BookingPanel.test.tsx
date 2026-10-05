@@ -597,9 +597,7 @@ describe('when there is no occurrence to select', () => {
     fireEvent.click(screen.getByRole('button', { name: /Pay/ }));
 
     await waitFor(() =>
-      expect(
-        screen.getByText('Just a moment — still loading available dates.'),
-      ).toBeInTheDocument(),
+      expect(screen.getByText('Just a moment, still loading available dates.')).toBeInTheDocument(),
     );
   });
 

@@ -205,7 +205,7 @@ export const AboutStep = ({
         <label className="block text-sm font-medium text-gray-900">
           Where will the experience take place?
         </label>
-        {/* A button rather than an input — it opens the place picker — so it
+        {/* A button rather than an input - it opens the place picker - so it
             borrows the field's box, text and icons to read as one */}
         <button
           type="button"

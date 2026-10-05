@@ -64,7 +64,7 @@ export const groupReservations = (
       amount,
       currency: purchase.ticket?.currency ?? 'Ksh.',
       // ⚠️ The purchase record carries no payment method
-      method: '—',
+      method: '-',
       status: purchase.status,
     });
   });

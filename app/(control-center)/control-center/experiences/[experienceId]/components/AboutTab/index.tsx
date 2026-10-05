@@ -46,11 +46,11 @@ export const AboutTab = ({ experience, metrics }: AboutTabProps) => {
   const dateValue = start?.isValid()
     ? [
         start.format('ddd D MMM YYYY'),
-        end?.isValid() ? `${start.format('h:mm A')} — ${end.format('h:mm A')}` : null,
+        end?.isValid() ? `${start.format('h:mm A')} - ${end.format('h:mm A')}` : null,
       ]
         .filter(Boolean)
         .join(' · ')
-    : '—';
+    : '-';
 
   const badgeType = experience.recurrenceRule
     ? 'recurring'
@@ -64,7 +64,7 @@ export const AboutTab = ({ experience, metrics }: AboutTabProps) => {
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      {/* Left — description, details, categories */}
+      {/* Left - description, details, categories */}
       <div className="space-y-8 lg:col-span-2">
         <div>
           <h2 className="text-base font-bold text-gray-900">About this experience</h2>
@@ -119,7 +119,7 @@ export const AboutTab = ({ experience, metrics }: AboutTabProps) => {
         <CancelExperienceAction experienceId={experience.id} experienceTitle={experience.title} />
       </div>
 
-      {/* Right — sales progress */}
+      {/* Right - sales progress */}
       <div className="h-fit rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
         <h3 className="text-base font-bold text-gray-900">Sales progress</h3>
 
@@ -138,7 +138,7 @@ export const AboutTab = ({ experience, metrics }: AboutTabProps) => {
           />
           <SummaryRow
             label="Days to go"
-            value={metrics.daysToGo === null ? '—' : `${metrics.daysToGo} days`}
+            value={metrics.daysToGo === null ? '-' : `${metrics.daysToGo} days`}
           />
           <SummaryRow label="Avg. daily sales" value={`+${metrics.averageDailySales} / day`} />
         </div>

@@ -56,11 +56,12 @@ const Arrow = ({
       'before:absolute before:-inset-2.5 before:content-[""]',
       'active:scale-[0.96]',
       // Live, it is a filled green disc with no outline; spent, it empties out
-      // to a white one behind a hairline. The greyed-out arrow carried the same
-      // fill as the live one and said nothing.
+      // to a white one behind a hairline at 35%, and stops taking the pointer.
+      // The values are the design's own (docs/design/HANDOFF.md, "Carousel
+      // arrows"), which also sets the hover.
       disabled
-        ? 'cursor-default border border-line-soft bg-white text-ink-subtle'
-        : 'bg-surface-brand text-brand hover:bg-surface-tab',
+        ? 'pointer-events-none cursor-default border border-line bg-white opacity-35'
+        : 'bg-surface-brand text-brand hover:bg-surface-brand-hover',
     )}
   >
     <IconComponent

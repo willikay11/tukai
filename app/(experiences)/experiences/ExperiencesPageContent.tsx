@@ -321,7 +321,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                 )}
               </section>
 
-              {/* Shared with you — hidden entirely when empty */}
+              {/* Shared with you - hidden entirely when empty */}
               {sharedBucketLists.length > 0 && (
                 <section>
                   <h2 className="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">

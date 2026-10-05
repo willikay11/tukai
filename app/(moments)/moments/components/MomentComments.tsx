@@ -166,7 +166,7 @@ export const MomentComments = ({ momentId }: { momentId: string }) => {
           ))}
         </div>
       ) : comments.length === 0 ? (
-        <p className="text-sm text-gray-400">No comments yet — be the first.</p>
+        <p className="text-sm text-gray-400">No comments yet. Be the first.</p>
       ) : (
         <div className="space-y-4">
           {comments.map((comment) => (

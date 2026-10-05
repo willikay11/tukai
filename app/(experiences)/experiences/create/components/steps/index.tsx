@@ -485,7 +485,7 @@ export const CreateExperienceSteps = ({
 
       {/* The stepper row above spans the full page width so every step stays
           visible; the form itself stays in a narrow left column. Preview is the
-          exception — it renders the full customer detail layout. */}
+          exception - it renders the full customer detail layout. */}
       <div className="grid grid-cols-12 gap-4">
         <div
           className={
@@ -847,7 +847,7 @@ export const CreateExperienceSteps = ({
                   </div>
                 ) : (
                   /*
-                    The REAL customer detail view — the same component
+                    The REAL customer detail view - the same component
                     /experiences/[experienceId] renders. Never fork this into a
                     preview-specific copy; changes there must show up here.
                   */

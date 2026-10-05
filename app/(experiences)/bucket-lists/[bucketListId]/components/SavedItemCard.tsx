@@ -104,7 +104,7 @@ const SavedCard = ({
           className="object-cover"
         />
 
-        {/* Already on a list, so the basket reads as done — and still opens the
+        {/* Already on a list, so the basket reads as done - and still opens the
             picker, which is how it is moved onto another one */}
         <div className="absolute right-2 top-2">
           <Bookmark

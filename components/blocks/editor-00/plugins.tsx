@@ -38,8 +38,8 @@ export function Plugins() {
           // container introduces does not reach them.
           <div className="flex items-center gap-1 overflow-x-auto border-b bg-gray-100 p-2 scrollbar-hide [&>*]:flex-shrink-0">
             {/* The block-format dropdown that used to lead the toolbar is gone:
-                it offered Paragraph and H1–H3, which the heading toggles now
-                cover — pressing the active one drops back to a paragraph. */}
+                it offered Paragraph and H1-H3, which the heading toggles now
+                cover - pressing the active one drops back to a paragraph. */}
             <FontFormatToolbarPlugin />
 
             <Separator orientation="vertical" className="mx-2 !h-4" />
