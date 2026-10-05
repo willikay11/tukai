@@ -52,17 +52,21 @@ const Arrow = ({
     // 24px to look at, 44px to hit: the canvas pads the target well past the
     // circle it draws
     className={cn(
-      'relative flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-line bg-white transition-opacity',
+      'relative flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full transition-colors',
       'before:absolute before:-inset-2.5 before:content-[""]',
-      'hover:bg-surface active:scale-[0.96]',
-      disabled ? 'cursor-default opacity-[0.35]' : 'opacity-100',
+      'active:scale-[0.96]',
+      // Live, it is a filled green disc with no outline; spent, it empties out
+      // to a white one behind a hairline. The greyed-out arrow carried the same
+      // fill as the live one and said nothing.
+      disabled
+        ? 'cursor-default border border-line-soft bg-white text-ink-subtle'
+        : 'bg-surface-brand text-brand hover:bg-surface-tab',
     )}
   >
     <IconComponent
       iconName={direction === 'back' ? 'ArrowLeft01Icon' : 'ArrowRight01Icon'}
       size={14}
       color="currentColor"
-      className="text-brand-ink"
     />
   </button>
 );

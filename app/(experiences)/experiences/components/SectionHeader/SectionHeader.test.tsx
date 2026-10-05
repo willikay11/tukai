@@ -185,4 +185,38 @@ describe('SectionHeader', () => {
       expect(screen.queryByRole('button', { name: /previous/i })).not.toBeInTheDocument();
     });
   });
+
+  // Live, an arrow is a filled green disc with no outline; spent, it empties
+  // out to a white one behind a hairline
+  describe('how an arrow reads', () => {
+    const renderArrows = (atStart: boolean, atEnd: boolean) =>
+      render(
+        <SectionHeader
+          title="Promoted places"
+          onBack={jest.fn()}
+          onNext={jest.fn()}
+          atStart={atStart}
+          atEnd={atEnd}
+        />,
+      );
+
+    it('fills the arrow that can still be pressed', () => {
+      renderArrows(true, false);
+
+      const next = screen.getByRole('button', { name: /next/i });
+      expect(next).toHaveClass('bg-surface-brand');
+      expect(next).toHaveClass('text-brand');
+      expect(next).not.toHaveClass('border');
+    });
+
+    it('empties the one that cannot', () => {
+      renderArrows(true, false);
+
+      const back = screen.getByRole('button', { name: /previous/i });
+      expect(back).toHaveClass('bg-white');
+      expect(back).toHaveClass('border-line-soft');
+      expect(back).toHaveClass('text-ink-subtle');
+      expect(back).toBeDisabled();
+    });
+  });
 });
