@@ -204,6 +204,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
     { page: 1, page_size: 8, date: tomorrow, category: categoryFilter },
     isAll,
   );
+  const tomorrowCount = tomorrowResponse?.data?.count;
 
   const { data: citiesResponse, isLoading: isLoadingCities } = usePlaceCategories(
     { pageSize: 100, group: 'cities' },
@@ -332,10 +333,14 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
           />
 
           <ExperienceRow
-            title={`Happening Tomorrow in ${userCity}`}
-            subtitle={formatLongDateWithOrdinal(moment().add(1, 'days').toDate())}
+            title={`Happening tomorrow ${formatLongDateWithOrdinal(moment().add(1, 'days').toDate())}`}
+            subtitle={
+              tomorrowCount === undefined
+                ? undefined
+                : `${tomorrowCount} ${tomorrowCount === 1 ? 'experience' : 'experiences'}`
+            }
             seeAllHref={`/experiences/see-all?type=tomorrow&city=${encodeURIComponent(userCity)}`}
-            total={tomorrowResponse?.data?.count}
+            total={tomorrowCount}
             experiences={tomorrowResponse?.data?.results ?? []}
             isLoading={isLoadingTomorrow}
           />

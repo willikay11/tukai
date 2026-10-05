@@ -12,7 +12,7 @@ Source: `docs/design/screens/experiences-listing.html`.
 | EL-02 | Featured experiences | build | done | none |
 | EL-03 | Happening near you | build | built, pending review | EL-00 |
 | EL-04 | Happening today | build | built, pending owner review | EL-00 |
-| EL-05 | Happening tomorrow | build | awaiting approval | EL-00 |
+| EL-05 | Happening tomorrow | build | built, pending owner review | EL-00 |
 | EL-06 | Discover itineraries | build | awaiting approval | EL-00 |
 | EL-07 | Communities | build | awaiting approval | EL-00, D-14 |
 | EL-08 | Guided tours | build | awaiting approval | EL-00 |
