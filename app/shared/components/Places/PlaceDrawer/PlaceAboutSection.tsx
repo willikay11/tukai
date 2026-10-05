@@ -2,13 +2,13 @@
 
 import { DescriptionShowMore, OpenInMapsLink } from '@/app/shared/components/Global';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { SquarePhotoStrip } from '@/app/shared/components/Images';
 import { useLocation } from '@/context/LocationContext';
 import { photoUrl } from '@/types/photo';
 import { Place } from '@/types/place';
 import { haversineKm } from '@/utils/geo-utils';
 
 import { PlaceFactsGrid } from './PlaceFactsGrid';
+import { PlacePhotoStrip } from './PlacePhotoStrip';
 import { PlaceSocialPills } from './PlaceSocialPills';
 
 export const PlaceAboutSection = ({ place }: { place: Place }) => {
@@ -30,7 +30,7 @@ export const PlaceAboutSection = ({ place }: { place: Place }) => {
 
   return (
     <div className="space-y-6">
-      {photos.length > 0 && <SquarePhotoStrip photos={photos} variant="hero" />}
+      <PlacePhotoStrip photos={photos} alt={place.title} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         {city && (

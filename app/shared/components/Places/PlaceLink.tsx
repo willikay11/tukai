@@ -1,6 +1,6 @@
 'use client';
 
-import { MouseEvent, ReactNode } from 'react';
+import { KeyboardEvent, ReactNode } from 'react';
 
 import Link from 'next/link';
 
@@ -8,11 +8,15 @@ import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { placePath } from '@/utils/detail-paths';
 
 /**
- * A link to a place that opens it in the drawer.
+ * Opens a place in the drawer.
  *
- * It stays a real link: the href is the place's own page, so middle-click,
- * "open in new tab" and the status bar all keep working, and a reader with no
- * drawer above them simply navigates.
+ * A place has no page of its own to send anyone to while the drawer is up, so
+ * this is not a link: it carries no href and opens nothing in a new tab.
+ * Without a drawer above it — a screen outside the provider — it falls back to
+ * the place's own page, which is the only thing left that can show it.
+ *
+ * role/tabIndex rather than a <button>: callers wrap cards that carry their
+ * own controls, and a button inside a button is invalid HTML.
  */
 export const PlaceLink = ({
   place,
@@ -23,24 +27,38 @@ export const PlaceLink = ({
   place: { id: string; slug?: string };
   className?: string;
   children: ReactNode;
-  /** Run alongside opening the drawer — closing a search panel, say. */
+  /** Run alongside opening — closing a search panel, say. */
   onNavigate?: () => void;
 }) => {
   const drawer = usePlaceDrawer();
 
-  const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
+  if (!drawer) {
+    return (
+      <Link href={placePath(place)} onClick={onNavigate} className={className}>
+        {children}
+      </Link>
+    );
+  }
+
+  const open = () => {
     onNavigate?.();
-
-    // A modified click is the reader asking for a new tab or window
-    if (!drawer || event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
-
-    event.preventDefault();
     drawer.openPlace(place.id);
   };
 
   return (
-    <Link href={placePath(place)} onClick={handleClick} className={className}>
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={open}
+      onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        // Space scrolls the page otherwise
+        event.preventDefault();
+        open();
+      }}
+      className={className}
+    >
       {children}
-    </Link>
+    </div>
   );
 };

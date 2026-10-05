@@ -30,66 +30,82 @@ describe('PlaceLink', () => {
     usePlaceDrawer.mockReturnValue({ openPlace, closePlace: jest.fn(), openPlaceId: null });
   });
 
-  it('opens the place rather than following the link', () => {
+  it('opens the place in the drawer', () => {
     render(<PlaceLink place={place}>Talisman</PlaceLink>);
 
-    fireEvent.click(screen.getByRole('link'), { button: 0 });
+    fireEvent.click(screen.getByRole('button'));
 
     expect(openPlace).toHaveBeenCalledWith('p1');
   });
 
-  // It stays a real link, so a new tab still lands on the page
-  it('keeps the place’s own href', () => {
+  // A place has no page of its own to send anyone to while the drawer is up
+  it('is not a link, so there is nothing to open in a new tab', () => {
     render(<PlaceLink place={place}>Talisman</PlaceLink>);
 
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/places/p1');
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
-  it('prefers the slug in the href where there is one', () => {
-    render(<PlaceLink place={{ id: 'p1', slug: 'talisman' }}>Talisman</PlaceLink>);
-
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/places/talisman');
-  });
-
-  it('leaves a modified click to the browser', () => {
+  it('opens on the keyboard too', () => {
     render(<PlaceLink place={place}>Talisman</PlaceLink>);
 
-    fireEvent.click(screen.getByRole('link'), { metaKey: true });
-    fireEvent.click(screen.getByRole('link'), { ctrlKey: true });
-    fireEvent.click(screen.getByRole('link'), { shiftKey: true });
+    fireEvent.keyDown(screen.getByRole('button'), { key: 'Enter' });
+    expect(openPlace).toHaveBeenCalledTimes(1);
+
+    fireEvent.keyDown(screen.getByRole('button'), { key: ' ' });
+    expect(openPlace).toHaveBeenCalledTimes(2);
+  });
+
+  it('ignores any other key', () => {
+    render(<PlaceLink place={place}>Talisman</PlaceLink>);
+
+    fireEvent.keyDown(screen.getByRole('button'), { key: 'a' });
 
     expect(openPlace).not.toHaveBeenCalled();
   });
 
-  // Rendered somewhere with no drawer above it, it simply navigates
-  it('navigates with no drawer in the tree', () => {
-    usePlaceDrawer.mockReturnValue(null);
-
-    render(<PlaceLink place={place}>Talisman</PlaceLink>);
-    fireEvent.click(screen.getByRole('link'), { button: 0 });
-
-    expect(openPlace).not.toHaveBeenCalled();
-  });
-
-  // A search panel closes itself on the way out, drawer or not
-  it('runs onNavigate either way', () => {
+  it('closes whatever it was opened from', () => {
     const onNavigate = jest.fn();
-
-    const { rerender } = render(
+    render(
       <PlaceLink place={place} onNavigate={onNavigate}>
         Talisman
       </PlaceLink>,
     );
-    fireEvent.click(screen.getByRole('link'), { button: 0 });
-    expect(onNavigate).toHaveBeenCalledTimes(1);
 
-    usePlaceDrawer.mockReturnValue(null);
-    rerender(
-      <PlaceLink place={place} onNavigate={onNavigate}>
-        Talisman
-      </PlaceLink>,
-    );
-    fireEvent.click(screen.getByRole('link'), { button: 0 });
-    expect(onNavigate).toHaveBeenCalledTimes(2);
+    fireEvent.click(screen.getByRole('button'));
+
+    expect(onNavigate).toHaveBeenCalled();
+  });
+
+  /**
+   * Outside the provider the place page is the only thing left that can show
+   * the place, so it falls back to being a link.
+   */
+  describe('with no drawer in the tree', () => {
+    beforeEach(() => usePlaceDrawer.mockReturnValue(null));
+
+    it('links to the place’s own page', () => {
+      render(<PlaceLink place={place}>Talisman</PlaceLink>);
+
+      expect(screen.getByRole('link')).toHaveAttribute('href', '/places/p1');
+    });
+
+    it('prefers the slug in that href', () => {
+      render(<PlaceLink place={{ id: 'p1', slug: 'talisman' }}>Talisman</PlaceLink>);
+
+      expect(screen.getByRole('link')).toHaveAttribute('href', '/places/talisman');
+    });
+
+    it('still runs onNavigate', () => {
+      const onNavigate = jest.fn();
+      render(
+        <PlaceLink place={place} onNavigate={onNavigate}>
+          Talisman
+        </PlaceLink>,
+      );
+
+      fireEvent.click(screen.getByRole('link'));
+
+      expect(onNavigate).toHaveBeenCalled();
+    });
   });
 });

@@ -45,16 +45,11 @@ export const PlaceCard = ({
 
   return (
     <CardShell
-      href={placePath(place)}
-      // Opens over the page, keeping the href so a new tab still works
-      onClick={(event) => {
-        // A modified click is the reader asking for a new tab or window
-        if (!drawer || event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) {
-          return;
-        }
-        event.preventDefault();
-        drawer.openPlace(place.id);
-      }}
+      // A place opens in the drawer, not on a page of its own — so no href,
+      // and nothing to open in a new tab. Without a drawer above it the card
+      // falls back to the place's own page.
+      href={drawer ? undefined : placePath(place)}
+      onClick={drawer ? () => drawer.openPlace(place.id) : undefined}
       src={coverPhotoUrl(place.photos, 'md')}
       alt={place.title}
       sizes="184px"

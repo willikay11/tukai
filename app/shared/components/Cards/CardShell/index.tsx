@@ -98,8 +98,31 @@ export const CardShell = ({
     );
   }
 
+  if (!onClick) return <div className={shared}>{body}</div>;
+
+  /**
+   * A card that opens something in place rather than navigating.
+   *
+   * role/tabIndex on a div rather than a <button>: these cards carry their own
+   * controls — a bookmark, a share — and a button inside a button is invalid
+   * HTML that browsers resolve by dropping one of them.
+   */
   return (
-    <div onClick={onClick} className={cn(shared, onClick && 'cursor-pointer')}>
+    <div
+      role="button"
+      tabIndex={0}
+      // Without this the card is an unnamed button: the photo's alt is inside
+      // it, not on it, and a screen reader announces only "button"
+      aria-label={alt}
+      onClick={onClick}
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        // Space scrolls the page otherwise
+        event.preventDefault();
+        onClick(event as unknown as React.MouseEvent<HTMLElement>);
+      }}
+      className={cn(shared, 'cursor-pointer')}
+    >
       {body}
     </div>
   );

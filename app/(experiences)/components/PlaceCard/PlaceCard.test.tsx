@@ -85,17 +85,18 @@ describe('PlaceCard', () => {
     expect(screen.getByText('Karen Rd')).toBeInTheDocument();
   });
 
-  it('links to the place detail page', () => {
+  // A place opens in the drawer, not on a page of its own
+  it('is not a link while the drawer is there to open', () => {
     render(<PlaceCard place={makePlace()} />);
 
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/places/p1');
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
   // The canvas draws its place media square, at 184px
   it('is a square tile at the canvas width', () => {
     const { container } = render(<PlaceCard place={makePlace()} />);
 
-    expect(screen.getByRole('link')).toHaveClass('w-[184px]');
+    expect(screen.getByRole('button', { name: 'Talisman' })).toHaveClass('w-[184px]');
     expect(container.querySelector('.aspect-square')).toBeInTheDocument();
   });
 
@@ -104,8 +105,9 @@ describe('PlaceCard', () => {
   it('fills its cell when the width is overridden', () => {
     render(<PlaceCard place={makePlace()} className="w-full" />);
 
-    expect(screen.getByRole('link')).toHaveClass('w-full');
-    expect(screen.getByRole('link')).not.toHaveClass('w-[184px]');
+    const card = screen.getByRole('button', { name: 'Talisman' });
+    expect(card).toHaveClass('w-full');
+    expect(card).not.toHaveClass('w-[184px]');
   });
 
   /**
@@ -144,45 +146,32 @@ describe('PlaceCard', () => {
     });
   });
 
-  /**
-   * The card opens a drawer rather than navigating — but it stays a real
-   * link, so a new tab still lands on the page.
-   */
   describe('opening the drawer', () => {
-    it('opens the place instead of following the link', () => {
+    it('opens the place', () => {
       render(<PlaceCard place={makePlace()} />);
 
-      fireEvent.click(screen.getByRole('link'), { button: 0 });
+      fireEvent.click(screen.getByRole('button', { name: 'Talisman' }));
 
       expect(openPlace).toHaveBeenCalledWith('p1');
     });
 
-    it('keeps the href, so the card can still be opened in a new tab', () => {
+    it('opens on the keyboard too', () => {
       render(<PlaceCard place={makePlace()} />);
 
-      expect(screen.getByRole('link')).toHaveAttribute('href', '/places/p1');
+      fireEvent.keyDown(screen.getByRole('button', { name: 'Talisman' }), { key: 'Enter' });
+
+      expect(openPlace).toHaveBeenCalledWith('p1');
     });
 
-    // A modified click is the reader asking for a new tab or window
-    it('leaves a modified click to the browser', () => {
-      render(<PlaceCard place={makePlace()} />);
-
-      fireEvent.click(screen.getByRole('link'), { metaKey: true });
-      fireEvent.click(screen.getByRole('link'), { ctrlKey: true });
-      fireEvent.click(screen.getByRole('link'), { shiftKey: true });
-
-      expect(openPlace).not.toHaveBeenCalled();
-    });
-
-    // A card rendered somewhere with no drawer above it simply navigates
-    it('navigates as usual with no drawer in the tree', () => {
+    // A card rendered somewhere with no drawer above it falls back to the
+    // place's own page, which is the only thing left that can show it
+    it('links to the page with no drawer in the tree', () => {
       usePlaceDrawer.mockReturnValue(null);
 
       render(<PlaceCard place={makePlace()} />);
-      fireEvent.click(screen.getByRole('link'), { button: 0 });
 
-      expect(openPlace).not.toHaveBeenCalled();
       expect(screen.getByRole('link')).toHaveAttribute('href', '/places/p1');
+      expect(openPlace).not.toHaveBeenCalled();
     });
   });
 });
