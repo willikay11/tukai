@@ -13,6 +13,7 @@ import { BucketListCard } from '@/app/(experiences)/experiences/components/Bucke
 import { CategoryChipRow } from '@/app/(experiences)/experiences/components/CategoryChipRow';
 import type { CategoryChip } from '@/app/(experiences)/experiences/components/CategoryChipRow';
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
+import { CommunitiesSection } from '@/app/(experiences)/experiences/components/CommunitiesSection';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
 import {
   ExperienceRow,
@@ -34,6 +35,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { CardRail, ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
 import { PillTabs } from '@/app/shared/components/Tabs';
 import { isSharedWithMe, useMyBucketLists } from '@/app/shared/hooks/useBucketLists';
+import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences, useTicketPurchases } from '@/app/shared/hooks/useExperiences';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { toast } from '@/app/shared/hooks/useToast';
@@ -42,6 +44,7 @@ import { NoData } from '@/components/ui/noData';
 import { useLocation } from '@/context/LocationContext';
 import { downloadTicketPdf } from '@/services/experience';
 import { BucketList } from '@/types/bucket-list';
+import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { coverPhotoUrl } from '@/types/photo';
 import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
@@ -247,6 +250,16 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const itineraries: Experience[] = itinerariesResponse?.data?.results ?? [];
   const itineraryTotal = itinerariesResponse?.data?.count ?? 0;
 
+  // Communities running what is on: the list is filtered to those with an
+  // upcoming experience. Hidden when empty or when the request fails.
+  const { data: communitiesResponse, isLoading: isLoadingCommunities } = useGetCommunities({
+    page: 1,
+    enabled: isAll,
+    showUpComingExperiences: true,
+  });
+  const communities: Community[] = communitiesResponse?.data?.results ?? [];
+  const communityTotal = communitiesResponse?.data?.count ?? 0;
+
   const { data: topCityResponse, isLoading: isLoadingTopCity } = useExperiences(
     { page: 1, page_size: 8, search: topCity?.name, category: categoryFilter },
     isAll && Boolean(topCity),
@@ -384,6 +397,12 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
               )}
             </CardRail>
           )}
+
+          <CommunitiesSection
+            communities={communities}
+            total={communityTotal}
+            isLoading={isLoadingCommunities}
+          />
 
           {topCity && (
             <ExperienceRow
