@@ -24,3 +24,5 @@
 ## Notes
 
 The sort options are read at approval.
+
+**EL-00 decision applied:** the subtitle names no city, for now. Use the segment's own count or wording only.

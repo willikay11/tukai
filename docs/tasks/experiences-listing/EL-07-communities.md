@@ -22,3 +22,5 @@
 ## Notes
 
 Depends on the community layout decision (D-14, now in the old task set, re-raised here).
+
+**EL-00 decision applied:** the subtitle names no city, for now. Use the segment's own count or wording only.

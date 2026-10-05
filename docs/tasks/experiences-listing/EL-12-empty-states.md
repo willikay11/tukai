@@ -19,3 +19,5 @@
 ## Notes
 
 The copy depends on EL-00.
+
+**EL-00 decision applied:** the empty copy names no city. It can name the category, e.g. 'No food experiences listed yet. Pick another category.'

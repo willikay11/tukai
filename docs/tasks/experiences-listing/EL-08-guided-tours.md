@@ -21,3 +21,5 @@
 ## Notes
 
 Same count and city limit as the Discover version.
+
+**EL-00 decision applied:** the subtitle names no city, for now. Use the segment's own count or wording only.

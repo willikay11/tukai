@@ -22,3 +22,5 @@
 ## Notes
 
 Read the subtitle and card markup at approval.
+
+**EL-00 decision applied:** the subtitle names no city, for now. Use the segment's own count or wording only.

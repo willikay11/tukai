@@ -22,3 +22,5 @@
 ## Notes
 
 Also removed from Discover (D-01), so it lives here only.
+
+**EL-00 decision applied:** the subtitle names no city, for now. Use the segment's own count or wording only.

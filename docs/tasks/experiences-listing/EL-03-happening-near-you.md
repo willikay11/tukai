@@ -24,3 +24,5 @@
 ## Notes
 
 The design's card and sort are read at approval, not from this file.
+
+**EL-00 decision applied:** the subtitle names no city, for now. Use the segment's own count or wording only.
