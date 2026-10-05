@@ -199,6 +199,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
     { page: 1, page_size: 8, date: today, category: categoryFilter },
     isAll,
   );
+  const todayCount = todayResponse?.data?.count;
   const { data: tomorrowResponse, isLoading: isLoadingTomorrow } = useExperiences(
     { page: 1, page_size: 8, date: tomorrow, category: categoryFilter },
     isAll,
@@ -318,10 +319,14 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
           )}
 
           <ExperienceRow
-            title="Happening Today"
-            subtitle={formatLongDateWithOrdinal(new Date())}
+            title={`Happening today ${formatLongDateWithOrdinal(new Date())}`}
+            subtitle={
+              todayCount === undefined
+                ? undefined
+                : `${todayCount} ${todayCount === 1 ? 'experience' : 'experiences'}`
+            }
             seeAllHref="/experiences/see-all?type=today"
-            total={todayResponse?.data?.count}
+            total={todayCount}
             experiences={todayResponse?.data?.results ?? []}
             isLoading={isLoadingToday}
           />
