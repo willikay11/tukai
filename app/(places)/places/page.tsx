@@ -1,4 +1,5 @@
 import { DiscoverByCity } from './components/DiscoverByCity';
+import { NearbyPlaces } from './components/NearbyPlaces';
 import { PromotedPlaces } from './components/PromotedPlaces';
 import { ListPlaces } from './components/list';
 
@@ -8,6 +9,7 @@ export default async function Home() {
       <div className="col-span-12 mb-4 md:col-span-10 md:col-start-2 md:mx-0 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
         <PromotedPlaces />
         <DiscoverByCity />
+        <NearbyPlaces />
         <ListPlaces />
       </div>
     </main>
