@@ -6,6 +6,14 @@ import { User } from '@/types/user';
 import { Photo } from './photo';
 import { Ticket } from './ticket';
 
+/** The five kinds the API's `experience_type` filter accepts. */
+export type ExperienceType =
+  | 'standard'
+  | 'itinerary'
+  | 'restaurant_reservation'
+  | 'cinema_reservation'
+  | 'guide_booking';
+
 export type Experience = {
   id: string;
   // Human-readable identifier, and what the detail URL uses. The API resolves
@@ -19,7 +27,7 @@ export type Experience = {
   recurrenceRule?: string | null;
   // Returned by the API alongside the dates; drives the itinerary vs standard
   // split (see inferUIExperienceType)
-  experienceType?: 'standard' | 'itinerary';
+  experienceType?: ExperienceType;
   currency: string;
   isPaid: boolean;
   ticketSalesClosingDuration: number;

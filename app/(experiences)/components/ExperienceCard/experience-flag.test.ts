@@ -1,6 +1,6 @@
 import { Experience } from '@/types/experience';
 
-import { experienceFlag, experiencePriceLine } from './experience-flag';
+import { experienceFlag, experiencePriceLine, experienceRunBy } from './experience-flag';
 
 const experience = (overrides: Partial<Experience> = {}): Experience =>
   ({
@@ -80,5 +80,47 @@ describe('experiencePriceLine', () => {
   // Rather than "undefined /person"
   it('says nothing when there is no price at all', () => {
     expect(experiencePriceLine(experience({ priceStartsFrom: undefined as never }))).toBe('');
+  });
+});
+
+describe('experienceRunBy', () => {
+  it('is the host community for an ordinary experience', () => {
+    const run = experience({
+      hostCommunity: { id: 'c1', title: 'Nairobi Makers Circle' } as never,
+    });
+
+    expect(experienceRunBy(run)).toBe('Nairobi Makers Circle');
+  });
+
+  // A guided tour is provisioned behind a guide's profile, so the host IS the
+  // guide and their name is what the card has to say
+  it('falls back to the host for a guided tour, which has no community', () => {
+    const tour = experience({
+      host: { id: 'u1', firstName: 'Michelle', lastName: 'Wachira' } as never,
+    });
+
+    expect(experienceRunBy(tour)).toBe('Michelle Wachira');
+  });
+
+  it('prefers a display name', () => {
+    const tour = experience({
+      host: {
+        id: 'u1',
+        firstName: 'Michelle',
+        lastName: 'Wachira',
+        displayName: 'Shelly',
+      } as never,
+    });
+
+    expect(experienceRunBy(tour)).toBe('Shelly');
+  });
+
+  it('is nothing when neither is there', () => {
+    expect(experienceRunBy(experience())).toBeUndefined();
+  });
+
+  // Rather than a stray space passing as a name
+  it('is nothing when the host has no name at all', () => {
+    expect(experienceRunBy(experience({ host: { id: 'u1' } as never }))).toBeUndefined();
   });
 });

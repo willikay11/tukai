@@ -44,3 +44,23 @@ export const experiencePriceLine = (experience: Experience): string => {
   const currency = experience.priceStartsFrom?.currency ?? '';
   return `${currency} ${amount.toLocaleString('en-US')}/person`.trim();
 };
+
+/**
+ * Who is running this — the line above the title.
+ *
+ * Most experiences are run by a community. A guided tour is not: its
+ * `experience_type` is `guide_booking` and it is auto-provisioned behind a
+ * guide's profile, so the person hosting it IS the guide, and their name is
+ * what the card has to say.
+ */
+export const experienceRunBy = (experience: Experience): string | undefined => {
+  const community = experience.hostCommunity?.title?.trim();
+  if (community) return community;
+
+  const host = experience.host;
+  if (!host) return undefined;
+
+  return (
+    host.displayName?.trim() || `${host.firstName ?? ''} ${host.lastName ?? ''}`.trim() || undefined
+  );
+};

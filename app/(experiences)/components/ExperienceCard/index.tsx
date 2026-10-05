@@ -9,10 +9,10 @@ import { TITLE_TINT } from '@/app/shared/components/Motion';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { coverPhotoUrl } from '@/types/photo';
-import { formatDateAndTimeRange } from '@/utils/date-utils';
+import { formatCardDateTime } from '@/utils/date-utils';
 import { experiencePath } from '@/utils/detail-paths';
 
-import { experienceFlag, experiencePriceLine } from './experience-flag';
+import { experienceFlag, experiencePriceLine, experienceRunBy } from './experience-flag';
 
 /**
  * An experience, as the canvas draws it in a rail: a square photo at 184px,
@@ -33,7 +33,8 @@ export const ExperienceCard = ({
   const { data: session } = useSession();
 
   const flag = experienceFlag(experience);
-  const when = formatDateAndTimeRange(experience.startDate, experience.endDate);
+  const runBy = experienceRunBy(experience);
+  const when = formatCardDateTime(experience.startDate, experience.endDate);
   const priceLine = experiencePriceLine(experience);
 
   return (
@@ -72,13 +73,9 @@ export const ExperienceCard = ({
       }
     >
       <div className="mt-[9px] flex flex-col gap-0.5">
-        {/* The community leads: it is who is running this, and the canvas sets
-            it smaller than everything below it */}
-        {experience.hostCommunity && (
-          <span className="truncate text-[10px] font-semibold text-brand">
-            {experience.hostCommunity.title}
-          </span>
-        )}
+        {/* Who is running it leads, set smaller than everything below it: a
+            community for most experiences, a named guide for a tour */}
+        {runBy && <span className="truncate text-[10px] font-semibold text-brand">{runBy}</span>}
 
         <p className={cn('text-sm font-semibold leading-snug text-brand-ink', TITLE_TINT)}>
           {experience.title}

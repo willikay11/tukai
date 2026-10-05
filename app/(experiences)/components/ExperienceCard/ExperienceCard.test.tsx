@@ -66,10 +66,29 @@ describe('ExperienceCard', () => {
     expect(screen.getByText('Nairobi Makers Circle')).toBeInTheDocument();
   });
 
-  it('leaves the host line out when the experience has no community', () => {
+  it('leaves the host line out when there is neither a community nor a host', () => {
     render(<ExperienceCard experience={makeExperience({ hostCommunity: undefined })} />);
 
     expect(screen.queryByText('Nairobi Makers Circle')).not.toBeInTheDocument();
+  });
+
+  // A guided tour hangs off a guide's profile, not a community
+  it('names the guide on a tour, which has no community', () => {
+    const tour = makeExperience({
+      hostCommunity: undefined,
+      experienceType: 'guide_booking',
+      host: { id: 'u1', firstName: 'Michelle', lastName: 'Wachira' } as never,
+    });
+
+    render(<ExperienceCard experience={tour} />);
+
+    expect(screen.getByText('Michelle Wachira')).toBeInTheDocument();
+  });
+
+  it('says when it runs, with the weekday and a 24-hour range', () => {
+    render(<ExperienceCard experience={makeExperience()} />);
+
+    expect(screen.getByText(/Sat 3 Oct, \d{2}:\d{2} - \d{2}:\d{2}/)).toBeInTheDocument();
   });
 
   it('shows the price per person', () => {

@@ -1,3 +1,5 @@
+import { ExperienceType } from '@/types/experience';
+
 export const getOrdinalDate = (dateString: string): string => {
   try {
     const [year, month, day] = dateString.split('-').map(Number);
@@ -263,7 +265,9 @@ export type UIExperienceType = 'one-time' | 'multi-day' | 'itinerary';
 
 // Infer the UI experience type from the API response
 export const inferUIExperienceType = (
-  apiExperienceType: 'standard' | 'itinerary',
+  // Anything that is not an itinerary infers from the dates, so the booking
+  // kinds (a guide, a table, a seat) need no case of their own here
+  apiExperienceType: ExperienceType,
   startDate: string | null,
   endDate: string | null,
   isRecurring = false,
@@ -349,6 +353,38 @@ export const formatDateAndTimeRange = (
     const period = hours >= 12 ? 'PM' : 'AM';
     return `${hours % 12 || 12}:${String(date.getMinutes()).padStart(2, '0')} ${period}`;
   };
+
+  const endDate = end ? new Date(end) : null;
+  const hasEnd = endDate && !Number.isNaN(endDate.getTime());
+
+  return `${day}, ${time(startDate)}${hasEnd ? ` - ${time(endDate)}` : ''}`;
+};
+
+/**
+ * "Wed 7 Oct, 10:00 - 12:00" — the when-line on a card in a Discover rail.
+ *
+ * Distinct from {@link formatDateAndTimeRange}, which renders "Oct 7, 10:00 AM
+ * - 12:00 PM" for the rows and panels that already use it. The card wants the
+ * weekday (a tour on Saturday reads differently from one on Tuesday) and the
+ * 24-hour clock, which is shorter and is how the times are entered.
+ */
+export const formatCardDateTime = (
+  start: string | null | undefined,
+  end: string | null | undefined,
+): string | null => {
+  if (!start) return null;
+
+  const startDate = new Date(start);
+  if (Number.isNaN(startDate.getTime())) return null;
+
+  const day = startDate.toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  });
+
+  const time = (date: Date) =>
+    `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 
   const endDate = end ? new Date(end) : null;
   const hasEnd = endDate && !Number.isNaN(endDate.getTime());

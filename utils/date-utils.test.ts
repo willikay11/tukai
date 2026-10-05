@@ -1,4 +1,4 @@
-import { formatShortDate, inferUIExperienceType } from './date-utils';
+import { formatCardDateTime, formatShortDate, inferUIExperienceType } from './date-utils';
 
 describe('inferUIExperienceType', () => {
   it('maps itinerary API type to itinerary UI type', () => {
@@ -104,5 +104,34 @@ describe('formatShortDate', () => {
 
   it('returns an empty string for an unparseable date', () => {
     expect(formatShortDate('not-a-date')).toBe('');
+  });
+});
+
+describe('formatCardDateTime', () => {
+  // The weekday matters on a card: a tour on Saturday reads differently from
+  // one on Tuesday, and the 24-hour clock is how the times are entered
+  it('is the weekday, the date and a 24-hour range', () => {
+    expect(formatCardDateTime('2026-10-07T10:00:00', '2026-10-07T12:00:00')).toBe(
+      'Wed 7 Oct, 10:00 - 12:00',
+    );
+  });
+
+  it('pads a single-digit hour and minute', () => {
+    expect(formatCardDateTime('2026-10-11T06:30:00', '2026-10-11T09:00:00')).toBe(
+      'Sun 11 Oct, 06:30 - 09:00',
+    );
+  });
+
+  it('gives just the start when there is no end', () => {
+    expect(formatCardDateTime('2026-10-07T10:00:00', null)).toBe('Wed 7 Oct, 10:00');
+  });
+
+  it('ignores an end that cannot be read', () => {
+    expect(formatCardDateTime('2026-10-07T10:00:00', 'later')).toBe('Wed 7 Oct, 10:00');
+  });
+
+  it('is null without a usable start', () => {
+    expect(formatCardDateTime(null, '2026-10-07T12:00:00')).toBeNull();
+    expect(formatCardDateTime('whenever', null)).toBeNull();
   });
 });

@@ -100,6 +100,15 @@ export const DiscoverPageContent = () => {
     usePlacesWithExperiences(!isSearching, PLACES_WITH_EXPERIENCES_SIZE);
   const placesWithExperiences: Place[] = withExperiencesResponse?.data?.results ?? [];
 
+  // A tour is an experience the API provisions behind a guide's profile, so
+  // this is the whole query — see the section below
+  const { data: toursResponse, isLoading: isLoadingTours } = useExperiences(
+    { page: 1, page_size: ROW_SIZE, experience_type: 'guide_booking', lat, long: lng },
+    !isSearching,
+  );
+  const guidedTours: Experience[] = toursResponse?.data?.results ?? [];
+  const tourCount: number = toursResponse?.data?.count ?? guidedTours.length;
+
   // ⚠️ `GET /experiences/` takes a single `date`, not a range, so "next 14
   // days" cannot be asked for — a wider page is read and narrowed by
   // happeningSoon(). Coordinates are omitted until the user grants location,
@@ -138,6 +147,14 @@ export const DiscoverPageContent = () => {
 
   // Same queries the /experiences rows issue
   const userCity = city ?? DEFAULT_CITY;
+
+  // ⚠️ `count` is the whole published total, not a per-city one: the list is
+  // geo-ORDERED by lat/long, never geo-filtered, so saying "in {city}" is a
+  // claim the API cannot make. The number is dropped where it would be wrong.
+  const toursSubtitle =
+    lat !== undefined && lng !== undefined
+      ? `${tourCount} ${tourCount === 1 ? 'tour' : 'tours'} led by local guides near you`
+      : `Tours led by local guides, closest to ${userCity} first`;
   const today = moment().format('YYYY-MM-DD');
   const tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
 
@@ -249,6 +266,40 @@ export const DiscoverPageContent = () => {
         </CardRail>
       )}
 
+      {(isLoadingCities || cities.length > 0) && (
+        <CardRail title="Discover by city" subtitle="Switch the city and everything above follows">
+          {isLoadingCities ? (
+            <RowSkeleton cardClassName="aspect-[8/3] w-[184px]" />
+          ) : (
+            cities.map((category) => (
+              <CityCard
+                key={category.id}
+                variant="banner"
+                city={category.name}
+                imageUrl={categoryImageOf(category) ?? ''}
+                href={cityExperiencesHref(category.name)}
+              />
+            ))
+          )}
+        </CardRail>
+      )}
+
+      {/* Tours are experiences the API provisions behind a guide's profile,
+          so `experience_type=guide_booking` is the whole query — there is no
+          separate tours endpoint, and GET /guides/ returns profiles with no
+          title, photo or date to put on a card. */}
+      {(isLoadingTours || guidedTours.length > 0) && (
+        <CardRail title="Guided tours" subtitle={toursSubtitle} seeAllHref="/experiences">
+          {isLoadingTours ? (
+            <RowSkeleton cardClassName="aspect-square w-[184px]" />
+          ) : (
+            guidedTours.map((tour, index) => (
+              <ExperienceCard key={tour.id} experience={tour} priority={index < EAGER_IN_ROW} />
+            ))
+          )}
+        </CardRail>
+      )}
+
       {/* The canvas lays this one out as a grid the header's arrows page,
           not as a rail. `has_experiences=true` is exactly what the heading
           says, so the section is the honest one of the two.
@@ -279,33 +330,6 @@ export const DiscoverPageContent = () => {
             />
           )}
         </section>
-      )}
-
-      {/* Discover by City */}
-      {(isLoadingCities || cities.length > 0) && (
-        <CardRail title="Discover by City" subtitle="Where will you go next?">
-          {isLoadingCities ? (
-            <RowSkeleton cardClassName="h-[130px] w-[240px]" />
-          ) : (
-            <>
-              {cities.map((category) => (
-                <div key={category.id} className="snap-start">
-                  <CityCard
-                    city={category.name}
-                    imageUrl={categoryImageOf(category) ?? ''}
-                    href={cityExperiencesHref(category.name)}
-                  />
-                </div>
-              ))}
-
-              <SeeAllCard
-                href="/experiences/see-all?type=cities"
-                previewPhotos={cities.slice(0, 3).map(categoryImageOf)}
-                className="aspect-auto h-[130px] w-[240px]"
-              />
-            </>
-          )}
-        </CardRail>
       )}
 
       {/* A rail of tall cards closed by an invitation to post one, with See

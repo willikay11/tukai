@@ -2,6 +2,7 @@ import { ca } from 'date-fns/locale';
 
 import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
+import { ExperienceType } from '@/types/experience';
 import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
 import { ItineraryDayPayload } from '@/types/itinerary';
 import { assertValidImageFiles } from '@/utils/images';
@@ -28,8 +29,10 @@ export type ExperiencesQueryParams = {
   page_size?: number;
   invited?: boolean;
   date?: string;
-  // Server-side filter; the list response does not echo the field back
-  experience_type?: 'standard' | 'itinerary';
+  // Server-side filter; the list response does not echo the field back.
+  // `guide_booking` is a tour led by a guide, `*_reservation` a table or a
+  // seat — each one is an experience auto-provisioned behind a profile.
+  experience_type?: ExperienceType;
   // Geo scoping — the API expects `lat`/`long` (see fetchPlaces for the same pair)
   lat?: number;
   long?: number;
