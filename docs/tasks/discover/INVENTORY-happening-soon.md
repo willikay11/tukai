@@ -18,12 +18,17 @@ For review before any code.
 | 8 | Card: title | built | |
 | 9 | Card: when (day, time range) | built | `formatCardDateTime` |
 | 10 | Card: price line ("Free" or "KES x/person") | built | |
-| 11 | Card click opens the experience summary drawer | missing | D-03. Decided: summary drawer with a View experience footer |
+| 11 | Card click opens the experience summary drawer | built | `ExperienceCard` calls `openExperience` on a plain click and keeps its href for modifier clicks. D-03 is done. Check the drawer's View experience footer under D-03 |
 | 12 | See all card with three fanned photos | differs | The design sets the Experiences tab in-app. We link to `/experiences`. See D-13 |
 | 13 | Pool: the first nine experiences, in fixture order | differs | We filter to 14 days, sort by start, and show nine. See HS-02 |
 | 14 | Empty state | differs | The design has no empty copy. We hide the section. See HS-02 |
 
 ## Summary
 
-Built: 9 of 14. Missing: 1 (item 11, D-03). Differs: 4 (items 2, 7, 12, 13), plus
-item 14 which is a gap in the design itself.
+Built: 10 of 14 (item 11 corrected from missing; D-03 is done). Missing: 0.
+Differs: 4 (items 2, 7, 12, 13), plus item 14.
+
+Open for the owner, not yet decided: the design also has a grid variant
+(`showExpGrid`) beside the rail (`showExpRail`), and the arrows sit behind a
+`tabAll` guard. Neither is an item above. Item 14 also needs rechecking: the
+design does hide the section, via `showExpSection`, so it is not a gap in the design.

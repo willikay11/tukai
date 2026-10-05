@@ -8,7 +8,7 @@
 
 ## Done when
 
-- [ ] Owner reviews the 14 items and agrees or corrects each status
+- [X] Owner reviews the 14 items and agrees or corrects each status
 - [ ] Corrections are made in the inventory, not in code
 
 ## Notes

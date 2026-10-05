@@ -1,17 +1,28 @@
-# HS-02 Decide the Happening soon data rule
+# HS-02 Happening soon data rule
 
-- **Status:** decision
+- **Status:** decided
 - **Type:** decision
 - **Depends on:** HS-01
-- **Design:** Pool and window: the design's `expPool` has no date filter. Copy says 'next 14 days'.
-- **Now:** We filter to 14 days, sort by start time, show nine, and hide the section when empty.
+- **Design:** `docs/design/screens/discover-guest-brief.md`, section 11.2 (module 2), 11.5 (low supply), 11.2 (no empty headings).
+- **Now:** Fixed 14-day window in code and copy. The brief sets no window.
 
 ## Done when
 
-- [ ] Decision recorded on the window: 14 days (ours, matching the copy) or the design's unfiltered pool
-- [ ] Decision recorded on ordering: soonest first, or fixture order
-- [ ] Decision recorded on the empty state: hide the section, or show an empty rail
+- [ ] Code follows the decision below
+- [ ] Copy follows the decision below
 
-## Notes
+## Decision
 
-The design's copy and its data disagree. Our window is the one the copy promises, so it is the likely answer, but it is still the owner's call.
+Decided from the brief:
+
+- **Upcoming, not a fixed window.** The brief says "relevant upcoming
+  activities". It gives no 14-day window, so the window goes. Ordered soonest
+  first. The "next 14 days" subtitle goes with it.
+- **Today and This weekend only when the When filter is set.** The brief says
+  to use them "only when the filter matches". That filter is DS-02.
+- **Hide the section when empty.** The brief says not to render empty section
+  headings, and to show fewer good modules instead.
+- **Limit repeats.** The brief says to limit an Experience's repeat appearances
+  across the first modules. That is DS-03.
+
+Nine cards is kept from the prototype. The brief does not set a count.

@@ -41,11 +41,23 @@ Run in this order:
 | ID | Task | Status | Depends on |
 |---|---|---|---|
 | HS-01 | Review the Happening soon inventory | decision | none |
-| HS-02 | Decide the data rule | decision | HS-01 |
-| HS-03 | Decide what the subtitle can say | decision | HS-01 |
+| HS-02 | Happening soon data rule (decided from the brief) | decided | HS-01 |
+| HS-03 | What the subtitle can say (decided from the brief) | decided | HS-01 |
 | D-03 | Experience cards open the summary drawer | todo | none |
 | D-12 | Verify the basket on cards | verify | none |
 | D-13 | Confirm the See all targets | decision | none |
 | HS-04 | Build the agreed changes | todo | HS-01, HS-02, HS-03 |
 | D-19 | Check the rail at phone width | todo | none |
+
+## Discover, against the redesign brief
+
+The brief is the source of truth. See `docs/design/README.md`.
+
+| ID | Task | Status | Depends on |
+|---|---|---|---|
+| DS-01 | Discover module order, against the brief | decision | none |
+| DS-02 | Quick filters: When, Budget, Interests, Filters | todo | DS-01 |
+| DS-03 | Limit an experience's repeats across modules | todo | HS-02 |
+| DS-04 | Multi-day experiences and durations on cards | todo | none |
+| HS-05 | API: filter experiences by city | blocked | HS-03 |
 

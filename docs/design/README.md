@@ -24,6 +24,18 @@ grep -n 'data-screen-label' "<design project>/Tukai Web.dc.html"   # jump to a s
 Markup from that file beats a screenshot: it carries the exact hex, padding,
 weight and hover state, where a picture has to be measured and guessed at.
 
+## Source of truth
+
+The redesign is the source of truth. In the design project folder:
+
+1. **`uploads/Tukai_Web_App_Redesign_Claude_Design_Brief.md`** is the spec.
+   Section 11 is Discover, excerpted into `screens/discover-guest-brief.md`.
+2. **`Tukai Redesign.dc.html`** is "Web app redesign, Pass 1". Its artboards
+   are not readable as text, so use it for the structure the brief names.
+3. **`Tukai Web.dc.html`** is the previous prototype. The place panel and the
+   Happening soon markup in `screens/` come from it. Where it disagrees with
+   the brief, the brief wins.
+
 ## Where this disagrees with the code
 
 Both are living documents and the code has its own notes where the API cannot
