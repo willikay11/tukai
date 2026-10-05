@@ -74,3 +74,15 @@ export const toPlainText = (text: string | null | undefined): string =>
   decodeEntities(sanitizeHtml(text || '', { allowedTags: [], allowedAttributes: {} }))
     .replace(/\s+/g, ' ')
     .trim();
+
+// Several API writes want a title as well as a body, where the form asks one
+// question — a moment, a place review. The first line stands in as the title,
+// which is what a reader would call the thing anyway.
+const TITLE_MAX = 60;
+
+export const titleFrom = (text: string): string => {
+  const [firstLine] = text.trim().split('\n');
+  const title = (firstLine || text).trim();
+
+  return title.length > TITLE_MAX ? `${title.slice(0, TITLE_MAX).trimEnd()}…` : title;
+};

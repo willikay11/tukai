@@ -10,18 +10,7 @@ import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-
-// The API requires a title as well as a description, but the composer asks one
-// question — the same as the mobile app. The first line stands in as the title,
-// which is what a reader would call the moment anyway.
-const TITLE_MAX = 60;
-
-export const titleFrom = (text: string): string => {
-  const [firstLine] = text.trim().split('\n');
-  const title = (firstLine || text).trim();
-
-  return title.length > TITLE_MAX ? `${title.slice(0, TITLE_MAX).trimEnd()}…` : title;
-};
+import { titleFrom } from '@/utils/safe-text-utils';
 
 /**
  * Shares a moment at a place, a community or an experience.

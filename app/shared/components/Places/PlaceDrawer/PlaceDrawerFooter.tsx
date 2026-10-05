@@ -2,9 +2,12 @@
 
 import { useState } from 'react';
 
-import { AddPlaceReviewAction } from '@/app/(places)/places/[placeId]/components/AddPlaceReviewAction';
+import { useSession } from 'next-auth/react';
+
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PlanThisDrawer } from '@/app/shared/components/Plans/PlanThisDrawer';
+import { Button } from '@/components/ui/button';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 import { coverPhotoUrl } from '@/types/photo';
 import { Place } from '@/types/place';
 import { mapsHref } from '@/utils/maps';
@@ -13,8 +16,18 @@ import { mapsHref } from '@/utils/maps';
  * The three things a reader does with a place, pinned to the bottom of the
  * drawer so they stay reachable however far down the page has gone.
  */
-export const PlaceDrawerFooter = ({ place }: { place: Place }) => {
+export const PlaceDrawerFooter = ({
+  place,
+  onAddReview,
+}: {
+  place: Place;
+  /** Swaps the drawer over to the review form, rather than opening a second
+   *  drawer on top of this one. */
+  onAddReview: () => void;
+}) => {
   const [isPlanOpen, setIsPlanOpen] = useState(false);
+  const { data: session } = useSession();
+  const { setOpenSignIn } = useAuthDialog();
 
   const directions = mapsHref({
     lat: place.location?.pointLat,
@@ -27,13 +40,23 @@ export const PlaceDrawerFooter = ({ place }: { place: Place }) => {
       {/* Scrolls rather than wraps: three pills do not fit a phone, and a
           second row would push the content above them off the screen */}
       <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
-        <AddPlaceReviewAction
-          placeId={place.id}
-          placeTitle={place.title}
-          label="Add review"
+        <Button
+          type="button"
           variant="gradient"
+          onClick={() => {
+            // Reviewing needs an account; the dialog returns them here rather
+            // than to a sign-in page they have to navigate back from
+            if (!session?.user?.id) {
+              setOpenSignIn(true);
+              return;
+            }
+            onAddReview();
+          }}
           className="h-12 flex-shrink-0 rounded-full px-6 text-[15px] font-bold"
-        />
+        >
+          <IconComponent iconName="StarIcon" size={16} color="currentColor" />
+          Add a review
+        </Button>
 
         {directions && (
           <a

@@ -11,14 +11,39 @@ import { placePath } from '@/utils/detail-paths';
 /** The round grey disc each of the header's controls sits in. */
 const DISC = 'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-surface';
 
-export const PlaceDrawerHeader = ({ place, onClose }: { place: Place; onClose: () => void }) => {
+export const PlaceDrawerHeader = ({
+  place,
+  onClose,
+  title,
+  onBack,
+}: {
+  place: Place;
+  onClose: () => void;
+  /** What the drawer is showing, where that is not the place itself. */
+  title?: string;
+  /** Given one, a back control takes the reader to the place again. */
+  onBack?: () => void;
+}) => {
   const { data: session } = useSession();
 
   return (
     <div className="flex items-start justify-between gap-4 px-6 py-4">
-      <h2 className="min-w-0 pt-1 text-[26px] font-bold leading-tight text-brand-ink">
-        {place.title}
-      </h2>
+      <div className="flex min-w-0 items-center gap-3">
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label={`Back to ${place.title}`}
+            className={`${DISC} transition-colors hover:bg-surface-muted`}
+          >
+            <IconComponent iconName="ArrowLeft01Icon" size={20} color="currentColor" />
+          </button>
+        )}
+
+        <h2 className="min-w-0 truncate text-[26px] font-bold leading-tight text-brand-ink">
+          {title ?? place.title}
+        </h2>
+      </div>
 
       <div className="flex flex-shrink-0 items-center gap-2">
         <div className={DISC}>

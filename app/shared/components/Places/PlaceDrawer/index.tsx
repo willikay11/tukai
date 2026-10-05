@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { ClaimPlacePrompt } from '@/app/(places)/places/[placeId]/components/ClaimPlacePrompt';
 import { PlaceReviewsSection } from '@/app/(places)/places/[placeId]/components/PlaceReviewsSection';
@@ -14,6 +14,7 @@ import { PlaceAboutSection } from './PlaceAboutSection';
 import { PlaceDrawerFooter } from './PlaceDrawerFooter';
 import { PlaceDrawerHeader } from './PlaceDrawerHeader';
 import { PlaceDrawerTabs } from './PlaceDrawerTabs';
+import { PlaceReviewForm } from './PlaceReviewForm';
 import { UpcomingExperiences } from './UpcomingExperiences';
 import { PLACE_SECTIONS, PLACE_SECTION_IDS, placeDrawerTabs } from './tabs';
 
@@ -49,6 +50,10 @@ export const PlaceDrawer = ({
   // drawer opens, and a ref would never tell the scroll spy it had arrived
   const [panel, setPanel] = useState<HTMLDivElement | null>(null);
 
+  // Writing a review takes over the drawer rather than opening a second one
+  // over it. It resets whenever the drawer opens on a different place.
+  const [isWritingReview, setIsWritingReview] = useState(false);
+
   const { data, isLoading } = usePlace(placeId, isOpen && Boolean(placeId));
   const place: Place | undefined = data?.data;
 
@@ -57,6 +62,8 @@ export const PlaceDrawer = ({
   // called unclaimed on that.
   const { data: ownership } = usePlaceOwnership(placeId ?? '', isOpen && Boolean(placeId));
   const isUnclaimed = ownership?.success === true && !ownership.data;
+
+  useEffect(() => setIsWritingReview(false), [placeId]);
 
   const tabs = useMemo(() => placeDrawerTabs(place?.totalReviews ?? null), [place?.totalReviews]);
   const { activeId, scrollTo } = useScrollSpy(PLACE_SECTION_IDS, TAB_OFFSET, panel);
@@ -76,55 +83,70 @@ export const PlaceDrawer = ({
       ) : (
         <div className="flex min-h-full flex-col">
           <div className="sticky top-0 z-30 border-b border-line bg-white">
-            <PlaceDrawerHeader place={place} onClose={onClose} />
+            <PlaceDrawerHeader
+              place={place}
+              onClose={onClose}
+              title={isWritingReview ? 'Add a review' : undefined}
+              onBack={isWritingReview ? () => setIsWritingReview(false) : undefined}
+            />
           </div>
 
-          <div className="sticky top-[76px] z-20 bg-white px-6 py-3">
-            <PlaceDrawerTabs tabs={tabs} activeId={activeId} onSelect={scrollTo} />
-          </div>
+          {!isWritingReview && (
+            <div className="sticky top-[76px] z-20 bg-white px-6 py-3">
+              <PlaceDrawerTabs tabs={tabs} activeId={activeId} onSelect={scrollTo} />
+            </div>
+          )}
 
-          <div className="flex-1 divide-y divide-line px-6">
-            {/* scroll-mt clears the two sticky bars above */}
-            <section id={PLACE_SECTIONS.about} className="scroll-mt-[148px] py-6">
-              <PlaceAboutSection place={place} />
-            </section>
+          {isWritingReview ? (
+            <div className="flex-1 px-6">
+              <PlaceReviewForm place={place} onDone={() => setIsWritingReview(false)} />
+            </div>
+          ) : (
+            <>
+              <div className="flex-1 divide-y divide-line px-6">
+                {/* scroll-mt clears the two sticky bars above */}
+                <section id={PLACE_SECTIONS.about} className="scroll-mt-[148px] py-6">
+                  <PlaceAboutSection place={place} />
+                </section>
 
-            <section id={PLACE_SECTIONS.experiences} className="scroll-mt-[148px] py-6">
-              <UpcomingExperiences placeId={place.id} placeTitle={place.title} />
-            </section>
+                <section id={PLACE_SECTIONS.experiences} className="scroll-mt-[148px] py-6">
+                  <UpcomingExperiences placeId={place.id} placeTitle={place.title} />
+                </section>
 
-            <section id={PLACE_SECTIONS.moments} className="scroll-mt-[148px] py-6">
-              <ContextMoments
-                title="Moments"
-                contextLabel={place.title}
-                emptyMessage={`No moments from ${place.title} yet. Yours could be the first.`}
-                placeId={place.id}
-                placeLabel={place.title}
-              />
-            </section>
+                <section id={PLACE_SECTIONS.moments} className="scroll-mt-[148px] py-6">
+                  <ContextMoments
+                    title="Moments"
+                    contextLabel={place.title}
+                    emptyMessage={`No moments from ${place.title} yet. Yours could be the first.`}
+                    placeId={place.id}
+                    placeLabel={place.title}
+                  />
+                </section>
 
-            {isUnclaimed && (
-              <section className="py-6">
-                <ClaimPlacePrompt placeId={place.id} placeName={place.title} />
-              </section>
-            )}
+                {isUnclaimed && (
+                  <section className="py-6">
+                    <ClaimPlacePrompt placeId={place.id} placeName={place.title} />
+                  </section>
+                )}
 
-            <section id={PLACE_SECTIONS.reviews} className="scroll-mt-[148px] py-6">
-              <PlaceReviewsSection
-                placeId={place.id}
-                placeTitle={place.title}
-                rating={place.averageRating}
-                reviewCount={place.totalReviews}
-                // The footer pins Add review; a second one here would read as
-                // a different control
-                showAddReview={false}
-              />
-            </section>
-          </div>
+                <section id={PLACE_SECTIONS.reviews} className="scroll-mt-[148px] py-6">
+                  <PlaceReviewsSection
+                    placeId={place.id}
+                    placeTitle={place.title}
+                    rating={place.averageRating}
+                    reviewCount={place.totalReviews}
+                    // The footer pins Add review; a second one here would read as
+                    // a different control
+                    showAddReview={false}
+                  />
+                </section>
+              </div>
 
-          <div className="sticky bottom-0 z-30 border-t border-line bg-white px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
-            <PlaceDrawerFooter place={place} />
-          </div>
+              <div className="sticky bottom-0 z-30 border-t border-line bg-white px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
+                <PlaceDrawerFooter place={place} onAddReview={() => setIsWritingReview(true)} />
+              </div>
+            </>
+          )}
         </div>
       )}
     </Drawer>

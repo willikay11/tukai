@@ -22,12 +22,40 @@ jest.mock('./UpcomingExperiences', () => ({
   ),
 }));
 jest.mock('./PlaceDrawerFooter', () => ({
-  PlaceDrawerFooter: () => <div data-testid="footer" />,
+  PlaceDrawerFooter: ({ onAddReview }: { onAddReview: () => void }) => (
+    <button type="button" onClick={onAddReview}>
+      Add a review
+    </button>
+  ),
+}));
+jest.mock('./PlaceReviewForm', () => ({
+  PlaceReviewForm: ({ onDone }: { onDone: () => void }) => (
+    <div data-testid="review-form">
+      <button type="button" onClick={onDone}>
+        posted
+      </button>
+    </div>
+  ),
 }));
 jest.mock('./PlaceDrawerHeader', () => ({
-  PlaceDrawerHeader: ({ place, onClose }: { place: { title: string }; onClose: () => void }) => (
+  PlaceDrawerHeader: ({
+    place,
+    onClose,
+    title,
+    onBack,
+  }: {
+    place: { title: string };
+    onClose: () => void;
+    title?: string;
+    onBack?: () => void;
+  }) => (
     <div>
-      <h2>{place.title}</h2>
+      <h2>{title ?? place.title}</h2>
+      {onBack && (
+        <button type="button" onClick={onBack}>
+          back
+        </button>
+      )}
       <button type="button" onClick={onClose}>
         close
       </button>
@@ -73,7 +101,7 @@ describe('PlaceDrawer', () => {
     expect(screen.getByTestId('about')).toBeInTheDocument();
     expect(screen.getByTestId('upcoming')).toBeInTheDocument();
     expect(screen.getByTestId('reviews')).toBeInTheDocument();
-    expect(screen.getByTestId('footer')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add a review' })).toBeInTheDocument();
   });
 
   it('counts the reviews on its tab', () => {
@@ -145,5 +173,53 @@ describe('PlaceDrawer', () => {
     render(<PlaceDrawer placeId="p1" isOpen onClose={jest.fn()} />);
 
     expect(screen.getByTestId('reviews')).toHaveAttribute('data-add-review', 'false');
+  });
+
+  /**
+   * Writing a review takes the drawer over rather than opening a second one on
+   * top of it.
+   */
+  describe('writing a review', () => {
+    const openForm = () => {
+      render(<PlaceDrawer placeId="p1" isOpen onClose={jest.fn()} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Add a review' }));
+    };
+
+    it('replaces the place with the form', () => {
+      openForm();
+
+      expect(screen.getByTestId('review-form')).toBeInTheDocument();
+      expect(screen.queryByTestId('about')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('reviews')).not.toBeInTheDocument();
+    });
+
+    it('renames the header and offers a way back', () => {
+      openForm();
+
+      expect(screen.getByRole('heading', { name: 'Add a review' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'back' })).toBeInTheDocument();
+    });
+
+    // The tabs point at sections that are not on screen while the form is
+    it('puts the tabs away', () => {
+      openForm();
+
+      expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+    });
+
+    it('comes back on the back control', () => {
+      openForm();
+      fireEvent.click(screen.getByRole('button', { name: 'back' }));
+
+      expect(screen.getByTestId('about')).toBeInTheDocument();
+      expect(screen.queryByTestId('review-form')).not.toBeInTheDocument();
+    });
+
+    it('comes back once the review has been posted', () => {
+      openForm();
+      fireEvent.click(screen.getByRole('button', { name: 'posted' }));
+
+      expect(screen.getByTestId('about')).toBeInTheDocument();
+    });
   });
 });

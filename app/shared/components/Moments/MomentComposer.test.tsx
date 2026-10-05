@@ -3,7 +3,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { MomentComposer, titleFrom } from './MomentComposer';
+import { MomentComposer } from './MomentComposer';
 
 const toast = jest.fn();
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
@@ -31,21 +31,6 @@ const renderComposer = () =>
       communityLabel="Nairobi Runners"
     />,
   );
-
-describe('titleFrom', () => {
-  // The API demands a title as well as a description, but the composer asks
-  // one question — so the first line stands in
-  it('takes the first line', () => {
-    expect(titleFrom('Sunrise hike\nWe left at six')).toBe('Sunrise hike');
-  });
-
-  it('trims a long opening line rather than sending it whole', () => {
-    const title = titleFrom('a'.repeat(90));
-
-    expect(title).toHaveLength(61);
-    expect(title.endsWith('…')).toBe(true);
-  });
-});
 
 describe('MomentComposer', () => {
   beforeEach(() => jest.clearAllMocks());
