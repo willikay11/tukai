@@ -14,4 +14,4 @@
 
 ## Notes
 
-The design opens a panel for every experience. There is no experience drawer yet, so this is the largest task on the page. Decide first: drawer replaces the experience page, or drawer sits on top of it. The place drawer (`app/shared/components/Places/PlaceDrawer/`) is the model.
+The design opens a panel for every experience. There is no experience drawer yet, so this is the largest task on the page. The drawer replaces the experience page. The place drawer (`app/shared/components/Places/PlaceDrawer/`) is the model.

@@ -1,6 +1,6 @@
 # D-02 Remove "Happening Tomorrow" from Discover
 
-- **Status:** todo
+- **Status:** done
 - **Type:** cleanup
 - **Depends on:** none
 - **Design:** grep `Happening tomorrow`. It sits under the Experiences tab only.
@@ -8,9 +8,9 @@
 
 ## Done when
 
-- [ ] Discover renders no Happening Tomorrow row
-- [ ] Experiences still shows it
-- [ ] Tests and build pass
+- [x] Discover renders no Happening Tomorrow row
+- [x] Experiences still shows it
+- [x] Tests and build pass
 
 ## Notes
 
