@@ -8,18 +8,17 @@
 
 ## Inventory
 
-| Rule | Design | Ours | Decision needed |
+| Rule | Design | Ours | Decision |
 |---|---|---|---|
-| City in subtitles - Same rule as EL-00: no city, for now |
-| Category chips - API categories (brief 13.1 asks for relevant groups, with the full list under Filters) |
-| Hero banner -  remove
-| FeaturedPlaceSection | Replace with the Promoted places rail, as on Discover 
+| City in subtitles | 'in {city}' in pcExpSub, pcDiscoverSub, pcEmptyLine | none | No city, for now (same as EL-00) |
+| Category chips | Seven hardcoded: All, Studio, Gallery, Garden, Cafe, Museum, Nature | Category filter in ListPlaces | API categories, relevant groups first, full list under Filters (brief 13.1) |
+| Hero banner | None on the Places tab | FeaturedPlaceSection | Removed. The Promoted places rail (PL-02) takes its place |
 
 ## Done when
 
-- [ ] Each rule has a recorded decision
-- [ ] Segments below are updated to match
+- [x] Each rule has a recorded decision
+- [x] Segments below are updated to match
 
 ## Notes
 
-Decide these first. Same pattern as EL-00.
+Read 'Hero banner - remove' as removing the hero only. The rail is still built. Confirm at approval.

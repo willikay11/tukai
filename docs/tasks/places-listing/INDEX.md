@@ -1,13 +1,12 @@
 # Places listing, by segment
 
-The design's Places listing, broken into segments. Nothing is built until the
-owner approves its task.
+The design's Places listing, broken into segments. Nothing is built until the owner approves its task.
 
 Source: `docs/design/screens/places-listing.html`.
 
 | ID | Segment | Type | Status | Depends on |
 |---|---|---|---|---|
-| PL-00 | Decide the rules every Places segment shares | decision | awaiting approval | none |
+| PL-00 | Decide the rules every Places segment shares | decision | decided | none |
 | PL-01 | Category row with arrows | build | awaiting approval | PL-00 |
 | PL-02 | Promoted places | build | awaiting approval | PL-00 |
 | PL-03 | Discover by city (places) | build | awaiting approval | PL-00 |

@@ -10,13 +10,13 @@
 
 | Item | Design | Ours |
 |---|---|---|
-| Rail ranked by reviews | yes | no |
-| Sort | by reviews | the API's `sort_by=popular` is listed in services/place.ts, but a Discover comment says it was verified to be ignored |
+| Rail ranked by reviews | Yes | No |
+| Sort | By reviews | `sort_by=popular` is listed in services/place.ts, but a Discover comment says the API ignores it |
 
 ## Done when
 
-- [ ] Check whether `sort_by=popular` changes the order, before building
-- [ ] Decision on the rail if it does not
+- [ ] Check whether `sort_by=popular` changes the order
+- [ ] Decide the rail if it does not
 
 ## Notes
 

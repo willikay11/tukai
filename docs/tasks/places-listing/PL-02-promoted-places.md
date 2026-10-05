@@ -1,5 +1,23 @@
+# PL-02 Promoted places
 
+- **Status:** awaiting approval
+- **Type:** build
+- **Depends on:** PL-00
+- **Design:** `docs/design/screens/places-listing.html`, `showPromoted` on the Places tab (`pcPromo`).
+- **Now:** FeaturedPlaceSection hero, showing one place.
 
-**PL-00 decision applied:** the hero banner is removed. The Promoted places
-rail (this task) takes its place, using the place list's featured flag. Read as
-'remove the hero, add the rail', so the rail is still built.
+## Inventory
+
+| Item | Design | Ours |
+|---|---|---|
+| Rail of promoted places | Yes | Hero of one |
+| Heading | 'Promoted places' | Hero label |
+
+## Done when
+
+- [ ] Rail uses the place list's featured flag
+- [ ] Hero removed (PL-00)
+
+## Notes
+
+**PL-00 applied:** the hero is removed and this rail takes its place. Read as hero removal, rail still built. Confirm at approval.

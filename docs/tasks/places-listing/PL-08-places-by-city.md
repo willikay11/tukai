@@ -10,7 +10,7 @@
 
 | Item | Design | Ours |
 |---|---|---|
-| Per-city place rails | yes | no |
+| Per-city place rails | Yes | No |
 
 ## Done when
 

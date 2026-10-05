@@ -10,13 +10,13 @@
 
 | Item | Design | Ours |
 |---|---|---|
-| City cards rail | yes | no |
+| City cards rail | Yes | No |
 | Card | CityCard banner | CityCard banner (Discover) |
 
 ## Done when
 
-- [ ] City rail on Places, linking to the places in that city
+- [ ] City rail on Places, each city linking to its places
 
 ## Notes
 
-Brief places cities under 'Explore further' (module 7). Confirm the placement at approval.
+The brief places cities under 'Explore further' (module 7). Confirm the placement at approval.
