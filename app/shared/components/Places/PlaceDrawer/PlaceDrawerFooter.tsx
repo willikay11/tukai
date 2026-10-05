@@ -55,7 +55,7 @@ export const PlaceDrawerFooter = ({
           className="h-12 flex-shrink-0 rounded-full px-6 text-[15px] font-bold"
         >
           <IconComponent iconName="StarIcon" size={16} color="currentColor" />
-          Add a review
+          Add review
         </Button>
 
         {directions && (

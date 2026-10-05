@@ -130,7 +130,7 @@ describe('PlaceDrawer', () => {
     expect(screen.getByTestId('about')).toBeInTheDocument();
     expect(screen.getByTestId('upcoming')).toBeInTheDocument();
     expect(screen.getByTestId('reviews')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Add a review' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add review' })).toBeInTheDocument();
   });
 
   it('counts the reviews on its tab', () => {
