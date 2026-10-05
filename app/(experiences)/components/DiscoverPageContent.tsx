@@ -27,6 +27,7 @@ import { PageContainer } from '@/app/shared/components/Layout';
 import { CardGrid, CardRail, SeeAllCard } from '@/app/shared/components/Lists';
 import { ShowMoreButton } from '@/app/shared/components/Lists';
 import { MomentComposer } from '@/app/shared/components/Moments';
+import { PlaceDrawer } from '@/app/shared/components/Places';
 import { usePublicBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
@@ -99,6 +100,13 @@ export const DiscoverPageContent = () => {
   // Discover has no place, experience or community of its own to post a
   // moment at, so the composer opens untagged — see MomentComposer
   const [isComposerOpen, setIsComposerOpen] = useState(false);
+
+  // A place opens in a drawer over whatever the reader was looking at. It
+  // lives in the URL so the drawer can be linked to and the back button
+  // closes it, the same as a moment.
+  const openPlaceId = searchParams.get('placeId');
+  const openPlace = (place: Place) => router.push(`?placeId=${place.id}`, { scroll: false });
+  const closePlace = () => router.back();
 
   // "View more" reveals another grid's worth in place rather than navigating —
   // there is no public-lists page to send anyone to
@@ -303,7 +311,12 @@ export const DiscoverPageContent = () => {
               pageSize={PLACES_PER_PAGE}
               getKey={(place) => place.id}
               renderItem={(place, index) => (
-                <PlaceCard place={place} priority={index < EAGER_IN_ROW} className="w-full" />
+                <PlaceCard
+                  place={place}
+                  priority={index < EAGER_IN_ROW}
+                  className="w-full"
+                  onOpen={openPlace}
+                />
               )}
             />
           )}
@@ -391,6 +404,8 @@ export const DiscoverPageContent = () => {
       )}
 
       <MomentComposer open={isComposerOpen} onOpenChange={setIsComposerOpen} />
+
+      <PlaceDrawer placeId={openPlaceId} isOpen={Boolean(openPlaceId)} onClose={closePlace} />
 
       <ExperienceRow
         title="Happening Today"

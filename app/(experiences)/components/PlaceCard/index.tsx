@@ -30,11 +30,17 @@ export const PlaceCard = ({
   place,
   priority = false,
   className = RAIL_WIDTH,
+  onOpen,
 }: {
   place: Place;
   priority?: boolean;
   /** Overridden where the card fills a grid cell instead of sitting in a rail. */
   className?: string;
+  /**
+   * Opens the place in a drawer rather than navigating. The card keeps its
+   * href either way, so a new tab still lands on the page.
+   */
+  onOpen?: (place: Place) => void;
 }) => {
   const { data: session } = useSession();
 
@@ -44,6 +50,16 @@ export const PlaceCard = ({
   return (
     <CardShell
       href={placePath(place)}
+      onClick={
+        onOpen
+          ? (event) => {
+              // A modified click is the reader asking for a new tab or window
+              if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+              event.preventDefault();
+              onOpen(place);
+            }
+          : undefined
+      }
       src={coverPhotoUrl(place.photos, 'md')}
       alt={place.title}
       sizes="184px"

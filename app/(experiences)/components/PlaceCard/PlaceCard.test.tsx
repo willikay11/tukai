@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { Place } from '@/types/place';
 
@@ -130,6 +130,45 @@ describe('PlaceCard', () => {
       );
 
       expect(screen.getByText('No reviews yet')).toBeInTheDocument();
+    });
+  });
+
+  /**
+   * The card opens a drawer rather than navigating — but it stays a real
+   * link, so a new tab still lands on the page.
+   */
+  describe('onOpen', () => {
+    it('opens the place instead of following the link', () => {
+      const onOpen = jest.fn();
+      render(<PlaceCard place={makePlace()} onOpen={onOpen} />);
+
+      fireEvent.click(screen.getByRole('link'), { button: 0 });
+
+      expect(onOpen).toHaveBeenCalledWith(expect.objectContaining({ id: 'p1' }));
+    });
+
+    it('keeps the href, so the card can still be opened in a new tab', () => {
+      render(<PlaceCard place={makePlace()} onOpen={jest.fn()} />);
+
+      expect(screen.getByRole('link')).toHaveAttribute('href', '/places/p1');
+    });
+
+    // A modified click is the reader asking for a new tab or window
+    it('leaves a modified click to the browser', () => {
+      const onOpen = jest.fn();
+      render(<PlaceCard place={makePlace()} onOpen={onOpen} />);
+
+      fireEvent.click(screen.getByRole('link'), { metaKey: true });
+      fireEvent.click(screen.getByRole('link'), { ctrlKey: true });
+      fireEvent.click(screen.getByRole('link'), { shiftKey: true });
+
+      expect(onOpen).not.toHaveBeenCalled();
+    });
+
+    it('navigates as usual with no handler', () => {
+      render(<PlaceCard place={makePlace()} />);
+
+      expect(screen.getByRole('link')).toHaveAttribute('href', '/places/p1');
     });
   });
 });

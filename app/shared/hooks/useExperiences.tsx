@@ -64,6 +64,10 @@ export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean)
       params.lat,
       params.long,
       params.experience_type,
+      // Without these two, every place's experiences shared one cache entry
+      // and each served the last one's results
+      params.place,
+      params.community,
     ],
     queryFn: async () => await fetchExperiences(params),
     enabled: enabled,

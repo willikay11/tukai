@@ -2,15 +2,9 @@ import { ReactNode } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { cn } from '@/lib/utils';
+import { mapsHref } from '@/utils/maps';
 
-/**
- * Sends the reader to this spot in Google Maps.
- *
- * Google's cross-platform `maps/search/?api=1` URL hands off to the installed
- * Maps app on Android and iOS and falls back to the web everywhere else, so no
- * platform sniffing is needed — and unlike a `comgooglemaps://` scheme it does
- * not dead-end when the app is not installed.
- */
+/** Sends the reader to this spot in Google Maps. See {@link mapsHref}. */
 export const OpenInMapsLink = ({
   lat,
   lng,
@@ -26,13 +20,13 @@ export const OpenInMapsLink = ({
   // What reads as the link — the place's own location line, typically
   children: ReactNode;
 }) => {
-  const target = lat !== undefined && lng !== undefined ? `${lat},${lng}` : query?.trim();
+  const href = mapsHref({ lat, lng, query });
 
-  if (!target) return null;
+  if (!href) return null;
 
   return (
     <a
-      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(target)}`}
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Ref, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
@@ -30,11 +30,18 @@ export const Drawer = ({
   setIsOpen,
   children,
   width = 'medium',
+  panelRef,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   children: React.ReactNode;
   width?: DrawerWidth;
+  /**
+   * The panel itself, for content that has to know what it scrolls inside —
+   * anchor tabs tracking their sections, say. The panel is the scroll
+   * container, so the window fires no scroll event for it.
+   */
+  panelRef?: Ref<HTMLDivElement>;
 }) => {
   const [mounted, setMounted] = useState(false);
   // Below this the panel is a bottom sheet. 720px is the canvas's own
@@ -109,6 +116,7 @@ export const Drawer = ({
           />
 
           <motion.div
+            ref={panelRef}
             role="dialog"
             aria-modal="true"
             initial={panel.initial}

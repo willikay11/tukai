@@ -45,7 +45,11 @@ export const CardShell = ({
 }: {
   /** Given one, the tile is a link; otherwise the caller handles the press. */
   href?: string;
-  onClick?: () => void;
+  /**
+   * With `href`, this runs on a plain left-click and the caller decides
+   * whether to navigate; without one, it is the whole press.
+   */
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
   src: string | null | undefined;
   alt: string;
   sizes: string;
@@ -84,8 +88,11 @@ export const CardShell = ({
   const shared = cn('group block', CARD_LIFT, className);
 
   if (href) {
+    // Both: the card stays a real link — middle-click, "open in new tab" and
+    // the status bar all keep working — while a caller that opens a drawer
+    // intercepts the plain left-click
     return (
-      <Link href={href} className={shared}>
+      <Link href={href} onClick={onClick} className={shared}>
         {body}
       </Link>
     );
