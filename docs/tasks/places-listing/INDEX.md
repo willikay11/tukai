@@ -12,7 +12,7 @@ Source: `docs/design/screens/places-listing.html`.
 | PL-03 | Discover by city (places) | build | built, pending owner review | PL-00 |
 | PL-04 | Nearby places | build | built, pending owner review | PL-00 |
 | PL-05 | Places with experiences | build | built, pending owner review | PL-00 |
-| PL-06 | Popular places | decision | awaiting approval | PL-00 |
+| PL-06 | Popular places | decision | built, pending owner review | PL-00 |
 | PL-07 | Communities on the Places tab | decision | awaiting approval | PL-00 |
 | PL-08 | Places by city | decision | awaiting approval | PL-03 |
 | PL-09 | Discover places: all places in a grid | build | awaiting approval | PL-00, PL-01 |

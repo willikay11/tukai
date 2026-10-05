@@ -560,6 +560,21 @@ export const usePlacesWithExperiences = (enabled = true, perPage = 10) =>
   });
 
 /**
+ * The places ranked by reviews - the "Popular places" rail. The API orders
+ * them by highest average rating, unrated places last, so the order is not
+ * re-sorted here.
+ */
+export const usePopularPlaces = (enabled = true, perPage = 10) =>
+  useQuery({
+    queryKey: ['places', 'popular', perPage],
+    queryFn: async () =>
+      await fetchPlaces(1, perPage, undefined, undefined, undefined, undefined, {
+        sortBy: 'popular',
+      }),
+    enabled,
+  });
+
+/**
  * The places the API marks `featured` - the "Promoted places" row.
  *
  * ⚠️ `featured` is on the list serializer but there is no `featured` query
