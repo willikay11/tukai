@@ -5,7 +5,7 @@ prototype. Each task has its own file. Reference a task by ID.
 
 | ID | Task | Type | Status | Depends on |
 |---|---|---|---|---|
-| D-01 | Remove "Happening Today" from Discover | cleanup | todo | none |
+| D-01 | Remove "Happening Today" from Discover | cleanup | done | none |
 | D-02 | Remove "Happening Tomorrow" from Discover | cleanup | todo | none |
 | D-03 | Experience cards open an experience drawer | interaction | decision | D-10 for stacking |
 | D-04 | Community rows open a community drawer | interaction | todo | D-10 for stacking |

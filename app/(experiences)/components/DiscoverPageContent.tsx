@@ -180,13 +180,8 @@ export const DiscoverPageContent = () => {
     lat !== undefined && lng !== undefined
       ? `${tourCount} ${tourCount === 1 ? 'tour' : 'tours'} led by local guides near you`
       : `Tours led by local guides, closest to ${userCity} first`;
-  const today = moment().format('YYYY-MM-DD');
   const tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
 
-  const { data: todayResponse, isLoading: isLoadingToday } = useExperiences(
-    { page: 1, page_size: 8, date: today },
-    true,
-  );
   const { data: tomorrowResponse, isLoading: isLoadingTomorrow } = useExperiences(
     { page: 1, page_size: 8, date: tomorrow },
     true,
@@ -391,15 +386,6 @@ export const DiscoverPageContent = () => {
       )}
 
       <MomentComposer open={isComposerOpen} onOpenChange={setIsComposerOpen} />
-
-      <ExperienceRow
-        title="Happening Today"
-        subtitle={formatLongDateWithOrdinal(new Date())}
-        seeAllHref="/experiences/see-all?type=today"
-        total={todayResponse?.data?.count}
-        experiences={todayResponse?.data?.results ?? []}
-        isLoading={isLoadingToday}
-      />
 
       <ExperienceRow
         title={`Happening Tomorrow in ${userCity}`}
