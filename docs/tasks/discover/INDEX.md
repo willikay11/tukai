@@ -61,3 +61,19 @@ The brief is the source of truth. See `docs/design/README.md`.
 | DS-04 | Multi-day experiences and durations on cards | todo | none |
 | HS-05 | API: filter experiences by city | blocked | HS-03 |
 
+## Deferred: drawers
+
+The owner has decided not to build drawers for Discover, Experiences or Places
+for now. The listing pages are built instead (see `docs/tasks/listings/`). These
+tasks stay on file, unbuilt:
+
+| ID | Task | Status |
+|---|---|---|
+| D-03 | Experience cards open an experience drawer | deferred |
+| D-04 | Community rows open a community drawer | deferred |
+| D-05 | Bucket list rows open a list drawer | deferred |
+| D-06 | Moment cards open the moment in the drawer | deferred |
+| D-10 | Stacked drawers | deferred |
+
+The place drawer already built stays as it is. Its content tasks (`docs/tasks/place-drawer/`) are deferred with it.
+
