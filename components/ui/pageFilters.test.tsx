@@ -4,29 +4,43 @@ import * as nextNavigation from 'next/navigation';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@testing-library/jest-dom';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 
 import { PageFilters } from './pageFilters';
 
 // Mock dependencies
+const mockReplace = jest.fn();
 jest.mock('next/navigation', () => ({
   usePathname: jest.fn(),
   useSearchParams: jest.fn(),
+  useRouter: () => ({ replace: mockReplace }),
 }));
 
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   usePlaceCategories: jest.fn(),
 }));
 
-jest.mock('@/app/shared/components/Filters/ScrollFilters', () => ({
-  ScrollFilters: ({ filters }: { filters: any[] }) => (
-    <div data-testid="scroll-filters">
-      {filters.map((filter) => (
-        <div key={filter.value} data-testid={`filter-${filter.value}`}>
-          {filter.label}
-        </div>
+jest.mock('@/app/shared/components/Filters/CategoryChipRow', () => ({
+  CategoryChipRow: ({
+    chips,
+    value,
+    onChange,
+  }: {
+    chips: { value: string; label: string }[];
+    value: string;
+    onChange: (value: string) => void;
+  }) => (
+    <div data-testid="category-chip-row" data-value={value}>
+      {chips.map((chip) => (
+        <button
+          key={chip.value}
+          data-testid={`chip-${chip.value}`}
+          onClick={() => onChange(chip.value)}
+        >
+          {chip.label}
+        </button>
       ))}
     </div>
   ),
@@ -37,8 +51,10 @@ jest.mock('@/app/shared/components/Cards/Skeletons', () => ({
 }));
 
 const mockSetSelectedCategoryId = jest.fn();
+let mockSelectedCategoryId: string | undefined;
 jest.mock('@/context/SelectedCategoryContext', () => ({
   useSelectedCategory: () => ({
+    selectedCategoryId: mockSelectedCategoryId,
     setSelectedCategoryId: mockSetSelectedCategoryId,
   }),
 }));
@@ -59,6 +75,7 @@ const renderWithProviders = (component: React.ReactElement) => {
 describe('PageFilters', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSelectedCategoryId = undefined;
 
     // Set default mock return value for usePlaceCategories
     (usePlaceCategories as jest.Mock).mockReturnValue({
@@ -137,7 +154,7 @@ describe('PageFilters', () => {
       expect(screen.getByTestId('pills-skeleton')).toBeInTheDocument();
     });
 
-    it('should render filters for places page', async () => {
+    it('should render an All chip followed by the categories, without cities', async () => {
       (usePlaceCategories as jest.Mock).mockReturnValue({
         data: mockCategories,
         isFetching: false,
@@ -146,15 +163,40 @@ describe('PageFilters', () => {
       renderWithProviders(<PageFilters />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('scroll-filters')).toBeInTheDocument();
+        expect(screen.getByTestId('category-chip-row')).toBeInTheDocument();
       });
 
+      expect(screen.getByText('All')).toBeInTheDocument();
       expect(screen.getByText('Restaurants')).toBeInTheDocument();
       expect(screen.getByText('Cafes')).toBeInTheDocument();
       expect(screen.queryByText('Cities')).not.toBeInTheDocument(); // Filtered out
     });
 
-    it('should sort categories by places count', async () => {
+    it('should order interest categories first, then by places count', async () => {
+      (usePlaceCategories as jest.Mock).mockReturnValue({
+        data: {
+          data: {
+            results: [
+              { id: 'food1', name: 'Food', placesCount: 500, group: 'food' },
+              { id: 'int1', name: 'Gallery', placesCount: 10, group: 'interests' },
+              { id: 'int2', name: 'Garden', placesCount: 40, group: 'interests' },
+            ],
+          },
+        },
+        isFetching: false,
+      });
+
+      renderWithProviders(<PageFilters />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('category-chip-row')).toBeInTheDocument();
+      });
+
+      const labels = screen.getByTestId('category-chip-row').textContent;
+      expect(labels).toBe('AllGardenGalleryFood');
+    });
+
+    it('defaults to All when the URL names no category', async () => {
       (usePlaceCategories as jest.Mock).mockReturnValue({
         data: mockCategories,
         isFetching: false,
@@ -163,7 +205,7 @@ describe('PageFilters', () => {
       renderWithProviders(<PageFilters />);
 
       await waitFor(() => {
-        expect(mockSetSelectedCategoryId).toHaveBeenCalledWith('cat1'); // Restaurants has highest count
+        expect(mockSetSelectedCategoryId).toHaveBeenCalledWith('all');
       });
     });
 
@@ -181,6 +223,39 @@ describe('PageFilters', () => {
 
       await waitFor(() => {
         expect(mockSetSelectedCategoryId).toHaveBeenCalledWith('cat2');
+      });
+    });
+
+    it('picking a chip selects it and writes it to the URL', async () => {
+      (nextNavigation.useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+      (usePlaceCategories as jest.Mock).mockReturnValue({
+        data: mockCategories,
+        isFetching: false,
+      });
+
+      renderWithProviders(<PageFilters />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('chip-cat2')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('chip-cat2'));
+
+      expect(mockSetSelectedCategoryId).toHaveBeenCalledWith('cat2');
+      expect(mockReplace).toHaveBeenCalledWith('/places?category=cat2', { scroll: true });
+    });
+
+    it('marks the selected category on the row', async () => {
+      mockSelectedCategoryId = 'cat1';
+      (usePlaceCategories as jest.Mock).mockReturnValue({
+        data: mockCategories,
+        isFetching: false,
+      });
+
+      renderWithProviders(<PageFilters />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('category-chip-row')).toHaveAttribute('data-value', 'cat1');
       });
     });
   });

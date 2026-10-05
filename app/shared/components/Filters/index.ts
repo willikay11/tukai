@@ -1,3 +1,4 @@
+export { CategoryChipRow } from './CategoryChipRow';
 export { FilterPill } from './FilterPill';
 export { Pills } from './pills';
 export { ScrollFilters } from './ScrollFilters';
