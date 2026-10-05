@@ -1,10 +1,16 @@
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { Experience } from '@/types/experience';
 
 import { ExperienceCard } from './index';
+
+// Null by default, so the cases above run without a drawer and see the link alone
+const mockDrawer = { current: null as null | { openExperience: jest.Mock } };
+jest.mock('@/context/ExperienceDrawerContext', () => ({
+  useExperienceDrawer: () => mockDrawer.current,
+}));
 
 jest.mock('next-auth/react', () => ({ useSession: () => ({ data: null }) }));
 jest.mock('@/app/shared/components/Bookmark', () => ({
@@ -133,6 +139,49 @@ describe('ExperienceCard', () => {
 
       expect(screen.getAllByText('Free')).toHaveLength(2);
       expect(screen.queryByText(/person/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('opening the drawer', () => {
+    const openExperience = jest.fn();
+
+    beforeEach(() => {
+      openExperience.mockClear();
+      mockDrawer.current = { openExperience };
+    });
+
+    afterEach(() => {
+      mockDrawer.current = null;
+    });
+
+    it('opens the drawer on a plain click, and keeps the link to the page', () => {
+      render(<ExperienceCard experience={makeExperience()} />);
+
+      const link = screen.getByRole('link');
+      const notCancelled = fireEvent.click(link);
+
+      expect(openExperience).toHaveBeenCalledWith('e1');
+      expect(link).toHaveAttribute('href', '/experiences/e1');
+      // preventDefault was called, so the browser does not follow the link
+      expect(notCancelled).toBe(false);
+    });
+
+    it('leaves a modified click to the browser, so it can open a new tab', () => {
+      render(<ExperienceCard experience={makeExperience()} />);
+
+      const notCancelled = fireEvent.click(screen.getByRole('link'), { metaKey: true });
+
+      expect(openExperience).not.toHaveBeenCalled();
+      expect(notCancelled).toBe(true);
+    });
+
+    it('keeps the link alone where the drawer is switched off', () => {
+      render(<ExperienceCard experience={makeExperience()} opensDrawer={false} />);
+
+      const notCancelled = fireEvent.click(screen.getByRole('link'));
+
+      expect(openExperience).not.toHaveBeenCalled();
+      expect(notCancelled).toBe(true);
     });
   });
 });
