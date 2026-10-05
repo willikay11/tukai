@@ -42,39 +42,21 @@ describe('placeLocality', () => {
 });
 
 /**
- * ⚠️ The canvas leads this line with an experience happening at the place,
- * then a weekly one, then an offer, with opening hours as the fallback. The
- * places list carries none of those, so the order is what it does carry.
+ * ⚠️ The brief leads this line with an activity happening at the place, then
+ * hours or an attribute, then the category. The list carries only the last.
  */
 describe('placeFact', () => {
-  it('leads with the score and its count', () => {
-    expect(placeFact(place({ averageRating: 4.6, totalReviews: 128 }))).toMatchObject({
-      text: '4.6 · 128 reviews',
-      tone: 'plain',
-    });
-  });
-
-  it('counts one review in the singular', () => {
-    expect(placeFact(place({ averageRating: 5, totalReviews: 1 })).text).toBe('5 · 1 review');
-  });
-
-  it('groups a large count', () => {
-    expect(placeFact(place({ averageRating: 4.2, totalReviews: 1234 })).text).toBe(
-      '4.2 · 1,234 reviews',
-    );
-  });
-
-  // A score with nothing behind it is not a fact worth leading with
-  it('ignores a score with no reviews behind it', () => {
-    expect(placeFact(place({ averageRating: 4.6, totalReviews: 0 })).text).toBe('Restaurants');
-  });
-
-  it('falls back to the kind of place', () => {
+  it('is the kind of place', () => {
     expect(placeFact(place())).toMatchObject({ text: 'Restaurants', tone: 'muted' });
   });
 
-  // Saying so beats an empty line, which reads as missing data
-  it('says so when there is nothing else to say', () => {
-    expect(placeFact(place({ categories: [] as never })).text).toBe('No reviews yet');
+  // A score is not in the brief's order, and it is not the one useful fact
+  it('ignores the score, even with reviews behind it', () => {
+    expect(placeFact(place({ averageRating: 4.6, totalReviews: 128 }))?.text).toBe('Restaurants');
+  });
+
+  // Regression: a card must never say it has no reviews
+  it('is nothing when there is no category, rather than "No reviews yet"', () => {
+    expect(placeFact(place({ categories: [] as never }))).toBeUndefined();
   });
 });

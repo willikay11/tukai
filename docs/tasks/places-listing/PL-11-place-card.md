@@ -16,9 +16,9 @@
 
 ## Done when
 
-- [ ] The fact line never says 'No reviews yet'
+- [x] The fact line never says 'No reviews yet'
 - [ ] The fact prefers a current or upcoming activity, then hours or an attribute, then category
-- [ ] Category is shown on the card
+- [x] Category is shown on the card
 
 ## Notes
 

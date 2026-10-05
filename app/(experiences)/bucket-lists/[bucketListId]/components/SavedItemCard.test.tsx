@@ -109,7 +109,7 @@ describe('saved card shapes', () => {
   it('gives an experience the experiences listing shape', () => {
     const { container } = render(<SavedExperienceCard item={experienceItem()} />);
 
-    expect(container.querySelector('.aspect-\\[4\\/3\\]')).toBeInTheDocument();
+    expect(container.querySelector('.aspect-square')).toBeInTheDocument();
   });
 
   it('gives a place the places listing shape', () => {

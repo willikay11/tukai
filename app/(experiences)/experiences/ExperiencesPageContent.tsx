@@ -57,13 +57,10 @@ import { Reservation } from '@/types/ticket-purchase';
 import { formatLongDateWithOrdinal } from '@/utils/date-utils';
 import { groupTicketPurchases } from '@/utils/ticket-utils';
 
-// Saved and Hosting are no longer surfaced. Their components and render
-// branches below are intentionally left in place - only the tabs are gone, so
-// nothing routes to them.
-const TABS = [
-  { value: 'all', label: 'All' },
-  { value: 'reserved', label: 'Reserved' },
-];
+// Saved, Reserved and Hosting are no longer surfaced (EL-13). Their components
+// and render branches below are intentionally left in place - only the tabs are
+// gone, so nothing routes to them. Reserved has no other entry point for now.
+const TABS = [{ value: 'all', label: 'All' }];
 
 /** Cards in a horizontal row that are fetched straight away rather than lazily. */
 const EAGER_IN_ROW = 3;
@@ -308,29 +305,21 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
 
   return (
     <main className="grid grid-cols-12 gap-x-4 px-4 md:px-0">
-      {/* Filter tabs */}
-      <div className="col-span-12 pt-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
-        <PillTabs tabs={visibleTabs} value={activeTab} onChange={handleTabChange} />
-      </div>
+      {/* Filter tabs: hidden while there is only the All tab, so no lone pill shows */}
+      {visibleTabs.length > 1 && (
+        <div className="col-span-12 pt-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+          <PillTabs tabs={visibleTabs} value={activeTab} onChange={handleTabChange} />
+        </div>
+      )}
 
       {isAll ? (
         <div className="col-span-12 space-y-10 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
-          {/* Category filter: narrows the experience rails below. Hidden until
-              there is more than the All chip, so no lone chip shows. */}
-          {categoryChips.length > 1 && (
-            <CategoryChipRow
-              chips={categoryChips}
-              value={categoryId}
-              onChange={handleCategoryChange}
-            />
-          )}
-
           {/* Featured experiences: a paged rail of cards, as the design has it.
               Hidden when nothing is featured, so no empty heading shows. */}
           {(isLoadingFeatured || featuredExperiences.length > 0) && (
             <CardRail title="Featured experiences" subtitle="Handpicked from what is coming up">
               {isLoadingFeatured ? (
-                <RowSkeleton cardClassName="aspect-[4/3] w-[280px]" />
+                <RowSkeleton cardClassName="aspect-square w-[184px]" />
               ) : (
                 featuredExperiences.map((experience, index) => (
                   <ExperienceCard
@@ -423,12 +412,24 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             hasLocation={lat !== undefined && lng !== undefined}
           />
 
+          {/* Category filter: sits under the Discover heading and narrows the
+              experience rails above too. Hidden until there is more than the
+              All chip, so no lone chip shows. */}
           <DiscoverGrid
             experiences={discoverExperiences}
             total={discoverTotal}
             page={discoverPage}
             onPageChange={setDiscoverPage}
             isLoading={isLoadingDiscover}
+            filters={
+              categoryChips.length > 1 ? (
+                <CategoryChipRow
+                  chips={categoryChips}
+                  value={categoryId}
+                  onChange={handleCategoryChange}
+                />
+              ) : undefined
+            }
           />
         </div>
       ) : (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { ReactNode, useRef } from 'react';
 
 import Link from 'next/link';
 
@@ -8,6 +8,7 @@ import { SectionHeader } from '@/app/(experiences)/experiences/components/Sectio
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { CARD_LIFT } from '@/app/shared/components/Motion';
 import { Button } from '@/components/ui/button';
+import { NoData } from '@/components/ui/noData';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { experiencePath } from '@/utils/detail-paths';
@@ -20,6 +21,12 @@ interface DiscoverGridProps {
   page: number;
   onPageChange: (page: number) => void;
   isLoading: boolean;
+  /**
+   * Filters that sit under the heading and stick under the top bar as the grid
+   * scrolls. Kept even when the filtered grid is empty, so a reader can always
+   * get back out of a category with nothing in it.
+   */
+  filters?: ReactNode;
 }
 
 /** Experiences per page in the Discover grid. */
@@ -31,7 +38,7 @@ const totalPagesOf = (total: number): number =>
 /**
  * Every published experience, nine to a page. The subtitle names the count
  * only, since EL-00 drops the city. Hidden when it loaded empty, so no heading
- * shows alone.
+ * shows alone - unless there are filters to keep on screen.
  */
 export const DiscoverGrid = ({
   experiences,
@@ -39,10 +46,12 @@ export const DiscoverGrid = ({
   page,
   onPageChange,
   isLoading,
+  filters,
 }: DiscoverGridProps) => {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const isEmpty = !isLoading && experiences.length === 0;
 
-  if (!isLoading && experiences.length === 0) {
+  if (isEmpty && !filters) {
     return null;
   }
 
@@ -60,7 +69,18 @@ export const DiscoverGrid = ({
     <div ref={sectionRef} className="scroll-mt-24">
       <SectionHeader title="Discover experiences" subtitle={subtitle} />
 
-      {isLoading ? (
+      {filters && (
+        // Sticks under the top bar. The bar is sticky only from md up, so on a
+        // phone the filters stick to the top of the screen. 69px is the desktop
+        // bar: 12px padding, the 44px tab row, and its 1px border.
+        <div className="sticky top-0 z-40 bg-white/95 py-3 md:top-[69px]">{filters}</div>
+      )}
+
+      {isEmpty ? (
+        <div className="flex justify-center py-8">
+          <NoData message="No experiences in this category yet" />
+        </div>
+      ) : isLoading ? (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(168px,1fr))] gap-x-4 gap-y-[26px]">
           {Array.from({ length: DISCOVER_GRID_PAGE_SIZE }).map((_, index) => (
             <div key={index} className="aspect-square animate-pulse rounded-xl bg-gray-200" />

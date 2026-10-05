@@ -48,7 +48,7 @@ export const ExperienceRow = ({
       ) : (
         <ScrollRow>
           {experiences.map((experience) => (
-            <div key={experience.id} className="w-[280px] flex-shrink-0 snap-start">
+            <div key={experience.id} className="w-[184px] flex-shrink-0 snap-start">
               <Link
                 target="_blank"
                 href={experiencePath(experience)}

@@ -25,7 +25,7 @@ type ListExperiencesProps = {
   skeletonCount?: number;
   type: 'discover' | 'invited';
   noDataMessage?: string;
-  // Forwarded to SingleExperience - 'row' is the compact 4:3 discover card
+  // Forwarded to SingleExperience - 'row' is the compact square discover card
   variant?: 'default' | 'row';
 };
 

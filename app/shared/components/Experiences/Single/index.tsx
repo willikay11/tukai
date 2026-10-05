@@ -35,12 +35,12 @@ export const SingleExperience = ({
   const { lat, lng } = useLocation();
 
   if (experience.id.startsWith('placeholder-')) {
-    // The row card is much shorter than the default one, so it gets a
-    // matching skeleton to stop the grid jumping when results land
+    // The row card has its own image box, so it gets a matching skeleton to
+    // stop the grid jumping when results land
     if (variant === 'row') {
       return (
         <div className="flex flex-col">
-          <div className="aspect-[4/3] w-full animate-pulse rounded-xl bg-gray-200" />
+          <div className="aspect-square w-full animate-pulse rounded-xl bg-gray-200" />
           <div className="mt-2 h-4 w-3/4 animate-pulse rounded bg-gray-200" />
           <div className="mt-1 h-3 w-1/2 animate-pulse rounded bg-gray-200" />
         </div>
@@ -50,7 +50,7 @@ export const SingleExperience = ({
     return <EventSkeleton />;
   }
 
-  // Compact card for horizontal discover rows: single 4:3 image, dark
+  // Compact card for horizontal discover rows: single square image, dark
   // bookmark circle, title, "City · N Kms", community, price and when it runs
   if (variant === 'row') {
     const coverPhoto = coverPhotoUrl(experience.photos, 'md');
@@ -71,12 +71,12 @@ export const SingleExperience = ({
 
     return (
       <div className="flex flex-col">
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl">
+        <div className="relative aspect-square w-full overflow-hidden rounded-xl">
           <PhotoImage
             src={coverPhoto}
             alt={experience.title}
             fill
-            sizes="280px"
+            sizes="184px"
             className={cn('object-cover', MEDIA_ZOOM)}
             onError={() => setHasError(true)}
           />
@@ -124,7 +124,8 @@ export const SingleExperience = ({
     );
   }
 
-  const dateSlot = (
+  // No start date means no date line at all - moment would print "Invalid date"
+  const dateSlot = experience?.startDate ? (
     <div className="inline-flex items-center">
       <span className="text-xs font-normal text-gray-500">
         {moment(experience?.startDate).isSame(moment(experience?.endDate), 'day')
@@ -132,16 +133,13 @@ export const SingleExperience = ({
           : `${moment(experience?.startDate).format('MMM D, YYYY HH:mm A')} - ${moment(experience?.endDate).format('MMM D, YYYY HH:mm A')}`}
       </span>
     </div>
-  );
+  ) : null;
 
   return (
     <>
       <div className="relative mb-2 flex flex-col">
         <div
-          className={cn('relative w-full overflow-hidden rounded-[5px]', {
-            'aspect-square': type === 'discover',
-            'aspect-[16/9]': type === 'invited',
-          })}
+          className="relative aspect-square w-full overflow-hidden rounded-[5px]"
         >
           {!hasError ? (
             <ImageCarousel
@@ -151,7 +149,7 @@ export const SingleExperience = ({
                 // A card in a grid, not a gallery - the card rendition is
                 // plenty, and the original can be several megabytes
                 .map((photo) => photoUrl(photo, 'md')!)}
-              aspectRatio={type === 'discover' ? 'aspect-square' : 'aspect-[16/9]'}
+              aspectRatio="aspect-square"
             />
           ) : (
             <div className="h-full w-full bg-gray-50" />
@@ -182,7 +180,7 @@ export const SingleExperience = ({
             {experience?.priceStartsFrom.currency}{' '}
             {numeral(experience?.priceStartsFrom.amount).format('0,0')} / person
           </span>
-          {type === 'invited' && (
+          {type === 'invited' && dateSlot && (
             <>
               <div className="mx-1 h-[3px] w-[3px] rounded-full bg-gray-400" />
               {dateSlot}
