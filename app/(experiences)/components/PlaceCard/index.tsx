@@ -6,6 +6,7 @@ import { Bookmark } from '@/app/shared/components/Bookmark';
 import { CardShell } from '@/app/shared/components/Cards/CardShell';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { TITLE_TINT } from '@/app/shared/components/Motion';
+import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { cn } from '@/lib/utils';
 import { coverPhotoUrl } from '@/types/photo';
 import { Place } from '@/types/place';
@@ -30,19 +31,14 @@ export const PlaceCard = ({
   place,
   priority = false,
   className = RAIL_WIDTH,
-  onOpen,
 }: {
   place: Place;
   priority?: boolean;
   /** Overridden where the card fills a grid cell instead of sitting in a rail. */
   className?: string;
-  /**
-   * Opens the place in a drawer rather than navigating. The card keeps its
-   * href either way, so a new tab still lands on the page.
-   */
-  onOpen?: (place: Place) => void;
 }) => {
   const { data: session } = useSession();
+  const drawer = usePlaceDrawer();
 
   const fact = placeFact(place);
   const locality = placeLocality(place);
@@ -50,16 +46,15 @@ export const PlaceCard = ({
   return (
     <CardShell
       href={placePath(place)}
-      onClick={
-        onOpen
-          ? (event) => {
-              // A modified click is the reader asking for a new tab or window
-              if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
-              event.preventDefault();
-              onOpen(place);
-            }
-          : undefined
-      }
+      // Opens over the page, keeping the href so a new tab still works
+      onClick={(event) => {
+        // A modified click is the reader asking for a new tab or window
+        if (!drawer || event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) {
+          return;
+        }
+        event.preventDefault();
+        drawer.openPlace(place.id);
+      }}
       src={coverPhotoUrl(place.photos, 'md')}
       alt={place.title}
       sizes="184px"

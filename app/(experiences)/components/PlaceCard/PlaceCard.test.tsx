@@ -7,6 +7,12 @@ import { Place } from '@/types/place';
 import { PlaceCard } from './index';
 
 jest.mock('next-auth/react', () => ({ useSession: () => ({ data: null }) }));
+
+const openPlace = jest.fn();
+const usePlaceDrawer = jest.fn();
+jest.mock('@/context/PlaceDrawerContext', () => ({
+  usePlaceDrawer: () => usePlaceDrawer(),
+}));
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   useBookmarkPlace: () => ({ mutate: jest.fn() }),
 }));
@@ -51,6 +57,11 @@ const makePlace = (overrides: Partial<Place> = {}): Place =>
   }) as unknown as Place;
 
 describe('PlaceCard', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    usePlaceDrawer.mockReturnValue({ openPlace, closePlace: jest.fn(), openPlaceId: null });
+  });
+
   it('renders the cover and the title', () => {
     render(<PlaceCard place={makePlace()} />);
 
@@ -137,37 +148,40 @@ describe('PlaceCard', () => {
    * The card opens a drawer rather than navigating — but it stays a real
    * link, so a new tab still lands on the page.
    */
-  describe('onOpen', () => {
+  describe('opening the drawer', () => {
     it('opens the place instead of following the link', () => {
-      const onOpen = jest.fn();
-      render(<PlaceCard place={makePlace()} onOpen={onOpen} />);
+      render(<PlaceCard place={makePlace()} />);
 
       fireEvent.click(screen.getByRole('link'), { button: 0 });
 
-      expect(onOpen).toHaveBeenCalledWith(expect.objectContaining({ id: 'p1' }));
+      expect(openPlace).toHaveBeenCalledWith('p1');
     });
 
     it('keeps the href, so the card can still be opened in a new tab', () => {
-      render(<PlaceCard place={makePlace()} onOpen={jest.fn()} />);
+      render(<PlaceCard place={makePlace()} />);
 
       expect(screen.getByRole('link')).toHaveAttribute('href', '/places/p1');
     });
 
     // A modified click is the reader asking for a new tab or window
     it('leaves a modified click to the browser', () => {
-      const onOpen = jest.fn();
-      render(<PlaceCard place={makePlace()} onOpen={onOpen} />);
+      render(<PlaceCard place={makePlace()} />);
 
       fireEvent.click(screen.getByRole('link'), { metaKey: true });
       fireEvent.click(screen.getByRole('link'), { ctrlKey: true });
       fireEvent.click(screen.getByRole('link'), { shiftKey: true });
 
-      expect(onOpen).not.toHaveBeenCalled();
+      expect(openPlace).not.toHaveBeenCalled();
     });
 
-    it('navigates as usual with no handler', () => {
-      render(<PlaceCard place={makePlace()} />);
+    // A card rendered somewhere with no drawer above it simply navigates
+    it('navigates as usual with no drawer in the tree', () => {
+      usePlaceDrawer.mockReturnValue(null);
 
+      render(<PlaceCard place={makePlace()} />);
+      fireEvent.click(screen.getByRole('link'), { button: 0 });
+
+      expect(openPlace).not.toHaveBeenCalled();
       expect(screen.getByRole('link')).toHaveAttribute('href', '/places/p1');
     });
   });

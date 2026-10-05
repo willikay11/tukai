@@ -14,6 +14,7 @@ import {
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { useSearchResults } from '@/app/shared/hooks/useSearch';
 import { Button } from '@/components/ui/button';
+import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { PlaceCategory } from '@/types/placeCategory';
 import { communityPath, experiencePath, placePath } from '@/utils/detail-paths';
 
@@ -48,6 +49,7 @@ const RowSkeleton = () => (
  */
 export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
   const router = useRouter();
+  const drawer = usePlaceDrawer();
   const searchParams = useSearchParams();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -167,7 +169,9 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
                 <PlaceResultRow
                   key={place.id}
                   item={place}
-                  onClick={() => router.push(placePath(place))}
+                  onClick={() =>
+                    drawer ? drawer.openPlace(place.id) : router.push(placePath(place))
+                  }
                 />
               ))}
             </ResultGroup>

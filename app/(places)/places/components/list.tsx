@@ -1,12 +1,11 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import Link from 'next/link';
-
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 
 import { CARD_LIFT } from '@/app/shared/components/Motion';
+import { PlaceLink } from '@/app/shared/components/Places';
 import { usePlaces } from '@/app/shared/hooks/usePlaces';
 import { NoData } from '@/components/ui/noData';
 import { useLocation } from '@/context/LocationContext';
@@ -14,7 +13,6 @@ import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { Status } from '@/enums/status';
 import { cn } from '@/lib/utils';
 import { Place } from '@/types/place';
-import { placePath } from '@/utils/detail-paths';
 
 import { SinglePlace } from './place';
 
@@ -212,9 +210,9 @@ export const ListPlaces = () => {
             {/* `group` here rather than inside the card: the card's photo and
                 its title sit in separate wrappers, and both respond to a hover
                 anywhere on the card */}
-            <Link target="_blank" href={placePath(place)} className={cn('group block', CARD_LIFT)}>
+            <PlaceLink place={place} className={cn('group block', CARD_LIFT)}>
               <SinglePlace place={place} />
-            </Link>
+            </PlaceLink>
           </motion.div>
         );
       })}

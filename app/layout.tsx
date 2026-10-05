@@ -22,6 +22,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { AuthDialogProvider } from '@/context/AuthDialogContext';
 import { DownloadAppProvider } from '@/context/DownloadAppContext';
 import { LocationProvider } from '@/context/LocationContext';
+import { PlaceDrawerProvider } from '@/context/PlaceDrawerContext';
 import { PlanProvider } from '@/context/PlanContext';
 import { SelectedCategoryProvider } from '@/context/SelectedCategoryContext';
 import ReactQueryClientProvider from '@/providers/ReactQueryProvider';
@@ -94,97 +95,99 @@ export default function RootLayout({
                   <AuthDialogProvider>
                     <SelectedCategoryProvider>
                       <PlanProvider>
-                        <div className="relative flex min-h-screen flex-col">
-                          {/* The auth screens draw their own bar, so the app's
+                        <PlaceDrawerProvider>
+                          <div className="relative flex min-h-screen flex-col">
+                            {/* The auth screens draw their own bar, so the app's
                             chrome stands down there rather than stacking on it */}
-                          <ChromeGate>
-                            <div className="z-50 border-b border-gray-100 bg-white/95 backdrop-opacity-50 md:sticky md:top-0">
-                              {/* Mobile */}
-                              <div className="mx-4 mt-5 inline-flex w-[calc(100%-2rem)] justify-between md:hidden">
-                                <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
-                                  <Link href="/" className="inline-flex items-center">
-                                    <Image
-                                      src="/images/logo.svg"
-                                      alt="Tukai logo"
-                                      width={100}
-                                      height={100}
-                                    />
-                                  </Link>
+                            <ChromeGate>
+                              <div className="z-50 border-b border-gray-100 bg-white/95 backdrop-opacity-50 md:sticky md:top-0">
+                                {/* Mobile */}
+                                <div className="mx-4 mt-5 inline-flex w-[calc(100%-2rem)] justify-between md:hidden">
+                                  <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
+                                    <Link href="/" className="inline-flex items-center">
+                                      <Image
+                                        src="/images/logo.svg"
+                                        alt="Tukai logo"
+                                        width={100}
+                                        height={100}
+                                      />
+                                    </Link>
+                                  </div>
+                                  <AuthActions />
                                 </div>
-                                <AuthActions />
-                              </div>
-                              <div className="mx-4 md:hidden">
-                                <Suspense
-                                  fallback={
-                                    <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
-                                  }
-                                >
-                                  <Search />
-                                </Suspense>
-                              </div>
-                              {/* Browser */}
-                              <div className="hidden md:grid md:grid-cols-12 md:gap-x-4">
-                                {/* The tabs are centred on the row itself, not
-                                in the gap between the logo and the actions:
-                                those two are different widths, so sharing the
-                                leftover space put the tabs off-centre. */}
-                                <header className="relative flex items-center gap-4 py-3 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
-                                  <Link href="/" className="flex-shrink-0">
-                                    <Image
-                                      src="/images/logo.svg"
-                                      alt="Tukai logo"
-                                      width={100}
-                                      height={40}
-                                      className="h-10 w-[100px] shrink-0"
-                                    />
-                                  </Link>
-
-                                  <div className="pointer-events-none absolute inset-x-0 flex justify-center">
-                                    <div className="pointer-events-auto">
-                                      <Nav />
-                                    </div>
-                                  </div>
-
-                                  <div className="ml-auto flex flex-shrink-0 items-center gap-2">
-                                    <AuthActions />
-                                  </div>
-                                </header>
-
-                                <div className="flex justify-center pb-5 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+                                <div className="mx-4 md:hidden">
                                   <Suspense
                                     fallback={
-                                      <div className="h-[54px] w-full max-w-[600px] animate-pulse rounded-full bg-gray-200" />
+                                      <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
                                     }
                                   >
                                     <Search />
                                   </Suspense>
                                 </div>
+                                {/* Browser */}
+                                <div className="hidden md:grid md:grid-cols-12 md:gap-x-4">
+                                  {/* The tabs are centred on the row itself, not
+                                in the gap between the logo and the actions:
+                                those two are different widths, so sharing the
+                                leftover space put the tabs off-centre. */}
+                                  <header className="relative flex items-center gap-4 py-3 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+                                    <Link href="/" className="flex-shrink-0">
+                                      <Image
+                                        src="/images/logo.svg"
+                                        alt="Tukai logo"
+                                        width={100}
+                                        height={40}
+                                        className="h-10 w-[100px] shrink-0"
+                                      />
+                                    </Link>
+
+                                    <div className="pointer-events-none absolute inset-x-0 flex justify-center">
+                                      <div className="pointer-events-auto">
+                                        <Nav />
+                                      </div>
+                                    </div>
+
+                                    <div className="ml-auto flex flex-shrink-0 items-center gap-2">
+                                      <AuthActions />
+                                    </div>
+                                  </header>
+
+                                  <div className="flex justify-center pb-5 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+                                    <Suspense
+                                      fallback={
+                                        <div className="h-[54px] w-full max-w-[600px] animate-pulse rounded-full bg-gray-200" />
+                                      }
+                                    >
+                                      <Search />
+                                    </Suspense>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
 
-                            <Suspense fallback={<PillsSkeleton />}>
-                              <PageFilters />
-                            </Suspense>
-                            <LocationPrompt />
-                          </ChromeGate>
+                              <Suspense fallback={<PillsSkeleton />}>
+                                <PageFilters />
+                              </Suspense>
+                              <LocationPrompt />
+                            </ChromeGate>
 
-                          <div className="mb-20 flex-grow md:mb-0">{children}</div>
+                            <div className="mb-20 flex-grow md:mb-0">{children}</div>
 
+                            <ChromeGate>
+                              <Footer />
+                            </ChromeGate>
+                          </div>
                           <ChromeGate>
-                            <Footer />
-                          </ChromeGate>
-                        </div>
-                        <ChromeGate>
-                          <DownloadApp />
-                          {/* It reads the `tab` parameter to stand aside for the
+                            <DownloadApp />
+                            {/* It reads the `tab` parameter to stand aside for the
                             create button on My Communities, and `useSearchParams`
                             in a component this layout renders on every page opts
                             the whole app out of static rendering without this —
                             the same boundary PageFilters sits behind above. */}
-                          <Suspense fallback={null}>
-                            <BottomNavigation />
-                          </Suspense>
-                        </ChromeGate>
+                            <Suspense fallback={null}>
+                              <BottomNavigation />
+                            </Suspense>
+                          </ChromeGate>
+                        </PlaceDrawerProvider>
                       </PlanProvider>
                     </SelectedCategoryProvider>
                   </AuthDialogProvider>

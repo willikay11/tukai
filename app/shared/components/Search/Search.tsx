@@ -13,6 +13,7 @@ import { useRecentSearches } from '@/app/shared/hooks/useRecentSearches';
 import { useSearch } from '@/app/shared/hooks/useSearch';
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover';
 import { useLocation } from '@/context/LocationContext';
+import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { PlaceCategory } from '@/types/placeCategory';
 import { SearchResultType } from '@/types/search';
@@ -38,6 +39,7 @@ type TypeFilter = 'all' | SearchResultType;
 export const Search = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const drawer = usePlaceDrawer();
   const searchParams = useSearchParams();
   const { setSelectedCitySearchId } = useSelectedCategory();
   const { city, area, isUsingLocation } = useLocation();
@@ -156,12 +158,24 @@ export const Search = () => {
   // Takes the whole path rather than a type and an id: experiences and places
   // are addressed by slug, which only their own helper knows how to resolve
   const go = (path: string) => {
+    leaving();
+    router.push(path);
+  };
+
+  /** Shared by every way out of the panel: close it, and keep the query. */
+  const leaving = () => {
     setShowSearchResults(false);
     // The query led the reader here, so it is worth offering again
     if (query?.trim()) {
       addRecentSearch(query);
     }
-    router.push(path);
+  };
+
+  // A place opens over the page rather than navigating to it
+  const goToPlace = (place: { id: string; slug?: string }) => {
+    leaving();
+    if (drawer) drawer.openPlace(place.id);
+    else router.push(placePath(place));
   };
 
   return (
@@ -336,7 +350,7 @@ export const Search = () => {
                           <PlaceResultRow
                             key={place.id}
                             item={place}
-                            onClick={() => go(placePath(place))}
+                            onClick={() => goToPlace(place)}
                           />
                         ))}
                       </div>
