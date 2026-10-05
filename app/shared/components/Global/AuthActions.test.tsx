@@ -6,10 +6,11 @@ import { AuthActions } from './AuthActions';
 
 const mockPush = jest.fn();
 
+const SIGNED_IN = { user: { id: 'u1', name: 'George Ralak', image: null, hasSubscribed: true } };
+let session: typeof SIGNED_IN | null = SIGNED_IN;
+
 jest.mock('next-auth/react', () => ({
-  useSession: () => ({
-    data: { user: { id: 'u1', name: 'George Ralak', image: null, hasSubscribed: true } },
-  }),
+  useSession: () => ({ data: session }),
   signOut: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push: mockPush }) }));
@@ -87,5 +88,54 @@ describe('navbar control heights', () => {
     render(<AuthActions />);
 
     expect(screen.getByRole('link', { name: /Create/ })).not.toHaveClass('py-2');
+  });
+});
+
+/**
+ * Two doors for a visitor with no account yet: one for whoever already has
+ * one, and one for whoever does not.
+ */
+describe('AuthActions, signed out', () => {
+  beforeEach(() => {
+    session = null;
+  });
+
+  afterEach(() => {
+    session = SIGNED_IN;
+  });
+
+  it('offers a way in and a way to join', () => {
+    render(<AuthActions />);
+
+    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/auth/sign-in');
+    expect(screen.getByText('Create account').closest('a')).toHaveAttribute(
+      'href',
+      '/auth/sign-up',
+    );
+  });
+
+  // Offering Create only to answer with a sign-in dialog is a door that opens
+  // onto another door
+  it('does not offer Create', () => {
+    render(<AuthActions />);
+
+    expect(screen.queryByText('Create')).not.toBeInTheDocument();
+  });
+
+  it('shows no account menu', () => {
+    render(<AuthActions />);
+
+    expect(screen.queryByLabelText('Account menu')).not.toBeInTheDocument();
+  });
+});
+
+describe('AuthActions, signed in', () => {
+  it('offers Create and the account menu, and no sign-in buttons', () => {
+    render(<AuthActions />);
+
+    expect(screen.getByText('Create')).toBeInTheDocument();
+    expect(screen.getByLabelText('Account menu')).toBeInTheDocument();
+    expect(screen.queryByText('Sign in')).not.toBeInTheDocument();
+    expect(screen.queryByText('Create account')).not.toBeInTheDocument();
   });
 });
