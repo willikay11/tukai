@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 
 import moment from 'moment';
 
+import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
 import { BucketListCard } from '@/app/(experiences)/experiences/components/BucketListCard';
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
@@ -14,16 +15,19 @@ import {
   ExperienceRow,
   RowSkeleton,
 } from '@/app/(experiences)/experiences/components/ExperienceRow';
-import { FeaturedExperienceBanner } from '@/app/(experiences)/experiences/components/FeaturedExperienceBanner';
 import { HostingCard } from '@/app/(experiences)/experiences/components/HostingCard';
 import { ReservedTab } from '@/app/(experiences)/experiences/components/ReservedTab';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
+import {
+  FEATURED_PAGE_SIZE,
+  featuredOnly,
+} from '@/app/(experiences)/experiences/components/featured-experiences';
 import {
   cityExperiencesHref,
   shouldShowSeeAll,
 } from '@/app/(experiences)/experiences/see-all/config';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
+import { CardRail, ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
 import { PillTabs } from '@/app/shared/components/Tabs';
 import { isSharedWithMe, useMyBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useExperiences, useTicketPurchases } from '@/app/shared/hooks/useExperiences';
@@ -47,6 +51,9 @@ const TABS = [
   { value: 'all', label: 'All' },
   { value: 'reserved', label: 'Reserved' },
 ];
+
+/** Cards in a horizontal row that are fetched straight away rather than lazily. */
+const EAGER_IN_ROW = 3;
 
 export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: string }) => {
   const router = useRouter();
@@ -133,14 +140,13 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const today = moment().format('YYYY-MM-DD');
   const tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
 
-  // No featured endpoint exists - the default list is the closest available
-  // query, and its first result stands in as the featured hero
-  const { data: discoverResponse, isLoading: isLoadingDiscover } = useExperiences(
-    { page: 1, page_size: 9 },
+  // The list serializer carries `featured`, but there is no query param for it,
+  // so one page is read and filtered here (as Promoted places is)
+  const { data: featuredResponse, isLoading: isLoadingFeatured } = useExperiences(
+    { page: 1, page_size: FEATURED_PAGE_SIZE, status: 'published' },
     isAll,
   );
-  const discoverExperiences: Experience[] = discoverResponse?.data?.results ?? [];
-  const featuredExperience = discoverExperiences[0];
+  const featuredExperiences: Experience[] = featuredOnly(featuredResponse?.data?.results ?? []);
 
   // "Happening Near You": the first 10 published experiences, scoped to the
   // coordinates the LocationContext resolved. Coordinates are omitted until the
@@ -195,11 +201,22 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
 
       {isAll ? (
         <div className="col-span-12 space-y-10 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
-          {/* Featured Experience */}
-          {isLoadingDiscover ? (
-            <div className="aspect-[16/9] w-full animate-pulse rounded-2xl bg-gray-200 md:aspect-[3/1]" />
-          ) : (
-            featuredExperience && <FeaturedExperienceBanner experience={featuredExperience} />
+          {/* Featured experiences: a paged rail of cards, as the design has it.
+              Hidden when nothing is featured, so no empty heading shows. */}
+          {(isLoadingFeatured || featuredExperiences.length > 0) && (
+            <CardRail title="Featured experiences" subtitle="Handpicked from what is coming up">
+              {isLoadingFeatured ? (
+                <RowSkeleton cardClassName="aspect-[4/3] w-[280px]" />
+              ) : (
+                featuredExperiences.map((experience, index) => (
+                  <ExperienceCard
+                    key={experience.id}
+                    experience={experience}
+                    priority={index < EAGER_IN_ROW}
+                  />
+                ))
+              )}
+            </CardRail>
           )}
 
           <ExperienceRow

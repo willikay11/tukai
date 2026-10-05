@@ -28,6 +28,9 @@ export type Experience = {
   // Returned by the API alongside the dates; drives the itinerary vs standard
   // split (see inferUIExperienceType)
   experienceType?: ExperienceType;
+  // Set by the editors on the list serializer. There is no query param for it,
+  // so a caller filters the page it has.
+  featured?: boolean;
   currency: string;
   isPaid: boolean;
   ticketSalesClosingDuration: number;
