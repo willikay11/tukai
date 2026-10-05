@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import moment from 'moment';
@@ -9,6 +11,7 @@ import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
 import { happeningSoon } from '@/app/(experiences)/components/ExperienceCard/happening-soon';
 import { ItineraryCard } from '@/app/(experiences)/components/ItineraryCard';
 import { MomentCard } from '@/app/(experiences)/components/MomentCard';
+import { MomentComposeCard } from '@/app/(experiences)/components/MomentCard/MomentComposeCard';
 import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
 import { SearchResults } from '@/app/(experiences)/components/SearchResults';
 import { filtersFromParams, hasSearch } from '@/app/(experiences)/components/SearchResults/filters';
@@ -20,6 +23,7 @@ import {
 import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { CardGrid, CardRail, SeeAllCard } from '@/app/shared/components/Lists';
+import { MomentComposer } from '@/app/shared/components/Moments';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useMoments } from '@/app/shared/hooks/useMoments';
@@ -50,10 +54,7 @@ const SOON_PAGE_SIZE = 50;
 /** The canvas fills the "Places with experiences" grid five at a time. */
 const PLACES_PER_PAGE = 5;
 
-/** And the moments grid four at a time. */
-const MOMENTS_PER_PAGE = 4;
-
-const MOMENTS_SUBTITLE = 'Every moment is attached to a community, place or experience.';
+const MOMENTS_SUBTITLE = 'Proof it happened, shared by the people who were there';
 
 /** Read in one go, then paged locally — the API pages by request. */
 const PLACES_WITH_EXPERIENCES_SIZE = 30;
@@ -87,6 +88,10 @@ export const DiscoverPageContent = () => {
   // someone and the back button still means something
   const filters = filtersFromParams(searchParams);
   const isSearching = hasSearch(filters);
+
+  // Discover has no place, experience or community of its own to post a
+  // moment at, so the composer opens untagged — see MomentComposer
+  const [isComposerOpen, setIsComposerOpen] = useState(false);
 
   const { data: promotedResponse, isLoading: isLoadingPromoted } = useFeaturedPlaces(!isSearching);
   const promotedPlaces: Place[] = promotedResponse?.data?.results ?? [];
@@ -303,33 +308,31 @@ export const DiscoverPageContent = () => {
         </CardRail>
       )}
 
-      {/* The canvas lays moments out as a square grid the header's arrows
-          page — not the masonry the Moments page uses, which was going into a
-          horizontally scrolling rail here. */}
+      {/* A rail of tall cards closed by an invitation to post one, with See
+          all in the header — not the masonry the Moments page uses, which was
+          going into this rail as a column layout. */}
       {(isLoadingMoments || moments.length > 0) && (
-        <section>
+        <CardRail title="Recent moments" subtitle={MOMENTS_SUBTITLE} seeAllHref="/moments">
           {isLoadingMoments ? (
-            <CardRail title="Recent moments" subtitle={MOMENTS_SUBTITLE}>
-              <RowSkeleton cardClassName="aspect-square w-[184px]" />
-            </CardRail>
+            <RowSkeleton cardClassName="aspect-[3/4] w-[265px]" />
           ) : (
-            <CardGrid
-              title="Recent moments"
-              subtitle={MOMENTS_SUBTITLE}
-              items={moments}
-              pageSize={MOMENTS_PER_PAGE}
-              getKey={(moment) => moment.id}
-              renderItem={(moment, index) => (
+            <>
+              {moments.map((moment, index) => (
                 <MomentCard
+                  key={moment.id}
                   moment={moment}
                   priority={index < EAGER_IN_ROW}
                   onClick={() => router.push(`/moments?momentId=${moment.id}`)}
                 />
-              )}
-            />
+              ))}
+
+              <MomentComposeCard onClick={() => setIsComposerOpen(true)} />
+            </>
           )}
-        </section>
+        </CardRail>
       )}
+
+      <MomentComposer open={isComposerOpen} onOpenChange={setIsComposerOpen} />
 
       {/* Discover Communities */}
       {(isLoadingCommunities || communities.length > 0) && (

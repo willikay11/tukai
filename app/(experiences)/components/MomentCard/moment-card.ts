@@ -1,7 +1,4 @@
-import { Moment, momentAuthorName } from '@/types/moment';
-
-/** Where the canvas cuts a caption on a grid card. */
-export const PREVIEW_LENGTH = 74;
+import { Moment } from '@/types/moment';
 
 /**
  * The moment's own words.
@@ -13,20 +10,10 @@ export const PREVIEW_LENGTH = 74;
 export const momentCaption = (moment: Pick<Moment, 'title' | 'description'>): string =>
   moment.description?.trim() || moment.title?.trim() || '';
 
-/** The caption, cut to one card's worth. */
-export const momentPreview = (moment: Pick<Moment, 'title' | 'description'>): string => {
-  const caption = momentCaption(moment);
-  return caption.length > PREVIEW_LENGTH ? `${caption.slice(0, PREVIEW_LENGTH)}...` : caption;
-};
-
-/** "2 Oct" — the compact form the canvas puts in a byline. */
+/** "2 Oct" — the compact form the byline uses under an author's name. */
 export const momentDate = (isoString: string): string => {
   const date = new Date(isoString);
   if (Number.isNaN(date.getTime())) return '';
 
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 };
-
-/** "Amina · 2 Oct", or just the name when the date cannot be read. */
-export const momentByline = (moment: Pick<Moment, 'author' | 'dateCreated'>): string =>
-  [momentAuthorName(moment.author), momentDate(moment.dateCreated)].filter(Boolean).join(' · ');

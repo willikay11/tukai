@@ -41,8 +41,15 @@ export const MomentComposer = ({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  // What the moment is being posted at, for the chip under the author
-  contextLabel: string;
+  /**
+   * What the moment is being posted at, for the chip under the author.
+   *
+   * Absent where there is nothing to post it at — the Discover tile has no
+   * context of its own. `POST /moments/` needs only a title and description,
+   * so an untagged moment is valid; the chip and the trail are simply not
+   * drawn.
+   */
+  contextLabel?: string;
   experienceId?: string;
   placeId?: string;
   // The place and community the experience belongs to. Named in the trail so
@@ -107,7 +114,9 @@ export const MomentComposer = ({
         onSuccess: () => {
           toast({
             title: 'Moment shared',
-            description: `Your moment at ${contextLabel} is live.`,
+            description: contextLabel
+              ? `Your moment at ${contextLabel} is live.`
+              : 'Your moment is live.',
             variant: 'success',
           });
           close();
@@ -139,10 +148,14 @@ export const MomentComposer = ({
             </span>
           ))}
 
-          <IconComponent iconName="ArrowRight01Icon" size={14} className="text-gray-400" />
-          <span className="rounded-full bg-green-200 px-3 py-1 text-xs font-medium text-primary">
-            {contextLabel}
-          </span>
+          {contextLabel && (
+            <>
+              <IconComponent iconName="ArrowRight01Icon" size={14} className="text-gray-400" />
+              <span className="rounded-full bg-green-200 px-3 py-1 text-xs font-medium text-primary">
+                {contextLabel}
+              </span>
+            </>
+          )}
         </div>
 
         {(placeLabel || communityLabel) && (

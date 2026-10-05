@@ -9,6 +9,7 @@ import moment from 'moment';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
+import { MomentAvatar } from '@/app/shared/components/Moments';
 import { useFlagMoment, useToggleMomentLike } from '@/app/shared/hooks/useMoments';
 import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
@@ -17,7 +18,6 @@ import { Moment, momentAuthorName, momentContext, momentPhotos } from '@/types/m
 import { CANVAS_ICONS } from '@/utils/canvas-icons';
 
 import { FlagReasonPicker } from './FlagReasonPicker';
-import { MomentAvatar } from './MomentAvatar';
 import { MomentComments } from './MomentComments';
 
 export const MomentDetail = ({ moment: item }: { moment: Moment }) => {

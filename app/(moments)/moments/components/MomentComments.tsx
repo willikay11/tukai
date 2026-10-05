@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react';
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { MomentAvatar } from '@/app/shared/components/Moments';
 import {
   useAddComment,
   useMomentComments,
@@ -17,8 +18,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { MomentComment, momentAuthorName } from '@/types/moment';
-
-import { MomentAvatar } from './MomentAvatar';
 
 const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: string }) => {
   const { data: session } = useSession();

@@ -11,6 +11,17 @@ jest.mock('next-auth/react', () => ({ useSession: () => useSession() }));
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: { iconName: string }) => <span data-testid={iconName} />,
 }));
+jest.mock('@/app/shared/components/Moments', () => ({
+  // The name goes on an attribute, not in the text, so asserting on the
+  // byline below does not also match the avatar's fallback
+  MomentAvatar: ({ name }: { name: string }) => <span data-testid="avatar" title={name} />,
+}));
+jest.mock('@/app/shared/components/Images', () => ({
+  PhotoImage: ({ alt, src }: { alt: string; src: string }) => <img alt={alt} src={src} />,
+  FannedPhotos: ({ photos }: { photos: string[] }) => (
+    <span data-testid="photo-pile">{photos.length}</span>
+  ),
+}));
 jest.mock('next/image', () => {
   function MockImage({ alt, src }: { alt: string; src: string }) {
     return <img alt={alt} src={src} />;
@@ -44,7 +55,46 @@ describe('MomentCard', () => {
 
     expect(screen.getByAltText('First bowl')).toHaveAttribute('src', 'https://cdn.tukai.co/m1.jpg');
     expect(screen.getByText('First bowl off the wheel.')).toBeInTheDocument();
-    expect(screen.getByText('Amina Njeri · 2 Oct')).toBeInTheDocument();
+    expect(screen.getByText('Amina Njeri')).toBeInTheDocument();
+    expect(screen.getByText('2 Oct')).toBeInTheDocument();
+  });
+
+  // A moment can carry several photos; the pile over the corner says so
+  describe('the photo pile', () => {
+    it('is absent for a moment with one photo', () => {
+      render(<MomentCard moment={makeMoment()} onClick={jest.fn()} />);
+
+      expect(screen.queryByTestId('photo-pile')).not.toBeInTheDocument();
+    });
+
+    it('shows the photos behind the first one', () => {
+      const several = makeMoment({
+        media: [0, 1, 2, 3].map((order) => ({
+          id: `md${order}`,
+          mediaType: 'photo',
+          photo: `https://cdn.tukai.co/m${order}.jpg`,
+          order,
+        })) as never,
+      });
+
+      render(<MomentCard moment={several} onClick={jest.fn()} />);
+
+      expect(screen.getByTestId('photo-pile')).toHaveTextContent('3');
+    });
+  });
+
+  // jsdom reports no layout, so nothing ever overflows there — the clamp is
+  // measured, and with no measurement to make the link stays off
+  it('does not offer See more when the caption fits', () => {
+    render(<MomentCard moment={makeMoment()} onClick={jest.fn()} />);
+
+    expect(screen.queryByText('See more')).not.toBeInTheDocument();
+  });
+
+  it('leaves the caption out entirely when a moment has no words', () => {
+    render(<MomentCard moment={makeMoment({ title: '', description: '' })} onClick={jest.fn()} />);
+
+    expect(screen.getByTestId('avatar')).toBeInTheDocument();
   });
 
   // A caption on its own does not say whether this was a community, a place or
