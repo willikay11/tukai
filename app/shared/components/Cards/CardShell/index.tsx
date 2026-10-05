@@ -12,8 +12,8 @@ import { cn } from '@/lib/utils';
  * The photo-and-body tile behind every card in the app.
  *
  * Experience, place, community and itinerary cards were each building the same
- * three things by hand — a rounded, clipped media box, a photo that zooms with
- * the card, and a body beneath — which is four places to change whenever the
+ * three things by hand - a rounded, clipped media box, a photo that zooms with
+ * the card, and a body beneath - which is four places to change whenever the
  * shape moves.
  *
  * ⚠️ The shape is about to move. The canvas draws its card media square (33 of
@@ -57,7 +57,7 @@ export const CardShell = ({
   priority?: boolean;
   ratio?: CardRatio;
   radius?: string;
-  /** Sits over the photo — a bookmark, a category badge, a lock. */
+  /** Sits over the photo - a bookmark, a category badge, a lock. */
   overlay?: ReactNode;
   /** The body under the photo. */
   children?: ReactNode;
@@ -88,8 +88,8 @@ export const CardShell = ({
   const shared = cn('group block', CARD_LIFT, className);
 
   if (href) {
-    // Both: the card stays a real link — middle-click, "open in new tab" and
-    // the status bar all keep working — while a caller that opens a drawer
+    // Both: the card stays a real link - middle-click, "open in new tab" and
+    // the status bar all keep working - while a caller that opens a drawer
     // intercepts the plain left-click
     return (
       <Link href={href} onClick={onClick} className={shared}>
@@ -104,7 +104,7 @@ export const CardShell = ({
    * A card that opens something in place rather than navigating.
    *
    * role/tabIndex on a div rather than a <button>: these cards carry their own
-   * controls — a bookmark, a share — and a button inside a button is invalid
+   * controls - a bookmark, a share - and a button inside a button is invalid
    * HTML that browsers resolve by dropping one of them.
    */
   return (

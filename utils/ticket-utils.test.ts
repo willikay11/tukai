@@ -332,7 +332,7 @@ describe('groupTicketPurchases', () => {
   ];
 
   // Regression: status used to be part of the key, so this single Aug 27
-  // booking rendered as two cards for the same experience — one for the four
+  // booking rendered as two cards for the same experience - one for the four
   // completed tickets, one for the lone expired one.
   it('renders one card per outing, not per ticket status', () => {
     const reservations = groupTicketPurchases(purchases);

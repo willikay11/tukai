@@ -27,7 +27,7 @@ type FormPhoto = {
   isTempId?: boolean;
 };
 
-// Derived from the zod schema — never redeclare this shape by hand
+// Derived from the zod schema - never redeclare this shape by hand
 type AboutFormData = AboutFormValues;
 
 interface AboutStepProps {
@@ -120,7 +120,7 @@ export const AboutStep = ({
       source: 'tukai' | 'google';
     }) => {
       if (place.source === 'google') {
-        // Google pick — submitted as google_map_place_id (current behaviour)
+        // Google pick - submitted as google_map_place_id (current behaviour)
         onFormDataChange({
           location: place.name,
           locationPlaceId: place.id,
@@ -128,7 +128,7 @@ export const AboutStep = ({
           placeImageUrl: null,
         });
       } else {
-        // Tukai place — submitted as place_id
+        // Tukai place - submitted as place_id
         onFormDataChange({
           location: [place.name, place.city].filter(Boolean).join(', '),
           placeId: place.id,

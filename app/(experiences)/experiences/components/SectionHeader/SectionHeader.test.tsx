@@ -27,7 +27,7 @@ describe('SectionHeader', () => {
     expect(screen.queryByTestId('Compass01Icon')).not.toBeInTheDocument();
   });
 
-  // Beside the title from sm up, stacked under it on a phone — a long title
+  // Beside the title from sm up, stacked under it on a phone - a long title
   // and subtitle side by side overflow a narrow screen
   // The canvas always sets the subtitle under the title, at any width
   it('sets the subtitle under the title', () => {

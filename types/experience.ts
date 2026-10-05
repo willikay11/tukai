@@ -34,7 +34,7 @@ export type Experience = {
   ticketSalesClosingUnit: 'minutes' | 'hours' | 'days';
   ticketSalesClosingCondition: 'before_end' | 'before_start';
   priceStartsFrom: { amount: number; currency: string };
-  // Remaining inventory, not a flag — the API sends a count here (and the same
+  // Remaining inventory, not a flag - the API sends a count here (and the same
   // count again as available_tickets)
   ticketsAvailable: number;
   availableTickets?: number;
@@ -68,7 +68,7 @@ export type Experience = {
   // Who absorbs Tukai's commission. Drives each ticket's buyer_price.
   feesAllocation?: 'host_pays' | 'customer_pays' | 'split' | null;
   dateCreated: string;
-  // Not documented on every response — parseSnakeToCamel maps `date_updated`
+  // Not documented on every response - parseSnakeToCamel maps `date_updated`
   // when the API sends it. Read it through getLastSavedAt(), which falls back
   // to dateCreated so callers never depend on it being present.
   dateUpdated?: string;

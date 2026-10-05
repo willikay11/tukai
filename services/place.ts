@@ -58,7 +58,7 @@ export async function fetchPlaces(
 }
 
 /**
- * The places this user owns — `GET /places/?mine=true`.
+ * The places this user owns - `GET /places/?mine=true`.
  *
  * Ownership of a place is held by a community the user is an OWNER/ADMIN of
  * (see claimPlaceOwnership), and the filter resolves that server-side. It is
@@ -477,7 +477,7 @@ export async function fetchGoogleMapsPlaceGeocode(placeId: string): Promise<ApiR
 // PROFILE. Diners then post a booking REQUEST against that profile, which the
 // API turns into a Purchase with status "requested" for the venue to accept.
 //
-// Note these are deliberately NOT the experiences ticket-purchase endpoints —
+// Note these are deliberately NOT the experiences ticket-purchase endpoints -
 // per the API spec, places have their own path precisely so the two do not
 // share a booking flow.
 
@@ -553,7 +553,7 @@ export async function createPlaceBookingRequest(
 ): Promise<ApiResponse> {
   try {
     const axiosInstance = await apiWithToken();
-    // Flat body — requested_date, requested_time and party_size — not the
+    // Flat body - requested_date, requested_time and party_size - not the
     // ticket_purchases array the experience purchase paths take
     const res = await axiosInstance.post(
       `/v1/places/${placeId}/reservation-profile/${profileId}/booking-requests/`,
@@ -573,7 +573,7 @@ export async function createPlaceBookingRequest(
 
 /**
  * Cancelling a table booking goes through the SHARED purchase action, not a
- * place path — the spec is explicit that "accept/decline/pay/cancel stay on the
+ * place path - the spec is explicit that "accept/decline/pay/cancel stay on the
  * unified purchase actions - not duplicated here".
  */
 export async function cancelPlaceBookingRequest(purchaseId: string): Promise<ApiResponse> {
@@ -593,7 +593,7 @@ export async function cancelPlaceBookingRequest(purchaseId: string): Promise<Api
 }
 
 /**
- * The people the reader follows — the source for the reservation invite list.
+ * The people the reader follows - the source for the reservation invite list.
  * `GET /accounts/users/?following=<id>` is the only friend-shaped query the API
  * offers; there is no dedicated friends endpoint.
  */
@@ -646,7 +646,7 @@ export async function fetchPlaceOwnership(placeId: string): Promise<ApiResponse>
 }
 
 /**
- * Ownership of a place is held by a COMMUNITY, not a person — the claimant must
+ * Ownership of a place is held by a COMMUNITY, not a person - the claimant must
  * be an owner or admin of a published community, and a place can only have one
  * approved owner.
  */
@@ -716,7 +716,7 @@ export async function createPlace(data: {
  *
  * The endpoint takes multipart because it also accepts `new_photos`, so every
  * field goes through FormData even when no file is attached. Photos added here
- * cannot carry a cover flag or an order — `uploadPlacePhoto` is the way in when
+ * cannot carry a cover flag or an order - `uploadPlacePhoto` is the way in when
  * either matters.
  */
 export async function updatePlace(
@@ -956,7 +956,7 @@ export type ReservationProfilePayload = {
  *
  * Creating a profile provisions a draft "anchor" experience server-side that
  * bookings hang off; it is never shown to diners. The profile itself starts as
- * a draft — `activateReservationProfile` is what makes the place bookable.
+ * a draft - `activateReservationProfile` is what makes the place bookable.
  */
 export async function createReservationProfile(
   placeId: string,
@@ -1059,7 +1059,7 @@ export async function createAvailabilityRule(
 }
 
 /**
- * Rules can only be created and removed — the API offers no update — so
+ * Rules can only be created and removed - the API offers no update - so
  * changing a day's hours means removing its rule and writing a new one.
  */
 export async function deleteAvailabilityRule(

@@ -3,7 +3,7 @@ import { ExperienceRating } from '@/types/experienceRating';
 /**
  * Whether to offer the review form at all.
  *
- * The API is the authority — it takes a review from an attendee of an
+ * The API is the authority - it takes a review from an attendee of an
  * experience that has ended who has not already rated it, and says which of
  * those failed. This only decides whether to put the form in front of someone,
  * and it answers the two questions the page can already see: has it happened,

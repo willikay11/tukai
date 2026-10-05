@@ -20,10 +20,10 @@ export type ExperiencesQueryParams = {
   reserved_by?: string;
   hosted_by?: string;
   // Experiences belonging to one community. NOTE: `host_community` and
-  // `hosted_by_community` are silently ignored by the API — only `community`
+  // `hosted_by_community` are silently ignored by the API - only `community`
   // actually filters.
   community?: string;
-  // Experiences held at one place — verified filtering
+  // Experiences held at one place - verified filtering
   place?: string;
   page?: number;
   page_size?: number;
@@ -31,9 +31,9 @@ export type ExperiencesQueryParams = {
   date?: string;
   // Server-side filter; the list response does not echo the field back.
   // `guide_booking` is a tour led by a guide, `*_reservation` a table or a
-  // seat — each one is an experience auto-provisioned behind a profile.
+  // seat - each one is an experience auto-provisioned behind a profile.
   experience_type?: ExperienceType;
-  // Geo scoping — the API expects `lat`/`long` (see fetchPlaces for the same pair)
+  // Geo scoping - the API expects `lat`/`long` (see fetchPlaces for the same pair)
   lat?: number;
   long?: number;
 };
@@ -41,7 +41,7 @@ export type ExperiencesQueryParams = {
 export async function fetchExperiences(params: ExperiencesQueryParams): Promise<ApiResponse> {
   try {
     // User-scoped queries need the bearer token. Anonymously, the list endpoint
-    // can only return public/published rows — so a host's own drafts (and their
+    // can only return public/published rows - so a host's own drafts (and their
     // reservations) are invisible without it.
     const needsAuth = Boolean(params.invited || params.hosted_by || params.reserved_by);
 
@@ -460,7 +460,7 @@ export const publishExperience = async (id: string): Promise<ApiResponse> => {
 };
 
 // There is no delete-experience endpoint, so discarding a draft means
-// cancelling it — it stops being an unfinished draft without destroying the
+// cancelling it - it stops being an unfinished draft without destroying the
 // row. Mirrors publishExperience: same verb, same shape, different action.
 //
 // Per the spec this "cancels the experience, refunding any completed
@@ -549,7 +549,7 @@ export const deleteExperiencePhoto = async (photoId: string): Promise<ApiRespons
  * What attendees said about an experience.
  *
  * The endpoint answers with a bare array rather than a page, and can refuse
- * outright (403) on an experience whose ratings the reader may not see — which
+ * outright (403) on an experience whose ratings the reader may not see - which
  * is a quiet empty state, not an error to shout about.
  */
 export const fetchExperienceRatings = async (experienceId: string): Promise<ApiResponse> => {
@@ -578,7 +578,7 @@ export const fetchExperienceRatings = async (experienceId: string): Promise<ApiR
  *
  * Sent as multipart because the photos ride along on the same request as
  * `new_photos`. The API decides who may: an attendee of an experience that has
- * ended, who has not already rated it, and it says which of those failed — so
+ * ended, who has not already rated it, and it says which of those failed - so
  * its own message is what the reader is shown.
  */
 export const createExperienceRating = async (
@@ -793,7 +793,7 @@ export interface TicketPurchasePayload {
   confirmation_email?: string;
   whatsapp_phone?: string;
   /**
-   * Checked by the API before anything else about the order — a code it will
+   * Checked by the API before anything else about the order - a code it will
    * not take comes back as a validation error against this field, so a preview
    * is what keeps that off the Pay button.
    */
@@ -812,7 +812,7 @@ export interface PromoCodePreviewPayload {
  * The endpoint is public and takes the purchase body plus the code; it answers
  * `{ valid: false, reason }` for a code it will not take, and the discount for
  * one it will. Its documented body is the promo-code viewset's own serializer,
- * which is not what it accepts — this shape was read off the API itself.
+ * which is not what it accepts - this shape was read off the API itself.
  */
 export const previewPromoCode = async (data: PromoCodePreviewPayload): Promise<ApiResponse> => {
   try {
@@ -864,7 +864,7 @@ export const purchaseExperienceTicketV2 = async (
 export const fetchTicketPurchases = async (params: {
   user?: string;
   // The documented filters are `ticket`, `experience`, `user` and `status`.
-  // This used to send `ticket__experience`, which the API does not recognise —
+  // This used to send `ticket__experience`, which the API does not recognise -
   // and DRF drops unknown query params silently, so a host's Sales tab was
   // listing every purchase they could see rather than this experience's.
   experience?: string;
@@ -883,7 +883,7 @@ export const fetchTicketPurchases = async (params: {
 };
 
 /**
- * One purchase — "the purchase is the ticket", so this is a single ticket with
+ * One purchase - "the purchase is the ticket", so this is a single ticket with
  * its number, QR, occurrence and payment details.
  *
  * Requires the buyer's token: the endpoint scopes to purchases they can see.
@@ -899,7 +899,7 @@ export const fetchPurchase = async (purchaseId: string): Promise<ApiResponse> =>
   };
 };
 
-// Returns the ticket PDF bytes — the URL requires the Bearer token, so a plain
+// Returns the ticket PDF bytes - the URL requires the Bearer token, so a plain
 // link/new-tab navigation would 401; callers open the blob as an object URL.
 export const downloadTicketPdf = async (purchaseId: string): Promise<Blob> => {
   const axiosInstance = await apiWithToken();

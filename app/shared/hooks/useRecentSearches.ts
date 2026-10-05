@@ -22,7 +22,7 @@ const writeStored = (terms: string[]) => {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(terms));
   } catch {
-    // Nothing to recover — the list just will not persist
+    // Nothing to recover - the list just will not persist
   }
 };
 
@@ -33,7 +33,7 @@ const writeStored = (terms: string[]) => {
 export const useRecentSearches = () => {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
-  // Read after mount rather than in the initial state — localStorage does not
+  // Read after mount rather than in the initial state - localStorage does not
   // exist while server-rendering, and seeding from it would make the first
   // client render disagree with the server's markup.
   useEffect(() => {

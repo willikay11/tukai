@@ -185,7 +185,7 @@ describe('moment like state on load', () => {
 });
 
 /**
- * Moments read without an account — the feed, a moment and its comments are
+ * Moments read without an account - the feed, a moment and its comments are
  * all public. The actions that write are not, and each asks at the point it is
  * pressed rather than bouncing the reader at the door.
  */

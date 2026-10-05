@@ -6,7 +6,7 @@ const rows = [
 ];
 
 /**
- * A co-host is added by id, and the only lookup is by email — so the address
+ * A co-host is added by id, and the only lookup is by email - so the address
  * has to resolve to exactly one account before anyone is invited.
  */
 describe('matchUserByEmail', () => {

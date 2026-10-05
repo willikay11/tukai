@@ -17,8 +17,8 @@ export const ROW_GRID = 'grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 xl:grid
 /**
  * A thumbnail beside a title and a line or two beneath it.
  *
- * Communities and bucket lists are drawn identically on Discover — the same
- * 72px tile, the same stacked body — and differ only in what the body says, so
+ * Communities and bucket lists are drawn identically on Discover - the same
+ * 72px tile, the same stacked body - and differ only in what the body says, so
  * the shape lives here and each section supplies its own lines.
  */
 export const MediaRow = ({

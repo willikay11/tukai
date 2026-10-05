@@ -46,7 +46,7 @@ const Stat = ({ label, value }: { label: string; value: string }) => (
  * A reader's own profile.
  *
  * ⚠️ The profile menu has linked here since it was built, and there was no page
- * — only an `api/route.ts` beside it — so "My Profile" answered with a 404.
+ * - only an `api/route.ts` beside it - so "My Profile" answered with a 404.
  *
  * Everything shown comes off `GET /accounts/users/{id}/`. The picture is
  * read-only on that serializer, so it is shown and not editable here; the

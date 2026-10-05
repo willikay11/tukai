@@ -118,8 +118,8 @@ describe('leaving a review', () => {
   });
 
   /**
-   * The API says which rule was broken — not an attendee, already rated, or
-   * not ended yet — and that is more use than anything invented here.
+   * The API says which rule was broken - not an attendee, already rated, or
+   * not ended yet - and that is more use than anything invented here.
    */
   it('shows the refusal the API gave', async () => {
     createRating.mockImplementation((_data, { onError }) =>

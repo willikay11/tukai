@@ -28,7 +28,7 @@ const steps = [
 ];
 
 // The full subscribe flow, extracted verbatim from the /auth/subscribe page so
-// it can also render inside the Join Tukai Premium modal. Orchestration only —
+// it can also render inside the Join Tukai Premium modal. Orchestration only -
 // the business logic lives unchanged in PaymentDetails and Package.
 export const SubscribeView = () => {
   const [paymentMethod, setPaymentMethod] = useState<{
@@ -98,14 +98,14 @@ export const SubscribeView = () => {
         />
       )}
 
-      
       <div className="h-[calc(85dvh-4.5rem)] w-full overflow-hidden rounded-xl border border-gray-200 bg-white">
         <Paystack
           onPaymentSuccess={() => setIsPaystackOpen(false)}
-          url={paymentMethod?.verificationResponse || 'https://checkout.paystack.com/mgk99hs4wr21ejb'}
+          url={
+            paymentMethod?.verificationResponse || 'https://checkout.paystack.com/mgk99hs4wr21ejb'
+          }
         />
       </div>
-      
 
       {/* {currentStep === 1 && !showPaystack && (
         <Package

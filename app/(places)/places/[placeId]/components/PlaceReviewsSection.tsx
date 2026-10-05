@@ -18,7 +18,7 @@ export const PlaceReviewsSection = ({
   rating: number;
   reviewCount: number | null;
   /**
-   * False where the surface already offers it elsewhere — the drawer pins
+   * False where the surface already offers it elsewhere - the drawer pins
    * Add review to its footer, and two of the same control on one screen reads
    * as two different things.
    */
@@ -35,7 +35,7 @@ export const PlaceReviewsSection = ({
         </span>
       ) : undefined
     }
-    // In the header, so it is there whether or not the place has reviews yet —
+    // In the header, so it is there whether or not the place has reviews yet -
     // the list below returns early with its empty state
     action={
       showAddReview ? <AddPlaceReviewAction placeId={placeId} placeTitle={placeTitle} /> : undefined

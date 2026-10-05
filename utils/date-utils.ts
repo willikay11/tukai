@@ -93,7 +93,7 @@ export const formatTimeRange = (start: string | null, end: string | null): strin
   return `${time(startDate)} - ${time(endDate)}`;
 };
 
-// start + end ISO → "Sat 4 July · 6:00 AM — 4:00 PM"
+// start + end ISO → "Sat 4 July · 6:00 AM - 4:00 PM"
 export const formatReservationDateTime = (start: string, end: string): string => {
   const startDate = new Date(start);
   const endDate = new Date(end);
@@ -279,14 +279,14 @@ export const inferUIExperienceType = (
 
   // Recurring experiences use the 'one-time' base type with the isRecurring flag
   // layered on top. Their start/end span the first-to-last occurrence (often
-  // several calendar days), so they must NOT be inferred as multi-day — doing so
+  // several calendar days), so they must NOT be inferred as multi-day - doing so
   // routes the tickets step to the single-time multi-day layout instead of the
   // per-slot recurring layout.
   if (isRecurring) {
     return 'one-time';
   }
 
-  // Standard — infer from date span
+  // Standard - infer from date span
   if (!startDate || !endDate) {
     return 'one-time'; // default if dates missing
   }
@@ -301,7 +301,7 @@ export const inferUIExperienceType = (
   return startDay.getTime() === endDay.getTime() ? 'one-time' : 'multi-day';
 };
 
-// → "Tue 17 Mar 2026 · 6:00 AM – 12:00 PM"
+// → "Tue 17 Mar 2026 · 6:00 AM - 12:00 PM"
 // Takes an ISO date plus already-formatted display times, which is the shape a
 // booking confirmation carries. formatReservationDateTime is the two-ISO
 // equivalent and is left alone for its existing callers.
@@ -330,7 +330,7 @@ export const formatPaidAt = (isoString: string): string => {
 };
 
 /**
- * "Sep 11, 11:00 AM - 8:00 PM" — the date once, then the hours it runs.
+ * "Sep 11, 11:00 AM - 8:00 PM" - the date once, then the hours it runs.
  *
  * Shorter than {@link formatReservationDateTime}, which spells the weekday and
  * month out in full; this sits under a card title where the room is a line.
@@ -344,7 +344,7 @@ export const formatDateAndTimeRange = (
   const startDate = new Date(start);
   if (Number.isNaN(startDate.getTime())) return null;
 
-  // en-US for "Sep 11" — en-GB renders "11 Sept", which is not the shape this
+  // en-US for "Sep 11" - en-GB renders "11 Sept", which is not the shape this
   // sits in on a card
   const day = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
@@ -361,7 +361,7 @@ export const formatDateAndTimeRange = (
 };
 
 /**
- * "Wed 7 Oct, 10:00 - 12:00" — the when-line on a card in a Discover rail.
+ * "Wed 7 Oct, 10:00 - 12:00" - the when-line on a card in a Discover rail.
  *
  * Distinct from {@link formatDateAndTimeRange}, which renders "Oct 7, 10:00 AM
  * - 12:00 PM" for the rows and panels that already use it. The card wants the

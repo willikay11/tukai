@@ -1,11 +1,11 @@
 import { forwardRef } from 'react';
 
-// Native horizontal scroller — unlike the embla carousel it responds to
+// Native horizontal scroller - unlike the embla carousel it responds to
 // trackpad/wheel scrolling and keyboard as well as touch drag. Cards set their
 // own width, so the next one peeks in at the right edge.
 //
 // `overflow-x-auto` also clips vertically, which would cut off the drop shadow
-// on cards that carry one (see SeeAllCard) — most visibly on short rows like
+// on cards that carry one (see SeeAllCard) - most visibly on short rows like
 // the cities row, where the card's height leaves the shadow flush with the
 // bottom edge. The vertical padding gives the shadow room inside the scroll
 // box and the matching negative margins take that room back out of the layout,

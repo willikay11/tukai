@@ -16,7 +16,7 @@ import { activeWallet, walletHolder, walletLabel } from './wallets';
  *
  * The create flow can add and edit these while an experience is being made;
  * outside it there was nowhere to see them at all, and nothing anywhere called
- * `set-active` — so a host with two accounts could not choose which one the
+ * `set-active` - so a host with two accounts could not choose which one the
  * money went to.
  */
 export const WalletsSection = ({ onAddWallet }: { onAddWallet?: () => void }) => {

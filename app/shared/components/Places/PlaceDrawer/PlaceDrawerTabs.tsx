@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { PlaceDrawerTab } from './tabs';
 
 /**
- * In-drawer navigation, not routing — each pill scrolls to its section and
+ * In-drawer navigation, not routing - each pill scrolls to its section and
  * fills in as the reader passes it.
  */
 export const PlaceDrawerTabs = ({

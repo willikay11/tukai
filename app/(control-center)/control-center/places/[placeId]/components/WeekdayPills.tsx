@@ -44,7 +44,7 @@ export const SelectablePill = ({
 );
 
 /**
- * The days a place keeps — shared by its listed opening hours and by the days
+ * The days a place keeps - shared by its listed opening hours and by the days
  * it accepts reservations, which are asked for the same way but stored
  * differently.
  */

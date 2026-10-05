@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 
 import { InviteMembers, type InvitedMember } from './invite-members';
 
-// Controlled, like the real callers — the component reads back what it added,
+// Controlled, like the real callers - the component reads back what it added,
 // which is what makes duplicate detection and batching observable
 const Harness = ({
   initial = [],

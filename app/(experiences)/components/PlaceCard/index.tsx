@@ -45,7 +45,7 @@ export const PlaceCard = ({
 
   return (
     <CardShell
-      // A place opens in the drawer, not on a page of its own — so no href,
+      // A place opens in the drawer, not on a page of its own - so no href,
       // and nothing to open in a new tab. Without a drawer above it the card
       // falls back to the place's own page.
       href={drawer ? undefined : placePath(place)}

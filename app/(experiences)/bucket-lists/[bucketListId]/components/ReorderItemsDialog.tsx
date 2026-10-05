@@ -37,7 +37,7 @@ import { BucketListItem, bucketListItemName, bucketListItemPhoto } from '@/types
  * would rather nudge a row than aim at one. dnd-kit's keyboard sensor also
  * makes the drag itself reachable without a mouse.
  *
- * The order is saved on request rather than on every drop — a drag is a rough
+ * The order is saved on request rather than on every drop - a drag is a rough
  * gesture and often takes two or three tries to land, which would otherwise be
  * two or three requests.
  */

@@ -53,7 +53,7 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
     .map((photo: Photo) => photo.photo)
     .filter((photo): photo is string => Boolean(photo));
 
-  // Categories mix city and interest groups — the interest one names the kind
+  // Categories mix city and interest groups - the interest one names the kind
   // of place, as it does on the place cards
   const category = place.categories?.find(
     (entry: PlaceCategory) => entry.group === 'interests',

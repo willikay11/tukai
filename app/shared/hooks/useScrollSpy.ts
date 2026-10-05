@@ -12,14 +12,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  *
  * @param sectionIds  element ids to watch, in page order
  * @param offset      distance from the top a section must clear to count as
- *                    current — match the sticky header it scrolls under
+ *                    current - match the sticky header it scrolls under
  * @param container   the element that scrolls, where that is not the page. A
  *                    drawer scrolls its own body, and the window fires no
  *                    scroll event for it at all.
  *
  *                    The ELEMENT, not a ref to it: a ref object never changes
- *                    identity, so the effect below would run once — against
- *                    whatever the ref held at first render — and a panel that
+ *                    identity, so the effect below would run once - against
+ *                    whatever the ref held at first render - and a panel that
  *                    mounts later would never be watched at all.
  */
 export const useScrollSpy = (sectionIds: string[], offset = 96, container?: HTMLElement | null) => {
@@ -59,7 +59,7 @@ export const useScrollSpy = (sectionIds: string[], offset = 96, container?: HTML
       const current = passed.length ? passed[passed.length - 1] : positions[0];
 
       // At the very bottom the last section may be too short to reach the
-      // line — without this its tab could never light up. Guarded on the page
+      // line - without this its tab could never light up. Guarded on the page
       // actually being scrollable, or a short page that fits the viewport would
       // always report its last section as current.
       const scrollHeight = container ? container.scrollHeight : document.body.scrollHeight;
@@ -101,7 +101,7 @@ export const useScrollSpy = (sectionIds: string[], offset = 96, container?: HTML
       pendingId.current = id;
       setActiveId(id);
 
-      // A section too short to reach the offset line — the last one, usually —
+      // A section too short to reach the offset line - the last one, usually -
       // would hold the pill forever, so the hold also times out
       if (pendingTimer.current) clearTimeout(pendingTimer.current);
       pendingTimer.current = setTimeout(() => {

@@ -44,9 +44,9 @@ jest.mock('@/app/shared/hooks/useExperiences', () => ({
   useExperiences: (params: unknown, enabled: boolean) => useExperiences(params, enabled),
 }));
 
-// The reservation panel is its own unit — stubbed here so this suite stays
+// The reservation panel is its own unit - stubbed here so this suite stays
 // about the page
-// Their own units — this suite is about the page's layout and content
+// Their own units - this suite is about the page's layout and content
 jest.mock('./AddPlaceReviewAction', () => ({
   AddPlaceReviewAction: () => <button>Write a review</button>,
 }));
@@ -128,7 +128,7 @@ describe('PlaceDetailContent', () => {
       expect(screen.getByText('Karen')).toBeInTheDocument();
     });
 
-    // The API returns no distance — it is only known once the reader has a
+    // The API returns no distance - it is only known once the reader has a
     // location of their own
     it('omits the distance until the reader has a location', () => {
       render(<PlaceDetailContent place={place()} />);
@@ -169,7 +169,7 @@ describe('PlaceDetailContent', () => {
   });
 
   describe('details', () => {
-    // Rows are whatever the API stores, each with its own icon — not a
+    // Rows are whatever the API stores, each with its own icon - not a
     // hardcoded list that would go stale
     it('renders a row per API property', () => {
       render(<PlaceDetailContent place={place()} />);
@@ -223,7 +223,7 @@ describe('PlaceDetailContent', () => {
       expect(screen.getByText('reviews-p1')).toBeInTheDocument();
     });
 
-    // The embedded map never rendered — it was an unreachable branch behind an
+    // The embedded map never rendered - it was an unreachable branch behind an
     // early return, so the page showed a stray pin icon and nothing else
     it('sends the reader to Maps instead of embedding one', () => {
       render(<PlaceDetailContent place={place()} />);
@@ -255,7 +255,7 @@ describe('PlaceDetailContent motion', () => {
     Object.defineProperty(window, 'scrollY', { value: 0, configurable: true });
   });
 
-  // Without an IntersectionObserver — jsdom has none — RevealOnScroll starts
+  // Without an IntersectionObserver - jsdom has none - RevealOnScroll starts
   // revealed, so nothing on the page is ever left hidden by it
   it('leaves every section readable when nothing can observe them', () => {
     render(<PlaceDetailContent place={place()} />);

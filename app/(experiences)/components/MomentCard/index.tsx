@@ -22,7 +22,7 @@ export const MOMENT_CARD_WIDTH = 'w-[265px]';
  * posted against over its corner, then who posted it and when, then their
  * words.
  *
- * Deliberately not the masonry tile the Moments page uses — that one is a
+ * Deliberately not the masonry tile the Moments page uses - that one is a
  * photo sized to itself with an author chip laid over it, and carries no
  * caption at all.
  */
@@ -44,8 +44,8 @@ export const MomentCard = ({
   const isYours = Boolean(session?.user?.id && session.user.id === moment.author?.id);
 
   // "See more" is shown only where the caption actually overflows its two
-  // lines. Counting characters cannot answer that — the same count wraps
-  // differently at every width — so the clamped element is measured.
+  // lines. Counting characters cannot answer that - the same count wraps
+  // differently at every width - so the clamped element is measured.
   const captionRef = useRef<HTMLSpanElement | null>(null);
   const [isClamped, setIsClamped] = useState(false);
 

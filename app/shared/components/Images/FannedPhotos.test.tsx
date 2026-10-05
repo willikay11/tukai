@@ -15,14 +15,14 @@ jest.mock('next/image', () => {
 const sourcesIn = (container: HTMLElement) =>
   Array.from(container.querySelectorAll('img')).map((image) => image.getAttribute('src'));
 
-// Rooted paths, because next/image rejects a bare "a.jpg" at runtime — the
+// Rooted paths, because next/image rejects a bare "a.jpg" at runtime - the
 // mock below accepts anything, so unrooted fixtures passed here and failed in
 // the app
 describe('FannedPhotos', () => {
   it('centres the first photo and fans the next two behind it', () => {
     const { container } = render(<FannedPhotos photos={['/a.jpg', '/b.jpg', '/c.jpg']} />);
 
-    // Rendered left flank, centre, right flank — the tilt classes carry
+    // Rendered left flank, centre, right flank - the tilt classes carry
     // arbitrary values, which are not worth escaping into a selector
     expect(container.querySelector('.z-10 img')).toHaveAttribute('src', '/a.jpg');
     expect(sourcesIn(container)).toEqual(['/b.jpg', '/a.jpg', '/c.jpg']);
@@ -70,7 +70,7 @@ describe('FannedPhotos', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  // The photos are decorative — every caller wraps them in its own labelled
+  // The photos are decorative - every caller wraps them in its own labelled
   // link or card
   it('marks the photos as decorative', () => {
     const { container } = render(<FannedPhotos photos={['/a.jpg', '/b.jpg']} />);

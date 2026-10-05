@@ -39,7 +39,7 @@ export const RATING_LABELS: Record<number, string> = {
  * Deliberately not the shared {@link AddReview}: that one opens a Drawer of its
  * own, which would be a drawer inside a drawer, and asks for a title and a
  * description as two fields. This asks one question, as the design does, and
- * the title is taken from the first line — the API wants both.
+ * the title is taken from the first line - the API wants both.
  */
 export const PlaceReviewForm = ({ place, onDone }: { place: Place; onDone: () => void }) => {
   const { data: session } = useSession();

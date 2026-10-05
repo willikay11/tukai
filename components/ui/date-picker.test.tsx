@@ -16,7 +16,7 @@ const openCalendar = () => {
   return screen.getByRole('grid');
 };
 
-// The day is a button inside the gridcell, and the cell carries the ISO date —
+// The day is a button inside the gridcell, and the cell carries the ISO date -
 // reading it keeps these assertions independent of which month opens
 const clickDay = (label: string) => {
   const cell = screen.getAllByRole('gridcell', { name: label })[0];
@@ -84,8 +84,8 @@ describe('DatePicker', () => {
 });
 
 /**
- * The canvas's Date Field is 56px and knows which end of a range it is —
- * `range-start`, `range-end` — so a pair of fields reads as one span. Two
+ * The canvas's Date Field is 56px and knows which end of a range it is -
+ * `range-start`, `range-end` - so a pair of fields reads as one span. Two
  * single pickers showed one day each and nothing in between.
  */
 describe('the field as one end of a range', () => {

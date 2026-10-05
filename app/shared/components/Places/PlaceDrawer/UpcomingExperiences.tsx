@@ -88,8 +88,8 @@ const DayPill = ({
 /**
  * What is on at a place, a week at a time.
  *
- * ⚠️ `GET /experiences/?place=` is the only query the API offers here — there
- * is no per-day or per-month endpoint, and no date range — so one wide page is
+ * ⚠️ `GET /experiences/?place=` is the only query the API offers here - there
+ * is no per-day or per-month endpoint, and no date range - so one wide page is
  * read and the week strip is built from it. A place running more than 50
  * experiences would lose the tail.
  */

@@ -38,7 +38,7 @@ export default function ManageExperiencePage() {
   const { data: experienceResponse, isLoading } = useFetchSingleExperience(experienceId, true);
   const experience: Experience | undefined = experienceResponse?.data;
 
-  // The same purchases the Sales tab lists — the buyer count is derived from
+  // The same purchases the Sales tab lists - the buyer count is derived from
   // them rather than hardcoded
   const { data: purchasesResponse } = useExperienceTicketPurchases(experienceId, true);
   const purchases: TicketPurchase[] = purchasesResponse?.data?.results ?? [];
@@ -91,7 +91,7 @@ export default function ManageExperiencePage() {
     <main className="mx-auto max-w-6xl space-y-6 px-6 py-6">
       <Breadcrumb
         items={[
-          // No href yet — the Control Center landing page does not exist
+          // No href yet - the Control Center landing page does not exist
           { label: 'Control Center' },
           { label: 'Manage Experience' },
         ]}

@@ -2,7 +2,7 @@ import { DESTINATIONS, isDestinationActive } from './destinations';
 
 /**
  * The canvas's five, in its order. Experiences, Places and Moments are tabs on
- * Discover there, not destinations — but they keep their URLs, so every link
+ * Discover there, not destinations - but they keep their URLs, so every link
  * to them still resolves.
  */
 describe('DESTINATIONS', () => {

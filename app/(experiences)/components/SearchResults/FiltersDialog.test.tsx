@@ -91,7 +91,7 @@ describe('the filters dialog', () => {
 
   /**
    * The API cannot narrow by day-shape, so the count has to come from the rows
-   * — otherwise the button promises more than the list will show.
+   * - otherwise the button promises more than the list will show.
    */
   it('counts the shapes off the rows, not the API total', async () => {
     open();

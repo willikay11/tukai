@@ -28,7 +28,7 @@ const QuoteRow = ({ label, value, strong }: { label: string; value: string; stro
  * Taking money out.
  *
  * The fees are the API's to work out, so the quote is asked for as the amount
- * is typed and shown before anything is committed — a host sees what will
+ * is typed and shown before anything is committed - a host sees what will
  * actually land, not the number they typed. The wallet it goes to is whichever
  * one is active.
  */

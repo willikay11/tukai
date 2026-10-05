@@ -23,7 +23,7 @@ export const dayKey = (date: Date): string => {
 
 const atMidnight = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-/** The Sunday on or before a date — where the strip starts. */
+/** The Sunday on or before a date - where the strip starts. */
 export const weekStart = (date: Date): Date => {
   const start = atMidnight(date);
   start.setDate(start.getDate() - start.getDay());
@@ -54,7 +54,7 @@ export const experiencesOnDay = (experiences: Experience[], key: string): Experi
  * The seven pills for one week.
  *
  * ⚠️ Only one-off experiences land on a day. A recurring one is filed under
- * the date its SERIES began, which is often months back — placing it on every
+ * the date its SERIES began, which is often months back - placing it on every
  * date it runs would mean reading its rule for each of the seven, and the list
  * endpoint returns no occurrences to read instead.
  */
@@ -85,7 +85,7 @@ export const buildWeek = (
   });
 };
 
-/** "October 2026" — the month the shown week belongs to. */
+/** "October 2026" - the month the shown week belongs to. */
 export const monthLabel = (week: StripDay[]): string => {
   // A week spanning two months is named for the one holding most of it, which
   // is the month of its middle day

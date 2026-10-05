@@ -16,12 +16,12 @@ export type MomentContextProps = {
   /**
    * What the moment is being posted at, for the trail under the author.
    *
-   * Absent where there is nothing to post it at — the Discover tile has no
+   * Absent where there is nothing to post it at - the Discover tile has no
    * context of its own. `POST /moments/` needs only a title and description,
    * so an untagged moment is valid; the trail is simply not drawn.
    */
   contextLabel?: string;
-  /** What kind of thing that is — "Community", "Place", "Experience". */
+  /** What kind of thing that is - "Community", "Place", "Experience". */
   contextKind?: string;
   experienceId?: string;
   placeId?: string;
@@ -55,7 +55,7 @@ export const MomentComposerForm = ({
 
   const [text, setText] = useState('');
   // The preview url is made once per file and revoked when it goes, rather
-  // than minted during render — which would leak one on every keystroke
+  // than minted during render - which would leak one on every keystroke
   const [photos, setPhotos] = useState<{ file: File; previewUrl: string }[]>([]);
   const galleryRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
@@ -65,7 +65,7 @@ export const MomentComposerForm = ({
   const author = session?.user?.name ?? 'You';
 
   /**
-   * A moment is a photo with a line under it — the feeds that show them are
+   * A moment is a photo with a line under it - the feeds that show them are
    * photo-led, and one with no photo would be filtered straight back out. The
    * API would take it, so this is the product's rule rather than the API's.
    */

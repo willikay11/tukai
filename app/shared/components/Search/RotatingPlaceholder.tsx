@@ -18,7 +18,7 @@ const SLIDE_MS = 500;
  *
  * A real `placeholder` attribute cannot be animated, so this is drawn over the
  * empty field instead and the input carries an aria-label for its name. It is
- * decorative — hidden from assistive tech, which reads that label.
+ * decorative - hidden from assistive tech, which reads that label.
  */
 export const RotatingPlaceholder = ({
   visible,
@@ -78,7 +78,7 @@ export const RotatingPlaceholder = ({
             // Readers who ask for less motion get the phrases swapped, not slid
             'motion-reduce:transition-none',
           )}
-          // Runtime offset — no static Tailwind class can express it
+          // Runtime offset - no static Tailwind class can express it
           style={{ transform: `translateY(-${index * SLOT_HEIGHT}px)` }}
         >
           {[...phrases, phrases[0]].map((phrase, slot) => (

@@ -20,7 +20,7 @@ describe('detail paths', () => {
     );
   });
 
-  // A record the API has not slugged yet still has to be reachable — and the
+  // A record the API has not slugged yet still has to be reachable - and the
   // detail endpoints resolve the UUID just as happily
   it('falls back to the id when there is no slug', () => {
     expect(placePath({ id: 'p1' })).toBe('/places/p1');

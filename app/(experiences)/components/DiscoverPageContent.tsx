@@ -60,13 +60,13 @@ const PLACES_PER_PAGE = 5;
 
 const MOMENTS_SUBTITLE = 'Proof it happened, shared by the people who were there';
 
-/** Four across, two rows — what the list sections show before "View more". */
+/** Four across, two rows - what the list sections show before "View more". */
 const ROW_GRID_SIZE = 8;
 
 /** Read in one go; "View more" pages through it without another request. */
 const PUBLIC_LISTS_SIZE = 24;
 
-/** Read in one go, then paged locally — the API pages by request. */
+/** Read in one go, then paged locally - the API pages by request. */
 const PLACES_WITH_EXPERIENCES_SIZE = 30;
 
 // First photo of a row's leading item, used as the See All tile's preview
@@ -80,7 +80,7 @@ const coverPhotoOf = (experience: Experience | undefined): string | null =>
  *
  * A scroll row shows about three at once on a laptop and two on a phone;
  * anything past that is off-screen and stays lazy. Marking them `priority`
- * skips the lazy-load observer, which cannot fire until React has painted —
+ * skips the lazy-load observer, which cannot fire until React has painted -
  * the reason the first row used to trickle in a card at a time.
  */
 const EAGER_IN_ROW = 3;
@@ -90,17 +90,17 @@ export const DiscoverPageContent = () => {
   const searchParams = useSearchParams();
   const { city, lat, lng } = useLocation();
 
-  // A search or a filter replaces the rails outright, as the canvas has it —
+  // A search or a filter replaces the rails outright, as the canvas has it -
   // and it lives in the URL, so a result list is somewhere you can send
   // someone and the back button still means something
   const filters = filtersFromParams(searchParams);
   const isSearching = hasSearch(filters);
 
   // Discover has no place, experience or community of its own to post a
-  // moment at, so the composer opens untagged — see MomentComposer
+  // moment at, so the composer opens untagged - see MomentComposer
   const [isComposerOpen, setIsComposerOpen] = useState(false);
 
-  // "View more" reveals another grid's worth in place rather than navigating —
+  // "View more" reveals another grid's worth in place rather than navigating -
   // there is no public-lists page to send anyone to
   const [visibleListCount, setVisibleListCount] = useState(ROW_GRID_SIZE);
 
@@ -112,7 +112,7 @@ export const DiscoverPageContent = () => {
   const placesWithExperiences: Place[] = withExperiencesResponse?.data?.results ?? [];
 
   // A tour is an experience the API provisions behind a guide's profile, so
-  // this is the whole query — see the section below
+  // this is the whole query - see the section below
   const { data: toursResponse, isLoading: isLoadingTours } = useExperiences(
     { page: 1, page_size: ROW_SIZE, experience_type: 'guide_booking', lat, long: lng },
     !isSearching,
@@ -123,7 +123,7 @@ export const DiscoverPageContent = () => {
   const hasMoreTours = tourCount > guidedTours.length;
 
   // ⚠️ `GET /experiences/` takes a single `date`, not a range, so "next 14
-  // days" cannot be asked for — a wider page is read and narrowed by
+  // days" cannot be asked for - a wider page is read and narrowed by
   // happeningSoon(). Coordinates are omitted until the user grants location,
   // so the rail still renders unscoped if they decline.
   const { data: rowResponse, isLoading: isLoadingRow } = useExperiences(

@@ -30,7 +30,7 @@ export const ErrorState = ({
   const router = useRouter();
 
   useEffect(() => {
-    // Keep the real error in the console — the UI deliberately does not show
+    // Keep the real error in the console - the UI deliberately does not show
     // stack traces or messages, which can leak internals to users
     console.error('Unhandled error:', error);
   }, [error]);

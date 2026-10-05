@@ -31,7 +31,7 @@ describe('SeeAllCard', () => {
     expect(link).toHaveAttribute('href', '/experiences/see-all?type=today');
   });
 
-  // The preview is decorative — the link already carries its own label — so it
+  // The preview is decorative - the link already carries its own label - so it
   // has an empty alt and is exposed as presentation, not an image
   it('previews a photo from the row it closes', () => {
     const { container } = render(
@@ -89,7 +89,7 @@ describe('SeeAllCard', () => {
     expect(screen.getByRole('link')).toHaveClass('w-[184px]');
   });
 
-  // It must match the height of the cards' IMAGES, not the whole card —
+  // It must match the height of the cards' IMAGES, not the whole card -
   // stretching would run it past the titles and prices beneath them
   it('matches the 4:3 card image and does not stretch to the row height', () => {
     render(<SeeAllCard href="/places" />);

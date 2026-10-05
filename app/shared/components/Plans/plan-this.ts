@@ -37,7 +37,7 @@ export const alreadyInPlan = (plan: Plan | undefined, refId: string): boolean =>
   Boolean(plan?.stops.some((stop) => stop.refId === refId));
 
 /**
- * What to say before anything is added — one thing, the most useful.
+ * What to say before anything is added - one thing, the most useful.
  *
  * A clash of days is worth saying here rather than only in the plan: it is the
  * reason someone would choose a different plan.

@@ -26,7 +26,7 @@ interface DiscountCodesSectionProps {
 export const codesForExperience = (codes: PromoCode[], experienceId: string): PromoCode[] =>
   codes.filter((code) => code.experience === experienceId);
 
-/** "32 times", and "1 time" — the canvas counts in words. */
+/** "32 times", and "1 time" - the canvas counts in words. */
 export const redeemedLabel = (count: number): string =>
   `${count} ${count === 1 ? 'time' : 'times'}`;
 

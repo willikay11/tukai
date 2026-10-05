@@ -3,7 +3,7 @@ import { BucketList } from '@/types/bucket-list';
 /**
  * Which of the canvas's three faces a list card wears.
  *
- * The canvas has one card with three states — a list you own opens, one you are
+ * The canvas has one card with three states - a list you own opens, one you are
  * on says so and can be left, and any other public one can be joined. Two
  * separate cards said the same thing twice and neither covered all three.
  */
@@ -30,11 +30,11 @@ export const CARD_STATE_LABEL: Record<BucketListCardState, string> = {
   joinable: 'Join list',
 };
 
-/** "12 saved" — what the canvas puts on a card, as against the detail header. */
+/** "12 saved" - what the canvas puts on a card, as against the detail header. */
 export const savedLine = (bucketList: BucketList): string => `${bucketList.itemCount ?? 0} saved`;
 
 /**
- * "8 ideas, 3 members" — the canvas's wording on the list's own page, where
+ * "8 ideas, 3 members" - the canvas's wording on the list's own page, where
  * both counts belong. A card has no room for it and says "N saved" instead.
  */
 export const countLine = (bucketList: BucketList): string => {

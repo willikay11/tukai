@@ -14,7 +14,7 @@ import { SocialAuthButtons } from './SocialAuthButtons';
  * The way in, wherever it is asked for.
  *
  * Social first, because it is one tap, with email a step behind it rather than
- * a page away — the reader stays on the card either way. The dialog over a
+ * a page away - the reader stays on the card either way. The dialog over a
  * place and the sign-up page render this same component, so the two cannot
  * drift apart again.
  */

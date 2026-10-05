@@ -14,7 +14,7 @@ export type DeadlinePreset = {
 
 /**
  * The three the canvas offers. The API takes any duration and unit, so a code
- * set elsewhere — on mobile, or in the create flow — can be something else; the
+ * set elsewhere - on mobile, or in the create flow - can be something else; the
  * view line reads it either way, and these are what a host can pick here.
  */
 export const DEADLINE_PRESETS: DeadlinePreset[] = [
@@ -76,7 +76,7 @@ export const deadlineAt = (
   return at.subtract(duration, unit).toDate();
 };
 
-/** "Sales close Sat 4 Jul, 5:00 PM." — and for a recurring one, the next date. */
+/** "Sales close Sat 4 Jul, 5:00 PM." - and for a recurring one, the next date. */
 export const deadlineWhen = (at: Date | null, isRecurring = false): string => {
   if (!at) return 'No deadline is set, so sales run until the experience starts.';
 

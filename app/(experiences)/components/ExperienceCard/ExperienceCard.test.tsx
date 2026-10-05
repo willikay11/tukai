@@ -126,7 +126,7 @@ describe('ExperienceCard', () => {
       expect(screen.getByText('Sold out')).toBeInTheDocument();
     });
 
-    // The canvas says it in both places on a free experience — the pill over
+    // The canvas says it in both places on a free experience - the pill over
     // the photo and the price line beneath it
     it('says free on the pill and on the price line', () => {
       render(<ExperienceCard experience={makeExperience({ isPaid: false })} />);

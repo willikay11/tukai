@@ -1,6 +1,6 @@
 /**
  * Proof-of-ownership document types, from the API's own
- * `VerificationDocument.document_type` enum — the labels are ours, the values
+ * `VerificationDocument.document_type` enum - the labels are ours, the values
  * are the API's.
  */
 export const OWNERSHIP_DOCUMENT_TYPES = [

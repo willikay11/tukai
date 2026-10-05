@@ -4,8 +4,8 @@ import { Experience } from '@/types/experience';
  * The four shapes the canvas lets a reader pick between.
  *
  * ⚠️ Only `itinerary` is something the API filters on. "One day", "Recurring"
- * and "Multi-day" describe how an experience sits in the calendar — a
- * recurrence rule, or a start and end on different days — and no endpoint takes
+ * and "Multi-day" describe how an experience sits in the calendar - a
+ * recurrence rule, or a start and end on different days - and no endpoint takes
  * either as a parameter. They are applied to the rows that come back instead,
  * and the counts shown are counted from the same rows, so the number and the
  * list always agree.

@@ -8,7 +8,7 @@ const MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR;
 const CLOSING_SOON_MINUTES = 60;
 
 export type PlaceOpenState = {
-  /** Open right now — drives the "Open now" wording and the un-greyed photo */
+  /** Open right now - drives the "Open now" wording and the un-greyed photo */
   isOpen: boolean;
   /** Open, but shutting within the hour */
   isClosingSoon: boolean;
@@ -18,7 +18,7 @@ export type PlaceOpenState = {
    * design says nothing about it.
    */
   pill: string;
-  /** The line for a meta row — always said, open or shut */
+  /** The line for a meta row - always said, open or shut */
   label: string;
 };
 
@@ -52,7 +52,7 @@ type Window = { open: number; close: number };
 /**
  * The opening window for one date, or null when the venue is shut that day.
  *
- * An exception for the date wins over the weekly rule — it can close a day
+ * An exception for the date wins over the weekly rule - it can close a day
  * outright, or open one the weekly rules leave closed, the same precedence the
  * booking slot picker uses.
  */
@@ -84,7 +84,7 @@ const shiftDays = (date: Date, days: number): Date => {
  *
  * ⚠️ Hours are not on the place itself. They live on a reservation profile's
  * availability rules, so only a place opened to restaurant or cinema bookings
- * has any — everything else returns null and says nothing, rather than
+ * has any - everything else returns null and says nothing, rather than
  * claiming a venue is open on no evidence.
  */
 export const placeOpenState = (

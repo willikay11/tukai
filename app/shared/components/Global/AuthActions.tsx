@@ -67,7 +67,7 @@ export const AuthActions = () => {
 
   /**
    * Create belongs to the signed-in bar. A visitor who has not joined yet is
-   * asked to join — offering them Create only to answer with a sign-in dialog
+   * asked to join - offering them Create only to answer with a sign-in dialog
    * is a door that opens onto another door.
    */
   const createButton = hasSubscribed ? (

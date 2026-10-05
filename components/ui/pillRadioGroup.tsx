@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 interface PillRadioOption {
   value: string;
   label: string;
-  /** Offered but not choosable — a lock icon says why without a tooltip */
+  /** Offered but not choosable - a lock icon says why without a tooltip */
   disabled?: boolean;
   /** A hugeicon name, drawn after the label */
   icon?: string;

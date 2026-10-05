@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
  *
  * "Claim" on its own reads as claiming a reward, so this names the audience,
  * what it unlocks and what it takes. Everything listed here is something the
- * product does today — reservations, the listing in Control Center, ownership
+ * product does today - reservations, the listing in Control Center, ownership
  * sitting with a community rather than a person.
  */
 const WHAT_YOU_GET: { icon: string; title: string; detail: string }[] = [
@@ -47,7 +47,7 @@ export const ClaimPlacePrompt = ({
       </p>
     </div>
 
-    <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
       {WHAT_YOU_GET.map((item) => (
         <li key={item.title} className="col-span-1">
           <div className="flex items-start gap-3">

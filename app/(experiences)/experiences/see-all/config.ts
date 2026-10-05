@@ -4,7 +4,7 @@ import { ExperiencesQueryParams } from '@/services/experience';
 import { formatLongDateWithOrdinal } from '@/utils/date-utils';
 
 // One entry per "See all" section on /experiences. Adding a section to the
-// listing page means adding it here — the see-all page is otherwise generic.
+// listing page means adding it here - the see-all page is otherwise generic.
 export const EXPERIENCE_SEE_ALL_TYPES = [
   'today',
   'tomorrow',
@@ -26,7 +26,7 @@ export type SeeAllType = (typeof SEE_ALL_TYPES)[number];
 // count / skeletonCount, so this must equal the page_size we request.
 export const SEE_ALL_PAGE_SIZE = 12;
 
-// Copy only — the API takes lat/long and decides the radius itself
+// Copy only - the API takes lat/long and decides the radius itself
 export const NEAR_ME_RADIUS_KM = 25;
 
 export const DEFAULT_CITY = 'Nairobi';
@@ -54,7 +54,7 @@ export const isSeeAllType = (value: string | undefined): value is SeeAllType =>
 export const SEE_ALL_MIN_RESULTS = 10;
 
 // Rows request a page_size smaller than this threshold, so the decision has to
-// come from the API total — never from the length of the rendered array.
+// come from the API total - never from the length of the rendered array.
 export const shouldShowSeeAll = (total: number | null | undefined): boolean =>
   (total ?? 0) >= SEE_ALL_MIN_RESULTS;
 
@@ -98,19 +98,19 @@ export const SEE_ALL_CONFIG: Record<ExperienceSeeAllType, SeeAllSection> = {
     title: () => 'Happening Near You',
     subtitle: (context, count) =>
       joinSubtitle(`Within ${NEAR_ME_RADIUS_KM} km of ${context.city}`, resultsLabel(count)),
-    // ⚠️ No `near`/`radius` param exists — lat/long is the whole geo contract
+    // ⚠️ No `near`/`radius` param exists - lat/long is the whole geo contract
     query: (context) => ({ status: 'published', lat: context.lat, long: context.lng }),
   },
 
   city: {
     title: (context) => `Experiences in ${context.city}`,
     subtitle: (_context, count) => joinSubtitle(resultsLabel(count)),
-    // ⚠️ No `city` param — free-text search on the city name is the closest
+    // ⚠️ No `city` param - free-text search on the city name is the closest
     // available filter, matching what the listing row already does
     query: (context) => ({ search: context.city }),
   },
 
-  // Sourced from itinerary-type experiences — there is no itineraries endpoint,
+  // Sourced from itinerary-type experiences - there is no itineraries endpoint,
   // but the experiences list honours experience_type server-side
   itineraries: {
     title: () => 'Discover Itineraries',
@@ -122,13 +122,13 @@ export const SEE_ALL_CONFIG: Record<ExperienceSeeAllType, SeeAllSection> = {
   featured: {
     title: () => 'Featured Experiences',
     subtitle: (_context, count) => joinSubtitle(resultsLabel(count)),
-    // ⚠️ No `is_featured` param — the default published list stands in
+    // ⚠️ No `is_featured` param - the default published list stands in
     query: () => ({ status: 'published' }),
   },
 };
 
-// The cities grid is not paginated — every destination arrives in one page of
-// place categories — so its count is simply how many cities we render.
+// The cities grid is not paginated - every destination arrives in one page of
+// place categories - so its count is simply how many cities we render.
 export const CITIES_SECTION = {
   title: 'Experiences by City',
   subtitle: (count: number | null): string =>

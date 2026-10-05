@@ -18,12 +18,12 @@ const exception = (entry: Partial<PlaceAvailabilityException>) =>
 // 2026-08-24 is a Monday, so the API's day 0
 const at = (hours: number, minutes = 0) => new Date(2026, 7, 24, hours, minutes);
 
-// Mon–Fri 10:00–22:00, shut at the weekend
+// Mon-Fri 10:00-22:00, shut at the weekend
 const WEEKDAYS = [0, 1, 2, 3, 4].map((day) => rule(day, '10:00', '22:00'));
 
 describe('placeOpenState', () => {
   // Most places have no reservation profile at all, and a place with no hours
-  // must not be called open — the caller renders nothing instead
+  // must not be called open - the caller renders nothing instead
   it('says nothing when there are no rules or exceptions', () => {
     expect(placeOpenState([], [], at(12))).toBeNull();
   });
@@ -101,7 +101,7 @@ describe('placeOpenState', () => {
     const LATE = [0, 1, 2, 3, 4].map((day) => rule(day, '18:00', '02:00'));
 
     it('is open after midnight on yesterday’s window', () => {
-      // Tuesday 00:30, still inside Monday's 18:00–02:00
+      // Tuesday 00:30, still inside Monday's 18:00-02:00
       expect(placeOpenState(LATE, [], new Date(2026, 7, 25, 0, 30))).toEqual({
         isOpen: true,
         isClosingSoon: false,

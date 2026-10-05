@@ -138,7 +138,7 @@ export const ReservePageContent = ({ place }: { place: Place }) => {
 
     // A session can lapse while a long form is being filled in, and someone can
     // land here directly. Either way the dialog opens over the form and the
-    // request goes out on the other side — nothing typed is lost.
+    // request goes out on the other side - nothing typed is lost.
     if (!isSignedIn) {
       openSignInWithCallback(() => submitBooking(result.data));
       return;

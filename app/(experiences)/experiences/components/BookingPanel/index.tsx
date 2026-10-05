@@ -36,7 +36,7 @@ import { RecurringDateSlotPicker } from './RecurringDateSlotPicker';
 
 interface BookingPanelProps {
   experience: Experience;
-  // 'preview' renders the identical panel — tabs, pickers, steppers, totals —
+  // 'preview' renders the identical panel - tabs, pickers, steppers, totals -
   // but hard-disables the purchase call so a creator
   // previewing their own draft can never buy a ticket. Layout must NOT branch
   // on this; only the Pay action does.
@@ -142,7 +142,7 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
     }
   }, [timeSlots, selectedSlotId]);
 
-  // Tickets are linked to a slot template — list only the selected slot's
+  // Tickets are linked to a slot template - list only the selected slot's
   // tickets. Tickets without a slot template (one-time experiences) always
   // show. Total and payload are scoped the same way, so quantities picked on
   // another slot stay inert.
@@ -210,7 +210,7 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
             const result = response.data ?? {};
 
             // The endpoint answers 200 for a code it will not take, so it is
-            // `valid` that decides — not the status
+            // `valid` that decides - not the status
             if (result.valid === false) {
               setDiscount(null);
               setDiscountError(result.reason ?? 'This code is not valid for this order.');
@@ -218,7 +218,7 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
             }
 
             // Money comes back as `{ amount, currency }`, and `netAmount` is
-            // the API's own figure for what is left to pay — preferred over
+            // the API's own figure for what is left to pay - preferred over
             // subtracting locally, since it is what the purchase will charge
             setDiscount({
               // The API echoes the code as it stores it
@@ -261,8 +261,8 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
 
     if (!selectedSlotId) {
       /*
-       * Only a recurring experience shows a date/time picker. Everything else —
-       * single-day, multi-day and itineraries — gets a read-only date pill and
+       * Only a recurring experience shows a date/time picker. Everything else -
+       * single-day, multi-day and itineraries - gets a read-only date pill and
        * has its occurrence selected automatically, so telling those users to
        * "select a date and time" asks for something the panel never offers.
        * The occurrence is required by the purchase payload, so the sale still
@@ -305,7 +305,7 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
 
   // Clears everything the purchaser typed once the payment lands, so the panel
   // is not left holding their details. PhoneNumber and Quantity are both
-  // uncontrolled — they seed from their props once and ignore later changes —
+  // uncontrolled - they seed from their props once and ignore later changes -
   // so clearing the state alone leaves the old values on screen. Bumping the
   // key remounts them.
   const resetPanel = () => {
@@ -331,7 +331,7 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
   };
 
   const handlePay = () => {
-    // Second guard behind the disabled button — the purchase API must be
+    // Second guard behind the disabled button - the purchase API must be
     // unreachable from preview even if the button is somehow activated
     if (isPreview) return;
 
@@ -365,13 +365,13 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
         if (authorizationUrl) {
           setIsPaystackOpen(true);
         } else {
-          // Nothing to charge — the purchase is already complete
+          // Nothing to charge - the purchase is already complete
           goToBookingSuccess(response.data?.paymentDetails?.reference);
         }
       },
       onError: (error: any) => {
         const status = error?.status ?? error?.response?.status;
-        // Prefer the API's own detail — a 400 can also mean the occurrence
+        // Prefer the API's own detail - a 400 can also mean the occurrence
         // belongs to a different experience, not just sold-out tickets
         const apiDetail = error?.data?.errors?.[0]?.detail;
         if (status === 400) {
@@ -487,7 +487,7 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
                         <p className="mt-0.5 text-sm text-gray-500">{ticket.name}</p>
                       </div>
                       <Quantity
-                        // Uncontrolled like PhoneNumber — it seeds from
+                        // Uncontrolled like PhoneNumber - it seeds from
                         // initialValue once, so a reset needs a remount
                         key={`${ticket.id}-${formResetKey}`}
                         initialValue={quantities[ticket.id] ?? 0}
@@ -700,7 +700,7 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
           <Button
             variant="lime"
             onClick={handlePay}
-            // Stays enabled when the form is incomplete — pressing it surfaces
+            // Stays enabled when the form is incomplete - pressing it surfaces
             // an error on each offending input instead of silently doing nothing
             disabled={isPreview || isPaying}
             className={`h-12 w-full rounded-full py-3 text-primary ${

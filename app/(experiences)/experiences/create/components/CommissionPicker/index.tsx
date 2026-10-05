@@ -5,7 +5,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 interface CommissionPickerProps {
   value: 'host' | 'customer' | 'split';
   onChange: (value: 'host' | 'customer' | 'split') => void;
-  // Each pick is saved to the experience — locked while that is in flight so
+  // Each pick is saved to the experience - locked while that is in flight so
   // two rapid picks cannot land out of order
   isSaving?: boolean;
 }

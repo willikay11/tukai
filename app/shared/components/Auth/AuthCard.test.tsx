@@ -25,7 +25,7 @@ describe('AuthCard', () => {
     expect(screen.queryByTestId('email-form')).not.toBeInTheDocument();
   });
 
-  // A step on the same card, not a page away — whatever brought the reader here
+  // A step on the same card, not a page away - whatever brought the reader here
   // is still behind it
   it('swaps to the email form in place', async () => {
     const user = userEvent.setup();

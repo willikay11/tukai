@@ -4,7 +4,7 @@ interface MetaRowProps {
   location?: string;
   distanceKm?: number;
   // Pre-formatted day the experience runs, e.g. "Saturday 15, August". Takes
-  // the slot durationMinutes used to occupy — when both are supplied the date
+  // the slot durationMinutes used to occupy - when both are supplied the date
   // wins, since it is the more useful fact on a detail page.
   date?: string;
   durationMinutes?: number;

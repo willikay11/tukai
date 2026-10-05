@@ -78,7 +78,7 @@ const ToggleCard = ({
  *
  * ⚠️ Only what can actually be answered. The canvas also offers time of day,
  * duration, a distance radius, price, open now, drop-in, reservable, offers,
- * step-free access, parking and a minimum rating — no endpoint takes any of
+ * step-free access, parking and a minimum rating - no endpoint takes any of
  * them, so they are absent rather than present and inert.
  */
 export const FiltersDialog = ({

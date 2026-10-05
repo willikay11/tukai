@@ -33,8 +33,8 @@ export async function fetchMyPromoCodes(params: { page?: number; page_size?: num
 }
 
 /**
- * The canvas asks for three fields. Everything else the serializer accepts —
- * redemption caps, date windows, minimum orders — is left to the API's own
+ * The canvas asks for three fields. Everything else the serializer accepts -
+ * redemption caps, date windows, minimum orders - is left to the API's own
  * defaults rather than sent empty.
  */
 export async function createPromoCode(payload: CreatePromoCode): Promise<PromoCode> {

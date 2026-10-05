@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 /**
  * Just enough to draw a face. This used to borrow the bucket-list member type,
  * which tied a stack of community avatars to a feature it has nothing to do
- * with — and broke the moment that type matched the API.
+ * with - and broke the moment that type matched the API.
  */
 export interface AvatarStackUser {
   id: string;

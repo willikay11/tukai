@@ -31,7 +31,7 @@ const asIsoDate = (date: Date): string => {
  * The bookable times for one date.
  *
  * Weekly rules set the normal hours; an exception for that date overrides them
- * — either closing the day outright or replacing its open/close times. The last
+ * - either closing the day outright or replacing its open/close times. The last
  * slot starts a full interval before closing, so a booking never lands on the
  * moment the venue shuts.
  */
@@ -52,7 +52,7 @@ export const slotsForDate = (
   const close = toMinutes(exception?.closeTime || rule!.closeTime);
 
   // A zero or negative interval is bad data, and a negative one would make the
-  // loop below never terminate — fall back rather than trusting it
+  // loop below never terminate - fall back rather than trusting it
   const declaredInterval = rule?.slotIntervalMinutes ?? DEFAULT_SLOT_MINUTES;
   const interval = declaredInterval > 0 ? declaredInterval : DEFAULT_SLOT_MINUTES;
 
@@ -69,7 +69,7 @@ export const slotsForDate = (
   return slots;
 };
 
-/** Whether a date can be booked at all — used to disable days in the picker. */
+/** Whether a date can be booked at all - used to disable days in the picker. */
 export const isDateBookable = (
   date: Date,
   rules: PlaceAvailabilityRule[],

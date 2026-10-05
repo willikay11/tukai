@@ -17,7 +17,7 @@ import { getTicketBuyerPrice } from '@/utils/ticket-utils';
  * customer detail view consumes, so the Preview step can render the REAL
  * detail components (ViewExperiencePageContent) rather than a parallel copy.
  *
- * Fields the form cannot know yet are synthesised — see PREVIEW_DEFAULTS below.
+ * Fields the form cannot know yet are synthesised - see PREVIEW_DEFAULTS below.
  * Nothing here may throw on a half-filled form: the creator can open Preview at
  * any point in the flow.
  */
@@ -31,7 +31,7 @@ export interface PreviewContext {
   // where the panel simply has no slots to show.
   experienceId?: string | null;
   hostCommunity?: CommunityOption | null;
-  // The NextAuth session user — the creator previews as their own host card
+  // The NextAuth session user - the creator previews as their own host card
   currentUser?: { id?: string | null; name?: string | null; image?: string | null } | null;
   // Resolved from about.locationPlaceId via the Google geocode endpoint
   geocodedLocation?: Partial<Location> | null;
@@ -81,7 +81,7 @@ export const mapGeocodeResultToLocation = (result: any): Partial<Location> | nul
     country: findComponent('country'),
     pointLat: lat,
     pointLong: lng,
-    // GeoJSON order is [lng, lat] — the same order the API returns
+    // GeoJSON order is [lng, lat] - the same order the API returns
     point: { type: 'Point', coordinates: [lng, lat] },
   };
 };
@@ -113,7 +113,7 @@ export const mapFormTicketsToPreview = (formData: FormData): Ticket[] =>
     name: item.name,
     quantity: item.quantity,
     price: item.amount,
-    // Only saved tickets have one — a draft the API has not seen yet previews
+    // Only saved tickets have one - a draft the API has not seen yet previews
     // at the host's base amount
     buyerPrice:
       item.buyerPrice != null
@@ -134,7 +134,7 @@ export const mapFormTicketsToPreview = (formData: FormData): Ticket[] =>
   }));
 
 /**
- * Start/end come from a different pair of fields per experience type — the form
+ * Start/end come from a different pair of fields per experience type - the form
  * keeps them separate so switching type does not clobber the other's dates.
  */
 export const resolvePreviewDates = (

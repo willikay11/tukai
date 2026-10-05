@@ -7,7 +7,7 @@ import { ALL_DAYS, dayKey } from '@/utils/reservation-calendar';
 
 /**
  * The chrome above a reservations list: a month stepper, a count, and a pill
- * per day that has something on it. The rows themselves belong to the caller —
+ * per day that has something on it. The rows themselves belong to the caller -
  * an experience booking and a table reservation read very differently.
  */
 export const MonthDayFilter = ({

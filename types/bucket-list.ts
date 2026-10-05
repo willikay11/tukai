@@ -10,7 +10,7 @@ export interface BucketListItem {
   experienceBookmark?: {
     id: string;
     experienceId?: string;
-    // `experience_title` on the wire — the place side calls its own `place_name`
+    // `experience_title` on the wire - the place side calls its own `place_name`
     experienceTitle?: string;
     photo?: PhotoLike;
     status?: string;
@@ -19,7 +19,7 @@ export interface BucketListItem {
     location?: string | { city?: string; name?: string };
     startDate?: string;
     endDate?: string;
-    // Money, not a string — the swagger says otherwise but every other reader
+    // Money, not a string - the swagger says otherwise but every other reader
     // in the app treats it as { amount, currency }
     priceStartsFrom?: MoneyLike;
   };
@@ -79,7 +79,7 @@ export interface AddBucketListItemPayload {
 
 /**
  * A photo arrives as a URL string on some endpoints and as the Photo object on
- * others — `price_starts_from` is documented as a string and is not one either,
+ * others - `price_starts_from` is documented as a string and is not one either,
  * so neither is taken on trust here.
  */
 export type PhotoLike =
@@ -102,7 +102,7 @@ export const bucketListItemPhoto = (item: BucketListItem): string | undefined =>
  * A list's cover, read the same way an item's photo is.
  *
  * `cover_image` is documented as a string and arrives as one on some
- * responses and as the Photo object on others — the same split that left the
+ * responses and as the Photo object on others - the same split that left the
  * saved items blank.
  */
 export const bucketListCoverPhoto = (bucketList: { coverImage?: PhotoLike }): string | undefined =>

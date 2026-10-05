@@ -16,7 +16,7 @@ interface CityCardProps {
    * under the name and so needs the corner to itself.
    */
   variant?: 'default' | 'banner';
-  // Overrides the fixed row sizing — the cities grid wants full-width cards
+  // Overrides the fixed row sizing - the cities grid wants full-width cards
   className?: string;
 }
 

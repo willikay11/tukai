@@ -23,7 +23,7 @@ const newId = (key: string) => `new-${key.toLowerCase().replace(/\s+/g, '-')}-${
 /**
  * The details a place carries, offered as the pills its categories call for.
  *
- * Every field here writes into the same `properties` list the step is given —
+ * Every field here writes into the same `properties` list the step is given -
  * a pill group is one property whose value is its selected labels joined with
  * ", ", and contact and hours are properties too. Nothing has its own store, so
  * the save diff stays exactly as it was.
@@ -69,7 +69,7 @@ export const EditPlacePropertiesStep = ({
   };
 
   // Whatever the place already holds that no group above offers. Kept editable
-  // rather than hidden — a place in a category this catalogue has no pills for
+  // rather than hidden - a place in a category this catalogue has no pills for
   // would otherwise lose everything it has on the first save.
   const otherProperties = properties.filter(
     (property) => !offeredKeys.has(property.key.trim()) || !property.key.trim(),
@@ -92,7 +92,7 @@ export const EditPlacePropertiesStep = ({
     setHours(next);
 
     // Nothing composed yet and nothing composed before means the reader is
-    // still building the first one — writing '' here would delete hours this
+    // still building the first one - writing '' here would delete hours this
     // field could not read back
     if (composed || previous) writeValue(CONTACT_KEYS.hours, composed, 'Clock01Icon');
   };

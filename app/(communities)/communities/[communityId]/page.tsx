@@ -33,7 +33,7 @@ export async function generateMetadata({
 }
 
 export default async function ViewCommunityPage({ params }: { params: { communityId: string } }) {
-  // No auth gate. A community is public to read — the actions inside it ask
+  // No auth gate. A community is public to read - the actions inside it ask
   // for a sign-in where they are pressed, rather than at the door.
   const session: Session | null = await getAuthSession();
 

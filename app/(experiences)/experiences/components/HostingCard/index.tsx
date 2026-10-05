@@ -12,7 +12,7 @@ import { Photo } from '@/types/photo';
 
 import { PaymentStatusBadge, StatusConfig } from '../PaymentStatusBadge';
 
-// Exhaustive over the Status enum — tsc fails here if a status is unhandled.
+// Exhaustive over the Status enum - tsc fails here if a status is unhandled.
 // Labels mirror the Status enum wording so the badge reads the same wherever
 // it appears (Hosting tab and the pre-wizard listing).
 const HOSTING_STATUS_CONFIG: Record<Status, StatusConfig> = {
@@ -54,7 +54,7 @@ const buildHostingFooterText = (experience: Experience): string => {
       return total > 0 ? `${sold} / ${total} tickets sold` : 'No tickets yet';
     }
     case Status.Draft:
-      // The API has no last-edited field — creation time is the closest signal
+      // The API has no last-edited field - creation time is the closest signal
       return experience.dateCreated ? `Created ${moment(experience.dateCreated).fromNow()}` : '';
     case Status.Cancelled:
       return 'Hidden from Explore';
@@ -75,7 +75,7 @@ export const HostingCard = ({ experience }: HostingCardProps) => {
   const status = normalizeStatus(experience.status);
   const isDraft = status === Status.Draft;
   // A draft has nothing to manage yet, so it reopens in the create wizard.
-  // Anything published goes to the host's Control Center dashboard — this card
+  // Anything published goes to the host's Control Center dashboard - this card
   // only ever renders in host contexts (Hosting tab, pre-wizard listing).
   const manageHref = isDraft
     ? `/experiences/create?experienceId=${experience.id}`

@@ -8,8 +8,8 @@ export const AVATAR_LIMIT = 3;
 /**
  * Owner records as faces.
  *
- * ⚠️ The communities LIST endpoint returns no membership records — only
- * `members_count` and `owners` — so a row built from it can only ever show the
+ * ⚠️ The communities LIST endpoint returns no membership records - only
+ * `members_count` and `owners` - so a row built from it can only ever show the
  * people who run the community. The detail endpoint does return `members`,
  * which is why CommunityDiscoverCard prefers those when it has them.
  */

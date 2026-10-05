@@ -61,7 +61,7 @@ describe('the city picker', () => {
 
   /**
    * A page cannot un-grant a permission, so the switch follows the reader's
-   * own preference rather than the browser's answer — otherwise it could be
+   * own preference rather than the browser's answer - otherwise it could be
    * turned on and never off.
    */
   it('turns back off, though the permission stays granted', async () => {

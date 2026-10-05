@@ -41,7 +41,7 @@ export const SendMessage = ({
   });
 
   // The same hook the inbox's conversation composer sends through, so the two
-  // cannot drift apart — and a message sent here shows up in that conversation
+  // cannot drift apart - and a message sent here shows up in that conversation
   const { mutate: sendMessage, isPending, isSuccess, isError } = useSendMessageTo();
 
   function onSubmit(values: z.infer<typeof formSchema>) {

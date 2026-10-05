@@ -15,11 +15,11 @@ interface SeeAllCardProps {
 
 /**
  * The last tile in a horizontal row, where the reader runs out of cards. The
- * canvas has exactly this — a square, quietly bordered, with three photos of
+ * canvas has exactly this - a square, quietly bordered, with three photos of
  * what lies beyond fanned above the label.
  *
  * It aligns to the top of the row and matches the height of the cards' IMAGES,
- * not the full card — otherwise it would stretch past them to cover the title
+ * not the full card - otherwise it would stretch past them to cover the title
  * and price beneath.
  *
  * ⚠️ The canvas expands the rail in place here. This navigates instead: the

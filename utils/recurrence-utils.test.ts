@@ -31,7 +31,7 @@ describe('recurrence-utils', () => {
   });
 
   describe('parseRecurrenceRule', () => {
-    // RRule weekday numbers start at Monday, not Sunday — MO=0 must map to 'mon'
+    // RRule weekday numbers start at Monday, not Sunday - MO=0 must map to 'mon'
     it('maps RRule weekdays to the right day keys', () => {
       const parsed = parseRecurrenceRule(
         'DTSTART:20260601T090000Z\nRRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;UNTIL=20260831T235959Z',

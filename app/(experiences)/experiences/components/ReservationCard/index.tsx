@@ -80,7 +80,7 @@ export const ReservationCard = ({
             <button
               type="button"
               onClick={(e) => {
-                // The card is wrapped in a link to the experience — keep the
+                // The card is wrapped in a link to the experience - keep the
                 // ticket action from also triggering that navigation
                 e.preventDefault();
                 e.stopPropagation();

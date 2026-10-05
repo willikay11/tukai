@@ -20,7 +20,7 @@ export interface DatePickerProps {
   /**
    * The span this field is one end of. Given either, the calendar shades the
    * days between them, so a pair of fields reads as one range rather than as
-   * two unrelated days — the canvas's `range-start` and `range-end`.
+   * two unrelated days - the canvas's `range-start` and `range-end`.
    */
   rangeStart?: string;
   rangeEnd?: string;

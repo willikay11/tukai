@@ -159,7 +159,7 @@ describe('Bookmark', () => {
 
   /**
    * The state was seeded once at mount. A card that re-read its experience
-   * after a save — which is what the reader sees on coming back to the page —
+   * after a save - which is what the reader sees on coming back to the page -
    * kept showing the empty basket until it was unmounted and built again.
    */
   it('follows the saved state when its card re-reads', () => {
@@ -173,8 +173,8 @@ describe('Bookmark', () => {
   });
   /**
    * The confirmation beat. `animate-pop` is a one-shot, so it has to be absent
-   * on arrival — otherwise every already-saved card on a page would pop at once
-   * on load — and it has to be cleared afterwards so a second save replays it.
+   * on arrival - otherwise every already-saved card on a page would pop at once
+   * on load - and it has to be cleared afterwards so a second save replays it.
    */
   describe('the save beat', () => {
     it('does not play for something that arrived already saved', () => {

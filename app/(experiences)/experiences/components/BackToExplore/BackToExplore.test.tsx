@@ -38,7 +38,7 @@ describe('BackToExplore', () => {
   });
 
   // A flex item stretches to fill the cross axis, so inside a `flex-col`
-  // parent — the see-all header on mobile — this spanned the full width
+  // parent - the see-all header on mobile - this spanned the full width
   it('never spans the full width of its parent', () => {
     render(<BackToExplore variant="pill" label="Back" />);
 

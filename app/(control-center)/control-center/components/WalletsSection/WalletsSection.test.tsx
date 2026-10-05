@@ -68,7 +68,7 @@ describe('walletLabel', () => {
 
 /**
  * Exactly one wallet takes the payouts, and nothing in the app called
- * `set-active` — so a host with two accounts could not choose.
+ * `set-active` - so a host with two accounts could not choose.
  */
 describe('activeWallet', () => {
   it('is the one the API flagged', () => {

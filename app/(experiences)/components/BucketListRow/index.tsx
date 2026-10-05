@@ -13,7 +13,7 @@ import { CANVAS_ICONS } from '@/utils/canvas-icons';
  * on it and how much is in it.
  *
  * ⚠️ Only one face. The list endpoint carries `member_count` but no membership
- * records — the detail endpoint is the only place those live — so the pile is
+ * records - the detail endpoint is the only place those live - so the pile is
  * the owner, and the "+N" is everyone else counted but not described.
  */
 export const BucketListRow = ({

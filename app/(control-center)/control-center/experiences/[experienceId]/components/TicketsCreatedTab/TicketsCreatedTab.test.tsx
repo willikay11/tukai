@@ -129,7 +129,7 @@ describe('pausing ticket sales', () => {
 
 /**
  * The canvas shows seven figures under each ticket type, in its own order and
- * wording — "Ticket currency", not "Currency", and the currency written out.
+ * wording - "Ticket currency", not "Currency", and the currency written out.
  */
 describe('the per-ticket stat block', () => {
   beforeEach(() => {

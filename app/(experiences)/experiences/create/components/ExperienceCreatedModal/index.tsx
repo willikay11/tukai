@@ -11,7 +11,7 @@ interface ExperienceCreatedModalProps {
   onOpenChange: (open: boolean) => void;
   experienceId?: string;
   /**
-   * Where the button goes, for callers whose subject is not an experience — a
+   * Where the button goes, for callers whose subject is not an experience - a
    * requested table reservation, say. Without it the destination is derived
    * from `experienceId` as before.
    */

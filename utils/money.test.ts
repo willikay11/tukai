@@ -11,7 +11,7 @@ describe('moneyAmount', () => {
     expect(moneyAmount(1500)).toBe(1500);
   });
 
-  // Nothing is not zero — the caller decides what an absent amount means
+  // Nothing is not zero - the caller decides what an absent amount means
   it('answers null for nothing at all', () => {
     expect(moneyAmount(null)).toBeNull();
     expect(moneyAmount(undefined)).toBeNull();

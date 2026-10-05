@@ -102,7 +102,7 @@ export const ItineraryDaysStep = ({
     }
 
     // Dropping a persisted day locally would leave the row orphaned in the DB
-    // — the exact bug this handler exists to fix — so refuse rather than lie
+    // - the exact bug this handler exists to fix - so refuse rather than lie
     if (!onDeleteDay) {
       console.error('ItineraryDaysStep: onDeleteDay is not wired; refusing to remove a saved day');
       return;

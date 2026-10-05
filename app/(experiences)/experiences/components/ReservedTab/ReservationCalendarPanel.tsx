@@ -40,7 +40,7 @@ interface ReservationCalendarPanelProps {
   onViewTicket: (item: PanelItem) => void;
   onAcceptInvite?: (item: PanelItem) => void;
   onDeclineInvite?: (item: PanelItem) => void;
-  // No accept/decline endpoint exists yet — see ReservedTab
+  // No accept/decline endpoint exists yet - see ReservedTab
   invitesActionable?: boolean;
 }
 

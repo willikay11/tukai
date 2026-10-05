@@ -39,7 +39,7 @@ export const notificationIcon = (notification: AppNotification): string =>
   NOTIFICATION_ICON.uncategorized;
 
 /**
- * New first, then the rest — the canvas's two groups. Order within each is the
+ * New first, then the rest - the canvas's two groups. Order within each is the
  * API's, which is newest first.
  */
 export const splitByRead = (notifications: AppNotification[]) => ({

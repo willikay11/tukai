@@ -81,7 +81,7 @@ export const ControlCenterContent = () => {
     Boolean(userId),
   );
   // hosted_by also matches experiences this user only co-hosts, so ownership is
-  // enforced here — everything downstream (metrics, purchases, sections) then
+  // enforced here - everything downstream (metrics, purchases, sections) then
   // sees only the host's own experiences
   const experiences: Experience[] = (hostedResponse?.data?.results ?? []).filter(
     (experience: Experience) => isHostedBy(experience, userId),

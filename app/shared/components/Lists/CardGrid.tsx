@@ -10,7 +10,7 @@ import { usePagedItems } from './usePagedItems';
  * A section heading over a grid the heading's arrows page.
  *
  * The canvas lays some sections out as a rail you scroll and others as a grid
- * that fills the row and pages — same header, different body. This is the
+ * that fills the row and pages - same header, different body. This is the
  * grid half; {@link CardRail} is the other.
  */
 export const CardGrid = <T,>({
@@ -34,7 +34,7 @@ export const CardGrid = <T,>({
 }) => {
   const paged = usePagedItems(items, pageSize);
 
-  // Everything already fits, so the arrows could never do anything — they are
+  // Everything already fits, so the arrows could never do anything - they are
   // left out rather than drawn and greyed, the same as a rail that cannot
   // scroll
   const canPage = paged.pageCount > 1;

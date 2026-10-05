@@ -184,8 +184,8 @@ describe('JoinCommunityPanel', () => {
   });
 
   /**
-   * The community page lost its auth gate in the merge — it is public to read
-   * now — so a reader without an account reaches this button.
+   * The community page lost its auth gate in the merge - it is public to read
+   * now - so a reader without an account reaches this button.
    */
   describe('a reader who is not signed in', () => {
     it('is asked to sign in rather than joining', async () => {

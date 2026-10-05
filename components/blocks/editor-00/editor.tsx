@@ -15,8 +15,8 @@ import { Plugins } from './plugins';
  * Seeds the editor from stored HTML.
  *
  * Lexical's own parser is what makes the round trip hold: it restores every
- * format the toolbar can apply — bold, italic, underline, strikethrough, code,
- * headings, lists and alignment — where hand-rolled loaders have to know about
+ * format the toolbar can apply - bold, italic, underline, strikethrough, code,
+ * headings, lists and alignment - where hand-rolled loaders have to know about
  * each tag and silently drop the ones they do not.
  */
 const editorStateFromHtml = (html: string) => (editor: LexicalEditor) => {

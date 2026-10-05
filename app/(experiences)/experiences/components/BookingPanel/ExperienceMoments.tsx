@@ -5,7 +5,7 @@ import { ContextMoments } from '@/app/shared/components/Moments';
 /**
  * The booking panel's moments tab.
  *
- * Everything here is the shared {@link ContextMoments} — this only shapes an
+ * Everything here is the shared {@link ContextMoments} - this only shapes an
  * experience into it, including the place and community a moment posted here
  * will also surface in.
  */

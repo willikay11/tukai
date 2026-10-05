@@ -212,7 +212,7 @@ describe('IconComponent', () => {
   });
 
   /**
-   * The style is the package an icon comes from, not a prop on the icon — so a
+   * The style is the package an icon comes from, not a prop on the icon - so a
    * variant only exists here once its package is a dependency.
    */
   describe('rendering with bulk variant', () => {

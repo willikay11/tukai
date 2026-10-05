@@ -62,7 +62,7 @@ export const isUpcoming = (item: ReservationView, now: number = Date.now()): boo
  * One card per reserved EXPERIENCE.
  *
  * The upcoming cards used to be built from ticket purchases, which the API
- * returns one row per ticket and which we group per occurrence — so an
+ * returns one row per ticket and which we group per occurrence - so an
  * experience booked on several dates produced several cards for the same
  * experience. The experiences endpoint already reports reserved_tickets_count
  * and reserved_tickets_amount per experience, so that is the honest source for
@@ -152,7 +152,7 @@ export const isExperienceUpcoming = (
 };
 
 // A reservation that is over: it has a date, and that date has passed. Kept
-// visible in its own section so nothing a user booked silently disappears —
+// visible in its own section so nothing a user booked silently disappears -
 // the alternative was reaching it only by paging the calendar back a month.
 export const isExperiencePast = (
   item: ExperienceReservationView,

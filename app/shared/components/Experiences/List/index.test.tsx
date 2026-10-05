@@ -52,7 +52,7 @@ const PAGE_SIZE = 12;
 const TOTAL = 20;
 
 // The reset effect depends on `setPage` identity, so every render in a test
-// must share one instance — exactly as a real parent does with useState.
+// must share one instance - exactly as a real parent does with useState.
 const fixedProps = () => ({
   type: 'discover' as const,
   className: '',

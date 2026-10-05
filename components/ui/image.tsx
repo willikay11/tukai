@@ -49,7 +49,7 @@ export const TukaiImage = ({
             setIsLoaded(true);
           }}
           // `priority` and `loading="lazy"` together throw, and props spread
-          // after this line — so the default only applies when nothing above
+          // after this line - so the default only applies when nothing above
           // the fold has asked for the opposite
           {...(props.priority ? {} : { loading: 'lazy' as const })}
           {...props}

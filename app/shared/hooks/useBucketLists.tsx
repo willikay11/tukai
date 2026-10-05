@@ -16,7 +16,7 @@ import {
 import { AddBucketListItemPayload, BucketList, CreateBucketListPayload } from '@/types/bucket-list';
 
 /**
- * Every list the reader can see — the ones they own and the ones they were
+ * Every list the reader can see - the ones they own and the ones they were
  * invited onto. The API returns them together; `isMember` is what tells the two
  * apart, so the split is made here rather than in a second request.
  */
@@ -81,7 +81,7 @@ export const useDeleteBucketList = () => {
 /**
  * A saved item is a bookmark that also belongs to a list, so saving one flips
  * `is_bookmarked` on the experience or place it points at. The lists holding it
- * are not the only thing that went stale — every card showing that experience
+ * are not the only thing that went stale - every card showing that experience
  * or place is now wrong until its query is re-read.
  */
 const invalidateSaved = (queryClient: ReturnType<typeof useQueryClient>, bucketListId: string) => {

@@ -63,7 +63,7 @@ describe('ExperienceOrganiser', () => {
 
   /**
    * On a phone the host name and the button shared one narrow row, so a long
-   * name wrapped to two lines and the button — sized `h-full` — stretched down
+   * name wrapped to two lines and the button - sized `h-full` - stretched down
    * the side of it.
    */
   describe('the layout on a narrow screen', () => {

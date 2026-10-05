@@ -17,7 +17,7 @@ import { CommunityPostsQueryParams, CreateCommunity } from '@/types/community';
 
 /**
  * A single community, for the membership records the LIST endpoint leaves out.
- * Only the detail endpoint returns `members` with their user objects — the list
+ * Only the detail endpoint returns `members` with their user objects - the list
  * carries just `members_count` and `owners`.
  *
  * Cached long, and keyed by id: a grid of cards each asks for its own, and the
@@ -172,7 +172,7 @@ export const useCreateCommunityPhotos = () => {
 /**
  * Opens the community's verification application. Proof-of-ownership documents
  * hang off it, so this runs before any document upload. The API rejects a
- * second application while one is PENDING or UNDER_REVIEW — the caller treats
+ * second application while one is PENDING or UNDER_REVIEW - the caller treats
  * that as "already open" rather than as a failure.
  */
 export const useSubmitCommunityVerification = () => {

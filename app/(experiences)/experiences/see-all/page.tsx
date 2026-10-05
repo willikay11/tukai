@@ -11,7 +11,7 @@ export default function SeeAllExperiencesPage({
 }) {
   const type = searchParams?.type;
 
-  // An unknown or missing type has no section to render — send them back to
+  // An unknown or missing type has no section to render - send them back to
   // the listing rather than showing an empty shell
   if (!isSeeAllType(type)) {
     redirect('/experiences');

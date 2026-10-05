@@ -43,7 +43,7 @@ const items = [
 ];
 
 // The panel opens on the current month, so the fixtures below only make sense
-// against a pinned clock — otherwise these pass today and fail next month
+// against a pinned clock - otherwise these pass today and fail next month
 beforeAll(() => {
   jest.useFakeTimers({ now: new Date('2026-08-20T12:00:00Z') });
 });

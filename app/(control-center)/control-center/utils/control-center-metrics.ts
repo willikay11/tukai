@@ -6,7 +6,7 @@ import { Experience } from '@/types/experience';
 /**
  * Metrics for the Control Center landing page.
  *
- * Revenue, tickets sold and experience counts are REAL — the experiences
+ * Revenue, tickets sold and experience counts are REAL - the experiences
  * endpoint returns per-experience host figures (tickets_sold, total_amount_sold)
  * when you own the experience, and these sum them.
  *
@@ -69,7 +69,7 @@ const placeholderMonthlyRevenue = (total: number): { month: string; amount: numb
  * Whether this user actually owns the experience.
  *
  * The API's hosted_by filter also returns experiences you are a CO-HOST on, so
- * the control center was listing other people's experiences — and counting their sales
+ * the control center was listing other people's experiences - and counting their sales
  * in the host's own figures. Ownership is the host id, not co-host membership.
  */
 export const isHostedBy = (experience: Experience, userId: string | null | undefined): boolean =>

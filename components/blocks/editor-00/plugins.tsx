@@ -32,7 +32,7 @@ export function Plugins() {
           // (the create-experience side panel, the inline edit panels), where
           // the controls used to compress into each other.
           //
-          // `[&>*]:flex-shrink-0` is what makes it scroll — without it the
+          // `[&>*]:flex-shrink-0` is what makes it scroll - without it the
           // children give up their width to fit and there is nothing to
           // overflow. The dropdowns portal to the body, so the clipping this
           // container introduces does not reach them.

@@ -13,7 +13,7 @@ export const MomentsGridSection = ({
   moments,
   isLoading,
 }: {
-  // Whoever they were posted at — a community, or a place
+  // Whoever they were posted at - a community, or a place
   hostName: string;
   moments: Moment[];
   isLoading: boolean;

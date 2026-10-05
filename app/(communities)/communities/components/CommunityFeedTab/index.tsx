@@ -28,7 +28,7 @@ import { COMMUNITY_GRID, COMMUNITY_GRID_COLLAPSED } from '../grid';
  * How many followed communities the two feeds below fan out across.
  *
  * Neither `/experiences/` nor `/moments/` can be asked about more than one
- * community at a time — a repeated `community` parameter is last-wins, not an
+ * community at a time - a repeated `community` parameter is last-wins, not an
  * OR, and a comma-joined one is a 400. So "what is happening across everything
  * I follow" costs one request per community, and the cap is what keeps a
  * reader who follows thirty of them from opening thirty connections.
@@ -62,7 +62,7 @@ export interface CommunityFeedTabProps {
   isSignedIn: boolean;
   /** Which slice of the reader's communities this tab is: their follows, or the ones they run. */
   query: { following?: boolean; createdBy?: string };
-  /** Heading over the grid — "Following", "Created or Hosted by You". */
+  /** Heading over the grid - "Following", "Created or Hosted by You". */
   listHeading: string;
   signedOutMessage: string;
   signedOutBlurb: string;

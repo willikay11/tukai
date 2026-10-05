@@ -71,7 +71,7 @@ const NotificationRow = ({
 
 /**
  * What has happened, newest first, with what is new kept apart from what has
- * been seen — the canvas's two groups.
+ * been seen - the canvas's two groups.
  */
 export const NotificationsTab = () => {
   const { toast } = useToast();

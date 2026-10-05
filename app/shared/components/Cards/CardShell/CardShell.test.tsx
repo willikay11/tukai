@@ -36,7 +36,7 @@ describe('CardShell', () => {
   });
 
   /**
-   * The canvas draws card media square — 33 of its 40 ratios are 1:1, where
+   * The canvas draws card media square - 33 of its 40 ratios are 1:1, where
    * ours are 4:3. The default keeps today's shape so adopting the shell moves
    * nothing; each screen's own task flips it as that screen is diffed.
    */

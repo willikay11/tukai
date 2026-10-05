@@ -14,7 +14,7 @@ import { PRESSABLE } from '@/app/shared/components/Motion';
  * they drifted to different greens.
  *
  * Distinct from `CategoryPill` in `components/ui`, which is the deep-green chip
- * the create and interests flows *pick* categories with — choosing what
+ * the create and interests flows *pick* categories with - choosing what
  * something is, rather than narrowing what is on screen.
  */
 export const FilterPill = ({
@@ -46,7 +46,7 @@ export const FilterPill = ({
   >
     {icon && <IconComponent iconName={icon} size={18} />}
     <span
-      // 600 chosen, 500 resting — the canvas's own weights for a chip
+      // 600 chosen, 500 resting - the canvas's own weights for a chip
       className={clsx('text-nowrap text-xs', icon && 'ml-2', {
         'font-semibold text-brand': isSelected,
         'font-medium text-gray-800': !isSelected,

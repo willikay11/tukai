@@ -27,7 +27,7 @@ function notifyRefreshSubscribers(token: string) {
   refreshSubscribers = [];
 }
 
-// Request interceptor — attach the latest access token before every call.
+// Request interceptor - attach the latest access token before every call.
 authenticatedApi.interceptors.request.use(async (config) => {
   const session = await getSession();
 
@@ -43,7 +43,7 @@ authenticatedApi.interceptors.request.use(async (config) => {
   return config;
 });
 
-// Response interceptor — retry once on 401/403 after forcing a session refresh.
+// Response interceptor - retry once on 401/403 after forcing a session refresh.
 authenticatedApi.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -51,7 +51,7 @@ authenticatedApi.interceptors.response.use(
     const status = error.response?.status;
 
     if ((status === 401 || status === 403) && !originalRequest._retry) {
-      // Another refresh is already in progress — wait for it to finish.
+      // Another refresh is already in progress - wait for it to finish.
       if (isRefreshing) {
         return new Promise((resolve) => {
           refreshSubscribers.push((newToken: string) => {
@@ -99,7 +99,7 @@ authenticatedApi.interceptors.response.use(
   },
 );
 
-// Async factory kept for backward compatibility — all callers use
+// Async factory kept for backward compatibility - all callers use
 // `const api = await apiWithToken()` then immediately call one method on it.
 export const apiWithToken = async (_token?: string): Promise<AxiosInstance> => {
   return authenticatedApi;

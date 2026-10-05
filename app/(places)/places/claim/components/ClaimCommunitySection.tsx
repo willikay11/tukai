@@ -12,7 +12,7 @@ import { SectionShell } from '@/app/shared/components/Sections';
 import { Community } from '@/types/community';
 
 /**
- * A place is owned by a community, never by a person — so the claim opens on
+ * A place is owned by a community, never by a person - so the claim opens on
  * the communities this reader hosts, picked through the same selector step 1
  * of the create-experience flow uses.
  */

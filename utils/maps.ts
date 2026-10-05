@@ -3,7 +3,7 @@
  *
  * Google's cross-platform `maps/search/?api=1` URL hands off to the installed
  * Maps app on Android and iOS and falls back to the web everywhere else, so no
- * platform sniffing is needed — and unlike a `comgooglemaps://` scheme it does
+ * platform sniffing is needed - and unlike a `comgooglemaps://` scheme it does
  * not dead-end when the app is not installed.
  *
  * Returns null when there is nothing to search for, so a caller can leave the
@@ -12,7 +12,7 @@
 export const mapsHref = ({
   lat,
   lng,
-  // Used when the place carries no coordinates — a name and city still find it
+  // Used when the place carries no coordinates - a name and city still find it
   query,
 }: {
   lat?: number;

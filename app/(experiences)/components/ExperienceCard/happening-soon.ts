@@ -11,7 +11,7 @@ export const SOON_LIMIT = 9;
  * When an experience next happens, or null when it is over.
  *
  * A recurring experience's `start_date` is when the series began, which can be
- * months back — the rule is what says when it next runs, so that is what is
+ * months back - the rule is what says when it next runs, so that is what is
  * read. A series whose UNTIL has passed is finished and drops out.
  */
 export const nextStart = (experience: Experience, now: Date): Date | null => {
@@ -33,7 +33,7 @@ export const nextStart = (experience: Experience, now: Date): Date | null => {
  *
  * ⚠️ The window is applied here rather than asked for. `GET /experiences/`
  * takes a single `date`, not a range, so there is no way to ask the API for a
- * fortnight — the rail reads a larger page and narrows it. If the city ever
+ * fortnight - the rail reads a larger page and narrows it. If the city ever
  * holds more experiences than that page, one starting soon could be missed;
  * the rail would still be true about everything it shows.
  */

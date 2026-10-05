@@ -1,8 +1,8 @@
 /**
  * Canvas icon names to {@link IconComponent} names.
  *
- * The design canvas names Hugeicons directly — `hgi-ticket-01`, `hgi-compass`
- * — and the app already draws from that library, so an icon is a lookup rather
+ * The design canvas names Hugeicons directly - `hgi-ticket-01`, `hgi-compass`
+ * - and the app already draws from that library, so an icon is a lookup rather
  * than a judgement call. 90 of the 95 icons the canvas uses convert by one
  * rule; the five that do not are listed below with the reason.
  *

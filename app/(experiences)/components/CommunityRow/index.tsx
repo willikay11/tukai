@@ -19,7 +19,7 @@ const ICON_LIMIT = 4;
  * name, who runs it with how many have joined, and what it is about.
  *
  * ⚠️ The faces are the community's OWNERS. The list endpoint returns no
- * membership records at all — only `members_count` and `owners` — so the "+N"
+ * membership records at all - only `members_count` and `owners` - so the "+N"
  * beside them is everyone else counted but not described. One request per row
  * would describe them; eight requests to draw eight facepiles would not be
  * worth it.

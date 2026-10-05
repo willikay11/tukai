@@ -56,7 +56,7 @@ export const BottomNavigation = () => {
   }, [lastScrollY]);
 
   // A single experience puts its booking bar along the bottom edge, and that
-  // CTA is the point of the page — two bars would sit on top of each other
+  // CTA is the point of the page - two bars would sit on top of each other
   if (isDetailPage(pathname)) return null;
 
   // Same reason, for a tab rather than a route: "My Communities" floats its

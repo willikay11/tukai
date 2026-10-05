@@ -17,8 +17,8 @@ import { useAuthDialog } from '@/context/AuthDialogContext';
 /**
  * Writing a review, from the reviews section's own header.
  *
- * Everything here already existed — the {@link AddReview} drawer, the create
- * and photo-upload hooks — it simply had no entry point on the redesigned
+ * Everything here already existed - the {@link AddReview} drawer, the create
+ * and photo-upload hooks - it simply had no entry point on the redesigned
  * place page. Photos upload against the review the create call returns, which
  * the drawer sequences itself.
  */

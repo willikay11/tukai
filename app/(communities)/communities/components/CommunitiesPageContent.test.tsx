@@ -294,7 +294,7 @@ describe('CommunitiesPageContent', () => {
     });
 
     // Cards in a matrix, not one per row: the page is browsed, not scanned.
-    // Scoped to the listing — PageContainer is itself a 12-column grid.
+    // Scoped to the listing - PageContainer is itself a 12-column grid.
     it('lays the cards out as a grid', () => {
       render(<CommunitiesPageContent />);
 
@@ -315,7 +315,7 @@ describe('CommunitiesPageContent', () => {
       );
     });
 
-    // Descriptions are stored as HTML — the markup used to leak into the card
+    // Descriptions are stored as HTML - the markup used to leak into the card
     it('shows the description as text, not markup', () => {
       render(<CommunitiesPageContent />);
 
@@ -359,7 +359,7 @@ describe('CommunitiesPageContent', () => {
       sessionState = { data: null, status: 'unauthenticated' };
     });
 
-    // Discover is public — the page used to bounce them at the door
+    // Discover is public - the page used to bounce them at the door
     it('still browses Discover', () => {
       render(<CommunitiesPageContent />);
 
@@ -386,8 +386,8 @@ describe('CommunitiesPageContent', () => {
 });
 
 /**
- * A 429 from the API used to render as "No communities right now" — the same
- * screen as a genuinely empty result — because the service resolves rather than
+ * A 429 from the API used to render as "No communities right now" - the same
+ * screen as a genuinely empty result - because the service resolves rather than
  * throws, so React Query never reports an error.
  */
 describe('when the request fails', () => {

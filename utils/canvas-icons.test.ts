@@ -6,7 +6,7 @@ import { CANVAS_ICONS, canvasIcon } from './canvas-icons';
 /**
  * Every icon name the design canvas uses, extracted from its source. The point
  * of this test is that all of them resolve to an icon that actually exists in
- * the installed set — a name that does not resolve renders nothing at all, and
+ * the installed set - a name that does not resolve renders nothing at all, and
  * a blank space in a card is easy to miss in review.
  */
 const CANVAS_NAMES = fs

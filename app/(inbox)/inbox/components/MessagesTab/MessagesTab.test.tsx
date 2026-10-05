@@ -50,8 +50,8 @@ describe('the messages tab', () => {
   });
 
   /**
-   * The API has no threads — one flat list of every message the reader is
-   * party to — so the conversations are grouped here.
+   * The API has no threads - one flat list of every message the reader is
+   * party to - so the conversations are grouped here.
    */
   it('lists a conversation per person', () => {
     messages = [fromThem(), fromThem({ id: 'm2', sender: { id: 'other', displayName: 'Kevo' } })];

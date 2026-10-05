@@ -8,7 +8,7 @@ import { mapsHref } from '@/utils/maps';
 export const OpenInMapsLink = ({
   lat,
   lng,
-  // Used when the place carries no coordinates — a name and city still find it
+  // Used when the place carries no coordinates - a name and city still find it
   query,
   className,
   children,
@@ -17,7 +17,7 @@ export const OpenInMapsLink = ({
   lng?: number;
   query?: string;
   className?: string;
-  // What reads as the link — the place's own location line, typically
+  // What reads as the link - the place's own location line, typically
   children: ReactNode;
 }) => {
   const href = mapsHref({ lat, lng, query });

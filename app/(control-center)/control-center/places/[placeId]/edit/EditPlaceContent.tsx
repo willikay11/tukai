@@ -48,7 +48,7 @@ const STEP_FOR_FIELD: Record<string, StepId> = {
   socialLinks: 'social-links',
 };
 
-// Free or paid entry is not a field on a place — the API has no such column —
+// Free or paid entry is not a field on a place - the API has no such column -
 // so it is kept as the property of this name, which is also how it reaches the
 // place page. The pill and the Properties row are therefore one value.
 const ENTRY_KEY = 'Entry';
@@ -86,8 +86,8 @@ const toSocialLinkValues = (links: PlaceSocialLink[] = []): SocialLinkValue[] =>
  * The three steps of editing a place: what it is, the details people scan, and
  * where else it lives online.
  *
- * Laid out as the create-experience wizard is — the same pill tabs over one
- * form — because it is the same job: a long form broken into parts that each
+ * Laid out as the create-experience wizard is - the same pill tabs over one
+ * form - because it is the same job: a long form broken into parts that each
  * fit on a screen. Everything is held here and saved once, so switching tabs
  * never loses work and one button covers all three.
  */

@@ -222,7 +222,7 @@ export interface FormData {
       // What the buyer is charged, as returned by the API once the ticket is
       // saved. Null for a draft the API has not seen yet.
       buyerPrice?: number | null;
-      // Ticket slot time (when the ticket/experience runs) — for multi-day in "entire-period" mode
+      // Ticket slot time (when the ticket/experience runs) - for multi-day in "entire-period" mode
       startTime: string | null;
       endTime: string | null;
       // Sales validity (when people can purchase)
@@ -466,7 +466,7 @@ export const useCreateExperienceFlow = ({
   }, [experience]);
 
   // Guard: Redirect to communities/create if no community.
-  // Disabled while the pre-wizard listing is showing — that screen is visible
+  // Disabled while the pre-wizard listing is showing - that screen is visible
   // to every creator, and only proceeding into the wizard requires a community.
   useEffect(() => {
     if (!enforceCommunityGuard) {
@@ -566,7 +566,7 @@ export const useCreateExperienceFlow = ({
     // query. With staleTime: 0 the query serves a (possibly incomplete) cached
     // result immediately and refetches in the background, so committing here too
     // early drops slots. Wait until the query has settled to fresh data before
-    // marking hydration done — the effect re-runs when isFetching flips to false.
+    // marking hydration done - the effect re-runs when isFetching flips to false.
     if (!!experience.recurrenceRule && (isLoadingSlotTemplates || isFetchingSlotTemplates)) {
       return;
     }
@@ -1120,7 +1120,7 @@ export const useCreateExperienceFlow = ({
 
     // Map API response to form state with correct apiIds.
     // fetchItineraryDays camel-cases the response, so day_number arrives as
-    // dayNumber — reading only the snake key left dayNumber undefined, which
+    // dayNumber - reading only the snake key left dayNumber undefined, which
     // cascaded into Invalid Date crashes in the itinerary preview
     const itineraryDays: ItineraryDayFormValue[] = apiDays.map((day: any, index: number) => ({
       id: uuidv4(),
@@ -1274,7 +1274,7 @@ export const useCreateExperienceFlow = ({
                   'Experience saved but time slots failed to update. Please try editing them again.',
                 variant: 'default',
               });
-              // Non-blocking — experience was already saved
+              // Non-blocking - experience was already saved
             }
           }
         }
@@ -1335,7 +1335,7 @@ export const useCreateExperienceFlow = ({
                   'Experience saved but time slots failed to save. You can re-add them later.',
                 variant: 'default',
               });
-              // Non-blocking — experience was already created
+              // Non-blocking - experience was already created
             }
           }
         }
@@ -1352,7 +1352,7 @@ export const useCreateExperienceFlow = ({
             try {
               await createItineraryDaysForExperience(newExperienceId, startDate, endDate);
             } catch (error) {
-              // Non-blocking — experience already created
+              // Non-blocking - experience already created
               // User can still proceed and add days later
               console.error('[handleSaveAbout] Itinerary days creation failed:', error);
               toast({
@@ -1580,7 +1580,7 @@ export const useCreateExperienceFlow = ({
       try {
         await deleteItineraryDay(experienceId, day.apiId);
 
-        // The renumbering has to land after the delete — patching survivors
+        // The renumbering has to land after the delete - patching survivors
         // first would push a day_number onto the value the doomed row still
         // holds, which the API rejects as a duplicate
         const persistedDays = remainingDays.filter((d) => d.apiId);
@@ -1639,7 +1639,7 @@ export const useCreateExperienceFlow = ({
 
   /**
    * PATCHes fees_allocation on its own. Fired as soon as the picker is clicked,
-   * so the value is passed in rather than read from formData — a click and the
+   * so the value is passed in rather than read from formData - a click and the
    * state update land in the same tick.
    *
    * Only fees_allocation is sent: re-sending the whole experience here would
@@ -1659,7 +1659,7 @@ export const useCreateExperienceFlow = ({
 
         // A new allocation re-prices every ticket, so the buyer prices the
         // saved cards show are refreshed from the same response. Skipped when
-        // the response carries no tickets — the cards keep what they had.
+        // the response carries no tickets - the cards keep what they had.
         const repricedTickets = response?.data?.tickets;
         if (Array.isArray(repricedTickets)) {
           setFormData((prev) => ({
@@ -1712,7 +1712,7 @@ export const useCreateExperienceFlow = ({
   useEffect(() => {
     if (hasAutoSelectedCommunity.current) return;
 
-    // Already chosen, or hydrated from a draft — nothing to preselect
+    // Already chosen, or hydrated from a draft - nothing to preselect
     if (formData.dateType.community) {
       hasAutoSelectedCommunity.current = true;
       return;

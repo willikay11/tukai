@@ -83,7 +83,7 @@ describe('MomentCard', () => {
     });
   });
 
-  // jsdom reports no layout, so nothing ever overflows there — the clamp is
+  // jsdom reports no layout, so nothing ever overflows there - the clamp is
   // measured, and with no measurement to make the link stays off
   it('does not offer See more when the caption fits', () => {
     render(<MomentCard moment={makeMoment()} onClick={jest.fn()} />);

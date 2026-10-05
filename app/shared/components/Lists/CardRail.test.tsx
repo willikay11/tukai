@@ -17,7 +17,7 @@ jest.mock('@/app/shared/components/Icons', () => ({
 
 /**
  * jsdom lays nothing out, so every element reports a scrollWidth and a
- * clientWidth of 0 — which is exactly the "nothing to scroll" case the rail
+ * clientWidth of 0 - which is exactly the "nothing to scroll" case the rail
  * reports as being at both ends at once. Overflow is simulated by giving the
  * scroll container a width smaller than its contents.
  */

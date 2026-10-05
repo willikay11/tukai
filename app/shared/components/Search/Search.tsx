@@ -58,7 +58,7 @@ export const Search = () => {
   const hasQuery = Boolean(query?.trim());
 
   // One debounced setter for the component's life. Building it inline per
-  // keystroke — as this did — gives every keystroke its own timer with nothing
+  // keystroke - as this did - gives every keystroke its own timer with nothing
   // to cancel, so it delays each search rather than collapsing them.
   const debouncedSetQuery = useMemo(
     () => debounce((value: string) => setQuery(value), DEBOUNCE_MS),
@@ -81,7 +81,7 @@ export const Search = () => {
 
   const showGroup = (type: SearchResultType) => typeFilter === 'all' || typeFilter === type;
 
-  // Location suggestions come from the curated cities categories — there is
+  // Location suggestions come from the curated cities categories - there is
   // no dedicated suggestions endpoint. When typing, narrow them by name.
   const cities: PlaceCategory[] = placeCategories?.data?.results ?? [];
   const suggestions = hasQuery
@@ -117,7 +117,7 @@ export const Search = () => {
   const handleSelectLocation = (category: PlaceCategory) => {
     setShowSearchResults(false);
     setSelectedCitySearchId(category.id);
-    // Only /places consumes the city filter — experiences have no city param
+    // Only /places consumes the city filter - experiences have no city param
     router.push(`/places?city=${category.id}`);
   };
 
@@ -128,7 +128,7 @@ export const Search = () => {
       inputElRef.current.value = term;
     }
     setIsFieldEmpty(!term);
-    // Skip the debounce — the term is complete, not mid-typing
+    // Skip the debounce - the term is complete, not mid-typing
     debouncedSetQuery.cancel();
     setQuery(term);
     setTypeFilter('all');
@@ -187,7 +187,7 @@ export const Search = () => {
       <PopoverAnchor asChild className="my-4 md:my-0">
         <div ref={barRef} className="w-full">
           <SearchBarShell
-            // Where the reader actually is, once that is known — "Near me"
+            // Where the reader actually is, once that is known - "Near me"
             // only while it is still being worked out
             cityLabel={isUsingLocation ? (area ?? city ?? 'Near me') : (city ?? 'Nairobi')}
             isLocationOn={isUsingLocation}

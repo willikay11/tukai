@@ -468,8 +468,8 @@ export const useFetchItineraryDays = (experienceId: string | null) =>
  *
  * A mutation rather than a query: applying a code is something the reader does,
  * and re-running it is what re-checks a code after the order changes. The
- * endpoint answers 200 either way — an unusable code comes back as
- * `{ valid: false, reason }` rather than an error — so the caller reads
+ * endpoint answers 200 either way - an unusable code comes back as
+ * `{ valid: false, reason }` rather than an error - so the caller reads
  * `valid`, not the status.
  */
 export const usePreviewPromoCode = () =>

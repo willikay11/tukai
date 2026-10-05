@@ -5,7 +5,7 @@ import { parseApiError } from '@/utils/parseApiError';
 import { parseCamelToSnake, parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 /**
- * Bucket lists — a reader's saved experiences and places, and the people they
+ * Bucket lists - a reader's saved experiences and places, and the people they
  * share them with.
  *
  * These were mocked in-memory while the endpoints 404'd. They answer now (401
@@ -33,7 +33,7 @@ export const fetchMyBucketLists = async (page = 1, pageSize = 24): Promise<ApiRe
 /**
  * Every list anyone has made public.
  *
- * Unauthenticated by design — the endpoint says so — so this uses the plain
+ * Unauthenticated by design - the endpoint says so - so this uses the plain
  * `api` instance. A reader who is not signed in still sees the section.
  */
 export const fetchPublicBucketLists = async (page = 1, pageSize = 16): Promise<ApiResponse> => {
@@ -171,7 +171,7 @@ export const removeBucketListItem = async (
 /**
  * Opens a shared list by its token.
  *
- * Public — the whole point of a share link is that it works before the reader
+ * Public - the whole point of a share link is that it works before the reader
  * has an account.
  */
 export const fetchSharedBucketList = async (shareToken: string): Promise<ApiResponse> => {
@@ -245,7 +245,7 @@ export const fetchBucketListShare = async (bucketListId: string): Promise<ApiRes
 /**
  * Sets the order items appear in, as a list of item ids.
  *
- * The whole order is sent rather than a moved id and a destination — the API
+ * The whole order is sent rather than a moved id and a destination - the API
  * takes the final sequence, so a reorder is one request however many things
  * moved.
  */

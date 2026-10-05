@@ -392,7 +392,7 @@ export const TicketsStep = ({
         }
 
         const apiId = response.data?.id;
-        // The API allocates the commission and returns what the buyer pays —
+        // The API allocates the commission and returns what the buyer pays -
         // the saved card shows that rather than the amount typed in
         const buyerPrice = response.data ? getTicketBuyerAmount(response.data) : null;
 
@@ -717,7 +717,7 @@ export const TicketsStep = ({
             </div>
           ) : (
             // Both multi-day layouts need the full date range and times before
-            // tickets can be attached to anything — say so rather than render
+            // tickets can be attached to anything - say so rather than render
             // an empty step
             <p className="text-xs text-muted-foreground">
               Add the experience start and end dates and times before creating tickets.

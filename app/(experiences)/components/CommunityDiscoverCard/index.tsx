@@ -40,7 +40,7 @@ export const CommunityDiscoverCard = ({
 
   const category = community.categories?.[0]?.name;
 
-  // ⚠️ The list endpoint returns NO membership records — only `members_count`
+  // ⚠️ The list endpoint returns NO membership records - only `members_count`
   // and `owners`. So the faces shown are the community's OWNERS, and the "+N"
   // is everyone else counted but not described. The detail endpoint does return
   // `members`, so prefer those when they are present.
@@ -48,7 +48,7 @@ export const CommunityDiscoverCard = ({
   const owners: CommunityOwner[] = community.owners ?? [];
 
   // Only worth asking when the caller wants faces and the row it was given has
-  // none — the detail endpoint is the only source of membership records
+  // none - the detail endpoint is the only source of membership records
   const { data: detail } = useCommunityDetail(
     community.id,
     showMemberAvatars && listMembers.length === 0,

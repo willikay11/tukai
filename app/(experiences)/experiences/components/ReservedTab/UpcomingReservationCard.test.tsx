@@ -37,7 +37,7 @@ const makeView = (overrides: Partial<ExperienceReservationView> = {}): Experienc
 const defaults = { shareLink: 'https://tukai.co/e/1', onDownloadAll: jest.fn() };
 
 describe('UpcomingReservationCard', () => {
-  // The amount is what this user paid, from reserved_tickets_amount — not the
+  // The amount is what this user paid, from reserved_tickets_amount - not the
   // experience's from-price
   it('shows title, amount paid with ticket count, and the date range', () => {
     render(<UpcomingReservationCard {...defaults} reservation={makeView()} />);

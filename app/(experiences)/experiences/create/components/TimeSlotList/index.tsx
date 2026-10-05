@@ -61,7 +61,7 @@ export const TimeSlotList = ({ slots, onChange, errors }: TimeSlotListProps) => 
 
           return (
             // Top-aligned so an error message under one field cannot push the
-            // other field's input out of line — the message hangs below instead
+            // other field's input out of line - the message hangs below instead
             <div key={index} className="flex items-start gap-2">
               <div className="flex-1">
                 <TimePicker

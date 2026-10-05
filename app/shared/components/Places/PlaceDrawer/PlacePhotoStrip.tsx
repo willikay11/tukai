@@ -50,7 +50,7 @@ const Arrow = ({
  *
  * Not SquarePhotoStrip: its `hero` variant is a full-width 4:3 carousel with
  * dots and its `strip` variant crops every photo square. This design does
- * neither — a wide room and a tall doorway both read as themselves.
+ * neither - a wide room and a tall doorway both read as themselves.
  *
  * ⚠️ The API sends no dimensions with a photo, so each one is laid out at an
  * assumed width and takes its real ratio once it loads. Fixing that properly

@@ -34,7 +34,7 @@ export const CategoryPill = ({
       className={clsx(
         'inline-flex w-fit cursor-pointer items-center rounded-full px-4 py-2 transition-all duration-300 ease-in-out active:scale-95 motion-reduce:transform-none',
         {
-          // The same gradient a chosen pill takes everywhere else — the pill
+          // The same gradient a chosen pill takes everywhere else - the pill
           // radio group, the property pills and the gradient button
           'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-sm': active,
           'border border-gray-100 bg-gray-100 text-gray-700 hover:text-gray-900': !active,

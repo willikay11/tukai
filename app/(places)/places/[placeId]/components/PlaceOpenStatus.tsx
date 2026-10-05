@@ -13,8 +13,8 @@ import { placeOpenState } from '@/utils/place-hours';
  * "Open now · Closes 10 PM", or "Closed · Opens 10 AM".
  *
  * ⚠️ Only a place opened to reservations has hours to read. They are not on
- * the place serializer at all — they hang off a reservation profile's
- * availability rules, two requests deep — so this renders nothing for every
+ * the place serializer at all - they hang off a reservation profile's
+ * availability rules, two requests deep - so this renders nothing for every
  * other place rather than guessing. That is also why it is not on the cards in
  * a rail: two requests per card is not a trade worth making for a line of
  * text.

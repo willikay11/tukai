@@ -25,12 +25,12 @@ export const SeeAllCitiesContent = () => {
   );
 
   // The group param is passed through, but the listing page filters client-side
-  // too — keep doing the same so a non-filtering backend can't leak other groups
+  // too - keep doing the same so a non-filtering backend can't leak other groups
   const cities: PlaceCategory[] = (response?.data?.results ?? [])
     .filter((category: PlaceCategory) => category.group === 'cities')
     .sort((a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount);
 
-  // Every destination arrives in one page, so this is the true total — unlike
+  // Every destination arrives in one page, so this is the true total - unlike
   // the experience grids, which take their count from the paginated response
   const count = isLoading ? null : cities.length;
 

@@ -196,7 +196,7 @@ describe('PageFilters', () => {
       });
     });
 
-    // The experience tabs moved to ExperiencesPageContent — PageFilters is
+    // The experience tabs moved to ExperiencesPageContent - PageFilters is
     // deliberately absent on these paths now.
     it.each(['/', '/experiences'])('renders nothing on %s', async (pathname) => {
       (nextNavigation.usePathname as jest.Mock).mockReturnValue(pathname);
@@ -222,7 +222,7 @@ describe('PageFilters', () => {
     });
 
     // The My Communities / Recommended toggle moved onto the page itself, so
-    // PageFilters is deliberately absent here — same as on /experiences.
+    // PageFilters is deliberately absent here - same as on /experiences.
     it('renders nothing on /communities', async () => {
       const { container } = renderWithProviders(<PageFilters />);
 

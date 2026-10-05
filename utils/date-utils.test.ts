@@ -56,7 +56,7 @@ describe('inferUIExperienceType', () => {
   });
 
   it('maps a recurring experience spanning multiple days to one-time, not multi-day', () => {
-    // Recurring experiences span first-to-last occurrence (here 27–29 Aug) but
+    // Recurring experiences span first-to-last occurrence (here 27-29 Aug) but
     // must stay on the one-time base type so the recurring tickets layout renders.
     expect(
       inferUIExperienceType('standard', '2026-08-27T14:00:00', '2026-08-29T21:00:00', true),

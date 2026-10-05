@@ -32,7 +32,7 @@ const rule = (dayOfWeek: number, openTime: string, closeTime: string) => ({
   slotIntervalMinutes: 60,
 });
 
-// Mon–Sun 10:00–22:00 so the assertions do not depend on which weekday the
+// Mon-Sun 10:00-22:00 so the assertions do not depend on which weekday the
 // frozen clock lands on
 const EVERY_DAY = [0, 1, 2, 3, 4, 5, 6].map((day) => rule(day, '10:00', '22:00'));
 
@@ -70,7 +70,7 @@ describe('PlaceOpenStatus', () => {
     jest.setSystemTime(new Date(2026, 7, 24, 12, 0));
   });
 
-  // Most places are not bookable, so most places have no hours — and a place
+  // Most places are not bookable, so most places have no hours - and a place
   // with no hours must not be labelled either way
   it('renders nothing when the place has no reservation profile', () => {
     usePlaceReservationProfiles.mockReturnValue({ data: { data: { results: [] } } });

@@ -24,7 +24,7 @@ export const ExperienceUnavailable = ({
 }: ExperienceUnavailableProps) => {
   const router = useRouter();
 
-  // No similar/recommended endpoint exists — the default list (same source
+  // No similar/recommended endpoint exists - the default list (same source
   // as "Happening Near You") is the closest available query
   const { data: similarResponse } = useExperiences({ page: 1, page_size: 9 }, true);
   const similarExperiences: Experience[] = (similarResponse?.data?.results ?? [])

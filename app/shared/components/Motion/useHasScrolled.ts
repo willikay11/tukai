@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 /**
  * Whether the page has scrolled past `threshold`.
  *
- * For decorations that need to know the reader has moved — a sticky panel
+ * For decorations that need to know the reader has moved - a sticky panel
  * lifting off the page, say. Passive listener, and it reads once on mount so
  * the answer is right for a page restored mid-scroll.
  */

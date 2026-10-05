@@ -42,7 +42,7 @@ const DAY_FULL: Record<string, string> = {
   sun: 'Sunday',
 };
 
-// JS weekday numbers, as returned by moment().day() — 0 = Sunday
+// JS weekday numbers, as returned by moment().day() - 0 = Sunday
 const DAY_INDEX: Record<string, number> = {
   sun: 0,
   mon: 1,
@@ -67,12 +67,12 @@ const joinDayNames = (names: string[]): string => {
   return `${names.slice(0, -1).join(', ')} & ${last}`;
 };
 
-/** "Mon, Wed & Fri" — the compact form used in the create flow's step 1 */
+/** "Mon, Wed & Fri" - the compact form used in the create flow's step 1 */
 export const formatDayLabel = (days: string[]): string =>
   joinDayNames(days.map((day) => DAY_ABBREV[day] ?? day));
 
 /**
- * "Monday, Wednesday & Friday" — the form the customer sees on the booking
+ * "Monday, Wednesday & Friday" - the form the customer sees on the booking
  * panel. Unknown values pass through, so full names can be handed in as-is.
  */
 export const formatFullDayLabel = (days: string[]): string =>
@@ -95,7 +95,7 @@ export const parseRecurrenceRule = (
     const rule = new RRule(RRule.parseString(recurrenceRule));
     const byweekday = (rule.options.byweekday ?? []) as number[];
 
-    // RRule stores these as UTC instants. Read them back in UTC too — an
+    // RRule stores these as UTC instants. Read them back in UTC too - an
     // end-of-day UNTIL would otherwise roll into the next date east of GMT.
     return {
       days: byweekday.map((day) => RRULE_DAY_KEYS[day]).filter(Boolean),
@@ -113,7 +113,7 @@ export const parseRecurrenceRule = (
  * When a recurring experience next runs, at or after `from`.
  *
  * Returns null for an unparseable rule, and for a series whose UNTIL has
- * passed — a finished series has no next run, and callers must not treat it as
+ * passed - a finished series has no next run, and callers must not treat it as
  * if it were still on.
  */
 export const nextOccurrence = (recurrenceRule: string, from: Date = new Date()): Date | null => {

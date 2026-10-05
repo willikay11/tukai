@@ -30,7 +30,7 @@ describe('MobileBookingBar', () => {
     expect(screen.queryByText(/2,500/)).not.toBeInTheDocument();
   });
 
-  // Each button lands on what it promised — not on a tab row to choose again
+  // Each button lands on what it promised - not on a tab row to choose again
   it('opens the reservation view from Buy Tickets', async () => {
     const user = userEvent.setup();
     render(<MobileBookingBar experience={experience()} />);

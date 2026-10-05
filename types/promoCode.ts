@@ -1,7 +1,7 @@
 /**
  * A host's discount code.
  *
- * The API carries far more than this — referral kinds, funders, partner
+ * The API carries far more than this - referral kinds, funders, partner
  * labels, redemption caps, minimum order values, date windows. The canvas
  * exposes three fields: the code, whether it takes a percentage or a flat
  * amount, and how much. This type covers what the API returns; the create
@@ -24,7 +24,7 @@ export type PromoCode = {
   redeemedCount: number;
   /**
    * The limits the API keeps on a code. The canvas's form sets none of them, so
-   * they are only ever read — but a code made from the mobile app or by an
+   * they are only ever read - but a code made from the mobile app or by an
    * admin can carry them, and a host looking at redemptions needs to see them.
    */
   maxRedemptions?: number | null;
@@ -46,7 +46,7 @@ export type CreatePromoCode = {
 };
 
 /**
- * Editing one. `isActive` is how the canvas's pause and resume are expressed —
+ * Editing one. `isActive` is how the canvas's pause and resume are expressed -
  * the API has no pause of its own, it has a flag.
  */
 export type UpdatePromoCode = Partial<Omit<CreatePromoCode, 'experience'>> & {

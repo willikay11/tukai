@@ -20,7 +20,7 @@ describe('buildShareMetadata', () => {
 
   /**
    * Every detail route ships an `opengraph-image.tsx`, so a 1200×630 card
-   * exists whether or not one is passed here — asking for a small card would
+   * exists whether or not one is passed here - asking for a small card would
    * waste it.
    */
   it('always asks for the large card', () => {

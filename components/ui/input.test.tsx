@@ -47,7 +47,7 @@ describe('Input', () => {
     });
 
     // The placeholder is told apart by colour alone now that the value is
-    // regular too — weighting it any lighter would only make it harder to read
+    // regular too - weighting it any lighter would only make it harder to read
     it('lightens the placeholder without shrinking it', () => {
       render(<Input placeholder="Email" />);
 

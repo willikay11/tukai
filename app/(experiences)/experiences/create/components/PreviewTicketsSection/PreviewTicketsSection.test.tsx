@@ -109,8 +109,8 @@ describe('PreviewTicketsSection', () => {
   });
 
   // TicketCard has its Validity line commented out for now, so none of the
-  // computed strings reach the DOM. Restore these cases — and the ones under
-  // "Relative Validity Units" below — when that line comes back.
+  // computed strings reach the DOM. Restore these cases - and the ones under
+  // "Relative Validity Units" below - when that line comes back.
   describe('Validity Display', () => {
     it('does not render the validity line', () => {
       const { container } = render(<PreviewTicketsSection tickets={mockTickets} />);
@@ -221,7 +221,7 @@ describe('PreviewTicketsSection', () => {
     });
   });
 
-  // Restore with the Validity line in TicketCard — see the note above.
+  // Restore with the Validity line in TicketCard - see the note above.
   //
   // describe('Relative Validity Units', () => {
   //   it('displays relative validity with hour unit', () => {

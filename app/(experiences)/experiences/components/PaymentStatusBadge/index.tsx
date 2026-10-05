@@ -12,7 +12,7 @@ export interface StatusConfig {
 //
 // Colour bands: green = settled, orange = needs attention (warning), red =
 // terminal failure, grey = inert. There is no `warning` colour token, so orange
-// is the codebase's warning colour — see `partial` below.
+// is the codebase's warning colour - see `partial` below.
 const STATUS_CONFIG: Record<string, StatusConfig> = {
   completed: { label: 'Paid', dot: 'bg-primary', text: 'text-primary' },
   paid: { label: 'Paid', dot: 'bg-primary', text: 'text-primary' },

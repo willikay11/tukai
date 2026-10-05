@@ -46,7 +46,7 @@ export const UpcomingExperiencesSection = ({
   experiences,
   isLoading,
 }: {
-  // Whoever hosts them — a community, or a place
+  // Whoever hosts them - a community, or a place
   hostName: string;
   experiences: Experience[];
   isLoading: boolean;

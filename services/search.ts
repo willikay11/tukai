@@ -20,7 +20,7 @@ const rowsOf = <T>(response: { data?: { results?: unknown[] } }): T[] =>
   (parseSnakeToCamel(response.data?.results) as T[]) ?? [];
 
 /**
- * No unified search endpoint exists — this fans out to the three per-type list
+ * No unified search endpoint exists - this fans out to the three per-type list
  * endpoints with their `search` param and returns the groups side by side.
  *
  * `perPage` caps the rows returned per type; the counts are the API's totals,
@@ -66,7 +66,7 @@ export const searchPlaces = async (
  * A search with its filters, for the results view.
  *
  * The same fan-out as {@link searchPlaces}, but each endpoint gets the
- * narrowings it understands — and only those. A type other than "all" skips
+ * narrowings it understands - and only those. A type other than "all" skips
  * the endpoints it excludes rather than fetching rows nobody will see.
  */
 export const searchAll = async (filters: SearchFilters, perPage = 24): Promise<SearchResults> => {
@@ -93,7 +93,7 @@ export const searchAll = async (filters: SearchFilters, perPage = 24): Promise<S
           search: query,
           date: filters.date,
           // The API reads a parameter's presence as a filter, so these go in
-          // only when they are on — `is_paid=false` would mean "paid: no",
+          // only when they are on - `is_paid=false` would mean "paid: no",
           // which is what we want, but `sold_out=false` matches nothing
           ...(filters.freeOnly ? { is_paid: false } : {}),
           ...(filters.availableOnly ? { sold_out: false } : {}),

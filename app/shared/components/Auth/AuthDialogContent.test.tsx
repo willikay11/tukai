@@ -18,7 +18,7 @@ const renderBox = (className?: string) =>
 describe('AuthDialogContent', () => {
   /**
    * The shared DialogContent is 720px from md and declares nothing unprefixed,
-   * so both caps are needed — an unprefixed max-width alone never reaches the
+   * so both caps are needed - an unprefixed max-width alone never reaches the
    * desktop width. Two surfaces set neither and showed the card full width.
    */
   it('caps the card at a form width, at every size', () => {

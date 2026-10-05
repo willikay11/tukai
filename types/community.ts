@@ -18,7 +18,7 @@ export type CommunityCategory = {
 };
 
 /**
- * The owner summary the LIST endpoint returns. It is not a CommunityMember —
+ * The owner summary the LIST endpoint returns. It is not a CommunityMember -
  * the list response carries no membership records at all, just this and a
  * count.
  */
@@ -42,7 +42,7 @@ export type Community = {
   status: string;
   photos: Photo[];
   location: Location;
-  // ⚠️ The LIST endpoint does not return this — only the detail endpoint does.
+  // ⚠️ The LIST endpoint does not return this - only the detail endpoint does.
   // For a list row use `membersCount` and `owners` instead.
   members: CommunityMember[];
   membersCount?: number;

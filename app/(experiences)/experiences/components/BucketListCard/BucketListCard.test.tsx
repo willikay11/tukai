@@ -85,7 +85,7 @@ describe('BucketListCard', () => {
 });
 
 /**
- * The canvas gives one card three states — a list you own, one you are on, and
+ * The canvas gives one card three states - a list you own, one you are on, and
  * a public one you could join. Two cards used to say this, and neither covered
  * all three.
  */
@@ -257,7 +257,7 @@ describe('members on the card', () => {
 
 /**
  * `cover_image` is documented as a string and arrives as the Photo object on
- * some responses — the same split that left the saved items blank on the
+ * some responses - the same split that left the saved items blank on the
  * detail page.
  */
 describe('the cover, however it arrives', () => {

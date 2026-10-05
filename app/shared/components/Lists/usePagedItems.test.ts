@@ -46,7 +46,7 @@ describe('usePagedItems', () => {
   });
 
   // A list with one page of its own is at both ends at once, which greys both
-  // arrows — the same thing a rail with nothing to scroll reports
+  // arrows - the same thing a rail with nothing to scroll reports
   it('is at both ends when everything fits on one page', () => {
     const { result } = renderHook(() => usePagedItems(items(3), 5));
 

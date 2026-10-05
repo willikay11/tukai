@@ -10,7 +10,7 @@ export type ApiTicketCondition = 'before_start' | 'before_end';
 const toNumber = moneyAmount;
 
 /**
- * The buyer amount the API sent, or null when the payload carries none —
+ * The buyer amount the API sent, or null when the payload carries none -
  * locally built draft tickets, and any ticket saved before the field existed.
  * Use this where the caller needs to tell "no buyer price" apart from a price
  * of zero; use getTicketBuyerPrice where a number is all that is needed.
@@ -129,7 +129,7 @@ export const buildAbsoluteTicketValidity = (
  * experience + occurrence.
  *
  * Status is deliberately NOT part of the key. It used to be, which split a
- * single booking across several cards the moment one of its tickets differed —
+ * single booking across several cards the moment one of its tickets differed -
  * 4 completed + 1 expired on the same occurrence rendered as two cards for the
  * same experience. The group now carries one merged status instead (see
  * mergeReservationStatus).
@@ -151,7 +151,7 @@ const USABLE = new Set(['completed', 'paid']);
 /**
  * One status for a group of tickets:
  *   1. anything awaiting payment wins, so a part-paid outing never reads as paid
- *   2. otherwise, if any ticket is usable the reservation is settled — one
+ *   2. otherwise, if any ticket is usable the reservation is settled - one
  *      expired ticket among four valid ones must not mark the booking expired
  *   3. otherwise keep what was already there (expired, failed, refunded…)
  */

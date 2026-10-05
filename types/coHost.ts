@@ -4,8 +4,8 @@ import { LinkedUser } from '@/types/user';
  * A co-host invite.
  *
  * Inviting a co-host does not make them one: the API records a PENDING invite
- * and waits for them to accept. So a host reads two lists — who is a co-host,
- * and who has been asked — and REMOVED is an invite the host withdrew.
+ * and waits for them to accept. So a host reads two lists - who is a co-host,
+ * and who has been asked - and REMOVED is an invite the host withdrew.
  */
 export type CoHostInviteStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'REMOVED';
 

@@ -30,7 +30,7 @@ const PlaceCardSkeleton = () => (
 
 /**
  * The places this host owns. Ownership is held by a community they run, and
- * `GET /places/?mine=true` resolves that server-side — the client has no owner
+ * `GET /places/?mine=true` resolves that server-side - the client has no owner
  * field on Place to filter by itself.
  */
 export const YourPlaces = () => {

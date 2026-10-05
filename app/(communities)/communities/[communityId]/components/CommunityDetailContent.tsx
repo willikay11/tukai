@@ -33,7 +33,7 @@ export const CommunityDetailContent = ({
   // still hidden behind
   const { activeId, scrollTo } = useScrollSpy(SECTION_IDS, 128);
 
-  // `community` is the only filter the experiences list honours —
+  // `community` is the only filter the experiences list honours -
   // `host_community` and `hosted_by_community` are ignored by the API
   const { data: experiencesResponse, isLoading: isLoadingExperiences } = useExperiences(
     { community: community.id, page: 1, page_size: 10 },

@@ -39,7 +39,7 @@ describe('nextStart', () => {
     expect(nextStart(over, NOW)).toBeNull();
   });
 
-  // The series start is when it began, which can be months back — the rule is
+  // The series start is when it began, which can be months back - the rule is
   // what says when it next runs
   it('reads a recurring one off its rule, not its start date', () => {
     const weekly = experience({

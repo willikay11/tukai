@@ -35,7 +35,7 @@ import { ExperienceDates } from '../dates';
 import { CreateExperienceInvites } from '../invites';
 import { CreateExperienceWallet } from '../wallet';
 
-// Derived from the zod schema — never redeclare this shape by hand
+// Derived from the zod schema - never redeclare this shape by hand
 type AboutFormData = AboutFormValues;
 
 // The Preview step shows either the captured-data summary or the customer mirror
@@ -365,7 +365,7 @@ export const CreateExperienceSteps = ({
     onStepChange?.(step);
   };
 
-  // Back to the step immediately before Preview — 'wallet' is last in all three
+  // Back to the step immediately before Preview - 'wallet' is last in all three
   // STEPS_* variants, so this holds for every experience type
   const handleKeepEditing = () => handleStepChange('wallet');
 
@@ -450,7 +450,7 @@ export const CreateExperienceSteps = ({
             tickets: isDatesTicketsFilled,
             guests: isGuestsFilled,
             wallet: hasSavedWallets,
-            // Preview is a read-only view — it is "filled" as soon as there is
+            // Preview is a read-only view - it is "filled" as soon as there is
             // something to look at
             preview: Boolean(previewExperience?.title),
           };

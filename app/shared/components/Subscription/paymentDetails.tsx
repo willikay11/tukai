@@ -20,7 +20,7 @@ export const PaymentDetails = ({
     paymentOption: string;
     verificationResponse: string;
   }) => void;
-  // Step-wiring callbacks for the in-modal flow — optional, no-ops elsewhere
+  // Step-wiring callbacks for the in-modal flow - optional, no-ops elsewhere
   onSubmitStart?: () => void;
   onError?: (message?: string) => void;
   submitLabel?: string;

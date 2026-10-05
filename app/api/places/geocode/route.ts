@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 // Resolves a Google place id to coordinates and address components. The create
 // flow stores only a place id for the experience location, but the detail view
-// renders a map — this fills that gap for the preview step.
+// renders a map - this fills that gap for the preview step.
 export async function GET(request: NextRequest) {
   try {
     const placeId = request.nextUrl.searchParams.get('placeId');

@@ -9,7 +9,7 @@ import { PlaceCategory } from '@/types/placeCategory';
  * opening hours as the fallback.
  *
  * ⚠️ We can answer none of those from a place. `/places/` returns no
- * experiences, no offers and no opening hours on the list serializer — hours
+ * experiences, no offers and no opening hours on the list serializer - hours
  * live behind `/places/{id}/availability-rules/`, one request per place, which
  * a rail of ten cards cannot spend. So the order here is what a place does
  * carry: what people made of it, then what kind of place it is.
@@ -21,7 +21,7 @@ export type PlaceFact = {
   tone: 'event' | 'plain' | 'muted';
 };
 
-/** The kind of place, from the interests group — the city ones are the area. */
+/** The kind of place, from the interests group - the city ones are the area. */
 export const placeKind = (place: Place): string | undefined =>
   place.categories?.find((category: PlaceCategory) => category.group === 'interests')?.name;
 

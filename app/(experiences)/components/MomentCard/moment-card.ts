@@ -10,7 +10,7 @@ import { Moment } from '@/types/moment';
 export const momentCaption = (moment: Pick<Moment, 'title' | 'description'>): string =>
   moment.description?.trim() || moment.title?.trim() || '';
 
-/** "2 Oct" — the compact form the byline uses under an author's name. */
+/** "2 Oct" - the compact form the byline uses under an author's name. */
 export const momentDate = (isoString: string): string => {
   const date = new Date(isoString);
   if (Number.isNaN(date.getTime())) return '';

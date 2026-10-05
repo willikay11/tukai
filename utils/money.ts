@@ -1,5 +1,5 @@
 /**
- * The API returns money as `{ amount: "20.00", currency: "KES" }` — buyer
+ * The API returns money as `{ amount: "20.00", currency: "KES" }` - buyer
  * prices, promo discounts, order totals. This reads the number out of one,
  * and also accepts the bare string or number the same field is sometimes sent
  * as, so a caller does not have to know which it got.
@@ -19,7 +19,7 @@ export const moneyAmount = (value: MoneyLike): number | null => {
 
 /**
  * The currency written out in words, the way the canvas says it: "Ticket
- * currency — Kenya shillings", and the note under a discount amount.
+ * currency - Kenya shillings", and the note under a discount amount.
  *
  * Tukai prices in shillings, and the API's only other currency is the dollar;
  * the app writes either as `KES`, `Ksh.`, `USD` or `$` depending on where the

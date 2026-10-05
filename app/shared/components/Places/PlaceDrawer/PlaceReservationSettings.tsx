@@ -38,9 +38,9 @@ const STATUS_LINES: Record<string, (name: string) => string> = {
  *
  * ⚠️ The design also shows entry fees by guest type (Residents, Visitors,
  * Kids), a max party size per booking, a buffer between bookings, and wallet
- * details. None of the first three exist on the API at all — there is no fee
+ * details. None of the first three exist on the API at all - there is no fee
  * or guest-type field anywhere, and `max_party_size` is not on the documented
- * serializer — so they are left out rather than drawn empty. The slot interval
+ * serializer - so they are left out rather than drawn empty. The slot interval
  * below IS real, and is the gap the picker steps by rather than a buffer after
  * a booking, so it is labelled as what it is.
  */

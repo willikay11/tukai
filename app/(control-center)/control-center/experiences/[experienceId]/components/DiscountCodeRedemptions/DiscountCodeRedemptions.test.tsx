@@ -23,7 +23,7 @@ const rowFor = (code: PromoCode, label: string) =>
   redemptionRows(code, 'KES').find((row) => row.label === label);
 
 /**
- * The limits are the API's, not the canvas form's — a code made on mobile or by
+ * The limits are the API's, not the canvas form's - a code made on mobile or by
  * an admin can carry any of them, and each only appears when it is set.
  */
 describe('redemptionRows', () => {
@@ -107,7 +107,7 @@ describe('the redemptions panel', () => {
   });
 
   // The API's own redemptions endpoint declares the wrong response schema, so
-  // the per-purchase list is not built — and the panel says so
+  // the per-purchase list is not built - and the panel says so
   it('admits that who used it is not available', () => {
     render(<DiscountCodeRedemptions code={promo()} currency="KES" onClose={jest.fn()} />);
 

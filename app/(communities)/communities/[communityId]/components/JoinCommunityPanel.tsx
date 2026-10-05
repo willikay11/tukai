@@ -41,7 +41,7 @@ const nameOf = (member: CommunityMember) =>
  * states are kept apart so the button never offers to leave a community the
  * reader has not actually been let into yet.
  *
- * A record whose status the API leaves out counts as a member — membership is
+ * A record whose status the API leaves out counts as a member - membership is
  * what having the record means, and the alternative would strand the reader on
  * a pending state they cannot act on.
  */

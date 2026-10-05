@@ -20,10 +20,10 @@ const ICON_SHADOW = '[filter:drop-shadow(0_1px_3px_rgba(1,51,52,.55))]';
  * Saves an experience or a place onto one of the reader's bucket lists.
  *
  * One treatment everywhere: the basket over a photo, which fills in once the
- * thing is saved. The bookmark-pin variant this used to carry is gone — two
+ * thing is saved. The bookmark-pin variant this used to carry is gone - two
  * icons for one action read as two different features.
  *
- * `className` styles the ICON, not the button — it is where a caller sets the
+ * `className` styles the ICON, not the button - it is where a caller sets the
  * colour the basket needs against whatever it is sitting on.
  *
  * Which list is a choice, so pressing it opens the picker rather than toggling

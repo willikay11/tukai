@@ -5,7 +5,7 @@ import { PhotoImage } from '@/app/shared/components/Images';
 
 interface PreviewLocationSectionProps {
   location: string | null;
-  // Tukai place photo — Google picks have none and keep the icon tile
+  // Tukai place photo - Google picks have none and keep the icon tile
   imageUrl?: string | null;
   label?: string;
   onEdit?: () => void;

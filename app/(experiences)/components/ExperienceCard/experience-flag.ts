@@ -7,7 +7,7 @@ export type ExperienceFlag = { text: string; icon: string };
 /**
  * The pill over an experience's photo, or null when there is nothing to say.
  *
- * The canvas carries three — "Sold out", "Recurring" and "Free" — and never
+ * The canvas carries three - "Sold out", "Recurring" and "Free" - and never
  * two at once, but does not say which wins when more than one applies. Sold
  * out leads here because it is the only one that changes whether the reader
  * can act on the card at all; a free experience that cannot be joined is
@@ -46,7 +46,7 @@ export const experiencePriceLine = (experience: Experience): string => {
 };
 
 /**
- * Who is running this — the line above the title.
+ * Who is running this - the line above the title.
  *
  * Most experiences are run by a community. A guided tour is not: its
  * `experience_type` is `guide_booking` and it is auto-provisioned behind a

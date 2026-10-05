@@ -11,7 +11,7 @@ let trigger: ((entries: { isIntersecting: boolean }[]) => void) | null = null;
 const originalObserver = global.IntersectionObserver;
 
 const installObserver = () => {
-  // @ts-expect-error — a stand-in for the browser's observer
+  // @ts-expect-error - a stand-in for the browser's observer
   global.IntersectionObserver = class {
     constructor(callback: (entries: { isIntersecting: boolean }[]) => void) {
       trigger = callback;
@@ -82,9 +82,9 @@ describe('RevealOnScroll', () => {
     expect(container.firstElementChild).toHaveClass('opacity-0');
   });
 
-  // No observer means no way to know — showing the content beats hiding it
+  // No observer means no way to know - showing the content beats hiding it
   it('renders revealed where IntersectionObserver is unavailable', () => {
-    // @ts-expect-error — removing it for this case
+    // @ts-expect-error - removing it for this case
     global.IntersectionObserver = undefined;
 
     const { container } = render(

@@ -9,10 +9,10 @@ import { Figtree } from 'next/font/google';
  *
  * Figtree rather than one of the other near-matches for Satoshi: the app sets
  * `font-black` in 23 places, and Manrope and Plus Jakarta Sans both stop at
- * 800 — those would be faux-bolded by the browser, which is the problem this
+ * 800 - those would be faux-bolded by the browser, which is the problem this
  * swap is fixing.
  *
- * No `weight`, so the variable font ships: one file covering 300–900, where
+ * No `weight`, so the variable font ships: one file covering 300-900, where
  * the five static Satoshi cuts it replaces carried 300, 400, 500, 800 and 900
  * and left `font-semibold` (293 uses) and `font-bold` (254) to be synthesised.
  */

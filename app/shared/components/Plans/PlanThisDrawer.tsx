@@ -31,7 +31,7 @@ export type PlanThisSubject = {
 /**
  * Adding an experience or a place to a plan.
  *
- * Nothing here books anything, which the message afterwards says outright —
+ * Nothing here books anything, which the message afterwards says outright -
  * the canvas is emphatic about it, because "add to plan" beside a ticket price
  * reads like a purchase.
  */

@@ -20,7 +20,7 @@ import { experienceFlag, experiencePriceLine, experienceRunBy } from './experien
  * running it, what it is, when, and what it costs.
  *
  * This is deliberately not `SingleExperience`'s `row` variant. That card is
- * 4:3 at 280px and leads on distance, and five other screens render it — the
+ * 4:3 at 280px and leads on distance, and five other screens render it - the
  * canvas reshaped the rail card alone, so the rail card alone is rebuilt.
  */
 export const ExperienceCard = ({

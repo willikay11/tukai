@@ -122,7 +122,7 @@ describe('BookingPanel purchase flow', () => {
 
   /**
    * The fixture's occurrences are dated 27 Aug 2026, and the panel only offers
-   * a date that has not passed — so without a fixed clock every test here
+   * a date that has not passed - so without a fixed clock every test here
    * starts failing the day those dates go by, which is what happened.
    *
    * Only the clock is faked; the timers userEvent needs are left alone.
@@ -446,7 +446,7 @@ describe('BookingPanel purchase flow', () => {
 
     expect(mockMutate).not.toHaveBeenCalled();
     expect(screen.getByText('Please select at least one ticket.')).toBeInTheDocument();
-    // One phone error, from the WhatsApp delivery contact — the M-Pesa field
+    // One phone error, from the WhatsApp delivery contact - the M-Pesa field
     // that produced the second one has been removed
     expect(screen.getAllByText('Please enter a valid phone number.')).toHaveLength(1);
   });
@@ -481,7 +481,7 @@ describe('BookingPanel purchase flow', () => {
   });
 });
 
-// Itinerary experiences have no slot templates — the occurrence arrives with
+// Itinerary experiences have no slot templates - the occurrence arrives with
 // slotTemplate: null, which used to crash on `slotTemplate.startTime`
 describe('BookingPanel for an experience without slot templates', () => {
   const itineraryExperience = {

@@ -22,7 +22,7 @@ type LocationContextType = LocationState & {
    * reads that prefix as a hook wherever it is called.
    */
   setUsingLocation: (on: boolean) => void;
-  /** "Westlands, Nairobi" — the reader's own location, once resolved. */
+  /** "Westlands, Nairobi" - the reader's own location, once resolved. */
   area?: string;
   // Reverse-geocoded city name. Resolved here rather than by whichever
   // component happened to be on screen: the search bar names the city, and it
@@ -151,8 +151,8 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   /**
    * Asking for the reader's location, or stepping back off it.
    *
-   * Turning it off keeps the permission and the coordinates — there is nothing
-   * to give back — and simply stops sorting by them.
+   * Turning it off keeps the permission and the coordinates - there is nothing
+   * to give back - and simply stops sorting by them.
    */
   const setUsingLocation = (on: boolean) => {
     setIsUsingLocation(on);

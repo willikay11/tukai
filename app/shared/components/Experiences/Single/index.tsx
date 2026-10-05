@@ -148,7 +148,7 @@ export const SingleExperience = ({
               images={experience.photos
                 .filter((photo: Photo) => photo.mediaType === 'photo' && photo.photo)
                 .sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0))
-                // A card in a grid, not a gallery — the card rendition is
+                // A card in a grid, not a gallery - the card rendition is
                 // plenty, and the original can be several megabytes
                 .map((photo) => photoUrl(photo, 'md')!)}
               aspectRatio={type === 'discover' ? 'aspect-square' : 'aspect-[16/9]'}

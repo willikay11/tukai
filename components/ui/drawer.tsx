@@ -14,12 +14,12 @@ import { AnimatePresence, motion } from 'framer-motion';
  *
  * `mobile="full"` keeps the right-hand panel on a phone and gives it the whole
  * screen instead. That is for a drawer deep enough to be a screen in its own
- * right — the place drawer runs to half a dozen sections — where a sheet at
+ * right - the place drawer runs to half a dozen sections - where a sheet at
  * 92% of the viewport spends its height on the page behind it.
  *
  * It renders through a portal. Without one, `position: fixed` resolves against
  * the nearest transformed or backdrop-filtered ancestor rather than the
- * viewport — which is why the bucket-list picker would not open on a large
+ * viewport - which is why the bucket-list picker would not open on a large
  * screen and had to be moved onto a dialog.
  */
 export type DrawerWidth = 'narrow' | 'medium' | 'wide';
@@ -45,7 +45,7 @@ export const Drawer = ({
   /** What it becomes below 720px. See the note above. */
   mobile?: 'sheet' | 'full';
   /**
-   * The panel itself, for content that has to know what it scrolls inside —
+   * The panel itself, for content that has to know what it scrolls inside -
    * anchor tabs tracking their sections, say. The panel is the scroll
    * container, so the window fires no scroll event for it.
    */

@@ -22,7 +22,7 @@ describe('useScrollSpy', () => {
     Object.defineProperty(window, 'scrollY', { value: 0, configurable: true });
   });
 
-  // A page that fits the viewport is never "at the bottom" for spy purposes —
+  // A page that fits the viewport is never "at the bottom" for spy purposes -
   // otherwise its last section would always read as current
   it('does not jump to the last section on a page that does not scroll', () => {
     placeSections({ about: 0, experiences: 500, members: 1000 });
@@ -62,7 +62,7 @@ describe('useScrollSpy', () => {
     expect(result.current.activeId).toBe('experiences');
   });
 
-  // A short final section may never reach the line — its tab must still light
+  // A short final section may never reach the line - its tab must still light
   // up when the reader hits the bottom
   it('activates the last section at the bottom of the page', () => {
     placeSections({ about: -900, experiences: -600, members: 400 });
@@ -78,7 +78,7 @@ describe('useScrollSpy', () => {
 
   it('respects the offset for a sticky header', () => {
     // 'experiences' sits 150px down, still below the 96px offset line, so it
-    // has not become current yet — with no offset it would have
+    // has not become current yet - with no offset it would have
     placeSections({ about: -200, experiences: 150, members: 700 });
 
     const { result } = renderHook(() => useScrollSpy(IDS, 96));
@@ -125,7 +125,7 @@ describe('useScrollSpy', () => {
     const { result } = renderHook(() => useScrollSpy(IDS));
     act(() => result.current.scrollTo('members'));
 
-    // The scroll lands — 'members' is now at the top
+    // The scroll lands - 'members' is now at the top
     placeSections({ about: -1000, experiences: -500, members: -10 });
     scroll();
     expect(result.current.activeId).toBe('members');
@@ -220,7 +220,7 @@ describe('useScrollSpy', () => {
 
     it('measures each section against the container, not the viewport', () => {
       // The container starts 200px down the page, so a section sitting 210px
-      // down the viewport is still 10px below the container's own top — it has
+      // down the viewport is still 10px below the container's own top - it has
       // not been reached, however far down the window it looks
       const panel = buildPanel({ about: 10, experiences: 210, members: 900 });
       panel.getBoundingClientRect = () => ({ top: 200 }) as DOMRect;

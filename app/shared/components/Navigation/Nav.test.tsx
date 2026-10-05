@@ -17,7 +17,7 @@ const at = (pathname: string) => {
 /**
  * The canvas holds these four as tabs on one route and switches them in state.
  * Here they stay four addressable routes, so the strip reads as a tablist and
- * behaves as links — a deep link still lands, and back still means something.
+ * behaves as links - a deep link still lands, and back still means something.
  */
 describe('the Discover tab strip', () => {
   beforeEach(() => jest.clearAllMocks());

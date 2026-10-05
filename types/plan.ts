@@ -3,7 +3,7 @@
  *
  * ⚠️ No endpoint backs this. Nothing in the API stores an itinerary of a
  * reader's own, so a plan lives in the browser and every read and write goes
- * through the plan store — the one seam where persistence lands the day an
+ * through the plan store - the one seam where persistence lands the day an
  * endpoint exists.
  *
  * A stop keeps a snapshot of what it points at (title, subtitle, photo, and for
@@ -70,7 +70,7 @@ export const stopEnd = (stop: PlanStop): number | null => {
   return start === null ? null : start + (stop.durationMinutes ?? 60);
 };
 
-/** The default length of a stop, by what it is — the canvas's own numbers. */
+/** The default length of a stop, by what it is - the canvas's own numbers. */
 export const DEFAULT_DURATION: Record<PlanStopKind, number> = {
   experience: 120,
   place: 90,

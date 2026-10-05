@@ -112,7 +112,7 @@ describe('useCreateExperienceFlow', () => {
     expect(result.current.activeStep).toBe('dates');
   });
 
-  // Each step is a full page of form — advancing while scrolled down lands the
+  // Each step is a full page of form - advancing while scrolled down lands the
   // reader partway into the next one, past its heading
   it('scrolls back to the top when the step changes', () => {
     const scrollTo = jest.fn();
@@ -225,7 +225,7 @@ describe('useCreateExperienceFlow', () => {
       salesEndDate: null,
       salesEndTime: null,
       acceptPartialPayment: false,
-      // Recurring only captures a closing (end) validity — no start-relative field
+      // Recurring only captures a closing (end) validity - no start-relative field
       salesStartRelative: null,
       salesEndRelative: { amount: 1, unit: 'hour' as const, anchor: 'start' as const },
       duplicateForEntirePeriod: false,
@@ -251,7 +251,7 @@ describe('useCreateExperienceFlow', () => {
     });
 
     // Sales validity is commented out in TicketForm, so a ticket without it must
-    // still pass — flip this back to expect(false) when that section returns
+    // still pass - flip this back to expect(false) when that section returns
     it('passes when a recurring ticket has no salesEndRelative', () => {
       const { result } = renderHook(() => useCreateExperienceFlow(), {
         wrapper: createWrapper(),
@@ -313,7 +313,7 @@ describe('useCreateExperienceFlow', () => {
     };
 
     // The picker shows "entire period" selected from the first render, so form
-    // state has to agree — otherwise Save & Continue fails against a question
+    // state has to agree - otherwise Save & Continue fails against a question
     // the host was never actually asked
     it('passes without the host touching the ticket mode picker', () => {
       const { result } = renderHook(() => useCreateExperienceFlow(), {

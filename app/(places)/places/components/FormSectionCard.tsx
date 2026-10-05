@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 
 /**
- * One panel of a places form — the reservation form and the ownership claim
+ * One panel of a places form - the reservation form and the ownership claim
  * form are both built from these.
  */
 export const FormSectionCard = ({

@@ -550,7 +550,7 @@ describe('useFeaturedPlaces', () => {
   /**
    * ⚠️ There is no answer to "are there more featured places?". `count` is the
    * number of PLACES, so a page that did not hold the whole table says nothing
-   * about the featured ones beyond it — which is why the row offers no See
+   * about the featured ones beyond it - which is why the row offers no See
    * all rather than guessing.
    */
   it('reports no total of its own, only the featured rows it found', async () => {

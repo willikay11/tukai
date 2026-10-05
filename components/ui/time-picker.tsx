@@ -19,7 +19,7 @@ export interface TimePickerProps {
   disabled?: boolean;
   /**
    * Earliest time ("HH:MM") that can be chosen. Anything at or before it is
-   * dropped from the list — used to stop an end time landing before its start.
+   * dropped from the list - used to stop an end time landing before its start.
    */
   minTime?: string;
 }
@@ -60,7 +60,7 @@ const ALL_SLOTS: string[] = Array.from({ length: MINUTES_PER_DAY / STEP_MINUTES 
  * A plain half-hour time list.
  *
  * This replaced a scrolling hour/minute/period drum with a Save step. Every
- * caller stores "HH:MM" in 24-hour form, so the value contract is unchanged —
+ * caller stores "HH:MM" in 24-hour form, so the value contract is unchanged -
  * only how a time is chosen.
  *
  * A value that is not on the half hour (an experience saved before this, or one

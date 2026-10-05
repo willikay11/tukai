@@ -11,7 +11,7 @@ import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
 /**
  * What the city button opens: the reader's own location, or a city.
  *
- * The two are alternatives, which is why they share one panel — turning the
+ * The two are alternatives, which is why they share one panel - turning the
  * location on supersedes whichever city was chosen, and choosing a city turns
  * it back off.
  */

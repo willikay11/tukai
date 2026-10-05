@@ -83,7 +83,7 @@ export const LeftPanel = ({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Somewhere the reader was sent here from and has to get back to — claiming a
+  // Somewhere the reader was sent here from and has to get back to - claiming a
   // place, for instance, needs a community to claim on behalf of. The community
   // they just created travels back with them so it arrives already chosen.
   const returnTo = searchParams.get('returnTo');

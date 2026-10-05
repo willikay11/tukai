@@ -14,7 +14,7 @@ export const SectionShell = ({
   children,
 }: {
   id: string;
-  // Omitted where the content speaks for itself — the About section opens on
+  // Omitted where the content speaks for itself - the About section opens on
   // its photos rather than repeating the tab's label
   title?: string;
   subtitle?: ReactNode;

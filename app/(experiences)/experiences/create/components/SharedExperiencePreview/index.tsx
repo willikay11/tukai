@@ -197,7 +197,7 @@ export const SharedExperiencePreview = ({
 
   // Each section's pencil jumps to the step that owns its data. Step ids are
   // legacy: 'dates-type' is the Date & Type step, and 'tickets' owns
-  // tickets only — the dates themselves are captured in 'dates-type'.
+  // tickets only - the dates themselves are captured in 'dates-type'.
   const editHandler = (ownerStep: ExperienceStepId) =>
     onEditStep ? () => onEditStep(ownerStep) : undefined;
 

@@ -32,8 +32,8 @@ import { ReservationSettingsValues, reservationSettingsSchema, zodErrorsToMap } 
  * How guests reserve.
  *
  * The API's two types are the restaurant's table booking and the cinema's seat
- * booking. Only the first is offered here — a place is what this screen
- * configures — and it is free, which is what the label says.
+ * booking. Only the first is offered here - a place is what this screen
+ * configures - and it is free, which is what the label says.
  */
 const RESERVATION_TYPES: {
   value: ReservationSettingsValues['reservationType'];
@@ -120,7 +120,7 @@ export const ReservationSettingsContent = ({ place }: { place: Place }) => {
         ...(values.maxPartySize ? { maxPartySize: Number(values.maxPartySize) } : {}),
       },
       // One set of hours applies to every day chosen, which is what the form
-      // asks for — the API stores a rule per day
+      // asks for - the API stores a rule per day
       rules: values.days.map((day) => ({
         dayOfWeek: WEEKDAYS.indexOf(day as (typeof WEEKDAYS)[number]),
         openTime: values.opensAt,

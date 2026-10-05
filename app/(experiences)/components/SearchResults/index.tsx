@@ -76,7 +76,7 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
   };
 
   const chips = activeChips(filters, categoryName);
-  // The API cannot filter by day-shape, so those picks narrow the rows here —
+  // The API cannot filter by day-shape, so those picks narrow the rows here -
   // and the counts below are taken from the same rows, so the two agree
   const experiences = (results?.experiences ?? []).filter((experience) =>
     matchesShapes(experience, filters.experienceShapes),

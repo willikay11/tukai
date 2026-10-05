@@ -46,7 +46,7 @@ const PhoneNumber = React.forwardRef<HTMLInputElement, PhoneNumberProps>(
 
     // Held in a ref so the report below keys on the value alone. Depending on
     // `onChange` itself re-fires on every render for any caller that passes an
-    // inline arrow — and if that caller sets state, the two loop forever.
+    // inline arrow - and if that caller sets state, the two loop forever.
     const onChangeRef = React.useRef(onChange);
     React.useEffect(() => {
       onChangeRef.current = onChange;

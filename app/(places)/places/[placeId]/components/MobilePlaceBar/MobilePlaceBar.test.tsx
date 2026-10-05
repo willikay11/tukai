@@ -64,7 +64,7 @@ describe('MobilePlaceBar', () => {
     expect(screen.queryByText(/From/)).not.toBeInTheDocument();
   });
 
-  // Each button opens just its own view — no tab row to choose again
+  // Each button opens just its own view - no tab row to choose again
   it('opens the reservation panel alone', async () => {
     const user = userEvent.setup();
     renderBar();
@@ -112,7 +112,7 @@ describe('MobilePlaceBar', () => {
     });
   });
 
-  // A failed or skipped request is not an answer — the bar must not announce
+  // A failed or skipped request is not an answer - the bar must not announce
   // a place is unclaimed because it could not ask
   it('keeps Reserve when the ownership request failed', () => {
     ownership = undefined;

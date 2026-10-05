@@ -33,7 +33,7 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
   const [isLiked, setIsLiked] = useState(item.isLiked ?? false);
   const [likeCount, setLikeCount] = useState(item.totalLikes);
 
-  // Only media that can actually be rendered — a null photo throws in next/image
+  // Only media that can actually be rendered - a null photo throws in next/image
   const photos = momentPhotos(item);
   const authorName = momentAuthorName(item.author);
   const context = momentContext(item);

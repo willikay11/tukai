@@ -30,7 +30,7 @@ describe('toPlainText', () => {
     expect(toPlainText('')).toBe('');
   });
 
-  // The result is rendered as React text, so script content is inert — but it
+  // The result is rendered as React text, so script content is inert - but it
   // must not silently vanish or become markup
   it('renders escaped script markup as literal text', () => {
     expect(toPlainText('&lt;script&gt;alert(1)&lt;/script&gt;')).toBe('<script>alert(1)</script>');
@@ -43,7 +43,7 @@ describe('toPlainText', () => {
 
 describe('titleFrom', () => {
   // Several API writes demand a title as well as a body where the form asks
-  // one question — so the first line stands in
+  // one question - so the first line stands in
   it('takes the first line', () => {
     expect(titleFrom('Sunrise hike\nWe left at six')).toBe('Sunrise hike');
   });

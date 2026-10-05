@@ -174,7 +174,7 @@ describe('Search popover', () => {
       await waitFor(() => expect(screen.getByText(/5 results for/)).toBeInTheDocument());
     });
 
-    // Counts are the API's totals, not the page length — only one experience is
+    // Counts are the API's totals, not the page length - only one experience is
     // returned but two match
     it('labels each type tab with its own count', async () => {
       await typeQuery();

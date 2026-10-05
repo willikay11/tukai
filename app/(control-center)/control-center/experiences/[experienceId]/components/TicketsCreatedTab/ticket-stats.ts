@@ -10,7 +10,7 @@ import { currencyFullName } from '@/utils/money';
  * with its labels. The last one spans the row.
  *
  * `full` is that span. The value a paused type shows in that place is not the
- * expiry but the words "Paused" — a host wants to know sales are off before
+ * expiry but the words "Paused" - a host wants to know sales are off before
  * they read anything else about when they would have ended.
  */
 export type TicketStat = { label: string; value: string; full?: boolean };
@@ -34,7 +34,7 @@ export const ticketStats = (ticket: Ticket, currency: string): TicketStat[] => {
     // A free ticket says so rather than showing a zero
     { label: 'Amount per ticket', value: price ? money(price) : 'Free' },
     { label: 'Tickets sold', value: String(sold) },
-    // Gross of any fees or refunds — there is no revenue endpoint to net it
+    // Gross of any fees or refunds - there is no revenue endpoint to net it
     { label: 'Amount sold', value: money(sold * price) },
     { label: 'Available tickets', value: String(available) },
     isTicketPaused(ticket)

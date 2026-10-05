@@ -73,8 +73,8 @@ const Person = ({
  * Co-hosts, and who has been asked to be one.
  *
  * The endpoints existed and nothing called them: a host could not share an
- * experience with anyone. Inviting is not the same as co-hosting — the API
- * records a PENDING invite and waits — so both lists are shown, and the pending
+ * experience with anyone. Inviting is not the same as co-hosting - the API
+ * records a PENDING invite and waits - so both lists are shown, and the pending
  * one says what it is waiting for.
  */
 export const CoHostsSection = ({ experience }: { experience: Experience }) => {

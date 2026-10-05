@@ -167,7 +167,7 @@ describe('one plan', () => {
   });
 
   /**
-   * Plans hold references, not bookings — the canvas says this outright when
+   * Plans hold references, not bookings - the canvas says this outright when
    * one is deleted.
    */
   it('promises that deleting a plan cancels nothing', async () => {

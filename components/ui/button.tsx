@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 
 // `transition` rather than `transition-colors`: the press feedback below needs
 // transform to animate too, and tailwind-merge would keep only the last of the
-// two anyway. Every button in the app dips slightly when pressed — a press that
+// two anyway. Every button in the app dips slightly when pressed - a press that
 // does nothing visible reads as a click that did not land.
 const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[8px] text-xs font-medium transition duration-150 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
@@ -28,8 +28,8 @@ const buttonVariants = cva(
         // on #047857 -> #064E3B, which is a different pair of greens.
         gradient: 'bg-gradient-to-b from-brand-mid to-brand-deep text-white',
         // The outlined counterpart of `gradient`: the same two greens, but as
-        // the border on a white face. Two backgrounds do it — white clipped to
-        // the padding box over the gradient clipped to the border box — which
+        // the border on a white face. Two backgrounds do it - white clipped to
+        // the padding box over the gradient clipped to the border box - which
         // is the only way a gradient border follows the corner radius.
         'gradient-outline':
           'border border-transparent text-brand [background:linear-gradient(#fff,#fff)_padding-box,linear-gradient(to_bottom,#0C7A50,#044B36)_border-box] hover:opacity-90',
@@ -41,7 +41,7 @@ const buttonVariants = cva(
         // The canvas's resting button: a white face, deep-teal label, hairline
         // border. Its default, where ours is a filled `default`.
         'canvas-outline': 'border border-line bg-white text-brand-ink hover:bg-surface',
-        // The canvas's "already done" state — joined a community, saved a list
+        // The canvas's "already done" state - joined a community, saved a list
         joined: 'border border-line-brand bg-surface-brand text-brand-deep',
       },
       size: {
@@ -64,7 +64,7 @@ export interface ButtonProps
   /**
    * Work in flight: the button shows the app's spinner beside its label and
    * cannot be pressed again. Prefer this over swapping the label for
-   * "Saving…" — every loading button in the app reads the same way.
+   * "Saving…" - every loading button in the app reads the same way.
    */
   isLoading?: boolean;
 }

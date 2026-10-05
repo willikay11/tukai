@@ -113,7 +113,7 @@ describe('the profile page', () => {
 
   /**
    * The session carries a name and picture even where the profile request
-   * failed, so the page is still worth showing — and says what happened.
+   * failed, so the page is still worth showing - and says what happened.
    */
   it('falls back to the session when the profile cannot be loaded', () => {
     profileResponse = { success: false };

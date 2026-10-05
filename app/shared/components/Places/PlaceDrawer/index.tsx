@@ -51,7 +51,7 @@ const Loading = () => (
  * A place, opened over whatever the reader was looking at.
  *
  * Every section is in the drawer at once and the tabs follow the reader down
- * it — the same anchor-tab pattern the community page uses, except the scroll
+ * it - the same anchor-tab pattern the community page uses, except the scroll
  * container is the panel rather than the window.
  */
 export const PlaceDrawer = ({
@@ -78,7 +78,7 @@ export const PlaceDrawer = ({
   const place: Place | undefined = data?.data;
 
   // Only a 404 answered successfully means nobody owns it. A request that
-  // failed, or was never made, is "we do not know" — and a place must never be
+  // failed, or was never made, is "we do not know" - and a place must never be
   // called unclaimed on that.
   const { data: ownership } = usePlaceOwnership(placeId ?? '', isOpen && Boolean(placeId));
   const isUnclaimed = ownership?.success === true && !ownership.data;

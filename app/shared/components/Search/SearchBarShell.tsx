@@ -17,7 +17,7 @@ import { CityPicker } from './CityPicker';
  * this is a shell the search owns rather than four components in a header.
  *
  * 54px on a desktop and 50px on a phone, where the Filters label drops to its
- * icon — both the canvas's own numbers.
+ * icon - both the canvas's own numbers.
  */
 export const SearchBarShell = ({
   cityLabel,

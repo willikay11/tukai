@@ -15,7 +15,7 @@ import {
  * The plan store.
  *
  * ⚠️ Plans have no endpoint. Nothing in the API stores an itinerary of a
- * reader's own, so they live in this browser — which is why every read and
+ * reader's own, so they live in this browser - which is why every read and
  * write goes through here and nothing reaches into localStorage itself. When an
  * endpoint arrives, the calls below become requests and no screen changes.
  *

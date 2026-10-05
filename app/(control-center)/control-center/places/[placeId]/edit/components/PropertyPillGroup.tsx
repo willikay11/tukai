@@ -6,7 +6,7 @@ import { SelectablePill } from '../../components/WeekdayPills';
  * One property, chosen from pills.
  *
  * Every group is multi-select and stores its value as the chosen labels joined
- * with ", " — the format places already hold, so what is saved here reads the
+ * with ", " - the format places already hold, so what is saved here reads the
  * same way on the place page as what the mobile app writes.
  *
  * A saved value that is not one of the offered options still shows, selected,

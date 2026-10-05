@@ -4,7 +4,7 @@ import { Experience } from '@/types/experience';
  * The invited, as the canvas shows them: one chip each, with a face where we
  * have one and a letter where we do not.
  *
- * Guests come back as an email and a status — no display name, no avatar — so a
+ * Guests come back as an email and a status - no display name, no avatar - so a
  * guest's letter is the `@` the canvas uses for an address. Communities come
  * back with a title and photos.
  */

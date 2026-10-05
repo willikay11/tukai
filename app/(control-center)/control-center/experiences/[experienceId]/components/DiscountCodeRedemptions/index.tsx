@@ -20,8 +20,8 @@ type Row = { label: string; value: string; hint?: string };
  *
  * Every figure here comes off the code record itself. `GET
  * promo-codes/{id}/redemptions/` exists and would give the individual
- * purchases, but the schema declares it returning the code serializer — plainly
- * the generator copying the viewset's own — so the real shape of a row is
+ * purchases, but the schema declares it returning the code serializer - plainly
+ * the generator copying the viewset's own - so the real shape of a row is
  * unknown, and a list built on a guess would break on first contact. The
  * per-purchase list is left for when that response can be seen.
  */

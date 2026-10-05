@@ -16,8 +16,8 @@ const PlaceDrawerContext = createContext<PlaceDrawerValue | null>(null);
 /**
  * One place drawer for the whole app.
  *
- * A place is clickable from a dozen screens — Discover's rails, the places
- * list, search results, a featured banner — and threading an `onOpen` through
+ * A place is clickable from a dozen screens - Discover's rails, the places
+ * list, search results, a featured banner - and threading an `onOpen` through
  * each of them would mean every new place card deciding for itself whether to
  * navigate or open. They all call this instead.
  *

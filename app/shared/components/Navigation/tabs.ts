@@ -2,8 +2,8 @@
  * The four faces of Discover.
  *
  * The canvas holds these as tabs on one route and switches them in state. Here
- * they stay four addressable routes — the URLs predate the design and 25 links
- * point at them — so the strip is a row of links that reads as a tablist.
+ * they stay four addressable routes - the URLs predate the design and 25 links
+ * point at them - so the strip is a row of links that reads as a tablist.
  *
  * Not to be confused with {@link DESTINATIONS}: those are where the app can
  * take you, and on a phone they are the bottom bar. These are what Discover

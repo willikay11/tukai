@@ -31,7 +31,7 @@ export interface ItineraryDayPayload {
 /**
  * What /v1/experiences/{id}/itinerary-days/ returns after parseSnakeToCamel.
  * Distinct from ItineraryDayFormValue above, which is the create flow's local
- * draft shape — the API carries no client uuid and nests a full place object.
+ * draft shape - the API carries no client uuid and nests a full place object.
  */
 export interface ItineraryDayActivity {
   id: string;

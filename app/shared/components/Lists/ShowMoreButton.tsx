@@ -6,7 +6,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
  * "View more" / "View less", for a section that grows in place.
  *
  * A section with somewhere to send the reader uses a See all link instead.
- * This is for the ones with no page of their own — the rest of the rows are
+ * This is for the ones with no page of their own - the rest of the rows are
  * already here, so revealing them beats a navigation that goes nowhere.
  */
 export const ShowMoreButton = ({

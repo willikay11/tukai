@@ -4,7 +4,7 @@ import { z } from 'zod';
  * Validation for the edit-place form.
  *
  * As in the create-experience wizard these schemas are the single source of
- * truth for both the rules and the form's shape — the step types are derived
+ * truth for both the rules and the form's shape - the step types are derived
  * with `z.infer` rather than declared by hand. Issue paths match the keys the
  * step components read, so `zodErrorsToMap` needs no translation.
  */
@@ -13,7 +13,7 @@ export { zodErrorsToMap } from '@/utils/zod-errors';
 /**
  * A photo already on the place, or one picked in this session.
  *
- * Mirrors the shared uploader's `FormPhoto`, which is what fills this list —
+ * Mirrors the shared uploader's `FormPhoto`, which is what fills this list -
  * a photo it adds carries a `temp-` id and `isTempId`.
  */
 const editPhotoSchema = z.object({

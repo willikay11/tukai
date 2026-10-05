@@ -16,8 +16,8 @@ import { Moment } from '@/types/moment';
  * What people posted at one experience, place or community, with the composer
  * above it.
  *
- * It lives in a narrow column — the booking panel, or a bottom sheet on a
- * phone — so the masonry runs two columns at every width rather than widening
+ * It lives in a narrow column - the booking panel, or a bottom sheet on a
+ * phone - so the masonry runs two columns at every width rather than widening
  * to three the way the full feed does.
  */
 export const ContextMoments = ({
@@ -35,7 +35,7 @@ export const ContextMoments = ({
   title?: string;
   /**
    * Given one, pressing Share moment calls this instead of opening the
-   * composer dialog — for a surface that shows the form in place rather than
+   * composer dialog - for a surface that shows the form in place rather than
    * stacking a second panel over itself.
    */
   onShare?: () => void;
@@ -62,7 +62,7 @@ export const ContextMoments = ({
   });
   const moments: Moment[] = data?.data?.results ?? [];
 
-  // Posting needs an account — the moments endpoints are all authenticated.
+  // Posting needs an account - the moments endpoints are all authenticated.
   // The invitation still shows either way: hiding it from a signed-out reader
   // leaves the section looking like nothing can be done with it.
   const canPost = sessionStatus === 'authenticated';

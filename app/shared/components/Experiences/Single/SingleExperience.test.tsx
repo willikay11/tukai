@@ -41,7 +41,7 @@ const experience = (overrides: Partial<Experience> = {}): Experience =>
   }) as unknown as Experience;
 
 /**
- * The row card is what every experience on Discover renders as — the
+ * The row card is what every experience on Discover renders as - the
  * handpicked row, "Happening Today" and "Happening Tomorrow" all use it.
  */
 describe('SingleExperience, the discover row card', () => {
@@ -123,7 +123,7 @@ describe('SingleExperience, the discover row card', () => {
   /**
    * `price_starts_from` is the cheapest ticket by definition, so the amount on
    * a card is always a floor. The list endpoint returns no ticket data, so the
-   * card cannot tell a single-price experience from a multi-price one — and
+   * card cannot tell a single-price experience from a multi-price one - and
    * "from" is never wrong either way.
    */
   describe('the "from" prefix', () => {

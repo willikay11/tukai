@@ -24,7 +24,7 @@ export type AppliedDiscount = {
  *
  * A code is checked against the order before anything is paid, so an unusable
  * one is answered here rather than by the Pay button. Once applied it stops
- * being an editable field and becomes the applied row — the code is part of the
+ * being an editable field and becomes the applied row - the code is part of the
  * order at that point, and changing it means removing it first.
  */
 export const DiscountCodeField = ({

@@ -54,7 +54,7 @@ export type FilterChip = {
 };
 
 /**
- * One chip per narrowing in force. The query is not a chip — it is the search
+ * One chip per narrowing in force. The query is not a chip - it is the search
  * itself, and a reader who cleared it from here would be left on a results
  * page with nothing to show.
  */

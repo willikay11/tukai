@@ -15,7 +15,7 @@ export function useUpdateToolbarHandler(callback: (selection: BaseSelection) => 
   const { activeEditor } = useToolbarContext();
 
   // Callers pass a fresh closure on every render. Depending on it made the
-  // effect below re-run each render and set state again — and because that
+  // effect below re-run each render and set state again - and because that
   // state is a newly built array, React never bailed out, so the pair looped
   // until it hit the update-depth limit. The ref keeps the latest callback
   // without making it a dependency.

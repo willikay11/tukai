@@ -31,7 +31,7 @@ export const profileCount = (value?: string | number | null): number => {
 /**
  * What to call the reader on their own profile.
  *
- * Not `linkedUserName`: that prefers the display name, which is the handle —
+ * Not `linkedUserName`: that prefers the display name, which is the handle -
  * and the handle already has its own line here, so using it for the heading
  * printed it twice and lost the reader's actual name.
  */

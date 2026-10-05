@@ -45,7 +45,7 @@ export const RecurrenceDateRange = ({
             value={endDate || undefined}
             onChange={onEndDateChange}
             placeholder="End Date"
-            // The recurrence window can't end before it starts — same
+            // The recurrence window can't end before it starts - same
             // constraint as the itinerary date pickers
             minDate={startDate ? new Date(startDate) : new Date()}
             rangeStart={startDate || undefined}

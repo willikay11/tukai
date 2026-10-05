@@ -592,7 +592,7 @@ describe('useGetCommunities cache separation', () => {
       } as any);
     });
 
-    // One client, so both hooks share a cache — the whole point of the test
+    // One client, so both hooks share a cache - the whole point of the test
     const wrapper = createWrapper();
 
     const popular = renderHook(

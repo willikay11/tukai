@@ -69,14 +69,14 @@ const decodeEntities = (text: string): string =>
   });
 
 // Descriptions are stored as HTML. Strip every tag for contexts that render
-// text rather than markup — card excerpts, meta tags, line-clamped summaries.
+// text rather than markup - card excerpts, meta tags, line-clamped summaries.
 export const toPlainText = (text: string | null | undefined): string =>
   decodeEntities(sanitizeHtml(text || '', { allowedTags: [], allowedAttributes: {} }))
     .replace(/\s+/g, ' ')
     .trim();
 
 // Several API writes want a title as well as a body, where the form asks one
-// question — a moment, a place review. The first line stands in as the title,
+// question - a moment, a place review. The first line stands in as the title,
 // which is what a reader would call the thing anyway.
 const TITLE_MAX = 60;
 

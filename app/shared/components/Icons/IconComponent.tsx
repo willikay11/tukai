@@ -8,14 +8,14 @@ import * as Icons from '@hugeicons-pro/core-twotone-rounded';
 import { HugeiconsIcon } from '@hugeicons/react';
 
 /**
- * The style is the PACKAGE an icon comes from, not a prop on the icon — so a
+ * The style is the PACKAGE an icon comes from, not a prop on the icon - so a
  * variant exists here only once its package is a dependency. `bulk` is the
  * filled-with-a-tinted-counterpart style the designs use for a control that is
  * already switched on, where `twotone` is the same icon switched off.
  *
  * ⚠️ Named imports, not `import * as`. The two wildcard imports below are
  * indexed by a runtime string, so the bundler cannot tell which icons are
- * reachable and ships all of them — which is most of this app's First Load JS.
+ * reachable and ships all of them - which is most of this app's First Load JS.
  * Adding a third set that way cost 3.5MB a route. Bulk is used by one control,
  * so it lists the one icon; add a line here when another needs it.
  */

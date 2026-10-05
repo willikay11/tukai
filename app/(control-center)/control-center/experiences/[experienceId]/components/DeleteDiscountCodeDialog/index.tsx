@@ -19,7 +19,7 @@ import { PromoCode } from '@/types/promoCode';
  * Deleting a code for good.
  *
  * Pausing is the reversible answer and sits on the row beside this, so the only
- * reason to reach here is to be rid of the code — which is why the count of
+ * reason to reach here is to be rid of the code - which is why the count of
  * people who have already used it is said out loud first. Their purchases are
  * not affected; the code simply stops working.
  */

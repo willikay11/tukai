@@ -119,7 +119,7 @@ describe('ContextMoments', () => {
     expect(screen.getByText('moment-m2')).toBeInTheDocument();
   });
 
-  // The feed owns the viewer — this is a way in, not a second copy of it
+  // The feed owns the viewer - this is a way in, not a second copy of it
   it('opens a moment in the moments feed', async () => {
     withMoments([{ id: 'm1' }]);
     const user = userEvent.setup();
@@ -148,7 +148,7 @@ describe('ContextMoments', () => {
   });
 
   /**
-   * Posting needs an account — every moments endpoint is authenticated — but
+   * Posting needs an account - every moments endpoint is authenticated - but
    * the invitation still shows, or the section looks like nothing can be done
    * with it.
    */
@@ -204,7 +204,7 @@ describe('ContextMoments', () => {
     expect(screen.getByRole('status', { name: 'Loading moments' })).toBeInTheDocument();
   });
 
-  // A surface that shows the composer in place — the place drawer — owns the
+  // A surface that shows the composer in place - the place drawer - owns the
   // form itself, so there must not be a second one here
   describe('onShare', () => {
     it('hands the press over instead of opening the dialog', async () => {

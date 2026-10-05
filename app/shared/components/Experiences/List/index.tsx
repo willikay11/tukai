@@ -25,7 +25,7 @@ type ListExperiencesProps = {
   skeletonCount?: number;
   type: 'discover' | 'invited';
   noDataMessage?: string;
-  // Forwarded to SingleExperience — 'row' is the compact 4:3 discover card
+  // Forwarded to SingleExperience - 'row' is the compact 4:3 discover card
   variant?: 'default' | 'row';
 };
 
@@ -229,7 +229,7 @@ export const ListExperiences = ({
             animate={{ opacity: 1, y: 0 }}
             // Capped, not `index * 0.02`: the index runs over the whole
             // accumulated list, so by the fifth page the last card was waiting
-            // more than a second before it even began to fade in — which is
+            // more than a second before it even began to fade in - which is
             // what made the grid look like it was loading in a slow cascade.
             // A stagger is only worth anything across the first screenful.
             transition={{ duration: 0.2, delay: Math.min(index, STAGGER_CAP) * 0.02 }}

@@ -10,7 +10,7 @@ import { Search } from './Search';
  *
  * The search bar holds a city button that opens a panel of its own. When the
  * whole bar was the results popover's *trigger*, that button sat inside
- * another trigger and a click on it opened the results panel instead — the
+ * another trigger and a click on it opened the results panel instead - the
  * city panel never appeared. The rest of the Search suite swaps Radix for
  * plain markup, so nothing there could see it.
  */

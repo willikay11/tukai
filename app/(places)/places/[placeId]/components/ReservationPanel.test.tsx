@@ -106,7 +106,7 @@ describe('ReservationPanel', () => {
   });
 
   // A place is only bookable once its owning community sets up a profile. The
-  // panel still renders — hiding it would leave the whole column empty — but
+  // panel still renders - hiding it would leave the whole column empty - but
   // the button cannot be used.
   describe('before the place opens reservations', () => {
     const expectNotBookable = () => {
@@ -182,7 +182,7 @@ describe('ReservationPanel', () => {
   // Claiming the place is how it becomes bookable, so that is the way out of
   // the not-yet-open state
   describe('claiming', () => {
-    // Nobody owns it, so it cannot take bookings and nobody can hold one —
+    // Nobody owns it, so it cannot take bookings and nobody can hold one -
     // the panel offers the way out of that state instead of a dead button
     it('replaces the reservation panel when nobody has claimed the place', () => {
       ownership = { success: true, data: null };
@@ -204,7 +204,7 @@ describe('ReservationPanel', () => {
       expect(screen.queryByTestId('claim-prompt')).not.toBeInTheDocument();
     });
 
-    // Already bookable — nothing to claim
+    // Already bookable - nothing to claim
     it('does not offer a claim once the place takes reservations', () => {
       renderPanel();
 
@@ -290,7 +290,7 @@ describe('ReservationPanel', () => {
       expect(screen.getByText(/4 Pax/)).toBeInTheDocument();
     });
 
-    // A reservation is a Purchase — the venue still has to accept it
+    // A reservation is a Purchase - the venue still has to accept it
     it('says a request is not yet confirmed', () => {
       withBookings([booking()]);
 

@@ -10,7 +10,7 @@ const guest = (email: string): Experience['guests'][number] => ({
 });
 
 /**
- * A guest is only ever an email and a status on the API — no name, no avatar —
+ * A guest is only ever an email and a status on the API - no name, no avatar -
  * so the chip has to be built out of the address.
  */
 describe('guestChip', () => {

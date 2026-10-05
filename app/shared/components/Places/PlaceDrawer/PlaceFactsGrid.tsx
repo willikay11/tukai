@@ -6,7 +6,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { PlaceProperty } from '@/types/place';
 
 /**
- * The drawer's two-column facts grid — phone, hours, type of place, and
+ * The drawer's two-column facts grid - phone, hours, type of place, and
  * whatever else the API stores against the place.
  *
  * Rows come straight from `properties`, each carrying its own key, value and

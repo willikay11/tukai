@@ -5,7 +5,7 @@ import { canvasIcon } from '@/utils/canvas-icons';
 
 /**
  * The canvas names an icon per step of the create flow. These were picked by
- * eye before the canvas was readable, and three of the four differed — it
+ * eye before the canvas was readable, and three of the four differed - it
  * reaches for the "add" variants on date, guests and wallet, and Ticket01
  * rather than Ticket02.
  *

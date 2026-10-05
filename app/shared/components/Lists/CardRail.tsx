@@ -8,8 +8,8 @@ import { useRailPaging } from './useRailPaging';
 /**
  * A section heading over a rail the heading's arrows page.
  *
- * The two belong together — the arrows need the rail's scroll position to know
- * when to grey out — so this owns both rather than asking every section to
+ * The two belong together - the arrows need the rail's scroll position to know
+ * when to grey out - so this owns both rather than asking every section to
  * thread a ref from one to the other.
  */
 export const CardRail = ({
@@ -34,7 +34,7 @@ export const CardRail = ({
 
   // A rail whose cards all fit reports both ends at once. Arrows that can
   // never do anything are noise, so they are left out rather than drawn and
-  // greyed — and a See all link, where the section has one, takes the space
+  // greyed - and a See all link, where the section has one, takes the space
   // back.
   const canScroll = showArrows && !(atStart && atEnd);
 

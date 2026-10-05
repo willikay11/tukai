@@ -9,8 +9,8 @@ import { SocialLinkValue } from '../schemas';
 /**
  * The icon a platform is stored with.
  *
- * These are the names the API already holds — a link saved from the app comes
- * back as `InstagramIcon` or `Globe02Icon` — so a link added here is stored the
+ * These are the names the API already holds - a link saved from the app comes
+ * back as `InstagramIcon` or `Globe02Icon` - so a link added here is stored the
  * same way and renders identically on the place page.
  */
 const PLATFORM_ICONS: { match: RegExp; icon: string }[] = [
@@ -27,7 +27,7 @@ const PLATFORM_ICONS: { match: RegExp; icon: string }[] = [
 export const iconForPlatform = (platformName: string): string =>
   PLATFORM_ICONS.find((entry) => entry.match.test(platformName.trim()))?.icon ?? 'Link01Icon';
 
-/** Where else the place lives online — the links on its page. */
+/** Where else the place lives online - the links on its page. */
 export const EditPlaceSocialLinksStep = ({
   socialLinks,
   errors,

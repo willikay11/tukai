@@ -63,7 +63,7 @@ describe('ExperienceTypeRadio', () => {
       expect(screen.getByRole('switch')).toBeInTheDocument();
     });
 
-    // Only a single-day experience can repeat — a multi-day span or an
+    // Only a single-day experience can repeat - a multi-day span or an
     // itinerary has its own dates
     it('hides recurring for the other types', () => {
       renderPicker({ value: 'multi-day' });

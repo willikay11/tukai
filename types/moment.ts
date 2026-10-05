@@ -25,7 +25,7 @@ export interface Moment {
   community: { id: string; title: string } | null;
   experience: { id: string; title: string } | null;
   place: { id: string; title: string } | null;
-  // May be empty — a moment can be posted without media
+  // May be empty - a moment can be posted without media
   media: MomentMedia[];
   totalLikes: number;
   totalComments: number;
@@ -39,7 +39,7 @@ export interface Moment {
 // next/image hard-throws on a null src (it treats a non-string as a static
 // import and reads .default off it) and on a relative path without a leading
 // slash. Media items carry a media_type, so a video or a still-processing
-// upload can legitimately have photo: null — those must never reach an <Image>.
+// upload can legitimately have photo: null - those must never reach an <Image>.
 export const isRenderablePhoto = (photo: string | null | undefined): photo is string =>
   typeof photo === 'string' &&
   photo.trim().length > 0 &&

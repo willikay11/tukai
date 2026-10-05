@@ -212,7 +212,7 @@ describe('BottomNavigation', () => {
       expect(screen.getByRole('link', { name: /you/i })).toHaveClass('bg-lime');
     });
 
-    // Only '/' exactly — every other route starts with it
+    // Only '/' exactly - every other route starts with it
     it('marks Discover as active only on the root', () => {
       mockUsePathname.mockReturnValue('/communities');
 
@@ -407,7 +407,7 @@ describe('BottomNavigation', () => {
   });
 
   describe('styling', () => {
-    // The pill styling sits on the nav itself now — the outer element only
+    // The pill styling sits on the nav itself now - the outer element only
     // positions it, because the profile button floats beside it
     it('has rounded full appearance', () => {
       mockUsePathname.mockReturnValue('/');
@@ -438,7 +438,7 @@ describe('BottomNavigation', () => {
   /**
    * "My Communities" floats its own Create Community button along the bottom
    * edge. Two bars stacked on each other is the same problem a detail page's
-   * booking bar has — and the tab is in the URL so this can see it.
+   * booking bar has - and the tab is in the URL so this can see it.
    */
   describe('the communities tabs', () => {
     afterEach(() => {

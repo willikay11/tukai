@@ -133,7 +133,7 @@ describe('CommunityFeedTab', () => {
     expect(screen.getByText('Evo owners club')).toBeInTheDocument();
   });
 
-  // The same grid Discover uses — switching tabs should not re-flow the page
+  // The same grid Discover uses - switching tabs should not re-flow the page
   it('lays them out in the shared community grid', () => {
     renderTab();
 
@@ -192,8 +192,8 @@ describe('CommunityFeedTab', () => {
 
   /**
    * Neither /experiences/ nor /moments/ can be asked about more than one
-   * community at a time — a repeated `community` is last-wins and a
-   * comma-joined one is a 400 — so the feeds fan out, one request each.
+   * community at a time - a repeated `community` is last-wins and a
+   * comma-joined one is a 400 - so the feeds fan out, one request each.
    */
   describe('the feeds', () => {
     it('asks each followed community for its own experiences', () => {

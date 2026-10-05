@@ -12,7 +12,7 @@ import { placePath } from '@/utils/detail-paths';
  *
  * A place has no page of its own to send anyone to while the drawer is up, so
  * this is not a link: it carries no href and opens nothing in a new tab.
- * Without a drawer above it — a screen outside the provider — it falls back to
+ * Without a drawer above it - a screen outside the provider - it falls back to
  * the place's own page, which is the only thing left that can show it.
  *
  * role/tabIndex rather than a <button>: callers wrap cards that carry their
@@ -27,7 +27,7 @@ export const PlaceLink = ({
   place: { id: string; slug?: string };
   className?: string;
   children: ReactNode;
-  /** Run alongside opening — closing a search panel, say. */
+  /** Run alongside opening - closing a search panel, say. */
   onNavigate?: () => void;
 }) => {
   const drawer = usePlaceDrawer();

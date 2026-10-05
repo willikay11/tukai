@@ -83,7 +83,7 @@ export const Share = ({
   kind?: ShareKind;
   /**
    * `icon` is the bare glyph, for a row of circular controls that supply
-   * their own disc — the place drawer's header, where a labelled pill beside
+   * their own disc - the place drawer's header, where a labelled pill beside
    * two icon buttons reads as a different kind of control.
    */
   variant?: 'button' | 'icon';

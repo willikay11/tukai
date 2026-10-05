@@ -96,8 +96,8 @@ describe('MembersSection', () => {
 });
 
 /**
- * The community detail endpoint hands over every member in one payload — there
- * is no cap on it — so a large community rendered as one unbroken wall of
+ * The community detail endpoint hands over every member in one payload - there
+ * is no cap on it - so a large community rendered as one unbroken wall of
  * rows. The dedicated `/communities/{id}/members/` endpoint is paginated, but
  * it needs a token and this page is public, so the paging happens here.
  */

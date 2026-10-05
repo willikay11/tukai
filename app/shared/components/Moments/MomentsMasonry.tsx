@@ -72,7 +72,7 @@ export const MomentsMasonry = ({
                 // Lifts under the cursor so it reads as openable. No entrance
                 // animation: `animate-in fade-in` starts the tile at opacity 0,
                 // so anywhere the animation does not run the photo never
-                // appears at all — which is the other half of what broke here.
+                // appears at all - which is the other half of what broke here.
                 className={`block w-full overflow-hidden rounded-2xl transition duration-300 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
                   moment.id === selectedId ? 'ring-2 ring-primary' : ''
                 }`}

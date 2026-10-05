@@ -44,18 +44,18 @@ import { ExperienceReviews } from './components/ExperienceReviews';
  *
  * The preview feeds it a form-derived Experience via buildPreviewExperience
  * (utils/preview-utils.ts) instead of a fetched one. Do NOT create a
- * preview-specific copy of any section below — edit it here and both surfaces
+ * preview-specific copy of any section below - edit it here and both surfaces
  * change together. The only permitted divergence is behaviour keyed off
  * `bookingMode`, never layout.
  *
  * It is presentational: it does not fetch the experience. (Children still do
- * their own I/O — BookingPanel loads occurrences, BucketListButton mutates
- * bookmarks — which is why both take a preview mode.)
+ * their own I/O - BookingPanel loads occurrences, BucketListButton mutates
+ * bookmarks - which is why both take a preview mode.)
  */
 interface ViewExperiencePageContentProps {
   experience: Experience;
   // 'preview' keeps the full layout but blocks purchase and bookmarking. It
-  // also drops the "Back to Explore" link, which is meaningless mid-create —
+  // also drops the "Back to Explore" link, which is meaningless mid-create -
   // BackToExplore owns its own router.back(), so there is no onBack to thread.
   bookingMode?: 'live' | 'preview';
 }
@@ -71,7 +71,7 @@ export const ViewExperiencePageContent = ({
   // A form-derived experience can be missing anything the user has not filled
   // in yet, so every read below is guarded. Live data always populates these.
   const photos = experience.photos ?? [];
-  // Copy before sorting — sort() mutates, and in preview this array belongs to
+  // Copy before sorting - sort() mutates, and in preview this array belongs to
   // a memoised object that would be reordered on every render
   const sortedPhotos = [...photos].sort((a, b) => Number(b.isCover) - Number(a.isCover));
   const coverPhoto = photos.find((photo: Photo) => photo.isCover)?.photo || photos[0]?.photo || '';

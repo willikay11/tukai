@@ -37,8 +37,8 @@ describe('isMine', () => {
 });
 
 /**
- * The API has no threads — one flat list of every message the reader is party
- * to — so a conversation is worked out from who is on the other side.
+ * The API has no threads - one flat list of every message the reader is party
+ * to - so a conversation is worked out from who is on the other side.
  */
 describe('toThreads', () => {
   it('groups a conversation under the other person', () => {

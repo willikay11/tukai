@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
  *
  * A crawler fetches a shared link from its own servers, so every URL it reads
  * has to be absolute. `NEXT_PUBLIC_APP_URL` is localhost in development, where
- * no crawler can reach it — that is a property of localhost, not a
+ * no crawler can reach it - that is a property of localhost, not a
  * misconfiguration, and previews can only be checked against a tunnel or a
  * deployed URL.
  */

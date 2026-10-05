@@ -113,7 +113,7 @@ describe('PlaceCard', () => {
   /**
    * One line of substance under the name. The canvas leads with something
    * happening at the place; we have no such field, so it leads with what
-   * people made of it — see `place-fact`.
+   * people made of it - see `place-fact`.
    */
   describe('the fact line', () => {
     it('leads with the score and how many reviews it came from', () => {

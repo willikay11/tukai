@@ -3,7 +3,7 @@
  *
  * The detail routes carry the API's `slug` rather than its UUID, which reads
  * better and is what gets shared. The API accepts either on the detail route
- * and on every nested one, so a link made before slugs — or a bookmark — still
+ * and on every nested one, so a link made before slugs - or a bookmark - still
  * resolves, and the id is the fallback whenever a record has no slug yet.
  */
 export const placePath = (place: { id: string; slug?: string }): string =>

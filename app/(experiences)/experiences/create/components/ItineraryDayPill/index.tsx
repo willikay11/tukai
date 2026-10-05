@@ -219,7 +219,7 @@ export const ItineraryDayPill = ({
     }
   };
 
-  // Cleanup — flush on unmount (unless parent is already saving)
+  // Cleanup - flush on unmount (unless parent is already saving)
   useEffect(() => {
     return () => {
       if (saveTimerRef.current) {

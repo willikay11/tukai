@@ -38,7 +38,7 @@ describe('buildDraftSteps', () => {
 
     expect(byId['dates-type']).toBe('done');
     expect(byId.about).toBe('done');
-    // No tickets yet — this is where the creator left off
+    // No tickets yet - this is where the creator left off
     expect(byId['tickets']).toBe('current');
     expect(byId.guests).toBe('pending');
     expect(byId.preview).toBe('pending');

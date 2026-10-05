@@ -11,7 +11,7 @@ interface SectionHeaderProps {
   seeAllHref?: string;
   /**
    * Paging for the rail beneath. Given these, the header carries the canvas's
-   * two circular arrows instead of a "See all" link — the link moves to the
+   * two circular arrows instead of a "See all" link - the link moves to the
    * card at the end of the rail, where a reader runs out of cards.
    */
   onBack?: () => void;
@@ -22,7 +22,7 @@ interface SectionHeaderProps {
   railLabel?: string;
   /**
    * Put in place of the arrows or the See all link, for a section whose
-   * control is neither — the grids that grow in place take a ShowMoreButton.
+   * control is neither - the grids that grow in place take a ShowMoreButton.
    */
   action?: React.ReactNode;
   // ⚠️ Retired with the canvas's header, which carries no icon. Kept only for

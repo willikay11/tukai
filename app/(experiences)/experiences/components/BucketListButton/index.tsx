@@ -16,7 +16,7 @@ interface BucketListButtonProps {
   isBookmarked: boolean;
   /** Named in the confirmation once it is saved */
   experienceTitle?: string;
-  // Renders normally but does nothing — used by the create-flow preview, where
+  // Renders normally but does nothing - used by the create-flow preview, where
   // the experience id may be synthetic and saving makes no sense
   inert?: boolean;
 }

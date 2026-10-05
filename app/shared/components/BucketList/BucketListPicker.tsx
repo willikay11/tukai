@@ -15,7 +15,7 @@ import { BucketList, bucketListCoverPhoto } from '@/types/bucket-list';
 /**
  * Which list to save this onto.
  *
- * Saving is a two-step choice — the reader picks the list, then it goes on —
+ * Saving is a two-step choice - the reader picks the list, then it goes on -
  * so this asks rather than toggling. A reader with no lists can make one
  * without leaving it.
  *

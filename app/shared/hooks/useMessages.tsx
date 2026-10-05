@@ -6,7 +6,7 @@ const MESSAGES = ['messages'];
 
 /**
  * Every message the reader is party to. One query, because the API has no
- * threads — the conversations are grouped from this list.
+ * threads - the conversations are grouped from this list.
  */
 export const useMessages = (enabled = true) =>
   useQuery({

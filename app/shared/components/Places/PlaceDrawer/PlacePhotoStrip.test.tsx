@@ -15,7 +15,7 @@ jest.mock('@/app/shared/components/Images', () => ({
 
 /**
  * jsdom lays nothing out, so everything reports a scrollWidth and clientWidth
- * of 0 — which the rail reads as "nothing to scroll". Overflow is simulated by
+ * of 0 - which the rail reads as "nothing to scroll". Overflow is simulated by
  * giving the row a width smaller than its contents.
  */
 const withOverflow = () => {

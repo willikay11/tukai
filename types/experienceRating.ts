@@ -3,8 +3,8 @@ import { LinkedUser } from '@/types/user';
 /**
  * What an attendee said about an experience they went to.
  *
- * Experiences carry no rating aggregate of their own — no average, no count, on
- * either serializer — so both are worked out from the ratings themselves. The
+ * Experiences carry no rating aggregate of their own - no average, no count, on
+ * either serializer - so both are worked out from the ratings themselves. The
  * ratings endpoint answers with a bare array rather than a page.
  */
 export type ExperienceRatingPhoto = {

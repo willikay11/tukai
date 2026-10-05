@@ -44,8 +44,8 @@ export const BeforeYouCreate = ({ onCreateNew, onStartFromScratch }: BeforeYouCr
     return () => clearTimeout(timer);
   }, [search]);
 
-  // Same call the Hosting tab makes — every experience the user created, in
-  // all statuses — narrowed by the API's own search param
+  // Same call the Hosting tab makes - every experience the user created, in
+  // all statuses - narrowed by the API's own search param
   const { data: hostedResponse, isLoading } = useExperiences(
     {
       page: 1,

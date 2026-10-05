@@ -30,7 +30,7 @@ export interface TicketPurchase {
   dateCreated: string;
 }
 
-// One entry per individual ticket inside a reservation — drives the
+// One entry per individual ticket inside a reservation - drives the
 // ticket modal's paginated QR view
 export interface ReservationTicket {
   id: string; // purchase record id - used for the per-ticket PDF download

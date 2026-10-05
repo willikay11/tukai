@@ -165,7 +165,7 @@ describe('column count', () => {
 
 /**
  * iOS Safari showed one tile with an empty column beside it. Two WebKit
- * behaviours account for that, and both are structural — jsdom renders neither
+ * behaviours account for that, and both are structural - jsdom renders neither
  * CSS columns nor animations, so what is pinned here is the markup that avoids
  * them rather than the visual result.
  */

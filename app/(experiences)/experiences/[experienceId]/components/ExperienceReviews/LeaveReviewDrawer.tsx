@@ -72,8 +72,8 @@ export const LeaveReviewDrawer = ({
           });
           close();
         },
-        // The API says which rule was broken — not an attendee, already rated,
-        // or not ended — and that is more use than anything invented here
+        // The API says which rule was broken - not an attendee, already rated,
+        // or not ended - and that is more use than anything invented here
         onError: (failure: Error) => setError(failure.message),
       },
     );

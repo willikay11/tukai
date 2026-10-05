@@ -32,7 +32,7 @@ const ITINERARY_STEP = { id: 'itinerary-days', label: 'Itinerary' };
 // resume screen. These are the same rules expressed against a saved draft.
 const isStepComplete = (step: string, experience: Experience): boolean => {
   switch (step) {
-    // A saved draft always belongs to a community — it could not have been
+    // A saved draft always belongs to a community - it could not have been
     // created otherwise
     case 'dates-type':
       return true;
@@ -49,7 +49,7 @@ const isStepComplete = (step: string, experience: Experience): boolean => {
       return (experience.tickets?.length ?? 0) > 0;
     case 'guests':
       return (experience.guests?.length ?? 0) > 0;
-    // Preview is a read-only view — reachable as soon as there is a title
+    // Preview is a read-only view - reachable as soon as there is a title
     case 'preview':
       return Boolean(experience.title?.trim());
     default:
@@ -77,7 +77,7 @@ export const buildDraftSteps = (experience: Experience): DraftStep[] => {
   // Progress reads sequentially: everything up to the first gap is done, that
   // gap is where the creator resumes, and the rest is pending. A later step
   // that happens to be filled (Preview needs only a title) must not show as
-  // done ahead of the gap — the checklist would read out of order.
+  // done ahead of the gap - the checklist would read out of order.
   return steps.map((step, index) => ({
     ...step,
     state:
@@ -96,8 +96,8 @@ export const getLastSavedAt = (experience: Experience): string =>
 
 /**
  * Drafts are selected client-side rather than with a `status` query param.
- * The list endpoint's status filter is unverified — nothing else in the app
- * uses it — whereas `hosted_by` alone is the proven call the Hosting tab makes.
+ * The list endpoint's status filter is unverified - nothing else in the app
+ * uses it - whereas `hosted_by` alone is the proven call the Hosting tab makes.
  * The API returns statuses lowercase while the enum is uppercase, so this
  * normalizes before comparing (same rule as HostingCard).
  */

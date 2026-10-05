@@ -4,7 +4,7 @@ export interface ImageValidationResult {
   warning?: string;
 }
 
-// Small images are accepted — they just lose detail once cropped, so this is a
+// Small images are accepted - they just lose detail once cropped, so this is a
 // quality hint rather than a hard floor
 export const RECOMMENDED_MIN_DIMENSION = 500;
 
@@ -49,10 +49,10 @@ export const validateExperienceImage = (file: File): Promise<ImageValidationResu
         return;
       }
 
-      // Valid — crop dialog handles:
+      // Valid - crop dialog handles:
       //   - non-square aspect ratio
       //   - images larger than 1024×1024
-      // No warning needed — crop is automatic
+      // No warning needed - crop is automatic
       resolve({ valid: true });
     };
 
