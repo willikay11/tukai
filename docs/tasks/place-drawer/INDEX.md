@@ -12,3 +12,6 @@ design's markup, found by comparing the place panel's sections with the drawer.
 | PD-05 | Moments: count on the Share moment row | decision | decision | none |
 | PD-06 | Who sees the reservation button, and what it says | decision | decision | none |
 | PD-07 | Verify the About "Show more" label and toggle | qa | verify | none |
+| PD-08 | Owner variant of the place view | decision | decision | PD-06 |
+
+The inventory for the place view is in [INVENTORY-place-view.md](INVENTORY-place-view.md), built from `docs/design/screens/place-panel.html`.
