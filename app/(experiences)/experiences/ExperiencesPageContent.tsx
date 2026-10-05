@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import moment from 'moment';
 
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
+import { ItineraryCard } from '@/app/(experiences)/components/ItineraryCard';
 import { BucketListCard } from '@/app/(experiences)/experiences/components/BucketListCard';
 import { CategoryChipRow } from '@/app/(experiences)/experiences/components/CategoryChipRow';
 import type { CategoryChip } from '@/app/(experiences)/experiences/components/CategoryChipRow';
@@ -42,6 +43,7 @@ import { useLocation } from '@/context/LocationContext';
 import { downloadTicketPdf } from '@/services/experience';
 import { BucketList } from '@/types/bucket-list';
 import { Experience } from '@/types/experience';
+import { coverPhotoUrl } from '@/types/photo';
 import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
 import { Reservation } from '@/types/ticket-purchase';
 import { formatLongDateWithOrdinal } from '@/utils/date-utils';
@@ -57,6 +59,9 @@ const TABS = [
 
 /** Cards in a horizontal row that are fetched straight away rather than lazily. */
 const EAGER_IN_ROW = 3;
+
+/** Itineraries the Discover itineraries rail asks for. */
+const ITINERARY_PAGE_SIZE = 8;
 
 /** The place-category group the experience category chips are read from. */
 const CATEGORY_CHIP_GROUP = 'interests';
@@ -232,6 +237,16 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   // top city by count; experiences have no city filter, so search by city name
   const topCity = cities[0];
   const visibleCities = cities.slice(0, 10);
+
+  // Discover itineraries: published itinerary-type experiences. The rail is
+  // hidden when there are none, so no empty heading shows.
+  const { data: itinerariesResponse, isLoading: isLoadingItineraries } = useExperiences(
+    { page: 1, page_size: ITINERARY_PAGE_SIZE, status: 'published', experience_type: 'itinerary' },
+    isAll,
+  );
+  const itineraries: Experience[] = itinerariesResponse?.data?.results ?? [];
+  const itineraryTotal = itinerariesResponse?.data?.count ?? 0;
+
   const { data: topCityResponse, isLoading: isLoadingTopCity } = useExperiences(
     { page: 1, page_size: 8, search: topCity?.name, category: categoryFilter },
     isAll && Boolean(topCity),
@@ -344,6 +359,31 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             experiences={tomorrowResponse?.data?.results ?? []}
             isLoading={isLoadingTomorrow}
           />
+
+          {(isLoadingItineraries || itineraries.length > 0) && (
+            <CardRail title="Discover itineraries" subtitle="Several places in one plan">
+              {isLoadingItineraries ? (
+                <RowSkeleton cardClassName="aspect-square w-[184px]" />
+              ) : (
+                <>
+                  {itineraries.map((itinerary) => (
+                    <ItineraryCard key={itinerary.id} itinerary={itinerary} />
+                  ))}
+
+                  {/* Only when the API holds more than the row shows: a full
+                      row that is every itinerary there is would lead nowhere new */}
+                  {shouldShowSeeAll(itineraryTotal) && (
+                    <SeeAllCard
+                      href="/experiences/see-all?type=itineraries"
+                      previewPhotos={itineraries
+                        .slice(0, 3)
+                        .map((itinerary) => coverPhotoUrl(itinerary.photos, 'md'))}
+                    />
+                  )}
+                </>
+              )}
+            </CardRail>
+          )}
 
           {topCity && (
             <ExperienceRow
