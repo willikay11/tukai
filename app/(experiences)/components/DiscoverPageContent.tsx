@@ -334,7 +334,12 @@ export const DiscoverPageContent = () => {
           all in the header — not the masonry the Moments page uses, which was
           going into this rail as a column layout. */}
       {(isLoadingMoments || moments.length > 0) && (
-        <CardRail title="Recent moments" subtitle={MOMENTS_SUBTITLE} seeAllHref="/moments">
+        <CardRail
+          title="Recent moments"
+          subtitle={MOMENTS_SUBTITLE}
+          seeAllHref="/moments"
+          showArrows={false}
+        >
           {isLoadingMoments ? (
             <RowSkeleton cardClassName="aspect-[3/4] w-[265px]" />
           ) : (

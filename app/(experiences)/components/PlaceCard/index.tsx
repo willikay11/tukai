@@ -54,15 +54,14 @@ export const PlaceCard = ({
       radius="rounded-xl"
       className={className}
       overlay={
-        // Top-right, over the photo. The drop shadow is what keeps a white
-        // icon legible on a pale one.
+        // Top-right, over the photo
         <div className="absolute right-0 top-0">
           <Bookmark
             bookmarked={place.isBookmarked}
             userId={session?.user?.id}
             placeId={place.id}
             itemName={place.title}
-            className="h-11 w-11 text-white [filter:drop-shadow(0_1px_3px_rgba(1,51,52,.55))]"
+            className="text-white"
           />
         </div>
       }

@@ -4,8 +4,13 @@ import userEvent from '@testing-library/user-event';
 import { SectionHeader } from './index';
 
 jest.mock('next/link', () => {
-  function MockLink({ children, href }: { children: React.ReactNode; href: string }) {
-    return <a href={href}>{children}</a>;
+  // Forwards every prop, so class-based assertions see what the header renders
+  function MockLink({ children, href, ...rest }: Record<string, unknown>) {
+    return (
+      <a href={href as string} {...rest}>
+        {children as React.ReactNode}
+      </a>
+    );
   }
   MockLink.displayName = 'MockLink';
   return MockLink;
@@ -218,5 +223,14 @@ describe('SectionHeader', () => {
       expect(back).toHaveClass('text-ink-subtle');
       expect(back).toBeDisabled();
     });
+  });
+
+  it('points the See all link on with a chevron', () => {
+    render(<SectionHeader title="Recent moments" seeAllHref="/moments" />);
+
+    const link = screen.getByText('See all').closest('a');
+    expect(link).toHaveAttribute('href', '/moments');
+    expect(link).toHaveClass('font-bold');
+    expect(screen.getByTestId('ArrowRight01Icon')).toBeInTheDocument();
   });
 });

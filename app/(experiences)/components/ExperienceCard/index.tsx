@@ -51,15 +51,14 @@ export const ExperienceCard = ({
       className="w-[184px] flex-shrink-0 snap-start"
       overlay={
         <>
-          {/* Top-right, over the photo. The drop shadow is what keeps a white
-              icon legible on a pale one. */}
+          {/* Top-right, over the photo */}
           <div className="absolute right-0 top-0">
             <Bookmark
               bookmarked={experience.isBookmarked}
               userId={session?.user?.id}
               experienceId={experience.id}
               itemName={experience.title}
-              className="h-11 w-11 text-white [filter:drop-shadow(0_1px_3px_rgba(1,51,52,.55))]"
+              className="text-white"
             />
           </div>
 

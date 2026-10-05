@@ -108,4 +108,21 @@ describe('CardRail', () => {
 
     expect(screen.queryByText('See all')).not.toBeInTheDocument();
   });
+
+  // Some sections would rather send the reader on than page in place
+  describe('showArrows={false}', () => {
+    it('keeps See all and draws no arrows, even when the rail overflows', () => {
+      withOverflow();
+
+      render(
+        <CardRail title="Recent moments" seeAllHref="/moments" showArrows={false}>
+          <div>a card</div>
+        </CardRail>,
+      );
+
+      expect(screen.getByText('See all')).toHaveAttribute('href', '/moments');
+      expect(screen.queryByRole('button', { name: /previous/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /next/i })).not.toBeInTheDocument();
+    });
+  });
 });

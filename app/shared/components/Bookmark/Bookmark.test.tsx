@@ -44,6 +44,31 @@ describe('Bookmark', () => {
     expect(screen.getByTestId('ShoppingBasketDone02Icon')).toBeInTheDocument();
   });
 
+  // The basket sits straight on the photo. The disc it used to wear read as a
+  // second control over every card.
+  describe('has no disc behind it', () => {
+    it('carries no fill of its own, saved or not', () => {
+      const { rerender } = render(
+        <Bookmark userId={USER} bookmarked={false} experienceId="exp-1" />,
+      );
+
+      expect(screen.getByRole('button')).toHaveClass('bg-transparent');
+      expect(screen.getByRole('button').className).not.toMatch(/bg-black|rounded-full/);
+
+      rerender(<Bookmark userId={USER} bookmarked experienceId="exp-1" />);
+
+      expect(screen.getByRole('button')).toHaveClass('bg-transparent');
+      expect(screen.getByRole('button').className).not.toMatch(/bg-white/);
+    });
+
+    // Still 44px to press, even with nothing drawn around the icon
+    it('keeps a full-sized hit target', () => {
+      render(<Bookmark userId={USER} bookmarked={false} experienceId="exp-1" />);
+
+      expect(screen.getByRole('button')).toHaveClass('h-11', 'w-11');
+    });
+  });
+
   // Which list is a choice, so it asks rather than toggling
   it('opens the picker for an experience', () => {
     render(<Bookmark userId={USER} bookmarked={false} experienceId="exp-1" />);

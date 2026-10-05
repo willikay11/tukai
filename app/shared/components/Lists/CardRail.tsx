@@ -16,12 +16,18 @@ export const CardRail = ({
   title,
   subtitle,
   seeAllHref,
+  showArrows = true,
   children,
 }: {
   title: string;
   subtitle?: string;
   /** Only used where the rail has no see-all card of its own. */
   seeAllHref?: string;
+  /**
+   * False where the section would rather send the reader on than page in
+   * place. The rail still scrolls; it just has no arrows over it.
+   */
+  showArrows?: boolean;
   children: React.ReactNode;
 }) => {
   const { ref, atStart, atEnd, onBack, onNext } = useRailPaging<HTMLDivElement>();
@@ -30,7 +36,7 @@ export const CardRail = ({
   // never do anything are noise, so they are left out rather than drawn and
   // greyed — and a See all link, where the section has one, takes the space
   // back.
-  const canScroll = !(atStart && atEnd);
+  const canScroll = showArrows && !(atStart && atEnd);
 
   return (
     <section>

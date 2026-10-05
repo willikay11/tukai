@@ -138,9 +138,17 @@ export const SectionHeader = ({
         seeAllHref && (
           <Link
             href={seeAllHref}
-            className="flex-shrink-0 text-sm font-medium text-brand hover:underline"
+            className="-my-2 -mr-1 inline-flex h-11 flex-shrink-0 items-center gap-1.5 whitespace-nowrap px-1 text-[15px] font-bold text-brand hover:text-brand-deep"
           >
             See all
+            {/* A lighter tint of the same green: the chevron points, the word
+                is what gets read */}
+            <IconComponent
+              iconName="ArrowRight01Icon"
+              size={18}
+              color="currentColor"
+              className="flex-shrink-0 text-brand/50"
+            />
           </Link>
         )
       )}
