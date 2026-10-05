@@ -1,6 +1,6 @@
 # PL-00 Decide the rules every Places segment shares
 
-- **Status:** awaiting approval
+- **Status:** decided
 - **Type:** decision
 - **Depends on:** none
 - **Design:** `docs/design/screens/places-listing.html`, all segments.
@@ -10,9 +10,10 @@
 
 | Rule | Design | Ours | Decision needed |
 |---|---|---|---|
-| City in subtitles | 'in {city}' in pcExpSub, pcDiscoverSub, pcEmptyLine | none | Same rule as EL-00: no city, for now |
-| Category chips | seven hardcoded: All, Studio, Gallery, Garden, Cafe, Museum, Nature | category filter in ListPlaces | Hardcoded, or the API categories (brief 13.1 asks for relevant groups, with the full list under Filters) |
-| Hero banner | none on the Places tab | FeaturedPlaceSection | Replace with the Promoted places rail, as on Discover, or keep the hero |
+| City in subtitles - Same rule as EL-00: no city, for now |
+| Category chips - API categories (brief 13.1 asks for relevant groups, with the full list under Filters) |
+| Hero banner -  remove
+| FeaturedPlaceSection | Replace with the Promoted places rail, as on Discover 
 
 ## Done when
 
