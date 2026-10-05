@@ -557,31 +557,29 @@ export const usePlacesWithExperiences = (enabled = true, perPage = 10) =>
   });
 
 /**
- * The places the API marks `featured` — the canvas's "Promoted places" row.
+ * The places the API marks `featured` — the "Promoted places" row.
  *
  * ⚠️ `featured` is on the list serializer but there is no `featured` query
  * param, so the filter happens here over a wider page. That also means the
  * row is honestly empty when nothing is featured, rather than showing an
  * arbitrary ten places under a word that promises editorial choice.
+ *
+ * ⚠️ And it means there is no answer to "are there more?". `count` is the
+ * number of PLACES, not of featured ones, so a page that did not hold the
+ * whole table says nothing about whether more featured places exist. The row
+ * shows what it found and offers no See all — which is right anyway, since
+ * /places lists every place rather than more of these.
  */
 export const useFeaturedPlaces = (enabled = true, perPage = 50) =>
   useQuery({
     queryKey: ['places', 'featured', perPage],
     queryFn: async () => await fetchPlaces(1, perPage),
     enabled,
-    select: (response) => {
-      const all = response.data?.results ?? [];
-
-      return {
-        ...response,
-        data: {
-          ...response.data,
-          results: all.filter((place: Place) => place.featured),
-          // Whether this one page held every place there is. When it did, the
-          // featured ones in hand ARE all of them, and a section showing them
-          // has nowhere further to send the reader.
-          isComplete: (response.data?.count ?? all.length) <= perPage,
-        },
-      };
-    },
+    select: (response) => ({
+      ...response,
+      data: {
+        ...response.data,
+        results: (response.data?.results ?? []).filter((place: Place) => place.featured),
+      },
+    }),
   });

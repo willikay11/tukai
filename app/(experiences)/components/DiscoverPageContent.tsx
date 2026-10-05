@@ -75,9 +75,6 @@ const coverPhotoOf = (experience: Experience | undefined): string | null =>
   experience?.photos?.[0]?.photo ||
   null;
 
-const placePhotoOf = (place: Place | undefined): string | null =>
-  place?.photos?.find((photo: Photo) => photo.isCover)?.photo || place?.photos?.[0]?.photo || null;
-
 /**
  * How many cards in a horizontal row are fetched eagerly.
  *
@@ -109,9 +106,6 @@ export const DiscoverPageContent = () => {
 
   const { data: promotedResponse, isLoading: isLoadingPromoted } = useFeaturedPlaces(!isSearching);
   const promotedPlaces: Place[] = promotedResponse?.data?.results ?? [];
-  // Every featured place is already on the rail, so there is nothing for a
-  // See all card to lead to
-  const hasMorePromoted = promotedResponse?.data?.isComplete === false;
 
   const { data: withExperiencesResponse, isLoading: isLoadingWithExperiences } =
     usePlacesWithExperiences(!isSearching, PLACES_WITH_EXPERIENCES_SIZE);
@@ -216,18 +210,9 @@ export const DiscoverPageContent = () => {
           {isLoadingPromoted ? (
             <RowSkeleton cardClassName="aspect-square w-[184px]" />
           ) : (
-            <>
-              {promotedPlaces.map((place, index) => (
-                <PlaceCard key={place.id} place={place} priority={index < EAGER_IN_ROW} />
-              ))}
-
-              {hasMorePromoted && (
-                <SeeAllCard
-                  href="/places"
-                  previewPhotos={promotedPlaces.slice(0, 3).map(placePhotoOf)}
-                />
-              )}
-            </>
+            promotedPlaces.map((place, index) => (
+              <PlaceCard key={place.id} place={place} priority={index < EAGER_IN_ROW} />
+            ))
           )}
         </CardRail>
       )}

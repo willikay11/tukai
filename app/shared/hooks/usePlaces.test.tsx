@@ -538,44 +538,6 @@ describe('useFeaturedPlaces', () => {
     expect(result.current.data?.data?.results).toEqual([]);
   });
 
-  // A section holding every featured place has nowhere to send the reader, so
-  // the See all card comes off
-  describe('isComplete', () => {
-    const respondWithCount = (count: number, results: unknown[]) =>
-      mockPlaceService.fetchPlaces.mockResolvedValue({
-        status: 200,
-        success: true,
-        data: { count, results },
-      } as never);
-
-    it('is true when one page held every place there is', async () => {
-      respondWithCount(3, [{ ...mockPlace, id: 'p1', featured: true }]);
-
-      const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
-
-      await waitFor(() => expect(result.current.isSuccess).toBe(true));
-      expect(result.current.data?.data?.isComplete).toBe(true);
-    });
-
-    it('is false when more places exist than the page asked for', async () => {
-      respondWithCount(120, [{ ...mockPlace, id: 'p1', featured: true }]);
-
-      const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
-
-      await waitFor(() => expect(result.current.isSuccess).toBe(true));
-      expect(result.current.data?.data?.isComplete).toBe(false);
-    });
-
-    it('treats a response with no count as complete', async () => {
-      respond([{ ...mockPlace, id: 'p1', featured: true }]);
-
-      const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
-
-      await waitFor(() => expect(result.current.isSuccess).toBe(true));
-      expect(result.current.data?.data?.isComplete).toBe(true);
-    });
-  });
-
   it('asks for a wide page, since it has to filter locally', async () => {
     respond([]);
 
@@ -583,6 +545,27 @@ describe('useFeaturedPlaces', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockPlaceService.fetchPlaces).toHaveBeenCalledWith(1, 50);
+  });
+
+  /**
+   * ⚠️ There is no answer to "are there more featured places?". `count` is the
+   * number of PLACES, so a page that did not hold the whole table says nothing
+   * about the featured ones beyond it — which is why the row offers no See
+   * all rather than guessing.
+   */
+  it('reports no total of its own, only the featured rows it found', async () => {
+    mockPlaceService.fetchPlaces.mockResolvedValue({
+      status: 200,
+      success: true,
+      data: { count: 120, results: [{ ...mockPlace, id: 'p1', featured: true }] },
+    } as never);
+
+    const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    // The count still describes every place, not the one featured row returned
+    expect(result.current.data?.data?.count).toBe(120);
+    expect(result.current.data?.data?.results).toHaveLength(1);
   });
 
   it('does not fetch while disabled', () => {
