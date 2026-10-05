@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
-import { ShoppingBasketAdd02Icon, ShoppingBasketDone02Icon } from '@hugeicons/react-pro';
-
 import { BucketListPicker } from '@/app/shared/components/BucketList';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { POP_ONCE } from '@/app/shared/components/Motion';
 import { Button } from '@/components/ui/button';
 import { useAuthDialog } from '@/context/AuthDialogContext';
@@ -116,18 +115,23 @@ export const Bookmark = ({
         onAnimationEnd={() => setHasJustSaved(false)}
         onClick={handleClick}
       >
+        {/* Bulk once it is saved and twotone until then, as the canvas draws
+            the pair: the filled basket is the switched-on state of the same
+            icon rather than a different one */}
         {isBookmarked ? (
-          <ShoppingBasketDone02Icon
-            id="bookmark"
+          <IconComponent
+            iconName="ShoppingBasketDone02Icon"
             size={21}
-            variant="solid"
+            variant="bulk"
+            color="currentColor"
             className={cn('text-lime', ICON_SHADOW)}
           />
         ) : (
-          <ShoppingBasketAdd02Icon
-            id="bookmark"
+          <IconComponent
+            iconName="ShoppingBasketAdd02Icon"
             size={21}
             variant="twotone"
+            color="currentColor"
             className={cn(className, ICON_SHADOW)}
           />
         )}

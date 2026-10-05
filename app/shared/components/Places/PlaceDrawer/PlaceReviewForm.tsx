@@ -23,11 +23,13 @@ const STARS = [1, 2, 3, 4, 5];
 /** What the API's own schema asks for before it will take a review. */
 const MIN_REVIEW_LENGTH = 2;
 
-const RATING_LABELS: Record<number, string> = {
+/** What each score is called once it is picked. Exported so a test can follow
+ *  the wording rather than pin a copy of it. */
+export const RATING_LABELS: Record<number, string> = {
   1: 'Poor',
   2: 'Fair',
   3: 'Good',
-  4: 'Great',
+  4: 'Very Good',
   5: 'Excellent',
 };
 
@@ -159,7 +161,7 @@ export const PlaceReviewForm = ({ place, onDone }: { place: Place; onDone: () =>
                 <IconComponent
                   iconName="StarIcon"
                   size={34}
-                  variant="twotone"
+                  variant="solid"
                   color="currentColor"
                   className={star <= shown ? 'text-star' : 'text-surface-muted'}
                 />

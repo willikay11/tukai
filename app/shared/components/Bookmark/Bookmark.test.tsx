@@ -44,6 +44,28 @@ describe('Bookmark', () => {
     expect(screen.getByTestId('ShoppingBasketDone02Icon')).toBeInTheDocument();
   });
 
+  // The canvas draws the pair as one icon in two states, not two icons: bulk
+  // once it is saved, twotone until then
+  describe('which style the basket wears', () => {
+    it('is twotone while nothing is saved', () => {
+      render(<Bookmark userId={USER} bookmarked={false} experienceId="exp-1" />);
+
+      expect(screen.getByTestId('ShoppingBasketAdd02Icon')).toHaveAttribute(
+        'data-variant',
+        'twotone',
+      );
+    });
+
+    it('is bulk once it is', () => {
+      render(<Bookmark userId={USER} bookmarked experienceId="exp-1" />);
+
+      expect(screen.getByTestId('ShoppingBasketDone02Icon')).toHaveAttribute(
+        'data-variant',
+        'bulk',
+      );
+    });
+  });
+
   // The basket sits straight on the photo. The disc it used to wear read as a
   // second control over every card.
   describe('has no disc behind it', () => {

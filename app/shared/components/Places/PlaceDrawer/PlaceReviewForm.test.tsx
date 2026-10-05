@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 import { Place } from '@/types/place';
 
-import { PlaceReviewForm } from './PlaceReviewForm';
+import { PlaceReviewForm, RATING_LABELS } from './PlaceReviewForm';
 
 const createReview = jest.fn();
 const uploadImages = jest.fn();
@@ -63,7 +63,7 @@ describe('PlaceReviewForm', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '4 stars' }));
 
-    expect(screen.getByText('Great')).toBeInTheDocument();
+    expect(screen.getByText(RATING_LABELS[4])).toBeInTheDocument();
     expect(screen.queryByText('Tap a star to rate')).not.toBeInTheDocument();
   });
 

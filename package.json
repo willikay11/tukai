@@ -25,6 +25,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@headlessui/react": "^2.1.2",
     "@hookform/resolvers": "^4.1.2",
+    "@hugeicons-pro/core-bulk-rounded": "^1.2.1",
     "@hugeicons-pro/core-solid-rounded": "^1.0.10",
     "@hugeicons-pro/core-solid-sharp": "^1.0.10",
     "@hugeicons-pro/core-twotone-rounded": "^1.0.10",

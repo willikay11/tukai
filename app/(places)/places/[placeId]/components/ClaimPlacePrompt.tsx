@@ -47,20 +47,22 @@ export const ClaimPlacePrompt = ({
       </p>
     </div>
 
-    <ul className="space-y-4">
+    <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {WHAT_YOU_GET.map((item) => (
-        <li key={item.title} className="flex items-start gap-3">
-          <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-green-200">
-            <IconComponent
-              iconName={item.icon}
-              size={18}
-              color="currentColor"
-              className="text-primary"
-            />
-          </span>
-          <div>
-            <p className="text-sm font-semibold text-gray-900">{item.title}</p>
-            <p className="text-sm text-gray-500">{item.detail}</p>
+        <li key={item.title} className="col-span-1">
+          <div className="flex items-start gap-3">
+            <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full">
+              <IconComponent
+                iconName={item.icon}
+                size={18}
+                color="currentColor"
+                className="text-primary"
+              />
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-gray-900">{item.title}</p>
+              <p className="text-sm text-gray-500">{item.detail}</p>
+            </div>
           </div>
         </li>
       ))}
