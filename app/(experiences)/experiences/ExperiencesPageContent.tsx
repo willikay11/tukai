@@ -12,7 +12,7 @@ import { ItineraryCard } from '@/app/(experiences)/components/ItineraryCard';
 import { BucketListCard } from '@/app/(experiences)/experiences/components/BucketListCard';
 import { CategoryChipRow } from '@/app/(experiences)/experiences/components/CategoryChipRow';
 import type { CategoryChip } from '@/app/(experiences)/experiences/components/CategoryChipRow';
-import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
+import { CitiesRail } from '@/app/(experiences)/experiences/components/CitiesRail';
 import { CommunitiesSection } from '@/app/(experiences)/experiences/components/CommunitiesSection';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
 import {
@@ -36,7 +36,7 @@ import {
   shouldShowSeeAll,
 } from '@/app/(experiences)/experiences/see-all/config';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { CardRail, ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
+import { CardRail, SeeAllCard } from '@/app/shared/components/Lists';
 import { PillTabs } from '@/app/shared/components/Tabs';
 import { isSharedWithMe, useMyBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
@@ -51,7 +51,7 @@ import { BucketList } from '@/types/bucket-list';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { coverPhotoUrl } from '@/types/photo';
-import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
+import { PlaceCategory } from '@/types/placeCategory';
 import { Reservation } from '@/types/ticket-purchase';
 import { formatLongDateWithOrdinal } from '@/utils/date-utils';
 import { groupTicketPurchases } from '@/utils/ticket-utils';
@@ -77,7 +77,7 @@ const ALL_CATEGORIES = 'all';
 export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: string }) => {
   const router = useRouter();
   const { data: session } = useSession();
-  const { city, lat, lng } = useLocation();
+  const { city, lat, lng, setCity } = useLocation();
   const [activeTab, setActiveTab] = useState(
     TABS.some((tab) => tab.value === initialCategory) ? initialCategory : 'all',
   );
@@ -243,7 +243,6 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   // Curated destination row: no featured-destination field exists, so use the
   // top city by count; experiences have no city filter, so search by city name
   const topCity = cities[0];
-  const visibleCities = cities.slice(0, 10);
 
   // Discover itineraries: published itinerary-type experiences. The rail is
   // hidden when there are none, so no empty heading shows.
@@ -336,36 +335,12 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             onToggle={() => setIsNearbyExpanded((current) => !current)}
           />
 
-          {/* Experiences by City */}
-          {(isLoadingCities || cities.length > 0) && (
-            <section>
-              <SectionHeader title="Experiences by City" subtitle="Browse by destination" />
-              {isLoadingCities ? (
-                <RowSkeleton cardClassName="h-[130px] w-[240px]" />
-              ) : (
-                <ScrollRow>
-                  {visibleCities.map((category) => (
-                    <div key={category.id} className="snap-start">
-                      <CityCard
-                        city={category.name}
-                        experienceCount={category.placesCount}
-                        imageUrl={categoryImageOf(category) ?? ''}
-                        href={cityExperiencesHref(category.name)}
-                      />
-                    </div>
-                  ))}
-
-                  {shouldShowSeeAll(cities.length) && (
-                    <SeeAllCard
-                      href="/experiences/see-all?type=cities"
-                      previewPhotos={cities.slice(0, 3).map(categoryImageOf)}
-                      className="aspect-auto h-[130px] w-[240px]"
-                    />
-                  )}
-                </ScrollRow>
-              )}
-            </section>
-          )}
+          <CitiesRail
+            cities={cities}
+            isLoading={isLoadingCities}
+            selectedCity={city}
+            onSelectCity={setCity}
+          />
 
           <ExperienceRow
             title={`Happening today ${formatLongDateWithOrdinal(new Date())}`}

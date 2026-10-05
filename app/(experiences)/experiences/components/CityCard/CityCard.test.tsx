@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { CityCard } from './index';
 
@@ -51,6 +51,31 @@ describe('CityCard', () => {
 
       expect(screen.getByText('Nairobi')).toBeInTheDocument();
       expect(screen.queryByText('7 experiences')).not.toBeInTheDocument();
+    });
+  });
+
+  // Picking a city switches the page's city rather than opening a page
+  describe('the select variant', () => {
+    it('is a button rather than a link', () => {
+      renderCard({ variant: 'banner', onSelect: jest.fn() });
+
+      expect(screen.getByRole('button')).toBeInTheDocument();
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    });
+
+    it('calls onSelect when pressed', () => {
+      const onSelect = jest.fn();
+      renderCard({ variant: 'banner', onSelect });
+
+      fireEvent.click(screen.getByRole('button'));
+
+      expect(onSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows the selected city as pressed', () => {
+      renderCard({ variant: 'banner', onSelect: jest.fn(), selected: true });
+
+      expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
     });
   });
 });
