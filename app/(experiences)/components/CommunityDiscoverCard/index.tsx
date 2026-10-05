@@ -6,6 +6,10 @@ import {
   AvatarStack,
   type AvatarStackUser,
 } from '@/app/(experiences)/experiences/components/AvatarStack';
+import {
+  AVATAR_LIMIT,
+  ownerFaces,
+} from '@/app/(experiences)/experiences/components/AvatarStack/community-faces';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { CARD_LIFT, MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motion';
 import { useCommunityDetail } from '@/app/shared/hooks/useCommunities';
@@ -14,8 +18,6 @@ import { Community, CommunityMember, CommunityOwner } from '@/types/community';
 import { coverPhotoUrl } from '@/types/photo';
 import { communityPath } from '@/utils/detail-paths';
 import { toPlainText } from '@/utils/safe-text-utils';
-
-const AVATAR_LIMIT = 3;
 
 export const CommunityDiscoverCard = ({
   community,
@@ -63,11 +65,7 @@ export const CommunityDiscoverCard = ({
           `${member.user?.firstName ?? ''} ${member.user?.lastName ?? ''}`.trim(),
         picture: member.user?.picture || null,
       }))
-    : owners.slice(0, AVATAR_LIMIT).map((owner) => ({
-        id: owner.id,
-        name: owner.displayName || `${owner.firstName ?? ''} ${owner.lastName ?? ''}`.trim(),
-        picture: owner.picture || null,
-      }));
+    : ownerFaces(owners);
 
   const totalMembers = community.membersCount ?? members.length;
 

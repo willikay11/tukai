@@ -30,6 +30,29 @@ export const fetchMyBucketLists = async (page = 1, pageSize = 24): Promise<ApiRe
   }
 };
 
+/**
+ * Every list anyone has made public.
+ *
+ * Unauthenticated by design — the endpoint says so — so this uses the plain
+ * `api` instance. A reader who is not signed in still sees the section.
+ */
+export const fetchPublicBucketLists = async (page = 1, pageSize = 16): Promise<ApiResponse> => {
+  try {
+    const res = await api.get(`/v1/accounts/bucket-lists/public/`, {
+      params: { page, page_size: pageSize },
+    });
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load public bucket lists'),
+    };
+  }
+};
+
 /** One list, with the items it holds and the people on it. */
 export const fetchBucketList = async (bucketListId: string): Promise<ApiResponse> => {
   try {

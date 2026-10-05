@@ -6,6 +6,7 @@ import {
   deleteBucketList,
   fetchBucketList,
   fetchMyBucketLists,
+  fetchPublicBucketLists,
   joinBucketList,
   leaveBucketList,
   removeBucketListItem,
@@ -24,6 +25,18 @@ export const useMyBucketLists = (enabled: boolean = true) =>
     queryKey: ['bucket-lists', 'mine'],
     queryFn: () => fetchMyBucketLists(),
     enabled,
+  });
+
+/**
+ * Every public list, for the Discover section. Needs no sign-in, so it is
+ * asked for whether or not there is a session.
+ */
+export const usePublicBucketLists = (enabled: boolean = true, pageSize = 16) =>
+  useQuery({
+    queryKey: ['bucket-lists', 'public', pageSize],
+    queryFn: () => fetchPublicBucketLists(1, pageSize),
+    enabled,
+    staleTime: 5 * 60 * 1000,
   });
 
 /** One list, with its items. */

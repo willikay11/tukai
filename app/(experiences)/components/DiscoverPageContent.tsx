@@ -6,10 +6,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import moment from 'moment';
 
+import { BucketListRow } from '@/app/(experiences)/components/BucketListRow';
 import { CommunityDiscoverCard } from '@/app/(experiences)/components/CommunityDiscoverCard';
+import { CommunityRow } from '@/app/(experiences)/components/CommunityRow';
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
 import { happeningSoon } from '@/app/(experiences)/components/ExperienceCard/happening-soon';
 import { ItineraryCard } from '@/app/(experiences)/components/ItineraryCard';
+import { ROW_GRID, RowGridSkeleton } from '@/app/(experiences)/components/MediaRow';
 import { MomentCard } from '@/app/(experiences)/components/MomentCard';
 import { MomentComposeCard } from '@/app/(experiences)/components/MomentCard/MomentComposeCard';
 import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
@@ -20,12 +23,15 @@ import {
   ExperienceRow,
   RowSkeleton,
 } from '@/app/(experiences)/experiences/components/ExperienceRow';
+import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { CardGrid, CardRail, SeeAllCard } from '@/app/shared/components/Lists';
 import { MomentComposer } from '@/app/shared/components/Moments';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
+import { ShowMoreButton } from '@/app/shared/components/Lists';
+import { usePublicBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useMoments } from '@/app/shared/hooks/useMoments';
 import {
   useFeaturedPlaces,
@@ -34,6 +40,7 @@ import {
   usePlacesWithExperiences,
 } from '@/app/shared/hooks/usePlaces';
 import { useLocation } from '@/context/LocationContext';
+import { BucketList } from '@/types/bucket-list';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Moment, momentPhotos } from '@/types/moment';
@@ -55,6 +62,12 @@ const SOON_PAGE_SIZE = 50;
 const PLACES_PER_PAGE = 5;
 
 const MOMENTS_SUBTITLE = 'Proof it happened, shared by the people who were there';
+
+/** Four across, two rows — what the list sections show before "View more". */
+const ROW_GRID_SIZE = 8;
+
+/** Read in one go; "View more" pages through it without another request. */
+const PUBLIC_LISTS_SIZE = 24;
 
 /** Read in one go, then paged locally — the API pages by request. */
 const PLACES_WITH_EXPERIENCES_SIZE = 30;
@@ -93,6 +106,10 @@ export const DiscoverPageContent = () => {
   // moment at, so the composer opens untagged — see MomentComposer
   const [isComposerOpen, setIsComposerOpen] = useState(false);
 
+  // "View more" reveals another grid's worth in place rather than navigating —
+  // there is no public-lists page to send anyone to
+  const [visibleListCount, setVisibleListCount] = useState(ROW_GRID_SIZE);
+
   const { data: promotedResponse, isLoading: isLoadingPromoted } = useFeaturedPlaces(!isSearching);
   const promotedPlaces: Place[] = promotedResponse?.data?.results ?? [];
 
@@ -127,6 +144,25 @@ export const DiscoverPageContent = () => {
     .filter((category: PlaceCategory) => category.group === 'cities')
     .sort((a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount);
   const cities: PlaceCategory[] = allCities.slice(0, ROW_SIZE);
+
+  // `upcoming_experiences` is the section's own heading as a filter: a
+  // community organising things is one with something coming up
+  const { data: organisingResponse, isLoading: isLoadingOrganising } = useGetCommunities({
+    page: 1,
+    enabled: !isSearching,
+    showUpComingExperiences: true,
+  });
+  const organisingCommunities: Community[] = (organisingResponse?.data?.results ?? []).slice(
+    0,
+    ROW_GRID_SIZE,
+  );
+
+  const { data: publicListsResponse, isLoading: isLoadingPublicLists } = usePublicBucketLists(
+    !isSearching,
+    PUBLIC_LISTS_SIZE,
+  );
+  const publicLists: BucketList[] = publicListsResponse?.data?.results ?? [];
+  const shownPublicLists = publicLists.slice(0, visibleListCount);
 
   const { data: momentsResponse, isLoading: isLoadingMoments } = useMoments({
     page: 1,
@@ -332,6 +368,26 @@ export const DiscoverPageContent = () => {
         </section>
       )}
 
+      {(isLoadingOrganising || organisingCommunities.length > 0) && (
+        <section>
+          <SectionHeader title="Communities organising things" seeAllHref="/communities" />
+
+          {isLoadingOrganising ? (
+            <RowGridSkeleton />
+          ) : (
+            <div className={ROW_GRID}>
+              {organisingCommunities.map((community, index) => (
+                <CommunityRow
+                  key={community.id}
+                  community={community}
+                  priority={index < EAGER_IN_ROW}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
       {/* A rail of tall cards closed by an invitation to post one, with See
           all in the header — not the masonry the Moments page uses, which was
           going into this rail as a column layout. */}
@@ -354,6 +410,37 @@ export const DiscoverPageContent = () => {
             </>
           )}
         </CardRail>
+      )}
+
+      {(isLoadingPublicLists || publicLists.length > 0) && (
+        <section>
+          <SectionHeader
+            title="Public bucket lists"
+            action={
+              publicLists.length > ROW_GRID_SIZE ? (
+                <ShowMoreButton
+                  isExpanded={visibleListCount >= publicLists.length}
+                  onExpand={() => setVisibleListCount(publicLists.length)}
+                  onCollapse={() => setVisibleListCount(ROW_GRID_SIZE)}
+                />
+              ) : undefined
+            }
+          />
+
+          {isLoadingPublicLists ? (
+            <RowGridSkeleton />
+          ) : (
+            <div className={ROW_GRID}>
+              {shownPublicLists.map((bucketList, index) => (
+                <BucketListRow
+                  key={bucketList.id}
+                  bucketList={bucketList}
+                  priority={index < EAGER_IN_ROW}
+                />
+              ))}
+            </div>
+          )}
+        </section>
       )}
 
       <MomentComposer open={isComposerOpen} onOpenChange={setIsComposerOpen} />

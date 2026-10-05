@@ -155,4 +155,34 @@ describe('SectionHeader', () => {
       expect(screen.getByRole('link', { name: 'See all' })).toHaveAttribute('href', '/moments');
     });
   });
+
+  // A section whose rows grow in place has neither arrows nor a page to go to
+  describe('a custom action', () => {
+    it('takes the place of the See all link', () => {
+      render(
+        <SectionHeader
+          title="Public bucket lists"
+          seeAllHref="/somewhere"
+          action={<button type="button">View more</button>}
+        />,
+      );
+
+      expect(screen.getByText('View more')).toBeInTheDocument();
+      expect(screen.queryByText('See all')).not.toBeInTheDocument();
+    });
+
+    it('takes the place of the arrows', () => {
+      render(
+        <SectionHeader
+          title="Public bucket lists"
+          onBack={jest.fn()}
+          onNext={jest.fn()}
+          action={<button type="button">View more</button>}
+        />,
+      );
+
+      expect(screen.getByText('View more')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /previous/i })).not.toBeInTheDocument();
+    });
+  });
 });

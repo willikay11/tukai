@@ -20,6 +20,11 @@ interface SectionHeaderProps {
   atEnd?: boolean;
   /** Names the arrows for a screen reader: "Previous promoted places". */
   railLabel?: string;
+  /**
+   * Put in place of the arrows or the See all link, for a section whose
+   * control is neither — the grids that grow in place take a ShowMoreButton.
+   */
+  action?: React.ReactNode;
   // ⚠️ Retired with the canvas's header, which carries no icon. Kept only for
   // the communities category groups, which still stack an icon above a title.
   icon?: string;
@@ -71,6 +76,7 @@ export const SectionHeader = ({
   atStart = true,
   atEnd = false,
   railLabel,
+  action,
   icon,
   iconBgClass = 'bg-primary/10',
   iconColorClass = 'text-primary',
@@ -106,7 +112,9 @@ export const SectionHeader = ({
         </div>
       </div>
 
-      {hasArrows ? (
+      {action ?? null}
+
+      {!action && hasArrows ? (
         <div className="flex flex-shrink-0 items-center gap-2">
           <Arrow
             direction="back"
@@ -122,6 +130,7 @@ export const SectionHeader = ({
           />
         </div>
       ) : (
+        !action &&
         seeAllHref && (
           <Link
             href={seeAllHref}
