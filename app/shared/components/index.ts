@@ -43,7 +43,7 @@ export {
   DescriptionShowMore,
   GoogleMapComponent,
   SocialLinks,
-  satoshi,
+  appFont,
 } from './Global';
 
 // Preview Panel

@@ -10,7 +10,7 @@ import { PillsSkeleton } from '@/app/shared/components/Cards';
 import { DownloadApp } from '@/app/shared/components/Download';
 import { AuthActions } from '@/app/shared/components/Global';
 import { ChromeGate } from '@/app/shared/components/Global';
-import { satoshi } from '@/app/shared/components/Global';
+import { appFont } from '@/app/shared/components/Global';
 import { GlobalLoading } from '@/app/shared/components/Global';
 import { LocationPrompt } from '@/app/shared/components/LocationPicker';
 import { BottomNavigation } from '@/app/shared/components/Navigation';
@@ -84,7 +84,7 @@ export default function RootLayout({
           </>
         )}
       </head>
-      <body className={`${satoshi.className} flex min-h-screen flex-col`}>
+      <body className={`${appFont.className} flex min-h-screen flex-col`}>
         <ReduxProvider>
           <SessionProvider>
             <ReactQueryClientProvider>
