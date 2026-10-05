@@ -24,7 +24,9 @@ export const PlaceDrawerFooter = ({ place }: { place: Place }) => {
 
   return (
     <>
-      <div className="flex items-center gap-3">
+      {/* Scrolls rather than wraps: three pills do not fit a phone, and a
+          second row would push the content above them off the screen */}
+      <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
         <AddPlaceReviewAction
           placeId={place.id}
           placeTitle={place.title}

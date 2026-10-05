@@ -77,6 +77,52 @@ describe('Drawer', () => {
     expect(panel.className).toContain('rounded-t-18');
   });
 
+  /**
+   * A drawer deep enough to be a screen in its own right keeps arriving from
+   * the right on a phone and takes the whole viewport, rather than becoming a
+   * sheet that spends its height on the page behind it.
+   */
+  describe('mobile="full"', () => {
+    it('is edge to edge on a narrow viewport', () => {
+      setViewport(true);
+      render(
+        <Drawer isOpen setIsOpen={jest.fn()} mobile="full">
+          <p>Pick a list</p>
+        </Drawer>,
+      );
+
+      const panel = document.body.querySelector('[role="dialog"]') as HTMLElement;
+      expect(panel.className).toContain('inset-0');
+      expect(panel.className).not.toContain('rounded-t-18');
+      expect(panel.style.width).toBe('100vw');
+    });
+
+    it('is the usual side panel on a wide one', () => {
+      render(
+        <Drawer isOpen setIsOpen={jest.fn()} width="wide" mobile="full">
+          <p>Pick a list</p>
+        </Drawer>,
+      );
+
+      const panel = document.body.querySelector('[role="dialog"]') as HTMLElement;
+      expect(panel.className).toContain('right-0');
+      expect(panel.style.width).toBe('760px');
+    });
+
+    // Every other drawer keeps the sheet
+    it('leaves the default alone', () => {
+      setViewport(true);
+      render(
+        <Drawer isOpen setIsOpen={jest.fn()}>
+          <p>Pick a list</p>
+        </Drawer>,
+      );
+
+      const panel = document.body.querySelector('[role="dialog"]') as HTMLElement;
+      expect(panel.className).toContain('rounded-t-18');
+    });
+  });
+
   it('closes on the scrim', async () => {
     const setIsOpen = jest.fn();
     const user = userEvent.setup();

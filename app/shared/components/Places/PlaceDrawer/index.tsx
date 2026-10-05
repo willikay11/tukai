@@ -66,6 +66,9 @@ export const PlaceDrawer = ({
       isOpen={isOpen}
       setIsOpen={(next) => !next && onClose()}
       width="wide"
+      // Half a dozen sections deep: on a phone it takes the whole screen
+      // rather than a sheet spending its height on the page behind it
+      mobile="full"
       panelRef={setPanel}
     >
       {isLoading || !place ? (
@@ -119,7 +122,7 @@ export const PlaceDrawer = ({
             </section>
           </div>
 
-          <div className="sticky bottom-0 z-30 border-t border-line bg-white px-6 py-4">
+          <div className="sticky bottom-0 z-30 border-t border-line bg-white px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
             <PlaceDrawerFooter place={place} />
           </div>
         </div>
