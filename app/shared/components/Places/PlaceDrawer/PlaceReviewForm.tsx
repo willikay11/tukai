@@ -159,7 +159,7 @@ export const PlaceReviewForm = ({ place, onDone }: { place: Place; onDone: () =>
                 <IconComponent
                   iconName="StarIcon"
                   size={34}
-                  variant="solid"
+                  variant="twotone"
                   color="currentColor"
                   className={star <= shown ? 'text-star' : 'text-surface-muted'}
                 />

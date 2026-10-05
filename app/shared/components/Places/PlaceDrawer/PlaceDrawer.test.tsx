@@ -63,7 +63,21 @@ jest.mock('./PlaceDrawerHeader', () => ({
   ),
 }));
 jest.mock('@/app/shared/components/Moments', () => ({
-  ContextMoments: ({ emptyMessage }: { emptyMessage: string }) => <div>{emptyMessage}</div>,
+  ContextMoments: ({ emptyMessage, onShare }: { emptyMessage: string; onShare: () => void }) => (
+    <div>
+      {emptyMessage}
+      <button type="button" onClick={onShare}>
+        Share moment
+      </button>
+    </div>
+  ),
+  MomentComposerForm: ({ onDone }: { onDone: () => void }) => (
+    <div data-testid="moment-form">
+      <button type="button" onClick={onDone}>
+        shared
+      </button>
+    </div>
+  ),
 }));
 jest.mock('@/app/(places)/places/[placeId]/components/PlaceReviewsSection', () => ({
   PlaceReviewsSection: ({ showAddReview }: { showAddReview?: boolean }) => (
@@ -218,6 +232,35 @@ describe('PlaceDrawer', () => {
     it('comes back once the review has been posted', () => {
       openForm();
       fireEvent.click(screen.getByRole('button', { name: 'posted' }));
+
+      expect(screen.getByTestId('about')).toBeInTheDocument();
+    });
+  });
+
+  // Same shape as the review: in place, not a second panel over the first
+  describe('sharing a moment', () => {
+    const openForm = () => {
+      render(<PlaceDrawer placeId="p1" isOpen onClose={jest.fn()} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Share moment' }));
+    };
+
+    it('replaces the place with the composer', () => {
+      openForm();
+
+      expect(screen.getByTestId('moment-form')).toBeInTheDocument();
+      expect(screen.queryByTestId('about')).not.toBeInTheDocument();
+    });
+
+    it('calls it a new moment, with a way back', () => {
+      openForm();
+
+      expect(screen.getByRole('heading', { name: 'New moment' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'back' })).toBeInTheDocument();
+    });
+
+    it('comes back once the moment has gone', () => {
+      openForm();
+      fireEvent.click(screen.getByRole('button', { name: 'shared' }));
 
       expect(screen.getByTestId('about')).toBeInTheDocument();
     });

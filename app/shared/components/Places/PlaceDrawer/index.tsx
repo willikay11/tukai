@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { ClaimPlacePrompt } from '@/app/(places)/places/[placeId]/components/ClaimPlacePrompt';
 import { PlaceReviewsSection } from '@/app/(places)/places/[placeId]/components/PlaceReviewsSection';
-import { ContextMoments } from '@/app/shared/components/Moments';
+import { ContextMoments, MomentComposerForm } from '@/app/shared/components/Moments';
 import { usePlace, usePlaceOwnership } from '@/app/shared/hooks/usePlaces';
 import { useScrollSpy } from '@/app/shared/hooks/useScrollSpy';
 import { Drawer } from '@/components/ui/drawer';
@@ -20,6 +20,13 @@ import { PLACE_SECTIONS, PLACE_SECTION_IDS, placeDrawerTabs } from './tabs';
 
 /** The header and tabs a section has to clear before its pill lights up. */
 const TAB_OFFSET = 148;
+
+/** What the header says while the drawer is showing something other than the place. */
+const VIEW_TITLES: Record<string, string | undefined> = {
+  place: undefined,
+  review: 'Add a review',
+  moment: 'New moment',
+};
 
 const Loading = () => (
   <div className="space-y-4 px-6 py-6">
@@ -50,9 +57,12 @@ export const PlaceDrawer = ({
   // drawer opens, and a ref would never tell the scroll spy it had arrived
   const [panel, setPanel] = useState<HTMLDivElement | null>(null);
 
-  // Writing a review takes over the drawer rather than opening a second one
-  // over it. It resets whenever the drawer opens on a different place.
-  const [isWritingReview, setIsWritingReview] = useState(false);
+  /**
+   * Writing a review and sharing a moment each take the drawer over rather
+   * than opening a second one on top of it. Both reset whenever the drawer
+   * opens on a different place.
+   */
+  const [view, setView] = useState<'place' | 'review' | 'moment'>('place');
 
   const { data, isLoading } = usePlace(placeId, isOpen && Boolean(placeId));
   const place: Place | undefined = data?.data;
@@ -63,7 +73,7 @@ export const PlaceDrawer = ({
   const { data: ownership } = usePlaceOwnership(placeId ?? '', isOpen && Boolean(placeId));
   const isUnclaimed = ownership?.success === true && !ownership.data;
 
-  useEffect(() => setIsWritingReview(false), [placeId]);
+  useEffect(() => setView('place'), [placeId]);
 
   const tabs = useMemo(() => placeDrawerTabs(place?.totalReviews ?? null), [place?.totalReviews]);
   const { activeId, scrollTo } = useScrollSpy(PLACE_SECTION_IDS, TAB_OFFSET, panel);
@@ -86,20 +96,29 @@ export const PlaceDrawer = ({
             <PlaceDrawerHeader
               place={place}
               onClose={onClose}
-              title={isWritingReview ? 'Add a review' : undefined}
-              onBack={isWritingReview ? () => setIsWritingReview(false) : undefined}
+              title={VIEW_TITLES[view]}
+              onBack={view === 'place' ? undefined : () => setView('place')}
             />
           </div>
 
-          {!isWritingReview && (
+          {view === 'place' && (
             <div className="sticky top-[76px] z-20 bg-white px-6 py-3">
               <PlaceDrawerTabs tabs={tabs} activeId={activeId} onSelect={scrollTo} />
             </div>
           )}
 
-          {isWritingReview ? (
+          {view === 'review' ? (
             <div className="flex-1 px-6">
-              <PlaceReviewForm place={place} onDone={() => setIsWritingReview(false)} />
+              <PlaceReviewForm place={place} onDone={() => setView('place')} />
+            </div>
+          ) : view === 'moment' ? (
+            <div className="flex-1 px-6 py-6">
+              <MomentComposerForm
+                contextLabel={place.title}
+                contextKind="Place"
+                placeId={place.id}
+                onDone={() => setView('place')}
+              />
             </div>
           ) : (
             <>
@@ -120,6 +139,7 @@ export const PlaceDrawer = ({
                     emptyMessage={`No moments from ${place.title} yet. Yours could be the first.`}
                     placeId={place.id}
                     placeLabel={place.title}
+                    onShare={() => setView('moment')}
                   />
                 </section>
 
@@ -143,7 +163,7 @@ export const PlaceDrawer = ({
               </div>
 
               <div className="sticky bottom-0 z-30 border-t border-line bg-white px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
-                <PlaceDrawerFooter place={place} onAddReview={() => setIsWritingReview(true)} />
+                <PlaceDrawerFooter place={place} onAddReview={() => setView('review')} />
               </div>
             </>
           )}

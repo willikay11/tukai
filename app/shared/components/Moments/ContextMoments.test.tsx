@@ -203,4 +203,45 @@ describe('ContextMoments', () => {
 
     expect(screen.getByRole('status', { name: 'Loading moments' })).toBeInTheDocument();
   });
+
+  // A surface that shows the composer in place — the place drawer — owns the
+  // form itself, so there must not be a second one here
+  describe('onShare', () => {
+    it('hands the press over instead of opening the dialog', async () => {
+      const onShare = jest.fn();
+      const user = userEvent.setup();
+
+      render(
+        <ContextMoments
+          contextLabel="Kazuri"
+          emptyMessage="None yet"
+          placeId="p1"
+          onShare={onShare}
+        />,
+      );
+      await user.click(screen.getByRole('button', { name: /share moment/i }));
+
+      expect(onShare).toHaveBeenCalled();
+      expect(screen.queryByTestId('composer')).not.toBeInTheDocument();
+    });
+
+    it('still asks a signed-out reader to sign in', async () => {
+      const onShare = jest.fn();
+      sessionStatus = 'unauthenticated';
+      const user = userEvent.setup();
+
+      render(
+        <ContextMoments
+          contextLabel="Kazuri"
+          emptyMessage="None yet"
+          placeId="p1"
+          onShare={onShare}
+        />,
+      );
+      await user.click(screen.getByRole('button', { name: /share moment/i }));
+
+      expect(setOpenSignIn).toHaveBeenCalledWith(true);
+      expect(onShare).not.toHaveBeenCalled();
+    });
+  });
 });

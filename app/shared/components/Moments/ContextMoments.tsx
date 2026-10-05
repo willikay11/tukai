@@ -22,6 +22,7 @@ import { Moment } from '@/types/moment';
  */
 export const ContextMoments = ({
   title,
+  onShare,
   contextLabel,
   emptyMessage,
   experienceId,
@@ -32,6 +33,12 @@ export const ContextMoments = ({
 }: {
   /** A heading over the section. Omitted where a tab already names it. */
   title?: string;
+  /**
+   * Given one, pressing Share moment calls this instead of opening the
+   * composer dialog — for a surface that shows the form in place rather than
+   * stacking a second panel over itself.
+   */
+  onShare?: () => void;
   // What the moments belong to, named in the composer
   contextLabel: string;
   emptyMessage: string;
@@ -63,7 +70,14 @@ export const ContextMoments = ({
   const shareButton = (
     <button
       type="button"
-      onClick={() => (canPost ? setIsComposerOpen(true) : setOpenSignIn(true))}
+      onClick={() => {
+        if (!canPost) {
+          setOpenSignIn(true);
+          return;
+        }
+        if (onShare) onShare();
+        else setIsComposerOpen(true);
+      }}
       className="inline-flex h-12 flex-shrink-0 items-center gap-2.5 rounded-full bg-lime px-6 text-[15px] font-bold text-brand-ink transition-colors hover:bg-lime-dark"
     >
       <IconComponent iconName="DashboardCircleAddIcon" size={20} color="currentColor" />
@@ -73,7 +87,8 @@ export const ContextMoments = ({
 
   const heading = title ? <h3 className="text-[22px] font-bold text-brand-ink">{title}</h3> : null;
 
-  const composer = (
+  // The caller owns the form where it asked to, so there is no second one here
+  const composer = onShare ? null : (
     <MomentComposer
       open={isComposerOpen}
       onOpenChange={setIsComposerOpen}
