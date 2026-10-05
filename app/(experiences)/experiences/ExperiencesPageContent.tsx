@@ -19,6 +19,10 @@ import {
   ExperienceRow,
   RowSkeleton,
 } from '@/app/(experiences)/experiences/components/ExperienceRow';
+import {
+  GUIDED_TOURS_PAGE_SIZE,
+  GuidedToursRail,
+} from '@/app/(experiences)/experiences/components/GuidedToursRail';
 import { HappeningNearYou } from '@/app/(experiences)/experiences/components/HappeningNearYou';
 import { HostingCard } from '@/app/(experiences)/experiences/components/HostingCard';
 import { ReservedTab } from '@/app/(experiences)/experiences/components/ReservedTab';
@@ -260,6 +264,22 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const communities: Community[] = communitiesResponse?.data?.results ?? [];
   const communityTotal = communitiesResponse?.data?.count ?? 0;
 
+  // Guided tours: the same query Discover's tours rail issues. The rail is
+  // hidden when there are none, so no empty heading shows.
+  const { data: toursResponse, isLoading: isLoadingTours } = useExperiences(
+    {
+      page: 1,
+      page_size: GUIDED_TOURS_PAGE_SIZE,
+      experience_type: 'guide_booking',
+      lat,
+      long: lng,
+      category: categoryFilter,
+    },
+    isAll,
+  );
+  const tours: Experience[] = toursResponse?.data?.results ?? [];
+  const tourTotal = toursResponse?.data?.count ?? tours.length;
+
   const { data: topCityResponse, isLoading: isLoadingTopCity } = useExperiences(
     { page: 1, page_size: 8, search: topCity?.name, category: categoryFilter },
     isAll && Boolean(topCity),
@@ -402,6 +422,13 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             communities={communities}
             total={communityTotal}
             isLoading={isLoadingCommunities}
+          />
+
+          <GuidedToursRail
+            tours={tours}
+            total={tourTotal}
+            isLoading={isLoadingTours}
+            hasLocation={lat !== undefined && lng !== undefined}
           />
 
           {topCity && (
