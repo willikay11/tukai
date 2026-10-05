@@ -569,11 +569,19 @@ export const useFeaturedPlaces = (enabled = true, perPage = 50) =>
     queryKey: ['places', 'featured', perPage],
     queryFn: async () => await fetchPlaces(1, perPage),
     enabled,
-    select: (response) => ({
-      ...response,
-      data: {
-        ...response.data,
-        results: (response.data?.results ?? []).filter((place: Place) => place.featured),
-      },
-    }),
+    select: (response) => {
+      const all = response.data?.results ?? [];
+
+      return {
+        ...response,
+        data: {
+          ...response.data,
+          results: all.filter((place: Place) => place.featured),
+          // Whether this one page held every place there is. When it did, the
+          // featured ones in hand ARE all of them, and a section showing them
+          // has nowhere further to send the reader.
+          isComplete: (response.data?.count ?? all.length) <= perPage,
+        },
+      };
+    },
   });

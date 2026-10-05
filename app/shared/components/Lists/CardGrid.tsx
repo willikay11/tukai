@@ -34,14 +34,19 @@ export const CardGrid = <T,>({
 }) => {
   const paged = usePagedItems(items, pageSize);
 
+  // Everything already fits, so the arrows could never do anything — they are
+  // left out rather than drawn and greyed, the same as a rail that cannot
+  // scroll
+  const canPage = paged.pageCount > 1;
+
   return (
     <section>
       <SectionHeader
         title={title}
         subtitle={subtitle}
         railLabel={title.toLowerCase()}
-        onBack={paged.onBack}
-        onNext={paged.onNext}
+        onBack={canPage ? paged.onBack : undefined}
+        onNext={canPage ? paged.onNext : undefined}
         atStart={paged.atStart}
         atEnd={paged.atEnd}
       />

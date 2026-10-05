@@ -7,11 +7,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import moment from 'moment';
 
 import { BucketListRow } from '@/app/(experiences)/components/BucketListRow';
-import { CommunityDiscoverCard } from '@/app/(experiences)/components/CommunityDiscoverCard';
 import { CommunityRow } from '@/app/(experiences)/components/CommunityRow';
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
 import { happeningSoon } from '@/app/(experiences)/components/ExperienceCard/happening-soon';
-import { ItineraryCard } from '@/app/(experiences)/components/ItineraryCard';
 import { ROW_GRID, RowGridSkeleton } from '@/app/(experiences)/components/MediaRow';
 import { MomentCard } from '@/app/(experiences)/components/MomentCard';
 import { MomentComposeCard } from '@/app/(experiences)/components/MomentCard/MomentComposeCard';
@@ -27,16 +25,15 @@ import { SectionHeader } from '@/app/(experiences)/experiences/components/Sectio
 import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { CardGrid, CardRail, SeeAllCard } from '@/app/shared/components/Lists';
+import { ShowMoreButton } from '@/app/shared/components/Lists';
 import { MomentComposer } from '@/app/shared/components/Moments';
+import { usePublicBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
-import { ShowMoreButton } from '@/app/shared/components/Lists';
-import { usePublicBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useMoments } from '@/app/shared/hooks/useMoments';
 import {
   useFeaturedPlaces,
   usePlaceCategories,
-  usePlaces,
   usePlacesWithExperiences,
 } from '@/app/shared/hooks/usePlaces';
 import { useLocation } from '@/context/LocationContext';
@@ -112,6 +109,9 @@ export const DiscoverPageContent = () => {
 
   const { data: promotedResponse, isLoading: isLoadingPromoted } = useFeaturedPlaces(!isSearching);
   const promotedPlaces: Place[] = promotedResponse?.data?.results ?? [];
+  // Every featured place is already on the rail, so there is nothing for a
+  // See all card to lead to
+  const hasMorePromoted = promotedResponse?.data?.isComplete === false;
 
   const { data: withExperiencesResponse, isLoading: isLoadingWithExperiences } =
     usePlacesWithExperiences(!isSearching, PLACES_WITH_EXPERIENCES_SIZE);
@@ -125,6 +125,8 @@ export const DiscoverPageContent = () => {
   );
   const guidedTours: Experience[] = toursResponse?.data?.results ?? [];
   const tourCount: number = toursResponse?.data?.count ?? guidedTours.length;
+  // Nothing for See all to lead to once the rail holds them all
+  const hasMoreTours = tourCount > guidedTours.length;
 
   // ⚠️ `GET /experiences/` takes a single `date`, not a range, so "next 14
   // days" cannot be asked for — a wider page is read and narrowed by
@@ -174,13 +176,6 @@ export const DiscoverPageContent = () => {
     (moment: Moment) => momentPhotos(moment).length > 0,
   );
 
-  const { data: communitiesResponse, isLoading: isLoadingCommunities } = useGetCommunities({
-    page: 1,
-    enabled: true,
-    popularCommunities: true,
-  });
-  const communities: Community[] = communitiesResponse?.data?.results ?? [];
-
   // Same queries the /experiences rows issue
   const userCity = city ?? DEFAULT_CITY;
 
@@ -202,50 +197,6 @@ export const DiscoverPageContent = () => {
     { page: 1, page_size: 8, date: tomorrow },
     true,
   );
-
-  // No itineraries endpoint exists, but the experiences list honours
-  // experience_type server-side, so this is a real filter rather than a guess
-  const { data: itinerariesResponse, isLoading: isLoadingItineraries } = useExperiences(
-    { page: 1, page_size: ROW_SIZE, experience_type: 'itinerary' },
-    true,
-  );
-  const itineraries: Experience[] = itinerariesResponse?.data?.results ?? [];
-
-  // ⚠️ The places API ignores `popular` and `ordering` (verified: identical
-  // count and order), so "Popular" is scoped to the user's city rather than
-  // actually ranked. Reuses the city categories already fetched above.
-  const userCityCategory = allCities.find(
-    (category) => category.name.toLowerCase() === userCity.toLowerCase(),
-  );
-  const { data: popularPlacesResponse, isLoading: isFetchingPopularPlaces } = usePlaces({
-    page: 1,
-    enabled: Boolean(userCityCategory),
-    categoryId: userCityCategory?.id,
-  });
-  const popularPlaces: Place[] = popularPlacesResponse?.data?.results ?? [];
-  // A disabled query reports isLoading false, so without folding in the
-  // prerequisite the section would render nothing at all while it resolves
-  const isLoadingPopularPlaces = isLoadingCities || isFetchingPopularPlaces;
-
-  const { data: interestsResponse, isLoading: isLoadingInterests } = usePlaceCategories(
-    { pageSize: 100, group: 'interests' },
-    true,
-  );
-  const restaurantCategoryId = (interestsResponse?.data?.results ?? []).find(
-    (category: PlaceCategory) => category.name === 'Restaurants',
-  )?.id;
-
-  // ⚠️ No radius param exists — "Within 20 km" is copy; the API decides the
-  // radius from lat/lng
-  const { data: restaurantsResponse, isLoading: isFetchingRestaurants } = usePlaces({
-    page: 1,
-    enabled: Boolean(restaurantCategoryId),
-    categoryId: restaurantCategoryId,
-    lat,
-    lng,
-  });
-  const nearbyRestaurants: Place[] = restaurantsResponse?.data?.results ?? [];
-  const isLoadingRestaurants = isLoadingInterests || isFetchingRestaurants;
 
   if (isSearching) {
     return (
@@ -270,10 +221,12 @@ export const DiscoverPageContent = () => {
                 <PlaceCard key={place.id} place={place} priority={index < EAGER_IN_ROW} />
               ))}
 
-              <SeeAllCard
-                href="/places"
-                previewPhotos={promotedPlaces.slice(0, 3).map(placePhotoOf)}
-              />
+              {hasMorePromoted && (
+                <SeeAllCard
+                  href="/places"
+                  previewPhotos={promotedPlaces.slice(0, 3).map(placePhotoOf)}
+                />
+              )}
             </>
           )}
         </CardRail>
@@ -325,7 +278,11 @@ export const DiscoverPageContent = () => {
           separate tours endpoint, and GET /guides/ returns profiles with no
           title, photo or date to put on a card. */}
       {(isLoadingTours || guidedTours.length > 0) && (
-        <CardRail title="Guided tours" subtitle={toursSubtitle} seeAllHref="/experiences">
+        <CardRail
+          title="Guided tours"
+          subtitle={toursSubtitle}
+          seeAllHref={hasMoreTours ? '/experiences' : undefined}
+        >
           {isLoadingTours ? (
             <RowSkeleton cardClassName="aspect-square w-[184px]" />
           ) : (
@@ -445,33 +402,6 @@ export const DiscoverPageContent = () => {
 
       <MomentComposer open={isComposerOpen} onOpenChange={setIsComposerOpen} />
 
-      {/* Discover Communities */}
-      {(isLoadingCommunities || communities.length > 0) && (
-        <CardRail title="Discover Communities" subtitle="Find your crew">
-          {isLoadingCommunities ? (
-            <RowSkeleton cardClassName="h-[180px] w-[320px]" />
-          ) : (
-            <>
-              {communities.map((community, index) => (
-                <CommunityDiscoverCard
-                  key={community.id}
-                  community={community}
-                  priority={index < EAGER_IN_ROW}
-                />
-              ))}
-
-              <SeeAllCard
-                href="/communities"
-                previewPhotos={communities
-                  .slice(0, 3)
-                  .map((community) => community.photos?.[0]?.photo ?? null)}
-                className="aspect-auto h-[180px] w-[320px]"
-              />
-            </>
-          )}
-        </CardRail>
-      )}
-
       <ExperienceRow
         title="Happening Today"
         subtitle={formatLongDateWithOrdinal(new Date())}
@@ -489,72 +419,6 @@ export const DiscoverPageContent = () => {
         experiences={tomorrowResponse?.data?.results ?? []}
         isLoading={isLoadingTomorrow}
       />
-
-      {/* Discover Itineraries */}
-      {(isLoadingItineraries || itineraries.length > 0) && (
-        <CardRail title="Discover Itineraries" subtitle="Ready-to-book plans from TukAI">
-          {isLoadingItineraries ? (
-            <RowSkeleton cardClassName="aspect-[4/3] w-[300px]" />
-          ) : (
-            <>
-              {itineraries.map((itinerary) => (
-                <ItineraryCard key={itinerary.id} itinerary={itinerary} />
-              ))}
-
-              {/* Only when the row came back full: a partial row is already
-                  every itinerary there is, so "See all" would lead to the same
-                  cards the reader is looking at */}
-              {itineraries.length >= ROW_SIZE && (
-                <SeeAllCard
-                  href="/experiences/see-all?type=itineraries"
-                  previewPhotos={itineraries.slice(0, 3).map(coverPhotoOf)}
-                  className="w-[300px]"
-                />
-              )}
-            </>
-          )}
-        </CardRail>
-      )}
-
-      {/* Popular Places */}
-      {(isLoadingPopularPlaces || popularPlaces.length > 0) && (
-        <CardRail title={`Popular Places in ${userCity}`} subtitle="Loved by the community">
-          {isLoadingPopularPlaces ? (
-            <RowSkeleton />
-          ) : (
-            <>
-              {popularPlaces.map((place, index) => (
-                <PlaceCard key={place.id} place={place} priority={index < EAGER_IN_ROW} />
-              ))}
-
-              <SeeAllCard
-                href="/places"
-                previewPhotos={popularPlaces.slice(0, 3).map(placePhotoOf)}
-              />
-            </>
-          )}
-        </CardRail>
-      )}
-
-      {/* Nearby Restaurants */}
-      {(isLoadingRestaurants || nearbyRestaurants.length > 0) && (
-        <CardRail title="Nearby Restaurants" subtitle="Within 20 km of you">
-          {isLoadingRestaurants ? (
-            <RowSkeleton />
-          ) : (
-            <>
-              {nearbyRestaurants.map((place, index) => (
-                <PlaceCard key={place.id} place={place} priority={index < EAGER_IN_ROW} />
-              ))}
-
-              <SeeAllCard
-                href="/places"
-                previewPhotos={nearbyRestaurants.slice(0, 3).map(placePhotoOf)}
-              />
-            </>
-          )}
-        </CardRail>
-      )}
     </PageContainer>
   );
 };

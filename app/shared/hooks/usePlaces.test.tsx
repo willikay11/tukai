@@ -538,6 +538,44 @@ describe('useFeaturedPlaces', () => {
     expect(result.current.data?.data?.results).toEqual([]);
   });
 
+  // A section holding every featured place has nowhere to send the reader, so
+  // the See all card comes off
+  describe('isComplete', () => {
+    const respondWithCount = (count: number, results: unknown[]) =>
+      mockPlaceService.fetchPlaces.mockResolvedValue({
+        status: 200,
+        success: true,
+        data: { count, results },
+      } as never);
+
+    it('is true when one page held every place there is', async () => {
+      respondWithCount(3, [{ ...mockPlace, id: 'p1', featured: true }]);
+
+      const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(result.current.data?.data?.isComplete).toBe(true);
+    });
+
+    it('is false when more places exist than the page asked for', async () => {
+      respondWithCount(120, [{ ...mockPlace, id: 'p1', featured: true }]);
+
+      const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(result.current.data?.data?.isComplete).toBe(false);
+    });
+
+    it('treats a response with no count as complete', async () => {
+      respond([{ ...mockPlace, id: 'p1', featured: true }]);
+
+      const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(result.current.data?.data?.isComplete).toBe(true);
+    });
+  });
+
   it('asks for a wide page, since it has to filter locally', async () => {
     respond([]);
 

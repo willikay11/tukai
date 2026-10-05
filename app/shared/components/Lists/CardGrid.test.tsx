@@ -70,11 +70,13 @@ describe('CardGrid', () => {
     expect(screen.getByRole('button', { name: /next/i })).toBeDisabled();
   });
 
-  it('greys both arrows when everything fits on one page', () => {
+  // Arrows that could never do anything are noise, so they are left out
+  // rather than drawn and greyed
+  it('shows no arrows at all when everything fits on one page', () => {
     renderGrid(items(3));
 
-    expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled();
-    expect(screen.getByRole('button', { name: /next/i })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: /previous/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /next/i })).not.toBeInTheDocument();
   });
 
   it('says the empty line instead of an empty grid', () => {

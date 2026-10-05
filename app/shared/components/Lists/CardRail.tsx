@@ -26,6 +26,12 @@ export const CardRail = ({
 }) => {
   const { ref, atStart, atEnd, onBack, onNext } = useRailPaging<HTMLDivElement>();
 
+  // A rail whose cards all fit reports both ends at once. Arrows that can
+  // never do anything are noise, so they are left out rather than drawn and
+  // greyed — and a See all link, where the section has one, takes the space
+  // back.
+  const canScroll = !(atStart && atEnd);
+
   return (
     <section>
       <SectionHeader
@@ -33,8 +39,8 @@ export const CardRail = ({
         subtitle={subtitle}
         seeAllHref={seeAllHref}
         railLabel={title.toLowerCase()}
-        onBack={onBack}
-        onNext={onNext}
+        onBack={canScroll ? onBack : undefined}
+        onNext={canScroll ? onNext : undefined}
         atStart={atStart}
         atEnd={atEnd}
       />
