@@ -32,3 +32,20 @@ prototype. Each task has its own file. Reference a task by ID.
 3. Interactions: D-07, then D-04 and D-05, then D-10
 4. Verify: D-11, D-12, D-19
 5. Blocked on the API, to raise with the backend: D-08, D-16, D-17, D-18
+
+## Happening soon
+
+Inventory: [INVENTORY-happening-soon.md](INVENTORY-happening-soon.md).
+Run in this order:
+
+| ID | Task | Status | Depends on |
+|---|---|---|---|
+| HS-01 | Review the Happening soon inventory | decision | none |
+| HS-02 | Decide the data rule | decision | HS-01 |
+| HS-03 | Decide what the subtitle can say | decision | HS-01 |
+| D-03 | Experience cards open the summary drawer | todo | none |
+| D-12 | Verify the basket on cards | verify | none |
+| D-13 | Confirm the See all targets | decision | none |
+| HS-04 | Build the agreed changes | todo | HS-01, HS-02, HS-03 |
+| D-19 | Check the rail at phone width | todo | none |
+
