@@ -20,6 +20,12 @@ jest.mock('@/app/shared/components/Icons', () => ({
   ),
 }));
 
+// The account is read only for the face on "You"; signed out, the icon stands in
+let mockSession: { user: { image: string; name: string } } | null = null;
+jest.mock('next-auth/react', () => ({
+  useSession: () => ({ data: mockSession }),
+}));
+
 const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>;
 
 describe('BottomNavigation', () => {
@@ -125,55 +131,44 @@ describe('BottomNavigation', () => {
       const { container } = render(<BottomNavigation />);
       const navContainer = container.firstChild;
 
-      expect(navContainer).toHaveClass('fixed', 'bottom-6');
+      expect(navContainer).toHaveClass('fixed', 'bottom-0', 'inset-x-0');
     });
   });
 
   describe('active link styling and labels', () => {
-    it('shows label only for active link', () => {
+    // Every destination names itself, as the design has it - no bare icons
+    it('shows every label, active or not', () => {
+      mockUsePathname.mockReturnValue('/communities');
+
+      render(<BottomNavigation />);
+
+      ['Discover', 'Bucket lists', 'Communities', 'Plans', 'You'].forEach((label) => {
+        expect(screen.getByText(label)).toBeInTheDocument();
+      });
+    });
+
+    it('applies active styling (bold label and a soft pill behind the icon)', () => {
       mockUsePathname.mockReturnValue('/communities');
 
       render(<BottomNavigation />);
 
       const communitiesLink = screen.getByRole('link', { name: /communities/i });
 
-      // Active link should show the label
-      expect(communitiesLink).toHaveTextContent('Communities');
+      expect(communitiesLink).toHaveAttribute('aria-current', 'page');
+      expect(communitiesLink).toHaveClass('font-semibold', 'text-gray-900');
+      expect(communitiesLink.querySelector('span')).toHaveClass('bg-surface-tab');
     });
 
-    it('hides label for non-active links', () => {
+    it('applies inactive styling (muted label, no pill)', () => {
       mockUsePathname.mockReturnValue('/');
 
       render(<BottomNavigation />);
 
-      const links = screen.getAllByRole('link');
-      const exploreLinkElement = links.find((link) => link.getAttribute('href') === '/plans');
+      const plansLink = screen.getByRole('link', { name: /plans/i });
 
-      // Non-active links should only have icons, not text
-      expect(exploreLinkElement).not.toHaveTextContent('Explore');
-    });
-
-    it('applies active styling (background and color)', () => {
-      mockUsePathname.mockReturnValue('/communities');
-
-      render(<BottomNavigation />);
-
-      const communitiesLink = screen.getByRole('link', { name: /communities/i });
-
-      expect(communitiesLink).toHaveClass('bg-lime');
-      expect(communitiesLink).toHaveClass('text-primary');
-    });
-
-    it('applies inactive styling (text color)', () => {
-      mockUsePathname.mockReturnValue('/');
-
-      render(<BottomNavigation />);
-
-      const links = screen.getAllByRole('link');
-      const exploreLink = links.find((link) => link.getAttribute('href') === '/plans');
-
-      expect(exploreLink).toHaveClass('text-gray-500');
-      expect(exploreLink).not.toHaveClass('bg-lime');
+      expect(plansLink).not.toHaveAttribute('aria-current');
+      expect(plansLink).toHaveClass('font-medium', 'text-gray-500');
+      expect(plansLink.querySelector('span')).not.toHaveClass('bg-surface-tab');
     });
 
     it('marks Experiences link as active when pathname is /experiences', () => {
@@ -183,7 +178,7 @@ describe('BottomNavigation', () => {
 
       const communitiesLink = screen.getByRole('link', { name: /communities/i });
 
-      expect(communitiesLink).toHaveClass('bg-lime');
+      expect(communitiesLink).toHaveAttribute('aria-current', 'page');
     });
 
     it('marks Plans as active when pathname is /plans', () => {
@@ -191,7 +186,7 @@ describe('BottomNavigation', () => {
 
       render(<BottomNavigation />);
 
-      expect(screen.getByRole('link', { name: /plans/i })).toHaveClass('bg-lime');
+      expect(screen.getByRole('link', { name: /plans/i })).toHaveAttribute('aria-current', 'page');
     });
 
     // A single place hides the nav entirely, so the deepest route that still
@@ -201,7 +196,7 @@ describe('BottomNavigation', () => {
 
       render(<BottomNavigation />);
 
-      expect(screen.getByRole('link', { name: /plans/i })).toHaveClass('bg-lime');
+      expect(screen.getByRole('link', { name: /plans/i })).toHaveAttribute('aria-current', 'page');
     });
 
     it('marks You as active when pathname is /profile', () => {
@@ -209,7 +204,7 @@ describe('BottomNavigation', () => {
 
       render(<BottomNavigation />);
 
-      expect(screen.getByRole('link', { name: /you/i })).toHaveClass('bg-lime');
+      expect(screen.getByRole('link', { name: /you/i })).toHaveAttribute('aria-current', 'page');
     });
 
     // Only '/' exactly - every other route starts with it
@@ -218,7 +213,9 @@ describe('BottomNavigation', () => {
 
       render(<BottomNavigation />);
 
-      expect(screen.queryByRole('link', { name: /discover/i })).not.toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /discover/i })).not.toHaveAttribute(
+        'aria-current',
+      );
     });
 
     it('only shows one active link at a time', () => {
@@ -228,7 +225,7 @@ describe('BottomNavigation', () => {
 
       const activeLinks = screen
         .getAllByRole('link')
-        .filter((link) => link.className.includes('bg-lime'));
+        .filter((link) => link.getAttribute('aria-current') === 'page');
 
       expect(activeLinks).toHaveLength(1);
       expect(activeLinks[0]).toHaveTextContent('Plans');
@@ -366,6 +363,20 @@ describe('BottomNavigation', () => {
         expect(screen.queryByRole('button')).not.toBeInTheDocument();
       });
 
+      // The reader's face stands in for the You icon, as the design has it
+      it('shows the signed-in reader’s face on You', () => {
+        mockUsePathname.mockReturnValue('/');
+        mockSession = { user: { image: '/me.jpg', name: 'Ada' } };
+
+        render(<BottomNavigation />);
+
+        const you = screen.getByRole('link', { name: /you/i });
+        expect(you.querySelector('img')).toHaveAttribute('alt', 'Ada');
+        expect(screen.queryByTestId('icon-UserIcon')).not.toBeInTheDocument();
+
+        mockSession = null;
+      });
+
       it('shows no account avatar', () => {
         mockUsePathname.mockReturnValue('/');
 
@@ -395,34 +406,33 @@ describe('BottomNavigation', () => {
       expect(nav).toHaveClass('md:hidden');
     });
 
-    it('is centered horizontally on screen', () => {
+    it('spans the full width of the screen, along the bottom edge', () => {
       mockUsePathname.mockReturnValue('/');
 
       const { container } = render(<BottomNavigation />);
       const nav = container.firstChild;
 
-      expect(nav).toHaveClass('left-1/2');
-      expect(nav).toHaveClass('-translate-x-1/2');
+      expect(nav).toHaveClass('inset-x-0', 'bottom-0');
+      expect(nav).not.toHaveClass('left-1/2', '-translate-x-1/2');
     });
   });
 
   describe('styling', () => {
-    // The pill styling sits on the nav itself now - the outer element only
-    // positions it, because the profile button floats beside it
-    it('has rounded full appearance', () => {
+    it('is a white bar with an upward shadow, not a floating pill', () => {
       mockUsePathname.mockReturnValue('/');
 
-      render(<BottomNavigation />);
+      const { container } = render(<BottomNavigation />);
 
-      expect(screen.getByRole('navigation')).toHaveClass('rounded-full');
+      expect(container.firstChild).toHaveClass('bg-white', 'shadow-top-md');
+      expect(screen.getByRole('navigation')).not.toHaveClass('rounded-full', 'shadow-lg');
     });
 
-    it('has shadow and white background', () => {
+    it('splits the five destinations into equal columns', () => {
       mockUsePathname.mockReturnValue('/');
 
       render(<BottomNavigation />);
 
-      expect(screen.getByRole('navigation')).toHaveClass('bg-white', 'shadow-lg');
+      expect(screen.getByRole('navigation')).toHaveClass('grid', 'grid-cols-5');
     });
 
     it('has z-index 50 for proper layering', () => {

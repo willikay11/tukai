@@ -126,6 +126,9 @@ export default function RootLayout({
                                       <Search />
                                     </Suspense>
                                   </div>
+                                  <div className="mx-4 pb-4 md:hidden">
+                                    <Nav />
+                                  </div>
                                   {/* Browser */}
                                   <div className="hidden md:grid md:grid-cols-12 md:gap-x-4">
                                     {/* The tabs are centred on the row itself, not
@@ -179,7 +182,7 @@ export default function RootLayout({
                               </ChromeGate>
                             </div>
                             <ChromeGate>
-                              <DownloadApp />
+                              {/* <DownloadApp /> */}
                               {/* It reads the `tab` parameter to stand aside for the
                             create button on My Communities, and `useSearchParams`
                             in a component this layout renders on every page opts

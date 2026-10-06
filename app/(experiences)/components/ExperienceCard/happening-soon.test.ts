@@ -1,6 +1,6 @@
 import { Experience } from '@/types/experience';
 
-import { SOON_LIMIT, happeningSoon, nextStart } from './happening-soon';
+import { SOON_LIMIT, hasMoreSoon, happeningSoon, nextStart } from './happening-soon';
 
 // A Thursday
 const NOW = new Date(2026, 9, 1, 12, 0);
@@ -126,5 +126,36 @@ describe('happeningSoon', () => {
 
   it('is empty when nothing is coming up', () => {
     expect(happeningSoon([], NOW)).toEqual([]);
+  });
+});
+
+describe('hasMoreSoon', () => {
+  const fortnightOf = (count: number) =>
+    Array.from({ length: count }, (_, index) =>
+      experience({
+        id: `e${index}`,
+        startDate: iso(daysFromNow(index % 10)),
+        endDate: iso(daysFromNow(index % 10, 12)),
+      }),
+    );
+
+  // The See All tile only earns its place when the rail is leaving some out
+  it('is false when everything in the fortnight fits on the rail', () => {
+    expect(hasMoreSoon(fortnightOf(SOON_LIMIT), NOW)).toBe(false);
+    expect(hasMoreSoon(fortnightOf(3), NOW)).toBe(false);
+  });
+
+  it('is true when the fortnight holds more than the rail shows', () => {
+    expect(hasMoreSoon(fortnightOf(SOON_LIMIT + 1), NOW)).toBe(true);
+  });
+
+  it('ignores experiences outside the fortnight', () => {
+    const later = experience({ id: 'later', startDate: iso(daysFromNow(30)) });
+
+    expect(hasMoreSoon([...fortnightOf(SOON_LIMIT), later], NOW)).toBe(false);
+  });
+
+  it('is false when nothing is coming up', () => {
+    expect(hasMoreSoon([], NOW)).toBe(false);
   });
 });

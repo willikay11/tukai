@@ -97,11 +97,17 @@ describe('the Discover tab strip', () => {
     expect(screen.getByRole('tab', { name: 'Places' })).not.toHaveClass('bg-surface-tab');
   });
 
-  it('hides below md, where the bottom bar takes over', () => {
+  it('does not hide itself, so the bar it sits in decides where it shows', () => {
     at('/');
 
-    expect(screen.getByRole('tablist')).toHaveClass('hidden');
-    expect(screen.getByRole('tablist')).toHaveClass('md:flex');
+    expect(screen.getByRole('tablist')).not.toHaveClass('hidden');
+    expect(screen.getByRole('tablist')).not.toHaveClass('md:flex');
+  });
+
+  it('scrolls sideways when the four tabs are wider than the phone', () => {
+    at('/');
+
+    expect(screen.getByRole('tablist')).toHaveClass('overflow-x-auto');
   });
 
   it('is reachable from the keyboard', async () => {
