@@ -18,6 +18,12 @@ interface CityCardProps {
   variant?: 'default' | 'banner';
   // Overrides the fixed row sizing - the cities grid wants full-width cards
   className?: string;
+  /**
+   * Makes the card a toggle rather than a link: the city the reader has picked
+   * is pressed. Given `onSelect`, `href` is not used.
+   */
+  onSelect?: () => void;
+  selected?: boolean;
 }
 
 export const CityCard = ({
@@ -27,18 +33,21 @@ export const CityCard = ({
   href,
   variant = 'default',
   className,
+  onSelect,
+  selected = false,
 }: CityCardProps) => {
   const isBanner = variant === 'banner';
 
-  return (
-    <Link
-      href={href}
-      className={cn(
-        'relative block flex-shrink-0 overflow-hidden rounded-xl',
-        isBanner ? 'aspect-[8/3] w-[184px]' : 'h-[130px] w-[240px]',
-        className,
-      )}
-    >
+  const classes = cn(
+    'relative block flex-shrink-0 overflow-hidden rounded-xl',
+    isBanner ? 'aspect-[8/3] w-[184px]' : 'h-[130px] w-[240px]',
+    onSelect && 'cursor-pointer p-0',
+    selected && 'ring-2 ring-primary',
+    className,
+  );
+
+  const content = (
+    <>
       <PhotoImage
         src={imageUrl}
         alt={city}
@@ -73,6 +82,20 @@ export const CityCard = ({
           )}
         </div>
       )}
+    </>
+  );
+
+  if (onSelect) {
+    return (
+      <button type="button" onClick={onSelect} aria-pressed={selected} className={classes}>
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <Link href={href} className={classes}>
+      {content}
     </Link>
   );
 };

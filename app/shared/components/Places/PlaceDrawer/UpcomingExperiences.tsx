@@ -158,7 +158,9 @@ export const UpcomingExperiences = ({
       ) : onSelectedDay.length > 0 ? (
         <div className="flex flex-wrap gap-4">
           {onSelectedDay.map((experience) => (
-            <ExperienceCard key={experience.id} experience={experience} />
+            // Stays a link: a drawer opened from here would stack on the place
+            // drawer, which cannot yet be closed back to in order (see D-10)
+            <ExperienceCard key={experience.id} experience={experience} opensDrawer={false} />
           ))}
         </div>
       ) : (

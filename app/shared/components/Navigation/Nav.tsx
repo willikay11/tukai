@@ -37,7 +37,7 @@ export const Nav = () => {
             role="tab"
             aria-selected={active}
             className={cn(
-              'inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm transition-colors',
+              'inline-flex h-10 items-center gap-2 rounded-full px-4 text-[13.5px] transition-colors',
               active
                 ? 'bg-surface-tab font-semibold text-brand'
                 : 'bg-surface font-medium text-gray-900 hover:brightness-[0.97]',
@@ -45,7 +45,7 @@ export const Nav = () => {
           >
             <IconComponent
               iconName={tab.icon}
-              size={20}
+              size={18}
               color="currentColor"
               // The canvas fills the chosen tab's icon and outlines the rest
               variant={active ? 'solid' : 'twotone'}

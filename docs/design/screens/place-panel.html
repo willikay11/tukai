@@ -1,0 +1,334 @@
+<!--
+Source: Tukai Web.dc.html (design project folder), the place panel's place view.
+Extracted: the block guarded by pn.isPlace, markup and inline values kept, scripts removed.
+Template tokens ({{ ... }}) are left as the prototype has them.
+Re-extract when the prototype changes; do not hand-edit.
+-->
+<sc-if value="{{ pn.isPlace }}">
+        <nav aria-label="Sections" style="position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:8px;margin:-20px -24px -12px;padding:12px 24px;background:#FFFFFF;overflow-x:auto;scrollbar-width:none;">
+          <sc-for list="{{ pn.secs }}" as="sc" hint-placeholder-count="5">
+            <button type="button" onClick="{{ sc.onClick }}" aria-current="{{ sc.cur }}" style="display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;height:44px;padding:0 18px 0 12px;border:none;border-radius:999px;background:{{ sc.bg }};color:{{ sc.fg }};font-family:'Google Sans';font-size:14.5px;font-weight:500;white-space:nowrap;cursor:pointer;" style-hover="filter:brightness(0.97);" style-active="transform:scale(0.98);">
+              <i class="{{ sc.icon }}" style="font-size:21px;flex:0 0 auto;color:{{ sc.ic }};" aria-hidden="true"></i>
+              {{ sc.label }}
+            </button>
+          </sc-for>
+        </nav>
+          <sc-if value="{{ pn.isMyPlace }}">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;padding:16px;border-radius:12px;background:#E8F1ED;">
+              <span style="flex:0 0 auto;width:44px;height:44px;border-radius:999px;background:#FFFFFF;color:#066349;display:flex;align-items:center;justify-content:center;"><i class="hgi-twotone hgi-store-verified-01" style="font-size:22px;" aria-hidden="true"></i></span>
+              <div style="flex:1 1 220px;min-width:0;display:flex;flex-direction:column;gap:2px;">
+                <span style="font-size:15px;font-weight:600;color:#013334;">{{ pn.myPlaceTitle }}</span>
+                <span style="font-size:13.5px;line-height:1.45;color:#1F2937;text-wrap:pretty;">{{ pn.rsLine }}</span>
+              </div>
+              <button type="button" onClick="{{ pn.onRset }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 18px;border:none;border-radius:999px;background:linear-gradient(180deg,#0C7A50 0%,#044B36 100%);color:#FFFFFF;font-family:'Google Sans';font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;" style-hover="filter:brightness(1.06);"><i class="hgi-twotone hgi-calendar-03" style="font-size:18px;flex:0 0 auto;" aria-hidden="true"></i>{{ pn.rsBtn }}</button>
+            </div>
+          </sc-if>
+        <div style="position:relative;margin:0 -24px;">
+          <div data-gal-row="1" onScroll="{{ pn.onGalScroll }}" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 24px;scroll-snap-type:x proximity;scroll-padding:0 24px;">
+            <sc-for list="{{ pn.gallery }}" as="g" hint-placeholder-count="4">
+              <button type="button" onClick="{{ g.onOpen }}" aria-label="{{ g.aria }}" style="flex:0 0 auto;width:{{ g.w }};height:240px;padding:0;border:none;border-radius:12px;overflow:hidden;background:#F3F4F2;cursor:zoom-in;scroll-snap-align:start;">
+                <img loading="lazy" src="{{ g.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+              </button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ pn.galCanPrev }}">
+            <button type="button" onClick="{{ pn.onGalRowPrev }}" aria-label="Scroll photos left" style="position:absolute;left:14px;top:50%;z-index:2;transform:translateY(-50%);width:44px;height:44px;border:none;border-radius:999px;background:rgba(255,255,255,.95);color:#013334;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(1,51,52,.25);" style-hover="background:#FFFFFF;" style-active="transform:translateY(-50%) scale(0.94);"><i class="hgi-twotone hgi-arrow-left-01" style="font-size:20px;flex:0 0 auto;" aria-hidden="true"></i></button>
+          </sc-if>
+          <sc-if value="{{ pn.galCanNext }}">
+            <button type="button" onClick="{{ pn.onGalRowNext }}" aria-label="Scroll photos right" style="position:absolute;right:14px;top:50%;z-index:2;transform:translateY(-50%);width:44px;height:44px;border:none;border-radius:999px;background:rgba(255,255,255,.95);color:#013334;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(1,51,52,.25);" style-hover="background:#FFFFFF;" style-active="transform:translateY(-50%) scale(0.94);"><i class="hgi-twotone hgi-arrow-right-01" style="font-size:20px;flex:0 0 auto;" aria-hidden="true"></i></button>
+          </sc-if>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;margin-top:-12px;">
+          <button type="button" onClick="{{ pn.onDirections }}" aria-label="{{ pn.distanceAria }}" style="display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px 0 12px;border:1px solid #E3E7E5;border-radius:999px;background:#EEF1EF;font-family:'Google Sans';font-size:14.5px;color:#3F4B47;cursor:pointer;white-space:nowrap;" style-hover="border-color:#CBDDD4;background:#E8F1ED;">
+            <i class="hgi-twotone hgi-location-01" style="font-size:19px;flex:0 0 auto;color:#066349;" aria-hidden="true"></i>
+            {{ pn.city }}
+            <sc-if value="{{ pn.hasDistance }}"><span aria-hidden="true" style="flex:0 0 auto;width:5px;height:5px;border-radius:999px;background:#60A5FA;"></span>{{ pn.distance }}</sc-if>
+            <i class="hgi-twotone hgi-arrow-up-right-01" style="font-size:17px;flex:0 0 auto;color:#066349;margin-left:6px;" aria-hidden="true"></i>
+          </button>
+          <button type="button" onClick="{{ pn.onRating }}" style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0;border:none;background:transparent;font-family:'Google Sans';font-size:14.5px;color:#1F2937;cursor:pointer;white-space:nowrap;" style-hover="color:#066349;">
+            <sc-if value="{{ pn.hasRating }}"><i class="hgi-bulk hgi-star" style="font-size:18px;flex:0 0 auto;color:#FBBF24;" aria-hidden="true"></i><span style="font-weight:600;">{{ pn.ratingNum }}</span><span aria-hidden="true" style="flex:0 0 auto;width:5px;height:5px;border-radius:999px;background:#60A5FA;"></span></sc-if>
+            {{ pn.reviewsLine }}
+          </button>
+        </div>
+        <div data-psec="about" style="display:flex;flex-direction:column;gap:4px;margin-top:-14px;">
+          <p data-about="1" style="margin:0;font-size:15px;line-height:1.6;color:#1F2937;text-wrap:pretty;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:{{ pn.aboutClamp }};overflow:hidden;">{{ pn.about }}</p>
+          <sc-if value="{{ pn.aboutOpen }}">
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+              <sc-for list="{{ pn.aboutBlocks }}" as="ab" hint-placeholder-count="4">
+                <sc-if value="{{ ab.isH }}"><h4 style="margin:12px 0 0;font-family:'Google Sans';font-size:16px;font-weight:700;color:#013334;letter-spacing:-.1px;">{{ ab.text }}</h4></sc-if>
+                <sc-if value="{{ ab.isSub }}"><h5 style="margin:4px 0 0;font-family:'Google Sans';font-size:14.5px;font-weight:700;color:#1F2937;">{{ ab.text }}</h5></sc-if>
+                <sc-if value="{{ ab.isP }}"><p style="margin:0;font-size:15px;line-height:1.6;color:#1F2937;text-wrap:pretty;">{{ ab.text }}</p></sc-if>
+                <sc-if value="{{ ab.isLi }}"><div style="display:flex;align-items:flex-start;gap:10px;font-size:15px;line-height:1.6;color:#1F2937;"><span aria-hidden="true" style="flex:0 0 auto;width:6px;height:6px;margin-top:10px;border-radius:999px;background:#066349;"></span><span style="min-width:0;text-wrap:pretty;"><span style="font-weight:600;color:#013334;">{{ ab.lead }}</span> {{ ab.text }}</span></div></sc-if>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ pn.aboutToggle }}">
+            <button type="button" onClick="{{ pn.onAboutMore }}" aria-expanded="{{ pn.aboutOpen }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:6px;height:44px;margin:-4px 0 -10px;padding:0;border:none;background:transparent;font-family:'Google Sans';font-size:15px;font-weight:500;color:#066349;cursor:pointer;" style-hover="text-decoration:underline;">{{ pn.aboutLabel }}<i class="hgi-twotone {{ pn.aboutIcon }}" style="font-size:17px;flex:0 0 auto;" aria-hidden="true"></i></button>
+          </sc-if>
+        </div>
+        <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        <sc-if value="{{ pn.hasMine }}">
+          <div data-psec="mine" data-mine="1" style="display:flex;flex-direction:column;gap:16px;">
+            <div><h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">My reservations</h3><p style="margin:6px 0 0;font-size:14px;line-height:1.45;color:#5B6B66;text-wrap:pretty;">Your upcoming experiences and reservations at {{ pn.title }}</p></div>
+            <div style="display:flex;flex-direction:column;gap:2px;padding:8px 8px 0;border:1px solid #ECEEF1;border-radius:18px;background:#F9FAFB;">
+              <button type="button" onClick="{{ pn.mineCur.onOpen }}" style="display:flex;align-items:center;gap:14px;width:100%;padding:10px;border:1px solid #ECEEF1;border-radius:14px;background:#FFFFFF;text-align:left;cursor:pointer;font-family:'Google Sans';" style-hover="border-color:#CBDDD4;">
+                <img loading="lazy" src="{{ pn.mineCur.img }}" alt="" style="width:64px;height:64px;border-radius:12px;object-fit:cover;display:block;flex:0 0 auto;background:#E8F1ED;">
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;">
+                  <span style="font-size:16px;font-weight:600;color:#1F2937;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ pn.mineCur.title }}</span>
+                  <span style="display:flex;align-items:center;gap:7px;min-width:0;font-size:14px;color:#5B6B66;"><span style="flex:0 0 auto;font-weight:600;color:#1F2937;">{{ pn.mineCur.party }}</span><span aria-hidden="true" style="flex:0 0 auto;width:5px;height:5px;border-radius:999px;background:#60A5FA;"></span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ pn.mineCur.time }}</span></span>
+                </span>
+                <span style="flex:0 0 auto;width:58px;height:64px;border:1px dashed #BFDBFE;border-radius:12px;background:linear-gradient(180deg,#EFF6FF 0%,#DBEAFE 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;"><span style="font-size:14px;color:#1F2937;">{{ pn.mineCur.mon }}</span><span style="font-size:17px;font-weight:600;color:#1F2937;line-height:1;">{{ pn.mineCur.day }}</span></span>
+              </button>
+              <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0 8px;padding:0 4px;">
+                <div style="display:flex;align-items:center;min-height:44px;">
+                  <sc-if value="{{ pn.hasMineDots }}">
+                    <sc-for list="{{ pn.mineDots }}" as="md" hint-placeholder-count="2">
+                      <button type="button" onClick="{{ md.onClick }}" aria-label="{{ md.aria }}" aria-current="{{ md.cur }}" style="width:26px;height:44px;padding:0;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:block;width:{{ md.w }};height:6px;border-radius:999px;background:{{ md.bg }};"></span></button>
+                    </sc-for>
+                  </sc-if>
+                </div>
+                <div style="display:flex;align-items:center;flex-wrap:wrap;gap:0 10px;">
+                  <button type="button" onClick="{{ pn.mineCur.onEdit }}" style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0;border:none;background:transparent;color:#066349;font-family:'Google Sans';font-size:14.5px;font-weight:500;cursor:pointer;" style-hover="text-decoration:underline;"><i class="hgi-bulk hgi-edit-04" style="font-size:18px;flex:0 0 auto;" aria-hidden="true"></i>Edit reservation</button>
+                  <span aria-hidden="true" style="flex:0 0 auto;width:5px;height:5px;border-radius:999px;background:#60A5FA;"></span>
+                  <button type="button" onClick="{{ pn.mineCur.onCancel }}" style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0;border:none;background:transparent;color:#E02D3C;font-family:'Google Sans';font-size:14.5px;font-weight:600;cursor:pointer;" style-hover="text-decoration:underline;"><i class="hgi-bulk hgi-delete-01" style="font-size:18px;flex:0 0 auto;color:#E02D3C;" aria-hidden="true"></i>Cancel reservation</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        </sc-if>
+        <sc-if value="{{ pn.hasToday }}">
+          <div data-psec="exps" style="display:flex;flex-direction:column;gap:16px;">
+            <div>
+              <button type="button" onClick="{{ pn.onNowAll }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:-10px 0;padding:0;border:none;background:transparent;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;cursor:pointer;" style-hover="color:#066349;">Happening now<i class="hgi-twotone hgi-arrow-right-01" style="font-size:20px;flex:0 0 auto;color:#5B6B66;" aria-hidden="true"></i></button>
+              <p style="margin:6px 0 0;font-size:14px;line-height:1.45;color:#5B6B66;text-wrap:pretty;">Ongoing experiences at {{ pn.title }}</p>
+            </div>
+            <div data-now-row="1" onScroll="{{ pn.onNowScroll }}" style="display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;margin:0 -24px;padding:0 24px;scroll-snap-type:x mandatory;scroll-padding:0 24px;">
+              <sc-for list="{{ pn.today }}" as="e" hint-placeholder-count="2">
+                <button type="button" onClick="{{ e.onOpen }}" style="flex:0 0 auto;width:min(340px,80%);display:flex;align-items:center;gap:12px;padding:10px 14px 10px 10px;border:1px solid #ECEEF1;border-radius:16px;background:#F9FAFB;text-align:left;cursor:pointer;font-family:'Google Sans';scroll-snap-align:start;" style-hover="border-color:#CBDDD4;">
+                  <img loading="lazy" src="{{ e.img }}" alt="" style="width:56px;height:56px;border-radius:10px;object-fit:cover;display:block;flex:0 0 auto;background:#E8F1ED;">
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;">
+                    <span style="font-size:15.5px;font-weight:600;color:#1F2937;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ e.title }}</span>
+                    <span style="display:flex;align-items:center;gap:7px;min-width:0;font-size:13.5px;color:#5B6B66;"><span style="flex:0 0 auto;font-weight:600;color:#1F2937;">{{ e.priceShort }}</span><span aria-hidden="true" style="flex:0 0 auto;width:5px;height:5px;border-radius:999px;background:#60A5FA;"></span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">By {{ e.host }}</span></span>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ pn.hasNowDots }}">
+              <div style="display:flex;align-items:center;margin:-14px 0 -12px -8px;">
+                <sc-for list="{{ pn.nowDots }}" as="nd" hint-placeholder-count="2">
+                      <button type="button" onClick="{{ nd.onClick }}" aria-label="{{ nd.aria }}" aria-current="{{ nd.cur }}" style="width:26px;height:44px;padding:0;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:block;width:{{ nd.w }};height:6px;border-radius:999px;background:{{ nd.bg }};"></span></button>
+                    </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        </sc-if>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:20px 24px;">
+          <sc-for list="{{ pn.details }}" as="d" hint-placeholder-count="8">
+            <div style="display:flex;align-items:flex-start;gap:16px;min-width:0;">
+              <i class="hgi-twotone {{ d.icon }}" style="font-size:22px;flex:0 0 auto;color:#1F2937;margin-top:1px;" aria-hidden="true"></i>
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;">
+                <span style="font-size:15px;font-weight:600;color:#1F2937;">{{ d.k }}</span>
+                <sc-if value="{{ d.href }}"><span style="display:flex;align-items:center;gap:4px;margin:-12px 0;"><a href="{{ d.href }}" style="display:inline-flex;align-items:center;min-height:44px;font-size:14.5px;color:#5B6B66;text-decoration:none;" style-hover="color:#066349;text-decoration:underline;">{{ d.v }}</a><sc-if value="{{ d.onCopy }}"><button type="button" onClick="{{ d.onCopy }}" aria-label="{{ d.copyAria }}" title="Copy" style="width:44px;height:44px;flex:0 0 auto;border:none;border-radius:999px;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#066349;" style-hover="background:#E8F1ED;"><i class="hgi-twotone {{ d.copyIcon }}" style="font-size:18px;flex:0 0 auto;" aria-hidden="true"></i></button></sc-if></span></sc-if>
+                <sc-if value="{{ d.plain }}"><span style="font-size:14.5px;line-height:1.45;color:#5B6B66;text-wrap:pretty;">{{ d.v }}</span></sc-if>
+              </span>
+            </div>
+          </sc-for>
+        </div>
+        <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        <sc-if value="{{ pn.hasSocials }}">
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Socials</h3>
+            <div style="display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:0 -24px;padding:0 24px;">
+              <sc-for list="{{ pn.socials }}" as="so" hint-placeholder-count="4">
+                <button type="button" onClick="{{ so.onClick }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 18px 0 14px;border:none;border-radius:999px;background:{{ so.bg }};color:{{ so.fg }};font-family:'Google Sans';font-size:14.5px;font-weight:500;cursor:pointer;white-space:nowrap;" style-hover="filter:brightness(0.96);"><i class="hgi-twotone {{ so.icon }}" style="font-size:19px;flex:0 0 auto;" aria-hidden="true"></i>{{ so.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        </sc-if>
+        <sc-if value="{{ pn.hasComms }}">
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Community</h3>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <sc-for list="{{ pn.comms }}" as="c" hint-placeholder-count="1">
+                <div style="display:flex;align-items:center;gap:16px;">
+                  <button type="button" onClick="{{ c.onOpen }}" style="flex:0 1 auto;min-width:0;display:flex;align-items:center;gap:16px;padding:0;border:none;background:transparent;text-align:left;cursor:pointer;font-family:'Google Sans';">
+                    <img loading="lazy" src="{{ c.img }}" alt="" style="width:72px;height:72px;border-radius:14px;object-fit:cover;display:block;flex:0 0 auto;background:#E8F1ED;">
+                    <span style="flex:0 1 auto;min-width:0;display:flex;flex-direction:column;gap:5px;">
+                      <span style="display:flex;align-items:center;gap:8px;min-width:0;font-size:15.5px;font-weight:500;color:#1F2937;"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.name }}</span><i class="hgi-twotone hgi-arrow-up-right-01" style="font-size:17px;flex:0 0 auto;color:#066349;" aria-hidden="true"></i></span>
+                      <span style="font-size:14px;color:#5B6B66;">{{ c.hostedLine }}</span>
+                    </span>
+                  </button>
+                  <sc-if value="{{ c.canJoin }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ c.onJoin }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px 0 16px;border:none;border-radius:999px;background:#B0E800;color:#013334;box-shadow:0 8px 20px rgba(176,232,0,.4);font-family:'Google Sans';font-size:15px;font-weight:500;cursor:pointer;white-space:nowrap;" style-active="transform:scale(0.98);"><i class="hgi-twotone hgi-user-add-01" style="font-size:19px;flex:0 0 auto;" aria-hidden="true"></i>Join</button></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        </sc-if>
+        <sc-if value="{{ pn.hasUp }}">
+          <div data-psec="exps" data-up="1" style="display:flex;flex-direction:column;gap:16px;">
+            <div><h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Upcoming experiences</h3><p style="margin:6px 0 0;font-size:14px;line-height:1.45;color:#5B6B66;text-wrap:pretty;">Upcoming experiences at {{ pn.title }}</p></div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;align-items:center;gap:2px;margin-left:-12px;">
+                <button type="button" onClick="{{ pn.onUpPrev }}" aria-label="Previous week" disabled="{{ pn.upPrevOff }}" style="width:44px;height:44px;flex:0 0 auto;border:none;border-radius:999px;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#1F2937;opacity:{{ pn.upPrevOp }};" style-hover="background:#F3F4F6;"><i class="hgi-twotone hgi-arrow-left-01" style="font-size:20px;flex:0 0 auto;" aria-hidden="true"></i></button>
+                <span aria-live="polite" style="font-size:15.5px;font-weight:600;color:#1F2937;">{{ pn.upWeekLabel }}</span>
+                <button type="button" onClick="{{ pn.onUpNext }}" aria-label="Next week" disabled="{{ pn.upNextOff }}" style="width:44px;height:44px;flex:0 0 auto;border:none;border-radius:999px;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#1F2937;opacity:{{ pn.upNextOp }};" style-hover="background:#F3F4F6;"><i class="hgi-twotone hgi-arrow-right-01" style="font-size:20px;flex:0 0 auto;" aria-hidden="true"></i></button>
+              </div>
+              <div style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;">
+                <sc-for list="{{ pn.upDays }}" as="ud" hint-placeholder-count="7">
+                  <button type="button" onClick="{{ ud.onClick }}" aria-pressed="{{ ud.on }}" aria-label="{{ ud.aria }}" disabled="{{ ud.past }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;height:44px;padding:0 14px;border:1px solid {{ ud.bc }};border-radius:999px;background:{{ ud.bg }};color:{{ ud.fg }};font-family:'Google Sans';font-size:14.5px;cursor:{{ ud.cur }};white-space:nowrap;">
+                    <span>{{ ud.wd }}</span>
+                    <span style="font-weight:700;">{{ ud.d }}</span>
+                    <sc-if value="{{ ud.hasDots }}"><span aria-hidden="true" style="display:inline-flex;align-items:center;gap:3px;margin-left:2px;"><sc-for list="{{ ud.dots }}" as="dt" hint-placeholder-count="1"><span style="display:block;width:5px;height:5px;border-radius:999px;background:{{ dt.c }};"></span></sc-for></span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+              <sc-if value="{{ pn.hasUpList }}">
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:22px 14px;padding-top:6px;"><sc-for list="{{ pn.upList }}" as="e" hint-placeholder-count="3">
+                    <div style="display:flex;flex-direction:column;gap:9px;min-width:0;">
+                      <div style="position:relative;">
+                        <button type="button" onClick="{{ e.onOpen }}" style="display:block;width:100%;padding:0;border:none;background:#F3F4F2;border-radius:12px;overflow:hidden;aspect-ratio:1/1;cursor:pointer;">
+                          <img loading="lazy" src="{{ e.img }}" alt="{{ e.title }}" style="width:100%;height:100%;object-fit:cover;display:block;">
+                        </button>
+                        <button type="button" onClick="{{ e.onSave }}" aria-label="{{ e.saveLabel }}" style="position:absolute;top:0;right:0;width:44px;height:44px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                          <i class="{{ e.saveCls }}" style="font-size:21px;flex:0 0 auto;filter:drop-shadow(0 1px 3px rgba(1,51,52,.55));color:{{ e.saveTint }};" aria-hidden="true"></i>
+                        </button>
+                        <sc-if value="{{ e.flag }}">
+                          <span style="position:absolute;top:10px;left:10px;height:26px;padding:0 10px;border-radius:999px;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#FFFFFF;font-size:11.5px;font-weight:700;display:inline-flex;align-items:center;gap:5px;">
+                            <i class="hgi-twotone {{ e.flagIcon }}" style="font-size:14px;flex:0 0 auto;" aria-hidden="true"></i>
+                            {{ e.flag }}
+                          </span>
+                        </sc-if>
+                      </div>
+                      <button type="button" onClick="{{ e.onOpen }}" style="border:none;background:transparent;padding:0;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0;">
+                        <span style="font-size:10px;font-weight:600;color:#066349;">{{ e.host }}</span>
+                        <span style="font-size:14px;font-weight:600;color:#013334;line-height:1.35;text-wrap:pretty;">{{ e.title }}</span>
+                        <span style="font-size:12.5px;color:#5B6B66;">{{ e.when }}</span>
+                        <span style="font-size:13px;font-weight:600;color:#1F2937;margin-top:2px;">{{ e.priceLine }}</span>
+                      </button>
+                    </div>
+                  </sc-for></div>
+              </sc-if>
+              <sc-if value="{{ pn.noUpList }}">
+                <p style="margin:0;padding-top:4px;font-size:14px;line-height:1.45;color:#5B6B66;text-wrap:pretty;">{{ pn.noUpLine }}</p>
+              </sc-if>
+            </div>
+          </div>
+          <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        </sc-if>
+        <div data-psec="moments" style="display:flex;flex-direction:column;align-items:flex-start;gap:14px;">
+          <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Moments</h3>
+          <button type="button" onClick="{{ pn.onCompose }}" aria-label="Share a moment from {{ pn.title }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:50px;padding:0 24px 0 20px;border:none;border-radius:999px;background:#B0E800;color:#013334;font-family:'Google Sans';font-size:14.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:transform .18s ease, box-shadow .2s ease, background .2s ease;" style-hover="background:#A3D900;box-shadow:0 6px 16px rgba(176,232,0,.4);" style-active="transform:scale(0.97);"><i class="hgi-duotone hgi-dashboard-circle-add" style="font-size:19px;flex:0 0 auto;" aria-hidden="true"></i>Share moment</button>
+        </div>
+        <sc-if value="{{ pn.hasMoments }}">
+          <div style="container-type:inline-size;margin-top:-12px;">
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:calc((100cqw - 8px) / 3);grid-auto-flow:dense;gap:4px;">
+              <sc-for list="{{ pn.moments }}" as="m" hint-placeholder-count="7">
+                <button type="button" onClick="{{ m.onOpen }}" aria-label="{{ m.aria }}" style="grid-column:{{ m.gc }};grid-row:{{ m.gr }};position:relative;padding:0;border:none;border-radius:12px;overflow:hidden;background:#F3F4F2;cursor:pointer;">
+                  <img src="{{ m.img }}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;"><sc-if value="{{ m.isAlbum }}"><span style="position:absolute;top:6px;right:6px;display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;background:rgba(0,0,0,.55);color:#FFFFFF;font-size:11.5px;font-weight:700;pointer-events:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto;display:block;"><rect x="8" y="8" width="13" height="13" rx="3"></rect><path d="M16 4H7a3 3 0 0 0-3 3v9"></path></svg>{{ m.albumCount }}</span></sc-if>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        </sc-if>
+        <sc-if value="{{ pn.noMoments }}">
+          <p style="margin:-8px 0 0;font-size:14px;line-height:1.5;color:#5B6B66;text-wrap:pretty;">No moments from {{ pn.title }} yet. Yours could be the first.</p>
+          <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        </sc-if>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <button type="button" onClick="{{ pn.onGuidesAll }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:-10px 0;padding:0;border:none;background:transparent;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;cursor:pointer;" style-hover="color:#066349;">Tour guides<i class="hgi-twotone hgi-arrow-right-01" style="font-size:20px;flex:0 0 auto;color:#5B6B66;" aria-hidden="true"></i></button>
+          <div style="display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;margin:0 -24px;padding:0 24px 10px;">
+            <sc-for list="{{ pn.guides }}" as="g" hint-placeholder-count="3">
+              <div style="flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:10px 10px 10px 12px;border:1px solid #ECEEF1;border-radius:16px;background:#F9FAFB;">
+                <img loading="lazy" src="{{ g.img }}" alt="" style="width:48px;height:48px;border-radius:999px;object-fit:cover;display:block;flex:0 0 auto;background:#E8F1ED;">
+                <span style="display:flex;flex-direction:column;gap:3px;min-width:0;">
+                  <span style="display:flex;align-items:center;gap:5px;font-size:15px;font-weight:600;color:#1F2937;white-space:nowrap;">{{ g.name }}<i class="hgi-bulk hgi-checkmark-badge-01" role="img" aria-label="Verified" style="font-size:17px;flex:0 0 auto;color:#066349;"></i></span>
+                  <span style="font-size:13.5px;color:#5B6B66;white-space:nowrap;">{{ g.sub }}</span>
+                </span>
+                <button type="button" onClick="{{ g.onClick }}" aria-pressed="{{ g.pressed }}" aria-label="{{ g.aria }}" style="flex:0 0 auto;margin-left:8px;height:44px;padding:0 20px;border:none;border-radius:999px;background:{{ g.bg }};color:{{ g.fg }};box-shadow:{{ g.sh }};font-family:'Google Sans';font-size:14.5px;font-weight:500;cursor:pointer;white-space:nowrap;" style-active="transform:scale(0.98);">{{ g.label }}</button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        <sc-if value="{{ pn.canClaim }}">
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div>
+              <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">{{ pn.claimTitle }}</h3>
+              <p style="margin:6px 0 0;font-size:14px;line-height:1.45;color:#5B6B66;text-wrap:pretty;">Nobody has claimed this place yet. If you own or manage it, claiming connects it to your community on Tukai.</p>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:20px 24px;">
+              <div style="display:flex;align-items:flex-start;gap:16px;min-width:0;">
+                <i class="hgi-twotone hgi-calendar-03" style="font-size:22px;flex:0 0 auto;color:#066349;margin-top:1px;" aria-hidden="true"></i>
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;">
+                  <span style="font-size:15px;font-weight:600;color:#1F2937;">Take reservations</span>
+                  <span style="font-size:14.5px;line-height:1.45;color:#5B6B66;text-wrap:pretty;">{{ pn.claimResLine }}</span>
+                </span>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:16px;min-width:0;">
+                <i class="hgi-twotone hgi-chart-line-data-01" style="font-size:22px;flex:0 0 auto;color:#066349;margin-top:1px;" aria-hidden="true"></i>
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;">
+                  <span style="font-size:15px;font-weight:600;color:#1F2937;">Manage it from Control center</span>
+                  <span style="font-size:14.5px;line-height:1.45;color:#5B6B66;text-wrap:pretty;">The listing joins Your places, alongside the experiences your community runs.</span>
+                </span>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:16px;min-width:0;">
+                <i class="hgi-twotone hgi-user-multiple" style="font-size:22px;flex:0 0 auto;color:#066349;margin-top:1px;" aria-hidden="true"></i>
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;">
+                  <span style="font-size:15px;font-weight:600;color:#1F2937;">Own it as a community</span>
+                  <span style="font-size:14.5px;line-height:1.45;color:#5B6B66;text-wrap:pretty;">Ownership sits with a community you run, so your whole team can manage it.</span>
+                </span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:12px;background:#F3F4F2;">
+              <i class="hgi-twotone hgi-information-circle" style="font-size:19px;flex:0 0 auto;color:#066349;margin-top:1px;" aria-hidden="true"></i>
+              <span style="font-size:14px;line-height:1.5;color:#1F2937;text-wrap:pretty;">You will need a published community you run, and documents showing you own or manage the business such as a licence, a certificate of incorporation, or similar. A claim is reviewed before it goes live.</span>
+            </div>
+            <button type="button" onClick="{{ pn.onClaim }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px 0 16px;border:none;border-radius:999px;background:#B0E800;color:#013334;box-shadow:0 8px 20px rgba(176,232,0,.4);font-family:'Google Sans';font-size:15px;font-weight:500;cursor:pointer;white-space:nowrap;" style-hover="background:#A3D900;" style-active="transform:scale(0.98);"><i class="hgi-twotone hgi-store-verified-01" style="font-size:19px;flex:0 0 auto;" aria-hidden="true"></i>Start claim</button>
+          </div><div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        </sc-if>
+        <div data-psec="reviews" style="display:flex;flex-direction:column;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px 16px;margin-bottom:6px;">
+            <button type="button" onClick="{{ pn.onAllReviews }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:-10px 0;padding:0;border:none;background:transparent;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;cursor:pointer;" style-hover="color:#066349;">Reviews<i class="hgi-twotone hgi-arrow-right-01" style="font-size:20px;flex:0 0 auto;color:#5B6B66;" aria-hidden="true"></i></button>
+            <span style="display:inline-flex;align-items:center;gap:7px;font-size:14.5px;color:#1F2937;white-space:nowrap;">
+              <sc-if value="{{ pn.hasRating }}"><i class="hgi-bulk hgi-star" style="font-size:18px;flex:0 0 auto;color:#FBBF24;" aria-hidden="true"></i><span style="font-weight:600;">{{ pn.ratingNum }}</span><span aria-hidden="true" style="flex:0 0 auto;width:5px;height:5px;border-radius:999px;background:#60A5FA;"></span></sc-if>
+              {{ pn.reviewsLine }}
+            </span>
+          </div>
+          <sc-if value="{{ pn.hasReviews }}">
+            <sc-for list="{{ pn.reviews }}" as="r" hint-placeholder-count="3">
+              <div style="display:flex;align-items:flex-start;gap:14px;margin:0 -24px;padding:18px 24px;border-top:1px solid {{ r.bt }};">
+                <img loading="lazy" src="{{ r.img }}" alt="" style="width:48px;height:48px;border-radius:999px;object-fit:cover;display:block;flex:0 0 auto;background:#E8F1ED;">
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:10px;">
+                  <div style="display:flex;align-items:flex-start;gap:8px;">
+                    <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;">
+                      <span style="font-size:15.5px;font-weight:600;color:#1F2937;">{{ r.author }}</span>
+                      <span style="display:flex;align-items:center;gap:6px;font-size:13.5px;color:#5B6B66;"><i class="hgi-bulk hgi-star" style="font-size:16px;flex:0 0 auto;color:#FBBF24;" aria-hidden="true"></i><span style="color:#1F2937;">{{ r.rating }}</span><span aria-hidden="true" style="flex:0 0 auto;width:5px;height:5px;border-radius:999px;background:#60A5FA;"></span><span>{{ r.date }}</span></span>
+                    </span>
+                    <button type="button" onClick="{{ r.onMore }}" aria-label="{{ r.moreAria }}" style="flex:0 0 auto;width:44px;height:44px;margin:-10px -10px 0 0;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#1F2937;" style-hover="color:#066349;"><i class="hgi-twotone hgi-more-horizontal" style="font-size:20px;flex:0 0 auto;" aria-hidden="true"></i></button>
+                  </div>
+                  <p style="margin:0;font-size:15px;line-height:1.55;color:#1F2937;text-wrap:pretty;">{{ r.text }}</p>
+                  <sc-if value="{{ r.hasPhotos }}">
+                    <div style="display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin-right:-24px;padding-right:24px;">
+                      <sc-for list="{{ r.photos }}" as="ph" hint-placeholder-count="1">
+                        <button type="button" onClick="{{ ph.onOpen }}" aria-label="{{ ph.alt }}" style="flex:0 0 auto;width:150px;height:150px;padding:0;border:none;border-radius:12px;overflow:hidden;background:#E8F1ED;cursor:zoom-in;"><img src="{{ ph.img }}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;"></button>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                  <div style="display:flex;align-items:center;gap:14px;margin:-6px 0 -12px;">
+                    <button type="button" onClick="{{ r.onLike }}" aria-pressed="{{ r.liked }}" aria-label="{{ r.likeAria }}" style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0;border:none;background:transparent;color:{{ r.likeFg }};font-family:'Google Sans';font-size:14.5px;cursor:pointer;"><i class="{{ r.likeIcon }}" style="font-size:20px;flex:0 0 auto;" aria-hidden="true"></i>{{ r.likeCount }}</button>
+                    <button type="button" onClick="{{ r.onComment }}" aria-label="{{ r.commentAria }}" style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0;border:none;background:transparent;color:#1F2937;font-family:'Google Sans';font-size:14.5px;cursor:pointer;" style-hover="color:#066349;"><i class="hgi-twotone hgi-bubble-chat" style="font-size:20px;flex:0 0 auto;" aria-hidden="true"></i>{{ r.commentCount }}</button>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </sc-if>
+          <sc-if value="{{ pn.noReviews }}">
+            <p style="margin:8px 0 0;font-size:14.5px;line-height:1.5;color:#5B6B66;text-wrap:pretty;">No reviews yet. If you have been, yours would be the first.</p>
+          </sc-if>
+        </div>
+        </sc-if>

@@ -1,9 +1,8 @@
 'use client';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { MOMENT_CARD_WIDTH } from '@/app/shared/components/Moments/MomentCard';
 import { cn } from '@/lib/utils';
-
-import { MOMENT_CARD_WIDTH } from './index';
 
 /**
  * The tile that closes the Recent moments rail: an invitation to post one.

@@ -73,7 +73,7 @@ export const AuthActions = () => {
   const createButton = hasSubscribed ? (
     <Link
       href="/experiences/create"
-      className="mr-2 hidden h-11 flex-shrink-0 items-center gap-2 rounded-full bg-lime px-[18px] text-sm font-semibold text-brand-ink transition-colors hover:bg-lime-dark lg:inline-flex"
+      className="hidden h-11 flex-shrink-0 items-center gap-2 rounded-full bg-lime px-4 text-sm font-semibold text-brand-ink transition-colors hover:bg-lime-dark lg:inline-flex"
     >
       <IconComponent iconName="Add01Icon" size={18} color="currentColor" />
       Create
@@ -81,7 +81,7 @@ export const AuthActions = () => {
   ) : (
     <Button
       variant="lime"
-      className="mr-2 hidden h-11 flex-shrink-0 items-center gap-2 rounded-full px-[18px] text-sm font-semibold lg:inline-flex"
+      className="hidden h-11 flex-shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold lg:inline-flex"
       onClick={handleCreateExperience}
     >
       <IconComponent iconName="Add01Icon" size={18} color="currentColor" />

@@ -25,7 +25,7 @@ export const experienceFlag = (experience: Experience): ExperienceFlag | null =>
  * whose cheapest ticket happens to be zero is still not a free one. The price
  * is only read when the flag is absent.
  */
-const isFree = (experience: Experience): boolean =>
+export const isFree = (experience: Experience): boolean =>
   experience.isPaid === false || moneyAmount(experience.priceStartsFrom) === 0;
 
 /**

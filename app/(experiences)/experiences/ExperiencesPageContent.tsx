@@ -7,25 +7,40 @@ import { useRouter } from 'next/navigation';
 
 import moment from 'moment';
 
+import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
+import { ItineraryCard } from '@/app/(experiences)/components/ItineraryCard';
 import { BucketListCard } from '@/app/(experiences)/experiences/components/BucketListCard';
-import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
+import { CategoryChipRow } from '@/app/shared/components/Filters/CategoryChipRow';
+import type { CategoryChip } from '@/app/shared/components/Filters/CategoryChipRow';
+import { CitiesRail } from '@/app/(experiences)/experiences/components/CitiesRail';
+import { CommunitiesSection } from '@/app/(experiences)/experiences/components/CommunitiesSection';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
+import {
+  DISCOVER_GRID_PAGE_SIZE,
+  DiscoverGrid,
+} from '@/app/(experiences)/experiences/components/DiscoverGrid';
 import {
   ExperienceRow,
   RowSkeleton,
 } from '@/app/(experiences)/experiences/components/ExperienceRow';
-import { FeaturedExperienceBanner } from '@/app/(experiences)/experiences/components/FeaturedExperienceBanner';
+import {
+  GUIDED_TOURS_PAGE_SIZE,
+  GuidedToursRail,
+} from '@/app/(experiences)/experiences/components/GuidedToursRail';
+import { HappeningNearYou } from '@/app/(experiences)/experiences/components/HappeningNearYou';
 import { HostingCard } from '@/app/(experiences)/experiences/components/HostingCard';
 import { ReservedTab } from '@/app/(experiences)/experiences/components/ReservedTab';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import {
-  cityExperiencesHref,
-  shouldShowSeeAll,
-} from '@/app/(experiences)/experiences/see-all/config';
+  FEATURED_PAGE_SIZE,
+  featuredOnly,
+} from '@/app/(experiences)/experiences/components/featured-experiences';
+import { shouldShowSeeAll } from '@/app/(experiences)/experiences/see-all/config';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
+import { CardRail, SeeAllCard } from '@/app/shared/components/Lists';
 import { PillTabs } from '@/app/shared/components/Tabs';
 import { isSharedWithMe, useMyBucketLists } from '@/app/shared/hooks/useBucketLists';
+import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences, useTicketPurchases } from '@/app/shared/hooks/useExperiences';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { toast } from '@/app/shared/hooks/useToast';
@@ -34,28 +49,41 @@ import { NoData } from '@/components/ui/noData';
 import { useLocation } from '@/context/LocationContext';
 import { downloadTicketPdf } from '@/services/experience';
 import { BucketList } from '@/types/bucket-list';
+import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
-import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
+import { coverPhotoUrl } from '@/types/photo';
+import { PlaceCategory } from '@/types/placeCategory';
 import { Reservation } from '@/types/ticket-purchase';
 import { formatLongDateWithOrdinal } from '@/utils/date-utils';
 import { groupTicketPurchases } from '@/utils/ticket-utils';
 
-// Saved and Hosting are no longer surfaced. Their components and render
-// branches below are intentionally left in place - only the tabs are gone, so
-// nothing routes to them.
-const TABS = [
-  { value: 'all', label: 'All' },
-  { value: 'reserved', label: 'Reserved' },
-];
+// Saved, Reserved and Hosting are no longer surfaced (EL-13). Their components
+// and render branches below are intentionally left in place - only the tabs are
+// gone, so nothing routes to them. Reserved has no other entry point for now.
+const TABS = [{ value: 'all', label: 'All' }];
+
+/** Cards in a horizontal row that are fetched straight away rather than lazily. */
+const EAGER_IN_ROW = 3;
+
+/** Itineraries the Discover itineraries rail asks for. */
+const ITINERARY_PAGE_SIZE = 8;
+
+/** The place-category group the experience category chips are read from. */
+const CATEGORY_CHIP_GROUP = 'interests';
+const ALL_CATEGORIES = 'all';
 
 export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: string }) => {
   const router = useRouter();
   const { data: session } = useSession();
-  const { city, lat, lng } = useLocation();
+  const { city, lat, lng, setCity } = useLocation();
   const [activeTab, setActiveTab] = useState(
     TABS.some((tab) => tab.value === initialCategory) ? initialCategory : 'all',
   );
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  // 'all' is no filter. Kept out of the URL: `category` there already names the tab.
+  const [categoryId, setCategoryId] = useState(ALL_CATEGORIES);
+  const categoryFilter = categoryId === ALL_CATEGORIES ? undefined : categoryId;
+  const [discoverPage, setDiscoverPage] = useState(1);
 
   const isAll = activeTab === 'all';
   const isSaved = activeTab === 'saved';
@@ -133,49 +161,138 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const today = moment().format('YYYY-MM-DD');
   const tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
 
-  // No featured endpoint exists - the default list is the closest available
-  // query, and its first result stands in as the featured hero
-  const { data: discoverResponse, isLoading: isLoadingDiscover } = useExperiences(
-    { page: 1, page_size: 9 },
+  // The list serializer carries `featured`, but there is no query param for it,
+  // so one page is read and filtered here (as Promoted places is)
+  const { data: featuredResponse, isLoading: isLoadingFeatured } = useExperiences(
+    { page: 1, page_size: FEATURED_PAGE_SIZE, status: 'published', category: categoryFilter },
     isAll,
   );
-  const discoverExperiences: Experience[] = discoverResponse?.data?.results ?? [];
-  const featuredExperience = discoverExperiences[0];
+  const featuredExperiences: Experience[] = featuredOnly(featuredResponse?.data?.results ?? []);
 
-  // "Happening Near You": the first 10 published experiences, scoped to the
+  // "Happening near you": the first 10 published experiences, scoped to the
   // coordinates the LocationContext resolved. Coordinates are omitted until the
   // user grants location, so the row still renders (unscoped) if they decline.
   const { data: nearbyResponse, isLoading: isLoadingNearby } = useExperiences(
-    { page: 1, page_size: 10, status: 'published', lat, long: lng },
+    {
+      page: 1,
+      page_size: 10,
+      status: 'published',
+      lat,
+      long: lng,
+      category: categoryFilter,
+    },
     isAll,
   );
   const nearbyExperiences: Experience[] = nearbyResponse?.data?.results ?? [];
+  const nearbyTotal = nearbyResponse?.data?.count ?? 0;
+  const hasMoreNearby = nearbyTotal > nearbyExperiences.length;
+
+  // The full list is only read once the reader expands the row, so the page
+  // does not pay for every match up front
+  const [isNearbyExpanded, setIsNearbyExpanded] = useState(false);
+  const { data: nearbyAllResponse, isLoading: isLoadingNearbyAll } = useExperiences(
+    {
+      page: 1,
+      page_size: nearbyTotal,
+      status: 'published',
+      lat,
+      long: lng,
+      category: categoryFilter,
+    },
+    isAll && isNearbyExpanded && hasMoreNearby,
+  );
+  const allNearbyExperiences: Experience[] = nearbyAllResponse?.data?.results ?? [];
+  // Until the full list lands, the first page stays on screen rather than a blank grid
+  const shownNearbyExperiences =
+    isNearbyExpanded && allNearbyExperiences.length > 0 ? allNearbyExperiences : nearbyExperiences;
 
   const { data: todayResponse, isLoading: isLoadingToday } = useExperiences(
-    { page: 1, page_size: 8, date: today },
+    { page: 1, page_size: 8, date: today, category: categoryFilter },
     isAll,
   );
+  const todayCount = todayResponse?.data?.count;
   const { data: tomorrowResponse, isLoading: isLoadingTomorrow } = useExperiences(
-    { page: 1, page_size: 8, date: tomorrow },
+    { page: 1, page_size: 8, date: tomorrow, category: categoryFilter },
     isAll,
   );
+  const tomorrowCount = tomorrowResponse?.data?.count;
 
   const { data: citiesResponse, isLoading: isLoadingCities } = usePlaceCategories(
     { pageSize: 100, group: 'cities' },
     isAll,
   );
+  // The chips. Interest-group place categories stand in for the experience
+  // categories until the API exposes its own list (see EL-01).
+  const { data: interestsResponse } = usePlaceCategories(
+    { pageSize: 100, group: CATEGORY_CHIP_GROUP },
+    isAll,
+  );
+  const categoryChips: CategoryChip[] = [
+    { value: ALL_CATEGORIES, label: 'All' },
+    ...(interestsResponse?.data?.results ?? []).map((category: PlaceCategory) => ({
+      value: category.id,
+      label: category.name,
+    })),
+  ];
+
   const cities: PlaceCategory[] = (citiesResponse?.data?.results ?? [])
     .filter((category: PlaceCategory) => category.group === 'cities')
     .sort((a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount);
 
-  // Curated destination row: no featured-destination field exists, so use the
-  // top city by count; experiences have no city filter, so search by city name
-  const topCity = cities[0];
-  const visibleCities = cities.slice(0, 10);
-  const { data: topCityResponse, isLoading: isLoadingTopCity } = useExperiences(
-    { page: 1, page_size: 8, search: topCity?.name },
-    isAll && Boolean(topCity),
+  // Discover itineraries: published itinerary-type experiences. The rail is
+  // hidden when there are none, so no empty heading shows.
+  const { data: itinerariesResponse, isLoading: isLoadingItineraries } = useExperiences(
+    { page: 1, page_size: ITINERARY_PAGE_SIZE, status: 'published', experience_type: 'itinerary' },
+    isAll,
   );
+  const itineraries: Experience[] = itinerariesResponse?.data?.results ?? [];
+  const itineraryTotal = itinerariesResponse?.data?.count ?? 0;
+
+  // Communities running what is on: the list is filtered to those with an
+  // upcoming experience. Hidden when empty or when the request fails.
+  const { data: communitiesResponse, isLoading: isLoadingCommunities } = useGetCommunities({
+    page: 1,
+    enabled: isAll,
+    showUpComingExperiences: true,
+  });
+  const communities: Community[] = communitiesResponse?.data?.results ?? [];
+  const communityTotal = communitiesResponse?.data?.count ?? 0;
+
+  // Guided tours: the same query Discover's tours rail issues. The rail is
+  // hidden when there are none, so no empty heading shows.
+  const { data: toursResponse, isLoading: isLoadingTours } = useExperiences(
+    {
+      page: 1,
+      page_size: GUIDED_TOURS_PAGE_SIZE,
+      experience_type: 'guide_booking',
+      lat,
+      long: lng,
+      category: categoryFilter,
+    },
+    isAll,
+  );
+  const tours: Experience[] = toursResponse?.data?.results ?? [];
+  const tourTotal = toursResponse?.data?.count ?? tours.length;
+
+  // Discover experiences: every published experience, one page at a time. Not
+  // scoped to the location, so the count is the whole published total.
+  const { data: discoverResponse, isLoading: isLoadingDiscover } = useExperiences(
+    {
+      page: discoverPage,
+      page_size: DISCOVER_GRID_PAGE_SIZE,
+      status: 'published',
+      category: categoryFilter,
+    },
+    isAll,
+  );
+  const discoverExperiences: Experience[] = discoverResponse?.data?.results ?? [];
+  const discoverTotal = discoverResponse?.data?.count ?? 0;
+
+  // A different category is a different list, so paging starts again at the top
+  const handleCategoryChange = (value: string) => {
+    setCategoryId(value);
+    setDiscoverPage(1);
+  };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -188,88 +305,132 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
 
   return (
     <main className="grid grid-cols-12 gap-x-4 px-4 md:px-0">
-      {/* Filter tabs */}
-      <div className="col-span-12 pt-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
-        <PillTabs tabs={visibleTabs} value={activeTab} onChange={handleTabChange} />
-      </div>
+      {/* Filter tabs: hidden while there is only the All tab, so no lone pill shows */}
+      {visibleTabs.length > 1 && (
+        <div className="col-span-12 pt-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+          <PillTabs tabs={visibleTabs} value={activeTab} onChange={handleTabChange} />
+        </div>
+      )}
 
       {isAll ? (
         <div className="col-span-12 space-y-10 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
-          {/* Featured Experience */}
-          {isLoadingDiscover ? (
-            <div className="aspect-[16/9] w-full animate-pulse rounded-2xl bg-gray-200 md:aspect-[3/1]" />
-          ) : (
-            featuredExperience && <FeaturedExperienceBanner experience={featuredExperience} />
+          {/* Featured experiences: a paged rail of cards, as the design has it.
+              Hidden when nothing is featured, so no empty heading shows. */}
+          {(isLoadingFeatured || featuredExperiences.length > 0) && (
+            <CardRail title="Featured experiences" subtitle="Handpicked from what is coming up">
+              {isLoadingFeatured ? (
+                <RowSkeleton cardClassName="aspect-square w-[184px]" />
+              ) : (
+                featuredExperiences.map((experience, index) => (
+                  <ExperienceCard
+                    key={experience.id}
+                    experience={experience}
+                    priority={index < EAGER_IN_ROW}
+                  />
+                ))
+              )}
+            </CardRail>
           )}
 
-          <ExperienceRow
-            title="Happening Near You"
-            subtitle={`Within 25 km of ${userCity}`}
-            seeAllHref="/experiences/see-all?type=near-me"
-            total={nearbyResponse?.data?.count}
-            experiences={nearbyExperiences}
-            isLoading={isLoadingNearby}
+          <HappeningNearYou
+            experiences={shownNearbyExperiences}
+            total={nearbyTotal}
+            hasMore={hasMoreNearby}
+            isLoading={isLoadingNearby || (isNearbyExpanded && isLoadingNearbyAll)}
+            isExpanded={isNearbyExpanded}
+            onToggle={() => setIsNearbyExpanded((current) => !current)}
           />
 
-          {/* Experiences by City */}
-          {(isLoadingCities || cities.length > 0) && (
-            <section>
-              <SectionHeader title="Experiences by City" subtitle="Browse by destination" />
-              {isLoadingCities ? (
-                <RowSkeleton cardClassName="h-[130px] w-[240px]" />
-              ) : (
-                <ScrollRow>
-                  {visibleCities.map((category) => (
-                    <div key={category.id} className="snap-start">
-                      <CityCard
-                        city={category.name}
-                        experienceCount={category.placesCount}
-                        imageUrl={categoryImageOf(category) ?? ''}
-                        href={cityExperiencesHref(category.name)}
-                      />
-                    </div>
-                  ))}
-
-                  {shouldShowSeeAll(cities.length) && (
-                    <SeeAllCard
-                      href="/experiences/see-all?type=cities"
-                      previewPhotos={cities.slice(0, 3).map(categoryImageOf)}
-                      className="aspect-auto h-[130px] w-[240px]"
-                    />
-                  )}
-                </ScrollRow>
-              )}
-            </section>
-          )}
+          <CitiesRail
+            cities={cities}
+            isLoading={isLoadingCities}
+            selectedCity={city}
+            onSelectCity={setCity}
+          />
 
           <ExperienceRow
-            title="Happening Today"
-            subtitle={formatLongDateWithOrdinal(new Date())}
+            title={`Happening today ${formatLongDateWithOrdinal(new Date())}`}
+            subtitle={
+              todayCount === undefined
+                ? undefined
+                : `${todayCount} ${todayCount === 1 ? 'experience' : 'experiences'}`
+            }
             seeAllHref="/experiences/see-all?type=today"
-            total={todayResponse?.data?.count}
+            total={todayCount}
             experiences={todayResponse?.data?.results ?? []}
             isLoading={isLoadingToday}
           />
 
           <ExperienceRow
-            title={`Happening Tomorrow in ${userCity}`}
-            subtitle={formatLongDateWithOrdinal(moment().add(1, 'days').toDate())}
+            title={`Happening tomorrow ${formatLongDateWithOrdinal(moment().add(1, 'days').toDate())}`}
+            subtitle={
+              tomorrowCount === undefined
+                ? undefined
+                : `${tomorrowCount} ${tomorrowCount === 1 ? 'experience' : 'experiences'}`
+            }
             seeAllHref={`/experiences/see-all?type=tomorrow&city=${encodeURIComponent(userCity)}`}
-            total={tomorrowResponse?.data?.count}
+            total={tomorrowCount}
             experiences={tomorrowResponse?.data?.results ?? []}
             isLoading={isLoadingTomorrow}
           />
 
-          {topCity && (
-            <ExperienceRow
-              title={`Experiences in ${topCity.name}`}
-              subtitle="Curated destination"
-              seeAllHref={cityExperiencesHref(topCity.name)}
-              total={topCityResponse?.data?.count}
-              experiences={topCityResponse?.data?.results ?? []}
-              isLoading={isLoadingTopCity}
-            />
+          {(isLoadingItineraries || itineraries.length > 0) && (
+            <CardRail title="Discover itineraries" subtitle="Several places in one plan">
+              {isLoadingItineraries ? (
+                <RowSkeleton cardClassName="aspect-square w-[184px]" />
+              ) : (
+                <>
+                  {itineraries.map((itinerary) => (
+                    <ItineraryCard key={itinerary.id} itinerary={itinerary} />
+                  ))}
+
+                  {/* Only when the API holds more than the row shows: a full
+                      row that is every itinerary there is would lead nowhere new */}
+                  {shouldShowSeeAll(itineraryTotal) && (
+                    <SeeAllCard
+                      href="/experiences/see-all?type=itineraries"
+                      previewPhotos={itineraries
+                        .slice(0, 3)
+                        .map((itinerary) => coverPhotoUrl(itinerary.photos, 'md'))}
+                    />
+                  )}
+                </>
+              )}
+            </CardRail>
           )}
+
+          <CommunitiesSection
+            communities={communities}
+            total={communityTotal}
+            isLoading={isLoadingCommunities}
+          />
+
+          <GuidedToursRail
+            tours={tours}
+            total={tourTotal}
+            isLoading={isLoadingTours}
+            hasLocation={lat !== undefined && lng !== undefined}
+          />
+
+          {/* Category filter: sits under the Discover heading and narrows the
+              experience rails above too. Hidden until there is more than the
+              All chip, so no lone chip shows. */}
+          <DiscoverGrid
+            experiences={discoverExperiences}
+            total={discoverTotal}
+            page={discoverPage}
+            onPageChange={setDiscoverPage}
+            isLoading={isLoadingDiscover}
+            filters={
+              categoryChips.length > 1 ? (
+                <CategoryChipRow
+                  chips={categoryChips}
+                  value={categoryId}
+                  onChange={handleCategoryChange}
+                />
+              ) : undefined
+            }
+          />
         </div>
       ) : (
         /* Reserved / Saved / Hosting - the Experiences wrapper positions

@@ -79,20 +79,22 @@ export const PlaceCard = ({
 
         {locality && <p className="text-[12.5px] text-ink-muted">{locality}</p>}
 
-        <p
-          className={cn(
-            'mt-0.5 flex items-start gap-1.5 text-xs font-semibold leading-4',
-            FACT_TONE[fact.tone],
-          )}
-        >
-          <IconComponent
-            iconName={fact.icon}
-            size={15}
-            color="currentColor"
-            className="flex-shrink-0"
-          />
-          {fact.text}
-        </p>
+        {fact && (
+          <p
+            className={cn(
+              'mt-0.5 flex items-start gap-1.5 text-xs font-semibold leading-4',
+              FACT_TONE[fact.tone],
+            )}
+          >
+            <IconComponent
+              iconName={fact.icon}
+              size={15}
+              color="currentColor"
+              className="flex-shrink-0"
+            />
+            {fact.text}
+          </p>
+        )}
       </div>
     </CardShell>
   );

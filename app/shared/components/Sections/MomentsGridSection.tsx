@@ -1,8 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
-import { MomentsMasonry } from '@/app/shared/components/Moments';
+import { MomentDrawer, MomentsMasonry } from '@/app/shared/components/Moments';
 import { NoData } from '@/components/ui/noData';
 import { Moment } from '@/types/moment';
 
@@ -18,7 +18,7 @@ export const MomentsGridSection = ({
   moments: Moment[];
   isLoading: boolean;
 }) => {
-  const router = useRouter();
+  const [openMoment, setOpenMoment] = useState<Moment | null>(null);
 
   return (
     <SectionShell id="moments" title={`Moments at ${hostName}`}>
@@ -33,15 +33,17 @@ export const MomentsGridSection = ({
           <NoData message={`No moments from ${hostName} yet`} />
         </div>
       ) : (
-        <MomentsMasonry
-          moments={moments}
-          selectedId={null}
-          onSelect={(id) => router.push(`/moments?momentId=${id}`)}
-          onLoadMore={() => {}}
-          hasMore={false}
-          isLoadingMore={false}
-          columnsClassName="columns-2 gap-4 md:columns-3"
-        />
+        <>
+          <MomentsMasonry
+            moments={moments}
+            onSelect={(id) => setOpenMoment(moments.find((moment) => moment.id === id) ?? null)}
+            onLoadMore={() => {}}
+            hasMore={false}
+            isLoadingMore={false}
+            columnsClassName="columns-2 gap-4 md:columns-3"
+          />
+          <MomentDrawer moment={openMoment} onClose={() => setOpenMoment(null)} />
+        </>
       )}
     </SectionShell>
   );

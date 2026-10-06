@@ -111,38 +111,36 @@ describe('PlaceCard', () => {
   });
 
   /**
-   * One line of substance under the name. The canvas leads with something
-   * happening at the place; we have no such field, so it leads with what
-   * people made of it - see `place-fact`.
+   * One line of substance under the name. The brief leads with an activity
+   * happening at the place; the list carries none, so the category shows.
    */
   describe('the fact line', () => {
-    it('leads with the score and how many reviews it came from', () => {
+    // Regression: categories[0] is often a city, which is not the kind of place
+    it('shows the kind of place, not the city', () => {
+      render(<PlaceCard place={makePlace()} />);
+
+      expect(screen.getByText('Restaurants')).toBeInTheDocument();
+      expect(screen.queryByText('Nairobi')).not.toBeInTheDocument();
+    });
+
+    it('does not lead with the score', () => {
       render(<PlaceCard place={makePlace({ averageRating: 4.5, totalReviews: 23 })} />);
 
-      expect(screen.getByText('4.5 · 23 reviews')).toBeInTheDocument();
-    });
-
-    it('says one review in the singular', () => {
-      render(<PlaceCard place={makePlace({ averageRating: 5, totalReviews: 1 })} />);
-
-      expect(screen.getByText('5 · 1 review')).toBeInTheDocument();
-    });
-
-    // Regression: categories[0] is often a city, which is not the kind of place
-    it('falls back to the kind of place, not the city', () => {
-      render(<PlaceCard place={makePlace({ averageRating: 0, totalReviews: 0 })} />);
-
+      expect(screen.queryByText(/4\.5/)).not.toBeInTheDocument();
       expect(screen.getByText('Restaurants')).toBeInTheDocument();
     });
 
-    it('says so when there is nothing else to say', () => {
-      render(
+    // Regression: a card with nothing to say leaves the line out rather than
+    // saying the place has no reviews
+    it('never says "No reviews yet"', () => {
+      const { container } = render(
         <PlaceCard
           place={makePlace({ averageRating: 0, totalReviews: 0, categories: [] as never })}
         />,
       );
 
-      expect(screen.getByText('No reviews yet')).toBeInTheDocument();
+      expect(screen.queryByText('No reviews yet')).not.toBeInTheDocument();
+      expect(container.querySelector('p.text-xs')).not.toBeInTheDocument();
     });
   });
 

@@ -6,6 +6,7 @@ import { Bookmark } from '@/app/shared/components/Bookmark';
 import { CardShell } from '@/app/shared/components/Cards/CardShell';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { TITLE_TINT } from '@/app/shared/components/Motion';
+import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { coverPhotoUrl } from '@/types/photo';
@@ -19,6 +20,9 @@ import { experienceFlag, experiencePriceLine, experienceRunBy } from './experien
  * the save control over one corner and a flag over the other, then who is
  * running it, what it is, when, and what it costs.
  *
+ * A plain click opens the experience in the drawer. The card stays a link to
+ * the experience page, so a new tab, or a copied address, still gets there.
+ *
  * This is deliberately not `SingleExperience`'s `row` variant. That card is
  * 4:3 at 280px and leads on distance, and five other screens render it - the
  * canvas reshaped the rail card alone, so the rail card alone is rebuilt.
@@ -26,20 +30,42 @@ import { experienceFlag, experiencePriceLine, experienceRunBy } from './experien
 export const ExperienceCard = ({
   experience,
   priority = false,
+  opensDrawer = true,
+  className,
 }: {
   experience: Experience;
   priority?: boolean;
+  /**
+   * Off where a drawer would stack on top of another - a card inside the place
+   * drawer keeps its link until drawers can open from inside drawers.
+   */
+  opensDrawer?: boolean;
+  /**
+   * Replaces the rail's fixed 184px width where the card sits in a grid cell.
+   */
+  className?: string;
 }) => {
   const { data: session } = useSession();
+  const drawer = useExperienceDrawer();
 
   const flag = experienceFlag(experience);
   const runBy = experienceRunBy(experience);
   const when = formatCardDateTime(experience.startDate, experience.endDate);
   const priceLine = experiencePriceLine(experience);
 
+  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+    // A modifier asks the browser for something else - a new tab, a new window -
+    // and the link should do that rather than the drawer
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    event.preventDefault();
+    drawer?.openExperience(experience.id);
+  };
+
   return (
     <CardShell
       href={experiencePath(experience)}
+      onClick={drawer && opensDrawer ? handleOpen : undefined}
       src={coverPhotoUrl(experience.photos, 'md')}
       alt={experience.title}
       sizes="184px"
@@ -48,7 +74,7 @@ export const ExperienceCard = ({
       priority={priority}
       ratio="square"
       radius="rounded-xl"
-      className="w-[184px] flex-shrink-0 snap-start"
+      className={cn('w-[184px] flex-shrink-0 snap-start', className)}
       overlay={
         <>
           {/* Top-right, over the photo */}

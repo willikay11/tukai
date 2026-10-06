@@ -1,5 +1,9 @@
 export { ContextMoments } from './ContextMoments';
 export { MomentAvatar } from './MomentAvatar';
+export { MomentCard, MOMENT_CARD_WIDTH } from './MomentCard';
+export { MomentCardSkeleton } from './MomentCardSkeleton';
+export { MomentDetail } from './MomentDetail';
+export { MomentDrawer } from './MomentDrawer';
 export { MomentsMasonry } from './MomentsMasonry';
 export { MomentComposer } from './MomentComposer';
 export { MomentComposerForm } from './MomentComposerForm';

@@ -27,11 +27,13 @@ export const UpcomingReservationCard = ({
   const [isTicketOpen, setIsTicketOpen] = useState(false);
 
   const settled = isSettled(reservation.status);
-  const dateTime = formatReservationDateTime(reservation.start ?? '', reservation.end ?? '');
+  const dateTime = reservation.start
+    ? formatReservationDateTime(reservation.start, reservation.end ?? '')
+    : null;
 
   return (
     <div>
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
+      <div className="relative aspect-square w-full overflow-hidden rounded-2xl">
         <PhotoImage
           src={reservation.coverPhoto}
           alt={reservation.title}

@@ -1,0 +1,101 @@
+import React from 'react';
+
+import { fireEvent, render, screen } from '@testing-library/react';
+
+import { ExperienceDrawer } from './index';
+
+const useFetchSingleExperience = jest.fn();
+jest.mock('@/app/shared/hooks/useExperiences', () => ({
+  useFetchSingleExperience: (id: string) => useFetchSingleExperience(id),
+}));
+
+// Each of these is its own unit; this suite is about the drawer's shell
+jest.mock('next-auth/react', () => ({ useSession: () => ({ data: null }) }));
+jest.mock('@/app/shared/components/Bookmark', () => ({
+  Bookmark: () => <button type="button">bookmark</button>,
+}));
+jest.mock('@/app/shared/components/Share', () => ({
+  Share: () => <button type="button">share</button>,
+}));
+jest.mock('@/app/shared/components/Icons', () => ({
+  IconComponent: ({ iconName }: { iconName: string }) => <span data-testid={iconName} />,
+}));
+jest.mock('@/app/shared/components/Global', () => ({
+  DescriptionShowMore: ({ text }: { text: string }) => <p>{text}</p>,
+}));
+jest.mock('next/image', () => {
+  function MockImage({ alt, src }: { alt: string; src: string }) {
+    return <img alt={alt} src={src} />;
+  }
+  MockImage.displayName = 'MockImage';
+  return MockImage;
+});
+
+const experience = {
+  id: 'e1',
+  title: 'Pottery for beginners',
+  description: 'Hands in the clay from the first hour.',
+  startDate: '2026-10-03T10:00:00Z',
+  endDate: '2026-10-03T12:00:00Z',
+  isPaid: true,
+  isBookmarked: false,
+  priceStartsFrom: { amount: 1800, currency: 'KES' },
+  location: { city: 'Nairobi' },
+  hostCommunity: { id: 'c1', title: 'Nairobi Makers Circle' },
+  photos: [{ id: 'ph1', photo: 'https://cdn.tukai.co/cover.jpg', isCover: true }],
+};
+
+describe('ExperienceDrawer', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useFetchSingleExperience.mockReturnValue({
+      data: { data: experience },
+      isLoading: false,
+      isError: false,
+    });
+  });
+
+  it('fetches the experience it is given, and only while open', () => {
+    render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
+    expect(useFetchSingleExperience).toHaveBeenLastCalledWith('e1');
+
+    render(<ExperienceDrawer experienceId="e1" isOpen={false} onClose={jest.fn()} />);
+    expect(useFetchSingleExperience).toHaveBeenLastCalledWith('');
+  });
+
+  it('shows the title, who runs it, where, and the price', () => {
+    render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
+
+    expect(screen.getByRole('heading', { name: 'Pottery for beginners' })).toBeInTheDocument();
+    expect(screen.getByText('Nairobi Makers Circle')).toBeInTheDocument();
+    expect(screen.getByText('Nairobi')).toBeInTheDocument();
+    expect(screen.getByText('KES 1,800/person')).toBeInTheDocument();
+    expect(screen.getByText('Hands in the clay from the first hour.')).toBeInTheDocument();
+  });
+
+  it('sends the reader to the experience page to book', () => {
+    render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
+
+    expect(screen.getByRole('link', { name: 'View experience' })).toHaveAttribute(
+      'href',
+      '/experiences/e1',
+    );
+  });
+
+  it('closes from its close control', () => {
+    const onClose = jest.fn();
+    render(<ExperienceDrawer experienceId="e1" isOpen onClose={onClose} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close Pottery for beginners' }));
+
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('says so when the experience cannot be loaded', () => {
+    useFetchSingleExperience.mockReturnValue({ data: undefined, isLoading: false, isError: true });
+
+    render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
+
+    expect(screen.getByText('This experience could not be loaded.')).toBeInTheDocument();
+  });
+});

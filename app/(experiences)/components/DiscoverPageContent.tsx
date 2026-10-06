@@ -2,31 +2,25 @@
 
 import { useState } from 'react';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-
-import moment from 'moment';
+import { useSearchParams } from 'next/navigation';
 
 import { BucketListRow } from '@/app/(experiences)/components/BucketListRow';
 import { CommunityRow } from '@/app/(experiences)/components/CommunityRow';
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
 import { happeningSoon } from '@/app/(experiences)/components/ExperienceCard/happening-soon';
 import { ROW_GRID, RowGridSkeleton } from '@/app/(experiences)/components/MediaRow';
-import { MomentCard } from '@/app/(experiences)/components/MomentCard';
 import { MomentComposeCard } from '@/app/(experiences)/components/MomentCard/MomentComposeCard';
 import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
 import { SearchResults } from '@/app/(experiences)/components/SearchResults';
 import { filtersFromParams, hasSearch } from '@/app/(experiences)/components/SearchResults/filters';
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
-import {
-  ExperienceRow,
-  RowSkeleton,
-} from '@/app/(experiences)/experiences/components/ExperienceRow';
+import { RowSkeleton } from '@/app/(experiences)/experiences/components/ExperienceRow';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { CardGrid, CardRail, SeeAllCard } from '@/app/shared/components/Lists';
 import { ShowMoreButton } from '@/app/shared/components/Lists';
-import { MomentComposer } from '@/app/shared/components/Moments';
+import { MomentCard, MomentComposer, MomentDrawer } from '@/app/shared/components/Moments';
 import { usePublicBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
@@ -44,7 +38,6 @@ import { Moment, momentPhotos } from '@/types/moment';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
 import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
-import { formatLongDateWithOrdinal } from '@/utils/date-utils';
 
 const ROW_SIZE = 10;
 
@@ -86,7 +79,6 @@ const coverPhotoOf = (experience: Experience | undefined): string | null =>
 const EAGER_IN_ROW = 3;
 
 export const DiscoverPageContent = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { city, lat, lng } = useLocation();
 
@@ -99,6 +91,7 @@ export const DiscoverPageContent = () => {
   // Discover has no place, experience or community of its own to post a
   // moment at, so the composer opens untagged - see MomentComposer
   const [isComposerOpen, setIsComposerOpen] = useState(false);
+  const [openMoment, setOpenMoment] = useState<Moment | null>(null);
 
   // "View more" reveals another grid's worth in place rather than navigating -
   // there is no public-lists page to send anyone to
@@ -180,17 +173,6 @@ export const DiscoverPageContent = () => {
     lat !== undefined && lng !== undefined
       ? `${tourCount} ${tourCount === 1 ? 'tour' : 'tours'} led by local guides near you`
       : `Tours led by local guides, closest to ${userCity} first`;
-  const today = moment().format('YYYY-MM-DD');
-  const tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
-
-  const { data: todayResponse, isLoading: isLoadingToday } = useExperiences(
-    { page: 1, page_size: 8, date: today },
-    true,
-  );
-  const { data: tomorrowResponse, isLoading: isLoadingTomorrow } = useExperiences(
-    { page: 1, page_size: 8, date: tomorrow },
-    true,
-  );
 
   if (isSearching) {
     return (
@@ -349,7 +331,7 @@ export const DiscoverPageContent = () => {
                   key={moment.id}
                   moment={moment}
                   priority={index < EAGER_IN_ROW}
-                  onClick={() => router.push(`/moments?momentId=${moment.id}`)}
+                  onClick={() => setOpenMoment(moment)}
                 />
               ))}
 
@@ -390,25 +372,8 @@ export const DiscoverPageContent = () => {
         </section>
       )}
 
+      <MomentDrawer moment={openMoment} onClose={() => setOpenMoment(null)} />
       <MomentComposer open={isComposerOpen} onOpenChange={setIsComposerOpen} />
-
-      <ExperienceRow
-        title="Happening Today"
-        subtitle={formatLongDateWithOrdinal(new Date())}
-        seeAllHref="/experiences/see-all?type=today"
-        total={todayResponse?.data?.count}
-        experiences={todayResponse?.data?.results ?? []}
-        isLoading={isLoadingToday}
-      />
-
-      <ExperienceRow
-        title={`Happening Tomorrow in ${userCity}`}
-        subtitle={formatLongDateWithOrdinal(moment().add(1, 'days').toDate())}
-        seeAllHref={`/experiences/see-all?type=tomorrow&city=${encodeURIComponent(userCity)}`}
-        total={tomorrowResponse?.data?.count}
-        experiences={tomorrowResponse?.data?.results ?? []}
-        isLoading={isLoadingTomorrow}
-      />
     </PageContainer>
   );
 };

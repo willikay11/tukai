@@ -38,7 +38,7 @@ jest.mock('./UpcomingExperiences', () => ({
 jest.mock('./PlaceDrawerFooter', () => ({
   PlaceDrawerFooter: ({ onAddReview }: { onAddReview: () => void }) => (
     <button type="button" onClick={onAddReview}>
-      Add a review
+      Add review
     </button>
   ),
 }));
@@ -211,7 +211,7 @@ describe('PlaceDrawer', () => {
   describe('writing a review', () => {
     const openForm = () => {
       render(<PlaceDrawer placeId="p1" isOpen onClose={jest.fn()} />);
-      fireEvent.click(screen.getByRole('button', { name: 'Add a review' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Add review' }));
     };
 
     it('replaces the place with the form', () => {

@@ -41,8 +41,8 @@ export const SavedExperienceCard = ({ item }: { item: BucketListItem }) => {
       name={name}
       photo={bucketListItemPhoto(item)}
       experienceId={bookmark?.experienceId}
-      // The shape an experience takes on the experiences listing
-      shape="aspect-[4/3] rounded-xl"
+      // The shape an experience takes on the experiences listing: square
+      shape="aspect-square rounded-xl"
     >
       {price !== null && (
         <p className="mt-0.5 text-sm text-gray-500">

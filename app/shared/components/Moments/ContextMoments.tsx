@@ -3,10 +3,10 @@
 import { useState } from 'react';
 
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { MomentComposer } from '@/app/shared/components/Moments/MomentComposer';
+import { MomentDrawer } from '@/app/shared/components/Moments/MomentDrawer';
 import { MomentsMasonry } from '@/app/shared/components/Moments/MomentsMasonry';
 import { useMoments } from '@/app/shared/hooks/useMoments';
 import { useAuthDialog } from '@/context/AuthDialogContext';
@@ -50,10 +50,10 @@ export const ContextMoments = ({
   communityId?: string;
   communityLabel?: string;
 }) => {
-  const router = useRouter();
   const { status: sessionStatus } = useSession();
   const { setOpenSignIn } = useAuthDialog();
   const [isComposerOpen, setIsComposerOpen] = useState(false);
+  const [openMoment, setOpenMoment] = useState<Moment | null>(null);
 
   const { data, isLoading } = useMoments({
     experience: experienceId,
@@ -130,14 +130,13 @@ export const ContextMoments = ({
       {shareButton}
       <MomentsMasonry
         moments={moments}
-        selectedId={null}
-        // The moments feed owns the viewer; this is a way in, not a copy of it
-        onSelect={(id) => router.push(`/moments?momentId=${id}`)}
+        onSelect={(id) => setOpenMoment(moments.find((moment) => moment.id === id) ?? null)}
         onLoadMore={() => {}}
         hasMore={false}
         isLoadingMore={false}
         columnsClassName="columns-2 gap-3"
       />
+      <MomentDrawer moment={openMoment} onClose={() => setOpenMoment(null)} />
       {composer}
     </div>
   );

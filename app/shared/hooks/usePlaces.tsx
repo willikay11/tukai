@@ -560,6 +560,21 @@ export const usePlacesWithExperiences = (enabled = true, perPage = 10) =>
   });
 
 /**
+ * The places ranked by reviews - the "Popular places" rail. The API orders
+ * them by highest average rating, unrated places last, so the order is not
+ * re-sorted here.
+ */
+export const usePopularPlaces = (enabled = true, perPage = 10) =>
+  useQuery({
+    queryKey: ['places', 'popular', perPage],
+    queryFn: async () =>
+      await fetchPlaces(1, perPage, undefined, undefined, undefined, undefined, {
+        sortBy: 'popular',
+      }),
+    enabled,
+  });
+
+/**
  * The places the API marks `featured` - the "Promoted places" row.
  *
  * ⚠️ `featured` is on the list serializer but there is no `featured` query
@@ -585,4 +600,26 @@ export const useFeaturedPlaces = (enabled = true, perPage = 50) =>
         results: (response.data?.results ?? []).filter((place: Place) => place.featured),
       },
     }),
+  });
+
+/**
+ * The places nearest the reader. The API orders them by distance from the
+ * coordinates it is sent, so the query only runs once both are known.
+ */
+export const useNearbyPlaces = (lat?: number, lng?: number, categoryId?: string, perPage = 10) =>
+  useQuery({
+    queryKey: ['places', 'nearby', { lat, lng, categoryId, perPage }],
+    queryFn: async () => await fetchPlaces(1, perPage, categoryId, undefined, lat, lng),
+    enabled: lat !== undefined && lng !== undefined,
+  });
+
+/**
+ * The places in one city, for its rail on /places. The city is a place
+ * category, so it goes through the same `category` filter the list uses.
+ */
+export const usePlacesInCity = (cityCategoryId: string, enabled = true, perPage = 10) =>
+  useQuery({
+    queryKey: ['places', 'city', cityCategoryId, perPage],
+    queryFn: async () => await fetchPlaces(1, perPage, cityCategoryId),
+    enabled: enabled && Boolean(cityCategoryId),
   });

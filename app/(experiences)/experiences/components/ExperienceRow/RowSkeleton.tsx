@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 
 export const RowSkeleton = ({
-  cardClassName = 'aspect-[4/3] w-[280px]',
+  cardClassName = 'aspect-square w-[184px]',
   hideText = false,
 }: {
   cardClassName?: string;

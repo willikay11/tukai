@@ -6,6 +6,8 @@ import { Moment } from '@/types/moment';
 
 import { MomentsMasonry } from './MomentsMasonry';
 
+jest.mock('next-auth/react', () => ({ useSession: () => ({ data: null }) }));
+
 jest.mock('next/image', () => {
   function MockImage({ alt, src, width, height }: Record<string, unknown>) {
     return (
@@ -38,7 +40,6 @@ const makeMoment = (id: string, width: number, height: number): Moment =>
   }) as unknown as Moment;
 
 const defaults = {
-  selectedId: null,
   onSelect: jest.fn(),
   onLoadMore: jest.fn(),
   hasMore: false,
@@ -71,20 +72,6 @@ describe('MomentsMasonry', () => {
     const image = screen.getByAltText('Moment c');
     expect(image).toHaveAttribute('width', '400');
     expect(image).toHaveAttribute('height', '400');
-  });
-
-  it('rings the selected tile only', () => {
-    render(
-      <MomentsMasonry
-        {...defaults}
-        selectedId="a"
-        moments={[makeMoment('a', 800, 800), makeMoment('b', 800, 800)]}
-      />,
-    );
-
-    const buttons = screen.getAllByRole('button');
-    expect(buttons[0].className).toContain('ring-primary');
-    expect(buttons[1].className).not.toContain('ring-primary');
   });
 
   it('reports the clicked moment id', () => {
@@ -198,5 +185,71 @@ describe('surviving WebKit', () => {
     const button = screen.getByRole('button');
     expect(button.className).not.toContain('animate-in');
     expect(button.className).not.toContain('fade-in');
+  });
+});
+
+// The card tile is what the Moments page shows: the shared moment card, with
+// its caption and byline, rather than a bare photo
+describe('card tile', () => {
+  const cardMoment = (id: string) =>
+    ({
+      id,
+      title: `Moment ${id}`,
+      description: `Caption ${id}`,
+      author: {
+        id: `u-${id}`,
+        firstName: 'Amina',
+        lastName: 'Njeri',
+        displayName: null,
+        picture: null,
+      },
+      dateCreated: '2026-10-02T09:00:00Z',
+      media: [
+        {
+          id: `md-${id}`,
+          photo: `https://cdn.tukai.co/${id}.jpg`,
+          width: 800,
+          height: 600,
+          order: 0,
+        },
+      ],
+    }) as unknown as Moment;
+
+  it('renders each moment as the shared card, with its photo and caption', () => {
+    render(
+      <MomentsMasonry {...defaults} tile="card" moments={[cardMoment('a'), cardMoment('b')]} />,
+    );
+
+    expect(screen.getByAltText('Moment a')).toHaveAttribute('src', 'https://cdn.tukai.co/a.jpg');
+    expect(screen.getByText('Caption a')).toBeInTheDocument();
+    expect(screen.getByText('Caption b')).toBeInTheDocument();
+  });
+
+  it('reports the clicked moment id', () => {
+    const onSelect = jest.fn();
+    render(
+      <MomentsMasonry {...defaults} tile="card" onSelect={onSelect} moments={[cardMoment('a')]} />,
+    );
+
+    fireEvent.click(screen.getByRole('button'));
+
+    expect(onSelect).toHaveBeenCalledWith('a');
+  });
+
+  it('keeps the column item a plain div around the card', () => {
+    const { container } = render(
+      <MomentsMasonry {...defaults} tile="card" moments={[cardMoment('a')]} />,
+    );
+
+    const item = container.querySelector('.break-inside-avoid');
+    expect(item?.tagName).toBe('DIV');
+    expect(item?.querySelector('button')).toBeInTheDocument();
+  });
+
+  it('shows the photo tile by default, without the caption', () => {
+    render(<MomentsMasonry {...defaults} moments={[cardMoment('a')]} />);
+
+    expect(screen.queryByText('Caption a')).not.toBeInTheDocument();
+    expect(screen.getByAltText('Moment a')).toBeInTheDocument();
   });
 });
