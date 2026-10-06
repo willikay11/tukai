@@ -81,10 +81,9 @@ export const MomentsView = () => {
   return (
     <PageContainer className="py-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Moments</h1>
-        <p className="mt-1 text-sm text-gray-400">
-          Real photos and stories from the Tukai community
-        </p>
+        <h1 className="text-[22px] font-bold leading-tight tracking-[-0.3px] text-brand-ink">
+          Moments
+        </h1>
       </div>
 
       {isLoading ? (
