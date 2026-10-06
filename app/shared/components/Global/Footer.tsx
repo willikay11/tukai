@@ -6,6 +6,7 @@ import Link from 'next/link';
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { DESTINATIONS } from '@/app/shared/components/Navigation/destinations';
 import { useLocation } from '@/context/LocationContext';
 
 export const Footer = () => {
@@ -89,6 +90,28 @@ export const Footer = () => {
             </div>
           </div>
         </div>
+
+        {/* Destinations. Help sits under You, as the brief places it */}
+        <nav aria-label="Footer" className="mt-8 md:mt-10">
+          <ul className="grid grid-cols-2 gap-x-4 gap-y-4 text-center text-sm text-gray-800 md:grid-cols-5 md:text-left">
+            {DESTINATIONS.map((destination) => (
+              <li key={destination.href}>
+                <Link href={destination.href} className="hover:text-primary">
+                  {destination.label}
+                </Link>
+                {destination.showsFace && (
+                  <ul className="mt-2">
+                    <li>
+                      <Link href="/help" className="text-gray-600 hover:text-primary">
+                        Help
+                      </Link>
+                    </li>
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        </nav>
 
         {/* Bottom Section */}
         <div className="mt-6 flex flex-col items-center justify-start gap-4 border-t border-gray-200 pt-4 text-sm text-gray-600 md:mt-8 md:flex-row md:pt-6">

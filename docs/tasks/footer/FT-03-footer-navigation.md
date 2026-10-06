@@ -1,6 +1,6 @@
 # FT-03 Footer links to the five destinations and Help
 
-- **Status:** approved
+- **Status:** done
 - **Type:** build
 - **Depends on:** FT-00
 - **Design:** brief 7.1: five destinations, and Help under You. Brief 7.3 for the routes.
@@ -16,9 +16,9 @@
 
 ## Done when
 
-- [ ] Five destinations linked
-- [ ] Help linked
-- [ ] Terms and Privacy kept
+- [x] Five destinations linked
+- [x] Help linked
+- [x] Terms and Privacy kept
 
 ## Notes
 

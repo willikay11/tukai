@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 
 import { Footer } from './Footer';
 
@@ -53,5 +53,30 @@ describe('Footer', () => {
     expect(screen.getByText('support@tukai.co')).toBeInTheDocument();
     expect(screen.getByText('Terms & Conditions')).toBeInTheDocument();
     expect(screen.getByText('Privacy Policy')).toBeInTheDocument();
+  });
+
+  it('links the five destinations', () => {
+    render(<Footer />);
+
+    const nav = screen.getByRole('navigation', { name: 'Footer' });
+    const link = (name: string) => within(nav).getByRole('link', { name });
+
+    expect(link('Discover')).toHaveAttribute('href', '/');
+    expect(link('Bucket lists')).toHaveAttribute('href', '/bucket-lists');
+    expect(link('Communities')).toHaveAttribute('href', '/communities');
+    expect(link('Plans')).toHaveAttribute('href', '/plans');
+    expect(link('You')).toHaveAttribute('href', '/profile');
+  });
+
+  it('links Help beneath You', () => {
+    render(<Footer />);
+
+    const nav = screen.getByRole('navigation', { name: 'Footer' });
+    const you = within(nav).getByRole('link', { name: 'You' }).closest('li');
+
+    expect(within(you as HTMLElement).getByRole('link', { name: 'Help' })).toHaveAttribute(
+      'href',
+      '/help',
+    );
   });
 });
