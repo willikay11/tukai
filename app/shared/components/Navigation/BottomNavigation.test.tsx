@@ -4,7 +4,7 @@ import React from 'react';
 
 import { usePathname } from 'next/navigation';
 
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 
 import { BottomNavigation } from './BottomNavigation';
 
@@ -213,9 +213,7 @@ describe('BottomNavigation', () => {
 
       render(<BottomNavigation />);
 
-      expect(screen.getByRole('link', { name: /discover/i })).not.toHaveAttribute(
-        'aria-current',
-      );
+      expect(screen.getByRole('link', { name: /discover/i })).not.toHaveAttribute('aria-current');
     });
 
     it('only shows one active link at a time', () => {
@@ -232,88 +230,42 @@ describe('BottomNavigation', () => {
     });
   });
 
-  describe('scroll behavior', () => {
-    it('is visible by default', () => {
+  describe('scrolling', () => {
+    // The bar is a fixed part of the screen, so it stays where it is however
+    // far the page moves
+    it('stays in place as the page scrolls down and back up', () => {
       mockUsePathname.mockReturnValue('/');
 
       const { container } = render(<BottomNavigation />);
-      const navContainer = container.firstChild;
+      const navContainer = container.firstChild as HTMLElement;
 
-      expect(navContainer).toHaveClass('translate-y-0');
+      act(() => {
+        Object.defineProperty(window, 'scrollY', { value: 400, writable: true });
+        window.dispatchEvent(new Event('scroll', { bubbles: true }));
+      });
+      act(() => {
+        Object.defineProperty(window, 'scrollY', { value: 200, writable: true });
+        window.dispatchEvent(new Event('scroll', { bubbles: true }));
+      });
+
+      expect(navContainer).toHaveClass('fixed', 'bottom-0');
       expect(navContainer).not.toHaveClass('translate-y-[150%]');
     });
 
-    it('stays visible when at top of page (scrollY < 10)', async () => {
+    it('does not listen for scroll at all', () => {
       mockUsePathname.mockReturnValue('/');
 
-      const { container } = render(<BottomNavigation />);
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
 
-      // Set scroll position to 5 (near top)
-      Object.defineProperty(window, 'scrollY', { value: 5, writable: true });
+      render(<BottomNavigation />);
 
-      // Trigger scroll event
-      window.dispatchEvent(new Event('scroll', { bubbles: true }));
+      expect(addEventListenerSpy).not.toHaveBeenCalledWith(
+        'scroll',
+        expect.any(Function),
+        expect.anything(),
+      );
 
-      await waitFor(() => {
-        const navContainer = container.firstChild as HTMLElement;
-        expect(navContainer).toHaveClass('translate-y-0');
-      });
-    });
-
-    it('hides when scrolling down', async () => {
-      mockUsePathname.mockReturnValue('/');
-
-      const { container } = render(<BottomNavigation />);
-
-      // Initial scroll
-      Object.defineProperty(window, 'scrollY', { value: 100, writable: true });
-      window.dispatchEvent(new Event('scroll', { bubbles: true }));
-
-      // Scroll down further
-      Object.defineProperty(window, 'scrollY', { value: 150, writable: true });
-      window.dispatchEvent(new Event('scroll', { bubbles: true }));
-
-      await waitFor(() => {
-        const navContainer = container.firstChild as HTMLElement;
-        expect(navContainer).toHaveClass('translate-y-[150%]');
-      });
-    });
-
-    it('shows when scrolling up', async () => {
-      mockUsePathname.mockReturnValue('/');
-
-      const { container } = render(<BottomNavigation />);
-
-      // Scroll down to hide
-      Object.defineProperty(window, 'scrollY', { value: 150, writable: true });
-      window.dispatchEvent(new Event('scroll', { bubbles: true }));
-
-      await waitFor(() => {
-        const navContainer = container.firstChild as HTMLElement;
-        expect(navContainer).toHaveClass('translate-y-[150%]');
-      });
-
-      // Scroll back up
-      Object.defineProperty(window, 'scrollY', { value: 100, writable: true });
-      window.dispatchEvent(new Event('scroll', { bubbles: true }));
-
-      await waitFor(() => {
-        const navContainer = container.firstChild as HTMLElement;
-        expect(navContainer).toHaveClass('translate-y-0');
-      });
-    });
-
-    it('removes scroll listener on unmount', () => {
-      mockUsePathname.mockReturnValue('/');
-
-      const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
-
-      const { unmount } = render(<BottomNavigation />);
-      unmount();
-
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function));
-
-      removeEventListenerSpy.mockRestore();
+      addEventListenerSpy.mockRestore();
     });
   });
 
@@ -384,15 +336,6 @@ describe('BottomNavigation', () => {
 
         expect(screen.queryByRole('link', { name: /account|sign in/i })).not.toBeInTheDocument();
       });
-    });
-
-    it('has transition class for smooth animation', () => {
-      mockUsePathname.mockReturnValue('/');
-
-      const { container } = render(<BottomNavigation />);
-      const navContainer = container.firstChild;
-
-      expect(navContainer).toHaveClass('transition-transform');
     });
   });
 
