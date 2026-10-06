@@ -100,6 +100,7 @@ const config: Config = {
           subtle: '#8A9793', // 37 — hints and placeholders
           pill: '#1F2937', // the label and icon on a resting section pill
           summary: '#1F2937', // the one-line summary under a manager's banner title
+          label: '#1F2937', // a fact's label and icon in the place drawer's facts grid
         },
         danger: {
           // ⚠️ The canvas carries three reds — #E02D3C (22), #D92D20 (15) and
