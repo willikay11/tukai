@@ -23,8 +23,8 @@ with its status against what is built. Reviewed by the owner first.
 
 ## Done when
 
-- [ ] Banner matches the design's radius, padding, disc size and type
-- [ ] Button label follows whether a reservation profile exists
+- [x] Banner matches the design's radius, padding, disc size and type
+- [x] Button label follows whether a reservation profile exists
 
 ## Notes
 
