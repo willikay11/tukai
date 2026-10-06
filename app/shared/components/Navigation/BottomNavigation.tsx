@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react';
 
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { TukaiImage } from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 
 import { DESTINATIONS, isDestinationActive } from './destinations';
@@ -35,6 +37,7 @@ export const BottomNavigation = () => {
   const searchParams = useSearchParams();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const { data: session } = useSession();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,19 +70,20 @@ export const BottomNavigation = () => {
   return (
     <div
       className={cn(
-        'fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 transition-transform duration-300 ease-in-out md:hidden',
+        'fixed inset-x-0 bottom-0 z-50 bg-white shadow-top-md transition-transform duration-300 ease-in-out md:hidden',
         isVisible ? 'translate-y-0' : 'translate-y-[150%]',
       )}
     >
-      {/* The destinations sit in one floating pill */}
+      {/* Five equal columns across the full width, each an icon over its label.
+          The active one takes a soft pill behind its icon and a heavier label. */}
       <nav
         aria-label="Primary"
-        // p-1 rather than p-2: the items carry their own padding, so the pill
-        // only needs enough to keep the active lime chip off its edge
-        className="flex items-center gap-1 rounded-full bg-white p-1 shadow-lg"
+        className="grid grid-cols-5 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2"
       >
         {DESTINATIONS.map((link) => {
           const active = isDestinationActive(link.href, pathname);
+          // The reader's face stands in for the "You" icon once it is known
+          const face = link.showsFace ? session?.user?.image : undefined;
 
           return (
             <Link
@@ -87,19 +91,37 @@ export const BottomNavigation = () => {
               href={link.href}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                'inline-flex items-center justify-center gap-2 rounded-full transition-colors duration-200 active:scale-95 motion-reduce:transform-none',
-                // Only the current destination is named; the rest are icons, so
-                // five fit across a phone
-                active ? 'bg-lime px-4 py-2.5 text-primary' : 'px-3 py-2.5 text-gray-500',
+                'flex flex-col items-center gap-1 text-[11px] transition-colors duration-200 active:scale-95 motion-reduce:transform-none',
+                active ? 'font-semibold text-gray-900' : 'font-medium text-gray-500',
               )}
             >
-              <IconComponent
-                iconName={link.icon}
-                size={20}
-                color="currentColor"
-                variant={active ? 'solid' : 'twotone'}
-              />
-              {active && <span className="text-sm font-semibold">{link.label}</span>}
+              <span
+                className={cn(
+                  'flex h-8 w-16 items-center justify-center rounded-full transition-colors duration-200',
+                  active && 'bg-surface-tab',
+                )}
+              >
+                {face ? (
+                  <span className="relative h-6 w-6 overflow-hidden rounded-full">
+                    <TukaiImage
+                      src={face}
+                      alt={session?.user?.name || link.label}
+                      fill
+                      sizes="24px"
+                      style={{ objectFit: 'cover' }}
+                      showNotFoundText={false}
+                    />
+                  </span>
+                ) : (
+                  <IconComponent
+                    iconName={link.icon}
+                    size={22}
+                    color="currentColor"
+                    variant={active ? 'solid' : 'twotone'}
+                  />
+                )}
+              </span>
+              {link.label}
             </Link>
           );
         })}

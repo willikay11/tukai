@@ -37,7 +37,7 @@ export const nextStart = (experience: Experience, now: Date): Date | null => {
  * holds more experiences than that page, one starting soon could be missed;
  * the rail would still be true about everything it shows.
  */
-export const happeningSoon = (experiences: Experience[], now: Date = new Date()): Experience[] => {
+const upcomingInWindow = (experiences: Experience[], now: Date): Experience[] => {
   const horizon = new Date(now);
   horizon.setDate(horizon.getDate() + SOON_DAYS);
 
@@ -48,6 +48,16 @@ export const happeningSoon = (experiences: Experience[], now: Date = new Date())
         entry.at !== null && entry.at.getTime() <= horizon.getTime(),
     )
     .sort((left, right) => left.at.getTime() - right.at.getTime())
-    .slice(0, SOON_LIMIT)
     .map((entry) => entry.experience);
 };
+
+export const happeningSoon = (experiences: Experience[], now: Date = new Date()): Experience[] =>
+  upcomingInWindow(experiences, now).slice(0, SOON_LIMIT);
+
+/**
+ * Whether the fortnight holds more than the rail shows. Only then does the See
+ * All tile have anywhere to lead - otherwise it would repeat what is already
+ * on the rail.
+ */
+export const hasMoreSoon = (experiences: Experience[], now: Date = new Date()): boolean =>
+  upcomingInWindow(experiences, now).length > SOON_LIMIT;

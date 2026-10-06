@@ -69,23 +69,27 @@ export const AuthActions = () => {
    * Create belongs to the signed-in bar. A visitor who has not joined yet is
    * asked to join - offering them Create only to answer with a sign-in dialog
    * is a door that opens onto another door.
+   *
+   * On a phone it is a round lime plus, and the word comes back from lg. The
+   * word stays in the DOM as screen-reader text, so the control keeps its name.
+   * Between md and lg it is hidden, as it was before.
    */
   const createButton = hasSubscribed ? (
     <Link
       href="/experiences/create"
-      className="hidden h-11 flex-shrink-0 items-center gap-2 rounded-full bg-lime px-4 text-sm font-semibold text-brand-ink transition-colors hover:bg-lime-dark lg:inline-flex"
+      className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-lime text-sm font-semibold text-brand-ink transition-colors hover:bg-lime-dark md:hidden lg:inline-flex lg:w-auto lg:gap-2 lg:px-4"
     >
       <IconComponent iconName="Add01Icon" size={18} color="currentColor" />
-      Create
+      <span className="sr-only lg:not-sr-only">Create</span>
     </Link>
   ) : (
     <Button
       variant="lime"
-      className="hidden h-11 flex-shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold lg:inline-flex"
+      className="h-11 w-11 flex-shrink-0 items-center justify-center rounded-full p-0 text-sm font-semibold md:hidden lg:inline-flex lg:w-auto lg:gap-2 lg:px-4"
       onClick={handleCreateExperience}
     >
       <IconComponent iconName="Add01Icon" size={18} color="currentColor" />
-      Create
+      <span className="sr-only lg:not-sr-only">Create</span>
     </Button>
   );
 
@@ -105,7 +109,7 @@ export const AuthActions = () => {
               app is behind it, which a bare avatar does not. */}
             <PopoverTrigger
               aria-label="Account menu"
-              className="flex h-11 flex-shrink-0 items-center gap-2 rounded-full border border-line-soft bg-white pl-3 pr-[5px] outline-none transition-shadow hover:shadow-[0_2px_10px_rgba(1,51,52,.09)]"
+              className="flex h-11 flex-shrink-0 items-center gap-2 rounded-full border border-line-soft bg-white pl-[5px] pr-[5px] outline-none md:pl-3 transition-shadow hover:shadow-[0_2px_10px_rgba(1,51,52,.09)]"
             >
               <IconComponent
                 iconName="Menu02Icon"

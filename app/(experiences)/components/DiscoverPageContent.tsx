@@ -7,7 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import { BucketListRow } from '@/app/(experiences)/components/BucketListRow';
 import { CommunityRow } from '@/app/(experiences)/components/CommunityRow';
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
-import { happeningSoon } from '@/app/(experiences)/components/ExperienceCard/happening-soon';
+import { hasMoreSoon, happeningSoon } from '@/app/(experiences)/components/ExperienceCard/happening-soon';
 import { ROW_GRID, RowGridSkeleton } from '@/app/(experiences)/components/MediaRow';
 import { MomentComposeCard } from '@/app/(experiences)/components/MomentCard/MomentComposeCard';
 import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
@@ -58,6 +58,12 @@ const ROW_GRID_SIZE = 8;
 
 /** Read in one go; "View more" pages through it without another request. */
 const PUBLIC_LISTS_SIZE = 24;
+
+/**
+ * Public lists sit two across from phone width, so a reader sees more of them
+ * without scrolling. The shared row grid is one column on a phone.
+ */
+const PUBLIC_LISTS_GRID = 'grid grid-cols-2 gap-x-4 gap-y-6 sm:gap-x-8 xl:grid-cols-4';
 
 /** Read in one go, then paged locally - the API pages by request. */
 const PLACES_WITH_EXPERIENCES_SIZE = 30;
@@ -123,7 +129,10 @@ export const DiscoverPageContent = () => {
     { page: 1, page_size: SOON_PAGE_SIZE, status: 'published', lat, long: lng },
     true,
   );
-  const soonExperiences: Experience[] = happeningSoon(rowResponse?.data?.results ?? []);
+  const soonResults: Experience[] = rowResponse?.data?.results ?? [];
+  const soonExperiences: Experience[] = happeningSoon(soonResults);
+  // See all only when the fortnight holds more than the rail shows
+  const hasMoreSoonExperiences = hasMoreSoon(soonResults);
 
   const { data: citiesResponse, isLoading: isLoadingCities } = usePlaceCategories(
     { pageSize: 100, group: 'cities' },
@@ -213,10 +222,12 @@ export const DiscoverPageContent = () => {
                 />
               ))}
 
-              <SeeAllCard
-                href="/experiences"
-                previewPhotos={soonExperiences.slice(0, 3).map(coverPhotoOf)}
-              />
+              {hasMoreSoonExperiences && (
+                <SeeAllCard
+                  href="/experiences"
+                  previewPhotos={soonExperiences.slice(0, 3).map(coverPhotoOf)}
+                />
+              )}
             </>
           )}
         </CardRail>
@@ -357,9 +368,9 @@ export const DiscoverPageContent = () => {
           />
 
           {isLoadingPublicLists ? (
-            <RowGridSkeleton />
+            <RowGridSkeleton gridClassName={PUBLIC_LISTS_GRID} />
           ) : (
-            <div className={ROW_GRID}>
+            <div className={PUBLIC_LISTS_GRID}>
               {shownPublicLists.map((bucketList, index) => (
                 <BucketListRow
                   key={bucketList.id}

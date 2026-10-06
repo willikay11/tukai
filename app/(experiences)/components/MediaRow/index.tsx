@@ -57,8 +57,15 @@ export const MediaRow = ({
 );
 
 /** Eight rows' worth of grey, in the grid the real rows will fill. */
-export const RowGridSkeleton = ({ rows = 8 }: { rows?: number }) => (
-  <div className={ROW_GRID}>
+export const RowGridSkeleton = ({
+  rows = 8,
+  gridClassName = ROW_GRID,
+}: {
+  rows?: number;
+  /** Matches the grid the rows will load into, so the layout does not jump. */
+  gridClassName?: string;
+}) => (
+  <div className={gridClassName}>
     {Array.from({ length: rows }).map((_, index) => (
       <div key={index} className="flex items-start gap-4">
         <div className="h-[72px] w-[72px] flex-shrink-0 animate-pulse rounded-xl bg-gray-200" />

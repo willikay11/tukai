@@ -20,12 +20,13 @@ export const Nav = () => {
   const pathname = usePathname();
 
   return (
-    // From md, not lg: the floating bottom navigation stops at md, so between
-    // 768px and 1024px the app had no navigation at all.
+    // Not hidden here: it renders in both the phone bar and the desktop bar,
+    // and each of those containers decides where it shows. On a phone the
+    // strip is wider than some screens, so it scrolls sideways.
     <nav
       role="tablist"
       aria-label="Discover"
-      className="hidden min-h-11 flex-shrink-0 items-center gap-2 md:flex"
+      className="flex min-h-11 flex-shrink-0 items-center gap-2 overflow-x-auto scrollbar-hide"
     >
       {DISCOVER_TABS.map((tab) => {
         const active = isTabActive(tab.href, pathname);
