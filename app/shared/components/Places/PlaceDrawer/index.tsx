@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { ClaimPlacePrompt } from '@/app/(places)/places/[placeId]/components/ClaimPlacePrompt';
-import { PlaceReviewsSection } from '@/app/(places)/places/[placeId]/components/PlaceReviewsSection';
 import { ContextMoments, MomentComposerForm } from '@/app/shared/components/Moments';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import {
@@ -22,9 +20,11 @@ import { PlaceAvailabilityRule, PlaceReservationProfile } from '@/types/placeRes
 import { HappeningNow } from './HappeningNow';
 import { MyReservations } from './MyReservations';
 import { PlaceAboutSection } from './PlaceAboutSection';
+import { PlaceClaimSection } from './PlaceClaimSection';
 import { PlaceCommunity } from './PlaceCommunity';
 import { PlaceDrawerFooter } from './PlaceDrawerFooter';
 import { PlaceDrawerHeader } from './PlaceDrawerHeader';
+import { PlaceDrawerReviews } from './PlaceDrawerReviews';
 import { PlaceDrawerTabs } from './PlaceDrawerTabs';
 import { PlaceManagerBanner } from './PlaceManagerBanner';
 import { PlaceReservationSettings } from './PlaceReservationSettings';
@@ -208,6 +208,7 @@ export const PlaceDrawer = ({
                 <section id={PLACE_SECTIONS.moments} className="scroll-mt-[148px] py-6">
                   <ContextMoments
                     title="Moments"
+                    variant="panel"
                     contextLabel={place.title}
                     emptyMessage={`No moments from ${place.title} yet. Yours could be the first.`}
                     placeId={place.id}
@@ -218,24 +219,20 @@ export const PlaceDrawer = ({
 
                 {isUnclaimed && (
                   <section className="py-6">
-                    <ClaimPlacePrompt placeId={place.id} placeName={place.title} />
+                    <PlaceClaimSection placeId={place.id} placeName={place.title} />
                   </section>
                 )}
 
                 <section id={PLACE_SECTIONS.reviews} className="scroll-mt-[148px] py-6">
-                  <PlaceReviewsSection
+                  <PlaceDrawerReviews
                     placeId={place.id}
-                    placeTitle={place.title}
                     rating={place.averageRating}
                     reviewCount={place.totalReviews}
-                    // The footer pins Add review; a second one here would read as
-                    // a different control
-                    showAddReview={false}
                   />
                 </section>
               </div>
 
-              <div className="sticky bottom-0 z-30 border-t border-line bg-white px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
+              <div className="sticky bottom-0 z-30 border-t border-surface-muted bg-white px-6 pb-[calc(12px_+_env(safe-area-inset-bottom))] pt-3">
                 <PlaceDrawerFooter place={place} onAddReview={() => setView('review')} />
               </div>
             </>

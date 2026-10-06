@@ -39,7 +39,7 @@ export const PlaceDrawerFooter = ({
     <>
       {/* Scrolls rather than wraps: three pills do not fit a phone, and a
           second row would push the content above them off the screen */}
-      <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
+      <div className="flex items-center gap-2.5 overflow-x-auto scrollbar-hide">
         <Button
           type="button"
           variant="gradient"
@@ -52,9 +52,9 @@ export const PlaceDrawerFooter = ({
             }
             onAddReview();
           }}
-          className="h-12 flex-shrink-0 rounded-full px-6 text-[15px] font-bold"
+          className="h-12 flex-shrink-0 rounded-full px-6 text-[15px] font-semibold"
         >
-          <IconComponent iconName="StarIcon" size={16} color="currentColor" />
+          <IconComponent iconName="StarIcon" size={20} color="currentColor" />
           Add review
         </Button>
 
@@ -63,20 +63,23 @@ export const PlaceDrawerFooter = ({
             href={directions}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex h-12 flex-shrink-0 items-center gap-2.5 rounded-full bg-lime px-6 text-[15px] font-bold text-brand-ink transition-colors hover:bg-lime-dark"
+            className="inline-flex h-12 flex-shrink-0 items-center gap-2 rounded-full bg-lime px-6 text-[15px] font-semibold text-brand-ink transition-colors hover:bg-lime-dark"
           >
             <IconComponent iconName="Navigation03Icon" size={20} color="currentColor" />
             Get directions
           </a>
         )}
 
+        {/* Icon only on a phone-width screen, where the three buttons do not
+            fit with their labels. The label returns from 720px, as the design does. */}
         <button
           type="button"
           onClick={() => setIsPlanOpen(true)}
-          className="inline-flex h-12 flex-shrink-0 items-center gap-2.5 rounded-full bg-surface-brand px-6 text-[15px] font-bold text-brand-ink transition-colors hover:bg-surface-tab"
+          aria-label="Plan this"
+          className="inline-flex h-12 min-w-12 flex-shrink-0 items-center justify-center gap-2 rounded-full bg-surface-brand px-0 text-[15px] font-semibold text-brand transition-colors hover:bg-surface-tab min-[720px]:px-[18px]"
         >
           <IconComponent iconName="CalendarAdd01Icon" size={20} color="currentColor" />
-          Plan this
+          <span className="hidden min-[720px]:inline">Plan this</span>
         </button>
       </div>
 

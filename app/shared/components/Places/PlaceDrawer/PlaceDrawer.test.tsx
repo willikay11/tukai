@@ -105,13 +105,11 @@ jest.mock('@/app/shared/components/Moments', () => ({
     </div>
   ),
 }));
-jest.mock('@/app/(places)/places/[placeId]/components/PlaceReviewsSection', () => ({
-  PlaceReviewsSection: ({ showAddReview }: { showAddReview?: boolean }) => (
-    <div data-testid="reviews" data-add-review={String(showAddReview)} />
-  ),
+jest.mock('./PlaceDrawerReviews', () => ({
+  PlaceDrawerReviews: () => <div data-testid="reviews" />,
 }));
-jest.mock('@/app/(places)/places/[placeId]/components/ClaimPlacePrompt', () => ({
-  ClaimPlacePrompt: ({ placeName }: { placeName: string }) => (
+jest.mock('./PlaceClaimSection', () => ({
+  PlaceClaimSection: ({ placeName }: { placeName: string }) => (
     <div data-testid="claim">{placeName}</div>
   ),
 }));
@@ -235,14 +233,6 @@ describe('PlaceDrawer', () => {
 
       expect(screen.queryByTestId('claim')).not.toBeInTheDocument();
     });
-  });
-
-  // The footer pins Add review; a second one in the reviews header would read
-  // as a different control
-  it('leaves the write-a-review control to the footer', () => {
-    render(<PlaceDrawer placeId="p1" isOpen onClose={jest.fn()} />);
-
-    expect(screen.getByTestId('reviews')).toHaveAttribute('data-add-review', 'false');
   });
 
   /**

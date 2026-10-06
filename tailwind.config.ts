@@ -153,6 +153,8 @@ const config: Config = {
         'top-md': '0 -2px 10px -1px rgba(0, 0, 0, 0.1), 0 -2px 2px -1px rgba(0, 0, 0, 0.06)',
         'scroll-filters': '0 0px 8px 17px rgb(255 255 255), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
         'search-bar': '0 0px 15px 0px rgba(0, 0, 0, 0.15)',
+        // The lift under a lime button in the place drawer's claim prompt
+        'lime-glow': '0 8px 20px rgba(176, 232, 0, 0.4)',
       },
       keyframes: {
         shimmer: {
