@@ -44,13 +44,16 @@ export const MomentCard = ({
 
   // "See more" is shown only where the caption actually overflows its two
   // lines. Counting characters cannot answer that - the same count wraps
-  // differently at every width - so the clamped element is measured.
-  const captionRef = useRef<HTMLSpanElement | null>(null);
+  // differently at every width - so the clamped element is measured. An open
+  // caption is not clamped, so it is not measured: the last answer stands
+  // until it is closed again.
+  const captionRef = useRef<HTMLParagraphElement | null>(null);
   const [isClamped, setIsClamped] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useLayoutEffect(() => {
     const element = captionRef.current;
-    if (!element) return;
+    if (!element || isOpen) return;
 
     const measure = () => setIsClamped(element.scrollHeight > element.clientHeight + 1);
     measure();
@@ -59,19 +62,23 @@ export const MomentCard = ({
     observer?.observe(element);
 
     return () => observer?.disconnect();
-  }, [caption]);
+  }, [caption, isOpen]);
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
+    <article
       className={cn(
         'group flex flex-shrink-0 snap-start flex-col text-left',
         MOMENT_CARD_WIDTH,
         className,
       )}
     >
-      <span className="relative block aspect-[3/4] w-full overflow-hidden rounded-2xl bg-surface">
+      {/* Only the photo opens the moment. The caption sits outside this button,
+          so its See more and See less can be buttons of their own */}
+      <button
+        type="button"
+        onClick={onClick}
+        className="relative block aspect-[3/4] w-full overflow-hidden rounded-2xl bg-surface"
+      >
         <PhotoImage
           src={photos[0]?.photo}
           alt={moment.title}
@@ -111,31 +118,52 @@ export const MomentCard = ({
             className="absolute bottom-3 right-3"
           />
         )}
-      </span>
+      </button>
 
-      <span className="mt-3 flex min-w-0 items-center gap-2.5">
+      <div className="mt-3 flex min-w-0 items-center gap-2.5">
         <MomentAvatar src={moment.author?.picture ?? null} name={authorName} size={36} />
-        <span className="flex min-w-0 flex-col">
+        <div className="flex min-w-0 flex-col">
           <span className="truncate text-[15px] font-semibold text-brand-ink">{authorName}</span>
           <span className="text-[13px] text-ink-muted">{momentDate(moment.dateCreated)}</span>
-        </span>
-      </span>
+        </div>
+      </div>
 
       {caption && (
-        <span
-          ref={captionRef}
-          className="relative mt-3 line-clamp-2 text-[15px] leading-[1.45] text-gray-800"
-        >
-          {caption}
-          {isClamped && (
-            // Laid over the end of the second line rather than inserted into
-            // it, so the measurement above stays true
-            <span className="absolute bottom-0 right-0 bg-background pl-1 font-semibold text-brand">
+        <div className="relative mt-3 min-w-0">
+          <p
+            ref={captionRef}
+            className={cn('text-[15px] leading-[1.45] text-gray-800', !isOpen && 'line-clamp-2')}
+          >
+            {caption}
+            {isOpen && (
+              <>
+                {' '}
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  aria-expanded="true"
+                  className="font-semibold text-brand"
+                >
+                  See less
+                </button>
+              </>
+            )}
+          </p>
+
+          {/* Laid over the end of the second line rather than inserted into
+              it, so the measurement above stays true */}
+          {!isOpen && isClamped && (
+            <button
+              type="button"
+              onClick={() => setIsOpen(true)}
+              aria-expanded="false"
+              className="absolute bottom-0 right-0 bg-background pl-1 font-semibold text-brand"
+            >
               See more
-            </span>
+            </button>
           )}
-        </span>
+        </div>
       )}
-    </button>
+    </article>
   );
 };

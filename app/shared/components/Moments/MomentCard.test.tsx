@@ -91,6 +91,57 @@ describe('MomentCard', () => {
     expect(screen.queryByText('See more')).not.toBeInTheDocument();
   });
 
+  describe('the caption toggle', () => {
+    // A caption that overflows its two lines: jsdom has no layout, so the
+    // measured element is given a height that is too small for its content
+    const overflowing = () => {
+      jest.spyOn(Element.prototype, 'scrollHeight', 'get').mockReturnValue(60);
+      jest.spyOn(Element.prototype, 'clientHeight', 'get').mockReturnValue(40);
+    };
+
+    afterEach(() => jest.restoreAllMocks());
+
+    it('offers See more when the caption overflows, and expands it', () => {
+      overflowing();
+      render(<MomentCard moment={makeMoment()} onClick={jest.fn()} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'See more' }));
+
+      expect(screen.getByText(/First bowl off the wheel\./)).not.toHaveClass('line-clamp-2');
+      expect(screen.getByRole('button', { name: 'See less' })).toHaveAttribute(
+        'aria-expanded',
+        'true',
+      );
+      expect(screen.queryByRole('button', { name: 'See more' })).not.toBeInTheDocument();
+    });
+
+    it('collapses again on See less, and offers See more once more', () => {
+      overflowing();
+      render(<MomentCard moment={makeMoment()} onClick={jest.fn()} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'See more' }));
+      fireEvent.click(screen.getByRole('button', { name: 'See less' }));
+
+      expect(screen.getByText(/First bowl off the wheel\./)).toHaveClass('line-clamp-2');
+      expect(screen.getByRole('button', { name: 'See more' })).toHaveAttribute(
+        'aria-expanded',
+        'false',
+      );
+    });
+
+    // The caption is not inside the button that opens the moment
+    it('does not open the moment', () => {
+      overflowing();
+      const onClick = jest.fn();
+      render(<MomentCard moment={makeMoment()} onClick={onClick} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'See more' }));
+      fireEvent.click(screen.getByRole('button', { name: 'See less' }));
+
+      expect(onClick).not.toHaveBeenCalled();
+    });
+  });
+
   it('leaves the caption out entirely when a moment has no words', () => {
     render(<MomentCard moment={makeMoment({ title: '', description: '' })} onClick={jest.fn()} />);
 
