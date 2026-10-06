@@ -27,4 +27,4 @@ Nothing in the new design specifies a footer. Keeping one is a product call, not
 
 **Decided:** keep the footer. Remove the hardcoded location (FT-01). Add the five destinations and Help (FT-03). Confirm the contact details (FT-04). Keep the legal line, with the copy fixes (FT-06).
 
-**Not decided:** app download links (FT-07). Still awaiting.
+**Decided:** keep the App Store and Google Play badges in the footer (FT-07).
