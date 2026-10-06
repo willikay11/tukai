@@ -1,17 +1,21 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 
 import { useSearchParams } from 'next/navigation';
 
 import { PageContainer } from '@/app/shared/components/Layout';
 import { MomentsMasonry } from '@/app/shared/components/Moments';
 import { useInfiniteMoments } from '@/app/shared/hooks/useMoments';
+import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { Drawer } from '@/components/ui/drawer';
 import { NoData } from '@/components/ui/noData';
 import { Moment, momentPhotos } from '@/types/moment';
+import { PlaceCategory } from '@/types/placeCategory';
 
 import { MomentDetail } from './components/MomentDetail';
+import { MomentsBreakRail } from './components/MomentsBreakRail';
+import { FEED_MIX_DEFAULT, FeedMix, splitIntoRuns } from './feed-mix';
 
 const MasonrySkeleton = () => (
   <div className="columns-2 gap-4 md:columns-3">
@@ -41,7 +45,11 @@ const useIsDesktop = () => {
   return isDesktop;
 };
 
-export const MomentsView = () => {
+interface MomentsViewProps {
+  feedMix?: FeedMix;
+}
+
+export const MomentsView = ({ feedMix = FEED_MIX_DEFAULT }: MomentsViewProps) => {
   const searchParams = useSearchParams();
   const deepLinkedId = searchParams.get('momentId');
 
@@ -49,6 +57,16 @@ export const MomentsView = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const isDesktop = useIsDesktop();
+  const { data: categoriesResponse } = usePlaceCategories({ pageSize: 100 }, true);
+
+  // Each break rail takes the next interest category in the API's order
+  const interestCategories = useMemo(
+    () =>
+      ((categoriesResponse?.data?.results ?? []) as PlaceCategory[]).filter(
+        (category) => category.group === 'interests',
+      ),
+    [categoriesResponse],
+  );
 
   // The masonry is photo-led. A moment with no media - or whose only media is a
   // video / still-processing upload with photo: null - has nothing to show, and
@@ -95,14 +113,32 @@ export const MomentsView = () => {
       ) : (
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           <div className="lg:col-span-8">
-            <MomentsMasonry
-              moments={moments}
-              selectedId={selectedId}
-              onSelect={onSelect}
-              onLoadMore={fetchNextPage}
-              hasMore={Boolean(hasNextPage)}
-              isLoadingMore={isFetchingNextPage}
-            />
+            {splitIntoRuns(moments, feedMix).map((run, runIndex, runs) => {
+              const isLast = runIndex === runs.length - 1;
+              const startIndex = runs
+                .slice(0, runIndex)
+                .reduce((total, earlier) => total + earlier.length, 0);
+
+              return (
+                <Fragment key={runIndex}>
+                  <MomentsMasonry
+                    moments={run}
+                    startIndex={startIndex}
+                    tile="card"
+                    selectedId={selectedId}
+                    onSelect={onSelect}
+                    // Only the last run reads on to the next page, so the paging
+                    // sentinel sits at the foot of the feed
+                    onLoadMore={fetchNextPage}
+                    hasMore={isLast && Boolean(hasNextPage)}
+                    isLoadingMore={isLast && isFetchingNextPage}
+                  />
+                  {!isLast && interestCategories[runIndex] && (
+                    <MomentsBreakRail category={interestCategories[runIndex]} />
+                  )}
+                </Fragment>
+              );
+            })}
           </div>
 
           <div className="hidden lg:col-span-4 lg:block">

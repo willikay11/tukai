@@ -4,14 +4,14 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 import { Moment } from '@/types/moment';
 
-import { MomentCard } from './index';
+import { MomentCard } from './MomentCard';
 
 const useSession = jest.fn();
 jest.mock('next-auth/react', () => ({ useSession: () => useSession() }));
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: { iconName: string }) => <span data-testid={iconName} />,
 }));
-jest.mock('@/app/shared/components/Moments', () => ({
+jest.mock('@/app/shared/components/Moments/MomentAvatar', () => ({
   // The name goes on an attribute, not in the text, so asserting on the
   // byline below does not also match the avatar's fallback
   MomentAvatar: ({ name }: { name: string }) => <span data-testid="avatar" title={name} />,

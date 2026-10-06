@@ -6,34 +6,33 @@ import { useSession } from 'next-auth/react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { FannedPhotos, PhotoImage } from '@/app/shared/components/Images';
-import { MomentAvatar } from '@/app/shared/components/Moments';
 import { MEDIA_ZOOM } from '@/app/shared/components/Motion';
 import { cn } from '@/lib/utils';
 import { Moment, momentAuthorName, momentContext, momentPhotos } from '@/types/moment';
 import { CANVAS_ICONS } from '@/utils/canvas-icons';
 
+import { MomentAvatar } from './MomentAvatar';
 import { momentCaption, momentDate } from './moment-card';
 
 /** The width a card takes in the Recent moments rail. */
 export const MOMENT_CARD_WIDTH = 'w-[265px]';
 
 /**
- * A moment, as the design draws it on Discover: a tall photo with what it was
- * posted against over its corner, then who posted it and when, then their
- * words.
- *
- * Deliberately not the masonry tile the Moments page uses - that one is a
- * photo sized to itself with an author chip laid over it, and carries no
- * caption at all.
+ * A moment: a tall photo with what it was posted against over its corner, then
+ * who posted it and when, then their words. The same card on Discover's rail
+ * and in the masonry grids; a caller that lays it out in columns passes its
+ * own width.
  */
 export const MomentCard = ({
   moment,
   onClick,
   priority = false,
+  className,
 }: {
   moment: Moment;
   onClick: () => void;
   priority?: boolean;
+  className?: string;
 }) => {
   const { data: session } = useSession();
 
@@ -66,7 +65,11 @@ export const MomentCard = ({
     <button
       type="button"
       onClick={onClick}
-      className={cn('group flex flex-shrink-0 snap-start flex-col text-left', MOMENT_CARD_WIDTH)}
+      className={cn(
+        'group flex flex-shrink-0 snap-start flex-col text-left',
+        MOMENT_CARD_WIDTH,
+        className,
+      )}
     >
       <span className="relative block aspect-[3/4] w-full overflow-hidden rounded-2xl bg-surface">
         <PhotoImage

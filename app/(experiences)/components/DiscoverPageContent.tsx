@@ -9,7 +9,6 @@ import { CommunityRow } from '@/app/(experiences)/components/CommunityRow';
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
 import { happeningSoon } from '@/app/(experiences)/components/ExperienceCard/happening-soon';
 import { ROW_GRID, RowGridSkeleton } from '@/app/(experiences)/components/MediaRow';
-import { MomentCard } from '@/app/(experiences)/components/MomentCard';
 import { MomentComposeCard } from '@/app/(experiences)/components/MomentCard/MomentComposeCard';
 import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
 import { SearchResults } from '@/app/(experiences)/components/SearchResults';
@@ -21,7 +20,7 @@ import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experienc
 import { PageContainer } from '@/app/shared/components/Layout';
 import { CardGrid, CardRail, SeeAllCard } from '@/app/shared/components/Lists';
 import { ShowMoreButton } from '@/app/shared/components/Lists';
-import { MomentComposer } from '@/app/shared/components/Moments';
+import { MomentCard, MomentComposer } from '@/app/shared/components/Moments';
 import { usePublicBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';

@@ -8,8 +8,8 @@ Source: `docs/design/screens/moments-listing.html`.
 |---|---|---|---|---|
 | MO-00 | Decide the rules the Moments listing shares | decision | decided | none |
 | MO-01 | Heading | build | awaiting approval | none |
-| MO-02 | Feed mix and break rails | decision | awaiting approval | MO-00 |
-| MO-03 | Moment card | build | awaiting approval | none |
+| MO-02 | Feed mix and break rails | decision | built, pending owner review | MO-00 |
+| MO-03 | Moment card | build | built, pending owner review | none |
 | MO-04 | Album card | build | awaiting approval | MO-03 |
 | MO-05 | Empty state | build | awaiting approval | none |
 | MO-06 | Paging: View more, not infinite scroll | decision | awaiting approval | none |
