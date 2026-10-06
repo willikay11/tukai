@@ -178,7 +178,10 @@ export const PlaceDrawer = ({
                     />
                   )}
 
-                  <PlaceAboutSection place={place} />
+                  <PlaceAboutSection
+                    place={place}
+                    onReviewsClick={() => scrollTo(PLACE_SECTIONS.reviews)}
+                  />
                 </section>
 
                 {hasExperiences && (

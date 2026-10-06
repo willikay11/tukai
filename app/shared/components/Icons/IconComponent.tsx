@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { ShoppingBasketDone02Icon } from '@hugeicons-pro/core-bulk-rounded';
+import { ShoppingBasketDone02Icon, StarIcon } from '@hugeicons-pro/core-bulk-rounded';
 import * as SolidIcons from '@hugeicons-pro/core-solid-rounded';
 import * as Icons from '@hugeicons-pro/core-twotone-rounded';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -16,10 +16,10 @@ import { HugeiconsIcon } from '@hugeicons/react';
  * ⚠️ Named imports, not `import * as`. The two wildcard imports below are
  * indexed by a runtime string, so the bundler cannot tell which icons are
  * reachable and ships all of them - which is most of this app's First Load JS.
- * Adding a third set that way cost 3.5MB a route. Bulk is used by one control,
- * so it lists the one icon; add a line here when another needs it.
+ * Adding a third set that way cost 3.5MB a route. Bulk is used by a few
+ * controls, so it lists the icons they use; add a line here when another needs it.
  */
-const BULK_ICONS = { ShoppingBasketDone02Icon };
+const BULK_ICONS = { ShoppingBasketDone02Icon, StarIcon };
 
 type TwotoneIconName = keyof typeof Icons;
 type SolidIconName = keyof typeof SolidIcons;

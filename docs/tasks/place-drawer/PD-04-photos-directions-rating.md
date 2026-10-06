@@ -25,9 +25,9 @@ with its status against what is built. Reviewed by the owner first.
 
 ## Done when
 
-- [ ] Arrows and directions pill match the design's size, border and colour
-- [ ] The rating is a control that jumps to Reviews
-- [ ] The rating row shows No reviews yet when there are none
+- [x] Arrows and directions pill match the design's size, border and colour
+- [x] The rating is a control that jumps to Reviews
+- [x] The rating row shows No reviews yet when there are none
 
 ## Notes
 

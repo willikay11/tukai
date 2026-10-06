@@ -75,6 +75,9 @@ const config: Config = {
         // rating or a "city • distance" line does.
         star: '#F2C14B',
         dot: '#70A3F3',
+        // The blue dot before a distance or a rating count in the place drawer's
+        // photo row, a 5px circle rather than a glyph
+        distance: '#60A5FA',
         surface: {
           DEFAULT: '#F3F4F2', // 298 — resting chip and card ground
           brand: '#E8F1ED', // 280 — a chosen chip
