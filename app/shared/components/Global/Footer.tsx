@@ -17,6 +17,9 @@ import { useLocation } from '@/context/LocationContext';
 const APP_STORE_URL = 'https://apps.apple.com/us/app/tukai/id6751051486';
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.tukaitravels.app&hl=en';
 
+// Discover is left out here. The footer lists the other destinations only
+const FOOTER_DESTINATIONS = DESTINATIONS.filter((destination) => destination.href !== '/');
+
 const HEADING = 'text-sm font-semibold text-gray-700';
 const LINK = 'text-gray-800 transition-colors hover:text-primary';
 
@@ -133,9 +136,9 @@ export const Footer = () => {
         </div>
 
         {/* Destinations, for a second route to each. Help sits under You */}
-        <nav aria-label="Footer" className="mt-8 md:mt-10">
-          <ul className="grid grid-cols-2 gap-x-4 gap-y-4 text-center text-sm text-gray-800 md:grid-cols-5 md:text-left">
-            {DESTINATIONS.map((destination) => (
+        {/* <nav aria-label="Footer" className="mt-8 md:mt-10">
+          <ul className="grid grid-cols-2 gap-x-4 gap-y-4 text-center text-sm text-gray-800 md:grid-cols-4 md:text-left">
+            {FOOTER_DESTINATIONS.map((destination) => (
               <li key={destination.href}>
                 <Link href={destination.href} className="hover:text-primary">
                   {destination.label}
@@ -152,7 +155,7 @@ export const Footer = () => {
               </li>
             ))}
           </ul>
-        </nav>
+        </nav> */}
 
         {/* Bottom: legal line, and the reader's location */}
         <div className="mt-8 flex flex-col gap-4 border-t border-gray-200 pt-6 text-sm text-gray-600 md:mt-10 md:flex-row md:items-center md:justify-between">

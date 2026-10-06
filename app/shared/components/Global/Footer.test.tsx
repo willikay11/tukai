@@ -55,13 +55,13 @@ describe('Footer', () => {
     expect(screen.getByText('Privacy policy')).toBeInTheDocument();
   });
 
-  it('links the five destinations', () => {
+  it('links the four destinations other than Discover', () => {
     render(<Footer />);
 
     const nav = screen.getByRole('navigation', { name: 'Footer' });
     const link = (name: string) => within(nav).getByRole('link', { name });
 
-    expect(link('Discover')).toHaveAttribute('href', '/');
+    expect(within(nav).queryByRole('link', { name: 'Discover' })).not.toBeInTheDocument();
     expect(link('Bucket lists')).toHaveAttribute('href', '/bucket-lists');
     expect(link('Communities')).toHaveAttribute('href', '/communities');
     expect(link('Plans')).toHaveAttribute('href', '/plans');

@@ -132,14 +132,14 @@ export default function RootLayout({
                                 in the gap between the logo and the actions:
                                 those two are different widths, so sharing the
                                 leftover space put the tabs off-centre. */}
-                                    <header className="relative flex items-center gap-4 py-3 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+                                    <header className="relative flex items-center gap-4 px-6 pb-[18px] pt-[30px] md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
                                       <Link href="/" className="flex-shrink-0">
                                         <Image
                                           src="/images/logo.svg"
                                           alt="Tukai logo"
-                                          width={100}
-                                          height={40}
-                                          className="h-10 w-[100px] shrink-0"
+                                          width={106}
+                                          height={35}
+                                          className="h-[30px] w-auto shrink-0"
                                         />
                                       </Link>
 
