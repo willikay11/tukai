@@ -15,19 +15,13 @@ import { ListPlaces } from '../list';
 jest.mock('@/context/LocationContext');
 jest.mock('@/context/SelectedCategoryContext');
 jest.mock('@/app/shared/hooks/usePlaces');
-jest.mock('../place', () => {
-  const MockComponent = React.forwardRef<HTMLDivElement, { place: Place }>(function MockSinglePlace(
-    { place },
-    ref,
-  ) {
-    return (
-      <div ref={ref} data-testid={`place-${place.id}`}>
-        {place.title}
-      </div>
-    );
-  });
-  return { SinglePlace: MockComponent };
-});
+jest.mock('@/app/(experiences)/components/PlaceCard', () => ({
+  PlaceCard: ({ place, className }: { place: Place; className?: string }) => (
+    <div data-testid={`place-${place.id}`} className={className}>
+      {place.title}
+    </div>
+  ),
+}));
 jest.mock('@/components/ui/noData', () => {
   function MockNoData({ message }: { message: string }) {
     return <div>{message}</div>;
@@ -161,9 +155,40 @@ describe('ListPlaces', () => {
   it('should render placeholders initially', () => {
     mockUsePlaces.mockReturnValue(createMockUsePlacesReturn([], 0, true));
 
+    const { container } = render(<ListPlaces />, { wrapper: createWrapper() });
+
+    expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0);
+  });
+
+  it('should show the Discover heading and the place count', async () => {
+    const mockPlaces = Array.from({ length: 12 }, (_, i) => createMockPlace(`place-${i}`));
+    mockUsePlaces.mockReturnValue(createMockUsePlacesReturn(mockPlaces, 30));
+
     render(<ListPlaces />, { wrapper: createWrapper() });
 
-    expect(screen.getAllByText('Loading...').length).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Discover places' })).toBeInTheDocument();
+      expect(screen.getByText('30 places')).toBeInTheDocument();
+    });
+  });
+
+  it('should use the singular for a count of one', async () => {
+    mockUsePlaces.mockReturnValue(createMockUsePlacesReturn([createMockPlace('only')], 1));
+
+    render(<ListPlaces />, { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(screen.getByText('1 place')).toBeInTheDocument();
+    });
+  });
+
+  it('should show the heading with no count while the first page loads', () => {
+    mockUsePlaces.mockReturnValue(createMockUsePlacesReturn([], 0, true));
+
+    render(<ListPlaces />, { wrapper: createWrapper() });
+
+    expect(screen.getByRole('heading', { name: 'Discover places' })).toBeInTheDocument();
+    expect(screen.queryByText(/^\d+ places?$/)).not.toBeInTheDocument();
   });
 
   it('should render places after loading', async () => {
@@ -249,9 +274,7 @@ describe('ListPlaces', () => {
     render(<ListPlaces />, { wrapper: createWrapper() });
 
     await waitFor(() => {
-      expect(
-        screen.getByText('No places listed yet. Try another category.'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('No places listed yet. Try another category.')).toBeInTheDocument();
     });
   });
 
@@ -266,10 +289,10 @@ describe('ListPlaces', () => {
 
     mockUsePlaces.mockReturnValue(createMockUsePlacesReturn([], 0, true));
 
-    render(<ListPlaces />, { wrapper: createWrapper() });
+    const { container } = render(<ListPlaces />, { wrapper: createWrapper() });
 
     // Verify placeholders are rendered
-    expect(screen.getAllByText('Loading...').length).toBe(12); // ITEMS_PER_PAGE constant
+    expect(container.querySelectorAll('.animate-pulse').length).toBe(12); // ITEMS_PER_PAGE constant
 
     // Verify that IntersectionObserver was never created (no ref attached to placeholders)
     expect(observeMock).not.toHaveBeenCalled();

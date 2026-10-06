@@ -11,6 +11,7 @@ import {
 } from '@/app/shared/components/Filters/CategoryChipRow';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
+import { cn } from '@/lib/utils';
 import { PlaceCategory } from '@/types/placeCategory';
 
 const ALL_CATEGORIES = 'all';
@@ -87,8 +88,21 @@ export const PageFilters = () => {
     router.replace(`${pathname}?${params.toString()}`, { scroll: true });
   };
 
+  // Sticks under the top bar. The bar is sticky only from md up, so on a phone
+  // the row sticks to the top of the screen. 143px is the desktop bar, worked
+  // out from its classes in app/layout.tsx: the header is 68px (12px padding,
+  // the 44px auth button, 12px padding) and the search row is 74px (the 54px
+  // search bar and its 20px bottom padding), plus the bar's 1px border. Change
+  // this if the bar changes.
+  const showRow = isFetching || chips.length > 1;
+
   return (
-    <div className="">
+    <div
+      className={cn(
+        showRow &&
+          'sticky top-0 z-40 border-b border-gray-100 bg-white pb-3 pt-4 md:top-[143px]',
+      )}
+    >
       <div className="col-span-12 gap-4 px-4 md:px-0">
         <div className="w-full">
           <div className="grid grid-cols-12 gap-4">

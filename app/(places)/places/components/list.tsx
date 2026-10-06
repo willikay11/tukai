@@ -4,17 +4,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 
-import { CARD_LIFT } from '@/app/shared/components/Motion';
-import { PlaceLink } from '@/app/shared/components/Places';
+import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
+import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { usePlaces } from '@/app/shared/hooks/usePlaces';
 import { NoData } from '@/components/ui/noData';
 import { useLocation } from '@/context/LocationContext';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { Status } from '@/enums/status';
-import { cn } from '@/lib/utils';
 import { Place } from '@/types/place';
-
-import { SinglePlace } from './place';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -51,6 +48,7 @@ export const ListPlaces = () => {
   const [page, setPage] = useState(1);
   const [placeList, setPlaceList] = useState<Place[]>(placeholders);
   const [endPage, setEndPage] = useState<number | null>(null);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const [isQueryEnabled, setIsQueryEnabled] = useState(true);
 
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -105,6 +103,7 @@ export const ListPlaces = () => {
     setPage(1);
     setPlaceList([]); // Clear list immediately
     setEndPage(null);
+    setTotalCount(null);
 
     // Re-enable query in next tick after state has settled
     const timeoutId = setTimeout(() => {
@@ -128,6 +127,10 @@ export const ListPlaces = () => {
 
     if (places.data.count) {
       setEndPage(Math.ceil(places.data.count / ITEMS_PER_PAGE));
+    }
+
+    if (typeof places.data.count === 'number') {
+      setTotalCount(places.data.count);
     }
   }, [places, page]);
 
@@ -173,49 +176,62 @@ export const ListPlaces = () => {
     return () => observerRef.current?.disconnect();
   }, []);
 
+  // PL-00: the count reads 'N places' only, with no city
+  const countLine =
+    totalCount === null ? undefined : `${totalCount} ${totalCount === 1 ? 'place' : 'places'}`;
+  const heading = <SectionHeader title="Discover places" subtitle={countLine} />;
+
   if (!isLoading && placeList.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, ease: 'easeInOut' }}
-      >
-        <NoData message="No places listed yet. Try another category." />
-      </motion.div>
+      <>
+        {heading}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+        >
+          <NoData message="No places listed yet. Try another category." />
+        </motion.div>
+      </>
     );
   }
 
   return (
-    <motion.div
-      key={selectedCategoryId}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-4 lg:grid-cols-4 2xl:grid-cols-6 3xl:grid-cols-6 4xl:grid-cols-6"
-    >
-      {placeList.map((place: Place, index: number) => {
-        const isLastElement = index === placeList.length - 1;
-        const isPlaceholder = place.id.startsWith('placeholder-');
-        const shouldAttachRef = isLastElement && !isLoading && !isPlaceholder && isQueryEnabled;
+    <>
+      {heading}
+      <motion.div
+        key={selectedCategoryId}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+        // Tracks are the rails' card width, with the rails' gap, so a tile here is the
+        // same size as the cards above it. Left-aligned like the rails.
+        className="grid grid-cols-[repeat(auto-fill,184px)] justify-start gap-x-4 gap-y-8"
+      >
+        {placeList.map((place: Place, index: number) => {
+          const isLastElement = index === placeList.length - 1;
+          const isPlaceholder = place.id.startsWith('placeholder-');
+          const shouldAttachRef = isLastElement && !isLoading && !isPlaceholder && isQueryEnabled;
 
-        return (
-          <motion.div
-            key={place.id}
-            ref={shouldAttachRef ? lastPlaceElementRef : undefined}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="cursor-pointer"
-          >
-            {/* `group` here rather than inside the card: the card's photo and
-                its title sit in separate wrappers, and both respond to a hover
-                anywhere on the card */}
-            <PlaceLink place={place} className={cn('group block', CARD_LIFT)}>
-              <SinglePlace place={place} />
-            </PlaceLink>
-          </motion.div>
-        );
-      })}
-    </motion.div>
+          return (
+            <motion.div
+              key={place.id}
+              ref={shouldAttachRef ? lastPlaceElementRef : undefined}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {isPlaceholder ? (
+                <div className="aspect-square animate-pulse rounded-xl bg-gray-200" />
+              ) : (
+                // The rails' card at the rails' width, so a tile here matches
+                // the rails above it
+                <PlaceCard place={place} />
+              )}
+            </motion.div>
+          );
+        })}
+      </motion.div>
+    </>
   );
 };

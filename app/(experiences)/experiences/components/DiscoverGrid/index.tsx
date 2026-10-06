@@ -2,16 +2,11 @@
 
 import { ReactNode, useRef } from 'react';
 
-import Link from 'next/link';
-
+import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
-import { SingleExperience } from '@/app/shared/components/Experiences/Single';
-import { CARD_LIFT } from '@/app/shared/components/Motion';
 import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
-import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
-import { experiencePath } from '@/utils/detail-paths';
 
 interface DiscoverGridProps {
   /** The page on screen. */
@@ -81,22 +76,17 @@ export const DiscoverGrid = ({
           <NoData message="No experiences in this category yet" />
         </div>
       ) : isLoading ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(168px,1fr))] gap-x-4 gap-y-[26px]">
+        <div className="grid grid-cols-[repeat(auto-fill,184px)] justify-start gap-x-4 gap-y-[26px]">
           {Array.from({ length: DISCOVER_GRID_PAGE_SIZE }).map((_, index) => (
             <div key={index} className="aspect-square animate-pulse rounded-xl bg-gray-200" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(168px,1fr))] gap-x-4 gap-y-[26px]">
+        <div className="grid grid-cols-[repeat(auto-fill,184px)] justify-start gap-x-4 gap-y-[26px]">
           {experiences.map((experience) => (
-            <Link
-              key={experience.id}
-              target="_blank"
-              href={experiencePath(experience)}
-              className={cn('group block min-w-0', CARD_LIFT)}
-            >
-              <SingleExperience type="discover" variant="row" experience={experience} />
-            </Link>
+            // The rails' card at the rails' width, so a tile here matches the
+            // rails above it
+            <ExperienceCard key={experience.id} experience={experience} />
           ))}
         </div>
       )}

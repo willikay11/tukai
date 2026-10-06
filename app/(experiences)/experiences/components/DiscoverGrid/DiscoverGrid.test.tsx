@@ -17,8 +17,10 @@ jest.mock('next/link', () => {
   MockLink.displayName = 'MockLink';
   return MockLink;
 });
-jest.mock('@/app/shared/components/Experiences/Single', () => ({
-  SingleExperience: ({ experience }: { experience: Experience }) => <span>{experience.title}</span>,
+jest.mock('@/app/(experiences)/components/ExperienceCard', () => ({
+  ExperienceCard: ({ experience }: { experience: Experience }) => (
+    <span data-testid="experience-card">{experience.title}</span>
+  ),
 }));
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: { iconName: string }) => <span data-testid={iconName} />,
@@ -59,6 +61,14 @@ describe('DiscoverGrid', () => {
 
     expect(screen.getByText('Lake walk')).toBeInTheDocument();
     expect(screen.getByText('Pottery class')).toBeInTheDocument();
+  });
+
+  it("lays the tiles out in the rails' 184px columns", () => {
+    render(<DiscoverGrid {...baseProps} />);
+
+    const cards = screen.getAllByTestId('experience-card');
+    expect(cards).toHaveLength(2);
+    expect(cards[0].parentElement).toHaveClass('grid-cols-[repeat(auto-fill,184px)]');
   });
 
   it('pages forward and back from the pager', () => {

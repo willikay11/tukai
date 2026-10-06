@@ -31,6 +31,7 @@ export const ExperienceCard = ({
   experience,
   priority = false,
   opensDrawer = true,
+  className,
 }: {
   experience: Experience;
   priority?: boolean;
@@ -39,6 +40,10 @@ export const ExperienceCard = ({
    * drawer keeps its link until drawers can open from inside drawers.
    */
   opensDrawer?: boolean;
+  /**
+   * Replaces the rail's fixed 184px width where the card sits in a grid cell.
+   */
+  className?: string;
 }) => {
   const { data: session } = useSession();
   const drawer = useExperienceDrawer();
@@ -69,7 +74,7 @@ export const ExperienceCard = ({
       priority={priority}
       ratio="square"
       radius="rounded-xl"
-      className="w-[184px] flex-shrink-0 snap-start"
+      className={cn('w-[184px] flex-shrink-0 snap-start', className)}
       overlay={
         <>
           {/* Top-right, over the photo */}

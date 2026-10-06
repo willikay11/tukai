@@ -4,14 +4,14 @@ const shimmer =
 export function PillSkeleton() {
   return (
     <div className={`${shimmer} relative`}>
-      <div className="mb-2 h-[2.5rem] w-24 rounded-[2.5rem] bg-gray-200" />
+      <div className="mb-0 h-[2.5rem] w-24 rounded-[2.5rem] bg-gray-200" />
     </div>
   );
 }
 
 export function PillsSkeleton() {
   return (
-    <div className="inline-flex h-[5rem] items-center gap-2">
+    <div className="inline-flex h-fit items-center gap-2">
       <PillSkeleton />
       <PillSkeleton />
       <PillSkeleton />
