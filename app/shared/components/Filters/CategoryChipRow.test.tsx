@@ -52,6 +52,25 @@ describe('CategoryChipRow', () => {
     expect(screen.getByRole('tab', { name: 'All' })).toHaveAttribute('aria-selected', 'false');
   });
 
+  it('draws the icon before the label of a chip that has one', () => {
+    render(
+      <CategoryChipRow
+        chips={[{ value: 'food', label: 'Food', icon: 'Restaurant01Icon' }]}
+        value="all"
+        onChange={jest.fn()}
+      />,
+    );
+
+    const chip = screen.getByRole('tab', { name: 'Food' });
+    expect(chip.querySelector('[data-testid="Restaurant01Icon"]')).toBeInTheDocument();
+  });
+
+  it('leaves the icon out of a chip without one', () => {
+    render(<CategoryChipRow chips={chips} value="all" onChange={jest.fn()} />);
+
+    expect(screen.getByRole('tab', { name: 'Food' }).querySelector('span[data-testid]')).toBeNull();
+  });
+
   it('reports the chip that was picked', () => {
     const onChange = jest.fn();
     render(<CategoryChipRow chips={chips} value="all" onChange={onChange} />);

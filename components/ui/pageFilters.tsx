@@ -31,7 +31,11 @@ const chipsFrom = (categories: PlaceCategory[]): CategoryChip[] => {
 
   return [
     { value: ALL_CATEGORIES, label: 'All' },
-    ...sorted.map((category) => ({ value: category.id, label: category.name })),
+    ...sorted.map((category) => ({
+      value: category.id,
+      label: category.name,
+      icon: category.icon || undefined,
+    })),
   ];
 };
 
@@ -99,8 +103,7 @@ export const PageFilters = () => {
   return (
     <div
       className={cn(
-        showRow &&
-          'sticky top-0 z-40 border-b border-gray-100 bg-white pb-3 pt-4 md:top-[143px]',
+        showRow && 'sticky top-0 z-40 border-b border-gray-100 bg-white pb-3 pt-4 md:top-[143px]',
       )}
     >
       <div className="col-span-12 gap-4 px-4 md:px-0">

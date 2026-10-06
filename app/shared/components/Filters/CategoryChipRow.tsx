@@ -9,6 +9,8 @@ import { cn } from '@/lib/utils';
 export interface CategoryChip {
   value: string;
   label: string;
+  /** A Hugeicons name. Outlined when the chip is off, filled when it is on. */
+  icon?: string;
 }
 
 /**
@@ -50,12 +52,22 @@ export const CategoryChipRow = ({
               aria-selected={isOn}
               onClick={() => onChange(chip.value)}
               className={cn(
-                'h-11 flex-shrink-0 whitespace-nowrap rounded-full px-4 text-[13.5px] transition-colors',
+                'flex h-11 flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 text-[13.5px] transition-colors',
+                chip.icon && 'pl-3.5 pr-[18px]',
                 isOn
                   ? 'bg-surface-brand font-semibold text-brand'
                   : 'bg-surface font-medium text-gray-900 hover:bg-surface-brand-hover',
               )}
             >
+              {chip.icon && (
+                <IconComponent
+                  iconName={chip.icon}
+                  variant={isOn ? 'solid' : 'twotone'}
+                  size={20}
+                  color="currentColor"
+                  className="flex-shrink-0"
+                />
+              )}
               {chip.label}
             </button>
           );
