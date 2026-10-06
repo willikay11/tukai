@@ -32,7 +32,7 @@ export const PlaceDrawerTabs = ({
           aria-selected={isActive}
           onClick={() => onSelect(tab.id)}
           className={cn(
-            'pr-4.5 inline-flex h-11 flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-full pl-3 text-[14.5px] font-medium transition duration-150 hover:brightness-[0.97] active:scale-[0.98]',
+            'inline-flex h-11 flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-full pl-3 pr-3 text-[14.5px] font-medium transition duration-150 hover:brightness-[0.97] active:scale-[0.98]',
             isActive ? 'bg-surface-pill-active text-brand' : 'bg-surface-pill text-ink-pill',
           )}
         >

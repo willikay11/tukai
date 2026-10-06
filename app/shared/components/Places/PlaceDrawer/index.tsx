@@ -20,7 +20,9 @@ import { Place } from '@/types/place';
 import { PlaceAvailabilityRule, PlaceReservationProfile } from '@/types/placeReservation';
 
 import { HappeningNow } from './HappeningNow';
+import { MyReservations } from './MyReservations';
 import { PlaceAboutSection } from './PlaceAboutSection';
+import { PlaceCommunity } from './PlaceCommunity';
 import { PlaceDrawerFooter } from './PlaceDrawerFooter';
 import { PlaceDrawerHeader } from './PlaceDrawerHeader';
 import { PlaceDrawerTabs } from './PlaceDrawerTabs';
@@ -90,7 +92,12 @@ export const PlaceDrawer = ({
   // A manager sees their own setup at the top, and the way into the settings
   const { isManager, owningCommunity } = usePlaceManager(isOpen && placeId ? placeId : '');
 
-  const { data: profilesResponse } = usePlaceReservationProfiles(placeId ?? '', isManager);
+  // Public to anyone, and a reader's own bookings hang off the profile, so it is
+  // read for every reader rather than only a manager
+  const { data: profilesResponse } = usePlaceReservationProfiles(
+    placeId ?? '',
+    isOpen && Boolean(placeId),
+  );
   const profiles: PlaceReservationProfile[] = profilesResponse?.data?.results ?? [];
   // A place may hold two (restaurant and cinema); the live one is the one a
   // manager is being told about
@@ -186,6 +193,10 @@ export const PlaceDrawer = ({
                     onReviewsClick={() => scrollTo(PLACE_SECTIONS.reviews)}
                   />
                 </section>
+
+                {/* Each renders nothing unless it has something to say */}
+                <MyReservations place={place} profile={profile} />
+                <PlaceCommunity communityId={ownership?.data?.community ?? ''} />
 
                 {hasExperiences && (
                   <section id={PLACE_SECTIONS.experiences} className="scroll-mt-[148px] py-6">

@@ -35,6 +35,12 @@ jest.mock('./PlaceReservationSettings', () => ({
 jest.mock('./PlaceAboutSection', () => ({
   PlaceAboutSection: () => <div data-testid="about" />,
 }));
+jest.mock('./MyReservations', () => ({
+  MyReservations: () => null,
+}));
+jest.mock('./PlaceCommunity', () => ({
+  PlaceCommunity: () => null,
+}));
 jest.mock('./UpcomingExperiences', () => ({
   UPCOMING_PAGE_SIZE: 50,
   UpcomingExperiences: ({ placeTitle }: { placeTitle: string }) => (

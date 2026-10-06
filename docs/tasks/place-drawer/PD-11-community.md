@@ -1,11 +1,11 @@
 # PD-11 Community
 
-- **Status:** decision
+- **Status:** built, awaiting review
 - **Type:** decision
 - **Depends on:** the owner's approval of [INVENTORY.md](INVENTORY.md)
 - **Design:** `Tukai Web.dc.html`, grep `pn.hasComms`
 - **Excerpt:** `docs/design/screens/place-panel.html`, section the Community block (lines 151 to 170)
-- **Now:** `app/shared/components/Places/PlaceDrawer/` (not built)
+- **Now:** `app/shared/components/Places/PlaceDrawer/PlaceCommunity.tsx`
 
 ## Inventory
 
@@ -20,9 +20,19 @@ with its status against what is built. Reviewed by the owner first.
 
 ## Done when
 
-- [ ] Owner decides which communities are listed
-- [ ] If built, rows link to the community and Join shows only when allowed
+- [x] Owner decides which communities are listed (owning community only, see Notes)
+- [x] If built, rows link to the community and Join shows only when allowed
 
 ## Notes
 
-Decision needed: the design lists every community that holds the place. `usePlaceManager` gives only the owning community. Decide whether to list all of them, or the owner only.
+Built in `PlaceCommunity.tsx`.
+
+- Owner only. The ownership record names one community, and the API has no
+  query for the communities that hold a place, so a list of several would need
+  a new endpoint. Revisit if the API gains one.
+- The hosted line reads "Hosted by {owner}", or "{n} members" when no owner is
+  in the response.
+- Join shows unless the reader is a member, or has a request waiting on a
+  private community. A signed-out reader sees Join and is sent to sign in first.
+- Join reuses `useJoinCommunity`, so the community's detail query refreshes and
+  the button drops away once the reader is in.
