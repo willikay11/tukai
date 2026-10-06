@@ -8,8 +8,10 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { MomentComposer } from '@/app/shared/components/Moments/MomentComposer';
 import { MomentDrawer } from '@/app/shared/components/Moments/MomentDrawer';
 import { MomentsMasonry } from '@/app/shared/components/Moments/MomentsMasonry';
+import { MomentsSquareGrid } from '@/app/shared/components/Moments/MomentsSquareGrid';
 import { useMoments } from '@/app/shared/hooks/useMoments';
 import { useAuthDialog } from '@/context/AuthDialogContext';
+import { cn } from '@/lib/utils';
 import { Moment } from '@/types/moment';
 
 /**
@@ -30,6 +32,7 @@ export const ContextMoments = ({
   placeLabel,
   communityId,
   communityLabel,
+  variant = 'default',
 }: {
   /** A heading over the section. Omitted where a tab already names it. */
   title?: string;
@@ -49,7 +52,15 @@ export const ContextMoments = ({
   placeLabel?: string;
   communityId?: string;
   communityLabel?: string;
+  /**
+   * 'panel' is the place drawer: a 19px heading, a 50px Share moment button
+   * with its icon, and a three-column grid of square cells. Everywhere else
+   * keeps the two-column masonry.
+   */
+  variant?: 'default' | 'panel';
 }) => {
+  const isPanel = variant === 'panel';
+
   const { status: sessionStatus } = useSession();
   const { setOpenSignIn } = useAuthDialog();
   const [isComposerOpen, setIsComposerOpen] = useState(false);
@@ -78,14 +89,29 @@ export const ContextMoments = ({
         if (onShare) onShare();
         else setIsComposerOpen(true);
       }}
-      className="inline-flex h-12 flex-shrink-0 items-center gap-2.5 rounded-full bg-lime px-6 text-[15px] font-bold text-brand-ink transition-colors hover:bg-lime-dark"
+      className={cn(
+        'inline-flex flex-shrink-0 items-center rounded-full bg-lime font-bold text-brand-ink transition-colors hover:bg-lime-dark',
+        isPanel
+          ? 'h-[50px] gap-2 pl-5 pr-6 text-[14.5px] font-semibold'
+          : 'h-12 gap-2.5 px-6 text-[15px]',
+      )}
     >
-      <IconComponent iconName="DashboardCircleAddIcon" size={20} color="currentColor" />
+      <IconComponent
+        iconName="DashboardCircleAddIcon"
+        size={isPanel ? 19 : 20}
+        color="currentColor"
+      />
       Share moment
     </button>
   );
 
-  const heading = title ? <h3 className="text-[22px] font-bold text-brand-ink">{title}</h3> : null;
+  const heading = title ? (
+    <h3
+      className={cn('font-bold', isPanel ? 'text-19 text-gray-800' : 'text-[22px] text-brand-ink')}
+    >
+      {title}
+    </h3>
+  ) : null;
 
   // The caller owns the form where it asked to, so there is no second one here
   const composer = onShare ? null : (
@@ -118,7 +144,7 @@ export const ContextMoments = ({
         {shareButton}
         {/* A line, not an illustrated empty card: the invitation above it is
             what the reader is meant to act on */}
-        <p className="text-[15px] text-ink-muted">{emptyMessage}</p>
+        <p className={cn(isPanel ? 'text-sm' : 'text-[15px]', 'text-ink-muted')}>{emptyMessage}</p>
         {composer}
       </div>
     );
@@ -128,14 +154,21 @@ export const ContextMoments = ({
     <div className="space-y-4">
       {heading}
       {shareButton}
-      <MomentsMasonry
-        moments={moments}
-        onSelect={(id) => setOpenMoment(moments.find((moment) => moment.id === id) ?? null)}
-        onLoadMore={() => {}}
-        hasMore={false}
-        isLoadingMore={false}
-        columnsClassName="columns-2 gap-3"
-      />
+      {isPanel ? (
+        <MomentsSquareGrid
+          moments={moments}
+          onSelect={(id) => setOpenMoment(moments.find((moment) => moment.id === id) ?? null)}
+        />
+      ) : (
+        <MomentsMasonry
+          moments={moments}
+          onSelect={(id) => setOpenMoment(moments.find((moment) => moment.id === id) ?? null)}
+          onLoadMore={() => {}}
+          hasMore={false}
+          isLoadingMore={false}
+          columnsClassName="columns-2 gap-3"
+        />
+      )}
       <MomentDrawer moment={openMoment} onClose={() => setOpenMoment(null)} />
       {composer}
     </div>

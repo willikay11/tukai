@@ -14,9 +14,11 @@ import { Review as ReviewType } from '@/types/review';
 
 type placeReviewsProps = {
   placeId: string;
+  /** 'panel' is the place drawer's list: full-bleed rows and its own empty line. */
+  variant?: 'default' | 'panel';
 };
 
-export const Reviews = ({ placeId }: placeReviewsProps) => {
+export const Reviews = ({ placeId, variant = 'default' }: placeReviewsProps) => {
   const { data: reviews, isLoading } = usePlaceReviews(placeId);
   const { mutate: likeReview } = useLikePlaceReview();
   const { mutate: deleteReview, isPending: isDeletingReview } = useDeletePlaceReview();
@@ -32,6 +34,13 @@ export const Reviews = ({ placeId }: placeReviewsProps) => {
     useDeletePlaceReviewImage();
 
   if (reviews?.data?.results?.length === 0 && !isLoading) {
+    if (variant === 'panel') {
+      return (
+        <p className="text-sm leading-normal text-ink-muted">
+          No reviews yet. If you have been, yours would be the first.
+        </p>
+      );
+    }
     return (
       <div className="my-2 w-full items-center justify-center">
         <NoData message="No reviews" />
@@ -43,6 +52,7 @@ export const Reviews = ({ placeId }: placeReviewsProps) => {
     <Review
       key={review.id}
       id={placeId}
+      variant={variant}
       review={review}
       likeReview={() => {
         likeReview({ placeId, reviewId: review.id });

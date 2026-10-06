@@ -5,6 +5,7 @@ export { MomentCardSkeleton } from './MomentCardSkeleton';
 export { MomentDetail } from './MomentDetail';
 export { MomentDrawer } from './MomentDrawer';
 export { MomentsMasonry } from './MomentsMasonry';
+export { MomentsSquareGrid } from './MomentsSquareGrid';
 export { MomentComposer } from './MomentComposer';
 export { MomentComposerForm } from './MomentComposerForm';
 export { MomentComposerTrigger } from './MomentComposerTrigger';
