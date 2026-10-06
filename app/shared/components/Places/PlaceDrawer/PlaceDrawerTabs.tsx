@@ -18,7 +18,9 @@ export const PlaceDrawerTabs = ({
   activeId: string;
   onSelect: (id: string) => void;
 }) => (
-  <div className="flex gap-2 overflow-x-auto scrollbar-hide" role="tablist">
+  // The -mx-6 / px-6 pair runs the row to the drawer's edges, so a scrolled-to-end
+  // last pill keeps the 24px gutter instead of stopping at the content edge
+  <div className="-mx-6 flex gap-2 overflow-x-auto px-6 scrollbar-hide" role="tablist">
     {tabs.map((tab) => {
       const isActive = activeId === tab.id;
 

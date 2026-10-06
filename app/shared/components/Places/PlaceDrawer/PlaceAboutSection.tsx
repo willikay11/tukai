@@ -61,12 +61,6 @@ export const PlaceAboutSection = ({
                 {`${distanceKm} km`}
               </>
             )}
-            <IconComponent
-              iconName="ArrowUpRight01Icon"
-              size={17}
-              color="currentColor"
-              className="ml-1.5 text-brand"
-            />
           </OpenInMapsLink>
         )}
 

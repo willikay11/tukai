@@ -15,9 +15,11 @@ import {
 } from '@/app/shared/hooks/usePlaces';
 import { useScrollSpy } from '@/app/shared/hooks/useScrollSpy';
 import { Drawer } from '@/components/ui/drawer';
+import { Experience } from '@/types/experience';
 import { Place } from '@/types/place';
 import { PlaceAvailabilityRule, PlaceReservationProfile } from '@/types/placeReservation';
 
+import { HappeningNow } from './HappeningNow';
 import { PlaceAboutSection } from './PlaceAboutSection';
 import { PlaceDrawerFooter } from './PlaceDrawerFooter';
 import { PlaceDrawerHeader } from './PlaceDrawerHeader';
@@ -108,7 +110,8 @@ export const PlaceDrawer = ({
     { page: 1, page_size: UPCOMING_PAGE_SIZE, place: placeId ?? '', status: 'published' },
     isOpen && Boolean(placeId),
   );
-  const hasExperiences = (experiencesResponse?.data?.results ?? []).length > 0;
+  const experiences: Experience[] = experiencesResponse?.data?.results ?? [];
+  const hasExperiences = experiences.length > 0;
 
   const tabs = useMemo(
     () => placeDrawerTabs(place?.totalReviews ?? null, hasExperiences),
@@ -186,6 +189,7 @@ export const PlaceDrawer = ({
 
                 {hasExperiences && (
                   <section id={PLACE_SECTIONS.experiences} className="scroll-mt-[148px] py-6">
+                    <HappeningNow experiences={experiences} placeTitle={place.title} />
                     <UpcomingExperiences placeId={place.id} placeTitle={place.title} />
                   </section>
                 )}

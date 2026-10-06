@@ -1,6 +1,6 @@
 # PD-08 Happening now
 
-- **Status:** awaiting approval
+- **Status:** built, awaiting review
 - **Type:** content
 - **Depends on:** the owner's approval of [INVENTORY.md](INVENTORY.md)
 - **Design:** `Tukai Web.dc.html`, grep `pn.hasToday`
@@ -22,10 +22,16 @@ with its status against what is built. Reviewed by the owner first.
 
 ## Done when
 
-- [ ] Happening now shows experiences on at the place right now, using the same request as Upcoming
-- [ ] Section is hidden when nothing is on
-- [ ] Card, row and pager match the design
+- [x] Happening now shows experiences on at the place right now, using the same request as Upcoming
+- [x] Section is hidden when nothing is on
+- [ ] Card, row and pager match the design (layout and type match; colours use the nearest tokens, see Notes)
 
 ## Notes
 
 Ongoing means start time passed and end time not yet. Check the experience fields for both before building.
+
+Built as: `HappeningNow.tsx`, `HappeningNowCard.tsx`, `happening-now.ts` (in `PlaceDrawer/`), reading the drawer's existing experiences request.
+
+- Recurring experiences are never shown as on now. Their `startDate` and `endDate` describe the whole series, so they cannot say whether today's run is on. Showing them needs the occurrence times (slot templates), which is a follow-up.
+- The heading is not a button yet. The excerpt does not say where the arrow leads.
+- The card border (#ECEEF1) and background (#F9FAFB) have no exact token, so they use `border-line-soft` and `bg-surface`.
