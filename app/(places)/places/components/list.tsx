@@ -180,7 +180,7 @@ export const ListPlaces = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, ease: 'easeInOut' }}
       >
-        <NoData message="No places found" />
+        <NoData message="No places listed yet. Try another category." />
       </motion.div>
     );
   }

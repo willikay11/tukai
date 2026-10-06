@@ -1,6 +1,6 @@
 # PL-10 Empty state
 
-- **Status:** awaiting approval
+- **Status:** built, pending owner review
 - **Type:** build
 - **Depends on:** PL-00
 - **Design:** `docs/design/screens/places-listing.html`, `pcEmptyLine` ('No {noun} listed in {city} yet. Pick another city above.').
@@ -10,11 +10,11 @@
 
 | Item | Design | Ours |
 |---|---|---|
-| Empty copy | Names the city and 'Pick another city above' | Generic |
+| Empty copy | Names the city and 'Pick another city above' | Generic, now 'No places listed yet. Try another category.' |
 
 ## Done when
 
-- [ ] Copy per PL-00, with no city
+- [x] Copy per PL-00, with no city
 
 ## Notes
 

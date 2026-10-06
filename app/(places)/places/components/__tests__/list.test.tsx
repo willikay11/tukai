@@ -249,7 +249,9 @@ describe('ListPlaces', () => {
     render(<ListPlaces />, { wrapper: createWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByText('No places found')).toBeInTheDocument();
+      expect(
+        screen.getByText('No places listed yet. Try another category.'),
+      ).toBeInTheDocument();
     });
   });
 
