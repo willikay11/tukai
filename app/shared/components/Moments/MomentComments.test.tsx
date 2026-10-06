@@ -132,24 +132,36 @@ describe('MomentComments', () => {
   });
 });
 
-// Matches the design: an avatar, a placeholder and a send icon in one pill
+// Matches the design: the avatar sits beside a grey pill, with a Post label after it
 describe('comment bar', () => {
   it('shows the signed-in user avatar beside the input', () => {
     render(<MomentComments momentId="m1" />);
 
     expect(screen.getByLabelText('Leave a comment')).toHaveAttribute(
       'placeholder',
-      'Leave a comment...',
+      'Add a comment',
     );
     // No picture on the session, so the avatar falls back to the initial
     expect(screen.getByText('G')).toBeInTheDocument();
   });
 
-  it('sends with an icon button rather than a Post label', () => {
+  it('sends with a Post label', () => {
     render(<MomentComments momentId="m1" />);
 
-    expect(screen.getByRole('button', { name: 'Post comment' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Post' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Post comment' })).toHaveTextContent('Post');
+  });
+
+  it('heads the list with the comment count', () => {
+    setComments([makeComment(), makeComment({ id: 'c2', content: 'Second' })]);
+    render(<MomentComments momentId="m1" totalComments={3} />);
+
+    expect(screen.getByRole('heading', { name: '3 comments' })).toBeInTheDocument();
+  });
+
+  it('uses the singular for one comment', () => {
+    render(<MomentComments momentId="m1" totalComments={1} />);
+
+    expect(screen.getByRole('heading', { name: '1 comment' })).toBeInTheDocument();
   });
 });
 

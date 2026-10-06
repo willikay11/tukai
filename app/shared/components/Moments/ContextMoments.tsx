@@ -130,7 +130,6 @@ export const ContextMoments = ({
       {shareButton}
       <MomentsMasonry
         moments={moments}
-        selectedId={openMoment?.id ?? null}
         onSelect={(id) => setOpenMoment(moments.find((moment) => moment.id === id) ?? null)}
         onLoadMore={() => {}}
         hasMore={false}

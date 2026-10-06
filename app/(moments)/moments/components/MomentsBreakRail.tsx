@@ -8,6 +8,8 @@ import { Place } from '@/types/place';
 import { PlaceCategory } from '@/types/placeCategory';
 import { greatCircleKm } from '@/utils/geo-utils';
 
+import { RailPlaceCardSkeleton } from './RailPlaceCardSkeleton';
+
 /** A place with no coordinates sorts after every place that has some. */
 const UNKNOWN_DISTANCE = Number.MAX_SAFE_INTEGER;
 
@@ -56,12 +58,7 @@ export const MomentsBreakRail = ({ category }: { category: PlaceCategory }) => {
     <div className="my-8">
       <CardRail title={category.name}>
         {isLoading
-          ? Array.from({ length: 4 }, (_, index) => (
-              <div
-                key={index}
-                className="h-[96px] w-[280px] flex-shrink-0 animate-pulse rounded-xl bg-gray-200"
-              />
-            ))
+          ? Array.from({ length: 4 }, (_, index) => <RailPlaceCardSkeleton key={index} />)
           : places.map(({ place, km }) => (
               <div key={place.id} className="w-[280px] flex-shrink-0 snap-start">
                 <NearbyPlaceCard place={place} distanceKm={km} />

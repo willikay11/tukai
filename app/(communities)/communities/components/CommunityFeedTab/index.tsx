@@ -286,7 +286,6 @@ export const CommunityFeedTab = ({
             ) : (
               <MomentsMasonry
                 moments={moments}
-                selectedId={null}
                 // The masonry opens a pane on the moments page; here a tile is
                 // a link into it, deep-linked to the one that was pressed
                 onSelect={(id) => router.push(`/moments?momentId=${id}`)}

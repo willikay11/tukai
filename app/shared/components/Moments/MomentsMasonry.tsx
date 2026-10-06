@@ -9,7 +9,6 @@ import { MomentCard } from './MomentCard';
 
 interface MomentsMasonryProps {
   moments: Moment[];
-  selectedId: string | null;
   onSelect: (id: string) => void;
   // Paging is optional. Without onLoadMore there is no sentinel, so the caller
   // pages itself (the Moments feed uses a Show more button)
@@ -34,7 +33,6 @@ const EAGER_TILES = 6;
 
 export const MomentsMasonry = ({
   moments,
-  selectedId,
   onSelect,
   onLoadMore,
   hasMore = false,
@@ -84,12 +82,7 @@ export const MomentsMasonry = ({
               // not measure a `button` correctly as a multi-column child, which
               // left iOS Safari piling the tiles into the first column and leaving
               // the rest of the row blank.
-              <div
-                key={moment.id}
-                className={`mb-4 break-inside-avoid rounded-2xl ${
-                  moment.id === selectedId ? 'ring-2 ring-primary' : ''
-                }`}
-              >
+              <div key={moment.id} className="mb-4 break-inside-avoid rounded-2xl">
                 <MomentCard
                   moment={moment}
                   onClick={() => onSelect(moment.id)}
@@ -113,9 +106,7 @@ export const MomentsMasonry = ({
                 // animation: `animate-in fade-in` starts the tile at opacity 0,
                 // so anywhere the animation does not run the photo never
                 // appears at all - which is the other half of what broke here.
-                className={`block w-full overflow-hidden rounded-2xl transition duration-300 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
-                  moment.id === selectedId ? 'ring-2 ring-primary' : ''
-                }`}
+                className="block w-full overflow-hidden rounded-2xl transition duration-300 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0"
               >
                 <PhotoImage
                   src={media.photo}

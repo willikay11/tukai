@@ -40,7 +40,6 @@ const makeMoment = (id: string, width: number, height: number): Moment =>
   }) as unknown as Moment;
 
 const defaults = {
-  selectedId: null,
   onSelect: jest.fn(),
   onLoadMore: jest.fn(),
   hasMore: false,
@@ -73,20 +72,6 @@ describe('MomentsMasonry', () => {
     const image = screen.getByAltText('Moment c');
     expect(image).toHaveAttribute('width', '400');
     expect(image).toHaveAttribute('height', '400');
-  });
-
-  it('rings the selected tile only', () => {
-    render(
-      <MomentsMasonry
-        {...defaults}
-        selectedId="a"
-        moments={[makeMoment('a', 800, 800), makeMoment('b', 800, 800)]}
-      />,
-    );
-
-    const buttons = screen.getAllByRole('button');
-    expect(buttons[0].className).toContain('ring-primary');
-    expect(buttons[1].className).not.toContain('ring-primary');
   });
 
   it('reports the clicked moment id', () => {
@@ -238,22 +223,6 @@ describe('card tile', () => {
     expect(screen.getByAltText('Moment a')).toHaveAttribute('src', 'https://cdn.tukai.co/a.jpg');
     expect(screen.getByText('Caption a')).toBeInTheDocument();
     expect(screen.getByText('Caption b')).toBeInTheDocument();
-  });
-
-  it('rings the selected card on its column item', () => {
-    render(
-      <MomentsMasonry
-        {...defaults}
-        tile="card"
-        selectedId="a"
-        moments={[cardMoment('a'), cardMoment('b')]}
-      />,
-    );
-
-    const tileA = screen.getByAltText('Moment a').closest('.break-inside-avoid');
-    const tileB = screen.getByAltText('Moment b').closest('.break-inside-avoid');
-    expect(tileA).toHaveClass('ring-primary');
-    expect(tileB).not.toHaveClass('ring-primary');
   });
 
   it('reports the clicked moment id', () => {

@@ -121,7 +121,14 @@ const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: s
   );
 };
 
-export const MomentComments = ({ momentId }: { momentId: string }) => {
+export const MomentComments = ({
+  momentId,
+  totalComments,
+}: {
+  momentId: string;
+  /** The moment's own count, so the heading holds before the list has loaded */
+  totalComments?: number;
+}) => {
   const { data: session } = useSession();
   const isSignedIn = Boolean(session?.user?.id);
   const { openSignInWithCallback } = useAuthDialog();
@@ -152,8 +159,14 @@ export const MomentComments = ({ momentId }: { momentId: string }) => {
     });
   };
 
+  const count = totalComments ?? comments.length;
+
   return (
-    <div className="mt-6">
+    <div className="mt-6 flex flex-1 flex-col gap-4 border-t border-gray-100 pt-4">
+      <h3 className="text-base font-bold text-gray-900">
+        {count === 1 ? '1 comment' : `${count} comments`}
+      </h3>
+
       {isLoading ? (
         <div className="space-y-4">
           {Array.from({ length: 2 }).map((_, index) => (
@@ -187,7 +200,9 @@ export const MomentComments = ({ momentId }: { momentId: string }) => {
         </div>
       )}
 
-      <div className="mt-4 border-t border-gray-100 pt-4">
+      {/* At the foot of the drawer when the comments are short, and stuck there
+          while they scroll past */}
+      <div className="sticky bottom-0 z-10 -mx-4 mt-auto border-t border-gray-100 bg-white px-4 pb-4 pt-3">
         {!isSignedIn ? (
           // No field at all rather than one that bounces on submit: a comment
           // box a reader cannot post from is an invitation to type something
@@ -202,28 +217,29 @@ export const MomentComments = ({ momentId }: { momentId: string }) => {
             </Button>
           </div>
         ) : (
-          <Input
-            shape="pill"
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            onKeyDown={(event) => event.key === 'Enter' && submit()}
-            placeholder="Leave a comment..."
-            aria-label="Leave a comment"
-            // Tighter than the standard 13px/16px: a 40px avatar sits inside
-            containerClassName="gap-3 bg-white py-2 pl-2 pr-4 shadow-sm"
-            icon={<MomentAvatar src={currentUserImage} name={currentUserName} size={40} />}
-            suffixIcon={
-              <button
-                type="button"
-                onClick={submit}
-                disabled={!draft.trim() || isPosting}
-                aria-label="Post comment"
-                className="flex-shrink-0 text-primary transition-opacity disabled:opacity-40"
-              >
-                <IconComponent iconName="Sent02Icon" size={24} color="currentColor" />
-              </button>
-            }
-          />
+          <div className="flex items-center gap-3">
+            <MomentAvatar src={currentUserImage} name={currentUserName} size={40} />
+
+            <Input
+              shape="pill"
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={(event) => event.key === 'Enter' && submit()}
+              placeholder="Add a comment"
+              aria-label="Leave a comment"
+              containerClassName="flex-1 border-transparent bg-gray-100 py-2.5 focus-within:border-transparent"
+            />
+
+            <button
+              type="button"
+              onClick={submit}
+              disabled={!draft.trim() || isPosting}
+              aria-label="Post comment"
+              className="flex-shrink-0 text-sm font-semibold text-primary transition-opacity disabled:opacity-40"
+            >
+              Post
+            </button>
+          </div>
         )}
       </div>
     </div>

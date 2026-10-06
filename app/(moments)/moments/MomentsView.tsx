@@ -5,7 +5,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 import { PageContainer } from '@/app/shared/components/Layout';
-import { MomentDrawer, MomentsMasonry } from '@/app/shared/components/Moments';
+import { MomentCardSkeleton, MomentDrawer, MomentsMasonry } from '@/app/shared/components/Moments';
 import { useInfiniteMoments } from '@/app/shared/hooks/useMoments';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { Moment, momentPhotos } from '@/types/moment';
@@ -15,14 +15,14 @@ import { MomentsBreakRail } from './components/MomentsBreakRail';
 import { MomentsShowMore } from './components/MomentsShowMore';
 import { FEED_MIX_DEFAULT, FeedMix, splitIntoRuns } from './feed-mix';
 
+// The same grid as the feed, with the cards' own shape, so the page does not
+// reflow when the moments arrive
 const MasonrySkeleton = () => (
   <div className="columns-2 gap-4 md:columns-3 lg:columns-5">
-    {[220, 300, 180, 260, 200, 320].map((height, index) => (
-      <div
-        key={index}
-        style={{ height }}
-        className="mb-4 w-full animate-pulse break-inside-avoid rounded-2xl bg-gray-200"
-      />
+    {Array.from({ length: 10 }, (_, index) => (
+      <div key={index} className="mb-4 break-inside-avoid">
+        <MomentCardSkeleton />
+      </div>
     ))}
   </div>
 );
@@ -100,7 +100,6 @@ export const MomentsView = ({ feedMix = FEED_MIX_DEFAULT }: MomentsViewProps) =>
                   startIndex={startIndex}
                   tile="card"
                   columnsClassName="columns-2 gap-4 md:columns-3 lg:columns-5"
-                  selectedId={openMoment?.id ?? null}
                   onSelect={(id) => setOpenMoment(moments.find((item) => item.id === id) ?? null)}
                 />
                 {!isLast && interestCategories[runIndex] && (

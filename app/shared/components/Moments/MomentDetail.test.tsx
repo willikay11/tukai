@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react';
+import moment from 'moment';
 
 import { Moment } from '@/types/moment';
 
@@ -24,9 +25,6 @@ jest.mock('@/app/shared/hooks/useMoments', () => ({
 }));
 jest.mock('./MomentComments', () => ({
   MomentComments: ({ momentId }: { momentId: string }) => <div>comments for {momentId}</div>,
-}));
-jest.mock('@/app/shared/components/Images/SquarePhotoStrip', () => ({
-  SquarePhotoStrip: ({ photos }: { photos: string[] }) => <div>strip:{photos.length}</div>,
 }));
 jest.mock('next/image', () => {
   function MockImage({ alt, src }: Record<string, unknown>) {
@@ -60,12 +58,13 @@ const makeMoment = (overrides: Partial<Moment> = {}): Moment =>
   }) as unknown as Moment;
 
 describe('MomentDetail', () => {
-  it('shows author, relative time and the context label', () => {
-    render(<MomentDetail moment={makeMoment()} />);
+  it('shows author, the posting date and the context label', () => {
+    const item = makeMoment();
+    render(<MomentDetail moment={item} />);
 
     expect(screen.getByText('Asha Mwangi')).toBeInTheDocument();
-    // The context is its own node now, with an icon between it and the time
-    expect(screen.getByText('2 days ago')).toBeInTheDocument();
+    // Absolute, as the drawer shows it: "26 Sep", not "2 days ago"
+    expect(screen.getByText(moment(item.dateCreated).format('D MMM'))).toBeInTheDocument();
     expect(screen.getByText('Trails And Us')).toBeInTheDocument();
   });
 
@@ -87,9 +86,9 @@ describe('MomentDetail', () => {
     expect(screen.getByText(/Mara Trip/)).toBeInTheDocument();
   });
 
-  it('renders a single photo directly and multiple as a strip', () => {
+  it('shows every photo in the carousel, even a single one', () => {
     const { rerender } = render(<MomentDetail moment={makeMoment()} />);
-    expect(screen.getByAltText('Sunrise on the Mara')).toBeInTheDocument();
+    expect(screen.getByAltText('Sunrise on the Mara photo 1')).toBeInTheDocument();
 
     rerender(
       <MomentDetail
@@ -101,7 +100,8 @@ describe('MomentDetail', () => {
         })}
       />,
     );
-    expect(screen.getByText('strip:2')).toBeInTheDocument();
+    expect(screen.getByAltText('Sunrise on the Mara photo 1')).toBeInTheDocument();
+    expect(screen.getByAltText('Sunrise on the Mara photo 2')).toBeInTheDocument();
   });
 
   // Regression: media with photo: null (a video, or an upload still
@@ -118,8 +118,8 @@ describe('MomentDetail', () => {
       />,
     );
 
-    // One renderable photo left, so it takes the single-image path
-    expect(screen.getByAltText('Sunrise on the Mara')).toHaveAttribute(
+    // One renderable photo left, so the carousel holds just that one
+    expect(screen.getByAltText('Sunrise on the Mara photo 1')).toHaveAttribute(
       'src',
       'https://cdn.tukai.co/real.jpg',
     );
@@ -134,7 +134,7 @@ describe('MomentDetail', () => {
       />,
     );
 
-    expect(screen.queryByAltText('Sunrise on the Mara')).not.toBeInTheDocument();
+    expect(screen.queryByAltText(/Sunrise on the Mara photo/)).not.toBeInTheDocument();
     expect(screen.getByText('Worth the 4am start.')).toBeInTheDocument();
   });
 
@@ -145,19 +145,11 @@ describe('MomentDetail', () => {
     expect(screen.getByText('3')).toBeInTheDocument();
   });
 
-  // No follow endpoint exists on the API
-  it('renders Follow disabled', () => {
+  // The drawer has no Follow control: the API has no follow endpoint yet
+  it('has no Follow control', () => {
     render(<MomentDetail moment={makeMoment()} />);
 
-    expect(screen.getByRole('button', { name: 'Follow' })).toBeDisabled();
-  });
-
-  it('hides Follow on the current user own moment', () => {
-    const item = makeMoment();
-    item.author.id = 'me';
-    render(<MomentDetail moment={item} />);
-
-    expect(screen.queryByRole('button', { name: 'Follow' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Follow/ })).not.toBeInTheDocument();
   });
 });
 

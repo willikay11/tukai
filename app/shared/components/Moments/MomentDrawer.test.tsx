@@ -46,6 +46,15 @@ describe('MomentDrawer', () => {
     expect(screen.queryByTestId('drawer')).not.toBeInTheDocument();
   });
 
+  it('closes from the header close control', () => {
+    const onClose = jest.fn();
+    render(<MomentDrawer moment={moment} onClose={onClose} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('calls onClose when the drawer is dismissed', () => {
     const onClose = jest.fn();
     render(<MomentDrawer moment={moment} onClose={onClose} />);
