@@ -10,7 +10,7 @@ The new design has no footer. The current app has one, on every page. These task
 | FT-03 | Footer links to the five destinations and Help | build | done | FT-00 |
 | FT-04 | Confirm the contact details and social links | decision | done | FT-00 |
 | FT-05 | Footer clears the bottom navigation on phones | verify | todo | FT-02 |
-| FT-06 | Footer copy follows the house style | build | approved | FT-00 |
+| FT-06 | Footer copy follows the house style | build | done | FT-00 |
 | FT-07 | App download links in the footer | decision | awaiting approval | FT-00 |
 | FT-08 | Footer design, once it exists | blocked | blocked | none |
 
