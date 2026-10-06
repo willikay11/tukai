@@ -13,7 +13,7 @@ Source: `docs/design/screens/moments-listing.html`.
 | MO-04 | Album card | build | awaiting approval | MO-03 |
 | MO-05 | Empty state | build | built, pending owner review | none |
 | MO-06 | Paging: View more, not infinite scroll | decision | built, pending owner review | none |
-| MO-07 | Open a moment | build | deferred | none |
+| MO-07 | Open a moment | build | built, pending owner review | none |
 | MO-08 | Place cards inside the break rails | blocked | blocked | MO-02 |
 
 Run in order: MO-00 first.

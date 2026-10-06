@@ -1,24 +1,22 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useSearchParams } from 'next/navigation';
 
 import { PageContainer } from '@/app/shared/components/Layout';
-import { MomentsMasonry } from '@/app/shared/components/Moments';
+import { MomentDrawer, MomentsMasonry } from '@/app/shared/components/Moments';
 import { useInfiniteMoments } from '@/app/shared/hooks/useMoments';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
-import { Drawer } from '@/components/ui/drawer';
 import { Moment, momentPhotos } from '@/types/moment';
 import { PlaceCategory } from '@/types/placeCategory';
 
-import { MomentDetail } from './components/MomentDetail';
 import { MomentsBreakRail } from './components/MomentsBreakRail';
 import { MomentsShowMore } from './components/MomentsShowMore';
 import { FEED_MIX_DEFAULT, FeedMix, splitIntoRuns } from './feed-mix';
 
 const MasonrySkeleton = () => (
-  <div className="columns-2 gap-4 md:columns-3">
+  <div className="columns-2 gap-4 md:columns-3 lg:columns-5">
     {[220, 300, 180, 260, 200, 320].map((height, index) => (
       <div
         key={index}
@@ -29,22 +27,6 @@ const MasonrySkeleton = () => (
   </div>
 );
 
-// The detail pane is only rendered from lg up; below that a tap opens a sheet
-const useIsDesktop = () => {
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const media = window.matchMedia('(min-width: 1024px)');
-    const update = () => setIsDesktop(media.matches);
-
-    update();
-    media.addEventListener('change', update);
-    return () => media.removeEventListener('change', update);
-  }, []);
-
-  return isDesktop;
-};
-
 interface MomentsViewProps {
   feedMix?: FeedMix;
 }
@@ -54,9 +36,8 @@ export const MomentsView = ({ feedMix = FEED_MIX_DEFAULT }: MomentsViewProps) =>
   const deepLinkedId = searchParams.get('momentId');
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteMoments();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const isDesktop = useIsDesktop();
+  const [openMoment, setOpenMoment] = useState<Moment | null>(null);
+  const hasOpenedDeepLink = useRef(false);
   const { data: categoriesResponse } = usePlaceCategories({ pageSize: 100 }, true);
 
   // Each break rail takes the next interest category in the API's order
@@ -79,22 +60,16 @@ export const MomentsView = ({ feedMix = FEED_MIX_DEFAULT }: MomentsViewProps) =>
     [data],
   );
 
-  // Preselect the deep-linked moment when it arrives, otherwise the first one
+  // A shared link opens its moment in the drawer once it has loaded
   useEffect(() => {
-    if (selectedId || moments.length === 0) return;
+    if (hasOpenedDeepLink.current || !deepLinkedId) return;
 
-    const deepLinked = deepLinkedId && moments.find((item) => item.id === deepLinkedId);
-    setSelectedId(deepLinked ? deepLinked.id : moments[0].id);
-  }, [moments, deepLinkedId, selectedId]);
+    const deepLinked = moments.find((item) => item.id === deepLinkedId);
+    if (!deepLinked) return;
 
-  const selectedMoment = moments.find((item) => item.id === selectedId) ?? null;
-
-  const onSelect = (id: string) => {
-    setSelectedId(id);
-    // On desktop the sticky pane already shows it; below lg there is no pane,
-    // so the moment opens in a sheet instead
-    if (!isDesktop) setIsSheetOpen(true);
-  };
+    hasOpenedDeepLink.current = true;
+    setOpenMoment(deepLinked);
+  }, [moments, deepLinkedId]);
 
   return (
     <PageContainer className="py-6">
@@ -111,57 +86,39 @@ export const MomentsView = ({ feedMix = FEED_MIX_DEFAULT }: MomentsViewProps) =>
           No moments yet. Yours could be the first.
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-          <div className="lg:col-span-8">
-            {splitIntoRuns(moments, feedMix).map((run, runIndex, runs) => {
-              const isLast = runIndex === runs.length - 1;
-              const startIndex = runs
-                .slice(0, runIndex)
-                .reduce((total, earlier) => total + earlier.length, 0);
+        <>
+          {splitIntoRuns(moments, feedMix).map((run, runIndex, runs) => {
+            const isLast = runIndex === runs.length - 1;
+            const startIndex = runs
+              .slice(0, runIndex)
+              .reduce((total, earlier) => total + earlier.length, 0);
 
-              return (
-                <Fragment key={runIndex}>
-                  <MomentsMasonry
-                    moments={run}
-                    startIndex={startIndex}
-                    tile="card"
-                    selectedId={selectedId}
-                    onSelect={onSelect}
-                  />
-                  {!isLast && interestCategories[runIndex] && (
-                    <MomentsBreakRail category={interestCategories[runIndex]} />
-                  )}
-                </Fragment>
-              );
-            })}
+            return (
+              <Fragment key={runIndex}>
+                <MomentsMasonry
+                  moments={run}
+                  startIndex={startIndex}
+                  tile="card"
+                  columnsClassName="columns-2 gap-4 md:columns-3 lg:columns-5"
+                  selectedId={openMoment?.id ?? null}
+                  onSelect={(id) => setOpenMoment(moments.find((item) => item.id === id) ?? null)}
+                />
+                {!isLast && interestCategories[runIndex] && (
+                  <MomentsBreakRail category={interestCategories[runIndex]} />
+                )}
+              </Fragment>
+            );
+          })}
 
-            {hasNextPage && (
-              <div className="mt-8 flex justify-center">
-                <MomentsShowMore isLoading={isFetchingNextPage} onClick={() => fetchNextPage()} />
-              </div>
-            )}
-          </div>
-
-          <div className="hidden lg:col-span-4 lg:block">
-            <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto pr-1">
-              {selectedMoment ? (
-                <MomentDetail key={selectedMoment.id} moment={selectedMoment} />
-              ) : (
-                <p className="text-sm text-gray-400">Pick a moment to see the story behind it.</p>
-              )}
+          {hasNextPage && (
+            <div className="mt-8 flex justify-center">
+              <MomentsShowMore isLoading={isFetchingNextPage} onClick={() => fetchNextPage()} />
             </div>
-          </div>
-        </div>
+          )}
+        </>
       )}
 
-      <Drawer
-        isOpen={isSheetOpen && !isDesktop && Boolean(selectedMoment)}
-        setIsOpen={setIsSheetOpen}
-      >
-        <div className="px-4 pb-8 pt-4">
-          {selectedMoment && <MomentDetail key={selectedMoment.id} moment={selectedMoment} />}
-        </div>
-      </Drawer>
+      <MomentDrawer moment={openMoment} onClose={() => setOpenMoment(null)} />
     </PageContainer>
   );
 };

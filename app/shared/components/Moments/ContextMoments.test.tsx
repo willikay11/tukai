@@ -5,8 +5,10 @@ import userEvent from '@testing-library/user-event';
 
 import { ContextMoments } from './ContextMoments';
 
-const push = jest.fn();
-jest.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
+jest.mock('@/app/shared/components/Moments/MomentDrawer', () => ({
+  MomentDrawer: ({ moment }: { moment: { id: string } | null }) =>
+    moment ? <div data-testid="drawer">{`drawer-${moment.id}`}</div> : null,
+}));
 
 let sessionStatus = 'authenticated';
 jest.mock('next-auth/react', () => ({ useSession: () => ({ status: sessionStatus }) }));
@@ -119,15 +121,14 @@ describe('ContextMoments', () => {
     expect(screen.getByText('moment-m2')).toBeInTheDocument();
   });
 
-  // The feed owns the viewer - this is a way in, not a second copy of it
-  it('opens a moment in the moments feed', async () => {
+  it('opens a moment in a drawer over the page', async () => {
     withMoments([{ id: 'm1' }]);
     const user = userEvent.setup();
 
     renderForExperience();
     await user.click(screen.getByText('moment-m1'));
 
-    expect(push).toHaveBeenCalledWith('/moments?momentId=m1');
+    expect(screen.getByTestId('drawer')).toHaveTextContent('drawer-m1');
   });
 
   it('says so when there are none', () => {

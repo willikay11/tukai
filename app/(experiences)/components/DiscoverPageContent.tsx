@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 import { BucketListRow } from '@/app/(experiences)/components/BucketListRow';
 import { CommunityRow } from '@/app/(experiences)/components/CommunityRow';
@@ -20,7 +20,7 @@ import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experienc
 import { PageContainer } from '@/app/shared/components/Layout';
 import { CardGrid, CardRail, SeeAllCard } from '@/app/shared/components/Lists';
 import { ShowMoreButton } from '@/app/shared/components/Lists';
-import { MomentCard, MomentComposer } from '@/app/shared/components/Moments';
+import { MomentCard, MomentComposer, MomentDrawer } from '@/app/shared/components/Moments';
 import { usePublicBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
@@ -79,7 +79,6 @@ const coverPhotoOf = (experience: Experience | undefined): string | null =>
 const EAGER_IN_ROW = 3;
 
 export const DiscoverPageContent = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { city, lat, lng } = useLocation();
 
@@ -92,6 +91,7 @@ export const DiscoverPageContent = () => {
   // Discover has no place, experience or community of its own to post a
   // moment at, so the composer opens untagged - see MomentComposer
   const [isComposerOpen, setIsComposerOpen] = useState(false);
+  const [openMoment, setOpenMoment] = useState<Moment | null>(null);
 
   // "View more" reveals another grid's worth in place rather than navigating -
   // there is no public-lists page to send anyone to
@@ -331,7 +331,7 @@ export const DiscoverPageContent = () => {
                   key={moment.id}
                   moment={moment}
                   priority={index < EAGER_IN_ROW}
-                  onClick={() => router.push(`/moments?momentId=${moment.id}`)}
+                  onClick={() => setOpenMoment(moment)}
                 />
               ))}
 
@@ -372,6 +372,7 @@ export const DiscoverPageContent = () => {
         </section>
       )}
 
+      <MomentDrawer moment={openMoment} onClose={() => setOpenMoment(null)} />
       <MomentComposer open={isComposerOpen} onOpenChange={setIsComposerOpen} />
     </PageContainer>
   );
