@@ -9,7 +9,6 @@ import { MomentsMasonry } from '@/app/shared/components/Moments';
 import { useInfiniteMoments } from '@/app/shared/hooks/useMoments';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { Drawer } from '@/components/ui/drawer';
-import { NoData } from '@/components/ui/noData';
 import { Moment, momentPhotos } from '@/types/moment';
 import { PlaceCategory } from '@/types/placeCategory';
 
@@ -107,9 +106,9 @@ export const MomentsView = ({ feedMix = FEED_MIX_DEFAULT }: MomentsViewProps) =>
       {isLoading ? (
         <MasonrySkeleton />
       ) : moments.length === 0 ? (
-        <div className="py-16">
-          <NoData message="No moments to show yet" />
-        </div>
+        <p className="mt-5 text-[14.5px] leading-normal text-foreground">
+          No moments yet. Yours could be the first.
+        </p>
       ) : (
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           <div className="lg:col-span-8">
