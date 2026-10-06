@@ -17,3 +17,4 @@ Source: `docs/design/screens/moments-listing.html`.
 | MO-08 | Place cards inside the break rails | blocked | blocked | MO-02 |
 
 Run in order: MO-00 first.
+| MO-09 | Open a single moment in a drawer | build | awaiting approval | MO-00, MO-03 |
