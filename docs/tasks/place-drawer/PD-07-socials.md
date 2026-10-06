@@ -21,9 +21,25 @@ with its status against what is built. Reviewed by the owner first.
 
 ## Done when
 
-- [ ] Heading and pill sizes match
-- [ ] Pills scroll sideways on a phone
-- [ ] Pill colours checked against the prototype's view model
+- [x] Heading and pill sizes match
+- [x] Pills scroll sideways on a phone (single `flex-nowrap` row, `overflow-x-auto`, 24px bleed; not yet checked in a browser)
+- [x] Pill colours checked against the prototype's view model
+
+## Colour check
+
+The prototype's `SOC` view model (`Tukai Web.dc.html`, grep `const SOC`) gives
+different values from the built palette. Built values are kept, as the code
+comment asks.
+
+| Network | Prototype bg / fg | Built bg / fg |
+|---|---|---|
+| Website | #DBEAFE / #1D4ED8 | #E8EEFF / #2F5BD7 |
+| Instagram | #F1E4F4 / #86399E | #F6E9F8 / #A33AB0 |
+| Facebook | #DCEBFE / #1259C3 | #E4EEFB / #1A66C9 |
+| TikTok | #FFDCE7 / #B80F45 | #FCE7EC / #D62B4E |
+| YouTube | #FFE1E1 / #B91C1C | #FDE8E8 / #C62828 |
+| X | #E0F2FE / #0369A1 | surface / brand-ink |
+| WhatsApp | not in the place panel | #E4F6E8 / #128C4A |
 
 ## Notes
 

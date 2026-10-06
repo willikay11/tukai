@@ -107,7 +107,7 @@ export const PlaceAboutSection = ({
 
       {(place.socialLinks?.length ?? 0) > 0 && (
         <div className="border-t border-line pt-6">
-          <h3 className="mb-4 text-[22px] font-bold text-brand-ink">Socials</h3>
+          <h3 className="mb-3.5 text-[19px] font-bold tracking-[-0.2px] text-ink-label">Socials</h3>
           <PlaceSocialPills links={place.socialLinks ?? []} />
         </div>
       )}
