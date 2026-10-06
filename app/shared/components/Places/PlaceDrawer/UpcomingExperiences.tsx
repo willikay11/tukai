@@ -13,8 +13,11 @@ import {
   addWeeks,
   buildWeek,
   dayKey,
+  dayLabel,
   experiencesOnDay,
-  monthLabel,
+  isCurrentWeek,
+  isLastWeek,
+  weekLabel,
   weekStart,
 } from './week-strip';
 
@@ -24,6 +27,12 @@ import {
  * the query keys match.
  */
 export const UPCOMING_PAGE_SIZE = 50;
+
+/**
+ * One dot per experience, up to this many. Past it the pill would grow past the
+ * design's 44px height, and the count is already in the cards below.
+ */
+const MAX_DAY_DOTS = 3;
 
 const PagerArrow = ({
   direction,
@@ -41,10 +50,7 @@ const PagerArrow = ({
     onClick={onClick}
     disabled={disabled}
     aria-label={label}
-    className={cn(
-      'flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-colors',
-      disabled ? 'cursor-default text-ink-subtle' : 'text-brand-ink hover:bg-surface',
-    )}
+    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-brand-ink transition-colors hover:bg-surface disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
   >
     <IconComponent
       iconName={direction === 'back' ? 'ArrowLeft01Icon' : 'ArrowRight01Icon'}
@@ -62,32 +68,44 @@ const DayPill = ({
   day: StripDay;
   isSelected: boolean;
   onSelect: () => void;
-}) => (
-  <button
-    type="button"
-    onClick={onSelect}
-    disabled={day.isPast}
-    aria-pressed={isSelected}
-    className={cn(
-      'inline-flex flex-shrink-0 items-center gap-1.5 rounded-full border px-4 py-2.5 text-[15px] transition-colors',
-      day.isPast
-        ? 'cursor-default border-transparent bg-surface text-ink-subtle'
-        : isSelected
-          ? 'border-transparent bg-green-200 font-semibold text-brand'
-          : 'border-line bg-white text-brand-ink hover:bg-surface',
-    )}
-  >
-    <span>{day.weekday}</span>
-    <span className="font-bold">{day.dayOfMonth}</span>
-    {/* A dot rather than a count: the number is in the cards below */}
-    {day.hasExperiences && !day.isPast && (
-      <span
-        aria-hidden
-        className={cn('h-1.5 w-1.5 rounded-full', isSelected ? 'bg-brand' : 'bg-lime-dark')}
-      />
-    )}
-  </button>
-);
+}) => {
+  const dots = Math.min(day.experienceCount, MAX_DAY_DOTS);
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      disabled={day.isPast}
+      aria-pressed={isSelected}
+      className={cn(
+        'inline-flex h-11 flex-shrink-0 items-center gap-[5px] rounded-full border px-3.5 text-[14.5px] transition-colors',
+        day.isPast
+          ? 'cursor-default border-transparent bg-surface text-ink-subtle'
+          : isSelected
+            ? 'border-transparent bg-green-200 text-brand'
+            : 'border-line bg-white text-brand-ink hover:bg-surface',
+        isSelected && 'font-semibold',
+      )}
+    >
+      <span>{day.weekday}</span>
+      <span className="font-bold">{day.dayOfMonth}</span>
+      {/* A dot rather than a count: the number is in the cards below */}
+      {dots > 0 && !day.isPast && (
+        <span aria-hidden className="ml-0.5 flex items-center gap-[3px]">
+          {Array.from({ length: dots }, (_, index) => (
+            <span
+              key={index}
+              className={cn(
+                'h-[5px] w-[5px] rounded-full',
+                isSelected ? 'bg-brand' : 'bg-lime-dark',
+              )}
+            />
+          ))}
+        </span>
+      )}
+    </button>
+  );
+};
 
 /**
  * What is on at a place, a week at a time.
@@ -119,34 +137,44 @@ export const UpcomingExperiences = ({
     [experiences, selectedKey],
   );
 
-  // Nothing to page back to before the week the reader is standing in
-  const isCurrentWeek = dayKey(anchor) === dayKey(weekStart(new Date()));
+  // Moving a week lands on its first day, or today when that is the week the
+  // reader is in - a selection left behind would be off the strip entirely
+  const moveTo = (weeks: number) => {
+    const next = addWeeks(anchor, weeks);
+    setAnchor(next);
+    setSelectedKey(isCurrentWeek(next) ? dayKey(new Date()) : dayKey(next));
+  };
 
   return (
     <div className="space-y-5">
       <div>
-        <h3 className="text-[22px] font-bold text-brand-ink">Upcoming experiences</h3>
-        <p className="mt-1 text-[15px] text-ink-muted">Upcoming experiences at {placeTitle}</p>
+        <h3 className="text-[19px] font-bold tracking-[-0.2px] text-brand-ink">
+          Upcoming experiences
+        </h3>
+        <p className="mt-1.5 text-sm leading-snug text-ink-muted">
+          Upcoming experiences at {placeTitle}
+        </p>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="-ml-3 flex items-center gap-0.5">
         <PagerArrow
           direction="back"
           label="Previous week"
-          disabled={isCurrentWeek}
-          onClick={() => setAnchor((current) => addWeeks(current, -1))}
+          disabled={isCurrentWeek(anchor)}
+          onClick={() => moveTo(-1)}
         />
-        <span className="min-w-[150px] text-[17px] font-bold text-brand-ink">
-          {monthLabel(week)}
+        <span aria-live="polite" className="text-[15.5px] font-semibold text-brand-ink">
+          {weekLabel(week)}
         </span>
         <PagerArrow
           direction="next"
           label="Next week"
-          onClick={() => setAnchor((current) => addWeeks(current, 1))}
+          disabled={isLastWeek(anchor)}
+          onClick={() => moveTo(1)}
         />
       </div>
 
-      <div className="flex gap-2.5 overflow-x-auto scrollbar-hide">
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide">
         {week.map((day) => (
           <DayPill
             key={day.key}
@@ -160,16 +188,21 @@ export const UpcomingExperiences = ({
       {isLoading ? (
         <div className="aspect-square w-[184px] animate-pulse rounded-xl bg-gray-200" />
       ) : onSelectedDay.length > 0 ? (
-        <div className="flex flex-wrap gap-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-x-3.5 gap-y-[22px] pt-1.5">
           {onSelectedDay.map((experience) => (
             // Stays a link: a drawer opened from here would stack on the place
             // drawer, which cannot yet be closed back to in order (see D-10)
-            <ExperienceCard key={experience.id} experience={experience} opensDrawer={false} />
+            <ExperienceCard
+              key={experience.id}
+              experience={experience}
+              opensDrawer={false}
+              className="w-full"
+            />
           ))}
         </div>
       ) : (
-        <p className="rounded-xl bg-surface px-5 py-[18px] text-[15px] text-ink-muted">
-          Nothing on at {placeTitle} that day.
+        <p className="pt-1 text-sm leading-snug text-ink-muted">
+          Nothing on at {placeTitle} on {dayLabel(selectedKey)}. Try another day.
         </p>
       )}
     </div>

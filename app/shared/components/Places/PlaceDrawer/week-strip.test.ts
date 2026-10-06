@@ -4,9 +4,13 @@ import {
   addWeeks,
   buildWeek,
   dayKey,
+  dayLabel,
   experienceDayKey,
   experiencesOnDay,
-  monthLabel,
+  isCurrentWeek,
+  isLastWeek,
+  parseDayKey,
+  weekLabel,
   weekStart,
 } from './week-strip';
 
@@ -78,6 +82,54 @@ describe('buildWeek', () => {
     expect(days[6].hasExperiences).toBe(true);
     expect(days[5].hasExperiences).toBe(false);
   });
+
+  it('counts what is on each day', () => {
+    const days = buildWeek(
+      weekStart(WEDNESDAY),
+      [
+        experience('a', '2026-10-10T09:00:00'),
+        experience('b', '2026-10-10T15:00:00'),
+        experience('c', '2026-10-11T09:00:00'),
+      ],
+      WEDNESDAY,
+    );
+
+    expect(days[6].experienceCount).toBe(2);
+    expect(days[0].experienceCount).toBe(0);
+  });
+});
+
+describe('isCurrentWeek', () => {
+  it('is true for the week the reader is in', () => {
+    expect(isCurrentWeek(weekStart(WEDNESDAY), WEDNESDAY)).toBe(true);
+  });
+
+  it('is false for any other week', () => {
+    expect(isCurrentWeek(addWeeks(weekStart(WEDNESDAY), 1), WEDNESDAY)).toBe(false);
+    expect(isCurrentWeek(addWeeks(weekStart(WEDNESDAY), -1), WEDNESDAY)).toBe(false);
+  });
+});
+
+describe('isLastWeek', () => {
+  it('stops at twelve weeks ahead', () => {
+    const current = weekStart(WEDNESDAY);
+
+    expect(isLastWeek(addWeeks(current, 11), WEDNESDAY)).toBe(false);
+    expect(isLastWeek(addWeeks(current, 12), WEDNESDAY)).toBe(true);
+  });
+});
+
+describe('parseDayKey', () => {
+  it('reads the key as a local day, not UTC', () => {
+    expect(parseDayKey('2026-10-05').getDate()).toBe(5);
+    expect(parseDayKey('2026-10-05').getHours()).toBe(0);
+  });
+});
+
+describe('dayLabel', () => {
+  it('names the day the way the empty state does', () => {
+    expect(dayLabel('2026-07-05')).toBe('Sun 5 Jul');
+  });
 });
 
 describe('experiencesOnDay', () => {
@@ -99,17 +151,22 @@ describe('experiencesOnDay', () => {
   });
 });
 
-describe('monthLabel', () => {
-  it('names the month the week sits in', () => {
-    expect(monthLabel(buildWeek(weekStart(WEDNESDAY), [], WEDNESDAY))).toBe('October 2026');
+describe('weekLabel', () => {
+  it('names the month when the week sits inside one', () => {
+    expect(weekLabel(buildWeek(weekStart(WEDNESDAY), [], WEDNESDAY))).toBe('October 2026');
   });
 
-  // A week split across two months is named for the one holding most of it
-  it('names the majority month on a split week', () => {
-    const split = buildWeek(weekStart(new Date(2026, 9, 29)), [], WEDNESDAY);
+  it('names both months when the week crosses one', () => {
+    const split = buildWeek(weekStart(new Date(2026, 8, 30)), [], WEDNESDAY);
 
-    expect(split[0].key).toBe('2026-10-25');
-    expect(monthLabel(split)).toBe('October 2026');
+    expect(split[0].key).toBe('2026-09-27');
+    expect(weekLabel(split)).toBe('Sep to Oct 2026');
+  });
+
+  it('names both years when the week crosses a year end', () => {
+    const newYear = buildWeek(weekStart(new Date(2026, 11, 30)), [], WEDNESDAY);
+
+    expect(weekLabel(newYear)).toBe('Dec 2026 to Jan 2027');
   });
 });
 

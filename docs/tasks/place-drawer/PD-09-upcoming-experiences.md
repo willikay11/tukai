@@ -1,6 +1,6 @@
 # PD-09 Upcoming experiences
 
-- **Status:** awaiting approval
+- **Status:** built, awaiting review
 - **Type:** cleanup
 - **Depends on:** the owner's approval of [INVENTORY.md](INVENTORY.md)
 - **Design:** `Tukai Web.dc.html`, grep `pn.hasUp`
@@ -25,10 +25,26 @@ with its status against what is built. Reviewed by the owner first.
 
 ## Done when
 
-- [ ] Week controls match the design's size, disabled states and 12-week limit
-- [ ] Day pills are 44px tall with a dot per experience
-- [ ] Results use the design's card, and the empty copy names the day
+- [x] Week controls match the design's size, disabled states and 12-week limit
+- [x] Day pills are 44px tall with a dot per experience (capped at three, see Notes)
+- [x] Results use the design's card, and the empty copy names the day
 
 ## Notes
 
-The design's cards carry a save button. Bookmarking from the drawer needs the bookmark component's behaviour checked, so confirm before building.
+Built in `UpcomingExperiences.tsx` and `week-strip.ts`.
+
+- Save and flag were already on the drawer's cards. `ExperienceCard` carries the
+  bookmark and the flag, so the inventory's "No save or flag" line is out of
+  date. Only the layout changed: the cards now fill a `minmax(160px, 1fr)` grid
+  rather than the fixed 184px rail width.
+- The card's price is still semibold, not bold. It is shared with the rail, so
+  changing its weight is a separate call.
+- Dots are capped at three per pill. The design says one per experience, but
+  fifty would push the pill past its 44px height. The count is in the cards
+  below. Change `MAX_DAY_DOTS` if the owner wants every dot.
+- The next arrow stops at twelve weeks after the current week (`MAX_WEEKS_AHEAD`).
+- Week label: "October 2026" inside a month, "Sep to Oct 2026" across two, and
+  "Dec 2026 to Jan 2027" across a year end. Month abbreviations are fixed,
+  because en-GB writes September as "Sept".
+- Moving a week selects its first day, or today in the current week, so the
+  selection never sits off the strip.
