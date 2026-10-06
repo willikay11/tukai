@@ -1,17 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
 import Image from 'next/image';
 import Link from 'next/link';
 
 import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { Button } from '@/components/ui/button';
 import { useLocation } from '@/context/LocationContext';
 
 export const Footer = () => {
+  const { city } = useLocation();
+
   return (
     <footer className="grid grid-cols-12 border-t border-gray-100 bg-gray-50 pb-6 pt-8 md:pt-10">
       <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
@@ -28,10 +27,13 @@ export const Footer = () => {
               />
             </Link>
           </div>
-          <div className="col-span-12 text-center md:col-span-2 md:text-left">
-            <h3 className="text-sm font-semibold text-gray-700 md:text-base">Location:</h3>
-            <p className="mt-1 text-sm text-gray-800">Parkwood Villas, Syokimau</p>
-          </div>
+          {/* Only the reader's own selected city. Without one, nothing is named */}
+          {city && (
+            <div className="col-span-12 text-center md:col-span-2 md:text-left">
+              <h3 className="text-sm font-semibold text-gray-700 md:text-base">Location:</h3>
+              <p className="mt-1 text-sm text-gray-800">{city}</p>
+            </div>
+          )}
 
           <div className="col-span-12 text-center md:col-span-4 md:text-left">
             <h3 className="text-sm font-semibold text-gray-700 md:text-base">Contacts:</h3>

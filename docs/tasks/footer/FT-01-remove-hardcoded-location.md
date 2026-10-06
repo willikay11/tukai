@@ -1,6 +1,6 @@
 # FT-01 Remove the hardcoded location
 
-- **Status:** approved
+- **Status:** done
 - **Type:** build
 - **Depends on:** FT-00
 - **Design:** not in the new design. The brief forbids fabricated location (11.6).
@@ -14,9 +14,9 @@
 
 ## Done when
 
-- [ ] The hardcoded address is gone
-- [ ] The footer shows the reader's selected city, or nothing
-- [ ] Tests pass
+- [x] The hardcoded address is gone
+- [x] The footer shows the reader's selected city, or nothing
+- [x] Tests pass
 
 ## Notes
 
