@@ -1,6 +1,6 @@
 # PD-05 About
 
-- **Status:** awaiting approval
+- **Status:** built (structured blocks recorded as not possible)
 - **Type:** content
 - **Depends on:** the owner's approval of [INVENTORY.md](INVENTORY.md)
 - **Design:** `Tukai Web.dc.html`, grep `pn.aboutClamp`
@@ -22,10 +22,16 @@ with its status against what is built. Reviewed by the owner first.
 
 ## Done when
 
-- [ ] Description uses the design's type size and line height
-- [ ] Clamp is by lines, with the design's toggle
-- [ ] Structured blocks are either built from API data or recorded as not possible
+- [x] Description uses the design's type size and line height
+- [x] Clamp is by lines, with the design's toggle
+- [x] Structured blocks are either built from API data or recorded as not possible
 
 ## Notes
 
 Structured about blocks need a decision: the API has no field for them. The design has them, so either the field is added or the design falls back to plain text.
+
+**Decision (PD-05 build):** the design falls back to plain text. The API sends one description string, so the about section shows that string, with its rich text formatting kept once expanded. Structured blocks wait for an API field; nothing in the UI is built for them yet.
+
+**Built:** `PlaceDescription.tsx` in `app/shared/components/Places/PlaceDrawer/`, used by `PlaceAboutSection.tsx`. It is a place-only component because `DescriptionShowMore` is shared with experiences and its 240-character clamp is not the design's. The clamp is `line-clamp-3`, and the toggle (44px, 15px medium, brand green, arrow icon) appears only when the browser reports the clamp is cutting text.
+
+**Not changed:** the border above the facts grid is PD-06's (facts) concern, not this task's done-when list.

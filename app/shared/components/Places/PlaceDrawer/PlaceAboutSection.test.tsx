@@ -20,7 +20,6 @@ jest.mock('./PlacePhotoStrip', () => ({ PlacePhotoStrip: () => <div data-testid=
 jest.mock('./PlaceFactsGrid', () => ({ PlaceFactsGrid: () => <div data-testid="facts" /> }));
 jest.mock('./PlaceSocialPills', () => ({ PlaceSocialPills: () => <div data-testid="socials" /> }));
 jest.mock('@/app/shared/components/Global', () => ({
-  DescriptionShowMore: ({ text }: { text: string }) => <p>{text}</p>,
   OpenInMapsLink: ({ children }: { children: React.ReactNode }) => <a href="#maps">{children}</a>,
 }));
 

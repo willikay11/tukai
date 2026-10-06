@@ -1,12 +1,13 @@
 'use client';
 
-import { DescriptionShowMore, OpenInMapsLink } from '@/app/shared/components/Global';
+import { OpenInMapsLink } from '@/app/shared/components/Global';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useLocation } from '@/context/LocationContext';
 import { photoUrl } from '@/types/photo';
 import { Place } from '@/types/place';
 import { haversineKm } from '@/utils/geo-utils';
 
+import { PlaceDescription } from './PlaceDescription';
 import { PlaceFactsGrid } from './PlaceFactsGrid';
 import { PlacePhotoStrip } from './PlacePhotoStrip';
 import { PlaceSocialPills } from './PlaceSocialPills';
@@ -96,11 +97,7 @@ export const PlaceAboutSection = ({
         </button>
       </div>
 
-      {place.description && (
-        <div className="text-[17px] leading-relaxed text-ink">
-          <DescriptionShowMore text={place.description} maxLength={240} />
-        </div>
-      )}
+      {place.description && <PlaceDescription text={place.description} />}
 
       {(place.properties?.length ?? 0) > 0 && (
         <div className="border-t border-line pt-6">
