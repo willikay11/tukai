@@ -28,7 +28,7 @@ import { UpcomingExperiences } from './UpcomingExperiences';
 import { PLACE_SECTIONS, PLACE_SECTION_IDS, placeDrawerTabs } from './tabs';
 
 /** The header and tabs a section has to clear before its pill lights up. */
-const TAB_OFFSET = 148;
+const TAB_OFFSET = 140;
 
 /** What the header says while the drawer is showing something other than the place. */
 const VIEW_TITLES: Record<string, string | undefined> = {
@@ -117,7 +117,7 @@ export const PlaceDrawer = ({
         <Loading />
       ) : (
         <div className="flex min-h-full flex-col">
-          <div className="sticky top-0 z-30 border-b border-line bg-white">
+          <div className="sticky top-0 z-30 bg-white">
             <PlaceDrawerHeader
               place={place}
               onClose={onClose}
@@ -127,7 +127,7 @@ export const PlaceDrawer = ({
           </div>
 
           {view === 'place' && (
-            <div className="sticky top-[76px] z-20 bg-white px-6 py-3">
+            <div className="sticky top-[68px] z-20 bg-white px-6 py-3">
               <PlaceDrawerTabs tabs={tabs} activeId={activeId} onSelect={scrollTo} />
             </div>
           )}
