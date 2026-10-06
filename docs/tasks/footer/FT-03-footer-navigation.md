@@ -1,6 +1,6 @@
 # FT-03 Footer links to the five destinations and Help
 
-- **Status:** awaiting approval
+- **Status:** approved
 - **Type:** build
 - **Depends on:** FT-00
 - **Design:** brief 7.1: five destinations, and Help under You. Brief 7.3 for the routes.
@@ -23,3 +23,5 @@
 ## Notes
 
 The footer is a second route to every destination. Worth it only if FT-00 keeps the footer.
+
+**FT-00 applied:** approved to build. Add the five destinations and Help.

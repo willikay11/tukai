@@ -1,6 +1,6 @@
 # FT-01 Remove the hardcoded location
 
-- **Status:** todo
+- **Status:** approved
 - **Type:** build
 - **Depends on:** FT-00
 - **Design:** not in the new design. The brief forbids fabricated location (11.6).
@@ -21,3 +21,5 @@
 ## Notes
 
 A footer that names a fixed place is wrong for every reader who is not there. This is the one fix that does not wait for a design.
+
+**FT-00 applied:** approved to build. Remove the hardcoded location.

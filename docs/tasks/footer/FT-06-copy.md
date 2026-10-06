@@ -1,6 +1,6 @@
 # FT-06 Footer copy follows the house style
 
-- **Status:** todo
+- **Status:** approved
 - **Type:** build
 - **Depends on:** FT-00
 - **Design:** `docs/design/CONVENTIONS.md`: sentence case, and no em or en dashes.
@@ -21,3 +21,5 @@
 ## Notes
 
 Small. Combine with FT-04 if the owner is confirming the details anyway.
+
+**FT-00 applied:** approved to build. Fix the copyright line's copy, and confirm the entity name.

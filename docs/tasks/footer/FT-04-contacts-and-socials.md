@@ -22,3 +22,5 @@
 ## Notes
 
 Hardcoded values go stale. Confirm them, and move them to config so they can change without a code edit.
+
+**FT-00 applied:** the contacts are to be confirmed. The owner has not yet given the confirmed values, so this stays open until they are provided.
