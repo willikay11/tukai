@@ -15,16 +15,24 @@ export const PLACE_SECTIONS = {
 } as const;
 
 /**
- * The drawer's four tabs. They are anchors, not panels: every section is in
- * the drawer at once and the pills follow the reader down it.
+ * The drawer's tabs. They are anchors, not panels: every section is in the
+ * drawer at once and the pills follow the reader down it.
+ *
+ * Experiences is only offered when the place has some - an empty tab would
+ * scroll to a section with nothing in it.
  */
-export const placeDrawerTabs = (reviewCount: number | null): PlaceDrawerTab[] => [
+export const placeDrawerTabs = (
+  reviewCount: number | null,
+  hasExperiences: boolean,
+): PlaceDrawerTab[] => [
   { id: PLACE_SECTIONS.about, label: 'About', icon: 'InformationCircleIcon' },
-  { id: PLACE_SECTIONS.experiences, label: 'Experiences', icon: CANVAS_ICONS.calendar },
+  ...(hasExperiences
+    ? [{ id: PLACE_SECTIONS.experiences, label: 'Experiences', icon: CANVAS_ICONS.calendar }]
+    : []),
   { id: PLACE_SECTIONS.moments, label: 'Moments', icon: 'DashboardCircleIcon' },
   {
     id: PLACE_SECTIONS.reviews,
-    label: reviewCount ? `Reviews (${reviewCount})` : 'Reviews',
+    label: reviewCount ? `Reviews (${reviewCount.toLocaleString('en-US')})` : 'Reviews',
     icon: CANVAS_ICONS.star,
   },
 ];

@@ -31,8 +31,8 @@ const Arrow = ({
       onClick={onClick}
       aria-label={direction === 'back' ? 'Previous photos' : 'More photos'}
       className={cn(
-        'absolute top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-brand-ink shadow-[0_4px_14px_rgba(1,51,52,.18)] transition-transform hover:scale-105 active:scale-95',
-        direction === 'back' ? 'left-2' : 'right-2',
+        'absolute top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-brand-ink shadow-[0_4px_14px_rgba(1,51,52,.25)] transition-transform hover:bg-white active:scale-[0.94]',
+        direction === 'back' ? 'left-3.5' : 'right-3.5',
       )}
     >
       <IconComponent

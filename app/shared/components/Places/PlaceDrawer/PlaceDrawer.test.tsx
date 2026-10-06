@@ -6,6 +6,11 @@ import { PlaceDrawer } from './index';
 
 const usePlace = jest.fn();
 const usePlaceOwnership = jest.fn();
+const useExperiences = jest.fn();
+
+jest.mock('@/app/shared/hooks/useExperiences', () => ({
+  useExperiences: (...args: unknown[]) => useExperiences(...args),
+}));
 
 const usePlaceManager = jest.fn();
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
@@ -31,6 +36,7 @@ jest.mock('./PlaceAboutSection', () => ({
   PlaceAboutSection: () => <div data-testid="about" />,
 }));
 jest.mock('./UpcomingExperiences', () => ({
+  UPCOMING_PAGE_SIZE: 50,
   UpcomingExperiences: ({ placeTitle }: { placeTitle: string }) => (
     <div data-testid="upcoming">{placeTitle}</div>
   ),
@@ -121,6 +127,7 @@ describe('PlaceDrawer', () => {
     usePlace.mockReturnValue({ data: { data: place }, isLoading: false });
     usePlaceOwnership.mockReturnValue({ data: { success: true, data: null } });
     usePlaceManager.mockReturnValue({ isManager: false, owningCommunity: undefined });
+    useExperiences.mockReturnValue({ data: { data: { results: [{ id: 'e1' }] } } });
   });
 
   it('shows the place and its sections', () => {
@@ -145,6 +152,34 @@ describe('PlaceDrawer', () => {
     render(<PlaceDrawer placeId="p1" isOpen onClose={jest.fn()} />);
 
     expect(screen.getByRole('tab', { name: 'Reviews' })).toBeInTheDocument();
+  });
+
+  it('separates thousands in the review count', () => {
+    usePlace.mockReturnValue({
+      data: { data: { ...place, totalReviews: 1400 } },
+      isLoading: false,
+    });
+
+    render(<PlaceDrawer placeId="p1" isOpen onClose={jest.fn()} />);
+
+    expect(screen.getByRole('tab', { name: /Reviews \(1,400\)/ })).toBeInTheDocument();
+  });
+
+  it('offers Experiences only where the place has some', () => {
+    useExperiences.mockReturnValue({ data: { data: { results: [] } } });
+
+    render(<PlaceDrawer placeId="p1" isOpen onClose={jest.fn()} />);
+
+    expect(screen.queryByRole('tab', { name: 'Experiences' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('upcoming')).not.toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Moments' })).toBeInTheDocument();
+  });
+
+  it('keeps the Experiences tab in the order the design gives it', () => {
+    render(<PlaceDrawer placeId="p1" isOpen onClose={jest.fn()} />);
+
+    const labels = screen.getAllByRole('tab').map((tab) => tab.textContent);
+    expect(labels).toEqual(['About', 'Experiences', 'Moments', 'Reviews (14)']);
   });
 
   it('invites a moment naming the place', () => {

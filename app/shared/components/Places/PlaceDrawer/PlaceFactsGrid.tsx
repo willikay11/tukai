@@ -6,8 +6,8 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { PlaceProperty } from '@/types/place';
 
 /**
- * The drawer's two-column facts grid - phone, hours, type of place, and
- * whatever else the API stores against the place.
+ * The drawer's facts grid - phone, hours, type of place, and whatever else the
+ * API stores against the place.
  *
  * Rows come straight from `properties`, each carrying its own key, value and
  * Hugeicons name, so a new property type appears here with no code change.
@@ -34,21 +34,40 @@ export const PlaceFactsGrid = ({ properties }: { properties: PlaceProperty[] }) 
   };
 
   return (
-    <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-x-6 gap-y-5">
       {rows.map((property) => (
-        <div key={property.id} className="flex items-start gap-3">
+        <div key={property.id} className="flex min-w-0 items-start gap-4">
           <IconComponent
             iconName={property.icon || 'InformationCircleIcon'}
-            size={24}
+            size={22}
             color="currentColor"
-            className="mt-0.5 flex-shrink-0 text-brand-ink"
+            className="mt-px flex-shrink-0 text-ink-label"
           />
 
-          <div className="min-w-0">
-            <p className="text-[17px] font-bold text-brand-ink">{property.key}</p>
+          <div className="flex min-w-0 flex-col gap-[3px]">
+            <p className="text-[15px] font-semibold text-ink-label">{property.key}</p>
 
-            <div className="flex items-center gap-2.5">
-              <p className="text-[15px] text-ink-muted">{property.value}</p>
+            {/* The value row is 44px tall so a link or copy button is a full
+                touch target; the negative margin keeps the visual gap to the label */}
+            <div className="-my-3 flex min-w-0 items-center gap-1">
+              {property.linkType ? (
+                <a
+                  href={
+                    property.linkType === 'email'
+                      ? `mailto:${property.value}`
+                      : toWebsiteHref(property.value)
+                  }
+                  target={property.linkType === 'website' ? '_blank' : undefined}
+                  rel={property.linkType === 'website' ? 'noopener noreferrer' : undefined}
+                  className="inline-flex min-h-11 min-w-0 items-center break-all text-[14.5px] text-ink-muted hover:text-brand hover:underline"
+                >
+                  {property.value}
+                </a>
+              ) : (
+                <p className="inline-flex min-h-11 min-w-0 items-center text-pretty text-[14.5px] leading-[1.45] text-ink-muted">
+                  {property.value}
+                </p>
+              )}
 
               {/* The API marks the phone row by key; copying it is the one
                   thing a reader on a laptop cannot do by tapping */}
@@ -59,7 +78,8 @@ export const PlaceFactsGrid = ({ properties }: { properties: PlaceProperty[] }) 
                   aria-label={
                     copiedKey === property.id ? `${property.key} copied` : `Copy ${property.key}`
                   }
-                  className="flex-shrink-0 text-brand transition-opacity hover:opacity-70"
+                  title="Copy"
+                  className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-brand transition-colors hover:bg-surface-brand"
                 >
                   <IconComponent
                     iconName={copiedKey === property.id ? 'Tick02Icon' : 'Copy01Icon'}
@@ -75,3 +95,7 @@ export const PlaceFactsGrid = ({ properties }: { properties: PlaceProperty[] }) 
     </div>
   );
 };
+
+// A website saved without its scheme would otherwise resolve relative to the
+// drawer's own page
+const toWebsiteHref = (value: string) => (/^https?:\/\//i.test(value) ? value : `https://${value}`);

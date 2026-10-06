@@ -34,6 +34,9 @@ export type PlaceProperty = {
   value: string;
   icon?: string;
   canCopy?: boolean;
+  // Set when the value is a website or email address, so the drawer can link it.
+  // The API does not send this yet; until it does, the value renders as text.
+  linkType?: 'website' | 'email';
 };
 
 export type PlaceSocialLink = {

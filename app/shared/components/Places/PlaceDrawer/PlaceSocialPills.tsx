@@ -28,8 +28,10 @@ const NEUTRAL = 'bg-surface text-ink';
 export const PlaceSocialPills = ({ links }: { links: PlaceSocialLink[] }) => {
   if (links.length === 0) return null;
 
+  // One row that scrolls sideways. The -mx-6 / px-6 pair runs the row to the
+  // drawer's edges, so the first and last pill still sit on the 24px gutter
   return (
-    <div className="flex flex-wrap gap-2.5">
+    <div className="-mx-6 flex gap-2.5 overflow-x-auto px-6 scrollbar-hide">
       {links.map((link) => (
         <a
           key={link.id}
@@ -37,11 +39,11 @@ export const PlaceSocialPills = ({ links }: { links: PlaceSocialLink[] }) => {
           target="_blank"
           rel="noopener noreferrer"
           className={cn(
-            'inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[15px] font-semibold transition-opacity hover:opacity-80',
+            'inline-flex h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-full pl-3.5 pr-[18px] text-[14.5px] font-medium transition-opacity hover:opacity-80',
             PLATFORM_STYLES[link.platformName?.toLowerCase()] ?? NEUTRAL,
           )}
         >
-          <IconComponent iconName={link.icon ?? 'Link01Icon'} size={18} color="currentColor" />
+          <IconComponent iconName={link.icon ?? 'Link01Icon'} size={19} color="currentColor" />
           {link.platformName}
         </a>
       ))}

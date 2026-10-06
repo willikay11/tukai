@@ -21,31 +21,33 @@ export const PlaceManagerBanner = ({
   rules: PlaceAvailabilityRule[];
   onOpenSettings: () => void;
 }) => (
-  <div className="flex flex-col gap-4 rounded-2xl bg-surface-brand p-5 sm:flex-row sm:items-center">
-    <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-white">
+  <div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-xl bg-surface-brand p-4">
+    <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-white">
       <IconComponent
         iconName="StoreVerified01Icon"
-        size={26}
+        size={22}
         color="currentColor"
         className="text-brand"
       />
     </span>
 
-    <div className="min-w-0 flex-1">
-      <p className="text-[19px] font-bold leading-snug text-brand-ink">
+    <div className="flex min-w-0 flex-[1_1_220px] flex-col gap-0.5">
+      <p className="text-[15px] font-semibold text-brand-ink">
         {communityName ? `You manage this place through ${communityName}` : 'You manage this place'}
       </p>
-      <p className="mt-1 text-[15px] text-ink-muted">{reservationSummary(profile, rules)}</p>
+      <p className="text-[13.5px] leading-[1.45] text-ink-summary">
+        {reservationSummary(profile, rules)}
+      </p>
     </div>
 
     <Button
       type="button"
       variant="gradient"
       onClick={onOpenSettings}
-      className="h-12 flex-shrink-0 rounded-full px-6 text-[15px] font-bold"
+      className="h-11 flex-shrink-0 rounded-full px-[18px] text-[14px] font-semibold"
     >
-      <IconComponent iconName="Calendar03Icon" size={20} color="currentColor" />
-      Reservation settings
+      <IconComponent iconName="Calendar03Icon" size={18} color="currentColor" />
+      {profile ? 'Reservation settings' : 'Set up reservations'}
     </Button>
   </div>
 );

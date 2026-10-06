@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -35,28 +33,7 @@ const isDetailPage = (pathname: string): boolean => {
 export const BottomNavigation = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const { data: session } = useSession();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY < 10) {
-        setIsVisible(true);
-      } else if (currentScrollY > lastScrollY) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
-      }
-
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
 
   // A single experience puts its booking bar along the bottom edge, and that
   // CTA is the point of the page - two bars would sit on top of each other
@@ -68,12 +45,7 @@ export const BottomNavigation = () => {
   if (pathname === '/communities' && searchParams.get('tab') === 'mine') return null;
 
   return (
-    <div
-      className={cn(
-        'fixed inset-x-0 bottom-0 z-50 bg-white shadow-top-md transition-transform duration-300 ease-in-out md:hidden',
-        isVisible ? 'translate-y-0' : 'translate-y-[150%]',
-      )}
-    >
+    <div className="fixed inset-x-0 bottom-0 z-50 bg-white shadow-top-md md:hidden">
       {/* Five equal columns across the full width, each an icon over its label.
           The active one takes a soft pill behind its icon and a heavier label. */}
       <nav

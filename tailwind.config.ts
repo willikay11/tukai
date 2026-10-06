@@ -75,11 +75,16 @@ const config: Config = {
         // rating or a "city • distance" line does.
         star: '#F2C14B',
         dot: '#70A3F3',
+        // The blue dot before a distance or a rating count in the place drawer's
+        // photo row, a 5px circle rather than a glyph
+        distance: '#60A5FA',
         surface: {
           DEFAULT: '#F3F4F2', // 298 — resting chip and card ground
           brand: '#E8F1ED', // 280 — a chosen chip
           muted: '#EDF0EE', // 82 — a quieter panel
           tab: '#DCEAE3', // 13 — the selected tab pill, a shade deeper than brand
+          pill: '#F3F4F6', // the resting section pill in the place drawer's tab row
+          'pill-active': '#A7F3D0', // the selected section pill, a lime-tinted green
           // The hover on a brand-soft control, per the design's carousel-arrow
           // spec in docs/design/HANDOFF.md
           'brand-hover': '#D5E7DE',
@@ -93,6 +98,9 @@ const config: Config = {
           DEFAULT: '#3F4B47', // 42 — strong body text
           muted: '#5B6B66', // 488 — secondary text, the canvas's workhorse
           subtle: '#8A9793', // 37 — hints and placeholders
+          pill: '#1F2937', // the label and icon on a resting section pill
+          summary: '#1F2937', // the one-line summary under a manager's banner title
+          label: '#1F2937', // a fact's label and icon in the place drawer's facts grid
         },
         danger: {
           // ⚠️ The canvas carries three reds — #E02D3C (22), #D92D20 (15) and

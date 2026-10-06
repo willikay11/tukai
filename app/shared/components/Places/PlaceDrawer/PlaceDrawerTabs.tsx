@@ -18,7 +18,9 @@ export const PlaceDrawerTabs = ({
   activeId: string;
   onSelect: (id: string) => void;
 }) => (
-  <div className="flex gap-2 overflow-x-auto scrollbar-hide" role="tablist">
+  // The -mx-6 / px-6 pair runs the row to the drawer's edges, so a scrolled-to-end
+  // last pill keeps the 24px gutter instead of stopping at the content edge
+  <div className="-mx-6 flex gap-2 overflow-x-auto px-6 scrollbar-hide" role="tablist">
     {tabs.map((tab) => {
       const isActive = activeId === tab.id;
 
@@ -30,19 +32,16 @@ export const PlaceDrawerTabs = ({
           aria-selected={isActive}
           onClick={() => onSelect(tab.id)}
           className={cn(
-            'inline-flex flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2.5 text-[15px] transition-colors',
-            isActive
-              ? 'bg-green-200 font-semibold text-brand'
-              : 'bg-surface text-gray-900 hover:bg-surface-muted',
+            'pr-4.5 inline-flex h-11 flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-full pl-3 text-[14.5px] font-medium transition duration-150 hover:brightness-[0.97] active:scale-[0.98]',
+            isActive ? 'bg-surface-pill-active text-brand' : 'bg-surface-pill text-ink-pill',
           )}
         >
           {/* The selected pill's icon fills in; the rest stay outlined */}
           <IconComponent
             iconName={tab.icon}
-            size={18}
+            size={21}
             variant={isActive ? 'solid' : 'twotone'}
             color="currentColor"
-            className={isActive ? 'text-brand' : 'text-gray-500'}
           />
           {tab.label}
         </button>

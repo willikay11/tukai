@@ -18,8 +18,12 @@ import {
   weekStart,
 } from './week-strip';
 
-/** Wide enough that a place's whole programme lands in one request. */
-const PAGE_SIZE = 50;
+/**
+ * Wide enough that a place's whole programme lands in one request. Exported so
+ * the drawer asks for the same page: React Query shares the response only when
+ * the query keys match.
+ */
+export const UPCOMING_PAGE_SIZE = 50;
 
 const PagerArrow = ({
   direction,
@@ -104,7 +108,7 @@ export const UpcomingExperiences = ({
   const [selectedKey, setSelectedKey] = useState(() => dayKey(new Date()));
 
   const { data, isLoading } = useExperiences(
-    { page: 1, page_size: PAGE_SIZE, place: placeId, status: 'published' },
+    { page: 1, page_size: UPCOMING_PAGE_SIZE, place: placeId, status: 'published' },
     Boolean(placeId),
   );
   const experiences: Experience[] = useMemo(() => data?.data?.results ?? [], [data]);

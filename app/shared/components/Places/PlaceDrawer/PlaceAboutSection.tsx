@@ -1,17 +1,24 @@
 'use client';
 
-import { DescriptionShowMore, OpenInMapsLink } from '@/app/shared/components/Global';
+import { OpenInMapsLink } from '@/app/shared/components/Global';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useLocation } from '@/context/LocationContext';
 import { photoUrl } from '@/types/photo';
 import { Place } from '@/types/place';
 import { haversineKm } from '@/utils/geo-utils';
 
+import { PlaceDescription } from './PlaceDescription';
 import { PlaceFactsGrid } from './PlaceFactsGrid';
 import { PlacePhotoStrip } from './PlacePhotoStrip';
 import { PlaceSocialPills } from './PlaceSocialPills';
 
-export const PlaceAboutSection = ({ place }: { place: Place }) => {
+export const PlaceAboutSection = ({
+  place,
+  onReviewsClick,
+}: {
+  place: Place;
+  onReviewsClick: () => void;
+}) => {
   const { lat, lng } = useLocation();
 
   const photos = (place.photos ?? [])
@@ -38,11 +45,11 @@ export const PlaceAboutSection = ({ place }: { place: Place }) => {
             lat={placeLat}
             lng={placeLng}
             query={[place.title, city].filter(Boolean).join(', ')}
-            className="inline-flex items-center gap-2 rounded-full bg-surface px-4 py-2.5 text-[15px] text-ink transition-colors hover:bg-surface-muted"
+            className="inline-flex h-11 items-center gap-2 whitespace-nowrap rounded-full border border-line-soft bg-surface-muted pl-3 pr-4 text-[14.5px] text-ink transition-colors hover:border-line-brand hover:bg-surface-brand"
           >
             <IconComponent
               iconName="Location01Icon"
-              size={18}
+              size={19}
               color="currentColor"
               className="text-brand"
             />
@@ -50,36 +57,41 @@ export const PlaceAboutSection = ({ place }: { place: Place }) => {
             {/* Distance only once the reader has shared where they are */}
             {distanceKm !== null && (
               <>
-                <span className="text-dot">•</span>
+                <span aria-hidden="true" className="h-[5px] w-[5px] rounded-full bg-distance" />
                 {`${distanceKm} km`}
               </>
             )}
           </OpenInMapsLink>
         )}
 
-        {place.averageRating > 0 && (
-          <span className="flex items-center gap-2 text-[15px] text-gray-800">
-            <IconComponent
-              iconName="StarIcon"
-              size={18}
-              variant="twotone"
-              color="currentColor"
-              className="text-star"
-            />
-            <span className="font-bold">{place.averageRating}</span>
-            <span className="text-dot">•</span>
-            <span>
-              {reviews} {reviews === 1 ? 'review' : 'reviews'}
-            </span>
+        {/* Always shown: a place nobody has rated says so, and the row jumps to Reviews */}
+        <button
+          type="button"
+          onClick={onReviewsClick}
+          className="inline-flex h-11 items-center gap-[7px] whitespace-nowrap text-[14.5px] text-ink-pill transition-colors hover:text-brand"
+        >
+          {place.averageRating > 0 && (
+            <>
+              <IconComponent
+                iconName="StarIcon"
+                size={18}
+                variant="bulk"
+                color="currentColor"
+                className="text-star"
+              />
+              <span className="font-semibold">{place.averageRating}</span>
+              <span aria-hidden="true" className="h-[5px] w-[5px] rounded-full bg-distance" />
+            </>
+          )}
+          <span>
+            {reviews === 0
+              ? 'No reviews yet'
+              : `${reviews} ${reviews === 1 ? 'review' : 'reviews'}`}
           </span>
-        )}
+        </button>
       </div>
 
-      {place.description && (
-        <div className="text-[17px] leading-relaxed text-ink">
-          <DescriptionShowMore text={place.description} maxLength={240} />
-        </div>
-      )}
+      {place.description && <PlaceDescription text={place.description} />}
 
       {(place.properties?.length ?? 0) > 0 && (
         <div className="border-t border-line pt-6">
@@ -89,7 +101,7 @@ export const PlaceAboutSection = ({ place }: { place: Place }) => {
 
       {(place.socialLinks?.length ?? 0) > 0 && (
         <div className="border-t border-line pt-6">
-          <h3 className="mb-4 text-[22px] font-bold text-brand-ink">Socials</h3>
+          <h3 className="mb-3.5 text-[19px] font-bold tracking-[-0.2px] text-ink-label">Socials</h3>
           <PlaceSocialPills links={place.socialLinks ?? []} />
         </div>
       )}

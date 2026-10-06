@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ClaimPlacePrompt } from '@/app/(places)/places/[placeId]/components/ClaimPlacePrompt';
 import { PlaceReviewsSection } from '@/app/(places)/places/[placeId]/components/PlaceReviewsSection';
 import { ContextMoments, MomentComposerForm } from '@/app/shared/components/Moments';
+import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import {
   usePlace,
   usePlaceAvailability,
@@ -14,9 +15,11 @@ import {
 } from '@/app/shared/hooks/usePlaces';
 import { useScrollSpy } from '@/app/shared/hooks/useScrollSpy';
 import { Drawer } from '@/components/ui/drawer';
+import { Experience } from '@/types/experience';
 import { Place } from '@/types/place';
 import { PlaceAvailabilityRule, PlaceReservationProfile } from '@/types/placeReservation';
 
+import { HappeningNow } from './HappeningNow';
 import { PlaceAboutSection } from './PlaceAboutSection';
 import { PlaceDrawerFooter } from './PlaceDrawerFooter';
 import { PlaceDrawerHeader } from './PlaceDrawerHeader';
@@ -25,10 +28,11 @@ import { PlaceManagerBanner } from './PlaceManagerBanner';
 import { PlaceReservationSettings } from './PlaceReservationSettings';
 import { PlaceReviewForm } from './PlaceReviewForm';
 import { UpcomingExperiences } from './UpcomingExperiences';
-import { PLACE_SECTIONS, PLACE_SECTION_IDS, placeDrawerTabs } from './tabs';
+import { UPCOMING_PAGE_SIZE } from './UpcomingExperiences';
+import { PLACE_SECTIONS, placeDrawerTabs } from './tabs';
 
 /** The header and tabs a section has to clear before its pill lights up. */
-const TAB_OFFSET = 148;
+const TAB_OFFSET = 140;
 
 /** What the header says while the drawer is showing something other than the place. */
 const VIEW_TITLES: Record<string, string | undefined> = {
@@ -100,8 +104,22 @@ export const PlaceDrawer = ({
 
   useEffect(() => setView('place'), [placeId]);
 
-  const tabs = useMemo(() => placeDrawerTabs(place?.totalReviews ?? null), [place?.totalReviews]);
-  const { activeId, scrollTo } = useScrollSpy(PLACE_SECTION_IDS, TAB_OFFSET, panel);
+  // The same request UpcomingExperiences makes, so React Query shares the one
+  // response. It only decides whether the Experiences tab and section exist.
+  const { data: experiencesResponse } = useExperiences(
+    { page: 1, page_size: UPCOMING_PAGE_SIZE, place: placeId ?? '', status: 'published' },
+    isOpen && Boolean(placeId),
+  );
+  const experiences: Experience[] = experiencesResponse?.data?.results ?? [];
+  const hasExperiences = experiences.length > 0;
+
+  const tabs = useMemo(
+    () => placeDrawerTabs(place?.totalReviews ?? null, hasExperiences),
+    [place?.totalReviews, hasExperiences],
+  );
+  // The spy re-runs on a change of identity, so the ids are kept stable
+  const sectionIds = useMemo(() => tabs.map((tab) => tab.id), [tabs]);
+  const { activeId, scrollTo } = useScrollSpy(sectionIds, TAB_OFFSET, panel);
 
   return (
     <Drawer
@@ -117,7 +135,7 @@ export const PlaceDrawer = ({
         <Loading />
       ) : (
         <div className="flex min-h-full flex-col">
-          <div className="sticky top-0 z-30 border-b border-line bg-white">
+          <div className="sticky top-0 z-30 bg-white">
             <PlaceDrawerHeader
               place={place}
               onClose={onClose}
@@ -127,7 +145,7 @@ export const PlaceDrawer = ({
           </div>
 
           {view === 'place' && (
-            <div className="sticky top-[76px] z-20 bg-white px-6 py-3">
+            <div className="sticky top-[68px] z-20 bg-white px-6 py-3">
               <PlaceDrawerTabs tabs={tabs} activeId={activeId} onSelect={scrollTo} />
             </div>
           )}
@@ -163,12 +181,18 @@ export const PlaceDrawer = ({
                     />
                   )}
 
-                  <PlaceAboutSection place={place} />
+                  <PlaceAboutSection
+                    place={place}
+                    onReviewsClick={() => scrollTo(PLACE_SECTIONS.reviews)}
+                  />
                 </section>
 
-                <section id={PLACE_SECTIONS.experiences} className="scroll-mt-[148px] py-6">
-                  <UpcomingExperiences placeId={place.id} placeTitle={place.title} />
-                </section>
+                {hasExperiences && (
+                  <section id={PLACE_SECTIONS.experiences} className="scroll-mt-[148px] py-6">
+                    <HappeningNow experiences={experiences} placeTitle={place.title} />
+                    <UpcomingExperiences placeId={place.id} placeTitle={place.title} />
+                  </section>
+                )}
 
                 <section id={PLACE_SECTIONS.moments} className="scroll-mt-[148px] py-6">
                   <ContextMoments

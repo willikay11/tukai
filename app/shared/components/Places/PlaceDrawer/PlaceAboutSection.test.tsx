@@ -1,10 +1,12 @@
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { Place } from '@/types/place';
 
 import { PlaceAboutSection } from './PlaceAboutSection';
+
+const onReviewsClick = jest.fn();
 
 const useLocation = jest.fn();
 jest.mock('@/context/LocationContext', () => ({ useLocation: () => useLocation() }));
@@ -18,7 +20,6 @@ jest.mock('./PlacePhotoStrip', () => ({ PlacePhotoStrip: () => <div data-testid=
 jest.mock('./PlaceFactsGrid', () => ({ PlaceFactsGrid: () => <div data-testid="facts" /> }));
 jest.mock('./PlaceSocialPills', () => ({ PlaceSocialPills: () => <div data-testid="socials" /> }));
 jest.mock('@/app/shared/components/Global', () => ({
-  DescriptionShowMore: ({ text }: { text: string }) => <p>{text}</p>,
   OpenInMapsLink: ({ children }: { children: React.ReactNode }) => <a href="#maps">{children}</a>,
 }));
 
@@ -43,7 +44,7 @@ describe('PlaceAboutSection', () => {
   });
 
   it('shows where the place is', () => {
-    render(<PlaceAboutSection place={makePlace()} />);
+    render(<PlaceAboutSection place={makePlace()} onReviewsClick={onReviewsClick} />);
 
     expect(screen.getByText('Nairobi')).toBeInTheDocument();
   });
@@ -52,20 +53,20 @@ describe('PlaceAboutSection', () => {
   it('adds the distance once location is granted', () => {
     useLocation.mockReturnValue({ lat: -1.2, lng: 36.8 });
 
-    render(<PlaceAboutSection place={makePlace()} />);
+    render(<PlaceAboutSection place={makePlace()} onReviewsClick={onReviewsClick} />);
 
     expect(screen.getByText(/km$/)).toBeInTheDocument();
   });
 
   it('leaves the distance out without it', () => {
-    render(<PlaceAboutSection place={makePlace()} />);
+    render(<PlaceAboutSection place={makePlace()} onReviewsClick={onReviewsClick} />);
 
     expect(screen.queryByText(/km$/)).not.toBeInTheDocument();
   });
 
   describe('the rating line', () => {
     it('sits beside the location with the score and the count', () => {
-      render(<PlaceAboutSection place={makePlace()} />);
+      render(<PlaceAboutSection place={makePlace()} onReviewsClick={onReviewsClick} />);
 
       expect(screen.getByText('4.7')).toBeInTheDocument();
       expect(screen.getByText('14 reviews')).toBeInTheDocument();
@@ -73,21 +74,55 @@ describe('PlaceAboutSection', () => {
     });
 
     it('says one review in the singular', () => {
-      render(<PlaceAboutSection place={makePlace({ totalReviews: 1 })} />);
+      render(
+        <PlaceAboutSection
+          place={makePlace({ totalReviews: 1 })}
+          onReviewsClick={onReviewsClick}
+        />,
+      );
 
       expect(screen.getByText('1 review')).toBeInTheDocument();
     });
 
     it('is left out for a place nobody has rated', () => {
-      render(<PlaceAboutSection place={makePlace({ averageRating: 0, totalReviews: 0 })} />);
+      render(
+        <PlaceAboutSection
+          place={makePlace({ averageRating: 0, totalReviews: 0 })}
+          onReviewsClick={onReviewsClick}
+        />,
+      );
 
       expect(screen.queryByTestId('StarIcon')).not.toBeInTheDocument();
     });
 
-    it('counts zero where the API sent no total', () => {
-      render(<PlaceAboutSection place={makePlace({ totalReviews: null })} />);
+    it('says No reviews yet for a place nobody has rated', () => {
+      render(
+        <PlaceAboutSection
+          place={makePlace({ averageRating: 0, totalReviews: 0 })}
+          onReviewsClick={onReviewsClick}
+        />,
+      );
 
-      expect(screen.getByText('0 reviews')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'No reviews yet' })).toBeInTheDocument();
+    });
+
+    it('says No reviews yet where the API sent no total', () => {
+      render(
+        <PlaceAboutSection
+          place={makePlace({ totalReviews: null })}
+          onReviewsClick={onReviewsClick}
+        />,
+      );
+
+      expect(screen.getByText('No reviews yet')).toBeInTheDocument();
+    });
+
+    it('is a control that jumps to Reviews', () => {
+      render(<PlaceAboutSection place={makePlace()} onReviewsClick={onReviewsClick} />);
+
+      fireEvent.click(screen.getByRole('button', { name: /14 reviews/ }));
+
+      expect(onReviewsClick).toHaveBeenCalledTimes(1);
     });
   });
 });
