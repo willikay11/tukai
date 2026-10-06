@@ -14,6 +14,7 @@ import { PlaceCategory } from '@/types/placeCategory';
 
 import { MomentDetail } from './components/MomentDetail';
 import { MomentsBreakRail } from './components/MomentsBreakRail';
+import { MomentsShowMore } from './components/MomentsShowMore';
 import { FEED_MIX_DEFAULT, FeedMix, splitIntoRuns } from './feed-mix';
 
 const MasonrySkeleton = () => (
@@ -126,11 +127,6 @@ export const MomentsView = ({ feedMix = FEED_MIX_DEFAULT }: MomentsViewProps) =>
                     tile="card"
                     selectedId={selectedId}
                     onSelect={onSelect}
-                    // Only the last run reads on to the next page, so the paging
-                    // sentinel sits at the foot of the feed
-                    onLoadMore={fetchNextPage}
-                    hasMore={isLast && Boolean(hasNextPage)}
-                    isLoadingMore={isLast && isFetchingNextPage}
                   />
                   {!isLast && interestCategories[runIndex] && (
                     <MomentsBreakRail category={interestCategories[runIndex]} />
@@ -138,6 +134,12 @@ export const MomentsView = ({ feedMix = FEED_MIX_DEFAULT }: MomentsViewProps) =>
                 </Fragment>
               );
             })}
+
+            {hasNextPage && (
+              <div className="mt-8 flex justify-center">
+                <MomentsShowMore isLoading={isFetchingNextPage} onClick={() => fetchNextPage()} />
+              </div>
+            )}
           </div>
 
           <div className="hidden lg:col-span-4 lg:block">

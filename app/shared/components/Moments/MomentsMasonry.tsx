@@ -11,9 +11,11 @@ interface MomentsMasonryProps {
   moments: Moment[];
   selectedId: string | null;
   onSelect: (id: string) => void;
-  onLoadMore: () => void;
-  hasMore: boolean;
-  isLoadingMore: boolean;
+  // Paging is optional. Without onLoadMore there is no sentinel, so the caller
+  // pages itself (the Moments feed uses a Show more button)
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
   // Column count varies by the width the grid is given, starting at two on a
   // phone so the feed reads as a grid rather than a single stack.
   columnsClassName?: string;
@@ -35,8 +37,8 @@ export const MomentsMasonry = ({
   selectedId,
   onSelect,
   onLoadMore,
-  hasMore,
-  isLoadingMore,
+  hasMore = false,
+  isLoadingMore = false,
   columnsClassName = 'columns-2 gap-4 md:columns-3',
   startIndex = 0,
   tile = 'photo',
@@ -48,7 +50,7 @@ export const MomentsMasonry = ({
     (node: HTMLDivElement | null) => {
       observerRef.current?.disconnect();
       sentinelRef.current = node;
-      if (!node || !hasMore || isLoadingMore) return;
+      if (!node || !onLoadMore || !hasMore || isLoadingMore) return;
 
       observerRef.current = new IntersectionObserver(
         (entries) => {
@@ -134,7 +136,7 @@ export const MomentsMasonry = ({
         })}
       </div>
 
-      <div ref={loadMoreRef} className="h-8" />
+      {onLoadMore && <div ref={loadMoreRef} className="h-8" />}
 
       {isLoadingMore && (
         <div className={columnsClassName}>
