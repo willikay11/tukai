@@ -606,10 +606,10 @@ export const useFeaturedPlaces = (enabled = true, perPage = 50) =>
  * The places nearest the reader. The API orders them by distance from the
  * coordinates it is sent, so the query only runs once both are known.
  */
-export const useNearbyPlaces = (lat?: number, lng?: number, perPage = 10) =>
+export const useNearbyPlaces = (lat?: number, lng?: number, categoryId?: string, perPage = 10) =>
   useQuery({
-    queryKey: ['places', 'nearby', { lat, lng, perPage }],
-    queryFn: async () => await fetchPlaces(1, perPage, undefined, undefined, lat, lng),
+    queryKey: ['places', 'nearby', { lat, lng, categoryId, perPage }],
+    queryFn: async () => await fetchPlaces(1, perPage, categoryId, undefined, lat, lng),
     enabled: lat !== undefined && lng !== undefined,
   });
 

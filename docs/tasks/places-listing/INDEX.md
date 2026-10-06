@@ -10,7 +10,7 @@ Source: `docs/design/screens/places-listing.html`.
 | PL-01 | Category row with arrows | build | built, pending owner review | PL-00 |
 | PL-02 | Promoted places | build | built, pending owner review | PL-00 |
 | PL-03 | Discover by city (places) | build | built, pending owner review | PL-00 |
-| PL-04 | Nearby places | build | built, pending owner review | PL-00 |
+| PL-04 | Nearby places | build | built, pending owner review | PL-00, PL-01 |
 | PL-05 | Places with experiences | build | built, pending owner review | PL-00 |
 | PL-06 | Popular places | decision | built, pending owner review | PL-00 |
 | PL-07 | Communities on the Places tab | decision | decided | PL-00 |
