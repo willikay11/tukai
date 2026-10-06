@@ -25,8 +25,10 @@ export const Footer = () => {
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const locationLabel = isUsingLocation ? 'Near me' : city;
 
+  // On mobile the floating bottom navigation sits over the bottom of the page,
+  // so the footer keeps its last line clear of it (24px offset + ~48px pill)
   return (
-    <footer className="border-t border-gray-100 bg-gray-50 pb-6 pt-8 md:pt-10">
+    <footer className="border-t border-gray-100 bg-gray-50 pb-24 pt-8 md:pb-6 md:pt-10">
       <div className="mx-4 md:mx-auto md:max-w-[1312px]">
         {/* Top: logo, location, contacts, company */}
         <div className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
