@@ -13,7 +13,7 @@
 | Break rails, titled, interleaved into the feed | Yes | No |
 | Rail arrows | Yes | n/a |
 | Rail cards: places with an open/closed pill | Yes | Blocked: hours are not on the list |
-| Mix: every third, every other, or newest first | Tweak | Newest first |
+| Mix: every third, every other, or newest first | Tweak, default every third | Newest first |
 
 ## Done when
 
@@ -24,3 +24,5 @@
 ## Notes
 
 The breaks are where the place cards sit. Their pill is blocked on hours, as on the Places listing.
+
+**MO-00 applied:** build all three Feed mix modes. Default is Every third.

@@ -6,7 +6,7 @@ Source: `docs/design/screens/moments-listing.html`.
 
 | ID | Segment | Type | Status | Depends on |
 |---|---|---|---|---|
-| MO-00 | Decide the rules the Moments listing shares | decision | awaiting approval | none |
+| MO-00 | Decide the rules the Moments listing shares | decision | decided | none |
 | MO-01 | Heading | build | awaiting approval | none |
 | MO-02 | Feed mix and break rails | decision | awaiting approval | MO-00 |
 | MO-03 | Moment card | build | awaiting approval | none |
