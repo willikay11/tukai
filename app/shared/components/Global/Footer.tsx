@@ -11,16 +11,11 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { DESTINATIONS } from '@/app/shared/components/Navigation/destinations';
 import { CityPicker } from '@/app/shared/components/Search/CityPicker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_HREF, SOCIAL_LINKS } from '@/config/contacts';
 import { useLocation } from '@/context/LocationContext';
 
 const APP_STORE_URL = 'https://apps.apple.com/us/app/tukai/id6751051486';
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.tukaitravels.app&hl=en';
-
-const SOCIAL_LINKS = [
-  { label: 'Instagram', href: 'https://instagram.com/tukai_app', icon: 'InstagramIcon' },
-  { label: 'X', href: 'https://x.com/Tukaiexper69436', icon: 'NewTwitterIcon' },
-  { label: 'Facebook', href: 'https://facebook.com/tukai', icon: 'Facebook02Icon' },
-];
 
 const HEADING = 'text-sm font-semibold text-gray-700';
 const LINK = 'text-gray-800 transition-colors hover:text-primary';
@@ -62,15 +57,15 @@ export const Footer = () => {
             <h3 className={HEADING}>Contacts</h3>
             <ul className="mt-3 flex flex-col gap-4 text-sm">
               <li>
-                <a href="mailto:support@tukai.co" className={`flex items-center gap-2 ${LINK}`}>
+                <a href={`mailto:${CONTACT_EMAIL}`} className={`flex items-center gap-2 ${LINK}`}>
                   <IconComponent iconName="Mail01Icon" size={18} color="currentColor" />
-                  support@tukai.co
+                  {CONTACT_EMAIL}
                 </a>
               </li>
               <li>
-                <a href="tel:+254716909815" className={`flex items-center gap-2 ${LINK}`}>
+                <a href={CONTACT_PHONE_HREF} className={`flex items-center gap-2 ${LINK}`}>
                   <IconComponent iconName="Call02Icon" size={18} color="currentColor" />
-                  +254 716 909 815
+                  {CONTACT_PHONE}
                 </a>
               </li>
             </ul>
@@ -113,24 +108,26 @@ export const Footer = () => {
             </div>
           </div>
 
-          <div className="col-span-2 md:col-span-1 md:col-start-4">
-            <h3 className={HEADING}>Follow us</h3>
-            <ul className="mt-3 flex gap-3">
-              {SOCIAL_LINKS.map((social) => (
-                <li key={social.label}>
-                  <a
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={social.label}
-                    className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 transition-colors hover:text-primary"
-                  >
-                    <IconComponent iconName={social.icon} size={20} color="currentColor" />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {SOCIAL_LINKS.length > 0 && (
+            <div className="col-span-2 md:col-span-1 md:col-start-4">
+              <h3 className={HEADING}>Follow us</h3>
+              <ul className="mt-3 flex gap-3">
+                {SOCIAL_LINKS.map((social) => (
+                  <li key={social.label}>
+                    <a
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={social.label}
+                      className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 transition-colors hover:text-primary"
+                    >
+                      <IconComponent iconName={social.icon} size={20} color="currentColor" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* Destinations, for a second route to each. Help sits under You */}
