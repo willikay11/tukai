@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -7,91 +9,131 @@ import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { DESTINATIONS } from '@/app/shared/components/Navigation/destinations';
+import { CityPicker } from '@/app/shared/components/Search/CityPicker';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useLocation } from '@/context/LocationContext';
 
+const APP_STORE_URL = 'https://apps.apple.com/us/app/tukai/id6751051486';
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.tukaitravels.app&hl=en';
+
+const SOCIAL_LINKS = [
+  { label: 'Instagram', href: 'https://instagram.com/tukai_app', icon: 'InstagramIcon' },
+  { label: 'X', href: 'https://x.com/Tukaiexper69436', icon: 'NewTwitterIcon' },
+  { label: 'Facebook', href: 'https://facebook.com/tukai', icon: 'Facebook02Icon' },
+];
+
+const HEADING = 'text-sm font-semibold text-gray-700';
+const LINK = 'text-gray-800 transition-colors hover:text-primary';
+
 export const Footer = () => {
-  const { city } = useLocation();
+  const { city, isUsingLocation } = useLocation();
+  const [isLocationOpen, setIsLocationOpen] = useState(false);
+  const locationLabel = isUsingLocation ? 'Near me' : city;
 
   return (
-    <footer className="grid grid-cols-12 border-t border-gray-100 bg-gray-50 pb-6 pt-8 md:pt-10">
-      <div className="col-span-12 mx-4 md:col-span-10 md:col-start-2 md:mx-0 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
-        {/* Top Section */}
-        <div className="grid grid-cols-12 gap-4 md:gap-2">
-          <div className="col-span-12 flex justify-center md:col-span-2 md:justify-start">
-            <Link href="/">
+    <footer className="border-t border-gray-100 bg-gray-50 pb-6 pt-8 md:pt-10">
+      <div className="mx-4 md:mx-auto md:max-w-[1312px]">
+        {/* Top: logo, location, contacts, company */}
+        <div className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
+          <div className="col-span-2 md:col-span-1">
+            <Link href="/" className="inline-block">
               <Image
                 src="/images/logo.svg"
                 alt="Tukai logo"
                 width={100}
                 height={40}
-                className="mt-2 h-10 w-[100px] shrink-0"
+                className="h-10 w-[100px] shrink-0"
               />
             </Link>
           </div>
+
           {/* Only the reader's own selected city. Without one, nothing is named */}
           {city && (
-            <div className="col-span-12 text-center md:col-span-2 md:text-left">
-              <h3 className="text-sm font-semibold text-gray-700 md:text-base">Location:</h3>
-              <p className="mt-1 text-sm text-gray-800">{city}</p>
+            <div>
+              <h3 className={HEADING}>Location</h3>
+              <p className="mt-3 flex items-center gap-2 text-sm text-gray-800">
+                <IconComponent iconName="Location01Icon" size={18} color="currentColor" />
+                {city}
+              </p>
             </div>
           )}
 
-          <div className="col-span-12 text-center md:col-span-4 md:text-left">
-            <h3 className="text-sm font-semibold text-gray-700 md:text-base">Contacts:</h3>
-            <div className="mt-1 flex flex-col items-center gap-2 text-sm text-gray-800 md:flex-row md:items-center md:gap-3">
-              <a href="mailto:support@tukai.co" className="hover:text-primary">
-                support@tukai.co
-              </a>
-              <div className="hidden h-1 w-1 rounded-full bg-gray-300 md:block" />
-              <a href="tel:+254716909815" className="hover:text-primary">
-                +254 716 909 815
-              </a>
-            </div>
+          <div>
+            <h3 className={HEADING}>Contacts</h3>
+            <ul className="mt-3 flex flex-col gap-4 text-sm">
+              <li>
+                <a href="mailto:support@tukai.co" className={`flex items-center gap-2 ${LINK}`}>
+                  <IconComponent iconName="Mail01Icon" size={18} color="currentColor" />
+                  support@tukai.co
+                </a>
+              </li>
+              <li>
+                <a href="tel:+254716909815" className={`flex items-center gap-2 ${LINK}`}>
+                  <IconComponent iconName="Call02Icon" size={18} color="currentColor" />
+                  +254 716 909 815
+                </a>
+              </li>
+            </ul>
           </div>
 
-          <div className="col-span-12 md:col-span-4">
-            <div className="flex h-full items-start justify-center gap-6 md:items-end md:justify-end">
-              <a
-                href="https://instagram.com/tukai_app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-600 transition-colors hover:text-primary"
-                aria-label="Instagram"
-              >
-                <IconComponent iconName="InstagramIcon" size={20} />
-              </a>
-              <a
-                href="https://x.com/Tukaiexper69436"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-600 transition-colors hover:text-primary"
-                aria-label="Twitter"
-              >
-                <IconComponent iconName="NewTwitterIcon" size={20} />
-              </a>
-              <a
-                href="https://www.tiktok.com/@tukaiexperiences"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-600 transition-colors hover:text-primary"
-                aria-label="TikTok"
-              >
-                <IconComponent iconName="TiktokIcon" size={20} />
-              </a>
-              {/* <a
-                href="https://facebook.com/tukai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-600 transition-colors hover:text-primary"
-                aria-label="Facebook"
-              >
-                <IconComponent iconName="Facebook02Icon" size={20} />
-              </a> */}
-            </div>
+          <div>
+            <h3 className={HEADING}>Company</h3>
+            <ul className="mt-3 flex flex-col gap-4 text-sm">
+              <li>
+                <Link href="/about" className={LINK}>
+                  About us
+                </Link>
+              </li>
+              <li>
+                <Link href="/pricing" className={LINK}>
+                  Pricing
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
 
-        {/* Destinations. Help sits under You, as the brief places it */}
+        {/* Middle: app download and social links */}
+        <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-8 md:mt-10 md:grid-cols-4">
+          <div className="col-span-2">
+            <h3 className={HEADING}>Get the app</h3>
+            <div className="mt-3 flex flex-wrap gap-3">
+              <StoreBadge
+                href={APP_STORE_URL}
+                icon="AppleIcon"
+                small="Download on the"
+                name="App Store"
+              />
+              <StoreBadge
+                href={PLAY_STORE_URL}
+                icon="PlayStoreIcon"
+                small="Get it on"
+                name="Google Play"
+              />
+            </div>
+          </div>
+
+          <div className="col-span-2 md:col-span-1 md:col-start-4">
+            <h3 className={HEADING}>Follow us</h3>
+            <ul className="mt-3 flex gap-3">
+              {SOCIAL_LINKS.map((social) => (
+                <li key={social.label}>
+                  <a
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.label}
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 transition-colors hover:text-primary"
+                  >
+                    <IconComponent iconName={social.icon} size={20} color="currentColor" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Destinations, for a second route to each. Help sits under You */}
         <nav aria-label="Footer" className="mt-8 md:mt-10">
           <ul className="grid grid-cols-2 gap-x-4 gap-y-4 text-center text-sm text-gray-800 md:grid-cols-5 md:text-left">
             {DESTINATIONS.map((destination) => (
@@ -113,19 +155,64 @@ export const Footer = () => {
           </ul>
         </nav>
 
-        {/* Bottom Section */}
-        <div className="mt-6 flex flex-col items-center justify-start gap-4 border-t border-gray-200 pt-4 text-sm text-gray-600 md:mt-8 md:flex-row md:pt-6">
-          <p>© {moment().year()} Tukai, Inc. All Rights Reserved</p>
-          <div className="flex flex-col items-center gap-4 md:ml-2.5 md:flex-row md:gap-6">
+        {/* Bottom: legal line, and the reader's location */}
+        <div className="mt-8 flex flex-col gap-4 border-t border-gray-200 pt-6 text-sm text-gray-600 md:mt-10 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col items-center gap-4 md:flex-row md:gap-6">
+            <p>© {moment().year()} Tukai, Inc. All rights reserved.</p>
             <Link href="/terms" className="hover:text-primary">
-              Terms & Conditions
+              Terms of use
             </Link>
             <Link href="/privacy" className="hover:text-primary">
-              Privacy Policy
+              Privacy policy
             </Link>
+          </div>
+
+          <div className="flex items-center justify-center gap-2 md:justify-end">
+            <IconComponent iconName="Location01Icon" size={16} color="currentColor" />
+            {locationLabel && <span className="text-gray-800">{locationLabel}</span>}
+            {locationLabel && <span aria-hidden="true">·</span>}
+            <Popover open={isLocationOpen} onOpenChange={setIsLocationOpen}>
+              <PopoverTrigger className="font-semibold text-primary hover:underline">
+                Update location
+              </PopoverTrigger>
+              <PopoverContent
+                align="end"
+                sideOffset={12}
+                className="w-auto rounded-[18px] border-line-soft p-0"
+              >
+                <CityPicker onClose={() => setIsLocationOpen(false)} />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
     </footer>
   );
 };
+
+const StoreBadge = ({
+  href,
+  icon,
+  small,
+  name,
+}: {
+  href: string;
+  icon: string;
+  small: string;
+  name: string;
+}) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="flex items-center gap-3 rounded-full border border-gray-200 bg-white py-2 pl-2 pr-5 transition-colors hover:bg-gray-100"
+  >
+    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-800">
+      <IconComponent iconName={icon} size={18} color="currentColor" />
+    </span>
+    <span className="flex flex-col leading-tight">
+      <span className="text-[11px] text-gray-500">{small}</span>
+      <span className="text-sm font-semibold text-gray-900">{name}</span>
+    </span>
+  </a>
+);

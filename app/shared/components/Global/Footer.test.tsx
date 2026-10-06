@@ -28,14 +28,14 @@ describe('Footer', () => {
 
     render(<Footer />);
 
-    expect(screen.getByText('Location:')).toBeInTheDocument();
-    expect(screen.getByText('Nairobi')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Location' })).toBeInTheDocument();
+    expect(screen.getAllByText('Nairobi').length).toBeGreaterThan(0);
   });
 
   it('shows no location when the reader has not selected one', () => {
     render(<Footer />);
 
-    expect(screen.queryByText('Location:')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Location' })).not.toBeInTheDocument();
   });
 
   it('never names the old hardcoded address', () => {
@@ -51,8 +51,8 @@ describe('Footer', () => {
     render(<Footer />);
 
     expect(screen.getByText('support@tukai.co')).toBeInTheDocument();
-    expect(screen.getByText('Terms & Conditions')).toBeInTheDocument();
-    expect(screen.getByText('Privacy Policy')).toBeInTheDocument();
+    expect(screen.getByText('Terms of use')).toBeInTheDocument();
+    expect(screen.getByText('Privacy policy')).toBeInTheDocument();
   });
 
   it('links the five destinations', () => {
