@@ -4,7 +4,7 @@
 - **Type:** build
 - **Depends on:** PL-00, PL-01 (the nearby title follows the selected category)
 - **Design:** `docs/design/screens/places-listing.html`, the nearby block: title `'Nearby ' + pcNoun`, subtitle `pcNearSub`, cards from `pcNear`.
-- **Now:** Not on /places. Nearby restaurants is on Discover as a rail (`NearbyRestaurants`, 184px cards). The design is a grid.
+- **Now:** Not on /places. Nearby restaurants was removed from Discover in the cleanup, so nothing is built to adapt.
 
 ## Inventory
 
