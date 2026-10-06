@@ -17,7 +17,7 @@ export { DownloadApp, MobileStore } from './Download';
 export { SuccessMessage } from './Messages';
 
 // Share
-export { Share, Footer } from './Share';
+export { Share } from './Share';
 
 // Search
 export { Search } from './Search';
@@ -41,6 +41,7 @@ export {
   GlobalLoading,
   AuthActions,
   DescriptionShowMore,
+  Footer,
   GoogleMapComponent,
   SocialLinks,
   appFont,

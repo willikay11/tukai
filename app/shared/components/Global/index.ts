@@ -2,6 +2,7 @@ export { ChromeGate } from './ChromeGate';
 export { GlobalLoading } from './GlobalLoading';
 export { AuthActions } from './AuthActions';
 export { DescriptionShowMore } from './DescriptionShowMore';
+export { Footer } from './Footer';
 export { GoogleMapComponent } from './GoogleMap';
 export { OpenInMapsLink } from './OpenInMapsLink';
 export { SocialLinks } from './SocialLinks';

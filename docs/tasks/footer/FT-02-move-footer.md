@@ -1,6 +1,6 @@
 # FT-02 Move the footer out of the Share folder
 
-- **Status:** todo
+- **Status:** done
 - **Type:** cleanup
 - **Depends on:** FT-00
 - **Design:** not in the new design.
@@ -16,9 +16,9 @@
 
 ## Done when
 
-- [ ] Footer lives in Global, with the other site chrome
-- [ ] Layout imports from Global
-- [ ] No footer export left in Share
+- [x] Footer lives in Global, with the other site chrome
+- [x] Layout imports from Global
+- [x] No footer export left in Share
 
 ## Notes
 
