@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ClaimPlacePrompt } from '@/app/(places)/places/[placeId]/components/ClaimPlacePrompt';
 import { PlaceReviewsSection } from '@/app/(places)/places/[placeId]/components/PlaceReviewsSection';
 import { ContextMoments, MomentComposerForm } from '@/app/shared/components/Moments';
+import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import {
   usePlace,
   usePlaceAvailability,
@@ -25,7 +26,8 @@ import { PlaceManagerBanner } from './PlaceManagerBanner';
 import { PlaceReservationSettings } from './PlaceReservationSettings';
 import { PlaceReviewForm } from './PlaceReviewForm';
 import { UpcomingExperiences } from './UpcomingExperiences';
-import { PLACE_SECTIONS, PLACE_SECTION_IDS, placeDrawerTabs } from './tabs';
+import { UPCOMING_PAGE_SIZE } from './UpcomingExperiences';
+import { PLACE_SECTIONS, placeDrawerTabs } from './tabs';
 
 /** The header and tabs a section has to clear before its pill lights up. */
 const TAB_OFFSET = 140;
@@ -100,8 +102,21 @@ export const PlaceDrawer = ({
 
   useEffect(() => setView('place'), [placeId]);
 
-  const tabs = useMemo(() => placeDrawerTabs(place?.totalReviews ?? null), [place?.totalReviews]);
-  const { activeId, scrollTo } = useScrollSpy(PLACE_SECTION_IDS, TAB_OFFSET, panel);
+  // The same request UpcomingExperiences makes, so React Query shares the one
+  // response. It only decides whether the Experiences tab and section exist.
+  const { data: experiencesResponse } = useExperiences(
+    { page: 1, page_size: UPCOMING_PAGE_SIZE, place: placeId ?? '', status: 'published' },
+    isOpen && Boolean(placeId),
+  );
+  const hasExperiences = (experiencesResponse?.data?.results ?? []).length > 0;
+
+  const tabs = useMemo(
+    () => placeDrawerTabs(place?.totalReviews ?? null, hasExperiences),
+    [place?.totalReviews, hasExperiences],
+  );
+  // The spy re-runs on a change of identity, so the ids are kept stable
+  const sectionIds = useMemo(() => tabs.map((tab) => tab.id), [tabs]);
+  const { activeId, scrollTo } = useScrollSpy(sectionIds, TAB_OFFSET, panel);
 
   return (
     <Drawer
@@ -166,9 +181,11 @@ export const PlaceDrawer = ({
                   <PlaceAboutSection place={place} />
                 </section>
 
-                <section id={PLACE_SECTIONS.experiences} className="scroll-mt-[148px] py-6">
-                  <UpcomingExperiences placeId={place.id} placeTitle={place.title} />
-                </section>
+                {hasExperiences && (
+                  <section id={PLACE_SECTIONS.experiences} className="scroll-mt-[148px] py-6">
+                    <UpcomingExperiences placeId={place.id} placeTitle={place.title} />
+                  </section>
+                )}
 
                 <section id={PLACE_SECTIONS.moments} className="scroll-mt-[148px] py-6">
                   <ContextMoments

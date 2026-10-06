@@ -1,6 +1,6 @@
 # PD-02 Section pills
 
-- **Status:** awaiting approval
+- **Status:** done (the My reservations tab waits on PD-10)
 - **Type:** cleanup
 - **Depends on:** the owner's approval of [INVENTORY.md](INVENTORY.md)
 - **Design:** `Tukai Web.dc.html`, grep `pn.secs`
@@ -24,10 +24,10 @@ with its status against what is built. Reviewed by the owner first.
 
 ## Done when
 
-- [ ] Pills match the design's height, padding, type size and both colour states
-- [ ] Icon size is 21px
+- [x] Pills match the design's height, padding, type size and both colour states
+- [x] Icon size is 21px
 - [ ] Tab set follows the design's conditions, including My reservations once PD-10 is built
 
 ## Notes
 
-The active colour is a hex in the design (#A7F3D0). It is not a token in `tailwind.config.ts`. Decide whether to add one.
+The design's colours are now tokens in `tailwind.config.ts`: `surface-pill`, `surface-pill-active` (#A7F3D0) and `ink-pill` (#1F2937). Experiences shows only when the place has published experiences. My reservations is not built, so that item stays open until PD-10 lands.
