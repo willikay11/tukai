@@ -612,3 +612,14 @@ export const useNearbyPlaces = (lat?: number, lng?: number, perPage = 10) =>
     queryFn: async () => await fetchPlaces(1, perPage, undefined, undefined, lat, lng),
     enabled: lat !== undefined && lng !== undefined,
   });
+
+/**
+ * The places in one city, for its rail on /places. The city is a place
+ * category, so it goes through the same `category` filter the list uses.
+ */
+export const usePlacesInCity = (cityCategoryId: string, enabled = true, perPage = 10) =>
+  useQuery({
+    queryKey: ['places', 'city', cityCategoryId, perPage],
+    queryFn: async () => await fetchPlaces(1, perPage, cityCategoryId),
+    enabled: enabled && Boolean(cityCategoryId),
+  });
