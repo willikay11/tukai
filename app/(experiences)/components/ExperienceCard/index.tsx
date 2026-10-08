@@ -59,6 +59,12 @@ export const ExperienceCard = ({
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
 
     event.preventDefault();
+    // nextjs-toploader's own click listener sits on `document`, below this
+    // card in the bubble, and starts the top bar for any same-site anchor
+    // click regardless of preventDefault - it never reaches `document` once
+    // this stops it here, so the bar never shows for a click that opens the
+    // drawer rather than navigating.
+    event.stopPropagation();
     drawer?.openExperience(experience.id);
   };
 
