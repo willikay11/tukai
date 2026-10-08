@@ -102,6 +102,12 @@ export const PlaceDrawer = ({
   // A place may hold two (restaurant and cinema); the live one is the one a
   // manager is being told about
   const profile = profiles.find((entry) => entry.status === 'active') ?? profiles[0];
+  // The footer's lime button is Make reservation rather than Get directions
+  // once a diner can actually book a table here - the same gate
+  // ReservationPanel uses for its own CTA
+  const canReserve = profiles.some(
+    (entry) => entry.reservationType === 'restaurant_reservation' && entry.status === 'active',
+  );
 
   const { data: availability } = usePlaceAvailability(
     placeId ?? '',
@@ -233,7 +239,11 @@ export const PlaceDrawer = ({
               </div>
 
               <div className="sticky bottom-0 z-30 border-t border-surface-muted bg-white px-6 pb-[calc(12px_+_env(safe-area-inset-bottom))] pt-3">
-                <PlaceDrawerFooter place={place} onAddReview={() => setView('review')} />
+                <PlaceDrawerFooter
+                  place={place}
+                  canReserve={canReserve}
+                  onAddReview={() => setView('review')}
+                />
               </div>
             </>
           )}

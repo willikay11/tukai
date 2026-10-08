@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PlanThisDrawer } from '@/app/shared/components/Plans/PlanThisDrawer';
@@ -18,22 +19,42 @@ import { mapsHref } from '@/utils/maps';
  */
 export const PlaceDrawerFooter = ({
   place,
+  canReserve,
   onAddReview,
 }: {
   place: Place;
+  /**
+   * A diner can book a table here - the lime button becomes Make reservation
+   * rather than Get directions, same as the design's restaurant-and-claimed
+   * case.
+   */
+  canReserve: boolean;
   /** Swaps the drawer over to the review form, rather than opening a second
    *  drawer on top of this one. */
   onAddReview: () => void;
 }) => {
   const [isPlanOpen, setIsPlanOpen] = useState(false);
   const { data: session } = useSession();
-  const { setOpenSignIn } = useAuthDialog();
+  const { setOpenSignIn, openSignInWithCallback } = useAuthDialog();
+  const router = useRouter();
 
   const directions = mapsHref({
     lat: place.location?.pointLat,
     lng: place.location?.pointLong,
     query: [place.title, place.location?.city].filter(Boolean).join(', '),
   });
+
+  const reservePath = `/places/${place.id}/reserve`;
+  // Reserving needs an account, same as adding a review; the dialog returns
+  // them to the reserve page rather than to a sign-in page they would have to
+  // navigate back from
+  const startReservation = () => {
+    if (!session?.user?.id) {
+      openSignInWithCallback(() => router.push(reservePath));
+      return;
+    }
+    router.push(reservePath);
+  };
 
   return (
     <>
@@ -58,16 +79,27 @@ export const PlaceDrawerFooter = ({
           Add review
         </Button>
 
-        {directions && (
-          <a
-            href={directions}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-12 flex-shrink-0 items-center gap-2 rounded-full bg-lime px-6 text-[15px] font-semibold text-brand-ink transition-colors hover:bg-lime-dark"
+        {canReserve ? (
+          <button
+            type="button"
+            onClick={startReservation}
+            className="inline-flex h-12 flex-shrink-0 items-center gap-2 rounded-full bg-lime px-6 text-[15px] font-semibold text-brand-ink transition hover:bg-lime-dark hover:shadow-lime-glow-sm"
           >
-            <IconComponent iconName="Navigation03Icon" size={20} color="currentColor" />
-            Get directions
-          </a>
+            <IconComponent iconName="Calendar03Icon" size={20} color="currentColor" />
+            Make reservation
+          </button>
+        ) : (
+          directions && (
+            <a
+              href={directions}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-12 flex-shrink-0 items-center gap-2 rounded-full bg-lime px-6 text-[15px] font-semibold text-brand-ink transition hover:bg-lime-dark hover:shadow-lime-glow-sm"
+            >
+              <IconComponent iconName="Navigation03Icon" size={20} color="currentColor" />
+              Get directions
+            </a>
+          )
         )}
 
         {/* Icon only on a phone-width screen, where the three buttons do not

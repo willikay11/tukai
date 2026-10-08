@@ -155,6 +155,9 @@ const config: Config = {
         'search-bar': '0 0px 15px 0px rgba(0, 0, 0, 0.15)',
         // The lift under a lime button in the place drawer's claim prompt
         'lime-glow': '0 8px 20px rgba(176, 232, 0, 0.4)',
+        // The same lift, on hover rather than always-on - the place drawer's
+        // Share moment and footer lime buttons
+        'lime-glow-sm': '0 6px 16px rgba(176, 232, 0, 0.4)',
       },
       keyframes: {
         shimmer: {

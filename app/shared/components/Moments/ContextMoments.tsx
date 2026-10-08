@@ -90,7 +90,7 @@ export const ContextMoments = ({
         else setIsComposerOpen(true);
       }}
       className={cn(
-        'inline-flex flex-shrink-0 items-center rounded-full bg-lime font-bold text-brand-ink transition-colors hover:bg-lime-dark',
+        'inline-flex flex-shrink-0 items-center rounded-full bg-lime font-bold text-brand-ink transition hover:bg-lime-dark hover:shadow-lime-glow-sm',
         isPanel
           ? 'h-[50px] gap-2 pl-5 pr-6 text-[14.5px] font-semibold'
           : 'h-12 gap-2.5 px-6 text-[15px]',
