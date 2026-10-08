@@ -23,6 +23,12 @@ jest.mock('@/app/shared/components/Icons', () => ({
 jest.mock('@/app/shared/components/Images', () => ({
   PhotoImage: ({ alt, src }: { alt: string; src: string }) => <img alt={alt} src={src} />,
 }));
+jest.mock('@/app/shared/components/Moments', () => ({
+  ContextMoments: () => <div data-testid="context-moments" />,
+}));
+jest.mock('@/app/shared/components/SendMessage/SendMessage', () => ({
+  SendMessage: () => <div data-testid="send-message" />,
+}));
 jest.mock('next/image', () => {
   function MockImage({ alt, src }: { alt: string; src: string }) {
     return <img alt={alt} src={src} />;
@@ -68,8 +74,10 @@ describe('ExperienceDrawer', () => {
   it('shows the title, who runs it, where, and the price', () => {
     render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
 
-    expect(screen.getByText('Nairobi Makers Circle')).toBeInTheDocument();
-    expect(screen.getByText('Nairobi')).toBeInTheDocument();
+    // Host community and city repeat lower down, in the host and location
+    // sections (ED-07, ED-08), so these are no longer unique to the summary
+    expect(screen.getAllByText('Nairobi Makers Circle').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Nairobi').length).toBeGreaterThan(0);
     expect(screen.getByText('KES 1,800/person')).toBeInTheDocument();
     expect(screen.getByText('Hands in the clay from the first hour.')).toBeInTheDocument();
   });

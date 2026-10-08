@@ -73,11 +73,11 @@ the design is missing, not differing.
 | Gallery | Scrolling photo strip | Done - reuses PlacePhotoStrip | ED-03 |
 | About | 3-line clamp, structured blocks | Done for the clamp; structured blocks recorded as not possible without an API change | ED-04 |
 | My tickets | QR stack or list, download, share, check-in status | Decided: stays out of the drawer; "View experience" already sends the reader to where ticket status lives | ED-05 |
-| Ticket prices | Date picker, a priced pill per ticket type | Missing; one summary price line | ED-06 |
-| Location and meeting point | Two cards, each with an image | A text line with a pin icon | ED-07 |
-| Host, going, host community | Avatar, verified badge, message, guest avatars | A text line | ED-08 |
-| Moments | Share moment button, three-column grid | Missing | ED-09 |
-| Cancellation policy, report | Heading and line, a report action | Missing | ED-10 |
+| Ticket prices | Date picker, a priced pill per ticket type | Built: a priced pill per ticket type, each linking to the full page; no date picker (no route to deep-link into) | ED-06 |
+| Location and meeting point | Two cards, each with an image | Built: a location card (image + link when tied to a place, else a plain address) plus a separate meeting-point card | ED-07 |
+| Host, going, host community | Avatar, verified badge, message, guest avatars | Built: host row and host-community row; "going" stays blocked, no guest-picture data | ED-08 |
+| Moments | Share moment button, three-column grid | Built: wires the shared `ContextMoments`, plus a past-experience note | ED-09 |
+| Cancellation policy, report | Heading and line, a report action | Blocked, not missing: no cancellation-policy field and no report flow exist anywhere in the app | ED-10 |
 | Footer | Not yet read from the prototype | View experience, full width | ED-11 |
 | Manage-experience screen | Date, visibility, type, categories, location, co-hosts, delete | Missing; overlaps the create and edit flow | ED-12, decision |
 | Host dashboard tabs | Sales, Created tickets, Guests, Moments, Analytics | Missing; overlaps Control center | ED-13, decision |

@@ -11,6 +11,7 @@ import {
 } from '@/app/(experiences)/components/ExperienceCard/experience-flag';
 import { Bookmark } from '@/app/shared/components/Bookmark';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { ContextMoments } from '@/app/shared/components/Moments';
 import { PlacePhotoStrip } from '@/app/shared/components/Places/PlaceDrawer/PlacePhotoStrip';
 import { Share } from '@/app/shared/components/Share';
 import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
@@ -21,6 +22,10 @@ import { coverPhotoUrl, Photo, photoUrl } from '@/types/photo';
 import { formatCardDateTime } from '@/utils/date-utils';
 import { experiencePath } from '@/utils/detail-paths';
 import { toPlainText } from '@/utils/safe-text-utils';
+
+import { ExperienceHostSection } from './ExperienceHostSection';
+import { ExperienceLocationSection } from './ExperienceLocationSection';
+import { ExperienceTicketsSection } from './ExperienceTicketsSection';
 
 /** The round grey disc each of the header's controls sits in. */
 const DISC = 'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-surface';
@@ -77,6 +82,9 @@ const galleryPhotos = (photos: Photo[]): string[] =>
     .sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0))
     .map((photo) => photoUrl(photo, 'md'))
     .filter((url): url is string => Boolean(url));
+
+/** Whether to show the moments section's past-experience note (ED-09). */
+const hasEnded = (experience: Experience): boolean => new Date(experience.endDate) < new Date();
 
 const Loading = () => (
   <div className="space-y-4 px-6 py-6">
@@ -199,6 +207,28 @@ export const ExperienceDrawer = ({
             </div>
 
             {experience.description && <AboutClamp text={experience.description} />}
+
+            <ExperienceTicketsSection experience={experience} />
+
+            <ExperienceLocationSection experience={experience} />
+
+            <ExperienceHostSection experience={experience} />
+
+            <div className="space-y-4 border-t border-line pt-6">
+              {hasEnded(experience) && (
+                <p className="text-[14px] text-ink-muted">This experience has already happened.</p>
+              )}
+              <ContextMoments
+                title="Moments"
+                contextLabel={experience.title}
+                emptyMessage={`No moments from ${experience.title} yet. Yours could be the first.`}
+                experienceId={experience.id}
+                placeId={experience.place?.id}
+                placeLabel={experience.place?.title}
+                communityId={experience.hostCommunity?.id}
+                communityLabel={experience.hostCommunity?.title}
+              />
+            </div>
           </div>
 
           <div className="sticky bottom-0 z-30 border-t border-line bg-white px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
