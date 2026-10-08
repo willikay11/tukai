@@ -1,0 +1,433 @@
+<!--
+Source: Tukai Web.dc.html (design project folder), the experience panel.
+Extracted: the block guarded by pn.isExp, markup and inline values kept, scripts removed.
+Covers both the guest view (pn.guestMode: about, my tickets, ticket prices,
+location, host, moments, cancellation policy, report) and the host's own
+tabs (pn.hoTabSales, hoTabCreated, hoTabGuests, hoTabMoments, hoTabAnalytics,
+hoTabAbout) and the separate manage-experience screen (pn.hostMode: date,
+visibility, type, categories, location, meeting point, host community,
+co-hosts, help, delete).
+Template tokens ({{ ... }}) are left as the prototype has them.
+Re-extract when the prototype changes; do not hand-edit.
+-->
+<sc-if value="{{ pn.isExp }}">
+        <nav aria-label="Sections" style="position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:8px;margin:-20px -24px -12px;padding:12px 24px;background:#FFFFFF;overflow-x:auto;scrollbar-width:none;">
+          <sc-for list="{{ pn.secs }}" as="sc" hint-placeholder-count="5">
+            <button type="button" onClick="{{ sc.onClick }}" aria-current="{{ sc.cur }}" style="display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;height:44px;padding:0 18px 0 12px;border:none;border-radius:999px;background:{{ sc.bg }};color:{{ sc.fg }};font-family:'Google Sans';font-size:14.5px;font-weight:500;white-space:nowrap;cursor:pointer;" style-hover="filter:brightness(0.97);" style-active="transform:scale(0.98);">
+              <i class="{{ sc.icon }}" style="font-size:21px;flex:0 0 auto;color:{{ sc.ic }};" aria-hidden="true"></i>
+              {{ sc.label }}
+            </button>
+          </sc-for>
+        </nav>
+        <sc-if value="{{ pn.hoTabSales }}"><div style="display:flex;flex-direction:column;gap:20px;">
+          <div style="background:#F9FAFB;border:0.5px solid #E5E7EB;border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px;padding:12px 10px 8px 12px;">
+              <div style="min-width:0;"><div style="font-size:14.5px;color:#1F2937;">Current ticket sales</div><div style="margin-top:4px;font-size:28px;font-weight:700;color:#1F2937;letter-spacing:-.6px;line-height:1.15;">{{ pn.ho.sTotal }}</div></div>
+              <button type="button" onClick="{{ pn.ho.onWithdraw }}" style="display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 18px 0 22px;border:none;border-radius:999px;background:#B0E800;color:#013334;font-family:'Google Sans';font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;" style-hover="filter:brightness(0.96);">Withdraw<i class="hgi-twotone hgi-arrow-down-02" style="font-size:18px;" aria-hidden="true"></i></button>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:1px;background:#EDF0EE;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(1,51,52,.07);">
+              <sc-for list="{{ pn.ho.sStats }}" as="ss" hint-placeholder-count="3"><div style="flex:1 1 120px;min-width:0;background:#FFFFFF;padding:14px;"><div style="font-size:14px;color:#5B6B66;">{{ ss.label }}</div><div style="margin-top:4px;font-size:15.5px;font-weight:700;color:#1F2937;">{{ ss.value }}</div></div></sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0 12px;margin-top:-8px;">
+            <sc-for list="{{ pn.ho.sActs }}" as="sa" hint-placeholder-count="3"><sc-if value="{{ sa.sep }}"><span aria-hidden="true" style="width:5px;height:5px;border-radius:999px;background:#60A5FA;flex:0 0 auto;"></span></sc-if><button type="button" onClick="{{ sa.onClick }}" style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0;border:none;background:transparent;cursor:pointer;font-family:'Google Sans';font-size:14.5px;font-weight:500;color:#066349;white-space:nowrap;" style-hover="color:#013334;"><i class="hgi-twotone {{ sa.icon }}" style="font-size:19px;" aria-hidden="true"></i>{{ sa.label }}</button></sc-for>
+          </div>
+          <div style="margin:0 -24px;border-top:1px solid #EDF0EE;"></div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:-4px;">
+            <label for="ho-bq" style="font-size:14px;color:#5B6B66;">Find buyers</label>
+            <div style="position:relative;">
+              <span aria-hidden="true" style="position:absolute;left:4px;top:4px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;pointer-events:none;color:#5B6B66;"><i class="hgi-twotone hgi-user" style="font-size:20px;"></i></span>
+              <input id="ho-bq" type="text" value="{{ pn.ho.bq }}" onChange="{{ pn.ho.onBq }}" placeholder="Search by user name or email" style="width:100%;box-sizing:border-box;height:56px;padding:0 50px 0 48px;border:1px solid #DDE3DF;border-radius:12px;background:#FFFFFF;font-family:'Google Sans';font-size:15px;color:#1F2937;outline:none;" style-focus="border-color:#066349;box-shadow:0 0 0 3px #E8F1ED;">
+              <span aria-hidden="true" style="position:absolute;right:4px;top:4px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;pointer-events:none;color:#1F2937;"><i class="hgi-stroke hgi-search-01" style="font-size:22px;"></i></span>
+            </div>
+          </div>
+          <sc-if value="{{ pn.ho.bHas }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;margin:-8px -24px 0;">
+              <sc-for list="{{ pn.ho.bList }}" as="bu" hint-placeholder-count="6">
+                <div style="border-bottom:1px solid #EDF0EE;">
+                  <button type="button" onClick="{{ bu.onToggle }}" aria-expanded="{{ bu.open }}" style="display:flex;align-items:center;gap:12px;width:100%;min-height:76px;padding:12px 24px 12px 16px;border:none;background:transparent;cursor:pointer;text-align:left;font-family:'Google Sans';" style-hover="background:#FAFBFA;">
+                    <i class="hgi-twotone {{ bu.chev }}" style="font-size:20px;flex:0 0 auto;color:#1F2937;" aria-hidden="true"></i>
+                    <sc-if value="{{ bu.hasImg }}"><img loading="lazy" src="{{ bu.img }}" alt="" style="width:48px;height:48px;border-radius:999px;object-fit:cover;display:block;flex:0 0 auto;background:#E8F1ED;"></sc-if>
+                    <sc-if value="{{ bu.noImg }}"><span style="width:48px;height:48px;border-radius:999px;background:#E8F1ED;color:#013334;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 auto;">{{ bu.initial }}</span></sc-if>
+                    <span style="flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px;">
+                      <span style="display:flex;align-items:center;gap:5px;min-width:0;font-size:15.5px;font-weight:600;color:#1F2937;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ bu.name }}</span><sc-if value="{{ bu.verified }}"><i class="hgi-bulk hgi-checkmark-badge-01" role="img" aria-label="Verified" style="font-size:17px;flex:0 0 auto;color:#066349;"></i></sc-if></span>
+                      <span style="display:flex;align-items:center;gap:7px;font-size:14px;color:#5B6B66;"><span style="font-weight:600;color:#1F2937;">{{ bu.amt }}</span><span aria-hidden="true" style="width:4px;height:4px;border-radius:999px;background:#8A9793;flex:0 0 auto;"></span>{{ bu.qty }}</span>
+                    </span>
+                  </button>
+                  <sc-if value="{{ bu.isOpen }}">
+                    <div style="display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:0 24px 18px 76px;">
+                      <div style="align-self:stretch;display:flex;align-items:center;border:1.5px dashed #BFDBFE;border-radius:14px;background:linear-gradient(180deg,#EFF6FF 0%,#DBEAFE 100%);min-width:0;">
+                        <span style="flex:0 0 auto;padding:10px 12px;"><img loading="lazy" src="{{ bu.qr }}" alt="{{ bu.qrAlt }}" style="width:56px;height:56px;border-radius:8px;display:block;background:#FFFFFF;"></span>
+                        <span aria-hidden="true" style="flex:0 0 auto;align-self:stretch;width:0;margin:10px 0;border-left:1.5px dashed #BFDBFE;"></span>
+                        <span style="flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:4px;padding:10px 14px;">
+                          <span style="font-size:15px;font-weight:600;color:#1F2937;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ bu.tName }}</span>
+                          <span style="font-size:13.5px;line-height:1.4;color:#3F4B47;">{{ bu.tMeta }}</span>
+                        </span>
+                      </div>
+                      <button type="button" onClick="{{ bu.onMsg }}" style="display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 18px 0 14px;border:none;border-radius:999px;background:#A7F3D0;color:#044B36;font-family:'Google Sans';font-size:14.5px;font-weight:600;cursor:pointer;white-space:nowrap;" style-hover="filter:brightness(0.97);"><i class="hgi-twotone hgi-message-01" style="font-size:18px;" aria-hidden="true"></i>Send message</button>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ pn.ho.bMore }}"><button type="button" onClick="{{ pn.ho.onBAll }}" style="align-self:flex-start;height:44px;padding:0 4px;margin-top:-8px;border:none;background:transparent;font-family:'Google Sans';font-size:14.5px;font-weight:600;color:#066349;cursor:pointer;">Show more buyers</button></sc-if>
+          </sc-if>
+          <sc-if value="{{ pn.ho.bNone }}"><p style="margin:-8px 0 0;padding:24px 20px;border-radius:12px;background:#F3F4F2;text-align:center;font-size:15px;line-height:1.55;color:#3F4B47;text-wrap:pretty;">{{ pn.ho.bNoneLine }}</p></sc-if>
+        </div></sc-if>
+        <sc-if value="{{ pn.hoTabCreated }}"><sc-for list="{{ pn.ho.tixActive }}" as="tc" hint-placeholder-count="1"><div style="display:flex;flex-direction:column;gap:14px;"><div style="display:flex;align-items:flex-start;gap:12px;"><i class="hgi-twotone hgi-ticket-01" style="font-size:24px;flex:0 0 auto;margin-top:2px;color:{{ tc.ic }};" aria-hidden="true"></i><h3 style="margin:0;min-width:0;font-family:'Google Sans';font-size:20px;font-weight:700;color:{{ tc.fg }};letter-spacing:-.3px;line-height:1.3;text-wrap:pretty;">{{ tc.name }}</h3></div><div style="display:flex;align-items:center;border:1.5px dashed {{ tc.bc }};border-radius:14px;background:{{ tc.bg }};"><span style="flex:0 0 auto;padding:12px 14px 12px 12px;"><img loading="lazy" src="{{ tc.qr }}" alt="{{ tc.qrAlt }}" style="width:64px;height:64px;border-radius:8px;display:block;background:#FFFFFF;opacity:{{ tc.qrOp }};"></span><span aria-hidden="true" style="flex:0 0 auto;align-self:stretch;width:0;margin:12px 0;border-left:1.5px dashed {{ tc.bc }};"></span><span style="flex:1 1 auto;min-width:0;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,.7fr);gap:6px 14px;padding:10px 4px 10px 16px;"><span style="display:flex;flex-direction:column;gap:3px;min-width:0;"><span style="font-size:16px;font-weight:700;color:{{ tc.fg }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ tc.name }}</span><span style="font-size:13px;color:#5B6B66;">Ticket name</span></span><span style="display:flex;flex-direction:column;gap:3px;min-width:0;"><span style="font-size:16px;font-weight:700;color:{{ tc.fg }};white-space:nowrap;">{{ tc.price }}</span><span style="font-size:13px;color:#5B6B66;">Amount per ticket</span></span><span style="display:flex;flex-direction:column;gap:3px;min-width:0;"><span style="font-size:16px;font-weight:700;color:{{ tc.fg }};">{{ tc.qty }}</span><span style="font-size:13px;color:#5B6B66;">Quantity</span></span></span><button type="button" onClick="{{ tc.onShare }}" aria-label="{{ tc.shareAria }}" style="flex:0 0 auto;width:44px;height:44px;margin-right:8px;border:none;border-radius:999px;background:transparent;display:flex;align-items:center;justify-content:center;color:{{ tc.shareC }};cursor:pointer;" style-hover="background:rgba(255,255,255,.7);"><i class="hgi-twotone hgi-share-08" style="font-size:20px;" aria-hidden="true"></i></button></div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;border-radius:12px;overflow:hidden;"><sc-for list="{{ tc.stats }}" as="st" hint-placeholder-count="7"><div style="grid-column:{{ st.col }};min-width:0;display:flex;flex-direction:column;gap:4px;padding:12px 16px;background:#F3F4F2;"><span style="font-size:13.5px;line-height:1.35;color:#5B6B66;">{{ st.label }}</span><span style="font-size:16px;font-weight:600;line-height:1.35;color:{{ st.fg }};overflow-wrap:anywhere;">{{ st.value }}</span></div></sc-for></div><div style="display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:4px 6px;margin-top:-4px;"><sc-if value="{{ tc.active }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ tc.onPause }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 10px;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:15px;font-weight:500;color:#D92D20;cursor:pointer;white-space:nowrap;" style-hover="background:#FEF3F2;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto;display:block;"><circle cx="12" cy="12" r="9.5"></circle><rect x="9" y="9" width="6" height="6" rx="1"></rect></svg>Pause ticket sales</button><span aria-hidden="true" style="flex:0 0 auto;width:5px;height:5px;border-radius:999px;background:#60A5FA;"></span><button type="button" onClick="{{ tc.onEdit }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 10px;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:15px;font-weight:500;color:#066349;cursor:pointer;white-space:nowrap;" style-hover="background:#E8F1ED;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto;display:block;"><path d="M14.4 5.6l4 4"></path><path d="M4 20l1.1-4.6L15.4 5.1a2.1 2.1 0 0 1 3 0l.5.5a2.1 2.1 0 0 1 0 3L8.6 18.9 4 20z"></path></svg>Edit ticket</button></sc-if><sc-if value="{{ tc.paused }}"><button type="button" onClick="{{ tc.onResume }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 10px;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:15px;font-weight:500;color:#066349;cursor:pointer;white-space:nowrap;" style-hover="background:#E8F1ED;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto;display:block;"><circle cx="12" cy="12" r="9.5"></circle><path d="M10 8.6v6.8l5.4-3.4z"></path></svg>Resume ticket sales</button></sc-if></div></div><div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div></sc-for><sc-if value="{{ pn.ho.hasPaused }}"><h3 style="margin:0 0 -14px;font-family:'Google Sans';font-size:15px;font-weight:600;color:#5B6B66;">Paused tickets</h3><sc-for list="{{ pn.ho.tixPaused }}" as="tc" hint-placeholder-count="1"><div style="display:flex;flex-direction:column;gap:14px;"><div style="display:flex;align-items:flex-start;gap:12px;"><i class="hgi-twotone hgi-ticket-01" style="font-size:24px;flex:0 0 auto;margin-top:2px;color:{{ tc.ic }};" aria-hidden="true"></i><h3 style="margin:0;min-width:0;font-family:'Google Sans';font-size:20px;font-weight:700;color:{{ tc.fg }};letter-spacing:-.3px;line-height:1.3;text-wrap:pretty;">{{ tc.name }}</h3></div><div style="display:flex;align-items:center;border:1.5px dashed {{ tc.bc }};border-radius:14px;background:{{ tc.bg }};"><span style="flex:0 0 auto;padding:12px 14px 12px 12px;"><img loading="lazy" src="{{ tc.qr }}" alt="{{ tc.qrAlt }}" style="width:64px;height:64px;border-radius:8px;display:block;background:#FFFFFF;opacity:{{ tc.qrOp }};"></span><span aria-hidden="true" style="flex:0 0 auto;align-self:stretch;width:0;margin:12px 0;border-left:1.5px dashed {{ tc.bc }};"></span><span style="flex:1 1 auto;min-width:0;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,.7fr);gap:6px 14px;padding:10px 4px 10px 16px;"><span style="display:flex;flex-direction:column;gap:3px;min-width:0;"><span style="font-size:16px;font-weight:700;color:{{ tc.fg }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ tc.name }}</span><span style="font-size:13px;color:#5B6B66;">Ticket name</span></span><span style="display:flex;flex-direction:column;gap:3px;min-width:0;"><span style="font-size:16px;font-weight:700;color:{{ tc.fg }};white-space:nowrap;">{{ tc.price }}</span><span style="font-size:13px;color:#5B6B66;">Amount per ticket</span></span><span style="display:flex;flex-direction:column;gap:3px;min-width:0;"><span style="font-size:16px;font-weight:700;color:{{ tc.fg }};">{{ tc.qty }}</span><span style="font-size:13px;color:#5B6B66;">Quantity</span></span></span><button type="button" onClick="{{ tc.onShare }}" aria-label="{{ tc.shareAria }}" style="flex:0 0 auto;width:44px;height:44px;margin-right:8px;border:none;border-radius:999px;background:transparent;display:flex;align-items:center;justify-content:center;color:{{ tc.shareC }};cursor:pointer;" style-hover="background:rgba(255,255,255,.7);"><i class="hgi-twotone hgi-share-08" style="font-size:20px;" aria-hidden="true"></i></button></div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;border-radius:12px;overflow:hidden;"><sc-for list="{{ tc.stats }}" as="st" hint-placeholder-count="7"><div style="grid-column:{{ st.col }};min-width:0;display:flex;flex-direction:column;gap:4px;padding:12px 16px;background:#F3F4F2;"><span style="font-size:13.5px;line-height:1.35;color:#5B6B66;">{{ st.label }}</span><span style="font-size:16px;font-weight:600;line-height:1.35;color:{{ st.fg }};overflow-wrap:anywhere;">{{ st.value }}</span></div></sc-for></div><div style="display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:4px 6px;margin-top:-4px;"><sc-if value="{{ tc.active }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ tc.onPause }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 10px;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:15px;font-weight:500;color:#D92D20;cursor:pointer;white-space:nowrap;" style-hover="background:#FEF3F2;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto;display:block;"><circle cx="12" cy="12" r="9.5"></circle><rect x="9" y="9" width="6" height="6" rx="1"></rect></svg>Pause ticket sales</button><span aria-hidden="true" style="flex:0 0 auto;width:5px;height:5px;border-radius:999px;background:#60A5FA;"></span><button type="button" onClick="{{ tc.onEdit }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 10px;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:15px;font-weight:500;color:#066349;cursor:pointer;white-space:nowrap;" style-hover="background:#E8F1ED;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto;display:block;"><path d="M14.4 5.6l4 4"></path><path d="M4 20l1.1-4.6L15.4 5.1a2.1 2.1 0 0 1 3 0l.5.5a2.1 2.1 0 0 1 0 3L8.6 18.9 4 20z"></path></svg>Edit ticket</button></sc-if><sc-if value="{{ tc.paused }}"><button type="button" onClick="{{ tc.onResume }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 10px;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:15px;font-weight:500;color:#066349;cursor:pointer;white-space:nowrap;" style-hover="background:#E8F1ED;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto;display:block;"><circle cx="12" cy="12" r="9.5"></circle><path d="M10 8.6v6.8l5.4-3.4z"></path></svg>Resume ticket sales</button></sc-if></div></div><div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div></sc-for></sc-if><div style="display:flex;flex-direction:column;gap:12px;"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px 16px;"><h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Sales deadline <span style="font-size:14.5px;font-weight:400;letter-spacing:0;color:#5B6B66;">(ticket sales close automatically at this time)</span></h3><sc-if value="{{ pn.ho.dlView }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ pn.ho.onDlEdit }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 10px;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:15px;font-weight:500;color:#066349;cursor:pointer;white-space:nowrap;" style-hover="background:#E8F1ED;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto;display:block;"><path d="M14.4 5.6l4 4"></path><path d="M4 20l1.1-4.6L15.4 5.1a2.1 2.1 0 0 1 3 0l.5.5a2.1 2.1 0 0 1 0 3L8.6 18.9 4 20z"></path></svg>Edit</button></sc-if></div><sc-if value="{{ pn.ho.dlView }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:2px;margin-top:-6px;"><span style="font-size:15px;color:#1F2937;">{{ pn.ho.dlLabel }}</span><span style="font-size:13.5px;color:#5B6B66;">{{ pn.ho.dlWhen }}</span></div></sc-if><sc-if value="{{ pn.ho.dlEdit }}"><div role="radiogroup" aria-label="Sales deadline" style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;"><sc-for list="{{ pn.ho.dlOpts }}" as="o" hint-placeholder-count="3"><button type="button" role="radio" aria-checked="{{ o.on }}" onClick="{{ o.onClick }}" style="min-height:48px;padding:10px 20px;border:none;border-radius:999px;background:{{ o.bg }};color:{{ o.fg }};font-family:'Google Sans';font-size:15px;text-align:left;cursor:pointer;" style-active="transform:scale(0.98);">{{ o.label }}</button></sc-for></div><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px;"><button type="button" onClick="{{ pn.ho.onDlCancel }}" style="flex:0 0 auto;height:48px;padding:0 6px;border:none;background:transparent;font-family:'Google Sans';font-size:15px;font-weight:500;color:#D92D20;cursor:pointer;" style-hover="text-decoration:underline;">Cancel</button><button type="button" onClick="{{ pn.ho.onDlSave }}" style="flex:0 0 auto;height:48px;padding:0 24px;border:none;border-radius:999px;background:#B0E800;color:#013334;font-family:'Google Sans';font-size:15px;font-weight:600;cursor:pointer;" style-hover="background:#A3D900;" style-active="transform:scale(0.97);">Save changes</button></div></sc-if></div><div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div><div style="display:flex;flex-direction:column;gap:8px;"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px 16px;"><h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Discount codes</h3><button type="button" onClick="{{ pn.ho.onDiscount }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 10px;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:15px;font-weight:500;color:#066349;cursor:pointer;white-space:nowrap;" style-hover="background:#E8F1ED;"><i class="hgi-twotone hgi-discount-tag-02" style="font-size:20px;flex:0 0 auto;" aria-hidden="true"></i>Generate discount code</button></div><p style="margin:-4px 0 0;font-size:15px;line-height:1.5;color:#5B6B66;text-wrap:pretty;">Generate discount codes to help promote this experience.</p>
+          <sc-for list="{{ pn.ho.dcs }}" as="dc" hint-placeholder-count="1"><div style="display:flex;flex-direction:column;gap:12px;margin-top:12px;">
+            <div style="display:flex;align-items:center;gap:12px;"><i class="hgi-twotone hgi-discount-tag-02" style="font-size:24px;flex:0 0 auto;color:{{ dc.ic }};" aria-hidden="true"></i><h4 style="margin:0;flex:1 1 auto;min-width:0;font-family:'Google Sans';font-size:20px;font-weight:700;color:{{ dc.fg }};letter-spacing:.02em;overflow-wrap:anywhere;">{{ dc.code }}</h4><sc-if value="{{ dc.paused }}"><span style="flex:0 0 auto;display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;background:#F3F4F2;font-size:13px;font-weight:600;color:#5B6B66;">Paused</span></sc-if><button type="button" onClick="{{ dc.onShare }}" aria-label="{{ dc.shareAria }}" style="flex:0 0 auto;width:44px;height:44px;border:none;border-radius:999px;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:{{ dc.ic }};" style-hover="background:#E8F1ED;"><i class="hgi-twotone hgi-share-08" style="font-size:20px;" aria-hidden="true"></i></button></div>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;border-radius:12px;overflow:hidden;"><sc-for list="{{ dc.stats }}" as="ds" hint-placeholder-count="3"><div style="min-width:0;display:flex;flex-direction:column;gap:4px;padding:12px 16px;background:#F3F4F2;"><span style="font-size:13.5px;line-height:1.35;color:#5B6B66;">{{ ds.label }}</span><span style="font-size:16px;font-weight:600;line-height:1.35;color:{{ ds.fg }};overflow-wrap:anywhere;">{{ ds.value }}</span></div></sc-for></div>
+            <div style="display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:4px 6px;margin-top:-4px;"><button type="button" onClick="{{ dc.onRedemptions }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 10px;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:15px;font-weight:500;cursor:pointer;white-space:nowrap;color:#066349;" style-hover="background:#E8F1ED;"><i class="hgi-twotone hgi-chart-line-data-01" style="font-size:20px;flex:0 0 auto;" aria-hidden="true"></i>Redemptions</button><span aria-hidden="true" style="flex:0 0 auto;width:5px;height:5px;border-radius:999px;background:#60A5FA;"></span><sc-if value="{{ dc.active }}"><button type="button" onClick="{{ dc.onPause }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 10px;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:15px;font-weight:500;cursor:pointer;white-space:nowrap;color:#D92D20;" style-hover="background:#FEF3F2;"><i class="hgi-twotone hgi-stop-circle" style="font-size:20px;flex:0 0 auto;" aria-hidden="true"></i>Pause code</button></sc-if><sc-if value="{{ dc.paused }}"><button type="button" onClick="{{ dc.onResume }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 10px;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:15px;font-weight:500;cursor:pointer;white-space:nowrap;color:#066349;" style-hover="background:#E8F1ED;"><i class="hgi-twotone hgi-play" style="font-size:20px;flex:0 0 auto;" aria-hidden="true"></i>Resume code</button></sc-if><span aria-hidden="true" style="flex:0 0 auto;width:5px;height:5px;border-radius:999px;background:#60A5FA;"></span><button type="button" onClick="{{ dc.onEdit }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 10px;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:15px;font-weight:500;cursor:pointer;white-space:nowrap;color:#066349;" style-hover="background:#E8F1ED;"><i class="hgi-twotone hgi-pencil-edit-02" style="font-size:20px;flex:0 0 auto;" aria-hidden="true"></i>Edit code</button></div>
+          </div></sc-for></div></sc-if>
+        <sc-if value="{{ pn.hoTabGuests }}"><div style="display:flex;align-items:center;gap:12px;"><div role="tablist" aria-label="Invited" style="display:inline-flex;align-items:center;gap:4px;padding:4px;border-radius:999px;background:#F3F4F2;"><sc-for list="{{ pn.ho.gTabs }}" as="gt" hint-placeholder-count="2"><button type="button" role="tab" aria-selected="{{ gt.on }}" onClick="{{ gt.onClick }}" style="height:44px;padding:0 18px;border:none;border-radius:999px;background:{{ gt.bg }};color:{{ gt.fg }};font-family:'Google Sans';font-size:14.5px;font-weight:500;cursor:pointer;white-space:nowrap;">{{ gt.label }}</button></sc-for></div><span aria-hidden="true" style="flex:1 1 auto;"></span><button type="button" onClick="{{ pn.ho.onGSearch }}" aria-label="Search invited guests" aria-expanded="{{ pn.ho.gSearch }}" style="flex:0 0 auto;width:48px;height:48px;border:none;border-radius:999px;background:#F3F4F2;display:flex;align-items:center;justify-content:center;color:#1F2937;cursor:pointer;" style-hover="background:#E8F1ED;"><i class="hgi-stroke hgi-search-01" style="font-size:21px;" aria-hidden="true"></i></button></div><sc-if value="{{ pn.ho.gSearch }}"><input type="text" value="{{ pn.ho.gq }}" onChange="{{ pn.ho.onGq }}" aria-label="Search invited guests" placeholder="Search by name or email" style="width:100%;box-sizing:border-box;height:56px;margin-top:-14px;padding:0 16px;border:1px solid #DDE3DF;border-radius:12px;background:#FFFFFF;font-family:'Google Sans';font-size:15px;color:#1F2937;outline:none;" style-focus="border-color:#066349;box-shadow:0 0 0 3px #E8F1ED;"></sc-if><sc-if value="{{ pn.ho.gHas }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:-10px;"><sc-for list="{{ pn.ho.gList }}" as="pp" hint-placeholder-count="8"><span style="display:inline-flex;align-items:center;gap:8px;max-width:100%;height:52px;padding:0 2px 0 6px;border-radius:999px;background:#F3F4F2;"><sc-if value="{{ pp.hasImg }}"><img loading="lazy" src="{{ pp.img }}" alt="" style="width:40px;height:40px;border-radius:999px;object-fit:cover;display:block;flex:0 0 auto;background:#E8F1ED;"></sc-if><sc-if value="{{ pp.noImg }}"><span aria-hidden="true" style="width:40px;height:40px;border-radius:999px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:#E3E8E5;color:#3F4B47;font-size:15px;font-weight:600;">{{ pp.initial }}</span></sc-if><span style="min-width:0;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;color:#1F2937;">{{ pp.label }}</span><button type="button" onClick="{{ pp.onRemove }}" aria-label="{{ pp.removeAria }}" style="width:44px;height:44px;flex:0 0 auto;border:none;border-radius:999px;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#8A9793;" style-hover="color:#1F2937;"><i class="hgi-twotone hgi-cancel-circle" style="font-size:22px;flex:0 0 auto;" aria-hidden="true"></i></button></span></sc-for></div></sc-if><sc-if value="{{ pn.ho.gNone }}"><p style="margin:-10px 0 0;padding:24px 20px;border-radius:12px;background:#F3F4F2;text-align:center;font-size:15px;line-height:1.55;color:#3F4B47;text-wrap:pretty;">{{ pn.ho.gNoneLine }}</p></sc-if></sc-if>
+        <sc-if value="{{ pn.hoTabMoments }}"><button type="button" onClick="{{ pn.hoB.onClick }}" style="display:flex;align-items:center;gap:14px;margin:0 -24px;padding:0 24px 18px;border:none;border-bottom:1px solid #EDF0EE;background:transparent;text-align:left;cursor:text;font-family:'Google Sans';"><img loading="lazy" src="{{ pn.meImg }}" alt="" style="width:48px;height:48px;border-radius:999px;object-fit:cover;display:block;flex:0 0 auto;background:#E8F1ED;"><span style="flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px;"><span style="font-size:15px;font-weight:600;color:#1F2937;">{{ pn.meName }}</span><span style="font-size:14.5px;color:#5B6B66;">What are you up to?</span></span></button><sc-if value="{{ pn.hasMoments }}"><div style="container-type:inline-size;margin-top:-10px;"><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:calc((100cqw - 8px) / 3);grid-auto-flow:dense;gap:4px;"><sc-for list="{{ pn.moments }}" as="m" hint-placeholder-count="7"><button type="button" onClick="{{ m.onOpen }}" aria-label="{{ m.aria }}" style="grid-column:{{ m.gc }};grid-row:{{ m.gr }};position:relative;padding:0;border:none;border-radius:12px;overflow:hidden;background:#F3F4F2;cursor:pointer;"><img src="{{ m.img }}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;"><sc-if value="{{ m.isAlbum }}"><span style="position:absolute;top:6px;right:6px;display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;background:rgba(0,0,0,.55);color:#FFFFFF;font-size:11.5px;font-weight:700;pointer-events:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto;display:block;"><rect x="8" y="8" width="13" height="13" rx="3"></rect><path d="M16 4H7a3 3 0 0 0-3 3v9"></path></svg>{{ m.albumCount }}</span></sc-if></button></sc-for></div></div></sc-if><sc-if value="{{ pn.noMoments }}"><p style="margin:-10px 0 0;padding:24px 20px;border-radius:12px;background:#F3F4F2;text-align:center;font-size:15px;line-height:1.55;color:#3F4B47;text-wrap:pretty;">No moments from this experience yet. Photos your guests share show up here.</p></sc-if></sc-if>
+        <sc-if value="{{ pn.hoTabAnalytics }}"><div style="display:flex;flex-direction:column;gap:12px;"><span style="font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#5B6B66;">Key metrics</span><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;border-radius:12px;overflow:hidden;"><sc-for list="{{ pn.ho.anStats }}" as="st" hint-placeholder-count="7"><div style="grid-column:{{ st.col }};min-width:0;display:flex;flex-direction:column;gap:4px;padding:12px 16px;background:#F3F4F2;"><span style="font-size:13.5px;line-height:1.35;color:#5B6B66;">{{ st.label }}</span><span style="font-size:16px;font-weight:600;line-height:1.35;color:{{ st.fg }};overflow-wrap:anywhere;">{{ st.value }}</span></div></sc-for></div></div></sc-if>
+        <sc-if value="{{ pn.hoTabAbout }}" hint-placeholder-val="{{ true }}">
+        <div style="position:relative;margin:0 -24px;">
+          <div data-gal-row="1" onScroll="{{ pn.onGalScroll }}" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 24px;scroll-snap-type:x proximity;scroll-padding:0 24px;">
+            <sc-for list="{{ pn.gallery }}" as="g" hint-placeholder-count="4">
+              <button type="button" onClick="{{ g.onOpen }}" aria-label="{{ g.aria }}" style="flex:0 0 auto;width:{{ g.w }};height:240px;padding:0;border:none;border-radius:12px;overflow:hidden;background:#F3F4F2;cursor:zoom-in;scroll-snap-align:start;">
+                <img loading="lazy" src="{{ g.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+              </button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ pn.galCanPrev }}">
+            <button type="button" onClick="{{ pn.onGalRowPrev }}" aria-label="Scroll photos left" style="position:absolute;left:14px;top:50%;z-index:2;transform:translateY(-50%);width:44px;height:44px;border:none;border-radius:999px;background:rgba(255,255,255,.95);color:#013334;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(1,51,52,.25);" style-hover="background:#FFFFFF;" style-active="transform:translateY(-50%) scale(0.94);"><i class="hgi-twotone hgi-arrow-left-01" style="font-size:20px;flex:0 0 auto;" aria-hidden="true"></i></button>
+          </sc-if>
+          <sc-if value="{{ pn.galCanNext }}">
+            <button type="button" onClick="{{ pn.onGalRowNext }}" aria-label="Scroll photos right" style="position:absolute;right:14px;top:50%;z-index:2;transform:translateY(-50%);width:44px;height:44px;border:none;border-radius:999px;background:rgba(255,255,255,.95);color:#013334;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(1,51,52,.25);" style-hover="background:#FFFFFF;" style-active="transform:translateY(-50%) scale(0.94);"><i class="hgi-twotone hgi-arrow-right-01" style="font-size:20px;flex:0 0 auto;" aria-hidden="true"></i></button>
+          </sc-if>
+        </div>
+        <div data-psec="about" style="display:flex;flex-direction:column;gap:10px;margin-top:-10px;">
+          <h2 style="margin:0;font-family:'Google Sans';font-size:26px;font-weight:700;color:#1F2937;letter-spacing:-.5px;line-height:1.2;text-wrap:pretty;">{{ pn.title }}</h2>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <sc-if value="{{ pn.plainAbout }}" hint-placeholder-val="{{ true }}"><p data-about="1" style="margin:0;font-size:15px;line-height:1.6;color:#1F2937;text-wrap:pretty;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:{{ pn.aboutClamp }};overflow:hidden;">{{ pn.about }}</p></sc-if><sc-if value="{{ pn.richAbout }}"><div data-about="1" style="display:flex;flex-direction:column;gap:8px;font-size:15px;line-height:1.6;color:#1F2937;max-height:{{ pn.aboutMaxH }};overflow:hidden;"><sc-for list="{{ pn.aboutRich }}" as="db" hint-placeholder-count="2"><div style="display:flex;align-items:flex-start;gap:10px;"><sc-if value="{{ db.isUl }}"><span aria-hidden="true" style="flex:0 0 auto;width:6px;height:6px;margin:10px 2px 0 4px;border-radius:999px;background:#066349;"></span></sc-if><sc-if value="{{ db.isOl }}"><span aria-hidden="true" style="flex:0 0 auto;min-width:18px;font-weight:600;color:#066349;">{{ db.mark }}</span></sc-if><span style="min-width:0;text-wrap:pretty;"><sc-for list="{{ db.runs }}" as="r" hint-placeholder-count="1"><span style="font-weight:{{ r.fw }};font-style:{{ r.fs }};text-decoration:{{ r.td }};">{{ r.text }}</span></sc-for></span></div></sc-for></div></sc-if>
+            <sc-if value="{{ pn.aboutOpen }}">
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+                <sc-for list="{{ pn.aboutBlocks }}" as="ab" hint-placeholder-count="6">
+                  <sc-if value="{{ ab.isH }}"><h4 style="margin:12px 0 0;font-family:'Google Sans';font-size:16px;font-weight:700;color:#013334;letter-spacing:-.1px;">{{ ab.text }}</h4></sc-if>
+                  <sc-if value="{{ ab.isLi }}"><div style="display:flex;align-items:flex-start;gap:10px;font-size:15px;line-height:1.6;color:#1F2937;"><span aria-hidden="true" style="flex:0 0 auto;width:6px;height:6px;margin-top:10px;border-radius:999px;background:#066349;"></span><span style="min-width:0;text-wrap:pretty;"><span style="font-weight:600;color:#013334;">{{ ab.lead }}</span> <sc-for list="{{ ab.runs }}" as="r" hint-placeholder-count="1"><span style="font-weight:{{ r.fw }};font-style:{{ r.fs }};text-decoration:{{ r.td }};">{{ r.text }}</span></sc-for></span></div></sc-if>
+                </sc-for>
+              </div>
+            </sc-if>
+            <button type="button" onClick="{{ pn.onAboutMore }}" aria-expanded="{{ pn.aboutOpen }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:6px;height:44px;margin:-4px 0 -10px;padding:0;border:none;background:transparent;font-family:'Google Sans';font-size:15px;font-weight:500;color:#066349;cursor:pointer;" style-hover="text-decoration:underline;">{{ pn.aboutLabel }}<i class="hgi-twotone {{ pn.aboutIcon }}" style="font-size:17px;flex:0 0 auto;" aria-hidden="true"></i></button>
+          </div>
+        </div>
+        <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        <sc-if value="{{ pn.guestMode }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ pn.hasTix }}">
+          <div data-psec="mine" style="display:flex;flex-direction:column;gap:14px;">
+            <button type="button" onClick="{{ pn.onTixToggle }}" aria-expanded="{{ pn.tixOpen }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;min-height:44px;margin:-10px 0;padding:0;border:none;background:transparent;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;cursor:pointer;" style-hover="color:#066349;">My tickets<i class="hgi-twotone {{ pn.tixIcon }}" style="font-size:20px;flex:0 0 auto;color:#5B6B66;" aria-hidden="true"></i></button>
+            <sc-if value="{{ pn.tixOpen }}">
+              <sc-if value="{{ pn.tixStackView }}" hint-placeholder-val="{{ true }}">
+              <div style="position:relative;padding-bottom:{{ pn.tixCur.stackPad }};">
+                <sc-if value="{{ pn.tixCur.stack }}">
+                  <span aria-hidden="true" style="position:absolute;left:16px;right:16px;bottom:0;height:24px;border:1.5px dashed #BFDBFE;border-top:none;border-radius:0 0 14px 14px;background:#E4EEFD;"></span>
+                </sc-if>
+                <div style="position:relative;display:flex;align-items:center;flex-wrap:wrap;border:1.5px dashed #BFDBFE;border-radius:14px;background:linear-gradient(180deg,#EFF6FF 0%,#DBEAFE 100%);transition:border-color .2s ease;" style-hover="border-color:#93C5FD;">
+                  <button type="button" onClick="{{ pn.tixCur.onSpread }}" aria-label="{{ pn.tixCur.spreadAria }}" style="flex:1 1 280px;min-width:0;display:flex;align-items:center;padding:0;border:none;border-radius:14px;background:transparent;text-align:left;cursor:pointer;font-family:'Google Sans';">
+                    <span style="flex:0 0 auto;padding:12px 16px 12px 12px;">
+                      <img loading="lazy" src="{{ pn.tixCur.qr }}" alt="{{ pn.tixCur.qrAlt }}" style="width:76px;height:76px;border-radius:8px;display:block;background:#FFFFFF;opacity:{{ pn.tixCur.qrOp }};transition:opacity .2s ease;">
+                    </span>
+                    <span aria-hidden="true" style="flex:0 0 auto;align-self:stretch;width:0;margin:12px 0;border-left:1.5px dashed #BFDBFE;"></span>
+                    <span style="flex:1 1 auto;min-width:0;display:flex;align-items:center;flex-wrap:wrap;gap:6px 28px;padding:10px 12px 10px 20px;">
+                      <span style="display:flex;flex-direction:column;gap:3px;">
+                        <span style="font-size:17px;font-weight:700;color:#1F2937;">{{ pn.tixCur.qty }}</span>
+                        <span style="font-size:13.5px;color:#5B6B66;">Quantity</span>
+                      </span>
+                      <span style="display:flex;flex-direction:column;gap:3px;min-width:0;">
+                        <span style="font-size:17px;font-weight:700;color:#1F2937;white-space:nowrap;">{{ pn.tixCur.type }}</span>
+                        <span style="font-size:13.5px;color:#5B6B66;">Ticket type</span>
+                      </span>
+                      <sc-if value="{{ pn.tixCur.hasIn }}">
+                        <span style="display:flex;flex-direction:column;gap:3px;">
+                          <span style="font-size:17px;font-weight:700;color:#066349;white-space:nowrap;">{{ pn.tixCur.inVal }}</span>
+                          <span style="font-size:13.5px;color:#5B6B66;">Checked in</span>
+                        </span>
+                      </sc-if>
+                    </span>
+                  </button>
+                  <span style="flex:1 0 auto;display:flex;align-items:center;justify-content:flex-end;gap:2px;padding:4px 12px 4px 8px;">
+                    <button type="button" onClick="{{ pn.tixCur.onShare }}" aria-label="Share a ticket" style="width:44px;height:44px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:14.5px;font-weight:500;color:#066349;cursor:pointer;white-space:nowrap;" style-hover="background:rgba(255,255,255,.7);"><i class="hgi-twotone hgi-share-08" style="font-size:20px;flex:0 0 auto;color:#066349;" aria-hidden="true"></i></button>
+                    <span aria-hidden="true" style="flex:0 0 auto;width:5px;height:5px;border-radius:999px;background:#60A5FA;"></span>
+                    <button type="button" onClick="{{ pn.tixCur.onDownload }}" style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 12px;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:14.5px;font-weight:500;color:#1F2937;cursor:pointer;white-space:nowrap;" style-hover="background:rgba(255,255,255,.7);"><i class="hgi-twotone hgi-download-04" style="font-size:19px;flex:0 0 auto;color:#066349;" aria-hidden="true"></i>Download</button>
+                  </span>
+                </div>
+              </div>
+              </sc-if>
+              <sc-if value="{{ pn.tixListView }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                  <sc-for list="{{ pn.tixSingles }}" as="ts" hint-placeholder-count="2">
+                    <div style="border:1.5px dashed {{ ts.bc }};border-radius:14px;background:{{ ts.bg }};">
+                      <button type="button" onClick="{{ ts.onToggle }}" aria-expanded="{{ ts.open }}" style="display:flex;align-items:center;gap:14px;width:100%;min-height:66px;padding:10px 16px 10px 10px;border:none;border-radius:14px;background:transparent;text-align:left;cursor:pointer;font-family:'Google Sans';">
+                        <sc-if value="{{ ts.showThumb }}">
+                          <img loading="lazy" src="{{ ts.qr }}" alt="" style="width:44px;height:44px;border-radius:6px;display:block;flex:0 0 auto;background:#FFFFFF;">
+                        </sc-if>
+                        <sc-if value="{{ ts.showTicket }}">
+                          <span aria-hidden="true" style="width:44px;height:44px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:#FFFFFF;color:#066349;"><i class="hgi-twotone hgi-ticket-01" style="font-size:22px;" aria-hidden="true"></i></span>
+                        </sc-if>
+                        <sc-if value="{{ ts.used }}">
+                          <span aria-hidden="true" style="width:44px;height:44px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:#E8F1ED;color:#066349;"><i class="hgi-twotone {{ ts.checkIcon }}" style="font-size:22px;" aria-hidden="true"></i></span>
+                        </sc-if>
+                        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
+                          <span style="font-size:15.5px;font-weight:700;color:#1F2937;">{{ ts.title }}</span>
+                          <span style="font-size:13.5px;color:#5B6B66;">{{ ts.sub }}</span>
+                        </span>
+                        <span style="flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:#066349;white-space:nowrap;">{{ ts.hint }}<i class="hgi-twotone {{ ts.icon }}" style="font-size:18px;flex:0 0 auto;" aria-hidden="true"></i></span>
+                      </button>
+                      <sc-if value="{{ ts.active }}">
+                        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px 16px 12px;">
+                          <button type="button" onClick="{{ ts.onScan }}" aria-label="{{ ts.qrAlt }}" style="display:block;padding:14px;border:none;border-radius:14px;background:#FFFFFF;cursor:pointer;">
+                            <img loading="lazy" src="{{ ts.qr }}" alt="" style="width:216px;height:216px;display:block;">
+                          </button>
+                          <span style="font-size:18px;font-weight:700;letter-spacing:2px;color:#1F2937;font-variant-numeric:tabular-nums;">{{ ts.code }}</span>
+                          <span style="max-width:36ch;font-size:13.5px;line-height:1.5;color:#3F4B47;text-align:center;text-wrap:pretty;">Show this at the entrance. Turn your brightness up if it does not scan.</span>
+                          <span style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px;">
+                            <button type="button" onClick="{{ ts.onShare }}" style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 12px;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:14.5px;font-weight:500;color:#1F2937;cursor:pointer;white-space:nowrap;" style-hover="background:rgba(255,255,255,.7);"><i class="hgi-twotone hgi-share-08" style="font-size:20px;flex:0 0 auto;color:#066349;" aria-hidden="true"></i>Share</button>
+                            <span aria-hidden="true" style="flex:0 0 auto;width:5px;height:5px;border-radius:999px;background:#60A5FA;"></span>
+                            <button type="button" onClick="{{ ts.onDownload }}" style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 12px;border:none;border-radius:999px;background:transparent;font-family:'Google Sans';font-size:14.5px;font-weight:500;color:#1F2937;cursor:pointer;white-space:nowrap;" style-hover="background:rgba(255,255,255,.7);"><i class="hgi-twotone hgi-download-04" style="font-size:19px;flex:0 0 auto;color:#066349;" aria-hidden="true"></i>Download</button>
+                          </span>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ ts.usedOpen }}">
+                        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px 16px 16px;">
+                          <span style="position:relative;display:block;padding:14px;border-radius:14px;background:#FFFFFF;">
+                            <img loading="lazy" src="{{ ts.qr }}" alt="" style="width:216px;height:216px;display:block;opacity:.1;filter:grayscale(1);">
+                            <span style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
+                              <span aria-hidden="true" style="width:64px;height:64px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#066349;color:#FFFFFF;"><i class="hgi-twotone {{ ts.checkIcon }}" style="font-size:32px;" aria-hidden="true"></i></span>
+                              <span style="font-size:18px;font-weight:700;color:#013334;">Checked in</span>
+                            </span>
+                          </span>
+                          <span style="font-size:16px;font-weight:600;letter-spacing:2px;color:#5B6B66;font-variant-numeric:tabular-nums;">{{ ts.code }}</span>
+                          <span style="max-width:36ch;font-size:13.5px;line-height:1.5;color:#3F4B47;text-align:center;text-wrap:pretty;">{{ ts.usedNote }}</span>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0 12px;margin:-6px 0 -12px;">
+                <span style="display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:14px;color:#3F4B47;"><i class="hgi-twotone {{ pn.tixCur.statusIcon }}" style="font-size:18px;flex:0 0 auto;color:#066349;" aria-hidden="true"></i>{{ pn.tixCur.status }}</span>
+                <sc-if value="{{ pn.hasTixDots }}">
+                  <div style="display:flex;align-items:center;">
+                    <sc-for list="{{ pn.tixDots }}" as="td" hint-placeholder-count="2">
+                      <button type="button" onClick="{{ td.onClick }}" aria-label="{{ td.aria }}" aria-current="{{ td.cur }}" style="width:26px;height:44px;padding:0;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:block;width:{{ td.w }};height:6px;border-radius:999px;background:{{ td.bg }};"></span></button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ pn.tixCanStack }}">
+                  <button type="button" onClick="{{ pn.onTixStack }}" style="display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0;border:none;background:transparent;font-family:'Google Sans';font-size:14px;font-weight:600;color:#066349;cursor:pointer;" style-hover="text-decoration:underline;"><i class="hgi-twotone hgi-arrow-up-01" style="font-size:17px;flex:0 0 auto;" aria-hidden="true"></i>Stack tickets</button>
+                </sc-if>
+              </div>
+            </sc-if>
+          </div>
+          <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        </sc-if>
+        <div data-psec="tickets" style="display:flex;flex-direction:column;gap:16px;">
+          <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Ticket prices</h3>
+          <sc-if value="{{ pn.hasOcc }}">
+            <div role="group" aria-label="Choose a date" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -24px;padding:0 24px;">
+              <sc-for list="{{ pn.occList }}" as="oc" hint-placeholder-count="4">
+                <button type="button" onClick="{{ oc.onPick }}" aria-pressed="{{ oc.on }}" style="flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;min-height:56px;padding:8px 18px;border:none;border-radius:14px;background:{{ oc.bg }};text-align:left;cursor:pointer;font-family:'Google Sans';" style-active="transform:scale(0.98);">
+                  <span style="font-size:14.5px;font-weight:600;color:{{ oc.fg }};white-space:nowrap;">{{ oc.label }}</span>
+                  <span style="font-size:12.5px;color:{{ oc.sfg }};white-space:nowrap;">{{ oc.sub }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:0 -24px;padding:0 24px;">
+            <sc-for list="{{ pn.tickets }}" as="tk" hint-placeholder-count="3">
+              <button type="button" onClick="{{ tk.onClick }}" style="flex:0 0 auto;min-width:176px;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:14px 16px;border:none;border-radius:12px;background:#F3F4F2;text-align:left;cursor:pointer;font-family:'Google Sans';" style-hover="background:#E8F1ED;">
+                <span style="display:flex;flex-direction:column;gap:3px;">
+                  <span style="font-size:15px;font-weight:600;color:#1F2937;white-space:nowrap;">{{ tk.label }}</span>
+                  <span style="font-size:14.5px;color:#1F2937;white-space:nowrap;">{{ tk.price }}</span>
+                  <span style="font-size:12px;color:#5B6B66;white-space:nowrap;">{{ tk.note }}</span>
+                </span>
+                <i class="hgi-twotone hgi-arrow-up-right-01" style="font-size:18px;flex:0 0 auto;color:#066349;" aria-hidden="true"></i>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+        <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        <div data-psec="where" style="display:flex;flex-wrap:wrap;gap:28px 40px;">
+          <div style="flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:14px;">
+            <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Location</h3>
+            <div style="display:flex;align-items:center;gap:16px;">
+              <img loading="lazy" src="{{ pn.locImg }}" alt="" style="width:72px;height:72px;border-radius:12px;object-fit:cover;display:block;flex:0 0 auto;background:#F3F4F2;">
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
+                <sc-if value="{{ pn.locLink }}">
+                  <button type="button" onClick="{{ pn.onLoc }}" style="align-self:flex-start;max-width:100%;display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:-10px 0 -8px;padding:0;border:none;background:transparent;text-align:left;font-family:'Google Sans';font-size:15px;font-weight:600;color:#1F2937;cursor:pointer;" style-hover="color:#066349;"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ pn.locName }}</span><i class="hgi-twotone hgi-arrow-up-right-01" style="font-size:16px;flex:0 0 auto;color:#066349;" aria-hidden="true"></i></button>
+                </sc-if>
+                <sc-if value="{{ pn.locPlain }}">
+                  <span style="min-height:26px;font-size:15px;font-weight:600;color:#1F2937;">{{ pn.locName }}</span>
+                </sc-if>
+                <button type="button" onClick="{{ pn.onMap }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:-8px 0 -10px;padding:0;border:none;background:transparent;font-family:'Google Sans';font-size:14px;font-weight:600;color:#066349;cursor:pointer;" style-hover="text-decoration:underline;"><i class="hgi-twotone hgi-location-01" style="font-size:17px;flex:0 0 auto;" aria-hidden="true"></i>View on Google Maps</button>
+              </span>
+            </div>
+          </div>
+          <div style="flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:14px;">
+            <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Meeting point and time</h3>
+            <div style="display:flex;align-items:center;gap:16px;">
+              <img loading="lazy" src="{{ pn.meetImgSafe }}" alt="" style="width:72px;height:72px;border-radius:12px;object-fit:cover;display:block;flex:0 0 auto;background:#F3F4F2;">
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
+                <span style="display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;min-height:26px;font-size:15px;color:#1F2937;"><span style="font-weight:600;">{{ pn.meetName }}</span><span aria-hidden="true" style="flex:0 0 auto;width:5px;height:5px;border-radius:999px;background:#B7C3BE;"></span><span style="color:#3F4B47;">{{ pn.meetTime }}</span></span>
+                <button type="button" onClick="{{ pn.onMeetMap }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:-8px 0 -10px;padding:0;border:none;background:transparent;font-family:'Google Sans';font-size:14px;font-weight:600;color:#066349;cursor:pointer;" style-hover="text-decoration:underline;"><i class="hgi-twotone hgi-location-01" style="font-size:17px;flex:0 0 auto;" aria-hidden="true"></i>View on Google Maps</button>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div data-psec="host" style="display:flex;flex-direction:column;gap:28px;">
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin:0 -24px;padding:16px 24px;background:#F3F4F2;">
+            <img loading="lazy" src="{{ pn.orgImg }}" alt="" style="width:52px;height:52px;border-radius:999px;object-fit:cover;display:block;flex:0 0 auto;background:#E8F1ED;">
+            <span style="flex:1 1 220px;min-width:0;display:flex;flex-direction:column;gap:2px;">
+              <button type="button" onClick="{{ pn.onOrg }}" style="align-self:flex-start;max-width:100%;display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:-10px 0 -8px;padding:0;border:none;background:transparent;text-align:left;font-family:'Google Sans';font-size:15px;color:#1F2937;cursor:pointer;" style-hover="color:#066349;">
+                <span style="color:#5B6B66;">{{ pn.hostRole }}:</span>
+                <span style="min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ pn.orgName }}</span>
+                <i class="hgi-bulk hgi-checkmark-badge-01" role="img" aria-label="Verified" style="font-size:18px;flex:0 0 auto;color:#066349;"></i>
+                <i class="hgi-twotone hgi-arrow-up-right-01" style="font-size:16px;flex:0 0 auto;color:#066349;" aria-hidden="true"></i>
+              </button>
+              <span style="font-size:13.5px;color:#5B6B66;">{{ pn.orgLine }}</span>
+            </span>
+            <button type="button" onClick="{{ pn.onMessage }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 20px;border:none;border-radius:999px;background:linear-gradient(180deg,#0C7A50 0%,#044B36 100%);color:#FFFFFF;font-family:'Google Sans';font-size:14.5px;font-weight:700;cursor:pointer;white-space:nowrap;" style-active="transform:scale(0.98);"><i class="hgi-twotone hgi-bubble-chat" style="font-size:18px;flex:0 0 auto;" aria-hidden="true"></i>{{ pn.msgLabel }}</button>
+          </div>
+          <sc-if value="{{ pn.hasHostComm }}">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Host community</h3>
+              <div style="display:flex;align-items:center;gap:16px;">
+                <button type="button" onClick="{{ pn.hc.onOpen }}" style="flex:0 1 auto;min-width:0;display:flex;align-items:center;gap:16px;padding:0;border:none;background:transparent;text-align:left;cursor:pointer;font-family:'Google Sans';">
+                  <img loading="lazy" src="{{ pn.hc.img }}" alt="" style="width:72px;height:72px;border-radius:14px;object-fit:cover;display:block;flex:0 0 auto;background:#E8F1ED;">
+                  <span style="flex:0 1 auto;min-width:0;display:flex;flex-direction:column;gap:5px;">
+                    <span style="display:flex;align-items:center;gap:8px;min-width:0;font-size:15.5px;font-weight:500;color:#1F2937;"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ pn.hc.name }}</span><i class="hgi-twotone hgi-arrow-up-right-01" style="font-size:17px;flex:0 0 auto;color:#066349;" aria-hidden="true"></i></span>
+                    <span style="font-size:14px;color:#5B6B66;">{{ pn.hc.hostedLine }}</span>
+                  </span>
+                </button>
+                <sc-if value="{{ pn.hc.canJoin }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ pn.hc.onJoin }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px 0 16px;border:none;border-radius:999px;background:#B0E800;color:#013334;box-shadow:0 8px 20px rgba(176,232,0,.4);font-family:'Google Sans';font-size:15px;font-weight:500;cursor:pointer;white-space:nowrap;" style-active="transform:scale(0.98);"><i class="hgi-twotone hgi-user-add-01" style="font-size:19px;flex:0 0 auto;" aria-hidden="true"></i>Join</button></sc-if>
+              </div>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Going</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <sc-for list="{{ pn.going }}" as="gp" hint-placeholder-count="3">
+                <span style="display:inline-flex;align-items:center;gap:8px;max-width:180px;height:44px;padding:0 16px 0 5px;border-radius:999px;background:#F3F4F2;font-size:14px;color:#1F2937;"><img loading="lazy" src="{{ gp.img }}" alt="" style="width:34px;height:34px;border-radius:999px;object-fit:cover;display:block;flex:0 0 auto;background:#E8F1ED;"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ gp.name }}</span></span>
+              </sc-for>
+              <span style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:44px;padding:0 12px;border-radius:999px;background:#E8F1ED;color:#066349;font-size:14px;font-weight:700;">{{ pn.goingMore }}</span>
+            </div>
+          </div>
+        </div>
+        <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        <div data-psec="moments" style="display:flex;flex-direction:column;gap:16px;">
+          <div style="display:flex;flex-direction:column;align-items:flex-start;gap:14px;">
+            <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Moments</h3>
+            <sc-if value="{{ pn.hasPast }}"><p style="margin:-6px 0 0;font-size:14px;line-height:1.5;color:#5B6B66;text-wrap:pretty;">{{ pn.pastLine }}</p></sc-if>
+            <button type="button" onClick="{{ pn.onCompose }}" aria-label="Share a moment from {{ pn.title }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:50px;padding:0 24px 0 20px;border:none;border-radius:999px;background:#B0E800;color:#013334;font-family:'Google Sans';font-size:14.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:transform .18s ease, box-shadow .2s ease, background .2s ease;" style-hover="background:#A3D900;box-shadow:0 6px 16px rgba(176,232,0,.4);" style-active="transform:scale(0.97);"><i class="hgi-duotone hgi-dashboard-circle-add" style="font-size:19px;flex:0 0 auto;" aria-hidden="true"></i>Share moment</button>
+          </div>
+          <sc-if value="{{ pn.hasMoments }}">
+            <div style="container-type:inline-size;">
+              <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:calc((100cqw - 8px) / 3);grid-auto-flow:dense;gap:4px;">
+                <sc-for list="{{ pn.moments }}" as="m" hint-placeholder-count="7">
+                  <button type="button" onClick="{{ m.onOpen }}" aria-label="{{ m.aria }}" style="grid-column:{{ m.gc }};grid-row:{{ m.gr }};position:relative;padding:0;border:none;border-radius:12px;overflow:hidden;background:#F3F4F2;cursor:pointer;">
+                    <img src="{{ m.img }}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;"><sc-if value="{{ m.isAlbum }}"><span style="position:absolute;top:6px;right:6px;display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;background:rgba(0,0,0,.55);color:#FFFFFF;font-size:11.5px;font-weight:700;pointer-events:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto;display:block;"><rect x="8" y="8" width="13" height="13" rx="3"></rect><path d="M16 4H7a3 3 0 0 0-3 3v9"></path></svg>{{ m.albumCount }}</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ pn.noMoments }}">
+            <p style="margin:0;font-size:14px;line-height:1.5;color:#5B6B66;text-wrap:pretty;">No moments from this experience yet. Yours could be the first.</p>
+          </sc-if>
+        </div>
+        <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Cancellation policy</h3>
+          <p style="margin:0;font-size:15px;line-height:1.55;color:#1F2937;text-wrap:pretty;">{{ pn.cancelLine }}</p>
+        </div>
+        <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        <button type="button" onClick="{{ pn.onReport }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:10px;height:44px;margin-top:-12px;padding:0;border:none;background:transparent;font-family:'Google Sans';font-size:14.5px;color:#1F2937;cursor:pointer;" style-hover="text-decoration:underline;"><i class="hgi-twotone hgi-flag-02" style="font-size:20px;flex:0 0 auto;color:#E02D3C;" aria-hidden="true"></i>Report this experience</button>
+        </sc-if>
+        <sc-if value="{{ pn.hostMode }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Date</h3>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <span aria-hidden="true" style="width:72px;height:72px;flex:0 0 auto;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#F3F4F2;color:#1F2937;"><i class="hgi-twotone hgi-calendar-03" style="font-size:28px;flex:0 0 auto;"></i></span>
+            <span style="font-size:15px;font-weight:600;color:#1F2937;">{{ pn.hoWhen }}</span>
+          </div>
+        </div>
+        <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Visibility <span style="font-size:14.5px;font-weight:400;letter-spacing:0;color:#5B6B66;">(who can see and book it)</span></h3>
+          <p style="margin:0;font-size:15px;color:#1F2937;">{{ pn.hoVis }}</p>
+        </div>
+        <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Experience type</h3>
+          <p style="margin:0;font-size:15px;color:#1F2937;">{{ pn.hoType }}</p>
+        </div>
+        <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Categories</h3>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <sc-for list="{{ pn.hoCats }}" as="hk" hint-placeholder-count="4">
+              <span style="display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:999px;background:#F3F4F2;font-size:14.5px;color:#1F2937;white-space:nowrap;">{{ hk.label }}</span>
+            </sc-for>
+          </div>
+        </div>
+        <div aria-hidden="true" style="flex:0 0 auto;height:1px;margin:0 -24px;background:#E5E7EB;"></div>
+        <div style="display:flex;flex-wrap:wrap;gap:28px 40px;">
+          <div style="flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:14px;">
+            <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Location</h3>
+            <div style="display:flex;align-items:center;gap:16px;">
+              <img loading="lazy" src="{{ pn.locImg }}" alt="" style="width:72px;height:72px;border-radius:12px;object-fit:cover;display:block;flex:0 0 auto;background:#F3F4F2;">
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
+                <sc-if value="{{ pn.locLink }}">
+                  <button type="button" onClick="{{ pn.onLoc }}" style="align-self:flex-start;max-width:100%;display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:-10px 0 -8px;padding:0;border:none;background:transparent;text-align:left;font-family:'Google Sans';font-size:15px;font-weight:600;color:#1F2937;cursor:pointer;" style-hover="color:#066349;"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ pn.locName }}</span><i class="hgi-twotone hgi-arrow-up-right-01" style="font-size:16px;flex:0 0 auto;color:#066349;" aria-hidden="true"></i></button>
+                </sc-if>
+                <sc-if value="{{ pn.locPlain }}">
+                  <span style="min-height:26px;font-size:15px;font-weight:600;color:#1F2937;">{{ pn.locName }}</span>
+                </sc-if>
+                <button type="button" onClick="{{ pn.onMap }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:-8px 0 -10px;padding:0;border:none;background:transparent;font-family:'Google Sans';font-size:14px;font-weight:600;color:#066349;cursor:pointer;" style-hover="text-decoration:underline;"><i class="hgi-twotone hgi-location-01" style="font-size:17px;flex:0 0 auto;" aria-hidden="true"></i>View on Google Maps</button>
+              </span>
+            </div>
+          </div>
+          <div style="flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:14px;">
+            <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Meeting or pick-up point</h3>
+            <div style="display:flex;align-items:center;gap:16px;">
+              <img loading="lazy" src="{{ pn.meetImgSafe }}" alt="" style="width:72px;height:72px;border-radius:12px;object-fit:cover;display:block;flex:0 0 auto;background:#F3F4F2;">
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
+                <span style="display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;min-height:26px;font-size:15px;color:#1F2937;"><span style="font-weight:600;">{{ pn.meetName }}</span><span aria-hidden="true" style="flex:0 0 auto;width:5px;height:5px;border-radius:999px;background:#B7C3BE;"></span><span style="color:#3F4B47;">{{ pn.meetTime }}</span></span>
+                <button type="button" onClick="{{ pn.onMeetMap }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:-8px 0 -10px;padding:0;border:none;background:transparent;font-family:'Google Sans';font-size:14px;font-weight:600;color:#066349;cursor:pointer;" style-hover="text-decoration:underline;"><i class="hgi-twotone hgi-location-01" style="font-size:17px;flex:0 0 auto;" aria-hidden="true"></i>View on Google Maps</button>
+              </span>
+            </div>
+          </div>
+        </div>
+        <sc-if value="{{ pn.hasHostComm }}">
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <h3 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Host community</h3>
+            <button type="button" onClick="{{ pn.hc.onOpen }}" style="align-self:flex-start;max-width:100%;display:flex;align-items:center;gap:16px;padding:0;border:none;background:transparent;text-align:left;cursor:pointer;font-family:'Google Sans';">
+              <img loading="lazy" src="{{ pn.hc.img }}" alt="" style="width:72px;height:72px;border-radius:14px;object-fit:cover;display:block;flex:0 0 auto;background:#E8F1ED;">
+              <span style="min-width:0;display:flex;flex-direction:column;gap:5px;">
+                <span style="display:flex;align-items:center;gap:8px;min-width:0;font-size:15.5px;font-weight:500;color:#1F2937;"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ pn.hc.name }}</span><i class="hgi-twotone hgi-arrow-up-right-01" style="font-size:17px;flex:0 0 auto;color:#066349;" aria-hidden="true"></i></span>
+                <span style="font-size:14px;color:#5B6B66;">{{ pn.hc.hostedLine }}</span>
+              </span>
+            </button>
+          </div>
+        </sc-if>
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin:0 -24px;padding:18px 24px;background:#F3F4F2;">
+          <span style="flex:1 1 220px;min-width:0;display:flex;flex-direction:column;gap:3px;">
+            <span style="font-family:'Google Sans';font-size:17px;font-weight:700;color:#1F2937;letter-spacing:-.2px;">Experience co-hosts</span>
+            <span style="font-size:13.5px;color:#5B6B66;">Co-hosts help you manage your experience.</span>
+          </span>
+          <button type="button" onClick="{{ pn.onAddCohost }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 20px;border:none;border-radius:999px;background:linear-gradient(180deg,#0C7A50 0%,#044B36 100%);color:#FFFFFF;font-family:'Google Sans';font-size:14.5px;font-weight:600;cursor:pointer;white-space:nowrap;" style-active="transform:scale(0.98);"><i class="hgi-twotone hgi-user-add-01" style="font-size:18px;flex:0 0 auto;" aria-hidden="true"></i>Add co-hosts</button>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:16px 18px;border-radius:12px;background:#F3F4F2;">
+          <i class="hgi hgi-stroke hgi-rounded hgi-customer-support" style="font-size:22px;flex:0 0 auto;margin-top:1px;color:#066349;" aria-hidden="true"></i>
+          <span style="min-width:0;display:flex;flex-direction:column;gap:2px;font-size:15px;line-height:1.5;color:#1F2937;">
+            <span style="font-weight:600;">Need help? Reach out to us on</span>
+            <span style="display:flex;align-items:center;flex-wrap:wrap;gap:0 6px;"><a href="mailto:support@tukai.co" style="font-weight:600;color:#066349;text-decoration:none;" style-hover="text-decoration:underline;">support@tukai.co</a><span style="color:#5B6B66;">or</span><a href="tel:+254716909815" style="font-weight:600;color:#066349;text-decoration:none;white-space:nowrap;" style-hover="text-decoration:underline;">+254 716 909 815</a></span>
+          </span>
+        </div>
+        <button type="button" onClick="{{ pn.onDelete }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:10px;height:44px;margin-top:-14px;padding:0;border:none;background:transparent;font-family:'Google Sans';font-size:14.5px;color:#1F2937;cursor:pointer;" style-hover="text-decoration:underline;"><i class="hgi hgi-stroke hgi-rounded hgi-delete-02" style="font-size:20px;flex:0 0 auto;color:#E02D3C;" aria-hidden="true"></i>Delete this experience</button>
+        </sc-if>
+        </sc-if>
+        </sc-if>
