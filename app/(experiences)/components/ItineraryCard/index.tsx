@@ -6,6 +6,7 @@ import { Bookmark } from '@/app/shared/components/Bookmark';
 import { CardShell } from '@/app/shared/components/Cards/CardShell';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { TITLE_TINT } from '@/app/shared/components/Motion';
+import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { Photo, coverPhotoUrl, photoUrl } from '@/types/photo';
@@ -22,9 +23,14 @@ import { experienceRunBy, isFree } from '../ExperienceCard/experience-flag';
  *
  * The stop photos are the itinerary's own photos after the cover - the list
  * response carries no stop list, so the cover is the only thing guaranteed.
+ *
+ * An itinerary is an `Experience` (`experience_type: 'itinerary'`), so a plain
+ * click opens it in the same drawer the other experience cards use, the same
+ * pattern `ExperienceCard` follows.
  */
 export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
   const { data: session } = useSession();
+  const drawer = useExperienceDrawer();
 
   const cover = coverPhotoUrl(itinerary.photos, 'md');
   const stops = stopPhotos(itinerary.photos, cover);
@@ -36,9 +42,19 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
       ? formatItineraryDateRange(itinerary.startDate, itinerary.endDate)
       : null;
 
+  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+    // A modifier asks the browser for something else - a new tab, a new window -
+    // and the link should do that rather than the drawer
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    event.preventDefault();
+    drawer?.openExperience(itinerary.id);
+  };
+
   return (
     <CardShell
       href={experiencePath(itinerary)}
+      onClick={drawer ? handleOpen : undefined}
       src={cover}
       alt={itinerary.title}
       sizes="184px"
