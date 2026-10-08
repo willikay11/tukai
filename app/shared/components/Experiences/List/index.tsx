@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { CARD_LIFT } from '@/app/shared/components/Motion';
 import { NoData } from '@/components/ui/noData';
+import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { Status } from '@/enums/status';
 import { cn } from '@/lib/utils';
@@ -88,6 +89,7 @@ export const ListExperiences = ({
   variant = 'default',
 }: ListExperiencesProps) => {
   const { selectedCategoryId } = useSelectedCategory();
+  const drawer = useExperienceDrawer();
 
   const initialPlaceholders = useMemo(() => createPlaceholders(skeletonCount), [skeletonCount]);
   const [experienceList, setExperienceList] = useState<Experience[]>(initialPlaceholders);
@@ -238,8 +240,17 @@ export const ListExperiences = ({
             {/* `group` so the card's own photo and title can respond to a
                 hover anywhere on the card, not just over themselves */}
             <Link
-              target="_blank"
               href={experiencePath(experience)}
+              onClick={(event) => {
+                // A modifier asks the browser for something else - a new
+                // tab, a new window - and the link should do that rather
+                // than the drawer
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                if (!drawer) return;
+
+                event.preventDefault();
+                drawer.openExperience(experience.id);
+              }}
               className={cn('group block', CARD_LIFT)}
             >
               <SingleExperience type={type} experience={experience} variant={variant} />

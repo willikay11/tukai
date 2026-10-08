@@ -8,10 +8,12 @@ import { motion } from 'framer-motion';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { NoData } from '@/components/ui/noData';
+import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { Experience } from '@/types/experience';
 import { experiencePath } from '@/utils/detail-paths';
 
 export const UpcomingExperiences = ({ category }: { category: string }) => {
+  const drawer = useExperienceDrawer();
   const { data: upcomingExperiences } = useExperiences(
     {
       page: 1,
@@ -45,7 +47,20 @@ export const UpcomingExperiences = ({ category }: { category: string }) => {
         >
           {upcomingExperiences?.data?.count > 0 ? (
             upcomingExperiences?.data?.results?.map((experience: Experience) => (
-              <Link key={experience.id} href={experiencePath(experience)} target="_blank">
+              <Link
+                key={experience.id}
+                href={experiencePath(experience)}
+                onClick={(event) => {
+                  // A modifier asks the browser for something else - a new
+                  // tab, a new window - and the link should do that rather
+                  // than the drawer
+                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                  if (!drawer) return;
+
+                  event.preventDefault();
+                  drawer.openExperience(experience.id);
+                }}
+              >
                 <SingleExperience key={experience.id} experience={experience} type="invited" />
               </Link>
             ))
