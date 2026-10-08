@@ -1,6 +1,6 @@
 # ED-12 Manage-experience screen
 
-- **Status:** decision
+- **Status:** decided - not built
 - **Type:** decision
 - **Depends on:** the owner's approval of [INVENTORY.md](INVENTORY.md)
 - **Design:** `Tukai Web.dc.html`, grep `pn.hostMode`
@@ -20,9 +20,17 @@ with its status against what is built. Reviewed by the owner first.
 
 ## Done when
 
-- [ ] Owner decides whether this screen is built at all
-- [ ] If built, it does not duplicate the create and edit experience flow
+- [x] Owner decides whether this screen is built at all
+- [x] If built, it does not duplicate the create and edit experience flow
 
 ## Notes
 
 This screen is the experience's settings; `app/(experiences)/experiences/create/` already edits most of these fields, per CLAUDE.md's active feature work. Recommend this stays there rather than becoming a second editor inside the drawer. Needs the owner's call before any task is written for it.
+
+## Decision (2026-10-08)
+
+Not built. [INVENTORY.md](INVENTORY.md) decision 3: the drawer stays a summary
+and does not take on the host's management surfaces. Editing an experience's
+date, visibility, type, categories, location and co-hosts stays in
+`app/(experiences)/experiences/create/`, which already owns these fields.
+Nothing in `ExperienceDrawer` changes for this task.

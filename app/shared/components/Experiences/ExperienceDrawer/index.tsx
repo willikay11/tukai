@@ -3,7 +3,6 @@
 import { useState } from 'react';
 
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 
 import {
   experiencePriceLine,
@@ -23,6 +22,7 @@ import { formatCardDateTime } from '@/utils/date-utils';
 import { experiencePath } from '@/utils/detail-paths';
 import { toPlainText } from '@/utils/safe-text-utils';
 
+import { ExperienceDrawerFooter } from './ExperienceDrawerFooter';
 import { ExperienceHostSection } from './ExperienceHostSection';
 import { ExperienceLocationSection } from './ExperienceLocationSection';
 import { ExperienceTicketsSection } from './ExperienceTicketsSection';
@@ -231,14 +231,7 @@ export const ExperienceDrawer = ({
             </div>
           </div>
 
-          <div className="sticky bottom-0 z-30 border-t border-line bg-white px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
-            <Link
-              href={experiencePath(experience)}
-              className="inline-flex h-12 w-full items-center justify-center rounded-full bg-lime text-[15px] font-bold text-brand-ink transition-colors hover:bg-lime-dark"
-            >
-              View experience
-            </Link>
-          </div>
+          <ExperienceDrawerFooter experience={experience} />
         </div>
       )}
     </Drawer>

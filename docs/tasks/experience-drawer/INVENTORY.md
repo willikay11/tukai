@@ -1,6 +1,6 @@
 # Experience drawer: design against build
 
-- **Status:** awaiting approval
+- **Status:** approved
 - **Design:** `Tukai Web.dc.html` (the previous prototype), the experience view behind `pn.isExp`
 - **Excerpt:** [experience-panel.html](../../design/screens/experience-panel.html)
 - **Built:** `app/shared/components/Experiences/ExperienceDrawer/index.tsx`
@@ -78,16 +78,16 @@ the design is missing, not differing.
 | Host, going, host community | Avatar, verified badge, message, guest avatars | Built: host row and host-community row; "going" stays blocked, no guest-picture data | ED-08 |
 | Moments | Share moment button, three-column grid | Built: wires the shared `ContextMoments`, plus a past-experience note | ED-09 |
 | Cancellation policy, report | Heading and line, a report action | Blocked, not missing: no cancellation-policy field and no report flow exist anywhere in the app | ED-10 |
-| Footer | Not yet read from the prototype | View experience, full width | ED-11 |
-| Manage-experience screen | Date, visibility, type, categories, location, co-hosts, delete | Missing; overlaps the create and edit flow | ED-12, decision |
-| Host dashboard tabs | Sales, Created tickets, Guests, Moments, Analytics | Missing; overlaps Control center | ED-13, decision |
+| Footer | Read: a booking button plus Plan this, or a host bar | Done - View experience plus Plan this; no host bar (decision 3) | ED-11 |
+| Manage-experience screen | Date, visibility, type, categories, location, co-hosts, delete | Decided: not built, overlaps the create and edit flow | ED-12, decision |
+| Host dashboard tabs | Sales, Created tickets, Guests, Moments, Analytics | Decided: not built, overlaps Control center | ED-13, decision |
 
 ## Gaps in the excerpt
 
 - The shared sticky header (back, title, share, save, close) is not in the
   excerpt, the same gap PD-01 recorded for the place drawer (ED-01).
-- The footer is not in the excerpt (ED-11). Read it from the prototype's
-  shared footer block before deciding whether it needs to change at all.
+- The footer was not in the excerpt. Read directly from the prototype's
+  shared footer block instead (ED-11, now done).
 
 ## Order if the owner says grow it
 

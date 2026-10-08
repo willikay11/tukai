@@ -29,6 +29,10 @@ jest.mock('@/app/shared/components/Moments', () => ({
 jest.mock('@/app/shared/components/SendMessage/SendMessage', () => ({
   SendMessage: () => <div data-testid="send-message" />,
 }));
+// Its own unit (ExperienceDrawerFooter.test.tsx); this suite is about the shell
+jest.mock('./ExperienceDrawerFooter', () => ({
+  ExperienceDrawerFooter: () => <div data-testid="footer" />,
+}));
 jest.mock('next/image', () => {
   function MockImage({ alt, src }: { alt: string; src: string }) {
     return <img alt={alt} src={src} />;
@@ -124,15 +128,6 @@ describe('ExperienceDrawer', () => {
     render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
 
     expect(screen.queryByRole('button', { name: /show more/i })).not.toBeInTheDocument();
-  });
-
-  it('sends the reader to the experience page to book', () => {
-    render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
-
-    expect(screen.getByRole('link', { name: 'View experience' })).toHaveAttribute(
-      'href',
-      '/experiences/e1',
-    );
   });
 
   it('closes from its close control', () => {
