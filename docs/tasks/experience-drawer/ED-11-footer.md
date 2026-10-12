@@ -1,11 +1,11 @@
 # ED-11 Footer
 
-- **Status:** done
-- **Type:** cleanup
+- **Status:** decision
+- **Type:** decision
 - **Depends on:** the owner's approval of [INVENTORY.md](INVENTORY.md)
 - **Design:** `Tukai Web.dc.html`, grep `pn.hasFab`
 - **Excerpt:** `docs/design/screens/experience-panel.html`, section the footer, shared across panel kinds, not in the excerpt
-- **Now:** `app/shared/components/Experiences/ExperienceDrawer/index.tsx`
+- **Now:** `app/shared/components/Experiences/ExperienceDrawer/index.tsx`, `ExperienceDrawerFooter.tsx`
 
 ## Inventory
 
@@ -14,16 +14,28 @@ with its status against what is built. Reviewed by the owner first.
 
 | Design item | Built? | Notes |
 |---|---|---|
-| Design's footer for an experience | Read | Read from the prototype directly (`Tukai Web.dc.html`, `pn.hasFloat`/`pn.hasHostBar`/`pn.canPlan`, around lines 10412-10416 of the exp branch). A guest's footer (`hasFloat`) is a price/date note plus one primary button that opens booking (`flLabel`: "Buy more tickets" / "RSVP" / "Make reservation" / "Join the waiting list"), plus a "Plan this" pill (`canPlan`). The host's own experience gets a different footer (`hasHostBar`, two actions) instead. |
-| View experience, full width, lime | Built, now alongside Plan this | The primary button already covered the design's booking action, by sending the reader to where booking actually happens (decisions 1-2, [INVENTORY.md](INVENTORY.md)) instead of duplicating it. The price/date note is already shown higher in the drawer body, not repeated in the footer. |
-| Plan this pill | Built | Not booking, and not covered by any of the three INVENTORY decisions, so it is in scope on its own. Added using the same `PlanThisDrawer` the place drawer's footer and the full experience page already use - no new planning logic. |
-| Host footer (`hasHostBar`) | Not built | Out of scope: INVENTORY decision 3 keeps the drawer from branching on whether the reader is the experience's host at all (see ED-13). |
+| Price and date, as text, to the left of the buttons | Missing | The owner's screenshot (2026-10-08) shows "From KES 2,700 / person" and "Tomorrow, 6:00 PM to 9:00 PM" stacked on the left of the footer. Built: no text in the footer at all, just the two buttons. |
+| Primary button: "Make reservation", a ticket icon, lime | Differs | Built: "View experience", no icon, lime, linking to the bare experience page. The app already has this exact label and copy pattern elsewhere: `BookingPanel`'s own tab reads "Make Reservation", and a `/reserve` route already exists (`experiencePath(experience) + '/reserve'`). |
+| Plan this pill | Built | Matches. |
+| Host's own footer (`hasHostBar`) | Not built | Unchanged, still out of scope under INVENTORY decision 3. |
 
 ## Done when
 
-- [x] The design's experience footer is read from the prototype and added to the excerpt
-- [x] Footer decision made against that, not guessed
+- [ ] Owner confirms: does the primary button read "Make reservation" and go straight to `/reserve`, or stay "View experience" with different copy added around it
+- [ ] If confirmed, the footer shows the price and date as text, reusing the same helpers the drawer body already calls (`experiencePriceLine`, `formatCardDateTime`)
+- [ ] Primary button copy and destination match whatever the owner confirms, consistently with `BookingPanel`'s own "Make Reservation" wording elsewhere in the app
 
 ## Notes
 
-Decided 2026-10-08: booking stays out of the footer, per ED-05/ED-06 and INVENTORY decisions 1-2 - "View experience" still covers it. Plan this was not covered by any existing decision and does not duplicate booking, ticket holding or editing, so it was added to the footer in `ExperienceDrawerFooter.tsx`, next to "View experience", matching `PlaceDrawerFooter`'s pattern.
+Reopened 2026-10-08 against the owner's screenshot, which asked for the
+drawer's look and functionality to match it. This does not reverse
+decision 2 (ticket selection itself stays on the page, not in the drawer):
+it corrects the footer's copy and destination to the more specific place the
+app already sends a reader to book, `/reserve`, rather than the bare
+experience page, and matches the wording the rest of the app already uses
+("Make Reservation" in `BookingPanel`, in the unused `ExperienceActions`
+component, and in the place drawer's own `ReservationPanel`). The original
+prototype's footer label is dynamic (`flLabel`: "Buy more tickets" for a
+reader who already holds one, "RSVP" for a free experience, "Make
+reservation" otherwise, "Join the waiting list" when sold out), worth
+deciding now whether the drawer matches that, or keeps one fixed label.

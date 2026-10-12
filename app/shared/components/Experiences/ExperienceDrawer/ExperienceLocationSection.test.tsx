@@ -35,10 +35,10 @@ describe('ExperienceLocationSection', () => {
     expect(screen.getByText('Nairobi, Kenya')).toBeInTheDocument();
   });
 
-  it('offers directions out to Google Maps', () => {
+  it('offers directions out to Google Maps as a quiet link under the name', () => {
     render(<ExperienceLocationSection experience={experience({})} />);
 
-    expect(screen.getByRole('link', { name: /Get directions/ })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /View on Google Maps/ })).toHaveAttribute(
       'href',
       expect.stringContaining('google.com/maps'),
     );

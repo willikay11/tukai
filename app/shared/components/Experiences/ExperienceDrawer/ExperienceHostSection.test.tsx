@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { Experience } from '@/types/experience';
 
@@ -16,6 +16,22 @@ jest.mock('@/app/shared/components/Images', () => ({
   PhotoImage: ({ alt, src }: { alt: string; src: string }) => <img alt={alt} src={src} />,
 }));
 
+const useCommunityDetail = jest.fn();
+const joinCommunity = jest.fn();
+const openSignInWithCallback = jest.fn();
+
+jest.mock('@/app/shared/hooks/useCommunities', () => ({
+  useCommunityDetail: (id: string, enabled: boolean) => useCommunityDetail(id, enabled),
+  useJoinCommunity: () => ({ mutate: joinCommunity, isPending: false }),
+}));
+jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast: jest.fn() }) }));
+jest.mock('@/context/AuthDialogContext', () => ({
+  useAuthDialog: () => ({ openSignInWithCallback }),
+}));
+
+const member = (id: string, inviteStatus: string) =>
+  ({ id, inviteStatus, user: { id } }) as never;
+
 const experience = (overrides: Partial<Experience>) =>
   ({
     id: 'exp-1',
@@ -25,6 +41,8 @@ const experience = (overrides: Partial<Experience>) =>
 describe('ExperienceHostSection', () => {
   beforeEach(() => {
     sessionState = { data: { user: { id: 'viewer' } } };
+    jest.clearAllMocks();
+    useCommunityDetail.mockReturnValue({ data: undefined });
   });
 
   it('names the host and how much they have run', () => {
@@ -69,6 +87,61 @@ describe('ExperienceHostSection', () => {
 
     expect(screen.getByText('Nairobi Makers Circle')).toBeInTheDocument();
     expect(screen.getByText('Host community')).toBeInTheDocument();
+  });
+
+  it('offers Join on the host community to a reader who is not in it', () => {
+    useCommunityDetail.mockReturnValue({
+      data: { data: { id: 'c1', title: 'Nairobi Makers Circle', isPublic: true, members: [] } },
+    });
+
+    render(
+      <ExperienceHostSection
+        experience={experience({ hostCommunity: { id: 'c1', title: 'Nairobi Makers Circle' } })}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Join/ }));
+
+    expect(joinCommunity).toHaveBeenCalledWith('c1', expect.any(Object));
+  });
+
+  it('hides Join once the reader is already a member', () => {
+    useCommunityDetail.mockReturnValue({
+      data: {
+        data: {
+          id: 'c1',
+          title: 'Nairobi Makers Circle',
+          isPublic: true,
+          members: [member('viewer', 'accepted')],
+        },
+      },
+    });
+
+    render(
+      <ExperienceHostSection
+        experience={experience({ hostCommunity: { id: 'c1', title: 'Nairobi Makers Circle' } })}
+      />,
+    );
+
+    expect(screen.queryByRole('button', { name: /Join/ })).not.toBeInTheDocument();
+  });
+
+  it('sends a signed-out reader through sign-in before joining the host community', () => {
+    sessionState = { data: null };
+    useCommunityDetail.mockReturnValue({
+      data: { data: { id: 'c1', title: 'Nairobi Makers Circle', isPublic: true, members: [] } },
+    });
+
+    render(
+      <ExperienceHostSection
+        experience={experience({ hostCommunity: { id: 'c1', title: 'Nairobi Makers Circle' } })}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Join/ }));
+
+    expect(openSignInWithCallback).toHaveBeenCalledWith(expect.any(Function));
+    expect(joinCommunity).not.toHaveBeenCalled();
   });
 
   it('renders nothing for an experience with neither a host nor a host community', () => {

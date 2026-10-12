@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 
@@ -11,14 +11,17 @@ import {
 import { Bookmark } from '@/app/shared/components/Bookmark';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { ContextMoments } from '@/app/shared/components/Moments';
+import { PlaceDrawerTabs } from '@/app/shared/components/Places/PlaceDrawer/PlaceDrawerTabs';
 import { PlacePhotoStrip } from '@/app/shared/components/Places/PlaceDrawer/PlacePhotoStrip';
 import { Share } from '@/app/shared/components/Share';
 import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
+import { useScrollSpy } from '@/app/shared/hooks/useScrollSpy';
 import { Drawer } from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { coverPhotoUrl, Photo, photoUrl } from '@/types/photo';
-import { formatCardDateTime } from '@/utils/date-utils';
+import { isTicketPaused } from '@/types/ticket';
+import { formatCardDateTime, formatExperienceHeaderDate } from '@/utils/date-utils';
 import { experiencePath } from '@/utils/detail-paths';
 import { toPlainText } from '@/utils/safe-text-utils';
 
@@ -26,9 +29,18 @@ import { ExperienceDrawerFooter } from './ExperienceDrawerFooter';
 import { ExperienceHostSection } from './ExperienceHostSection';
 import { ExperienceLocationSection } from './ExperienceLocationSection';
 import { ExperienceTicketsSection } from './ExperienceTicketsSection';
+import { EXPERIENCE_SECTIONS, experienceDrawerTabs } from './tabs';
 
 /** The round grey disc each of the header's controls sits in. */
 const DISC = 'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-surface';
+
+/**
+ * The header and tab row together, both sticky as one block (ED-02) - unlike
+ * the place drawer, nothing here ever swaps the header's title out, so there
+ * is no need to pin them independently. Sections clear this with a matching
+ * `scroll-mt`.
+ */
+const TAB_OFFSET = 148;
 
 /**
  * Matches the design's 3-line clamp (`pn.aboutClamp`) rather than
@@ -113,13 +125,29 @@ export const ExperienceDrawer = ({
 }) => {
   const { data: session } = useSession();
 
+  // Held in state rather than a ref: the panel only mounts once the drawer
+  // opens, and a ref would never tell the scroll spy it had arrived
+  const [panel, setPanel] = useState<HTMLDivElement | null>(null);
+
   const { data, isLoading, isError } = useFetchSingleExperience(
     isOpen && experienceId ? experienceId : '',
   );
   const experience: Experience | undefined = data?.data;
 
+  const hasTickets = (experience?.tickets ?? []).some((ticket) => !isTicketPaused(ticket));
+  const hasHost = Boolean(experience?.host || experience?.hostCommunity);
+  const tabs = useMemo(() => experienceDrawerTabs(hasTickets, hasHost), [hasTickets, hasHost]);
+  const sectionIds = useMemo(() => tabs.map((tab) => tab.id), [tabs]);
+  const { activeId, scrollTo } = useScrollSpy(sectionIds, TAB_OFFSET, panel);
+
   return (
-    <Drawer isOpen={isOpen} setIsOpen={(next) => !next && onClose()} width="wide" mobile="full">
+    <Drawer
+      isOpen={isOpen}
+      setIsOpen={(next) => !next && onClose()}
+      width="wide"
+      mobile="full"
+      panelRef={setPanel}
+    >
       {isError ? (
         <div className="space-y-4 px-6 py-6">
           <p className="text-base text-ink-muted">This experience could not be loaded.</p>
@@ -128,10 +156,10 @@ export const ExperienceDrawer = ({
         <Loading />
       ) : (
         <div className="flex min-h-full flex-col">
-          <div className="sticky top-0 z-30 border-b border-line bg-white">
-            <div className="flex items-start justify-between gap-4 px-6 py-4">
+          <div className="sticky top-0 z-30 bg-white">
+            <div className="flex items-start justify-between gap-4 border-b border-line px-6 py-4">
               <h2 className="min-w-0 truncate text-[26px] font-bold leading-tight text-brand-ink">
-                {experience.title}
+                {formatExperienceHeaderDate(experience.startDate, experience.endDate)}
               </h2>
 
               <div className="flex flex-shrink-0 items-center gap-2">
@@ -165,48 +193,54 @@ export const ExperienceDrawer = ({
                 </button>
               </div>
             </div>
+
+            <div className="px-6 py-3">
+              <PlaceDrawerTabs tabs={tabs} activeId={activeId} onSelect={scrollTo} />
+            </div>
           </div>
 
           <div className="flex-1 space-y-6 px-6 py-6">
-            <PlacePhotoStrip photos={galleryPhotos(experience.photos)} alt={experience.title} />
+            <section id={EXPERIENCE_SECTIONS.about} className="scroll-mt-[156px] space-y-6">
+              <PlacePhotoStrip photos={galleryPhotos(experience.photos)} alt={experience.title} />
 
-            <h2 className="text-[26px] font-bold leading-tight tracking-[-0.5px] text-brand-ink">
-              {experience.title}
-            </h2>
+              <h2 className="text-[26px] font-bold leading-tight tracking-[-0.5px] text-brand-ink">
+                {experience.title}
+              </h2>
 
-            <div className="flex flex-col gap-1">
-              {experienceRunBy(experience) && (
-                <span className="text-sm font-semibold text-brand">
-                  {experienceRunBy(experience)}
-                </span>
-              )}
+              <div className="flex flex-col gap-1">
+                {experienceRunBy(experience) && (
+                  <span className="text-sm font-semibold text-brand">
+                    {experienceRunBy(experience)}
+                  </span>
+                )}
 
-              {formatCardDateTime(experience.startDate, experience.endDate) && (
-                <p className="text-[15px] text-ink-muted">
-                  {formatCardDateTime(experience.startDate, experience.endDate)}
-                </p>
-              )}
+                {formatCardDateTime(experience.startDate, experience.endDate) && (
+                  <p className="text-[15px] text-ink-muted">
+                    {formatCardDateTime(experience.startDate, experience.endDate)}
+                  </p>
+                )}
 
-              {experience.location?.city && (
-                <p className="flex items-center gap-1.5 text-[15px] text-ink-muted">
-                  <IconComponent
-                    iconName="Location01Icon"
-                    size={16}
-                    color="currentColor"
-                    className="text-brand"
-                  />
-                  {experience.location.city}
-                </p>
-              )}
+                {experience.location?.city && (
+                  <p className="flex items-center gap-1.5 text-[15px] text-ink-muted">
+                    <IconComponent
+                      iconName="Location01Icon"
+                      size={16}
+                      color="currentColor"
+                      className="text-brand"
+                    />
+                    {experience.location.city}
+                  </p>
+                )}
 
-              {experiencePriceLine(experience) && (
-                <p className="mt-1 text-base font-semibold text-gray-800">
-                  {experiencePriceLine(experience)}
-                </p>
-              )}
-            </div>
+                {experiencePriceLine(experience) && (
+                  <p className="mt-1 text-base font-semibold text-gray-800">
+                    {experiencePriceLine(experience)}
+                  </p>
+                )}
+              </div>
 
-            {experience.description && <AboutClamp text={experience.description} />}
+              {experience.description && <AboutClamp text={experience.description} />}
+            </section>
 
             <ExperienceTicketsSection experience={experience} />
 
@@ -214,7 +248,10 @@ export const ExperienceDrawer = ({
 
             <ExperienceHostSection experience={experience} />
 
-            <div className="space-y-4 border-t border-line pt-6">
+            <section
+              id={EXPERIENCE_SECTIONS.moments}
+              className="scroll-mt-[156px] space-y-4 border-t border-line pt-6"
+            >
               {hasEnded(experience) && (
                 <p className="text-[14px] text-ink-muted">This experience has already happened.</p>
               )}
@@ -228,7 +265,7 @@ export const ExperienceDrawer = ({
                 communityId={experience.hostCommunity?.id}
                 communityLabel={experience.hostCommunity?.title}
               />
-            </div>
+            </section>
           </div>
 
           <ExperienceDrawerFooter experience={experience} />

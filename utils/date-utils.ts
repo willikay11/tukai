@@ -391,3 +391,53 @@ export const formatCardDateTime = (
 
   return `${day}, ${time(startDate)}${hasEnd ? ` - ${time(endDate)}` : ''}`;
 };
+
+/**
+ * "Today, 10:00 AM - 12:00 PM" / "Tomorrow, 10:00 AM" / "3 Oct - 5 Oct" - the
+ * experience drawer header's date line. A same-day experience leads with
+ * Today/Tomorrow ahead of its time instead of its weekday, since that is the
+ * more useful read at a glance; a multi-day experience shows its date range
+ * instead, since Today/Tomorrow alone wouldn't say how long it runs.
+ */
+export const formatExperienceHeaderDate = (
+  start: string | null | undefined,
+  end: string | null | undefined,
+  now: Date = new Date(),
+): string | null => {
+  if (!start) return null;
+
+  const startDate = new Date(start);
+  if (Number.isNaN(startDate.getTime())) return null;
+
+  const endDate = end ? new Date(end) : null;
+  const hasValidEnd = Boolean(endDate && !Number.isNaN(endDate.getTime()));
+
+  const sameDay = !hasValidEnd || startDate.toDateString() === (endDate as Date).toDateString();
+
+  const time = (date: Date) => {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const hour = hours % 12 || 12;
+    return `${hour}:${String(minutes).padStart(2, '0')} ${period}`;
+  };
+
+  if (!sameDay) {
+    const day = (date: Date) => date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    return `${day(startDate)} - ${day(endDate as Date)}`;
+  }
+
+  const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diffDays = Math.round(
+    (startOfDay(startDate).getTime() - startOfDay(now).getTime()) / (1000 * 60 * 60 * 24),
+  );
+
+  const dayLabel =
+    diffDays === 0
+      ? 'Today'
+      : diffDays === 1
+        ? 'Tomorrow'
+        : startDate.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+
+  return `${dayLabel}, ${time(startDate)}${hasValidEnd ? ` - ${time(endDate as Date)}` : ''}`;
+};

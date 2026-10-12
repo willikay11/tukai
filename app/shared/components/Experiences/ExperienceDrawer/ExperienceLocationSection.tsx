@@ -5,10 +5,16 @@ import { PlaceLink } from '@/app/shared/components/Places';
 import { Experience } from '@/types/experience';
 import { photoUrl } from '@/types/photo';
 
+import { EXPERIENCE_SECTIONS } from './tabs';
+
 /**
  * Location and meeting point (ED-07), built on the same pieces the place
  * drawer uses for directions: `OpenInMapsLink` for the maps link, and
  * `PlaceLink` for the venue name when the experience is tied to a place.
+ *
+ * The maps link sits as a quiet line under the venue name rather than a
+ * separate button, and as its own anchor rather than nested inside
+ * `PlaceLink`'s - two anchors stacked is valid, one inside the other is not.
  */
 export const ExperienceLocationSection = ({ experience }: { experience: Experience }) => {
   const place = experience.place;
@@ -17,6 +23,7 @@ export const ExperienceLocationSection = ({ experience }: { experience: Experien
   const placePhoto = place?.photos?.[0] ? photoUrl(place.photos[0], 'md') : undefined;
   const venueName = place?.title ?? location?.name;
   const addressLine = [location?.city, location?.country].filter(Boolean).join(', ');
+  const mapsQuery = [venueName, addressLine].filter(Boolean).join(', ') || undefined;
 
   if (!venueName && !addressLine) return null;
 
@@ -37,38 +44,42 @@ export const ExperienceLocationSection = ({ experience }: { experience: Experien
     </div>
   );
 
-  const label = (
-    <div className="min-w-0 flex-1">
-      {venueName && <p className="truncate text-[15px] font-semibold text-brand-ink">{venueName}</p>}
-      {addressLine && <p className="truncate text-[14px] text-ink-muted">{addressLine}</p>}
-    </div>
-  );
+  const nameLine = venueName ? (
+    place ? (
+      <PlaceLink
+        place={place}
+        className="block w-fit max-w-full truncate text-[15px] font-semibold text-brand-ink hover:underline"
+      >
+        {venueName}
+      </PlaceLink>
+    ) : (
+      <p className="truncate text-[15px] font-semibold text-brand-ink">{venueName}</p>
+    )
+  ) : null;
 
   return (
-    <div className="space-y-4 border-t border-line pt-6">
+    <div
+      id={EXPERIENCE_SECTIONS.where}
+      className="scroll-mt-[156px] space-y-4 border-t border-line pt-6"
+    >
       <h3 className="text-[22px] font-bold text-brand-ink">Location</h3>
 
       <div className="flex items-center gap-3 rounded-2xl bg-surface p-3">
-        {place ? (
-          <PlaceLink place={place} className="flex min-w-0 flex-1 cursor-pointer items-center gap-3">
-            {thumb}
-            {label}
-          </PlaceLink>
-        ) : (
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            {thumb}
-            {label}
-          </div>
-        )}
+        {thumb}
+        <div className="min-w-0 flex-1">
+          {nameLine}
+          {addressLine && <p className="truncate text-[14px] text-ink-muted">{addressLine}</p>}
 
-        <OpenInMapsLink
-          lat={location?.pointLat}
-          lng={location?.pointLong}
-          query={[venueName, addressLine].filter(Boolean).join(', ') || undefined}
-          className="flex-shrink-0 whitespace-nowrap rounded-full bg-lime px-4 py-2.5 text-[14px] font-bold text-brand-ink no-underline hover:bg-lime-dark"
-        >
-          Get directions
-        </OpenInMapsLink>
+          <OpenInMapsLink
+            lat={location?.pointLat}
+            lng={location?.pointLong}
+            query={mapsQuery}
+            className="mt-0.5 text-[13px] text-brand"
+          >
+            <IconComponent iconName="Location01Icon" size={14} color="currentColor" />
+            View on Google Maps
+          </OpenInMapsLink>
+        </div>
       </div>
 
       {(experience.meetingPoint || experience.meetingTime) && (

@@ -29,6 +29,16 @@ jest.mock('@/app/shared/components/Moments', () => ({
 jest.mock('@/app/shared/components/SendMessage/SendMessage', () => ({
   SendMessage: () => <div data-testid="send-message" />,
 }));
+// ExperienceHostSection's Join button (ED-08) - its own unit in
+// ExperienceHostSection.test.tsx; this suite is about the shell
+jest.mock('@/app/shared/hooks/useCommunities', () => ({
+  useCommunityDetail: () => ({ data: undefined }),
+  useJoinCommunity: () => ({ mutate: jest.fn(), isPending: false }),
+}));
+jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast: jest.fn() }) }));
+jest.mock('@/context/AuthDialogContext', () => ({
+  useAuthDialog: () => ({ openSignInWithCallback: jest.fn() }),
+}));
 // Its own unit (ExperienceDrawerFooter.test.tsx); this suite is about the shell
 jest.mock('./ExperienceDrawerFooter', () => ({
   ExperienceDrawerFooter: () => <div data-testid="footer" />,
@@ -86,12 +96,15 @@ describe('ExperienceDrawer', () => {
     expect(screen.getByText('Hands in the clay from the first hour.')).toBeInTheDocument();
   });
 
-  // The design repeats the title, larger, at the top of the body - the
-  // sticky header's copy stays, truncated, above it
-  it('repeats the title in the body, below the gallery', () => {
+  // The sticky header shows when the experience runs, not the title - the
+  // title itself lives once, below the gallery
+  it('shows the title once, below the gallery, and the date in the sticky header', () => {
     render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
 
-    expect(screen.getAllByRole('heading', { name: 'Pottery for beginners' })).toHaveLength(2);
+    expect(screen.getAllByRole('heading', { name: 'Pottery for beginners' })).toHaveLength(1);
+    expect(
+      screen.getByRole('heading', { name: /Sat 3 Oct, \d{1,2}:\d{2} [AP]M - \d{1,2}:\d{2} [AP]M/ }),
+    ).toBeInTheDocument();
   });
 
   it('shows the gallery as a photo strip, not a single hero image', () => {
