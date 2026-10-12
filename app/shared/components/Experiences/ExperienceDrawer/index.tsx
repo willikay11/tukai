@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { coverPhotoUrl, Photo, photoUrl } from '@/types/photo';
 import { isTicketPaused } from '@/types/ticket';
-import { formatCardDateTime, formatExperienceHeaderDate } from '@/utils/date-utils';
+import { formatExperienceHeaderDate } from '@/utils/date-utils';
 import { experiencePath } from '@/utils/detail-paths';
 import { toPlainText } from '@/utils/safe-text-utils';
 
@@ -204,26 +204,6 @@ export const ExperienceDrawer = ({
                 <h2 className="text-[26px] font-bold leading-tight tracking-[-0.5px] text-brand-ink">
                   {experience.title}
                 </h2>
-
-                <div className="flex flex-col gap-1">
-                  {formatCardDateTime(experience.startDate, experience.endDate) && (
-                    <p className="text-[15px] text-ink-muted">
-                      {formatCardDateTime(experience.startDate, experience.endDate)}
-                    </p>
-                  )}
-
-                  {experience.location?.city && (
-                    <p className="flex items-center gap-1.5 text-[15px] text-ink-muted">
-                      <IconComponent
-                        iconName="Location01Icon"
-                        size={16}
-                        color="currentColor"
-                        className="text-brand"
-                      />
-                      {experience.location.city}
-                    </p>
-                  )}
-                </div>
 
                 {experience.description && <AboutClamp text={experience.description} />}
               </div>

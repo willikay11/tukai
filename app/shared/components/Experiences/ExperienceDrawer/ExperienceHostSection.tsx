@@ -143,12 +143,12 @@ export const ExperienceHostSection = ({ experience }: { experience: Experience }
 
           <div className="flex items-center gap-3">
             {communityPhoto && (
-              <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-xl">
+              <div className="relative h-[72px] w-[72px] flex-shrink-0 overflow-hidden rounded-xl">
                 <PhotoImage
                   src={communityPhoto}
                   alt={experience.hostCommunity.title}
                   fill
-                  sizes="44px"
+                  sizes="72px"
                   className="object-cover"
                 />
               </div>

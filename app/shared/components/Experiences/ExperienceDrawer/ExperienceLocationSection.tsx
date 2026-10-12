@@ -99,7 +99,7 @@ export const ExperienceLocationSection = ({ experience }: { experience: Experien
             <h3 className="text-[22px] font-bold text-brand-ink">Meeting point and time</h3>
 
             <div className="flex items-center gap-3">
-              {thumb(placePhoto, experience.meetingPlace ?? '')}
+              {thumb(undefined, experience.meetingPlace ?? '')}
               <div className="min-w-0 flex-1">
                 <p className="flex flex-wrap items-center gap-x-2 text-[15px] text-brand-ink">
                   {experience.meetingPlace && (
