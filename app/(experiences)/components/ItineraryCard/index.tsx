@@ -48,10 +48,12 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
 
     event.preventDefault();
-    // Stops nextjs-toploader's own document-level click listener from
-    // starting the top bar for a click that opens the drawer rather than
-    // navigating - see the identical note in ExperienceCard.
     event.stopPropagation();
+    // nextjs-toploader's click listener and React's own delegated listener
+    // are both on `document` - siblings, not ancestor and descendant - so
+    // `stopPropagation()` alone cannot stop it. See the identical note in
+    // ExperienceCard.
+    event.nativeEvent.stopImmediatePropagation();
     drawer?.openExperience(itinerary.id);
   };
 
