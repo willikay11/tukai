@@ -103,7 +103,7 @@ export const PageFilters = () => {
   return (
     <div
       className={cn(
-        showRow && 'sticky top-0 z-40 border-b border-gray-100 bg-white pb-3 pt-4 md:top-[143px]',
+        showRow && 'sticky top-0 z-40 border-b border-gray-100 bg-white pb-3 pt-4 md:top-[165px]',
       )}
     >
       <div className="col-span-12 gap-4 px-4 md:px-0">
