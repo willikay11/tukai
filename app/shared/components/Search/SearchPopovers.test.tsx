@@ -55,6 +55,8 @@ jest.mock('@/app/shared/hooks/usePlaces', () => ({
 
 jest.mock('@/app/shared/hooks/useSearch', () => ({
   useSearch: () => ({ data: undefined, isFetching: false }),
+  // The Filters dialog's own live preview count - not under test here
+  useSearchResults: () => ({ data: undefined, isFetching: false }),
 }));
 
 // Radix needs these before it will open anything in jsdom

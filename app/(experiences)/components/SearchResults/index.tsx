@@ -4,6 +4,17 @@ import { useMemo, useState } from 'react';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
+import { FiltersDialog } from '@/app/shared/components/Filters';
+import {
+  FilterChip,
+  SearchFilters,
+  activeChips,
+  clearedFilters,
+  paramsFromFilters,
+  withoutFilter,
+} from '@/app/shared/components/Filters/filters';
+import { matchesShapes } from '@/app/shared/components/Filters/shapes';
+import { matchesQuickDate, matchesTimeOfDay } from '@/app/shared/components/Filters/when';
 import { IconComponent } from '@/app/shared/components/Icons';
 import {
   CommunityResultRow,
@@ -19,17 +30,7 @@ import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { PlaceCategory } from '@/types/placeCategory';
 import { communityPath, experiencePath, placePath } from '@/utils/detail-paths';
 
-import { FiltersDialog } from './FiltersDialog';
 import { ResultsFilterBar } from './ResultsFilterBar';
-import {
-  FilterChip,
-  SearchFilters,
-  activeChips,
-  clearedFilters,
-  paramsFromFilters,
-  withoutFilter,
-} from './filters';
-import { matchesShapes } from './shapes';
 
 const RowSkeleton = () => (
   <div className="flex items-center gap-3 py-2">
@@ -78,16 +79,23 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
   };
 
   const chips = activeChips(filters, categoryName);
-  // The API cannot filter by day-shape, so those picks narrow the rows here -
-  // and the counts below are taken from the same rows, so the two agree
-  const experiences = (results?.experiences ?? []).filter((experience) =>
-    matchesShapes(experience, filters.experienceShapes),
+  // The API cannot filter by day-shape, quick date or time of day, so those
+  // picks narrow the rows here - and the counts below are taken from the same
+  // rows, so the two agree
+  const experiences = (results?.experiences ?? []).filter(
+    (experience) =>
+      matchesShapes(experience, filters.experienceShapes) &&
+      matchesQuickDate(experience, filters.quickDate) &&
+      matchesTimeOfDay(experience, filters.timeOfDay),
   );
   const places = results?.places ?? [];
   const communities = results?.communities ?? [];
-  const narrowedByShape = filters.experienceShapes.length > 0;
-  const experienceCount = narrowedByShape ? experiences.length : (results?.counts.experience ?? 0);
-  const total = narrowedByShape
+  const narrowedClientSide =
+    filters.experienceShapes.length > 0 || Boolean(filters.quickDate) || filters.timeOfDay.length > 0;
+  const experienceCount = narrowedClientSide
+    ? experiences.length
+    : (results?.counts.experience ?? 0);
+  const total = narrowedClientSide
     ? experiences.length + places.length + communities.length
     : (results?.counts.total ?? 0);
 

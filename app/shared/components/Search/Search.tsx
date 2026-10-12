@@ -6,7 +6,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { debounce } from 'lodash';
 
-import { SimplePillFilters } from '@/app/shared/components/Filters';
+import { FiltersDialog, SimplePillFilters } from '@/app/shared/components/Filters';
+import { paramsFromFilters } from '@/app/shared/components/Filters/filters';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { useRecentSearches } from '@/app/shared/hooks/useRecentSearches';
@@ -17,7 +18,7 @@ import { useLocation } from '@/context/LocationContext';
 import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { PlaceCategory } from '@/types/placeCategory';
-import { SearchResultType } from '@/types/search';
+import { EMPTY_FILTERS, SearchFilters, SearchResultType } from '@/types/search';
 import { communityPath, experiencePath, placePath } from '@/utils/detail-paths';
 
 import { CommunityResultRow } from './CommunityResultRow';
@@ -49,6 +50,7 @@ export const Search = () => {
   const [query, setQuery] = useState<string>();
   const [tag, setTag] = useState<PlaceCategory | undefined>();
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   // `query` lags by the debounce, so the placeholder tracks the field directly
   const [isFieldEmpty, setIsFieldEmpty] = useState(true);
@@ -138,6 +140,21 @@ export const Search = () => {
     setShowSearchResults(true);
   };
 
+  // What the Filters dialog opens on - the query and city tag this bar
+  // already carries, narrowed no further until the reader picks something
+  const filtersDraft: SearchFilters = { ...EMPTY_FILTERS, query: query ?? '', category: tag?.id };
+
+  /**
+   * Filters live in the URL on Discover, same as a submitted search - so
+   * applying one is a navigation there, not a local state change.
+   */
+  const applyFilters = (next: SearchFilters) => {
+    setShowSearchResults(false);
+    setIsFiltersOpen(false);
+    const params = paramsFromFilters(next);
+    router.push(params.toString() ? `/?${params.toString()}` : '/');
+  };
+
   /**
    * Submitting takes the reader to the results, which live on Discover and
    * read their filters out of the URL. The popover is for type-ahead; this is
@@ -188,206 +205,214 @@ export const Search = () => {
   };
 
   return (
-    <Popover open={showSearchResults} onOpenChange={(isOpen) => setShowSearchResults(isOpen)}>
-      {/* An anchor, not a trigger. The bar holds the city button, which opens
+    <>
+      <Popover open={showSearchResults} onOpenChange={(isOpen) => setShowSearchResults(isOpen)}>
+        {/* An anchor, not a trigger. The bar holds the city button, which opens
           a popover of its own - nesting one trigger inside another meant a
           click on the city opened the results panel instead. The field opens
           this one itself, on focus. */}
-      <PopoverAnchor asChild className="my-4 md:my-0">
-        <div ref={barRef} className="w-full">
-          <SearchBarShell
-            // Where the reader actually is, once that is known - "Near me"
-            // only while it is still being worked out
-            cityLabel={isUsingLocation ? (area ?? city ?? 'Near me') : (city ?? 'Nairobi')}
-            isLocationOn={isUsingLocation}
-            onFilters={() => setShowSearchResults(true)}
-            filterCount={tag ? 1 : 0}
-            isFilterOpen={showSearchResults}
-            canSearch={!isFieldEmpty}
-            onSearch={handleSubmitSearch}
-          >
-            {/* The canvas clears a filter from its Filters dialog, which is
-                D4 and not built. Until it is, the chip stays: it was the only
-                way to drop a city filter, and the button beside it only opens
-                the panel. */}
-            {tag && (
-              <span className="mr-2 inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-surface py-1 pl-2.5 pr-1 text-[13px] font-medium text-brand-ink">
-                {tag.name}
-                <button
-                  type="button"
-                  aria-label={`Clear ${tag.name}`}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    removeTag();
-                  }}
-                  className="flex h-5 w-5 items-center justify-center rounded-full text-ink-subtle transition-colors hover:text-brand-ink"
-                >
-                  <IconComponent iconName="Cancel01Icon" size={12} color="currentColor" />
-                </button>
-              </span>
-            )}
+        <PopoverAnchor asChild className="my-4 md:my-0">
+          <div ref={barRef} className="w-full">
+            <SearchBarShell
+              // Where the reader actually is, once that is known - "Near me"
+              // only while it is still being worked out
+              cityLabel={isUsingLocation ? (area ?? city ?? 'Near me') : (city ?? 'Nairobi')}
+              isLocationOn={isUsingLocation}
+              onFilters={() => setIsFiltersOpen(true)}
+              filterCount={tag ? 1 : 0}
+              isFilterOpen={isFiltersOpen}
+              canSearch={!isFieldEmpty}
+              onSearch={handleSubmitSearch}
+            >
+              {/* The Filters dialog seeds its own category pick from this tag
+                but does not write back to it, so the chip's own close button
+                stays the one way to drop a city filter from the bar itself. */}
+              {tag && (
+                <span className="mr-2 inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-surface py-1 pl-2.5 pr-1 text-[13px] font-medium text-brand-ink">
+                  {tag.name}
+                  <button
+                    type="button"
+                    aria-label={`Clear ${tag.name}`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      removeTag();
+                    }}
+                    className="flex h-5 w-5 items-center justify-center rounded-full text-ink-subtle transition-colors hover:text-brand-ink"
+                  >
+                    <IconComponent iconName="Cancel01Icon" size={12} color="currentColor" />
+                  </button>
+                </span>
+              )}
 
-            <input
-              ref={inputElRef}
-              type="text"
-              aria-label="Search Tukai"
-              placeholder="Experiences, places, lists, communities"
-              className="min-w-0 flex-1 border-none bg-transparent text-[13.5px] font-medium text-gray-900 outline-none placeholder:text-ink-subtle"
-              onClick={() => setShowSearchResults(true)}
-              onFocus={() => setShowSearchResults(true)}
-              onChange={(event) => {
-                setIsFieldEmpty(event.target.value.length === 0);
-                debouncedSetQuery(event.target.value);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') handleSubmitSearch();
-              }}
-            />
-          </SearchBarShell>
-        </div>
-      </PopoverAnchor>
-      {/* Anchored to the field's right edge and grown leftwards: the field sits
+              <input
+                ref={inputElRef}
+                type="text"
+                aria-label="Search Tukai"
+                placeholder="Experiences, places, lists, communities"
+                className="min-w-0 flex-1 border-none bg-transparent text-[13.5px] font-medium text-gray-900 outline-none placeholder:text-ink-subtle"
+                onClick={() => setShowSearchResults(true)}
+                onFocus={() => setShowSearchResults(true)}
+                onChange={(event) => {
+                  setIsFieldEmpty(event.target.value.length === 0);
+                  debouncedSetQuery(event.target.value);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') handleSubmitSearch();
+                }}
+              />
+            </SearchBarShell>
+          </div>
+        </PopoverAnchor>
+        {/* Anchored to the field's right edge and grown leftwards: the field sits
           at the right of the header, so aligning left would push the panel off
           screen. `collisionPadding` keeps it clear of the viewport edge, and the
           max-width clamps it on anything narrower than the panel itself. */}
-      <PopoverContent
-        align="end"
-        collisionPadding={16}
-        // The bar is an anchor rather than a trigger, so Radix counts it as
-        // outside this panel: without these, clicking the field opens the
-        // panel and the same click dismisses it again
-        onOpenAutoFocus={(event) => event.preventDefault()}
-        onInteractOutside={(event) => {
-          if (barRef.current?.contains(event.target as Node)) event.preventDefault();
-        }}
-        className="z-50 max-h-[80vh] w-[860px] max-w-[calc(100vw-3rem)] overflow-y-auto rounded-3xl border-gray-100 p-0 shadow-xl"
-      >
-        {/* Idle - what the reader sees before typing anything */}
-        {!hasQuery && (
-          <div className="space-y-6 p-5">
-            {recentSearches.length > 0 && (
-              <div className="space-y-3">
-                <SearchSectionHeading>Recent searches</SearchSectionHeading>
-                <div className="flex flex-wrap gap-3">
-                  {recentSearches.map((term) => (
-                    <RecentSearchPill key={term} term={term} onSelect={() => runSearch(term)} />
+        <PopoverContent
+          align="end"
+          collisionPadding={16}
+          // The bar is an anchor rather than a trigger, so Radix counts it as
+          // outside this panel: without these, clicking the field opens the
+          // panel and the same click dismisses it again
+          onOpenAutoFocus={(event) => event.preventDefault()}
+          onInteractOutside={(event) => {
+            if (barRef.current?.contains(event.target as Node)) event.preventDefault();
+          }}
+          className="z-50 max-h-[80vh] w-[860px] max-w-[calc(100vw-3rem)] overflow-y-auto rounded-3xl border-gray-100 p-0 shadow-xl"
+        >
+          {/* Idle - what the reader sees before typing anything */}
+          {!hasQuery && (
+            <div className="space-y-6 p-5">
+              {recentSearches.length > 0 && (
+                <div className="space-y-3">
+                  <SearchSectionHeading>Recent searches</SearchSectionHeading>
+                  <div className="flex flex-wrap gap-3">
+                    {recentSearches.map((term) => (
+                      <RecentSearchPill key={term} term={term} onSelect={() => runSearch(term)} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {suggestions.length > 0 && (
+                <div className="space-y-3">
+                  <SearchSectionHeading>Trending destinations</SearchSectionHeading>
+                  {/* Two across on a phone, four on the wide header popover */}
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-4 lg:grid-cols-4">
+                    {suggestions.map((city) => (
+                      <SuggestionRow
+                        key={city.id}
+                        name={city.name}
+                        subtitle="City in Kenya"
+                        onSelect={() => handleSelectLocation(city)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Typing - a results header, type tabs, then results grouped by type */}
+          {hasQuery && (
+            <div className="p-5">
+              {isSearching ? (
+                <div className="space-y-1">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index} className="flex items-center gap-3 py-2">
+                      <div className="h-14 w-14 animate-pulse rounded-xl bg-gray-100" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-3 w-2/5 animate-pulse rounded bg-gray-100" />
+                        <div className="h-3 w-3/5 animate-pulse rounded bg-gray-100" />
+                      </div>
+                    </div>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : total === 0 ? (
+                <p className="py-8 text-center text-sm text-gray-400">
+                  No results for &ldquo;{query?.trim()}&rdquo;
+                </p>
+              ) : (
+                <>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                    <p className="text-lg font-bold text-gray-900">
+                      {total} {total === 1 ? 'result' : 'results'} for &ldquo;{query?.trim()}&rdquo;
+                    </p>
 
-            {suggestions.length > 0 && (
-              <div className="space-y-3">
-                <SearchSectionHeading>Trending destinations</SearchSectionHeading>
-                {/* Two across on a phone, four on the wide header popover */}
-                <div className="grid grid-cols-2 gap-x-8 gap-y-4 lg:grid-cols-4">
-                  {suggestions.map((city) => (
-                    <SuggestionRow
-                      key={city.id}
-                      name={city.name}
-                      subtitle="City in Kenya"
-                      onSelect={() => handleSelectLocation(city)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Typing - a results header, type tabs, then results grouped by type */}
-        {hasQuery && (
-          <div className="p-5">
-            {isSearching ? (
-              <div className="space-y-1">
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <div key={index} className="flex items-center gap-3 py-2">
-                    <div className="h-14 w-14 animate-pulse rounded-xl bg-gray-100" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-3 w-2/5 animate-pulse rounded bg-gray-100" />
-                      <div className="h-3 w-3/5 animate-pulse rounded bg-gray-100" />
+                    <div className="sm:flex-shrink-0">
+                      <SimplePillFilters
+                        variant="panel"
+                        filters={typeTabs}
+                        selected={typeFilter}
+                        onChange={(value) => setTypeFilter(value as TypeFilter)}
+                      />
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : total === 0 ? (
-              <p className="py-8 text-center text-sm text-gray-400">
-                No results for &ldquo;{query?.trim()}&rdquo;
-              </p>
-            ) : (
-              <>
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                  <p className="text-lg font-bold text-gray-900">
-                    {total} {total === 1 ? 'result' : 'results'} for &ldquo;{query?.trim()}&rdquo;
-                  </p>
 
-                  <div className="sm:flex-shrink-0">
-                    <SimplePillFilters
-                      variant="panel"
-                      filters={typeTabs}
-                      selected={typeFilter}
-                      onChange={(value) => setTypeFilter(value as TypeFilter)}
-                    />
+                  <div className="mt-6 space-y-8">
+                    {showGroup('experience') && experiences.length > 0 && (
+                      <ResultGroup
+                        title="Experiences"
+                        count={`${counts?.experience} ${counts?.experience === 1 ? 'experience' : 'experiences'}`}
+                      >
+                        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                          {experiences.map((experience) => (
+                            <ExperienceResultRow
+                              key={experience.id}
+                              item={experience}
+                              onClick={() => goToExperience(experience)}
+                            />
+                          ))}
+                        </div>
+                      </ResultGroup>
+                    )}
+
+                    {showGroup('place') && places.length > 0 && (
+                      <ResultGroup
+                        title="Places"
+                        count={`${counts?.place} ${counts?.place === 1 ? 'place' : 'places'}`}
+                      >
+                        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                          {places.map((place) => (
+                            <PlaceResultRow
+                              key={place.id}
+                              item={place}
+                              onClick={() => goToPlace(place)}
+                            />
+                          ))}
+                        </div>
+                      </ResultGroup>
+                    )}
+
+                    {showGroup('community') && communities.length > 0 && (
+                      <ResultGroup
+                        title="Communities"
+                        count={`${counts?.community} ${counts?.community === 1 ? 'community' : 'communities'}`}
+                      >
+                        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                          {communities.map((community) => (
+                            <CommunityResultRow
+                              key={community.id}
+                              item={community}
+                              onClick={() => go(communityPath(community))}
+                            />
+                          ))}
+                        </div>
+                      </ResultGroup>
+                    )}
                   </div>
-                </div>
+                </>
+              )}
+            </div>
+          )}
+        </PopoverContent>
+      </Popover>
 
-                <div className="mt-6 space-y-8">
-                  {showGroup('experience') && experiences.length > 0 && (
-                    <ResultGroup
-                      title="Experiences"
-                      count={`${counts?.experience} ${counts?.experience === 1 ? 'experience' : 'experiences'}`}
-                    >
-                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                        {experiences.map((experience) => (
-                          <ExperienceResultRow
-                            key={experience.id}
-                            item={experience}
-                            onClick={() => goToExperience(experience)}
-                          />
-                        ))}
-                      </div>
-                    </ResultGroup>
-                  )}
-
-                  {showGroup('place') && places.length > 0 && (
-                    <ResultGroup
-                      title="Places"
-                      count={`${counts?.place} ${counts?.place === 1 ? 'place' : 'places'}`}
-                    >
-                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                        {places.map((place) => (
-                          <PlaceResultRow
-                            key={place.id}
-                            item={place}
-                            onClick={() => goToPlace(place)}
-                          />
-                        ))}
-                      </div>
-                    </ResultGroup>
-                  )}
-
-                  {showGroup('community') && communities.length > 0 && (
-                    <ResultGroup
-                      title="Communities"
-                      count={`${counts?.community} ${counts?.community === 1 ? 'community' : 'communities'}`}
-                    >
-                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                        {communities.map((community) => (
-                          <CommunityResultRow
-                            key={community.id}
-                            item={community}
-                            onClick={() => go(communityPath(community))}
-                          />
-                        ))}
-                      </div>
-                    </ResultGroup>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-      </PopoverContent>
-    </Popover>
+      <FiltersDialog
+        filters={filtersDraft}
+        isOpen={isFiltersOpen}
+        onClose={() => setIsFiltersOpen(false)}
+        onApply={applyFilters}
+      />
+    </>
   );
 };

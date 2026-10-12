@@ -35,7 +35,7 @@ jest.mock('@/context/LocationContext', () => ({
   useLocation: () => ({ lat: undefined, lng: undefined }),
 }));
 
-jest.mock('./FiltersDialog', () => ({
+jest.mock('@/app/shared/components/Filters', () => ({
   FiltersDialog: ({ isOpen }: { isOpen: boolean }) => (isOpen ? <div>filters open</div> : null),
 }));
 

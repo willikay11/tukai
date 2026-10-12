@@ -1,9 +1,8 @@
 'use client';
 
+import { FilterChip } from '@/app/shared/components/Filters/filters';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { cn } from '@/lib/utils';
-
-import { FilterChip } from './filters';
 
 /**
  * The bar that sits under the header once a search is on.

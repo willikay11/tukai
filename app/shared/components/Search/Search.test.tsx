@@ -70,6 +70,8 @@ jest.mock('@/app/shared/hooks/usePlaces', () => ({
 const mockSearch = jest.fn();
 jest.mock('@/app/shared/hooks/useSearch', () => ({
   useSearch: (query?: string) => mockSearch(query),
+  // The Filters dialog's own live preview count - not under test here
+  useSearchResults: () => ({ data: undefined, isFetching: false }),
 }));
 
 const results = {
@@ -244,6 +246,33 @@ describe('Search popover', () => {
       await typeQuery();
 
       await waitFor(() => expect(screen.getByText(/No results for/)).toBeInTheDocument());
+    });
+  });
+
+  describe('Filters dialog', () => {
+    it('opens from the bar’s own Filters button', async () => {
+      const user = userEvent.setup();
+      render(<Search />);
+
+      expect(screen.queryByText('Looking for')).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Filters' }));
+
+      expect(screen.getByText('Looking for')).toBeInTheDocument();
+      expect(screen.getByText('Experience type')).toBeInTheDocument();
+      expect(screen.getByText('When')).toBeInTheDocument();
+    });
+
+    // Filters live in the URL on Discover, so applying one is a navigation
+    it('sends the reader to Discover with the chosen filters in the URL', async () => {
+      const user = userEvent.setup();
+      render(<Search />);
+
+      await user.click(screen.getByRole('button', { name: 'Filters' }));
+      await user.click(screen.getByRole('switch', { name: 'Itinerary' }));
+      await user.click(screen.getByRole('button', { name: /^Show all/ }));
+
+      expect(push).toHaveBeenCalledWith('/?xtype=itinerary');
     });
   });
 });

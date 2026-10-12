@@ -39,13 +39,28 @@ export type SearchResults = {
  */
 export type ResultType = 'all' | 'experiences' | 'places' | 'communities';
 
+/** A quick pick in the "When" section, in place of an exact date. */
+export type QuickDate = 'today' | 'tomorrow' | 'weekend' | 'next7';
+
+/** A start-time band, in place of an exact time. */
+export type TimeOfDay = 'morning' | 'afternoon' | 'evening';
+
 export type SearchFilters = {
   query: string;
   type: ResultType;
   /** A category id, which both experiences and places accept. */
   category?: string;
-  /** `YYYY-MM-DD`, experiences only. */
+  /** `YYYY-MM-DD`, experiences only - an exact day from "Pick dates". */
   date?: string;
+  /**
+   * A quick pick, in place of `date`. No endpoint takes a date range, so
+   * "This weekend" and "Next 7 days" narrow the rows that come back rather
+   * than the request - see `matchesQuickDate`. Mutually exclusive with
+   * `date`: picking one clears the other.
+   */
+  quickDate?: QuickDate;
+  /** One or more start-time bands, matched client-side - see `matchesTimeOfDay`. */
+  timeOfDay: TimeOfDay[];
   freeOnly: boolean;
   availableOnly: boolean;
   /**
@@ -62,6 +77,7 @@ export const EMPTY_FILTERS: SearchFilters = {
   query: '',
   type: 'all',
   experienceShapes: [],
+  timeOfDay: [],
   freeOnly: false,
   availableOnly: false,
   popularFirst: false,
