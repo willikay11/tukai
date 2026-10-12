@@ -7,6 +7,7 @@ import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { ScrollRow } from '@/app/shared/components/Lists';
 import { CARD_LIFT } from '@/app/shared/components/Motion';
+import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { experiencePath } from '@/utils/detail-paths';
@@ -23,11 +24,33 @@ interface HappeningNearYouProps {
   onToggle: () => void;
 }
 
-const NearCard = ({ experience }: { experience: Experience }) => (
-  <Link target="_blank" href={experiencePath(experience)} className={cn('group block', CARD_LIFT)}>
-    <SingleExperience type="discover" variant="row" experience={experience} />
-  </Link>
-);
+const NearCard = ({ experience }: { experience: Experience }) => {
+  const drawer = useExperienceDrawer();
+
+  return (
+    <Link
+      href={experiencePath(experience)}
+      onClick={(event) => {
+        // A modifier asks the browser for something else - a new tab, a new
+        // window - and the link should do that rather than the drawer
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        if (!drawer) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        // nextjs-toploader's click listener and React's own delegated
+        // listener are both on `document` - siblings, not ancestor and
+        // descendant - so `stopPropagation()` alone cannot stop it. See the
+        // identical note in ExperienceCard.
+        event.nativeEvent.stopImmediatePropagation();
+        drawer.openExperience(experience.id);
+      }}
+      className={cn('group block', CARD_LIFT)}
+    >
+      <SingleExperience type="discover" variant="row" experience={experience} />
+    </Link>
+  );
+};
 
 /**
  * The near-me row. Collapsed, it is a rail of the first page. The "All N"

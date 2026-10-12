@@ -8,6 +8,7 @@ import numeral from 'numeral';
 import { Bookmark } from '@/app/shared/components/Bookmark';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { CARD_LIFT, MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motion';
+import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { coverPhotoUrl } from '@/types/photo';
@@ -20,6 +21,11 @@ import { communityPath, experiencePath } from '@/utils/detail-paths';
  * The community leads because the section is about what is happening inside
  * the crews a reader follows - the experience is the news, the community is
  * the reason they are being told.
+ *
+ * A plain click opens the experience in the drawer, the same pattern
+ * ExperienceCard follows - this page is never itself a drawer, so there is no
+ * nesting concern stopping it here the way there is in the place drawer's own
+ * cards.
  */
 export const CommunityHappeningCard = ({
   experience,
@@ -29,15 +35,37 @@ export const CommunityHappeningCard = ({
   priority?: boolean;
 }) => {
   const { data: session } = useSession();
+  const drawer = useExperienceDrawer();
 
   const cover = coverPhotoUrl(experience.photos, 'md');
   const price = experience.priceStartsFrom;
   const community = experience.hostCommunity;
 
+  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+    // A modifier asks the browser for something else - a new tab, a new
+    // window - and the link should do that rather than the drawer
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (!drawer) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    // nextjs-toploader's click listener and React's own delegated listener
+    // are both on `document` - siblings, not ancestor and descendant - so
+    // `stopPropagation()` alone cannot stop it. See the identical note in
+    // ExperienceCard.
+    event.nativeEvent.stopImmediatePropagation();
+    drawer.openExperience(experience.id);
+  };
+
   return (
     <div className={cn('group w-full', CARD_LIFT)}>
       <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-gray-100">
-        <Link href={experiencePath(experience)} tabIndex={-1} aria-hidden="true">
+        <Link
+          href={experiencePath(experience)}
+          tabIndex={-1}
+          aria-hidden="true"
+          onClick={handleOpen}
+        >
           <PhotoImage
             src={cover}
             alt={experience.title}
@@ -69,7 +97,7 @@ export const CommunityHappeningCard = ({
           </Link>
         )}
 
-        <Link href={experiencePath(experience)} className="block">
+        <Link href={experiencePath(experience)} className="block" onClick={handleOpen}>
           <p className={cn('mt-0.5 text-base font-bold text-gray-900', TITLE_TINT)}>
             {experience.title}
           </p>

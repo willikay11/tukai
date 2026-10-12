@@ -1,4 +1,9 @@
-import { formatCardDateTime, formatShortDate, inferUIExperienceType } from './date-utils';
+import {
+  formatCardDateTime,
+  formatExperienceHeaderDate,
+  formatShortDate,
+  inferUIExperienceType,
+} from './date-utils';
 
 describe('inferUIExperienceType', () => {
   it('maps itinerary API type to itinerary UI type', () => {
@@ -133,5 +138,42 @@ describe('formatCardDateTime', () => {
   it('is null without a usable start', () => {
     expect(formatCardDateTime(null, '2026-10-07T12:00:00')).toBeNull();
     expect(formatCardDateTime('whenever', null)).toBeNull();
+  });
+});
+
+describe('formatExperienceHeaderDate', () => {
+  const NOW = new Date('2026-10-07T08:00:00');
+
+  it('leads with Today for a same-day experience happening today', () => {
+    expect(
+      formatExperienceHeaderDate('2026-10-07T10:00:00', '2026-10-07T12:00:00', NOW),
+    ).toBe('Today, 10:00 AM - 12:00 PM');
+  });
+
+  it('leads with Tomorrow for a same-day experience happening tomorrow', () => {
+    expect(
+      formatExperienceHeaderDate('2026-10-08T06:30:00', '2026-10-08T09:00:00', NOW),
+    ).toBe('Tomorrow, 6:30 AM - 9:00 AM');
+  });
+
+  it('falls back to the weekday and date further out', () => {
+    expect(
+      formatExperienceHeaderDate('2026-10-11T10:00:00', '2026-10-11T12:00:00', NOW),
+    ).toBe('Sun 11 Oct, 10:00 AM - 12:00 PM');
+  });
+
+  it('gives just the start time when there is no end', () => {
+    expect(formatExperienceHeaderDate('2026-10-07T10:00:00', null, NOW)).toBe('Today, 10:00 AM');
+  });
+
+  it('shows a date range for a multi-day experience, even if it starts today', () => {
+    expect(
+      formatExperienceHeaderDate('2026-10-07T10:00:00', '2026-10-09T12:00:00', NOW),
+    ).toBe('7 Oct - 9 Oct');
+  });
+
+  it('is null without a usable start', () => {
+    expect(formatExperienceHeaderDate(null, '2026-10-07T12:00:00', NOW)).toBeNull();
+    expect(formatExperienceHeaderDate('whenever', null, NOW)).toBeNull();
   });
 });

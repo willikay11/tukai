@@ -14,6 +14,7 @@ import {
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { useSearchResults } from '@/app/shared/hooks/useSearch';
 import { Button } from '@/components/ui/button';
+import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { PlaceCategory } from '@/types/placeCategory';
 import { communityPath, experiencePath, placePath } from '@/utils/detail-paths';
@@ -50,6 +51,7 @@ const RowSkeleton = () => (
 export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
   const router = useRouter();
   const drawer = usePlaceDrawer();
+  const experienceDrawer = useExperienceDrawer();
   const searchParams = useSearchParams();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -154,7 +156,11 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
                 <ExperienceResultRow
                   key={experience.id}
                   item={experience}
-                  onClick={() => router.push(experiencePath(experience))}
+                  onClick={() =>
+                    experienceDrawer
+                      ? experienceDrawer.openExperience(experience.id)
+                      : router.push(experiencePath(experience))
+                  }
                 />
               ))}
             </ResultGroup>

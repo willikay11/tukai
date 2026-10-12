@@ -58,6 +58,13 @@ export const UpcomingExperiences = ({ category }: { category: string }) => {
                   if (!drawer) return;
 
                   event.preventDefault();
+                  event.stopPropagation();
+                  // nextjs-toploader's click listener and React's own
+                  // delegated listener are both on `document` - siblings,
+                  // not ancestor and descendant - so `stopPropagation()`
+                  // alone cannot stop it. See the identical note in
+                  // ExperienceCard.
+                  event.nativeEvent.stopImmediatePropagation();
                   drawer.openExperience(experience.id);
                 }}
               >

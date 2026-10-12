@@ -12,6 +12,7 @@ import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { useRecentSearches } from '@/app/shared/hooks/useRecentSearches';
 import { useSearch } from '@/app/shared/hooks/useSearch';
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover';
+import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { useLocation } from '@/context/LocationContext';
 import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
@@ -40,6 +41,7 @@ export const Search = () => {
   const pathname = usePathname();
   const router = useRouter();
   const drawer = usePlaceDrawer();
+  const experienceDrawer = useExperienceDrawer();
   const searchParams = useSearchParams();
   const { setSelectedCitySearchId } = useSelectedCategory();
   const { city, area, isUsingLocation } = useLocation();
@@ -176,6 +178,13 @@ export const Search = () => {
     leaving();
     if (drawer) drawer.openPlace(place.id);
     else router.push(placePath(place));
+  };
+
+  // Same as above, for an experience
+  const goToExperience = (experience: { id: string; slug?: string }) => {
+    leaving();
+    if (experienceDrawer) experienceDrawer.openExperience(experience.id);
+    else router.push(experiencePath(experience));
   };
 
   return (
@@ -333,7 +342,7 @@ export const Search = () => {
                           <ExperienceResultRow
                             key={experience.id}
                             item={experience}
-                            onClick={() => go(experiencePath(experience))}
+                            onClick={() => goToExperience(experience)}
                           />
                         ))}
                       </div>

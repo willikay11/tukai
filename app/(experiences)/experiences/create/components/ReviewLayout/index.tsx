@@ -206,9 +206,9 @@ export const ReviewLayout = ({
       )}
 
       {/* 8. Meeting/Pick-up Point */}
-      {experience.meetingPoint && (
+      {experience.meetingPlace && (
         <PreviewMeetingSection
-          meetingPoint={experience.meetingPoint}
+          meetingPoint={experience.meetingPlace}
           meetingTime={experience.meetingTime}
           onEdit={() => handleEditClick('about-meeting-point')}
         />

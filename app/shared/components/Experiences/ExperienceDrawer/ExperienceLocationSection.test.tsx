@@ -35,10 +35,10 @@ describe('ExperienceLocationSection', () => {
     expect(screen.getByText('Nairobi, Kenya')).toBeInTheDocument();
   });
 
-  it('offers directions out to Google Maps', () => {
+  it('offers directions out to Google Maps as a quiet link under the name', () => {
     render(<ExperienceLocationSection experience={experience({})} />);
 
-    expect(screen.getByRole('link', { name: /Get directions/ })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /View on Google Maps/ })).toHaveAttribute(
       'href',
       expect.stringContaining('google.com/maps'),
     );
@@ -47,11 +47,11 @@ describe('ExperienceLocationSection', () => {
   it('shows the meeting point and time when the experience has one', () => {
     render(
       <ExperienceLocationSection
-        experience={experience({ meetingPoint: 'Main gate', meetingTime: '9:00am' })}
+        experience={experience({ meetingPlace: 'Main gate', meetingTime: '9:00am' })}
       />,
     );
 
-    expect(screen.getByText('Meeting point')).toBeInTheDocument();
+    expect(screen.getByText('Meeting point and time')).toBeInTheDocument();
     expect(screen.getByText('Main gate')).toBeInTheDocument();
     expect(screen.getByText('9:00am')).toBeInTheDocument();
   });
@@ -59,7 +59,7 @@ describe('ExperienceLocationSection', () => {
   it('leaves out the meeting point card when the experience has none', () => {
     render(<ExperienceLocationSection experience={experience({})} />);
 
-    expect(screen.queryByText('Meeting point')).not.toBeInTheDocument();
+    expect(screen.queryByText('Meeting point and time')).not.toBeInTheDocument();
   });
 
   it('renders nothing when the experience has neither a place nor an address', () => {

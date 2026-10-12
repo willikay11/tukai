@@ -1,6 +1,6 @@
 # ED-10 Cancellation and report
 
-- **Status:** blocked
+- **Status:** awaiting approval
 - **Type:** content
 - **Depends on:** the owner's approval of [INVENTORY.md](INVENTORY.md)
 - **Design:** `Tukai Web.dc.html`, grep `pn.cancelLine`
@@ -14,14 +14,25 @@ with its status against what is built. Reviewed by the owner first.
 
 | Design item | Built? | Notes |
 |---|---|---|
-| Cancellation policy heading and line | Blocked, not missing | Checked `types/experience.ts` and `services/experience.ts`: no cancellation-policy field exists anywhere on `Experience`, and nothing in the service layer fetches one. There is nothing to render. |
-| Report this experience action | Blocked, not missing | Checked the whole repo for a report flow - hook, mutation, service endpoint, modal. None exists. The experience page itself (`ViewExperiencePageContent.tsx`) already has a "Report this experience" button with no `onClick`; it has always been inert. |
+| Cancellation policy heading and line | Reopen, likely not blocked | The owner's screenshot (2026-10-08) reads "Free cancellation until 6:00 PM on Thu 8 Oct. After that, tickets can be transferred but not refunded." That deadline is the experience's own start time (the same drawer's header reads "Tomorrow, 6:00 PM to 9:00 PM"). This line is very likely computed from `experience.startDate` alone, not a stored policy field, which would make it buildable now, with no API change. |
+| Report this experience action | Blocked, not missing | Unchanged: no report flow exists anywhere in the app, confirmed by the earlier search. The experience page's own "Report this experience" button has never had an `onClick`. |
 
 ## Done when
 
-- [ ] Cancellation policy shows when the API sends one - blocked until the API sends one
-- [ ] Report action opens the existing report flow, if there is one - blocked until a report flow exists anywhere in the app
+- [ ] Confirm with the owner whether the cancellation line is meant to be a fixed, computed rule ("free until the start time, transfer-only after") or real per-experience policy data
+- [ ] If computed, build it from `experience.startDate` with no API change
+- [ ] Report stays a visible but inert control, matching the experience page's own current state, or gets left out of the drawer until a real flow exists, owner's call
 
 ## Notes
 
-Both halves of this task are blocked on backend/product work outside the frontend's reach, confirmed by reading the current `Experience` type, the experience service file, and a repo-wide search for report-related code. Nothing was built here to avoid rendering a fake policy or wiring a button to nothing, same as it was before. Revisit once either the cancellation-policy field or a real report flow exists.
+Reopened 2026-10-08 against the owner's screenshot. The earlier "blocked"
+call was a careful one: `types/experience.ts` really does carry no
+cancellation-policy field, but the specific deadline in the screenshot
+lining up exactly with the experience's own start time suggests the design
+never needed a stored field for this: it is a standard rule, stated in
+different words depending on how long before the start time it is. Confirm
+the wording and the rule with the owner before building it as copy.
+
+Report is unchanged: still nothing to wire it to. Building the row without a
+working action matches what the experience page already does, so it is a
+real option, not a half-measure unique to the drawer.

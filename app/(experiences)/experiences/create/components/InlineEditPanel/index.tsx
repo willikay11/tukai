@@ -941,7 +941,7 @@ export const InlineEditPanel = ({
       {activeEditSection === 'about-meeting-point' && (
         <EditMeetingPointFieldWithSave
           experienceId={experienceId}
-          currentMeetingPoint={experience.meetingPoint || ''}
+          currentMeetingPoint={experience.meetingPlace || ''}
           onClose={onClose}
         />
       )}

@@ -111,9 +111,9 @@ export const ExperienceReview = ({
         />
       )}
 
-      {experience.meetingPoint && (
+      {experience.meetingPlace && (
         <PreviewMeetingSection
-          meetingPoint={experience.meetingPoint}
+          meetingPoint={experience.meetingPlace}
           meetingTime={experience.meetingTime}
           onEdit={() => handleEditClick('about')}
         />
