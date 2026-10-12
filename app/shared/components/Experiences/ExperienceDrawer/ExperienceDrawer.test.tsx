@@ -85,14 +85,14 @@ describe('ExperienceDrawer', () => {
     expect(useFetchSingleExperience).toHaveBeenLastCalledWith('');
   });
 
-  it('shows the title, who runs it, where, and the price', () => {
+  it('shows the title, where, and the description', () => {
     render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
 
-    // Host community and city repeat lower down, in the host and location
-    // sections (ED-07, ED-08), so these are no longer unique to the summary
+    // Who runs it and the price live lower down, in the host section and the
+    // footer (ED-07, ED-08, ED-11) - the footer is mocked out in this shell
+    // suite and covered by ExperienceDrawerFooter.test.tsx instead
     expect(screen.getAllByText('Nairobi Makers Circle').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Nairobi').length).toBeGreaterThan(0);
-    expect(screen.getByText('KES 1,800/person')).toBeInTheDocument();
     expect(screen.getByText('Hands in the clay from the first hour.')).toBeInTheDocument();
   });
 

@@ -66,7 +66,8 @@ export type Experience = {
   place?: { id: string; title: string; photos?: Photo[] } | null;
   whatsIncluded?: string;
   whatsNotIncluded?: string;
-  meetingPoint?: string;
+  /** `meeting_place` on the API - the saved text address, not a place object. */
+  meetingPlace?: string;
   meetingTime?: string;
   // Who absorbs Tukai's commission. Drives each ticket's buyer_price.
   feesAllocation?: 'host_pays' | 'customer_pays' | 'split' | null;

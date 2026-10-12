@@ -21,6 +21,7 @@ import { formatCardDateTime, formatExperienceHeaderDate } from '@/utils/date-uti
 import { experiencePath } from '@/utils/detail-paths';
 import { toPlainText } from '@/utils/safe-text-utils';
 
+import { ExperienceCancellationSection } from './ExperienceCancellationSection';
 import { ExperienceDrawerFooter } from './ExperienceDrawerFooter';
 import { ExperienceHostSection } from './ExperienceHostSection';
 import { ExperienceLocationSection } from './ExperienceLocationSection';
@@ -252,6 +253,8 @@ export const ExperienceDrawer = ({
                 communityLabel={experience.hostCommunity?.title}
               />
             </section>
+
+            <ExperienceCancellationSection experience={experience} />
           </div>
 
           <ExperienceDrawerFooter experience={experience} />

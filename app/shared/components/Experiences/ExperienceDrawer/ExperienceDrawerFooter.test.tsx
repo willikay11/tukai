@@ -17,6 +17,9 @@ const experience = (overrides: Partial<Experience> = {}) =>
     id: 'e1',
     title: 'Pottery for beginners',
     startDate: '2026-10-03T10:00:00Z',
+    endDate: '2026-10-03T12:00:00Z',
+    isPaid: true,
+    priceStartsFrom: { amount: 1800, currency: 'KES' },
     location: { city: 'Nairobi' },
     photos: [],
     ...overrides,
@@ -26,10 +29,19 @@ describe('ExperienceDrawerFooter', () => {
   it('sends the reader to the experience page to book', () => {
     render(<ExperienceDrawerFooter experience={experience()} />);
 
-    expect(screen.getByRole('link', { name: 'View experience' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Make reservation/ })).toHaveAttribute(
       'href',
       '/experiences/e1',
     );
+  });
+
+  it('shows the price and when it runs', () => {
+    render(<ExperienceDrawerFooter experience={experience()} />);
+
+    expect(screen.getByText('KES 1,800/person')).toBeInTheDocument();
+    expect(
+      screen.getByText(/Sat 3 Oct, \d{1,2}:\d{2} [AP]M - \d{1,2}:\d{2} [AP]M/),
+    ).toBeInTheDocument();
   });
 
   // Planning is not booking, so it is not gated behind the push to the full

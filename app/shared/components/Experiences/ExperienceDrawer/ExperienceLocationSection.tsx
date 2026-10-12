@@ -25,19 +25,19 @@ export const ExperienceLocationSection = ({ experience }: { experience: Experien
   const addressLine = [location?.city, location?.country].filter(Boolean).join(', ');
   const mapsQuery = [venueName, addressLine].filter(Boolean).join(', ') || undefined;
   const hasVenue = Boolean(venueName || addressLine);
-  const hasMeeting = Boolean(experience.meetingPoint || experience.meetingTime);
+  const hasMeeting = Boolean(experience.meetingPlace || experience.meetingTime);
 
   if (!hasVenue && !hasMeeting) return null;
 
-  const thumb = (
-    <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl bg-surface-muted">
-      {placePhoto ? (
-        <PhotoImage src={placePhoto} alt={venueName ?? ''} fill sizes="48px" className="object-cover" />
+  const thumb = (photo: string | undefined, alt: string) => (
+    <div className="relative h-[72px] w-[72px] flex-shrink-0 overflow-hidden rounded-xl bg-surface-muted">
+      {photo ? (
+        <PhotoImage src={photo} alt={alt} fill sizes="72px" className="object-cover" />
       ) : (
         <div className="flex h-full w-full items-center justify-center">
           <IconComponent
             iconName="Location01Icon"
-            size={20}
+            size={24}
             color="currentColor"
             className="text-brand"
           />
@@ -50,9 +50,15 @@ export const ExperienceLocationSection = ({ experience }: { experience: Experien
     place ? (
       <PlaceLink
         place={place}
-        className="block w-fit max-w-full truncate text-[15px] font-semibold text-brand-ink hover:underline"
+        className="flex w-fit max-w-full items-center gap-1 text-[15px] font-semibold text-brand-ink hover:underline"
       >
-        {venueName}
+        <span className="truncate">{venueName}</span>
+        <IconComponent
+          iconName="ArrowUpRight01Icon"
+          size={16}
+          color="currentColor"
+          className="flex-shrink-0 text-brand"
+        />
       </PlaceLink>
     ) : (
       <p className="truncate text-[15px] font-semibold text-brand-ink">{venueName}</p>
@@ -66,8 +72,8 @@ export const ExperienceLocationSection = ({ experience }: { experience: Experien
           <div className="min-w-[260px] flex-1 space-y-4">
             <h3 className="text-[22px] font-bold text-brand-ink">Location</h3>
 
-            <div className="flex items-center gap-3 rounded-2xl bg-surface p-3">
-              {thumb}
+            <div className="flex items-center gap-3">
+              {thumb(placePhoto, venueName ?? '')}
               <div className="min-w-0 flex-1">
                 {nameLine}
                 {addressLine && (
@@ -92,21 +98,14 @@ export const ExperienceLocationSection = ({ experience }: { experience: Experien
           <div className="min-w-[260px] flex-1 space-y-4">
             <h3 className="text-[22px] font-bold text-brand-ink">Meeting point and time</h3>
 
-            <div className="flex items-center gap-3 rounded-2xl bg-surface p-3">
-              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white">
-                <IconComponent
-                  iconName="Location01Icon"
-                  size={20}
-                  color="currentColor"
-                  className="text-brand"
-                />
-              </div>
+            <div className="flex items-center gap-3">
+              {thumb(placePhoto, experience.meetingPlace ?? '')}
               <div className="min-w-0 flex-1">
                 <p className="flex flex-wrap items-center gap-x-2 text-[15px] text-brand-ink">
-                  {experience.meetingPoint && (
-                    <span className="truncate font-semibold">{experience.meetingPoint}</span>
+                  {experience.meetingPlace && (
+                    <span className="truncate font-semibold">{experience.meetingPlace}</span>
                   )}
-                  {experience.meetingPoint && experience.meetingTime && (
+                  {experience.meetingPlace && experience.meetingTime && (
                     <span
                       aria-hidden="true"
                       className="h-1 w-1 flex-shrink-0 rounded-full bg-ink-subtle"
@@ -116,7 +115,7 @@ export const ExperienceLocationSection = ({ experience }: { experience: Experien
                 </p>
 
                 <OpenInMapsLink
-                  query={experience.meetingPoint}
+                  query={experience.meetingPlace}
                   className="mt-0.5 text-[13px] text-brand"
                 >
                   <IconComponent iconName="Location01Icon" size={14} color="currentColor" />

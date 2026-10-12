@@ -100,15 +100,13 @@ export const ExperienceHostSection = ({ experience }: { experience: Experience }
 
   return (
     <div id={EXPERIENCE_SECTIONS.host} className="scroll-mt-[156px] space-y-4 border-t border-line pt-6">
-      <h3 className="text-[22px] font-bold text-brand-ink">Host</h3>
-
       {host && (
         <>
           {!isOwnExperience && (
             <SendMessage open={isMessageOpen} setOpen={setIsMessageOpen} recipientId={host.id} />
           )}
 
-          <div className="flex w-full flex-col gap-3 rounded-2xl bg-surface p-3.5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="-mx-6 flex flex-col gap-3 bg-surface px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center">
               <Avatar className="mr-2.5 h-11 w-11 flex-shrink-0">
                 <AvatarImage src={host.picture} />
@@ -143,25 +141,25 @@ export const ExperienceHostSection = ({ experience }: { experience: Experience }
         <div className="space-y-4">
           <h3 className="text-[22px] font-bold text-brand-ink">Host community</h3>
 
-          <div className="flex items-center gap-3 rounded-2xl bg-surface p-3">
-            <Link
-              href={communityPath(experience.hostCommunity)}
-              target="_blank"
-              className="flex min-w-0 flex-1 items-center gap-3 transition-colors hover:text-brand-ink"
-            >
-              {communityPhoto && (
-                <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-xl">
-                  <PhotoImage
-                    src={communityPhoto}
-                    alt={experience.hostCommunity.title}
-                    fill
-                    sizes="44px"
-                    className="object-cover"
-                  />
-                </div>
-              )}
-              <div className="min-w-0">
-                <div className="flex min-w-0 items-center gap-1">
+          <div className="flex items-center gap-3">
+            {communityPhoto && (
+              <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-xl">
+                <PhotoImage
+                  src={communityPhoto}
+                  alt={experience.hostCommunity.title}
+                  fill
+                  sizes="44px"
+                  className="object-cover"
+                />
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href={communityPath(experience.hostCommunity)}
+                  target="_blank"
+                  className="flex min-w-0 items-center gap-1 transition-colors hover:text-brand-ink"
+                >
                   <p className="truncate text-[15px] font-semibold text-brand-ink">
                     {experience.hostCommunity.title}
                   </p>
@@ -171,26 +169,27 @@ export const ExperienceHostSection = ({ experience }: { experience: Experience }
                     color="currentColor"
                     className="flex-shrink-0 text-brand"
                   />
-                </div>
-                {Boolean(community?.membersCount) && (
-                  <p className="text-[14px] text-ink-muted">
-                    {community?.membersCount} {community?.membersCount === 1 ? 'member' : 'members'}
-                  </p>
+                </Link>
+
+                {canJoinCommunity && (
+                  <button
+                    type="button"
+                    onClick={handleJoin}
+                    disabled={isJoining}
+                    className="inline-flex h-10 flex-shrink-0 items-center gap-2 rounded-full bg-lime px-4 text-[14px] font-medium text-brand-ink transition-colors hover:bg-lime-dark disabled:opacity-60"
+                  >
+                    <IconComponent iconName="UserAdd01Icon" size={18} color="currentColor" />
+                    Join
+                  </button>
                 )}
               </div>
-            </Link>
 
-            {canJoinCommunity && (
-              <button
-                type="button"
-                onClick={handleJoin}
-                disabled={isJoining}
-                className="inline-flex h-10 flex-shrink-0 items-center gap-2 rounded-full bg-lime px-4 text-[14px] font-medium text-brand-ink transition-colors hover:bg-lime-dark disabled:opacity-60"
-              >
-                <IconComponent iconName="UserAdd01Icon" size={18} color="currentColor" />
-                Join
-              </button>
-            )}
+              {Boolean(community?.membersCount) && (
+                <p className="text-[14px] text-ink-muted">
+                  {community?.membersCount} {community?.membersCount === 1 ? 'member' : 'members'}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -230,7 +230,7 @@ export const buildPreviewExperience = (
     description: about.description,
     whatsIncluded: about.whatsIncluded,
     whatsNotIncluded: about.whatsNotIncluded,
-    meetingPoint: about.meetingPoint,
+    meetingPlace: about.meetingPoint,
     meetingTime: about.meetingTime ?? undefined,
 
     photos: mapFormPhotosToPreview(about.photos),

@@ -45,7 +45,7 @@ export const LocationMeetingSection = ({ experience }: LocationMeetingSectionPro
         </div>
       </div>
 
-      {(experience.meetingPoint || experience.meetingTime) && (
+      {(experience.meetingPlace || experience.meetingTime) && (
         <div>
           <h3 className="mb-3 text-xl font-bold text-gray-900">Meeting Point & Time</h3>
           <div className="flex items-center gap-3">
@@ -53,8 +53,8 @@ export const LocationMeetingSection = ({ experience }: LocationMeetingSectionPro
               <IconComponent iconName="Location01Icon" size={20} className="text-primary" />
             </div>
             <div>
-              {experience.meetingPoint && (
-                <p className="text-sm font-semibold">{experience.meetingPoint}</p>
+              {experience.meetingPlace && (
+                <p className="text-sm font-semibold">{experience.meetingPlace}</p>
               )}
               {experience.meetingTime && (
                 <p className="text-sm text-gray-500">{experience.meetingTime}</p>

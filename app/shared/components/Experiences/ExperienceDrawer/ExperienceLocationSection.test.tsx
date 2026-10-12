@@ -47,7 +47,7 @@ describe('ExperienceLocationSection', () => {
   it('shows the meeting point and time when the experience has one', () => {
     render(
       <ExperienceLocationSection
-        experience={experience({ meetingPoint: 'Main gate', meetingTime: '9:00am' })}
+        experience={experience({ meetingPlace: 'Main gate', meetingTime: '9:00am' })}
       />,
     );
 
