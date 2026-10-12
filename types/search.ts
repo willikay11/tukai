@@ -43,13 +43,17 @@ export type ResultType = 'all' | 'experiences' | 'places' | 'communities';
 export type QuickDate = 'today' | 'tomorrow' | 'weekend' | 'next7';
 
 /** A start-time band, in place of an exact time. */
-export type TimeOfDay = 'morning' | 'afternoon' | 'evening';
+export type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'lateNight';
+
+/** A quick radius in the "Where" section's Distance pick. */
+export type DistanceBand = '1km' | '5km' | '10km' | '25km' | '100km';
+
+/** How long an experience runs, in the "Duration" section. */
+export type DurationBand = 'short' | 'medium' | 'full';
 
 export type SearchFilters = {
   query: string;
   type: ResultType;
-  /** A category id, which both experiences and places accept. */
-  category?: string;
   /** `YYYY-MM-DD`, experiences only - an exact day from "Pick dates". */
   date?: string;
   /**
@@ -61,14 +65,45 @@ export type SearchFilters = {
   quickDate?: QuickDate;
   /** One or more start-time bands, matched client-side - see `matchesTimeOfDay`. */
   timeOfDay: TimeOfDay[];
+  /** A city category id - both experiences and places accept it as `category`. */
+  city?: string;
+  /**
+   * Interest category ids, one or more. Places accept every pick (its
+   * `category` param repeats); experiences accept only one, so the rest are
+   * matched off the rows - see `matchesInterests`.
+   */
+  interests: string[];
+  /**
+   * A quick radius, measured from `origin` (the reader's own location once
+   * granted, central Nairobi otherwise) - matched client-side, since no
+   * endpoint takes a radius. See `matchesDistance`.
+   */
+  distance?: DistanceBand;
   freeOnly: boolean;
+  /** The paid counterpart of `freeOnly` - mutually exclusive in the UI. */
+  paidOnly: boolean;
+  /** `priceStartsFrom.amount`, experiences only - see `matchesPrice`. */
+  priceMin?: number;
+  priceMax?: number;
   availableOnly: boolean;
+  /** Under way right now - excludes recurring rows, whose dates describe the whole series. See `isOngoing`. */
+  happeningNow: boolean;
+  /** `experience_type: 'guide_booking'` - a real, API-filterable value. */
+  guidedToursOnly: boolean;
+  /**
+   * Hosted by a community the reader follows. The API's `community` param
+   * takes one id, not a list, so this is matched off the rows against every
+   * followed community rather than sent as the request's own narrowing.
+   */
+  yourCommunitiesOnly: boolean;
   /**
    * The shapes a reader picked, one or more. Only `itinerary` is a value the
    * API filters on; the rest describe how an experience sits in the calendar,
    * which no endpoint exposes - see `matchesShapes`.
    */
   experienceShapes: string[];
+  /** Up to 2 hours / 2 to 5 hours / full day, experiences only - see `matchesDuration`. */
+  durationBand?: DurationBand;
   /** Places ranked by rating rather than relevance. */
   popularFirst: boolean;
 };
@@ -77,8 +112,13 @@ export const EMPTY_FILTERS: SearchFilters = {
   query: '',
   type: 'all',
   experienceShapes: [],
+  interests: [],
   timeOfDay: [],
   freeOnly: false,
+  paidOnly: false,
   availableOnly: false,
+  happeningNow: false,
+  guidedToursOnly: false,
+  yourCommunitiesOnly: false,
   popularFirst: false,
 };

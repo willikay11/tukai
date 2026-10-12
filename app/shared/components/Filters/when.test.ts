@@ -27,8 +27,13 @@ describe('QUICK_DATES', () => {
 });
 
 describe('TIME_OF_DAY', () => {
-  it('offers the canvas three bands, in its order and its words', () => {
-    expect(TIME_OF_DAY.map((band) => band.label)).toEqual(['Morning', 'Afternoon', 'Evening']);
+  it('offers the canvas four bands, in its order and its words', () => {
+    expect(TIME_OF_DAY.map((band) => band.label)).toEqual([
+      'Morning',
+      'Afternoon',
+      'Evening',
+      'Late night',
+    ]);
   });
 });
 
@@ -97,6 +102,9 @@ describe('matchesTimeOfDay', () => {
     expect(matchesTimeOfDay(experience({ startDate: '2026-10-05T19:00:00' }), ['evening'])).toBe(
       true,
     );
+    expect(
+      matchesTimeOfDay(experience({ startDate: '2026-10-05T22:00:00' }), ['lateNight']),
+    ).toBe(true);
   });
 
   it('keeps anything matching one of several picked bands', () => {

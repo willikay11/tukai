@@ -17,6 +17,7 @@ export const TIME_OF_DAY: Array<{
   { value: 'morning', label: 'Morning', description: 'Before 12 PM', icon: 'SunriseIcon' },
   { value: 'afternoon', label: 'Afternoon', description: '12 - 5 PM', icon: 'Sun03Icon' },
   { value: 'evening', label: 'Evening', description: '5 - 9 PM', icon: 'SunsetIcon' },
+  { value: 'lateNight', label: 'Late night', description: 'After 9 PM', icon: 'Moon02Icon' },
 ];
 
 const startOfDay = (date: Date): Date => new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -63,7 +64,8 @@ export const matchesQuickDate = (
 const bandOf = (hour: number): TimeOfDay => {
   if (hour < 12) return 'morning';
   if (hour < 17) return 'afternoon';
-  return 'evening';
+  if (hour < 21) return 'evening';
+  return 'lateNight';
 };
 
 /** No bands picked means every start time. */

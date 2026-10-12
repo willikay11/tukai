@@ -21,7 +21,27 @@ jest.mock('@/app/shared/hooks/useSearch', () => ({
 }));
 
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
-  usePlaceCategories: () => ({ data: { data: { results: [{ id: 'c1', name: 'Hiking' }] } } }),
+  usePlaceCategories: ({ group }: { group?: string }) => ({
+    data: {
+      data: {
+        results:
+          group === 'cities'
+            ? [
+                { id: 'ct1', name: 'Nairobi', placesCount: 33 },
+                { id: 'ct2', name: 'Mombasa', placesCount: 2 },
+              ]
+            : [{ id: 'c1', name: 'Hiking', icon: 'HikingBootsIcon' }],
+      },
+    },
+  }),
+}));
+
+jest.mock('@/context/LocationContext', () => ({
+  useLocation: () => ({ lat: undefined, lng: undefined, requestLocation: jest.fn() }),
+}));
+
+jest.mock('@/app/shared/hooks/useCommunities', () => ({
+  useGetCommunities: () => ({ data: { data: { results: [] } } }),
 }));
 
 const filters = (overrides: Partial<SearchFilters> = {}): SearchFilters => ({
@@ -30,7 +50,11 @@ const filters = (overrides: Partial<SearchFilters> = {}): SearchFilters => ({
 });
 
 const open = (current: SearchFilters = filters({ query: 'hike' })) =>
-  render(<FiltersDialog filters={current} isOpen onClose={jest.fn()} onApply={onApply} />);
+  render(
+    <FiltersDialog filters={current} isOpen onClose={jest.fn()} onApply={onApply}>
+      <button type="button">Open filters</button>
+    </FiltersDialog>,
+  );
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -121,7 +145,7 @@ describe('the filters dialog', () => {
   });
 
   it('clears everything without clearing the search', async () => {
-    open(filters({ query: 'hike', experienceShapes: ['one'], category: 'c1' }));
+    open(filters({ query: 'hike', experienceShapes: ['one'], city: 'c1' }));
 
     await userEvent.click(screen.getByRole('button', { name: 'Clear all' }));
     await userEvent.click(screen.getByRole('button', { name: /^Show all/ }));
@@ -130,7 +154,7 @@ describe('the filters dialog', () => {
     const applied = onApply.mock.calls[0][0];
     expect(applied.query).toBe('hike');
     expect(applied.experienceShapes).toEqual([]);
-    expect(applied.category).toBeUndefined();
+    expect(applied.city).toBeUndefined();
   });
 
   // The dialog stays mounted, so it must follow what is in force on each open
@@ -219,6 +243,151 @@ describe('the filters dialog', () => {
 
       expect(screen.getByRole('switch', { name: 'Afternoon' })).toBeChecked();
       expect(screen.getByRole('switch', { name: 'Morning' })).not.toBeChecked();
+    });
+
+    it('offers Late night alongside the other three bands', () => {
+      open();
+
+      expect(screen.getByRole('switch', { name: 'Late night' })).toBeInTheDocument();
+      expect(screen.getByText('After 9 PM')).toBeInTheDocument();
+    });
+  });
+
+  describe('Where', () => {
+    it('names the cities, with how many places are in each', () => {
+      open();
+
+      expect(screen.getByRole('button', { name: /Nairobi/ })).toHaveTextContent('33');
+      expect(screen.getByRole('button', { name: /Mombasa/ })).toHaveTextContent('2');
+    });
+
+    it('picks a city', async () => {
+      open();
+
+      await userEvent.click(screen.getByRole('button', { name: /Nairobi/ }));
+      await userEvent.click(screen.getByRole('button', { name: /^Show all/ }));
+
+      expect(onApply).toHaveBeenCalledWith(expect.objectContaining({ city: 'ct1' }));
+    });
+
+    // No `group: 'areas'` exists on the API - shown to match the canvas, not functional
+    it('shows the area chips as inert', () => {
+      open();
+
+      expect(screen.getByRole('button', { name: 'Westlands' })).toBeDisabled();
+    });
+
+    it('offers a distance band, and Any distance by default', async () => {
+      open();
+
+      expect(screen.getByRole('button', { name: 'Any distance' })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
+
+      await userEvent.click(screen.getByRole('button', { name: 'Within 5 km' }));
+      await userEvent.click(screen.getByRole('button', { name: /^Show all/ }));
+
+      expect(onApply).toHaveBeenCalledWith(expect.objectContaining({ distance: '5km' }));
+    });
+
+    it('names the distance from central Nairobi until the reader grants their own', () => {
+      open();
+
+      expect(screen.getByText(/Distance measured from central Nairobi/)).toBeInTheDocument();
+    });
+  });
+
+  describe('Price', () => {
+    it('picks Free and Paid as mutually exclusive', async () => {
+      open();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Free' }));
+      await userEvent.click(screen.getByRole('button', { name: /^Show all/ }));
+
+      expect(onApply).toHaveBeenCalledWith(
+        expect.objectContaining({ freeOnly: true, paidOnly: false }),
+      );
+    });
+
+    it('offers a from/to price range', () => {
+      open();
+
+      expect(screen.getByLabelText('Minimum price per person')).toBeInTheDocument();
+      expect(screen.getByLabelText('Maximum price per person')).toBeInTheDocument();
+    });
+  });
+
+  describe('Availability', () => {
+    it('toggles Happening now and Spots left', async () => {
+      open();
+
+      await userEvent.click(screen.getByRole('switch', { name: 'Happening now' }));
+      await userEvent.click(screen.getByRole('switch', { name: 'Spots left' }));
+      await userEvent.click(screen.getByRole('button', { name: /^Show all/ }));
+
+      expect(onApply).toHaveBeenCalledWith(
+        expect.objectContaining({ happeningNow: true, availableOnly: true }),
+      );
+    });
+
+    // Nothing marks this yet - shown to match the canvas, not functional
+    it('shows No booking needed as inert', () => {
+      open();
+
+      expect(screen.getByRole('switch', { name: 'No booking needed' })).toBeDisabled();
+    });
+  });
+
+  describe('Interests', () => {
+    it('picks more than one interest at a time', async () => {
+      open();
+
+      await userEvent.click(screen.getByRole('button', { name: /Hiking/ }));
+      await userEvent.click(screen.getByRole('button', { name: /^Show all/ }));
+
+      expect(onApply).toHaveBeenCalledWith(expect.objectContaining({ interests: ['c1'] }));
+    });
+  });
+
+  describe('Duration', () => {
+    it('picks a duration band', async () => {
+      open();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Up to 2 hours' }));
+      await userEvent.click(screen.getByRole('button', { name: /^Show all/ }));
+
+      expect(onApply).toHaveBeenCalledWith(expect.objectContaining({ durationBand: 'short' }));
+    });
+  });
+
+  describe('Organised by', () => {
+    it('toggles Your communities and Guided tours', async () => {
+      open();
+
+      await userEvent.click(screen.getByRole('switch', { name: 'Your communities' }));
+      await userEvent.click(screen.getByRole('switch', { name: 'Guided tours' }));
+      await userEvent.click(screen.getByRole('button', { name: /^Show all/ }));
+
+      expect(onApply).toHaveBeenCalledWith(
+        expect.objectContaining({ yourCommunitiesOnly: true, guidedToursOnly: true }),
+      );
+    });
+  });
+
+  describe('Accessibility', () => {
+    // No structured field exists yet - shown to match the canvas, not functional
+    it('shows Step-free access and Parking as inert', () => {
+      open();
+
+      expect(screen.getByRole('switch', { name: 'Step-free access' })).toBeDisabled();
+      expect(screen.getByRole('switch', { name: 'Parking' })).toBeDisabled();
+    });
+
+    it('hides when only experiences are wanted', () => {
+      open(filters({ query: 'hike', type: 'experiences' }));
+
+      expect(screen.queryByText('Accessibility')).not.toBeInTheDocument();
     });
   });
 });

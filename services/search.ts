@@ -73,12 +73,26 @@ export const searchAll = async (filters: SearchFilters, perPage = 24): Promise<S
   const query = filters.query.trim() || undefined;
   const wants = (type: SearchFilters['type']) => filters.type === 'all' || filters.type === type;
 
+  // Places take every category pick at once (the endpoint repeats the param);
+  // experiences take only one, so City leads and Interests follow - see
+  // `matchesInterests` for how the rest are read off the rows instead
+  const placeCategories = [filters.city, ...filters.interests].filter(Boolean) as string[];
+  const experienceCategory = filters.interests[0] ?? filters.city;
+
+  // Guided tours and the itinerary shape are both read through one param, so
+  // whichever is picked wins - a reader cannot have asked for both at once
+  const experienceType = filters.guidedToursOnly
+    ? ('guide_booking' as const)
+    : filters.experienceShapes.length === 1 && filters.experienceShapes[0] === 'itinerary'
+      ? ('itinerary' as const)
+      : undefined;
+
   const [places, experiences, communities] = await Promise.all([
     wants('places')
       ? fetchPlaces(
           1,
           perPage,
-          filters.category,
+          placeCategories.length ? placeCategories : undefined,
           query,
           undefined,
           undefined,
@@ -89,19 +103,16 @@ export const searchAll = async (filters: SearchFilters, perPage = 24): Promise<S
       ? fetchExperiences({
           page: 1,
           page_size: perPage,
-          category: filters.category,
+          category: experienceCategory,
           search: query,
           date: filters.date,
           // The API reads a parameter's presence as a filter, so these go in
           // only when they are on - `is_paid=false` would mean "paid: no",
           // which is what we want, but `sold_out=false` matches nothing
           ...(filters.freeOnly ? { is_paid: false } : {}),
+          ...(filters.paidOnly ? { is_paid: true } : {}),
           ...(filters.availableOnly ? { sold_out: false } : {}),
-          // Only an itinerary-only pick is something the API can narrow; the
-          // other shapes are read off the rows that come back
-          ...(filters.experienceShapes.length === 1 && filters.experienceShapes[0] === 'itinerary'
-            ? { experience_type: 'itinerary' as const }
-            : {}),
+          ...(experienceType ? { experience_type: experienceType } : {}),
         })
       : Promise.resolve({ data: { count: 0, results: [] } }),
     wants('communities')

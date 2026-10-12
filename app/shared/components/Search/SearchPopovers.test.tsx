@@ -59,6 +59,11 @@ jest.mock('@/app/shared/hooks/useSearch', () => ({
   useSearchResults: () => ({ data: undefined, isFetching: false }),
 }));
 
+jest.mock('@/app/shared/hooks/useCommunities', () => ({
+  // The Filters dialog's "Your communities" toggle - not under test here
+  useGetCommunities: () => ({ data: { data: { results: [] } } }),
+}));
+
 // Radix needs these before it will open anything in jsdom
 beforeAll(() => {
   window.HTMLElement.prototype.scrollIntoView = jest.fn();
