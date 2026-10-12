@@ -24,8 +24,10 @@ export const ExperienceLocationSection = ({ experience }: { experience: Experien
   const venueName = place?.title ?? location?.name;
   const addressLine = [location?.city, location?.country].filter(Boolean).join(', ');
   const mapsQuery = [venueName, addressLine].filter(Boolean).join(', ') || undefined;
+  const hasVenue = Boolean(venueName || addressLine);
+  const hasMeeting = Boolean(experience.meetingPoint || experience.meetingTime);
 
-  if (!venueName && !addressLine) return null;
+  if (!hasVenue && !hasMeeting) return null;
 
   const thumb = (
     <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl bg-surface-muted">
@@ -58,51 +60,73 @@ export const ExperienceLocationSection = ({ experience }: { experience: Experien
   ) : null;
 
   return (
-    <div
-      id={EXPERIENCE_SECTIONS.where}
-      className="scroll-mt-[156px] space-y-4 border-t border-line pt-6"
-    >
-      <h3 className="text-[22px] font-bold text-brand-ink">Location</h3>
+    <div id={EXPERIENCE_SECTIONS.where} className="scroll-mt-[156px] border-t border-line pt-6">
+      <div className="flex flex-wrap gap-x-10 gap-y-6">
+        {hasVenue && (
+          <div className="min-w-[260px] flex-1 space-y-4">
+            <h3 className="text-[22px] font-bold text-brand-ink">Location</h3>
 
-      <div className="flex items-center gap-3 rounded-2xl bg-surface p-3">
-        {thumb}
-        <div className="min-w-0 flex-1">
-          {nameLine}
-          {addressLine && <p className="truncate text-[14px] text-ink-muted">{addressLine}</p>}
+            <div className="flex items-center gap-3 rounded-2xl bg-surface p-3">
+              {thumb}
+              <div className="min-w-0 flex-1">
+                {nameLine}
+                {addressLine && (
+                  <p className="truncate text-[14px] text-ink-muted">{addressLine}</p>
+                )}
 
-          <OpenInMapsLink
-            lat={location?.pointLat}
-            lng={location?.pointLong}
-            query={mapsQuery}
-            className="mt-0.5 text-[13px] text-brand"
-          >
-            <IconComponent iconName="Location01Icon" size={14} color="currentColor" />
-            View on Google Maps
-          </OpenInMapsLink>
-        </div>
+                <OpenInMapsLink
+                  lat={location?.pointLat}
+                  lng={location?.pointLong}
+                  query={mapsQuery}
+                  className="mt-0.5 text-[13px] text-brand"
+                >
+                  <IconComponent iconName="Location01Icon" size={14} color="currentColor" />
+                  View on Google Maps
+                </OpenInMapsLink>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {hasMeeting && (
+          <div className="min-w-[260px] flex-1 space-y-4">
+            <h3 className="text-[22px] font-bold text-brand-ink">Meeting point and time</h3>
+
+            <div className="flex items-center gap-3 rounded-2xl bg-surface p-3">
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white">
+                <IconComponent
+                  iconName="Location01Icon"
+                  size={20}
+                  color="currentColor"
+                  className="text-brand"
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="flex flex-wrap items-center gap-x-2 text-[15px] text-brand-ink">
+                  {experience.meetingPoint && (
+                    <span className="truncate font-semibold">{experience.meetingPoint}</span>
+                  )}
+                  {experience.meetingPoint && experience.meetingTime && (
+                    <span
+                      aria-hidden="true"
+                      className="h-1 w-1 flex-shrink-0 rounded-full bg-ink-subtle"
+                    />
+                  )}
+                  {experience.meetingTime && <span>{experience.meetingTime}</span>}
+                </p>
+
+                <OpenInMapsLink
+                  query={experience.meetingPoint}
+                  className="mt-0.5 text-[13px] text-brand"
+                >
+                  <IconComponent iconName="Location01Icon" size={14} color="currentColor" />
+                  View on Google Maps
+                </OpenInMapsLink>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-
-      {(experience.meetingPoint || experience.meetingTime) && (
-        <div className="flex items-center gap-3 rounded-2xl bg-surface p-3">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white">
-            <IconComponent
-              iconName="Location01Icon"
-              size={20}
-              color="currentColor"
-              className="text-brand"
-            />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[15px] font-semibold text-brand-ink">Meeting point</p>
-            {experience.meetingPoint && (
-              <p className="truncate text-[14px] text-ink-muted">{experience.meetingPoint}</p>
-            )}
-            {experience.meetingTime && (
-              <p className="text-[14px] text-ink-muted">{experience.meetingTime}</p>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

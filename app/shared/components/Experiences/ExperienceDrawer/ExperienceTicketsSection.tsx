@@ -35,7 +35,7 @@ export const ExperienceTicketsSection = ({ experience }: { experience: Experienc
     >
       <h3 className="text-[22px] font-bold text-brand-ink">Ticket prices</h3>
 
-      <div className="space-y-3">
+      <div className="-mx-6 flex gap-2.5 overflow-x-auto px-6 scrollbar-hide">
         {tickets.map((ticket) => {
           const note = ticketNote(ticket);
 
@@ -43,19 +43,25 @@ export const ExperienceTicketsSection = ({ experience }: { experience: Experienc
             <Link
               key={ticket.id}
               href={experiencePath(experience)}
-              className="relative flex flex-col gap-0.5 rounded-2xl bg-surface p-4 pr-10 transition-colors hover:bg-surface-muted"
+              className="flex min-w-[176px] flex-none items-start justify-between gap-4 rounded-xl bg-surface px-4 py-3.5 text-left transition-colors hover:bg-surface-brand"
             >
-              <span className="font-bold text-brand-ink">{ticket.name}</span>
-              <span className="text-[15px] font-semibold text-ink-muted">
-                {experience.currency} {getTicketBuyerPrice(ticket).toLocaleString()}
+              <span className="flex flex-col gap-1">
+                <span className="whitespace-nowrap text-[15px] font-semibold text-brand-ink">
+                  {ticket.name}
+                </span>
+                <span className="whitespace-nowrap text-[14.5px] text-brand-ink">
+                  {experience.currency} {getTicketBuyerPrice(ticket).toLocaleString()}
+                </span>
+                {note && (
+                  <span className="whitespace-nowrap text-xs text-ink-muted">{note}</span>
+                )}
               </span>
-              {note && <span className="text-[13px] text-ink-muted">{note}</span>}
 
               <IconComponent
                 iconName="ArrowUpRight01Icon"
                 size={18}
                 color="currentColor"
-                className="absolute right-4 top-4 text-ink-muted"
+                className="flex-shrink-0 text-brand"
               />
             </Link>
           );

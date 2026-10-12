@@ -51,7 +51,7 @@ describe('ExperienceLocationSection', () => {
       />,
     );
 
-    expect(screen.getByText('Meeting point')).toBeInTheDocument();
+    expect(screen.getByText('Meeting point and time')).toBeInTheDocument();
     expect(screen.getByText('Main gate')).toBeInTheDocument();
     expect(screen.getByText('9:00am')).toBeInTheDocument();
   });
@@ -59,7 +59,7 @@ describe('ExperienceLocationSection', () => {
   it('leaves out the meeting point card when the experience has none', () => {
     render(<ExperienceLocationSection experience={experience({})} />);
 
-    expect(screen.queryByText('Meeting point')).not.toBeInTheDocument();
+    expect(screen.queryByText('Meeting point and time')).not.toBeInTheDocument();
   });
 
   it('renders nothing when the experience has neither a place nor an address', () => {

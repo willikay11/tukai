@@ -86,7 +86,21 @@ describe('ExperienceHostSection', () => {
     );
 
     expect(screen.getByText('Nairobi Makers Circle')).toBeInTheDocument();
-    expect(screen.getByText('Host community')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Host community' })).toBeInTheDocument();
+  });
+
+  it('shows the host community member count once its detail has loaded', () => {
+    useCommunityDetail.mockReturnValue({
+      data: { data: { id: 'c1', title: 'Nairobi Makers Circle', membersCount: 66, members: [] } },
+    });
+
+    render(
+      <ExperienceHostSection
+        experience={experience({ hostCommunity: { id: 'c1', title: 'Nairobi Makers Circle' } })}
+      />,
+    );
+
+    expect(screen.getByText('66 members')).toBeInTheDocument();
   });
 
   it('offers Join on the host community to a reader who is not in it', () => {

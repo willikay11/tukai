@@ -129,7 +129,7 @@ export const ExperienceHostSection = ({ experience }: { experience: Experience }
               <button
                 type="button"
                 onClick={() => setIsMessageOpen(true)}
-                className="inline-flex h-10 flex-shrink-0 items-center justify-center gap-2 rounded-full bg-lime px-5 text-[14px] font-bold text-brand-ink transition-colors hover:bg-lime-dark sm:w-auto"
+                className="inline-flex h-10 flex-shrink-0 items-center justify-center gap-2 rounded-full bg-gradient-to-b from-brand-mid to-brand-deep px-5 text-[14px] font-bold text-white transition-opacity hover:opacity-90 sm:w-auto"
               >
                 <IconComponent iconName="MessageMultiple02Icon" size={18} color="currentColor" />
                 Message host
@@ -140,42 +140,58 @@ export const ExperienceHostSection = ({ experience }: { experience: Experience }
       )}
 
       {experience.hostCommunity && (
-        <div className="flex items-center gap-3 rounded-2xl bg-surface p-3">
-          <Link
-            href={communityPath(experience.hostCommunity)}
-            target="_blank"
-            className="flex min-w-0 flex-1 items-center gap-3 transition-colors hover:text-brand-ink"
-          >
-            {communityPhoto && (
-              <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-xl">
-                <PhotoImage
-                  src={communityPhoto}
-                  alt={experience.hostCommunity.title}
-                  fill
-                  sizes="44px"
-                  className="object-cover"
-                />
-              </div>
-            )}
-            <div className="min-w-0">
-              <p className="truncate text-[15px] font-semibold text-brand-ink">
-                {experience.hostCommunity.title}
-              </p>
-              <p className="text-[14px] text-ink-muted">Host community</p>
-            </div>
-          </Link>
+        <div className="space-y-4">
+          <h3 className="text-[22px] font-bold text-brand-ink">Host community</h3>
 
-          {canJoinCommunity && (
-            <button
-              type="button"
-              onClick={handleJoin}
-              disabled={isJoining}
-              className="inline-flex h-10 flex-shrink-0 items-center gap-2 rounded-full bg-lime px-4 text-[14px] font-medium text-brand-ink transition-colors hover:bg-lime-dark disabled:opacity-60"
+          <div className="flex items-center gap-3 rounded-2xl bg-surface p-3">
+            <Link
+              href={communityPath(experience.hostCommunity)}
+              target="_blank"
+              className="flex min-w-0 flex-1 items-center gap-3 transition-colors hover:text-brand-ink"
             >
-              <IconComponent iconName="UserAdd01Icon" size={18} color="currentColor" />
-              Join
-            </button>
-          )}
+              {communityPhoto && (
+                <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-xl">
+                  <PhotoImage
+                    src={communityPhoto}
+                    alt={experience.hostCommunity.title}
+                    fill
+                    sizes="44px"
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              <div className="min-w-0">
+                <div className="flex min-w-0 items-center gap-1">
+                  <p className="truncate text-[15px] font-semibold text-brand-ink">
+                    {experience.hostCommunity.title}
+                  </p>
+                  <IconComponent
+                    iconName="ArrowUpRight01Icon"
+                    size={16}
+                    color="currentColor"
+                    className="flex-shrink-0 text-brand"
+                  />
+                </div>
+                {Boolean(community?.membersCount) && (
+                  <p className="text-[14px] text-ink-muted">
+                    {community?.membersCount} {community?.membersCount === 1 ? 'member' : 'members'}
+                  </p>
+                )}
+              </div>
+            </Link>
+
+            {canJoinCommunity && (
+              <button
+                type="button"
+                onClick={handleJoin}
+                disabled={isJoining}
+                className="inline-flex h-10 flex-shrink-0 items-center gap-2 rounded-full bg-lime px-4 text-[14px] font-medium text-brand-ink transition-colors hover:bg-lime-dark disabled:opacity-60"
+              >
+                <IconComponent iconName="UserAdd01Icon" size={18} color="currentColor" />
+                Join
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

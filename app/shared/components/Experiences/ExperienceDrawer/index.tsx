@@ -4,10 +4,6 @@ import { useMemo, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 
-import {
-  experiencePriceLine,
-  experienceRunBy,
-} from '@/app/(experiences)/components/ExperienceCard/experience-flag';
 import { Bookmark } from '@/app/shared/components/Bookmark';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { ContextMoments } from '@/app/shared/components/Moments';
@@ -203,43 +199,33 @@ export const ExperienceDrawer = ({
             <section id={EXPERIENCE_SECTIONS.about} className="scroll-mt-[156px] space-y-6">
               <PlacePhotoStrip photos={galleryPhotos(experience.photos)} alt={experience.title} />
 
-              <h2 className="text-[26px] font-bold leading-tight tracking-[-0.5px] text-brand-ink">
-                {experience.title}
-              </h2>
+              <div className="space-y-2">
+                <h2 className="text-[26px] font-bold leading-tight tracking-[-0.5px] text-brand-ink">
+                  {experience.title}
+                </h2>
 
-              <div className="flex flex-col gap-1">
-                {experienceRunBy(experience) && (
-                  <span className="text-sm font-semibold text-brand">
-                    {experienceRunBy(experience)}
-                  </span>
-                )}
+                <div className="flex flex-col gap-1">
+                  {formatCardDateTime(experience.startDate, experience.endDate) && (
+                    <p className="text-[15px] text-ink-muted">
+                      {formatCardDateTime(experience.startDate, experience.endDate)}
+                    </p>
+                  )}
 
-                {formatCardDateTime(experience.startDate, experience.endDate) && (
-                  <p className="text-[15px] text-ink-muted">
-                    {formatCardDateTime(experience.startDate, experience.endDate)}
-                  </p>
-                )}
+                  {experience.location?.city && (
+                    <p className="flex items-center gap-1.5 text-[15px] text-ink-muted">
+                      <IconComponent
+                        iconName="Location01Icon"
+                        size={16}
+                        color="currentColor"
+                        className="text-brand"
+                      />
+                      {experience.location.city}
+                    </p>
+                  )}
+                </div>
 
-                {experience.location?.city && (
-                  <p className="flex items-center gap-1.5 text-[15px] text-ink-muted">
-                    <IconComponent
-                      iconName="Location01Icon"
-                      size={16}
-                      color="currentColor"
-                      className="text-brand"
-                    />
-                    {experience.location.city}
-                  </p>
-                )}
-
-                {experiencePriceLine(experience) && (
-                  <p className="mt-1 text-base font-semibold text-gray-800">
-                    {experiencePriceLine(experience)}
-                  </p>
-                )}
+                {experience.description && <AboutClamp text={experience.description} />}
               </div>
-
-              {experience.description && <AboutClamp text={experience.description} />}
             </section>
 
             <ExperienceTicketsSection experience={experience} />
