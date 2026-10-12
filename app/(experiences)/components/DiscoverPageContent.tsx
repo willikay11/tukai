@@ -12,11 +12,11 @@ import { ROW_GRID, RowGridSkeleton } from '@/app/(experiences)/components/MediaR
 import { MomentComposeCard } from '@/app/(experiences)/components/MomentCard/MomentComposeCard';
 import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
 import { SearchResults } from '@/app/(experiences)/components/SearchResults';
-import { filtersFromParams, hasSearch } from '@/app/(experiences)/components/SearchResults/filters';
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
 import { RowSkeleton } from '@/app/(experiences)/experiences/components/ExperienceRow';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
+import { filtersFromParams, hasSearch } from '@/app/shared/components/Filters/filters';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { CardGrid, CardRail, SeeAllCard } from '@/app/shared/components/Lists';
 import { ShowMoreButton } from '@/app/shared/components/Lists';

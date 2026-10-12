@@ -3,6 +3,8 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { EMPTY_FILTERS, SearchFilters } from '@/types/search';
+
 import { Search } from './Search';
 
 const push = jest.fn();
@@ -23,6 +25,38 @@ jest.mock('@/components/ui/popover', () => ({
   PopoverTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   PopoverAnchor: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   PopoverContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+
+// Its own unit (FiltersDialog.test.tsx); this suite is about the bar's own
+// Filters button and where applying a filter sends the reader - not the
+// sections inside the panel. Mocking the file rather than the barrel keeps
+// the barrel's other export, SimplePillFilters, real - the type tabs below
+// are this suite's own business.
+jest.mock('@/app/shared/components/Filters/FiltersDialog', () => ({
+  FiltersDialog: ({
+    isOpen,
+    onApply,
+    children,
+  }: {
+    isOpen: boolean;
+    onApply: (next: SearchFilters) => void;
+    children: React.ReactNode;
+  }) => (
+    <>
+      {children}
+      {isOpen && (
+        <div>
+          filters open
+          <button
+            type="button"
+            onClick={() => onApply({ ...EMPTY_FILTERS, experienceShapes: ['itinerary'] })}
+          >
+            Show all
+          </button>
+        </div>
+      )}
+    </>
+  ),
 }));
 
 jest.mock('@/app/shared/components/Images', () => ({
@@ -70,6 +104,8 @@ jest.mock('@/app/shared/hooks/usePlaces', () => ({
 const mockSearch = jest.fn();
 jest.mock('@/app/shared/hooks/useSearch', () => ({
   useSearch: (query?: string) => mockSearch(query),
+  // The Filters dialog's own live preview count - not under test here
+  useSearchResults: () => ({ data: undefined, isFetching: false }),
 }));
 
 const results = {
@@ -244,6 +280,31 @@ describe('Search popover', () => {
       await typeQuery();
 
       await waitFor(() => expect(screen.getByText(/No results for/)).toBeInTheDocument());
+    });
+  });
+
+  describe('Filters dialog', () => {
+    it('opens from the bar’s own Filters button', async () => {
+      const user = userEvent.setup();
+      render(<Search />);
+
+      expect(screen.queryByText('filters open')).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Filters' }));
+
+      expect(screen.getByText('filters open')).toBeInTheDocument();
+    });
+
+    // Filters live in the URL on Discover, so applying one is a navigation.
+    // What the panel itself offers is FiltersDialog's own unit.
+    it('sends the reader to Discover with the chosen filters in the URL', async () => {
+      const user = userEvent.setup();
+      render(<Search />);
+
+      await user.click(screen.getByRole('button', { name: 'Filters' }));
+      await user.click(screen.getByRole('button', { name: 'Show all' }));
+
+      expect(push).toHaveBeenCalledWith('/?xtype=itinerary');
     });
   });
 });

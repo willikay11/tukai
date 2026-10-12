@@ -4,23 +4,9 @@ import { useMemo, useState } from 'react';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import { IconComponent } from '@/app/shared/components/Icons';
-import {
-  CommunityResultRow,
-  ExperienceResultRow,
-  PlaceResultRow,
-  ResultGroup,
-} from '@/app/shared/components/Search';
-import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
-import { useSearchResults } from '@/app/shared/hooks/useSearch';
-import { Button } from '@/components/ui/button';
-import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
-import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
-import { PlaceCategory } from '@/types/placeCategory';
-import { communityPath, experiencePath, placePath } from '@/utils/detail-paths';
-
-import { FiltersDialog } from './FiltersDialog';
-import { ResultsFilterBar } from './ResultsFilterBar';
+import { FiltersDialog } from '@/app/shared/components/Filters';
+import { matchesYourCommunities } from '@/app/shared/components/Filters/community';
+import { matchesDuration } from '@/app/shared/components/Filters/duration';
 import {
   FilterChip,
   SearchFilters,
@@ -28,8 +14,34 @@ import {
   clearedFilters,
   paramsFromFilters,
   withoutFilter,
-} from './filters';
-import { matchesShapes } from './shapes';
+} from '@/app/shared/components/Filters/filters';
+import { matchesPrice } from '@/app/shared/components/Filters/price';
+import { matchesShapes } from '@/app/shared/components/Filters/shapes';
+import { matchesQuickDate, matchesTimeOfDay } from '@/app/shared/components/Filters/when';
+import {
+  NAIROBI_CENTER,
+  matchesDistance,
+  matchesInterests,
+} from '@/app/shared/components/Filters/where';
+import { IconComponent } from '@/app/shared/components/Icons';
+import { isOngoing } from '@/app/shared/components/Places/PlaceDrawer/happening-now';
+import {
+  CommunityResultRow,
+  ExperienceResultRow,
+  PlaceResultRow,
+  ResultGroup,
+} from '@/app/shared/components/Search';
+import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
+import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
+import { useSearchResults } from '@/app/shared/hooks/useSearch';
+import { Button } from '@/components/ui/button';
+import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
+import { useLocation } from '@/context/LocationContext';
+import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
+import { PlaceCategory } from '@/types/placeCategory';
+import { communityPath, experiencePath, placePath } from '@/utils/detail-paths';
+
+import { ResultsFilterBar } from './ResultsFilterBar';
 
 const RowSkeleton = () => (
   <div className="flex items-center gap-3 py-2">
@@ -56,15 +68,30 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const { data: results, isFetching } = useSearchResults(filters);
-  const { data: categoriesResponse } = usePlaceCategories(
-    { pageSize: 100 },
-    Boolean(filters.category),
+  const needsCategoryNames = Boolean(filters.city) || filters.interests.length > 0;
+  const { data: categoriesResponse } = usePlaceCategories({ pageSize: 100 }, needsCategoryNames);
+  const { lat, lng } = useLocation();
+  // Capped at the hook's own page size (12) - "Your communities" is a
+  // best-effort proxy already (followed, not joined; see `matchesYourCommunities`),
+  // so a reader following more than that sees it narrow imperfectly rather
+  // than not at all
+  const { data: followedResponse } = useGetCommunities({
+    page: 1,
+    enabled: filters.yourCommunitiesOnly,
+    following: true,
+  });
+
+  const categoryNames = useMemo(() => {
+    const categories: PlaceCategory[] = categoriesResponse?.data?.results ?? [];
+    return Object.fromEntries(categories.map((one) => [one.id, one.name]));
+  }, [categoriesResponse]);
+
+  const followedCommunityIds = useMemo(
+    () => (followedResponse?.data?.results ?? []).map((one: { id: string }) => one.id),
+    [followedResponse],
   );
 
-  const categoryName = useMemo(() => {
-    const categories: PlaceCategory[] = categoriesResponse?.data?.results ?? [];
-    return categories.find((one) => one.id === filters.category)?.name;
-  }, [categoriesResponse, filters.category]);
+  const origin = lat !== undefined && lng !== undefined ? { lat, lng } : NAIROBI_CENTER;
 
   // The filters are the URL, so changing them is a navigation
   const apply = (next: SearchFilters) => {
@@ -77,17 +104,42 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
     setIsEditOpen(false);
   };
 
-  const chips = activeChips(filters, categoryName);
-  // The API cannot filter by day-shape, so those picks narrow the rows here -
-  // and the counts below are taken from the same rows, so the two agree
-  const experiences = (results?.experiences ?? []).filter((experience) =>
-    matchesShapes(experience, filters.experienceShapes),
+  const chips = activeChips(filters, categoryNames);
+  // Everything the API itself cannot narrow by is read off the rows instead -
+  // and the counts below are taken from the same rows, so the two always agree
+  const experiences = (results?.experiences ?? []).filter(
+    (experience) =>
+      matchesShapes(experience, filters.experienceShapes) &&
+      matchesQuickDate(experience, filters.quickDate) &&
+      matchesTimeOfDay(experience, filters.timeOfDay) &&
+      matchesInterests(experience, filters.interests) &&
+      matchesDistance(experience, filters.distance, origin) &&
+      matchesPrice(experience, filters) &&
+      matchesDuration(experience, filters.durationBand) &&
+      matchesYourCommunities(experience, filters.yourCommunitiesOnly, followedCommunityIds) &&
+      (!filters.happeningNow || isOngoing(experience)),
   );
-  const places = results?.places ?? [];
+  const places = (results?.places ?? []).filter((place) =>
+    matchesDistance(place, filters.distance, origin),
+  );
   const communities = results?.communities ?? [];
-  const narrowedByShape = filters.experienceShapes.length > 0;
-  const experienceCount = narrowedByShape ? experiences.length : (results?.counts.experience ?? 0);
-  const total = narrowedByShape
+  const narrowedClientSide =
+    filters.experienceShapes.length > 0 ||
+    Boolean(filters.quickDate) ||
+    filters.timeOfDay.length > 0 ||
+    filters.interests.length > 0 ||
+    Boolean(filters.distance) ||
+    filters.paidOnly ||
+    filters.priceMin !== undefined ||
+    filters.priceMax !== undefined ||
+    Boolean(filters.durationBand) ||
+    filters.happeningNow ||
+    filters.yourCommunitiesOnly;
+  const experienceCount = narrowedClientSide
+    ? experiences.length
+    : (results?.counts.experience ?? 0);
+  const placeCount = Boolean(filters.distance) ? places.length : (results?.counts.place ?? 0);
+  const total = narrowedClientSide
     ? experiences.length + places.length + communities.length
     : (results?.counts.total ?? 0);
 
@@ -106,14 +158,25 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
             }`}
       </p>
 
-      <ResultsFilterBar
-        chips={chips}
-        onEdit={() => setIsEditOpen(true)}
-        onRemove={(chip: FilterChip) => apply(withoutFilter(filters, chip.key, chip.value))}
-        onClearAll={() => apply(clearedFilters(filters))}
-        sortLabel={filters.popularFirst ? 'Most popular' : 'Most relevant'}
-        onToggleSort={() => apply({ ...filters, popularFirst: !filters.popularFirst })}
-      />
+      <FiltersDialog
+        filters={filters}
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        onApply={apply}
+      >
+        {/* A plain wrapper, not the bar itself - the bar is a bare function
+            component, which cannot take the ref the anchor needs */}
+        <div>
+          <ResultsFilterBar
+            chips={chips}
+            onEdit={() => setIsEditOpen(true)}
+            onRemove={(chip: FilterChip) => apply(withoutFilter(filters, chip.key, chip.value))}
+            onClearAll={() => apply(clearedFilters(filters))}
+            sortLabel={filters.popularFirst ? 'Most popular' : 'Most relevant'}
+            onToggleSort={() => apply({ ...filters, popularFirst: !filters.popularFirst })}
+          />
+        </div>
+      </FiltersDialog>
 
       {isFetching && total === 0 ? (
         <div className="mt-4 space-y-2">
@@ -169,7 +232,7 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
           {places.length > 0 && (
             <ResultGroup
               title="Places"
-              count={`${results?.counts.place} ${results?.counts.place === 1 ? 'place' : 'places'}`}
+              count={`${placeCount} ${placeCount === 1 ? 'place' : 'places'}`}
             >
               {places.map((place) => (
                 <PlaceResultRow
@@ -201,13 +264,6 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
           )}
         </div>
       )}
-
-      <FiltersDialog
-        filters={filters}
-        isOpen={isEditOpen}
-        onClose={() => setIsEditOpen(false)}
-        onApply={apply}
-      />
     </div>
   );
 };

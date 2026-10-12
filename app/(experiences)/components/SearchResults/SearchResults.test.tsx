@@ -35,8 +35,23 @@ jest.mock('@/context/LocationContext', () => ({
   useLocation: () => ({ lat: undefined, lng: undefined }),
 }));
 
-jest.mock('./FiltersDialog', () => ({
-  FiltersDialog: ({ isOpen }: { isOpen: boolean }) => (isOpen ? <div>filters open</div> : null),
+jest.mock('@/app/shared/hooks/useCommunities', () => ({
+  useGetCommunities: () => ({ data: { data: { results: [] } } }),
+}));
+
+jest.mock('@/app/shared/components/Filters', () => ({
+  FiltersDialog: ({
+    isOpen,
+    children,
+  }: {
+    isOpen: boolean;
+    children: React.ReactNode;
+  }) => (
+    <>
+      {children}
+      {isOpen && <div>filters open</div>}
+    </>
+  ),
 }));
 
 const filters = (overrides: Partial<SearchFilters> = {}): SearchFilters => ({
@@ -146,8 +161,8 @@ describe('the results view', () => {
     expect(screen.getByText('filters open')).toBeInTheDocument();
   });
 
-  it('names the category rather than its id', () => {
-    render(<SearchResults filters={filters({ category: 'c1' })} />);
+  it('names the city rather than its id', () => {
+    render(<SearchResults filters={filters({ city: 'c1' })} />);
 
     expect(screen.getByRole('button', { name: 'Remove Hiking' })).toBeInTheDocument();
   });
