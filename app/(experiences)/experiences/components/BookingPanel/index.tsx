@@ -44,6 +44,11 @@ interface BookingPanelProps {
   // 'all' shows both tabs. The mobile sheet opens one or the other on its own,
   // so it asks for that view and the tab row is left out.
   view?: 'all' | 'reservation' | 'moments';
+  // The full page and the mobile sheet float this over other content, so it
+  // carries its own card. The experience drawer already supplies the white
+  // background and the padding, so a second card there would nest one inside
+  // another.
+  appearance?: 'card' | 'plain';
 }
 
 const formatSlotLabel = (startTime: string, durationMinutes: number): string => {
@@ -74,7 +79,15 @@ const occurrenceLabel = (occurrence: ExperienceOccurrence): string => {
 // Same rule PaymentForm's paymentFormSchema applies to mobile-money numbers
 const PHONE_REGEX = /^\+\d{6,15}$/;
 
-export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: BookingPanelProps) => {
+// A reason to hurry, not a running inventory count - plenty left says nothing
+const LOW_STOCK_THRESHOLD = 5;
+
+export const BookingPanel = ({
+  experience,
+  mode = 'live',
+  view = 'all',
+  appearance = 'card',
+}: BookingPanelProps) => {
   const router = useRouter();
   const { data: session } = useSession();
   const isLoggedIn = Boolean(session?.user);
@@ -92,6 +105,10 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [deliveryMethod, setDeliveryMethod] = useState<'email' | 'whatsapp'>('whatsapp');
   const [deliveryContact, setDeliveryContact] = useState('');
+  // A signed-in reader's own address is a known-good default - shown read-only
+  // until they ask to change it, rather than an empty field they have to
+  // retype what the account already has
+  const [isEditingDeliveryContact, setIsEditingDeliveryContact] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [firstName, setFirstName] = useState('');
@@ -101,6 +118,17 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
   // Bumped by resetPanel to remount the uncontrolled inputs (PhoneNumber, Quantity)
   const [formResetKey, setFormResetKey] = useState(0);
   const [isPaystackOpen, setIsPaystackOpen] = useState(false);
+
+  // Defaults a signed-in reader to their own address once the session
+  // resolves - an anonymous purchaser, who has no address to default to,
+  // keeps the panel's original Whatsapp default
+  useEffect(() => {
+    if (isLoggedIn && session?.user?.email) {
+      setDeliveryMethod('email');
+      setDeliveryContact(session.user.email);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- a one-time default, not a sync; re-running it would stomp on a reader's own edit
+  }, [isLoggedIn, session?.user?.email]);
 
   const isRecurring = Boolean(experience.recurrenceRule);
 
@@ -311,7 +339,10 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
   const resetPanel = () => {
     setQuantities({});
     setErrors({});
-    setDeliveryContact('');
+    // A signed-in reader's own address is the default to return to, the same
+    // one the panel seeded on arrival - not a blank field
+    setDeliveryContact(isLoggedIn && session?.user?.email ? session.user.email : '');
+    setIsEditingDeliveryContact(false);
     setFirstName('');
     setLastName('');
     setEmail('');
@@ -391,7 +422,7 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
   const currency = experience.currency ?? 'Ksh.';
 
   return (
-    <div className="space-y-4 rounded-3xl bg-gray-50 p-5">
+    <div className={cn('space-y-4', appearance === 'card' && 'rounded-3xl bg-gray-50 p-5')}>
       {/* Tabs */}
       <Tabs value={tab} onValueChange={(val) => setTab(val as 'reservation' | 'moments')}>
         {showTabs && (
@@ -447,56 +478,72 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
               onSlotChange={setSelectedSlotId}
             />
           ) : (
-            /* Date pill (single / multi-day experiences) */
-            <div className="flex items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3">
-              <div className="flex items-start gap-3">
-                <IconComponent
-                  iconName="Calendar03Icon"
-                  size={20}
-                  className="mt-0.5 flex-shrink-0 text-primary"
-                />
-                <div className="space-y-2">
-                  <p className="text-sm font-semibold text-gray-900">{dateRange}</p>
-                  {experience.priceStartsFrom?.amount != null && (
-                    <p className="text-sm text-gray-500">
-                      From {currency} {experience.priceStartsFrom.amount.toLocaleString()}/Guest
-                    </p>
-                  )}
+            appearance === 'card' && (
+              /* Date pill (single / multi-day experiences) - left out where the
+                 drawer's own summary above the panel already names the date,
+                 see ExperienceDrawer */
+              <div className="flex items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3">
+                <div className="flex items-start gap-3">
+                  <IconComponent
+                    iconName="Calendar03Icon"
+                    size={20}
+                    className="mt-0.5 flex-shrink-0 text-primary"
+                  />
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-gray-900">{dateRange}</p>
+                    {experience.priceStartsFrom?.amount != null && (
+                      <p className="text-sm text-gray-500">
+                        From {currency} {experience.priceStartsFrom.amount.toLocaleString()}/Guest
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )
           )}
 
           {errors.slot && <p className="text-sm text-red-500">{errors.slot}</p>}
 
           {/* Ticket selector */}
           {(experience.tickets?.length ?? 0) > 0 && (
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-gray-900">Select ticket</p>
+            <div className="space-y-4">
+              <p className="text-xl font-bold text-gray-900">Select ticket</p>
 
               {visibleTickets.length === 0 ? (
                 <p className="text-sm text-gray-500">No tickets available for this time slot.</p>
               ) : (
-                <div className="space-y-3">
-                  {visibleTickets.map((ticket) => (
-                    <div key={ticket.id} className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-bold text-gray-900">
-                          {currency} {getTicketBuyerPrice(ticket).toLocaleString()}/person
-                        </p>
-                        <p className="mt-0.5 text-sm text-gray-500">{ticket.name}</p>
+                <div className="space-y-5">
+                  {visibleTickets.map((ticket) => {
+                    // What is actually left to sell, where the API says - the
+                    // total ever allocated (`quantity`) is not what a buyer
+                    // can still take
+                    const remaining = ticket.availableQuantity ?? ticket.available_quantity;
+
+                    return (
+                      <div key={ticket.id} className="flex items-center justify-between">
+                        <div>
+                          <p className="text-lg font-semibold text-gray-900">
+                            {currency} {getTicketBuyerPrice(ticket).toLocaleString()}/person{' '}
+                            {remaining !== undefined && remaining <= LOW_STOCK_THRESHOLD && (
+                              <span className="text-base font-medium text-blue-600">
+                                ({remaining} {remaining === 1 ? 'ticket' : 'tickets'} left)
+                              </span>
+                            )}
+                          </p>
+                          <p className="mt-0.5 text-base text-gray-500">{ticket.name}</p>
+                        </div>
+                        <Quantity
+                          // Uncontrolled like PhoneNumber - it seeds from
+                          // initialValue once, so a reset needs a remount
+                          key={`${ticket.id}-${formResetKey}`}
+                          initialValue={quantities[ticket.id] ?? 0}
+                          min={0}
+                          max={remaining ?? ticket.quantity}
+                          onChange={(qty) => updateQuantity(ticket.id, qty)}
+                        />
                       </div>
-                      <Quantity
-                        // Uncontrolled like PhoneNumber - it seeds from
-                        // initialValue once, so a reset needs a remount
-                        key={`${ticket.id}-${formResetKey}`}
-                        initialValue={quantities[ticket.id] ?? 0}
-                        min={0}
-                        max={ticket.quantity}
-                        onChange={(qty) => updateQuantity(ticket.id, qty)}
-                      />
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
@@ -539,13 +586,13 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
 
           {/* Total */}
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-500">Total</span>
+            <span className="text-xl font-bold text-gray-900">Total</span>
             {/* Keyed on the amount so React remounts it - and the animation
                 replays - only when the figure actually changes, rather than on
                 every render of the panel */}
             <span
               key={payableTotal}
-              className="text-sm font-bold text-gray-900 duration-300 animate-in fade-in slide-in-from-bottom-1 motion-reduce:animate-none"
+              className="text-xl font-bold text-gray-900 duration-300 animate-in fade-in slide-in-from-bottom-1 motion-reduce:animate-none"
             >
               {currency}{' '}
               {payableTotal.toLocaleString(undefined, {
@@ -632,7 +679,10 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
               <button
                 type="button"
                 onClick={() => {
-                  if (deliveryMethod !== 'email') setDeliveryContact('');
+                  if (deliveryMethod !== 'email') {
+                    setDeliveryContact(isLoggedIn && session?.user?.email ? session.user.email : '');
+                    setIsEditingDeliveryContact(false);
+                  }
                   setDeliveryMethod('email');
                 }}
                 className={`rounded-full px-4 py-3 text-sm font-medium transition-colors ${
@@ -669,6 +719,23 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
                 {errors.deliveryContact && (
                   <p className="mt-1 text-sm text-red-500">{errors.deliveryContact}</p>
                 )}
+              </div>
+            ) : isLoggedIn &&
+              deliveryContact &&
+              deliveryContact === session?.user?.email &&
+              !isEditingDeliveryContact ? (
+              <div className="flex items-center justify-between rounded-xl border border-dashed border-gray-300 px-4 py-3">
+                <p className="truncate text-sm text-gray-900">
+                  <span className="font-bold">Email:</span> {deliveryContact}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingDeliveryContact(true)}
+                  aria-label="Edit delivery email"
+                  className="flex-shrink-0 text-primary"
+                >
+                  <IconComponent iconName="PencilEdit02Icon" size={16} color="currentColor" />
+                </button>
               </div>
             ) : (
               <div>

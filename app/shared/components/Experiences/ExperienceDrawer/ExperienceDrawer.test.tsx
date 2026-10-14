@@ -39,9 +39,18 @@ jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast: jest
 jest.mock('@/context/AuthDialogContext', () => ({
   useAuthDialog: () => ({ openSignInWithCallback: jest.fn() }),
 }));
-// Its own unit (ExperienceDrawerFooter.test.tsx); this suite is about the shell
+// Its own unit (ExperienceDrawerFooter.test.tsx); this suite is about the
+// shell, but the reservation swap it triggers is this suite's business
 jest.mock('./ExperienceDrawerFooter', () => ({
-  ExperienceDrawerFooter: () => <div data-testid="footer" />,
+  ExperienceDrawerFooter: ({ onMakeReservation }: { onMakeReservation: () => void }) => (
+    <button type="button" onClick={onMakeReservation}>
+      footer make reservation
+    </button>
+  ),
+}));
+// Its own unit (BookingPanel.test.tsx); this suite is only about the swap
+jest.mock('@/app/(experiences)/experiences/components/BookingPanel', () => ({
+  BookingPanel: () => <div data-testid="booking-panel" />,
 }));
 jest.mock('next/image', () => {
   function MockImage({ alt, src }: { alt: string; src: string }) {
@@ -158,5 +167,39 @@ describe('ExperienceDrawer', () => {
     render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
 
     expect(screen.getByText('This experience could not be loaded.')).toBeInTheDocument();
+  });
+
+  describe('the reservation swap (ED-11)', () => {
+    it('takes the drawer over to the booking panel rather than navigating away', () => {
+      render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'footer make reservation' }));
+
+      expect(screen.getByRole('heading', { name: 'Make reservation' })).toBeInTheDocument();
+      expect(screen.getByTestId('booking-panel')).toBeInTheDocument();
+      // Two reservation-view summaries of the experience name are expected -
+      // the header no longer carries the title once it says "Make reservation"
+      expect(screen.getAllByText('Pottery for beginners').length).toBeGreaterThan(0);
+    });
+
+    it('hides the tabs and the footer while reserving', () => {
+      render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'footer make reservation' }));
+
+      expect(screen.queryByText('footer make reservation')).not.toBeInTheDocument();
+    });
+
+    it('returns to the experience from the back control', () => {
+      render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'footer make reservation' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Back to Pottery for beginners' }));
+
+      expect(
+        screen.getByRole('heading', { name: /Sat 3 Oct, \d{1,2}:\d{2} [AP]M - \d{1,2}:\d{2} [AP]M/ }),
+      ).toBeInTheDocument();
+      expect(screen.getByText('footer make reservation')).toBeInTheDocument();
+    });
   });
 });

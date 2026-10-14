@@ -41,7 +41,7 @@ export const Quantity = ({
   };
 
   return (
-    <div className="inline-flex items-center justify-between rounded-full p-2">
+    <div className="inline-flex items-center justify-between rounded-full bg-gray-100 px-4 py-3">
       <button
         onClick={handleDecrease}
         disabled={quantity <= min}
@@ -50,11 +50,13 @@ export const Quantity = ({
       >
         <HugeiconsIcon
           icon={MinusSignCircleTwotoneRounded}
-          size={20}
+          size={28}
           className={clsx(quantity <= min && 'text-gray-300')}
         />
       </button>
-      <span className="mx-2 min-w-[1ch] text-center text-sm font-medium">{quantity}</span>
+      <span className="mx-4 min-w-[1ch] text-center text-xl font-bold text-gray-900">
+        {quantity}
+      </span>
       <button
         onClick={handleIncrease}
         disabled={quantity >= max}
@@ -63,7 +65,7 @@ export const Quantity = ({
       >
         <HugeiconsIcon
           icon={PlusSignCircleTwotoneRounded}
-          size={20}
+          size={28}
           className={clsx(quantity >= max && 'text-gray-300')}
         />
       </button>

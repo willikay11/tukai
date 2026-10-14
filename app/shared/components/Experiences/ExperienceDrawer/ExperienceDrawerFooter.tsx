@@ -2,22 +2,25 @@
 
 import { useState } from 'react';
 
-import Link from 'next/link';
-
 import { experiencePriceLine } from '@/app/(experiences)/components/ExperienceCard/experience-flag';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PlanThisDrawer } from '@/app/shared/components/Plans/PlanThisDrawer';
 import { Experience } from '@/types/experience';
 import { coverPhotoUrl } from '@/types/photo';
-import { experiencePath } from '@/utils/detail-paths';
 import { formatExperienceHeaderDate } from '@/utils/date-utils';
 
 /**
- * Booking stays on the experience's own page (ED-11), so the primary action
- * here pushes there rather than duplicating ticket selection. Planning is not
- * booking, so it stays in the footer, matching the place drawer's footer.
+ * Planning is not booking, so it stays in the footer, matching the place
+ * drawer's footer. Reserving swaps the drawer over to the booking panel
+ * (ED-11) rather than duplicating it here or sending the reader away.
  */
-export const ExperienceDrawerFooter = ({ experience }: { experience: Experience }) => {
+export const ExperienceDrawerFooter = ({
+  experience,
+  onMakeReservation,
+}: {
+  experience: Experience;
+  onMakeReservation: () => void;
+}) => {
   const [isPlanOpen, setIsPlanOpen] = useState(false);
 
   const priceLine = experiencePriceLine(experience);
@@ -43,13 +46,14 @@ export const ExperienceDrawerFooter = ({ experience }: { experience: Experience 
             Plan this
           </button>
 
-          <Link
-            href={experiencePath(experience)}
+          <button
+            type="button"
+            onClick={onMakeReservation}
             className="inline-flex h-12 flex-shrink-0 items-center gap-2.5 rounded-full bg-lime px-6 text-[15px] font-bold text-brand-ink transition-colors hover:bg-lime-dark"
           >
             <IconComponent iconName="Ticket01Icon" size={20} color="currentColor" />
             Make reservation
-          </Link>
+          </button>
         </div>
       </div>
 

@@ -26,17 +26,21 @@ const experience = (overrides: Partial<Experience> = {}) =>
   }) as unknown as Experience;
 
 describe('ExperienceDrawerFooter', () => {
-  it('sends the reader to the experience page to book', () => {
-    render(<ExperienceDrawerFooter experience={experience()} />);
-
-    expect(screen.getByRole('link', { name: /Make reservation/ })).toHaveAttribute(
-      'href',
-      '/experiences/e1',
+  // Booking swaps the drawer over to the booking panel (ED-11) rather than
+  // sending the reader away
+  it('opens the reservation view rather than navigating away', () => {
+    const onMakeReservation = jest.fn();
+    render(
+      <ExperienceDrawerFooter experience={experience()} onMakeReservation={onMakeReservation} />,
     );
+
+    fireEvent.click(screen.getByRole('button', { name: /Make reservation/ }));
+
+    expect(onMakeReservation).toHaveBeenCalled();
   });
 
   it('shows the price and when it runs', () => {
-    render(<ExperienceDrawerFooter experience={experience()} />);
+    render(<ExperienceDrawerFooter experience={experience()} onMakeReservation={jest.fn()} />);
 
     expect(screen.getByText('KES 1,800/person')).toBeInTheDocument();
     expect(
@@ -47,7 +51,7 @@ describe('ExperienceDrawerFooter', () => {
   // Planning is not booking, so it is not gated behind the push to the full
   // page the way ticket holding and booking are (ED-11)
   it('opens Plan this without leaving the drawer', () => {
-    render(<ExperienceDrawerFooter experience={experience()} />);
+    render(<ExperienceDrawerFooter experience={experience()} onMakeReservation={jest.fn()} />);
 
     expect(screen.queryByText('Nairobi')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /plan this/i }));
