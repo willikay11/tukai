@@ -40,8 +40,17 @@ export const Quantity = ({
     }
   };
 
+  // The pill itself reads as off/on - grey at the floor, the same mint green
+  // as a chosen pick elsewhere once at least one is taken
+  const isEmpty = quantity <= min;
+
   return (
-    <div className="inline-flex items-center justify-between rounded-full bg-gray-100 px-4 py-3">
+    <div
+      className={clsx(
+        'inline-flex items-center justify-between rounded-full px-4 py-3',
+        isEmpty ? 'bg-gray-100' : 'bg-emerald-100',
+      )}
+    >
       <button
         onClick={handleDecrease}
         disabled={quantity <= min}
@@ -51,7 +60,7 @@ export const Quantity = ({
         <HugeiconsIcon
           icon={MinusSignCircleTwotoneRounded}
           size={28}
-          className={clsx(quantity <= min && 'text-gray-300')}
+          className={clsx(quantity <= min ? 'text-gray-300' : 'text-primary')}
         />
       </button>
       <span className="mx-4 min-w-[1ch] text-center text-xl font-bold text-gray-900">
@@ -66,7 +75,7 @@ export const Quantity = ({
         <HugeiconsIcon
           icon={PlusSignCircleTwotoneRounded}
           size={28}
-          className={clsx(quantity >= max && 'text-gray-300')}
+          className={clsx(quantity >= max ? 'text-gray-300' : 'text-primary')}
         />
       </button>
     </div>

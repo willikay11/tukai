@@ -17,7 +17,6 @@ import {
   usePurchaseExperienceTicketV2,
 } from '@/app/shared/hooks/useExperiences';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Paystack } from '@/components/ui/paystack';
 import { PhoneNumber } from '@/components/ui/phoneNumber';
@@ -421,6 +420,40 @@ export const BookingPanel = ({
   const dateRange = `${moment(experience.startDate).format('ddd D MMM')} · ${moment(experience.startDate).format('h:mm A')} - ${moment(experience.endDate).format('h:mm A')}`;
   const currency = experience.currency ?? 'Ksh.';
 
+  // Checkout takes the panel over rather than opening a drawer or a dialog on
+  // top of it - whatever is already hosting this panel (the page, the mobile
+  // sheet, the experience drawer) stays the one surface in play
+  if (isPaystackOpen) {
+    return (
+      <div className={cn('space-y-4', appearance === 'card' && 'rounded-3xl bg-gray-50 p-5')}>
+        <div className="flex items-center justify-between gap-3 border-b border-gray-200 pb-4">
+          <p className="text-base font-bold text-gray-900">Complete your payment</p>
+
+          <button
+            type="button"
+            onClick={() => setIsPaystackOpen(false)}
+            aria-label="Close"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50"
+          >
+            <IconComponent iconName="Cancel01Icon" size={20} color="currentColor" />
+          </button>
+        </div>
+
+        <div className="h-[70vh] w-full overflow-hidden">
+          <Paystack
+            onPaymentSuccess={(paymentSuccess) => {
+              setIsPaystackOpen(false);
+              if (paymentSuccess) {
+                goToBookingSuccess(purchaseData?.data?.paymentDetails?.reference);
+              }
+            }}
+            url={purchaseData?.data?.paymentDetails?.authorizationUrl || ''}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={cn('space-y-4', appearance === 'card' && 'rounded-3xl bg-gray-50 p-5')}>
       {/* Tabs */}
@@ -670,12 +703,12 @@ export const BookingPanel = ({
           )}
 
           {/* Ticket delivery */}
-          <div className="space-y-3">
-            <p className="text-sm font-normal text-gray-900">
+          <div className="space-y-4">
+            <p className="text-base font-normal text-gray-900">
               How would you like to receive your tickets?
             </p>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={() => {
@@ -685,13 +718,13 @@ export const BookingPanel = ({
                   }
                   setDeliveryMethod('email');
                 }}
-                className={`rounded-full px-4 py-3 text-sm font-medium transition-colors ${
+                className={`inline-flex h-[50px] flex-none items-center justify-center rounded-full px-6 text-sm font-normal transition-colors ${
                   deliveryMethod === 'email'
                     ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
-                    : 'bg-white text-gray-500'
+                    : 'bg-gray-100 text-gray-900'
                 } `}
               >
-                Via Email
+                Via email
               </button>
               <button
                 type="button"
@@ -699,13 +732,13 @@ export const BookingPanel = ({
                   if (deliveryMethod !== 'whatsapp') setDeliveryContact('');
                   setDeliveryMethod('whatsapp');
                 }}
-                className={`rounded-full px-4 py-3 text-sm font-medium transition-colors ${
+                className={`inline-flex h-[50px] flex-none items-center justify-center rounded-full px-6 text-sm font-normal transition-colors ${
                   deliveryMethod === 'whatsapp'
                     ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
-                    : 'bg-white text-gray-500'
+                    : 'bg-gray-100 text-gray-900'
                 } `}
               >
-                Via Whatsapp
+                Via WhatsApp
               </button>
             </div>
 
@@ -714,7 +747,14 @@ export const BookingPanel = ({
                 <PhoneNumber
                   key={`delivery-${formResetKey}`}
                   onChange={(value) => setDeliveryContact(value)}
-                  placeholder="Enter Whatsapp number"
+                  placeholder="Enter WhatsApp number"
+                  icon={
+                    <IconComponent
+                      iconName="WhatsappIcon"
+                      size={18}
+                      className="flex-shrink-0 text-gray-700"
+                    />
+                  }
                 />
                 {errors.deliveryContact && (
                   <p className="mt-1 text-sm text-red-500">{errors.deliveryContact}</p>
@@ -770,13 +810,13 @@ export const BookingPanel = ({
             // Stays enabled when the form is incomplete - pressing it surfaces
             // an error on each offending input instead of silently doing nothing
             disabled={isPreview || isPaying}
-            className={`h-12 w-full rounded-full py-3 text-primary ${
+            className={`h-14 w-full rounded-full py-3 text-[#013334] ${
               isPreview ? 'bg-gray-200 bg-none text-gray-500 disabled:opacity-100' : ''
             }`}
           >
-            <span className="flex items-center justify-center gap-3 text-sm">
+            <span className="flex items-center justify-center gap-3 text-lg font-semibold">
               <span>{isPaying ? 'Processing…' : 'Pay'}</span>
-              <span className={isPreview ? 'text-gray-400' : 'text-primary/40'}>|</span>
+              <span className={isPreview ? 'text-gray-400' : 'text-[#013334]/40'}>|</span>
               <span>
                 {currency}{' '}
                 {payableTotal.toLocaleString(undefined, {
@@ -815,34 +855,6 @@ export const BookingPanel = ({
           />
         </TabsContent>
       </Tabs>
-
-      {/* Same post-purchase flow as the reserve page. The checkout is an
-          overlay so it covers the panel instead of appending an iframe below
-          it - Radix also unmounts it while closed, so the iframe never mounts
-          against an empty url. */}
-      <Dialog
-        open={isPaystackOpen}
-        onOpenChange={(open) => {
-          if (!open) setIsPaystackOpen(false);
-        }}
-      >
-        <DialogContent className="max-w-2xl gap-0 p-0">
-          <DialogTitle className="px-6 pb-4 pt-6 text-base font-bold text-gray-900">
-            Complete your payment
-          </DialogTitle>
-          <div className="h-[70vh] w-full overflow-hidden px-6 pb-6">
-            <Paystack
-              onPaymentSuccess={(paymentSuccess) => {
-                setIsPaystackOpen(false);
-                if (paymentSuccess) {
-                  goToBookingSuccess(purchaseData?.data?.paymentDetails?.reference);
-                }
-              }}
-              url={purchaseData?.data?.paymentDetails?.authorizationUrl || ''}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

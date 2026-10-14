@@ -154,7 +154,7 @@ describe('BookingPanel purchase flow', () => {
     await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
     // Email delivery avoids the WhatsApp phone requirement, but still needs a
     // valid address of its own
-    await user.click(screen.getByRole('button', { name: 'Via Email' }));
+    await user.click(screen.getByRole('button', { name: 'Via email' }));
     await user.type(screen.getByPlaceholderText('Enter email address'), 'guest@example.com');
   };
 
@@ -582,7 +582,7 @@ describe('delivery contact defaults', () => {
     const user = userEvent.setup();
     render(<BookingPanel experience={experience} />);
 
-    await user.click(screen.getByRole('button', { name: 'Via Email' }));
+    await user.click(screen.getByRole('button', { name: 'Via email' }));
 
     expect(screen.getByPlaceholderText('Enter email address')).toHaveValue('');
   });
@@ -679,11 +679,11 @@ describe('BookingPanel preview mode', () => {
 });
 
 describe('pay button styling', () => {
-  it('uses the lime variant with primary text, not the dark gradient', () => {
+  it('uses the lime variant with dark-ink text, not the dark gradient', () => {
     render(<BookingPanel experience={experience} />);
 
     const pay = screen.getByRole('button', { name: /Pay/ });
-    expect(pay).toHaveClass('bg-lime', 'text-primary');
+    expect(pay).toHaveClass('bg-lime', 'text-[#013334]');
     expect(pay).not.toHaveClass('bg-gradient-to-b');
   });
 });
