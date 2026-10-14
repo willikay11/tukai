@@ -5,7 +5,9 @@ import { Experience } from '@/types/experience';
 
 import { BookingPanel } from './index';
 
-let mockSession: { data: { user: { id: string } } | null } = { data: { user: { id: 'u1' } } };
+let mockSession: { data: { user: { id: string; email?: string } } | null } = {
+  data: { user: { id: 'u1' } },
+};
 jest.mock('next-auth/react', () => ({
   useSession: () => mockSession,
 }));
@@ -152,7 +154,7 @@ describe('BookingPanel purchase flow', () => {
     await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
     // Email delivery avoids the WhatsApp phone requirement, but still needs a
     // valid address of its own
-    await user.click(screen.getByRole('button', { name: 'Via Email' }));
+    await user.click(screen.getByRole('button', { name: 'Via email' }));
     await user.type(screen.getByPlaceholderText('Enter email address'), 'guest@example.com');
   };
 
@@ -358,6 +360,25 @@ describe('BookingPanel purchase flow', () => {
     );
   });
 
+  // The experience drawer passes this so a completed purchase returns to its
+  // own 'experience' view instead of navigating off the drawer entirely
+  it('calls onPurchaseComplete instead of navigating, when the host supplies one', async () => {
+    const user = userEvent.setup();
+    const onPurchaseComplete = jest.fn();
+    render(<BookingPanel experience={experience} onPurchaseComplete={onPurchaseComplete} />);
+
+    await selectTicketAndSafePaymentOptions(user);
+    await user.click(screen.getByRole('button', { name: /^pay/i }));
+
+    await waitFor(() => expect(document.querySelector('iframe')).toBeInTheDocument());
+    fireEvent(window, new MessageEvent('message', { data: { status: 'success' } }));
+
+    await waitFor(() =>
+      expect(onPurchaseComplete).toHaveBeenCalledWith('TRN-20260714-4OIK5LDP'),
+    );
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
   it('clears the purchaser’s details once Paystack reports success', async () => {
     const user = userEvent.setup();
     render(<BookingPanel experience={experience} />);
@@ -402,6 +423,75 @@ describe('BookingPanel purchase flow', () => {
 
     expect(screen.getByText('VIP')).toBeInTheDocument();
     expect(screen.queryByText('Normal')).not.toBeInTheDocument();
+  });
+
+  it('names how many of a ticket are actually left, not how many were ever allocated', () => {
+    const scarce = {
+      ...experience,
+      tickets: [
+        { ...experience.tickets[0], quantity: 10, availableQuantity: 2 },
+        experience.tickets[1],
+      ],
+    } as unknown as Experience;
+
+    render(<BookingPanel experience={scarce} />);
+
+    expect(screen.getByText('(2 tickets left)')).toBeInTheDocument();
+  });
+
+  it('caps the stepper at what is left, not at the total ever allocated', async () => {
+    const user = userEvent.setup();
+    const scarce = {
+      ...experience,
+      tickets: [
+        { ...experience.tickets[0], quantity: 10, availableQuantity: 1 },
+        experience.tickets[1],
+      ],
+    } as unknown as Experience;
+
+    render(<BookingPanel experience={scarce} />);
+
+    const increase = screen.getByRole('button', { name: 'Increase quantity' });
+    await user.click(increase);
+
+    expect(increase).toBeDisabled();
+    expect(screen.getByText('1')).toBeInTheDocument();
+  });
+
+  // No remaining-quantity field on a ticket is not the same as zero left
+  it('leaves off the tickets-left label when the API sends no remaining count', () => {
+    render(<BookingPanel experience={experience} />);
+
+    expect(screen.queryByText(/tickets left/)).not.toBeInTheDocument();
+  });
+
+  // Plenty left is not a reason to hurry - the label is only a nudge for low stock
+  it('leaves off the tickets-left label once plenty are left', () => {
+    const plentiful = {
+      ...experience,
+      tickets: [
+        { ...experience.tickets[0], quantity: 10, availableQuantity: 6 },
+        experience.tickets[1],
+      ],
+    } as unknown as Experience;
+
+    render(<BookingPanel experience={plentiful} />);
+
+    expect(screen.queryByText(/tickets left/)).not.toBeInTheDocument();
+  });
+
+  it('shows the tickets-left label at the threshold, five or fewer', () => {
+    const atThreshold = {
+      ...experience,
+      tickets: [
+        { ...experience.tickets[0], quantity: 10, availableQuantity: 5 },
+        experience.tickets[1],
+      ],
+    } as unknown as Experience;
+
+    render(<BookingPanel experience={atThreshold} />);
+
+    expect(screen.getByText('(5 tickets left)')).toBeInTheDocument();
   });
 
   it('keeps quantities picked on another slot out of the total and blocks Pay', async () => {
@@ -481,6 +571,42 @@ describe('BookingPanel purchase flow', () => {
   });
 });
 
+describe('delivery contact defaults', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('pre-fills a signed-in reader’s own address, read-only until edited', async () => {
+    mockSession = { data: { user: { id: 'u1', email: 'wanjiku@example.com' } } };
+    render(<BookingPanel experience={experience} />);
+
+    expect(await screen.findByText('wanjiku@example.com')).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('Enter email address')).not.toBeInTheDocument();
+  });
+
+  it('unlocks the pre-filled address for editing via its pencil', async () => {
+    mockSession = { data: { user: { id: 'u1', email: 'wanjiku@example.com' } } };
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} />);
+
+    await user.click(await screen.findByRole('button', { name: 'Edit delivery email' }));
+
+    expect(screen.getByPlaceholderText('Enter email address')).toHaveValue(
+      'wanjiku@example.com',
+    );
+  });
+
+  it('leaves the field blank and editable when the session carries no address', async () => {
+    mockSession = { data: { user: { id: 'u1' } } };
+    const user = userEvent.setup();
+    render(<BookingPanel experience={experience} />);
+
+    await user.click(screen.getByRole('button', { name: 'Via email' }));
+
+    expect(screen.getByPlaceholderText('Enter email address')).toHaveValue('');
+  });
+});
+
 // Itinerary experiences have no slot templates - the occurrence arrives with
 // slotTemplate: null, which used to crash on `slotTemplate.startTime`
 describe('BookingPanel for an experience without slot templates', () => {
@@ -511,6 +637,19 @@ describe('BookingPanel for an experience without slot templates', () => {
   it('renders without throwing and still lists the ticket', () => {
     expect(() => render(<BookingPanel experience={itineraryExperience} />)).not.toThrow();
     expect(screen.getByText('Standard')).toBeInTheDocument();
+  });
+
+  it('names the date by default, for the full page and the mobile sheet', () => {
+    render(<BookingPanel experience={itineraryExperience} />);
+
+    expect(screen.getByText('From Ksh. 5,000/Guest')).toBeInTheDocument();
+  });
+
+  // The drawer's own summary above the panel already names the date
+  it('leaves out the date pill where the drawer already names the date', () => {
+    render(<BookingPanel experience={itineraryExperience} appearance="plain" />);
+
+    expect(screen.queryByText('From Ksh. 5,000/Guest')).not.toBeInTheDocument();
   });
 });
 
@@ -559,11 +698,11 @@ describe('BookingPanel preview mode', () => {
 });
 
 describe('pay button styling', () => {
-  it('uses the lime variant with primary text, not the dark gradient', () => {
+  it('uses the lime variant with dark-ink text, not the dark gradient', () => {
     render(<BookingPanel experience={experience} />);
 
     const pay = screen.getByRole('button', { name: /Pay/ });
-    expect(pay).toHaveClass('bg-lime', 'text-primary');
+    expect(pay).toHaveClass('bg-lime', 'text-[#013334]');
     expect(pay).not.toHaveClass('bg-gradient-to-b');
   });
 });

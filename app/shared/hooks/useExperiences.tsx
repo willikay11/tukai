@@ -88,6 +88,7 @@ export const usePurchaseExperienceTicketV2 = () => {
     mutationFn: async (data: TicketPurchasePayload) => await purchaseExperienceTicketV2(data),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['experience'] });
+      queryClient.invalidateQueries({ queryKey: ['purchases'] });
     },
   });
 };

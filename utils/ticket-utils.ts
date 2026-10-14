@@ -146,7 +146,7 @@ const purchaseHolderName = (purchase: TicketPurchase): string => {
 // Statuses that mean the buyer still has to do something. If any ticket in a
 // group is in one of these, the whole reservation is shown that way.
 const ACTION_NEEDED = new Set(['pending', 'partial']);
-const USABLE = new Set(['completed', 'paid']);
+export const USABLE = new Set(['completed', 'paid']);
 
 /**
  * One status for a group of tickets:
@@ -201,4 +201,39 @@ export const groupTicketPurchases = (purchases: TicketPurchase[]): Reservation[]
   return Array.from(groups.values()).sort((a, b) =>
     (a.occurrenceStart ?? '').localeCompare(b.occurrenceStart ?? ''),
   );
+};
+
+/** One row per ticket type (the drawer's "My tickets" section), rather than
+ * per occurrence (groupTicketPurchases) or per individual ticket. Scoped to
+ * USABLE purchases only - an unpaid or expired ticket has no QR worth
+ * showing. */
+export interface TicketTypeGroup {
+  ticketType: string;
+  quantity: number;
+  qrCodeImage: string | null;
+  purchaseIds: string[];
+}
+
+export const groupPurchasesByType = (purchases: TicketPurchase[]): TicketTypeGroup[] => {
+  const groups = new Map<string, TicketTypeGroup>();
+
+  purchases
+    .filter((purchase) => USABLE.has(purchase.status))
+    .forEach((purchase) => {
+      const key = purchase.ticket.name;
+      const existing = groups.get(key);
+      if (existing) {
+        existing.quantity += 1;
+        existing.purchaseIds.push(purchase.id);
+      } else {
+        groups.set(key, {
+          ticketType: key,
+          quantity: 1,
+          qrCodeImage: purchase.qrCodeImage,
+          purchaseIds: [purchase.id],
+        });
+      }
+    });
+
+  return Array.from(groups.values());
 };

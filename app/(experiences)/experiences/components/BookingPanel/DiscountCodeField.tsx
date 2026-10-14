@@ -88,7 +88,7 @@ export const DiscountCodeField = ({
       </p>
 
       <div className="flex items-start gap-2">
-        <div className="flex-1">
+        <div className="w-full max-w-[180px]">
           <Input
             value={code}
             aria-label="Discount Code"

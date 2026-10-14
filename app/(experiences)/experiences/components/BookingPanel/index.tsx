@@ -17,7 +17,6 @@ import {
   usePurchaseExperienceTicketV2,
 } from '@/app/shared/hooks/useExperiences';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Paystack } from '@/components/ui/paystack';
 import { PhoneNumber } from '@/components/ui/phoneNumber';
@@ -44,6 +43,26 @@ interface BookingPanelProps {
   // 'all' shows both tabs. The mobile sheet opens one or the other on its own,
   // so it asks for that view and the tab row is left out.
   view?: 'all' | 'reservation' | 'moments';
+  // The full page and the mobile sheet float this over other content, so it
+  // carries its own card. The experience drawer already supplies the white
+  // background and the padding, so a second card there would nest one inside
+  // another.
+  appearance?: 'card' | 'plain';
+  /**
+   * Checkout, controlled by a host that needs to know when it is open - the
+   * experience drawer retitles its own header to "Complete your payment" and
+   * sends its back control here rather than out of the reservation view
+   * entirely. Left out, the panel tracks this itself, as it always did.
+   */
+  checkoutOpen?: boolean;
+  onCheckoutOpenChange?: (open: boolean) => void;
+  /**
+   * Where a paid-in-full purchase lands, in place of the default
+   * booking-success navigation - the experience drawer uses this to return to
+   * its own 'experience' view (ED-11) rather than navigating away from the
+   * drawer entirely. Left out, the panel keeps its original page redirect.
+   */
+  onPurchaseComplete?: (reference?: string) => void;
 }
 
 const formatSlotLabel = (startTime: string, durationMinutes: number): string => {
@@ -74,7 +93,18 @@ const occurrenceLabel = (occurrence: ExperienceOccurrence): string => {
 // Same rule PaymentForm's paymentFormSchema applies to mobile-money numbers
 const PHONE_REGEX = /^\+\d{6,15}$/;
 
-export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: BookingPanelProps) => {
+// A reason to hurry, not a running inventory count - plenty left says nothing
+const LOW_STOCK_THRESHOLD = 5;
+
+export const BookingPanel = ({
+  experience,
+  mode = 'live',
+  view = 'all',
+  appearance = 'card',
+  checkoutOpen,
+  onCheckoutOpenChange,
+  onPurchaseComplete,
+}: BookingPanelProps) => {
   const router = useRouter();
   const { data: session } = useSession();
   const isLoggedIn = Boolean(session?.user);
@@ -92,6 +122,10 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [deliveryMethod, setDeliveryMethod] = useState<'email' | 'whatsapp'>('whatsapp');
   const [deliveryContact, setDeliveryContact] = useState('');
+  // A signed-in reader's own address is a known-good default - shown read-only
+  // until they ask to change it, rather than an empty field they have to
+  // retype what the account already has
+  const [isEditingDeliveryContact, setIsEditingDeliveryContact] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [firstName, setFirstName] = useState('');
@@ -100,7 +134,24 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
   const [errors, setErrors] = useState<Record<string, string>>({});
   // Bumped by resetPanel to remount the uncontrolled inputs (PhoneNumber, Quantity)
   const [formResetKey, setFormResetKey] = useState(0);
-  const [isPaystackOpen, setIsPaystackOpen] = useState(false);
+  const [internalPaystackOpen, setInternalPaystackOpen] = useState(false);
+  const isCheckoutControlled = checkoutOpen !== undefined;
+  const isPaystackOpen = isCheckoutControlled ? checkoutOpen : internalPaystackOpen;
+  const setIsPaystackOpen = (open: boolean) => {
+    if (isCheckoutControlled) onCheckoutOpenChange?.(open);
+    else setInternalPaystackOpen(open);
+  };
+
+  // Defaults a signed-in reader to their own address once the session
+  // resolves - an anonymous purchaser, who has no address to default to,
+  // keeps the panel's original Whatsapp default
+  useEffect(() => {
+    if (isLoggedIn && session?.user?.email) {
+      setDeliveryMethod('email');
+      setDeliveryContact(session.user.email);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- a one-time default, not a sync; re-running it would stomp on a reader's own edit
+  }, [isLoggedIn, session?.user?.email]);
 
   const isRecurring = Boolean(experience.recurrenceRule);
 
@@ -311,7 +362,10 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
   const resetPanel = () => {
     setQuantities({});
     setErrors({});
-    setDeliveryContact('');
+    // A signed-in reader's own address is the default to return to, the same
+    // one the panel seeded on arrival - not a blank field
+    setDeliveryContact(isLoggedIn && session?.user?.email ? session.user.email : '');
+    setIsEditingDeliveryContact(false);
     setFirstName('');
     setLastName('');
     setEmail('');
@@ -323,6 +377,11 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
   // confirmation once that API exists, with no further wiring here.
   const goToBookingSuccess = (reference?: string) => {
     resetPanel();
+
+    if (onPurchaseComplete) {
+      onPurchaseComplete(reference);
+      return;
+    }
 
     const params = new URLSearchParams({ experienceId: experience.id });
     if (reference) params.set('ref', reference);
@@ -390,8 +449,47 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
   const dateRange = `${moment(experience.startDate).format('ddd D MMM')} · ${moment(experience.startDate).format('h:mm A')} - ${moment(experience.endDate).format('h:mm A')}`;
   const currency = experience.currency ?? 'Ksh.';
 
+  // Checkout takes the panel over rather than opening a drawer or a dialog on
+  // top of it - whatever is already hosting this panel (the page, the mobile
+  // sheet, the experience drawer) stays the one surface in play
+  if (isPaystackOpen) {
+    return (
+      <div className={cn('space-y-4', appearance === 'card' && 'rounded-3xl bg-gray-50 p-5')}>
+        {/* The experience drawer already retitles its own header to this and
+            sends its back control here (`onCheckoutOpenChange`), so this row
+            would only repeat it */}
+        {appearance === 'card' && (
+          <div className="flex items-center justify-between gap-3 border-b border-gray-200 pb-4">
+            <p className="text-base font-bold text-gray-900">Complete your payment</p>
+
+            <button
+              type="button"
+              onClick={() => setIsPaystackOpen(false)}
+              aria-label="Close"
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50"
+            >
+              <IconComponent iconName="Cancel01Icon" size={20} color="currentColor" />
+            </button>
+          </div>
+        )}
+
+        <div className="h-[70vh] w-full overflow-hidden">
+          <Paystack
+            onPaymentSuccess={(paymentSuccess) => {
+              setIsPaystackOpen(false);
+              if (paymentSuccess) {
+                goToBookingSuccess(purchaseData?.data?.paymentDetails?.reference);
+              }
+            }}
+            url={purchaseData?.data?.paymentDetails?.authorizationUrl || ''}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4 rounded-3xl bg-gray-50 p-5">
+    <div className={cn('space-y-4', appearance === 'card' && 'rounded-3xl bg-gray-50 p-5')}>
       {/* Tabs */}
       <Tabs value={tab} onValueChange={(val) => setTab(val as 'reservation' | 'moments')}>
         {showTabs && (
@@ -447,56 +545,72 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
               onSlotChange={setSelectedSlotId}
             />
           ) : (
-            /* Date pill (single / multi-day experiences) */
-            <div className="flex items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3">
-              <div className="flex items-start gap-3">
-                <IconComponent
-                  iconName="Calendar03Icon"
-                  size={20}
-                  className="mt-0.5 flex-shrink-0 text-primary"
-                />
-                <div className="space-y-2">
-                  <p className="text-sm font-semibold text-gray-900">{dateRange}</p>
-                  {experience.priceStartsFrom?.amount != null && (
-                    <p className="text-sm text-gray-500">
-                      From {currency} {experience.priceStartsFrom.amount.toLocaleString()}/Guest
-                    </p>
-                  )}
+            appearance === 'card' && (
+              /* Date pill (single / multi-day experiences) - left out where the
+                 drawer's own summary above the panel already names the date,
+                 see ExperienceDrawer */
+              <div className="flex items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3">
+                <div className="flex items-start gap-3">
+                  <IconComponent
+                    iconName="Calendar03Icon"
+                    size={20}
+                    className="mt-0.5 flex-shrink-0 text-primary"
+                  />
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-gray-900">{dateRange}</p>
+                    {experience.priceStartsFrom?.amount != null && (
+                      <p className="text-sm text-gray-500">
+                        From {currency} {experience.priceStartsFrom.amount.toLocaleString()}/Guest
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )
           )}
 
           {errors.slot && <p className="text-sm text-red-500">{errors.slot}</p>}
 
           {/* Ticket selector */}
           {(experience.tickets?.length ?? 0) > 0 && (
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-gray-900">Select ticket</p>
+            <div className="space-y-4">
+              <p className="text-xl font-bold text-gray-900">Select ticket</p>
 
               {visibleTickets.length === 0 ? (
                 <p className="text-sm text-gray-500">No tickets available for this time slot.</p>
               ) : (
-                <div className="space-y-3">
-                  {visibleTickets.map((ticket) => (
-                    <div key={ticket.id} className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-bold text-gray-900">
-                          {currency} {getTicketBuyerPrice(ticket).toLocaleString()}/person
-                        </p>
-                        <p className="mt-0.5 text-sm text-gray-500">{ticket.name}</p>
+                <div className="space-y-5">
+                  {visibleTickets.map((ticket) => {
+                    // What is actually left to sell, where the API says - the
+                    // total ever allocated (`quantity`) is not what a buyer
+                    // can still take
+                    const remaining = ticket.availableQuantity ?? ticket.available_quantity;
+
+                    return (
+                      <div key={ticket.id} className="flex items-center justify-between">
+                        <div>
+                          <p className="text-lg font-semibold text-gray-900">
+                            {currency} {getTicketBuyerPrice(ticket).toLocaleString()}/person{' '}
+                            {remaining !== undefined && remaining <= LOW_STOCK_THRESHOLD && (
+                              <span className="text-base font-medium text-blue-600">
+                                ({remaining} {remaining === 1 ? 'ticket' : 'tickets'} left)
+                              </span>
+                            )}
+                          </p>
+                          <p className="mt-0.5 text-base text-gray-500">{ticket.name}</p>
+                        </div>
+                        <Quantity
+                          // Uncontrolled like PhoneNumber - it seeds from
+                          // initialValue once, so a reset needs a remount
+                          key={`${ticket.id}-${formResetKey}`}
+                          initialValue={quantities[ticket.id] ?? 0}
+                          min={0}
+                          max={remaining ?? ticket.quantity}
+                          onChange={(qty) => updateQuantity(ticket.id, qty)}
+                        />
                       </div>
-                      <Quantity
-                        // Uncontrolled like PhoneNumber - it seeds from
-                        // initialValue once, so a reset needs a remount
-                        key={`${ticket.id}-${formResetKey}`}
-                        initialValue={quantities[ticket.id] ?? 0}
-                        min={0}
-                        max={ticket.quantity}
-                        onChange={(qty) => updateQuantity(ticket.id, qty)}
-                      />
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
@@ -539,13 +653,13 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
 
           {/* Total */}
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-500">Total</span>
+            <span className="text-xl font-bold text-gray-900">Total</span>
             {/* Keyed on the amount so React remounts it - and the animation
                 replays - only when the figure actually changes, rather than on
                 every render of the panel */}
             <span
               key={payableTotal}
-              className="text-sm font-bold text-gray-900 duration-300 animate-in fade-in slide-in-from-bottom-1 motion-reduce:animate-none"
+              className="text-xl font-bold text-gray-900 duration-300 animate-in fade-in slide-in-from-bottom-1 motion-reduce:animate-none"
             >
               {currency}{' '}
               {payableTotal.toLocaleString(undefined, {
@@ -623,25 +737,28 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
           )}
 
           {/* Ticket delivery */}
-          <div className="space-y-3">
-            <p className="text-sm font-normal text-gray-900">
+          <div className="space-y-4">
+            <p className="text-base font-normal text-gray-900">
               How would you like to receive your tickets?
             </p>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={() => {
-                  if (deliveryMethod !== 'email') setDeliveryContact('');
+                  if (deliveryMethod !== 'email') {
+                    setDeliveryContact(isLoggedIn && session?.user?.email ? session.user.email : '');
+                    setIsEditingDeliveryContact(false);
+                  }
                   setDeliveryMethod('email');
                 }}
-                className={`rounded-full px-4 py-3 text-sm font-medium transition-colors ${
+                className={`inline-flex h-[50px] flex-none items-center justify-center rounded-full px-6 text-sm font-normal transition-colors ${
                   deliveryMethod === 'email'
                     ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
-                    : 'bg-white text-gray-500'
+                    : 'bg-gray-100 text-gray-900'
                 } `}
               >
-                Via Email
+                Via email
               </button>
               <button
                 type="button"
@@ -649,13 +766,13 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
                   if (deliveryMethod !== 'whatsapp') setDeliveryContact('');
                   setDeliveryMethod('whatsapp');
                 }}
-                className={`rounded-full px-4 py-3 text-sm font-medium transition-colors ${
+                className={`inline-flex h-[50px] flex-none items-center justify-center rounded-full px-6 text-sm font-normal transition-colors ${
                   deliveryMethod === 'whatsapp'
                     ? 'bg-gradient-to-b from-[#047857] to-[#064E3B] text-white shadow-md'
-                    : 'bg-white text-gray-500'
+                    : 'bg-gray-100 text-gray-900'
                 } `}
               >
-                Via Whatsapp
+                Via WhatsApp
               </button>
             </div>
 
@@ -664,11 +781,35 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
                 <PhoneNumber
                   key={`delivery-${formResetKey}`}
                   onChange={(value) => setDeliveryContact(value)}
-                  placeholder="Enter Whatsapp number"
+                  placeholder="Enter WhatsApp number"
+                  icon={
+                    <IconComponent
+                      iconName="WhatsappIcon"
+                      size={18}
+                      className="flex-shrink-0 text-gray-700"
+                    />
+                  }
                 />
                 {errors.deliveryContact && (
                   <p className="mt-1 text-sm text-red-500">{errors.deliveryContact}</p>
                 )}
+              </div>
+            ) : isLoggedIn &&
+              deliveryContact &&
+              deliveryContact === session?.user?.email &&
+              !isEditingDeliveryContact ? (
+              <div className="flex items-center justify-between rounded-xl border border-dashed border-gray-300 px-4 py-3">
+                <p className="truncate text-sm text-gray-900">
+                  <span className="font-bold">Email:</span> {deliveryContact}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingDeliveryContact(true)}
+                  aria-label="Edit delivery email"
+                  className="flex-shrink-0 text-primary"
+                >
+                  <IconComponent iconName="PencilEdit02Icon" size={16} color="currentColor" />
+                </button>
               </div>
             ) : (
               <div>
@@ -703,13 +844,13 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
             // Stays enabled when the form is incomplete - pressing it surfaces
             // an error on each offending input instead of silently doing nothing
             disabled={isPreview || isPaying}
-            className={`h-12 w-full rounded-full py-3 text-primary ${
+            className={`h-14 w-full rounded-full py-3 text-[#013334] ${
               isPreview ? 'bg-gray-200 bg-none text-gray-500 disabled:opacity-100' : ''
             }`}
           >
-            <span className="flex items-center justify-center gap-3 text-sm">
+            <span className="flex items-center justify-center gap-3 text-lg font-semibold">
               <span>{isPaying ? 'Processing…' : 'Pay'}</span>
-              <span className={isPreview ? 'text-gray-400' : 'text-primary/40'}>|</span>
+              <span className={isPreview ? 'text-gray-400' : 'text-[#013334]/40'}>|</span>
               <span>
                 {currency}{' '}
                 {payableTotal.toLocaleString(undefined, {
@@ -748,34 +889,6 @@ export const BookingPanel = ({ experience, mode = 'live', view = 'all' }: Bookin
           />
         </TabsContent>
       </Tabs>
-
-      {/* Same post-purchase flow as the reserve page. The checkout is an
-          overlay so it covers the panel instead of appending an iframe below
-          it - Radix also unmounts it while closed, so the iframe never mounts
-          against an empty url. */}
-      <Dialog
-        open={isPaystackOpen}
-        onOpenChange={(open) => {
-          if (!open) setIsPaystackOpen(false);
-        }}
-      >
-        <DialogContent className="max-w-2xl gap-0 p-0">
-          <DialogTitle className="px-6 pb-4 pt-6 text-base font-bold text-gray-900">
-            Complete your payment
-          </DialogTitle>
-          <div className="h-[70vh] w-full overflow-hidden px-6 pb-6">
-            <Paystack
-              onPaymentSuccess={(paymentSuccess) => {
-                setIsPaystackOpen(false);
-                if (paymentSuccess) {
-                  goToBookingSuccess(purchaseData?.data?.paymentDetails?.reference);
-                }
-              }}
-              url={purchaseData?.data?.paymentDetails?.authorizationUrl || ''}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

@@ -1,11 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 
+import { BookingPanel } from '@/app/(experiences)/experiences/components/BookingPanel';
 import { Bookmark } from '@/app/shared/components/Bookmark';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PhotoImage } from '@/app/shared/components/Images';
 import { ContextMoments } from '@/app/shared/components/Moments';
 import { PlaceDrawerTabs } from '@/app/shared/components/Places/PlaceDrawer/PlaceDrawerTabs';
 import { PlacePhotoStrip } from '@/app/shared/components/Places/PlaceDrawer/PlacePhotoStrip';
@@ -25,6 +27,7 @@ import { ExperienceCancellationSection } from './ExperienceCancellationSection';
 import { ExperienceDrawerFooter } from './ExperienceDrawerFooter';
 import { ExperienceHostSection } from './ExperienceHostSection';
 import { ExperienceLocationSection } from './ExperienceLocationSection';
+import { ExperienceMyTickets } from './ExperienceMyTickets';
 import { ExperienceTicketsSection } from './ExperienceTicketsSection';
 import { EXPERIENCE_SECTIONS, experienceDrawerTabs } from './tabs';
 
@@ -126,6 +129,20 @@ export const ExperienceDrawer = ({
   // opens, and a ref would never tell the scroll spy it had arrived
   const [panel, setPanel] = useState<HTMLDivElement | null>(null);
 
+  /**
+   * Reserving takes the drawer over rather than opening a second one on top
+   * of it - the same swap the place drawer uses for Add a review.
+   */
+  const [view, setView] = useState<'experience' | 'reservation'>('experience');
+  // Checkout's own step within the reservation view - BookingPanel owns the
+  // flow, but the header's title and the drawer's own back control need to
+  // know which half of it is showing
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  useEffect(() => {
+    setView('experience');
+    setIsCheckingOut(false);
+  }, [experienceId]);
+
   const { data, isLoading, isError } = useFetchSingleExperience(
     isOpen && experienceId ? experienceId : '',
   );
@@ -155,30 +172,55 @@ export const ExperienceDrawer = ({
         <div className="flex min-h-full flex-col">
           <div className="sticky top-0 z-30 bg-white">
             <div className="flex items-start justify-between gap-4 border-b border-line px-6 py-4">
-              <h2 className="min-w-0 truncate text-[26px] font-bold leading-tight text-brand-ink">
-                {formatExperienceHeaderDate(experience.startDate, experience.endDate)}
-              </h2>
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                {view === 'reservation' && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      isCheckingOut ? setIsCheckingOut(false) : setView('experience')
+                    }
+                    aria-label={
+                      isCheckingOut ? 'Back to Make reservation' : `Back to ${experience.title}`
+                    }
+                    className={`${DISC} text-brand hover:bg-surface-brand`}
+                  >
+                    <IconComponent iconName="ArrowLeft01Icon" size={20} color="currentColor" />
+                  </button>
+                )}
+
+                <h2 className="min-w-0 truncate text-[26px] font-bold leading-tight text-brand-ink">
+                  {view === 'reservation'
+                    ? isCheckingOut
+                      ? 'Complete your payment'
+                      : 'Make reservation'
+                    : formatExperienceHeaderDate(experience.startDate, experience.endDate)}
+                </h2>
+              </div>
 
               <div className="flex flex-shrink-0 items-center gap-2">
-                <div className={DISC}>
-                  <Share
-                    coverPhoto={coverPhotoUrl(experience.photos, 'md') ?? ''}
-                    title={experience.title}
-                    link={`${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`}
-                    kind="experience"
-                    variant="icon"
-                  />
-                </div>
+                {view === 'experience' && (
+                  <>
+                    <div className={DISC}>
+                      <Share
+                        coverPhoto={coverPhotoUrl(experience.photos, 'md') ?? ''}
+                        title={experience.title}
+                        link={`${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`}
+                        kind="experience"
+                        variant="icon"
+                      />
+                    </div>
 
-                <div className={DISC}>
-                  <Bookmark
-                    bookmarked={experience.isBookmarked}
-                    userId={session?.user?.id}
-                    experienceId={experience.id}
-                    itemName={experience.title}
-                    className="text-brand"
-                  />
-                </div>
+                    <div className={DISC}>
+                      <Bookmark
+                        bookmarked={experience.isBookmarked}
+                        userId={session?.user?.id}
+                        experienceId={experience.id}
+                        itemName={experience.title}
+                        className="text-brand"
+                      />
+                    </div>
+                  </>
+                )}
 
                 <button
                   type="button"
@@ -191,53 +233,119 @@ export const ExperienceDrawer = ({
               </div>
             </div>
 
-            <div className="px-6 py-3">
-              <PlaceDrawerTabs tabs={tabs} activeId={activeId} onSelect={scrollTo} />
-            </div>
-          </div>
-
-          <div className="flex-1 space-y-6 px-6 py-6">
-            <section id={EXPERIENCE_SECTIONS.about} className="scroll-mt-[156px] space-y-6">
-              <PlacePhotoStrip photos={galleryPhotos(experience.photos)} alt={experience.title} />
-
-              <div className="space-y-2">
-                <h2 className="text-[26px] font-bold leading-tight tracking-[-0.5px] text-brand-ink">
-                  {experience.title}
-                </h2>
-
-                {experience.description && <AboutClamp text={experience.description} />}
+            {view === 'experience' && (
+              <div className="px-6 py-3">
+                <PlaceDrawerTabs tabs={tabs} activeId={activeId} onSelect={scrollTo} />
               </div>
-            </section>
-
-            <ExperienceTicketsSection experience={experience} />
-
-            <ExperienceLocationSection experience={experience} />
-
-            <ExperienceHostSection experience={experience} />
-
-            <section
-              id={EXPERIENCE_SECTIONS.moments}
-              className="scroll-mt-[156px] space-y-4 border-t border-line pt-6"
-            >
-              {hasEnded(experience) && (
-                <p className="text-[14px] text-ink-muted">This experience has already happened.</p>
-              )}
-              <ContextMoments
-                title="Moments"
-                contextLabel={experience.title}
-                emptyMessage={`No moments from ${experience.title} yet. Yours could be the first.`}
-                experienceId={experience.id}
-                placeId={experience.place?.id}
-                placeLabel={experience.place?.title}
-                communityId={experience.hostCommunity?.id}
-                communityLabel={experience.hostCommunity?.title}
-              />
-            </section>
-
-            <ExperienceCancellationSection experience={experience} />
+            )}
           </div>
 
-          <ExperienceDrawerFooter experience={experience} />
+          {view === 'reservation' ? (
+            <div className="flex-1 overflow-y-auto px-6 py-6">
+              <div className="flex items-center gap-3 border-b border-line pb-6">
+                <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-surface-muted">
+                  <PhotoImage
+                    src={coverPhotoUrl(experience.photos, 'thumb') ?? ''}
+                    alt={experience.title}
+                    fill
+                    sizes="64px"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-[17px] font-bold text-brand-ink">
+                    {experience.title}
+                  </p>
+                  {(() => {
+                    const headerDate = formatExperienceHeaderDate(
+                      experience.startDate,
+                      experience.endDate,
+                    );
+                    const [dayLabel, timeLabel] = headerDate?.split(', ') ?? [];
+
+                    return (
+                      <p className="flex items-center gap-1.5 text-[14px] text-ink-muted">
+                        {dayLabel && <span>{dayLabel}</span>}
+                        {dayLabel && timeLabel && (
+                          <span aria-hidden="true" className="h-1 w-1 rounded-full bg-dot" />
+                        )}
+                        {timeLabel && <span>{timeLabel}</span>}
+                      </p>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <BookingPanel
+                  experience={experience}
+                  view="reservation"
+                  appearance="plain"
+                  checkoutOpen={isCheckingOut}
+                  onCheckoutOpenChange={setIsCheckingOut}
+                  onPurchaseComplete={() => {
+                    setIsCheckingOut(false);
+                    setView('experience');
+                  }}
+                />
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex-1 space-y-6 px-6 py-6">
+                <section id={EXPERIENCE_SECTIONS.about} className="scroll-mt-[156px] space-y-6">
+                  <PlacePhotoStrip
+                    photos={galleryPhotos(experience.photos)}
+                    alt={experience.title}
+                  />
+
+                  <div className="space-y-2">
+                    <h2 className="text-[26px] font-bold leading-tight tracking-[-0.5px] text-brand-ink">
+                      {experience.title}
+                    </h2>
+
+                    {experience.description && <AboutClamp text={experience.description} />}
+                  </div>
+                </section>
+
+                <ExperienceMyTickets experience={experience} />
+
+                <ExperienceTicketsSection experience={experience} />
+
+                <ExperienceLocationSection experience={experience} />
+
+                <ExperienceHostSection experience={experience} />
+
+                <section
+                  id={EXPERIENCE_SECTIONS.moments}
+                  className="scroll-mt-[156px] space-y-4 border-t border-line pt-6"
+                >
+                  {hasEnded(experience) && (
+                    <p className="text-[14px] text-ink-muted">
+                      This experience has already happened.
+                    </p>
+                  )}
+                  <ContextMoments
+                    title="Moments"
+                    contextLabel={experience.title}
+                    emptyMessage={`No moments from ${experience.title} yet. Yours could be the first.`}
+                    experienceId={experience.id}
+                    placeId={experience.place?.id}
+                    placeLabel={experience.place?.title}
+                    communityId={experience.hostCommunity?.id}
+                    communityLabel={experience.hostCommunity?.title}
+                  />
+                </section>
+
+                <ExperienceCancellationSection experience={experience} />
+              </div>
+
+              <ExperienceDrawerFooter
+                experience={experience}
+                onMakeReservation={() => setView('reservation')}
+              />
+            </>
+          )}
         </div>
       )}
     </Drawer>
