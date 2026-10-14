@@ -48,6 +48,21 @@ interface BookingPanelProps {
   // background and the padding, so a second card there would nest one inside
   // another.
   appearance?: 'card' | 'plain';
+  /**
+   * Checkout, controlled by a host that needs to know when it is open - the
+   * experience drawer retitles its own header to "Complete your payment" and
+   * sends its back control here rather than out of the reservation view
+   * entirely. Left out, the panel tracks this itself, as it always did.
+   */
+  checkoutOpen?: boolean;
+  onCheckoutOpenChange?: (open: boolean) => void;
+  /**
+   * Where a paid-in-full purchase lands, in place of the default
+   * booking-success navigation - the experience drawer uses this to return to
+   * its own 'experience' view (ED-11) rather than navigating away from the
+   * drawer entirely. Left out, the panel keeps its original page redirect.
+   */
+  onPurchaseComplete?: (reference?: string) => void;
 }
 
 const formatSlotLabel = (startTime: string, durationMinutes: number): string => {
@@ -86,6 +101,9 @@ export const BookingPanel = ({
   mode = 'live',
   view = 'all',
   appearance = 'card',
+  checkoutOpen,
+  onCheckoutOpenChange,
+  onPurchaseComplete,
 }: BookingPanelProps) => {
   const router = useRouter();
   const { data: session } = useSession();
@@ -116,7 +134,13 @@ export const BookingPanel = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   // Bumped by resetPanel to remount the uncontrolled inputs (PhoneNumber, Quantity)
   const [formResetKey, setFormResetKey] = useState(0);
-  const [isPaystackOpen, setIsPaystackOpen] = useState(false);
+  const [internalPaystackOpen, setInternalPaystackOpen] = useState(false);
+  const isCheckoutControlled = checkoutOpen !== undefined;
+  const isPaystackOpen = isCheckoutControlled ? checkoutOpen : internalPaystackOpen;
+  const setIsPaystackOpen = (open: boolean) => {
+    if (isCheckoutControlled) onCheckoutOpenChange?.(open);
+    else setInternalPaystackOpen(open);
+  };
 
   // Defaults a signed-in reader to their own address once the session
   // resolves - an anonymous purchaser, who has no address to default to,
@@ -354,6 +378,11 @@ export const BookingPanel = ({
   const goToBookingSuccess = (reference?: string) => {
     resetPanel();
 
+    if (onPurchaseComplete) {
+      onPurchaseComplete(reference);
+      return;
+    }
+
     const params = new URLSearchParams({ experienceId: experience.id });
     if (reference) params.set('ref', reference);
 
@@ -426,18 +455,23 @@ export const BookingPanel = ({
   if (isPaystackOpen) {
     return (
       <div className={cn('space-y-4', appearance === 'card' && 'rounded-3xl bg-gray-50 p-5')}>
-        <div className="flex items-center justify-between gap-3 border-b border-gray-200 pb-4">
-          <p className="text-base font-bold text-gray-900">Complete your payment</p>
+        {/* The experience drawer already retitles its own header to this and
+            sends its back control here (`onCheckoutOpenChange`), so this row
+            would only repeat it */}
+        {appearance === 'card' && (
+          <div className="flex items-center justify-between gap-3 border-b border-gray-200 pb-4">
+            <p className="text-base font-bold text-gray-900">Complete your payment</p>
 
-          <button
-            type="button"
-            onClick={() => setIsPaystackOpen(false)}
-            aria-label="Close"
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50"
-          >
-            <IconComponent iconName="Cancel01Icon" size={20} color="currentColor" />
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={() => setIsPaystackOpen(false)}
+              aria-label="Close"
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50"
+            >
+              <IconComponent iconName="Cancel01Icon" size={20} color="currentColor" />
+            </button>
+          </div>
+        )}
 
         <div className="h-[70vh] w-full overflow-hidden">
           <Paystack

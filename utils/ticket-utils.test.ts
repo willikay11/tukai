@@ -401,6 +401,57 @@ describe('groupTicketPurchases', () => {
   });
 });
 
+describe('groupPurchasesByType', () => {
+  const { groupPurchasesByType } = jest.requireActual('./ticket-utils');
+
+  const purchase = (
+    id: string,
+    status: string,
+    ticketName: string,
+    qrCodeImage: string | null = null,
+  ) => ({
+    id,
+    ticketNumber: `TKT-${id}`,
+    ticket: {
+      id: `ticket-${ticketName}`,
+      name: ticketName,
+      price: '1500.00',
+      currency: 'KES',
+      experience: 'a97edd4f',
+    },
+    occurrence: { id: 'occ-a', startDate: '2026-08-27T14:00:00Z', endDate: '2026-08-27T17:00:00Z' },
+    qrCodeImage,
+    ticketPdf: null,
+    status,
+    dateCreated: '2026-07-14T20:04:50Z',
+  });
+
+  it('groups usable purchases by ticket type, counting each toward its own row', () => {
+    const groups = groupPurchasesByType([
+      purchase('p1', 'completed', 'Adults', 'https://x/qr1'),
+      purchase('p2', 'completed', 'Adults', 'https://x/qr2'),
+      purchase('p3', 'paid', 'Kids', 'https://x/qr3'),
+    ]);
+
+    expect(groups).toEqual([
+      { ticketType: 'Adults', quantity: 2, qrCodeImage: 'https://x/qr1', purchaseIds: ['p1', 'p2'] },
+      { ticketType: 'Kids', quantity: 1, qrCodeImage: 'https://x/qr3', purchaseIds: ['p3'] },
+    ]);
+  });
+
+  // A pending or expired ticket has no QR worth showing in "My tickets" -
+  // only a completed/paid one is
+  it('leaves out anything not completed or paid', () => {
+    const groups = groupPurchasesByType([
+      purchase('p1', 'pending', 'Adults'),
+      purchase('p2', 'expired', 'Adults'),
+      purchase('p3', 'refunded', 'Adults'),
+    ]);
+
+    expect(groups).toEqual([]);
+  });
+});
+
 describe('mergeReservationStatus', () => {
   const { mergeReservationStatus } = jest.requireActual('./ticket-utils');
 

@@ -7,6 +7,8 @@ import { ExperienceDrawer } from './index';
 const useFetchSingleExperience = jest.fn();
 jest.mock('@/app/shared/hooks/useExperiences', () => ({
   useFetchSingleExperience: (id: string) => useFetchSingleExperience(id),
+  // Its own unit (ExperienceMyTickets.test.tsx); this suite is about the shell
+  useExperienceTicketPurchases: () => ({ data: undefined }),
 }));
 
 // Each of these is its own unit; this suite is about the drawer's shell
@@ -48,9 +50,27 @@ jest.mock('./ExperienceDrawerFooter', () => ({
     </button>
   ),
 }));
-// Its own unit (BookingPanel.test.tsx); this suite is only about the swap
+// Its own unit (BookingPanel.test.tsx); this suite is only about the swap and
+// the checkout retitle/back wiring, which it drives through a stub button
 jest.mock('@/app/(experiences)/experiences/components/BookingPanel', () => ({
-  BookingPanel: () => <div data-testid="booking-panel" />,
+  BookingPanel: ({
+    checkoutOpen,
+    onCheckoutOpenChange,
+    onPurchaseComplete,
+  }: {
+    checkoutOpen?: boolean;
+    onCheckoutOpenChange?: (open: boolean) => void;
+    onPurchaseComplete?: (reference?: string) => void;
+  }) => (
+    <div data-testid="booking-panel">
+      <button type="button" onClick={() => onCheckoutOpenChange?.(!checkoutOpen)}>
+        booking panel toggle checkout
+      </button>
+      <button type="button" onClick={() => onPurchaseComplete?.('ref-123')}>
+        booking panel complete purchase
+      </button>
+    </div>
+  ),
 }));
 jest.mock('next/image', () => {
   function MockImage({ alt, src }: { alt: string; src: string }) {
@@ -200,6 +220,44 @@ describe('ExperienceDrawer', () => {
         screen.getByRole('heading', { name: /Sat 3 Oct, \d{1,2}:\d{2} [AP]M - \d{1,2}:\d{2} [AP]M/ }),
       ).toBeInTheDocument();
       expect(screen.getByText('footer make reservation')).toBeInTheDocument();
+    });
+
+    it('retitles the header to Complete your payment once checkout opens', () => {
+      render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'footer make reservation' }));
+      fireEvent.click(screen.getByRole('button', { name: 'booking panel toggle checkout' }));
+
+      expect(screen.getByRole('heading', { name: 'Complete your payment' })).toBeInTheDocument();
+    });
+
+    // The back control steps out of checkout first, rather than leaving the
+    // reservation view entirely while a payment is still in progress
+    it('sends back from checkout to Make reservation, not out to the experience', () => {
+      render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'footer make reservation' }));
+      fireEvent.click(screen.getByRole('button', { name: 'booking panel toggle checkout' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Back to Make reservation' }));
+
+      expect(screen.getByRole('heading', { name: 'Make reservation' })).toBeInTheDocument();
+      expect(screen.getByTestId('booking-panel')).toBeInTheDocument();
+    });
+
+    // Paid in full lands back on the drawer's own main view (ED-11), not a
+    // navigation away to the booking-success page
+    it('returns to the experience view once a purchase completes', () => {
+      render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'footer make reservation' }));
+      fireEvent.click(screen.getByRole('button', { name: 'booking panel toggle checkout' }));
+      fireEvent.click(screen.getByRole('button', { name: 'booking panel complete purchase' }));
+
+      expect(
+        screen.getByRole('heading', { name: /Sat 3 Oct, \d{1,2}:\d{2} [AP]M - \d{1,2}:\d{2} [AP]M/ }),
+      ).toBeInTheDocument();
+      expect(screen.getByText('footer make reservation')).toBeInTheDocument();
+      expect(screen.queryByTestId('booking-panel')).not.toBeInTheDocument();
     });
   });
 });

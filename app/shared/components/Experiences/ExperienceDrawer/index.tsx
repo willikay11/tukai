@@ -27,6 +27,7 @@ import { ExperienceCancellationSection } from './ExperienceCancellationSection';
 import { ExperienceDrawerFooter } from './ExperienceDrawerFooter';
 import { ExperienceHostSection } from './ExperienceHostSection';
 import { ExperienceLocationSection } from './ExperienceLocationSection';
+import { ExperienceMyTickets } from './ExperienceMyTickets';
 import { ExperienceTicketsSection } from './ExperienceTicketsSection';
 import { EXPERIENCE_SECTIONS, experienceDrawerTabs } from './tabs';
 
@@ -133,7 +134,14 @@ export const ExperienceDrawer = ({
    * of it - the same swap the place drawer uses for Add a review.
    */
   const [view, setView] = useState<'experience' | 'reservation'>('experience');
-  useEffect(() => setView('experience'), [experienceId]);
+  // Checkout's own step within the reservation view - BookingPanel owns the
+  // flow, but the header's title and the drawer's own back control need to
+  // know which half of it is showing
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  useEffect(() => {
+    setView('experience');
+    setIsCheckingOut(false);
+  }, [experienceId]);
 
   const { data, isLoading, isError } = useFetchSingleExperience(
     isOpen && experienceId ? experienceId : '',
@@ -168,8 +176,12 @@ export const ExperienceDrawer = ({
                 {view === 'reservation' && (
                   <button
                     type="button"
-                    onClick={() => setView('experience')}
-                    aria-label={`Back to ${experience.title}`}
+                    onClick={() =>
+                      isCheckingOut ? setIsCheckingOut(false) : setView('experience')
+                    }
+                    aria-label={
+                      isCheckingOut ? 'Back to Make reservation' : `Back to ${experience.title}`
+                    }
                     className={`${DISC} text-brand hover:bg-surface-brand`}
                   >
                     <IconComponent iconName="ArrowLeft01Icon" size={20} color="currentColor" />
@@ -178,7 +190,9 @@ export const ExperienceDrawer = ({
 
                 <h2 className="min-w-0 truncate text-[26px] font-bold leading-tight text-brand-ink">
                   {view === 'reservation'
-                    ? 'Make reservation'
+                    ? isCheckingOut
+                      ? 'Complete your payment'
+                      : 'Make reservation'
                     : formatExperienceHeaderDate(experience.startDate, experience.endDate)}
                 </h2>
               </div>
@@ -263,7 +277,17 @@ export const ExperienceDrawer = ({
               </div>
 
               <div className="pt-2">
-                <BookingPanel experience={experience} view="reservation" appearance="plain" />
+                <BookingPanel
+                  experience={experience}
+                  view="reservation"
+                  appearance="plain"
+                  checkoutOpen={isCheckingOut}
+                  onCheckoutOpenChange={setIsCheckingOut}
+                  onPurchaseComplete={() => {
+                    setIsCheckingOut(false);
+                    setView('experience');
+                  }}
+                />
               </div>
             </div>
           ) : (
@@ -283,6 +307,8 @@ export const ExperienceDrawer = ({
                     {experience.description && <AboutClamp text={experience.description} />}
                   </div>
                 </section>
+
+                <ExperienceMyTickets experience={experience} />
 
                 <ExperienceTicketsSection experience={experience} />
 

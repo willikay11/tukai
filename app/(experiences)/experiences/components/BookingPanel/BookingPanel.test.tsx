@@ -360,6 +360,25 @@ describe('BookingPanel purchase flow', () => {
     );
   });
 
+  // The experience drawer passes this so a completed purchase returns to its
+  // own 'experience' view instead of navigating off the drawer entirely
+  it('calls onPurchaseComplete instead of navigating, when the host supplies one', async () => {
+    const user = userEvent.setup();
+    const onPurchaseComplete = jest.fn();
+    render(<BookingPanel experience={experience} onPurchaseComplete={onPurchaseComplete} />);
+
+    await selectTicketAndSafePaymentOptions(user);
+    await user.click(screen.getByRole('button', { name: /^pay/i }));
+
+    await waitFor(() => expect(document.querySelector('iframe')).toBeInTheDocument());
+    fireEvent(window, new MessageEvent('message', { data: { status: 'success' } }));
+
+    await waitFor(() =>
+      expect(onPurchaseComplete).toHaveBeenCalledWith('TRN-20260714-4OIK5LDP'),
+    );
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
   it('clears the purchaser’s details once Paystack reports success', async () => {
     const user = userEvent.setup();
     render(<BookingPanel experience={experience} />);
