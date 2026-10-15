@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { TukaiImage } from '@/components/ui/image';
+import { cn } from '@/lib/utils';
 import type { ShareKind } from '@/utils/share-metadata';
 
 /**
@@ -75,6 +76,7 @@ export const Share = ({
   link,
   kind = 'place',
   variant = 'button',
+  showLabel = false,
 }: {
   coverPhoto: string;
   title: string;
@@ -87,6 +89,13 @@ export const Share = ({
    * two icon buttons reads as a different kind of control.
    */
   variant?: 'button' | 'icon';
+  /**
+   * Adds a "Share" word beside the icon variant's glyph - the ticket detail
+   * view's Share/Download row, where the bare glyph alone would not match its
+   * labelled neighbour. Ignored by the `button` variant, which already has
+   * its own label.
+   */
+  showLabel?: boolean;
 }) => {
   const [open, setOpen] = useState(false);
   const [hasCopied, setHasCopied] = useState(false);
@@ -134,9 +143,13 @@ export const Share = ({
           type="button"
           onClick={() => setOpen(true)}
           aria-label={`Share this ${kind}`}
-          className="flex h-full w-full items-center justify-center text-brand transition-opacity hover:opacity-70"
+          className={cn(
+            'flex items-center text-brand transition-opacity hover:opacity-70',
+            showLabel ? 'gap-1.5 text-sm font-semibold' : 'h-full w-full justify-center',
+          )}
         >
           <Share08Icon size={20} variant="twotone" />
+          {showLabel && 'Share'}
         </button>
       ) : (
         <Button
