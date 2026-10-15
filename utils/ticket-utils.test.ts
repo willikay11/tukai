@@ -426,7 +426,7 @@ describe('groupPurchasesByType', () => {
     dateCreated: '2026-07-14T20:04:50Z',
   });
 
-  it('groups usable purchases by ticket type, counting each toward its own row', () => {
+  it('groups usable purchases by ticket type, keeping each one as its own ticket', () => {
     const groups = groupPurchasesByType([
       purchase('p1', 'completed', 'Adults', 'https://x/qr1'),
       purchase('p2', 'completed', 'Adults', 'https://x/qr2'),
@@ -434,8 +434,17 @@ describe('groupPurchasesByType', () => {
     ]);
 
     expect(groups).toEqual([
-      { ticketType: 'Adults', quantity: 2, qrCodeImage: 'https://x/qr1', purchaseIds: ['p1', 'p2'] },
-      { ticketType: 'Kids', quantity: 1, qrCodeImage: 'https://x/qr3', purchaseIds: ['p3'] },
+      {
+        ticketType: 'Adults',
+        tickets: [
+          { id: 'p1', ticketNumber: 'TKT-p1', qrCodeImage: 'https://x/qr1' },
+          { id: 'p2', ticketNumber: 'TKT-p2', qrCodeImage: 'https://x/qr2' },
+        ],
+      },
+      {
+        ticketType: 'Kids',
+        tickets: [{ id: 'p3', ticketNumber: 'TKT-p3', qrCodeImage: 'https://x/qr3' }],
+      },
     ]);
   });
 

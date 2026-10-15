@@ -203,15 +203,21 @@ export const groupTicketPurchases = (purchases: TicketPurchase[]): Reservation[]
   );
 };
 
+/** One entry per individual ticket inside a TicketTypeGroup - what the
+ * layered detail view pages through ("Ticket 2 of 2"). */
+export interface TicketTypeGroupTicket {
+  id: string; // purchase record id - used for the per-ticket PDF download
+  ticketNumber: string;
+  qrCodeImage: string | null;
+}
+
 /** One row per ticket type (the drawer's "My tickets" section), rather than
  * per occurrence (groupTicketPurchases) or per individual ticket. Scoped to
  * USABLE purchases only - an unpaid or expired ticket has no QR worth
  * showing. */
 export interface TicketTypeGroup {
   ticketType: string;
-  quantity: number;
-  qrCodeImage: string | null;
-  purchaseIds: string[];
+  tickets: TicketTypeGroupTicket[];
 }
 
 export const groupPurchasesByType = (purchases: TicketPurchase[]): TicketTypeGroup[] => {
@@ -221,17 +227,17 @@ export const groupPurchasesByType = (purchases: TicketPurchase[]): TicketTypeGro
     .filter((purchase) => USABLE.has(purchase.status))
     .forEach((purchase) => {
       const key = purchase.ticket.name;
+      const ticket: TicketTypeGroupTicket = {
+        id: purchase.id,
+        ticketNumber: purchase.ticketNumber,
+        qrCodeImage: purchase.qrCodeImage,
+      };
+
       const existing = groups.get(key);
       if (existing) {
-        existing.quantity += 1;
-        existing.purchaseIds.push(purchase.id);
+        existing.tickets.push(ticket);
       } else {
-        groups.set(key, {
-          ticketType: key,
-          quantity: 1,
-          qrCodeImage: purchase.qrCodeImage,
-          purchaseIds: [purchase.id],
-        });
+        groups.set(key, { ticketType: key, tickets: [ticket] });
       }
     });
 
