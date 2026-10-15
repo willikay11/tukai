@@ -171,7 +171,7 @@ export const BookingPanel = ({
   // Slot options are occurrences: id is the OCCURRENCE uuid the v2 API requires.
   // Recurring experiences narrow to the picker's selected date; non-recurring
   // experiences have a single occurrence.
-  const timeSlots: { id: string; label: string }[] = useMemo(() => {
+  const timeSlots: { id: string; label: string; isPast: boolean }[] = useMemo(() => {
     const source = isRecurring
       ? occurrences.filter(
           (occurrence) => moment(occurrence.startDate).format('YYYY-MM-DD') === selectedDate,
@@ -181,15 +181,19 @@ export const BookingPanel = ({
     return source.map((occurrence) => ({
       id: occurrence.id,
       label: occurrenceLabel(occurrence),
+      // An elapsed slot is shown struck through, not left out - see
+      // RecurringDateSlotPicker
+      isPast: moment(occurrence.endDate).isBefore(moment()),
     }));
   }, [occurrences, isRecurring, selectedDate]);
 
-  // Keep an occurrence selected: default to the first slot, and re-default
-  // when the selected date changes and the previous occurrence no longer applies
+  // Keep an occurrence selected: default to the first slot still ahead of now,
+  // and re-default when the selected date changes and the previous occurrence
+  // no longer applies
   useEffect(() => {
     const stillValid = selectedSlotId && timeSlots.some((slot) => slot.id === selectedSlotId);
     if (!stillValid) {
-      setSelectedSlotId(timeSlots[0]?.id ?? null);
+      setSelectedSlotId(timeSlots.find((slot) => !slot.isPast)?.id ?? timeSlots[0]?.id ?? null);
     }
   }, [timeSlots, selectedSlotId]);
 
@@ -568,6 +572,12 @@ export const BookingPanel = ({
               </div>
             )
           )}
+
+          {/* Divider - only where something actually sits above it: the
+              recurring picker always renders, but the date pill below it is
+              itself left out for 'plain', which would otherwise leave a rule
+              with nothing above it */}
+          {(isRecurring || appearance === 'card') && <div className="border-t border-gray-200" />}
 
           {errors.slot && <p className="text-sm text-red-500">{errors.slot}</p>}
 

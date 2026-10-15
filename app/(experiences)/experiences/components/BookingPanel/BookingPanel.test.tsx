@@ -411,6 +411,21 @@ describe('BookingPanel purchase flow', () => {
     expect(screen.getByText('6:00 PM - 9:00 PM')).toBeInTheDocument();
   });
 
+  it('divides the date and slot picker from Select ticket', () => {
+    const { container } = render(<BookingPanel experience={experience} />);
+
+    const dividers = Array.from(container.querySelectorAll('.border-t.border-gray-200'));
+    const picker = screen.getByText('Select date and slot');
+    const ticketHeading = screen.getByText('Select ticket');
+
+    const dividerBetween = dividers.find(
+      (divider) =>
+        picker.compareDocumentPosition(divider) & Node.DOCUMENT_POSITION_FOLLOWING &&
+        ticketHeading.compareDocumentPosition(divider) & Node.DOCUMENT_POSITION_PRECEDING,
+    );
+    expect(dividerBetween).toBeDefined();
+  });
+
   it('lists only the selected slot’s tickets and swaps them on slot change', async () => {
     const user = userEvent.setup();
     render(<BookingPanel experience={experience} />);
@@ -650,6 +665,22 @@ describe('BookingPanel for an experience without slot templates', () => {
     render(<BookingPanel experience={itineraryExperience} appearance="plain" />);
 
     expect(screen.queryByText('From Ksh. 5,000/Guest')).not.toBeInTheDocument();
+  });
+
+  // A divider separates the date from Select ticket wherever the date pill
+  // itself renders - never a bare rule with nothing above it. The panel has
+  // other unconditional dividers further down (around the discount field and
+  // the total), so this compares the count against the 'plain' case rather
+  // than asserting presence on its own.
+  it('divides the date from Select ticket where the date pill renders, but not where it is left out', () => {
+    const { container: withDatePill } = render(<BookingPanel experience={itineraryExperience} />);
+    const { container: withoutDatePill } = render(
+      <BookingPanel experience={itineraryExperience} appearance="plain" />,
+    );
+
+    expect(withDatePill.querySelectorAll('.border-t.border-gray-200').length).toBe(
+      withoutDatePill.querySelectorAll('.border-t.border-gray-200').length + 1,
+    );
   });
 });
 
