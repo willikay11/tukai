@@ -87,7 +87,7 @@ describe('ExperienceMyTickets', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('shows one row per ticket type, with its quantity and the Paid in full status', () => {
+  it('shows the first ticket type, its quantity and the Paid in full status', () => {
     useExperienceTicketPurchases.mockReturnValue({
       data: {
         data: {
@@ -105,9 +105,47 @@ describe('ExperienceMyTickets', () => {
     expect(screen.getByRole('heading', { name: 'My tickets' })).toBeInTheDocument();
     expect(screen.getByText('Adults')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
-    expect(screen.getByText('Kids')).toBeInTheDocument();
-    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.queryByText('Kids')).not.toBeInTheDocument();
     expect(screen.getByText('Paid in full')).toBeInTheDocument();
+  });
+
+  // One card at a time, paged from the Paid in full row - not every ticket
+  // type stacked at once
+  it('pages between ticket types with the navigation beside Paid in full', () => {
+    useExperienceTicketPurchases.mockReturnValue({
+      data: {
+        data: {
+          results: [
+            purchase('p1', 'completed', 'Adults', 'https://x/qr1'),
+            purchase('p2', 'paid', 'Kids', 'https://x/qr2'),
+          ],
+        },
+      },
+    });
+
+    render(<ExperienceMyTickets experience={experience} />);
+
+    expect(screen.getByText('Adults')).toBeInTheDocument();
+    expect(screen.getByText('1 of 2')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Previous ticket' })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next ticket' }));
+
+    expect(screen.queryByText('Adults')).not.toBeInTheDocument();
+    expect(screen.getByText('Kids')).toBeInTheDocument();
+    expect(screen.getByText('2 of 2')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Next ticket' })).toBeDisabled();
+  });
+
+  it('leaves out the ticket-paging navigation with only one ticket type', () => {
+    useExperienceTicketPurchases.mockReturnValue({
+      data: { data: { results: [purchase('p1', 'completed', 'Adults', 'https://x/qr1')] } },
+    });
+
+    render(<ExperienceMyTickets experience={experience} />);
+
+    expect(screen.queryByRole('button', { name: 'Next ticket' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Previous ticket' })).not.toBeInTheDocument();
   });
 
   it('collapses behind its own chevron toggle', () => {
