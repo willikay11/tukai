@@ -62,6 +62,10 @@ export async function middleware(request: NextRequest) {
 // Configure the middleware to run on all routes except auth routes and specific excluded routes
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|images|css|js|^$).*)', // Exclude static assets and the root path
+    // sitemap.xml and robots.txt are framework-served files, the same tier as
+    // favicon.ico - a crawler fetching either must never be bounced to
+    // /auth/sign-in, which is what the catch-all below did before these were
+    // named here explicitly
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|images|css|js|^$).*)', // Exclude static assets and the root path
   ],
 };

@@ -501,7 +501,7 @@ describe('Place Hooks', () => {
 
 describe('useFeaturedPlaces', () => {
   const respond = (results: unknown[]) =>
-    mockPlaceService.fetchPlaces.mockResolvedValue({
+    mockPlaceService.fetchFeaturedPlaces.mockResolvedValue({
       status: 200,
       success: true,
       data: { results },
@@ -511,13 +511,8 @@ describe('useFeaturedPlaces', () => {
     jest.clearAllMocks();
   });
 
-  // There is no `featured` query param, so the filter has to happen here
-  it('keeps only the places the API marks featured', async () => {
-    respond([
-      { ...mockPlace, id: 'p1', featured: true },
-      { ...mockPlace, id: 'p2', featured: false },
-      { ...mockPlace, id: 'p3' },
-    ]);
+  it('returns the places the API hands back', async () => {
+    respond([{ ...mockPlace, id: 'p1', featured: true }]);
 
     const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
 
@@ -530,7 +525,7 @@ describe('useFeaturedPlaces', () => {
   // Better an empty row than ten arbitrary places under a word that promises
   // editorial choice
   it('is empty when nothing is featured', async () => {
-    respond([{ ...mockPlace, id: 'p1' }]);
+    respond([]);
 
     const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
 
@@ -538,34 +533,13 @@ describe('useFeaturedPlaces', () => {
     expect(result.current.data?.data?.results).toEqual([]);
   });
 
-  it('asks for a wide page, since it has to filter locally', async () => {
+  it('calls the featured endpoint, not the general places list', async () => {
     respond([]);
 
     const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockPlaceService.fetchPlaces).toHaveBeenCalledWith(1, 50);
-  });
-
-  /**
-   * ⚠️ There is no answer to "are there more featured places?". `count` is the
-   * number of PLACES, so a page that did not hold the whole table says nothing
-   * about the featured ones beyond it - which is why the row offers no See
-   * all rather than guessing.
-   */
-  it('reports no total of its own, only the featured rows it found', async () => {
-    mockPlaceService.fetchPlaces.mockResolvedValue({
-      status: 200,
-      success: true,
-      data: { count: 120, results: [{ ...mockPlace, id: 'p1', featured: true }] },
-    } as never);
-
-    const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    // The count still describes every place, not the one featured row returned
-    expect(result.current.data?.data?.count).toBe(120);
-    expect(result.current.data?.data?.results).toHaveLength(1);
+    expect(mockPlaceService.fetchFeaturedPlaces).toHaveBeenCalledWith();
   });
 
   it('does not fetch while disabled', () => {
@@ -573,6 +547,6 @@ describe('useFeaturedPlaces', () => {
 
     renderHook(() => useFeaturedPlaces(false), { wrapper: createWrapper() });
 
-    expect(mockPlaceService.fetchPlaces).not.toHaveBeenCalled();
+    expect(mockPlaceService.fetchFeaturedPlaces).not.toHaveBeenCalled();
   });
 });
