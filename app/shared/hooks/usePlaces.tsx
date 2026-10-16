@@ -22,6 +22,7 @@ import {
   deletePlaceReview,
   deletePlaceReviewImage,
   deletePlaceSocialLink,
+  fetchFeaturedPlaces,
   fetchFollowing,
   fetchGoogleMapsAutocomplete,
   fetchGoogleMapsPlaceGeocode,
@@ -47,7 +48,6 @@ import {
 } from '@/services/place';
 import { Community } from '@/types/community';
 import { PlaceCategoryParams } from '@/types/networkParam';
-import { Place } from '@/types/place';
 import { PlaceEditDraft } from '@/types/placeEdit';
 import { ReservationSettingsDraft } from '@/types/placeReservation';
 import { CreatePlaceBookingRequest } from '@/types/placeReservation';
@@ -575,31 +575,18 @@ export const usePopularPlaces = (enabled = true, perPage = 10) =>
   });
 
 /**
- * The places the API marks `featured` - the "Promoted places" row.
+ * The places staff have featured - the "Promoted places" row.
  *
- * ⚠️ `featured` is on the list serializer but there is no `featured` query
- * param, so the filter happens here over a wider page. That also means the
- * row is honestly empty when nothing is featured, rather than showing an
- * arbitrary ten places under a word that promises editorial choice.
- *
- * ⚠️ And it means there is no answer to "are there more?". `count` is the
- * number of PLACES, not of featured ones, so a page that did not hold the
- * whole table says nothing about whether more featured places exist. The row
- * shows what it found and offers no See all - which is right anyway, since
- * /places lists every place rather than more of these.
+ * `GET /places/featured/` returns them in equal-time rotation order, so this
+ * does not re-sort them. The row shows what it found and offers no See all -
+ * which is right anyway, since /places lists every place rather than more of
+ * these.
  */
-export const useFeaturedPlaces = (enabled = true, perPage = 50) =>
+export const useFeaturedPlaces = (enabled = true) =>
   useQuery({
-    queryKey: ['places', 'featured', perPage],
-    queryFn: async () => await fetchPlaces(1, perPage),
+    queryKey: ['places', 'featured'],
+    queryFn: async () => await fetchFeaturedPlaces(),
     enabled,
-    select: (response) => ({
-      ...response,
-      data: {
-        ...response.data,
-        results: (response.data?.results ?? []).filter((place: Place) => place.featured),
-      },
-    }),
   });
 
 /**

@@ -58,6 +58,34 @@ export async function fetchPlaces(
 }
 
 /**
+ * The places currently featured by staff - `GET /places/featured/`.
+ *
+ * ⚠️ The API spec describes this as returning a bare array, but the deployed
+ * endpoint actually paginates like every other list - `{ count, results,
+ * rotation, ... }` - so `res.data` already carries `results` and is not
+ * re-wrapped here.
+ */
+export async function fetchFeaturedPlaces(): Promise<ApiResponse> {
+  try {
+    const res = await api.get('/v1/places/featured/');
+
+    return {
+      status: res.status,
+      success: true,
+      data: parseSnakeToCamel(res.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
+  }
+}
+
+/**
  * The places this user owns - `GET /places/?mine=true`.
  *
  * Ownership of a place is held by a community the user is an OWNER/ADMIN of

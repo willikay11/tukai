@@ -19,8 +19,8 @@ export type Place = {
   isBookmarked: boolean;
   status: Status;
   dateCreated: string;
-  // On both the list and the detail serializer. There is no `featured` query
-  // param, so a caller that wants only featured places filters on this.
+  // On both the list and the detail serializer. `GET /places/featured/`
+  // returns only places with this set, in rotation order.
   featured?: boolean;
   // The DETAIL endpoint embeds both of these, so a place page needs no extra
   // requests for them. The list endpoint does not return them.
