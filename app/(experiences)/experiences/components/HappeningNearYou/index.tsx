@@ -100,7 +100,7 @@ export const HappeningNearYou = ({
       {isLoading ? (
         <RowSkeleton />
       ) : isExpanded ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(168px,1fr))] gap-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(168px,1fr))] gap-4 2xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-7">
           {experiences.map((experience) => (
             <div key={experience.id}>
               <NearCard experience={experience} />

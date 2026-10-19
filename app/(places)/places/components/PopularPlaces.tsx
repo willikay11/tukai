@@ -2,7 +2,7 @@
 
 import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
 import { RowSkeleton } from '@/app/(experiences)/experiences/components/ExperienceRow';
-import { CardRail } from '@/app/shared/components/Lists';
+import { CardRail, RAIL_CARD_RESPONSIVE_WIDTH } from '@/app/shared/components/Lists';
 import { usePopularPlaces } from '@/app/shared/hooks/usePlaces';
 import { Place } from '@/types/place';
 
@@ -30,7 +30,12 @@ export const PopularPlaces = () => {
           <RowSkeleton cardClassName="aspect-square w-[184px]" />
         ) : (
           popularPlaces.map((place, index) => (
-            <PlaceCard key={place.id} place={place} priority={index < EAGER_IN_RAIL} />
+            <PlaceCard
+              key={place.id}
+              place={place}
+              priority={index < EAGER_IN_RAIL}
+              className={RAIL_CARD_RESPONSIVE_WIDTH}
+            />
           ))
         )}
       </CardRail>

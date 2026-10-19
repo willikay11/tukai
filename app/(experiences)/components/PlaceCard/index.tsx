@@ -27,11 +27,11 @@ const RAIL_WIDTH = 'w-[184px] flex-shrink-0 snap-start';
 export const PlaceCard = ({
   place,
   priority = false,
-  className = RAIL_WIDTH,
+  className,
 }: {
   place: Place;
   priority?: boolean;
-  /** Overridden where the card fills a grid cell instead of sitting in a rail. */
+  /** Merged onto the rail width, so a caller can add to or override it (e.g. `w-full` to fill a grid cell). */
   className?: string;
 }) => {
   const { data: session } = useSession();
@@ -68,7 +68,7 @@ export const PlaceCard = ({
       priority={priority}
       ratio="square"
       radius="rounded-xl"
-      className={className}
+      className={cn(RAIL_WIDTH, className)}
       overlay={
         // Top-right, over the photo
         <div className="absolute right-0 top-0">

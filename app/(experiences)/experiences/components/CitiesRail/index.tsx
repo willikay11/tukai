@@ -3,7 +3,7 @@
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
 import { RowSkeleton } from '@/app/(experiences)/experiences/components/ExperienceRow';
 import { cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
-import { CardRail } from '@/app/shared/components/Lists';
+import { CardRail, RAIL_CARD_RESPONSIVE_WIDTH } from '@/app/shared/components/Lists';
 import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
 
 interface CitiesRailProps {
@@ -38,7 +38,7 @@ export const CitiesRail = ({ cities, isLoading, selectedCity, onSelectCity }: Ci
             imageUrl={categoryImageOf(category) ?? ''}
             href={cityExperiencesHref(category.name)}
             variant="banner"
-            className="aspect-auto h-[65px]"
+            className={`aspect-auto h-[65px] ${RAIL_CARD_RESPONSIVE_WIDTH}`}
             selected={category.name === selectedCity}
             onSelect={() => onSelectCity(category.name)}
           />
