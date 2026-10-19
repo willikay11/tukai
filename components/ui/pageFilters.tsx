@@ -19,25 +19,25 @@ const ALL_CATEGORIES = 'all';
 /**
  * Interest categories lead the row, then the rest by how many places they
  * hold. Cities are a location, not a category, so they never become a chip.
+ *
+ * No All chip: `selectedCategoryId` still defaults to `ALL_CATEGORIES`
+ * (below) and the service layer already drops it from the request, so
+ * nothing is selected until the reader picks one, rather than an All chip
+ * sitting there to pick.
  */
-const chipsFrom = (categories: PlaceCategory[]): CategoryChip[] => {
-  const sorted = categories
+const chipsFrom = (categories: PlaceCategory[]): CategoryChip[] =>
+  categories
     .filter((category) => category.group !== 'cities')
     .sort(
       (a, b) =>
         Number(b.group === 'interests') - Number(a.group === 'interests') ||
         b.placesCount - a.placesCount,
-    );
-
-  return [
-    { value: ALL_CATEGORIES, label: 'All' },
-    ...sorted.map((category) => ({
+    )
+    .map((category) => ({
       value: category.id,
       label: category.name,
       icon: category.icon || undefined,
-    })),
-  ];
-};
+    }));
 
 export const PageFilters = () => {
   const searchParams = useSearchParams();
@@ -98,7 +98,7 @@ export const PageFilters = () => {
   // the 44px auth button, 12px padding) and the search row is 74px (the 54px
   // search bar and its 20px bottom padding), plus the bar's 1px border. Change
   // this if the bar changes.
-  const showRow = isFetching || chips.length > 1;
+  const showRow = isFetching || chips.length > 0;
 
   return (
     <div
@@ -113,8 +113,8 @@ export const PageFilters = () => {
               {isFetching ? (
                 <PillsSkeleton />
               ) : (
-                // Hidden until there is more than the All chip, so no lone chip shows
-                chips.length > 1 && (
+                // Hidden when there is nothing to filter by at all
+                chips.length > 0 && (
                   <CategoryChipRow
                     chips={chips}
                     value={selectedCategoryId ?? ALL_CATEGORIES}

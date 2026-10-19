@@ -154,7 +154,7 @@ describe('PageFilters', () => {
       expect(screen.getByTestId('pills-skeleton')).toBeInTheDocument();
     });
 
-    it('should render an All chip followed by the categories, without cities', async () => {
+    it('should render the categories with no All chip, and without cities', async () => {
       (usePlaceCategories as jest.Mock).mockReturnValue({
         data: mockCategories,
         isFetching: false,
@@ -166,7 +166,7 @@ describe('PageFilters', () => {
         expect(screen.getByTestId('category-chip-row')).toBeInTheDocument();
       });
 
-      expect(screen.getByText('All')).toBeInTheDocument();
+      expect(screen.queryByText('All')).not.toBeInTheDocument();
       expect(screen.getByText('Restaurants')).toBeInTheDocument();
       expect(screen.getByText('Cafes')).toBeInTheDocument();
       expect(screen.queryByText('Cities')).not.toBeInTheDocument(); // Filtered out
@@ -193,7 +193,7 @@ describe('PageFilters', () => {
       });
 
       const labels = screen.getByTestId('category-chip-row').textContent;
-      expect(labels).toBe('AllGardenGalleryFood');
+      expect(labels).toBe('GardenGalleryFood');
     });
 
     it('defaults to All when the URL names no category', async () => {
