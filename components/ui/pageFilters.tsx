@@ -20,10 +20,9 @@ const ALL_CATEGORIES = 'all';
  * Interest categories lead the row, then the rest by how many places they
  * hold. Cities are a location, not a category, so they never become a chip.
  *
- * No All chip: `selectedCategoryId` still defaults to `ALL_CATEGORIES`
- * (below) and the service layer already drops it from the request, so
- * nothing is selected until the reader picks one, rather than an All chip
- * sitting there to pick.
+ * No All chip: with it gone, the row would otherwise load with nothing
+ * active, so the first chip in this order is selected by default instead -
+ * same as the reader clicking it themselves.
  */
 const chipsFrom = (categories: PlaceCategory[]): CategoryChip[] =>
   categories
@@ -54,10 +53,10 @@ export const PageFilters = () => {
   const chips = useMemo(() => (results?.length ? chipsFrom(results) : []), [results]);
 
   useEffect(() => {
-    if (pathname === '/places' && results?.length) {
-      setSelectedCategoryId(categoryFromQuery || ALL_CATEGORIES);
+    if (pathname === '/places' && chips.length) {
+      setSelectedCategoryId(categoryFromQuery || chips[0].value);
     }
-  }, [results, pathname, categoryFromQuery, setSelectedCategoryId]);
+  }, [chips, pathname, categoryFromQuery, setSelectedCategoryId]);
 
   // Hide filters on Discover, Experiences and Communities (which render their
   // own tabs), Moments and Bucket Lists (no categories to filter by - either
@@ -117,7 +116,7 @@ export const PageFilters = () => {
                 chips.length > 0 && (
                   <CategoryChipRow
                     chips={chips}
-                    value={selectedCategoryId ?? ALL_CATEGORIES}
+                    value={selectedCategoryId ?? chips[0]?.value ?? ALL_CATEGORIES}
                     onChange={handleChange}
                   />
                 )

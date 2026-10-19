@@ -196,7 +196,7 @@ describe('PageFilters', () => {
       expect(labels).toBe('GardenGalleryFood');
     });
 
-    it('defaults to All when the URL names no category', async () => {
+    it('defaults to the first chip when the URL names no category', async () => {
       (usePlaceCategories as jest.Mock).mockReturnValue({
         data: mockCategories,
         isFetching: false,
@@ -205,7 +205,7 @@ describe('PageFilters', () => {
       renderWithProviders(<PageFilters />);
 
       await waitFor(() => {
-        expect(mockSetSelectedCategoryId).toHaveBeenCalledWith('all');
+        expect(mockSetSelectedCategoryId).toHaveBeenCalledWith('cat1');
       });
     });
 

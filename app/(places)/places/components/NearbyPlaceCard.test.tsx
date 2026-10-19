@@ -23,6 +23,7 @@ const place = {
   slug: 'talisman',
   title: 'Talisman',
   photos: [],
+  location: { city: 'Karen' },
   categories: [
     { id: 'c1', name: 'Nairobi', group: 'cities', icon: '', placesCount: 0 },
     { id: 'c2', name: 'Restaurants', group: 'interests', icon: '', placesCount: 0 },
@@ -30,14 +31,14 @@ const place = {
 } as unknown as Place;
 
 describe('NearbyPlaceCard', () => {
-  it('shows the name, the kind of place and the distance', () => {
+  it('shows the name and the distance', () => {
     mockUsePlaceDrawer.mockReturnValue({ openPlace: jest.fn() });
 
     render(<NearbyPlaceCard place={place} distanceKm={1.14} />);
 
     expect(screen.getByText('Talisman')).toBeInTheDocument();
-    expect(screen.getByText('Restaurants')).toBeInTheDocument();
     expect(screen.getByText('1.1 km away')).toBeInTheDocument();
+    expect(screen.queryByText('Restaurants')).not.toBeInTheDocument();
   });
 
   it('says less than 0.1 km under a hundred metres', () => {
@@ -48,12 +49,15 @@ describe('NearbyPlaceCard', () => {
     expect(screen.getByText('Less than 0.1 km away')).toBeInTheDocument();
   });
 
-  it('leaves the distance out when there is none, rather than showing a made-up one', () => {
+  // No distance (e.g. still loading, or no coordinates to measure from): the
+  // city shows instead of leaving the line empty
+  it('falls back to the city when there is no distance', () => {
     mockUsePlaceDrawer.mockReturnValue({ openPlace: jest.fn() });
 
     render(<NearbyPlaceCard place={place} />);
 
     expect(screen.queryByText(/km away/)).not.toBeInTheDocument();
+    expect(screen.getByText('Karen')).toBeInTheDocument();
   });
 
   it('opens the place in the drawer when one is above it', () => {

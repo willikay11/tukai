@@ -6,26 +6,23 @@ import { Bookmark } from '@/app/shared/components/Bookmark';
 import { CardShell } from '@/app/shared/components/Cards/CardShell';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { TITLE_TINT } from '@/app/shared/components/Motion';
+import { useLocation } from '@/context/LocationContext';
 import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { cn } from '@/lib/utils';
 import { coverPhotoUrl } from '@/types/photo';
 import { Place } from '@/types/place';
 import { placePath } from '@/utils/detail-paths';
+import { formatNearbyDistance, greatCircleKm } from '@/utils/geo-utils';
 
-import { placeFact, placeLocality } from './place-fact';
-
-const FACT_TONE: Record<string, string> = {
-  event: 'text-brand',
-  plain: 'text-gray-900',
-  muted: 'text-ink-muted',
-};
+import { placeLocality } from './place-fact';
 
 /** The width a card takes in a rail. In a grid it fills the cell instead. */
 const RAIL_WIDTH = 'w-[184px] flex-shrink-0 snap-start';
 
 /**
  * A place, as the canvas draws it: a square photo at 184px, the save control
- * over its corner, then the name, where it is, and one line of substance.
+ * over its corner, then the name and where it is - a distance once the
+ * reader has opted into their own location, the city otherwise.
  */
 export const PlaceCard = ({
   place,
@@ -39,9 +36,22 @@ export const PlaceCard = ({
 }) => {
   const { data: session } = useSession();
   const drawer = usePlaceDrawer();
+  const { isUsingLocation, lat, lng } = useLocation();
 
-  const fact = placeFact(place);
-  const locality = placeLocality(place);
+  // Distance takes the line over the city once the reader has opted into
+  // their own location - a city they already set as home tells them less
+  // than how far this particular place is from them. The place's own
+  // coordinates are not guaranteed on the list payload, so this falls back
+  // to the city rather than showing a distance computed from nothing.
+  const placeLat = place.location?.pointLat;
+  const placeLng = place.location?.pointLong;
+  const distanceKm =
+    isUsingLocation && lat !== undefined && lng !== undefined && placeLat && placeLng
+      ? greatCircleKm(lat, lng, placeLat, placeLng)
+      : undefined;
+
+  const locality =
+    distanceKm !== undefined ? formatNearbyDistance(distanceKm) : placeLocality(place);
 
   return (
     <CardShell
@@ -77,22 +87,15 @@ export const PlaceCard = ({
           {place.title}
         </p>
 
-        {locality && <p className="text-[12.5px] text-ink-muted">{locality}</p>}
-
-        {fact && (
-          <p
-            className={cn(
-              'mt-0.5 flex items-start gap-1.5 text-xs font-semibold leading-4',
-              FACT_TONE[fact.tone],
-            )}
-          >
+        {locality && (
+          <p className="flex items-center gap-1 text-[12.5px] font-semibold text-ink-muted">
             <IconComponent
-              iconName={fact.icon}
-              size={15}
+              iconName="Location01Icon"
+              size={13}
               color="currentColor"
               className="flex-shrink-0"
             />
-            {fact.text}
+            {locality}
           </p>
         )}
       </div>
