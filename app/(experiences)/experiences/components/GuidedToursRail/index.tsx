@@ -2,7 +2,7 @@
 
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
 import { RowSkeleton } from '@/app/(experiences)/experiences/components/ExperienceRow';
-import { CardRail } from '@/app/shared/components/Lists';
+import { CardRail, RAIL_CARD_RESPONSIVE_WIDTH } from '@/app/shared/components/Lists';
 import { Experience } from '@/types/experience';
 
 interface GuidedToursRailProps {
@@ -50,7 +50,12 @@ export const GuidedToursRail = ({ tours, total, isLoading, hasLocation }: Guided
         <RowSkeleton cardClassName="aspect-square w-[184px]" />
       ) : (
         tours.map((tour, index) => (
-          <ExperienceCard key={tour.id} experience={tour} priority={index < EAGER_IN_ROW} />
+          <ExperienceCard
+            key={tour.id}
+            experience={tour}
+            priority={index < EAGER_IN_ROW}
+            className={RAIL_CARD_RESPONSIVE_WIDTH}
+          />
         ))
       )}
     </CardRail>

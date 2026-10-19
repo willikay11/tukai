@@ -54,7 +54,7 @@ export const CardGrid = <T,>({
       {items.length === 0 && emptyLine ? (
         <p className="rounded-xl bg-surface px-5 py-[18px] text-sm text-ink-muted">{emptyLine}</p>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(168px,1fr))] gap-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(168px,1fr))] gap-4 2xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-7">
           {paged.items.map((item, index) => (
             <div key={getKey(item)}>{renderItem(item, index)}</div>
           ))}

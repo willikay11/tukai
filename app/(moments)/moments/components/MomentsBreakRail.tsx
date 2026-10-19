@@ -1,7 +1,7 @@
 'use client';
 
 import { NearbyPlaceCard } from '@/app/(places)/places/components/NearbyPlaceCard';
-import { CardRail } from '@/app/shared/components/Lists';
+import { CardRail, RAIL_CARD_RESPONSIVE_WIDTH } from '@/app/shared/components/Lists';
 import { usePlaces } from '@/app/shared/hooks/usePlaces';
 import { useLocation } from '@/context/LocationContext';
 import { Place } from '@/types/place';
@@ -60,7 +60,10 @@ export const MomentsBreakRail = ({ category }: { category: PlaceCategory }) => {
         {isLoading
           ? Array.from({ length: 4 }, (_, index) => <RailPlaceCardSkeleton key={index} />)
           : places.map(({ place, km }) => (
-              <div key={place.id} className="w-[280px] flex-shrink-0 snap-start">
+              <div
+                key={place.id}
+                className={`w-[280px] flex-shrink-0 snap-start ${RAIL_CARD_RESPONSIVE_WIDTH}`}
+              >
                 <NearbyPlaceCard place={place} distanceKm={km} />
               </div>
             ))}

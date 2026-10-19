@@ -204,9 +204,10 @@ export const ListPlaces = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        // Tracks are the rails' card width, with the rails' gap, so a tile here is the
-        // same size as the cards above it. Left-aligned like the rails.
-        className="grid grid-cols-[repeat(auto-fill,184px)] justify-start gap-x-4 gap-y-8"
+        // Below 2xl, cards keep the rails' own width, auto-filling the row.
+        // From 2xl the row is a fixed 6 (7 from 3xl) columns instead, each
+        // card stretched to its column so the row still spans edge to edge.
+        className="grid grid-cols-[repeat(auto-fill,184px)] justify-start gap-x-4 gap-y-8 2xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-7"
       >
         {placeList.map((place: Place, index: number) => {
           const isLastElement = index === placeList.length - 1;
@@ -224,9 +225,9 @@ export const ListPlaces = () => {
               {isPlaceholder ? (
                 <div className="aspect-square animate-pulse rounded-xl bg-gray-200" />
               ) : (
-                // The rails' card at the rails' width, so a tile here matches
-                // the rails above it
-                <PlaceCard place={place} />
+                // w-full so the card fills its column once columns are fixed
+                // in count (2xl+) rather than fixed in width
+                <PlaceCard place={place} className="w-full" />
               )}
             </motion.div>
           );

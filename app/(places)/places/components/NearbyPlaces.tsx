@@ -73,7 +73,7 @@ export const NearbyPlaces = () => {
   return (
     <div className="mb-8">
       <SectionHeader title={`Nearby ${noun}`} subtitle={NEARBY_PLACES_SUBTITLE} />
-      <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))] gap-x-4 gap-y-3">
+      <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))] gap-x-4 gap-y-3 2xl:grid-cols-6 3xl:grid-cols-4 4xl:grid-cols-4">
         {isLoading
           ? Array.from({ length: NEARBY_PLACES_COUNT }, (_, index) => (
               <div key={index} className="h-[96px] animate-pulse rounded-xl bg-gray-200" />

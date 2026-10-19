@@ -2,7 +2,7 @@
 
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
 import { RowSkeleton } from '@/app/(experiences)/experiences/components/ExperienceRow';
-import { CardRail } from '@/app/shared/components/Lists';
+import { CardRail, RAIL_CARD_RESPONSIVE_WIDTH } from '@/app/shared/components/Lists';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
@@ -49,7 +49,7 @@ export const DiscoverByCity = () => {
                 imageUrl={categoryImageOf(category) ?? ''}
                 href=""
                 variant="banner"
-                className="aspect-auto h-[65px]"
+                className={`aspect-auto h-[65px] ${RAIL_CARD_RESPONSIVE_WIDTH}`}
                 selected={isSelected}
                 onSelect={() => setSelectedCitySearchId(isSelected ? '' : category.id)}
               />

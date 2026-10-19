@@ -13,6 +13,10 @@ const usePlaceDrawer = jest.fn();
 jest.mock('@/context/PlaceDrawerContext', () => ({
   usePlaceDrawer: () => usePlaceDrawer(),
 }));
+const useLocation = jest.fn();
+jest.mock('@/context/LocationContext', () => ({
+  useLocation: () => useLocation(),
+}));
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   useBookmarkPlace: () => ({ mutate: jest.fn() }),
 }));
@@ -49,7 +53,7 @@ const makePlace = (overrides: Partial<Place> = {}): Place =>
       { id: 'c1', name: 'Nairobi', group: 'cities', icon: '', placesCount: 0 },
       { id: 'c2', name: 'Restaurants', group: 'interests', icon: '', placesCount: 0 },
     ],
-    location: { city: 'Karen', name: 'Karen Rd' },
+    location: { city: 'Karen', name: 'Karen Rd', pointLat: -1.333, pointLong: 36.883 },
     averageRating: 4.6,
     totalReviews: 12,
     isBookmarked: false,
@@ -60,6 +64,7 @@ describe('PlaceCard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     usePlaceDrawer.mockReturnValue({ openPlace, closePlace: jest.fn(), openPlaceId: null });
+    useLocation.mockReturnValue({ isUsingLocation: false, lat: undefined, lng: undefined });
   });
 
   it('renders the cover and the title', () => {
@@ -110,37 +115,49 @@ describe('PlaceCard', () => {
     expect(card).not.toHaveClass('w-[184px]');
   });
 
-  /**
-   * One line of substance under the name. The brief leads with an activity
-   * happening at the place; the list carries none, so the category shows.
-   */
-  describe('the fact line', () => {
-    // Regression: categories[0] is often a city, which is not the kind of place
-    it('shows the kind of place, not the city', () => {
+  // Distance takes the line over the city once the reader has opted into
+  // their own location
+  describe('the distance line', () => {
+    it('shows the city when the reader has not opted into their location', () => {
       render(<PlaceCard place={makePlace()} />);
 
-      expect(screen.getByText('Restaurants')).toBeInTheDocument();
-      expect(screen.queryByText('Nairobi')).not.toBeInTheDocument();
+      expect(screen.getByText('Karen')).toBeInTheDocument();
+      expect(screen.queryByText(/km away/)).not.toBeInTheDocument();
     });
 
-    it('does not lead with the score', () => {
-      render(<PlaceCard place={makePlace({ averageRating: 4.5, totalReviews: 23 })} />);
+    it('shows the distance once the reader has opted in and coordinates are known', () => {
+      useLocation.mockReturnValue({ isUsingLocation: true, lat: -1.286, lng: 36.817 });
 
-      expect(screen.queryByText(/4\.5/)).not.toBeInTheDocument();
-      expect(screen.getByText('Restaurants')).toBeInTheDocument();
+      render(<PlaceCard place={makePlace()} />);
+
+      expect(screen.getByText(/km away/)).toBeInTheDocument();
+      expect(screen.queryByText('Karen')).not.toBeInTheDocument();
     });
 
-    // Regression: a card with nothing to say leaves the line out rather than
-    // saying the place has no reviews
-    it('never says "No reviews yet"', () => {
-      const { container } = render(
+    // Opted in with no fix yet: nothing to measure the distance against
+    it('falls back to the city when opted in but no coordinates are known', () => {
+      useLocation.mockReturnValue({ isUsingLocation: true, lat: undefined, lng: undefined });
+
+      render(<PlaceCard place={makePlace()} />);
+
+      expect(screen.getByText('Karen')).toBeInTheDocument();
+    });
+
+    // Regression: the list payload does not guarantee the place's own
+    // coordinates, which previously rendered as "NaN km away"
+    it('falls back to the city when the place has no coordinates of its own', () => {
+      useLocation.mockReturnValue({ isUsingLocation: true, lat: -1.286, lng: 36.817 });
+
+      render(
         <PlaceCard
-          place={makePlace({ averageRating: 0, totalReviews: 0, categories: [] as never })}
+          place={makePlace({
+            location: { city: 'Karen', pointLat: undefined, pointLong: undefined } as never,
+          })}
         />,
       );
 
-      expect(screen.queryByText('No reviews yet')).not.toBeInTheDocument();
-      expect(container.querySelector('p.text-xs')).not.toBeInTheDocument();
+      expect(screen.getByText('Karen')).toBeInTheDocument();
+      expect(screen.queryByText(/NaN/)).not.toBeInTheDocument();
     });
   });
 

@@ -76,17 +76,17 @@ export const DiscoverGrid = ({
           <NoData message="No experiences in this category yet" />
         </div>
       ) : isLoading ? (
-        <div className="grid grid-cols-[repeat(auto-fill,184px)] justify-start gap-x-4 gap-y-[26px]">
+        <div className="grid grid-cols-[repeat(auto-fill,184px)] justify-start gap-x-4 gap-y-[26px] 2xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-7">
           {Array.from({ length: DISCOVER_GRID_PAGE_SIZE }).map((_, index) => (
             <div key={index} className="aspect-square animate-pulse rounded-xl bg-gray-200" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,184px)] justify-start gap-x-4 gap-y-[26px]">
+        <div className="grid grid-cols-[repeat(auto-fill,184px)] justify-start gap-x-4 gap-y-[26px] 2xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-7">
           {experiences.map((experience) => (
-            // The rails' card at the rails' width, so a tile here matches the
-            // rails above it
-            <ExperienceCard key={experience.id} experience={experience} />
+            // w-full so the card fills its column once columns are fixed in
+            // count (2xl+) rather than fixed in width
+            <ExperienceCard key={experience.id} experience={experience} className="w-full" />
           ))}
         </div>
       )}

@@ -19,25 +19,24 @@ const ALL_CATEGORIES = 'all';
 /**
  * Interest categories lead the row, then the rest by how many places they
  * hold. Cities are a location, not a category, so they never become a chip.
+ *
+ * No All chip: with it gone, the row would otherwise load with nothing
+ * active, so the first chip in this order is selected by default instead -
+ * same as the reader clicking it themselves.
  */
-const chipsFrom = (categories: PlaceCategory[]): CategoryChip[] => {
-  const sorted = categories
+const chipsFrom = (categories: PlaceCategory[]): CategoryChip[] =>
+  categories
     .filter((category) => category.group !== 'cities')
     .sort(
       (a, b) =>
         Number(b.group === 'interests') - Number(a.group === 'interests') ||
         b.placesCount - a.placesCount,
-    );
-
-  return [
-    { value: ALL_CATEGORIES, label: 'All' },
-    ...sorted.map((category) => ({
+    )
+    .map((category) => ({
       value: category.id,
       label: category.name,
       icon: category.icon || undefined,
-    })),
-  ];
-};
+    }));
 
 export const PageFilters = () => {
   const searchParams = useSearchParams();
@@ -54,10 +53,10 @@ export const PageFilters = () => {
   const chips = useMemo(() => (results?.length ? chipsFrom(results) : []), [results]);
 
   useEffect(() => {
-    if (pathname === '/places' && results?.length) {
-      setSelectedCategoryId(categoryFromQuery || ALL_CATEGORIES);
+    if (pathname === '/places' && chips.length) {
+      setSelectedCategoryId(categoryFromQuery || chips[0].value);
     }
-  }, [results, pathname, categoryFromQuery, setSelectedCategoryId]);
+  }, [chips, pathname, categoryFromQuery, setSelectedCategoryId]);
 
   // Hide filters on Discover, Experiences and Communities (which render their
   // own tabs), Moments and Bucket Lists (no categories to filter by - either
@@ -98,7 +97,7 @@ export const PageFilters = () => {
   // the 44px auth button, 12px padding) and the search row is 74px (the 54px
   // search bar and its 20px bottom padding), plus the bar's 1px border. Change
   // this if the bar changes.
-  const showRow = isFetching || chips.length > 1;
+  const showRow = isFetching || chips.length > 0;
 
   return (
     <div
@@ -113,11 +112,11 @@ export const PageFilters = () => {
               {isFetching ? (
                 <PillsSkeleton />
               ) : (
-                // Hidden until there is more than the All chip, so no lone chip shows
-                chips.length > 1 && (
+                // Hidden when there is nothing to filter by at all
+                chips.length > 0 && (
                   <CategoryChipRow
                     chips={chips}
-                    value={selectedCategoryId ?? ALL_CATEGORIES}
+                    value={selectedCategoryId ?? chips[0]?.value ?? ALL_CATEGORIES}
                     onChange={handleChange}
                   />
                 )
