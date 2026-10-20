@@ -39,6 +39,16 @@ jest.mock('@/app/shared/components/Subscription', () => ({
 jest.mock('@/app/shared/hooks/useNotifications', () => ({
   useUnreadNotificationCount: () => ({ data: { data: { count: 0 } } }),
 }));
+// Both modals mount unconditionally (just closed) so their mutation hooks
+// run on every render - mocked out rather than wrapping the tree in a
+// QueryClientProvider this suite otherwise has no use for
+jest.mock('@/app/shared/hooks/useBucketLists', () => ({
+  useCreateBucketList: () => ({ mutate: jest.fn(), isPending: false }),
+  useUpdateBucketList: () => ({ mutate: jest.fn(), isPending: false }),
+}));
+jest.mock('@/app/shared/hooks/useMoments', () => ({
+  useCreateMoment: () => ({ mutate: jest.fn(), isPending: false }),
+}));
 
 // The trigger is the button wrapping the user's avatar
 const openMenu = () => {
@@ -77,7 +87,7 @@ describe('navbar control heights', () => {
   it('gives Create and the profile trigger the search bar height', () => {
     render(<AuthActions />);
 
-    const create = screen.getByRole('link', { name: /Create/ });
+    const create = screen.getByRole('button', { name: /Create/ });
     const trigger = screen.getByAltText('George Ralak').closest('button');
 
     expect(create).toHaveClass('h-11');
@@ -87,7 +97,7 @@ describe('navbar control heights', () => {
   it('no longer sizes Create by padding alone', () => {
     render(<AuthActions />);
 
-    expect(screen.getByRole('link', { name: /Create/ })).not.toHaveClass('py-2');
+    expect(screen.getByRole('button', { name: /Create/ })).not.toHaveClass('py-2');
   });
 });
 
@@ -137,5 +147,45 @@ describe('AuthActions, signed in', () => {
     expect(screen.getByLabelText('Account menu')).toBeInTheDocument();
     expect(screen.queryByText('Sign in')).not.toBeInTheDocument();
     expect(screen.queryByText('Create account')).not.toBeInTheDocument();
+  });
+});
+
+describe('AuthActions, Create menu', () => {
+  it('opens a 5-item menu from the Create trigger', () => {
+    render(<AuthActions />);
+
+    expect(screen.queryByText('Create an experience')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Create/ }));
+
+    expect(screen.getByText('Create an experience')).toBeInTheDocument();
+    expect(screen.getByText('Create a community')).toBeInTheDocument();
+    expect(screen.getByText('Connect a place')).toBeInTheDocument();
+    expect(screen.getByText('Create a bucket list')).toBeInTheDocument();
+    expect(screen.getByText('Share a moment')).toBeInTheDocument();
+  });
+
+  it('links Create a community and Connect a place straight to their pages', () => {
+    render(<AuthActions />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Create/ }));
+
+    expect(screen.getByText('Create a community').closest('a')).toHaveAttribute(
+      'href',
+      '/communities/create',
+    );
+    expect(screen.getByText('Connect a place').closest('a')).toHaveAttribute(
+      'href',
+      '/places/claim',
+    );
+  });
+
+  it('sends a subscribed user straight to the create-experience page', () => {
+    render(<AuthActions />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Create/ }));
+    fireEvent.click(screen.getByText('Create an experience'));
+
+    expect(mockPush).toHaveBeenCalledWith('/experiences/create');
   });
 });

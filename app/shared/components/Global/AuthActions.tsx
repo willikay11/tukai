@@ -6,7 +6,9 @@ import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { MomentComposer } from '@/app/shared/components/Moments';
 import { SubscriptionModalFlow } from '@/app/shared/components/Subscription';
 import { useUnreadNotificationCount } from '@/app/shared/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
@@ -15,6 +17,8 @@ import { TukaiImage } from '@/components/ui/image';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 
+import { CreateMenu } from './CreateMenu';
+import { CreateMenuItemId } from './CreateMenu/items';
 import { ProfileMenu } from './ProfileMenu';
 
 export const AuthActions = () => {
@@ -24,6 +28,9 @@ export const AuthActions = () => {
   const [showJoinPremium, setShowJoinPremium] = useState(false);
   const [pendingCreateAfterLogin, setPendingCreateAfterLogin] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
+  const [isBucketListModalOpen, setIsBucketListModalOpen] = useState(false);
+  const [isMomentComposerOpen, setIsMomentComposerOpen] = useState(false);
 
   const hasSubscribed = Boolean(session?.user?.hasSubscribed);
 
@@ -65,6 +72,16 @@ export const AuthActions = () => {
     setPendingCreateAfterLogin(false);
   }, [pendingCreateAfterLogin, session?.user, hasSubscribed, router]);
 
+  // Closes the Create popover first, then does whatever the row promised - a
+  // link row has already started navigating on its own by the time this runs.
+  const handleCreateMenuSelect = (id: CreateMenuItemId) => {
+    setIsCreateMenuOpen(false);
+
+    if (id === 'experience') handleCreateExperience();
+    if (id === 'bucketList') setIsBucketListModalOpen(true);
+    if (id === 'moment') setIsMomentComposerOpen(true);
+  };
+
   /**
    * Create belongs to the signed-in bar. A visitor who has not joined yet is
    * asked to join - offering them Create only to answer with a sign-in dialog
@@ -74,23 +91,25 @@ export const AuthActions = () => {
    * word stays in the DOM as screen-reader text, so the control keeps its name.
    * Between md and lg it is hidden, as it was before.
    */
-  const createButton = hasSubscribed ? (
-    <Link
-      href="/experiences/create"
-      className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-lime text-sm font-semibold text-brand-ink transition-colors hover:bg-lime-dark md:hidden lg:inline-flex lg:w-auto lg:gap-2 lg:px-4"
-    >
-      <IconComponent iconName="Add01Icon" size={18} color="currentColor" />
-      <span className="sr-only lg:not-sr-only">Create</span>
-    </Link>
-  ) : (
-    <Button
-      variant="lime"
-      className="h-11 w-11 flex-shrink-0 items-center justify-center rounded-full p-0 text-sm font-semibold md:hidden lg:inline-flex lg:w-auto lg:gap-2 lg:px-4"
-      onClick={handleCreateExperience}
-    >
-      <IconComponent iconName="Add01Icon" size={18} color="currentColor" />
-      <span className="sr-only lg:not-sr-only">Create</span>
-    </Button>
+  const createButton = (
+    <Popover open={isCreateMenuOpen} onOpenChange={setIsCreateMenuOpen}>
+      <PopoverTrigger
+        aria-label="Create"
+        className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-lime text-sm font-semibold text-brand-ink outline-none transition-colors hover:bg-lime-dark md:hidden lg:inline-flex lg:w-auto lg:gap-2 lg:px-4"
+      >
+        <IconComponent iconName="Add01Icon" size={18} color="currentColor" />
+        <span className="sr-only lg:not-sr-only">Create</span>
+      </PopoverTrigger>
+
+      <PopoverContent
+        align="end"
+        sideOffset={8}
+        collisionPadding={12}
+        className="w-auto rounded-2xl p-0"
+      >
+        <CreateMenu onSelect={handleCreateMenuSelect} />
+      </PopoverContent>
+    </Popover>
   );
 
   return (
@@ -177,6 +196,12 @@ export const AuthActions = () => {
           <SubscriptionModalFlow onClose={() => setShowJoinPremium(false)} />
         </DialogContent>
       </Dialog>
+
+      <CreateBucketListModal open={isBucketListModalOpen} onOpenChange={setIsBucketListModalOpen} />
+
+      {/* Opened with no context, same as the Discover page's own "Been
+          somewhere good?" tile - the moment posts untagged */}
+      <MomentComposer open={isMomentComposerOpen} onOpenChange={setIsMomentComposerOpen} />
     </div>
   );
 };
