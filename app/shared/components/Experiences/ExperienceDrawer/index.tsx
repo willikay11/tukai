@@ -26,6 +26,7 @@ import { toPlainText } from '@/utils/safe-text-utils';
 import { ExperienceCancellationSection } from './ExperienceCancellationSection';
 import { ExperienceDrawerFooter } from './ExperienceDrawerFooter';
 import { ExperienceHostSection } from './ExperienceHostSection';
+import { ExperienceItinerarySection } from './ExperienceItinerarySection';
 import { ExperienceLocationSection } from './ExperienceLocationSection';
 import { ExperienceMyTickets } from './ExperienceMyTickets';
 import { ExperienceTicketsSection } from './ExperienceTicketsSection';
@@ -150,7 +151,11 @@ export const ExperienceDrawer = ({
 
   const hasTickets = (experience?.tickets ?? []).some((ticket) => !isTicketPaused(ticket));
   const hasHost = Boolean(experience?.host || experience?.hostCommunity);
-  const tabs = useMemo(() => experienceDrawerTabs(hasTickets, hasHost), [hasTickets, hasHost]);
+  const isItinerary = experience?.experienceType === 'itinerary';
+  const tabs = useMemo(
+    () => experienceDrawerTabs(hasTickets, hasHost, isItinerary),
+    [hasTickets, hasHost, isItinerary],
+  );
   const sectionIds = useMemo(() => tabs.map((tab) => tab.id), [tabs]);
   const { activeId, scrollTo } = useScrollSpy(sectionIds, TAB_OFFSET, panel);
 
@@ -307,6 +312,8 @@ export const ExperienceDrawer = ({
                     {experience.description && <AboutClamp text={experience.description} />}
                   </div>
                 </section>
+
+                <ExperienceItinerarySection experience={experience} />
 
                 <ExperienceMyTickets experience={experience} />
 
