@@ -67,20 +67,15 @@ export const Drawer = ({
     return () => media.removeEventListener('change', update);
   }, []);
 
-  // Escape closes, and the page behind does not scroll while it is open
+  // Escape closes
   useEffect(() => {
     if (!isOpen) return;
 
     const onKey = (event: KeyboardEvent) => event.key === 'Escape' && setIsOpen(false);
-    const { overflow } = document.body.style;
 
-    document.body.style.overflow = 'hidden';
     document.addEventListener('keydown', onKey);
 
-    return () => {
-      document.body.style.overflow = overflow;
-      document.removeEventListener('keydown', onKey);
-    };
+    return () => document.removeEventListener('keydown', onKey);
   }, [isOpen, setIsOpen]);
 
   if (!mounted) return null;
@@ -126,15 +121,7 @@ export const Drawer = ({
   return createPortal(
     <AnimatePresence initial={false}>
       {isOpen && (
-        <div className="fixed inset-0 z-50">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsOpen(false)}
-            className="absolute inset-0 bg-black/50"
-          />
-
+        <div className="fixed inset-0 z-50 pointer-events-none">
           <motion.div
             ref={panelRef}
             role="dialog"
@@ -143,7 +130,7 @@ export const Drawer = ({
             animate={panel.animate}
             exit={panel.exit}
             transition={{ type: 'spring', stiffness: 220, damping: 28 }}
-            className={`absolute overflow-y-auto bg-white ${panel.className}`}
+            className={`pointer-events-auto absolute overflow-y-auto bg-white ${panel.className}`}
             style={{ ...panel.style, WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
           >
             {children}
