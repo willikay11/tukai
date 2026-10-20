@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 import { Drawer } from './drawer';
 
@@ -123,18 +122,18 @@ describe('Drawer', () => {
     });
   });
 
-  it('closes on the scrim', async () => {
+  it('lets clicks through to the page behind it', () => {
     const setIsOpen = jest.fn();
-    const user = userEvent.setup();
     render(
       <Drawer isOpen setIsOpen={setIsOpen}>
         <p>Pick a list</p>
       </Drawer>,
     );
 
-    await user.click(document.body.querySelector('.bg-black\\/50') as HTMLElement);
+    const wrapper = document.body.querySelector('[role="dialog"]')
+      ?.parentElement as HTMLElement;
 
-    expect(setIsOpen).toHaveBeenCalledWith(false);
+    expect(wrapper.className).toContain('pointer-events-none');
   });
 
   it('closes on Escape', () => {
@@ -150,16 +149,12 @@ describe('Drawer', () => {
     expect(setIsOpen).toHaveBeenCalledWith(false);
   });
 
-  it('holds the page still while it is open, and lets go after', () => {
-    const { unmount } = render(
+  it('leaves the page behind it scrollable', () => {
+    render(
       <Drawer isOpen setIsOpen={jest.fn()}>
         <p>Pick a list</p>
       </Drawer>,
     );
-
-    expect(document.body.style.overflow).toBe('hidden');
-
-    unmount();
 
     expect(document.body.style.overflow).not.toBe('hidden');
   });
