@@ -52,18 +52,30 @@ const renderComposer = () =>
 describe('MomentComposer', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  // The trail says where else it will be seen: a moment on an experience also
-  // surfaces in the place and the community it belongs to
-  it('names the author and the whole trail the moment lands in', () => {
+  // A moment on an experience also attaches to the place and the community it
+  // belongs to - one tile each, in that order
+  it('names the author and everywhere the moment is attached', () => {
     renderComposer();
 
     expect(screen.getByText('Tony Ouma')).toBeInTheDocument();
-    expect(screen.getByText('Karura Forest')).toBeInTheDocument();
-    expect(screen.getByText('Nairobi Runners')).toBeInTheDocument();
     expect(screen.getByText('Karura Entry Fees')).toBeInTheDocument();
-    expect(
-      screen.getByText('Shared with Karura Forest and Nairobi Runners too.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Nairobi Runners')).toBeInTheDocument();
+    expect(screen.getByText('Karura Forest')).toBeInTheDocument();
+    expect(screen.getByText('Experience')).toBeInTheDocument();
+    expect(screen.getByText('Community')).toBeInTheDocument();
+    expect(screen.getByText('Place')).toBeInTheDocument();
+  });
+
+  it('drops an attachment when its tile is removed', async () => {
+    const user = userEvent.setup();
+    renderComposer();
+
+    await user.click(screen.getByRole('button', { name: 'Remove Karura Forest' }));
+
+    expect(screen.queryByText('Karura Forest')).not.toBeInTheDocument();
+    // The other two are untouched
+    expect(screen.getByText('Karura Entry Fees')).toBeInTheDocument();
+    expect(screen.getByText('Nairobi Runners')).toBeInTheDocument();
   });
 
   it('cannot be shared while empty', () => {
@@ -79,7 +91,7 @@ describe('MomentComposer', () => {
     const user = userEvent.setup();
     renderComposer();
 
-    await user.type(screen.getByLabelText('What are you up to?'), 'Sunrise hike');
+    await user.type(screen.getByLabelText('Caption'), 'Sunrise hike');
 
     expect(screen.getByRole('button', { name: /share moment/i })).toBeDisabled();
   });
@@ -98,7 +110,7 @@ describe('MomentComposer', () => {
     const user = userEvent.setup();
     renderComposer();
 
-    await user.type(screen.getByLabelText('What are you up to?'), 'Sunrise hike');
+    await user.type(screen.getByLabelText('Caption'), 'Sunrise hike');
     await attachPhoto(user);
     await user.click(screen.getByRole('button', { name: /share moment/i }));
 
@@ -123,7 +135,7 @@ describe('MomentComposer', () => {
     const user = userEvent.setup();
     renderComposer();
 
-    await user.type(screen.getByLabelText('What are you up to?'), 'Sunrise hike');
+    await user.type(screen.getByLabelText('Caption'), 'Sunrise hike');
     await attachPhoto(user);
     await user.click(screen.getByRole('button', { name: /share moment/i }));
 
@@ -139,7 +151,7 @@ describe('MomentComposer', () => {
     const user = userEvent.setup();
     renderComposer();
 
-    await user.type(screen.getByLabelText('What are you up to?'), 'Sunrise hike');
+    await user.type(screen.getByLabelText('Caption'), 'Sunrise hike');
     await attachPhoto(user);
     await user.click(screen.getByRole('button', { name: /share moment/i }));
 

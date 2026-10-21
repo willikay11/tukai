@@ -9,3 +9,4 @@ export { MomentsSquareGrid } from './MomentsSquareGrid';
 export { MomentComposer } from './MomentComposer';
 export { MomentComposerForm } from './MomentComposerForm';
 export { MomentComposerTrigger } from './MomentComposerTrigger';
+export { useMomentComposer } from './useMomentComposer';
