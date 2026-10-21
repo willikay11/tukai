@@ -97,13 +97,14 @@ jest.mock('@/app/shared/components/Moments', () => ({
       </button>
     </div>
   ),
-  MomentComposerForm: ({ onDone }: { onDone: () => void }) => (
-    <div data-testid="moment-form">
-      <button type="button" onClick={onDone}>
-        shared
-      </button>
-    </div>
-  ),
+  MomentComposerForm: () => <div data-testid="moment-form" />,
+  // The drawer owns the hook directly and renders its own Share button -
+  // `handleShare` stands in for a share that always succeeds immediately
+  useMomentComposer: (_context: unknown, onDone: () => void) => ({
+    canShare: true,
+    isPending: false,
+    handleShare: onDone,
+  }),
 }));
 jest.mock('./PlaceDrawerReviews', () => ({
   PlaceDrawerReviews: () => <div data-testid="reviews" />,
@@ -306,7 +307,7 @@ describe('PlaceDrawer', () => {
 
     it('comes back once the moment has gone', () => {
       openForm();
-      fireEvent.click(screen.getByRole('button', { name: 'shared' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Share moment' }));
 
       expect(screen.getByTestId('about')).toBeInTheDocument();
     });

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { ContextMoments, MomentComposerForm } from '@/app/shared/components/Moments';
+import { ContextMoments, MomentComposerForm, useMomentComposer } from '@/app/shared/components/Moments';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import {
   usePlace,
@@ -12,6 +12,7 @@ import {
   usePlaceReservationProfiles,
 } from '@/app/shared/hooks/usePlaces';
 import { useScrollSpy } from '@/app/shared/hooks/useScrollSpy';
+import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
 import { Experience } from '@/types/experience';
 import { Place } from '@/types/place';
@@ -128,6 +129,13 @@ export const PlaceDrawer = ({
   const sectionIds = useMemo(() => tabs.map((tab) => tab.id), [tabs]);
   const { activeId, scrollTo } = useScrollSpy(sectionIds, TAB_OFFSET, panel);
 
+  // Driven directly rather than through MomentComposer: the "New moment" view
+  // takes over this drawer's own header instead of stacking a second panel
+  const momentComposer = useMomentComposer(
+    { contextLabel: place?.title, placeId: place?.id },
+    () => setView('place'),
+  );
+
   return (
     <Drawer
       isOpen={isOpen}
@@ -167,12 +175,20 @@ export const PlaceDrawer = ({
             </div>
           ) : view === 'moment' ? (
             <div className="flex-1 px-6 py-6">
-              <MomentComposerForm
-                contextLabel={place.title}
-                contextKind="Place"
-                placeId={place.id}
-                onDone={() => setView('place')}
-              />
+              <MomentComposerForm {...momentComposer} />
+
+              <div className="mt-6 flex items-center justify-end">
+                <Button
+                  type="button"
+                  variant="lime"
+                  onClick={momentComposer.handleShare}
+                  disabled={!momentComposer.canShare}
+                  isLoading={momentComposer.isPending}
+                  className="h-12 rounded-full px-6 text-[15px]"
+                >
+                  Share moment
+                </Button>
+              </div>
             </div>
           ) : (
             <>
