@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { MouseEvent, ReactNode } from 'react';
 
 import Link from 'next/link';
 
@@ -26,16 +26,20 @@ export const MediaRow = ({
   photo,
   title,
   priority = false,
+  onClick,
   children,
 }: {
   href: string;
   photo: string | null | undefined;
   title: string;
   priority?: boolean;
+  /** Intercepts a plain click - opening a drawer rather than following the
+   * link. `href` stays, so a modifier click or a copied address still works. */
+  onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
   /** The lines under the title. */
   children: ReactNode;
 }) => (
-  <Link href={href} className="group flex min-w-0 items-start gap-4">
+  <Link href={href} onClick={onClick} className="group flex min-w-0 items-start gap-4">
     <span className="relative block h-[72px] w-[72px] flex-shrink-0 overflow-hidden rounded-xl bg-surface">
       <PhotoImage
         src={photo}

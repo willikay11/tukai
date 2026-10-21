@@ -17,6 +17,12 @@ jest.mock('@/app/shared/hooks/useBucketLists', () => ({
 const toast = jest.fn();
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
 
+const openBucketList = jest.fn();
+let drawer: { openBucketList: typeof openBucketList } | null = null;
+jest.mock('@/context/BucketListDrawerContext', () => ({
+  useBucketListDrawer: () => drawer,
+}));
+
 let userId: string | undefined = 'me';
 jest.mock('next-auth/react', () => ({
   useSession: () => ({ data: userId ? { user: { id: userId } } : null }),
@@ -41,6 +47,10 @@ const shared: BucketList = {
   shareToken: 'share-abc',
   isMember: false,
 };
+
+beforeEach(() => {
+  drawer = null;
+});
 
 describe('BucketListCard', () => {
   beforeEach(() => {
@@ -252,6 +262,44 @@ describe('members on the card', () => {
     render(<BucketListCard bucketList={{ ...bucketList, memberCount: 0 }} href="/x" />);
 
     expect(screen.queryByText('0')).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * Where a drawer is mounted above the card, a plain click opens the list
+ * there instead of following the link - the href stays, for a new tab or a
+ * modifier click.
+ */
+describe('opening in the drawer', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    userId = 'me';
+    drawer = { openBucketList };
+  });
+
+  it('opens the drawer rather than navigating', async () => {
+    render(<BucketListCard bucketList={bucketList} href="/bucket-lists/bucket-1" />);
+
+    await userEvent.click(screen.getByText('Weekend Hikes'));
+
+    expect(openBucketList).toHaveBeenCalledWith('bucket-1');
+  });
+
+  it('opens the drawer from the owned card’s own "Open list" link too', async () => {
+    render(<BucketListCard bucketList={bucketList} href="/bucket-lists/bucket-1" />);
+
+    await userEvent.click(screen.getByRole('link', { name: 'Open list' }));
+
+    expect(openBucketList).toHaveBeenCalledWith('bucket-1');
+  });
+
+  it('keeps the link working where there is no drawer mounted', async () => {
+    drawer = null;
+    render(<BucketListCard bucketList={bucketList} href="/bucket-lists/bucket-1" />);
+
+    await userEvent.click(screen.getByText('Weekend Hikes'));
+
+    expect(openBucketList).not.toHaveBeenCalled();
   });
 });
 

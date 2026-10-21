@@ -10,6 +10,7 @@ import { CARD_LIFT, MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motio
 import { useJoinBucketList, useLeaveBucketList } from '@/app/shared/hooks/useBucketLists';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { useBucketListDrawer } from '@/context/BucketListDrawerContext';
 import { cn } from '@/lib/utils';
 import { BucketList, BucketListDetail, bucketListCoverPhoto } from '@/types/bucket-list';
 import { linkedUserName } from '@/types/user';
@@ -95,6 +96,7 @@ const CardBody = ({ bucketList }: { bucketList: BucketList }) => (
 export const BucketListCard = ({ bucketList, href, onClick }: BucketListCardProps) => {
   const { data: session } = useSession();
   const { toast } = useToast();
+  const drawer = useBucketListDrawer();
 
   const state = bucketListCardState(bucketList, session?.user?.id);
   const { mutate: joinBucketList, isPending: isJoining } = useJoinBucketList();
@@ -104,6 +106,18 @@ export const BucketListCard = ({ bucketList, href, onClick }: BucketListCardProp
     'group block cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md',
     CARD_LIFT,
   );
+
+  // A plain click opens the list in the drawer; the card keeps its href so a
+  // modifier click, a new tab, or a copied address still reaches the page
+  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+    if (!drawer) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
+    drawer.openBucketList(bucketList.id);
+  };
 
   const press = () => {
     if (state === 'joined') {
@@ -154,6 +168,7 @@ export const BucketListCard = ({ bucketList, href, onClick }: BucketListCardProp
         href ? (
           <Link
             href={href}
+            onClick={handleOpen}
             className={cn(buttonVariants({ variant: 'ghost' }), 'w-full rounded-full')}
           >
             {CARD_STATE_LABEL.owned}
@@ -185,7 +200,7 @@ export const BucketListCard = ({ bucketList, href, onClick }: BucketListCardProp
   if (href) {
     return (
       <div className={shell}>
-        <Link href={href} className="block">
+        <Link href={href} onClick={handleOpen} className="block">
           <CardBody bucketList={bucketList} />
         </Link>
         {action}

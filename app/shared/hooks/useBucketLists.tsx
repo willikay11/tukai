@@ -118,7 +118,13 @@ export const useJoinBucketList = () => {
 
   return useMutation({
     mutationFn: (shareToken: string) => joinBucketList(shareToken),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bucket-lists'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bucket-lists'] });
+      // Every `['bucket-list', id]` detail query, not just the list page -
+      // the drawer a reader joined from reads the same cache and would
+      // otherwise keep showing its own "Join" button after joining
+      queryClient.invalidateQueries({ queryKey: ['bucket-list'] });
+    },
   });
 };
 
@@ -128,7 +134,10 @@ export const useLeaveBucketList = () => {
 
   return useMutation({
     mutationFn: (bucketListId: string) => leaveBucketList(bucketListId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bucket-lists'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bucket-lists'] });
+      queryClient.invalidateQueries({ queryKey: ['bucket-list'] });
+    },
   });
 };
 

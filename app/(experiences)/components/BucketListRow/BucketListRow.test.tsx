@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { BucketList } from '@/types/bucket-list';
 
@@ -17,12 +18,30 @@ jest.mock('next/image', () => {
   return MockImage;
 });
 jest.mock('next/link', () => {
-  function MockLink({ children, href }: { children: React.ReactNode; href: string }) {
-    return <a href={href}>{children}</a>;
+  function MockLink({
+    children,
+    href,
+    onClick,
+  }: {
+    children: React.ReactNode;
+    href: string;
+    onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+  }) {
+    return (
+      <a href={href} onClick={onClick}>
+        {children}
+      </a>
+    );
   }
   MockLink.displayName = 'MockLink';
   return MockLink;
 });
+
+const openBucketList = jest.fn();
+let drawer: { openBucketList: typeof openBucketList } | null = null;
+jest.mock('@/context/BucketListDrawerContext', () => ({
+  useBucketListDrawer: () => drawer,
+}));
 
 const makeList = (overrides: Partial<BucketList> = {}): BucketList =>
   ({
@@ -37,6 +56,11 @@ const makeList = (overrides: Partial<BucketList> = {}): BucketList =>
   }) as unknown as BucketList;
 
 describe('BucketListRow', () => {
+  beforeEach(() => {
+    drawer = null;
+    openBucketList.mockClear();
+  });
+
   it('names the list and links to it', () => {
     render(<BucketListRow bucketList={makeList()} />);
 
@@ -82,5 +106,23 @@ describe('BucketListRow', () => {
     expect(screen.getByText('Nairobi creative weekends')).toBeInTheDocument();
     expect(screen.getByText('4 saved')).toBeInTheDocument();
     expect(screen.queryByText(/^By/)).not.toBeInTheDocument();
+  });
+
+  // A drawer above the row takes the click; the row keeps its href regardless
+  it('opens the drawer where one is mounted, rather than navigating', async () => {
+    drawer = { openBucketList };
+    render(<BucketListRow bucketList={makeList()} />);
+
+    await userEvent.click(screen.getByRole('link'));
+
+    expect(openBucketList).toHaveBeenCalledWith('bl1');
+  });
+
+  it('keeps the link working where there is no drawer mounted', async () => {
+    render(<BucketListRow bucketList={makeList()} />);
+
+    await userEvent.click(screen.getByRole('link'));
+
+    expect(openBucketList).not.toHaveBeenCalled();
   });
 });
