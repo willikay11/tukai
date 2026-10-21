@@ -183,7 +183,7 @@ describe('BucketListPageContent', () => {
 
     await user.click(screen.getAllByRole('button', { name: /Edit/ })[0]);
 
-    expect(screen.getByText('Edit Bucket List')).toBeInTheDocument();
+    expect(screen.getByText('Edit bucket list')).toBeInTheDocument();
   });
 
   /**

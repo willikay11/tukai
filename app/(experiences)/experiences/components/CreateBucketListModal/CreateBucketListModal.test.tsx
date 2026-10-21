@@ -25,17 +25,35 @@ const existing: BucketList = {
   memberCount: 0,
 };
 
+const fillForm = async (user: ReturnType<typeof userEvent.setup>, name: string, desc: string) => {
+  await user.type(screen.getByPlaceholderText(/Enter bucket list name/), name);
+  await user.type(screen.getByLabelText('Bucket list description'), desc);
+};
+
 describe('CreateBucketListModal', () => {
   beforeEach(() => jest.clearAllMocks());
 
   describe('creating', () => {
-    it('sends the description alongside the name', async () => {
+    it('keeps Create disabled until both a name and a description are entered', async () => {
       const user = userEvent.setup();
       render(<CreateBucketListModal open onOpenChange={jest.fn()} />);
 
-      await user.type(screen.getByPlaceholderText(/Bucket list name/), 'Date Nights');
-      await user.type(screen.getByLabelText('Description'), 'Somewhere quiet');
-      await user.click(screen.getByRole('button', { name: 'Create Bucket List' }));
+      const submit = screen.getByRole('button', { name: 'Create bucket list' });
+      expect(submit).toBeDisabled();
+
+      await user.type(screen.getByPlaceholderText(/Enter bucket list name/), 'Date Nights');
+      expect(submit).toBeDisabled();
+
+      await user.type(screen.getByLabelText('Bucket list description'), 'Somewhere quiet');
+      expect(submit).toBeEnabled();
+    });
+
+    it('sends the trimmed name and description', async () => {
+      const user = userEvent.setup();
+      render(<CreateBucketListModal open onOpenChange={jest.fn()} />);
+
+      await fillForm(user, '  Date Nights  ', '  Somewhere quiet  ');
+      await user.click(screen.getByRole('button', { name: 'Create bucket list' }));
 
       expect(createBucketList).toHaveBeenCalledWith(
         { name: 'Date Nights', description: 'Somewhere quiet', visibility: 'public' },
@@ -43,67 +61,137 @@ describe('CreateBucketListModal', () => {
       );
     });
 
-    // It is optional, so an empty one must not block the save
-    it('creates a list with no description at all', async () => {
+    it('moves focus to the description when Enter is pressed in the name field', async () => {
       const user = userEvent.setup();
       render(<CreateBucketListModal open onOpenChange={jest.fn()} />);
 
-      await user.type(screen.getByPlaceholderText(/Bucket list name/), 'Date Nights');
-      await user.click(screen.getByRole('button', { name: 'Create Bucket List' }));
+      await user.type(screen.getByPlaceholderText(/Enter bucket list name/), 'Date Nights{Enter}');
 
-      expect(createBucketList).toHaveBeenCalledWith(
-        expect.objectContaining({ description: '' }),
-        expect.any(Object),
+      expect(screen.getByLabelText('Bucket list description')).toHaveFocus();
+    });
+
+    it('shows the description counter only once space is running out', async () => {
+      const user = userEvent.setup();
+      render(<CreateBucketListModal open onOpenChange={jest.fn()} />);
+
+      const description = screen.getByLabelText('Bucket list description');
+      await user.type(description, 'Somewhere quiet');
+      expect(screen.queryByText(/\/ 160/)).not.toBeInTheDocument();
+
+      await user.type(description, 'x'.repeat(130 - 'Somewhere quiet'.length));
+      expect(screen.getByText('130 / 160')).toBeInTheDocument();
+    });
+
+    it('replaces the form with the success view once creation succeeds', async () => {
+      const user = userEvent.setup();
+      createBucketList.mockImplementation((payload, { onSuccess }) => {
+        onSuccess({ data: { id: 'new-list-1', ...payload } });
+      });
+
+      render(<CreateBucketListModal open onOpenChange={jest.fn()} />);
+
+      await fillForm(user, 'Date Nights', 'Somewhere quiet');
+      await user.click(screen.getByRole('button', { name: 'Create bucket list' }));
+
+      expect(screen.getByText('Your bucket list is ready')).toBeInTheDocument();
+      expect(screen.getByText(/Date Nights/)).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'View bucket list' })).toHaveAttribute(
+        'href',
+        '/bucket-lists/new-list-1',
       );
+      expect(screen.getByRole('button', { name: /Share link/ })).toBeInTheDocument();
+      // The form is gone, not just hidden
+      expect(screen.queryByPlaceholderText(/Enter bucket list name/)).not.toBeInTheDocument();
+    });
+
+    it('copies the new list\'s link when Share link is pressed', async () => {
+      const user = userEvent.setup();
+      // After setup(): userEvent installs its own clipboard stub, which would
+      // otherwise shadow this one
+      const writeText = jest.fn().mockResolvedValue(undefined);
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText },
+        configurable: true,
+      });
+      createBucketList.mockImplementation((payload, { onSuccess }) => {
+        onSuccess({ data: { id: 'new-list-1', ...payload } });
+      });
+
+      render(<CreateBucketListModal open onOpenChange={jest.fn()} />);
+
+      await fillForm(user, 'Date Nights', 'Somewhere quiet');
+      await user.click(screen.getByRole('button', { name: 'Create bucket list' }));
+      await user.click(screen.getByRole('button', { name: /Share link/ }));
+
+      expect(writeText).toHaveBeenCalledWith(expect.stringContaining('/bucket-lists/new-list-1'));
+    });
+
+    it('offers Invite members instead of Share link for a private list', async () => {
+      const user = userEvent.setup();
+      createBucketList.mockImplementation((payload, { onSuccess }) => {
+        onSuccess({ data: { id: 'new-list-1', ...payload } });
+      });
+
+      render(<CreateBucketListModal open onOpenChange={jest.fn()} />);
+
+      await fillForm(user, 'Date Nights', 'Somewhere quiet');
+      await user.click(screen.getByRole('radio', { name: /Private/ }));
+      await user.click(screen.getByRole('button', { name: 'Create bucket list' }));
+
+      expect(screen.getByRole('button', { name: /Invite members/ })).toBeInTheDocument();
     });
   });
 
   describe('editing', () => {
-    it('opens on the description the list already has', () => {
+    it('opens pre-filled with the list it is editing', () => {
       render(<CreateBucketListModal open onOpenChange={jest.fn()} bucketList={existing} />);
 
-      expect(screen.getByLabelText('Description')).toHaveValue('Trails worth the early start');
-      expect(screen.getByText('Edit Bucket List')).toBeInTheDocument();
+      expect(screen.getByLabelText('Bucket list description')).toHaveValue(
+        'Trails worth the early start',
+      );
+      expect(screen.getByText('Edit bucket list')).toBeInTheDocument();
     });
 
-    it('saves a changed description against that list', async () => {
+    it('saves a changed description against that list and closes', async () => {
       const user = userEvent.setup();
-      render(<CreateBucketListModal open onOpenChange={jest.fn()} bucketList={existing} />);
+      const onOpenChange = jest.fn();
+      updateBucketList.mockImplementation((payload, { onSuccess }) => onSuccess());
 
-      await user.clear(screen.getByLabelText('Description'));
-      await user.type(screen.getByLabelText('Description'), 'Now with fewer hills');
-      await user.click(screen.getByRole('button', { name: 'Save Changes' }));
+      render(<CreateBucketListModal open onOpenChange={onOpenChange} bucketList={existing} />);
+
+      await user.clear(screen.getByLabelText('Bucket list description'));
+      await user.type(screen.getByLabelText('Bucket list description'), 'Now with fewer hills');
+      await user.click(screen.getByRole('button', { name: 'Save changes' }));
 
       expect(updateFor).toHaveBeenCalledWith('bl1');
       expect(updateBucketList).toHaveBeenCalledWith(
         expect.objectContaining({ description: 'Now with fewer hills' }),
         expect.any(Object),
       );
+      expect(onOpenChange).toHaveBeenCalledWith(false);
     });
 
-    // Sent even when emptied, or clearing one would silently do nothing
-    it('lets a description be cleared', async () => {
+    it('disables Save changes if the description is cleared', async () => {
       const user = userEvent.setup();
       render(<CreateBucketListModal open onOpenChange={jest.fn()} bucketList={existing} />);
 
-      await user.clear(screen.getByLabelText('Description'));
-      await user.click(screen.getByRole('button', { name: 'Save Changes' }));
+      await user.clear(screen.getByLabelText('Bucket list description'));
 
-      expect(updateBucketList).toHaveBeenCalledWith(
-        expect.objectContaining({ description: '' }),
-        expect.any(Object),
-      );
+      expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled();
     });
 
-    it('still refuses a list with no name', async () => {
+    it('warns when the visibility no longer matches what was saved', async () => {
       const user = userEvent.setup();
+      // existing.visibility is 'private'
       render(<CreateBucketListModal open onOpenChange={jest.fn()} bucketList={existing} />);
 
-      await user.clear(screen.getByPlaceholderText(/Bucket list name/));
-      await user.click(screen.getByRole('button', { name: 'Save Changes' }));
+      expect(screen.queryByText(/Switching to/)).not.toBeInTheDocument();
 
-      expect(updateBucketList).not.toHaveBeenCalled();
-      expect(screen.getByText(/Please enter a name/)).toBeInTheDocument();
+      await user.click(screen.getByRole('radio', { name: /Public/ }));
+
+      expect(
+        screen.getByText(/Switching to Public means anyone can find, view and join it\./),
+      ).toBeInTheDocument();
     });
   });
 });
