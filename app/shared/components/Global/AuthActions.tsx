@@ -6,6 +6,7 @@ import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+import { CreateCommunityDrawer } from '@/app/(communities)/communities/components/CreateCommunityDrawer';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { MomentComposer } from '@/app/shared/components/Moments';
@@ -31,6 +32,7 @@ export const AuthActions = () => {
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
   const [isBucketListModalOpen, setIsBucketListModalOpen] = useState(false);
   const [isMomentComposerOpen, setIsMomentComposerOpen] = useState(false);
+  const [isCommunityDrawerOpen, setIsCommunityDrawerOpen] = useState(false);
 
   const hasSubscribed = Boolean(session?.user?.hasSubscribed);
 
@@ -78,6 +80,7 @@ export const AuthActions = () => {
     setIsCreateMenuOpen(false);
 
     if (id === 'experience') handleCreateExperience();
+    if (id === 'community') setIsCommunityDrawerOpen(true);
     if (id === 'bucketList') setIsBucketListModalOpen(true);
     if (id === 'moment') setIsMomentComposerOpen(true);
   };
@@ -196,6 +199,8 @@ export const AuthActions = () => {
           <SubscriptionModalFlow onClose={() => setShowJoinPremium(false)} />
         </DialogContent>
       </Dialog>
+
+      <CreateCommunityDrawer open={isCommunityDrawerOpen} onOpenChange={setIsCommunityDrawerOpen} />
 
       <CreateBucketListModal open={isBucketListModalOpen} onOpenChange={setIsBucketListModalOpen} />
 

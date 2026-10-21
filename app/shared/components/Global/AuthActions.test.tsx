@@ -39,15 +39,26 @@ jest.mock('@/app/shared/components/Subscription', () => ({
 jest.mock('@/app/shared/hooks/useNotifications', () => ({
   useUnreadNotificationCount: () => ({ data: { data: { count: 0 } } }),
 }));
-// Both modals mount unconditionally (just closed) so their mutation hooks
-// run on every render - mocked out rather than wrapping the tree in a
-// QueryClientProvider this suite otherwise has no use for
+// Every drawer and modal mounts unconditionally (just closed) so their
+// mutation/query hooks run on every render - mocked out rather than wrapping
+// the tree in a QueryClientProvider this suite otherwise has no use for
 jest.mock('@/app/shared/hooks/useBucketLists', () => ({
   useCreateBucketList: () => ({ mutate: jest.fn(), isPending: false }),
   useUpdateBucketList: () => ({ mutate: jest.fn(), isPending: false }),
 }));
 jest.mock('@/app/shared/hooks/useMoments', () => ({
   useCreateMoment: () => ({ mutate: jest.fn(), isPending: false }),
+}));
+jest.mock('@/app/shared/hooks/useAuth', () => ({
+  useGetInterestCategories: () => ({ data: [] }),
+  useGetUsers: () => ({ data: [], isFetching: false }),
+}));
+jest.mock('@/app/shared/hooks/useCommunities', () => ({
+  useCreateCommunity: () => ({ mutate: jest.fn(), isPending: false }),
+  useGetCommunities: () => ({ data: { data: { results: [] } }, isFetching: false }),
+}));
+jest.mock('@/context/LocationContext', () => ({
+  useLocation: () => ({ city: undefined, area: undefined, lat: undefined, lng: undefined }),
 }));
 
 // The trigger is the button wrapping the user's avatar
@@ -165,19 +176,24 @@ describe('AuthActions, Create menu', () => {
     expect(screen.getByText('Share a moment')).toBeInTheDocument();
   });
 
-  it('links Create a community and Connect a place straight to their pages', () => {
+  it('links Connect a place straight to its page', () => {
     render(<AuthActions />);
 
     fireEvent.click(screen.getByRole('button', { name: /Create/ }));
 
-    expect(screen.getByText('Create a community').closest('a')).toHaveAttribute(
-      'href',
-      '/communities/create',
-    );
     expect(screen.getByText('Connect a place').closest('a')).toHaveAttribute(
       'href',
       '/places/claim',
     );
+  });
+
+  it('opens the create-community drawer from Create a community', () => {
+    render(<AuthActions />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Create/ }));
+    fireEvent.click(screen.getByText('Create a community'));
+
+    expect(screen.getByRole('heading', { name: 'Create community' })).toBeInTheDocument();
   });
 
   it('sends a subscribed user straight to the create-experience page', () => {
