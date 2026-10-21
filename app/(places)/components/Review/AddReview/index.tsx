@@ -251,7 +251,7 @@ export const AddReview = ({
                             field.value >= value ? 'text-yellow-400' : 'text-gray-300'
                           }`}
                         >
-                          <StarIcon size={20} variant="solid" />
+                          <StarIcon size={20} variant="bulk" />
                         </button>
                       ))}
                     </div>

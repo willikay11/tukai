@@ -43,7 +43,12 @@ export const PlaceOwnerPanel = ({ placeId, placeName }: { placeId: string; place
   <div className="space-y-5">
     <div>
       <p className="flex items-center gap-2 text-sm font-medium text-primary">
-        <IconComponent iconName="CheckmarkBadge01Icon" size={18} color="currentColor" />
+        <IconComponent
+          iconName="CheckmarkBadge01Icon"
+          variant="bulk"
+          size={18}
+          color="currentColor"
+        />
         You manage this place
       </p>
       <h2 className="mt-2 text-xl font-bold text-gray-900">{placeName}</h2>

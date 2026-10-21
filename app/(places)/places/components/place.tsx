@@ -63,7 +63,7 @@ export const SinglePlace = ({ place }: { place: Place }) => {
         </div>
         <div className="inline-flex items-center">
           <StarIcon
-            variant="solid"
+            variant="twotone"
             size={14}
             className={clsx('mr-1', {
               'text-yellow-400': place.averageRating > 0,

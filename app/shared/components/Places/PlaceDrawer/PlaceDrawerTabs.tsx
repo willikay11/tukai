@@ -40,7 +40,7 @@ export const PlaceDrawerTabs = ({
           <IconComponent
             iconName={tab.icon}
             size={21}
-            variant={isActive ? 'solid' : 'twotone'}
+            variant={isActive ? 'bulk' : 'twotone'}
             color="currentColor"
           />
           {tab.label}

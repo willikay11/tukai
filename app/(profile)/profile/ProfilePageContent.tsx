@@ -131,7 +131,7 @@ export const ProfilePageContent = () => {
             {profile?.hasSubscribed && (
               <IconComponent
                 iconName="CheckmarkBadge01Icon"
-                variant="solid"
+                variant="bulk"
                 size={20}
                 color="currentColor"
                 className="flex-shrink-0 text-brand"

@@ -49,7 +49,7 @@ export const Nav = () => {
               size={18}
               color="currentColor"
               // The canvas fills the chosen tab's icon and outlines the rest
-              variant={active ? 'solid' : 'twotone'}
+              variant={active ? 'bulk' : 'twotone'}
             />
             {tab.label}
           </Link>

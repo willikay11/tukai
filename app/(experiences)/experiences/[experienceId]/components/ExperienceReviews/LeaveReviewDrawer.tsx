@@ -123,7 +123,7 @@ export const LeaveReviewDrawer = ({
                   >
                     <IconComponent
                       iconName="StarIcon"
-                      variant="solid"
+                      variant="bulk"
                       size={30}
                       color="currentColor"
                       className={value <= score ? 'text-yellow-400' : 'text-gray-200'}

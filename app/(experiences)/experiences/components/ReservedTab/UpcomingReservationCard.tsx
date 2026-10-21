@@ -50,7 +50,7 @@ export const UpcomingReservationCard = ({
               <IconComponent
                 iconName="ShoppingBasketCheckIn01Icon"
                 size={16}
-                variant="solid"
+                variant="bulk"
                 className="text-primary"
               />
             </div>

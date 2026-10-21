@@ -4,8 +4,6 @@ import { useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 
-import { CheckmarkBadge02Icon } from '@hugeicons/react-pro';
-
 import { IconComponent } from '@/app/shared/components';
 import { SendMessage } from '@/app/shared/components/SendMessage/SendMessage';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -45,9 +43,11 @@ export const ExperienceOrganiser = ({ experience }: { experience: Experience }) 
                 {experience.host.displayName ||
                   `${experience.host.firstName} ${experience.host.lastName}`}
               </p>
-              <CheckmarkBadge02Icon
+              <IconComponent
+                iconName="CheckmarkBadge01Icon"
+                variant="bulk"
                 size={16}
-                variant="solid"
+                color="currentColor"
                 className="flex-shrink-0 text-primary"
               />
             </div>

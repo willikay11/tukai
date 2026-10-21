@@ -2,28 +2,29 @@
 
 import React from 'react';
 
-import { ShoppingBasketDone02Icon, StarIcon } from '@hugeicons-pro/core-bulk-rounded';
+import * as BulkIcons from '@hugeicons-pro/core-bulk-rounded';
+import * as DuotoneIcons from '@hugeicons-pro/core-duotone-rounded';
 import * as SolidIcons from '@hugeicons-pro/core-solid-rounded';
 import * as Icons from '@hugeicons-pro/core-twotone-rounded';
 import { HugeiconsIcon } from '@hugeicons/react';
 
 /**
  * The style is the PACKAGE an icon comes from, not a prop on the icon - so a
- * variant exists here only once its package is a dependency. `bulk` is the
- * filled-with-a-tinted-counterpart style the designs use for a control that is
- * already switched on, where `twotone` is the same icon switched off.
+ * variant exists here only once its package is a dependency. `twotone` is the
+ * default, unselected look. `bulk` is the filled-with-a-tinted-counterpart
+ * style the designs use for a control that is already switched on (the
+ * active tab, a liked heart, a verified badge). `duotone` is reserved for the
+ * Create menu and the "Share moment" trigger - nowhere else uses it.
  *
- * ⚠️ Named imports, not `import * as`. The two wildcard imports below are
- * indexed by a runtime string, so the bundler cannot tell which icons are
- * reachable and ships all of them - which is most of this app's First Load JS.
- * Adding a third set that way cost 3.5MB a route. Bulk is used by a few
- * controls, so it lists the icons they use; add a line here when another needs it.
+ * All four are `import * as`, indexed by a runtime string, so the bundler
+ * ships every icon in each package rather than tree-shaking to what's used.
+ * That's the deliberate tradeoff for having every variant available on every
+ * icon instead of maintaining a hand-picked subset per style.
  */
-const BULK_ICONS = { ShoppingBasketDone02Icon, StarIcon };
-
 type TwotoneIconName = keyof typeof Icons;
 type SolidIconName = keyof typeof SolidIcons;
-type BulkIconName = keyof typeof BULK_ICONS;
+type BulkIconName = keyof typeof BulkIcons;
+type DuotoneIconName = keyof typeof DuotoneIcons;
 
 function isValidTwotoneIconName(name: string): name is TwotoneIconName {
   return name in Icons;
@@ -34,7 +35,11 @@ function isValidSolidIconName(name: string): name is SolidIconName {
 }
 
 function isValidBulkIconName(name: string): name is BulkIconName {
-  return name in BULK_ICONS;
+  return name in BulkIcons;
+}
+
+function isValidDuotoneIconName(name: string): name is DuotoneIconName {
+  return name in DuotoneIcons;
 }
 
 export const IconComponent = ({
@@ -48,10 +53,14 @@ export const IconComponent = ({
   size?: number;
   color?: string;
   className?: string;
-  variant?: 'solid' | 'twotone' | 'bulk';
+  variant?: 'solid' | 'twotone' | 'bulk' | 'duotone';
 }) => {
   if (variant === 'bulk' && isValidBulkIconName(iconName)) {
-    const iconComponent = BULK_ICONS[iconName];
+    const iconComponent = BulkIcons[iconName];
+    return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className} />;
+  }
+  if (variant === 'duotone' && isValidDuotoneIconName(iconName)) {
+    const iconComponent = DuotoneIcons[iconName];
     return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className} />;
   }
   if (variant === 'solid' && isValidSolidIconName(iconName)) {

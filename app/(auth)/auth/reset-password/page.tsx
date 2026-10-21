@@ -113,7 +113,7 @@ export default function Page() {
                 name="password"
                 placeholder="Create Password"
                 type="password"
-                icon={<LockKeyIcon size={16} />}
+                icon={<LockKeyIcon size={16} variant="twotone" />}
                 refs={register('password', {
                   required: 'Please enter your password',
                   // onBlur: (e) => (password = e.target.value),
@@ -127,7 +127,7 @@ export default function Page() {
                 name="confirmPassword"
                 placeholder="Confirm Password"
                 type="password"
-                icon={<LockKeyIcon size={16} />}
+                icon={<LockKeyIcon size={16} variant="twotone" />}
                 refs={register('confirmPassword', {
                   required: 'Please enter your password',
                   // pattern: {

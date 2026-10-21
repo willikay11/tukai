@@ -105,7 +105,7 @@ export const CommunityDrawer = ({
                   <IconComponent
                     iconName="CheckmarkBadge01Icon"
                     size={20}
-                    variant="solid"
+                    variant="bulk"
                     color="currentColor"
                     className="flex-shrink-0 text-primary"
                   />

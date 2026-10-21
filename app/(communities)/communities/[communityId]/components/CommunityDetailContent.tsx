@@ -74,6 +74,7 @@ export const CommunityDetailContent = ({
             {community.verified && (
               <IconComponent
                 iconName="CheckmarkBadge01Icon"
+                variant="bulk"
                 size={22}
                 className="flex-shrink-0 text-primary"
               />

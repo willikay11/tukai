@@ -5,8 +5,6 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
-import { CheckmarkBadge02Icon } from '@hugeicons/react-pro';
-
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { SendMessage } from '@/app/shared/components/SendMessage/SendMessage';
@@ -117,7 +115,13 @@ export const ExperienceHostSection = ({ experience }: { experience: Experience }
                   <p className="truncate text-[15px] font-semibold text-brand-ink">
                     {host.displayName || `${host.firstName ?? ''} ${host.lastName ?? ''}`.trim()}
                   </p>
-                  <CheckmarkBadge02Icon size={16} variant="solid" className="flex-shrink-0 text-brand" />
+                  <IconComponent
+                    iconName="CheckmarkBadge01Icon"
+                    variant="bulk"
+                    size={16}
+                    color="currentColor"
+                    className="flex-shrink-0 text-brand"
+                  />
                 </div>
                 <p className="text-[14px] text-ink-muted">{hostedLabel}</p>
               </div>

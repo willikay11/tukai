@@ -472,7 +472,7 @@ export const CreateExperienceSteps = ({
                 <IconComponent
                   iconName={step.icon}
                   size={16}
-                  variant={isFilled ? 'solid' : 'twotone'}
+                  variant={isFilled ? 'bulk' : 'twotone'}
                   className="sm:w-5"
                 />
               </div>

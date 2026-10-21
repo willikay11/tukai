@@ -2,10 +2,6 @@
 
 import * as React from 'react';
 
-import {
-  ArrowLeft01TwotoneRounded,
-  ArrowRight01TwotoneRounded,
-} from '@hugeicons-pro/core-twotone-rounded';
 import useEmblaCarousel, { type UseEmblaCarouselType } from 'embla-carousel-react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
@@ -201,7 +197,7 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
         onClick={scrollPrev}
         {...props}
       >
-        <IconComponent iconName="ArrowLeft01TwotoneRounded" size={20} />
+        <IconComponent iconName="ArrowLeft01Icon" size={20} />
         <span className="sr-only">Previous slide</span>
       </Button>
     );
@@ -229,7 +225,7 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
         onClick={scrollNext}
         {...props}
       >
-        <IconComponent iconName="ArrowRight01TwotoneRounded" size={20} />
+        <IconComponent iconName="ArrowRight01Icon" size={20} />
         <span className="sr-only">Next slide</span>
       </Button>
     );
