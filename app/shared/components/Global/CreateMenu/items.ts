@@ -22,7 +22,6 @@ export const CREATE_MENU_ITEMS: CreateMenuItem[] = [
     label: 'Create a community',
     description: 'Needed before you can host or manage a place.',
     icon: 'UserGroupIcon',
-    href: '/communities/create',
   },
   {
     id: 'place',

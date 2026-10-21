@@ -31,6 +31,13 @@ type LocationContextType = LocationState & {
   setCity: (city: string) => void;
   requestLocation: () => void;
   setLocation: (lat: number, lng: number) => void;
+  /**
+   * The Google place id of the reverse-geocoded point, from the same
+   * geocoding call that resolves `city`/`area`. A community created without
+   * asking the reader for a city (the create-community drawer) sends this as
+   * its `google_map_place_id` instead.
+   */
+  placeId?: string;
 };
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
@@ -43,6 +50,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [status, setStatus] = useState<LocationState['status']>('idle');
   const [city, setCity] = useState<string | undefined>(undefined);
   const [area, setArea] = useState<string | undefined>(undefined);
+  const [placeId, setPlaceId] = useState<string | undefined>(undefined);
   const [isUsingLocation, setIsUsingLocation] = useState(false);
 
   const save = (lat?: number, lng?: number, st?: LocationState['status']) => {
@@ -134,6 +142,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
 
         if (locality) setCity(locality);
         setArea([neighbourhood, locality].filter(Boolean).join(', ') || undefined);
+        setPlaceId(data?.results?.[0]?.place_id);
       } catch (error) {
         // A city we cannot resolve is a label that stays as it was, not a
         // failure worth showing anyone
@@ -176,6 +185,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
         status,
         city,
         area,
+        placeId,
         isUsingLocation,
         setUsingLocation,
         setCity,
