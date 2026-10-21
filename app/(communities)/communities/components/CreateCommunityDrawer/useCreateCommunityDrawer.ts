@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useGetInterestCategories, useGetUsers } from '@/app/shared/hooks/useAuth';
 import { useCreateCommunity, useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { toast } from '@/app/shared/hooks/useToast';
+import { useCommunityDrawer } from '@/context/CommunityDrawerContext';
 import { useLocation } from '@/context/LocationContext';
 import { Community } from '@/types/community';
 import { communityPath } from '@/utils/detail-paths';
@@ -37,6 +38,7 @@ const MAX_PHOTOS = 6;
 export const useCreateCommunityDrawer = (onOpenChange: (open: boolean) => void) => {
   const router = useRouter();
   const location = useLocation();
+  const communityDrawer = useCommunityDrawer();
 
   const [view, setView] = useState<CreateCommunityDrawerView>('form');
   const [photos, setPhotos] = useState<DraftPhoto[]>([]);
@@ -74,7 +76,8 @@ export const useCreateCommunityDrawer = (onOpenChange: (open: boolean) => void) 
     return (users as any[])
       .map((user) => ({
         id: user.id,
-        name: user.displayName || `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.email,
+        name:
+          user.displayName || `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.email,
         email: user.email,
         image: user.picture,
       }))
@@ -190,8 +193,12 @@ export const useCreateCommunityDrawer = (onOpenChange: (open: boolean) => void) 
     const title = name.trim();
     if (!title) return;
 
-    const memberIds = invitedPeople.filter((person) => !person.id.startsWith('email-')).map((p) => p.id);
-    const emails = invitedPeople.filter((person) => person.id.startsWith('email-')).map((p) => p.email!);
+    const memberIds = invitedPeople
+      .filter((person) => !person.id.startsWith('email-'))
+      .map((p) => p.id);
+    const emails = invitedPeople
+      .filter((person) => person.id.startsWith('email-'))
+      .map((p) => p.email!);
 
     createCommunity(
       {
@@ -207,25 +214,18 @@ export const useCreateCommunityDrawer = (onOpenChange: (open: boolean) => void) 
       },
       {
         onSuccess: (response: any) => {
-          const invitedCount = memberIds.length + emails.length;
-          const invitesNote =
-            invitedCount === 1
-              ? ' Invites are on their way to 1 person.'
-              : invitedCount > 1
-                ? ` Invites are on their way to ${invitedCount} people.`
-                : '';
-
-          toast({ title: `${title} is ready.${invitesNote}` });
-
           const createdId = response?.data?.id;
           const createdSlug = response?.data?.slug;
 
           resetDraft();
           onOpenChange(false);
 
-          if (createdId) {
-            router.push(communityPath({ id: createdId, slug: createdSlug }));
-          }
+          if (!createdId) return;
+
+          // The drawer itself is the confirmation that it is ready - opening
+          // straight into it needs no toast on top
+          if (communityDrawer) communityDrawer.openCommunity(createdId);
+          else router.push(communityPath({ id: createdId, slug: createdSlug }));
         },
         onError: (error: Error) => {
           toast({

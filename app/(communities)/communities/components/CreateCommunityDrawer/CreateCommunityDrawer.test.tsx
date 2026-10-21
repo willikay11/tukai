@@ -35,8 +35,17 @@ jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useGetCommunities: () => ({ data: { data: { results: [] } }, isFetching: false }),
 }));
 
+const openCommunity = jest.fn();
+let communityDrawer: { openCommunity: typeof openCommunity } | null = null;
+jest.mock('@/context/CommunityDrawerContext', () => ({
+  useCommunityDrawer: () => communityDrawer,
+}));
+
 describe('CreateCommunityDrawer', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    communityDrawer = null;
+  });
 
   it('keeps Create community disabled until a name is entered', async () => {
     const user = userEvent.setup();
@@ -87,7 +96,7 @@ describe('CreateCommunityDrawer', () => {
     );
   });
 
-  it('pushes to the new community once creation succeeds', async () => {
+  it('falls back to the full page where no drawer is mounted', async () => {
     const user = userEvent.setup();
     const onOpenChange = jest.fn();
     createCommunity.mockImplementation((_payload, { onSuccess }) =>
@@ -101,6 +110,27 @@ describe('CreateCommunityDrawer', () => {
 
     expect(onOpenChange).toHaveBeenCalledWith(false);
     expect(mockPush).toHaveBeenCalledWith('/communities/nairobi-trail-runners');
+  });
+
+  // The drawer itself is the confirmation that the community is ready -
+  // opening straight into it replaces the old "created" toast and the
+  // navigation to its own page
+  it('opens the new community in its drawer, with no toast, where one is mounted', async () => {
+    communityDrawer = { openCommunity };
+    const user = userEvent.setup();
+    const onOpenChange = jest.fn();
+    createCommunity.mockImplementation((_payload, { onSuccess }) =>
+      onSuccess({ data: { id: 'c1', slug: 'nairobi-trail-runners' } }),
+    );
+
+    render(<CreateCommunityDrawer open onOpenChange={onOpenChange} />);
+
+    await user.type(screen.getByPlaceholderText('Add a name'), 'Nairobi Trail Runners');
+    await user.click(screen.getByRole('button', { name: 'Create community' }));
+
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(openCommunity).toHaveBeenCalledWith('c1');
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
   it('switches to the preview view and back', async () => {

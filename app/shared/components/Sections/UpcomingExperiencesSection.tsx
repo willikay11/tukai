@@ -45,13 +45,17 @@ export const UpcomingExperiencesSection = ({
   hostName,
   experiences,
   isLoading,
+  id = 'experiences',
 }: {
   // Whoever hosts them - a community, or a place
   hostName: string;
   experiences: Experience[];
   isLoading: boolean;
+  /** Overridden where a caller's own ids could collide with this one's - a
+   * drawer open over the page this section already lives on, say. */
+  id?: string;
 }) => (
-  <SectionShell id="experiences" title="Upcoming Experiences" subtitle={`Hosted by ${hostName}`}>
+  <SectionShell id={id} title="Upcoming Experiences" subtitle={`Hosted by ${hostName}`}>
     {isLoading ? (
       <div className="space-y-3">
         {Array.from({ length: 2 }).map((_, index) => (
