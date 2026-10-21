@@ -1,9 +1,12 @@
 'use client';
 
+import { MouseEvent } from 'react';
+
 import { MediaRow } from '@/app/(experiences)/components/MediaRow';
 import { AvatarStack } from '@/app/(experiences)/experiences/components/AvatarStack';
 import { savedLine } from '@/app/(experiences)/experiences/components/BucketListCard/bucket-list-card';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { useBucketListDrawer } from '@/context/BucketListDrawerContext';
 import { BucketList, bucketListCoverPhoto } from '@/types/bucket-list';
 import { linkedUserName } from '@/types/user';
 import { CANVAS_ICONS } from '@/utils/canvas-icons';
@@ -23,9 +26,20 @@ export const BucketListRow = ({
   bucketList: BucketList;
   priority?: boolean;
 }) => {
+  const drawer = useBucketListDrawer();
   const owner = bucketList.owner;
   const ownerName = owner ? linkedUserName(owner) : '';
   const faces = owner ? [{ id: owner.id, name: ownerName, picture: owner.picture }] : [];
+
+  // A plain click opens the list in the drawer; the row keeps its href so a
+  // modifier click, a new tab, or a copied address still reaches the page
+  const handleOpen = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!drawer) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    event.preventDefault();
+    drawer.openBucketList(bucketList.id);
+  };
 
   return (
     <MediaRow
@@ -33,6 +47,7 @@ export const BucketListRow = ({
       photo={bucketListCoverPhoto(bucketList)}
       title={bucketList.name}
       priority={priority}
+      onClick={handleOpen}
     >
       {ownerName && (
         <span className="truncate text-sm text-ink-muted">

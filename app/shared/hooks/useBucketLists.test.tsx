@@ -3,7 +3,12 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 
-import { useAddBucketListItem, useRemoveBucketListItem } from './useBucketLists';
+import {
+  useAddBucketListItem,
+  useJoinBucketList,
+  useLeaveBucketList,
+  useRemoveBucketListItem,
+} from './useBucketLists';
 
 jest.mock('@/services/bucket-list', () => ({
   addBucketListItem: jest.fn().mockResolvedValue({ success: true }),
@@ -12,7 +17,8 @@ jest.mock('@/services/bucket-list', () => ({
   deleteBucketList: jest.fn(),
   fetchBucketList: jest.fn(),
   fetchMyBucketLists: jest.fn(),
-  joinBucketList: jest.fn(),
+  joinBucketList: jest.fn().mockResolvedValue({ success: true }),
+  leaveBucketList: jest.fn().mockResolvedValue({ success: true }),
   updateBucketList: jest.fn(),
 }));
 
@@ -66,5 +72,34 @@ describe('saving to a bucket list', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(invalidated).toEqual(expect.arrayContaining(['experiences', 'places']));
+  });
+});
+
+describe('joining and leaving a list', () => {
+  /**
+   * A drawer left open on the list a reader just joined or left reads its own
+   * `['bucket-list', id]` cache, not `['bucket-lists']` - without this it kept
+   * showing the button for whichever side the reader had just pressed.
+   */
+  it('re-reads the list itself after joining, not just the collection', async () => {
+    const { wrapper, invalidated } = setup();
+    const { result } = renderHook(() => useJoinBucketList(), { wrapper });
+
+    result.current.mutate('share-abc');
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(invalidated).toEqual(expect.arrayContaining(['bucket-lists', 'bucket-list']));
+  });
+
+  it('does the same after leaving', async () => {
+    const { wrapper, invalidated } = setup();
+    const { result } = renderHook(() => useLeaveBucketList(), { wrapper });
+
+    result.current.mutate('bl1');
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(invalidated).toEqual(expect.arrayContaining(['bucket-lists', 'bucket-list']));
   });
 });

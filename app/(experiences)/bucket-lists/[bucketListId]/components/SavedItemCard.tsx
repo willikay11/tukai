@@ -23,7 +23,14 @@ import { moneyAmount } from '@/utils/money';
  * price, dates, city. Enough for a card, and one request rather than one per
  * saved thing.
  */
-export const SavedExperienceCard = ({ item }: { item: BucketListItem }) => {
+export const SavedExperienceCard = ({
+  item,
+  onNavigate,
+}: {
+  item: BucketListItem;
+  /** Run before the link is followed - closing a drawer this card sits in. */
+  onNavigate?: () => void;
+}) => {
   const bookmark = item.experienceBookmark;
   const href = bucketListItemHref(item);
   const name = bookmark?.experienceTitle ?? 'Saved experience';
@@ -41,6 +48,7 @@ export const SavedExperienceCard = ({ item }: { item: BucketListItem }) => {
       name={name}
       photo={bucketListItemPhoto(item)}
       experienceId={bookmark?.experienceId}
+      onNavigate={onNavigate}
       // The shape an experience takes on the experiences listing: square
       shape="aspect-square rounded-xl"
     >
@@ -57,7 +65,14 @@ export const SavedExperienceCard = ({ item }: { item: BucketListItem }) => {
   );
 };
 
-export const SavedPlaceCard = ({ item }: { item: BucketListItem }) => {
+export const SavedPlaceCard = ({
+  item,
+  onNavigate,
+}: {
+  item: BucketListItem;
+  /** Run before the link is followed - closing a drawer this card sits in. */
+  onNavigate?: () => void;
+}) => {
   const bookmark = item.placeBookmark;
   const location = bucketListItemLocation(item);
 
@@ -67,6 +82,7 @@ export const SavedPlaceCard = ({ item }: { item: BucketListItem }) => {
       name={bookmark?.placeName ?? 'Saved place'}
       photo={bucketListItemPhoto(item)}
       placeId={bookmark?.placeId}
+      onNavigate={onNavigate}
       // And the shape a place takes on the places listing
       shape="aspect-square rounded-[5px]"
     >
@@ -82,6 +98,7 @@ const SavedCard = ({
   experienceId,
   placeId,
   shape,
+  onNavigate,
   children,
 }: {
   href: string | null;
@@ -91,6 +108,7 @@ const SavedCard = ({
   placeId?: string;
   /** Aspect and radius, taken from the listing this kind appears on */
   shape: string;
+  onNavigate?: () => void;
   children?: React.ReactNode;
 }) => {
   const card = (
@@ -126,7 +144,7 @@ const SavedCard = ({
   if (!href) return <div className="w-full">{card}</div>;
 
   return (
-    <Link href={href} className="block w-full">
+    <Link href={href} onClick={onNavigate} className="block w-full">
       {card}
     </Link>
   );
