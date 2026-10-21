@@ -12,16 +12,20 @@ export const MomentsGridSection = ({
   hostName,
   moments,
   isLoading,
+  id = 'moments',
 }: {
   // Whoever they were posted at - a community, or a place
   hostName: string;
   moments: Moment[];
   isLoading: boolean;
+  /** Overridden where a caller's own ids could collide with this one's - a
+   * drawer open over the page this section already lives on, say. */
+  id?: string;
 }) => {
   const [openMoment, setOpenMoment] = useState<Moment | null>(null);
 
   return (
-    <SectionShell id="moments" title={`Moments at ${hostName}`}>
+    <SectionShell id={id} title={`Moments at ${hostName}`}>
       {isLoading ? (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
