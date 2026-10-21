@@ -15,13 +15,13 @@ export const CREATE_MENU_ITEMS: CreateMenuItem[] = [
     id: 'experience',
     label: 'Create an experience',
     description: 'Requires a community you own.',
-    icon: 'Calendar03Icon',
+    icon: 'CalendarAdd01Icon',
   },
   {
     id: 'community',
     label: 'Create a community',
     description: 'Needed before you can host or manage a place.',
-    icon: 'UserGroupIcon',
+    icon: 'UserMultipleIcon',
   },
   {
     id: 'place',
@@ -40,6 +40,6 @@ export const CREATE_MENU_ITEMS: CreateMenuItem[] = [
     id: 'moment',
     label: 'Share a moment',
     description: 'Attach it to a community, place or experience.',
-    icon: 'Camera01Icon',
+    icon: 'DashboardCircleAddIcon',
   },
 ];

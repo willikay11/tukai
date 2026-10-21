@@ -111,7 +111,7 @@ const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: s
           <IconComponent
             iconName="FavouriteIcon"
             size={14}
-            variant={isLiked ? 'solid' : 'twotone'}
+            variant={isLiked ? 'bulk' : 'twotone'}
             className={isLiked ? 'text-red-500' : 'text-gray-400'}
           />
           <span className="text-xs text-gray-500">{likeCount}</span>

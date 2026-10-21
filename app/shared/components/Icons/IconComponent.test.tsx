@@ -31,6 +31,11 @@ jest.mock('@hugeicons-pro/core-solid-rounded', () => ({
 
 jest.mock('@hugeicons-pro/core-bulk-rounded', () => ({
   ShoppingBasketDone02Icon: { name: 'ShoppingBasketDone02Icon' },
+  StarIcon: { name: 'StarIcon' },
+}));
+
+jest.mock('@hugeicons-pro/core-duotone-rounded', () => ({
+  CalendarAdd01Icon: { name: 'CalendarAdd01Icon' },
 }));
 
 describe('IconComponent', () => {
@@ -225,12 +230,7 @@ describe('IconComponent', () => {
       );
     });
 
-    /**
-     * Bulk lists the icons it carries by name rather than importing the whole
-     * package, which the bundler cannot tree-shake. Anything not on that list
-     * draws nothing until a line is added for it.
-     */
-    it('returns null for a name the bulk list does not carry', () => {
+    it('returns null for a name the bulk package does not carry', () => {
       const { container } = render(<IconComponent iconName="Calendar01Icon" variant="bulk" />);
 
       expect(container.firstChild).toBeNull();
@@ -257,6 +257,29 @@ describe('IconComponent', () => {
       const icon = screen.getByTestId('hugeicons-icon');
       expect(icon).toHaveAttribute('data-size', '21');
       expect(icon).toHaveAttribute('data-color', 'currentColor');
+    });
+  });
+
+  describe('rendering with duotone variant', () => {
+    it('renders a duotone icon', () => {
+      render(<IconComponent iconName="CalendarAdd01Icon" variant="duotone" />);
+
+      expect(screen.getByTestId('hugeicons-icon')).toHaveAttribute(
+        'data-icon',
+        'CalendarAdd01Icon',
+      );
+    });
+
+    it('returns null for a name the duotone package does not carry', () => {
+      const { container } = render(<IconComponent iconName="Calendar01Icon" variant="duotone" />);
+
+      expect(container.firstChild).toBeNull();
+    });
+
+    it('does not fall back to another style', () => {
+      const { container } = render(<IconComponent iconName="Cancel01Icon" variant="duotone" />);
+
+      expect(container.firstChild).toBeNull();
     });
   });
 });

@@ -62,7 +62,7 @@ export const CategoryChipRow = ({
               {chip.icon && (
                 <IconComponent
                   iconName={chip.icon}
-                  variant={isOn ? 'solid' : 'twotone'}
+                  variant={isOn ? 'bulk' : 'twotone'}
                   size={20}
                   color="currentColor"
                   className="flex-shrink-0"

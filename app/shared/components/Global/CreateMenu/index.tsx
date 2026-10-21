@@ -20,6 +20,7 @@ const MenuRow = ({ item, onSelect }: { item: CreateMenuItem; onSelect: () => voi
     <>
       <IconComponent
         iconName={item.icon}
+        variant="duotone"
         size={20}
         color="currentColor"
         className="mt-0.5 flex-shrink-0 text-brand"

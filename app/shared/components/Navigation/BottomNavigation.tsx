@@ -89,7 +89,7 @@ export const BottomNavigation = () => {
                     iconName={link.icon}
                     size={22}
                     color="currentColor"
-                    variant={active ? 'solid' : 'twotone'}
+                    variant={active ? 'bulk' : 'twotone'}
                   />
                 )}
               </span>

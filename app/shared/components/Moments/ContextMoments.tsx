@@ -98,6 +98,7 @@ export const ContextMoments = ({
     >
       <IconComponent
         iconName="DashboardCircleAddIcon"
+        variant="duotone"
         size={isPanel ? 19 : 20}
         color="currentColor"
       />

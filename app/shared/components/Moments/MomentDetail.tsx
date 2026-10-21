@@ -136,7 +136,7 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
           <IconComponent
             iconName="FavouriteIcon"
             size={20}
-            variant={isLiked ? 'solid' : 'twotone'}
+            variant={isLiked ? 'bulk' : 'twotone'}
             className={isLiked ? 'text-red-500' : 'text-gray-500'}
           />
           <span className="text-sm text-gray-700">{likeCount}</span>

@@ -98,7 +98,7 @@ export const Post = ({
         >
           <FavouriteIcon
             size={20}
-            variant={isLiked ? 'solid' : 'stroke'}
+            variant={isLiked ? 'bulk' : 'twotone'}
             className={isLiked ? 'text-red-500' : ''}
           />
           <span className="text-sm">{likesCount} Likes</span>
@@ -108,7 +108,7 @@ export const Post = ({
           size="sm"
           className="flex items-center gap-2 px-2 py-1 text-gray-600 hover:text-gray-900"
         >
-          <Message02Icon size={20} variant="stroke" />
+          <Message02Icon size={20} variant="twotone" />
           <span className="text-sm">Comment</span>
         </Button>
       </div>

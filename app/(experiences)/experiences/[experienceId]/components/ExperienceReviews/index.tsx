@@ -32,7 +32,7 @@ const Stars = ({ score, size = 14 }: { score: number; size?: number }) => (
       <IconComponent
         key={index}
         iconName="StarIcon"
-        variant="solid"
+        variant="bulk"
         size={size}
         color="currentColor"
         className={index < Math.round(score) ? 'text-yellow-400' : 'text-gray-200'}

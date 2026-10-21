@@ -20,65 +20,65 @@ import { Anchor, Button } from '@/app/shared/components/Forms';
 
 const features = [
   {
-    icon: <WorkoutRunIcon size={20} className="text-blue-500" />,
+    icon: <WorkoutRunIcon size={20} variant="twotone" className="text-blue-500" />,
     title: 'Discover Activities',
     description:
       'Get access to unlimited activities such as hiking, camping, bike riding, Drives, Sunset watching etc',
   },
   {
-    icon: <RouteBlockIcon size={20} className="text-yellow-600" />,
+    icon: <RouteBlockIcon size={20} variant="twotone" className="text-yellow-600" />,
     title: 'Discover & Visit Places',
     description:
       'Access hiking places, parks, mountains and all the fun places you love. You can also plan your trips.',
   },
   {
-    icon: <Edit01Icon size={20} className="text-rose-500" />,
+    icon: <Edit01Icon size={20} variant="twotone" className="text-rose-500" />,
     title: 'Create Activities',
     description:
       'Planning a free or payable hiking, biking or even a camping trip? Create it and invite others.',
   },
   {
-    icon: <UserGroupIcon size={20} className="text-indigo-500" />,
+    icon: <UserGroupIcon size={20} variant="twotone" className="text-indigo-500" />,
     title: 'Follow Different Groups, Places & Members',
     description:
       'Whether you like biking or camping or specific people, you can follow them and keep updated when they post.',
   },
   {
-    icon: <Share08Icon size={20} className="text-pink-600" />,
+    icon: <Share08Icon size={20} variant="twotone" className="text-pink-600" />,
     title: 'Share your Activities',
     description:
       'A 20K hike is such a great achievement, why don’t you share that with friends on Whatsapp or Instagram.',
   },
   {
-    icon: <Message02Icon size={20} className="text-orange-500" />,
+    icon: <Message02Icon size={20} variant="twotone" className="text-orange-500" />,
     title: 'Comment and like community posts',
     description: 'Make those posts interactive by commenting or liking posts from the community.',
   },
   {
-    icon: <CheckListIcon size={20} className="text-indigo-600" />,
+    icon: <CheckListIcon size={20} variant="twotone" className="text-indigo-600" />,
     title: 'Create Your List',
     description:
       'You like an activity but don’t have time yet to join in, create you own list and revisit later.',
   },
   {
-    icon: <UserCheck01Icon size={20} className="text-green-500" />,
+    icon: <UserCheck01Icon size={20} variant="twotone" className="text-green-500" />,
     title: 'Vetted Activity Planners',
     description:
       'Whether you like biking or camping or specific people, you can follow them and keep updated when they post.',
   },
   {
-    icon: <TickDouble01Icon size={20} className="text-yellow-600" />,
+    icon: <TickDouble01Icon size={20} variant="twotone" className="text-yellow-600" />,
     title: 'Track Your Progress',
     description:
       'Check different activities you have participated in the past. When you decide to, for example, hike a place, we’ll track that.',
   },
   {
-    icon: <MapsLocation02Icon size={20} className="text-blue-500" />,
+    icon: <MapsLocation02Icon size={20} variant="twotone" className="text-blue-500" />,
     title: 'Maps to Different Places',
     description: 'Get a detailed location details to different places or activities. ',
   },
   {
-    icon: <ViewOffIcon size={20} className="text-pink-500" />,
+    icon: <ViewOffIcon size={20} variant="twotone" className="text-pink-500" />,
     title: 'No Ads',
     description: 'Yup, no adverts.',
   },

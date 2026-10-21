@@ -52,7 +52,7 @@ export const CommunityAnchorTabs = ({
             <IconComponent
               iconName={tab.icon}
               size={16}
-              variant={isActive ? 'solid' : 'twotone'}
+              variant={isActive ? 'bulk' : 'twotone'}
               color="currentColor"
               className={isActive ? 'text-primary' : 'text-gray-500'}
             />

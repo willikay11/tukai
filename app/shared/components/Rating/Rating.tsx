@@ -18,7 +18,7 @@ export const Rating = ({
         Array.from({ length: rating }).map((_, index) => (
           <StarIcon
             key={index}
-            variant="solid"
+            variant="bulk"
             size={14}
             className={clsx('mr-0.5', {
               'text-yellow-400': rating > 0,
@@ -28,7 +28,7 @@ export const Rating = ({
         ))
       ) : (
         <StarIcon
-          variant="solid"
+          variant="bulk"
           size={14}
           className={clsx('mr-1', {
             'text-yellow-400': rating > 0,

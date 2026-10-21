@@ -8,7 +8,7 @@ export { LocationAutocompleteField, LocationPrompt } from './LocationPicker';
 export { Button, Input, OtpInput, Anchor, Loader, FileUploadField } from './Forms';
 
 // Icons
-export { IconComponent, IconRadioButtonGroup } from './Icons';
+export { IconComponent } from './Icons';
 
 // Download
 export { DownloadApp, MobileStore } from './Download';

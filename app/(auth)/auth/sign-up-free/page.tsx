@@ -88,7 +88,7 @@ export default function Page() {
             placeholder="First Name"
             defaultValue={newUser?.payload?.firstName}
             type="text"
-            icon={<UserIcon size={16} />}
+            icon={<UserIcon size={16} variant="twotone" />}
             refs={register('firstName', {
               required: 'Please enter your first name',
             })}
@@ -99,7 +99,7 @@ export default function Page() {
             placeholder="Last Name"
             defaultValue={newUser?.payload?.lastName}
             type="text"
-            icon={<UserIcon size={16} />}
+            icon={<UserIcon size={16} variant="twotone" />}
             refs={register('lastName', {
               required: 'Please enter your last name',
             })}
@@ -113,7 +113,7 @@ export default function Page() {
             placeholder="Enter Email Address"
             defaultValue={newUser?.payload?.email}
             type="text"
-            icon={<Mail02Icon size={16} />}
+            icon={<Mail02Icon size={16} variant="twotone" />}
             refs={register('email', {
               required: 'Please enter your email address',
               pattern: {
@@ -140,7 +140,7 @@ export default function Page() {
             placeholder="Enter Password"
             type="password"
             defaultValue={newUser?.payload?.password}
-            icon={<LockKeyIcon size={16} />}
+            icon={<LockKeyIcon size={16} variant="twotone" />}
             refs={register('password', {
               required: 'Please enter your password',
             })}
@@ -154,7 +154,7 @@ export default function Page() {
             placeholder="Confirm Password"
             defaultValue={newUser?.payload?.password}
             type="password"
-            icon={<LockKeyIcon size={16} />}
+            icon={<LockKeyIcon size={16} variant="twotone" />}
             refs={register('confirmPassword', {
               required: 'Please enter your password',
               // pattern: {

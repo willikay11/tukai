@@ -70,7 +70,7 @@ export const ViewComment = ({
           }}
         >
           <FavouriteIcon
-            variant={isLiked ? 'solid' : 'twotone'}
+            variant={isLiked ? 'bulk' : 'twotone'}
             size={40}
             className={`${isLiked ? 'text-red-500' : 'text-gray-500'}`}
           />

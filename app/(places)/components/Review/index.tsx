@@ -210,7 +210,7 @@ export const Review = ({
                   onClick={handleLikeReview}
                 >
                   <FavouriteIcon
-                    variant={isLiked ? 'solid' : 'twotone'}
+                    variant={isLiked ? 'bulk' : 'twotone'}
                     size={20}
                     className={isLiked ? 'text-red-500' : 'text-gray-800'}
                   />
@@ -221,7 +221,7 @@ export const Review = ({
                   className="h-11 gap-[7px] text-[14.5px] text-gray-800"
                   onClick={() => setIsOpen(true)}
                 >
-                  <Message02Icon size={20} />
+                  <Message02Icon size={20} variant="twotone" />
                   <span>{review.totalComments} Comments</span>
                 </Button>
               </div>
@@ -279,14 +279,14 @@ export const Review = ({
         <div className="mt-2 flex inline-flex">
           <Button variant="text" className="mr-3" onClick={handleLikeReview}>
             <FavouriteIcon
-              variant={isLiked ? 'solid' : 'twotone'}
+              variant={isLiked ? 'bulk' : 'twotone'}
               size={40}
               className={`${isLiked ? 'text-red-500' : 'text-gray-500'}`}
             />
             <span className="text-sm font-medium">{Math.max(0, review?.totalLikes)} Likes</span>
           </Button>
           <Button variant="text" onClick={() => setIsOpen(true)}>
-            <Message02Icon size={20} />
+            <Message02Icon size={20} variant="twotone" />
             <span className="text-sm font-medium"> {review.totalComments} Comments</span>
           </Button>
         </div>
