@@ -38,6 +38,12 @@ export const BucketListRow = ({
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
 
     event.preventDefault();
+    event.stopPropagation();
+    // nextjs-toploader's click listener and React's own delegated listener
+    // are both on `document` - siblings, not ancestor and descendant - so
+    // `stopPropagation()` alone cannot stop it. See the identical note in
+    // ExperienceCard.
+    event.nativeEvent.stopImmediatePropagation();
     drawer.openBucketList(bucketList.id);
   };
 
