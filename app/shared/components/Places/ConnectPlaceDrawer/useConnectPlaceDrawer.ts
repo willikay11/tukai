@@ -410,8 +410,9 @@ export const useConnectPlaceDrawer = () => {
         notes: notes.trim() || undefined,
       });
 
+      // The drawer itself switches to "Your claim" right after this - that
+      // status view is the confirmation, so no toast on top of it
       setJustSubmittedClaimId(claim.id);
-      toast({ description: 'Claim sent. Tukai usually reviews claims within 2 working days.' });
     } catch (error) {
       toast({
         title: 'Could not submit this claim',
