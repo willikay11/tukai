@@ -17,6 +17,16 @@ const customJestConfig = {
       '<rootDir>/__mocks__/@hugeicons-pro/core-solid-rounded.js', // ESM package jest can't parse
     '^@hugeicons-pro/core-bulk-rounded$':
       '<rootDir>/__mocks__/@hugeicons-pro/core-bulk-rounded.js', // ESM package jest can't parse
+    // IconComponent loads each icon through this subpath instead of the
+    // bare package above - same ESM problem, so it gets the same treatment
+    '^@hugeicons-pro/core-twotone-rounded/loader$':
+      '<rootDir>/__mocks__/@hugeicons-pro/core-twotone-rounded/loader.js',
+    '^@hugeicons-pro/core-solid-rounded/loader$':
+      '<rootDir>/__mocks__/@hugeicons-pro/core-solid-rounded/loader.js',
+    '^@hugeicons-pro/core-bulk-rounded/loader$':
+      '<rootDir>/__mocks__/@hugeicons-pro/core-bulk-rounded/loader.js',
+    '^@hugeicons-pro/core-duotone-rounded/loader$':
+      '<rootDir>/__mocks__/@hugeicons-pro/core-duotone-rounded/loader.js',
     '^lucide-react$': '<rootDir>/__mocks__/lucide-react.js', // Mock for lucide-react
     // ESM-only: their package exports maps carry no `require` condition, so
     // Jest's CJS resolver cannot find them. Point at the dist entry directly;

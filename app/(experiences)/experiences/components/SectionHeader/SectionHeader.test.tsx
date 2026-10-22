@@ -69,16 +69,16 @@ describe('SectionHeader', () => {
     expect(screen.getByText('Handpicked for you')).toBeInTheDocument();
   });
 
-  it('defaults the icon circle to the brand tint', () => {
+  it('defaults the icon circle to the brand tint', async () => {
     const { container } = render(
       <SectionHeader icon="Compass01Icon" title="Discover" layout="stacked" />,
     );
 
     expect(container.querySelector('.bg-primary\\/10')).toBeInTheDocument();
-    expect(screen.getByTestId('Compass01Icon')).toHaveClass('text-primary');
+    expect(await screen.findByTestId('Compass01Icon')).toHaveClass('text-primary');
   });
 
-  it('accepts a per-section icon tint', () => {
+  it('accepts a per-section icon tint', async () => {
     const { container } = render(
       <SectionHeader
         icon="Fire03Icon"
@@ -91,7 +91,7 @@ describe('SectionHeader', () => {
 
     expect(container.querySelector('.bg-red-100')).toBeInTheDocument();
     expect(container.querySelector('.bg-primary\\/10')).not.toBeInTheDocument();
-    expect(screen.getByTestId('Fire03Icon')).toHaveClass('text-red-500');
+    expect(await screen.findByTestId('Fire03Icon')).toHaveClass('text-red-500');
   });
 
   it('omits See all when no href is given', () => {

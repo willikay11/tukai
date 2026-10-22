@@ -31,35 +31,35 @@ describe('Bookmark', () => {
   beforeEach(() => jest.clearAllMocks());
 
   // One treatment everywhere: the basket. The bookmark-pin variant is gone.
-  it('is a basket, whatever it is saving', () => {
+  it('is a basket, whatever it is saving', async () => {
     render(<Bookmark userId={USER} bookmarked={false} experienceId="exp-1" />);
 
-    expect(screen.getByTestId('ShoppingBasketAdd02Icon')).toBeInTheDocument();
+    expect(await screen.findByTestId('ShoppingBasketAdd02Icon')).toBeInTheDocument();
     expect(screen.queryByTestId('Bookmark02Icon')).not.toBeInTheDocument();
   });
 
-  it('fills the basket in once something is saved', () => {
+  it('fills the basket in once something is saved', async () => {
     render(<Bookmark userId={USER} bookmarked experienceId="exp-1" />);
 
-    expect(screen.getByTestId('ShoppingBasketDone02Icon')).toBeInTheDocument();
+    expect(await screen.findByTestId('ShoppingBasketDone02Icon')).toBeInTheDocument();
   });
 
   // The canvas draws the pair as one icon in two states, not two icons: bulk
   // once it is saved, twotone until then
   describe('which style the basket wears', () => {
-    it('is twotone while nothing is saved', () => {
+    it('is twotone while nothing is saved', async () => {
       render(<Bookmark userId={USER} bookmarked={false} experienceId="exp-1" />);
 
-      expect(screen.getByTestId('ShoppingBasketAdd02Icon')).toHaveAttribute(
+      expect(await screen.findByTestId('ShoppingBasketAdd02Icon')).toHaveAttribute(
         'data-variant',
         'twotone',
       );
     });
 
-    it('is bulk once it is', () => {
+    it('is bulk once it is', async () => {
       render(<Bookmark userId={USER} bookmarked experienceId="exp-1" />);
 
-      expect(screen.getByTestId('ShoppingBasketDone02Icon')).toHaveAttribute(
+      expect(await screen.findByTestId('ShoppingBasketDone02Icon')).toHaveAttribute(
         'data-variant',
         'bulk',
       );
@@ -162,14 +162,14 @@ describe('Bookmark', () => {
    * after a save - which is what the reader sees on coming back to the page -
    * kept showing the empty basket until it was unmounted and built again.
    */
-  it('follows the saved state when its card re-reads', () => {
+  it('follows the saved state when its card re-reads', async () => {
     const { rerender } = render(<Bookmark userId={USER} bookmarked={false} experienceId="exp-1" />);
 
-    expect(screen.getByTestId('ShoppingBasketAdd02Icon')).toBeInTheDocument();
+    expect(await screen.findByTestId('ShoppingBasketAdd02Icon')).toBeInTheDocument();
 
     rerender(<Bookmark userId={USER} bookmarked experienceId="exp-1" />);
 
-    expect(screen.getByTestId('ShoppingBasketDone02Icon')).toBeInTheDocument();
+    expect(await screen.findByTestId('ShoppingBasketDone02Icon')).toBeInTheDocument();
   });
   /**
    * The confirmation beat. `animate-pop` is a one-shot, so it has to be absent

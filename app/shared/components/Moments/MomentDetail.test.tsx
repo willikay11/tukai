@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import moment from 'moment';
 
 import { Moment } from '@/types/moment';
@@ -157,10 +157,10 @@ describe('MomentDetail', () => {
 describe('moment like state on load', () => {
   const heart = () => screen.getByText('12').closest('button');
 
-  it('shows a moment the user already liked as lit', () => {
+  it('shows a moment the user already liked as lit', async () => {
     render(<MomentDetail moment={makeMoment({ isLiked: true })} />);
 
-    expect(heart()?.querySelector('.text-red-500')).toBeInTheDocument();
+    await waitFor(() => expect(heart()?.querySelector('.text-red-500')).toBeInTheDocument());
   });
 
   it('shows an unliked moment as unlit', () => {
@@ -283,10 +283,10 @@ describe('what the moment was posted against', () => {
       'Location01Icon',
       'Place',
     ],
-  ])('marks a %s with its own icon and kind', (_name, parent, icon, kind) => {
+  ])('marks a %s with its own icon and kind', async (_name, parent, icon, kind) => {
     render(<MomentDetail moment={makeMoment(parent as never)} />);
 
-    expect(screen.getByTestId(icon)).toBeInTheDocument();
+    expect(await screen.findByTestId(icon)).toBeInTheDocument();
     expect(screen.getByText(`(${kind})`)).toBeInTheDocument();
   });
 

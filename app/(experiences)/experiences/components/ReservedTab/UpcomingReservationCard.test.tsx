@@ -53,19 +53,19 @@ describe('UpcomingReservationCard', () => {
     expect(screen.getByText(/· 1 ticket$/)).toBeInTheDocument();
   });
 
-  it('uses the settled basket icon on a white circle when paid', () => {
+  it('uses the settled basket icon on a white circle when paid', async () => {
     render(<UpcomingReservationCard {...defaults} reservation={makeView()} />);
 
-    expect(screen.getByTestId('ShoppingBasketCheckIn01Icon')).toBeInTheDocument();
+    expect(await screen.findByTestId('ShoppingBasketCheckIn01Icon')).toBeInTheDocument();
     expect(screen.queryByTestId('ShoppingBasketAdd01Icon')).not.toBeInTheDocument();
   });
 
   it.each(['pending', 'partial', 'expired'])(
     'uses the add-to-basket icon when status is %s',
-    (status) => {
+    async (status) => {
       render(<UpcomingReservationCard {...defaults} reservation={makeView({ status })} />);
 
-      expect(screen.getByTestId('ShoppingBasketAdd01Icon')).toBeInTheDocument();
+      expect(await screen.findByTestId('ShoppingBasketAdd01Icon')).toBeInTheDocument();
       expect(screen.queryByTestId('ShoppingBasketCheckIn01Icon')).not.toBeInTheDocument();
     },
   );
