@@ -9,17 +9,19 @@ import { ItineraryDayFormValue } from '@/types/itinerary';
 import { Wallet } from '@/types/payment';
 
 import { CommunityOption } from '../../hooks/useCreateExperienceFlow';
+import type { ExperienceStepId } from '../../hooks/useCreateExperienceFlow';
 import { type RelativeValidityValue } from '../RelativeValidityPicker';
 import { SharedExperiencePreview } from '../SharedExperiencePreview';
 import { CustomiseItinerary } from '../customiseItinerary';
 
-export type ExperienceStepId =
-  | 'dates-type'
-  | 'about'
-  | 'itinerary-days'
-  | 'tickets'
-  | 'guests'
-  | 'wallet';
+// Re-exported so SharedExperiencePreview (and anything else importing the
+// step id from here) keeps one definition - the hook's own - rather than a
+// second copy of the union.
+export type { ExperienceStepId } from '../../hooks/useCreateExperienceFlow';
+
+// This panel is never shown for the Preview step (ReviewLayout takes over
+// then), so its own step union excludes it - unlike the re-exported one above.
+type SidePanelStepId = Exclude<ExperienceStepId, 'preview'>;
 
 export type ExperienceType = 'one-time' | 'multi-day' | 'itinerary';
 
@@ -63,7 +65,7 @@ export const ExperienceStepSidePanel = ({
   allCommunities,
   selectedWallet,
 }: {
-  step: ExperienceStepId;
+  step: SidePanelStepId;
   canShowDateTickets?: boolean;
   isRecurring?: boolean;
   experienceType?: ExperienceType;
@@ -109,13 +111,16 @@ export const ExperienceStepSidePanel = ({
     duplicateForEntirePeriod: boolean;
   }>;
   ticketsCommissionPayer?: 'host' | 'customer' | 'split';
+  // Forwarded straight through to SharedExperiencePreview, which never calls
+  // it with 'preview' - but typing it any narrower than its own prop would
+  // make this an invalid (contravariant) assignment below.
   onEditStep?: (step: ExperienceStepId) => void;
   invitedGuests?: InvitedMember[];
   invitedCommunityIds?: string[];
   allCommunities?: CommunityOption[];
   selectedWallet?: Wallet;
 }) => {
-  const stepPanelContent: Record<ExperienceStepId, ReactNode> = {
+  const stepPanelContent: Record<SidePanelStepId, ReactNode> = {
     'dates-type': null,
     about: (
       <SharedExperiencePreview

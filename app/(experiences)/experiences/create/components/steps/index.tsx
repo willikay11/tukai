@@ -19,7 +19,7 @@ import { ItineraryDayFormValue } from '@/types/itinerary';
 import { Wallet } from '@/types/payment';
 import { experiencePath } from '@/utils/detail-paths';
 
-import type { FormData, FormPhoto } from '../../hooks/useCreateExperienceFlow';
+import type { ExperienceStepId, FormData, FormPhoto } from '../../hooks/useCreateExperienceFlow';
 import { type AboutFormValues } from '../../schemas';
 import { AboutStep } from '../AboutStep';
 import { type DateTypeFormData, DateTypeStep } from '../DateTypeStep';
@@ -40,15 +40,6 @@ type AboutFormData = AboutFormValues;
 
 // The Preview step shows either the captured-data summary or the customer mirror
 type PreviewMode = 'captured' | 'customer';
-
-export type ExperienceStepId =
-  | 'dates-type'
-  | 'about'
-  | 'itinerary-days'
-  | 'tickets'
-  | 'guests'
-  | 'wallet'
-  | 'preview';
 
 const STEPS_DEFAULT = [
   {

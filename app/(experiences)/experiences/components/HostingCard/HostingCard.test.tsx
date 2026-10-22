@@ -1,8 +1,13 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { Experience } from '@/types/experience';
 
 import { HostingCard } from './index';
+
+const openCreateExperience = jest.fn();
+jest.mock('@/context/CreateExperienceDrawerContext', () => ({
+  useCreateExperienceDrawer: () => ({ openCreateExperience }),
+}));
 
 const baseExperience = {
   id: 'exp-1',
@@ -19,6 +24,8 @@ const baseExperience = {
 } as unknown as Experience;
 
 describe('HostingCard', () => {
+  beforeEach(() => openCreateExperience.mockClear());
+
   it('renders a Published badge, date meta and tickets-sold footer for published', () => {
     render(<HostingCard experience={baseExperience} />);
 
@@ -35,7 +42,7 @@ describe('HostingCard', () => {
     );
   });
 
-  it('renders Draft badge, Not published meta, created-ago footer and editor routing', () => {
+  it('renders Draft badge, Not published meta, created-ago footer and reopens the create drawer', () => {
     render(
       <HostingCard experience={{ ...baseExperience, status: 'draft' } as unknown as Experience} />,
     );
@@ -43,10 +50,9 @@ describe('HostingCard', () => {
     expect(screen.getByText('Draft')).toBeInTheDocument();
     expect(screen.getByText('Nairobi · Not published')).toBeInTheDocument();
     expect(screen.getByText(/^Created .* ago$/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute(
-      'href',
-      '/experiences/create?experienceId=exp-1',
-    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Manage' }));
+    expect(openCreateExperience).toHaveBeenCalledWith({ experienceId: 'exp-1' });
   });
 
   it('renders Cancelled badge with hidden-from-explore footer and control center routing', () => {

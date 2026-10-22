@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -10,14 +10,13 @@ import { CreateCommunityDrawer } from '@/app/(communities)/communities/component
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { MomentComposer } from '@/app/shared/components/Moments';
-import { SubscriptionModalFlow } from '@/app/shared/components/Subscription';
 import { useUnreadNotificationCount } from '@/app/shared/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { TukaiImage } from '@/components/ui/image';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
+import { useCreateExperienceDrawer } from '@/context/CreateExperienceDrawerContext';
 
 import { CreateMenu } from './CreateMenu';
 import { CreateMenuItemId } from './CreateMenu/items';
@@ -26,17 +25,14 @@ import { ProfileMenu } from './ProfileMenu';
 export const AuthActions = () => {
   const { openSignInWithCallback } = useAuthDialog();
   const { openConnectPlace } = useConnectPlaceDrawer()!;
+  const { openCreateExperience } = useCreateExperienceDrawer()!;
   const router = useRouter();
   const { data: session } = useSession();
-  const [showJoinPremium, setShowJoinPremium] = useState(false);
-  const [pendingCreateAfterLogin, setPendingCreateAfterLogin] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
   const [isBucketListModalOpen, setIsBucketListModalOpen] = useState(false);
   const [isMomentComposerOpen, setIsMomentComposerOpen] = useState(false);
   const [isCommunityDrawerOpen, setIsCommunityDrawerOpen] = useState(false);
-
-  const hasSubscribed = Boolean(session?.user?.hasSubscribed);
 
   // The dot on the Notifications row was hardcoded true, so it was on for
   // everybody forever
@@ -48,33 +44,17 @@ export const AuthActions = () => {
     router.push('/');
   };
 
+  // Needs a hosting plan and a community you own - openCreateExperience
+  // itself opens the Hosting plan drawer first when the account has no
+  // active plan (see context/CreateExperienceDrawerContext.tsx).
   const handleCreateExperience = () => {
     if (session?.user) {
-      if (!hasSubscribed) {
-        setShowJoinPremium(true);
-        return;
-      }
-
-      router.push('/experiences/create');
+      openCreateExperience();
       return;
     }
 
-    openSignInWithCallback(() => {
-      setPendingCreateAfterLogin(true);
-    });
+    openSignInWithCallback(() => openCreateExperience());
   };
-
-  useEffect(() => {
-    if (!pendingCreateAfterLogin || !session?.user) return;
-
-    if (hasSubscribed) {
-      router.push('/experiences/create');
-    } else {
-      setShowJoinPremium(true);
-    }
-
-    setPendingCreateAfterLogin(false);
-  }, [pendingCreateAfterLogin, session?.user, hasSubscribed, router]);
 
   // Closes the Create popover first, then does whatever the row promised - a
   // link row has already started navigating on its own by the time this runs.
@@ -134,7 +114,7 @@ export const AuthActions = () => {
               app is behind it, which a bare avatar does not. */}
             <PopoverTrigger
               aria-label="Account menu"
-              className="flex h-11 flex-shrink-0 items-center gap-2 rounded-full border border-line-soft bg-white pl-[5px] pr-[5px] outline-none md:pl-3 transition-shadow hover:shadow-[0_2px_10px_rgba(1,51,52,.09)]"
+              className="flex h-11 flex-shrink-0 items-center gap-2 rounded-full border border-line-soft bg-white pl-[5px] pr-[5px] outline-none transition-shadow hover:shadow-[0_2px_10px_rgba(1,51,52,.09)] md:pl-3"
             >
               <IconComponent
                 iconName="Menu02Icon"
@@ -195,13 +175,6 @@ export const AuthActions = () => {
           </Link>
         </>
       )}
-
-      <Dialog open={showJoinPremium} onOpenChange={setShowJoinPremium}>
-        <DialogContent className="w-[calc(100%-35px)] max-w-[620px] border-0 bg-transparent p-0 shadow-none">
-          {/* Steps reset automatically - Radix unmounts content on close */}
-          <SubscriptionModalFlow onClose={() => setShowJoinPremium(false)} />
-        </DialogContent>
-      </Dialog>
 
       <CreateCommunityDrawer open={isCommunityDrawerOpen} onOpenChange={setIsCommunityDrawerOpen} />
 
