@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 
 import { PageContainer } from '@/app/shared/components/Layout';
 
-import { ClaimPlaceContent } from './ClaimPlaceContent';
+import { ClaimRedirect } from './ClaimRedirect';
 
 export const metadata: Metadata = {
   title: 'Tukai - Connect a business/place',
@@ -21,7 +21,7 @@ export default function ClaimPlacePage() {
         </PageContainer>
       }
     >
-      <ClaimPlaceContent />
+      <ClaimRedirect />
     </Suspense>
   );
 }

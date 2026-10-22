@@ -5,11 +5,11 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 
 import { MomentComposer } from '@/app/shared/components/Moments';
+import { ClaimCard } from '@/app/shared/components/Places/ClaimCard';
 import { usePlaceManager, usePlaceOwnership } from '@/app/shared/hooks/usePlaces';
 import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
 
-import { ClaimPlacePrompt } from '../ClaimPlacePrompt';
 import { ReservationPanel } from '../ReservationPanel';
 
 type SheetView = 'reservation' | 'claim';
@@ -80,7 +80,7 @@ export const MobilePlaceBar = ({ placeId, placeName }: { placeId: string; placeN
           {openView === 'reservation' && (
             <ReservationPanel placeId={placeId} placeName={placeName} />
           )}
-          {openView === 'claim' && <ClaimPlacePrompt placeId={placeId} placeName={placeName} />}
+          {openView === 'claim' && <ClaimCard placeId={placeId} placeName={placeName} />}
         </div>
       </Drawer>
 

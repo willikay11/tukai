@@ -26,7 +26,7 @@ import { PlaceAvailabilityRule, PlaceReservationProfile } from '@/types/placeRes
 import { HappeningNow } from './HappeningNow';
 import { MyReservations } from './MyReservations';
 import { PlaceAboutSection } from './PlaceAboutSection';
-import { PlaceClaimSection } from './PlaceClaimSection';
+import { ClaimCard } from '@/app/shared/components/Places/ClaimCard';
 import { PlaceCommunity } from './PlaceCommunity';
 import { PlaceDrawerFooter } from './PlaceDrawerFooter';
 import { PlaceDrawerHeader } from './PlaceDrawerHeader';
@@ -240,7 +240,7 @@ export const PlaceDrawer = ({
 
                   {isUnclaimed && (
                     <section className="py-6">
-                      <PlaceClaimSection placeId={place.id} placeName={place.title} />
+                      <ClaimCard placeId={place.id} placeName={place.title} />
                     </section>
                   )}
 

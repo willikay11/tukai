@@ -15,6 +15,10 @@ interface PosterFieldProps {
   onRemove: (id: string) => void;
   onReorder: (fromIndex: number, toIndex: number) => void;
   onMove: (id: string, direction: -1 | 1) => void;
+  // The claim form's photo uploader has no cover concept - a place's photos
+  // have no designated lead image here, unlike a community's poster.
+  showCoverBadge?: boolean;
+  label?: React.ReactNode;
 }
 
 /**
@@ -22,7 +26,15 @@ interface PosterFieldProps {
  * reorders on a pointer; the arrow keys do the same for anyone focused on a
  * tile with a keyboard, per the canvas's own accessibility note.
  */
-export const PosterField = ({ photos, onAdd, onRemove, onReorder, onMove }: PosterFieldProps) => {
+export const PosterField = ({
+  photos,
+  onAdd,
+  onRemove,
+  onReorder,
+  onMove,
+  showCoverBadge = true,
+  label,
+}: PosterFieldProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
@@ -31,8 +43,12 @@ export const PosterField = ({ photos, onAdd, onRemove, onReorder, onMove }: Post
   return (
     <div className="flex flex-col gap-3">
       <span className="text-[15px] font-semibold text-gray-800">
-        Upload a community poster{' '}
-        <span className="font-normal text-ink-muted">(540 × 540 px, up to 15 MB)</span>
+        {label ?? (
+          <>
+            Upload a community poster{' '}
+            <span className="font-normal text-ink-muted">(540 × 540 px, up to 15 MB)</span>
+          </>
+        )}
       </span>
 
       <div className="flex flex-wrap gap-2.5" role="group" aria-label="Community photos">
@@ -78,7 +94,7 @@ export const PosterField = ({ photos, onAdd, onRemove, onReorder, onMove }: Post
                 />
               </span>
 
-              {index === 0 && (
+              {showCoverBadge && index === 0 && (
                 <span className="pointer-events-none absolute bottom-2 left-2 inline-flex h-[22px] items-center rounded-full bg-black/60 px-2 text-[11.5px] font-bold text-white backdrop-blur-[6px]">
                   Cover
                 </span>

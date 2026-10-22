@@ -28,7 +28,6 @@ export const CREATE_MENU_ITEMS: CreateMenuItem[] = [
     label: 'Connect a place',
     description: 'Claim a business your community runs, with proof of ownership.',
     icon: 'StoreVerified01Icon',
-    href: '/places/claim',
   },
   {
     id: 'bucketList',

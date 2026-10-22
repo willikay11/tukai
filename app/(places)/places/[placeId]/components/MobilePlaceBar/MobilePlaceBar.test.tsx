@@ -25,8 +25,8 @@ jest.mock('@/app/shared/hooks/usePlaces', () => ({
   usePlaceManager: () => ({ isManager, isLoading: false }),
 }));
 
-jest.mock('../ClaimPlacePrompt', () => ({
-  ClaimPlacePrompt: ({ placeName }: { placeName: string }) => (
+jest.mock('@/app/shared/components/Places/ClaimCard', () => ({
+  ClaimCard: ({ placeName }: { placeName: string }) => (
     <div data-testid="claim-prompt">{placeName}</div>
   ),
 }));
