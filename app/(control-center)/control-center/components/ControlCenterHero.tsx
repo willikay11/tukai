@@ -1,10 +1,9 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-
 import numeral from 'numeral';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { useCreateExperienceDrawer } from '@/context/CreateExperienceDrawerContext';
 
 import { ControlCenterMetrics } from '../utils/control-center-metrics';
 
@@ -15,8 +14,14 @@ const HeroStat = ({ value, label, accent }: { value: string; label: string; acce
   </div>
 );
 
-export const ControlCenterHero = ({ name, metrics }: { name: string; metrics: ControlCenterMetrics }) => {
-  const router = useRouter();
+export const ControlCenterHero = ({
+  name,
+  metrics,
+}: {
+  name: string;
+  metrics: ControlCenterMetrics;
+}) => {
+  const createExperienceDrawer = useCreateExperienceDrawer();
   const money = (amount: number) => `${metrics.currency} ${numeral(amount).format('0,0')}`;
 
   return (
@@ -60,7 +65,7 @@ export const ControlCenterHero = ({ name, metrics }: { name: string; metrics: Co
         <div className="flex flex-shrink-0 flex-col gap-3">
           <button
             type="button"
-            onClick={() => router.push('/experiences/create')}
+            onClick={() => createExperienceDrawer?.openCreateExperience()}
             className="inline-flex items-center justify-center gap-2 rounded-full bg-lime px-6 py-3 text-sm font-semibold text-gray-900"
           >
             <IconComponent iconName="PlusSignIcon" size={16} color="currentColor" />

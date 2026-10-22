@@ -10,8 +10,6 @@ import moment from 'moment';
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
 import { ItineraryCard } from '@/app/(experiences)/components/ItineraryCard';
 import { BucketListCard } from '@/app/(experiences)/experiences/components/BucketListCard';
-import { CategoryChipRow } from '@/app/shared/components/Filters/CategoryChipRow';
-import type { CategoryChip } from '@/app/shared/components/Filters/CategoryChipRow';
 import { CitiesRail } from '@/app/(experiences)/experiences/components/CitiesRail';
 import { CommunitiesSection } from '@/app/(experiences)/experiences/components/CommunitiesSection';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
@@ -36,6 +34,8 @@ import {
   featuredOnly,
 } from '@/app/(experiences)/experiences/components/featured-experiences';
 import { shouldShowSeeAll } from '@/app/(experiences)/experiences/see-all/config';
+import { CategoryChipRow } from '@/app/shared/components/Filters/CategoryChipRow';
+import type { CategoryChip } from '@/app/shared/components/Filters/CategoryChipRow';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { CardRail, SeeAllCard } from '@/app/shared/components/Lists';
 import { PillTabs } from '@/app/shared/components/Tabs';
@@ -46,6 +46,7 @@ import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { toast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
+import { useCreateExperienceDrawer } from '@/context/CreateExperienceDrawerContext';
 import { useLocation } from '@/context/LocationContext';
 import { downloadTicketPdf } from '@/services/experience';
 import { BucketList } from '@/types/bucket-list';
@@ -74,6 +75,7 @@ const ALL_CATEGORIES = 'all';
 
 export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: string }) => {
   const router = useRouter();
+  const createExperienceDrawer = useCreateExperienceDrawer();
   const { data: session } = useSession();
   const { city, lat, lng, setCity } = useLocation();
   const [activeTab, setActiveTab] = useState(
@@ -520,7 +522,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                 <div className="flex flex-col items-center gap-4 py-8">
                   <NoData message="You're not hosting any experiences yet" />
                   <Button
-                    onClick={() => router.push('/experiences/create')}
+                    onClick={() => createExperienceDrawer?.openCreateExperience()}
                     className="rounded-full px-6"
                   >
                     Create an experience

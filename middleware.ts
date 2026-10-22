@@ -27,6 +27,9 @@ export async function middleware(request: NextRequest) {
     // for sign-in where it is pressed rather than at the door.
     pathname.startsWith('/moments') ||
     pathname.startsWith('/place') ||
+    // Browsing hosting plans needs no account; signing in is only prompted
+    // when a plan button is actually pressed (see PricingPageContent).
+    pathname.startsWith('/pricing') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/privacy') ||
     pathname.startsWith('/help') ||

@@ -6,6 +6,7 @@ import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
+import { useCreateExperienceDrawer } from '@/context/CreateExperienceDrawerContext';
 import { Status } from '@/enums/status';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
@@ -68,18 +69,16 @@ interface HostingCardProps {
 }
 
 export const HostingCard = ({ experience }: HostingCardProps) => {
+  const createExperienceDrawer = useCreateExperienceDrawer();
   const coverPhoto =
     experience.photos?.find((photo: Photo) => photo.isCover)?.photo ||
     experience.photos?.[0]?.photo;
 
   const status = normalizeStatus(experience.status);
   const isDraft = status === Status.Draft;
-  // A draft has nothing to manage yet, so it reopens in the create wizard.
+  // A draft has nothing to manage yet, so it reopens in the create drawer.
   // Anything published goes to the host's Control Center dashboard - this card
   // only ever renders in host contexts (Hosting tab, pre-wizard listing).
-  const manageHref = isDraft
-    ? `/experiences/create?experienceId=${experience.id}`
-    : `/control-center/experiences/${experience.id}`;
 
   const metaLine = buildHostingMetaLine(experience);
   const footerText = buildHostingFooterText(experience);
@@ -116,12 +115,24 @@ export const HostingCard = ({ experience }: HostingCardProps) => {
             <span className="truncate text-sm text-gray-700">{footerText}</span>
           </div>
 
-          <Link
-            href={manageHref}
-            className="flex-shrink-0 text-sm font-semibold text-primary hover:underline"
-          >
-            Manage
-          </Link>
+          {isDraft ? (
+            <button
+              type="button"
+              onClick={() =>
+                createExperienceDrawer?.openCreateExperience({ experienceId: experience.id })
+              }
+              className="flex-shrink-0 text-sm font-semibold text-primary hover:underline"
+            >
+              Manage
+            </button>
+          ) : (
+            <Link
+              href={`/control-center/experiences/${experience.id}`}
+              className="flex-shrink-0 text-sm font-semibold text-primary hover:underline"
+            >
+              Manage
+            </Link>
+          )}
         </div>
       </div>
     </div>

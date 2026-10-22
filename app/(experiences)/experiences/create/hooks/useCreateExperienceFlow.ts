@@ -336,22 +336,39 @@ const initialFormData: FormData = {
 interface UseCreateExperienceFlowOptions {
   // The wizard requires a community; the listing that precedes it does not
   enforceCommunityGuard?: boolean;
+  /**
+   * False for an overlay (e.g. the create-experience drawer) that shouldn't
+   * rewrite the page's URL on every step change. The experienceId/step the
+   * caller passes below seed the flow once instead, and stay in charge of
+   * resuming it - every save still hits the API exactly as it does on the
+   * full page. Defaults to true (the full page's own behaviour).
+   */
+  syncToUrl?: boolean;
+  /** Seeds experienceId when syncToUrl is false - ignored otherwise, the URL wins. */
+  experienceId?: string | null;
+  /** Seeds the starting step when syncToUrl is false. */
+  initialStep?: ExperienceStepId;
 }
 
 export const useCreateExperienceFlow = ({
   enforceCommunityGuard = true,
+  syncToUrl = true,
+  experienceId: experienceIdOption = null,
+  initialStep = 'dates-type',
 }: UseCreateExperienceFlowOptions = {}) => {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
+  // Always called, even when its value goes unused below - conditionally
+  // calling a hook would break the rules of hooks.
   const searchParams = useSearchParams();
   const { data: session, status: sessionStatus } = useSession();
 
   const currentUserId = session?.user?.id ?? undefined;
-  const experienceIdFromUrl = searchParams.get('experienceId');
-  const stepFromUrl = parseExperienceStepId(searchParams.get('step'));
+  const experienceIdFromUrl = syncToUrl ? searchParams.get('experienceId') : experienceIdOption;
+  const stepFromUrl = syncToUrl ? parseExperienceStepId(searchParams.get('step')) : null;
 
-  const [activeStep, setActiveStep] = useState<ExperienceStepId>(stepFromUrl || 'dates-type');
+  const [activeStep, setActiveStep] = useState<ExperienceStepId>(stepFromUrl || initialStep);
   const [experienceId, setExperienceId] = useState<string | null>(experienceIdFromUrl);
   const [hasUpdatedDates, setHasUpdatedDates] = useState(false);
   const [itineraryConfig, setItineraryConfig] = useState<{
@@ -444,19 +461,22 @@ export const useCreateExperienceFlow = ({
     sessionStatus === 'loading' ||
     (sessionStatus === 'authenticated' && !!currentUserId && isLoadingCreatedCommunities);
 
-  // Sync experienceId from URL
+  // Sync experienceId from URL - a no-op in drawer mode, where experienceId
+  // changes only through the handlers below (handleExperienceCreated, etc.)
   useEffect(() => {
+    if (!syncToUrl) return;
+
     setExperienceId(experienceIdFromUrl);
     setHasUpdatedDates(false);
     setItineraryConfig(null);
-  }, [experienceIdFromUrl]);
+  }, [experienceIdFromUrl, syncToUrl]);
 
   // Sync activeStep from URL
   useEffect(() => {
-    if (stepFromUrl) {
-      setActiveStep(stepFromUrl);
-    }
-  }, [stepFromUrl]);
+    if (!syncToUrl || !stepFromUrl) return;
+
+    setActiveStep(stepFromUrl);
+  }, [stepFromUrl, syncToUrl]);
 
   // Auto-show tickets panel if experience already has dates filled
   useEffect(() => {
@@ -507,6 +527,10 @@ export const useCreateExperienceFlow = ({
   const replaceCreateUrlParams = (
     nextValues: Partial<{ experienceId: string | null; step: ExperienceStepId }>,
   ) => {
+    // The drawer isn't a route of its own, so there's no URL to rewrite -
+    // every state change below still happens through plain setState calls.
+    if (!syncToUrl) return;
+
     const mergedExperienceId =
       nextValues.experienceId !== undefined ? nextValues.experienceId : experienceId;
     const mergedStep = nextValues.step !== undefined ? nextValues.step : activeStep;

@@ -18,6 +18,7 @@ import { ControlCenterHero } from './components/ControlCenterHero';
 import { ControlCenterStatCard } from './components/ControlCenterStatCard';
 import { EarningsSection } from './components/EarningsSection';
 import { ExperienceProgressRow } from './components/ExperienceProgressRow';
+import { HostingPlanCard } from './components/HostingPlanCard';
 import { MyExperiences } from './components/MyExperiences';
 import { ControlCenterReservation, RecentReservations } from './components/RecentReservations';
 import { RevenueChart } from './components/RevenueChart';
@@ -236,6 +237,8 @@ export const ControlCenterContent = () => {
           )}
         </div>
       </div>
+
+      <HostingPlanCard />
 
       {/* The money, which the control centre could not show at all */}
       <EarningsSection currency={metrics.currency} />
