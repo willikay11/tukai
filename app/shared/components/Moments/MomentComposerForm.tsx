@@ -63,7 +63,7 @@ export const MomentComposerForm = ({
       : null;
 
   const selectAttachment = (kind: AttachmentKind, option: MomentAttachOption) => {
-    onSelectAttachment(kind, { id: option.id, label: option.label });
+    onSelectAttachment(kind, { id: option.id, label: option.label, thumb: option.thumb });
     setOpenPickerKind(null);
   };
 

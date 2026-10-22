@@ -58,17 +58,19 @@ export const MomentAttachTile = ({
   return (
     <div className="relative">
       <div className="relative flex aspect-square flex-col justify-end overflow-hidden rounded-xl bg-surface p-3">
+        {attachment.thumb && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={attachment.thumb}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
         <span
           className="absolute inset-0 bg-gradient-to-t from-brand-ink/90 via-brand-ink/10 to-transparent"
           aria-hidden="true"
         />
-        <IconComponent
-          iconName={meta.icon}
-          size={22}
-          color="currentColor"
-          className="absolute left-3 top-3 z-[1] text-white"
-        />
-        <span className="relative z-[1] inline-flex h-[22px] w-fit items-center rounded-full bg-lime px-2 text-[11.5px] font-bold text-brand-ink">
+        <span className="absolute left-2 top-2 z-[1] inline-flex h-[22px] w-fit items-center rounded-full bg-lime px-2 text-[11.5px] font-bold text-brand-ink">
           {meta.badge}
         </span>
         <span className="relative z-[1] mt-1 line-clamp-2 text-sm font-bold leading-[1.25] text-white">

@@ -40,6 +40,8 @@ export interface MomentAttachment {
   kind: AttachmentKind;
   id: string;
   label: string;
+  /** Its cover photo, where one was picked from the picker (which knows it). */
+  thumb?: string;
 }
 
 // In the order the published moment shows them

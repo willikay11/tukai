@@ -32,7 +32,9 @@ jest.mock('@/app/shared/hooks/useMoments', () => ({
 jest.mock('./useMomentAttachSearch', () => ({
   useMomentAttachSearch: (kind: string) => ({
     options:
-      kind === 'place' ? [{ id: 'pl2', label: 'Two Rivers Mall', meta: 'Mall · Ruaka' }] : [],
+      kind === 'place'
+        ? [{ id: 'pl2', label: 'Two Rivers Mall', meta: 'Mall · Ruaka', thumb: 'two-rivers.jpg' }]
+        : [],
     total: kind === 'place' ? 1 : 0,
     isLoading: false,
     isSearching: false,
@@ -108,6 +110,10 @@ describe('MomentComposer', () => {
 
     expect(screen.getByText('Two Rivers Mall')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Select place' })).not.toBeInTheDocument();
+    // Its cover photo becomes the tile's background, with the "Place" pill
+    // over the top-left corner of it
+    expect(screen.getByAltText('')).toHaveAttribute('src', 'two-rivers.jpg');
+    expect(screen.getByText('Place')).toBeInTheDocument();
   });
 
   it('cannot be shared while empty', () => {
