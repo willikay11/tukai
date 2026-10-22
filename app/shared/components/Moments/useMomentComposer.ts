@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 
 import { useCreateMoment } from '@/app/shared/hooks/useMoments';
 import { useToast } from '@/app/shared/hooks/useToast';
+import { Moment } from '@/types/moment';
 import { titleFrom } from '@/utils/safe-text-utils';
 
 export type MomentContextProps = {
@@ -69,6 +70,9 @@ export const useMomentComposer = (context: MomentContextProps, onDone: () => voi
   const [overrides, setOverrides] = useState<Partial<Record<AttachmentKind, MomentAttachment | null>>>(
     {},
   );
+  // The moment just shared, opened in its own drawer in place of a toast - the
+  // drawer is the confirmation that it is live
+  const [sharedMoment, setSharedMoment] = useState<Moment | null>(null);
 
   const { mutate: shareMoment, isPending } = useCreateMoment();
 
@@ -200,7 +204,6 @@ export const useMomentComposer = (context: MomentContextProps, onDone: () => voi
     const experienceId = attachments.find((attachment) => attachment.kind === 'experience')?.id;
     const communityId = attachments.find((attachment) => attachment.kind === 'community')?.id;
     const placeId = attachments.find((attachment) => attachment.kind === 'place')?.id;
-    const firstLabel = attachments[0]?.label;
 
     shareMoment(
       {
@@ -212,14 +215,12 @@ export const useMomentComposer = (context: MomentContextProps, onDone: () => voi
         photos: photos.map((photo) => photo.file),
       },
       {
-        onSuccess: () => {
-          toast({
-            title: 'Moment shared',
-            description: firstLabel ? `Your moment at ${firstLabel} is live.` : 'Your moment is live.',
-            variant: 'success',
-          });
+        // The newly posted moment opens in its own drawer - that is the
+        // confirmation, so there is no toast on top of it
+        onSuccess: (response) => {
           resetDraft();
           onDone();
+          setSharedMoment((response?.data as Moment) ?? null);
         },
         onError: (error: Error) =>
           toast({
@@ -249,5 +250,7 @@ export const useMomentComposer = (context: MomentContextProps, onDone: () => voi
     canShare,
     isPending,
     handleShare,
+    sharedMoment,
+    onCloseSharedMoment: () => setSharedMoment(null),
   };
 };

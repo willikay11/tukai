@@ -27,6 +27,13 @@ jest.mock('@/app/shared/hooks/useMoments', () => ({
   useCreateMoment: () => ({ mutate: shareMoment, isPending: false }),
 }));
 
+// The real drawer is exercised in MomentDrawer.test.tsx; here it only matters
+// that the moment the share returned reaches it
+jest.mock('./MomentDrawer', () => ({
+  MomentDrawer: ({ moment }: { moment: { title: string } | null }) =>
+    moment ? <div data-testid="shared-moment">{moment.title}</div> : null,
+}));
+
 // The picker's own search hooks are exercised in MomentAttachPicker.test.tsx;
 // here it only matters that picking a row reaches the composer
 jest.mock('./useMomentAttachSearch', () => ({
@@ -166,9 +173,10 @@ describe('MomentComposer', () => {
     );
   });
 
-  it('closes and clears once the moment is shared', async () => {
-    shareMoment.mockImplementation((_input: unknown, { onSuccess }: { onSuccess: () => void }) =>
-      onSuccess(),
+  it('opens the shared moment in its own drawer, with no toast on top of it', async () => {
+    shareMoment.mockImplementation(
+      (_input: unknown, { onSuccess }: { onSuccess: (response: unknown) => void }) =>
+        onSuccess({ data: { id: 'm1', title: 'Sunrise hike' } }),
     );
     const user = userEvent.setup();
     renderComposer();
@@ -178,7 +186,8 @@ describe('MomentComposer', () => {
     await user.click(screen.getByRole('button', { name: /share moment/i }));
 
     await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
-    expect(toast).toHaveBeenCalledWith(expect.objectContaining({ variant: 'success' }));
+    expect(screen.getByTestId('shared-moment')).toHaveTextContent('Sunrise hike');
+    expect(toast).not.toHaveBeenCalled();
   });
 
   it('reports a failure instead of closing', async () => {

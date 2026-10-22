@@ -2,7 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { ContextMoments, MomentComposerForm, useMomentComposer } from '@/app/shared/components/Moments';
+import {
+  ContextMoments,
+  MomentComposerForm,
+  MomentDrawer,
+  useMomentComposer,
+} from '@/app/shared/components/Moments';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import {
   usePlace,
@@ -131,130 +136,138 @@ export const PlaceDrawer = ({
 
   // Driven directly rather than through MomentComposer: the "New moment" view
   // takes over this drawer's own header instead of stacking a second panel
-  const momentComposer = useMomentComposer(
-    { contextLabel: place?.title, placeId: place?.id },
-    () => setView('place'),
+  const momentComposer = useMomentComposer({ contextLabel: place?.title, placeId: place?.id }, () =>
+    setView('place'),
   );
 
   return (
-    <Drawer
-      isOpen={isOpen}
-      setIsOpen={(next) => !next && onClose()}
-      width="wide"
-      // Half a dozen sections deep: on a phone it takes the whole screen
-      // rather than a sheet spending its height on the page behind it
-      mobile="full"
-      panelRef={setPanel}
-    >
-      {isLoading || !place ? (
-        <Loading />
-      ) : (
-        <div className="flex min-h-full flex-col">
-          <div className="sticky top-0 z-30 bg-white">
-            <PlaceDrawerHeader
-              place={place}
-              onClose={onClose}
-              title={VIEW_TITLES[view]}
-              onBack={view === 'place' ? undefined : () => setView('place')}
-            />
-          </div>
-
-          {view === 'place' && (
-            <div className="sticky top-[68px] z-20 bg-white px-6 py-3">
-              <PlaceDrawerTabs tabs={tabs} activeId={activeId} onSelect={scrollTo} />
+    <>
+      <Drawer
+        isOpen={isOpen}
+        setIsOpen={(next) => !next && onClose()}
+        width="wide"
+        // Half a dozen sections deep: on a phone it takes the whole screen
+        // rather than a sheet spending its height on the page behind it
+        mobile="full"
+        panelRef={setPanel}
+      >
+        {isLoading || !place ? (
+          <Loading />
+        ) : (
+          <div className="flex min-h-full flex-col">
+            <div className="sticky top-0 z-30 bg-white">
+              <PlaceDrawerHeader
+                place={place}
+                onClose={onClose}
+                title={VIEW_TITLES[view]}
+                onBack={view === 'place' ? undefined : () => setView('place')}
+              />
             </div>
-          )}
 
-          {view === 'review' ? (
-            <div className="flex-1 px-6">
-              <PlaceReviewForm place={place} onDone={() => setView('place')} />
-            </div>
-          ) : view === 'reservations' ? (
-            <div className="flex-1 px-6">
-              <PlaceReservationSettings place={place} profile={profile} rules={rules} />
-            </div>
-          ) : view === 'moment' ? (
-            <div className="flex-1 px-6 py-6">
-              <MomentComposerForm {...momentComposer} />
-
-              <div className="mt-6 flex items-center justify-end">
-                <Button
-                  type="button"
-                  variant="lime"
-                  onClick={momentComposer.handleShare}
-                  disabled={!momentComposer.canShare}
-                  isLoading={momentComposer.isPending}
-                  className="h-12 rounded-full px-6 text-[15px]"
-                >
-                  Share moment
-                </Button>
+            {view === 'place' && (
+              <div className="sticky top-[68px] z-20 bg-white px-6 py-3">
+                <PlaceDrawerTabs tabs={tabs} activeId={activeId} onSelect={scrollTo} />
               </div>
-            </div>
-          ) : (
-            <>
-              <div className="flex-1 divide-y divide-line px-6">
-                {/* scroll-mt clears the two sticky bars above */}
-                <section id={PLACE_SECTIONS.about} className="scroll-mt-[148px] space-y-6 py-6">
-                  {isManager && (
-                    <PlaceManagerBanner
-                      communityName={owningCommunity?.title}
-                      profile={profile}
-                      rules={rules}
-                      onOpenSettings={() => setView('reservations')}
+            )}
+
+            {view === 'review' ? (
+              <div className="flex-1 px-6">
+                <PlaceReviewForm place={place} onDone={() => setView('place')} />
+              </div>
+            ) : view === 'reservations' ? (
+              <div className="flex-1 px-6">
+                <PlaceReservationSettings place={place} profile={profile} rules={rules} />
+              </div>
+            ) : view === 'moment' ? (
+              <div className="flex-1 px-6 py-6">
+                <MomentComposerForm {...momentComposer} />
+
+                <div className="mt-6 flex items-center justify-end">
+                  <Button
+                    type="button"
+                    variant="lime"
+                    onClick={momentComposer.handleShare}
+                    disabled={!momentComposer.canShare}
+                    isLoading={momentComposer.isPending}
+                    className="h-12 rounded-full px-6 text-[15px]"
+                  >
+                    Share moment
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex-1 divide-y divide-line px-6">
+                  {/* scroll-mt clears the two sticky bars above */}
+                  <section id={PLACE_SECTIONS.about} className="scroll-mt-[148px] space-y-6 py-6">
+                    {isManager && (
+                      <PlaceManagerBanner
+                        communityName={owningCommunity?.title}
+                        profile={profile}
+                        rules={rules}
+                        onOpenSettings={() => setView('reservations')}
+                      />
+                    )}
+
+                    <PlaceAboutSection
+                      place={place}
+                      onReviewsClick={() => scrollTo(PLACE_SECTIONS.reviews)}
                     />
+                  </section>
+
+                  {/* Each renders nothing unless it has something to say */}
+                  <MyReservations place={place} profile={profile} />
+                  <PlaceCommunity communityId={ownership?.data?.community ?? ''} />
+
+                  {hasExperiences && (
+                    <section id={PLACE_SECTIONS.experiences} className="scroll-mt-[148px] py-6">
+                      <HappeningNow experiences={experiences} placeTitle={place.title} />
+                      <UpcomingExperiences placeId={place.id} placeTitle={place.title} />
+                    </section>
                   )}
 
-                  <PlaceAboutSection
-                    place={place}
-                    onReviewsClick={() => scrollTo(PLACE_SECTIONS.reviews)}
-                  />
-                </section>
-
-                {/* Each renders nothing unless it has something to say */}
-                <MyReservations place={place} profile={profile} />
-                <PlaceCommunity communityId={ownership?.data?.community ?? ''} />
-
-                {hasExperiences && (
-                  <section id={PLACE_SECTIONS.experiences} className="scroll-mt-[148px] py-6">
-                    <HappeningNow experiences={experiences} placeTitle={place.title} />
-                    <UpcomingExperiences placeId={place.id} placeTitle={place.title} />
+                  <section id={PLACE_SECTIONS.moments} className="scroll-mt-[148px] py-6">
+                    <ContextMoments
+                      title="Moments"
+                      variant="panel"
+                      contextLabel={place.title}
+                      emptyMessage={`No moments from ${place.title} yet. Yours could be the first.`}
+                      placeId={place.id}
+                      placeLabel={place.title}
+                      onShare={() => setView('moment')}
+                    />
                   </section>
-                )}
 
-                <section id={PLACE_SECTIONS.moments} className="scroll-mt-[148px] py-6">
-                  <ContextMoments
-                    title="Moments"
-                    variant="panel"
-                    contextLabel={place.title}
-                    emptyMessage={`No moments from ${place.title} yet. Yours could be the first.`}
-                    placeId={place.id}
-                    placeLabel={place.title}
-                    onShare={() => setView('moment')}
-                  />
-                </section>
+                  {isUnclaimed && (
+                    <section className="py-6">
+                      <PlaceClaimSection placeId={place.id} placeName={place.title} />
+                    </section>
+                  )}
 
-                {isUnclaimed && (
-                  <section className="py-6">
-                    <PlaceClaimSection placeId={place.id} placeName={place.title} />
+                  <section id={PLACE_SECTIONS.reviews} className="scroll-mt-[148px] py-6">
+                    <PlaceDrawerReviews
+                      placeId={place.id}
+                      rating={place.averageRating}
+                      reviewCount={place.totalReviews}
+                    />
                   </section>
-                )}
+                </div>
 
-                <section id={PLACE_SECTIONS.reviews} className="scroll-mt-[148px] py-6">
-                  <PlaceDrawerReviews
-                    placeId={place.id}
-                    rating={place.averageRating}
-                    reviewCount={place.totalReviews}
-                  />
-                </section>
-              </div>
+                <div className="sticky bottom-0 z-30 border-t border-surface-muted bg-white px-6 pb-[calc(12px_+_env(safe-area-inset-bottom))] pt-3">
+                  <PlaceDrawerFooter place={place} onAddReview={() => setView('review')} />
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </Drawer>
 
-              <div className="sticky bottom-0 z-30 border-t border-surface-muted bg-white px-6 pb-[calc(12px_+_env(safe-area-inset-bottom))] pt-3">
-                <PlaceDrawerFooter place={place} onAddReview={() => setView('review')} />
-              </div>
-            </>
-          )}
-        </div>
-      )}
-    </Drawer>
+      {/* Opens in place of a toast once a shared moment succeeds - the moment
+          itself is the confirmation */}
+      <MomentDrawer
+        moment={momentComposer.sharedMoment}
+        onClose={momentComposer.onCloseSharedMoment}
+      />
+    </>
   );
 };
