@@ -47,8 +47,8 @@ jest.mock('./PlaceOwnerPanel', () => ({
   ),
 }));
 
-jest.mock('./ClaimPlacePrompt', () => ({
-  ClaimPlacePrompt: ({ placeName }: { placeName: string }) => (
+jest.mock('@/app/shared/components/Places/ClaimCard', () => ({
+  ClaimCard: ({ placeName }: { placeName: string }) => (
     <div data-testid="claim-prompt">{placeName}</div>
   ),
 }));

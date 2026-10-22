@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 
 import { ExperienceCreatedModal } from '@/app/(experiences)/experiences/create/components/ExperienceCreatedModal';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { ClaimCard } from '@/app/shared/components/Places/ClaimCard';
 import {
   useCancelPlaceBookingRequest,
   usePlaceBookingRequests,
@@ -20,7 +21,6 @@ import { Button } from '@/components/ui/button';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { PlaceBookingRequest, PlaceReservationProfile } from '@/types/placeReservation';
 
-import { ClaimPlacePrompt } from './ClaimPlacePrompt';
 import { PlaceOwnerPanel } from './PlaceOwnerPanel';
 import { PlaceReservationsCalendar } from './PlaceReservationsCalendar';
 
@@ -115,7 +115,7 @@ export const ReservationPanel = ({
   if (isUnclaimed) {
     return (
       <div className="rounded-3xl bg-gray-50 p-5">
-        <ClaimPlacePrompt placeId={placeId} placeName={placeName} />
+        <ClaimCard placeId={placeId} placeName={placeName} />
       </div>
     );
   }

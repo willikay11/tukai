@@ -112,10 +112,8 @@ jest.mock('@/app/shared/components/Moments', () => ({
 jest.mock('./PlaceDrawerReviews', () => ({
   PlaceDrawerReviews: () => <div data-testid="reviews" />,
 }));
-jest.mock('./PlaceClaimSection', () => ({
-  PlaceClaimSection: ({ placeName }: { placeName: string }) => (
-    <div data-testid="claim">{placeName}</div>
-  ),
+jest.mock('@/app/shared/components/Places/ClaimCard', () => ({
+  ClaimCard: ({ placeName }: { placeName: string }) => <div data-testid="claim">{placeName}</div>,
 }));
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: { iconName: string }) => <span data-testid={iconName} />,

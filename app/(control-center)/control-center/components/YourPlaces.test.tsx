@@ -1,12 +1,18 @@
 import React from 'react';
 
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { YourPlaces } from './YourPlaces';
 
 const useMyPlaces = jest.fn();
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   useMyPlaces: () => useMyPlaces(),
+}));
+
+const openConnectPlace = jest.fn();
+jest.mock('@/context/ConnectPlaceDrawerContext', () => ({
+  useConnectPlaceDrawer: () => ({ openConnectPlace }),
 }));
 
 const place = (extra: Record<string, unknown> = {}) => ({
@@ -28,6 +34,7 @@ const withPlaces = (results: unknown[], isLoading = false) =>
 describe('YourPlaces', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    openConnectPlace.mockClear();
     withPlaces([]);
   });
 
@@ -75,13 +82,18 @@ describe('YourPlaces', () => {
     expect(screen.queryByText('Claim a place your community owns')).not.toBeInTheDocument();
   });
 
-  // Claiming is the only route to owning a place, so both entry points lead there
-  it('sends the host to the claim flow to add one', () => {
+  // Claiming is the only route to owning a place, so both entry points open it
+  it('opens the connect-a-place drawer to add one', async () => {
+    const user = userEvent.setup();
     render(<YourPlaces />);
 
-    screen
-      .getAllByRole('link', { name: /Add a place/ })
-      .forEach((link) => expect(link).toHaveAttribute('href', '/places/claim'));
+    const buttons = screen.getAllByRole('button', { name: /Add a place/ });
+    for (const button of buttons) {
+      // eslint-disable-next-line no-await-in-loop
+      await user.click(button);
+    }
+
+    expect(openConnectPlace).toHaveBeenCalledTimes(buttons.length);
   });
 
   it('says what the empty tile is for when nothing is owned yet', () => {

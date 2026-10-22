@@ -108,6 +108,15 @@ const config: Config = {
           // rather than tokenised, so a screen that needs one asks first.
           DEFAULT: '#E02D3C',
           surface: '#FEF3F2', // 15 — the ground a danger message sits on
+          // The second red, asked for by the claim status view's "Not
+          // approved" text - distinct from DEFAULT, used only there.
+          deep: '#B42318',
+        },
+        // The claim status view's "Under review" / "Needs more documents"
+        // banner - amber, with no prior use in the canvas before this screen.
+        warn: {
+          DEFAULT: '#7A4A00',
+          surface: '#FFF6E5',
         },
         'brand-green': {
           DEFAULT: 'rgba(var(--color-brand-green) / <alpha-value>)',

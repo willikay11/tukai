@@ -17,6 +17,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { TukaiImage } from '@/components/ui/image';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAuthDialog } from '@/context/AuthDialogContext';
+import { useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
 
 import { CreateMenu } from './CreateMenu';
 import { CreateMenuItemId } from './CreateMenu/items';
@@ -24,6 +25,7 @@ import { ProfileMenu } from './ProfileMenu';
 
 export const AuthActions = () => {
   const { openSignInWithCallback } = useAuthDialog();
+  const { openConnectPlace } = useConnectPlaceDrawer()!;
   const router = useRouter();
   const { data: session } = useSession();
   const [showJoinPremium, setShowJoinPremium] = useState(false);
@@ -81,6 +83,7 @@ export const AuthActions = () => {
 
     if (id === 'experience') handleCreateExperience();
     if (id === 'community') setIsCommunityDrawerOpen(true);
+    if (id === 'place') openConnectPlace();
     if (id === 'bucketList') setIsBucketListModalOpen(true);
     if (id === 'moment') setIsMomentComposerOpen(true);
   };

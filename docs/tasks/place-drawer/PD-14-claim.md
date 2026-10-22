@@ -1,6 +1,9 @@
 # PD-14 Claim
 
-- **Status:** awaiting approval
+- **Status:** resolved - consolidated into `app/shared/components/Places/ClaimCard.tsx`,
+  used by both the place page and the place drawer, as part of the
+  Connect-a-place drawer conversion. `ClaimPlacePrompt.tsx` and
+  `PlaceClaimSection.tsx` are deleted.
 - **Type:** content
 - **Depends on:** the owner's approval of [INVENTORY.md](INVENTORY.md)
 - **Design:** `Tukai Web.dc.html`, grep `pn.canClaim`

@@ -6,6 +6,7 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { Rating } from '@/app/shared/components/Rating/Rating';
 import { useMyPlaces } from '@/app/shared/hooks/usePlaces';
+import { useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
 import { PlaceCategory } from '@/types/placeCategory';
@@ -34,6 +35,7 @@ const PlaceCardSkeleton = () => (
  * field on Place to filter by itself.
  */
 export const YourPlaces = () => {
+  const { openConnectPlace } = useConnectPlaceDrawer()!;
   const { data: response, isLoading } = useMyPlaces();
   const places: Place[] = response?.data?.results ?? [];
 
@@ -49,13 +51,14 @@ export const YourPlaces = () => {
 
         {/* Claiming is how a place becomes yours - there is no separate
             create-and-own path */}
-        <Link
-          href="/places/claim"
+        <button
+          type="button"
+          onClick={() => openConnectPlace()}
           className="inline-flex flex-shrink-0 items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary/90"
         >
           <IconComponent iconName="PlusSignIcon" size={16} color="currentColor" />
           Add a place
-        </Link>
+        </button>
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -115,8 +118,9 @@ export const YourPlaces = () => {
             })}
 
             {/* The add tile trails the list, and stands in for it when empty */}
-            <Link
-              href="/places/claim"
+            <button
+              type="button"
+              onClick={() => openConnectPlace()}
               className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/50 p-6 text-center hover:border-gray-300"
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
@@ -131,7 +135,7 @@ export const YourPlaces = () => {
               <p className="mt-1 text-xs text-gray-400">
                 {places.length === 0 ? 'Claim a place your community owns' : 'Claim another place'}
               </p>
-            </Link>
+            </button>
           </>
         )}
       </div>
