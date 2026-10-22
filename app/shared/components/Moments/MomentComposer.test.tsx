@@ -27,6 +27,19 @@ jest.mock('@/app/shared/hooks/useMoments', () => ({
   useCreateMoment: () => ({ mutate: shareMoment, isPending: false }),
 }));
 
+// The picker's own search hooks are exercised in MomentAttachPicker.test.tsx;
+// here it only matters that picking a row reaches the composer
+jest.mock('./useMomentAttachSearch', () => ({
+  useMomentAttachSearch: (kind: string) => ({
+    options:
+      kind === 'place' ? [{ id: 'pl2', label: 'Two Rivers Mall', meta: 'Mall · Ruaka' }] : [],
+    total: kind === 'place' ? 1 : 0,
+    isLoading: false,
+    isSearching: false,
+    hasNoCommunities: false,
+  }),
+}));
+
 // jsdom has no object URLs
 beforeAll(() => {
   URL.createObjectURL = jest.fn(() => 'blob:preview');
@@ -76,6 +89,25 @@ describe('MomentComposer', () => {
     // The other two are untouched
     expect(screen.getByText('Karura Entry Fees')).toBeInTheDocument();
     expect(screen.getByText('Nairobi Runners')).toBeInTheDocument();
+  });
+
+  it('opens with an empty tile per kind when nothing was passed in', () => {
+    render(<MomentComposer open onOpenChange={onOpenChange} />);
+
+    expect(screen.getByRole('button', { name: 'Select experience' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Select community' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Select place' })).toBeInTheDocument();
+  });
+
+  it('attaches a place picked from its own picker', async () => {
+    const user = userEvent.setup();
+    render(<MomentComposer open onOpenChange={onOpenChange} />);
+
+    await user.click(screen.getByRole('button', { name: 'Select place' }));
+    await user.click(screen.getByRole('option', { name: /Two Rivers Mall/ }));
+
+    expect(screen.getByText('Two Rivers Mall')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Select place' })).not.toBeInTheDocument();
   });
 
   it('cannot be shared while empty', () => {

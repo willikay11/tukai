@@ -4,26 +4,56 @@ import { IconComponent } from '@/app/shared/components/Icons';
 
 import type { AttachmentKind, MomentAttachment } from './useMomentComposer';
 
-const KIND_META: Record<AttachmentKind, { icon: string; badge: string }> = {
-  experience: { icon: 'Ticket01Icon', badge: 'Experience' },
-  community: { icon: 'UserMultipleIcon', badge: 'Community' },
-  place: { icon: 'Location01Icon', badge: 'Place' },
+const KIND_META: Record<AttachmentKind, { icon: string; badge: string; selectLabel: string }> = {
+  experience: { icon: 'Ticket01Icon', badge: 'Experience', selectLabel: 'Select experience' },
+  community: { icon: 'UserMultipleIcon', badge: 'Community', selectLabel: 'Select community' },
+  place: { icon: 'Location01Icon', badge: 'Place', selectLabel: 'Select place' },
 };
 
 /**
- * One of up to three tiles under "Where this moment took place" - fixed by
- * whichever page opened the composer, with no picker to add another. Removing
- * one is one-way; there is nothing to search for, so the only way back is to
- * close and reopen the drawer.
+ * One of the three tiles under "Where did this moment take place?" - empty
+ * and clickable (opens that kind's picker) until something is attached, then
+ * filled with a remove button. Whichever page opened the composer may have
+ * filled one or more already; the reader can still change or clear any of
+ * them.
  */
 export const MomentAttachTile = ({
+  kind,
   attachment,
+  isOpen,
+  onOpen,
   onRemove,
 }: {
-  attachment: MomentAttachment;
+  kind: AttachmentKind;
+  attachment: MomentAttachment | null;
+  isOpen: boolean;
+  onOpen: () => void;
   onRemove: () => void;
 }) => {
-  const meta = KIND_META[attachment.kind];
+  const meta = KIND_META[kind];
+
+  if (!attachment) {
+    return (
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-expanded={isOpen}
+        aria-label={meta.selectLabel}
+        className={`relative flex aspect-square flex-col justify-between rounded-xl bg-surface p-3 text-left transition-colors hover:bg-surface-brand ${
+          isOpen ? 'ring-2 ring-brand ring-offset-2 ring-offset-white' : ''
+        }`}
+      >
+        <div className="flex items-start justify-between gap-1.5">
+          <IconComponent iconName={meta.icon} size={28} color="currentColor" className="text-brand" />
+          <span className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-full bg-lime text-brand-ink">
+            <IconComponent iconName="Add01Icon" size={18} color="currentColor" />
+          </span>
+        </div>
+
+        <span className="text-[15px] font-bold leading-tight text-gray-900">{meta.selectLabel}</span>
+      </button>
+    );
+  }
 
   return (
     <div className="relative">

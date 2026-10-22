@@ -1,12 +1,21 @@
 'use client';
 
+import { useState } from 'react';
+
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { Textarea } from '@/components/ui/textarea';
 
+import { MomentAttachPicker } from './MomentAttachPicker';
 import { MomentAttachTile } from './MomentAttachTile';
 import { MomentPhotosField } from './MomentPhotosField';
-import type { AttachmentKind, DraftMomentPhoto, MomentAttachment } from './useMomentComposer';
+import type { MomentAttachOption } from './useMomentAttachSearch';
+import {
+  ATTACHMENT_KINDS,
+  type AttachmentKind,
+  type DraftMomentPhoto,
+  type MomentAttachment,
+} from './useMomentComposer';
 
 export interface MomentComposerFormProps {
   author: string;
@@ -18,7 +27,8 @@ export interface MomentComposerFormProps {
   onRemovePhoto: (id: string) => void;
   onMovePhoto: (id: string, direction: -1 | 1) => void;
   onReorderPhotos: (fromIndex: number, toIndex: number) => void;
-  attachments: MomentAttachment[];
+  attachmentFor: (kind: AttachmentKind) => MomentAttachment | null;
+  onSelectAttachment: (kind: AttachmentKind, attachment: Omit<MomentAttachment, 'kind'>) => void;
   onRemoveAttachment: (kind: AttachmentKind) => void;
   hasPhoto: boolean;
 }
@@ -39,15 +49,23 @@ export const MomentComposerForm = ({
   onRemovePhoto,
   onMovePhoto,
   onReorderPhotos,
-  attachments,
+  attachmentFor,
+  onSelectAttachment,
   onRemoveAttachment,
   hasPhoto,
 }: MomentComposerFormProps) => {
+  const [openPickerKind, setOpenPickerKind] = useState<AttachmentKind | null>(null);
+
   const needLine = !hasPhoto
     ? 'Add at least one photo.'
     : caption.trim().length === 0
       ? 'Say something about this moment.'
       : null;
+
+  const selectAttachment = (kind: AttachmentKind, option: MomentAttachOption) => {
+    onSelectAttachment(kind, { id: option.id, label: option.label });
+    setOpenPickerKind(null);
+  };
 
   return (
     <div className="flex flex-col gap-7">
@@ -101,23 +119,32 @@ export const MomentComposerForm = ({
         />
       </label>
 
-      {attachments.length > 0 && (
-        <div className="flex flex-col gap-3">
-          <span className="text-[15px] font-semibold text-gray-800">
-            Where this moment took place
-          </span>
+      <div className="flex flex-col gap-3">
+        <span className="text-[15px] font-semibold text-gray-800">
+          Where did this moment take place?
+        </span>
 
-          <div className="grid grid-cols-3 gap-2.5" role="list" aria-label="Attached to">
-            {attachments.map((attachment) => (
-              <MomentAttachTile
-                key={attachment.kind}
-                attachment={attachment}
-                onRemove={() => onRemoveAttachment(attachment.kind)}
-              />
-            ))}
-          </div>
+        <div className="grid grid-cols-3 gap-2.5" role="list" aria-label="Attached to">
+          {ATTACHMENT_KINDS.map((kind) => (
+            <MomentAttachTile
+              key={kind}
+              kind={kind}
+              attachment={attachmentFor(kind)}
+              isOpen={openPickerKind === kind}
+              onOpen={() => setOpenPickerKind((current) => (current === kind ? null : kind))}
+              onRemove={() => onRemoveAttachment(kind)}
+            />
+          ))}
         </div>
-      )}
+
+        {openPickerKind && (
+          <MomentAttachPicker
+            kind={openPickerKind}
+            onSelect={(option) => selectAttachment(openPickerKind, option)}
+            onClose={() => setOpenPickerKind(null)}
+          />
+        )}
+      </div>
 
       {needLine && (
         <p className="-mt-2 flex items-start gap-2 text-[13.5px] leading-relaxed text-ink-muted">
