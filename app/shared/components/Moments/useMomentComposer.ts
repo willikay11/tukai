@@ -6,16 +6,17 @@ import { useSession } from 'next-auth/react';
 
 import { useCreateMoment } from '@/app/shared/hooks/useMoments';
 import { useToast } from '@/app/shared/hooks/useToast';
+import { Moment } from '@/types/moment';
 import { titleFrom } from '@/utils/safe-text-utils';
 
 export type MomentContextProps = {
   /**
    * What the moment is being posted at, for the attach tile that carries no
-   * label of its own - see the per-kind fallback in `allAttachments` below.
+   * label of its own - see the per-kind fallback in `defaults` below.
    *
    * Absent where there is nothing to post it at - the Discover tile has no
    * context of its own. `POST /moments/` needs only a title and description,
-   * so an untagged moment is valid; no tiles are drawn.
+   * so an untagged moment is valid; every tile simply opens empty.
    */
   contextLabel?: string;
   experienceId?: string;
@@ -40,17 +41,25 @@ export interface MomentAttachment {
   kind: AttachmentKind;
   id: string;
   label: string;
+  /** Its cover photo, where one was picked from the picker (which knows it). */
+  thumb?: string;
 }
+
+// In the order the published moment shows them
+export const ATTACHMENT_KINDS: AttachmentKind[] = ['experience', 'community', 'place'];
 
 const MAX_PHOTOS = 10;
 
 /**
  * Everything the moment composer needs: the draft (caption, photos) and
- * whatever the caller attached it to, with a one-way remove per attachment.
+ * what it is attached to - one experience, one community, one place at most,
+ * matching what `POST /moments/` can actually take.
  *
- * There is no picker here - every entry point fixes what a moment is posted
- * at before the composer ever opens, so there is nothing to search for. A
- * removed attachment cannot be brought back without closing and reopening.
+ * Every entry point fixes an initial attachment per kind (or none); the
+ * reader can still change or clear any of the three tiles themselves, via
+ * `onSelectAttachment`/`onRemoveAttachment`, through the picker each empty
+ * tile opens. An override replaces the caller's default for that kind until
+ * the drawer is closed and reopened.
  */
 export const useMomentComposer = (context: MomentContextProps, onDone: () => void) => {
   const { data: session } = useSession();
@@ -58,39 +67,45 @@ export const useMomentComposer = (context: MomentContextProps, onDone: () => voi
 
   const [caption, setCaption] = useState('');
   const [photos, setPhotos] = useState<DraftMomentPhoto[]>([]);
-  const [removedKinds, setRemovedKinds] = useState<Set<AttachmentKind>>(new Set());
+  const [overrides, setOverrides] = useState<Partial<Record<AttachmentKind, MomentAttachment | null>>>(
+    {},
+  );
+  // The moment just shared, opened in its own drawer in place of a toast - the
+  // drawer is the confirmation that it is live
+  const [sharedMoment, setSharedMoment] = useState<Moment | null>(null);
 
   const { mutate: shareMoment, isPending } = useCreateMoment();
 
   const author = session?.user?.name ?? 'You';
 
-  // In the order the published moment shows them: experience, community, place
-  const allAttachments: MomentAttachment[] = useMemo(() => {
-    const list: MomentAttachment[] = [];
+  // What the caller fixed, before any override - by kind, so a pick or a
+  // remove can target one without touching the other two
+  const defaults = useMemo((): Partial<Record<AttachmentKind, MomentAttachment>> => {
+    const map: Partial<Record<AttachmentKind, MomentAttachment>> = {};
 
     if (context.experienceId) {
-      list.push({
+      map.experience = {
         kind: 'experience',
         id: context.experienceId,
         label: context.contextLabel || 'Experience',
-      });
+      };
     }
     if (context.communityId) {
-      list.push({
+      map.community = {
         kind: 'community',
         id: context.communityId,
         label: context.communityLabel || context.contextLabel || 'Community',
-      });
+      };
     }
     if (context.placeId) {
-      list.push({
+      map.place = {
         kind: 'place',
         id: context.placeId,
         label: context.placeLabel || context.contextLabel || 'Place',
-      });
+      };
     }
 
-    return list;
+    return map;
   }, [
     context.experienceId,
     context.communityId,
@@ -100,10 +115,18 @@ export const useMomentComposer = (context: MomentContextProps, onDone: () => voi
     context.placeLabel,
   ]);
 
-  const attachments = allAttachments.filter((attachment) => !removedKinds.has(attachment.kind));
+  const attachmentFor = (kind: AttachmentKind): MomentAttachment | null =>
+    kind in overrides ? (overrides[kind] ?? null) : (defaults[kind] ?? null);
+
+  const attachments = ATTACHMENT_KINDS.map(attachmentFor).filter(
+    (attachment): attachment is MomentAttachment => attachment !== null,
+  );
+
+  const onSelectAttachment = (kind: AttachmentKind, attachment: Omit<MomentAttachment, 'kind'>) =>
+    setOverrides((previous) => ({ ...previous, [kind]: { kind, ...attachment } }));
 
   const onRemoveAttachment = (kind: AttachmentKind) =>
-    setRemovedKinds((previous) => new Set(previous).add(kind));
+    setOverrides((previous) => ({ ...previous, [kind]: null }));
 
   /**
    * A moment is a photo with a line under it - the feeds that show them are
@@ -172,7 +195,7 @@ export const useMomentComposer = (context: MomentContextProps, onDone: () => voi
     photos.forEach((photo) => URL.revokeObjectURL(photo.url));
     setCaption('');
     setPhotos([]);
-    setRemovedKinds(new Set());
+    setOverrides({});
   };
 
   const handleShare = () => {
@@ -181,7 +204,6 @@ export const useMomentComposer = (context: MomentContextProps, onDone: () => voi
     const experienceId = attachments.find((attachment) => attachment.kind === 'experience')?.id;
     const communityId = attachments.find((attachment) => attachment.kind === 'community')?.id;
     const placeId = attachments.find((attachment) => attachment.kind === 'place')?.id;
-    const firstLabel = attachments[0]?.label;
 
     shareMoment(
       {
@@ -193,14 +215,12 @@ export const useMomentComposer = (context: MomentContextProps, onDone: () => voi
         photos: photos.map((photo) => photo.file),
       },
       {
-        onSuccess: () => {
-          toast({
-            title: 'Moment shared',
-            description: firstLabel ? `Your moment at ${firstLabel} is live.` : 'Your moment is live.',
-            variant: 'success',
-          });
+        // The newly posted moment opens in its own drawer - that is the
+        // confirmation, so there is no toast on top of it
+        onSuccess: (response) => {
           resetDraft();
           onDone();
+          setSharedMoment((response?.data as Moment) ?? null);
         },
         onError: (error: Error) =>
           toast({
@@ -223,10 +243,14 @@ export const useMomentComposer = (context: MomentContextProps, onDone: () => voi
     onMovePhoto,
     onReorderPhotos,
     attachments,
+    attachmentFor,
+    onSelectAttachment,
     onRemoveAttachment,
     hasPhoto,
     canShare,
     isPending,
     handleShare,
+    sharedMoment,
+    onCloseSharedMoment: () => setSharedMoment(null),
   };
 };

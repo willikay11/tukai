@@ -98,12 +98,15 @@ jest.mock('@/app/shared/components/Moments', () => ({
     </div>
   ),
   MomentComposerForm: () => <div data-testid="moment-form" />,
+  MomentDrawer: () => null,
   // The drawer owns the hook directly and renders its own Share button -
   // `handleShare` stands in for a share that always succeeds immediately
   useMomentComposer: (_context: unknown, onDone: () => void) => ({
     canShare: true,
     isPending: false,
     handleShare: onDone,
+    sharedMoment: null,
+    onCloseSharedMoment: () => {},
   }),
 }));
 jest.mock('./PlaceDrawerReviews', () => ({
