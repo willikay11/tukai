@@ -1,6 +1,14 @@
 'use client';
 
-import { ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
+import {
+  ReactNode,
+  Suspense,
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
 
 import type { ExperienceStepId } from '@/app/(experiences)/experiences/create/hooks/useCreateExperienceFlow';
 import { CreateExperienceDrawer } from '@/app/shared/components/Experiences/CreateExperienceDrawer';
@@ -68,7 +76,13 @@ export const CreateExperienceDrawerProvider = ({ children }: { children: ReactNo
   return (
     <CreateExperienceDrawerContext.Provider value={value}>
       {children}
-      <CreateExperienceDrawer />
+      {/* Mounted (just closed) on every page via this provider in
+          app/layout.tsx, and it reads useSearchParams through
+          useCreateExperienceFlow - same reason BottomNavigation gets this
+          boundary there, so static generation doesn't bail out app-wide. */}
+      <Suspense fallback={null}>
+        <CreateExperienceDrawer />
+      </Suspense>
     </CreateExperienceDrawerContext.Provider>
   );
 };
