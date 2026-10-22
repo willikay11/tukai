@@ -5,10 +5,10 @@ import { render, screen } from '@testing-library/react';
 import { ImageFallback } from './ImageFallback';
 
 describe('ImageFallback', () => {
-  it('shows the broken-image icon on a muted ground', () => {
+  it('shows the broken-image icon on a muted ground', async () => {
     const { container } = render(<ImageFallback />);
 
-    expect(screen.getByTestId('ImageNotFound01Icon')).toBeInTheDocument();
+    expect(await screen.findByTestId('ImageNotFound01Icon')).toBeInTheDocument();
     expect(container.firstChild).toHaveClass('bg-gray-50');
   });
 
@@ -34,10 +34,10 @@ describe('ImageFallback', () => {
     expect(screen.getByText('Image not available')).toBeInTheDocument();
   });
 
-  it('takes a caller shape and size', () => {
+  it('takes a caller shape and size', async () => {
     const { container } = render(<ImageFallback className="rounded-full" iconSize={12} />);
 
     expect(container.firstChild).toHaveClass('rounded-full');
-    expect(screen.getByTestId('ImageNotFound01Icon')).toHaveAttribute('size', '12');
+    expect(await screen.findByTestId('ImageNotFound01Icon')).toHaveAttribute('size', '12');
   });
 });

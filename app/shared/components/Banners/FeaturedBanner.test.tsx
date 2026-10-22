@@ -87,9 +87,9 @@ describe('FeaturedBanner secondary CTA', () => {
     expect(onCtaClick).not.toHaveBeenCalled();
   });
 
-  it('renders the badge icon when one is given', () => {
+  it('renders the badge icon when one is given', async () => {
     render(<FeaturedBanner {...defaultProps} badgeIcon="SparklesIcon" />);
 
-    expect(screen.getByTestId('SparklesIcon')).toBeInTheDocument();
+    expect(await screen.findByTestId('SparklesIcon')).toBeInTheDocument();
   });
 });

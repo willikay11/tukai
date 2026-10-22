@@ -32,12 +32,12 @@ describe('PhotoImage', () => {
     expect(screen.queryByTestId(FALLBACK)).not.toBeInTheDocument();
   });
 
-  it('swaps to the fallback when the photo fails to load', () => {
+  it('swaps to the fallback when the photo fails to load', async () => {
     render(<PhotoImage src="https://cdn.tukai.co/gone.jpg" alt="A hike" fill />);
 
     fireEvent.error(screen.getByRole('img', { name: 'A hike' }));
 
-    expect(screen.getByTestId(FALLBACK)).toBeInTheDocument();
+    expect(await screen.findByTestId(FALLBACK)).toBeInTheDocument();
     expect(screen.queryByRole('img', { name: 'A hike' })).not.toBeInTheDocument();
   });
 
@@ -46,10 +46,10 @@ describe('PhotoImage', () => {
     ['null', null],
     ['undefined', undefined],
     ['an empty string', ''],
-  ])('shows the fallback when src is %s', (_label, src) => {
+  ])('shows the fallback when src is %s', async (_label, src) => {
     render(<PhotoImage src={src} alt="A hike" fill />);
 
-    expect(screen.getByTestId(FALLBACK)).toBeInTheDocument();
+    expect(await screen.findByTestId(FALLBACK)).toBeInTheDocument();
   });
 
   it('still tells the caller about the error', () => {
@@ -166,9 +166,9 @@ describe('the placeholder blur', () => {
     expect(img()).toHaveAttribute('placeholder', 'empty');
   });
 
-  it('never reaches the fallback path', () => {
+  it('never reaches the fallback path', async () => {
     render(<PhotoImage src={null} alt="A hike" fill />);
 
-    expect(screen.getByTestId(FALLBACK)).toBeInTheDocument();
+    expect(await screen.findByTestId(FALLBACK)).toBeInTheDocument();
   });
 });

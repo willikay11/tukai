@@ -28,7 +28,7 @@ describe('RecentSearchPill', () => {
     render(<RecentSearchPill term="Nyama choma" onSelect={onSelect} />);
 
     expect(screen.getByText('Nyama choma')).toBeInTheDocument();
-    expect(screen.getByTestId('Clock01Icon')).toBeInTheDocument();
+    expect(await screen.findByTestId('Clock01Icon')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button'));
     expect(onSelect).toHaveBeenCalled();
