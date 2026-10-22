@@ -1,6 +1,5 @@
 import { OG_CONTENT_TYPE, OG_SIZE, fetchOgSubject, renderOgCard } from '@/utils/og-card';
 
-export const runtime = 'edge';
 export const alt = 'Tukai';
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
