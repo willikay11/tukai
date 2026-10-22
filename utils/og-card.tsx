@@ -9,8 +9,11 @@ import { ImageResponse } from 'next/og';
  * `photo_webp_*_url` come back null. So the card is composed at the 1200×630
  * every platform expects, and `next/og` rasterises the photo down to fit.
  *
- * Kept edge-safe on purpose - these routes run on the edge runtime, so nothing
- * here may reach for axios, next-auth or node built-ins.
+ * These routes now run on the default Node.js runtime - the edge runtime's
+ * 1MB-per-plan code size limit (Hobby) couldn't fit next/og's renderer
+ * (Satori + resvg + yoga, ~600KB on its own) alongside the rest of a route's
+ * shared chunks. `fetch` is still used in place of axios/next-auth so this
+ * file would also work unchanged if a route ever needs edge again.
  */
 export const OG_SIZE = { width: 1200, height: 630 };
 export const OG_CONTENT_TYPE = 'image/png';
