@@ -3,6 +3,7 @@
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
+import { isFreePlan } from '@/types/hostingPlan';
 
 import { ChoosePlanView } from './ChoosePlanView';
 import { HostingSubscribeView } from './HostingSubscribeView';
@@ -28,11 +29,14 @@ export const HostingPlanDrawer = () => {
     view,
     plans,
     currentPlan,
+    currentPlanName,
+    renewalDateLabel,
     isChangeMode,
     selectedPlanId,
     selectedPlan,
     isCurrentPlanSelected,
     isSubscribing,
+    isStartingFreePlan,
     isChangingPlan,
     paymentMethod,
     setPaymentMethod,
@@ -49,6 +53,7 @@ export const HostingPlanDrawer = () => {
     handleClose,
     handlePickPlan,
     handleContinue,
+    handleCompareFeatures,
     handleBackToChoose,
     handleSubscribe,
   } = drawer;
@@ -65,7 +70,7 @@ export const HostingPlanDrawer = () => {
       ? `Switch to ${selectedPlan.name}`
       : 'Continue'
     : selectedPlan
-      ? `Continue with ${selectedPlan.name}`
+      ? `${isFreePlan(selectedPlan) ? 'Start with' : 'Continue with'} ${selectedPlan.name}`
       : 'Continue';
 
   return (
@@ -103,8 +108,11 @@ export const HostingPlanDrawer = () => {
               plans={plans}
               selectedPlanId={selectedPlanId}
               currentPlanId={currentPlan.planId}
+              currentPlanName={currentPlanName}
+              renewalDateLabel={renewalDateLabel}
               isChangeMode={isChangeMode}
               onChoose={handlePickPlan}
+              onCompareFeatures={handleCompareFeatures}
               disabled={isChangingPlan}
             />
           )}
@@ -144,7 +152,7 @@ export const HostingPlanDrawer = () => {
               variant="lime"
               onClick={handleContinue}
               disabled={!selectedPlan || isCurrentPlanSelected}
-              isLoading={isChangingPlan}
+              isLoading={isChangingPlan || isStartingFreePlan}
               className="h-12 rounded-full px-6 text-[15px] disabled:bg-[#E4F4B5] disabled:text-[#5E7A45] disabled:opacity-100"
             >
               {isCurrentPlanSelected ? 'Your current plan' : continueLabel}

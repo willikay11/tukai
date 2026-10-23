@@ -14,15 +14,19 @@ jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: { iconName: string }) => <span data-testid={iconName} />,
 }));
 
+const push = jest.fn();
+jest.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
+
 const PLANS = [
   {
     id: 'basic',
     name: 'Basic',
     tagline: 'Start hosting experiences on Tukai.',
-    priceAmount: 1,
+    priceAmount: 0,
     priceCurrency: 'USD',
-    priceLabel: '$1 / month',
-    commissionPct: 4,
+    priceLabel: 'Free',
+    commissionPct: 8,
+    icon: 'Plant02Icon',
     features: ['Up to 3 live experiences'],
   },
   {
@@ -33,6 +37,7 @@ const PLANS = [
     priceCurrency: 'USD',
     priceLabel: '$15 / month',
     commissionPct: 3.5,
+    icon: 'Rocket01Icon',
     features: ['Unlimited live experiences'],
     isMostPopular: true,
   },
@@ -44,7 +49,9 @@ const PLANS = [
     priceCurrency: 'USD',
     priceLabel: '$49 / month',
     commissionPct: 3,
+    icon: 'Building03Icon',
     features: ['Everything in Premium'],
+    aiFeatures: [{ icon: 'SparklesIcon', text: 'Writes experience pages' }],
   },
 ];
 
@@ -53,6 +60,15 @@ const subscribeToPlan = jest.fn((planId: string, paymentMethod: string) =>
     planId,
     status: 'active',
     paymentMethod,
+    currentPeriodEnd: '2026-12-01T00:00:00.000Z',
+    dateSubscribed: '2026-11-01T00:00:00.000Z',
+  }),
+);
+const startFreePlan = jest.fn((planId: string) =>
+  Promise.resolve({
+    planId,
+    status: 'active',
+    paymentMethod: null,
     currentPeriodEnd: '2026-12-01T00:00:00.000Z',
     dateSubscribed: '2026-11-01T00:00:00.000Z',
   }),
@@ -66,6 +82,7 @@ jest.mock('@/services/hostingPlans', () => ({
   getHostingPlan: (id: string) => PLANS.find((plan) => plan.id === id),
   subscribeToPlan: (planId: string, paymentMethod: string) =>
     subscribeToPlan(planId, paymentMethod),
+  startFreePlan: (planId: string) => startFreePlan(planId),
   changePlan: (planId: string, current: Record<string, unknown>) => changePlan(planId, current),
   cancelPlan: jest.fn((current) => Promise.resolve({ ...current, status: 'cancel_pending' })),
   resumePlan: jest.fn((current) => Promise.resolve({ ...current, status: 'active' })),
@@ -161,5 +178,28 @@ describe('HostingPlanDrawer', () => {
     await screen.findByText('Change your plan');
     expect(screen.getByRole('radio', { name: /Basic/ })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Your current plan' })).toBeDisabled();
+  });
+
+  it('picking the free plan starts it straight away, with no Subscribe step', async () => {
+    const user = userEvent.setup();
+    renderDrawer();
+
+    await screen.findByText('Pick a plan to start hosting');
+
+    await user.click(screen.getByRole('radio', { name: /Basic/ }));
+    await user.click(screen.getByRole('button', { name: 'Start with Basic' }));
+
+    expect(startFreePlan).toHaveBeenCalledWith('basic');
+    expect(screen.queryByText('Subscribe to Basic')).not.toBeInTheDocument();
+  });
+
+  it('Compare every feature closes the drawer and goes to the Pricing page', async () => {
+    const user = userEvent.setup();
+    renderDrawer();
+
+    await screen.findByText('Pick a plan to start hosting');
+    await user.click(screen.getByRole('button', { name: /Compare every feature/ }));
+
+    expect(push).toHaveBeenCalledWith('/pricing');
   });
 });

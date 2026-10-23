@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useHostingPlan } from '@/context/HostingPlanContext';
 import { getHostingPlan } from '@/services/hostingPlans';
+import { isFreePlan } from '@/types/hostingPlan';
 
 /**
  * The Dashboard's "Hosting plan" card - mirrors WalletsSection/EarningsSection's
@@ -51,10 +52,11 @@ export const HostingPlanCard = () => {
   const handleResume = () => {
     resume().then(() => {
       toast({
-        title: 'Your plan renews',
-        description: renewalLabel
-          ? `Your ${plan?.name} plan renews on ${renewalLabel}.`
-          : undefined,
+        title: plan && isFreePlan(plan) ? `You're back on ${plan.name}` : 'Your plan renews',
+        description:
+          plan && !isFreePlan(plan) && renewalLabel
+            ? `Your ${plan.name} plan renews on ${renewalLabel}.`
+            : undefined,
         variant: 'success',
       });
     });
@@ -70,7 +72,7 @@ export const HostingPlanCard = () => {
             <>
               <span className="text-xl font-bold leading-snug text-gray-900">No plan yet</span>
               <p className="text-sm leading-relaxed text-ink-muted">
-                You need a plan to create experiences. Plans start at $1 a month.
+                You need a plan to create experiences. Basic is free.
               </p>
               <Button
                 variant="gradient"
@@ -98,7 +100,11 @@ export const HostingPlanCard = () => {
                 ) : (
                   <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-surface-brand px-2.5 text-13 font-semibold text-brand">
                     <IconComponent iconName="Calendar03Icon" size={14} color="currentColor" />
-                    {renewalLabel ? `Renews ${renewalLabel}` : 'Active'}
+                    {isFreePlan(plan)
+                      ? 'Nothing to renew'
+                      : renewalLabel
+                        ? `Renews ${renewalLabel}`
+                        : 'Active'}
                   </span>
                 )}
                 <span className="inline-flex items-center gap-1.5 text-13 font-semibold text-brand">

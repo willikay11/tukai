@@ -14,19 +14,31 @@
  */
 export type HostingPlanId = 'basic' | 'premium' | 'business';
 
+export type HostingPlanAiFeature = {
+  icon: string;
+  text: string;
+};
+
 export type HostingPlan = {
   id: HostingPlanId;
   name: string;
   tagline: string;
+  /** 0 for Basic - it's free, so priceLabel is "Free" and there's no "/ month". */
   priceAmount: number;
   priceCurrency: string;
-  /** "$1 / month" - already formatted, since the catalog is static. */
+  /** "$15 / month", or "Free" for a $0 plan - already formatted, since the catalog is static. */
   priceLabel: string;
-  /** e.g. 4 for "4% per paid ticket". */
+  /** e.g. 8 for "8% per paid ticket". */
   commissionPct: number;
+  /** Hugeicons name for the card's icon tile. */
+  icon: string;
   features: string[];
   isMostPopular?: boolean;
+  /** Business only: the "TukAI for your team" block. */
+  aiFeatures?: HostingPlanAiFeature[];
 };
+
+export const isFreePlan = (plan: HostingPlan): boolean => plan.priceAmount === 0;
 
 export type HostingPlanStatus = 'none' | 'active' | 'cancel_pending';
 

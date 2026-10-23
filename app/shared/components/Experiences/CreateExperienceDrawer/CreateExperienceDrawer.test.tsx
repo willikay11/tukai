@@ -18,6 +18,10 @@ jest.mock('next-auth/react', () => ({
   useSession: () => ({ data: { user: { id: 'user-1' } }, status: 'authenticated' }),
 }));
 
+// Pulled in transitively by HostingPlanDrawer (mounted by HostingPlanProvider
+// below), for its "Compare every feature" link - not under test here.
+jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }));
+
 const toast = jest.fn();
 jest.mock('@/app/shared/hooks/useToast', () => ({
   toast: (...args: unknown[]) => toast(...args),

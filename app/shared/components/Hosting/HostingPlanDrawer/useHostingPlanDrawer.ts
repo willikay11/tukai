@@ -2,9 +2,13 @@
 
 import { useEffect, useState } from 'react';
 
+import { useRouter } from 'next/navigation';
+
+import moment from 'moment';
+
 import { useToast } from '@/app/shared/hooks/useToast';
 import { useHostingPlan } from '@/context/HostingPlanContext';
-import { HostingPaymentMethod, HostingPlanId } from '@/types/hostingPlan';
+import { HostingPaymentMethod, HostingPlanId, isFreePlan } from '@/types/hostingPlan';
 
 import { canSubmitPayment, formatCardNumber, formatExpiry } from './hosting-plan-drawer';
 
@@ -18,6 +22,7 @@ type DrawerView = 'choose' | 'subscribe';
 export const useHostingPlanDrawer = () => {
   const hostingPlan = useHostingPlan();
   const { toast } = useToast();
+  const router = useRouter();
 
   const [view, setView] = useState<DrawerView>('choose');
   const [selectedPlanId, setSelectedPlanId] = useState<HostingPlanId | null>(null);
@@ -55,18 +60,30 @@ export const useHostingPlanDrawer = () => {
     hasActivePlan,
     isSubscribing,
     subscribe,
+    isStartingFreePlan,
+    startFreePlan,
     isChangingPlan,
     changeToPlan,
     closeHostingPlanFlow,
   } = hostingPlan;
 
   // Already paying for something: Continue swaps the plan in immediately,
-  // no checkout. No plan yet: Continue goes to Subscribe.
+  // no checkout. No plan yet: Continue goes to Subscribe, unless the plan
+  // picked is free (Basic), which also starts straight away.
   const isChangeMode = hasActivePlan;
   const selectedPlan = plans.find((plan) => plan.id === selectedPlanId) ?? null;
   const isCurrentPlanSelected = isChangeMode && selectedPlanId === currentPlan.planId;
+  const currentPlanRecord = plans.find((plan) => plan.id === currentPlan.planId) ?? null;
+  const renewalDateLabel = currentPlan.currentPeriodEnd
+    ? moment(currentPlan.currentPeriodEnd).format('ddd D MMM')
+    : null;
 
   const handlePickPlan = (planId: HostingPlanId) => setSelectedPlanId(planId);
+
+  const handleCompareFeatures = () => {
+    closeHostingPlanFlow();
+    router.push('/pricing');
+  };
 
   const handleContinue = () => {
     if (!selectedPlan || isCurrentPlanSelected) return;
@@ -75,7 +92,21 @@ export const useHostingPlanDrawer = () => {
       changeToPlan(selectedPlan.id).then(() => {
         toast({
           title: `You're on ${selectedPlan.name} now`,
-          description: `It costs ${selectedPlan.priceLabel} from your next renewal.`,
+          description: isFreePlan(selectedPlan)
+            ? 'Nothing to pay from your next renewal.'
+            : `It costs ${selectedPlan.priceLabel} from your next renewal.`,
+          variant: 'success',
+        });
+        closeHostingPlanFlow();
+      });
+      return;
+    }
+
+    if (isFreePlan(selectedPlan)) {
+      startFreePlan(selectedPlan.id).then(() => {
+        toast({
+          title: `You're on ${selectedPlan.name}`,
+          description: 'Now create your experience.',
           variant: 'success',
         });
         closeHostingPlanFlow();
@@ -121,11 +152,14 @@ export const useHostingPlanDrawer = () => {
     view,
     plans,
     currentPlan,
+    currentPlanName: currentPlanRecord?.name,
+    renewalDateLabel,
     isChangeMode,
     selectedPlanId,
     selectedPlan,
     isCurrentPlanSelected,
     isSubscribing,
+    isStartingFreePlan,
     isChangingPlan,
     paymentMethod,
     setPaymentMethod,
@@ -142,6 +176,7 @@ export const useHostingPlanDrawer = () => {
     handleClose: closeHostingPlanFlow,
     handlePickPlan,
     handleContinue,
+    handleCompareFeatures,
     handleBackToChoose,
     handleSubscribe,
   };

@@ -1,8 +1,224 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
-import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react';
+import {
+  Calendar03Icon as Calendar03IconBulk,
+  CalendarAdd01Icon as CalendarAdd01IconBulk,
+  Camera01Icon as Camera01IconBulk,
+  CheckmarkBadge01Icon as CheckmarkBadge01IconBulk,
+  CompassIcon as CompassIconBulk,
+  DashboardCircleIcon as DashboardCircleIconBulk,
+  FavouriteIcon as FavouriteIconBulk,
+  InformationCircleIcon as InformationCircleIconBulk,
+  Location01Icon as Location01IconBulk,
+  MapsLocation01Icon as MapsLocation01IconBulk,
+  Monocle01Icon as Monocle01IconBulk,
+  Search01Icon as Search01IconBulk,
+  ShoppingBasketAdd02Icon as ShoppingBasketAdd02IconBulk,
+  ShoppingBasketCheckIn01Icon as ShoppingBasketCheckIn01IconBulk,
+  ShoppingBasketDone02Icon as ShoppingBasketDone02IconBulk,
+  StarIcon as StarIconBulk,
+  Ticket01Icon as Ticket01IconBulk,
+  Ticket02Icon as Ticket02IconBulk,
+  UserAdd01Icon as UserAdd01IconBulk,
+  UserGroupIcon as UserGroupIconBulk,
+  UserIcon as UserIconBulk,
+  UserMultipleIcon as UserMultipleIconBulk,
+  Wallet01Icon as Wallet01IconBulk,
+} from '@hugeicons-pro/core-bulk-rounded';
+import {
+  CalendarAdd01Icon as CalendarAdd01IconDuotone,
+  DashboardCircleAddIcon as DashboardCircleAddIconDuotone,
+  ShoppingBasketAdd02Icon as ShoppingBasketAdd02IconDuotone,
+  StoreVerified01Icon as StoreVerified01IconDuotone,
+  UserMultipleIcon as UserMultipleIconDuotone,
+} from '@hugeicons-pro/core-duotone-rounded';
+import {
+  AbacusIcon as AbacusIconTwotone,
+  Add01Icon as Add01IconTwotone,
+  AddCircleIcon as AddCircleIconTwotone,
+  Album02Icon as Album02IconTwotone,
+  Alert01Icon as Alert01IconTwotone,
+  Alert02Icon as Alert02IconTwotone,
+  Analytics01Icon as Analytics01IconTwotone,
+  AngryBirdIcon as AngryBirdIconTwotone,
+  ArrowDown01Icon as ArrowDown01IconTwotone,
+  ArrowLeft01Icon as ArrowLeft01IconTwotone,
+  ArrowRight01Icon as ArrowRight01IconTwotone,
+  ArrowUp01Icon as ArrowUp01IconTwotone,
+  ArrowUpDownIcon as ArrowUpDownIconTwotone,
+  ArrowUpRight01Icon as ArrowUpRight01IconTwotone,
+  Backpack03Icon as Backpack03IconTwotone,
+  BankIcon as BankIconTwotone,
+  BbqGrillIcon as BbqGrillIconTwotone,
+  BicycleIcon as BicycleIconTwotone,
+  BorobudurIcon as BorobudurIconTwotone,
+  BubbleChatIcon as BubbleChatIconTwotone,
+  Building03Icon as Building03IconTwotone,
+  Calendar01Icon as Calendar01IconTwotone,
+  Calendar02Icon as Calendar02IconTwotone,
+  Calendar03Icon as Calendar03IconTwotone,
+  Calendar04Icon as Calendar04IconTwotone,
+  CalendarAdd01Icon as CalendarAdd01IconTwotone,
+  CalendarLove02Icon as CalendarLove02IconTwotone,
+  Call02Icon as Call02IconTwotone,
+  CallIcon as CallIconTwotone,
+  Camera01Icon as Camera01IconTwotone,
+  Cancel01Icon as Cancel01IconTwotone,
+  CancelCircleIcon as CancelCircleIconTwotone,
+  Chair03Icon as Chair03IconTwotone,
+  ChartLineData01Icon as ChartLineData01IconTwotone,
+  CheckmarkBadge01Icon as CheckmarkBadge01IconTwotone,
+  CheckmarkCircle01Icon as CheckmarkCircle01IconTwotone,
+  CheckmarkCircle02Icon as CheckmarkCircle02IconTwotone,
+  CheckmarkCircle03Icon as CheckmarkCircle03IconTwotone,
+  ChefIcon as ChefIconTwotone,
+  Clock01Icon as Clock01IconTwotone,
+  Clock02Icon as Clock02IconTwotone,
+  Clock05Icon as Clock05IconTwotone,
+  Comment01Icon as Comment01IconTwotone,
+  Compass01Icon as Compass01IconTwotone,
+  CompassIcon as CompassIconTwotone,
+  Copy01Icon as Copy01IconTwotone,
+  CowboyHatIcon as CowboyHatIconTwotone,
+  CreditCardAcceptIcon as CreditCardAcceptIconTwotone,
+  CreditCardIcon as CreditCardIconTwotone,
+  DashboardCircleAddIcon as DashboardCircleAddIconTwotone,
+  DashboardCircleIcon as DashboardCircleIconTwotone,
+  DashboardSquare01Icon as DashboardSquare01IconTwotone,
+  Delete01Icon as Delete01IconTwotone,
+  Delete02Icon as Delete02IconTwotone,
+  Delete04Icon as Delete04IconTwotone,
+  DeliveryTruck01Icon as DeliveryTruck01IconTwotone,
+  Directions01Icon as Directions01IconTwotone,
+  Directions02Icon as Directions02IconTwotone,
+  DiscountTag02Icon as DiscountTag02IconTwotone,
+  DishWasherIcon as DishWasherIconTwotone,
+  Download01Icon as Download01IconTwotone,
+  DrinkIcon as DrinkIconTwotone,
+  Edit02Icon as Edit02IconTwotone,
+  Edit04Icon as Edit04IconTwotone,
+  EquipmentGym03Icon as EquipmentGym03IconTwotone,
+  Facebook01Icon as Facebook01IconTwotone,
+  Facebook02Icon as Facebook02IconTwotone,
+  FavouriteIcon as FavouriteIconTwotone,
+  FileUploadIcon as FileUploadIconTwotone,
+  FilterHorizontalIcon as FilterHorizontalIconTwotone,
+  Fire03Icon as Fire03IconTwotone,
+  FireIcon as FireIconTwotone,
+  FirePitIcon as FirePitIconTwotone,
+  FishFoodIcon as FishFoodIconTwotone,
+  Flag01Icon as Flag01IconTwotone,
+  Flag02Icon as Flag02IconTwotone,
+  FlimSlateIcon as FlimSlateIconTwotone,
+  FootballPitchIcon as FootballPitchIconTwotone,
+  GiftIcon as GiftIconTwotone,
+  Globe02Icon as Globe02IconTwotone,
+  GlobeIcon as GlobeIconTwotone,
+  Gps01Icon as Gps01IconTwotone,
+  GpsSignal01Icon as GpsSignal01IconTwotone,
+  GridIcon as GridIconTwotone,
+  HandPointingRight01Icon as HandPointingRight01IconTwotone,
+  HandPrayerIcon as HandPrayerIconTwotone,
+  Hold04Icon as Hold04IconTwotone,
+  HourglassIcon as HourglassIconTwotone,
+  Image02Icon as Image02IconTwotone,
+  ImageAdd02Icon as ImageAdd02IconTwotone,
+  ImageNotFound01Icon as ImageNotFound01IconTwotone,
+  InformationCircleIcon as InformationCircleIconTwotone,
+  InstagramIcon as InstagramIconTwotone,
+  Invoice01Icon as Invoice01IconTwotone,
+  KidIcon as KidIconTwotone,
+  Link01Icon as Link01IconTwotone,
+  Link02Icon as Link02IconTwotone,
+  Linkedin01Icon as Linkedin01IconTwotone,
+  ListViewIcon as ListViewIconTwotone,
+  Loading03Icon as Loading03IconTwotone,
+  Location01Icon as Location01IconTwotone,
+  Location06Icon as Location06IconTwotone,
+  LockIcon as LockIconTwotone,
+  Logout03Icon as Logout03IconTwotone,
+  Logout04Icon as Logout04IconTwotone,
+  LogoutCircle02Icon as LogoutCircle02IconTwotone,
+  Mail01Icon as Mail01IconTwotone,
+  MapPinpoint02Icon as MapPinpoint02IconTwotone,
+  MapsIcon as MapsIconTwotone,
+  MapsLocation01Icon as MapsLocation01IconTwotone,
+  Menu02Icon as Menu02IconTwotone,
+  Message01Icon as Message01IconTwotone,
+  MessageMultiple02Icon as MessageMultiple02IconTwotone,
+  MinusSignIcon as MinusSignIconTwotone,
+  Money02Icon as Money02IconTwotone,
+  Money03Icon as Money03IconTwotone,
+  MoneyRemove01Icon as MoneyRemove01IconTwotone,
+  Monocle01Icon as Monocle01IconTwotone,
+  Moon02Icon as Moon02IconTwotone,
+  MoreHorizontalCircle01Icon as MoreHorizontalCircle01IconTwotone,
+  Navigation03Icon as Navigation03IconTwotone,
+  NewTwitterIcon as NewTwitterIconTwotone,
+  NoodlesIcon as NoodlesIconTwotone,
+  Notification02Icon as Notification02IconTwotone,
+  Notification03Icon as Notification03IconTwotone,
+  OrganicFoodIcon as OrganicFoodIconTwotone,
+  PencilEdit02Icon as PencilEdit02IconTwotone,
+  PercentIcon as PercentIconTwotone,
+  PieChartIcon as PieChartIconTwotone,
+  PlusSignCircleIcon as PlusSignCircleIconTwotone,
+  PlusSignIcon as PlusSignIconTwotone,
+  RepeatIcon as RepeatIconTwotone,
+  Restaurant02Icon as Restaurant02IconTwotone,
+  RocketIcon as RocketIconTwotone,
+  Route01Icon as Route01IconTwotone,
+  Search01Icon as Search01IconTwotone,
+  Settings02Icon as Settings02IconTwotone,
+  Share08Icon as Share08IconTwotone,
+  ShoppingBasket01Icon as ShoppingBasket01IconTwotone,
+  ShoppingBasket02Icon as ShoppingBasket02IconTwotone,
+  ShoppingBasketAdd01Icon as ShoppingBasketAdd01IconTwotone,
+  ShoppingBasketAdd02Icon as ShoppingBasketAdd02IconTwotone,
+  ShoppingBasketCheckIn01Icon as ShoppingBasketCheckIn01IconTwotone,
+  ShoppingBasketDone02Icon as ShoppingBasketDone02IconTwotone,
+  SkippingRopeIcon as SkippingRopeIconTwotone,
+  SmartPhone01Icon as SmartPhone01IconTwotone,
+  Sofa02Icon as Sofa02IconTwotone,
+  SortingAZ01Icon as SortingAZ01IconTwotone,
+  SparklesIcon as SparklesIconTwotone,
+  SquareLock01Icon as SquareLock01IconTwotone,
+  SquareLock02Icon as SquareLock02IconTwotone,
+  StarIcon as StarIconTwotone,
+  StoreVerified01Icon as StoreVerified01IconTwotone,
+  Sun03Icon as Sun03IconTwotone,
+  SunriseIcon as SunriseIconTwotone,
+  SunsetIcon as SunsetIconTwotone,
+  SwimmingIcon as SwimmingIconTwotone,
+  Tag01Icon as Tag01IconTwotone,
+  Target02Icon as Target02IconTwotone,
+  ThumbsDownIcon as ThumbsDownIconTwotone,
+  ThumbsUpIcon as ThumbsUpIconTwotone,
+  Tick02Icon as Tick02IconTwotone,
+  Ticket01Icon as Ticket01IconTwotone,
+  Ticket02Icon as Ticket02IconTwotone,
+  TiktokIcon as TiktokIconTwotone,
+  TongueWinkLeftIcon as TongueWinkLeftIconTwotone,
+  TruckDeliveryIcon as TruckDeliveryIconTwotone,
+  TruckMonsterIcon as TruckMonsterIconTwotone,
+  UserAdd01Icon as UserAdd01IconTwotone,
+  UserAdd02Icon as UserAdd02IconTwotone,
+  UserGroupIcon as UserGroupIconTwotone,
+  UserIcon as UserIconTwotone,
+  UserLove01Icon as UserLove01IconTwotone,
+  UserMultipleIcon as UserMultipleIconTwotone,
+  VanIcon as VanIconTwotone,
+  ViewIcon as ViewIconTwotone,
+  ViewOffSlashIcon as ViewOffSlashIconTwotone,
+  Wallet01Icon as Wallet01IconTwotone,
+  WhatsappIcon as WhatsappIconTwotone,
+  WorkoutRunIcon as WorkoutRunIconTwotone,
+  WorkoutSportIcon as WorkoutSportIconTwotone,
+  WorkoutStretchingIcon as WorkoutStretchingIconTwotone,
+  Yoga03Icon as Yoga03IconTwotone,
+  YoutubeIcon as YoutubeIconTwotone,
+} from '@hugeicons-pro/core-twotone-rounded';
+import { HugeiconsIcon } from '@hugeicons/react';
 
 /**
  * The style is the PACKAGE an icon comes from, not a prop on the icon - so a
@@ -12,47 +228,261 @@ import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react';
  * active tab, a liked heart, a verified badge). `duotone` is reserved for the
  * Create menu and the "Share moment" trigger - nowhere else uses it.
  *
- * Each package ships ~4,500-9,000 icons as one file each. Each one used to be
- * pulled in wholesale (`import * as Icons from '...'`), so the first route
- * that rendered any icon had to compile all four packages before it could
- * serve anything - tens of thousands of modules for icons the page never
- * draws. These loaders (the packages' own `/loader` entry point) resolve one
- * icon file at a time instead, so only what a page actually renders is ever
- * fetched. The cost is that an icon is not available on the very first paint
- * - it loads in just after, same as an image would - rather than always
- * having shipped with the page's own JS.
+ * Each of these is a named import of only the icons the app actually draws,
+ * not `import * as` - so the bundler tree-shakes everything else out of the
+ * ~4,500-9,000 icons each package ships. The tradeoff: an icon name that
+ * reaches this component without a matching entry here (e.g. a new category
+ * icon the backend starts returning) renders nothing, same as an unknown name
+ * always has. Add it to the matching map below when that happens - the same
+ * pattern `utils/canvas-icons.ts` already uses for the design canvas's icons.
+ *
+ * `solid` has no icons registered: nothing in the app currently renders that
+ * variant, so there is nothing to import yet. Add to `SOLID_ICONS` the first
+ * time something needs it.
  */
-type IconVariant = 'solid' | 'twotone' | 'bulk' | 'duotone';
-
-type IconLoader = (name: string) => Promise<IconSvgElement>;
-
-// Each package's loader resolves its own `IconSvgObject` type, structurally
-// identical to `@hugeicons/react`'s `IconSvgElement` (both are just a
-// readonly list of SVG tag/attribute tuples) but declared in a different
-// package, hence the cast on the resolved value
-const LOADERS: Record<IconVariant, IconLoader> = {
-  twotone: (name) =>
-    import('@hugeicons-pro/core-twotone-rounded/loader').then(
-      (module) => module.loadIcon(name) as unknown as IconSvgElement,
-    ),
-  solid: (name) =>
-    import('@hugeicons-pro/core-solid-rounded/loader').then(
-      (module) => module.loadIcon(name) as unknown as IconSvgElement,
-    ),
-  bulk: (name) =>
-    import('@hugeicons-pro/core-bulk-rounded/loader').then(
-      (module) => module.loadIcon(name) as unknown as IconSvgElement,
-    ),
-  duotone: (name) =>
-    import('@hugeicons-pro/core-duotone-rounded/loader').then(
-      (module) => module.loadIcon(name) as unknown as IconSvgElement,
-    ),
+const TWOTONE_ICONS = {
+  AbacusIcon: AbacusIconTwotone,
+  Add01Icon: Add01IconTwotone,
+  AddCircleIcon: AddCircleIconTwotone,
+  Album02Icon: Album02IconTwotone,
+  Alert01Icon: Alert01IconTwotone,
+  Alert02Icon: Alert02IconTwotone,
+  Analytics01Icon: Analytics01IconTwotone,
+  AngryBirdIcon: AngryBirdIconTwotone,
+  ArrowDown01Icon: ArrowDown01IconTwotone,
+  ArrowLeft01Icon: ArrowLeft01IconTwotone,
+  ArrowRight01Icon: ArrowRight01IconTwotone,
+  ArrowUp01Icon: ArrowUp01IconTwotone,
+  ArrowUpDownIcon: ArrowUpDownIconTwotone,
+  ArrowUpRight01Icon: ArrowUpRight01IconTwotone,
+  Backpack03Icon: Backpack03IconTwotone,
+  BankIcon: BankIconTwotone,
+  BbqGrillIcon: BbqGrillIconTwotone,
+  BicycleIcon: BicycleIconTwotone,
+  BorobudurIcon: BorobudurIconTwotone,
+  BubbleChatIcon: BubbleChatIconTwotone,
+  Building03Icon: Building03IconTwotone,
+  Calendar01Icon: Calendar01IconTwotone,
+  Calendar02Icon: Calendar02IconTwotone,
+  Calendar03Icon: Calendar03IconTwotone,
+  Calendar04Icon: Calendar04IconTwotone,
+  CalendarAdd01Icon: CalendarAdd01IconTwotone,
+  CalendarLove02Icon: CalendarLove02IconTwotone,
+  Call02Icon: Call02IconTwotone,
+  CallIcon: CallIconTwotone,
+  Camera01Icon: Camera01IconTwotone,
+  Cancel01Icon: Cancel01IconTwotone,
+  CancelCircleIcon: CancelCircleIconTwotone,
+  Chair03Icon: Chair03IconTwotone,
+  ChartLineData01Icon: ChartLineData01IconTwotone,
+  CheckmarkBadge01Icon: CheckmarkBadge01IconTwotone,
+  CheckmarkCircle01Icon: CheckmarkCircle01IconTwotone,
+  CheckmarkCircle02Icon: CheckmarkCircle02IconTwotone,
+  CheckmarkCircle03Icon: CheckmarkCircle03IconTwotone,
+  ChefIcon: ChefIconTwotone,
+  Clock01Icon: Clock01IconTwotone,
+  Clock02Icon: Clock02IconTwotone,
+  Clock05Icon: Clock05IconTwotone,
+  Comment01Icon: Comment01IconTwotone,
+  Compass01Icon: Compass01IconTwotone,
+  CompassIcon: CompassIconTwotone,
+  Copy01Icon: Copy01IconTwotone,
+  CowboyHatIcon: CowboyHatIconTwotone,
+  CreditCardAcceptIcon: CreditCardAcceptIconTwotone,
+  CreditCardIcon: CreditCardIconTwotone,
+  DashboardCircleAddIcon: DashboardCircleAddIconTwotone,
+  DashboardCircleIcon: DashboardCircleIconTwotone,
+  DashboardSquare01Icon: DashboardSquare01IconTwotone,
+  Delete01Icon: Delete01IconTwotone,
+  Delete02Icon: Delete02IconTwotone,
+  Delete04Icon: Delete04IconTwotone,
+  DeliveryTruck01Icon: DeliveryTruck01IconTwotone,
+  Directions01Icon: Directions01IconTwotone,
+  Directions02Icon: Directions02IconTwotone,
+  DiscountTag02Icon: DiscountTag02IconTwotone,
+  DishWasherIcon: DishWasherIconTwotone,
+  Download01Icon: Download01IconTwotone,
+  DrinkIcon: DrinkIconTwotone,
+  Edit02Icon: Edit02IconTwotone,
+  Edit04Icon: Edit04IconTwotone,
+  EquipmentGym03Icon: EquipmentGym03IconTwotone,
+  Facebook01Icon: Facebook01IconTwotone,
+  Facebook02Icon: Facebook02IconTwotone,
+  FavouriteIcon: FavouriteIconTwotone,
+  FileUploadIcon: FileUploadIconTwotone,
+  FilterHorizontalIcon: FilterHorizontalIconTwotone,
+  Fire03Icon: Fire03IconTwotone,
+  FireIcon: FireIconTwotone,
+  FirePitIcon: FirePitIconTwotone,
+  FishFoodIcon: FishFoodIconTwotone,
+  Flag01Icon: Flag01IconTwotone,
+  Flag02Icon: Flag02IconTwotone,
+  FlimSlateIcon: FlimSlateIconTwotone,
+  FootballPitchIcon: FootballPitchIconTwotone,
+  GiftIcon: GiftIconTwotone,
+  Globe02Icon: Globe02IconTwotone,
+  GlobeIcon: GlobeIconTwotone,
+  Gps01Icon: Gps01IconTwotone,
+  GpsSignal01Icon: GpsSignal01IconTwotone,
+  GridIcon: GridIconTwotone,
+  HandPointingRight01Icon: HandPointingRight01IconTwotone,
+  HandPrayerIcon: HandPrayerIconTwotone,
+  Hold04Icon: Hold04IconTwotone,
+  HourglassIcon: HourglassIconTwotone,
+  Image02Icon: Image02IconTwotone,
+  ImageAdd02Icon: ImageAdd02IconTwotone,
+  ImageNotFound01Icon: ImageNotFound01IconTwotone,
+  InformationCircleIcon: InformationCircleIconTwotone,
+  InstagramIcon: InstagramIconTwotone,
+  Invoice01Icon: Invoice01IconTwotone,
+  KidIcon: KidIconTwotone,
+  Link01Icon: Link01IconTwotone,
+  Link02Icon: Link02IconTwotone,
+  Linkedin01Icon: Linkedin01IconTwotone,
+  ListViewIcon: ListViewIconTwotone,
+  Loading03Icon: Loading03IconTwotone,
+  Location01Icon: Location01IconTwotone,
+  Location06Icon: Location06IconTwotone,
+  LockIcon: LockIconTwotone,
+  Logout03Icon: Logout03IconTwotone,
+  Logout04Icon: Logout04IconTwotone,
+  LogoutCircle02Icon: LogoutCircle02IconTwotone,
+  Mail01Icon: Mail01IconTwotone,
+  MapPinpoint02Icon: MapPinpoint02IconTwotone,
+  MapsIcon: MapsIconTwotone,
+  MapsLocation01Icon: MapsLocation01IconTwotone,
+  Menu02Icon: Menu02IconTwotone,
+  Message01Icon: Message01IconTwotone,
+  MessageMultiple02Icon: MessageMultiple02IconTwotone,
+  MinusSignIcon: MinusSignIconTwotone,
+  Money02Icon: Money02IconTwotone,
+  Money03Icon: Money03IconTwotone,
+  MoneyRemove01Icon: MoneyRemove01IconTwotone,
+  Monocle01Icon: Monocle01IconTwotone,
+  Moon02Icon: Moon02IconTwotone,
+  MoreHorizontalCircle01Icon: MoreHorizontalCircle01IconTwotone,
+  Navigation03Icon: Navigation03IconTwotone,
+  NewTwitterIcon: NewTwitterIconTwotone,
+  NoodlesIcon: NoodlesIconTwotone,
+  Notification02Icon: Notification02IconTwotone,
+  Notification03Icon: Notification03IconTwotone,
+  OrganicFoodIcon: OrganicFoodIconTwotone,
+  PencilEdit02Icon: PencilEdit02IconTwotone,
+  PercentIcon: PercentIconTwotone,
+  PieChartIcon: PieChartIconTwotone,
+  PlusSignCircleIcon: PlusSignCircleIconTwotone,
+  PlusSignIcon: PlusSignIconTwotone,
+  RepeatIcon: RepeatIconTwotone,
+  Restaurant02Icon: Restaurant02IconTwotone,
+  RocketIcon: RocketIconTwotone,
+  Route01Icon: Route01IconTwotone,
+  Search01Icon: Search01IconTwotone,
+  Settings02Icon: Settings02IconTwotone,
+  Share08Icon: Share08IconTwotone,
+  ShoppingBasket01Icon: ShoppingBasket01IconTwotone,
+  ShoppingBasket02Icon: ShoppingBasket02IconTwotone,
+  ShoppingBasketAdd01Icon: ShoppingBasketAdd01IconTwotone,
+  ShoppingBasketAdd02Icon: ShoppingBasketAdd02IconTwotone,
+  ShoppingBasketCheckIn01Icon: ShoppingBasketCheckIn01IconTwotone,
+  ShoppingBasketDone02Icon: ShoppingBasketDone02IconTwotone,
+  SkippingRopeIcon: SkippingRopeIconTwotone,
+  SmartPhone01Icon: SmartPhone01IconTwotone,
+  Sofa02Icon: Sofa02IconTwotone,
+  SortingAZ01Icon: SortingAZ01IconTwotone,
+  SparklesIcon: SparklesIconTwotone,
+  SquareLock01Icon: SquareLock01IconTwotone,
+  SquareLock02Icon: SquareLock02IconTwotone,
+  StarIcon: StarIconTwotone,
+  StoreVerified01Icon: StoreVerified01IconTwotone,
+  Sun03Icon: Sun03IconTwotone,
+  SunriseIcon: SunriseIconTwotone,
+  SunsetIcon: SunsetIconTwotone,
+  SwimmingIcon: SwimmingIconTwotone,
+  Tag01Icon: Tag01IconTwotone,
+  Target02Icon: Target02IconTwotone,
+  ThumbsDownIcon: ThumbsDownIconTwotone,
+  ThumbsUpIcon: ThumbsUpIconTwotone,
+  Tick02Icon: Tick02IconTwotone,
+  Ticket01Icon: Ticket01IconTwotone,
+  Ticket02Icon: Ticket02IconTwotone,
+  TiktokIcon: TiktokIconTwotone,
+  TongueWinkLeftIcon: TongueWinkLeftIconTwotone,
+  TruckDeliveryIcon: TruckDeliveryIconTwotone,
+  TruckMonsterIcon: TruckMonsterIconTwotone,
+  UserAdd01Icon: UserAdd01IconTwotone,
+  UserAdd02Icon: UserAdd02IconTwotone,
+  UserGroupIcon: UserGroupIconTwotone,
+  UserIcon: UserIconTwotone,
+  UserLove01Icon: UserLove01IconTwotone,
+  UserMultipleIcon: UserMultipleIconTwotone,
+  VanIcon: VanIconTwotone,
+  ViewIcon: ViewIconTwotone,
+  ViewOffSlashIcon: ViewOffSlashIconTwotone,
+  Wallet01Icon: Wallet01IconTwotone,
+  WhatsappIcon: WhatsappIconTwotone,
+  WorkoutRunIcon: WorkoutRunIconTwotone,
+  WorkoutSportIcon: WorkoutSportIconTwotone,
+  WorkoutStretchingIcon: WorkoutStretchingIconTwotone,
+  Yoga03Icon: Yoga03IconTwotone,
+  YoutubeIcon: YoutubeIconTwotone,
 };
 
-// Shared by every instance and never cleared - once an icon has loaded once
-// for the session, every later render of it (any component, any page) is
-// synchronous again
-const cache = new Map<string, IconSvgElement>();
+const BULK_ICONS = {
+  Calendar03Icon: Calendar03IconBulk,
+  CalendarAdd01Icon: CalendarAdd01IconBulk,
+  Camera01Icon: Camera01IconBulk,
+  CheckmarkBadge01Icon: CheckmarkBadge01IconBulk,
+  CompassIcon: CompassIconBulk,
+  DashboardCircleIcon: DashboardCircleIconBulk,
+  FavouriteIcon: FavouriteIconBulk,
+  InformationCircleIcon: InformationCircleIconBulk,
+  Location01Icon: Location01IconBulk,
+  MapsLocation01Icon: MapsLocation01IconBulk,
+  Monocle01Icon: Monocle01IconBulk,
+  Search01Icon: Search01IconBulk,
+  ShoppingBasketAdd02Icon: ShoppingBasketAdd02IconBulk,
+  ShoppingBasketCheckIn01Icon: ShoppingBasketCheckIn01IconBulk,
+  ShoppingBasketDone02Icon: ShoppingBasketDone02IconBulk,
+  StarIcon: StarIconBulk,
+  Ticket01Icon: Ticket01IconBulk,
+  Ticket02Icon: Ticket02IconBulk,
+  UserAdd01Icon: UserAdd01IconBulk,
+  UserGroupIcon: UserGroupIconBulk,
+  UserIcon: UserIconBulk,
+  UserMultipleIcon: UserMultipleIconBulk,
+  Wallet01Icon: Wallet01IconBulk,
+};
+
+const DUOTONE_ICONS = {
+  CalendarAdd01Icon: CalendarAdd01IconDuotone,
+  DashboardCircleAddIcon: DashboardCircleAddIconDuotone,
+  ShoppingBasketAdd02Icon: ShoppingBasketAdd02IconDuotone,
+  StoreVerified01Icon: StoreVerified01IconDuotone,
+  UserMultipleIcon: UserMultipleIconDuotone,
+};
+
+const SOLID_ICONS: Record<string, never> = {};
+
+type TwotoneIconName = keyof typeof TWOTONE_ICONS;
+type SolidIconName = keyof typeof SOLID_ICONS;
+type BulkIconName = keyof typeof BULK_ICONS;
+type DuotoneIconName = keyof typeof DUOTONE_ICONS;
+
+function isValidTwotoneIconName(name: string): name is TwotoneIconName {
+  return name in TWOTONE_ICONS;
+}
+
+function isValidSolidIconName(name: string): name is SolidIconName {
+  return name in SOLID_ICONS;
+}
+
+function isValidBulkIconName(name: string): name is BulkIconName {
+  return name in BULK_ICONS;
+}
+
+function isValidDuotoneIconName(name: string): name is DuotoneIconName {
+  return name in DUOTONE_ICONS;
+}
 
 export const IconComponent = ({
   iconName,
@@ -65,46 +495,23 @@ export const IconComponent = ({
   size?: number;
   color?: string;
   className?: string;
-  variant?: IconVariant;
+  variant?: 'solid' | 'twotone' | 'bulk' | 'duotone';
 }) => {
-  const cacheKey = `${variant}:${iconName}`;
-  const [icon, setIcon] = useState<IconSvgElement | undefined>(() => cache.get(cacheKey));
-  // Tracks which key `icon` belongs to, so a switch to an uncached icon (e.g.
-  // an expand/collapse chevron flipping direction) clears the old one
-  // straight away instead of showing it a beat longer under the new name
-  const [iconKey, setIconKey] = useState(cacheKey);
-
-  if (iconKey !== cacheKey) {
-    setIconKey(cacheKey);
-    setIcon(cache.get(cacheKey));
+  if (variant === 'bulk' && isValidBulkIconName(iconName)) {
+    const iconComponent = BULK_ICONS[iconName];
+    return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className} />;
   }
-
-  useEffect(() => {
-    const cached = cache.get(cacheKey);
-    if (cached) {
-      setIcon(cached);
-      return;
-    }
-
-    let cancelled = false;
-
-    LOADERS[variant](iconName)
-      .then((loaded) => {
-        cache.set(cacheKey, loaded);
-        if (!cancelled) setIcon(loaded);
-      })
-      .catch(() => {
-        // An unknown name for this variant - same as the old lookup finding
-        // nothing: render nothing rather than throw
-        if (!cancelled) setIcon(undefined);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [cacheKey, iconName, variant]);
-
-  if (!icon) return null;
-
-  return <HugeiconsIcon icon={icon} size={size} color={color} className={className} />;
+  if (variant === 'duotone' && isValidDuotoneIconName(iconName)) {
+    const iconComponent = DUOTONE_ICONS[iconName];
+    return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className} />;
+  }
+  if (variant === 'solid' && isValidSolidIconName(iconName)) {
+    const iconComponent = SOLID_ICONS[iconName];
+    return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className} />;
+  }
+  if (variant === 'twotone' && isValidTwotoneIconName(iconName)) {
+    const iconComponent = TWOTONE_ICONS[iconName];
+    return <HugeiconsIcon icon={iconComponent} size={size} color={color} className={className} />;
+  }
+  return null;
 };

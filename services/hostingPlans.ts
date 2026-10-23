@@ -23,10 +23,11 @@ const CATALOG: HostingPlan[] = [
     id: 'basic',
     name: 'Basic',
     tagline: 'Start hosting experiences on Tukai.',
-    priceAmount: 1,
+    priceAmount: 0,
     priceCurrency: 'USD',
-    priceLabel: '$1 / month',
-    commissionPct: 4,
+    priceLabel: 'Free',
+    commissionPct: 8,
+    icon: 'Plant02Icon',
     features: [
       'Up to 3 live experiences',
       'Paid & free ticketing',
@@ -42,6 +43,7 @@ const CATALOG: HostingPlan[] = [
     priceCurrency: 'USD',
     priceLabel: '$15 / month',
     commissionPct: 3.5,
+    icon: 'Rocket01Icon',
     features: [
       'Unlimited live experiences',
       'Recurring experiences',
@@ -58,11 +60,18 @@ const CATALOG: HostingPlan[] = [
     priceCurrency: 'USD',
     priceLabel: '$49 / month',
     commissionPct: 3,
+    icon: 'Building03Icon',
     features: [
       'Everything in Premium',
       '10+ team members',
       'Dedicated account support',
       'Lowest 3% ticket fee',
+    ],
+    aiFeatures: [
+      { icon: 'QuillWrite02Icon', text: 'Writes experience pages and day-by-day itineraries' },
+      { icon: 'ChartIncreaseIcon', text: 'Suggests prices and dates from your past bookings' },
+      { icon: 'BubbleChatIcon', text: 'Drafts replies to guest questions for your team' },
+      { icon: 'AnalyticsUpIcon', text: 'Weekly summary of sales, guests and reviews' },
     ],
   },
 ];
@@ -89,6 +98,19 @@ export const subscribeToPlan = (
     planId,
     status: 'active',
     paymentMethod,
+    currentPeriodEnd: addMonths(now, 1),
+    dateSubscribed: now.toISOString(),
+  });
+};
+
+/** Basic: no payment step, starts straight away with nothing to pay. */
+export const startFreePlan = (planId: HostingPlanId): Promise<CreatorPlanState> => {
+  const now = new Date();
+
+  return delay<CreatorPlanState>({
+    planId,
+    status: 'active',
+    paymentMethod: null,
     currentPeriodEnd: addMonths(now, 1),
     dateSubscribed: now.toISOString(),
   });

@@ -6,6 +6,7 @@ import { ChoosePlanView } from '@/app/shared/components/Hosting/HostingPlanDrawe
 import { PageContainer } from '@/app/shared/components/Layout';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { useHostingPlan } from '@/context/HostingPlanContext';
+import { getHostingPlan } from '@/services/hostingPlans';
 import { HostingPlanId } from '@/types/hostingPlan';
 
 /**
@@ -38,6 +39,7 @@ export const PricingPageContent = () => {
       <ChoosePlanView
         plans={plans}
         currentPlanId={currentPlan.planId}
+        currentPlanName={currentPlan.planId ? getHostingPlan(currentPlan.planId)?.name : undefined}
         isChangeMode={hasActivePlan}
         onChoose={handleChoose}
       />

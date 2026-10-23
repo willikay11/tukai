@@ -16,6 +16,7 @@ import {
   changePlan as changePlanRequest,
   fetchHostingPlans,
   resumePlan as resumePlanRequest,
+  startFreePlan as startFreePlanRequest,
   subscribeToPlan as subscribeToPlanRequest,
 } from '@/services/hostingPlans';
 import {
@@ -50,6 +51,9 @@ type HostingPlanContextValue = {
 
   isSubscribing: boolean;
   subscribe: (planId: HostingPlanId, paymentMethod: HostingPaymentMethod) => Promise<void>;
+  /** Basic: no payment step. */
+  isStartingFreePlan: boolean;
+  startFreePlan: (planId: HostingPlanId) => Promise<void>;
   isChangingPlan: boolean;
   changeToPlan: (planId: HostingPlanId) => Promise<void>;
   isCancelling: boolean;
@@ -105,6 +109,7 @@ export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
   const isReady = true;
 
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const [isStartingFreePlan, setIsStartingFreePlan] = useState(false);
   const [isChangingPlan, setIsChangingPlan] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
@@ -140,6 +145,15 @@ export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
     },
     [],
   );
+
+  const startFreePlan = useCallback(async (planId: HostingPlanId) => {
+    setIsStartingFreePlan(true);
+    try {
+      setCurrentPlan(await startFreePlanRequest(planId));
+    } finally {
+      setIsStartingFreePlan(false);
+    }
+  }, []);
 
   const changeToPlan = useCallback(
     async (planId: HostingPlanId) => {
@@ -183,6 +197,8 @@ export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
       hasActivePlan: hasActiveHostingPlan(currentPlan),
       isSubscribing,
       subscribe,
+      isStartingFreePlan,
+      startFreePlan,
       isChangingPlan,
       changeToPlan,
       isCancelling,
@@ -200,6 +216,8 @@ export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
       currentPlan,
       isSubscribing,
       subscribe,
+      isStartingFreePlan,
+      startFreePlan,
       isChangingPlan,
       changeToPlan,
       isCancelling,
