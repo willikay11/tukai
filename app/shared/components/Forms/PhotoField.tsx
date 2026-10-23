@@ -5,28 +5,34 @@ import { useRef, useState } from 'react';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { cn } from '@/lib/utils';
 
-import type { DraftPhoto } from './useCreateCommunityDrawer';
-
 const MAX_PHOTOS = 6;
 
-interface PosterFieldProps {
-  photos: DraftPhoto[];
+export interface PhotoFieldPhoto {
+  id: string;
+  url: string;
+}
+
+interface PhotoFieldProps {
+  photos: PhotoFieldPhoto[];
   onAdd: (files: File[]) => void;
   onRemove: (id: string) => void;
   onReorder: (fromIndex: number, toIndex: number) => void;
   onMove: (id: string, direction: -1 | 1) => void;
-  // The claim form's photo uploader has no cover concept - a place's photos
-  // have no designated lead image here, unlike a community's poster.
+  // A place's photos (and some other callers) have no designated lead image,
+  // unlike a community or experience poster.
   showCoverBadge?: boolean;
   label?: React.ReactNode;
+  maxPhotos?: number;
 }
 
 /**
- * The poster uploader: up to 6 photos, first is the cover. Hold-and-drag
- * reorders on a pointer; the arrow keys do the same for anyone focused on a
- * tile with a keyboard, per the canvas's own accessibility note.
+ * The photo uploader shared by every "poster" field across the drawers
+ * (Create community, Create experience's About step, the place-claim form):
+ * up to `maxPhotos` photos, first is the cover. Hold-and-drag reorders on a
+ * pointer; the arrow keys do the same for anyone focused on a tile with a
+ * keyboard, per the canvas's own accessibility note.
  */
-export const PosterField = ({
+export const PhotoField = ({
   photos,
   onAdd,
   onRemove,
@@ -34,24 +40,18 @@ export const PosterField = ({
   onMove,
   showCoverBadge = true,
   label,
-}: PosterFieldProps) => {
+  maxPhotos = MAX_PHOTOS,
+}: PhotoFieldProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
-  const hasReachedMax = photos.length >= MAX_PHOTOS;
+  const hasReachedMax = photos.length >= maxPhotos;
 
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-[15px] font-semibold text-gray-800">
-        {label ?? (
-          <>
-            Upload a community poster{' '}
-            <span className="font-normal text-ink-muted">(540 × 540 px, up to 15 MB)</span>
-          </>
-        )}
-      </span>
+      {label && <span className="text-[15px] font-semibold text-gray-800">{label}</span>}
 
-      <div className="flex flex-wrap gap-2.5" role="group" aria-label="Community photos">
+      <div className="flex flex-wrap gap-2.5" role="group" aria-label="Photos">
         {photos.map((photo, index) => {
           const isDragging = draggedIndex === index;
 
@@ -60,7 +60,7 @@ export const PosterField = ({
               key={photo.id}
               tabIndex={0}
               aria-label={`Photo ${index + 1} of ${photos.length}${
-                index === 0 ? ', cover' : ''
+                index === 0 && showCoverBadge ? ', cover' : ''
               }. Drag, or use the arrow keys, to reorder.`}
               draggable
               onDragStart={() => setDraggedIndex(index)}
@@ -115,7 +115,7 @@ export const PosterField = ({
         })}
 
         {!hasReachedMax && (
-          <label className="relative flex h-[140px] w-[140px] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-[1.5px] border-dashed border-[#0C7A50] bg-[#EEFBF4] text-center text-[14.5px] text-gray-800 transition-colors hover:bg-[#E3F7EC]">
+          <label className="relative flex h-[140px] w-[140px] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-[1.5px] border-dashed border-brand-mid bg-[#EEFBF4] text-center text-[14.5px] text-gray-800 transition-colors hover:bg-[#E3F7EC]">
             <input
               ref={inputRef}
               type="file"

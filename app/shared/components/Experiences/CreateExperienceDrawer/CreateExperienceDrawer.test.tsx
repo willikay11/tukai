@@ -63,25 +63,6 @@ jest.mock('@/app/(experiences)/experiences/create/hooks/useCreateExperienceFlow'
   useCreateExperienceFlow: () => mockFlow,
 }));
 
-jest.mock('@/app/(experiences)/experiences/create/components/steps', () => ({
-  CreateExperienceSteps: () => <div data-testid="wizard" />,
-}));
-
-jest.mock('@/app/(experiences)/experiences/create/components/ResumeDraft', () => ({
-  ResumeDraft: ({
-    onContinue,
-    onClearAndStartFresh,
-  }: {
-    onContinue: () => void;
-    onClearAndStartFresh: () => void;
-  }) => (
-    <div data-testid="resume-draft">
-      <button onClick={onContinue}>Continue draft</button>
-      <button onClick={onClearAndStartFresh}>Start fresh</button>
-    </div>
-  ),
-}));
-
 const setMockFlow = (overrides: Record<string, unknown>) => {
   Object.keys(mockFlow).forEach((key) => delete mockFlow[key]);
   Object.assign(mockFlow, {
@@ -148,35 +129,70 @@ const renderDrawer = (options?: OpenCreateExperienceOptions) =>
     </CreateExperienceDrawerProvider>,
   );
 
+// The step-tabs nav (aria-label="Steps") only renders once the wizard is
+// showing Date & type (or another step) rather than the Intro or Resume
+// screens - a stable, accessible stand-in for the old mocked "wizard" testid.
+const findWizard = () => screen.findByRole('navigation', { name: 'Steps' });
+const queryWizard = () => screen.queryByRole('navigation', { name: 'Steps' });
+
 describe('CreateExperienceDrawer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockFlow({});
     setMockHostingPlan({});
+    jest.requireMock('@/app/shared/hooks/useExperiences').useExperiences.mockReturnValue({
+      data: { data: { results: [] } },
+      isLoading: false,
+      refetch: jest.fn(),
+    });
   });
 
   it('with no active hosting plan, opening the drawer opens Choose a plan instead of the wizard', async () => {
     renderDrawer();
 
     await waitFor(() => expect(openHostingPlanFlow).toHaveBeenCalledWith({ view: 'choose' }));
-    expect(screen.queryByTestId('wizard')).not.toBeInTheDocument();
+    expect(queryWizard()).not.toBeInTheDocument();
   });
 
-  it('with an active plan and no draft, opens straight into the wizard', async () => {
+  it('with an active plan, no draft but a hosting history, opens straight into the wizard', async () => {
+    setMockHostingPlan({ hasActivePlan: true });
+    // A returning host (has a published experience, just no draft) skips the
+    // Intro screen entirely - only a host who has never hosted sees it.
+    jest.requireMock('@/app/shared/hooks/useExperiences').useExperiences.mockReturnValue({
+      data: { data: { results: [{ id: 'live-1', status: 'published', dateCreated: '2026-01-01' }] } },
+      isLoading: false,
+      refetch: jest.fn(),
+    });
+
+    renderDrawer();
+
+    expect(await findWizard()).toBeInTheDocument();
+    expect(openHostingPlanFlow).not.toHaveBeenCalled();
+  });
+
+  it('a first-time host with no hosting history sees the Intro screen first', async () => {
     setMockHostingPlan({ hasActivePlan: true });
 
     renderDrawer();
 
-    expect(await screen.findByTestId('wizard')).toBeInTheDocument();
-    expect(openHostingPlanFlow).not.toHaveBeenCalled();
+    expect(await screen.findByText('No experiences... yet!')).toBeInTheDocument();
+    expect(queryWizard()).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Create experience' }));
+
+    expect(await findWizard()).toBeInTheDocument();
   });
 
   it('jumps straight to the wizard when opened with an explicit step or experienceId', async () => {
     setMockHostingPlan({ hasActivePlan: true });
+    // The real useCreateExperienceFlow seeds `experienceId` from this option
+    // synchronously; the mocked hook below ignores its arguments, so this
+    // stands in for that seeding.
+    setMockFlow({ experienceId: 'exp-1' });
 
     renderDrawer({ experienceId: 'exp-1' });
 
-    expect(await screen.findByTestId('wizard')).toBeInTheDocument();
+    expect(await findWizard()).toBeInTheDocument();
   });
 
   it('closing with no in-progress draft closes immediately, no Leave confirm', async () => {
@@ -184,11 +200,11 @@ describe('CreateExperienceDrawer', () => {
     setMockFlow({ experienceId: null });
 
     renderDrawer();
-    await screen.findByTestId('wizard');
+    await screen.findByLabelText('Close');
 
     fireEvent.click(screen.getByLabelText('Close'));
 
-    await waitFor(() => expect(screen.queryByTestId('wizard')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByLabelText('Close')).not.toBeInTheDocument());
     expect(screen.queryByText('Save your experience before you leave?')).not.toBeInTheDocument();
   });
 
@@ -197,7 +213,7 @@ describe('CreateExperienceDrawer', () => {
     setMockFlow({ experienceId: 'exp-1' });
 
     renderDrawer();
-    await screen.findByTestId('wizard');
+    await findWizard();
 
     fireEvent.click(screen.getByLabelText('Close'));
     await screen.findByText('Save your experience before you leave?');
@@ -207,7 +223,7 @@ describe('CreateExperienceDrawer', () => {
     await waitFor(() =>
       expect(screen.queryByText('Save your experience before you leave?')).not.toBeInTheDocument(),
     );
-    expect(screen.getByTestId('wizard')).toBeInTheDocument();
+    expect(queryWizard()).toBeInTheDocument();
   });
 
   it('Discard experience cancels the draft and closes the drawer', async () => {
@@ -215,7 +231,7 @@ describe('CreateExperienceDrawer', () => {
     setMockFlow({ experienceId: 'exp-1' });
 
     renderDrawer();
-    await screen.findByTestId('wizard');
+    await findWizard();
 
     fireEvent.click(screen.getByLabelText('Close'));
     await screen.findByText('Save your experience before you leave?');
@@ -223,14 +239,13 @@ describe('CreateExperienceDrawer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Discard experience' }));
 
     await waitFor(() => expect(cancelExperience).toHaveBeenCalledWith('exp-1'));
-    await waitFor(() => expect(screen.queryByTestId('wizard')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByLabelText('Close')).not.toBeInTheDocument());
   });
 
   it('a saved draft shows Resume first; Continue proceeds to the wizard', async () => {
     setMockHostingPlan({ hasActivePlan: true });
 
-    const useExperiences = jest.requireMock('@/app/shared/hooks/useExperiences').useExperiences;
-    useExperiences.mockReturnValue({
+    jest.requireMock('@/app/shared/hooks/useExperiences').useExperiences.mockReturnValue({
       data: { data: { results: [{ id: 'draft-1', status: 'draft', dateCreated: '2026-01-01' }] } },
       isLoading: false,
       refetch: jest.fn(),
@@ -238,9 +253,9 @@ describe('CreateExperienceDrawer', () => {
 
     renderDrawer();
 
-    expect(await screen.findByTestId('resume-draft')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Continue draft' }));
+    expect(await screen.findByText('Continue your draft?')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Continue your draft' }));
 
-    expect(await screen.findByTestId('wizard')).toBeInTheDocument();
+    expect(await findWizard()).toBeInTheDocument();
   });
 });

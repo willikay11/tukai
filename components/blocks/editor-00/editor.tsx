@@ -47,6 +47,7 @@ export function Editor({
   onHtmlChange,
   className,
   minHeight,
+  placeholder,
 }: {
   editorState?: EditorState;
   editorSerializedState?: SerializedEditorState;
@@ -61,6 +62,8 @@ export function Editor({
    * 120 for a description, 96 for the included and excluded lists.
    */
   minHeight?: number;
+  /** Defaults to "Start typing ...". */
+  placeholder?: string;
 }) {
   return (
     <div
@@ -76,7 +79,7 @@ export function Editor({
         }}
       >
         <TooltipProvider>
-          <Plugins />
+          <Plugins placeholder={placeholder} />
 
           <OnChangePlugin
             ignoreSelectionChange={true}

@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  BankIcon as BankIconBulk,
   Calendar03Icon as Calendar03IconBulk,
   CalendarAdd01Icon as CalendarAdd01IconBulk,
   Camera01Icon as Camera01IconBulk,
@@ -16,6 +17,7 @@ import {
   ShoppingBasketAdd02Icon as ShoppingBasketAdd02IconBulk,
   ShoppingBasketCheckIn01Icon as ShoppingBasketCheckIn01IconBulk,
   ShoppingBasketDone02Icon as ShoppingBasketDone02IconBulk,
+  SmartPhone01Icon as SmartPhone01IconBulk,
   StarIcon as StarIconBulk,
   Ticket01Icon as Ticket01IconBulk,
   Ticket02Icon as Ticket02IconBulk,
@@ -112,6 +114,7 @@ import {
   FlimSlateIcon as FlimSlateIconTwotone,
   FootballPitchIcon as FootballPitchIconTwotone,
   GiftIcon as GiftIconTwotone,
+  GlobalRefreshIcon as GlobalRefreshIconTwotone,
   Globe02Icon as Globe02IconTwotone,
   GlobeIcon as GlobeIconTwotone,
   Gps01Icon as Gps01IconTwotone,
@@ -121,6 +124,7 @@ import {
   HandPrayerIcon as HandPrayerIconTwotone,
   Hold04Icon as Hold04IconTwotone,
   HourglassIcon as HourglassIconTwotone,
+  IdentityCardIcon as IdentityCardIconTwotone,
   Image02Icon as Image02IconTwotone,
   ImageAdd02Icon as ImageAdd02IconTwotone,
   ImageNotFound01Icon as ImageNotFound01IconTwotone,
@@ -320,6 +324,7 @@ const TWOTONE_ICONS = {
   FlimSlateIcon: FlimSlateIconTwotone,
   FootballPitchIcon: FootballPitchIconTwotone,
   GiftIcon: GiftIconTwotone,
+  GlobalRefreshIcon: GlobalRefreshIconTwotone,
   Globe02Icon: Globe02IconTwotone,
   GlobeIcon: GlobeIconTwotone,
   Gps01Icon: Gps01IconTwotone,
@@ -329,6 +334,7 @@ const TWOTONE_ICONS = {
   HandPrayerIcon: HandPrayerIconTwotone,
   Hold04Icon: Hold04IconTwotone,
   HourglassIcon: HourglassIconTwotone,
+  IdentityCardIcon: IdentityCardIconTwotone,
   Image02Icon: Image02IconTwotone,
   ImageAdd02Icon: ImageAdd02IconTwotone,
   ImageNotFound01Icon: ImageNotFound01IconTwotone,
@@ -428,6 +434,7 @@ const TWOTONE_ICONS = {
 };
 
 const BULK_ICONS = {
+  BankIcon: BankIconBulk,
   Calendar03Icon: Calendar03IconBulk,
   CalendarAdd01Icon: CalendarAdd01IconBulk,
   Camera01Icon: Camera01IconBulk,
@@ -443,6 +450,7 @@ const BULK_ICONS = {
   ShoppingBasketAdd02Icon: ShoppingBasketAdd02IconBulk,
   ShoppingBasketCheckIn01Icon: ShoppingBasketCheckIn01IconBulk,
   ShoppingBasketDone02Icon: ShoppingBasketDone02IconBulk,
+  SmartPhone01Icon: SmartPhone01IconBulk,
   StarIcon: StarIconBulk,
   Ticket01Icon: Ticket01IconBulk,
   Ticket02Icon: Ticket02IconBulk,
