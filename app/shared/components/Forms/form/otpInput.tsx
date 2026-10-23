@@ -5,8 +5,17 @@ import { useEffect, useState } from 'react';
 import { Input as I } from '@headlessui/react';
 import clsx from 'clsx';
 
+// Tailwind's scanner needs the literal class name in source, so a
+// dynamically built `grid-cols-${length}` string wouldn't be picked up -
+// every length an OtpInput is actually asked for goes here.
+const GRID_COLS: Record<number, string> = {
+  4: 'grid-cols-4',
+  6: 'grid-cols-6',
+};
+
 const Input = ({
   fieldIndex,
+  length,
   onChange,
   refs,
   placeholder,
@@ -14,6 +23,7 @@ const Input = ({
   error,
 }: {
   fieldIndex: number;
+  length: number;
   onChange: (index: number, val: string | undefined) => void;
   refs?: any;
   placeholder?: string;
@@ -23,7 +33,7 @@ const Input = ({
   const [value, setValue] = useState<string | undefined>(undefined);
 
   const goToNext = () => {
-    if (fieldIndex <= 4) {
+    if (fieldIndex <= length) {
       const nextField = document.querySelector(`input[name=field-${fieldIndex + 1}]`);
 
       if (nextField !== null) {
@@ -81,9 +91,12 @@ const Input = ({
   );
 };
 export const OtpInput = ({
+  length = 4,
   onComplete,
   error,
 }: {
+  /** How many digits the code is. Defaults to 4 for existing callers. */
+  length?: number;
   onComplete: (token: string) => void;
   error?: string;
 }) => {
@@ -102,18 +115,30 @@ export const OtpInput = ({
   };
 
   useEffect(() => {
-    if (otp?.length === 4) {
+    if (otp?.length === length) {
       onComplete(otp);
     }
-  }, [otp]);
+  }, [otp, length]);
 
   return (
     <div className="flex flex-col">
-      <div className="grid grid-cols-4 gap-2">
-        <Input fieldIndex={1} error={error} onChange={(index, val) => update(index, val)} />
-        <Input fieldIndex={2} error={error} onChange={(index, val) => update(index, val)} />
-        <Input fieldIndex={3} error={error} onChange={(index, val) => update(index, val)} />
-        <Input fieldIndex={4} error={error} onChange={(index, val) => update(index, val)} />
+      <div
+        className={clsx('grid gap-2', GRID_COLS[length])}
+        style={
+          GRID_COLS[length]
+            ? undefined
+            : { gridTemplateColumns: `repeat(${length}, minmax(0, 1fr))` }
+        }
+      >
+        {Array.from({ length }, (_, i) => i + 1).map((fieldIndex) => (
+          <Input
+            key={fieldIndex}
+            fieldIndex={fieldIndex}
+            length={length}
+            error={error}
+            onChange={(index, val) => update(index, val)}
+          />
+        ))}
       </div>
       {error ? <div className="mt-1 text-xs text-red-600">{error}</div> : null}
     </div>

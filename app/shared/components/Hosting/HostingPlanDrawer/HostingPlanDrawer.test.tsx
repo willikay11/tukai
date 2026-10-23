@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import {
@@ -8,7 +8,6 @@ import {
   OpenHostingPlanOptions,
   useHostingPlan,
 } from '@/context/HostingPlanContext';
-import { HOSTING_PLAN_STORAGE_KEY } from '@/types/hostingPlan';
 
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: { iconName: string }) => <span data-testid={iconName} />,
@@ -17,17 +16,38 @@ jest.mock('@/app/shared/components/Icons', () => ({
 const push = jest.fn();
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
 
+const openCreateCommunity = jest.fn();
+jest.mock('@/context/CreateCommunityDrawerContext', () => ({
+  useCreateCommunityDrawer: () => ({ openCreateCommunity, isOpen: false, closeCreateCommunity: jest.fn() }),
+}));
+
+// The real component is a Paystack-hosted iframe watched via postMessage -
+// stood in here with buttons that drive its onPaymentSuccess callback directly.
+jest.mock('@/components/ui/paystack', () => ({
+  Paystack: ({ onPaymentSuccess }: { onPaymentSuccess: (success: boolean) => void }) => (
+    <div data-testid="paystack-checkout">
+      <button type="button" onClick={() => onPaymentSuccess(true)}>
+        Simulate successful payment
+      </button>
+      <button type="button" onClick={() => onPaymentSuccess(false)}>
+        Simulate cancelled payment
+      </button>
+    </div>
+  ),
+}));
+
 const PLANS = [
   {
     id: 'basic',
     name: 'Basic',
     tagline: 'Start hosting experiences on Tukai.',
-    priceAmount: 0,
+    priceAmount: 1,
     priceCurrency: 'USD',
-    priceLabel: 'Free',
+    priceLabel: '$1 / month',
     commissionPct: 8,
     icon: 'Plant02Icon',
     features: ['Up to 3 live experiences'],
+    backendId: 'plan-basic-uuid',
   },
   {
     id: 'premium',
@@ -40,6 +60,7 @@ const PLANS = [
     icon: 'Rocket01Icon',
     features: ['Unlimited live experiences'],
     isMostPopular: true,
+    backendId: 'plan-premium-uuid',
   },
   {
     id: 'business',
@@ -52,43 +73,55 @@ const PLANS = [
     icon: 'Building03Icon',
     features: ['Everything in Premium'],
     aiFeatures: [{ icon: 'SparklesIcon', text: 'Writes experience pages' }],
+    backendId: 'plan-business-uuid',
   },
 ];
 
-const subscribeToPlan = jest.fn((planId: string, paymentMethod: string) =>
+const fetchCurrentHostingSubscription = jest.fn(() => Promise.resolve(null));
+
+const startHostingCheckout = jest.fn((planId: string) =>
   Promise.resolve({
-    planId,
-    status: 'active',
-    paymentMethod,
-    currentPeriodEnd: '2026-12-01T00:00:00.000Z',
-    dateSubscribed: '2026-11-01T00:00:00.000Z',
+    subscriptionId: `sub-${planId}`,
+    authorizationUrl: 'https://checkout.paystack.com/test-ref',
   }),
 );
-const startFreePlan = jest.fn((planId: string) =>
+
+const confirmHostingSubscription = jest.fn((subscriptionId: string) =>
   Promise.resolve({
-    planId,
+    planId: subscriptionId.replace('sub-', ''),
     status: 'active',
-    paymentMethod: null,
     currentPeriodEnd: '2026-12-01T00:00:00.000Z',
     dateSubscribed: '2026-11-01T00:00:00.000Z',
+    subscriptionId,
   }),
 );
-const changePlan = jest.fn((planId: string, current: Record<string, unknown>) =>
-  Promise.resolve({ ...current, planId, status: 'active' }),
+
+const cancelHostingSubscription = jest.fn((_subscriptionId: string) =>
+  Promise.resolve({
+    planId: null,
+    status: 'none',
+    currentPeriodEnd: null,
+    dateSubscribed: null,
+    subscriptionId: null,
+  }),
 );
 
 jest.mock('@/services/hostingPlans', () => ({
-  fetchHostingPlans: jest.fn(() => Promise.resolve(PLANS)),
+  fetchHostingPlans: () => Promise.resolve(PLANS),
+  fetchCurrentHostingSubscription: () => fetchCurrentHostingSubscription(),
   getHostingPlan: (id: string) => PLANS.find((plan) => plan.id === id),
-  subscribeToPlan: (planId: string, paymentMethod: string) =>
-    subscribeToPlan(planId, paymentMethod),
-  startFreePlan: (planId: string) => startFreePlan(planId),
-  changePlan: (planId: string, current: Record<string, unknown>) => changePlan(planId, current),
-  cancelPlan: jest.fn((current) => Promise.resolve({ ...current, status: 'cancel_pending' })),
-  resumePlan: jest.fn((current) => Promise.resolve({ ...current, status: 'active' })),
+  startHostingCheckout: (planId: string) => startHostingCheckout(planId),
+  confirmHostingSubscription: (subscriptionId: string) => confirmHostingSubscription(subscriptionId),
+  cancelHostingSubscription: (subscriptionId: string) => cancelHostingSubscription(subscriptionId),
+  resumeHostingSubscription: jest.fn((current) => Promise.resolve({ ...current, status: 'active' })),
 }));
 
-/** Opens the drawer on mount with the given options, through the real context. */
+/**
+ * Opens the drawer on mount with the given options, through the real
+ * context - and exposes a button to reopen it, since there's no
+ * localStorage to seed an "already has a plan" state from: a test that
+ * needs change mode drives a real subscribe first, then reopens.
+ */
 const OpenOnMount = ({ options }: { options?: OpenHostingPlanOptions }) => {
   const hostingPlan = useHostingPlan()!;
 
@@ -97,7 +130,11 @@ const OpenOnMount = ({ options }: { options?: OpenHostingPlanOptions }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return null;
+  return (
+    <button type="button" onClick={() => hostingPlan.openHostingPlanFlow(options)}>
+      Reopen
+    </button>
+  );
 };
 
 const renderDrawer = (options?: OpenHostingPlanOptions) =>
@@ -109,11 +146,11 @@ const renderDrawer = (options?: OpenHostingPlanOptions) =>
 
 describe('HostingPlanDrawer', () => {
   beforeEach(() => {
-    window.localStorage.clear();
     jest.clearAllMocks();
+    fetchCurrentHostingSubscription.mockResolvedValue(null);
   });
 
-  it('picking a plan and continuing opens the Subscribe view, disabled until a number is entered', async () => {
+  it('Continue starts a Paystack checkout straight away, no billing form of our own', async () => {
     const user = userEvent.setup();
     renderDrawer();
 
@@ -123,31 +160,95 @@ describe('HostingPlanDrawer', () => {
     await user.click(screen.getByRole('button', { name: 'Continue with Premium' }));
 
     await screen.findByText('Subscribe to Premium');
-    const pay = screen.getByRole('button', { name: /Pay \$15 and subscribe/ });
-    expect(pay).toBeDisabled();
-
-    await user.type(screen.getByRole('textbox'), '712345678');
-    expect(pay).toBeEnabled();
-
-    await user.click(pay);
-
-    expect(subscribeToPlan).toHaveBeenCalledWith('premium', 'mpesa');
+    await screen.findByTestId('paystack-checkout');
+    // No billing form anywhere in this view - Paystack's own page collects payment details
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    expect(startHostingCheckout).toHaveBeenCalledWith('premium');
+    expect(confirmHostingSubscription).not.toHaveBeenCalled();
   });
 
-  it('with an active plan, picking a different one switches immediately with no checkout', async () => {
-    window.localStorage.setItem(
-      HOSTING_PLAN_STORAGE_KEY,
-      JSON.stringify({
-        planId: 'basic',
-        status: 'active',
-        paymentMethod: 'mpesa',
-        currentPeriodEnd: '2026-12-01T00:00:00.000Z',
-        dateSubscribed: '2026-11-01T00:00:00.000Z',
-      }),
-    );
-
+  it('a successful payment shows the confirming panel, then activates the plan and opens Create community', async () => {
     const user = userEvent.setup();
     renderDrawer();
+
+    await screen.findByText('Pick a plan to start hosting');
+    await user.click(screen.getByRole('radio', { name: /Premium/ }));
+    await user.click(screen.getByRole('button', { name: 'Continue with Premium' }));
+
+    await screen.findByTestId('paystack-checkout');
+    await user.click(screen.getByRole('button', { name: 'Simulate successful payment' }));
+
+    await screen.findByText('Paying Tukai');
+    screen.getByText('$15.00');
+    screen.getByText('Confirming your payment with Paystack. This takes a few seconds.');
+    expect(confirmHostingSubscription).not.toHaveBeenCalled();
+
+    await waitFor(() => expect(confirmHostingSubscription).toHaveBeenCalledWith('sub-premium'), {
+      timeout: 3000,
+    });
+    // No toast - straight into Create community, since a new host needs one
+    // to publish an experience under.
+    await waitFor(() => expect(openCreateCommunity).toHaveBeenCalled());
+  });
+
+  it('a failed payment shows the error above the checkout, which stays open to retry', async () => {
+    const user = userEvent.setup();
+    renderDrawer();
+
+    await screen.findByText('Pick a plan to start hosting');
+    await user.click(screen.getByRole('radio', { name: /Premium/ }));
+    await user.click(screen.getByRole('button', { name: 'Continue with Premium' }));
+
+    await screen.findByTestId('paystack-checkout');
+    await user.click(screen.getByRole('button', { name: 'Simulate cancelled payment' }));
+
+    await screen.findByRole('alert');
+    expect(
+      screen.getByText(/The payment didn.t go through, so nothing was charged/),
+    ).toBeInTheDocument();
+    // The same checkout frame is still there to try again
+    expect(screen.getByTestId('paystack-checkout')).toBeInTheDocument();
+    expect(confirmHostingSubscription).not.toHaveBeenCalled();
+  });
+
+  it('Back on Subscribe returns to Choose a plan with nothing charged', async () => {
+    const user = userEvent.setup();
+    renderDrawer();
+
+    await screen.findByText('Pick a plan to start hosting');
+    await user.click(screen.getByRole('radio', { name: /Premium/ }));
+    await user.click(screen.getByRole('button', { name: 'Continue with Premium' }));
+
+    await screen.findByText('Subscribe to Premium');
+    await user.click(screen.getByLabelText('Back'));
+
+    await screen.findByText('Pick a plan to start hosting');
+    expect(screen.getByRole('radio', { name: /Premium/ })).toHaveAttribute('aria-checked', 'true');
+    expect(confirmHostingSubscription).not.toHaveBeenCalled();
+  });
+
+  /** Drives a real subscribe to Basic through the UI, then closes - the
+   * only way to reach "already has a plan" now that there's no
+   * localStorage to seed it from. */
+  const subscribeToBasicThenClose = async (user: ReturnType<typeof userEvent.setup>) => {
+    await screen.findByText('Pick a plan to start hosting');
+    await user.click(screen.getByRole('radio', { name: /Basic/ }));
+    await user.click(screen.getByRole('button', { name: 'Continue with Basic' }));
+
+    await screen.findByTestId('paystack-checkout');
+    await user.click(screen.getByRole('button', { name: 'Simulate successful payment' }));
+
+    await waitFor(() => expect(confirmHostingSubscription).toHaveBeenCalledWith('sub-basic'), {
+      timeout: 3000,
+    });
+  };
+
+  it('with an active plan, picking a different one cancels it and starts a fresh checkout', async () => {
+    const user = userEvent.setup();
+    renderDrawer();
+    await subscribeToBasicThenClose(user);
+
+    await user.click(screen.getByRole('button', { name: 'Reopen' }));
 
     await screen.findByText('Change your plan');
     expect(screen.getByText('Current plan')).toBeInTheDocument();
@@ -155,42 +256,23 @@ describe('HostingPlanDrawer', () => {
     await user.click(screen.getByRole('radio', { name: /Premium/ }));
     await user.click(screen.getByRole('button', { name: 'Switch to Premium' }));
 
-    expect(changePlan).toHaveBeenCalledWith(
-      'premium',
-      expect.objectContaining({ planId: 'basic', status: 'active' }),
-    );
+    await waitFor(() => expect(cancelHostingSubscription).toHaveBeenCalledWith('sub-basic'));
+    // No atomic "change plan" endpoint - switching cancels the old
+    // subscription, then pays for the new one through the same checkout.
+    await screen.findByText('Subscribe to Premium');
+    expect(startHostingCheckout).toHaveBeenCalledWith('premium');
   });
 
   it('the current plan cannot be re-picked in change mode', async () => {
-    window.localStorage.setItem(
-      HOSTING_PLAN_STORAGE_KEY,
-      JSON.stringify({
-        planId: 'basic',
-        status: 'active',
-        paymentMethod: 'mpesa',
-        currentPeriodEnd: '2026-12-01T00:00:00.000Z',
-        dateSubscribed: '2026-11-01T00:00:00.000Z',
-      }),
-    );
-
+    const user = userEvent.setup();
     renderDrawer();
+    await subscribeToBasicThenClose(user);
+
+    await user.click(screen.getByRole('button', { name: 'Reopen' }));
 
     await screen.findByText('Change your plan');
     expect(screen.getByRole('radio', { name: /Basic/ })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Your current plan' })).toBeDisabled();
-  });
-
-  it('picking the free plan starts it straight away, with no Subscribe step', async () => {
-    const user = userEvent.setup();
-    renderDrawer();
-
-    await screen.findByText('Pick a plan to start hosting');
-
-    await user.click(screen.getByRole('radio', { name: /Basic/ }));
-    await user.click(screen.getByRole('button', { name: 'Start with Basic' }));
-
-    expect(startFreePlan).toHaveBeenCalledWith('basic');
-    expect(screen.queryByText('Subscribe to Basic')).not.toBeInTheDocument();
   });
 
   it('Compare every feature closes the drawer and goes to the Pricing page', async () => {
