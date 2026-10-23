@@ -9,8 +9,9 @@ import { cn } from '@/lib/utils';
 import { Community } from '@/types/community';
 import { Interest } from '@/types/interest';
 
+import { PhotoField } from '@/app/shared/components/Forms/PhotoField';
+
 import { InvitePeopleField } from './InvitePeopleField';
-import { PosterField } from './PosterField';
 import type { CommunityVisibility, DraftPhoto, InvitedPerson } from './useCreateCommunityDrawer';
 
 const TYPE_OPTIONS: { value: CommunityVisibility; label: string; note: string }[] = [
@@ -222,7 +223,7 @@ export const CreateCommunityForm = ({
       </span>
     </div>
 
-    <PosterField
+    <PhotoField
       photos={photos}
       onAdd={onAddPhotos}
       onRemove={onRemovePhoto}

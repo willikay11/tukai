@@ -7,8 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { Interest } from '@/types/interest';
 
-import type { DraftPhoto } from '@/app/(communities)/communities/components/CreateCommunityDrawer/useCreateCommunityDrawer';
-import { PosterField } from '@/app/(communities)/communities/components/CreateCommunityDrawer/PosterField';
+import { PhotoField, type PhotoFieldPhoto } from '@/app/shared/components/Forms/PhotoField';
 
 import type { NewPlaceDraft } from './useConnectPlaceDrawer';
 
@@ -41,8 +40,8 @@ export const NewPlaceForm = ({
   onToggleCategory,
 }: NewPlaceFormProps) => (
   <section className="flex flex-col gap-5" aria-label="New place">
-    <PosterField
-      photos={draft.photos as DraftPhoto[]}
+    <PhotoField
+      photos={draft.photos as PhotoFieldPhoto[]}
       onAdd={onAddPhotos}
       onRemove={onRemovePhoto}
       onReorder={onReorderPhotos}
