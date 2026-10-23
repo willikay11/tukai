@@ -12,16 +12,16 @@ import {
 
 import { HostingPlanDrawer } from '@/app/shared/components/Hosting/HostingPlanDrawer';
 import {
-  cancelPlan as cancelPlanRequest,
-  changePlan as changePlanRequest,
+  HostingCheckout,
+  cancelHostingSubscription,
+  confirmHostingSubscription,
+  fetchCurrentHostingSubscription,
   fetchHostingPlans,
-  resumePlan as resumePlanRequest,
-  subscribeToPlan as subscribeToPlanRequest,
+  resumeHostingSubscription,
+  startHostingCheckout,
 } from '@/services/hostingPlans';
 import {
   CreatorPlanState,
-  HOSTING_PLAN_STORAGE_KEY,
-  HostingPaymentMethod,
   HostingPlan,
   HostingPlanId,
   NO_HOSTING_PLAN,
@@ -43,15 +43,15 @@ type HostingPlanContextValue = {
   closeHostingPlanFlow: () => void;
 
   plans: HostingPlan[];
-  /** False until the stored plan state has been read, so nothing flashes "no plan". */
-  isReady: boolean;
   currentPlan: CreatorPlanState;
   hasActivePlan: boolean;
 
-  isSubscribing: boolean;
-  subscribe: (planId: HostingPlanId, paymentMethod: HostingPaymentMethod) => Promise<void>;
-  isChangingPlan: boolean;
-  changeToPlan: (planId: HostingPlanId) => Promise<void>;
+  /** Creates the pending subscription and returns where to pay for it. */
+  isStartingCheckout: boolean;
+  startCheckout: (planId: HostingPlanId) => Promise<HostingCheckout>;
+  /** Reads the subscription back once Paystack reports success. */
+  isConfirming: boolean;
+  confirmSubscription: (subscriptionId: string) => Promise<CreatorPlanState>;
   isCancelling: boolean;
   cancel: () => Promise<void>;
   isResuming: boolean;
@@ -60,67 +60,34 @@ type HostingPlanContextValue = {
 
 const HostingPlanContext = createContext<HostingPlanContextValue | null>(null);
 
-/** Anything stored by an older build, read defensively. */
-const readStored = (): CreatorPlanState => {
-  if (typeof window === 'undefined') return NO_HOSTING_PLAN;
-
-  try {
-    const raw = window.localStorage.getItem(HOSTING_PLAN_STORAGE_KEY);
-    const parsed = raw ? JSON.parse(raw) : null;
-
-    if (!parsed || typeof parsed !== 'object') return NO_HOSTING_PLAN;
-
-    return { ...NO_HOSTING_PLAN, ...parsed };
-  } catch {
-    // A browser can refuse storage outright, and a half-written value should
-    // cost the reader their plan rather than the whole page
-    return NO_HOSTING_PLAN;
-  }
-};
-
 /**
  * One Hosting plan drawer for the whole app, opened from the Dashboard
  * hosting-plan card, the Pricing page, and (once an active plan is
  * required) the Create experience entry points.
  *
- * Also holds the mocked plan store: there is no backend yet for a creator
- * tier, a hosting subscription, or payment, so the current plan lives in
- * this browser - see types/hostingPlan.ts and services/hostingPlans.ts.
- * Swapping in real endpoints later only touches the service calls below.
+ * Backed by the backend's generic `/v1/subscriptions/` endpoints - see
+ * services/hostingPlans.ts for why the catalog is still local. The current
+ * plan itself is never persisted to localStorage: it is fetched fresh from
+ * the backend on mount and otherwise lives only in memory here.
  */
 export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [options, setOptions] = useState<OpenHostingPlanOptions>({});
 
   const [plans, setPlans] = useState<HostingPlan[]>([]);
-  // Read synchronously (a lazy initializer, not an effect) so the very first
-  // render already has the real stored plan - an effect would still be
-  // pending on the first render after mount, and a caller gating on
-  // hasActivePlan from a child's own mount effect (e.g. a drawer opened as
-  // soon as the app loads) would read the default before it ran.
-  const [currentPlan, setCurrentPlan] = useState<CreatorPlanState>(() => readStored());
-  // Kept in the context value for API symmetry with the other local stores
-  // (e.g. PlanContext) - always true here, since currentPlan above is never
-  // stale the way an effect-driven read would be for one render.
-  const isReady = true;
+  const [currentPlan, setCurrentPlan] = useState<CreatorPlanState>(NO_HOSTING_PLAN);
 
-  const [isSubscribing, setIsSubscribing] = useState(false);
-  const [isChangingPlan, setIsChangingPlan] = useState(false);
+  const [isStartingCheckout, setIsStartingCheckout] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
 
   useEffect(() => {
     fetchHostingPlans().then(setPlans);
+    fetchCurrentHostingSubscription().then((subscription) => {
+      if (subscription) setCurrentPlan(subscription);
+    });
   }, []);
-
-  // Written on every change, so a reload finds what was there
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(HOSTING_PLAN_STORAGE_KEY, JSON.stringify(currentPlan));
-    } catch {
-      // Storage can be full or blocked; the plan still works for this session
-    }
-  }, [currentPlan]);
 
   const openHostingPlanFlow = useCallback((opts?: OpenHostingPlanOptions) => {
     setOptions(opts ?? {});
@@ -129,43 +96,41 @@ export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
 
   const closeHostingPlanFlow = useCallback(() => setIsOpen(false), []);
 
-  const subscribe = useCallback(
-    async (planId: HostingPlanId, paymentMethod: HostingPaymentMethod) => {
-      setIsSubscribing(true);
-      try {
-        setCurrentPlan(await subscribeToPlanRequest(planId, paymentMethod));
-      } finally {
-        setIsSubscribing(false);
-      }
-    },
-    [],
-  );
+  const startCheckout = useCallback(async (planId: HostingPlanId) => {
+    setIsStartingCheckout(true);
+    try {
+      return await startHostingCheckout(planId);
+    } finally {
+      setIsStartingCheckout(false);
+    }
+  }, []);
 
-  const changeToPlan = useCallback(
-    async (planId: HostingPlanId) => {
-      setIsChangingPlan(true);
-      try {
-        setCurrentPlan(await changePlanRequest(planId, currentPlan));
-      } finally {
-        setIsChangingPlan(false);
-      }
-    },
-    [currentPlan],
-  );
+  const confirmSubscription = useCallback(async (subscriptionId: string) => {
+    setIsConfirming(true);
+    try {
+      const confirmed = await confirmHostingSubscription(subscriptionId);
+      setCurrentPlan(confirmed);
+      return confirmed;
+    } finally {
+      setIsConfirming(false);
+    }
+  }, []);
 
   const cancel = useCallback(async () => {
+    if (!currentPlan.subscriptionId) return;
+
     setIsCancelling(true);
     try {
-      setCurrentPlan(await cancelPlanRequest(currentPlan));
+      setCurrentPlan(await cancelHostingSubscription(currentPlan.subscriptionId));
     } finally {
       setIsCancelling(false);
     }
-  }, [currentPlan]);
+  }, [currentPlan.subscriptionId]);
 
   const resume = useCallback(async () => {
     setIsResuming(true);
     try {
-      setCurrentPlan(await resumePlanRequest(currentPlan));
+      setCurrentPlan(await resumeHostingSubscription(currentPlan));
     } finally {
       setIsResuming(false);
     }
@@ -178,13 +143,12 @@ export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
       openHostingPlanFlow,
       closeHostingPlanFlow,
       plans,
-      isReady,
       currentPlan,
       hasActivePlan: hasActiveHostingPlan(currentPlan),
-      isSubscribing,
-      subscribe,
-      isChangingPlan,
-      changeToPlan,
+      isStartingCheckout,
+      startCheckout,
+      isConfirming,
+      confirmSubscription,
       isCancelling,
       cancel,
       isResuming,
@@ -196,12 +160,11 @@ export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
       openHostingPlanFlow,
       closeHostingPlanFlow,
       plans,
-      isReady,
       currentPlan,
-      isSubscribing,
-      subscribe,
-      isChangingPlan,
-      changeToPlan,
+      isStartingCheckout,
+      startCheckout,
+      isConfirming,
+      confirmSubscription,
       isCancelling,
       cancel,
       isResuming,
@@ -212,9 +175,9 @@ export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
   return (
     <HostingPlanContext.Provider value={value}>
       {children}
-      {/* Reads everything it needs (isOpen, options, the mock plan store)
-          back off this same context, rather than through props - it is
-          always rendered inside this provider. */}
+      {/* Reads everything it needs (isOpen, options, the plan store) back
+          off this same context, rather than through props - it is always
+          rendered inside this provider. */}
       <HostingPlanDrawer />
     </HostingPlanContext.Provider>
   );

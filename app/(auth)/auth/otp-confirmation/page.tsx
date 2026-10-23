@@ -137,7 +137,7 @@ export default function OtpConfirmation() {
 
     toast({
       title: 'OTP sent successfully',
-      description: `A four digit code was sent to ${email}`,
+      description: `A six digit code was sent to ${email}`,
       variant: 'success',
     });
 
@@ -164,9 +164,9 @@ export default function OtpConfirmation() {
       <div className="mx-4 mb-4">
         <p className="text-xl font-black text-gray-700">Enter verification code!</p>
         <p className="mb-4 mt-2.5 text-xs font-normal text-gray-700">
-          A four digit code was sent to <span className="text-primary">{email}</span>
+          A six digit code was sent to <span className="text-primary">{email}</span>
         </p>
-        <OtpInput onComplete={(token) => setToken(token)} />
+        <OtpInput length={6} onComplete={(token) => setToken(token)} />
         <div className="my-4 inline-flex w-full justify-center">
           {remainingSeconds > 0 ? (
             <span className="inline-flex items-center justify-center text-sm text-primary">

@@ -12,11 +12,12 @@ const DISC =
   'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-surface transition-colors';
 
 /**
- * The Hosting plan drawer: Choose a plan, then Subscribe (or, with an
- * active plan already, Change plan with no checkout). Reads everything -
- * open state, the mocked plan catalog and current plan - off
- * HostingPlanContext. See useHostingPlanDrawer.ts for the view/payment-form
- * state.
+ * The Hosting plan drawer: Choose a plan, then Subscribe (Paystack
+ * checkout, no footer of its own) - switching plans with one already
+ * active goes through the same checkout, just cancelling the old
+ * subscription first (see useHostingPlanDrawer.ts; there's no atomic
+ * "change plan" endpoint). Reads everything - open state, the plan catalog
+ * and current plan - off HostingPlanContext.
  */
 export const HostingPlanDrawer = () => {
   const drawer = useHostingPlanDrawer();
@@ -28,29 +29,22 @@ export const HostingPlanDrawer = () => {
     view,
     plans,
     currentPlan,
+    currentPlanName,
+    renewalDateLabel,
     isChangeMode,
     selectedPlanId,
     selectedPlan,
     isCurrentPlanSelected,
-    isSubscribing,
-    isChangingPlan,
-    paymentMethod,
-    setPaymentMethod,
-    mpesaNumber,
-    setMpesaNumber,
-    cardNumber,
-    setCardNumber,
-    expiry,
-    setExpiry,
-    cvc,
-    setCvc,
+    isInitiatingCheckout,
+    checkoutUrl,
+    checkoutPhase,
     paymentError,
-    canSubmit,
     handleClose,
     handlePickPlan,
     handleContinue,
+    handleCompareFeatures,
     handleBackToChoose,
-    handleSubscribe,
+    handlePaystackResult,
   } = drawer;
 
   const title =
@@ -103,65 +97,51 @@ export const HostingPlanDrawer = () => {
               plans={plans}
               selectedPlanId={selectedPlanId}
               currentPlanId={currentPlan.planId}
+              currentPlanName={currentPlanName}
+              renewalDateLabel={renewalDateLabel}
               isChangeMode={isChangeMode}
               onChoose={handlePickPlan}
-              disabled={isChangingPlan}
+              onCompareFeatures={handleCompareFeatures}
+              disabled={isInitiatingCheckout}
             />
           )}
 
           {view === 'subscribe' && selectedPlan && (
             <HostingSubscribeView
               plan={selectedPlan}
-              paymentMethod={paymentMethod}
-              onPaymentMethodChange={setPaymentMethod}
-              mpesaNumber={mpesaNumber}
-              onMpesaNumberChange={setMpesaNumber}
-              cardNumber={cardNumber}
-              onCardNumberChange={setCardNumber}
-              expiry={expiry}
-              onExpiryChange={setExpiry}
-              cvc={cvc}
-              onCvcChange={setCvc}
+              checkoutUrl={checkoutUrl}
+              checkoutPhase={checkoutPhase}
               error={paymentError}
-              isSubmitting={isSubscribing}
+              onPaymentSuccess={handlePaystackResult}
             />
           )}
         </div>
 
-        <footer className="sticky bottom-0 z-10 flex min-h-[88px] flex-shrink-0 flex-wrap items-center gap-2.5 border-t border-surface-muted bg-white px-6 py-[18px]">
-          <button
-            type="button"
-            onClick={handleClose}
-            className="h-12 px-1.5 text-[15px] font-medium text-danger hover:underline"
-          >
-            Cancel
-          </button>
-          <span className="flex-1" aria-hidden="true" />
+        {/* Subscribe has no footer - the checkout frame is the whole
+            surface, same as Paystack's own flow for a ticket purchase. */}
+        {view === 'choose' && (
+          <footer className="sticky bottom-0 z-10 flex min-h-[88px] flex-shrink-0 flex-wrap items-center gap-2.5 border-t border-surface-muted bg-white px-6 py-[18px]">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="h-12 px-1.5 text-[15px] font-medium text-danger hover:underline"
+            >
+              Cancel
+            </button>
+            <span className="flex-1" aria-hidden="true" />
 
-          {view === 'choose' ? (
             <Button
               type="button"
               variant="lime"
               onClick={handleContinue}
-              disabled={!selectedPlan || isCurrentPlanSelected}
-              isLoading={isChangingPlan}
+              disabled={!selectedPlan || isCurrentPlanSelected || !selectedPlan.backendId}
+              isLoading={isInitiatingCheckout}
               className="h-12 rounded-full px-6 text-[15px] disabled:bg-[#E4F4B5] disabled:text-[#5E7A45] disabled:opacity-100"
             >
               {isCurrentPlanSelected ? 'Your current plan' : continueLabel}
             </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="lime"
-              onClick={handleSubscribe}
-              disabled={!canSubmit || isSubscribing}
-              isLoading={isSubscribing}
-              className="h-12 rounded-full px-6 text-[15px] disabled:bg-[#E4F4B5] disabled:text-[#5E7A45] disabled:opacity-100"
-            >
-              Pay {selectedPlan?.priceLabel.split('/')[0].trim()} and subscribe
-            </Button>
-          )}
-        </footer>
+          </footer>
+        )}
       </div>
     </Drawer>
   );

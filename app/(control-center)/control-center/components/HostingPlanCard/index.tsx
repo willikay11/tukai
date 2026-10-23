@@ -28,7 +28,7 @@ export const HostingPlanCard = () => {
   const { toast } = useToast();
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
 
-  if (!hostingPlan || !hostingPlan.isReady) return null;
+  if (!hostingPlan) return null;
 
   const { currentPlan, openHostingPlanFlow, cancel, resume, isCancelling, isResuming } =
     hostingPlan;
@@ -101,10 +101,12 @@ export const HostingPlanCard = () => {
                     {renewalLabel ? `Renews ${renewalLabel}` : 'Active'}
                   </span>
                 )}
-                <span className="inline-flex items-center gap-1.5 text-13 font-semibold text-brand">
-                  <IconComponent iconName="Ticket01Icon" size={14} color="currentColor" />
-                  {plan.commissionPct}% per paid ticket
-                </span>
+                {plan.commissionPct != null && (
+                  <span className="inline-flex items-center gap-1.5 text-13 font-semibold text-brand">
+                    <IconComponent iconName="Ticket01Icon" size={14} color="currentColor" />
+                    {plan.commissionPct}% per paid ticket
+                  </span>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center gap-2">

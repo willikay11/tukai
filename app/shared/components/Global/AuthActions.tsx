@@ -6,7 +6,6 @@ import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { CreateCommunityDrawer } from '@/app/(communities)/communities/components/CreateCommunityDrawer';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { MomentComposer } from '@/app/shared/components/Moments';
@@ -16,6 +15,7 @@ import { TukaiImage } from '@/components/ui/image';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
+import { useCreateCommunityDrawer } from '@/context/CreateCommunityDrawerContext';
 import { useCreateExperienceDrawer } from '@/context/CreateExperienceDrawerContext';
 
 import { CreateMenu } from './CreateMenu';
@@ -26,13 +26,13 @@ export const AuthActions = () => {
   const { openSignInWithCallback } = useAuthDialog();
   const { openConnectPlace } = useConnectPlaceDrawer()!;
   const { openCreateExperience } = useCreateExperienceDrawer()!;
+  const { openCreateCommunity } = useCreateCommunityDrawer()!;
   const router = useRouter();
   const { data: session } = useSession();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
   const [isBucketListModalOpen, setIsBucketListModalOpen] = useState(false);
   const [isMomentComposerOpen, setIsMomentComposerOpen] = useState(false);
-  const [isCommunityDrawerOpen, setIsCommunityDrawerOpen] = useState(false);
 
   // The dot on the Notifications row was hardcoded true, so it was on for
   // everybody forever
@@ -62,7 +62,7 @@ export const AuthActions = () => {
     setIsCreateMenuOpen(false);
 
     if (id === 'experience') handleCreateExperience();
-    if (id === 'community') setIsCommunityDrawerOpen(true);
+    if (id === 'community') openCreateCommunity();
     if (id === 'place') openConnectPlace();
     if (id === 'bucketList') setIsBucketListModalOpen(true);
     if (id === 'moment') setIsMomentComposerOpen(true);
@@ -175,8 +175,6 @@ export const AuthActions = () => {
           </Link>
         </>
       )}
-
-      <CreateCommunityDrawer open={isCommunityDrawerOpen} onOpenChange={setIsCommunityDrawerOpen} />
 
       <CreateBucketListModal open={isBucketListModalOpen} onOpenChange={setIsBucketListModalOpen} />
 

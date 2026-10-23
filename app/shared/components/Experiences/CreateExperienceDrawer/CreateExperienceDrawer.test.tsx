@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
@@ -7,16 +7,34 @@ import {
   OpenCreateExperienceOptions,
   useCreateExperienceDrawer,
 } from '@/context/CreateExperienceDrawerContext';
-import { HostingPlanProvider } from '@/context/HostingPlanContext';
-import { HOSTING_PLAN_STORAGE_KEY } from '@/types/hostingPlan';
 
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: { iconName: string }) => <span data-testid={iconName} />,
 }));
 
+// The Hosting plan drawer's own UI has its own test suite
+// (HostingPlanDrawer.test.tsx) - mocked here as a controllable fake so this
+// file can focus on the create-experience gate and the drawer's own
+// entry-gate / Leave-guard logic, without depending on a real plan state.
+const openHostingPlanFlow = jest.fn();
+const mockHostingPlan: Record<string, unknown> = {};
+const setMockHostingPlan = (overrides: Record<string, unknown>) => {
+  Object.keys(mockHostingPlan).forEach((key) => delete mockHostingPlan[key]);
+  Object.assign(mockHostingPlan, { hasActivePlan: false, openHostingPlanFlow, ...overrides });
+};
+
+jest.mock('@/context/HostingPlanContext', () => ({
+  HostingPlanProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+  useHostingPlan: () => mockHostingPlan,
+}));
+
 jest.mock('next-auth/react', () => ({
   useSession: () => ({ data: { user: { id: 'user-1' } }, status: 'authenticated' }),
 }));
+
+// Pulled in transitively by HostingPlanDrawer (mounted by HostingPlanProvider
+// below), for its "Compare every feature" link - not under test here.
+jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }));
 
 const toast = jest.fn();
 jest.mock('@/app/shared/hooks/useToast', () => ({
@@ -125,43 +143,36 @@ const OpenOnMount = ({ options }: { options?: OpenCreateExperienceOptions }) => 
 
 const renderDrawer = (options?: OpenCreateExperienceOptions) =>
   render(
-    <HostingPlanProvider>
-      <CreateExperienceDrawerProvider>
-        <OpenOnMount options={options} />
-      </CreateExperienceDrawerProvider>
-    </HostingPlanProvider>,
+    <CreateExperienceDrawerProvider>
+      <OpenOnMount options={options} />
+    </CreateExperienceDrawerProvider>,
   );
 
 describe('CreateExperienceDrawer', () => {
   beforeEach(() => {
-    window.localStorage.clear();
     jest.clearAllMocks();
     setMockFlow({});
+    setMockHostingPlan({});
   });
 
-  it('with no active hosting plan, opening the drawer opens Choose a plan instead', async () => {
+  it('with no active hosting plan, opening the drawer opens Choose a plan instead of the wizard', async () => {
     renderDrawer();
 
-    await screen.findByText('Pick a plan to start hosting');
+    await waitFor(() => expect(openHostingPlanFlow).toHaveBeenCalledWith({ view: 'choose' }));
     expect(screen.queryByTestId('wizard')).not.toBeInTheDocument();
   });
 
   it('with an active plan and no draft, opens straight into the wizard', async () => {
-    window.localStorage.setItem(
-      HOSTING_PLAN_STORAGE_KEY,
-      JSON.stringify({ planId: 'basic', status: 'active', paymentMethod: 'mpesa' }),
-    );
+    setMockHostingPlan({ hasActivePlan: true });
 
     renderDrawer();
 
     expect(await screen.findByTestId('wizard')).toBeInTheDocument();
+    expect(openHostingPlanFlow).not.toHaveBeenCalled();
   });
 
   it('jumps straight to the wizard when opened with an explicit step or experienceId', async () => {
-    window.localStorage.setItem(
-      HOSTING_PLAN_STORAGE_KEY,
-      JSON.stringify({ planId: 'basic', status: 'active', paymentMethod: 'mpesa' }),
-    );
+    setMockHostingPlan({ hasActivePlan: true });
 
     renderDrawer({ experienceId: 'exp-1' });
 
@@ -169,10 +180,7 @@ describe('CreateExperienceDrawer', () => {
   });
 
   it('closing with no in-progress draft closes immediately, no Leave confirm', async () => {
-    window.localStorage.setItem(
-      HOSTING_PLAN_STORAGE_KEY,
-      JSON.stringify({ planId: 'basic', status: 'active', paymentMethod: 'mpesa' }),
-    );
+    setMockHostingPlan({ hasActivePlan: true });
     setMockFlow({ experienceId: null });
 
     renderDrawer();
@@ -185,10 +193,7 @@ describe('CreateExperienceDrawer', () => {
   });
 
   it('closing with an in-progress draft opens the Leave confirm; Keep editing dismisses it', async () => {
-    window.localStorage.setItem(
-      HOSTING_PLAN_STORAGE_KEY,
-      JSON.stringify({ planId: 'basic', status: 'active', paymentMethod: 'mpesa' }),
-    );
+    setMockHostingPlan({ hasActivePlan: true });
     setMockFlow({ experienceId: 'exp-1' });
 
     renderDrawer();
@@ -206,10 +211,7 @@ describe('CreateExperienceDrawer', () => {
   });
 
   it('Discard experience cancels the draft and closes the drawer', async () => {
-    window.localStorage.setItem(
-      HOSTING_PLAN_STORAGE_KEY,
-      JSON.stringify({ planId: 'basic', status: 'active', paymentMethod: 'mpesa' }),
-    );
+    setMockHostingPlan({ hasActivePlan: true });
     setMockFlow({ experienceId: 'exp-1' });
 
     renderDrawer();
@@ -225,10 +227,7 @@ describe('CreateExperienceDrawer', () => {
   });
 
   it('a saved draft shows Resume first; Continue proceeds to the wizard', async () => {
-    window.localStorage.setItem(
-      HOSTING_PLAN_STORAGE_KEY,
-      JSON.stringify({ planId: 'basic', status: 'active', paymentMethod: 'mpesa' }),
-    );
+    setMockHostingPlan({ hasActivePlan: true });
 
     const useExperiences = jest.requireMock('@/app/shared/hooks/useExperiences').useExperiences;
     useExperiences.mockReturnValue({
