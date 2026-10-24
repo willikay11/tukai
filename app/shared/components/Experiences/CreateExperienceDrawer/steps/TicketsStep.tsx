@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -9,12 +9,14 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { useToast } from '@/app/shared/hooks/useToast';
 import {
   createExperienceTicket,
+  createSlotTemplate,
   deleteExperienceTicket,
   updateExperienceTicket,
 } from '@/services/experience';
 import type { CreateExperienceTicket } from '@/types/experience';
 import { getDaysBetween } from '@/utils/date-utils';
 import { parseApiError } from '@/utils/parseApiError';
+import { buildSingleOccurrenceRule, calculateDurationMinutes } from '@/utils/slot-template-utils';
 import { getTicketBuyerAmount } from '@/utils/ticket-utils';
 
 type Flow = ReturnType<typeof useCreateExperienceFlow>;
@@ -142,13 +144,50 @@ export const TicketsStep = ({ flow }: TicketsStepProps) => {
 
   // A one-time recurring experience's tickets hang off the slot template
   // created when About saved (useCreateExperienceFlow's handleSaveAbout syncs
-  // these already); multi-day "entire-period" would need one too, but
-  // nothing creates it yet outside the old full-page TicketsStep, so that one
-  // combination still saves without a slot_template - narrower than the old
-  // flow, not silently broken.
-  const slotTemplateId = (isRecurring || (isMultiDay && !isEachDay))
-    ? flow.slotTemplateRecords[0]?.templateId
-    : undefined;
+  // these already) - `flow.slotTemplateRecords` already has it by the time
+  // this step is reached, so recurring just reads it.
+  //
+  // Multi-day "entire-period" has no such pre-existing template - the old
+  // full-page TicketsStep creates one lazily, on the first ticket saved, via
+  // a setter the full-page route owns. `useCreateExperienceFlow` exposes
+  // `slotTemplateRecords` to this step as a plain array with no setter, so
+  // the created id is cached here instead, step-local, rather than in the
+  // shared hook (which the still-live full-page route also depends on).
+  // `pendingTemplateRef` holds the in-flight/resolved creation so two tickets
+  // saved in quick succession (e.g. tabbing through name then quantity)
+  // share one call instead of each creating their own template.
+  const pendingTemplateRef = useRef<Promise<string | undefined> | null>(null);
+
+  const getOrCreateEntirePeriodSlotTemplate = (): Promise<string | undefined> => {
+    const existing = flow.slotTemplateRecords[0]?.templateId;
+    if (existing) return Promise.resolve(existing);
+    if (pendingTemplateRef.current) return pendingTemplateRef.current;
+
+    const { multiDayStartDate, multiDayStartTime, multiDayEndTime } = dateType;
+    if (!multiDayStartDate || !multiDayStartTime || !multiDayEndTime || !flow.experienceId) {
+      return Promise.resolve(undefined);
+    }
+
+    const promise = createSlotTemplate(flow.experienceId, {
+      start_time: multiDayStartTime,
+      duration_minutes: calculateDurationMinutes(multiDayStartTime, multiDayEndTime),
+      recurrence_rule: buildSingleOccurrenceRule(multiDayStartDate, multiDayStartTime),
+    })
+      .then((response) => response.data?.id as string | undefined)
+      .catch((error) => {
+        toast({
+          title: 'Error',
+          description: parseApiError(error, 'Failed to set up ticket sales for this experience'),
+          variant: 'destructive',
+        });
+        // Let the next blur try again rather than being stuck on a failed attempt
+        pendingTemplateRef.current = null;
+        return undefined;
+      });
+
+    pendingTemplateRef.current = promise;
+    return promise;
+  };
 
   // Saves one row to the API on blur, matching the handoff's inline-edit
   // model (no separate "save" step). Skips rows that are still too empty to
@@ -159,6 +198,12 @@ export const TicketsStep = ({ flow }: TicketsStepProps) => {
     if (!item || !flow.experienceId) return;
     if (!item.name.trim() || !item.quantity || item.quantity <= 0) return;
     if (isPaid && !(item.amount > 0)) return;
+
+    const slotTemplateId = isRecurring
+      ? flow.slotTemplateRecords[0]?.templateId
+      : isMultiDay && !isEachDay
+        ? await getOrCreateEntirePeriodSlotTemplate()
+        : undefined;
 
     const payload: CreateExperienceTicket = {
       experience: flow.experienceId,
