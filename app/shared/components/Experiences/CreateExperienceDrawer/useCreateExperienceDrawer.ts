@@ -15,6 +15,7 @@ import {
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { useCreateExperienceDrawer as useCreateExperienceDrawerStore } from '@/context/CreateExperienceDrawerContext';
+import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { cancelExperience } from '@/services/experience';
 import { Experience } from '@/types/experience';
 import { parseApiError } from '@/utils/parseApiError';
@@ -68,6 +69,9 @@ const getDrawerStepList = (
 export const useCreateExperienceDrawer = () => {
   const store = useCreateExperienceDrawerStore()!;
   const { isOpen, options, closeCreateExperience } = store;
+  // Mounted alongside this drawer in app/layout.tsx, so always available
+  // here - publishing hands off to it (see handlePublished below).
+  const experienceDrawer = useExperienceDrawer();
 
   const { toast } = useToast();
   const { data: session, status: sessionStatus } = useSession();
@@ -234,8 +238,17 @@ export const useCreateExperienceDrawer = () => {
     }
   };
 
+  // "Opens in the drawer": closes this create-flow drawer and hands off to
+  // the app's existing view-experience drawer (the same pattern the Place
+  // drawer uses) - not a navigation, and not rendered inline here, since
+  // ViewExperiencePageContent's own contract ties real interactivity
+  // (booking, sharing) to `bookingMode: 'live'`, which also brings back a
+  // "Back to Explore" link that makes no sense inside a drawer. Letting the
+  // dedicated experience drawer own this avoids forking that contract.
   const handlePublished = () => {
     justPublishedRef.current = true;
+    if (flow.experienceId) experienceDrawer?.openExperience(flow.experienceId);
+    closeCreateExperience();
   };
 
   return {
