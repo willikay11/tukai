@@ -1,12 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { v4 as uuidv4 } from 'uuid';
 
 import type { useCreateExperienceFlow } from '@/app/(experiences)/experiences/create/hooks/useCreateExperienceFlow';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { useToast } from '@/app/shared/hooks/useToast';
+import {
+  createExperienceTicket,
+  deleteExperienceTicket,
+  updateExperienceTicket,
+} from '@/services/experience';
+import type { CreateExperienceTicket } from '@/types/experience';
 import { getDaysBetween } from '@/utils/date-utils';
+import { parseApiError } from '@/utils/parseApiError';
+import { getTicketBuyerAmount } from '@/utils/ticket-utils';
 
 type Flow = ReturnType<typeof useCreateExperienceFlow>;
 type TicketItem = Flow['formData']['tickets']['items'][number];
@@ -93,11 +102,13 @@ const PillOption = ({
  *    yet, so no `flow` update is called for it.
  */
 export const TicketsStep = ({ flow }: TicketsStepProps) => {
+  const { toast } = useToast();
   const { dateType, tickets } = flow.formData;
   const errors = flow.ticketsErrors;
   const isPaid = dateType.experiencePricing === 'paid';
   const isMultiDay = dateType.experienceType === 'multi-day';
   const isEachDay = isMultiDay && tickets.ticketMode === 'each-day';
+  const isRecurring = dateType.experienceType === 'one-time' && dateType.isRecurring;
 
   const [showPartialInfo, setShowPartialInfo] = useState(false);
   // No currency field exists on FormData['tickets'] yet - this is local-only
@@ -109,6 +120,17 @@ export const TicketsStep = ({ flow }: TicketsStepProps) => {
       ? getDaysBetween(dateType.multiDayStartDate, dateType.multiDayEndDate)
       : [];
 
+  // Always start with at least one ticket (space) form - an empty step with
+  // nothing but an "Add another" link reads as broken, not as "none yet".
+  useEffect(() => {
+    if (tickets.items.length === 0) {
+      flow.updateTicketsFormData({ items: [blankTicketItem()] });
+    }
+    // Only ever seed once, the first time this step has no items - adding or
+    // removing items afterwards must not re-trigger this.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tickets.items.length]);
+
   const itemNoun = isPaid ? 'Ticket' : 'Space';
   const itemNounLower = isPaid ? 'ticket' : 'space';
 
@@ -118,7 +140,69 @@ export const TicketsStep = ({ flow }: TicketsStepProps) => {
     });
   };
 
-  const removeItem = (index: number) => {
+  // A one-time recurring experience's tickets hang off the slot template
+  // created when About saved (useCreateExperienceFlow's handleSaveAbout syncs
+  // these already); multi-day "entire-period" would need one too, but
+  // nothing creates it yet outside the old full-page TicketsStep, so that one
+  // combination still saves without a slot_template - narrower than the old
+  // flow, not silently broken.
+  const slotTemplateId = (isRecurring || (isMultiDay && !isEachDay))
+    ? flow.slotTemplateRecords[0]?.templateId
+    : undefined;
+
+  // Saves one row to the API on blur, matching the handoff's inline-edit
+  // model (no separate "save" step). Skips rows that are still too empty to
+  // be worth creating - the first keystroke in "name" would otherwise create
+  // a ticket with no price or quantity yet.
+  const persistItem = async (index: number) => {
+    const item = tickets.items[index];
+    if (!item || !flow.experienceId) return;
+    if (!item.name.trim() || !item.quantity || item.quantity <= 0) return;
+    if (isPaid && !(item.amount > 0)) return;
+
+    const payload: CreateExperienceTicket = {
+      experience: flow.experienceId,
+      name: item.name.trim(),
+      quantity: item.quantity,
+      price: String(isPaid ? item.amount : 0),
+      is_paid: isPaid,
+      ...(slotTemplateId ? { slot_template: slotTemplateId } : {}),
+    };
+
+    try {
+      const response = item.apiId
+        ? await updateExperienceTicket(flow.experienceId, item.apiId, payload)
+        : await createExperienceTicket(flow.experienceId, payload);
+
+      updateItem(index, {
+        apiId: response.data?.id ?? item.apiId,
+        buyerPrice: response.data ? getTicketBuyerAmount(response.data) : item.buyerPrice,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: parseApiError(error, `Failed to save the ${itemNounLower}`),
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const removeItem = async (index: number) => {
+    const item = tickets.items[index];
+
+    if (item?.apiId && flow.experienceId) {
+      try {
+        await deleteExperienceTicket(flow.experienceId, item.apiId);
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: parseApiError(error, `Failed to remove the ${itemNounLower}`),
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
     flow.updateTicketsFormData({ items: tickets.items.filter((_, i) => i !== index) });
   };
 
@@ -289,6 +373,7 @@ export const TicketsStep = ({ flow }: TicketsStepProps) => {
                   type="text"
                   value={item.name}
                   onChange={(e) => updateItem(index, { name: e.target.value })}
+                  onBlur={() => persistItem(index)}
                   placeholder={
                     isPaid
                       ? 'Ticket name, e.g. VIP, Early bird, Locals'
@@ -320,6 +405,7 @@ export const TicketsStep = ({ flow }: TicketsStepProps) => {
                         const raw = e.target.value.replace(/[^0-9.,]/g, '');
                         updateItem(index, { amount: Number(raw.replace(/,/g, '')) || 0 });
                       }}
+                      onBlur={() => persistItem(index)}
                       placeholder="Amount per ticket"
                       aria-label="Amount per ticket"
                       className="h-14 w-full rounded-xl border border-line bg-white px-4 pr-[60px] text-15 text-gray-800 outline-none placeholder:text-ink-muted focus:border-brand focus:shadow-[0_0_0_3px_#E8F1ED]"
@@ -337,6 +423,7 @@ export const TicketsStep = ({ flow }: TicketsStepProps) => {
                     const raw = e.target.value.replace(/[^0-9]/g, '');
                     updateItem(index, { quantity: Number(raw) || 0 });
                   }}
+                  onBlur={() => persistItem(index)}
                   placeholder={isPaid ? 'Ticket quantity' : 'Number of spaces'}
                   aria-label={isPaid ? 'Ticket quantity' : 'Number of spaces'}
                   className="h-14 w-full rounded-xl border border-line bg-white px-4 text-15 text-gray-800 outline-none placeholder:text-ink-muted focus:border-brand focus:shadow-[0_0_0_3px_#E8F1ED]"

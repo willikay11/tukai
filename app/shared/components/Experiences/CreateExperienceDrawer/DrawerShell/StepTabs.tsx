@@ -42,7 +42,7 @@ export const StepTabs = ({
           aria-current={isActive ? 'step' : undefined}
           onClick={() => onStepChange(step.id)}
           className={cn(
-            'inline-flex h-11 flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-full py-0 pl-3.5 pr-4.5 text-[14.5px] font-medium text-gray-800',
+            'inline-flex h-11 flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-full py-0 pl-[14px] pr-[18px] text-[14.5px] font-medium text-gray-800',
             isReached ? 'bg-surface-pill-active text-brand-deep' : 'bg-surface',
             isActive && 'font-bold',
             disabled && 'cursor-default opacity-60',
