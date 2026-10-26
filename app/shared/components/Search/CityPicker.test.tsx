@@ -7,13 +7,23 @@ import { CityPicker } from './CityPicker';
 
 const setCity = jest.fn();
 const setUsingLocation = jest.fn();
+const showLocationToast = jest.fn();
 let status = 'idle';
 let city: string | undefined = 'Nairobi';
 let area: string | undefined;
 let isUsingLocation = false;
 
 jest.mock('@/context/LocationContext', () => ({
-  useLocation: () => ({ city, area, status, isUsingLocation, setUsingLocation, setCity }),
+  useLocation: () => ({
+    city,
+    area,
+    status,
+    isUsingLocation,
+    setUsingLocation,
+    setCity,
+    homeCity: 'Nairobi',
+    showLocationToast,
+  }),
 }));
 
 let isLoading = false;
@@ -83,7 +93,7 @@ describe('the city picker', () => {
     area = 'Westlands, Nairobi';
     render(<CityPicker onClose={jest.fn()} />);
 
-    expect(screen.getByText('Westlands, Nairobi')).toBeInTheDocument();
+    expect(screen.getByText('On, near Westlands, Nairobi')).toBeInTheDocument();
   });
 
   it('says it is working while it finds them', () => {

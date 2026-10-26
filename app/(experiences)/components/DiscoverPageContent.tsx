@@ -7,7 +7,11 @@ import { useSearchParams } from 'next/navigation';
 import { BucketListRow } from '@/app/(experiences)/components/BucketListRow';
 import { CommunityRow } from '@/app/(experiences)/components/CommunityRow';
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
-import { hasMoreSoon, happeningSoon } from '@/app/(experiences)/components/ExperienceCard/happening-soon';
+import {
+  happeningSoon,
+  hasMoreSoon,
+} from '@/app/(experiences)/components/ExperienceCard/happening-soon';
+import { ExploringCityBar } from '@/app/(experiences)/components/ExploringCityBar';
 import { ROW_GRID, RowGridSkeleton } from '@/app/(experiences)/components/MediaRow';
 import { MomentComposeCard } from '@/app/(experiences)/components/MomentCard/MomentComposeCard';
 import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
@@ -193,6 +197,8 @@ export const DiscoverPageContent = () => {
 
   return (
     <PageContainer className="space-y-10 py-6">
+      <ExploringCityBar />
+
       {/* The canvas opens Discover with this row, off its own `featured`
           flag. The row stays out of the way entirely when nothing is
           featured - see useFeaturedPlaces. */}

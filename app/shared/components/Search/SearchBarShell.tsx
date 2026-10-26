@@ -21,7 +21,10 @@ import { CityPicker } from './CityPicker';
  */
 export const SearchBarShell = ({
   cityLabel,
-  isLocationOn,
+  pinOn,
+  away,
+  homeCity,
+  onGoHome,
   onFilters,
   filterCount = 0,
   isFilterOpen = false,
@@ -30,7 +33,12 @@ export const SearchBarShell = ({
   children,
 }: {
   cityLabel: string;
-  isLocationOn: boolean;
+  /** The pin takes the brand green while away from home, or with location on. */
+  pinOn: boolean;
+  /** Another city, with location off - the chip turns green with a way back. */
+  away: boolean;
+  homeCity: string;
+  onGoHome: () => void;
   onFilters: () => void;
   filterCount?: number;
   isFilterOpen?: boolean;
@@ -48,25 +56,53 @@ export const SearchBarShell = ({
     // it and leaves the bar at its left edge
     <div className="mx-auto flex h-[50px] w-full max-w-[600px] items-center rounded-full border border-line-soft bg-white pl-5 pr-[5px] shadow-[0_1px_8px_rgba(1,51,52,.06)] min-[720px]:h-[54px]">
       <Popover open={isCityOpen} onOpenChange={setIsCityOpen}>
-        <PopoverTrigger
-          aria-label="Choose a location"
-          className="-ml-[15px] flex h-11 flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full pl-[15px] pr-3 text-[13.5px] font-semibold text-brand-ink outline-none transition-colors hover:bg-surface"
+        {/* Tagged so the "Exploring" bar's own Change city button, on Discover,
+        can reach this same popover - it is not the chip's own child. */}
+        <span
+          data-city-root=""
+          className={cn(
+            '-ml-[15px] flex flex-shrink-0 items-center rounded-full transition-colors duration-150',
+            away ? 'bg-surface-brand' : 'bg-transparent',
+          )}
         >
-          <IconComponent
-            iconName="Location01Icon"
-            size={17}
-            color="currentColor"
-            // The pin takes the brand green once the reader's own location is on
-            className={isLocationOn ? 'text-brand' : 'text-ink-muted'}
-          />
-          {cityLabel}
-          <IconComponent
-            iconName="ArrowDown01Icon"
-            size={14}
-            color="currentColor"
-            className="text-ink-muted"
-          />
-        </PopoverTrigger>
+          <PopoverTrigger
+            aria-label="Choose a location"
+            className={cn(
+              'flex h-11 flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full pl-[15px] pr-3 text-[13.5px] font-semibold outline-none transition-colors hover:bg-[rgba(1,51,52,0.06)]',
+              away ? 'text-brand' : 'text-brand-ink',
+            )}
+          >
+            <IconComponent
+              iconName="Location01Icon"
+              size={17}
+              color="currentColor"
+              className={pinOn ? 'text-brand' : 'text-ink-muted'}
+            />
+            {cityLabel}
+            {/* Shown at home, and with location on - away drops it for the
+            home button instead */}
+            {!away && (
+              <IconComponent
+                iconName="ArrowDown01Icon"
+                size={14}
+                color="currentColor"
+                className="text-ink-muted"
+              />
+            )}
+          </PopoverTrigger>
+
+          {away && (
+            <button
+              type="button"
+              onClick={onGoHome}
+              aria-label={`Back to ${homeCity}`}
+              title={`Back to ${homeCity}`}
+              className="-ml-3 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-brand transition-colors hover:bg-[rgba(1,51,52,0.08)]"
+            >
+              <IconComponent iconName="Cancel01Icon" size={16} color="currentColor" />
+            </button>
+          )}
+        </span>
 
         <PopoverContent
           align="start"
