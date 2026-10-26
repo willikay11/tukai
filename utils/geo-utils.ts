@@ -24,6 +24,10 @@ export const greatCircleKm = (lat1: number, lng1: number, lat2: number, lng2: nu
 export const haversineKm = (lat1: number, lng1: number, lat2: number, lng2: number): number =>
   Math.round(greatCircleKm(lat1, lng1, lat2, lng2));
 
-/** One decimal place, so a place 1.1 km off reads as that. Under 100 m reads as less than 0.1. */
+/** "2.4 km" under 10 km, one decimal; "12 km" from 10 km, a whole number. */
+export const formatDistanceKm = (km: number): string =>
+  km < 10 ? `${km.toFixed(1)} km` : `${Math.round(km)} km`;
+
+/** As `formatDistanceKm`, with "away" appended. Under 100 m reads as less than 0.1. */
 export const formatNearbyDistance = (km: number): string =>
-  km < 0.1 ? 'Less than 0.1 km away' : `${km.toFixed(1)} km away`;
+  km < 0.1 ? 'Less than 0.1 km away' : `${formatDistanceKm(km)} away`;

@@ -13,7 +13,7 @@ interface CreateMenuProps {
 }
 
 const rowClasses =
-  'flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-gray-50';
+  'flex w-full items-start gap-3 rounded-xl p-3 text-left transition-colors hover:bg-surface';
 
 const MenuRow = ({ item, onSelect }: { item: CreateMenuItem; onSelect: () => void }) => {
   const content = (
@@ -26,29 +26,29 @@ const MenuRow = ({ item, onSelect }: { item: CreateMenuItem; onSelect: () => voi
         className="mt-0.5 flex-shrink-0 text-brand"
       />
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold text-gray-900">{item.label}</span>
-        <span className="block text-sm text-ink-muted">{item.description}</span>
+        <span className="block text-[14.5px] font-semibold text-brand-ink">{item.label}</span>
+        <span className="block text-[13px] leading-[1.4] text-ink-muted">{item.description}</span>
       </span>
     </>
   );
 
   if (item.href) {
     return (
-      <Link href={item.href} onClick={onSelect} className={rowClasses}>
+      <Link href={item.href} onClick={onSelect} role="menuitem" className={rowClasses}>
         {content}
       </Link>
     );
   }
 
   return (
-    <button type="button" onClick={onSelect} className={rowClasses}>
+    <button type="button" role="menuitem" onClick={onSelect} className={rowClasses}>
       {content}
     </button>
   );
 };
 
 export const CreateMenu = ({ onSelect }: CreateMenuProps) => (
-  <div className="w-64 p-2">
+  <div role="menu" aria-label="Create" className="flex w-[288px] flex-col gap-0.5 p-2">
     {CREATE_MENU_ITEMS.map((item) => (
       <MenuRow key={item.id} item={item} onSelect={() => onSelect(item.id)} />
     ))}

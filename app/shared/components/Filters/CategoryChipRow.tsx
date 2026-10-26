@@ -52,7 +52,7 @@ export const CategoryChipRow = ({
               aria-selected={isOn}
               onClick={() => onChange(chip.value)}
               className={cn(
-                'flex h-11 flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 text-[13.5px] transition-colors',
+                'flex h-11 flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 text-[13.5px] transition-colors active:scale-[0.98]',
                 chip.icon && 'pl-3.5 pr-[18px]',
                 isOn
                   ? 'bg-surface-brand font-semibold text-brand'
@@ -75,12 +75,12 @@ export const CategoryChipRow = ({
       </div>
 
       {!atStart && (
-        <div className="pointer-events-none absolute inset-y-0 left-0 flex w-24 items-center bg-gradient-to-r from-white from-50% to-transparent">
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex w-[104px] items-center bg-gradient-to-r from-white from-50% to-transparent">
           <button
             type="button"
             onClick={onBack}
             aria-label="Scroll categories left"
-            className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-gray-900 shadow-md transition-colors hover:bg-surface"
+            className="pointer-events-auto relative flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-gray-900 shadow-md transition-colors after:absolute after:-inset-1 after:content-[''] hover:bg-surface"
           >
             <IconComponent iconName="ArrowLeft01Icon" size={16} color="currentColor" />
           </button>
@@ -88,12 +88,12 @@ export const CategoryChipRow = ({
       )}
 
       {!atEnd && (
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex w-24 items-center justify-end bg-gradient-to-l from-white from-50% to-transparent">
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex w-[104px] items-center justify-end bg-gradient-to-l from-white from-50% to-transparent">
           <button
             type="button"
             onClick={onNext}
             aria-label="Scroll categories right"
-            className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-gray-900 shadow-md transition-colors hover:bg-surface"
+            className="pointer-events-auto relative flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-gray-900 shadow-md transition-colors after:absolute after:-inset-1 after:content-[''] hover:bg-surface"
           >
             <IconComponent iconName="ArrowRight01Icon" size={16} color="currentColor" />
           </button>

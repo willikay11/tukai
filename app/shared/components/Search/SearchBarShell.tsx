@@ -46,7 +46,7 @@ export const SearchBarShell = ({
     // `mx-auto` rather than leaving it to the row: the popover anchor around
     // this is full width, so centring the row centres a box that already fills
     // it and leaves the bar at its left edge
-    <div className="mx-auto flex h-[50px] w-full max-w-[600px] items-center rounded-full border border-line-soft bg-white pl-5 pr-[5px] shadow-[0_1px_8px_rgba(1,51,52,.06)] md:h-[54px]">
+    <div className="mx-auto flex h-[50px] w-full max-w-[600px] items-center rounded-full border border-line-soft bg-white pl-5 pr-[5px] shadow-[0_1px_8px_rgba(1,51,52,.06)] min-[720px]:h-[54px]">
       <Popover open={isCityOpen} onOpenChange={setIsCityOpen}>
         <PopoverTrigger
           aria-label="Choose a location"
@@ -97,7 +97,7 @@ export const SearchBarShell = ({
         )}
       >
         <IconComponent iconName="FilterHorizontalIcon" size={17} color="currentColor" />
-        <span className="hidden md:inline">Filters</span>
+        <span className="hidden min-[720px]:inline">Filters</span>
         {filterCount > 0 && (
           <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-lime px-1.5 text-[11px] font-bold text-brand-ink">
             {filterCount}

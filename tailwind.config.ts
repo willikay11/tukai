@@ -75,6 +75,12 @@ const config: Config = {
         // rating or a "city • distance" line does.
         star: '#F2C14B',
         dot: '#70A3F3',
+        // The filter panel's Rating section star - a different, Tailwind-amber
+        // hex from `star` above, which exists only wherever a place's own
+        // reviews render (PlaceAboutSection, PlaceDrawerReviews, PlaceReviewForm,
+        // the Review components). Kept separate per the file's own convention:
+        // additive, scoped tokens rather than repainting an existing one.
+        rating: '#FBBF24',
         // The blue dot before a distance or a rating count in the place drawer's
         // photo row, a 5px circle rather than a glyph
         distance: '#60A5FA',
@@ -182,10 +188,17 @@ const config: Config = {
           '0%': { opacity: '0', transform: 'translateY(4px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        // The Experiences tab's "things waiting on you" dot. Used only via
+        // `motion-safe:`, so `prefers-reduced-motion` turns it off for free.
+        'tk-pulse': {
+          '0%, 75%, 100%': { boxShadow: '0 0 0 0 rgba(224, 45, 60, 0)' },
+          '10%': { boxShadow: '0 0 0 6px rgba(224, 45, 60, 0.45)' },
+        },
       },
       animation: {
         pop: 'pop 300ms ease-out',
         'fade-in-up': 'fade-in-up 200ms ease-out',
+        'tk-pulse': 'tk-pulse 1.6s ease-out infinite',
       },
       borderRadius: {
         lg: 'var(--radius)',

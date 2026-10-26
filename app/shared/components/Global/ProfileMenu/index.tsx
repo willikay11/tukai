@@ -6,8 +6,8 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { TukaiImage } from '@/components/ui/image';
 
 import {
-  PROFILE_MENU_DIVIDER_AFTER,
-  PROFILE_MENU_ITEMS,
+  PROFILE_MENU_GROUP_ONE,
+  PROFILE_MENU_GROUP_TWO,
   ProfileMenuItem,
   UNAVAILABLE_TITLE,
 } from './items';
@@ -17,7 +17,8 @@ interface ProfileMenuProps {
   // The user's @handle; users who never set one show no handle line
   handle?: string | null;
   image?: string | null;
-  hasUnreadNotifications?: boolean;
+  /** The real count, so the badge can show a number rather than just a dot. */
+  unreadNotificationCount?: number;
   onSignOut: () => void;
   // Fired when a row is chosen. Client navigation does not unmount the popover
   // this sits in, so it has to be told to close.
@@ -25,29 +26,26 @@ interface ProfileMenuProps {
 }
 
 const itemClasses =
-  'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-gray-800';
+  'flex min-h-11 w-full items-center gap-3 rounded-full px-2.5 text-left text-[14.5px] font-semibold text-gray-900';
 
-const MenuRow = ({
-  item,
-  hasUnreadNotifications,
-  onSelect,
-}: {
-  item: ProfileMenuItem;
-  hasUnreadNotifications: boolean;
-  onSelect?: () => void;
-}) => {
+/** The lime numeric pill the search bar's own Filters button already uses. */
+const CountBadge = ({ count }: { count: number }) => (
+  <span className="inline-flex h-5 min-w-5 flex-shrink-0 items-center justify-center rounded-full bg-lime px-1.5 text-[11px] font-bold text-brand-ink">
+    {count}
+  </span>
+);
+
+const MenuRow = ({ item, onSelect }: { item: ProfileMenuItem; onSelect?: () => void }) => {
   const content = (
     <>
       <IconComponent
         iconName={item.icon}
-        size={18}
+        size={19}
         color="currentColor"
-        className="flex-shrink-0 text-gray-700"
+        className="flex-shrink-0 text-ink-muted"
       />
       <span className="flex-1">{item.label}</span>
-      {item.showsUnreadDot && hasUnreadNotifications && (
-        <span className="h-2 w-2 flex-shrink-0 rounded-full bg-red-500" />
-      )}
+      {Boolean(item.badgeCount) && <CountBadge count={item.badgeCount as number} />}
     </>
   );
 
@@ -55,6 +53,7 @@ const MenuRow = ({
     return (
       <button
         type="button"
+        role="menuitem"
         disabled
         title={UNAVAILABLE_TITLE}
         className={`${itemClasses} opacity-40`}
@@ -65,78 +64,90 @@ const MenuRow = ({
   }
 
   return (
-    <Link href={item.href} onClick={onSelect} className={`${itemClasses} hover:bg-gray-50`}>
+    <Link
+      href={item.href}
+      onClick={onSelect}
+      role="menuitem"
+      className={`${itemClasses} hover:bg-surface`}
+    >
       {content}
     </Link>
   );
 };
 
+/** One of the menu's two white cards, sitting inside the grey tray. */
+const MenuGroup = ({ items, onSelect }: { items: ProfileMenuItem[]; onSelect?: () => void }) => (
+  <div className="flex flex-col gap-0.5 rounded-xl bg-white p-1.5 shadow-[0_1px_3px_rgba(1,51,52,.07)]">
+    {items.map((item) => (
+      <MenuRow key={item.label} item={item} onSelect={onSelect} />
+    ))}
+  </div>
+);
+
 export const ProfileMenu = ({
   name,
   handle,
   image,
-  hasUnreadNotifications = false,
+  unreadNotificationCount = 0,
   onSignOut,
   onItemSelect,
-}: ProfileMenuProps) => (
-  <div className="w-[300px] p-2">
-    {/* The canvas makes the whole header the way to the profile, rather than
-        listing "My Profile" as one row among the rest */}
-    <Link
-      href="/profile"
-      onClick={onItemSelect}
-      className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-gray-50"
-    >
-      <div className="relative aspect-square h-11 w-11 flex-shrink-0">
-        <TukaiImage
-          src={image || ''}
-          alt={name}
-          className="h-11 w-11 rounded-full"
-          quality={100}
-          fill
-          style={{ objectFit: 'cover' }}
-          showNotFoundText={false}
-        />
-      </div>
-      <div className="min-w-0">
-        <p className="truncate text-base font-bold text-gray-900">{name}</p>
-        <p className="truncate text-sm text-ink-muted">{handle ? `@${handle}` : 'View profile'}</p>
-      </div>
-    </Link>
+}: ProfileMenuProps) => {
+  const groupTwo = PROFILE_MENU_GROUP_TWO.map((item) =>
+    item.label === 'Notifications' ? { ...item, badgeCount: unreadNotificationCount } : item,
+  );
 
-    <div className="my-1 h-px bg-gray-100" />
-
-    <div className="flex flex-col">
-      {PROFILE_MENU_ITEMS.map((item, index) => (
-        <div key={item.label}>
-          <MenuRow
-            item={item}
-            hasUnreadNotifications={hasUnreadNotifications}
-            onSelect={onItemSelect}
+  return (
+    <div role="menu" aria-label="Account" className="w-[284px] p-2">
+      {/* The canvas makes the whole header the way to the profile, rather than
+          listing "Profile" as one row among the rest */}
+      <Link
+        href="/profile"
+        onClick={onItemSelect}
+        role="menuitem"
+        className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-surface"
+      >
+        <div className="relative aspect-square h-11 w-11 flex-shrink-0">
+          <TukaiImage
+            src={image || ''}
+            alt={name}
+            className="h-11 w-11 rounded-full"
+            quality={100}
+            fill
+            style={{ objectFit: 'cover' }}
+            showNotFoundText={false}
           />
-          {/* A rule after the three that are yours, as the canvas groups them */}
-          {index === PROFILE_MENU_DIVIDER_AFTER - 1 && <div className="my-1 h-px bg-gray-100" />}
         </div>
-      ))}
+        <div className="min-w-0">
+          <p className="truncate text-base font-bold text-gray-900">{name}</p>
+          <p className="truncate text-sm text-ink-muted">
+            {handle ? `@${handle}` : 'View profile'}
+          </p>
+        </div>
+      </Link>
+
+      {/* The grey tray holding the canvas's two grouped cards */}
+      <div className="mt-1 flex flex-col gap-1.5 rounded-xl bg-surface p-1.5">
+        <MenuGroup items={PROFILE_MENU_GROUP_ONE} onSelect={onItemSelect} />
+        <MenuGroup items={groupTwo} onSelect={onItemSelect} />
+      </div>
+
+      <button
+        type="button"
+        role="menuitem"
+        onClick={() => {
+          onItemSelect?.();
+          onSignOut();
+        }}
+        className={`${itemClasses} mt-1.5 hover:bg-danger-surface`}
+      >
+        <IconComponent
+          iconName="LogoutCircle01Icon"
+          size={18}
+          color="currentColor"
+          className="flex-shrink-0 text-danger"
+        />
+        <span className="flex-1 text-danger">Sign out</span>
+      </button>
     </div>
-
-    <div className="my-1 h-px bg-gray-100" />
-
-    <button
-      type="button"
-      onClick={() => {
-        onItemSelect?.();
-        onSignOut();
-      }}
-      className={`${itemClasses} hover:bg-red-50`}
-    >
-      <IconComponent
-        iconName="Logout04Icon"
-        size={18}
-        color="currentColor"
-        className="flex-shrink-0 text-red-600"
-      />
-      <span className="flex-1 text-red-600">Sign Out</span>
-    </button>
-  </div>
-);
+  );
+};

@@ -161,6 +161,41 @@ describe('PlaceCard', () => {
     });
   });
 
+  // The results view's own distance/rating lines, ahead of this card's own
+  // fallback above
+  describe('the results view line', () => {
+    it('shows the results distance ahead of the city, even with no location opted in', () => {
+      render(<PlaceCard place={makePlace()} resultDistanceKm={2.4} />);
+
+      expect(screen.getByText('2.4 km away')).toBeInTheDocument();
+      expect(screen.queryByText('Karen')).not.toBeInTheDocument();
+    });
+
+    it('shows the rating and review count under Top rated', () => {
+      render(
+        <PlaceCard place={makePlace({ averageRating: 4.6, totalReviews: 1204 })} showRating />,
+      );
+
+      expect(screen.getByText('4.6 · 1,204 reviews')).toBeInTheDocument();
+    });
+
+    // "No reviews yet" would read as missing data, same reason the card
+    // never shows a rating on its own
+    it('falls back to the city when rating is asked for but there are no reviews', () => {
+      render(<PlaceCard place={makePlace({ totalReviews: 0 })} showRating />);
+
+      expect(screen.getByText('Karen')).toBeInTheDocument();
+      expect(screen.queryByText(/reviews/)).not.toBeInTheDocument();
+    });
+
+    it('prefers distance over rating when both are asked for', () => {
+      render(<PlaceCard place={makePlace()} resultDistanceKm={2.4} showRating />);
+
+      expect(screen.getByText('2.4 km away')).toBeInTheDocument();
+      expect(screen.queryByText(/reviews/)).not.toBeInTheDocument();
+    });
+  });
+
   describe('opening the drawer', () => {
     it('opens the place', () => {
       render(<PlaceCard place={makePlace()} />);

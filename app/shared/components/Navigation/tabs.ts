@@ -19,7 +19,7 @@ export const DISCOVER_TABS: DiscoverTab[] = [
   { label: 'Discover', href: '/', icon: 'Search01Icon' },
   { label: 'Experiences', href: '/experiences', icon: 'Calendar03Icon' },
   { label: 'Places', href: '/places', icon: 'MapsLocation01Icon' },
-  { label: 'Moments', href: '/moments', icon: 'DashboardCircleIcon' },
+  { label: 'Moments', href: '/moments', icon: 'Menu02Icon' },
 ];
 
 /** Discover is the root, so it matches only itself. */

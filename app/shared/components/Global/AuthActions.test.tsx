@@ -71,12 +71,12 @@ describe('AuthActions profile menu', () => {
   it('opens the menu from the avatar trigger', () => {
     render(<AuthActions />);
 
-    expect(screen.queryByText('Control centre')).not.toBeInTheDocument();
+    expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
 
     openMenu();
 
-    expect(screen.getByText('Control centre')).toBeInTheDocument();
-    expect(screen.getByText('Sign Out')).toBeInTheDocument();
+    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Sign out')).toBeInTheDocument();
   });
 
   // Regression: the menu used NavigationMenu, whose viewport is hard-anchored
@@ -87,7 +87,7 @@ describe('AuthActions profile menu', () => {
 
     openMenu();
 
-    const panel = screen.getByText('Control centre').closest('[data-align]');
+    const panel = screen.getByText('Dashboard').closest('[data-align]');
     expect(panel).toHaveAttribute('data-align', 'end');
   });
 });

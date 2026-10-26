@@ -137,11 +137,12 @@ describe('the filters dialog', () => {
     expect(onApply).toHaveBeenCalledWith(expect.objectContaining({ experienceShapes: [] }));
   });
 
-  it('hides the experience sections when only places are wanted', async () => {
+  it('hides Experience type, but not When, when only places are wanted', async () => {
     open(filters({ query: 'hike', type: 'places' }));
 
     expect(screen.queryByText('Experience type')).not.toBeInTheDocument();
-    expect(screen.queryByText('When')).not.toBeInTheDocument();
+    // When shows for every scope now, with its copy following the pick
+    expect(screen.getByText('Places open on these days')).toBeInTheDocument();
   });
 
   it('clears everything without clearing the search', async () => {
@@ -176,7 +177,8 @@ describe('the filters dialog', () => {
       expect(screen.getByRole('button', { name: 'Next 7 days' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Pick dates/ })).toBeInTheDocument();
 
-      expect(screen.getByText('Time of day by start time')).toBeInTheDocument();
+      // Default filters look for Everything, so both halves get a mention
+      expect(screen.getByText('Time of day by start time, or open then')).toBeInTheDocument();
       expect(screen.getByRole('switch', { name: 'Morning' })).toBeInTheDocument();
       expect(screen.getByText('Before 12 PM')).toBeInTheDocument();
       expect(screen.getByRole('switch', { name: 'Afternoon' })).toBeInTheDocument();
@@ -251,6 +253,20 @@ describe('the filters dialog', () => {
       expect(screen.getByRole('switch', { name: 'Late night' })).toBeInTheDocument();
       expect(screen.getByText('After 9 PM')).toBeInTheDocument();
     });
+
+    it('follows the Experiences-only copy when only experiences are wanted', () => {
+      open(filters({ query: 'hike', type: 'experiences' }));
+
+      expect(screen.getByText('Days with something on')).toBeInTheDocument();
+      expect(screen.getByText('Time of day by start time')).toBeInTheDocument();
+    });
+
+    it('follows the Places-only copy when only places are wanted', () => {
+      open(filters({ query: 'hike', type: 'places' }));
+
+      expect(screen.getByText('Places open on these days')).toBeInTheDocument();
+      expect(screen.getByText('Time of day open at some point')).toBeInTheDocument();
+    });
   });
 
   describe('Where', () => {
@@ -319,10 +335,11 @@ describe('the filters dialog', () => {
   });
 
   describe('Availability', () => {
-    it('toggles Happening now and Spots left', async () => {
+    // Default filters look for Everything, so the row reads "Open now"
+    it('toggles Open now and Spots left', async () => {
       open();
 
-      await userEvent.click(screen.getByRole('switch', { name: 'Happening now' }));
+      await userEvent.click(screen.getByRole('switch', { name: 'Open now' }));
       await userEvent.click(screen.getByRole('switch', { name: 'Spots left' }));
       await userEvent.click(screen.getByRole('button', { name: /^Show all/ }));
 
@@ -331,11 +348,40 @@ describe('the filters dialog', () => {
       );
     });
 
+    it('reads Happening now when only experiences are wanted', () => {
+      open(filters({ query: 'hike', type: 'experiences' }));
+
+      expect(screen.getByRole('switch', { name: 'Happening now' })).toBeInTheDocument();
+    });
+
     // Nothing marks this yet - shown to match the canvas, not functional
     it('shows No booking needed as inert', () => {
       open();
 
       expect(screen.getByRole('switch', { name: 'No booking needed' })).toBeDisabled();
+    });
+
+    it('hides the experience-only rows when only places are wanted', () => {
+      open(filters({ query: 'hike', type: 'places' }));
+
+      expect(screen.queryByRole('switch', { name: 'Spots left' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('switch', { name: 'No booking needed' })).not.toBeInTheDocument();
+    });
+
+    // No `isClaimed`/offer field exists on Place yet - shown to match the
+    // canvas, not functional
+    it('shows Takes bookings and Has an offer, as inert, for places', () => {
+      open(filters({ query: 'hike', type: 'places' }));
+
+      expect(screen.getByRole('switch', { name: 'Takes bookings' })).toBeDisabled();
+      expect(screen.getByRole('switch', { name: 'Has an offer' })).toBeDisabled();
+    });
+
+    it('hides Takes bookings and Has an offer when only experiences are wanted', () => {
+      open(filters({ query: 'hike', type: 'experiences' }));
+
+      expect(screen.queryByRole('switch', { name: 'Takes bookings' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('switch', { name: 'Has an offer' })).not.toBeInTheDocument();
     });
   });
 
@@ -373,6 +419,13 @@ describe('the filters dialog', () => {
         expect.objectContaining({ yourCommunitiesOnly: true, guidedToursOnly: true }),
       );
     });
+
+    it('still offers Your communities, but not Guided tours, for places', () => {
+      open(filters({ query: 'hike', type: 'places' }));
+
+      expect(screen.getByRole('switch', { name: 'Your communities' })).toBeEnabled();
+      expect(screen.queryByRole('switch', { name: 'Guided tours' })).not.toBeInTheDocument();
+    });
   });
 
   describe('Accessibility', () => {
@@ -384,10 +437,44 @@ describe('the filters dialog', () => {
       expect(screen.getByRole('switch', { name: 'Parking' })).toBeDisabled();
     });
 
-    it('hides when only experiences are wanted', () => {
+    it('shows even when only experiences are wanted', () => {
       open(filters({ query: 'hike', type: 'experiences' }));
 
-      expect(screen.queryByText('Accessibility')).not.toBeInTheDocument();
+      expect(screen.getByText('Accessibility')).toBeInTheDocument();
+    });
+  });
+
+  describe('Rating', () => {
+    it('offers Any and the two star bands, places only', () => {
+      open();
+
+      expect(screen.getByText('Rating')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /4.0 and up/ })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /4.5 and up/ })).toBeInTheDocument();
+    });
+
+    it('picks a rating band', async () => {
+      open();
+
+      await userEvent.click(screen.getByRole('button', { name: /4.0 and up/ }));
+      await userEvent.click(screen.getByRole('button', { name: /^Show all/ }));
+
+      expect(onApply).toHaveBeenCalledWith(expect.objectContaining({ rating: 4 }));
+    });
+  });
+
+  describe('scope tags', () => {
+    it('marks Price, Duration and Rating when Looking for is Everything', () => {
+      open();
+
+      expect(screen.getAllByText('Experiences only')).toHaveLength(2);
+      expect(screen.getByText('Places only')).toBeInTheDocument();
+    });
+
+    it('drops the tags once a single kind is picked', () => {
+      open(filters({ query: 'hike', type: 'experiences' }));
+
+      expect(screen.queryByText('Experiences only')).not.toBeInTheDocument();
     });
   });
 });

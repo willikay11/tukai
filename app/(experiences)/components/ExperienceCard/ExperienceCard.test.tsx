@@ -103,6 +103,24 @@ describe('ExperienceCard', () => {
     expect(screen.getByText('KES 1,800/person')).toBeInTheDocument();
   });
 
+  // The results view's own distance, appended to the when line - set when
+  // the active sort is Nearest first, or a distance filter is on
+  describe('the results distance', () => {
+    it('appends it to the when line', () => {
+      render(<ExperienceCard experience={makeExperience()} resultDistanceKm={2.4} />);
+
+      expect(
+        screen.getByText(/Sat 3 Oct, \d{2}:\d{2} - \d{2}:\d{2} · 2\.4 km/),
+      ).toBeInTheDocument();
+    });
+
+    it('leaves the when line alone when there is no distance to show', () => {
+      render(<ExperienceCard experience={makeExperience()} />);
+
+      expect(screen.queryByText(/ · .*km/)).not.toBeInTheDocument();
+    });
+  });
+
   it('links to the experience detail page', () => {
     render(<ExperienceCard experience={makeExperience()} />);
 

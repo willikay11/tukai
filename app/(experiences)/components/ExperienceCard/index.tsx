@@ -12,6 +12,7 @@ import { Experience } from '@/types/experience';
 import { coverPhotoUrl } from '@/types/photo';
 import { formatCardDateTime } from '@/utils/date-utils';
 import { experiencePath } from '@/utils/detail-paths';
+import { formatDistanceKm } from '@/utils/geo-utils';
 
 import { experienceFlag, experiencePriceLine, experienceRunBy } from './experience-flag';
 
@@ -32,6 +33,7 @@ export const ExperienceCard = ({
   priority = false,
   opensDrawer = true,
   className,
+  resultDistanceKm,
 }: {
   experience: Experience;
   priority?: boolean;
@@ -44,6 +46,11 @@ export const ExperienceCard = ({
    * Replaces the rail's fixed 184px width where the card sits in a grid cell.
    */
   className?: string;
+  /**
+   * The results view's own distance, appended to the when line - set when
+   * the active sort is Nearest first, or a distance filter is on.
+   */
+  resultDistanceKm?: number;
 }) => {
   const { data: session } = useSession();
   const drawer = useExperienceDrawer();
@@ -51,6 +58,10 @@ export const ExperienceCard = ({
   const flag = experienceFlag(experience);
   const runBy = experienceRunBy(experience);
   const when = formatCardDateTime(experience.startDate, experience.endDate);
+  const whenWithDistance =
+    when && resultDistanceKm !== undefined
+      ? `${when} · ${formatDistanceKm(resultDistanceKm)}`
+      : when;
   const priceLine = experiencePriceLine(experience);
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -115,7 +126,7 @@ export const ExperienceCard = ({
           {experience.title}
         </p>
 
-        {when && <p className="text-[12.5px] text-ink-muted">{when}</p>}
+        {whenWithDistance && <p className="text-[12.5px] text-ink-muted">{whenWithDistance}</p>}
 
         {priceLine && <p className="mt-0.5 text-[13px] font-semibold text-gray-800">{priceLine}</p>}
       </div>

@@ -14,7 +14,7 @@ export const CREATE_MENU_ITEMS: CreateMenuItem[] = [
   {
     id: 'experience',
     label: 'Create an experience',
-    description: 'Requires a community you own.',
+    description: 'Needs a community you own.',
     icon: 'CalendarAdd01Icon',
   },
   {
@@ -22,12 +22,6 @@ export const CREATE_MENU_ITEMS: CreateMenuItem[] = [
     label: 'Create a community',
     description: 'Needed before you can host or manage a place.',
     icon: 'UserMultipleIcon',
-  },
-  {
-    id: 'place',
-    label: 'Connect a place',
-    description: 'Claim a business your community runs, with proof of ownership.',
-    icon: 'StoreVerified01Icon',
   },
   {
     id: 'bucketList',
@@ -40,5 +34,11 @@ export const CREATE_MENU_ITEMS: CreateMenuItem[] = [
     label: 'Share a moment',
     description: 'Attach it to a community, place or experience.',
     icon: 'DashboardCircleAddIcon',
+  },
+  {
+    id: 'place',
+    label: 'Connect a place',
+    description: 'Claim a business your community runs, with proof of ownership.',
+    icon: 'StoreVerified01Icon',
   },
 ];
