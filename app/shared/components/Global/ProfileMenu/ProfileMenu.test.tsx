@@ -16,29 +16,11 @@ jest.mock('next/link', () => {
   MockLink.displayName = 'MockLink';
   return MockLink;
 });
-jest.mock('@/components/ui/image', () => ({
-  TukaiImage: ({ alt }: { alt: string }) => <img alt={alt} />,
-}));
 
-const defaults = { name: 'George Ralak', onSignOut: jest.fn() };
+const defaults = { onSignOut: jest.fn() };
 const ALL_ITEMS = [...PROFILE_MENU_GROUP_ONE, ...PROFILE_MENU_GROUP_TWO];
 
 describe('ProfileMenu', () => {
-  it('shows the user name and handle', () => {
-    render(<ProfileMenu {...defaults} handle="georgeralak" />);
-
-    expect(screen.getByText('George Ralak')).toBeInTheDocument();
-    expect(screen.getByText('@georgeralak')).toBeInTheDocument();
-  });
-
-  // Not every user has set a display name; inventing one would be wrong
-  it('omits the handle line when the user has none', () => {
-    render(<ProfileMenu {...defaults} handle={null} />);
-
-    expect(screen.getByText('George Ralak')).toBeInTheDocument();
-    expect(screen.queryByText(/^@/)).not.toBeInTheDocument();
-  });
-
   it('lists every row from both groups', () => {
     render(<ProfileMenu {...defaults} />);
 
@@ -48,15 +30,19 @@ describe('ProfileMenu', () => {
     expect(screen.getByText('Sign out')).toBeInTheDocument();
   });
 
-  it('links the header row to the profile, not a listed row', () => {
+  it('links Profile to the profile page, as a plain row - no name or photo', () => {
     render(<ProfileMenu {...defaults} />);
 
-    // The header row is the way to the profile; there is no plain "Profile" row
-    expect(screen.getByRole('menuitem', { name: /George Ralak/ })).toHaveAttribute(
-      'href',
-      '/profile',
-    );
-    expect(screen.queryByText('Profile')).not.toBeInTheDocument();
+    expect(screen.getByText('Profile').closest('a')).toHaveAttribute('href', '/profile');
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
+
+  // The main tray is grey (#F3F4F2); the two groups sit on their own white cards
+  it('gives the tray a grey background and each group a white one', () => {
+    const { container } = render(<ProfileMenu {...defaults} />);
+
+    expect(container.querySelector('.bg-surface')).toBeInTheDocument();
+    expect(container.querySelectorAll('.bg-white')).toHaveLength(2);
   });
 
   it('links Dashboard to Control Center', () => {
@@ -65,13 +51,21 @@ describe('ProfileMenu', () => {
     expect(screen.getByText('Dashboard').closest('a')).toHaveAttribute('href', '/control-center');
   });
 
-  it('routes every row', () => {
+  it('routes every row that has a destination', () => {
     render(<ProfileMenu {...defaults} />);
 
-    ALL_ITEMS.forEach((item) => {
-      expect(item.href).toBeTruthy();
+    ALL_ITEMS.filter((item) => item.href).forEach((item) => {
       expect(screen.getByText(item.label).closest('a')).toHaveAttribute('href', item.href!);
     });
+  });
+
+  // No TukAI window or trigger exists anywhere yet - shown to match the
+  // design, but with nowhere to go
+  it('shows TukAI as disabled, with nowhere to go yet', () => {
+    render(<ProfileMenu {...defaults} />);
+
+    const tukai = screen.getByText('TukAI').closest('button');
+    expect(tukai).toBeDisabled();
   });
 
   it('sends Notifications and Messages to the inbox', () => {

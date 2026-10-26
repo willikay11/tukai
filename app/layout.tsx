@@ -13,7 +13,7 @@ import { ChromeGate } from '@/app/shared/components/Global';
 import { Footer } from '@/app/shared/components/Global';
 import { appFont } from '@/app/shared/components/Global';
 import { GlobalLoading } from '@/app/shared/components/Global';
-import { LocationPrompt } from '@/app/shared/components/LocationPicker';
+import { LocationPrompt, LocationToast } from '@/app/shared/components/LocationPicker';
 import { BottomNavigation } from '@/app/shared/components/Navigation';
 import { Nav } from '@/app/shared/components/Navigation';
 import { Search } from '@/app/shared/components/Search';
@@ -190,6 +190,7 @@ export default function RootLayout({
                                             </Suspense>
                                             <LocationPrompt />
                                           </ChromeGate>
+                                          <LocationToast />
 
                                           <div className="mb-20 flex-grow md:mb-0">{children}</div>
 

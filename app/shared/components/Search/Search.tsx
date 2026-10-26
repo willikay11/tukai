@@ -44,7 +44,10 @@ export const Search = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setSelectedCitySearchId } = useSelectedCategory();
-  const { city, area, isUsingLocation } = useLocation();
+  const { city, area, status, isUsingLocation, away, homeCity, goHome } = useLocation();
+  // While finding, the chip keeps whatever it already said - only a resolved
+  // "on" switches the label to "Near me"
+  const isResolving = isUsingLocation && (status === 'loading' || (status === 'granted' && !area));
   const [query, setQuery] = useState('');
   const [tag, setTag] = useState<PlaceCategory | undefined>();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -116,10 +119,13 @@ export const Search = () => {
     >
       <div className="my-4 w-full md:my-0">
         <SearchBarShell
-          // Where the reader actually is, once that is known - "Near me"
-          // only while it is still being worked out
-          cityLabel={isUsingLocation ? (area ?? city ?? 'Near me') : (city ?? 'Nairobi')}
-          isLocationOn={isUsingLocation}
+          // "Near me" only once location is actually resolved - while it is
+          // still being found, the chip keeps saying whatever it said before
+          cityLabel={isUsingLocation && !isResolving ? 'Near me' : (city ?? homeCity)}
+          pinOn={(isUsingLocation && !isResolving) || away}
+          away={away}
+          homeCity={homeCity}
+          onGoHome={goHome}
           onFilters={() => setIsFiltersOpen(true)}
           filterCount={tag ? 1 : 0}
           isFilterOpen={isFiltersOpen}

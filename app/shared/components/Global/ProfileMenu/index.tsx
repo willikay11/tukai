@@ -3,7 +3,6 @@
 import Link from 'next/link';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { TukaiImage } from '@/components/ui/image';
 
 import {
   PROFILE_MENU_GROUP_ONE,
@@ -13,10 +12,6 @@ import {
 } from './items';
 
 interface ProfileMenuProps {
-  name: string;
-  // The user's @handle; users who never set one show no handle line
-  handle?: string | null;
-  image?: string | null;
   /** The real count, so the badge can show a number rather than just a dot. */
   unreadNotificationCount?: number;
   onSignOut: () => void;
@@ -85,9 +80,6 @@ const MenuGroup = ({ items, onSelect }: { items: ProfileMenuItem[]; onSelect?: (
 );
 
 export const ProfileMenu = ({
-  name,
-  handle,
-  image,
   unreadNotificationCount = 0,
   onSignOut,
   onItemSelect,
@@ -97,36 +89,9 @@ export const ProfileMenu = ({
   );
 
   return (
-    <div role="menu" aria-label="Account" className="w-[284px] p-2">
-      {/* The canvas makes the whole header the way to the profile, rather than
-          listing "Profile" as one row among the rest */}
-      <Link
-        href="/profile"
-        onClick={onItemSelect}
-        role="menuitem"
-        className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-surface"
-      >
-        <div className="relative aspect-square h-11 w-11 flex-shrink-0">
-          <TukaiImage
-            src={image || ''}
-            alt={name}
-            className="h-11 w-11 rounded-full"
-            quality={100}
-            fill
-            style={{ objectFit: 'cover' }}
-            showNotFoundText={false}
-          />
-        </div>
-        <div className="min-w-0">
-          <p className="truncate text-base font-bold text-gray-900">{name}</p>
-          <p className="truncate text-sm text-ink-muted">
-            {handle ? `@${handle}` : 'View profile'}
-          </p>
-        </div>
-      </Link>
-
-      {/* The grey tray holding the canvas's two grouped cards */}
-      <div className="mt-1 flex flex-col gap-1.5 rounded-xl bg-surface p-1.5">
+    <div role="menu" aria-label="Account" className="w-[284px] p-1.5 rounded-2xl bg-surface">
+      {/* The grey tray holding the two groups */}
+      <div className="flex flex-col gap-1.5">
         <MenuGroup items={PROFILE_MENU_GROUP_ONE} onSelect={onItemSelect} />
         <MenuGroup items={groupTwo} onSelect={onItemSelect} />
       </div>

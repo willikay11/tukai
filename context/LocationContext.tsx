@@ -1,6 +1,14 @@
 'use client';
 
-import React, { ReactNode, createContext, useContext, useEffect, useState } from 'react';
+import React, {
+  ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 type LocationState = {
   lat?: number;
@@ -38,11 +46,30 @@ type LocationContextType = LocationState & {
    * its `google_map_place_id` instead.
    */
   placeId?: string;
+  /** The reader's own city. Fixed for now - see the location handoff's open questions. */
+  homeCity: string;
+  /**
+   * A city other than home, with location off. The city chip is just the
+   * one thing this drives - see the location bar handoff.
+   */
+  away: boolean;
+  /** Back to the home city, off location, as the chip's own home button does. */
+  goHome: () => void;
+  /** The one toast the location bar shows at a time, or none. */
+  locationToast: string | null;
+  /** Puts up a toast for 4.2s, replacing whichever one is already showing. */
+  showLocationToast: (message: string) => void;
 };
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'user_location';
+
+// The reader's own city. Not yet editable - see the location handoff's open
+// question on where that would live.
+const HOME_CITY = 'Nairobi';
+
+const TOAST_DURATION_MS = 4200;
 
 export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [lat, setLat] = useState<number | undefined>(undefined);
@@ -52,6 +79,30 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [area, setArea] = useState<string | undefined>(undefined);
   const [placeId, setPlaceId] = useState<string | undefined>(undefined);
   const [isUsingLocation, setIsUsingLocation] = useState(false);
+  const [locationToast, setLocationToast] = useState<string | null>(null);
+
+  // Guards a geolocation call in flight: bumped whenever one is cancelled, so
+  // a result that arrives after the reader picked a city or went home is
+  // simply dropped rather than reopening "near me" behind their back.
+  const requestTokenRef = useRef(0);
+  // Whether the "Location on" toast is still owed once the city resolves -
+  // set the moment the switch is turned on, so a slow reverse geocode still
+  // ends in the toast the reader was told to expect.
+  const toastPendingRef = useRef(false);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const showLocationToast = useCallback((message: string) => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    setLocationToast(message);
+    toastTimeoutRef.current = setTimeout(() => setLocationToast(null), TOAST_DURATION_MS);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    },
+    [],
+  );
 
   const save = (lat?: number, lng?: number, st?: LocationState['status']) => {
     if (lat !== undefined && lng !== undefined) {
@@ -61,6 +112,16 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
       } catch (e) {
         // ignore
       }
+    }
+  };
+
+  const persistUsing = (on: boolean) => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...parsed, using: on }));
+    } catch {
+      // Storage can be refused; the preference still holds for this session
     }
   };
 
@@ -77,9 +138,11 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
+    const requestId = ++requestTokenRef.current;
     setStatus('loading');
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        if (requestTokenRef.current !== requestId) return; // cancelled since
         const { latitude, longitude } = position.coords;
         setLat(latitude);
         setLng(longitude);
@@ -87,11 +150,18 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
         save(latitude, longitude, 'granted');
       },
       (error) => {
+        if (requestTokenRef.current !== requestId) return; // cancelled since
         if (error.code === error.PERMISSION_DENIED) setStatus('denied');
         else setStatus('unavailable');
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 5 * 60 * 1000 },
     );
+  };
+
+  /** Drops a geolocation call in flight - picking a city or going home does. */
+  const cancelPendingLocationRequest = () => {
+    requestTokenRef.current += 1;
+    setStatus((current) => (current === 'loading' ? 'idle' : current));
   };
 
   useEffect(() => {
@@ -140,13 +210,27 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
 
         if (cancelled) return;
 
+        const resolvedArea = [neighbourhood, locality].filter(Boolean).join(', ') || undefined;
+
         if (locality) setCity(locality);
-        setArea([neighbourhood, locality].filter(Boolean).join(', ') || undefined);
+        setArea(resolvedArea);
         setPlaceId(data?.results?.[0]?.place_id);
+
+        if (toastPendingRef.current) {
+          toastPendingRef.current = false;
+          showLocationToast(
+            `Location on. Closest first, around ${resolvedArea ?? locality ?? 'you'}.`,
+          );
+        }
       } catch (error) {
         // A city we cannot resolve is a label that stays as it was, not a
         // failure worth showing anyone
         console.error('Could not resolve the city:', error);
+
+        if (toastPendingRef.current) {
+          toastPendingRef.current = false;
+          showLocationToast('Location on. Closest first.');
+        }
       }
     };
 
@@ -155,26 +239,47 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       cancelled = true;
     };
-  }, [lat, lng, status]);
+  }, [lat, lng, status, showLocationToast]);
 
   /**
    * Asking for the reader's location, or stepping back off it.
    *
    * Turning it off keeps the permission and the coordinates - there is nothing
-   * to give back - and simply stops sorting by them.
+   * to give back - and simply stops sorting by them. The "Location off" toast
+   * is the caller's to show, not this function's - picking a city turns
+   * location off the same way, and that one shows no toast at all.
    */
   const setUsingLocation = (on: boolean) => {
     setIsUsingLocation(on);
+    persistUsing(on);
 
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      const parsed = raw ? JSON.parse(raw) : {};
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...parsed, using: on }));
-    } catch {
-      // Storage can be refused; the preference still holds for this session
+    if (!on) {
+      toastPendingRef.current = false;
+      cancelPendingLocationRequest();
+      return;
     }
 
-    if (on && status !== 'granted') requestLocation();
+    if (status === 'granted') {
+      showLocationToast(`Location on. Closest first, around ${area ?? city ?? 'you'}.`);
+    } else {
+      toastPendingRef.current = true;
+      requestLocation();
+    }
+  };
+
+  // A city other than home, with location off - the chip's "away" look and
+  // the "Exploring" bar both key off this. Location on counts as home, even
+  // while the city it found is still being named.
+  const away = !isUsingLocation && !!city && city !== HOME_CITY;
+
+  /** Back to the home city, off location - the chip's home button. */
+  const goHome = () => {
+    toastPendingRef.current = false;
+    cancelPendingLocationRequest();
+    setIsUsingLocation(false);
+    persistUsing(false);
+    setCity(HOME_CITY);
+    showLocationToast(`Back to ${HOME_CITY}.`);
   };
 
   return (
@@ -191,6 +296,11 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
         setCity,
         requestLocation,
         setLocation,
+        homeCity: HOME_CITY,
+        away,
+        goHome,
+        locationToast,
+        showLocationToast,
       }}
     >
       {children}

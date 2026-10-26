@@ -16,7 +16,16 @@ import { PlaceCategory, categoryImageOf } from '@/types/placeCategory';
  * it back off.
  */
 export const CityPicker = ({ onClose }: { onClose: () => void }) => {
-  const { city, area, status, isUsingLocation, setUsingLocation, setCity } = useLocation();
+  const {
+    city,
+    area,
+    status,
+    isUsingLocation,
+    setUsingLocation,
+    setCity,
+    homeCity,
+    showLocationToast,
+  } = useLocation();
   const { data: response, isLoading } = usePlaceCategories({ pageSize: 50, group: 'cities' }, true);
 
   const cities: PlaceCategory[] = response?.data?.results ?? [];
@@ -28,10 +37,18 @@ export const CityPicker = ({ onClose }: { onClose: () => void }) => {
     if (status === 'denied') return 'Your browser is blocking it. Allow location and try again.';
     if (status === 'unavailable') return 'This device cannot give a location.';
     if (isResolving) return 'Finding you…';
-    if (isUsingLocation && area) return area;
-    if (isUsingLocation && city) return city;
+    if (isUsingLocation && area) return `On, near ${area}`;
+    if (isUsingLocation && city) return `On, near ${city}`;
 
     return "See what's closest to you first";
+  };
+
+  // Turning the switch off (not picking a city, which also turns it off but
+  // says nothing) is the one path that owes the reader a toast right away -
+  // the "on" toast waits for the city to resolve, inside the context itself.
+  const handleLocationToggle = (checked: boolean) => {
+    setUsingLocation(checked);
+    if (!checked) showLocationToast(`Location off. Showing all of ${city ?? homeCity}.`);
   };
 
   return (
@@ -56,7 +73,11 @@ export const CityPicker = ({ onClose }: { onClose: () => void }) => {
         <Switch
           checked={isUsingLocation}
           aria-label="Use my location"
-          onCheckedChange={setUsingLocation}
+          onCheckedChange={handleLocationToggle}
+          className={cn(
+            'h-6 w-10 shadow-none data-[state=unchecked]:bg-line [&>span]:h-5 [&>span]:w-5 [&>span]:shadow-[0_1px_3px_rgba(0,0,0,.2)]',
+            isResolving ? 'data-[state=checked]:bg-[#8DBFA8]' : 'data-[state=checked]:bg-brand',
+          )}
         />
       </div>
 
