@@ -1,6 +1,7 @@
 import { Experience } from '@/types/experience';
 import { Place } from '@/types/place';
 import { DistanceBand } from '@/types/search';
+import { greatCircleKm } from '@/utils/geo-utils';
 
 export const DISTANCE_BANDS: Array<{ value: DistanceBand; label: string; km: number }> = [
   { value: '1km', label: 'Within 1 km', km: 1 },
@@ -13,21 +14,17 @@ export const DISTANCE_BANDS: Array<{ value: DistanceBand; label: string; km: num
 /** Where "central Nairobi" is measured from, until the reader grants their own. */
 export const NAIROBI_CENTER = { lat: -1.2921, lng: 36.8219 };
 
-const EARTH_RADIUS_KM = 6371;
-const toRadians = (degrees: number): number => (degrees * Math.PI) / 180;
-
-/** Great-circle distance between two points, in kilometres. */
+/**
+ * Great-circle distance between two points, in kilometres.
+ *
+ * A thin `{from, to}` wrapper around `greatCircleKm` - this file's own
+ * callers (`matchesDistance`, and the sort functions in `./sort`) take
+ * points as objects, so both keep one formula rather than two that drift.
+ */
 export const distanceKm = (
   from: { lat: number; lng: number },
   to: { lat: number; lng: number },
-): number => {
-  const dLat = toRadians(to.lat - from.lat);
-  const dLng = toRadians(to.lng - from.lng);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRadians(from.lat)) * Math.cos(toRadians(to.lat)) * Math.sin(dLng / 2) ** 2;
-  return EARTH_RADIUS_KM * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-};
+): number => greatCircleKm(from.lat, from.lng, to.lat, to.lng);
 
 /** No band picked means every distance. A row with no coordinates never matches a band. */
 export const matchesDistance = (

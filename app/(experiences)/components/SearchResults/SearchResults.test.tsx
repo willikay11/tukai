@@ -14,6 +14,34 @@ jest.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+// Results now render as ExperienceCard/PlaceCard, the same cards the main
+// pages use - these are the mocks those cards need, same as their own tests
+jest.mock('next-auth/react', () => ({ useSession: () => ({ data: null }) }));
+jest.mock('@/context/ExperienceDrawerContext', () => ({ useExperienceDrawer: () => null }));
+jest.mock('@/context/PlaceDrawerContext', () => ({ usePlaceDrawer: () => null }));
+jest.mock('@/app/shared/components/Bookmark', () => ({
+  Bookmark: () => <button type="button">bookmark</button>,
+}));
+jest.mock('next/image', () => {
+  function MockImage({ alt, src }: { alt: string; src: string }) {
+    return <img alt={alt} src={src} />;
+  }
+  MockImage.displayName = 'MockImage';
+  return MockImage;
+});
+jest.mock('next/link', () => {
+  // Forwards every prop, so class-based assertions see what the card renders
+  function MockLink({ children, href, ...rest }: Record<string, unknown>) {
+    return (
+      <a href={href as string} {...rest}>
+        {children as React.ReactNode}
+      </a>
+    );
+  }
+  MockLink.displayName = 'MockLink';
+  return MockLink;
+});
+
 let results: {
   experiences: unknown[];
   places: unknown[];
@@ -40,19 +68,20 @@ jest.mock('@/app/shared/hooks/useCommunities', () => ({
 }));
 
 jest.mock('@/app/shared/components/Filters', () => ({
-  FiltersDialog: ({
-    isOpen,
-    children,
-  }: {
-    isOpen: boolean;
-    children: React.ReactNode;
-  }) => (
+  FiltersDialog: ({ isOpen, children }: { isOpen: boolean; children: React.ReactNode }) => (
     <>
       {children}
       {isOpen && <div>filters open</div>}
     </>
   ),
 }));
+
+// Radix's dropdown menu (SortMenu) needs these before it will open in jsdom
+beforeAll(() => {
+  window.HTMLElement.prototype.scrollIntoView = jest.fn();
+  window.HTMLElement.prototype.hasPointerCapture = jest.fn();
+  window.HTMLElement.prototype.releasePointerCapture = jest.fn();
+});
 
 const filters = (overrides: Partial<SearchFilters> = {}): SearchFilters => ({
   ...EMPTY_FILTERS,
@@ -102,18 +131,50 @@ describe('the results view', () => {
     expect(screen.getByText('Places')).toBeInTheDocument();
   });
 
+  // The main /experiences and /places pages render their cards in this same
+  // grid - a flat list of rows reads as a different, lesser product here
+  it('lays experiences and places out in the same card grid the main pages use', () => {
+    render(<SearchResults filters={filters({ query: 'hike' })} />);
+
+    const experienceTitle = screen.getByText('Sunrise hike');
+    const experienceGrid = experienceTitle.closest('.grid');
+    expect(experienceGrid).toHaveClass('grid-cols-[repeat(auto-fill,184px)]');
+
+    const placeTitle = screen.getByText('Karura Forest');
+    const placeGrid = placeTitle.closest('.grid');
+    expect(placeGrid).toHaveClass('grid-cols-[repeat(auto-fill,184px)]');
+  });
+
   it('leaves out a group with nothing in it', () => {
     render(<SearchResults filters={filters({ query: 'hike' })} />);
 
     expect(screen.queryByText('Communities')).not.toBeInTheDocument();
   });
 
-  it('shows a chip per narrowing, and none for the query', () => {
+  it('shows a chip per narrowing, with the query as its own pill', () => {
     render(<SearchResults filters={filters({ query: 'hike', type: 'places', freeOnly: true })} />);
 
     expect(screen.getByRole('button', { name: 'Remove Places' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Remove Free' })).toBeInTheDocument();
+    // The query isn't one of `activeChips`' narrowings - it gets its own pill instead
     expect(screen.queryByRole('button', { name: 'Remove hike' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Remove search for hike' })).toHaveTextContent(
+      'Search: hike',
+    );
+  });
+
+  it('hides the search pill when there is no query', () => {
+    render(<SearchResults filters={filters({ freeOnly: true })} />);
+
+    expect(screen.queryByText(/^Search:/)).not.toBeInTheDocument();
+  });
+
+  it('clears just the query when its pill is closed, keeping the rest', async () => {
+    render(<SearchResults filters={filters({ query: 'hike', freeOnly: true })} />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Remove search for hike' }));
+
+    expect(replace).toHaveBeenCalledWith('/?free=1', expect.anything());
   });
 
   it('counts the narrowings on the edit button', () => {
@@ -145,12 +206,23 @@ describe('the results view', () => {
     expect(screen.queryByRole('button', { name: 'Clear all' })).not.toBeInTheDocument();
   });
 
-  it('toggles the ordering', async () => {
+  it('changes the order from the sort menu', async () => {
     render(<SearchResults filters={filters({ query: 'hike' })} />);
 
-    await userEvent.click(screen.getByRole('button', { name: /Most relevant/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Sort by' }));
+    await userEvent.click(screen.getByRole('menuitemradio', { name: 'Nearest first' }));
 
-    expect(replace).toHaveBeenCalledWith('/?q=hike&sort=popular', expect.anything());
+    expect(replace).toHaveBeenCalledWith('/?q=hike&sort=near', expect.anything());
+  });
+
+  // "Looking for" is Everything by default, which offers every option
+  it('offers only what the current tab supports', async () => {
+    render(<SearchResults filters={filters({ query: 'hike', type: 'places' })} />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Sort by' }));
+
+    expect(screen.queryByRole('menuitemradio', { name: 'Lowest price' })).not.toBeInTheDocument();
+    expect(screen.getByRole('menuitemradio', { name: 'Top rated' })).toBeInTheDocument();
   });
 
   it('opens the filter drawer', async () => {

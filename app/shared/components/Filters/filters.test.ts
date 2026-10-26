@@ -52,8 +52,19 @@ describe('reading filters out of the URL', () => {
       yourCommunitiesOnly: true,
       experienceShapes: ['itinerary'],
       durationBand: 'short',
-      popularFirst: true,
+      // The old places-only toggle this replaced - read as its closest
+      // equivalent today, places ranked by rating
+      sort: 'rating',
     });
+  });
+
+  it('reads a sort value directly', () => {
+    expect(filtersFromParams(new URLSearchParams('sort=near')).sort).toBe('near');
+  });
+
+  // A sort nobody offers is not one
+  it('falls back to Recommended on a sort it does not know', () => {
+    expect(filtersFromParams(new URLSearchParams('sort=shuffled')).sort).toBe('rec');
   });
 
   // A quick pick or band nobody offers is not one
@@ -70,6 +81,14 @@ describe('reading filters out of the URL', () => {
 
     expect(read.distance).toBeUndefined();
     expect(read.durationBand).toBeUndefined();
+  });
+
+  it('reads a rating band', () => {
+    expect(filtersFromParams(new URLSearchParams('rating=4.5')).rating).toBe(4.5);
+  });
+
+  it('drops a rating band nobody offers', () => {
+    expect(filtersFromParams(new URLSearchParams('rating=3')).rating).toBeUndefined();
   });
 
   // A type nobody offers is not a type
@@ -102,7 +121,8 @@ describe('writing filters back', () => {
         guidedToursOnly: true,
         yourCommunitiesOnly: true,
         durationBand: 'full',
-        popularFirst: true,
+        rating: 4.5,
+        sort: 'near',
       }),
     );
 
@@ -117,7 +137,8 @@ describe('writing filters back', () => {
     expect(written.get('guided')).toBe('1');
     expect(written.get('mine')).toBe('1');
     expect(written.get('duration')).toBe('full');
-    expect(written.get('sort')).toBe('popular');
+    expect(written.get('rating')).toBe('4.5');
+    expect(written.get('sort')).toBe('near');
   });
 
   it('survives a round trip', () => {
@@ -151,6 +172,8 @@ describe('writing filters back', () => {
       priceMin: 1000,
       priceMax: 8000,
       durationBand: 'medium',
+      rating: 4,
+      sort: 'price',
     });
 
     expect(filtersFromParams(paramsFromFilters(original))).toEqual(original);
@@ -243,6 +266,16 @@ describe('activeChips', () => {
   it('names a duration band', () => {
     expect(activeChips(filters({ durationBand: 'full' }))[0].label).toBe('Full day');
   });
+
+  it('names a rating band', () => {
+    expect(activeChips(filters({ rating: 4.5 }))[0].label).toBe('4.5 and up');
+  });
+
+  // The sort has its own menu, which already says what it's set to - a chip
+  // for it would just repeat that, and "Clear all" must not touch it
+  it('makes no chip for the sort', () => {
+    expect(activeChips(filters({ sort: 'near' }))).toEqual([]);
+  });
 });
 
 describe('removing one narrowing', () => {
@@ -254,10 +287,10 @@ describe('removing one narrowing', () => {
     ['happeningNow', { happeningNow: true }],
     ['guidedToursOnly', { guidedToursOnly: true }],
     ['yourCommunitiesOnly', { yourCommunitiesOnly: true }],
-    ['popularFirst', { popularFirst: true }],
     ['city', { city: 'c1' }],
     ['distance', { distance: '5km' as const }],
     ['durationBand', { durationBand: 'short' as const }],
+    ['rating', { rating: 4 as const }],
     ['date', { date: '2026-10-05' }],
     ['quickDate', { quickDate: 'weekend' as const }],
   ] as Array<[keyof SearchFilters, Partial<SearchFilters>]>)('clears %s', (key, on) => {
@@ -265,12 +298,12 @@ describe('removing one narrowing', () => {
   });
 
   it('clears both ends of the price range from either end', () => {
-    expect(
-      countActive(withoutFilter(filters({ priceMin: 500, priceMax: 5000 }), 'priceMin')),
-    ).toBe(0);
-    expect(
-      countActive(withoutFilter(filters({ priceMin: 500, priceMax: 5000 }), 'priceMax')),
-    ).toBe(0);
+    expect(countActive(withoutFilter(filters({ priceMin: 500, priceMax: 5000 }), 'priceMin'))).toBe(
+      0,
+    );
+    expect(countActive(withoutFilter(filters({ priceMin: 500, priceMax: 5000 }), 'priceMax'))).toBe(
+      0,
+    );
   });
 
   it('clears one shape and leaves the others', () => {
@@ -321,6 +354,13 @@ describe('clearing everything', () => {
     );
 
     expect(cleared).toEqual({ ...EMPTY_FILTERS, query: 'hike' });
+  });
+
+  // Sort isn't a filter - "Clear all" and removing a chip never touch it
+  it('keeps the sort too', () => {
+    const cleared = clearedFilters(filters({ query: 'hike', freeOnly: true, sort: 'near' }));
+
+    expect(cleared.sort).toBe('near');
   });
 });
 

@@ -3,14 +3,21 @@ import { usePathname } from 'next/navigation';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { useWaitingOnYouCount } from '@/app/shared/hooks/useWaitingOnYouCount';
+
 import { Nav } from './Nav';
 
 jest.mock('next/navigation', () => ({ usePathname: jest.fn() }));
+jest.mock('@/app/shared/hooks/useWaitingOnYouCount', () => ({
+  useWaitingOnYouCount: jest.fn(),
+}));
 
 const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>;
+const mockWaitingCount = useWaitingOnYouCount as jest.MockedFunction<typeof useWaitingOnYouCount>;
 
-const at = (pathname: string) => {
+const at = (pathname: string, waitingCount = 0) => {
   mockUsePathname.mockReturnValue(pathname);
+  mockWaitingCount.mockReturnValue(waitingCount);
   render(<Nav />);
 };
 
@@ -116,5 +123,42 @@ describe('the Discover tab strip', () => {
     await userEvent.tab();
 
     expect(screen.getByRole('tab', { name: 'Discover' })).toHaveFocus();
+  });
+});
+
+describe('the Experiences tab reminder dot', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('shows nothing waiting on you', () => {
+    at('/', 0);
+
+    expect(screen.getByRole('tab', { name: 'Experiences' })).not.toHaveAccessibleName(
+      /waiting on you/,
+    );
+  });
+
+  it('names the count in the accessible name when something is waiting', () => {
+    at('/', 3);
+
+    expect(
+      screen.getByRole('tab', { name: 'Experiences, 3 things waiting on you' }),
+    ).toBeInTheDocument();
+  });
+
+  it('uses the singular for exactly one', () => {
+    at('/', 1);
+
+    expect(
+      screen.getByRole('tab', { name: 'Experiences, 1 thing waiting on you' }),
+    ).toBeInTheDocument();
+  });
+
+  it('puts the dot on no other tab', () => {
+    at('/', 2);
+
+    expect(screen.getByRole('tab', { name: 'Discover' })).not.toHaveAccessibleName(
+      /waiting on you/,
+    );
+    expect(screen.getByRole('tab', { name: 'Places' })).not.toHaveAccessibleName(/waiting on you/);
   });
 });

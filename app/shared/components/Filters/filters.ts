@@ -4,13 +4,17 @@ import {
   DistanceBand,
   DurationBand,
   EMPTY_FILTERS,
+  RatingBand,
   ResultType,
   SearchFilters,
+  SortOption,
   TimeOfDay,
 } from '@/types/search';
 
 import { DURATION_BANDS } from './duration';
+import { RATING_BANDS } from './rating';
 import { EXPERIENCE_SHAPES } from './shapes';
+import { SORT_OPTIONS } from './sort';
 import { QUICK_DATES, TIME_OF_DAY } from './when';
 import { DISTANCE_BANDS } from './where';
 
@@ -59,7 +63,14 @@ export const filtersFromParams = (
   durationBand: DURATION_BANDS.find((one) => one.value === params.get('duration'))?.value as
     | DurationBand
     | undefined,
-  popularFirst: params.get('sort') === 'popular',
+  rating: RATING_BANDS.find((one) => String(one.value) === params.get('rating'))?.value as
+    | RatingBand
+    | undefined,
+  // `sort=popular` is the old, places-only toggle this replaced - read as its
+  // closest equivalent today, places ranked by rating, so an old shared link
+  // still lands somewhere sensible
+  sort: (SORT_OPTIONS.find((one) => one.value === params.get('sort'))?.value ??
+    (params.get('sort') === 'popular' ? 'rating' : 'rec')) as SortOption,
 });
 
 /** And back again, leaving out whatever is at its default. */
@@ -84,7 +95,8 @@ export const paramsFromFilters = (filters: SearchFilters): URLSearchParams => {
   if (filters.yourCommunitiesOnly) params.set('mine', '1');
   if (filters.experienceShapes.length) params.set('xtype', filters.experienceShapes.join(','));
   if (filters.durationBand) params.set('duration', filters.durationBand);
-  if (filters.popularFirst) params.set('sort', 'popular');
+  if (filters.rating) params.set('rating', String(filters.rating));
+  if (filters.sort !== 'rec') params.set('sort', filters.sort);
 
   return params;
 };
@@ -186,7 +198,15 @@ export const activeChips = (
     });
   }
 
-  if (filters.popularFirst) chips.push({ key: 'popularFirst', label: 'Most popular' });
+  if (filters.rating) {
+    chips.push({
+      key: 'rating',
+      label: RATING_BANDS.find((one) => one.value === filters.rating)?.label ?? 'Rating',
+    });
+  }
+
+  // No chip for `sort` - it isn't a narrowing, and its own button already
+  // says what it's set to (see SortMenu)
 
   return chips;
 };
@@ -235,17 +255,16 @@ export const withoutFilter = (
       return { ...filters, guidedToursOnly: false };
     case 'yourCommunitiesOnly':
       return { ...filters, yourCommunitiesOnly: false };
-    case 'popularFirst':
-      return { ...filters, popularFirst: false };
     default:
       return { ...filters, [key]: undefined };
   }
 };
 
-/** Everything off, but still searching for the same thing. */
+/** Everything off, but still searching for the same thing, with the same sort. */
 export const clearedFilters = (filters: SearchFilters): SearchFilters => ({
   ...EMPTY_FILTERS,
   query: filters.query,
+  sort: filters.sort,
 });
 
 export const countActive = (filters: SearchFilters): number => activeChips(filters).length;

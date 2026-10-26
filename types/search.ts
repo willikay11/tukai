@@ -51,6 +51,17 @@ export type DistanceBand = '1km' | '5km' | '10km' | '25km' | '100km';
 /** How long an experience runs, in the "Duration" section. */
 export type DurationBand = 'short' | 'medium' | 'full';
 
+/** A minimum star rating, in the "Rating" section - places only. */
+export type RatingBand = 4 | 4.5;
+
+/**
+ * How the results view orders what it shows, independent of the filters -
+ * "Clear all" and removing a chip never touch it. Not every tab offers every
+ * option; see `SORT_OPTIONS`/`sortOfferedOn` in `app/shared/components/
+ * Filters/sort.ts`.
+ */
+export type SortOption = 'rec' | 'soon' | 'near' | 'price' | 'rating';
+
 export type SearchFilters = {
   query: string;
   type: ResultType;
@@ -104,8 +115,14 @@ export type SearchFilters = {
   experienceShapes: string[];
   /** Up to 2 hours / 2 to 5 hours / full day, experiences only - see `matchesDuration`. */
   durationBand?: DurationBand;
-  /** Places ranked by rating rather than relevance. */
-  popularFirst: boolean;
+  /**
+   * A minimum star rating, places only - matched client-side, since no
+   * endpoint takes one. See `matchesRating`.
+   */
+  rating?: RatingBand;
+  /** Default `'rec'` (Recommended). Lives in the URL, but isn't a "filter" -
+   * not a chip, and untouched by "Clear all". */
+  sort: SortOption;
 };
 
 export const EMPTY_FILTERS: SearchFilters = {
@@ -120,5 +137,5 @@ export const EMPTY_FILTERS: SearchFilters = {
   happeningNow: false,
   guidedToursOnly: false,
   yourCommunitiesOnly: false,
-  popularFirst: false,
+  sort: 'rec',
 };

@@ -73,18 +73,20 @@ export const AuthActions = () => {
    * asked to join - offering them Create only to answer with a sign-in dialog
    * is a door that opens onto another door.
    *
-   * On a phone it is a round lime plus, and the word comes back from lg. The
-   * word stays in the DOM as screen-reader text, so the control keeps its name.
-   * Between md and lg it is hidden, as it was before.
+   * Below 720px it is a round lime plus; the word comes back at 720px and up.
+   * The word stays in the DOM as screen-reader text below that, so the
+   * control keeps its name either way.
    */
   const createButton = (
     <Popover open={isCreateMenuOpen} onOpenChange={setIsCreateMenuOpen}>
       <PopoverTrigger
         aria-label="Create"
-        className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-lime text-sm font-semibold text-brand-ink outline-none transition-colors hover:bg-lime-dark md:hidden lg:inline-flex lg:w-auto lg:gap-2 lg:px-4"
+        aria-haspopup="menu"
+        aria-expanded={isCreateMenuOpen}
+        className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center gap-2 rounded-full bg-lime px-0 text-sm font-semibold text-brand-ink outline-none transition-colors hover:bg-lime-dark min-[720px]:w-auto min-[720px]:px-4"
       >
-        <IconComponent iconName="Add01Icon" size={18} color="currentColor" />
-        <span className="sr-only lg:not-sr-only">Create</span>
+        <IconComponent iconName="AddCircleIcon" size={18} color="currentColor" />
+        <span className="sr-only min-[720px]:not-sr-only">Create</span>
       </PopoverTrigger>
 
       <PopoverContent
@@ -114,18 +116,22 @@ export const AuthActions = () => {
               app is behind it, which a bare avatar does not. */}
             <PopoverTrigger
               aria-label="Account menu"
-              className="flex h-11 flex-shrink-0 items-center gap-2 rounded-full border border-line-soft bg-white pl-[5px] pr-[5px] outline-none transition-shadow hover:shadow-[0_2px_10px_rgba(1,51,52,.09)] md:pl-3"
+              aria-haspopup="menu"
+              aria-expanded={isProfileOpen}
+              className="flex h-11 flex-shrink-0 items-center gap-2 rounded-full border border-line-soft bg-white pl-[5px] pr-[5px] outline-none transition-shadow hover:shadow-[0_2px_10px_rgba(1,51,52,.09)] min-[720px]:pl-3"
             >
               <IconComponent
                 iconName="Menu02Icon"
                 size={18}
                 color="currentColor"
-                className="hidden text-gray-800 md:block"
+                className="hidden text-gray-800 min-[720px]:block"
               />
               <div className="relative aspect-square h-8 w-8">
                 <TukaiImage
                   src={session?.user?.image || ''}
-                  alt={session?.user?.name || ''}
+                  // The button is already named "Account menu" via aria-label
+                  // above, so the photo need not repeat the person's name
+                  alt=""
                   className="h-8 w-8 rounded-full"
                   quality={100}
                   fill
@@ -145,7 +151,7 @@ export const AuthActions = () => {
                 name={session.user.name ?? ''}
                 handle={session.user.displayName}
                 image={session.user.image}
-                hasUnreadNotifications={unreadCount > 0}
+                unreadNotificationCount={unreadCount}
                 onSignOut={handleLogout}
                 // Client navigation leaves the popover mounted, so choosing a row
                 // has to close it explicitly

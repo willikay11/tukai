@@ -5,6 +5,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { matchesYourCommunities } from '@/app/shared/components/Filters/community';
 import { DURATION_BANDS, matchesDuration } from '@/app/shared/components/Filters/duration';
 import { matchesPrice } from '@/app/shared/components/Filters/price';
+import { RATING_BANDS, matchesRating } from '@/app/shared/components/Filters/rating';
 import {
   DISTANCE_BANDS,
   NAIROBI_CENTER,
@@ -29,21 +30,33 @@ import { RESULT_TYPES, clearedFilters } from './filters';
 import { EXPERIENCE_SHAPES, matchesShapes } from './shapes';
 import { QUICK_DATES, TIME_OF_DAY, matchesQuickDate, matchesTimeOfDay } from './when';
 
+/** "Experiences only" / "Places only", shown on a section that still applies
+ * when "Looking for" is Everything, but only narrows one of the two kinds. */
+const ScopeTag = ({ children }: { children: React.ReactNode }) => (
+  <span className="ml-0.5 inline-flex h-[22px] items-center rounded-full bg-surface px-2 text-[11.5px] font-semibold text-ink-muted">
+    {children}
+  </span>
+);
+
 const Section = ({
   icon,
   title,
   hint,
+  scopeTag,
   children,
 }: {
   icon: string;
   title: string;
   hint: string;
+  /** "Experiences only" / "Places only" - see `ScopeTag`. */
+  scopeTag?: string;
   children: React.ReactNode;
 }) => (
   <section className="border-b border-surface-muted px-6 py-5 last:border-b-0">
     <div className="flex items-center gap-2.5">
       <IconComponent iconName={icon} size={20} color="currentColor" className="text-brand" />
       <h3 className="text-lg font-bold text-brand-ink">{title}</h3>
+      {scopeTag && <ScopeTag>{scopeTag}</ScopeTag>}
     </div>
     <p className="mt-0.5 text-sm text-ink-muted">{hint}</p>
     <div className="mt-4">{children}</div>
@@ -294,12 +307,14 @@ export const FiltersDialog = ({
       matchesYourCommunities(experience, draft.yourCommunitiesOnly, followedCommunityIds) &&
       (!draft.happeningNow || isOngoing(experience)),
   ).length;
-  // Places carry no other client-only narrowing, so the API total stands
-  // unless a distance band is actually picked
-  const placeCount = draft.distance
-    ? (preview?.places ?? []).filter((place) => matchesDistance(place, draft.distance, origin))
-        .length
-    : (preview?.counts.place ?? 0);
+  // The API total stands unless a client-only place filter is actually picked
+  const placeCount =
+    draft.distance || draft.rating
+      ? (preview?.places ?? []).filter(
+          (place) =>
+            matchesDistance(place, draft.distance, origin) && matchesRating(place, draft.rating),
+        ).length
+      : (preview?.counts.place ?? 0);
   const countFor = (type: ResultType) =>
     type === 'experiences'
       ? experienceCount
@@ -361,6 +376,8 @@ export const FiltersDialog = ({
       priceMax: max >= PRICE_CEILING ? undefined : max,
     }));
 
+  const pickRating = (value: SearchFilters['rating']) => set('rating', value);
+
   const visibleInterests = showAllInterests
     ? interests
     : interests.slice(0, INITIAL_INTERESTS_SHOWN);
@@ -373,7 +390,7 @@ export const FiltersDialog = ({
         align="center"
         sideOffset={8}
         onOpenAutoFocus={(event) => event.preventDefault()}
-        className="z-50 flex max-h-[80vh] w-[calc(100vw-2rem)] max-w-[900px] flex-col gap-0 overflow-hidden rounded-3xl border-gray-100 p-0 shadow-xl"
+        className="z-50 flex max-h-[80vh] w-[calc(100vw-24px)] max-w-[780px] flex-col gap-0 overflow-hidden rounded-3xl border-gray-100 p-0 shadow-xl"
       >
         <div className="flex flex-shrink-0 items-center justify-between gap-4 border-b border-surface-muted px-6 py-4">
           <p className="text-xl font-bold text-brand-ink">Filters</p>
@@ -450,58 +467,79 @@ export const FiltersDialog = ({
             </Section>
           )}
 
-          {showsExperiences && (
-            <Section icon="Calendar03Icon" title="When" hint="Days with something on">
-              <div className="flex flex-wrap gap-2.5">
-                <Pill isOn={!draft.quickDate && !isPickingDate} onClick={pickAnyTime}>
-                  Any time
-                </Pill>
+          {/* Shows for every scope per the design, with the hint and the
+              "Time of day" label wording changing by what's being searched -
+              not gated to showsExperiences like the pills used to be. For
+              Places (and the place half of Everything) there's no matcher
+              yet for "open on this day"/"open at this time" against a
+              place's hours, so these pills are interactive but don't
+              currently narrow places - the same flagged, not-blocking gap as
+              "Open now" and "Your communities" above. */}
+          <Section
+            icon="Calendar03Icon"
+            title="When"
+            hint={
+              showsExperiences && !showsPlaces
+                ? 'Days with something on'
+                : showsPlaces && !showsExperiences
+                  ? 'Places open on these days'
+                  : 'Experiences on these days, and places open then'
+            }
+          >
+            <div className="flex flex-wrap gap-2.5">
+              <Pill isOn={!draft.quickDate && !isPickingDate} onClick={pickAnyTime}>
+                Any time
+              </Pill>
 
-                {QUICK_DATES.map((option) => (
-                  <Pill
-                    key={option.value}
-                    isOn={draft.quickDate === option.value}
-                    onClick={() => pickQuickDate(option.value)}
-                  >
-                    {option.label}
-                  </Pill>
-                ))}
-
-                <Pill isOn={isPickingDate} onClick={() => setIsPickingDate(true)}>
-                  <IconComponent iconName="Calendar03Icon" size={16} color="currentColor" />
-                  Pick dates
+              {QUICK_DATES.map((option) => (
+                <Pill
+                  key={option.value}
+                  isOn={draft.quickDate === option.value}
+                  onClick={() => pickQuickDate(option.value)}
+                >
+                  {option.label}
                 </Pill>
+              ))}
+
+              <Pill isOn={isPickingDate} onClick={() => setIsPickingDate(true)}>
+                <IconComponent iconName="Calendar03Icon" size={16} color="currentColor" />
+                Pick dates
+              </Pill>
+            </div>
+
+            {isPickingDate && (
+              <div className="mt-3 max-w-xs">
+                <DatePicker
+                  value={draft.date}
+                  onChange={pickExactDate}
+                  placeholder="Choose a date"
+                />
               </div>
+            )}
 
-              {isPickingDate && (
-                <div className="mt-3 max-w-xs">
-                  <DatePicker
-                    value={draft.date}
-                    onChange={pickExactDate}
-                    placeholder="Choose a date"
+            <div className="mt-5">
+              <p className="text-[13px] font-semibold text-ink-muted">
+                Time of day{' '}
+                {showsExperiences && !showsPlaces
+                  ? 'by start time'
+                  : showsPlaces && !showsExperiences
+                    ? 'open at some point'
+                    : 'by start time, or open then'}
+              </p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                {TIME_OF_DAY.map((band) => (
+                  <ToggleCard
+                    key={band.value}
+                    icon={band.icon}
+                    label={band.label}
+                    description={band.description}
+                    isOn={draft.timeOfDay.includes(band.value)}
+                    onToggle={() => toggleTimeOfDay(band.value)}
                   />
-                </div>
-              )}
-
-              <div className="mt-5">
-                <p className="text-[13px] font-semibold text-ink-muted">
-                  Time of day by start time
-                </p>
-                <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                  {TIME_OF_DAY.map((band) => (
-                    <ToggleCard
-                      key={band.value}
-                      icon={band.icon}
-                      label={band.label}
-                      description={band.description}
-                      isOn={draft.timeOfDay.includes(band.value)}
-                      onToggle={() => toggleTimeOfDay(band.value)}
-                    />
-                  ))}
-                </div>
+                ))}
               </div>
-            </Section>
-          )}
+            </div>
+          </Section>
 
           <Section
             icon="Location01Icon"
@@ -597,7 +635,12 @@ export const FiltersDialog = ({
             </div>
           </Section>
 
-          <Section icon="Tag01Icon" title="Price" hint="Per person">
+          <Section
+            icon="Tag01Icon"
+            title="Price"
+            hint="Per person"
+            scopeTag={draft.type === 'all' ? 'Experiences only' : undefined}
+          >
             <div className="flex flex-wrap gap-2.5">
               <Pill isOn={!draft.freeOnly && !draft.paidOnly} onClick={() => pickPrice('any')}>
                 Any price
@@ -619,34 +662,70 @@ export const FiltersDialog = ({
             </div>
           </Section>
 
-          {showsExperiences && (
-            <Section icon="Clock01Icon" title="Availability" hint="Right now, and how you book">
-              <div className="grid gap-3 sm:grid-cols-3">
-                <ToggleCard
-                  icon="FlashIcon"
-                  label="Happening now"
-                  description="Already started, still running"
-                  isOn={draft.happeningNow}
-                  onToggle={() => set('happeningNow', !draft.happeningNow)}
-                />
-                <ToggleCard
-                  icon="Ticket01Icon"
-                  label="Spots left"
-                  description="Hide sold out experiences"
-                  isOn={draft.availableOnly}
-                  onToggle={() => set('availableOnly', !draft.availableOnly)}
-                />
-                <ToggleCard
-                  icon="RunningShoesIcon"
-                  label="No booking needed"
-                  description="Experiences you can just turn up to"
-                  isOn={false}
-                  onToggle={() => {}}
-                  disabled
-                />
-              </div>
-            </Section>
-          )}
+          <Section icon="Clock01Icon" title="Availability" hint="Right now, and how you book">
+            <div className="grid gap-3 sm:grid-cols-3">
+              {/* Interactive in every scope, same as "Your communities" below -
+                  `isOngoing` only checks experiences, so toggling this while
+                  viewing Places narrows nothing yet (no "is this place open
+                  right now" matcher exists). Flagged, not blocking. */}
+              <ToggleCard
+                icon="FlashIcon"
+                label={showsExperiences && !showsPlaces ? 'Happening now' : 'Open now'}
+                description={
+                  showsExperiences && !showsPlaces
+                    ? 'Already started, still running'
+                    : showsPlaces && !showsExperiences
+                      ? 'Open at this moment'
+                      : 'Places open, experiences under way'
+                }
+                isOn={draft.happeningNow}
+                onToggle={() => set('happeningNow', !draft.happeningNow)}
+              />
+
+              {showsExperiences && (
+                <>
+                  <ToggleCard
+                    icon="Ticket01Icon"
+                    label="Spots left"
+                    description="Hide sold out experiences"
+                    isOn={draft.availableOnly}
+                    onToggle={() => set('availableOnly', !draft.availableOnly)}
+                  />
+                  <ToggleCard
+                    icon="RunningShoesIcon"
+                    label="No booking needed"
+                    description="Experiences you can just turn up to"
+                    isOn={false}
+                    onToggle={() => {}}
+                    disabled
+                  />
+                </>
+              )}
+
+              {showsPlaces && (
+                <>
+                  {/* No `isClaimed`/offer field exists on Place yet - shown to
+                      match the canvas, but inert until the API carries them. */}
+                  <ToggleCard
+                    icon="CalendarCheckIn01Icon"
+                    label="Takes bookings"
+                    description="Claimed places you can book"
+                    isOn={false}
+                    onToggle={() => {}}
+                    disabled
+                  />
+                  <ToggleCard
+                    icon="DiscountTag01Icon"
+                    label="Has an offer"
+                    description="A deal or discount right now"
+                    isOn={false}
+                    onToggle={() => {}}
+                    disabled
+                  />
+                </>
+              )}
+            </div>
+          </Section>
 
           {interests.length > 0 && (
             <Section icon="SparklesIcon" title="Interests" hint="Pick as many as you like">
@@ -689,35 +768,44 @@ export const FiltersDialog = ({
             </Section>
           )}
 
-          {showsExperiences && (
-            <Section icon="HourglassIcon" title="Duration" hint="How long it runs">
-              <div className="flex flex-wrap gap-2.5">
-                <Pill isOn={!draft.durationBand} onClick={() => set('durationBand', undefined)}>
-                  Any length
+          <Section
+            icon="HourglassIcon"
+            title="Duration"
+            hint="How long it runs"
+            scopeTag={draft.type === 'all' ? 'Experiences only' : undefined}
+          >
+            <div className="flex flex-wrap gap-2.5">
+              <Pill isOn={!draft.durationBand} onClick={() => set('durationBand', undefined)}>
+                Any length
+              </Pill>
+              {DURATION_BANDS.map((band) => (
+                <Pill
+                  key={band.value}
+                  isOn={draft.durationBand === band.value}
+                  onClick={() => set('durationBand', band.value)}
+                >
+                  {band.label}
                 </Pill>
-                {DURATION_BANDS.map((band) => (
-                  <Pill
-                    key={band.value}
-                    isOn={draft.durationBand === band.value}
-                    onClick={() => set('durationBand', band.value)}
-                  >
-                    {band.label}
-                  </Pill>
-                ))}
-              </div>
-            </Section>
-          )}
+              ))}
+            </div>
+          </Section>
 
-          {showsExperiences && (
-            <Section icon="UserGroupIcon" title="Organised by" hint="Who is running it">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <ToggleCard
-                  icon="UserGroup03Icon"
-                  label="Your communities"
-                  description="Run by communities you joined"
-                  isOn={draft.yourCommunitiesOnly}
-                  onToggle={() => set('yourCommunitiesOnly', !draft.yourCommunitiesOnly)}
-                />
+          <Section icon="UserGroupIcon" title="Organised by" hint="Who is running it">
+            <div className="grid gap-3 sm:grid-cols-2">
+              {/* Shows - and is clickable - for places too, per the design:
+                  "run by a community you joined, or a place claimed by one."
+                  `matchesYourCommunities` only checks experiences today (no
+                  community-ownership field on `Place` yet), so toggling this
+                  on while viewing Places narrows nothing yet. Flagged, not
+                  blocking - same treatment as "Open now" above. */}
+              <ToggleCard
+                icon="UserGroup03Icon"
+                label="Your communities"
+                description="Run by communities you joined"
+                isOn={draft.yourCommunitiesOnly}
+                onToggle={() => set('yourCommunitiesOnly', !draft.yourCommunitiesOnly)}
+              />
+              {showsExperiences && (
                 <ToggleCard
                   icon="UserStar01Icon"
                   label="Guided tours"
@@ -725,32 +813,59 @@ export const FiltersDialog = ({
                   isOn={draft.guidedToursOnly}
                   onToggle={() => set('guidedToursOnly', !draft.guidedToursOnly)}
                 />
-              </div>
-            </Section>
-          )}
+              )}
+            </div>
+          </Section>
 
-          {showsPlaces && (
-            <Section icon="WheelchairIcon" title="Accessibility" hint="As listed by each place">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <ToggleCard
-                  icon="WheelchairIcon"
-                  label="Step-free access"
-                  description="No steps at the entrance"
-                  isOn={false}
-                  onToggle={() => {}}
-                  disabled
-                />
-                <ToggleCard
-                  icon="ParkingAreaCircleIcon"
-                  label="Parking"
-                  description="Parking listed by the place"
-                  isOn={false}
-                  onToggle={() => {}}
-                  disabled
-                />
-              </div>
-            </Section>
-          )}
+          <Section icon="WheelchairIcon" title="Accessibility" hint="As listed by each place">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <ToggleCard
+                icon="WheelchairIcon"
+                label="Step-free access"
+                description="No steps at the entrance"
+                isOn={false}
+                onToggle={() => {}}
+                disabled
+              />
+              <ToggleCard
+                icon="ParkingAreaCircleIcon"
+                label="Parking"
+                description="Parking listed by the place"
+                isOn={false}
+                onToggle={() => {}}
+                disabled
+              />
+            </div>
+          </Section>
+
+          <Section
+            icon="StarIcon"
+            title="Rating"
+            hint="From people who have been"
+            scopeTag={draft.type === 'all' ? 'Places only' : undefined}
+          >
+            <div className="flex flex-wrap gap-2.5">
+              <Pill isOn={!draft.rating} onClick={() => pickRating(undefined)}>
+                Any
+              </Pill>
+              {RATING_BANDS.map((band) => (
+                <Pill
+                  key={band.value}
+                  isOn={draft.rating === band.value}
+                  onClick={() => pickRating(band.value)}
+                >
+                  <IconComponent
+                    iconName="StarIcon"
+                    variant="bulk"
+                    size={16}
+                    color="currentColor"
+                    className="text-rating"
+                  />
+                  {band.label}
+                </Pill>
+              ))}
+            </div>
+          </Section>
         </div>
 
         <div className="flex flex-shrink-0 items-center justify-between gap-4 border-t border-surface-muted px-6 py-4">

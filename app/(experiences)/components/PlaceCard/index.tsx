@@ -28,11 +28,22 @@ export const PlaceCard = ({
   place,
   priority = false,
   className,
+  resultDistanceKm,
+  showRating,
 }: {
   place: Place;
   priority?: boolean;
   /** Merged onto the rail width, so a caller can add to or override it (e.g. `w-full` to fill a grid cell). */
   className?: string;
+  /**
+   * The results view's own distance line, measured from the reader if
+   * they're on, the search's city otherwise - set when the active sort is
+   * Nearest first, or a distance filter is on. Takes over the fact line
+   * ahead of this card's own location-based fallback below.
+   */
+  resultDistanceKm?: number;
+  /** The results view's rating line - set when the active sort is Top rated. */
+  showRating?: boolean;
 }) => {
   const { data: session } = useSession();
   const drawer = usePlaceDrawer();
@@ -45,13 +56,34 @@ export const PlaceCard = ({
   // to the city rather than showing a distance computed from nothing.
   const placeLat = place.location?.pointLat;
   const placeLng = place.location?.pointLong;
-  const distanceKm =
+  const ownDistanceKm =
     isUsingLocation && lat !== undefined && lng !== undefined && placeLat && placeLng
       ? greatCircleKm(lat, lng, placeLat, placeLng)
       : undefined;
 
   const locality =
-    distanceKm !== undefined ? formatNearbyDistance(distanceKm) : placeLocality(place);
+    ownDistanceKm !== undefined ? formatNearbyDistance(ownDistanceKm) : placeLocality(place);
+
+  // Only one of these shows, checked in this order: the results view's own
+  // distance, then its rating (only once the place actually has reviews -
+  // "No reviews yet" would read as missing data), then this card's own
+  // fallback above.
+  const fact =
+    resultDistanceKm !== undefined
+      ? {
+          text: formatNearbyDistance(resultDistanceKm),
+          icon: 'Location01Icon',
+          tone: 'text-ink-muted',
+        }
+      : showRating && place.totalReviews
+        ? {
+            text: `${place.averageRating.toFixed(1)} · ${place.totalReviews.toLocaleString()} reviews`,
+            icon: 'StarIcon',
+            tone: 'text-ink-label',
+          }
+        : locality
+          ? { text: locality, icon: 'Location01Icon', tone: 'text-ink-muted' }
+          : undefined;
 
   return (
     <CardShell
@@ -87,15 +119,15 @@ export const PlaceCard = ({
           {place.title}
         </p>
 
-        {locality && (
-          <p className="flex items-center gap-1 text-[12.5px] font-semibold text-ink-muted">
+        {fact && (
+          <p className={cn('flex items-center gap-1 text-[12.5px] font-semibold', fact.tone)}>
             <IconComponent
-              iconName="Location01Icon"
+              iconName={fact.icon}
               size={13}
               color="currentColor"
               className="flex-shrink-0"
             />
-            {locality}
+            {fact.text}
           </p>
         )}
       </div>

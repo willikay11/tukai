@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
+import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
+import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
 import { FiltersDialog } from '@/app/shared/components/Filters';
 import { matchesYourCommunities } from '@/app/shared/components/Filters/community';
 import { matchesDuration } from '@/app/shared/components/Filters/duration';
@@ -17,39 +19,42 @@ import {
 } from '@/app/shared/components/Filters/filters';
 import { matchesPrice } from '@/app/shared/components/Filters/price';
 import { matchesShapes } from '@/app/shared/components/Filters/shapes';
+import {
+  effectiveSort,
+  sortExperiences,
+  sortOfferedOn,
+  sortPlaces,
+} from '@/app/shared/components/Filters/sort';
 import { matchesQuickDate, matchesTimeOfDay } from '@/app/shared/components/Filters/when';
 import {
   NAIROBI_CENTER,
+  distanceKm as distanceBetween,
   matchesDistance,
   matchesInterests,
 } from '@/app/shared/components/Filters/where';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { isOngoing } from '@/app/shared/components/Places/PlaceDrawer/happening-now';
-import {
-  CommunityResultRow,
-  ExperienceResultRow,
-  PlaceResultRow,
-  ResultGroup,
-} from '@/app/shared/components/Search';
+import { CommunityResultRow, ResultGroup } from '@/app/shared/components/Search';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
 import { useSearchResults } from '@/app/shared/hooks/useSearch';
 import { Button } from '@/components/ui/button';
-import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { useLocation } from '@/context/LocationContext';
-import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { PlaceCategory } from '@/types/placeCategory';
-import { communityPath, experiencePath, placePath } from '@/utils/detail-paths';
+import { communityPath } from '@/utils/detail-paths';
 
 import { ResultsFilterBar } from './ResultsFilterBar';
 
-const RowSkeleton = () => (
-  <div className="flex items-center gap-3 py-2">
-    <div className="h-14 w-14 flex-shrink-0 animate-pulse rounded-xl bg-gray-100" />
-    <div className="flex-1 space-y-2">
-      <div className="h-4 w-1/3 animate-pulse rounded bg-gray-100" />
-      <div className="h-3 w-1/2 animate-pulse rounded bg-gray-100" />
-    </div>
+// The same grid cell size DiscoverGrid and ListPlaces use, so a card here
+// sits exactly as it would on the main pages rather than as a row
+const CARD_GRID =
+  'grid grid-cols-[repeat(auto-fill,184px)] justify-start gap-x-4 gap-y-[26px] 2xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-7';
+
+const CardGridSkeleton = ({ count }: { count: number }) => (
+  <div className={CARD_GRID}>
+    {Array.from({ length: count }).map((_, index) => (
+      <div key={index} className="aspect-square animate-pulse rounded-xl bg-gray-100" />
+    ))}
   </div>
 );
 
@@ -62,8 +67,6 @@ const RowSkeleton = () => (
  */
 export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
   const router = useRouter();
-  const drawer = usePlaceDrawer();
-  const experienceDrawer = useExperienceDrawer();
   const searchParams = useSearchParams();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -107,7 +110,7 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
   const chips = activeChips(filters, categoryNames);
   // Everything the API itself cannot narrow by is read off the rows instead -
   // and the counts below are taken from the same rows, so the two always agree
-  const experiences = (results?.experiences ?? []).filter(
+  const filteredExperiences = (results?.experiences ?? []).filter(
     (experience) =>
       matchesShapes(experience, filters.experienceShapes) &&
       matchesQuickDate(experience, filters.quickDate) &&
@@ -119,10 +122,29 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
       matchesYourCommunities(experience, filters.yourCommunitiesOnly, followedCommunityIds) &&
       (!filters.happeningNow || isOngoing(experience)),
   );
-  const places = (results?.places ?? []).filter((place) =>
+  const filteredPlaces = (results?.places ?? []).filter((place) =>
     matchesDistance(place, filters.distance, origin),
   );
   const communities = results?.communities ?? [];
+
+  // "Looking for" decides which options the menu offers; a pick the current
+  // tab doesn't offer stays in the URL but acts as Recommended meanwhile
+  const sort = effectiveSort(filters.sort, filters.type);
+  const sortOptions = sortOfferedOn(filters.type);
+  const experiences = sortExperiences(filteredExperiences, sort, origin);
+  const places = sortPlaces(filteredPlaces, sort, origin);
+
+  // The card-line distance shown on both kinds - Nearest first, or any
+  // distance filter, measured from the same origin the sort itself uses.
+  // Anything without a known location gets no line rather than a wrong one.
+  const showsDistance = sort === 'near' || Boolean(filters.distance);
+  const distanceTo = (row: { location?: { pointLat?: number; pointLong?: number } }) => {
+    const lat = row.location?.pointLat;
+    const lng = row.location?.pointLong;
+    return lat !== undefined && lng !== undefined
+      ? distanceBetween(origin, { lat, lng })
+      : undefined;
+  };
   const narrowedClientSide =
     filters.experienceShapes.length > 0 ||
     Boolean(filters.quickDate) ||
@@ -169,20 +191,21 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
         <div>
           <ResultsFilterBar
             chips={chips}
+            searchTerm={filters.query.trim() || undefined}
             onEdit={() => setIsEditOpen(true)}
             onRemove={(chip: FilterChip) => apply(withoutFilter(filters, chip.key, chip.value))}
+            onRemoveSearch={() => apply({ ...filters, query: '' })}
             onClearAll={() => apply(clearedFilters(filters))}
-            sortLabel={filters.popularFirst ? 'Most popular' : 'Most relevant'}
-            onToggleSort={() => apply({ ...filters, popularFirst: !filters.popularFirst })}
+            sort={sort}
+            sortOptions={sortOptions}
+            onSortChange={(next) => apply({ ...filters, sort: next })}
           />
         </div>
       </FiltersDialog>
 
       {isFetching && total === 0 ? (
-        <div className="mt-4 space-y-2">
-          {[0, 1, 2, 3].map((row) => (
-            <RowSkeleton key={row} />
-          ))}
+        <div className="mt-6">
+          <CardGridSkeleton count={8} />
         </div>
       ) : total === 0 ? (
         <div className="mt-6 flex flex-col items-center gap-2 rounded-2xl bg-surface py-16 text-center">
@@ -215,17 +238,17 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
               title="Experiences"
               count={`${experienceCount} ${experienceCount === 1 ? 'experience' : 'experiences'}`}
             >
-              {experiences.map((experience) => (
-                <ExperienceResultRow
-                  key={experience.id}
-                  item={experience}
-                  onClick={() =>
-                    experienceDrawer
-                      ? experienceDrawer.openExperience(experience.id)
-                      : router.push(experiencePath(experience))
-                  }
-                />
-              ))}
+              <div className={CARD_GRID}>
+                {experiences.map((experience) => (
+                  // w-full so the card fills its column, same as DiscoverGrid
+                  <ExperienceCard
+                    key={experience.id}
+                    experience={experience}
+                    className="w-full"
+                    resultDistanceKm={showsDistance ? distanceTo(experience) : undefined}
+                  />
+                ))}
+              </div>
             </ResultGroup>
           )}
 
@@ -234,15 +257,18 @@ export const SearchResults = ({ filters }: { filters: SearchFilters }) => {
               title="Places"
               count={`${placeCount} ${placeCount === 1 ? 'place' : 'places'}`}
             >
-              {places.map((place) => (
-                <PlaceResultRow
-                  key={place.id}
-                  item={place}
-                  onClick={() =>
-                    drawer ? drawer.openPlace(place.id) : router.push(placePath(place))
-                  }
-                />
-              ))}
+              <div className={CARD_GRID}>
+                {places.map((place) => (
+                  // w-full so the card fills its column, same as ListPlaces
+                  <PlaceCard
+                    key={place.id}
+                    place={place}
+                    className="w-full"
+                    resultDistanceKm={showsDistance ? distanceTo(place) : undefined}
+                    showRating={sort === 'rating'}
+                  />
+                ))}
+              </div>
             </ResultGroup>
           )}
 

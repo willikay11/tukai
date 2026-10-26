@@ -2,7 +2,6 @@
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 interface DrawerFooterProps {
   leftAction: { label: string; onClick: () => void; variant: 'cancel' | 'delete' };
@@ -60,7 +59,7 @@ export const DrawerFooter = ({
         variant="outline"
         onClick={onSaveAndExit}
         isLoading={isSavingAndExit}
-        className="h-12 flex-shrink-0 rounded-full border-[1.5px] border-brand px-[22px] text-15 font-semibold text-brand hover:bg-surface-brand"
+        className="h-12 flex-shrink-0 rounded-full border-[1.5px] border-brand px-[22px] text-[15px] font-semibold text-brand hover:bg-surface-brand"
       >
         Save &amp; exit
       </Button>
@@ -71,10 +70,7 @@ export const DrawerFooter = ({
       onClick={onPrimary}
       disabled={primaryDisabled}
       isLoading={isPrimaryLoading}
-      className={cn(
-        'h-12 flex-shrink-0 rounded-full px-6 text-15 font-semibold hover:shadow-[0_6px_16px_rgba(176,232,0,.4)]',
-        'disabled:bg-[#E4F4B5] disabled:text-[#5E7A45] disabled:shadow-none',
-      )}
+      className="h-12 rounded-full px-6 text-[15px] disabled:bg-[#E4F4B5] disabled:text-[#5E7A45] disabled:opacity-100"
     >
       {primaryLabel}
     </Button>

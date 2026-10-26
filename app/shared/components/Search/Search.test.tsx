@@ -8,16 +8,16 @@ import { EMPTY_FILTERS, SearchFilters } from '@/types/search';
 import { Search } from './Search';
 
 const push = jest.fn();
+const replace = jest.fn();
+let pathname = '/';
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({ push, replace: jest.fn() }),
-  usePathname: () => '/',
+  useRouter: () => ({ push, replace }),
+  usePathname: () => pathname,
   useSearchParams: () => new URLSearchParams(),
 }));
 
-// Radix renders its content in a portal behind an open flag; swapping it for
-// plain markup keeps these tests about the popover's CONTENT
-// The popover is flattened below, which would otherwise render the city panel
-// and its own copy of every city alongside the trending list
+// The city picker is its own unit (CityPicker.test.tsx); this suite is about
+// the rest of the bar
 jest.mock('./CityPicker', () => ({ CityPicker: () => null }));
 
 jest.mock('@/components/ui/popover', () => ({
@@ -34,10 +34,12 @@ jest.mock('@/components/ui/popover', () => ({
 // are this suite's own business.
 jest.mock('@/app/shared/components/Filters/FiltersDialog', () => ({
   FiltersDialog: ({
+    filters,
     isOpen,
     onApply,
     children,
   }: {
+    filters: SearchFilters;
     isOpen: boolean;
     onApply: (next: SearchFilters) => void;
     children: React.ReactNode;
@@ -47,6 +49,9 @@ jest.mock('@/app/shared/components/Filters/FiltersDialog', () => ({
       {isOpen && (
         <div>
           filters open
+          {/* Stands in for the panel's own "Looking for" pills, just enough
+              to see what default `type` this bar opened it with */}
+          <p>Looking for: {filters.type}</p>
           <button
             type="button"
             onClick={() => onApply({ ...EMPTY_FILTERS, experienceShapes: ['itinerary'] })}
@@ -57,12 +62,6 @@ jest.mock('@/app/shared/components/Filters/FiltersDialog', () => ({
       )}
     </>
   ),
-}));
-
-jest.mock('@/app/shared/components/Images', () => ({
-  // Deliberately does NOT echo `alt`: it is the result title, and repeating it
-  // would make every title match twice
-  PhotoImage: () => <span data-testid="thumbnail" />,
 }));
 
 jest.mock('@/context/SelectedCategoryContext', () => ({
@@ -78,80 +77,18 @@ jest.mock('@/context/LocationContext', () => ({
   }),
 }));
 
-const mockRecent = jest.fn(() => ['Hiking', 'Nyama choma']);
-const addRecentSearch = jest.fn();
-jest.mock('@/app/shared/hooks/useRecentSearches', () => ({
-  useRecentSearches: () => ({
-    recentSearches: mockRecent(),
-    addRecentSearch,
-    clearRecentSearches: jest.fn(),
-  }),
-}));
-
-jest.mock('@/app/shared/hooks/usePlaces', () => ({
-  usePlaceCategories: () => ({
-    data: {
-      data: {
-        results: [
-          { id: 'c1', name: 'Nairobi', group: 'cities' },
-          { id: 'c2', name: 'Diani', group: 'cities' },
-        ],
-      },
-    },
-  }),
-}));
-
-const mockSearch = jest.fn();
-jest.mock('@/app/shared/hooks/useSearch', () => ({
-  useSearch: (query?: string) => mockSearch(query),
-  // The Filters dialog's own live preview count - not under test here
-  useSearchResults: () => ({ data: undefined, isFetching: false }),
-}));
-
-const results = {
-  experiences: [
-    {
-      id: 'e1',
-      title: 'Karura Forest Hike',
-      photos: [],
-      priceStartsFrom: { amount: 1500, currency: 'Ksh.' },
-      location: { city: 'Nairobi' },
-      startDate: '2026-09-01T09:00:00Z',
-      endDate: '2026-09-01T12:00:00Z',
-    },
-  ],
-  places: [
-    {
-      id: 'p1',
-      title: 'Karura Falls',
-      photos: [],
-      averageRating: 4.5,
-      categories: [{ id: 'k', name: 'Parks', group: 'interests' }],
-      location: { city: 'Nairobi' },
-    },
-  ],
-  communities: [{ id: 'cm1', title: 'Karura Runners', photos: [], categories: [] }],
-  counts: { experience: 2, place: 1, community: 2, total: 5 },
-};
-
-describe('Search popover', () => {
+describe('Search bar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRecent.mockReturnValue(['Hiking', 'Nyama choma']);
-    mockSearch.mockReturnValue({ data: undefined, isFetching: false });
+    pathname = '/';
   });
 
-  describe('State A - nothing typed', () => {
-    it('offers recent searches and trending destinations', () => {
+  describe('before typing', () => {
+    it('is just a field - no results, no popover', () => {
       render(<Search />);
 
-      expect(screen.getByText('Recent searches')).toBeInTheDocument();
-      expect(screen.getByText('Hiking')).toBeInTheDocument();
-      expect(screen.getByText('Trending destinations')).toBeInTheDocument();
-      // The city button in the bar names the city too, so this asks for the
-      // suggestion rows rather than any text that happens to match
-      expect(screen.getAllByText('Nairobi').length).toBeGreaterThan(1);
-      expect(screen.getByText('Diani')).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: 'Search Tukai' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Experiences/ })).not.toBeInTheDocument();
     });
 
     // The canvas sets the query at 13.5px/500 inside the bar
@@ -161,125 +98,85 @@ describe('Search popover', () => {
       const field = screen.getByRole('textbox', { name: 'Search Tukai' });
       expect(field).toHaveClass('text-[13.5px]', 'font-medium');
     });
-
-    it('hides the recent block when there is nothing to show', () => {
-      mockRecent.mockReturnValue([]);
-
-      render(<Search />);
-
-      expect(screen.queryByText('Recent searches')).not.toBeInTheDocument();
-      expect(screen.getByText('Trending destinations')).toBeInTheDocument();
-    });
-
-    it('runs the search when a recent chip is picked', async () => {
-      const user = userEvent.setup();
-      mockSearch.mockReturnValue({ data: results, isFetching: false });
-
-      render(<Search />);
-      await user.click(screen.getByText('Hiking'));
-
-      expect(mockSearch).toHaveBeenLastCalledWith('Hiking');
-      expect(addRecentSearch).toHaveBeenCalledWith('Hiking');
-    });
-
-    it('opens the city listing when a trending destination is picked', async () => {
-      const user = userEvent.setup();
-
-      render(<Search />);
-      // The last match is the suggestion row; the first is the bar's city button
-      const rows = screen.getAllByText('Nairobi');
-      await user.click(rows[rows.length - 1]);
-
-      expect(push).toHaveBeenCalledWith('/places?city=c1');
-    });
   });
 
-  describe('State B - results returned', () => {
-    const typeQuery = async () => {
+  /**
+   * Results never render in the bar itself - submitting is the whole answer,
+   * the same way a filter's "Show all" sends the reader to Discover. A
+   * pause in typing submits on its own; Enter and the button just skip the
+   * wait.
+   */
+  describe('submitting a search', () => {
+    it('navigates to Discover with the typed query on Enter', async () => {
       const user = userEvent.setup();
       render(<Search />);
+
+      await user.type(screen.getByRole('textbox', { name: 'Search Tukai' }), 'karura{Enter}');
+
+      expect(replace).toHaveBeenCalledWith('/?q=karura');
+    });
+
+    it('navigates when the search button is pressed', async () => {
+      const user = userEvent.setup();
+      render(<Search />);
+
       await user.type(screen.getByRole('textbox', { name: 'Search Tukai' }), 'karura');
-      return user;
-    };
+      await user.click(screen.getByRole('button', { name: 'Search' }));
 
-    beforeEach(() => mockSearch.mockReturnValue({ data: results, isFetching: false }));
-
-    it('heads the panel with the total and the query', async () => {
-      await typeQuery();
-
-      await waitFor(() => expect(screen.getByText(/5 results for/)).toBeInTheDocument());
+      expect(replace).toHaveBeenCalledWith('/?q=karura');
     });
 
-    // Counts are the API's totals, not the page length - only one experience is
-    // returned but two match
-    it('labels each type tab with its own count', async () => {
-      await typeQuery();
+    it('does nothing on an empty field', async () => {
+      const user = userEvent.setup();
+      render(<Search />);
 
-      await waitFor(() =>
-        expect(screen.getByRole('button', { name: /Experiences/ })).toBeInTheDocument(),
-      );
-      const tabFor = (label: string) => screen.getByRole('button', { name: new RegExp(label) });
-      expect(tabFor('All')).toHaveTextContent(/All\s*·\s*5/);
-      expect(tabFor('Experiences')).toHaveTextContent(/Experiences\s*·\s*2/);
-      expect(tabFor('Places')).toHaveTextContent(/Places\s*·\s*1/);
-      expect(tabFor('Communities')).toHaveTextContent(/Communities\s*·\s*2/);
+      await user.type(screen.getByRole('textbox', { name: 'Search Tukai' }), '{Enter}');
+
+      expect(replace).not.toHaveBeenCalled();
     });
 
-    it('groups the results by type', async () => {
-      await typeQuery();
+    it('disables the search button until something is typed', () => {
+      render(<Search />);
 
-      await waitFor(() => expect(screen.getByText('Karura Forest Hike')).toBeInTheDocument());
-      expect(screen.getByText('Karura Falls')).toBeInTheDocument();
-      expect(screen.getByText('Karura Runners')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Search' })).toBeDisabled();
     });
 
-    it('narrows to one group when a type tab is picked', async () => {
-      const user = await typeQuery();
+    // No Enter, no click - just a pause after typing
+    it('navigates on its own once typing pauses', async () => {
+      const user = userEvent.setup();
+      render(<Search />);
 
-      await waitFor(() => expect(screen.getByText('Karura Falls')).toBeInTheDocument());
-      await user.click(screen.getByRole('button', { name: /Experiences/ }));
+      await user.type(screen.getByRole('textbox', { name: 'Search Tukai' }), 'karura');
 
-      expect(screen.getByText('Karura Forest Hike')).toBeInTheDocument();
-      expect(screen.queryByText('Karura Falls')).not.toBeInTheDocument();
-      expect(screen.queryByText('Karura Runners')).not.toBeInTheDocument();
+      expect(replace).not.toHaveBeenCalled();
+      await waitFor(() => expect(replace).toHaveBeenCalledWith('/?q=karura'), { timeout: 2000 });
     });
 
-    it('keeps the counts unchanged while filtered', async () => {
-      const user = await typeQuery();
+    // Each keystroke resets the wait rather than queuing a navigation of its
+    // own, so a sentence typed out doesn't fire once per letter
+    it('collapses a run of keystrokes into a single navigation', async () => {
+      const user = userEvent.setup();
+      render(<Search />);
 
-      await waitFor(() =>
-        expect(screen.getByRole('button', { name: /Experiences/ })).toBeInTheDocument(),
-      );
-      await user.click(screen.getByRole('button', { name: /Experiences/ }));
+      await user.type(screen.getByRole('textbox', { name: 'Search Tukai' }), 'karura forest');
 
-      expect(screen.getByRole('button', { name: /All/ })).toHaveTextContent(/All\s*·\s*5/);
-      expect(screen.getByRole('button', { name: /Places/ })).toHaveTextContent(/Places\s*·\s*1/);
-    });
-
-    it('routes to the result and remembers the query', async () => {
-      const user = await typeQuery();
-
-      await waitFor(() => expect(screen.getByText('Karura Forest Hike')).toBeInTheDocument());
-      await user.click(screen.getByText('Karura Forest Hike'));
-
-      expect(push).toHaveBeenCalledWith('/experiences/e1');
-      expect(addRecentSearch).toHaveBeenCalledWith('karura');
-    });
-
-    it('says so when nothing matches', async () => {
-      mockSearch.mockReturnValue({
-        data: {
-          experiences: [],
-          places: [],
-          communities: [],
-          counts: { experience: 0, place: 0, community: 0, total: 0 },
-        },
-        isFetching: false,
+      await waitFor(() => expect(replace).toHaveBeenCalledWith('/?q=karura+forest'), {
+        timeout: 2000,
       });
+      expect(replace).toHaveBeenCalledTimes(1);
+    });
 
-      await typeQuery();
+    // Enter should not leave a pending navigation to fire a second time
+    // right after the one it already made
+    it('cancels the pending debounce when Enter already submitted', async () => {
+      const user = userEvent.setup();
+      render(<Search />);
 
-      await waitFor(() => expect(screen.getByText(/No results for/)).toBeInTheDocument());
+      await user.type(screen.getByRole('textbox', { name: 'Search Tukai' }), 'karura{Enter}');
+      expect(replace).toHaveBeenCalledTimes(1);
+
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      expect(replace).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -305,6 +202,54 @@ describe('Search popover', () => {
       await user.click(screen.getByRole('button', { name: 'Show all' }));
 
       expect(push).toHaveBeenCalledWith('/?xtype=itinerary');
+    });
+
+    /**
+     * "Looking for" starts on whichever tab the reader is already browsing,
+     * same as the design spec: Experiences on Experiences, Places on Places,
+     * Everything everywhere else.
+     */
+    describe('the "Looking for" default', () => {
+      it('starts on Experiences, on the Experiences page', async () => {
+        pathname = '/experiences';
+        const user = userEvent.setup();
+        render(<Search />);
+
+        await user.click(screen.getByRole('button', { name: 'Filters' }));
+
+        expect(screen.getByText('Looking for: experiences')).toBeInTheDocument();
+      });
+
+      // A detail page is still within the Experiences tab
+      it('starts on Experiences under an experience detail page too', async () => {
+        pathname = '/experiences/sunrise-hike';
+        const user = userEvent.setup();
+        render(<Search />);
+
+        await user.click(screen.getByRole('button', { name: 'Filters' }));
+
+        expect(screen.getByText('Looking for: experiences')).toBeInTheDocument();
+      });
+
+      it('starts on Places, on the Places page', async () => {
+        pathname = '/places';
+        const user = userEvent.setup();
+        render(<Search />);
+
+        await user.click(screen.getByRole('button', { name: 'Filters' }));
+
+        expect(screen.getByText('Looking for: places')).toBeInTheDocument();
+      });
+
+      it('starts on Everything everywhere else', async () => {
+        pathname = '/moments';
+        const user = userEvent.setup();
+        render(<Search />);
+
+        await user.click(screen.getByRole('button', { name: 'Filters' }));
+
+        expect(screen.getByText('Looking for: all')).toBeInTheDocument();
+      });
     });
   });
 });

@@ -114,10 +114,10 @@ export default function RootLayout({
                                           {/* The auth screens draw their own bar, so the app's
                             chrome stands down there rather than stacking on it */}
                                           <ChromeGate>
-                                            <div className="z-50 border-b border-gray-100 bg-white/95 backdrop-opacity-50 md:sticky md:top-0">
-                                              {/* Mobile */}
-                                              <div className="mx-4 mt-5 inline-flex w-[calc(100%-2rem)] justify-between md:hidden">
-                                                <div className="inline-flex cursor-pointer items-center justify-center md:hidden">
+                                            <div className="z-50 border-b border-gray-100 bg-white/95 backdrop-opacity-50 min-[720px]:sticky min-[720px]:top-0">
+                                              {/* Mobile, below 720px */}
+                                              <div className="mx-4 mt-5 inline-flex w-[calc(100%-2rem)] justify-between min-[720px]:hidden">
+                                                <div className="inline-flex h-11 cursor-pointer items-center justify-center min-[720px]:hidden">
                                                   <Link
                                                     href="/"
                                                     className="inline-flex items-center"
@@ -125,14 +125,15 @@ export default function RootLayout({
                                                     <Image
                                                       src="/images/logo.svg"
                                                       alt="Tukai logo"
-                                                      width={100}
-                                                      height={100}
+                                                      width={106}
+                                                      height={35}
+                                                      className="h-[30px] w-auto shrink-0"
                                                     />
                                                   </Link>
                                                 </div>
                                                 <AuthActions />
                                               </div>
-                                              <div className="mx-4 md:hidden">
+                                              <div className="mx-4 min-[720px]:hidden">
                                                 <Suspense
                                                   fallback={
                                                     <div className="h-10 w-full animate-pulse rounded-full bg-gray-200" />
@@ -141,16 +142,16 @@ export default function RootLayout({
                                                   <Search />
                                                 </Suspense>
                                               </div>
-                                              <div className="mx-4 pb-4 md:hidden">
+                                              <div className="mx-4 pb-4 min-[720px]:hidden">
                                                 <Nav />
                                               </div>
-                                              {/* Browser */}
-                                              <div className="hidden md:grid md:grid-cols-12 md:gap-x-4">
+                                              {/* Desktop, 720px and up */}
+                                              <div className="hidden min-[720px]:grid min-[720px]:grid-cols-12 min-[720px]:gap-x-4">
                                                 {/* The tabs are centred on the row itself, not
                                 in the gap between the logo and the actions:
                                 those two are different widths, so sharing the
                                 leftover space put the tabs off-centre. */}
-                                                <header className="relative flex items-center gap-4 pb-[18px] pt-[30px] md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+                                                <header className="relative flex items-center gap-4 pb-[18px] pt-[30px] min-[720px]:col-span-10 min-[720px]:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
                                                   <Link href="/" className="flex-shrink-0">
                                                     <Image
                                                       src="/images/logo.svg"
@@ -172,7 +173,7 @@ export default function RootLayout({
                                                   </div>
                                                 </header>
 
-                                                <div className="flex justify-center pb-5 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+                                                <div className="flex justify-center pb-5 min-[720px]:col-span-10 min-[720px]:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
                                                   <Suspense
                                                     fallback={
                                                       <div className="h-[54px] w-full max-w-[600px] animate-pulse rounded-full bg-gray-200" />

@@ -3,7 +3,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import { ProfileMenu } from './index';
-import { PROFILE_MENU_ITEMS } from './items';
+import { PROFILE_MENU_GROUP_ONE, PROFILE_MENU_GROUP_TWO } from './items';
 
 jest.mock('next/link', () => {
   function MockLink({ children, href, ...rest }: Record<string, unknown>) {
@@ -21,6 +21,7 @@ jest.mock('@/components/ui/image', () => ({
 }));
 
 const defaults = { name: 'George Ralak', onSignOut: jest.fn() };
+const ALL_ITEMS = [...PROFILE_MENU_GROUP_ONE, ...PROFILE_MENU_GROUP_TWO];
 
 describe('ProfileMenu', () => {
   it('shows the user name and handle', () => {
@@ -38,46 +39,36 @@ describe('ProfileMenu', () => {
     expect(screen.queryByText(/^@/)).not.toBeInTheDocument();
   });
 
-  it('lists every menu item in the designed order', () => {
+  it('lists every row from both groups', () => {
     render(<ProfileMenu {...defaults} />);
 
-    PROFILE_MENU_ITEMS.forEach((item) => {
+    ALL_ITEMS.forEach((item) => {
       expect(screen.getByText(item.label)).toBeInTheDocument();
     });
-    expect(screen.getByText('Sign Out')).toBeInTheDocument();
+    expect(screen.getByText('Sign out')).toBeInTheDocument();
   });
 
-  it('links the items that have a destination', () => {
+  it('links the header row to the profile, not a listed row', () => {
     render(<ProfileMenu {...defaults} />);
 
-    // The header row is the way to the profile now, not a listed item
-    expect(screen.getByRole('link', { name: /George Ralak/ })).toHaveAttribute('href', '/profile');
-    // Communities, Bucket lists and Plans left this menu for the primary nav
-    expect(screen.queryByRole('link', { name: /My Communities/ })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /Bucket List/ })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /My Plans/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Control centre/ })).toHaveAttribute(
+    // The header row is the way to the profile; there is no plain "Profile" row
+    expect(screen.getByRole('menuitem', { name: /George Ralak/ })).toHaveAttribute(
       'href',
-      '/control-center',
+      '/profile',
     );
+    expect(screen.queryByText('Profile')).not.toBeInTheDocument();
   });
 
-  it('links Control centre now that the page exists', () => {
+  it('links Dashboard to Control Center', () => {
     render(<ProfileMenu {...defaults} />);
 
-    const control = screen.getByText('Control centre').closest('a');
-    expect(control).toHaveAttribute('href', '/control-center');
-    expect(screen.getByText('Control centre').closest('button')).toBeNull();
+    expect(screen.getByText('Dashboard').closest('a')).toHaveAttribute('href', '/control-center');
   });
 
-  /**
-   * Every row routes now that the inbox exists. The disabled branch stays as a
-   * guard for the next item added before its page.
-   */
   it('routes every row', () => {
     render(<ProfileMenu {...defaults} />);
 
-    PROFILE_MENU_ITEMS.forEach((item) => {
+    ALL_ITEMS.forEach((item) => {
       expect(item.href).toBeTruthy();
       expect(screen.getByText(item.label).closest('a')).toHaveAttribute('href', item.href!);
     });
@@ -90,26 +81,26 @@ describe('ProfileMenu', () => {
     expect(screen.getByText('Messages').closest('a')).toHaveAttribute('href', '/inbox');
   });
 
-  it('shows the unread dot on Notifications only', () => {
-    const { container } = render(<ProfileMenu {...defaults} hasUnreadNotifications />);
+  it('shows the unread count as a badge on Notifications only', () => {
+    render(<ProfileMenu {...defaults} unreadNotificationCount={3} />);
 
-    // Notifications routes to the inbox now, so its row is a link
     const notifications = screen.getByText('Notifications').closest('a');
-    expect(notifications?.querySelector('.bg-red-500')).toBeInTheDocument();
-    expect(container.querySelectorAll('.bg-red-500')).toHaveLength(1);
+    expect(notifications).toHaveTextContent('3');
   });
 
-  it('hides the unread dot when there is nothing unread', () => {
-    const { container } = render(<ProfileMenu {...defaults} hasUnreadNotifications={false} />);
+  it('hides the badge when there is nothing unread', () => {
+    render(<ProfileMenu {...defaults} unreadNotificationCount={0} />);
 
-    expect(container.querySelector('.bg-red-500')).not.toBeInTheDocument();
+    const notifications = screen.getByText('Notifications').closest('a');
+    expect(notifications).toHaveTextContent('Notifications');
+    expect(notifications?.textContent).toBe('Notifications');
   });
 
   it('signs the user out', () => {
     const onSignOut = jest.fn();
     render(<ProfileMenu {...defaults} onSignOut={onSignOut} />);
 
-    fireEvent.click(screen.getByText('Sign Out'));
+    fireEvent.click(screen.getByText('Sign out'));
 
     expect(onSignOut).toHaveBeenCalledTimes(1);
   });
@@ -121,7 +112,7 @@ describe('ProfileMenu', () => {
       const onItemSelect = jest.fn();
       render(<ProfileMenu {...defaults} onItemSelect={onItemSelect} />);
 
-      const linked = PROFILE_MENU_ITEMS.find((item) => item.href)!;
+      const linked = ALL_ITEMS.find((item) => item.href)!;
       fireEvent.click(screen.getByText(linked.label));
 
       expect(onItemSelect).toHaveBeenCalled();
@@ -132,7 +123,7 @@ describe('ProfileMenu', () => {
       const onSignOut = jest.fn();
       render(<ProfileMenu {...defaults} onSignOut={onSignOut} onItemSelect={onItemSelect} />);
 
-      fireEvent.click(screen.getByText('Sign Out'));
+      fireEvent.click(screen.getByText('Sign out'));
 
       expect(onItemSelect).toHaveBeenCalled();
       expect(onSignOut).toHaveBeenCalled();
@@ -141,14 +132,14 @@ describe('ProfileMenu', () => {
     it('works without the callback', () => {
       render(<ProfileMenu {...defaults} />);
 
-      const linked = PROFILE_MENU_ITEMS.find((item) => item.href)!;
+      const linked = ALL_ITEMS.find((item) => item.href)!;
       expect(() => fireEvent.click(screen.getByText(linked.label))).not.toThrow();
     });
   });
 
-  it('renders Sign Out in the destructive colour', () => {
+  it('renders Sign out in the destructive colour', () => {
     render(<ProfileMenu {...defaults} />);
 
-    expect(screen.getByText('Sign Out')).toHaveClass('text-red-600');
+    expect(screen.getByText('Sign out')).toHaveClass('text-danger');
   });
 });
