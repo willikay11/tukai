@@ -148,9 +148,6 @@ export const AuthActions = () => {
               className="w-auto rounded-2xl p-0"
             >
               <ProfileMenu
-                name={session.user.name ?? ''}
-                handle={session.user.displayName}
-                image={session.user.image}
                 unreadNotificationCount={unreadCount}
                 onSignOut={handleLogout}
                 // Client navigation leaves the popover mounted, so choosing a row
