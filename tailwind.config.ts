@@ -96,6 +96,9 @@ const config: Config = {
         // The blue dot before a distance or a rating count in the place drawer's
         // photo row, a 5px circle rather than a glyph
         distance: '#60A5FA',
+        // The light grey frame behind a card - the profile card, the account
+        // balance card, the calendar panel - one shade paler than `surface`
+        shell: '#F9FAFB',
         surface: {
           DEFAULT: '#F3F4F2', // 298 — resting chip and card ground
           brand: '#E8F1ED', // 280 — a chosen chip
@@ -114,6 +117,9 @@ const config: Config = {
           DEFAULT: '#DDE3DF', // 176 — hairline borders and dividers
           brand: '#CBDDD4', // 15 — the hairline on a green-faced control
           soft: '#E2E7E4', // 15 — the border on a white control, such as the account chip
+          // The profile page's shell borders - the profile card, the account
+          // balance card, the calendar panel - a 0.5px hairline, paired with `shell`
+          shell: '#E5E7EB',
         },
         ink: {
           DEFAULT: '#3F4B47', // 42 — strong body text

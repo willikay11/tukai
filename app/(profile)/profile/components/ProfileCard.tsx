@@ -52,8 +52,8 @@ export const ProfileCard = ({
 
   return (
     <aside aria-label="Profile" className="flex min-w-0 flex-[1_1_340px] flex-col gap-2 max-w-[380px]">
-      <div className="flex flex-col gap-1.5 rounded-xl bg-surface p-1.5">
-        <div className="overflow-hidden rounded-xl bg-white shadow-[0_0_4px_0_rgba(0,0,0,.12)]">
+      <div className="flex flex-col gap-1.5 rounded-xl border-[0.5px] border-line-shell bg-shell p-1.5">
+        <div className="overflow-hidden rounded-xl border-[0.5px] border-surface bg-white shadow-[0_0_4px_0_rgba(0,0,0,.12)]">
           <div className="flex flex-col gap-3.5 p-[18px]">
             <div className="flex min-w-0 items-center gap-3.5">
               <div className="relative h-[72px] w-[72px] flex-shrink-0 overflow-hidden rounded-full bg-surface-brand">

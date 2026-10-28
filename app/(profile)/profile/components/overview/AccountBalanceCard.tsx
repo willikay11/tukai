@@ -14,8 +14,8 @@ export const AccountBalanceCard = ({
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
   return (
-    <div className="rounded-18 bg-surface p-1.5">
-      <div className="flex flex-wrap items-center justify-between gap-3 px-2 pb-3.5 pt-3">
+    <div className="rounded-xl border-[0.5px] border-line-shell bg-shell p-1.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 py-3 pl-3 pr-2">
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-[13.5px] text-ink-muted">
             Account balance
@@ -24,39 +24,37 @@ export const AccountBalanceCard = ({
               Only you
             </span>
           </div>
-          <div className="mt-1 text-28 font-bold leading-[1.15] tracking-[-0.6px] text-brand-ink">
-            {money(balances.available, balances.currency)}
+          <div className="mt-1 text-[28px] font-bold leading-[1.15] tracking-[-0.6px] text-brand-ink">
+            {money(balances.available + balances.pending, balances.currency)}
           </div>
         </div>
 
-        {balances.available > 0 && (
-          <button
-            type="button"
-            onClick={() => setIsWithdrawOpen(true)}
-            className="inline-flex h-11 items-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-b from-brand-mid to-brand-deep px-4 pl-5 text-[14.5px] font-semibold text-white shadow-[0_6px_16px_rgba(4,75,54,0.22)] transition-[filter] hover:brightness-110"
-          >
-            Withdraw
-            <IconComponent iconName="ArrowUpRight01Icon" size={18} color="currentColor" />
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => setIsWithdrawOpen(true)}
+          className="inline-flex h-12 items-center gap-2 whitespace-nowrap rounded-full bg-lime pl-[22px] pr-[18px] text-base font-semibold text-brand-ink hover:brightness-[.96]"
+        >
+          Withdraw
+          <IconComponent iconName="ArrowDown02Icon" size={19} color="currentColor" />
+        </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-px overflow-hidden rounded-xl bg-surface-muted shadow-sm">
+      <div className="grid grid-cols-3 gap-px overflow-hidden rounded-xl bg-surface-muted shadow-[0_1px_3px_rgba(1,51,52,0.07)]">
         <div className="min-w-0 bg-white px-3.5 py-3">
           <div className="text-[12.5px] text-ink-muted">Available</div>
-          <div className="mt-0.5 truncate text-[14.5px] font-bold text-gray-900">
+          <div className="mt-[3px] truncate text-[14.5px] font-bold text-gray-900">
             {money(balances.available, balances.currency)}
           </div>
         </div>
         <div className="min-w-0 bg-white px-3.5 py-3">
           <div className="text-[12.5px] text-ink-muted">Pending</div>
-          <div className="mt-0.5 truncate text-[14.5px] font-bold text-gray-900">
+          <div className="mt-[3px] truncate text-[14.5px] font-bold text-gray-900">
             {money(balances.pending, balances.currency)}
           </div>
         </div>
         <div className="min-w-0 bg-white px-3.5 py-3">
           <div className="text-[12.5px] text-ink-muted">Paid out</div>
-          <div className="mt-0.5 truncate text-[14.5px] font-bold text-gray-900">
+          <div className="mt-[3px] truncate text-[14.5px] font-bold text-gray-900">
             {money(balances.paidOut, balances.currency)}
           </div>
         </div>
@@ -65,6 +63,7 @@ export const AccountBalanceCard = ({
       <WithdrawDrawer
         currency={balances.currency}
         availableBalance={balances.availableBalance}
+        pending={balances.pending}
         isOpen={isWithdrawOpen}
         onClose={() => setIsWithdrawOpen(false)}
       />

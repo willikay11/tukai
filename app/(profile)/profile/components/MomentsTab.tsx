@@ -46,6 +46,7 @@ export const MomentsTab = ({ userId }: { userId?: string | null }) => {
               moment={moment}
               onClick={() => setOpenMoment(moment)}
               className="w-full"
+              showAuthor={false}
             />
           ))}
         </div>

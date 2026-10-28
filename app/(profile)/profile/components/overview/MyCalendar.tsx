@@ -220,7 +220,7 @@ export const MyCalendar = ({
       <h2 className="text-17 font-bold tracking-[-0.2px] text-brand-ink">My calendar</h2>
       <p className="mt-0.5 text-[13.5px] text-ink-muted">Your upcoming experiences and bookings</p>
 
-      <div className="mt-3 flex flex-col gap-1.5 rounded-18 bg-surface p-1.5">
+      <div className="mt-3 flex flex-col gap-1.5 rounded-14 border-[0.5px] border-line-shell bg-shell p-1.5">
         <div className="flex items-center gap-0.5 px-0.5 pt-0.5">
           <button
             type="button"
