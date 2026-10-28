@@ -43,6 +43,19 @@ describe('notification settings', () => {
     prefs = aPrefs();
   });
 
+  // No create endpoint exists for this record, so an account that never got
+  // one has nothing to load - this must reach a visible, final state rather
+  // than hold the loading skeleton up forever
+  it('shows a message instead of hanging when there is no saved record', () => {
+    prefs = undefined;
+    renderDrawer();
+
+    expect(
+      screen.getByText('Notification settings could not be loaded for this account.'),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled();
+  });
+
   it('shows what is saved now', () => {
     renderDrawer();
 

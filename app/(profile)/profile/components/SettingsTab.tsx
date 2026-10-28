@@ -2,9 +2,6 @@
 
 import { useState } from 'react';
 
-import { signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-
 import { useGetWallets } from '@/app/(experiences)/hooks/usePayment';
 import { useNotificationPreferences } from '@/app/(profile)/hooks';
 import { IconComponent } from '@/app/shared/components/Icons';
@@ -14,6 +11,8 @@ import { Wallet } from '@/types/payment';
 
 import { MyProfile, profileHandle, profileName } from '../profile';
 import { NotificationsDrawer } from './NotificationsDrawer';
+import { PayoutMethodDrawer } from './PayoutMethodDrawer';
+import { PrivacyDrawer } from './PrivacyDrawer';
 
 const payoutMethodLine = (wallets: Wallet[]): string => {
   const active = wallets.find((wallet) => wallet.isActive) ?? wallets[0];
@@ -83,7 +82,6 @@ export const SettingsTab = ({
   profile?: MyProfile | null;
   onEditProfile: () => void;
 }) => {
-  const router = useRouter();
   const { toast } = useToast();
   const { data } = useGetWallets();
   const walletsPayload = data?.data;
@@ -92,6 +90,8 @@ export const SettingsTab = ({
   const { data: notifResponse } = useNotificationPreferences();
   const notifPrefs = notifResponse?.success ? notifResponse.data : undefined;
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isPayoutOpen, setIsPayoutOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
   const comingSoon = (what: string) =>
     toast({ description: `${what} is coming soon.` });
@@ -114,7 +114,7 @@ export const SettingsTab = ({
           icon="Wallet02Icon"
           title="Payout method"
           sub={payoutMethodLine(wallets)}
-          onClick={() => comingSoon('Payout settings')}
+          onClick={() => setIsPayoutOpen(true)}
         />
         <SettingsRow
           icon="Notification03Icon"
@@ -126,7 +126,7 @@ export const SettingsTab = ({
           icon="LockIcon"
           title="Privacy"
           sub="Profile visible to everyone on Tukai"
-          onClick={() => comingSoon('Privacy settings')}
+          onClick={() => setIsPrivacyOpen(true)}
         />
         <SettingsRow
           icon="HelpCircleIcon"
@@ -136,19 +136,9 @@ export const SettingsTab = ({
         />
       </div>
 
-      <button
-        type="button"
-        onClick={async () => {
-          await signOut({ redirect: false });
-          router.push('/');
-        }}
-        className="-mt-1.5 inline-flex h-11 items-center gap-2.5 self-start whitespace-nowrap rounded-full px-3 text-[15px] font-semibold text-danger hover:bg-danger-surface"
-      >
-        <IconComponent iconName="Logout03Icon" size={20} color="currentColor" />
-        Sign out
-      </button>
-
       <NotificationsDrawer isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />
+      <PayoutMethodDrawer isOpen={isPayoutOpen} onClose={() => setIsPayoutOpen(false)} />
+      <PrivacyDrawer isOpen={isPrivacyOpen} onClose={() => setIsPrivacyOpen(false)} />
     </div>
   );
 };

@@ -50,6 +50,11 @@ jest.mock('@/app/(experiences)/hooks/usePayment', () => ({
   useGetWallets: () => ({ data: { data: { results: [] } }, isLoading: false }),
   usePayoutQuote: () => ({ data: undefined, isFetching: false }),
   useRequestWithdrawal: () => ({ mutate: jest.fn(), isPending: false }),
+  useCreatePhoneWallet: () => ({ mutate: jest.fn(), isPending: false }),
+  usePatchPhoneWallet: () => ({ mutate: jest.fn(), isPending: false }),
+  useCreateBankWallet: () => ({ mutate: jest.fn(), isPending: false }),
+  usePatchBankWallet: () => ({ mutate: jest.fn(), isPending: false }),
+  useSetActiveWallet: () => ({ mutate: jest.fn(), isPending: false }),
 }));
 jest.mock('@/context/ExperienceDrawerContext', () => ({
   useExperienceDrawer: () => null,

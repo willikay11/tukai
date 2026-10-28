@@ -67,6 +67,11 @@ export const NotificationsDrawer = ({ isOpen, onClose }: { isOpen: boolean; onCl
   const { toast } = useToast();
   const { data: response, isLoading } = useNotificationPreferences(isOpen);
   const saved = response?.success ? response.data : undefined;
+  // `success: true` with no record is real too - the API has no "create a
+  // preferences record" endpoint, so an account that never got one has
+  // nothing to load. Without this, `!draft` would hold the skeleton up
+  // forever instead of ever reaching a usable or an explained state.
+  const unavailable = !isLoading && !saved;
 
   const { mutate: save, isPending } = useUpdateNotificationPreferences();
   const [draft, setDraft] = useState<NotificationPreferences | null>(null);
@@ -132,7 +137,13 @@ export const NotificationsDrawer = ({ isOpen, onClose }: { isOpen: boolean; onCl
         </div>
 
         <div className="flex flex-1 flex-col gap-7 px-6 pb-9 pt-5">
-          {isLoading || !draft ? (
+          {isLoading ? (
+            <div className="h-40 animate-pulse rounded-xl bg-surface" />
+          ) : unavailable ? (
+            <p className="text-sm text-ink-subtle">
+              Notification settings could not be loaded for this account.
+            </p>
+          ) : !draft ? (
             <div className="h-40 animate-pulse rounded-xl bg-surface" />
           ) : (
             <>
