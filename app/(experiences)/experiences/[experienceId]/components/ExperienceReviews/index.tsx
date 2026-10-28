@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 
 import moment from 'moment';
 
+import { canOfferReviewForm, LeaveReviewDrawer, ownReview } from '@/app/shared/components/Experiences';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { useExperienceRatings } from '@/app/shared/hooks/useExperiences';
@@ -19,9 +20,6 @@ import {
   ratingSummary,
 } from '@/types/experienceRating';
 import { linkedUserName } from '@/types/user';
-
-import { LeaveReviewDrawer } from './LeaveReviewDrawer';
-import { canOfferReviewForm, ownReview } from './review-eligibility';
 
 /** How many reviews are shown before the rest are asked for. */
 const FIRST_PAGE = 4;
