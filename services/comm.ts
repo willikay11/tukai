@@ -1,9 +1,54 @@
 import { getSession } from 'next-auth/react';
 
+import { NotificationPreferences } from '@/types/notification';
 import { parseApiError } from '@/utils/parseApiError';
-import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
+import { parseCamelToSnake, parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 import { api, apiWithToken } from './apiService';
+
+/**
+ * The one email/push preferences record every account has.
+ *
+ * There is no "create" endpoint - the record already exists by the time a
+ * reader can open Settings - only a list of (always exactly one) and an
+ * update by that record's own id.
+ */
+export const fetchEmailPreferences = async () => {
+  try {
+    const client = await apiWithToken();
+    const response = await client.get('/v1/comms/email-preferences/');
+    const results = parseSnakeToCamel(response.data)?.results ?? [];
+
+    return { status: response.status, success: true, data: results[0] as NotificationPreferences | undefined };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load your notification settings'),
+    };
+  }
+};
+
+export const updateEmailPreferences = async (
+  id: string,
+  changes: Partial<Omit<NotificationPreferences, 'id' | 'email'>>,
+) => {
+  try {
+    const client = await apiWithToken();
+    const response = await client.patch(
+      `/v1/comms/email-preferences/${id}/`,
+      parseCamelToSnake(changes),
+    );
+
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    throw new Error(parseApiError(error.response?.data, 'Could not save your notification settings'));
+  }
+};
 
 export const sendMessage = async ({
   content,

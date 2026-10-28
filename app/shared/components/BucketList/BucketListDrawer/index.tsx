@@ -447,7 +447,7 @@ export const BucketListDrawer = ({
         </div>
 
         {!isMembers && (
-          <footer className="flex min-h-[88px] flex-shrink-0 flex-wrap items-center gap-2.5 border-t border-surface-muted bg-white px-6 py-[18px]">
+          <footer className="sticky bottom-0 z-10 flex min-h-[88px] flex-shrink-0 flex-wrap items-center gap-2.5 border-t border-surface-muted bg-white px-6 py-[18px]">
             {isOwner ? (
               <>
                 <Button

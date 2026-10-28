@@ -73,8 +73,20 @@ const config: Config = {
         // dot between one fact and the next. Both sampled from the designs —
         // neither is a shade of the brand green, and both recur wherever a
         // rating or a "city • distance" line does.
-        star: '#F2C14B',
-        dot: '#70A3F3',
+        star: {
+          DEFAULT: '#F2C14B',
+          // The "tap a star to review" row on the profile's Reviews tab - a
+          // sage green rather than the rating gold, since nothing has been
+          // rated yet
+          muted: '#8DB9A4',
+        },
+        dot: {
+          DEFAULT: '#70A3F3',
+          // The profile page's own meta dot - community/bucket-list member
+          // rows and the profile card's meta line - a different blue from
+          // the generic `dot` above
+          profile: '#2F74D0',
+        },
         // The filter panel's Rating section star - a different, Tailwind-amber
         // hex from `star` above, which exists only wherever a place's own
         // reviews render (PlaceAboutSection, PlaceDrawerReviews, PlaceReviewForm,
@@ -84,6 +96,9 @@ const config: Config = {
         // The blue dot before a distance or a rating count in the place drawer's
         // photo row, a 5px circle rather than a glyph
         distance: '#60A5FA',
+        // The light grey frame behind a card - the profile card, the account
+        // balance card, the calendar panel - one shade paler than `surface`
+        shell: '#F9FAFB',
         surface: {
           DEFAULT: '#F3F4F2', // 298 — resting chip and card ground
           brand: '#E8F1ED', // 280 — a chosen chip
@@ -94,11 +109,17 @@ const config: Config = {
           // The hover on a brand-soft control, per the design's carousel-arrow
           // spec in docs/design/HANDOFF.md
           'brand-hover': '#D5E7DE',
+          // The profile card's stat cell hover - lighter than `surface`,
+          // unique to this one control
+          'stat-hover': '#F7F8F6',
         },
         line: {
           DEFAULT: '#DDE3DF', // 176 — hairline borders and dividers
           brand: '#CBDDD4', // 15 — the hairline on a green-faced control
           soft: '#E2E7E4', // 15 — the border on a white control, such as the account chip
+          // The profile page's shell borders - the profile card, the account
+          // balance card, the calendar panel - a 0.5px hairline, paired with `shell`
+          shell: '#E5E7EB',
         },
         ink: {
           DEFAULT: '#3F4B47', // 42 — strong body text
@@ -107,6 +128,9 @@ const config: Config = {
           pill: '#1F2937', // the label and icon on a resting section pill
           summary: '#1F2937', // the one-line summary under a manager's banner title
           label: '#1F2937', // a fact's label and icon in the place drawer's facts grid
+          // The settings pages' inline notes (payout safety, notifications,
+          // privacy) and an empty panel's message - a shade darker than `muted`
+          note: '#3C4A45',
         },
         danger: {
           // ⚠️ The canvas carries three reds — #E02D3C (22), #D92D20 (15) and

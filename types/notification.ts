@@ -53,3 +53,23 @@ export const unreadBadge = (count: number): string | null => {
 
   return count > 9 ? '9+' : String(count);
 };
+
+/**
+ * What a reader gets notified about, and on which channel.
+ *
+ * Not one switch per content category with a shared channel list underneath -
+ * on the wire, email and push are each their own set of categories, and they
+ * don't match: email has no "social" toggle, push has no "marketing" one, and
+ * there is no WhatsApp channel at all.
+ */
+export type NotificationPreferences = {
+  id: string;
+  email: string;
+  marketing: boolean;
+  communities: boolean;
+  experiences: boolean;
+  pushCommunity: boolean;
+  pushExperiences: boolean;
+  pushSocial: boolean;
+  pushGuides: boolean;
+};

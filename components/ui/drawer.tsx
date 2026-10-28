@@ -37,6 +37,7 @@ export const Drawer = ({
   width = 'medium',
   mobile = 'sheet',
   panelRef,
+  ariaLabel,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
@@ -50,6 +51,7 @@ export const Drawer = ({
    * container, so the window fires no scroll event for it.
    */
   panelRef?: Ref<HTMLDivElement>;
+  ariaLabel?: string;
 }) => {
   const [mounted, setMounted] = useState(false);
   // Below this the panel is a bottom sheet. 720px is the canvas's own
@@ -126,6 +128,7 @@ export const Drawer = ({
             ref={panelRef}
             role="dialog"
             aria-modal="true"
+            aria-label={ariaLabel}
             initial={panel.initial}
             animate={panel.animate}
             exit={panel.exit}

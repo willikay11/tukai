@@ -195,6 +195,7 @@ export const EarningsSection = ({ currency = 'Ksh.' }: { currency?: string }) =>
       <WithdrawDrawer
         currency={currency}
         availableBalance={summary?.availableBalance ?? '0'}
+        pending={payoutAmount(summary?.pendingBalance)}
         isOpen={isWithdrawOpen}
         onClose={() => setIsWithdrawOpen(false)}
       />

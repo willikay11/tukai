@@ -28,11 +28,15 @@ export const MomentCard = ({
   onClick,
   priority = false,
   className,
+  // Off on the profile's own Moments tab, where every card is already the
+  // viewer's - naming them and badging each one "Yours" says nothing new.
+  showAuthor = true,
 }: {
   moment: Moment;
   onClick: () => void;
   priority?: boolean;
   className?: string;
+  showAuthor?: boolean;
 }) => {
   const { data: session } = useSession();
 
@@ -40,7 +44,7 @@ export const MomentCard = ({
   const context = momentContext(moment);
   const caption = momentCaption(moment);
   const authorName = momentAuthorName(moment.author);
-  const isYours = Boolean(session?.user?.id && session.user.id === moment.author?.id);
+  const isYours = showAuthor && Boolean(session?.user?.id && session.user.id === moment.author?.id);
 
   // "See more" is shown only where the caption actually overflows its two
   // lines. Counting characters cannot answer that - the same count wraps
@@ -121,15 +125,17 @@ export const MomentCard = ({
       </button>
 
       <div className="mt-3 flex min-w-0 items-center gap-2.5">
-        <MomentAvatar src={moment.author?.picture ?? null} name={authorName} size={36} />
+        {showAuthor && <MomentAvatar src={moment.author?.picture ?? null} name={authorName} size={36} />}
         <div className="flex min-w-0 flex-col">
-          <span className="truncate text-[15px] font-semibold text-brand-ink">{authorName}</span>
+          {showAuthor && (
+            <span className="truncate text-[15px] font-semibold text-brand-ink">{authorName}</span>
+          )}
           <span className="text-[13px] text-ink-muted">{momentDate(moment.dateCreated)}</span>
         </div>
       </div>
 
       {caption && (
-        <div className="relative mt-3 min-w-0">
+        <div className="relative min-w-0">
           <p
             ref={captionRef}
             className={cn('text-[15px] leading-[1.45] text-gray-800', !isOpen && 'line-clamp-2')}
