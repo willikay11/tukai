@@ -213,7 +213,9 @@ export const MyCalendar = ({
   onFindExperiences: () => void;
 }) => {
   const [moments, setMoments] = useState<{ experienceId: string; title: string } | null>(null);
-  const [review, setReview] = useState<{ experienceId: string; title: string } | null>(null);
+  const [review, setReview] = useState<
+    { experienceId: string; title: string; image?: string; organiser?: string; when: string } | null
+  >(null);
 
   return (
     <div>
@@ -272,7 +274,15 @@ export const MyCalendar = ({
               review={writtenByExperienceId.get(item.experienceId)}
               onOpen={() => onOpenExperience(item.experienceId)}
               onShare={() => setMoments({ experienceId: item.experienceId, title: item.title })}
-              onReview={() => setReview({ experienceId: item.experienceId, title: item.title })}
+              onReview={() =>
+                setReview({
+                  experienceId: item.experienceId,
+                  title: item.title,
+                  image: item.image,
+                  organiser: item.organiser,
+                  when: item.date,
+                })
+              }
             />
           ))
         ) : (
@@ -300,6 +310,9 @@ export const MyCalendar = ({
         <LeaveReviewDrawer
           experienceId={review.experienceId}
           experienceTitle={review.title}
+          experienceImage={review.image}
+          organiser={review.organiser}
+          attendedWhen={review.when}
           isOpen={Boolean(review)}
           onClose={() => setReview(null)}
         />

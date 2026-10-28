@@ -23,6 +23,7 @@ export interface ReviewToWrite {
   title: string;
   image?: string;
   when: string;
+  organiser?: string;
 }
 
 export interface WrittenReview {
@@ -30,6 +31,7 @@ export interface WrittenReview {
   title: string;
   image?: string;
   when: string;
+  organiser?: string;
   rating: ExperienceRating;
 }
 
@@ -64,6 +66,7 @@ export const useMyReviews = (attended: CalendarItem[], userId?: string | null) =
         title: item.title,
         image: item.image,
         when: item.date,
+        organiser: item.organiser,
         rating: mine,
       });
     } else {
@@ -72,6 +75,7 @@ export const useMyReviews = (attended: CalendarItem[], userId?: string | null) =
         title: item.title,
         image: item.image,
         when: item.date,
+        organiser: item.organiser,
       });
     }
   });

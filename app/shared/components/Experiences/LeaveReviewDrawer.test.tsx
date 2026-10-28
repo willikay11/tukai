@@ -13,42 +13,59 @@ jest.mock('@/app/shared/hooks/useExperiences', () => ({
 const toast = jest.fn();
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
 
-const renderDrawer = (onClose = jest.fn()) =>
+// jsdom has no object URLs
+beforeAll(() => {
+  URL.createObjectURL = jest.fn(() => 'blob:preview');
+  URL.revokeObjectURL = jest.fn();
+});
+
+const renderDrawer = (props: Partial<React.ComponentProps<typeof LeaveReviewDrawer>> = {}) =>
   render(
-    <LeaveReviewDrawer experienceId="e1" experienceTitle="Sunrise hike" isOpen onClose={onClose} />,
+    <LeaveReviewDrawer
+      experienceId="e1"
+      experienceTitle="Sunrise hike"
+      isOpen
+      onClose={jest.fn()}
+      {...props}
+    />,
   );
 
-const star = (value: number) => screen.getByRole('radio', { name: `${value} out of 5` });
+const star = (value: number) =>
+  screen.getByRole('button', { name: `${value} ${value === 1 ? 'star' : 'stars'}` });
+
+const postButton = () => screen.getByRole('button', { name: /Post review/ });
+
+const write = async (text: string) => userEvent.type(screen.getByLabelText('Your review'), text);
 
 describe('leaving a review', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('asks about the experience by name', () => {
-    renderDrawer();
+  it('shows the experience and when it was attended', () => {
+    renderDrawer({ attendedWhen: new Date().toISOString(), organiser: 'City Sketchers' });
 
-    expect(screen.getByText('How was Sunrise hike?')).toBeInTheDocument();
+    expect(screen.getByText('Sunrise hike')).toBeInTheDocument();
+    expect(screen.getByText('Attended yesterday, City Sketchers')).toBeInTheDocument();
   });
 
-  it('will not post without a score', async () => {
+  it('keeps Post review disabled until there is a score and some words', async () => {
     renderDrawer();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Post review' }));
-
-    expect(createRating).not.toHaveBeenCalled();
-    expect(await screen.findByRole('alert')).toHaveTextContent('Choose a score from one to five.');
-  });
-
-  // The API takes a rating with no words at all
-  it('posts a score on its own', async () => {
-    renderDrawer();
+    expect(postButton()).toBeDisabled();
 
     await userEvent.click(star(4));
-    await userEvent.click(screen.getByRole('button', { name: 'Post review' }));
+    expect(postButton()).toBeDisabled();
 
-    expect(createRating).toHaveBeenCalledWith(
-      { rating: 4, review: undefined, photos: [] },
-      expect.anything(),
-    );
+    await write('Worth the early start.');
+    expect(postButton()).toBeEnabled();
+  });
+
+  it('hints at what is still missing', async () => {
+    renderDrawer();
+
+    expect(screen.getByText('Pick a star rating and add a few words.')).toBeInTheDocument();
+
+    await userEvent.click(star(4));
+    expect(screen.getByText('Add a few words about what it was like.')).toBeInTheDocument();
   });
 
   it('says what each score means', async () => {
@@ -56,21 +73,18 @@ describe('leaving a review', () => {
 
     await userEvent.click(star(5));
 
-    expect(screen.getByText('Loved it')).toBeInTheDocument();
+    expect(screen.getByText('Excellent')).toBeInTheDocument();
   });
 
-  it('sends the words that were written', async () => {
+  it('sends the score and the words that were written', async () => {
     renderDrawer();
 
     await userEvent.click(star(5));
-    await userEvent.type(
-      screen.getByLabelText(/Anything you want to add/),
-      'Worth the early start.',
-    );
-    await userEvent.click(screen.getByRole('button', { name: 'Post review' }));
+    await write('Worth the early start.');
+    await userEvent.click(postButton());
 
     expect(createRating).toHaveBeenCalledWith(
-      expect.objectContaining({ review: 'Worth the early start.' }),
+      { rating: 5, review: 'Worth the early start.', photos: [] },
       expect.anything(),
     );
   });
@@ -81,8 +95,9 @@ describe('leaving a review', () => {
 
     const photo = new File(['x'], 'summit.jpg', { type: 'image/jpeg' });
     await userEvent.click(star(5));
+    await write('Worth the early start.');
     await userEvent.upload(screen.getByLabelText('Add photos'), photo);
-    await userEvent.click(screen.getByRole('button', { name: 'Post review' }));
+    await userEvent.click(postButton());
 
     expect(createRating).toHaveBeenCalledWith(
       expect.objectContaining({ photos: [photo] }),
@@ -96,23 +111,24 @@ describe('leaving a review', () => {
     const photo = new File(['x'], 'summit.jpg', { type: 'image/jpeg' });
     await userEvent.upload(screen.getByLabelText('Add photos'), photo);
 
-    expect(screen.getByText('summit.jpg')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Remove summit.jpg' })).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Remove summit.jpg' }));
 
-    expect(screen.queryByText('summit.jpg')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Remove summit.jpg' })).not.toBeInTheDocument();
   });
 
   it('thanks the reviewer and closes once it is posted', async () => {
     const onClose = jest.fn();
     createRating.mockImplementation((_data, { onSuccess }) => onSuccess());
-    renderDrawer(onClose);
+    renderDrawer({ onClose });
 
     await userEvent.click(star(5));
-    await userEvent.click(screen.getByRole('button', { name: 'Post review' }));
+    await write('Worth the early start.');
+    await userEvent.click(postButton());
 
     expect(toast).toHaveBeenCalledWith(
-      expect.objectContaining({ description: 'Your review of Sunrise hike is posted.' }),
+      expect.objectContaining({ description: 'Thanks for sharing what Sunrise hike was like.' }),
     );
     expect(onClose).toHaveBeenCalled();
   });
@@ -128,7 +144,8 @@ describe('leaving a review', () => {
     renderDrawer();
 
     await userEvent.click(star(3));
-    await userEvent.click(screen.getByRole('button', { name: 'Post review' }));
+    await write('It was alright.');
+    await userEvent.click(postButton());
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'You did not attend this experience.',

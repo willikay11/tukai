@@ -14,6 +14,7 @@ export interface CalendarItem {
   title: string;
   image?: string;
   place: string;
+  organiser?: string;
   tag: CalendarTag;
   isPast: boolean;
 }
@@ -33,6 +34,32 @@ export const dayOffset = (date: string | Date, now: Date = new Date()): number =
 
 const placeLine = (experience?: Experience | null): string =>
   experience?.location?.name || experience?.location?.city || '';
+
+/**
+ * Who ran it: the guide for a guided tour, otherwise the organising community.
+ *
+ * Not `linkedUserName` for the guide - on a person, `displayName` is their
+ * @handle, not a name to show here.
+ */
+const organiserLine = (experience?: Experience | null): string | undefined => {
+  if (!experience) return undefined;
+
+  if (experience.experienceType === 'guide_booking') {
+    const name = [experience.host?.firstName, experience.host?.lastName]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+    return name ? `Guided by ${name}` : undefined;
+  }
+
+  return experience.hostCommunity?.title;
+};
+
+/** "yesterday" or "{n} days ago", for the attended-experience review copy. */
+export const attendedAgo = (date: string, now: Date = new Date()): string => {
+  const ago = -dayOffset(date, now);
+  return ago <= 1 ? 'yesterday' : `${ago} days ago`;
+};
 
 /**
  * One bookings calendar out of three separate records: ticket purchases carry
@@ -64,6 +91,7 @@ export const buildCalendarAgenda = (
         title: experience.title,
         image: coverPhotoUrl(experience.photos),
         place: placeLine(experience),
+        organiser: organiserLine(experience),
         tag: isPast ? 'Attended' : 'Booked',
         isPast,
       } as CalendarItem;
