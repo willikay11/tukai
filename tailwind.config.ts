@@ -128,6 +128,9 @@ const config: Config = {
           pill: '#1F2937', // the label and icon on a resting section pill
           summary: '#1F2937', // the one-line summary under a manager's banner title
           label: '#1F2937', // a fact's label and icon in the place drawer's facts grid
+          // The settings pages' inline notes (payout safety, notifications,
+          // privacy) and an empty panel's message - a shade darker than `muted`
+          note: '#3C4A45',
         },
         danger: {
           // ⚠️ The canvas carries three reds — #E02D3C (22), #D92D20 (15) and

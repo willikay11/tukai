@@ -27,6 +27,8 @@ const profile = (overrides: Partial<MyProfile> = {}): MyProfile =>
 const renderDrawer = (onClose = jest.fn(), current: MyProfile | null = profile()) =>
   render(<EditProfileDrawer profile={current} userId="u1" isOpen onClose={onClose} />);
 
+const saveButton = () => screen.getByRole('button', { name: 'Save changes' });
+
 describe('editing a profile', () => {
   beforeEach(() => jest.clearAllMocks());
 
@@ -34,59 +36,56 @@ describe('editing a profile', () => {
     renderDrawer();
 
     expect(screen.getByLabelText('First name')).toHaveValue('Wanjiku');
-    expect(screen.getByLabelText('Handle')).toHaveValue('wanjiku.m');
-    expect(screen.getByLabelText('About you')).toHaveValue('Weekend hiker.');
+    expect(screen.getByLabelText('Last name')).toHaveValue('Maina');
+    expect(screen.getByLabelText('Username')).toHaveValue('wanjiku.m');
+    expect(screen.getByLabelText('Bio')).toHaveValue('Weekend hiker.');
+  });
+
+  it('keeps Save changes disabled until something changes', () => {
+    renderDrawer();
+
+    expect(saveButton()).toBeDisabled();
+  });
+
+  it('lowercases a username and drops anything not a letter, number, dot or underscore', async () => {
+    renderDrawer();
+
+    await userEvent.clear(screen.getByLabelText('Username'));
+    await userEvent.type(screen.getByLabelText('Username'), '@Wanjiku 123!');
+
+    expect(screen.getByLabelText('Username')).toHaveValue('wanjiku123');
+  });
+
+  it('disables Save changes for a username shorter than 3 characters', async () => {
+    renderDrawer();
+
+    await userEvent.clear(screen.getByLabelText('Username'));
+    await userEvent.type(screen.getByLabelText('Username'), 'ab');
+
+    expect(saveButton()).toBeDisabled();
+  });
+
+  it('disables Save changes once the name is cleared', async () => {
+    renderDrawer();
+
+    await userEvent.clear(screen.getByLabelText('First name'));
+    await userEvent.clear(screen.getByLabelText('Last name'));
+
+    expect(saveButton()).toBeDisabled();
   });
 
   it('saves what was changed', async () => {
     renderDrawer();
 
-    await userEvent.clear(screen.getByLabelText('About you'));
-    await userEvent.type(screen.getByLabelText('About you'), 'Slow reader.');
-    await userEvent.click(screen.getByRole('button', { name: 'Save profile' }));
+    await userEvent.clear(screen.getByLabelText('Bio'));
+    await userEvent.type(screen.getByLabelText('Bio'), 'Slow reader.');
+    expect(saveButton()).toBeEnabled();
+
+    await userEvent.click(saveButton());
 
     expect(save).toHaveBeenCalledWith(
       expect.objectContaining({ bio: 'Slow reader.', firstName: 'Wanjiku' }),
       expect.anything(),
-    );
-  });
-
-  // The API stores the handle without its @, however it was typed
-  it('strips an @ from the handle', async () => {
-    renderDrawer();
-
-    await userEvent.clear(screen.getByLabelText('Handle'));
-    await userEvent.type(screen.getByLabelText('Handle'), '@wanjiku');
-    await userEvent.click(screen.getByRole('button', { name: 'Save profile' }));
-
-    expect(save).toHaveBeenCalledWith(
-      expect.objectContaining({ displayName: 'wanjiku' }),
-      expect.anything(),
-    );
-  });
-
-  it('trims what was typed', async () => {
-    renderDrawer();
-
-    await userEvent.clear(screen.getByLabelText('Website'));
-    await userEvent.type(screen.getByLabelText('Website'), '  https://example.com  ');
-    await userEvent.click(screen.getByRole('button', { name: 'Save profile' }));
-
-    expect(save).toHaveBeenCalledWith(
-      expect.objectContaining({ websiteUrl: 'https://example.com' }),
-      expect.anything(),
-    );
-  });
-
-  it('will not save without a first name', async () => {
-    renderDrawer();
-
-    await userEvent.clear(screen.getByLabelText('First name'));
-    await userEvent.click(screen.getByRole('button', { name: 'Save profile' }));
-
-    expect(save).not.toHaveBeenCalled();
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'A first name is the one thing people need to recognise you.',
     );
   });
 
@@ -95,28 +94,37 @@ describe('editing a profile', () => {
     save.mockImplementation((_changes, { onSuccess }) => onSuccess());
     renderDrawer(onClose);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Save profile' }));
+    await userEvent.type(screen.getByLabelText('Bio'), ' Slow reader.');
+    await userEvent.click(saveButton());
 
-    expect(toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Profile saved' }));
+    expect(toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Your profile is updated.' }));
     expect(onClose).toHaveBeenCalled();
   });
 
   it('shows the refusal the API gave', async () => {
-    save.mockImplementation((_changes, { onError }) => onError(new Error('That handle is taken.')));
+    save.mockImplementation((_changes, { onError }) => onError(new Error('That username is taken.')));
     renderDrawer();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Save profile' }));
+    await userEvent.type(screen.getByLabelText('Bio'), ' Slow reader.');
+    await userEvent.click(saveButton());
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('That handle is taken.');
+    expect(await screen.findByRole('alert')).toHaveTextContent('That username is taken.');
   });
 
-  // The picture is read-only on this serializer and the email is verified
-  // rather than typed, so neither is offered
-  it('offers only what the API lets a reader change', () => {
+  // The picture is changed through a toast-only action (the photo picker isn't
+  // designed yet), and the email is verified rather than typed, so neither is
+  // a field here. Website and YouTube dropped too - this handoff's Social
+  // links are Instagram, X and TikTok only.
+  it('offers only what this handoff asks for', () => {
     renderDrawer();
 
+    expect(screen.queryByLabelText(/^Website$/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/^YouTube$/)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/picture/i)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/email/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Instagram username')).toBeInTheDocument();
+    expect(screen.getByLabelText('X username')).toBeInTheDocument();
+    expect(screen.getByLabelText('TikTok username')).toBeInTheDocument();
   });
 
   it('copes with a profile that could not be loaded', () => {

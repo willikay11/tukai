@@ -100,7 +100,9 @@ export const ProfilePageContent = () => {
           {activeTab === 'reviews' && (
             <ReviewsTab toReview={reviews.toReview} written={reviews.written} />
           )}
-          {activeTab === 'settings' && <SettingsTab onEditProfile={() => setIsEditOpen(true)} />}
+          {activeTab === 'settings' && (
+            <SettingsTab profile={profile} onEditProfile={() => setIsEditOpen(true)} />
+          )}
         </div>
       </div>
 

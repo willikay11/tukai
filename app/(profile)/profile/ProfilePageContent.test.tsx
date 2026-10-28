@@ -54,6 +54,10 @@ jest.mock('@/app/(experiences)/hooks/usePayment', () => ({
 jest.mock('@/context/ExperienceDrawerContext', () => ({
   useExperienceDrawer: () => null,
 }));
+jest.mock('@/app/(profile)/hooks/useNotificationPreferences', () => ({
+  useNotificationPreferences: () => ({ data: { success: true, data: undefined }, isLoading: false }),
+  useUpdateNotificationPreferences: () => ({ mutate: jest.fn(), isPending: false }),
+}));
 
 const profile = (overrides: Partial<MyProfile> = {}): MyProfile =>
   ({

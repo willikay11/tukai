@@ -1,12 +1,19 @@
 'use client';
 
+import { useState } from 'react';
+
 import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 import { useGetWallets } from '@/app/(experiences)/hooks/usePayment';
+import { useNotificationPreferences } from '@/app/(profile)/hooks';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useToast } from '@/app/shared/hooks/useToast';
+import { NotificationPreferences } from '@/types/notification';
 import { Wallet } from '@/types/payment';
+
+import { MyProfile, profileHandle, profileName } from '../profile';
+import { NotificationsDrawer } from './NotificationsDrawer';
 
 const payoutMethodLine = (wallets: Wallet[]): string => {
   const active = wallets.find((wallet) => wallet.isActive) ?? wallets[0];
@@ -17,6 +24,29 @@ const payoutMethodLine = (wallets: Wallet[]): string => {
   }
 
   return active.bankName || 'Bank account';
+};
+
+const personalDetailsLine = (profile?: MyProfile | null): string => {
+  const name = profileName(profile);
+  const handle = profileHandle(profile);
+  return [name, handle].filter(Boolean).join(', ');
+};
+
+/** Real field count is 7, not the handoff's sample 6 - email has no "social" toggle, push has no "marketing" one. */
+const notificationsLine = (prefs?: NotificationPreferences): string => {
+  if (!prefs) return 'Push, email and in-app alerts';
+
+  const keys = [
+    'marketing',
+    'communities',
+    'experiences',
+    'pushCommunity',
+    'pushExperiences',
+    'pushSocial',
+    'pushGuides',
+  ] as const;
+  const on = keys.filter((key) => prefs[key]).length;
+  return `${on} of ${keys.length} on`;
 };
 
 const SettingsRow = ({
@@ -46,12 +76,22 @@ const SettingsRow = ({
   </button>
 );
 
-export const SettingsTab = ({ onEditProfile }: { onEditProfile: () => void }) => {
+export const SettingsTab = ({
+  profile,
+  onEditProfile,
+}: {
+  profile?: MyProfile | null;
+  onEditProfile: () => void;
+}) => {
   const router = useRouter();
   const { toast } = useToast();
   const { data } = useGetWallets();
   const walletsPayload = data?.data;
   const wallets: Wallet[] = Array.isArray(walletsPayload) ? walletsPayload : walletsPayload?.results ?? [];
+
+  const { data: notifResponse } = useNotificationPreferences();
+  const notifPrefs = notifResponse?.success ? notifResponse.data : undefined;
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   const comingSoon = (what: string) =>
     toast({ description: `${what} is coming soon.` });
@@ -67,7 +107,7 @@ export const SettingsTab = ({ onEditProfile }: { onEditProfile: () => void }) =>
         <SettingsRow
           icon="UserCircleIcon"
           title="Personal details"
-          sub="Name, username, bio and city"
+          sub={personalDetailsLine(profile)}
           onClick={onEditProfile}
         />
         <SettingsRow
@@ -79,8 +119,8 @@ export const SettingsTab = ({ onEditProfile }: { onEditProfile: () => void }) =>
         <SettingsRow
           icon="Notification03Icon"
           title="Notifications"
-          sub="Reminders, invites and messages"
-          onClick={() => comingSoon('Notification settings')}
+          sub={notificationsLine(notifPrefs)}
+          onClick={() => setIsNotificationsOpen(true)}
         />
         <SettingsRow
           icon="LockIcon"
@@ -107,6 +147,8 @@ export const SettingsTab = ({ onEditProfile }: { onEditProfile: () => void }) =>
         <IconComponent iconName="Logout03Icon" size={20} color="currentColor" />
         Sign out
       </button>
+
+      <NotificationsDrawer isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />
     </div>
   );
 };

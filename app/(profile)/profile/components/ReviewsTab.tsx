@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import moment from 'moment';
 
@@ -10,7 +10,7 @@ import { LeaveReviewDrawer } from '@/app/shared/components/Experiences';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
-import { RATING_MAX, ratingPhotoUrl } from '@/types/experienceRating';
+import { ExperienceRatingPhoto, RATING_MAX, ratingPhotoUrl } from '@/types/experienceRating';
 
 /** "Attended yesterday, {organiser}", or without one when there is none. */
 const attendedLine = (when: string, organiser?: string): string => {
@@ -67,10 +67,99 @@ const ToReviewCard = ({
   </article>
 );
 
+/**
+ * A full-screen view of a review's own photos.
+ *
+ * Not built to any handoff's pixel values - every one of them calls the
+ * gallery itself out of scope, with its own design still to come. This is
+ * just enough to make "Open photo" and "See all" do something real.
+ */
+const PhotoGalleryModal = ({
+  photos,
+  index,
+  title,
+  onClose,
+}: {
+  photos: ExperienceRatingPhoto[];
+  index: number;
+  title: string;
+  onClose: () => void;
+}) => {
+  const [current, setCurrent] = useState(index);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+      if (event.key === 'ArrowLeft') setCurrent((value) => (value - 1 + photos.length) % photos.length);
+      if (event.key === 'ArrowRight') setCurrent((value) => (value + 1) % photos.length);
+    };
+
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [photos.length, onClose]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      className="fixed inset-0 z-[70] flex flex-col bg-black/90"
+    >
+      <div className="flex flex-shrink-0 items-center justify-between gap-3 px-4 py-3">
+        <span className="truncate text-sm font-medium text-white/80">
+          {title} · {current + 1} of {photos.length}
+        </span>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10"
+        >
+          <IconComponent iconName="Cancel01Icon" size={20} color="currentColor" />
+        </button>
+      </div>
+
+      <div className="relative flex min-h-0 flex-1 items-center justify-center px-4 pb-4">
+        <div className="relative h-full w-full max-w-4xl">
+          <PhotoImage
+            src={ratingPhotoUrl(photos[current])}
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-contain"
+          />
+        </div>
+
+        {photos.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => setCurrent((value) => (value - 1 + photos.length) % photos.length)}
+              aria-label="Previous photo"
+              className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60"
+            >
+              <IconComponent iconName="ArrowLeft01Icon" size={20} color="currentColor" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrent((value) => (value + 1) % photos.length)}
+              aria-label="Next photo"
+              className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60"
+            >
+              <IconComponent iconName="ArrowRight01Icon" size={20} color="currentColor" />
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const WrittenReviewCard = ({ review }: { review: WrittenReview }) => {
   const experienceDrawer = useExperienceDrawer();
   const photos = review.rating.photos ?? [];
   const rating = review.rating.rating;
+  const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
 
   return (
     <article className="flex flex-col gap-3 rounded-xl bg-surface px-4 pb-4 pt-3.5">
@@ -121,10 +210,11 @@ const WrittenReviewCard = ({ review }: { review: WrittenReview }) => {
               <button
                 key={photo.id}
                 type="button"
+                onClick={() => setGalleryIndex(index)}
                 aria-label={overflow ? `See all ${photos.length} photos` : `Open photo ${index + 1} of ${photos.length}`}
                 className="relative h-[76px] w-[76px] flex-shrink-0 cursor-zoom-in overflow-hidden rounded-[8px] bg-surface-brand"
               >
-                <PhotoImage src={ratingPhotoUrl(photo)} alt="" fill sizes="76px" className="object-cover" />
+                <PhotoImage src={ratingPhotoUrl(photo, 'thumb')} alt="" fill sizes="76px" className="object-cover" />
                 {overflow && (
                   <span className="absolute inset-0 flex items-center justify-center bg-[rgba(1,26,27,0.55)] text-[15px] font-bold text-white">
                     +{photos.length - 3}
@@ -134,6 +224,15 @@ const WrittenReviewCard = ({ review }: { review: WrittenReview }) => {
             );
           })}
         </div>
+      )}
+
+      {galleryIndex !== null && (
+        <PhotoGalleryModal
+          photos={photos}
+          index={galleryIndex}
+          title={`Your photos from ${review.title}`}
+          onClose={() => setGalleryIndex(null)}
+        />
       )}
     </article>
   );
