@@ -49,6 +49,11 @@ export interface BucketList {
   description?: string;
   visibility: 'public' | 'private';
   coverImage?: PhotoLike;
+  // The API's swagger doc types this as a plain string - a common
+  // mis-generation for a `SerializerMethodField` - but the name says a list,
+  // and `coverImage` is the one that is reliably blank, so both shapes are
+  // read defensively in `bucketListCoverPhoto`.
+  coverPhotos?: PhotoLike | PhotoLike[];
   shareToken?: string;
   owner?: LinkedUser;
   itemCount: number;
@@ -105,8 +110,16 @@ export const bucketListItemPhoto = (item: BucketListItem): string | undefined =>
  * responses and as the Photo object on others - the same split that left the
  * saved items blank.
  */
-export const bucketListCoverPhoto = (bucketList: { coverImage?: PhotoLike }): string | undefined =>
-  resolvePhotoUrl(bucketList.coverImage);
+export const bucketListCoverPhoto = (bucketList: {
+  coverImage?: PhotoLike;
+  coverPhotos?: PhotoLike | PhotoLike[];
+}): string | undefined => {
+  const direct = resolvePhotoUrl(bucketList.coverImage);
+  if (direct) return direct;
+
+  const photos = bucketList.coverPhotos;
+  return resolvePhotoUrl(Array.isArray(photos) ? photos[0] : photos);
+};
 
 /** What the saved item is called, whichever kind it is. */
 export const bucketListItemName = (item: BucketListItem): string =>
