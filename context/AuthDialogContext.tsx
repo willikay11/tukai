@@ -2,6 +2,7 @@
 
 import { ReactNode, createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { getSession, signIn, useSession } from 'next-auth/react';
 
 import { AuthFlowDialog } from '@/app/shared/components/Auth/AuthDialog/AuthFlowDialog';
@@ -136,6 +137,7 @@ const PENDING_VERIFICATION =
 
 export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
   const { data: session, status, update: updateSession } = useSession();
+  const queryClient = useQueryClient();
 
   const [view, setView] = useState<AuthView>(null);
   const [step, setStep] = useState<AuthStep>(null);
@@ -640,6 +642,10 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
       await updateSession?.();
 
       if (intsMode === 'edit') {
+        // The profile page reads interests off its own `['profile', userId]`
+        // query, not the session - without this it keeps showing the old
+        // list until that query happens to refetch on its own.
+        queryClient.invalidateQueries({ queryKey: ['profile', session?.user?.id] });
         setView(null);
         setIntsMode(null);
         toast({ description: 'Interests saved to your profile.', variant: 'success' });
@@ -682,7 +688,7 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
     setOtp('');
     setOtpErr('');
     setOtpSentAt(Date.now());
-  }, [intsDraft, intsBusy, intsMode, session?.user?.id, first, last, email, password, authProv, finishAndClose, updateSession]);
+  }, [intsDraft, intsBusy, intsMode, session?.user?.id, first, last, email, password, authProv, finishAndClose, updateSession, queryClient]);
 
   const submitForgotEmail = useCallback(async () => {
     const trimmed = forgotEmail.trim();

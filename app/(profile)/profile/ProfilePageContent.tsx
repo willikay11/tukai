@@ -17,6 +17,7 @@ import {
   MomentsTab,
   OverviewTab,
   ProfileCard,
+  ProfilePageSkeleton,
   ProfileTabs,
   ReviewsTab,
   SettingsTab,
@@ -46,8 +47,8 @@ export const ProfilePageContent = () => {
 
   if (status === 'loading' || (userId && isLoading)) {
     return (
-      <PageContainer className="py-6">
-        <div className="h-40 animate-pulse rounded-3xl bg-gray-100" />
+      <PageContainer className="pb-10">
+        <ProfilePageSkeleton />
       </PageContainer>
     );
   }

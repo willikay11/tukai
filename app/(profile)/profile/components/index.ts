@@ -6,6 +6,7 @@ export { EditProfileDrawer } from './EditProfileDrawer';
 export { MomentsTab } from './MomentsTab';
 export { OverviewTab } from './overview/OverviewTab';
 export { ProfileCard } from './ProfileCard';
+export { ProfilePageSkeleton } from './ProfilePageSkeleton';
 export { ProfileTabs } from './ProfileTabs';
 export type { ProfileTabId } from './ProfileTabs';
 export { ReviewsTab } from './ReviewsTab';
