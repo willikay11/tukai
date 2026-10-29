@@ -11,7 +11,7 @@ import { ForgotEmailScreen } from './ForgotEmailScreen';
 import { ForgotNewPasswordScreen } from './ForgotNewPasswordScreen';
 import { OtpScreen } from './OtpScreen';
 
-const PHOTO_SRC = '/images/hill-descent.webp';
+const PHOTO_SRC = '/images/auth-camp-night.jpg';
 
 /**
  * The white, split card shared by the email form, the OTP screen and the

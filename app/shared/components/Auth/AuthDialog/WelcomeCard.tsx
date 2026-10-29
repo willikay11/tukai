@@ -9,7 +9,7 @@ import { AppleGlyph, AuthSpinner, GoogleGlyph } from './SocialGlyphs';
 import { DialogCloseButton } from './DialogIconButtons';
 import { RotatingPhrase } from './RotatingPhrase';
 
-const PHOTO_SRC = '/images/hill-descent.webp';
+const PHOTO_SRC = '/images/auth-camp-night.jpg';
 
 const METHOD_BUTTON =
   'flex h-14 items-center justify-center gap-3 rounded-full px-5 text-base font-semibold whitespace-nowrap transition active:scale-[0.98] motion-reduce:active:scale-100 disabled:cursor-not-allowed';

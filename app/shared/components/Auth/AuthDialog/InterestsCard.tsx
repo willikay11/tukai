@@ -10,7 +10,7 @@ import { Interest } from '@/types/interest';
 import { DialogCloseButton } from './DialogIconButtons';
 import { AuthSpinner } from './SocialGlyphs';
 
-const PHOTO_SRC = '/images/hill-descent.webp';
+const PHOTO_SRC = '/images/auth-camp-night.jpg';
 
 const InterestChip = ({
   interest,
