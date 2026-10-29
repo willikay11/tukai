@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 
-import Link from 'next/link';
-
 import { interestName } from '@/app/(profile)/profile/profile';
 import { IconComponent } from '@/app/shared/components/Icons';
 
@@ -11,8 +9,10 @@ const COLLAPSED_COUNT = 4;
 
 export const MyInterests = ({
   interests,
+  onEdit,
 }: {
   interests: { id: string; name?: string; title?: string }[];
+  onEdit: () => void;
 }) => {
   const [showAll, setShowAll] = useState(false);
 
@@ -26,13 +26,14 @@ export const MyInterests = ({
     <div>
       <div className="-mt-3 flex items-center justify-between gap-3">
         <h2 className="text-17 font-bold tracking-[-0.2px] text-brand-ink">My interests</h2>
-        <Link
-          href="/auth/interests"
+        <button
+          type="button"
+          onClick={onEdit}
           className="inline-flex h-11 items-center gap-1.5 px-1 text-[13.5px] font-semibold text-brand hover:underline"
         >
           <IconComponent iconName="Edit04Icon" size={16} color="currentColor" />
           Edit
-        </Link>
+        </button>
       </div>
 
       <div className="mt-1 flex flex-wrap items-center gap-2">

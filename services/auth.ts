@@ -78,6 +78,7 @@ export const updateMyProfile = async (
     tiktokUrl?: string;
     youtubeUrl?: string;
     xUrl?: string;
+    interestIds?: string[];
   },
 ) => {
   try {
@@ -92,6 +93,7 @@ export const updateMyProfile = async (
       ...(changes.tiktokUrl !== undefined ? { tiktok_url: changes.tiktokUrl } : {}),
       ...(changes.youtubeUrl !== undefined ? { youtube_url: changes.youtubeUrl } : {}),
       ...(changes.xUrl !== undefined ? { x_url: changes.xUrl } : {}),
+      ...(changes.interestIds !== undefined ? { interests_ids: changes.interestIds } : {}),
     });
 
     return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
