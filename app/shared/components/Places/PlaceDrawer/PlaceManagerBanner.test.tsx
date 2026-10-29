@@ -46,4 +46,10 @@ describe('PlaceManagerBanner', () => {
 
     expect(screen.getByText('You manage this place through Nairobi Makers')).toBeInTheDocument();
   });
+
+  it('leaves the reservations to their own tab and section', () => {
+    render(<PlaceManagerBanner profile={profile} rules={[]} onOpenSettings={jest.fn()} />);
+
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+  });
 });
