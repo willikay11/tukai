@@ -23,7 +23,7 @@ export const ScrollFilters = ({
   const pathname = usePathname();
   const { data: session } = useSession();
   const { selectedCategoryId, setSelectedCategoryId } = useSelectedCategory();
-  const { setOpenSignIn, openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
   const [showPrevBtn, setShowPrevBtn] = useState<boolean>(false);
   const [showNextBtn, setShowNextBtn] = useState<boolean>(false);
   const [selectedOption, setSelectedOption] = useState<string | undefined>(selectedCategoryId);
@@ -112,7 +112,7 @@ export const ScrollFilters = ({
     if (requiresAuth && !session) {
       if (isMyCommunities) {
         // Signing in carries on to the filter they pressed for
-        openSignInWithCallback(() => {
+        needAuth(undefined, () => {
           setSelectedOption(categoryId);
           setSelectedCategoryId(categoryId);
 
@@ -121,7 +121,7 @@ export const ScrollFilters = ({
           router.replace(`${pathname}?${params.toString()}`, { scroll: true });
         });
       } else {
-        setOpenSignIn(true);
+        needAuth();
       }
       return;
     }

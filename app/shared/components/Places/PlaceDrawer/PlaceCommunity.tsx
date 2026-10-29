@@ -36,7 +36,7 @@ export const PlaceCommunity = ({ communityId }: { communityId: string }) => {
   const { data: session } = useSession();
   const userId = session?.user?.id;
   const { toast } = useToast();
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
 
   const { data: response } = useCommunityDetail(communityId, Boolean(communityId));
   const { mutate: joinCommunity, isPending: isJoining } = useJoinCommunity();
@@ -65,7 +65,7 @@ export const PlaceCommunity = ({ communityId }: { communityId: string }) => {
   };
 
   // Signing in carries on to the join, so the one press is the one that counts
-  const handleJoin = () => (userId ? join() : openSignInWithCallback(join));
+  const handleJoin = () => (userId ? join() : needAuth('join', join));
 
   return (
     <section className="space-y-3.5 py-6">

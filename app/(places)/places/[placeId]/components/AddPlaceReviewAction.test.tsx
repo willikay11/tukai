@@ -10,9 +10,9 @@ jest.mock('next-auth/react', () => ({
   useSession: () => ({ data: sessionUser ? { user: sessionUser } : null }),
 }));
 
-const setOpenSignIn = jest.fn();
+const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ setOpenSignIn }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 
 const createPlaceReview = jest.fn();
@@ -74,7 +74,7 @@ describe('AddPlaceReviewAction', () => {
 
     await user.click(screen.getByRole('button', { name: /Write a review/ }));
 
-    expect(setOpenSignIn).toHaveBeenCalledWith(true);
+    expect(needAuth).toHaveBeenCalledWith(undefined, expect.any(Function));
     expect(screen.queryByTestId('add-review')).not.toBeInTheDocument();
   });
 

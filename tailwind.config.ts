@@ -151,6 +151,10 @@ const config: Config = {
         'brand-green': {
           DEFAULT: 'rgba(var(--color-brand-green) / <alpha-value>)',
         },
+        // The auth dialog's photo-card background (Welcome, Interests, and
+        // the email form's photo panel) - sampled from the design canvas.
+        // No other screen uses this exact navy, so it isn't folded into `brand`.
+        'auth-night': '#0B1A26',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -218,11 +222,31 @@ const config: Config = {
           '0%, 75%, 100%': { boxShadow: '0 0 0 0 rgba(224, 45, 60, 0)' },
           '10%': { boxShadow: '0 0 0 6px rgba(224, 45, 60, 0.45)' },
         },
+        // The auth dialog's button spinner (`tkSpin` in the design canvas) -
+        // kept separate from Tailwind's own `animate-spin` (1s) since the
+        // canvas asks for 0.8s specifically.
+        'auth-spin': {
+          to: { transform: 'rotate(360deg)' },
+        },
+        // The auth welcome/interests screens' rotating phrase - a letter
+        // animating in (`tkLetterIn`) or the previous word animating out
+        // (`tkWordOut`).
+        'auth-letter-in': {
+          '0%': { opacity: '0', transform: 'translateY(.42em)', filter: 'blur(6px)' },
+          '100%': { opacity: '1', transform: 'none', filter: 'blur(0)' },
+        },
+        'auth-word-out': {
+          '0%': { opacity: '1', transform: 'none', filter: 'blur(0)' },
+          '100%': { opacity: '0', transform: 'translateY(-.36em)', filter: 'blur(6px)' },
+        },
       },
       animation: {
         pop: 'pop 300ms ease-out',
         'fade-in-up': 'fade-in-up 200ms ease-out',
         'tk-pulse': 'tk-pulse 1.6s ease-out infinite',
+        'auth-spin': 'auth-spin 0.8s linear infinite',
+        'auth-letter-in': 'auth-letter-in .62s cubic-bezier(.2,.8,.2,1) both',
+        'auth-word-out': 'auth-word-out .42s cubic-bezier(.4,0,.2,1) both',
       },
       borderRadius: {
         lg: 'var(--radius)',

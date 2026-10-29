@@ -1,88 +1,168 @@
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+import { signIn, useSession } from 'next-auth/react';
 
 import { AuthDialogProvider, useAuthDialog } from './AuthDialogContext';
 
-const back = jest.fn();
-jest.mock('next/navigation', () => ({ useRouter: () => ({ back, push: jest.fn() }) }));
-
-const onLoginHolder: { fire?: () => void } = {};
-// Only the card is stubbed: the box around it is the real one, so the dialog
-// still behaves like a dialog - Escape closes it, and it carries its own role
-jest.mock('@/app/shared/components/Auth', () => ({
-  ...jest.requireActual('@/app/shared/components/Auth'),
-  AuthCard: ({ onLogin }: { onLogin: () => void }) => {
-    onLoginHolder.fire = onLogin;
-    return <div data-testid="sign-in-form" />;
-  },
+jest.mock('next-auth/react', () => ({
+  useSession: jest.fn(),
+  signIn: jest.fn(),
+  getSession: jest.fn().mockResolvedValue({ user: { name: 'Wanjiku Kamau' } }),
 }));
 
-jest.mock('@/app/shared/hooks/useToast', () => ({ toast: jest.fn() }));
+// The dialog and nudge UI are exercised by their own component tests - here
+// only the state machine (needAuth, close, the pending callback) is under test
+jest.mock('@/app/shared/components/Auth/AuthDialog/AuthFlowDialog', () => ({
+  AuthFlowDialog: () => null,
+}));
+jest.mock('@/app/shared/components/Auth/AuthDialog/SignInNudge', () => ({
+  SignInNudge: () => null,
+}));
+
+const mockUseSession = useSession as jest.Mock;
+const mockSignIn = signIn as jest.Mock;
 
 const continued = jest.fn();
 
 const Opener = () => {
-  const { openSignInWithCallback } = useAuthDialog();
-
-  return <button onClick={() => openSignInWithCallback(continued)}>Reserve</button>;
+  const { needAuth } = useAuthDialog();
+  return <button onClick={() => needAuth('reserve', continued)}>Reserve</button>;
 };
 
-const renderWithProvider = () =>
-  render(
-    <AuthDialogProvider>
-      <Opener />
-    </AuthDialogProvider>,
+const ViewProbe = () => {
+  const { view, why, close } = useAuthDialog();
+  return (
+    <div>
+      <span data-testid="view">{view ?? 'none'}</span>
+      <span data-testid="why">{why}</span>
+      <button onClick={close}>Close dialog</button>
+    </div>
   );
+};
+
+const renderWithProvider = (children: React.ReactNode) =>
+  render(<AuthDialogProvider>{children}</AuthDialogProvider>);
 
 describe('AuthDialogProvider', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseSession.mockReturnValue({ data: null, status: 'unauthenticated', update: jest.fn() });
+  });
 
-  it('opens over whatever asked for it', async () => {
+  it('opens Create account with the reason pill for a signed-out reader', async () => {
     const user = userEvent.setup();
-    renderWithProvider();
+    renderWithProvider(
+      <>
+        <Opener />
+        <ViewProbe />
+      </>,
+    );
 
     await user.click(screen.getByRole('button', { name: 'Reserve' }));
 
-    expect(screen.getByTestId('sign-in-form')).toBeInTheDocument();
+    expect(screen.getByTestId('view')).toHaveTextContent('register');
+    expect(screen.getByTestId('why')).toHaveTextContent(
+      'Booking needs an account, so your bookings stay with you.',
+    );
+  });
+
+  it('does nothing for a reader who is already signed in', async () => {
+    mockUseSession.mockReturnValue({
+      data: { user: { id: 'u1' } },
+      status: 'authenticated',
+      update: jest.fn(),
+    });
+    const user = userEvent.setup();
+    renderWithProvider(
+      <>
+        <Opener />
+        <ViewProbe />
+      </>,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Reserve' }));
+
+    expect(screen.getByTestId('view')).toHaveTextContent('none');
+    expect(continued).not.toHaveBeenCalled();
   });
 
   // What makes the flow one press rather than two journeys
-  it('runs what the reader was doing once they are in', async () => {
+  it('runs what the reader was doing once a credentials sign-in succeeds', async () => {
+    mockSignIn.mockResolvedValue({ status: 200, ok: true });
     const user = userEvent.setup();
-    renderWithProvider();
+
+    const SignInFlow = () => {
+      const { needAuth, email, password, setEmail, setPassword, submitSignInEmailForm } =
+        useAuthDialog();
+      return (
+        <>
+          <button onClick={() => needAuth('reserve', continued)}>Reserve</button>
+          <input aria-label="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input
+            aria-label="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button onClick={() => void submitSignInEmailForm()}>Sign in</button>
+        </>
+      );
+    };
+
+    renderWithProvider(<SignInFlow />);
 
     await user.click(screen.getByRole('button', { name: 'Reserve' }));
-    onLoginHolder.fire?.();
+    await user.type(screen.getByLabelText('email'), 'reader@example.com');
+    await user.type(screen.getByLabelText('password'), 'hunter22');
+    await user.click(screen.getByRole('button', { name: 'Sign in' }));
 
-    expect(continued).toHaveBeenCalled();
+    // The resume runs on a short timeout so the dialog finishes closing first
+    await waitFor(() => expect(continued).toHaveBeenCalled());
   });
 
-  /**
-   * It used to call router.back() on close, so a reader who opened this from a
-   * place page and changed their mind was navigated off the page they were on.
-   */
-  it('closing only closes, and does not navigate', async () => {
+  it('closing drops whatever was pending, so a later sign-in does not run it', async () => {
     const user = userEvent.setup();
-    renderWithProvider();
+    renderWithProvider(
+      <>
+        <Opener />
+        <ViewProbe />
+      </>,
+    );
 
     await user.click(screen.getByRole('button', { name: 'Reserve' }));
-    await user.keyboard('{Escape}');
+    await user.click(screen.getByRole('button', { name: 'Close dialog' }));
 
-    expect(back).not.toHaveBeenCalled();
-    expect(screen.queryByTestId('sign-in-form')).not.toBeInTheDocument();
-  });
-
-  // Otherwise dismissing and later signing in would fire the old intent
-  it('forgets what was pending when it is dismissed', async () => {
-    const user = userEvent.setup();
-    renderWithProvider();
-
-    await user.click(screen.getByRole('button', { name: 'Reserve' }));
-    await user.keyboard('{Escape}');
-    onLoginHolder.fire?.();
-
+    expect(screen.getByTestId('view')).toHaveTextContent('none');
     expect(continued).not.toHaveBeenCalled();
+  });
+
+  it('openSignIn and openRegister open the matching view with no reason pill', async () => {
+    const user = userEvent.setup();
+
+    const Triggers = () => {
+      const { openSignIn, openRegister } = useAuthDialog();
+      return (
+        <>
+          <button onClick={openSignIn}>Sign in</button>
+          <button onClick={openRegister}>Create account</button>
+        </>
+      );
+    };
+
+    renderWithProvider(
+      <>
+        <Triggers />
+        <ViewProbe />
+      </>,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Sign in' }));
+    expect(screen.getByTestId('view')).toHaveTextContent('signin');
+    expect(screen.getByTestId('why')).toBeEmptyDOMElement();
+
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    expect(screen.getByTestId('view')).toHaveTextContent('register');
   });
 });

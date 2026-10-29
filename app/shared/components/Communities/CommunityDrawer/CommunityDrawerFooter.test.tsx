@@ -14,9 +14,9 @@ jest.mock('@/app/shared/components/Icons', () => ({
 const toast = jest.fn();
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
 
-const openSignInWithCallback = jest.fn();
+const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 
 const joinCommunity = jest.fn();
@@ -58,7 +58,7 @@ describe('CommunityDrawerFooter', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Join community' }));
 
     expect(joinCommunity).not.toHaveBeenCalled();
-    expect(openSignInWithCallback).toHaveBeenCalled();
+    expect(needAuth).toHaveBeenCalled();
   });
 
   it('shows the pending request as disabled', async () => {

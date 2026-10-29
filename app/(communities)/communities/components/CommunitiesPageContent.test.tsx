@@ -14,9 +14,9 @@ let sessionState: { data: { user: { id: string } } | null; status: string } = {
 };
 jest.mock('next-auth/react', () => ({ useSession: () => sessionState }));
 
-const openSignInWithCallback = jest.fn();
+const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 
 // The tab lives in the URL, so the mock has to round-trip it: `replace` writes
@@ -373,7 +373,7 @@ describe('CommunitiesPageContent', () => {
 
       await user.click(screen.getByRole('button', { name: 'Sign in' }));
 
-      expect(openSignInWithCallback).toHaveBeenCalled();
+      expect(needAuth).toHaveBeenCalled();
     });
 
     it('is not nagged once signed in', () => {

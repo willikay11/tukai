@@ -34,7 +34,7 @@ export const CommunityDrawerFooter = ({
   currentUserId?: string;
 }) => {
   const { toast } = useToast();
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
   const { mutate: joinCommunity, isPending: isJoining } = useJoinCommunity();
   const { mutate: leaveCommunity, isPending: isLeaving } = useLeaveCommunity();
 
@@ -63,7 +63,7 @@ export const CommunityDrawerFooter = ({
     });
   };
 
-  const handleJoin = () => (currentUserId ? join() : openSignInWithCallback(join));
+  const handleJoin = () => (currentUserId ? join() : needAuth('join', join));
 
   const handleLeave = () => {
     leaveCommunity(

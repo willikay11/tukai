@@ -38,7 +38,7 @@ export const BucketListButton = ({
   // where the experience was already saved
   const [hasJustSaved, setHasJustSaved] = useState(false);
   const { data: session } = useSession();
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
 
   const handleClick = () => {
     if (inert) return;
@@ -46,7 +46,7 @@ export const BucketListButton = ({
     // Signing in carries straight on to the picker, so the one press the reader
     // made is the one that gets them there
     if (!session?.user?.id) {
-      openSignInWithCallback(() => setIsPickerOpen(true));
+      needAuth('save', () => setIsPickerOpen(true));
       return;
     }
 

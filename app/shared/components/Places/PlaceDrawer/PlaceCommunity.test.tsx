@@ -7,7 +7,7 @@ import { PlaceCommunity } from './PlaceCommunity';
 const useSession = jest.fn();
 const useCommunityDetail = jest.fn();
 const joinCommunity = jest.fn();
-const openSignInWithCallback = jest.fn();
+const needAuth = jest.fn();
 
 jest.mock('next-auth/react', () => ({ useSession: () => useSession() }));
 jest.mock('@/app/shared/hooks/useCommunities', () => ({
@@ -16,7 +16,7 @@ jest.mock('@/app/shared/hooks/useCommunities', () => ({
 }));
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast: jest.fn() }) }));
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 
 const member = (id: string, role: string, inviteStatus: string, name = id) =>
@@ -107,7 +107,7 @@ describe('PlaceCommunity', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Join/ }));
 
-    expect(openSignInWithCallback).toHaveBeenCalledWith(expect.any(Function));
+    expect(needAuth).toHaveBeenCalledWith('join', expect.any(Function));
     expect(joinCommunity).not.toHaveBeenCalled();
   });
 });

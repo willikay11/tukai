@@ -59,7 +59,7 @@ export const Bookmark = ({
   // Seeded once at mount, so a card that re-read its experience after a save
   // kept showing the empty basket until it was unmounted and built again
   useEffect(() => setIsBookmarked(bookmarked), [bookmarked]);
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
 
   const savesToList = Boolean(experienceId || placeId);
 
@@ -73,7 +73,7 @@ export const Bookmark = ({
 
     // Signing in carries on to whatever they pressed for
     if (!userId) {
-      openSignInWithCallback(savesToList ? open : () => undefined);
+      needAuth('save', savesToList ? open : undefined);
       return;
     }
 

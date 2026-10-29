@@ -39,7 +39,7 @@ jest.mock('@/app/shared/hooks/useCommunities', () => ({
 }));
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast: jest.fn() }) }));
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback: jest.fn() }),
+  useAuthDialog: () => ({ needAuth: jest.fn() }),
 }));
 // Its own unit (ExperienceDrawerFooter.test.tsx); this suite is about the
 // shell, but the reservation swap it triggers is this suite's business
