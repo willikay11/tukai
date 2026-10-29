@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 
 import { useSession } from 'next-auth/react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 
 import { Breadcrumb } from '@/app/shared/components/Breadcrumb';
 import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
@@ -18,7 +18,7 @@ import { TicketPurchase } from '@/types/ticket-purchase';
 import { AboutTab } from './components/AboutTab';
 import { InvitedGuestsTab } from './components/InvitedGuestsTab';
 import { ManageExperienceHero } from './components/ManageExperienceHero';
-import { ManageExperienceTabs, type ManageTabId } from './components/ManageExperienceTabs';
+import { MANAGE_TABS, ManageExperienceTabs, type ManageTabId } from './components/ManageExperienceTabs';
 import { SalesTab } from './components/SalesTab';
 import { TicketsCreatedTab } from './components/TicketsCreatedTab';
 import { buildManageExperienceMetrics } from './utils/manage-metrics';
@@ -26,6 +26,7 @@ import { buildManageExperienceMetrics } from './utils/manage-metrics';
 export default function ManageExperiencePage() {
   const params = useParams<{ experienceId: string | string[] }>();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status: sessionStatus } = useSession();
 
   const experienceId =
@@ -33,7 +34,13 @@ export default function ManageExperiencePage() {
       ? params.experienceId
       : (params?.experienceId?.[0] ?? '');
 
-  const [tab, setTab] = useState<ManageTabId>('about');
+  // Lets the Dashboard's stat chips (Tickets created / Sold / Total sales)
+  // land straight on this tab rather than always on "About".
+  const requestedTab = searchParams.get('tab');
+  const initialTab: ManageTabId = MANAGE_TABS.some((entry) => entry.id === requestedTab)
+    ? (requestedTab as ManageTabId)
+    : 'about';
+  const [tab, setTab] = useState<ManageTabId>(initialTab);
 
   const { data: experienceResponse, isLoading } = useFetchSingleExperience(experienceId, true);
   const experience: Experience | undefined = experienceResponse?.data;

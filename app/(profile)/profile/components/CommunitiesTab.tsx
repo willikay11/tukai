@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 
-import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
+import { useMyCommunities } from '@/app/shared/hooks/useCommunities';
 import { Community } from '@/types/community';
 
 import { CommunityProfileCard } from './CommunityProfileCard';
@@ -28,25 +28,9 @@ const CommunityGrid = ({ communities }: { communities: Community[] }) => (
 );
 
 export const CommunitiesTab = ({ userId }: { userId?: string | null }) => {
-  const enabled = Boolean(userId);
+  const { owned, joined, isLoading } = useMyCommunities(userId);
 
-  const { data: ownedResponse, isLoading: isLoadingOwned } = useGetCommunities({
-    page: 1,
-    enabled,
-    createdBy: userId ?? undefined,
-  });
-  const { data: joinedResponse, isLoading: isLoadingJoined } = useGetCommunities({
-    page: 1,
-    enabled,
-    following: true,
-  });
-
-  const owned: Community[] = ownedResponse?.data?.results ?? [];
-  const joined: Community[] = (joinedResponse?.data?.results ?? []).filter(
-    (community: Community) => !owned.some((own) => own.id === community.id),
-  );
-
-  if (isLoadingOwned || isLoadingJoined) {
+  if (isLoading) {
     return (
       <div className="grid grid-cols-[repeat(auto-fill,minmax(max(190px,(100%_-_40px)/3),1fr))] gap-x-5 gap-y-6">
         {Array.from({ length: 3 }).map((_, index) => (

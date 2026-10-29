@@ -8,12 +8,10 @@ import { useToast } from '@/app/shared/hooks/useToast';
 import { Drawer } from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
 import { PayoutQuote, payoutAmount, Wallet } from '@/types/payment';
+import { formatCurrencyAmount } from '@/utils/money';
 
 const money = (currency: string, value?: string | number | null) =>
-  `${currency} ${payoutAmount(value).toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+  formatCurrencyAmount(value, currency);
 
 type PayoutDestination = {
   icon: string;

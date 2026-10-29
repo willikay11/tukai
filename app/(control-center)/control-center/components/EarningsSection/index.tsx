@@ -28,6 +28,9 @@ const STATUS_TONE: Record<string, string> = {
   reversed: 'bg-danger-surface text-danger',
 };
 
+// Deliberately not the shared `formatCurrencyAmount` - this section drops
+// trailing zeros on whole numbers (`maximumFractionDigits` only), unlike the
+// Dashboard balance card and WithdrawDrawer, which always show two decimals.
 const money = (currency: string, value?: string | null) =>
   `${currency} ${payoutAmount(value).toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
 

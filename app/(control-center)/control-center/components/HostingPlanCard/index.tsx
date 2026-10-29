@@ -17,13 +17,22 @@ import {
 import { Button } from '@/components/ui/button';
 import { useHostingPlan } from '@/context/HostingPlanContext';
 import { getHostingPlan } from '@/services/hostingPlans';
+import { Community } from '@/types/community';
+
+/** One name, "A and B" for two, "{n} communities" for three or more. */
+const nameList = (communities: Community[]): string => {
+  if (communities.length === 1) return communities[0].title;
+  if (communities.length === 2) return `${communities[0].title} and ${communities[1].title}`;
+  return `${communities.length} communities`;
+};
 
 /**
- * The Dashboard's "Hosting plan" card - mirrors WalletsSection/EarningsSection's
- * self-contained card shell, reading the mocked plan store straight off
- * HostingPlanContext rather than through props.
+ * The Dashboard's "Hosting plan" card - mirrors the Dashboard balance card's
+ * shell, reading the mocked plan store straight off HostingPlanContext rather
+ * than through props. `ownedCommunities` is only used to word the
+ * verified-business-aware note and cancel copy the handoff calls for.
  */
-export const HostingPlanCard = () => {
+export const HostingPlanCard = ({ ownedCommunities }: { ownedCommunities: Community[] }) => {
   const hostingPlan = useHostingPlan();
   const { toast } = useToast();
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
@@ -36,13 +45,37 @@ export const HostingPlanCard = () => {
   const renewalLabel = currentPlan.currentPeriodEnd
     ? moment(currentPlan.currentPeriodEnd).format('ddd D MMM')
     : null;
+  const off = currentPlan.status === 'cancel_pending';
+
+  const verifiedBusinesses = ownedCommunities.filter((community) => community.verified);
+  const otherCommunities = ownedCommunities.filter((community) => !community.verified);
+
+  const note = !plan
+    ? null
+    : plan.priceAmount > 0
+      ? `Covers every community you own.${
+          verifiedBusinesses.length ? ' Verified businesses pay 8% per paid ticket.' : ''
+        }`
+      : verifiedBusinesses.length
+        ? `Free for ${nameList(verifiedBusinesses)}.${
+            otherCommunities.length
+              ? ` ${nameList(otherCommunities)} ${
+                  otherCommunities.length === 1 ? 'needs' : 'need'
+                } Premium or Business to host.`
+              : ''
+          }`
+        : 'Free for verified businesses. Communities that own a claimed place host free on Basic.';
 
   const handleCancel = () => {
     cancel().then(() => {
       setIsCancelConfirmOpen(false);
       toast({
         title: 'Plan cancelled',
-        description: renewalLabel ? `You keep ${plan?.name} until ${renewalLabel}.` : undefined,
+        description: renewalLabel
+          ? `You keep ${plan?.name} until ${renewalLabel}${
+              verifiedBusinesses.length ? ', then move to Basic.' : '.'
+            }`
+          : undefined,
         variant: 'success',
       });
     });
@@ -62,58 +95,79 @@ export const HostingPlanCard = () => {
 
   return (
     <>
-      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-        <div className="flex flex-col gap-3.5">
-          <span className="text-13 leading-snug text-ink-muted">Hosting plan</span>
-
+      <div className="flex flex-col gap-1.5 rounded-xl border-[0.5px] border-line-shell bg-shell p-1.5">
+        <div className="flex flex-col gap-3.5 rounded-xl border-[0.5px] border-surface bg-white p-[18px] shadow-[0_0_4px_0_rgba(0,0,0,.12)]">
           {!plan ? (
             <>
-              <span className="text-xl font-bold leading-snug text-gray-900">No plan yet</span>
-              <p className="text-sm leading-relaxed text-ink-muted">
-                You need a plan to create experiences. Plans start at $1 a month.
+              <div className="flex flex-col gap-1">
+                <span className="text-[13.5px] text-ink-muted">Hosting plan</span>
+                <span className="text-[21px] font-bold leading-[1.25] tracking-[-0.35px] text-brand-ink">
+                  No plan yet
+                </span>
+              </div>
+              <p className="m-0 text-sm leading-[1.5] text-ink-note">
+                Your communities need Premium or Business to host. Communities that own a claimed
+                place host free on Basic.
               </p>
               <Button
+                type="button"
                 variant="gradient"
-                className="w-fit rounded-full px-5"
                 onClick={() => openHostingPlanFlow({ view: 'choose' })}
+                className="w-fit self-start rounded-full px-[18px] text-[14.5px] font-semibold"
               >
                 Choose a plan
               </Button>
             </>
           ) : (
             <>
-              <div className="flex flex-wrap items-baseline justify-between gap-1 gap-x-4">
-                <span className="text-xl font-bold leading-snug text-gray-900">{plan.name}</span>
-                <span className="whitespace-nowrap text-sm font-semibold text-gray-800">
-                  {plan.priceLabel}
-                </span>
+              <div className="flex flex-col gap-1">
+                <span className="text-[13.5px] text-ink-muted">Hosting plan</span>
+                <div className="flex flex-wrap items-baseline justify-between gap-1 gap-x-3">
+                  <span className="text-[21px] font-bold leading-[1.25] tracking-[-0.35px] text-brand-ink">
+                    {plan.name}
+                  </span>
+                  <span className="whitespace-nowrap text-[14.5px] font-semibold text-gray-800">
+                    {plan.priceLabel}
+                  </span>
+                </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                {currentPlan.status === 'cancel_pending' ? (
-                  <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-warn-surface px-2.5 text-13 font-semibold text-warn">
+              <div className="flex flex-wrap items-center gap-2 gap-x-3">
+                {off ? (
+                  <span className="inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full bg-warn-surface px-2.5 text-[13px] font-semibold text-warn">
                     <IconComponent iconName="Clock01Icon" size={14} color="currentColor" />
                     {renewalLabel ? `Ends ${renewalLabel}` : 'Ending soon'}
                   </span>
                 ) : (
-                  <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-surface-brand px-2.5 text-13 font-semibold text-brand">
-                    <IconComponent iconName="Calendar03Icon" size={14} color="currentColor" />
-                    {renewalLabel ? `Renews ${renewalLabel}` : 'Active'}
+                  <span className="inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full bg-surface-brand px-2.5 text-[13px] font-semibold text-brand">
+                    <IconComponent
+                      iconName={plan.priceAmount > 0 ? 'Calendar03Icon' : 'CheckmarkCircle02Icon'}
+                      size={14}
+                      color="currentColor"
+                    />
+                    {plan.priceAmount > 0
+                      ? renewalLabel
+                        ? `Renews ${renewalLabel}`
+                        : 'Active'
+                      : 'Always free'}
                   </span>
                 )}
                 {plan.commissionPct != null && (
-                  <span className="inline-flex items-center gap-1.5 text-13 font-semibold text-brand">
-                    <IconComponent iconName="Ticket01Icon" size={14} color="currentColor" />
+                  <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand">
+                    <IconComponent iconName="Ticket01Icon" size={15} color="currentColor" />
                     {plan.commissionPct}% per paid ticket
                   </span>
                 )}
               </div>
 
+              {note && <p className="m-0 text-[13.5px] leading-[1.5] text-ink-muted">{note}</p>}
+
               <div className="flex flex-wrap items-center gap-2">
-                {currentPlan.status === 'cancel_pending' ? (
+                {off ? (
                   <Button
+                    type="button"
                     variant="lime"
-                    className="h-11 rounded-full px-5 text-sm"
+                    className="h-11 rounded-full px-[18px] text-[14.5px] font-semibold"
                     isLoading={isResuming}
                     onClick={handleResume}
                   >
@@ -122,19 +176,22 @@ export const HostingPlanCard = () => {
                 ) : (
                   <>
                     <Button
+                      type="button"
                       variant="secondary"
-                      className="h-11 rounded-full bg-surface px-5 text-sm text-brand hover:bg-surface-brand"
+                      className="h-11 rounded-full bg-surface px-[18px] text-[14.5px] font-semibold text-brand hover:bg-surface-tab"
                       onClick={() => openHostingPlanFlow({ view: 'choose' })}
                     >
                       Change plan
                     </Button>
-                    <button
-                      type="button"
-                      onClick={() => setIsCancelConfirmOpen(true)}
-                      className="h-11 px-2 text-sm font-medium text-danger hover:underline"
-                    >
-                      Cancel plan
-                    </button>
+                    {plan.priceAmount > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setIsCancelConfirmOpen(true)}
+                        className="h-11 px-2.5 text-[14.5px] font-medium text-danger hover:underline"
+                      >
+                        Cancel plan
+                      </button>
+                    )}
                   </>
                 )}
               </div>
@@ -154,7 +211,11 @@ export const HostingPlanCard = () => {
             </AlertDialogTitle>
             <AlertDialogDescription className="text-[15px] leading-relaxed text-ink-muted">
               {renewalLabel
-                ? `You keep ${plan?.name} until ${renewalLabel}. After that you’ll need a plan to create experiences.`
+                ? `You keep ${plan?.name} until ${renewalLabel}. ${
+                    verifiedBusinesses.length
+                      ? 'After that you move to Basic, which is free for your verified businesses.'
+                      : 'After that your communities need a plan again to host.'
+                  }`
                 : 'After this period ends you’ll need a plan to create experiences.'}
             </AlertDialogDescription>
           </AlertDialogHeader>

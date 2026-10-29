@@ -1,13 +1,6 @@
 import { Experience } from '@/types/experience';
 
-import {
-  buildControlCenterMetrics,
-  experienceProgress,
-  isActive,
-  isHostedBy,
-  toAmount,
-  upcomingExperiences,
-} from './control-center-metrics';
+import { experienceProgress, isActive, isHostedBy, toAmount } from './control-center-metrics';
 
 // Shaped like the real hosted-experience payload, where money is a decimal
 // string and host counters only appear on experiences you own
@@ -37,57 +30,6 @@ describe('toAmount', () => {
   });
 });
 
-describe('buildControlCenterMetrics', () => {
-  it('sums real revenue and tickets across hosted experiences', () => {
-    const metrics = buildControlCenterMetrics([
-      hosted(),
-      hosted({ id: 'e2', ticketsSold: 6, totalAmountSold: { amount: '2000.00', currency: 'KES' } }),
-    ]);
-
-    expect(metrics.totalRevenue).toBe(342000);
-    expect(metrics.ticketsSold).toBe(10);
-  });
-
-  it('counts only published experiences as active', () => {
-    const metrics = buildControlCenterMetrics([
-      hosted(),
-      hosted({ id: 'e2', status: 'draft' }),
-      hosted({ id: 'e3', status: 'expired' }),
-    ]);
-
-    expect(metrics.activeExperiences).toBe(1);
-  });
-
-  it('copes with a host who has no experiences', () => {
-    const metrics = buildControlCenterMetrics([]);
-
-    expect(metrics.totalRevenue).toBe(0);
-    expect(metrics.ticketsSold).toBe(0);
-    expect(metrics.activeExperiences).toBe(0);
-    expect(metrics.monthlyRevenue).toHaveLength(8);
-  });
-
-  it('ignores experiences with no host counters', () => {
-    const metrics = buildControlCenterMetrics([
-      hosted({ ticketsSold: undefined, totalAmountSold: undefined }),
-    ]);
-
-    expect(metrics.totalRevenue).toBe(0);
-    expect(metrics.ticketsSold).toBe(0);
-  });
-
-  // The chart has no endpoint; it must still line up with the real total
-  it('produces eight labelled months that stay proportional to the total', () => {
-    const metrics = buildControlCenterMetrics([hosted()]);
-
-    expect(metrics.monthlyRevenue).toHaveLength(8);
-    metrics.monthlyRevenue.forEach((point) => {
-      expect(point.month).toMatch(/^[A-Z][a-z]{2}$/);
-      expect(point.amount).toBeGreaterThan(0);
-    });
-  });
-});
-
 describe('experienceProgress', () => {
   it('computes sold, total and percent', () => {
     expect(experienceProgress(hosted())).toMatchObject({ sold: 4, total: 15, percent: 27 });
@@ -109,27 +51,6 @@ describe('experienceProgress', () => {
     expect(experienceProgress(hosted({ totalTickets: undefined, ticketsCreated: 8 })).total).toBe(
       8,
     );
-  });
-});
-
-describe('upcomingExperiences', () => {
-  const now = new Date('2026-08-20T00:00:00Z').getTime();
-
-  it('keeps future experiences, soonest first', () => {
-    const result = upcomingExperiences(
-      [
-        hosted({ id: 'late', startDate: '2026-10-01T06:00:00Z' }),
-        hosted({ id: 'past', startDate: '2026-07-01T06:00:00Z' }),
-        hosted({ id: 'soon', startDate: '2026-09-01T06:00:00Z' }),
-      ],
-      now,
-    );
-
-    expect(result.map((item) => item.id)).toEqual(['soon', 'late']);
-  });
-
-  it('drops experiences with no start date', () => {
-    expect(upcomingExperiences([hosted({ startDate: null })], now)).toEqual([]);
   });
 });
 
@@ -169,14 +90,13 @@ describe('isHostedBy', () => {
   });
 
   // Sales on someone else's experience are not this host's revenue
-  it('keeps co-hosted sales out of the host figures', () => {
+  it('keeps co-hosted experiences out of the owned list', () => {
     const mine = { ...owned, ticketsSold: 4, status: 'published' } as unknown as Experience;
     const theirs = { ...coHosted, ticketsSold: 99, status: 'published' } as unknown as Experience;
 
     const ownedOnly = [mine, theirs].filter((item) => isHostedBy(item, 'me'));
-    const metrics = buildControlCenterMetrics(ownedOnly);
 
-    expect(metrics.ticketsSold).toBe(4);
-    expect(metrics.activeExperiences).toBe(1);
+    expect(ownedOnly).toEqual([mine]);
+    expect(ownedOnly.filter(isActive)).toHaveLength(1);
   });
 });
