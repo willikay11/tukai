@@ -3,7 +3,9 @@ import { useMemo } from 'react';
 import moment from 'moment';
 
 import { pickLatestDraft, selectDrafts } from '@/app/(experiences)/experiences/create/utils/draft-progress';
+import { HostTabId } from '@/app/shared/components/Experiences/ExperienceDrawer/host/types';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
+import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { Experience } from '@/types/experience';
 import { coverPhotoUrl } from '@/types/photo';
 import { formatCurrencyAmount } from '@/utils/money';
@@ -15,7 +17,7 @@ import { dateFromOffset, dayOffsetOf, defaultDayOffset } from '../utils/day-offs
 export interface DashboardHostingStat {
   label: string;
   value: string;
-  href: string;
+  onClick: () => void;
 }
 
 export interface DashboardHostingItem {
@@ -25,11 +27,14 @@ export interface DashboardHostingItem {
   image?: string;
   when: string;
   badge: Date | null;
-  onOpenHref: string;
+  onOpen: () => void;
   stats: DashboardHostingStat[];
 }
 
-const buildItem = (experience: Experience): DashboardHostingItem => {
+const buildItem = (
+  experience: Experience,
+  openExperience: (experienceId: string, options?: { hostTab?: HostTabId }) => void,
+): DashboardHostingItem => {
   const offset = experience.startDate ? dayOffsetOf(experience.startDate) : null;
   const start = experience.startDate ? moment(experience.startDate) : null;
   const end = experience.endDate ? moment(experience.endDate) : null;
@@ -49,7 +54,7 @@ const buildItem = (experience: Experience): DashboardHostingItem => {
           experience.totalAmountSold?.currency ?? experience.currency,
         );
 
-  const base = `/dashboard/experiences/${experience.id}`;
+  const open = (hostTab?: HostTabId) => () => openExperience(experience.id, { hostTab });
 
   return {
     key: experience.id,
@@ -58,11 +63,11 @@ const buildItem = (experience: Experience): DashboardHostingItem => {
     image: coverPhotoUrl(experience.photos),
     when,
     badge: start ? start.toDate() : null,
-    onOpenHref: base,
+    onOpen: open(),
     stats: [
-      { label: 'Tickets created', value: String(created), href: `${base}?tab=tickets` },
-      { label: 'Sold', value: String(sold), href: `${base}?tab=sales` },
-      { label: 'Total sales', value: salesLabel, href: `${base}?tab=sales` },
+      { label: 'Tickets created', value: String(created), onClick: open('created') },
+      { label: 'Sold', value: String(sold), onClick: open('sales') },
+      { label: 'Total sales', value: salesLabel, onClick: open('sales') },
     ],
   };
 };
@@ -73,12 +78,17 @@ const buildItem = (experience: Experience): DashboardHostingItem => {
  * "Continue your draft" CTA). `ticketsCreated`/`ticketsSold`/`totalAmountSold`
  * are already denormalized on `Experience` for its host, so no per-experience
  * fetch is needed - unlike the old Control Center page's "Recent reservations".
+ *
+ * Opens the shared experience drawer in host mode (TICKET_CREATED_FLOW's own
+ * "Opening from the Dashboard" behaviour) rather than navigating to the old
+ * manage-experience page.
  */
 export const useDashboardHosting = (userId: string | undefined, selectedOffset: number | null) => {
   const { data, isLoading } = useExperiences(
     { page: 1, page_size: 100, hosted_by: userId },
     Boolean(userId),
   );
+  const { openExperience } = useExperienceDrawer() ?? { openExperience: () => {} };
 
   const experiences: Experience[] = useMemo(
     () => (data?.data?.results ?? []).filter((experience: Experience) => isHostedBy(experience, userId)),
@@ -88,7 +98,11 @@ export const useDashboardHosting = (userId: string | undefined, selectedOffset: 
   const active = useMemo(() => experiences.filter(isActive), [experiences]);
   const draft = useMemo(() => pickLatestDraft(selectDrafts(experiences)), [experiences]);
 
-  const items = useMemo(() => active.map(buildItem), [active]);
+  const items = useMemo(
+    () => active.map((experience) => buildItem(experience, openExperience)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [active],
+  );
 
   const days: DateRailDay[] = useMemo(() => {
     const countByOffset = new Map<number, number>();

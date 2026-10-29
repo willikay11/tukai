@@ -24,6 +24,12 @@ interface DiscountCodeFormProps {
   editing: PromoCode | null;
   isOpen: boolean;
   onClose: () => void;
+  /**
+   * Shown the "Discount code generated successfully" dialog instead of a
+   * toast, once a brand-new code is created - the handoff's own panel wires
+   * this; the page tab leaves it unset and keeps the toast.
+   */
+  onGenerated?: (code: string) => void;
 }
 
 const TYPES: Array<{ value: 'fixed' | 'percentage'; label: string }> = [
@@ -53,6 +59,7 @@ export const DiscountCodeForm = ({
   editing,
   isOpen,
   onClose,
+  onGenerated,
 }: DiscountCodeFormProps) => {
   const { toast } = useToast();
   const { mutate: createCode, isPending: isCreating } = useCreatePromoCode();
@@ -115,12 +122,16 @@ export const DiscountCodeForm = ({
 
     createCode(payload, {
       onSuccess: () => {
-        toast({
-          title: `${values.code} is ready`,
-          description: 'Share it with your community to promote this experience.',
-          variant: 'success',
-        });
         onClose();
+        if (onGenerated) {
+          onGenerated(values.code);
+        } else {
+          toast({
+            title: `${values.code} is ready`,
+            description: 'Share it with your community to promote this experience.',
+            variant: 'success',
+          });
+        }
       },
       onError,
     });

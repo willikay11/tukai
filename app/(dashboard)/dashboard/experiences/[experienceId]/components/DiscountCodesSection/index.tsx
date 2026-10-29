@@ -15,6 +15,8 @@ import { DiscountCodeRedemptions } from '../DiscountCodeRedemptions';
 interface DiscountCodesSectionProps {
   experienceId: string;
   currency: string;
+  /** See DiscountCodeForm - unset by the page tab, wired by the host panel. */
+  onGenerated?: (code: string) => void;
 }
 
 /**
@@ -77,7 +79,11 @@ const Dot = () => (
   <span aria-hidden="true" className="h-[5px] w-[5px] flex-shrink-0 rounded-full bg-blue-400" />
 );
 
-export const DiscountCodesSection = ({ experienceId, currency }: DiscountCodesSectionProps) => {
+export const DiscountCodesSection = ({
+  experienceId,
+  currency,
+  onGenerated,
+}: DiscountCodesSectionProps) => {
   const { toast } = useToast();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editing, setEditing] = useState<PromoCode | null>(null);
@@ -269,6 +275,7 @@ export const DiscountCodesSection = ({ experienceId, currency }: DiscountCodesSe
         editing={editing}
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
+        onGenerated={onGenerated}
       />
     </section>
   );

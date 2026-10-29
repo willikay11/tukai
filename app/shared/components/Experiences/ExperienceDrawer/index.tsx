@@ -30,6 +30,9 @@ import { ExperienceItinerarySection } from './ExperienceItinerarySection';
 import { ExperienceLocationSection } from './ExperienceLocationSection';
 import { ExperienceMyTickets } from './ExperienceMyTickets';
 import { ExperienceTicketsSection } from './ExperienceTicketsSection';
+import { HostExperiencePanel } from './host/HostExperiencePanel';
+import { HostTabId } from './host/types';
+import { useHostMode } from './host/useHostMode';
 import { EXPERIENCE_SECTIONS, experienceDrawerTabs } from './tabs';
 
 /** The round grey disc each of the header's controls sits in. */
@@ -119,10 +122,13 @@ export const ExperienceDrawer = ({
   experienceId,
   isOpen,
   onClose,
+  initialHostTab,
 }: {
   experienceId: string | null;
   isOpen: boolean;
   onClose: () => void;
+  /** Lands straight on this host tab - the Dashboard's "Tickets created"/"Sold" chips. */
+  initialHostTab?: HostTabId;
 }) => {
   const { data: session } = useSession();
 
@@ -148,6 +154,14 @@ export const ExperienceDrawer = ({
     isOpen && experienceId ? experienceId : '',
   );
   const experience: Experience | undefined = data?.data;
+
+  // Host mode (ED-host): the drawer's owner sees the host's own tab set
+  // (About/Sales/Tickets created/Invited guests/Moments/Analytics) instead
+  // of the guest's single-scroll view.
+  const isHostMode = Boolean(
+    session?.user?.id && experience?.host?.id && session.user.id === experience.host.id,
+  );
+  const host = useHostMode(experienceId, initialHostTab);
 
   const hasTickets = (experience?.tickets ?? []).some((ticket) => !isTicketPaused(ticket));
   const hasHost = Boolean(experience?.host || experience?.hostCommunity);
@@ -178,14 +192,22 @@ export const ExperienceDrawer = ({
           <div className="sticky top-0 z-30 bg-white">
             <div className="flex items-start justify-between gap-4 border-b border-line px-6 py-4">
               <div className="flex min-w-0 flex-1 items-center gap-2">
-                {view === 'reservation' && (
+                {(view === 'reservation' || (isHostMode && host.view === 'editTicket')) && (
                   <button
                     type="button"
                     onClick={() =>
-                      isCheckingOut ? setIsCheckingOut(false) : setView('experience')
+                      isHostMode && host.view === 'editTicket'
+                        ? host.closeEditTicket()
+                        : isCheckingOut
+                          ? setIsCheckingOut(false)
+                          : setView('experience')
                     }
                     aria-label={
-                      isCheckingOut ? 'Back to Make reservation' : `Back to ${experience.title}`
+                      isHostMode && host.view === 'editTicket'
+                        ? 'Back to Tickets created'
+                        : isCheckingOut
+                          ? 'Back to Make reservation'
+                          : `Back to ${experience.title}`
                     }
                     className={`${DISC} text-brand hover:bg-surface-brand`}
                   >
@@ -194,16 +216,20 @@ export const ExperienceDrawer = ({
                 )}
 
                 <h2 className="min-w-0 truncate text-[26px] font-bold leading-tight text-brand-ink">
-                  {view === 'reservation'
-                    ? isCheckingOut
-                      ? 'Complete your payment'
-                      : 'Make reservation'
-                    : formatExperienceHeaderDate(experience.startDate, experience.endDate)}
+                  {isHostMode
+                    ? host.view === 'editTicket'
+                      ? 'Edit ticket details'
+                      : experience.title
+                    : view === 'reservation'
+                      ? isCheckingOut
+                        ? 'Complete your payment'
+                        : 'Make reservation'
+                      : formatExperienceHeaderDate(experience.startDate, experience.endDate)}
                 </h2>
               </div>
 
               <div className="flex flex-shrink-0 items-center gap-2">
-                {view === 'experience' && (
+                {view === 'experience' && !(isHostMode && host.view === 'editTicket') && (
                   <>
                     <div className={DISC}>
                       <Share
@@ -238,14 +264,24 @@ export const ExperienceDrawer = ({
               </div>
             </div>
 
-            {view === 'experience' && (
+            {view === 'experience' && !isHostMode && (
               <div className="px-6 py-3">
                 <PlaceDrawerTabs tabs={tabs} activeId={activeId} onSelect={scrollTo} />
               </div>
             )}
           </div>
 
-          {view === 'reservation' ? (
+          {isHostMode ? (
+            <HostExperiencePanel
+              experience={experience}
+              hostTab={host.hostTab}
+              onSelectTab={host.selectTab}
+              view={host.view}
+              editingTicket={host.editingTicket}
+              onEditTicket={host.openEditTicket}
+              onBackFromEdit={host.closeEditTicket}
+            />
+          ) : view === 'reservation' ? (
             <div className="flex-1 overflow-y-auto px-6 py-6">
               <div className="flex items-center gap-3 border-b border-line pb-6">
                 <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-surface-muted">
