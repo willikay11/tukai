@@ -13,10 +13,12 @@ import { Button } from '@/components/ui/button';
 import {
   BucketListsTab,
   CommunitiesTab,
+  EditInterestsDrawer,
   EditProfileDrawer,
   MomentsTab,
   OverviewTab,
   ProfileCard,
+  ProfilePageSkeleton,
   ProfileTabs,
   ReviewsTab,
   SettingsTab,
@@ -36,6 +38,7 @@ export const ProfilePageContent = () => {
   const { data: session, status } = useSession();
   const userId = session?.user?.id;
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isEditInterestsOpen, setIsEditInterestsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<ProfileTabId>('overview');
 
   const { data: response, isLoading } = useMyProfile(userId);
@@ -46,8 +49,8 @@ export const ProfilePageContent = () => {
 
   if (status === 'loading' || (userId && isLoading)) {
     return (
-      <PageContainer className="py-6">
-        <div className="h-40 animate-pulse rounded-3xl bg-gray-100" />
+      <PageContainer className="pb-10">
+        <ProfilePageSkeleton />
       </PageContainer>
     );
   }
@@ -92,6 +95,7 @@ export const ProfilePageContent = () => {
               calendar={calendar}
               written={reviews.written}
               interests={interests}
+              onEditInterests={() => setIsEditInterestsOpen(true)}
             />
           )}
           {activeTab === 'communities' && <CommunitiesTab userId={userId} />}
@@ -117,6 +121,13 @@ export const ProfilePageContent = () => {
         userId={userId}
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
+      />
+
+      <EditInterestsDrawer
+        interests={interests}
+        userId={userId}
+        isOpen={isEditInterestsOpen}
+        onClose={() => setIsEditInterestsOpen(false)}
       />
     </PageContainer>
   );

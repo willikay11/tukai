@@ -10,8 +10,10 @@ const COLLAPSED_COUNT = 4;
 
 export const MyInterests = ({
   interests,
+  onEdit,
 }: {
   interests: { id: string; name?: string; title?: string }[];
+  onEdit: () => void;
 }) => {
   const [showAll, setShowAll] = useState(false);
   const { openEditInterests } = useAuthDialog();
