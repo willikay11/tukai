@@ -34,9 +34,10 @@ export const PlaceCard = ({ place }: { place: DashboardPlaceItem }) => (
 
     <div className="flex flex-wrap gap-2">
       {place.stats.map((stat) => (
-        <Link
+        <button
           key={stat.label}
-          href={stat.href}
+          type="button"
+          onClick={stat.onClick}
           className="inline-flex h-11 items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-[18px] text-[14.5px] text-ink-muted shadow-[0_1px_3px_rgba(1,51,52,.07)] hover:text-brand-ink"
         >
           {stat.label}
@@ -44,7 +45,7 @@ export const PlaceCard = ({ place }: { place: DashboardPlaceItem }) => (
           {stat.alert && (
             <span role="img" aria-label="New" className="h-2 w-2 flex-shrink-0 rounded-full bg-danger" />
           )}
-        </Link>
+        </button>
       ))}
     </div>
   </div>

@@ -2,6 +2,7 @@ import { useQueries } from '@tanstack/react-query';
 
 import { useMyPlaces } from '@/app/shared/hooks/usePlaces';
 import { useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
+import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { fetchPlaceBookingRequests, fetchPlaceReservationProfiles } from '@/services/place';
 import { Claim } from '@/types/claim';
 import { Photo } from '@/types/photo';
@@ -18,7 +19,7 @@ export interface DashboardPlaceStat {
   label: string;
   value: string;
   alert: boolean;
-  href: string;
+  onClick: () => void;
 }
 
 export interface DashboardPlaceItem {
@@ -41,6 +42,7 @@ export interface DashboardPlaceItem {
 export const useDashboardPlaces = (userId: string | undefined) => {
   const { data: placesResponse, isLoading: isLoadingPlaces } = useMyPlaces(Boolean(userId));
   const places: Place[] = placesResponse?.data?.results ?? [];
+  const placeDrawer = usePlaceDrawer();
 
   const profileQueries = useQueries({
     queries: places.map((place) => ({
@@ -73,16 +75,23 @@ export const useDashboardPlaces = (userId: string | undefined) => {
     const profileId = profileIdByPlace.get(place.id);
     const requests: PlaceBookingRequest[] = requestQueries[index]?.data?.data?.results ?? [];
     const pending = requests.filter((request) => request.status === 'requested').length;
-    const reservationsHref = `/dashboard/places/${place.id}/reservations`;
 
+    // Stacks the same drawer every other entry point opens, rather than
+    // navigating to a dedicated page - a profile already set up goes straight
+    // to its requests, not back through the settings that made it
     const reservationStat: DashboardPlaceStat = profileId
       ? {
           label: 'Reservation requests',
           value: String(pending),
           alert: pending > 0,
-          href: reservationsHref,
+          onClick: () => placeDrawer?.openPlace(place.id, { view: 'requests' }),
         }
-      : { label: 'Set up reservations', value: '', alert: false, href: reservationsHref };
+      : {
+          label: 'Set up reservations',
+          value: '',
+          alert: false,
+          onClick: () => placeDrawer?.openPlace(place.id, { view: 'reservations' }),
+        };
 
     return {
       id: place.id,

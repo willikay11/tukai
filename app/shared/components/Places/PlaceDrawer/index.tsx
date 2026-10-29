@@ -87,7 +87,7 @@ export const PlaceDrawer = ({
 }: {
   placeId: string | null;
   isOpen: boolean;
-  initialView?: 'reservations';
+  initialView?: 'reservations' | 'requests';
   onClose: () => void;
 }) => {
   // The panel itself, held in state rather than a ref: it mounts only once the

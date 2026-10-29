@@ -4,40 +4,21 @@ import Link from 'next/link';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useCreateExperienceDrawer } from '@/context/CreateExperienceDrawerContext';
+import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 
 /**
  * What the community that owns this place can do with it.
  *
  * Takes the reservation panel's slot rather than sitting above the page: an
- * owner is not going to book their own table, so the column is theirs. The work
- * itself happens in the Dashboard, where there is room for the forms.
+ * owner is not going to book their own table, so the column is theirs.
+ * Editing the listing has its own form in the Dashboard, where there is room
+ * for it; opening an experience or the reservation settings both stack a
+ * drawer on top of this page instead, the same way every other entry point
+ * into them does.
  */
 type OwnerAction =
-  | { kind: 'link'; icon: string; title: string; detail: string; href: (id: string) => string }
-  | { kind: 'drawer'; icon: string; title: string; detail: string };
-
-const OWNER_ACTIONS: OwnerAction[] = [
-  {
-    kind: 'link',
-    icon: 'Edit02Icon',
-    title: 'Edit place',
-    detail: 'Update the photos, description and details readers see here.',
-    href: (id) => `/dashboard/places/${id}/edit`,
-  },
-  {
-    kind: 'drawer',
-    icon: 'PlusSignIcon',
-    title: 'New experience',
-    detail: 'Run something at this place and list it for people to book.',
-  },
-  {
-    kind: 'link',
-    icon: 'Calendar03Icon',
-    title: 'Reservation settings',
-    detail: 'Open your tables, set the hours you take them, and answer requests.',
-    href: (id) => `/dashboard/places/${id}/reservations`,
-  },
-];
+  | { kind: 'link'; icon: string; title: string; detail: string; href: string }
+  | { kind: 'action'; icon: string; title: string; detail: string; onClick: () => void };
 
 const RowContent = ({ action }: { action: OwnerAction }) => (
   <>
@@ -66,6 +47,31 @@ export const PlaceOwnerPanel = ({ placeId, placeName }: { placeId: string; place
   const { openCreateExperience } = useCreateExperienceDrawer() ?? {
     openCreateExperience: () => {},
   };
+  const drawer = usePlaceDrawer();
+
+  const ownerActions: OwnerAction[] = [
+    {
+      kind: 'link',
+      icon: 'Edit02Icon',
+      title: 'Edit place',
+      detail: 'Update the photos, description and details readers see here.',
+      href: `/dashboard/places/${placeId}/edit`,
+    },
+    {
+      kind: 'action',
+      icon: 'PlusSignIcon',
+      title: 'New experience',
+      detail: 'Run something at this place and list it for people to book.',
+      onClick: () => openCreateExperience(),
+    },
+    {
+      kind: 'action',
+      icon: 'Calendar03Icon',
+      title: 'Reservation settings',
+      detail: 'Open your tables, set the hours you take them, and answer requests.',
+      onClick: () => drawer?.openPlace(placeId, { view: 'reservations' }),
+    },
+  ];
 
   return (
     <div className="space-y-5">
@@ -86,25 +92,19 @@ export const PlaceOwnerPanel = ({ placeId, placeName }: { placeId: string; place
       </div>
 
       <ul className="space-y-2">
-        {OWNER_ACTIONS.map((action) =>
-          action.kind === 'link' ? (
-            <li key={action.title}>
-              <Link href={action.href(placeId)} className={ROW_CLASS}>
+        {ownerActions.map((action) => (
+          <li key={action.title}>
+            {action.kind === 'link' ? (
+              <Link href={action.href} className={ROW_CLASS}>
                 <RowContent action={action} />
               </Link>
-            </li>
-          ) : (
-            <li key={action.title}>
-              <button
-                type="button"
-                onClick={() => openCreateExperience()}
-                className={ROW_CLASS}
-              >
+            ) : (
+              <button type="button" onClick={action.onClick} className={ROW_CLASS}>
                 <RowContent action={action} />
               </button>
-            </li>
-          ),
-        )}
+            )}
+          </li>
+        ))}
       </ul>
     </div>
   );
