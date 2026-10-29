@@ -16,15 +16,17 @@ export type ClaimDocument = {
   // One of OWNERSHIP_DOCUMENT_TYPES' values
   documentType: string;
   fileName: string;
-  fileSizeLabel: string;
+  // The API does not report a size, so only a document sent in this session has one
+  fileSizeLabel?: string;
 };
 
 /**
  * A claim on one or more places, owned by a community.
  *
- * No backend endpoint returns this shape yet - status, cancellation and
- * multi-place claims are mocked locally in ConnectPlaceDrawerContext until
- * the API grows them. See that file for the mock store.
+ * The API has no claim record: a claim is a place ownership per place plus the
+ * community's verification application. ConnectPlaceDrawerContext remembers
+ * which places and community the reader claimed together in this session, and
+ * useResolvedClaim reads the live status and documents from the API.
  */
 export type Claim = {
   id: string;

@@ -3,10 +3,7 @@
 import { useMemo, useState } from 'react';
 
 import { PhotoImage } from '@/app/shared/components/Images';
-import {
-  useCancelPlaceBookingRequest,
-  usePlaceBookingRequests,
-} from '@/app/shared/hooks/usePlaces';
+import { useCancelPlaceBookingRequest, useMyPlaceReservations } from '@/app/shared/hooks/usePlaces';
 import { useToast } from '@/app/shared/hooks/useToast';
 import {
   AlertDialog,
@@ -92,7 +89,7 @@ export const MyReservations = ({
   const [index, setIndex] = useState(0);
   const [pendingCancel, setPendingCancel] = useState<PlaceBookingRequest | null>(null);
 
-  const { data: bookingsResponse } = usePlaceBookingRequests(place.id, profile?.id);
+  const { data: bookingsResponse } = useMyPlaceReservations(place.id, profile?.id);
   const { mutate: cancelBooking, isPending: isCancelling } = useCancelPlaceBookingRequest(
     place.id,
     profile?.id,

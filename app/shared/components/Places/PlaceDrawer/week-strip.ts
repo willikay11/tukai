@@ -41,11 +41,13 @@ export const weekStart = (date: Date): Date => {
   return start;
 };
 
-export const addWeeks = (date: Date, weeks: number): Date => {
+export const addDays = (date: Date, days: number): Date => {
   const moved = new Date(date);
-  moved.setDate(moved.getDate() + weeks * 7);
+  moved.setDate(moved.getDate() + days);
   return moved;
 };
+
+export const addWeeks = (date: Date, weeks: number): Date => addDays(date, weeks * 7);
 
 /** The week the strip is standing in is the one the reader is in. */
 export const isCurrentWeek = (anchor: Date, now: Date = new Date()): boolean =>
@@ -82,13 +84,22 @@ export const buildWeek = (
   experiences: Experience[],
   now: Date = new Date(),
 ): StripDay[] => {
-  const todayKey = dayKey(now);
-
   const counts = new Map<string, number>();
   for (const experience of experiences) {
     const key = experienceDayKey(experience);
     if (key !== null) counts.set(key, (counts.get(key) ?? 0) + 1);
   }
+
+  return buildWeekFromCounts(start, counts, now);
+};
+
+/** The seven pills for one week, from how many things fall on each day key. */
+export const buildWeekFromCounts = (
+  start: Date,
+  counts: Map<string, number>,
+  now: Date = new Date(),
+): StripDay[] => {
+  const todayKey = dayKey(now);
 
   return Array.from({ length: 7 }, (_, offset) => {
     const date = new Date(start);

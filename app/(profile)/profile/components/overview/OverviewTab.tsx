@@ -19,11 +19,13 @@ export const OverviewTab = ({
   calendar,
   written,
   interests,
+  onEditInterests,
 }: {
   userId?: string | null;
   calendar: ReturnType<typeof useMyCalendar>;
   written: WrittenReview[];
   interests: { id: string; name?: string; title?: string }[];
+  onEditInterests: () => void;
 }) => {
   const router = useRouter();
   const experienceDrawer = useExperienceDrawer();
@@ -59,7 +61,7 @@ export const OverviewTab = ({
       </div>
 
       <div className="flex min-w-0 flex-col gap-7">
-        <MyInterests interests={interests} />
+        <MyInterests interests={interests} onEdit={onEditInterests} />
         <RecentTransactions transactions={transactions} />
       </div>
     </div>

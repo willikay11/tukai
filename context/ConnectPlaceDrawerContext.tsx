@@ -32,9 +32,9 @@ type ConnectPlaceDrawerValue = {
   openConnectPlace: (opts?: OpenConnectPlaceOptions) => void;
   closeConnectPlace: () => void;
   /**
-   * Mock claim "backend", scoped to this context until the API grows a real
-   * claim-status / cancel / multi-place endpoint. In-memory only - it resets
-   * on reload, and nothing here is persisted.
+   * The claims sent in this session: which places and community went together.
+   * The API has no claim record, so this is in memory only and resets on reload;
+   * useResolvedClaim reads each one's live status and documents.
    */
   claims: Claim[];
   getClaimForPlace: (placeId: string) => Claim | undefined;
@@ -53,11 +53,8 @@ const makeId = (prefix: string) => `${prefix}-${Date.now()}-${Math.random().toSt
  * menu, Dashboard > Places, an unclaimed place's drawer, and the mobile place
  * bar.
  *
- * Also holds the mock claim store: nothing on the API returns claim status,
- * supports cancelling a claim, or supports multiple places on one claim yet,
- * so this context simulates all three in memory. Swapping in real endpoints
- * later only touches submitClaim / resubmitDocuments / cancelClaim and the
- * queries that replace `claims`.
+ * Also remembers the claims sent in this session, since the API has no claim
+ * record that groups several places under one set of documents.
  */
 export const ConnectPlaceDrawerProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -152,9 +149,9 @@ export const ConnectPlaceDrawerProvider = ({ children }: { children: ReactNode }
   return (
     <ConnectPlaceDrawerContext.Provider value={value}>
       {children}
-      {/* Reads everything it needs (isOpen, options, the mock claim store)
-          back off this same context, rather than through props - it is
-          always rendered inside this provider. */}
+      {/* Reads everything it needs (isOpen, options, the sent claims) back off
+          this same context, rather than through props - it is always rendered
+          inside this provider. */}
       <ConnectPlaceDrawer />
     </ConnectPlaceDrawerContext.Provider>
   );

@@ -8,12 +8,13 @@ import {
   MomentDrawer,
   useMomentComposer,
 } from '@/app/shared/components/Moments';
+import { ClaimCard } from '@/app/shared/components/Places/ClaimCard';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import {
   usePlace,
   usePlaceAvailability,
+  usePlaceBookingRequests,
   usePlaceManager,
-  usePlaceOwnership,
   usePlaceReservationProfiles,
 } from '@/app/shared/hooks/usePlaces';
 import { useScrollSpy } from '@/app/shared/hooks/useScrollSpy';
@@ -22,12 +23,19 @@ import { Drawer } from '@/components/ui/drawer';
 import { useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
 import { Experience } from '@/types/experience';
 import { Place } from '@/types/place';
-import { PlaceAvailabilityRule, PlaceReservationProfile } from '@/types/placeReservation';
+import {
+  PlaceAvailabilityException,
+  PlaceAvailabilityRule,
+  PlaceReservationProfile,
+} from '@/types/placeReservation';
 
 import { HappeningNow } from './HappeningNow';
+import { HoldOffReservations } from './HoldOffReservations';
+import { HostReservations } from './HostReservations';
+import { HostReservationsSection } from './HostReservationsSection';
 import { MyReservations } from './MyReservations';
 import { PlaceAboutSection } from './PlaceAboutSection';
-import { ClaimCard } from '@/app/shared/components/Places/ClaimCard';
+import { PlaceBookingForm } from './PlaceBookingForm';
 import { PlaceCommunity } from './PlaceCommunity';
 import { PlaceDrawerFooter } from './PlaceDrawerFooter';
 import { PlaceDrawerHeader } from './PlaceDrawerHeader';
@@ -38,6 +46,7 @@ import { PlaceReservationSettings } from './PlaceReservationSettings';
 import { PlaceReviewForm } from './PlaceReviewForm';
 import { UpcomingExperiences } from './UpcomingExperiences';
 import { UPCOMING_PAGE_SIZE } from './UpcomingExperiences';
+import { HostReservationGroup, hostReservations } from './host-reservations';
 import { PLACE_SECTIONS, placeDrawerTabs } from './tabs';
 
 /** The header and tabs a section has to clear before its pill lights up. */
@@ -49,6 +58,9 @@ const VIEW_TITLES: Record<string, string | undefined> = {
   review: 'Add a review',
   moment: 'New moment',
   reservations: 'Reservation settings',
+  requests: 'Reservations',
+  'hold-off': 'Hold off reservations',
+  booking: 'Make a booking',
 };
 
 const Loading = () => (
@@ -70,10 +82,12 @@ const Loading = () => (
 export const PlaceDrawer = ({
   placeId,
   isOpen,
+  initialView,
   onClose,
 }: {
   placeId: string | null;
   isOpen: boolean;
+  initialView?: 'reservations';
   onClose: () => void;
 }) => {
   // The panel itself, held in state rather than a ref: it mounts only once the
@@ -85,16 +99,17 @@ export const PlaceDrawer = ({
    * than opening a second one on top of it. Both reset whenever the drawer
    * opens on a different place.
    */
-  const [view, setView] = useState<'place' | 'review' | 'moment' | 'reservations'>('place');
+  const [view, setView] = useState<
+    'place' | 'review' | 'moment' | 'reservations' | 'requests' | 'hold-off' | 'booking'
+  >('place');
 
   const { data, isLoading } = usePlace(placeId, isOpen && Boolean(placeId));
   const place: Place | undefined = data?.data;
 
-  // Only a 404 answered successfully means nobody owns it. A request that
-  // failed, or was never made, is "we do not know" - and a place must never be
-  // called unclaimed on that.
-  const { data: ownership } = usePlaceOwnership(placeId ?? '', isOpen && Boolean(placeId));
-  const isUnclaimed = ownership?.success === true && !ownership.data;
+  // Only an explicit null means no claim has been approved. A place that has
+  // not loaded, or whose response carries no owner field, is "we do not know" -
+  // and a place must never be called unclaimed on that.
+  const isUnclaimed = place?.verifiedOwner === null;
 
   // A manager sees their own setup at the top, and the way into the settings
   const { isManager, owningCommunity } = usePlaceManager(isOpen && placeId ? placeId : '');
@@ -106,17 +121,40 @@ export const PlaceDrawer = ({
     isOpen && Boolean(placeId),
   );
   const profiles: PlaceReservationProfile[] = profilesResponse?.data?.results ?? [];
-  // A place may hold two (restaurant and cinema); the live one is the one a
-  // manager is being told about
-  const profile = profiles.find((entry) => entry.status === 'active') ?? profiles[0];
+  // A place may hold two (restaurant and cinema); the settings and the host
+  // screens work on the table profile
+  const profile =
+    profiles.find((entry) => entry.reservationType === 'restaurant_reservation') ?? profiles[0];
+
+  // Only a live table profile takes bookings; a draft or paused one is the
+  // manager's business alone
+  const bookingProfile = profiles.find(
+    (entry) => entry.reservationType === 'restaurant_reservation' && entry.status === 'active',
+  );
 
   const { data: availability } = usePlaceAvailability(
     placeId ?? '',
-    isManager ? profile?.id : undefined,
+    isManager ? profile?.id : bookingProfile?.id,
   );
   const rules: PlaceAvailabilityRule[] = availability?.data?.rules ?? [];
+  const exceptions: PlaceAvailabilityException[] = availability?.data?.exceptions ?? [];
+  const canBook = !isManager && Boolean(bookingProfile) && rules.length > 0;
 
-  useEffect(() => setView('place'), [placeId]);
+  const { data: requestsResponse } = usePlaceBookingRequests(
+    placeId ?? '',
+    isManager ? profile?.id : undefined,
+  );
+  const reservations = useMemo(
+    () => hostReservations(requestsResponse?.data?.results ?? []),
+    [requestsResponse],
+  );
+  const [requestsTarget, setRequestsTarget] = useState<{
+    day?: string;
+    group?: HostReservationGroup;
+  }>({});
+  const hasReservationsSection = isManager && Boolean(profile);
+
+  useEffect(() => setView(initialView ?? 'place'), [placeId, initialView]);
 
   // "Start claim" (ClaimCard, below) opens the global Connect-a-place
   // drawer - a second, separate `Drawer`, not a view this one swaps to in
@@ -143,8 +181,8 @@ export const PlaceDrawer = ({
   const hasExperiences = experiences.length > 0;
 
   const tabs = useMemo(
-    () => placeDrawerTabs(place?.totalReviews ?? null, hasExperiences),
-    [place?.totalReviews, hasExperiences],
+    () => placeDrawerTabs(place?.totalReviews ?? null, hasExperiences, hasReservationsSection),
+    [place?.totalReviews, hasExperiences, hasReservationsSection],
   );
   // The spy re-runs on a change of identity, so the ids are kept stable
   const sectionIds = useMemo(() => tabs.map((tab) => tab.id), [tabs]);
@@ -191,9 +229,35 @@ export const PlaceDrawer = ({
                 <PlaceReviewForm place={place} onDone={() => setView('place')} />
               </div>
             ) : view === 'reservations' ? (
-              <div className="flex-1 px-6">
-                <PlaceReservationSettings place={place} profile={profile} rules={rules} />
-              </div>
+              <PlaceReservationSettings
+                place={place}
+                profile={profile}
+                rules={rules}
+                onClose={() => setView('place')}
+              />
+            ) : view === 'requests' && profile ? (
+              <HostReservations
+                place={place}
+                profile={profile}
+                initialDay={requestsTarget.day}
+                initialGroup={requestsTarget.group}
+                onOpenHoldOff={() => setView('hold-off')}
+                onOpenSettings={() => setView('reservations')}
+              />
+            ) : view === 'hold-off' && profile ? (
+              <HoldOffReservations
+                placeId={place.id}
+                profile={profile}
+                rules={rules}
+                exceptions={exceptions}
+              />
+            ) : view === 'booking' && bookingProfile ? (
+              <PlaceBookingForm
+                place={place}
+                profile={bookingProfile}
+                availability={{ rules, exceptions }}
+                onDone={() => setView('place')}
+              />
             ) : view === 'moment' ? (
               <div className="flex-1 px-6 py-6">
                 <MomentComposerForm {...momentComposer} />
@@ -231,9 +295,23 @@ export const PlaceDrawer = ({
                     />
                   </section>
 
+                  {hasReservationsSection && profile && (
+                    <section id={PLACE_SECTIONS.reservations} className="scroll-mt-[148px] py-6">
+                      <HostReservationsSection
+                        reservations={reservations}
+                        profile={profile}
+                        exceptions={exceptions}
+                        onOpen={(day, group) => {
+                          setRequestsTarget({ day, group });
+                          setView('requests');
+                        }}
+                      />
+                    </section>
+                  )}
+
                   {/* Each renders nothing unless it has something to say */}
                   <MyReservations place={place} profile={profile} />
-                  <PlaceCommunity communityId={ownership?.data?.community ?? ''} />
+                  <PlaceCommunity communityId={place.verifiedOwner?.id ?? ''} />
 
                   {hasExperiences && (
                     <section id={PLACE_SECTIONS.experiences} className="scroll-mt-[148px] py-6">
@@ -270,7 +348,13 @@ export const PlaceDrawer = ({
                 </div>
 
                 <div className="sticky bottom-0 z-30 border-t border-surface-muted bg-white px-6 pb-[calc(12px_+_env(safe-area-inset-bottom))] pt-3">
-                  <PlaceDrawerFooter place={place} onAddReview={() => setView('review')} />
+                  <PlaceDrawerFooter
+                    place={place}
+                    onAddReview={() => setView('review')}
+                    onBook={canBook ? () => setView('booking') : undefined}
+                    isManager={isManager}
+                    onNavigate={onClose}
+                  />
                 </div>
               </>
             )}

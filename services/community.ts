@@ -311,3 +311,41 @@ export async function uploadVerificationDocument(
     };
   }
 }
+
+export async function fetchVerificationDocuments(communityId: string): Promise<ApiResponse> {
+  try {
+    const api = await apiWithToken();
+    const response = await api.get(`/v1/communities/${communityId}/verification/documents/`);
+
+    return { status: response.status, success: true, data: parseSnakeToCamel(response.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load the documents'),
+    };
+  }
+}
+
+// The API refuses once the application is approved or rejected
+export async function deleteVerificationDocument(
+  communityId: string,
+  documentId: string,
+): Promise<ApiResponse> {
+  try {
+    const api = await apiWithToken();
+    const response = await api.delete(
+      `/v1/communities/${communityId}/verification/documents/${documentId}/`,
+    );
+
+    return { status: response.status, success: true };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not remove this document'),
+    };
+  }
+}

@@ -1,7 +1,10 @@
 import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
 import { PlaceCategoryParams } from '@/types/networkParam';
-import { CreatePlaceBookingRequest } from '@/types/placeReservation';
+import {
+  CreatePlaceAvailabilityException,
+  CreatePlaceBookingRequest,
+} from '@/types/placeReservation';
 import { parseApiError } from '@/utils/parseApiError';
 import { parseCamelToSnake, parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
@@ -509,9 +512,13 @@ export async function fetchGoogleMapsPlaceGeocode(placeId: string): Promise<ApiR
 // per the API spec, places have their own path precisely so the two do not
 // share a booking flow.
 
+// The reservation reads are public, but they go out with the reader's token when
+// there is one: anonymous requests share a 60-an-hour allowance per address, and a
+// place page makes enough of them to run it dry, which read as "no hours set".
 export async function fetchPlaceReservationProfiles(placeId: string): Promise<ApiResponse> {
   try {
-    const res = await api.get(`/v1/places/${placeId}/reservation-profile/`);
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(`/v1/places/${placeId}/reservation-profile/`);
 
     return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
   } catch (error: any) {
@@ -529,10 +536,19 @@ export async function fetchPlaceAvailability(
   profileId: string,
 ): Promise<ApiResponse> {
   try {
+    const axiosInstance = await apiWithToken();
+    // A cut-off read is wrong rather than partial: a missing rule reads as a closed day
+    const params = { page_size: 100 };
     // Rules are the weekly hours; exceptions are one-off closures and overrides
     const [rules, exceptions] = await Promise.all([
-      api.get(`/v1/places/${placeId}/reservation-profile/${profileId}/availability-rules/`),
-      api.get(`/v1/places/${placeId}/reservation-profile/${profileId}/availability-exceptions/`),
+      axiosInstance.get(
+        `/v1/places/${placeId}/reservation-profile/${profileId}/availability-rules/`,
+        { params },
+      ),
+      axiosInstance.get(
+        `/v1/places/${placeId}/reservation-profile/${profileId}/availability-exceptions/`,
+        { params },
+      ),
     ]);
 
     return {
@@ -561,6 +577,7 @@ export async function fetchPlaceBookingRequests(
     const axiosInstance = await apiWithToken();
     const res = await axiosInstance.get(
       `/v1/places/${placeId}/reservation-profile/${profileId}/booking-requests/`,
+      { params: { page_size: 100 } },
     );
 
     return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
@@ -616,6 +633,75 @@ export async function cancelPlaceBookingRequest(purchaseId: string): Promise<Api
       status: error.response?.status || 500,
       success: false,
       message: parseApiError(error.response?.data, 'Could not cancel this reservation'),
+    };
+  }
+}
+
+export async function acceptPlaceBookingRequest(purchaseId: string): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.patch(`/v1/experiences/purchases/${purchaseId}/accept/`);
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not accept this reservation'),
+    };
+  }
+}
+
+export async function declinePlaceBookingRequest(purchaseId: string): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.patch(`/v1/experiences/purchases/${purchaseId}/decline/`);
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not decline this reservation'),
+    };
+  }
+}
+
+// The API refuses to admit a purchase that is not settled
+export async function admitPlaceBookingRequest(purchaseId: string): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.patch(`/v1/experiences/purchases/${purchaseId}/redeem/`);
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not admit this guest'),
+    };
+  }
+}
+
+// Only the detail carries experience_id, which a guest's own bookings are filed under
+export async function fetchPlaceReservationProfile(
+  placeId: string,
+  profileId: string,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.get(`/v1/places/${placeId}/reservation-profile/${profileId}/`);
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
     };
   }
 }
@@ -695,6 +781,23 @@ export async function claimPlaceOwnership(
       status: error.response?.status || 500,
       success: false,
       message: parseApiError(error.response?.data, 'Could not claim this place'),
+    };
+  }
+}
+
+// The API refuses once the claim is approved and the community verified
+export async function deletePlaceOwnership(placeId: string): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.delete(`/v1/places/${placeId}/ownership/`);
+
+    return { status: res.status, success: true };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not cancel this claim'),
     };
   }
 }
@@ -970,11 +1073,6 @@ export async function deletePlaceSocialLink(
 export type ReservationProfilePayload = {
   reservationType: 'restaurant_reservation' | 'cinema_reservation';
   seatingCapacity?: number;
-  /**
-   * Not a field the documented serializer carries. It is sent so it lands the
-   * moment the API grows one; until then DRF drops it and nothing is stored.
-   */
-  maxPartySize?: number;
   experienceTitle?: string;
   experienceDescription?: string;
 };
@@ -1027,6 +1125,39 @@ export async function updateReservationProfile(
       status: error.response?.status || 500,
       success: false,
       message: parseApiError(error.response?.data, 'Could not save these settings'),
+    };
+  }
+}
+
+/**
+ * A profile cannot be activated until its anchor experience carries a photo,
+ * and a fresh anchor has none. The endpoint takes multipart for `new_photos`.
+ */
+export async function addReservationProfilePhotos(
+  placeId: string,
+  profileId: string,
+  photos: File[],
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const formData = new FormData();
+    photos.forEach((photo, index) =>
+      formData.append('new_photos', photo, photo.name || `image_${Date.now()}_${index}`),
+    );
+
+    const res = await axiosInstance.patch(
+      `/v1/places/${placeId}/reservation-profile/${profileId}/`,
+      formData,
+      { headers: { 'Content-Type': undefined } },
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not add photos to these settings'),
     };
   }
 }
@@ -1108,6 +1239,52 @@ export async function deleteAvailabilityRule(
       status: error.response?.status || 500,
       success: false,
       message: parseApiError(error.response?.data, 'Could not remove these hours'),
+    };
+  }
+}
+
+// The API keeps one exception per date, so a date that already has one loses it first
+export async function createAvailabilityException(
+  placeId: string,
+  profileId: string,
+  data: CreatePlaceAvailabilityException,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.post(
+      `/v1/places/${placeId}/reservation-profile/${profileId}/availability-exceptions/`,
+      parseCamelToSnake(data),
+    );
+
+    return { status: res.status, success: true, data: parseSnakeToCamel(res.data) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not hold off these dates'),
+    };
+  }
+}
+
+export async function deleteAvailabilityException(
+  placeId: string,
+  profileId: string,
+  exceptionId: string,
+): Promise<ApiResponse> {
+  try {
+    const axiosInstance = await apiWithToken();
+    const res = await axiosInstance.delete(
+      `/v1/places/${placeId}/reservation-profile/${profileId}/availability-exceptions/${exceptionId}/`,
+    );
+
+    return { status: res.status, success: true, data: null };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not open these dates again'),
     };
   }
 }

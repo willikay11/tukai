@@ -23,9 +23,14 @@ const Probe = () => {
   const drawer = usePlaceDrawer();
 
   return (
-    <button type="button" onClick={() => drawer?.openPlace('p1')}>
-      open
-    </button>
+    <>
+      <button type="button" onClick={() => drawer?.openPlace('p1')}>
+        open
+      </button>
+      <button type="button" onClick={() => drawer?.openPlace('p1', { view: 'reservations' })}>
+        open settings
+      </button>
+    </>
   );
 };
 
@@ -52,6 +57,49 @@ describe('PlaceDrawerProvider', () => {
     fireEvent.click(screen.getByText('open'));
 
     expect(screen.getByTestId('drawer')).toHaveTextContent('p1');
+  });
+
+  it('opens on the place itself unless asked for a view', () => {
+    render(
+      <PlaceDrawerProvider>
+        <Probe />
+      </PlaceDrawerProvider>,
+    );
+
+    fireEvent.click(screen.getByText('open'));
+
+    expect(PlaceDrawer).toHaveBeenLastCalledWith(
+      expect.objectContaining({ initialView: undefined }),
+    );
+  });
+
+  it('opens on the view it is asked for', () => {
+    render(
+      <PlaceDrawerProvider>
+        <Probe />
+      </PlaceDrawerProvider>,
+    );
+
+    fireEvent.click(screen.getByText('open settings'));
+
+    expect(PlaceDrawer).toHaveBeenLastCalledWith(
+      expect.objectContaining({ placeId: 'p1', initialView: 'reservations' }),
+    );
+  });
+
+  it('forgets the view when the next place is opened plainly', () => {
+    render(
+      <PlaceDrawerProvider>
+        <Probe />
+      </PlaceDrawerProvider>,
+    );
+
+    fireEvent.click(screen.getByText('open settings'));
+    fireEvent.click(screen.getByText('open'));
+
+    expect(PlaceDrawer).toHaveBeenLastCalledWith(
+      expect.objectContaining({ initialView: undefined }),
+    );
   });
 
   it('closes again', () => {

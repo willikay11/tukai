@@ -2,6 +2,7 @@ export { BucketListProfileRow } from './BucketListProfileRow';
 export { BucketListsTab } from './BucketListsTab';
 export { CommunitiesTab } from './CommunitiesTab';
 export { CommunityProfileCard } from './CommunityProfileCard';
+export { EditInterestsDrawer } from './EditInterestsDrawer';
 export { EditProfileDrawer } from './EditProfileDrawer';
 export { MomentsTab } from './MomentsTab';
 export { OverviewTab } from './overview/OverviewTab';

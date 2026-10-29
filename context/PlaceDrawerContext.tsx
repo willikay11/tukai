@@ -4,10 +4,12 @@ import { ReactNode, createContext, useCallback, useContext, useMemo, useState } 
 
 import { PlaceDrawer } from '@/app/shared/components/Places';
 
+export type PlaceDrawerView = 'reservations';
+
 type PlaceDrawerValue = {
   /** The place currently open, or null. */
   openPlaceId: string | null;
-  openPlace: (placeId: string) => void;
+  openPlace: (placeId: string, options?: { view?: PlaceDrawerView }) => void;
   closePlace: () => void;
 };
 
@@ -29,8 +31,12 @@ const PlaceDrawerContext = createContext<PlaceDrawerValue | null>(null);
  */
 export const PlaceDrawerProvider = ({ children }: { children: ReactNode }) => {
   const [openPlaceId, setOpenPlaceId] = useState<string | null>(null);
+  const [initialView, setInitialView] = useState<PlaceDrawerView | undefined>(undefined);
 
-  const openPlace = useCallback((placeId: string) => setOpenPlaceId(placeId), []);
+  const openPlace = useCallback((placeId: string, options?: { view?: PlaceDrawerView }) => {
+    setInitialView(options?.view);
+    setOpenPlaceId(placeId);
+  }, []);
   const closePlace = useCallback(() => setOpenPlaceId(null), []);
 
   const value = useMemo(
@@ -41,7 +47,12 @@ export const PlaceDrawerProvider = ({ children }: { children: ReactNode }) => {
   return (
     <PlaceDrawerContext.Provider value={value}>
       {children}
-      <PlaceDrawer placeId={openPlaceId} isOpen={Boolean(openPlaceId)} onClose={closePlace} />
+      <PlaceDrawer
+        placeId={openPlaceId}
+        isOpen={Boolean(openPlaceId)}
+        initialView={initialView}
+        onClose={closePlace}
+      />
     </PlaceDrawerContext.Provider>
   );
 };
