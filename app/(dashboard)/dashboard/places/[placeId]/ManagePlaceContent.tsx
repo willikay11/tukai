@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
@@ -10,6 +12,7 @@ import { UpcomingExperiencesSection } from '@/app/shared/components/Sections';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { usePlaceManager } from '@/app/shared/hooks/usePlaces';
 import { Button } from '@/components/ui/button';
+import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { Experience } from '@/types/experience';
 import { Place } from '@/types/place';
 import { placePath } from '@/utils/detail-paths';
@@ -17,13 +20,24 @@ import { placePath } from '@/utils/detail-paths';
 /**
  * Where the community that owns a place manages it.
  *
- * The place page keeps the customer's view; the forms live here, beside the
- * experiences the place already runs. Editing the listing and configuring
- * reservations land in the tabs next.
+ * The place page keeps the customer's view; editing the listing lives here,
+ * beside the experiences the place already runs. Reservation settings used
+ * to be its own page at this route's `/reservations` child, then a `?tab=`
+ * on this one - both now stack the same drawer every other entry point
+ * opens, so a link still carrying either opens it automatically.
  */
 export const ManagePlaceContent = ({ place }: { place: Place }) => {
   const searchParams = useSearchParams();
+  const drawer = usePlaceDrawer();
   const { isManager, isLoading } = usePlaceManager(place.id);
+
+  useEffect(() => {
+    if (searchParams.get('tab') === 'reservations') {
+      drawer?.openPlace(place.id, { view: 'reservations' });
+    }
+    // Only when the page first carries the legacy param, not on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [place.id, searchParams]);
 
   // Experiences held at this place - a verified filter on the list endpoint
   const { data: experiencesResponse, isLoading: isLoadingExperiences } = useExperiences(
@@ -74,31 +88,19 @@ export const ManagePlaceContent = ({ place }: { place: Place }) => {
             </Link>
           </Button>
 
-          <Button asChild variant="gradient-outline" className="rounded-full">
-            <Link href={`/dashboard/places/${place.id}/reservations`}>
-              <span className="flex items-center gap-2">
-                <IconComponent iconName="Calendar03Icon" color="currentColor" size={16} />
-                Reservation settings
-              </span>
-            </Link>
+          <Button
+            type="button"
+            variant="gradient-outline"
+            className="rounded-full"
+            onClick={() => drawer?.openPlace(place.id, { view: 'reservations' })}
+          >
+            <span className="flex items-center gap-2">
+              <IconComponent iconName="Calendar03Icon" color="currentColor" size={16} />
+              Reservation settings
+            </span>
           </Button>
         </div>
       </div>
-
-      {/* `?tab=reservations` was where these settings lived before they had a
-          screen of their own, so links that still carry it land there */}
-      {searchParams.get('tab') === 'reservations' && (
-        <p className="mt-6 rounded-2xl bg-gray-50 p-4 text-sm text-gray-600">
-          Reservation settings have moved to{' '}
-          <Link
-            href={`/dashboard/places/${place.id}/reservations`}
-            className="font-medium text-primary underline"
-          >
-            their own page
-          </Link>
-          .
-        </p>
-      )}
 
       <div className="mt-8">
         <UpcomingExperiencesSection

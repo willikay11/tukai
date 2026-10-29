@@ -9,9 +9,12 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Place } from '@/types/place';
 import { PlaceAvailabilityRule, PlaceReservationProfile } from '@/types/placeReservation';
+import { formatTimeTo12Hour } from '@/utils/date-utils';
 
 import { ReservationSettingsForm } from './ReservationSettingsForm';
 import { activeDays, openingHours, slotInterval } from './reservation-summary';
+
+const hoursLabel = (hours: string): string => `${hours} ${hours === '1' ? 'hour' : 'hours'}`;
 
 const Row = ({ children }: { children: React.ReactNode }) => (
   <div className="flex flex-col gap-2 border-t border-surface-muted py-[18px]">{children}</div>
@@ -49,7 +52,10 @@ const STATUS_LINES: Record<string, (name: string) => string> = {
   draft: (name) => `Not live yet. ${name} is set up but closed to guests.`,
 };
 
-// Fees, a max party size and answer-by windows are not on the API, so the form leaves them out
+// Deposit and entry fees - and so the wallet step they would need - have no
+// backing fields on the API yet; see the reservation_settings_backend_gaps
+// memory. Max party size and the answer-by window are built, but kept
+// local-only for the same reason (no field to save them to).
 export const PlaceReservationSettings = ({
   place,
   profile,
@@ -63,16 +69,18 @@ export const PlaceReservationSettings = ({
 }) => {
   const { toast } = useToast();
   const [mode, setMode] = useState<'view' | 'edit'>(profile ? 'view' : 'edit');
-  const { values, errors, set, reset, submit, isSaving } = useReservationSettingsForm({
-    placeId: place.id,
-    profile,
-    rules,
-    placePhotos: place.photos,
-  });
+  const { values, errors, errorSummary, localOnly, set, reset, submit, isSaving } =
+    useReservationSettingsForm({
+      placeId: place.id,
+      profile,
+      rules,
+      placePhotos: place.photos,
+    });
 
   const days = activeDays(rules);
   const hours = openingHours(rules);
   const interval = slotInterval(rules);
+  const closeTime12 = rules[0]?.closeTime ? formatTimeTo12Hour(rules[0].closeTime.slice(0, 5)) : null;
   const status = profile?.status ?? 'draft';
   const locality = place.location?.city ?? place.location?.name;
 
@@ -126,6 +134,7 @@ export const PlaceReservationSettings = ({
                     role="tab"
                     aria-selected={isOn}
                     aria-disabled={step.isDisabled}
+                    aria-describedby={step.isDisabled ? 'rs-wallet-tab-note' : undefined}
                     className={cn(
                       'inline-flex h-12 flex-none items-center gap-2 whitespace-nowrap rounded-full pl-4 pr-5 text-[14.5px] font-semibold',
                       isOn && 'bg-surface-brand text-brand',
@@ -138,9 +147,18 @@ export const PlaceReservationSettings = ({
                   </button>
                 );
               })}
+              <p id="rs-wallet-tab-note" className="sr-only">
+                A wallet is only needed for a deposit or entry fees, which free reservations do not
+                use.
+              </p>
             </div>
 
-            <ReservationSettingsForm values={values} errors={errors} set={set} />
+            <ReservationSettingsForm
+              values={values}
+              errors={errors}
+              errorSummary={errorSummary}
+              set={set}
+            />
           </>
         ) : (
           <div className="-mt-1.5 flex flex-col">
@@ -173,9 +191,14 @@ export const PlaceReservationSettings = ({
                   <span className="text-sm text-ink-muted">Guests pay nothing to book</span>
                 </Row>
 
-                {profile.seatingCapacity !== undefined && (
+                {(profile.seatingCapacity !== undefined || localOnly.partySize) && (
                   <GridRow>
-                    <Fact label="Total seating capacity">{profile.seatingCapacity} guests</Fact>
+                    {profile.seatingCapacity !== undefined && (
+                      <Fact label="Total seating capacity">{profile.seatingCapacity} guests</Fact>
+                    )}
+                    {localOnly.partySize && (
+                      <Fact label="Max party size per booking">{localOnly.partySize} guests</Fact>
+                    )}
                   </GridRow>
                 )}
 
@@ -223,6 +246,10 @@ export const PlaceReservationSettings = ({
                   <Fact label="Buffer between bookings">
                     {interval !== null ? `${interval} minutes` : 'No buffer'}
                   </Fact>
+                  <Fact label="Requests expire">
+                    {hoursLabel(localOnly.expiryHours)} before the booking time
+                  </Fact>
+                  {closeTime12 && <Fact label="No-shows">At closing time, {closeTime12}</Fact>}
                 </GridRow>
 
                 <Row>

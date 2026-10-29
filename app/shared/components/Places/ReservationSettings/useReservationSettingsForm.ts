@@ -12,7 +12,13 @@ import {
   ReservationSettingsDraft,
 } from '@/types/placeReservation';
 
+import { reservationErrorSentence } from './errorSentence';
 import { ReservationSettingsValues, reservationSettingsSchema, zodErrorsToMap } from './schemas';
+
+/** Has nowhere to live on the API - see the reservation_settings_backend_gaps memory. */
+type LocalOnlyValues = Pick<ReservationSettingsValues, 'partySize' | 'expiryHours'>;
+
+const DEFAULT_LOCAL_ONLY: LocalOnlyValues = { partySize: '', expiryHours: '2' };
 
 export const useReservationSettingsForm = ({
   placeId,
@@ -30,6 +36,11 @@ export const useReservationSettingsForm = ({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Partial<ReservationSettingsValues>>({});
+  const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
+  // Max party size and the answer-by window have no field on the API, so this
+  // is the closest thing to a "saved" value they get: it survives Cancel (like
+  // a real saved field would) but resets once the drawer is reopened fresh.
+  const [localOnly, setLocalOnly] = useState<LocalOnlyValues>(DEFAULT_LOCAL_ONLY);
 
   const loaded: ReservationSettingsValues = useMemo(() => {
     const [first] = rules;
@@ -37,12 +48,14 @@ export const useReservationSettingsForm = ({
     return {
       reservationType: profile?.reservationType ?? 'restaurant_reservation',
       seatingCapacity: profile?.seatingCapacity ? String(profile.seatingCapacity) : '',
+      partySize: localOnly.partySize,
       days: rules.map((rule) => WEEKDAYS[rule.dayOfWeek]).filter(Boolean),
       opensAt: first?.openTime?.slice(0, 5) ?? '',
       closesAt: first?.closeTime?.slice(0, 5) ?? '',
       bufferMinutes: first?.slotIntervalMinutes ? String(first.slotIntervalMinutes) : '',
+      expiryHours: localOnly.expiryHours,
     };
-  }, [profile, rules]);
+  }, [profile, rules, localOnly]);
 
   const values: ReservationSettingsValues = { ...loaded, ...touched };
 
@@ -52,7 +65,10 @@ export const useReservationSettingsForm = ({
   const reset = () => {
     setTouched({});
     setErrors({});
+    setHasAttemptedSave(false);
   };
+
+  const errorSummary = hasAttemptedSave ? reservationErrorSentence(values) : null;
 
   const submit = (onSaved: () => void) => {
     const parsed = reservationSettingsSchema.safeParse(values);
@@ -60,13 +76,8 @@ export const useReservationSettingsForm = ({
 
     setErrors(nextErrors);
 
-    const firstError = Object.keys(nextErrors)[0];
-    if (firstError) {
-      toast({
-        title: 'Check the highlighted fields',
-        description: nextErrors[firstError],
-        variant: 'destructive',
-      });
+    if (!parsed.success) {
+      setHasAttemptedSave(true);
       return;
     }
 
@@ -85,14 +96,19 @@ export const useReservationSettingsForm = ({
       existingRules: rules,
       isActive: profile?.status === 'active',
       placePhotos,
+      // partySize/expiryHours are deliberately left out: no field exists yet
+      // for either on the API. They are kept in `localOnly` instead.
     };
 
     save(draft, {
-      onSuccess: onSaved,
+      onSuccess: () => {
+        setLocalOnly({ partySize: values.partySize, expiryHours: values.expiryHours });
+        onSaved();
+      },
       onError: (error: Error) =>
         toast({ title: 'Could not save', description: error.message, variant: 'destructive' }),
     });
   };
 
-  return { values, errors, set, reset, submit, isSaving: isPending };
+  return { values, errors, errorSummary, localOnly, set, reset, submit, isSaving: isPending };
 };

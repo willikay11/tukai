@@ -64,15 +64,13 @@ describe('SetupReservations', () => {
       expect(openPlace).toHaveBeenCalledWith('place-1', { view: 'reservations' });
     });
 
-    it('falls back to the settings page where there is no place drawer', () => {
+    it('does not blow up without a place drawer in the tree', () => {
       drawer = null;
       const onNavigate = jest.fn();
       render(<SetupReservations place={place} variant={variant} onNavigate={onNavigate} />);
 
-      const link = screen.getByRole('link', { name: /Set up reservations/ });
-      fireEvent.click(link);
+      fireEvent.click(screen.getByRole('button', { name: /Set up reservations/ }));
 
-      expect(link).toHaveAttribute('href', '/control-center/places/place-1/reservations');
       expect(onNavigate).toHaveBeenCalledTimes(1);
       expect(openPlace).not.toHaveBeenCalled();
     });

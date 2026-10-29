@@ -14,6 +14,3 @@ export const experiencePath = (experience: { id: string; slug?: string }): strin
 
 export const communityPath = (community: { id: string; slug?: string }): string =>
   `/communities/${community.slug || community.id}`;
-
-export const placeReservationSettingsPath = (place: { id: string }): string =>
-  `/control-center/places/${place.id}/reservations`;

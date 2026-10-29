@@ -296,11 +296,9 @@ describe('ConnectPlaceDrawer claim status', () => {
     renderSentClaim('claim', SENT.certificate, SENT.license);
 
     expect(await screen.findByText('Approved')).toBeInTheDocument();
-    screen
-      .getAllByRole('link', { name: /Set up reservations/ })
-      .forEach((link) =>
-        expect(link).toHaveAttribute('href', '/control-center/places/place-1/reservations'),
-      );
+    expect(screen.getAllByRole('button', { name: /Set up reservations/ }).length).toBeGreaterThan(
+      0,
+    );
   });
 
   it('is not approved when Tukai rejected the verification, and offers a new claim', async () => {

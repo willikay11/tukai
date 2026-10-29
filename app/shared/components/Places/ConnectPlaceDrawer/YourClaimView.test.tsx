@@ -74,16 +74,13 @@ describe('YourClaimView', () => {
     expect(onNavigate).toHaveBeenCalledTimes(1);
   });
 
-  it('sends an approved claim to the place reservation settings, not the public place page', () => {
+  it('offers reservation setup as a control distinct from opening the public place page', () => {
     renderClaim(claimWith('approved'));
 
-    expect(screen.getByRole('link', { name: /Set up reservations/ })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: /Set up reservations/ })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open Karura Forest' })).toHaveAttribute(
       'href',
-      '/control-center/places/place-1/reservations',
-    );
-    expect(screen.getByRole('link', { name: 'Open Karura Forest' })).not.toHaveAttribute(
-      'href',
-      '/control-center/places/place-1/reservations',
+      expect.stringContaining('karura-forest'),
     );
   });
 
@@ -92,7 +89,9 @@ describe('YourClaimView', () => {
     (status) => {
       renderClaim(claimWith(status));
 
-      expect(screen.queryByRole('link', { name: /Set up reservations/ })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: /Set up reservations/ }),
+      ).not.toBeInTheDocument();
     },
   );
 
@@ -103,7 +102,7 @@ describe('YourClaimView', () => {
       }),
     );
 
-    expect(screen.queryByRole('link', { name: /Set up reservations/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Set up reservations/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Open Fresh Bakery' })).not.toBeInTheDocument();
   });
 
