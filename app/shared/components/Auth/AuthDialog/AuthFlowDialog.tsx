@@ -27,12 +27,20 @@ export const AuthFlowDialog = () => {
   const ariaLabel =
     view === 'interests'
       ? 'Select your interests'
-      : view === 'register'
-        ? 'Create your Tukai account'
-        : 'Sign in to Tukai';
+      : view === 'forgot'
+        ? 'Reset your password'
+        : view === 'register'
+          ? 'Create your Tukai account'
+          : 'Sign in to Tukai';
 
   const card =
-    view === 'interests' ? <InterestsCard /> : step ? <EmailOrCodeCard /> : <WelcomeCard />;
+    view === 'interests' ? (
+      <InterestsCard />
+    ) : view === 'forgot' || step ? (
+      <EmailOrCodeCard />
+    ) : (
+      <WelcomeCard />
+    );
 
   return (
     <DialogPrimitive.Root

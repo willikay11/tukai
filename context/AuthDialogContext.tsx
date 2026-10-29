@@ -9,10 +9,11 @@ import { AUTH_REASONS as AUTH_REASON_TEXT, AuthReason } from '@/app/shared/compo
 import { SignInNudge } from '@/app/shared/components/Auth/AuthDialog/SignInNudge';
 import { toast } from '@/app/shared/hooks/useToast';
 
-export type AuthView = 'register' | 'signin' | 'expired' | 'interests' | null;
+export type AuthView = 'register' | 'signin' | 'expired' | 'interests' | 'forgot' | null;
 export type AuthStep = 'email' | 'code' | null;
 export type AuthProvider = 'google' | 'apple' | 'email' | null;
 export type IntsMode = 'onboard' | 'edit' | null;
+export type ForgotStep = 'email' | 'code' | 'password' | null;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/;
 const OTP_RESEND_SECONDS = 120; // AU-00 decision: keep the real app's 120s, not the design's 30s
@@ -75,6 +76,32 @@ type AuthDialogType = {
   intsBusy: boolean;
   toggleInterest: (id: string) => void;
   submitInterests: () => Promise<void>;
+
+  // Forgot/reset password (AU-08) - its own step axis since it isn't part of
+  // the register/sign-in email+code flow, just reachable from it
+  forgotStep: ForgotStep;
+  forgotEmail: string;
+  forgotEmailErr: string;
+  forgotSendBusy: boolean;
+  forgotCode: string;
+  forgotCodeErr: string;
+  forgotResendSecondsLeft: number;
+  forgotPassword: string;
+  forgotConfirmPassword: string;
+  forgotPwShow: boolean;
+  forgotSubmitErr: string;
+  forgotSubmitBusy: boolean;
+  openForgotPassword: () => void;
+  backFromForgotStep: () => void;
+  setForgotEmail: (v: string) => void;
+  submitForgotEmail: () => Promise<void>;
+  setForgotCode: (v: string) => void;
+  continueFromForgotCode: () => void;
+  resendForgotCode: () => Promise<void>;
+  setForgotPassword: (v: string) => void;
+  setForgotConfirmPassword: (v: string) => void;
+  toggleForgotPwShow: () => void;
+  submitNewPassword: () => Promise<void>;
 };
 
 const AuthDialogContext = createContext<AuthDialogType | undefined>(undefined);
@@ -134,8 +161,23 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
   const [intsDraft, setIntsDraft] = useState<string[]>([]);
   const [intsBusy, setIntsBusy] = useState(false);
 
+  const [forgotStep, setForgotStep] = useState<ForgotStep>(null);
+  const [forgotEmail, setForgotEmailState] = useState('');
+  const [forgotEmailErr, setForgotEmailErr] = useState('');
+  const [forgotSendBusy, setForgotSendBusy] = useState(false);
+  const [forgotCode, setForgotCodeState] = useState('');
+  const [forgotCodeErr, setForgotCodeErr] = useState('');
+  const [forgotSentAt, setForgotSentAt] = useState<number | null>(null);
+  const [forgotResendSecondsLeft, setForgotResendSecondsLeft] = useState(0);
+  const [forgotPassword, setForgotPassword] = useState('');
+  const [forgotConfirmPassword, setForgotConfirmPassword] = useState('');
+  const [forgotPwShow, setForgotPwShow] = useState(false);
+  const [forgotSubmitErr, setForgotSubmitErr] = useState('');
+  const [forgotSubmitBusy, setForgotSubmitBusy] = useState(false);
+
   const pendingThenRef = useRef<(() => void) | null>(null);
   const otpTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const forgotTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // --- Session-expired entry point (AU-00 decision 19) ---------------------
   // Nothing in the app previously watched this. A refresh failure sets
@@ -201,6 +243,35 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [view, step, otpSentAt]);
 
+  // --- Forgot-password resend countdown -------------------------------------
+  useEffect(() => {
+    if (!(view === 'forgot' && forgotStep === 'code')) {
+      if (forgotTimerRef.current) clearInterval(forgotTimerRef.current);
+      return;
+    }
+
+    if (!forgotSentAt) {
+      setForgotResendSecondsLeft(0);
+      if (forgotTimerRef.current) clearInterval(forgotTimerRef.current);
+      return;
+    }
+
+    const tick = () => {
+      const left = Math.max(0, OTP_RESEND_SECONDS - Math.floor((Date.now() - forgotSentAt) / 1000));
+      setForgotResendSecondsLeft(left);
+      if (left === 0 && forgotTimerRef.current) {
+        clearInterval(forgotTimerRef.current);
+        forgotTimerRef.current = null;
+      }
+    };
+
+    tick();
+    forgotTimerRef.current = setInterval(tick, 1000);
+    return () => {
+      if (forgotTimerRef.current) clearInterval(forgotTimerRef.current);
+    };
+  }, [view, forgotStep, forgotSentAt]);
+
   const resetDraft = useCallback(() => {
     setFirst('');
     setLast('');
@@ -217,6 +288,19 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
     setIntsMode(null);
     setIntsDraft([]);
     setIntsBusy(false);
+    setForgotStep(null);
+    setForgotEmailState('');
+    setForgotEmailErr('');
+    setForgotSendBusy(false);
+    setForgotCodeState('');
+    setForgotCodeErr('');
+    setForgotSentAt(null);
+    setForgotResendSecondsLeft(0);
+    setForgotPassword('');
+    setForgotConfirmPassword('');
+    setForgotPwShow(false);
+    setForgotSubmitErr('');
+    setForgotSubmitBusy(false);
   }, []);
 
   const close = useCallback(() => {
@@ -295,6 +379,40 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const togglePwShow = useCallback(() => setPwShow((v) => !v), []);
+
+  // --- Forgot/reset password (AU-08) -----------------------------------------
+  const openForgotPassword = useCallback(() => {
+    // Pre-fill with whatever was already typed on the sign-in form - it's
+    // almost always the account they mean to reset.
+    setForgotEmailState(email.trim());
+    setForgotEmailErr('');
+    setForgotSendBusy(false);
+    setForgotStep('email');
+    setForgotCodeState('');
+    setForgotCodeErr('');
+    setForgotSentAt(null);
+    setForgotPassword('');
+    setForgotConfirmPassword('');
+    setForgotPwShow(false);
+    setForgotSubmitErr('');
+    setView('forgot');
+  }, [email]);
+
+  const backFromForgotStep = useCallback(() => {
+    if (forgotStep === 'password') {
+      setForgotStep('code');
+      return;
+    }
+    if (forgotStep === 'code') {
+      setForgotStep('email');
+      return;
+    }
+    // Back from forgot's own email step returns to sign-in's, not Welcome -
+    // that's where "Forgot password?" is reachable from.
+    setView('signin');
+    setStep('email');
+    setForgotStep(null);
+  }, [forgotStep]);
 
   // --- finishing ------------------------------------------------------------
   const finishToast = useCallback(async (kind: FinishKind, provider: AuthProvider) => {
@@ -566,6 +684,125 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
     setOtpSentAt(Date.now());
   }, [intsDraft, intsBusy, intsMode, session?.user?.id, first, last, email, password, authProv, finishAndClose, updateSession]);
 
+  const submitForgotEmail = useCallback(async () => {
+    const trimmed = forgotEmail.trim();
+    if (!trimmed || forgotSendBusy) return;
+
+    if (!EMAIL_RE.test(trimmed)) {
+      setForgotEmailErr('Enter a valid email address, like name@example.com.');
+      return;
+    }
+
+    setForgotSendBusy(true);
+    setForgotEmailErr('');
+
+    try {
+      const response = await fetch('/auth/forgot-password/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: trimmed }),
+      });
+      const res = await response.json();
+      setForgotSendBusy(false);
+
+      if (!response.ok) {
+        setForgotEmailErr(res?.message || 'Could not send a code. Check the email and try again.');
+        return;
+      }
+
+      setForgotStep('code');
+      setForgotCodeState('');
+      setForgotCodeErr('');
+      setForgotSentAt(Date.now());
+      toast({ description: `We sent a code to ${trimmed}.` });
+    } catch {
+      setForgotSendBusy(false);
+      setForgotEmailErr('Could not send a code. Check the email and try again.');
+    }
+  }, [forgotEmail, forgotSendBusy]);
+
+  const continueFromForgotCode = useCallback(() => {
+    if (forgotCode.length === 6) setForgotStep('password');
+  }, [forgotCode]);
+
+  const resendForgotCode = useCallback(async () => {
+    if (forgotResendSecondsLeft > 0) return;
+
+    setForgotCodeState('');
+    setForgotCodeErr('');
+
+    try {
+      const response = await fetch('/auth/forgot-password/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail.trim() }),
+      });
+
+      if (!response.ok) {
+        const res = await response.json();
+        toast({ description: res?.message || 'Could not resend the code.', variant: 'destructive' });
+        return;
+      }
+
+      setForgotSentAt(Date.now());
+      toast({ description: `We sent a new code to ${forgotEmail.trim()}.` });
+    } catch {
+      toast({ description: 'Could not resend the code.', variant: 'destructive' });
+    }
+  }, [forgotEmail, forgotResendSecondsLeft]);
+
+  const toggleForgotPwShow = useCallback(() => setForgotPwShow((v) => !v), []);
+
+  const submitNewPassword = useCallback(async () => {
+    const pwOk = forgotPassword.length >= 8 && /\d/.test(forgotPassword);
+    if (!pwOk || forgotSubmitBusy || forgotPassword !== forgotConfirmPassword) return;
+
+    setForgotSubmitBusy(true);
+    setForgotSubmitErr('');
+
+    try {
+      const response = await fetch('/auth/reset-password/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: forgotCode,
+          password: forgotPassword,
+          email: forgotEmail.trim(),
+        }),
+      });
+      const res = await response.json();
+      setForgotSubmitBusy(false);
+
+      if (!response.ok) {
+        if (res?.message?.includes('invalid or has expired')) {
+          setForgotCodeState('');
+          setForgotCodeErr("That code isn't right or has expired. Check the latest email and try again.");
+          setForgotStep('code');
+          return;
+        }
+        setForgotSubmitErr(res?.message || 'Could not reset your password. Try again.');
+        return;
+      }
+
+      // Signed-in-ready rather than a dead-end success screen: land them on
+      // Sign in with the email already filled in, so resetting flows
+      // straight into using the new password.
+      const resetEmail = forgotEmail.trim();
+      setView('signin');
+      setStep('email');
+      setForgotStep(null);
+      setEmail(resetEmail);
+      setPassword('');
+      toast({
+        description: 'Your password was reset. Sign in with your new password.',
+        variant: 'success',
+      });
+    } catch {
+      setForgotSubmitBusy(false);
+      setForgotSubmitErr('Could not reset your password. Try again.');
+    }
+  }, [forgotPassword, forgotConfirmPassword, forgotSubmitBusy, forgotCode, forgotEmail]);
+
   return (
     <AuthDialogContext.Provider
       value={{
@@ -624,6 +861,38 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
         intsBusy,
         toggleInterest,
         submitInterests,
+
+        forgotStep,
+        forgotEmail,
+        forgotEmailErr,
+        forgotSendBusy,
+        forgotCode,
+        forgotCodeErr,
+        forgotResendSecondsLeft,
+        forgotPassword,
+        forgotConfirmPassword,
+        forgotPwShow,
+        forgotSubmitErr,
+        forgotSubmitBusy,
+        openForgotPassword,
+        backFromForgotStep,
+        setForgotEmail: (v) => {
+          setForgotEmailState(v);
+          setForgotEmailErr('');
+        },
+        submitForgotEmail,
+        setForgotCode: (v) => {
+          const digits = v.replace(/\D/g, '').slice(0, 6);
+          setForgotCodeState(digits);
+          setForgotCodeErr('');
+          if (digits.length === 6) setForgotStep('password');
+        },
+        continueFromForgotCode,
+        resendForgotCode,
+        setForgotPassword,
+        setForgotConfirmPassword,
+        toggleForgotPwShow,
+        submitNewPassword,
       }}
     >
       <AuthFlowDialog />

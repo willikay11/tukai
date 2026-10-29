@@ -1,10 +1,9 @@
 'use client';
 
-import { useRef, useState } from 'react';
-
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 
+import { DigitCodeInput } from './DigitCodeInput';
 import { AuthSpinner } from './SocialGlyphs';
 
 const formatCountdown = (seconds: number) => {
@@ -21,31 +20,8 @@ const formatCountdown = (seconds: number) => {
 export const OtpScreen = () => {
   const { email, otp, otpErr, otpBusy, resendSecondsLeft, setOtp, verifyOtp, resendOtp } =
     useAuthDialog();
-  const [focused, setFocused] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const full = otp.length === 6;
-  const activeIndex = focused && !otpBusy ? Math.min(otp.length, 5) : -1;
-
-  const boxClass = (i: number) => {
-    if (otpErr) return 'border-danger-deep';
-    if (i === activeIndex) return 'border-brand shadow-[0_0_0_3px_#E8F1ED]';
-    return 'border-line';
-  };
-
-  const digitBoxes = (indices: number[]) => (
-    <div className="grid flex-1 grid-cols-3 gap-2">
-      {indices.map((i) => (
-        <span
-          key={i}
-          aria-hidden="true"
-          className={`box-border flex h-14 items-center justify-center rounded-xl border bg-white text-2xl font-bold tabular-nums text-ink-pill transition-colors ${boxClass(i)}`}
-        >
-          {otp[i] ?? ''}
-        </span>
-      ))}
-    </div>
-  );
 
   return (
     <>
@@ -58,32 +34,16 @@ export const OtpScreen = () => {
       </p>
 
       <div className="mt-7 flex flex-col items-stretch gap-3">
-        <div className="relative flex gap-3.5">
-          {digitBoxes([0, 1, 2])}
-          {digitBoxes([3, 4, 5])}
-
-          <input
-            ref={inputRef}
-            type="text"
-            autoFocus
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            pattern="[0-9]*"
-            aria-label="6-digit code"
-            aria-invalid={!!otpErr}
-            readOnly={otpBusy}
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            onClick={(e) => {
-              const target = e.currentTarget;
-              const n = target.value.length;
-              target.setSelectionRange(n, n);
-            }}
-            className="absolute inset-0 m-0 h-full w-full cursor-text border-0 bg-transparent p-0 text-base opacity-0"
-          />
-        </div>
+        <DigitCodeInput
+          length={6}
+          groups={[3, 3]}
+          value={otp}
+          onChange={setOtp}
+          error={!!otpErr}
+          busy={otpBusy}
+          autoFocus
+          ariaLabel="6-digit code"
+        />
 
         {otpErr && (
           <p role="alert" className="flex items-start gap-2 text-[13.5px] leading-[1.45] text-danger-deep">

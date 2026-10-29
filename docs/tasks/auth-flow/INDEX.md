@@ -13,10 +13,9 @@ and a second dialog into one component, without breaking the real NextAuth/
 API calls each currently makes, is the actual work; the pixel spec is the
 easy part.
 
-AU-00 is approved (2026-10-29). AU-01 through AU-07 and AU-09 are built
-(2026-10-29) - see each file's Notes for exactly where the build departs from
-the handoff and why. AU-08 still has one open scoping question before it
-starts; nothing else in this feature depends on it.
+AU-00 is approved (2026-10-29). AU-01 through AU-09 are all built
+(2026-10-29, AU-08 last) - see each file's Notes for exactly where the build
+departs from the handoff and why.
 
 | ID | Task | Type | Status | Depends on |
 |---|---|---|---|---|
@@ -28,10 +27,17 @@ starts; nothing else in this feature depends on it.
 | AU-04 | Check your email (OTP) | build | built, pending owner review | AU-00, AU-03, AU-05 |
 | AU-06 | Signed-in toast | content | built, pending owner review | AU-01 |
 | AU-07 | Sign-in nudge card | build | built, pending owner review | AU-00, AU-01 |
-| AU-08 | Forgot/reset password | decision | awaiting approval | AU-00, AU-03 |
+| AU-08 | Forgot/reset password | decision | built, pending owner review | AU-00, AU-03 |
 | AU-09 | Accessibility, reduced motion, colour tokens | qa | verify | AU-01 through AU-07 |
 
-AU-08 is the only thing left: whether forgot/reset password moves fully into
-the dialog or stays as the standalone pages it already is, linked from the
-email form's "Forgot password?" (which is how it's wired today, as a
-placeholder pending that answer).
+AU-08's open scoping question (fold into the dialog vs. keep as standalone
+pages) is resolved: it's in the dialog now, reusing AU-04's digit-box UI for
+its 4-digit code. All seven old standalone pages
+(`/auth/sign-in`, `/auth/sign-up`, `/auth/sign-up-free`,
+`/auth/otp-confirmation`, `/auth/interests`, `/auth/forgot-password`,
+`/auth/reset-password`) now redirect into the dialog.
+
+Everything in this feature is built. What's left is owner review (every task
+is `pending owner review`) and the loose ends each file's Notes call out:
+component tests for the new screens, a real screen-reader/keyboard pass
+(AU-09), and the nudge card's partial hidden-when coverage (AU-07).

@@ -2,8 +2,6 @@
 
 import { FormEvent } from 'react';
 
-import { useRouter } from 'next/navigation';
-
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Input } from '@/components/ui/input';
 import { useAuthDialog } from '@/context/AuthDialogContext';
@@ -12,7 +10,6 @@ import { AuthSpinner } from './SocialGlyphs';
 
 /** The name/email/password form, shared by register and sign-in. AU-03. */
 export const EmailFormScreen = () => {
-  const router = useRouter();
   const {
     view,
     first,
@@ -29,7 +26,7 @@ export const EmailFormScreen = () => {
     togglePwShow,
     submitRegisterEmailForm,
     submitSignInEmailForm,
-    close,
+    openForgotPassword,
   } = useAuthDialog();
 
   const isRegister = view === 'register';
@@ -48,11 +45,6 @@ export const EmailFormScreen = () => {
     } else {
       void submitSignInEmailForm();
     }
-  };
-
-  const onForgotPassword = () => {
-    close();
-    router.push('/auth/forgot-password');
   };
 
   return (
@@ -137,7 +129,7 @@ export const EmailFormScreen = () => {
             {!isRegister && (
               <button
                 type="button"
-                onClick={onForgotPassword}
+                onClick={openForgotPassword}
                 className="-m-[11px] inline-flex min-h-11 items-center px-1 text-[14.5px] font-bold text-brand"
               >
                 Forgot password?

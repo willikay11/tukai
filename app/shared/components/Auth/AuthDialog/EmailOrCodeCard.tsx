@@ -6,31 +6,56 @@ import { useAuthDialog } from '@/context/AuthDialogContext';
 
 import { DialogBackButton, DialogCloseButton } from './DialogIconButtons';
 import { EmailFormScreen } from './EmailFormScreen';
+import { ForgotCodeScreen } from './ForgotCodeScreen';
+import { ForgotEmailScreen } from './ForgotEmailScreen';
+import { ForgotNewPasswordScreen } from './ForgotNewPasswordScreen';
 import { OtpScreen } from './OtpScreen';
 
 const PHOTO_SRC = '/images/hill-descent.webp';
 
 /**
- * The white, split card shared by the email form and the OTP screen. AU-03 / AU-04.
+ * The white, split card shared by the email form, the OTP screen and the
+ * forgot/reset-password screens - all three steps swap inside the same
+ * frame. AU-03 / AU-04 / AU-08.
  */
 export const EmailOrCodeCard = () => {
-  const { view, step, close, backFromEmailStep, goToEmailStep } = useAuthDialog();
+  const { view, step, forgotStep, close, backFromEmailStep, goToEmailStep, backFromForgotStep } =
+    useAuthDialog();
 
+  const isForgot = view === 'forgot';
   const isRegister = view === 'register';
   // The register path's account already exists by the time the code screen
   // shows (AU-00 decision 3 - Interests is what creates it), so there is no
   // sane "go back and change your email" destination there. The sign-in
   // path's pending-verification case created nothing new, so it can.
   const codeCanGoBack = view === 'signin';
-  const showBack = step === 'email' || (step === 'code' && codeCanGoBack);
+  const showBack = isForgot || step === 'email' || (step === 'code' && codeCanGoBack);
 
   const onBack = () => {
+    if (isForgot) {
+      backFromForgotStep();
+      return;
+    }
     if (step === 'code') {
       goToEmailStep();
       return;
     }
     backFromEmailStep();
   };
+
+  const content = isForgot ? (
+    forgotStep === 'email' ? (
+      <ForgotEmailScreen />
+    ) : forgotStep === 'code' ? (
+      <ForgotCodeScreen />
+    ) : (
+      <ForgotNewPasswordScreen />
+    )
+  ) : step === 'email' ? (
+    <EmailFormScreen />
+  ) : (
+    <OtpScreen />
+  );
 
   return (
     <div className="relative flex h-[100dvh] w-screen overflow-hidden bg-white min-[720px]:h-[min(720px,calc(100dvh-48px))] min-[720px]:w-[min(960px,calc(100vw-48px))] min-[720px]:rounded-[18px] min-[720px]:shadow-[0_30px_80px_rgba(0,0,0,.35)]">
@@ -41,7 +66,7 @@ export const EmailOrCodeCard = () => {
         <div className="flex w-full max-w-[360px] flex-1 flex-col items-stretch text-left text-ink-pill">
           <Image src="/images/logo.svg" alt="Tukai" width={72} height={21} className="h-8 w-auto self-start" />
 
-          {step === 'email' ? <EmailFormScreen /> : <OtpScreen />}
+          {content}
 
           <span aria-hidden="true" className="min-h-[28px] flex-1" />
 
@@ -70,7 +95,16 @@ export const EmailOrCodeCard = () => {
           }}
         />
         <div className="relative flex flex-col items-start px-10 pt-[104px]">
-          {isRegister ? (
+          {isForgot ? (
+            <>
+              <h2 className="max-w-[340px] text-[30px] font-bold leading-[1.15] tracking-[-0.6px] text-white">
+                Let&apos;s get you back in
+              </h2>
+              <p className="mt-3 max-w-[320px] text-base leading-[1.5] text-white">
+                A quick code to your email, then you&apos;re set with a new password.
+              </p>
+            </>
+          ) : isRegister ? (
             <>
               <h2 className="max-w-[340px] text-[30px] font-bold leading-[1.15] tracking-[-0.6px] text-white">
                 Places, experiences and communities near you

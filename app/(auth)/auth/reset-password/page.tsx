@@ -1,194 +1,26 @@
-// noinspection TypeScriptValidateTypes
-
 'use client';
-import { useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { useSelector } from 'react-redux';
+
+import { useEffect } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { LockKeyIcon, RefreshIcon } from '@hugeicons/react-pro';
-import { set } from 'lodash';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 
-import { MobileStore } from '@/app/shared/components/Download';
-import { Input } from '@/app/shared/components/Forms';
-import { OtpInput } from '@/app/shared/components/Forms/form/otpInput';
-import { SuccessMessage } from '@/app/shared/components/Messages/messages/success';
-import { toast } from '@/app/shared/hooks/useToast';
-import { Button } from '@/components/ui/button';
-
-type Inputs = {
-  password: string;
-  confirmPassword: string;
-};
-
+/**
+ * Retired as a standalone page (AU-08). The code/new-password steps only make
+ * sense mid-flow, with the dialog already holding which email requested a
+ * reset - there is nothing to resume from a bare visit to this URL, so it
+ * opens the forgot-password flow from its start rather than a broken step.
+ */
 export default function Page() {
   const router = useRouter();
-  const account = useSelector((state: any) => state.resetReducer.account);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<Inputs>({ mode: 'onChange' });
-  const [token, setToken] = useState<string | undefined>();
-  const [isResending, setIsResending] = useState<boolean>(false);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [enterPassword, setEnterPassword] = useState<boolean>(false);
-  const [passwordChanged, setPasswordChanged] = useState<boolean>(false);
+  const { openForgotPassword } = useAuthDialog();
 
-  const onNext = () => {
-    setEnterPassword(true);
-  };
+  useEffect(() => {
+    openForgotPassword();
+    router.replace('/');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const onResend = async () => {
-    setIsResending(true);
-    const response = await fetch('/auth/forgot-password/api', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: account?.email?.payload,
-      }),
-    });
-
-    const res = await response.json();
-
-    setIsResending(false);
-    if (!response.ok) {
-      setIsSubmitting(false);
-      toast({
-        title: 'Failure',
-        description: res.message,
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    toast({
-      title: 'Success',
-      description: 'Verification code resent successfully',
-      variant: 'success',
-    });
-  };
-
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    setIsSubmitting(true);
-    const response = await fetch('/auth/reset-password/api', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, password: data.password, email: account?.email?.payload }),
-    });
-
-    const res = await response.json();
-
-    setIsSubmitting(false);
-
-    if (!response.ok) {
-      setIsSubmitting(false);
-      toast({
-        title: 'Failure',
-        description: res.message,
-        variant: 'destructive',
-      });
-
-      if (res.message.includes('provided token is invalid or has expired.')) {
-        setEnterPassword(false);
-      }
-      return;
-    }
-    setEnterPassword(false);
-    setPasswordChanged(true);
-  };
-
-  return (
-    <>
-      {enterPassword ? (
-        <div className="mx-4">
-          <div className="mb-2">
-            <p className="text-xl font-black text-gray-700">Complete Reset Password</p>
-          </div>
-
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-2">
-              <Input
-                name="password"
-                placeholder="Create Password"
-                type="password"
-                icon={<LockKeyIcon size={16} variant="twotone" />}
-                refs={register('password', {
-                  required: 'Please enter your password',
-                  // onBlur: (e) => (password = e.target.value),
-                })}
-                error={errors.password?.message}
-              />
-            </div>
-
-            <div className="mb-4">
-              <Input
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                type="password"
-                icon={<LockKeyIcon size={16} variant="twotone" />}
-                refs={register('confirmPassword', {
-                  required: 'Please enter your password',
-                  // pattern: {
-                  //     value: /apple/,
-                  //     message: 'Passwords do not match'
-                  // }
-                })}
-                error={errors.confirmPassword?.message}
-              />
-            </div>
-
-            <div className="mb-2.5">
-              <Button className="h-[50px] w-full" isLoading={isSubmitting}>
-                Submit
-              </Button>
-            </div>
-
-            <div className="mb-4 mt-4 flex justify-center">
-              <span className="mr-1 text-xs">Wrong Token?</span>
-              <Button variant="link" className="h-fit p-0" onClick={() => setEnterPassword(false)}>
-                Edit
-              </Button>
-            </div>
-          </form>
-        </div>
-      ) : passwordChanged ? (
-        <SuccessMessage
-          icon="CheckmarkCircle03Icon"
-          title="Password reset complete"
-          description="Your new password was reset successfully."
-          buttonTitle="Done"
-          onContinue={() => router.push('/auth/sign-in')}
-        />
-      ) : (
-        <div className="mx-4">
-          <div className="mb-2">
-            <p className="text-xl font-black text-gray-700">Enter verification code</p>
-          </div>
-
-          <div className="mb-4">
-            <p className="text-xs font-medium text-gray-700">
-              A four digit code was sent to{' '}
-              <span className="text-primary">{account?.email?.payload}</span>.
-            </p>
-          </div>
-
-          <OtpInput onComplete={(token) => setToken(token)} />
-          <div className="mb-4 mt-4 inline-flex w-full justify-center">
-            <Button variant="link" className="h-fit p-0" onClick={onResend}>
-              <RefreshIcon variant="twotone" size={16} className="mr-2" />
-              {isResending ? 'Resending...' : 'Resend Code'}
-            </Button>
-          </div>
-          <Button className="h-[50px] w-full" onClick={onNext} isLoading={isSubmitting}>
-            Submit
-          </Button>
-        </div>
-      )}
-      <div className="-mx-[1.875rem] mb-4 mt-4 h-[1px] bg-gray-200 md:-mx-[3.875rem]" />
-
-      <MobileStore />
-    </>
-  );
+  return null;
 }
