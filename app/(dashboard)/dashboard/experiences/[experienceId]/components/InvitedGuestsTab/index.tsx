@@ -2,12 +2,11 @@
 
 import { useMemo, useState } from 'react';
 
-import { useRouter } from 'next/navigation';
-
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useRemoveExperienceGuest } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
+import { useCreateExperienceDrawer } from '@/context/CreateExperienceDrawerContext';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 import { coverPhotoUrl } from '@/types/photo';
@@ -75,7 +74,7 @@ export const InvitedGuestsTab = ({
   guests,
   communities = [],
 }: InvitedGuestsTabProps) => {
-  const router = useRouter();
+  const { openCreateExperience } = useCreateExperienceDrawer()!;
   const { toast } = useToast();
   const [view, setView] = useState<GuestsView>('guests');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -197,9 +196,7 @@ export const InvitedGuestsTab = ({
         <Button
           type="button"
           variant="gradient"
-          onClick={() =>
-            router.push(`/experiences/create?experienceId=${experienceId}&step=guests`)
-          }
+          onClick={() => openCreateExperience({ experienceId, step: 'guests' })}
           className="rounded-full px-5"
         >
           Invite More Guests

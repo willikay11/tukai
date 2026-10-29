@@ -45,6 +45,13 @@ const nextConfig = {
         destination: '/dashboard/:path*',
         permanent: true,
       },
+      // Creating an experience is the Create experience drawer now, not a
+      // route - same reason as the redirects above.
+      {
+        source: '/experiences/create',
+        destination: '/experiences',
+        permanent: true,
+      },
       {
         source: '/community/:path*',
         destination: '/communities/:path*',

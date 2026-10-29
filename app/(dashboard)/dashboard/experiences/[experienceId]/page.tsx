@@ -12,6 +12,7 @@ import {
   useExperienceTicketPurchases,
   useFetchSingleExperience,
 } from '@/app/shared/hooks/useExperiences';
+import { useCreateExperienceDrawer } from '@/context/CreateExperienceDrawerContext';
 import { Experience } from '@/types/experience';
 import { TicketPurchase } from '@/types/ticket-purchase';
 
@@ -28,6 +29,7 @@ export default function ManageExperiencePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status: sessionStatus } = useSession();
+  const { openCreateExperience } = useCreateExperienceDrawer()!;
 
   const experienceId =
     typeof params?.experienceId === 'string'
@@ -110,7 +112,7 @@ export default function ManageExperiencePage() {
         onChange={setTab}
         // TODO: no messaging endpoint for buyers in bulk yet
         onMessageBuyers={() => {}}
-        onEdit={() => router.push(`/experiences/create?experienceId=${experienceId}`)}
+        onEdit={() => openCreateExperience({ experienceId })}
       />
 
       {tab === 'about' && <AboutTab experience={experience} metrics={metrics} />}

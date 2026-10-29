@@ -17,6 +17,7 @@ import { InviteCommunities } from '@/components/ui/invite-communities';
 import { InviteMembers } from '@/components/ui/invite-members';
 import { PillRadioGroup } from '@/components/ui/pillRadioGroup';
 import { Textarea } from '@/components/ui/textarea';
+import { useCreateExperienceDrawer } from '@/context/CreateExperienceDrawerContext';
 import { GoogleMapsAutocompletePrediction } from '@/types/googleMaps';
 import { Interest } from '@/types/interest';
 import { communityPath } from '@/utils/detail-paths';
@@ -82,6 +83,7 @@ export const LeftPanel = ({
 }: LeftPanelProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { openCreateExperience } = useCreateExperienceDrawer()!;
 
   // Somewhere the reader was sent here from and has to get back to - claiming a
   // place, for instance, needs a community to claim on behalf of. The community
@@ -109,7 +111,7 @@ export const LeftPanel = ({
             ? 'Your community was created successfully. You can now carry on where you left off.'
             : undefined
         }
-        createExperienceHref={returnHref ? undefined : '/experiences/create'}
+        onCreateExperienceClick={returnHref ? undefined : () => openCreateExperience()}
       />
 
       {/* Header */}

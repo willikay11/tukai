@@ -6,6 +6,7 @@ import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
+import { useCreateExperienceDrawer } from '@/context/CreateExperienceDrawerContext';
 
 import { useDashboardHosting } from '../../hooks/useDashboardHosting';
 import { DateRail, DateRailDay } from '../DateRail';
@@ -31,6 +32,7 @@ export const MyExperiencesHostingSection = ({
   ownsCommunity: boolean;
 }) => {
   const router = useRouter();
+  const { openCreateExperience } = useCreateExperienceDrawer()!;
   const {
     items,
     days,
@@ -39,10 +41,22 @@ export const MyExperiencesHostingSection = ({
   } = useDashboardHosting(userId, selectedOffset);
 
   const cta = !ownsCommunity
-    ? { label: 'Create a community', icon: 'UserAdd02Icon', href: '/communities?create=community' }
+    ? {
+        label: 'Create a community',
+        icon: 'UserAdd02Icon',
+        onClick: () => router.push('/communities?create=community'),
+      }
     : draft
-      ? { label: 'Continue your draft', icon: 'Edit04Icon', href: `/experiences/create?experienceId=${draft.id}` }
-      : { label: 'Create an experience', icon: 'AddCircleIcon', href: '/experiences/create' };
+      ? {
+          label: 'Continue your draft',
+          icon: 'Edit04Icon',
+          onClick: () => openCreateExperience({ experienceId: draft.id }),
+        }
+      : {
+          label: 'Create an experience',
+          icon: 'AddCircleIcon',
+          onClick: () => openCreateExperience(),
+        };
 
   return (
     <section aria-label="My experiences (hosting)" className="flex min-w-0 flex-col gap-3">
@@ -81,7 +95,7 @@ export const MyExperiencesHostingSection = ({
       <Button
         type="button"
         variant="gradient"
-        onClick={() => router.push(cta.href)}
+        onClick={cta.onClick}
         className="h-[52px] w-fit flex-shrink-0 gap-2 rounded-full pl-[22px] pr-7 text-[15.5px] font-semibold hover:brightness-[1.06]"
       >
         <IconComponent iconName={cta.icon} size={20} color="currentColor" />

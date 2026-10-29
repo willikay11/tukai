@@ -5,14 +5,11 @@ import { NextResponse } from 'next/server';
 export async function middleware(request: NextRequest) {
   const token: any = await getToken({ req: request });
   const { pathname } = request.nextUrl;
-  const isExperienceCreateRoute =
-    pathname === '/experiences/create' || pathname.startsWith('/experiences/create/');
   const isCommunityCreateRoute =
     pathname === '/communities/create' || pathname.startsWith('/communities/create/');
-  const isExperienceTypeRoute =
-    pathname === '/experiences/type' || pathname.startsWith('/experiences/type');
-  const isExcludedExperienceRoute =
-    pathname.startsWith('/experiences') && !isExperienceCreateRoute && !isExperienceTypeRoute;
+  // Creating an experience is a drawer now, not a route, so nothing under
+  // /experiences needs carving out for it any more.
+  const isExcludedExperienceRoute = pathname.startsWith('/experiences');
   const isExcludedCommunityRoute = pathname.startsWith('/communities') && !isCommunityCreateRoute;
 
   // Exclude auth routes from middleware

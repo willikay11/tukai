@@ -19,7 +19,10 @@ jest.mock('@/app/shared/hooks/useExperiences', () => ({
 const toast = jest.fn();
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
 
-jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }));
+const openCreateExperience = jest.fn();
+jest.mock('@/context/CreateExperienceDrawerContext', () => ({
+  useCreateExperienceDrawer: () => ({ openCreateExperience }),
+}));
 
 const guests: Experience['guests'] = [
   { id: 'g1', email: 'amani.w@gmail.com', dateCreated: '', status: 'invited' },
@@ -139,5 +142,13 @@ describe('the invited guests tab', () => {
     renderTab({ guests: [], communities: [] });
 
     expect(screen.getByText('No guests invited yet.')).toBeInTheDocument();
+  });
+
+  it('opens the Create experience drawer on its guests step from Invite More Guests', async () => {
+    renderTab();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Invite More Guests' }));
+
+    expect(openCreateExperience).toHaveBeenCalledWith({ experienceId: 'e1', step: 'guests' });
   });
 });

@@ -59,8 +59,7 @@ const newDay = (dayNumber: number): ItineraryDayFormValue => ({
  * `updateItineraryDayActivity` / `deleteItineraryDayActivity` exist in
  * services/experience.ts but nothing called them before this. They're
  * called directly here (optimistic local update + API call) rather than
- * added to `useCreateExperienceFlow`, which the full-page /experiences/create
- * route also depends on unchanged.
+ * added to `useCreateExperienceFlow` itself, which stays unchanged.
  *
  * Day count is derived from the date range in Date & type
  * (`itineraryStartDate`/`itineraryEndDate`); "Add/remove a day" here moves
