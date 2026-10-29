@@ -171,7 +171,16 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
 
   // --- OTP resend countdown -------------------------------------------------
   useEffect(() => {
-    if (!(view && step === 'code') || !otpSentAt) {
+    if (!(view && step === 'code')) {
+      if (otpTimerRef.current) clearInterval(otpTimerRef.current);
+      return;
+    }
+
+    // No known send time (e.g. landing here without a resend actually having
+    // gone out) reads as "ready to resend" rather than carrying over
+    // whatever the countdown happened to be at the end of a previous visit.
+    if (!otpSentAt) {
+      setResendSecondsLeft(0);
       if (otpTimerRef.current) clearInterval(otpTimerRef.current);
       return;
     }
@@ -204,6 +213,7 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
     setOtpErr('');
     setOtpBusy(false);
     setOtpSentAt(null);
+    setResendSecondsLeft(0);
     setIntsMode(null);
     setIntsDraft([]);
     setIntsBusy(false);
@@ -321,6 +331,32 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
     [finishToast, resetDraft, runPendingThen],
   );
 
+  // Requests a real code from the backend and only advances the countdown on
+  // an actual success - shared by the explicit "Resend code" button and the
+  // sign-in flow's pending-verification recovery, neither of which should
+  // ever claim a code went out that didn't.
+  const requestVerificationCode = useCallback(async (targetEmail: string) => {
+    try {
+      const response = await fetch('/auth/otp-confirmation/api', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: targetEmail }),
+      });
+
+      if (!response.ok) {
+        const res = await response.json();
+        toast({ description: res?.message || 'Could not send a code.', variant: 'destructive' });
+        return false;
+      }
+
+      setOtpSentAt(Date.now());
+      return true;
+    } catch {
+      toast({ description: 'Could not send a code.', variant: 'destructive' });
+      return false;
+    }
+  }, []);
+
   // --- email form -------------------------------------------------------------
   const submitRegisterEmailForm = useCallback(() => {
     const pwOk = password.length >= 8 && /\d/.test(password);
@@ -365,17 +401,23 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
 
     if (message === PENDING_VERIFICATION) {
       // The account exists but was never verified - pick up exactly where
-      // registration leaves off, without asking for the password again.
+      // registration leaves off, without asking for the password again. A
+      // real code is requested here rather than just restarting the
+      // countdown: there's no way to know whether the original one is still
+      // sitting in their inbox or has already expired, so claiming a fresh
+      // 120s wait without actually sending anything would be misleading.
       setAuthProv('email');
       setStep('code');
-      setOtpSentAt(Date.now());
       setOtp('');
       setOtpErr('');
+      setOtpSentAt(null);
+      const sent = await requestVerificationCode(email.trim());
+      if (sent) toast({ description: `We sent a new code to ${email.trim()}.` });
       return;
     }
 
     toast({ description: message, variant: 'destructive' });
-  }, [email, password, sendBusy, finishAndClose]);
+  }, [email, password, sendBusy, finishAndClose, requestVerificationCode]);
 
   const signInSocial = useCallback(
     async (provider: 'google' | 'apple') => {
@@ -447,25 +489,9 @@ export const AuthDialogProvider = ({ children }: { children: ReactNode }) => {
     setOtp('');
     setOtpErr('');
 
-    try {
-      const response = await fetch('/auth/otp-confirmation/api', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      if (!response.ok) {
-        const res = await response.json();
-        toast({ description: res?.message || 'Could not resend the code.', variant: 'destructive' });
-        return;
-      }
-
-      setOtpSentAt(Date.now());
-      toast({ description: `We sent a new code to ${email}.` });
-    } catch {
-      toast({ description: 'Could not resend the code.', variant: 'destructive' });
-    }
-  }, [email, resendSecondsLeft]);
+    const sent = await requestVerificationCode(email);
+    if (sent) toast({ description: `We sent a new code to ${email}.` });
+  }, [email, resendSecondsLeft, requestVerificationCode]);
 
   // --- Interests ----------------------------------------------------------------
   const toggleInterest = useCallback((id: string) => {

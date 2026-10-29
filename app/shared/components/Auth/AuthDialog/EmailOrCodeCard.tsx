@@ -33,7 +33,7 @@ export const EmailOrCodeCard = () => {
   };
 
   return (
-    <div className="relative flex h-[100dvh] w-screen bg-white min-[720px]:h-[min(720px,calc(100dvh-48px))] min-[720px]:w-[min(960px,calc(100vw-48px))] min-[720px]:rounded-[18px] min-[720px]:shadow-[0_30px_80px_rgba(0,0,0,.35)]">
+    <div className="relative flex h-[100dvh] w-screen overflow-hidden bg-white min-[720px]:h-[min(720px,calc(100dvh-48px))] min-[720px]:w-[min(960px,calc(100vw-48px))] min-[720px]:rounded-[18px] min-[720px]:shadow-[0_30px_80px_rgba(0,0,0,.35)]">
       {showBack && <DialogBackButton onBack={onBack} />}
       <DialogCloseButton onClose={close} />
 
