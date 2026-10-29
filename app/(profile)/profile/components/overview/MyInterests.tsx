@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { interestName } from '@/app/(profile)/profile/profile';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 
 const COLLAPSED_COUNT = 4;
 
@@ -15,6 +16,7 @@ export const MyInterests = ({
   onEdit: () => void;
 }) => {
   const [showAll, setShowAll] = useState(false);
+  const { openEditInterests } = useAuthDialog();
 
   if (interests.length === 0) return null;
 
@@ -28,7 +30,7 @@ export const MyInterests = ({
         <h2 className="text-17 font-bold tracking-[-0.2px] text-brand-ink">My interests</h2>
         <button
           type="button"
-          onClick={onEdit}
+          onClick={openEditInterests}
           className="inline-flex h-11 items-center gap-1.5 px-1 text-[13.5px] font-semibold text-brand hover:underline"
         >
           <IconComponent iconName="Edit04Icon" size={16} color="currentColor" />

@@ -18,7 +18,7 @@ jest.mock('@/app/shared/components/Images', () => ({
 
 const useCommunityDetail = jest.fn();
 const joinCommunity = jest.fn();
-const openSignInWithCallback = jest.fn();
+const needAuth = jest.fn();
 
 jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useCommunityDetail: (id: string, enabled: boolean) => useCommunityDetail(id, enabled),
@@ -26,7 +26,7 @@ jest.mock('@/app/shared/hooks/useCommunities', () => ({
 }));
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast: jest.fn() }) }));
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 
 const member = (id: string, inviteStatus: string) =>
@@ -154,7 +154,7 @@ describe('ExperienceHostSection', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Join/ }));
 
-    expect(openSignInWithCallback).toHaveBeenCalledWith(expect.any(Function));
+    expect(needAuth).toHaveBeenCalledWith('join', expect.any(Function));
     expect(joinCommunity).not.toHaveBeenCalled();
   });
 

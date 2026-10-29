@@ -17,7 +17,7 @@ import { HostingPlanId } from '@/types/hostingPlan';
 export const PricingPageContent = () => {
   const { data: session } = useSession();
   const hostingPlan = useHostingPlan();
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
 
   if (!hostingPlan) return null;
 
@@ -31,7 +31,7 @@ export const PricingPageContent = () => {
       return;
     }
 
-    openSignInWithCallback(open);
+    needAuth(undefined, open);
   };
 
   return (

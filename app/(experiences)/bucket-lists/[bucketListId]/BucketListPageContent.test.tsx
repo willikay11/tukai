@@ -39,7 +39,7 @@ jest.mock('@/app/shared/components/Share', () => ({ Share: () => <div data-testi
 
 // Each card carries the basket, which reaches for the sign-in dialog
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback: jest.fn(), setOpenSignIn: jest.fn() }),
+  useAuthDialog: () => ({ needAuth: jest.fn() }),
 }));
 
 const experienceItem = (extra: Record<string, unknown> = {}) => ({

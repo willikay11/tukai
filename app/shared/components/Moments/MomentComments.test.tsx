@@ -20,9 +20,9 @@ jest.mock('next-auth/react', () => ({
   useSession: () => ({ data: sessionUser ? { user: sessionUser } : null }),
 }));
 
-const openSignInWithCallback = jest.fn();
+const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 jest.mock('@/app/shared/hooks/useMoments', () => ({
   useMomentComments: () => ({
@@ -359,7 +359,7 @@ describe('a reader who is not signed in', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
-    expect(openSignInWithCallback).toHaveBeenCalled();
+    expect(needAuth).toHaveBeenCalled();
   });
 
   it('gets the field once signed in', () => {
@@ -379,6 +379,6 @@ describe('a reader who is not signed in', () => {
     fireEvent.click(screen.getByText('4').closest('button') as HTMLElement);
 
     expect(mockToggleCommentLike).not.toHaveBeenCalled();
-    expect(openSignInWithCallback).toHaveBeenCalled();
+    expect(needAuth).toHaveBeenCalled();
   });
 });

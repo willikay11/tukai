@@ -61,6 +61,9 @@ jest.mock('@/app/(experiences)/hooks/usePayment', () => ({
 jest.mock('@/context/ExperienceDrawerContext', () => ({
   useExperienceDrawer: () => null,
 }));
+jest.mock('@/context/AuthDialogContext', () => ({
+  useAuthDialog: () => ({ openEditInterests: jest.fn() }),
+}));
 jest.mock('@/app/(profile)/hooks/useNotificationPreferences', () => ({
   useNotificationPreferences: () => ({ data: { success: true, data: undefined }, isLoading: false }),
   useUpdateNotificationPreferences: () => ({ mutate: jest.fn(), isPending: false }),

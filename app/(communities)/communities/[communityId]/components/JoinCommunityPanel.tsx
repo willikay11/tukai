@@ -61,7 +61,7 @@ export const JoinCommunityPanel = ({
 }) => {
   const router = useRouter();
   const { toast } = useToast();
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
   const { mutate: joinCommunity, isPending: isJoining } = useJoinCommunity();
   const { mutate: leaveCommunity, isPending: isLeaving } = useLeaveCommunity();
 
@@ -108,7 +108,7 @@ export const JoinCommunityPanel = ({
   // The community itself is public to read, so a reader can reach this button
   // without an account. `join` is handed over rather than this handler: the
   // callback runs with the closure it was made in, where there is still no id.
-  const handleJoin = () => (currentUserId ? join() : openSignInWithCallback(join));
+  const handleJoin = () => (currentUserId ? join() : needAuth('join', join));
 
   const handleLeave = () => {
     leaveCommunity(

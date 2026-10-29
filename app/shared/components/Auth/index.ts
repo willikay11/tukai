@@ -1,5 +1,4 @@
-export { AuthCard } from './AuthCard';
-export { AuthDialogContent } from './AuthDialogContent';
-export { AuthTerms } from './AuthTerms';
-export { EmailSignInForm } from './EmailSignInForm';
-export { SocialAuthButtons } from './SocialAuthButtons';
+export { AuthFlowDialog } from './AuthDialog/AuthFlowDialog';
+export { SignInNudge } from './AuthDialog/SignInNudge';
+export { AUTH_REASONS } from './AuthDialog/authReasons';
+export type { AuthReason } from './AuthDialog/authReasons';

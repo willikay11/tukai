@@ -5,9 +5,9 @@ import { Bookmark } from './index';
 
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }));
 
-const openSignInWithCallback = jest.fn();
+const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 
 jest.mock('@/app/shared/components/BucketList', () => ({
@@ -114,10 +114,10 @@ describe('Bookmark', () => {
     fireEvent.click(screen.getByRole('button'));
 
     expect(screen.queryByTestId('picker')).not.toBeInTheDocument();
-    expect(openSignInWithCallback).toHaveBeenCalled();
+    expect(needAuth).toHaveBeenCalled();
 
     // What signing in runs, inside act so the reopen is rendered
-    act(() => openSignInWithCallback.mock.calls[0][0]());
+    act(() => needAuth.mock.calls[0][1]());
 
     expect(screen.getByTestId('picker')).toBeInTheDocument();
   });

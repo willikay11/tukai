@@ -13,9 +13,9 @@ jest.mock('next/navigation', () => ({ useRouter: () => ({ push, back: jest.fn() 
 let sessionState: { data: { user: { id: string } } | null } = { data: { user: { id: 'u1' } } };
 jest.mock('next-auth/react', () => ({ useSession: () => sessionState }));
 
-const openSignInWithCallback = jest.fn();
+const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 
 jest.mock('@/app/shared/components/Images', () => ({
@@ -232,7 +232,7 @@ describe('ReservePageContent', () => {
       await pickFirstSlot(user);
       await user.click(screen.getByRole('button', { name: 'Request Reservation' }));
 
-      expect(openSignInWithCallback).toHaveBeenCalled();
+      expect(needAuth).toHaveBeenCalled();
       expect(requestBooking).not.toHaveBeenCalled();
     });
 
@@ -244,7 +244,7 @@ describe('ReservePageContent', () => {
       await pickFirstSlot(user);
       await user.click(screen.getByRole('button', { name: 'Request Reservation' }));
 
-      openSignInWithCallback.mock.calls[0][0]();
+      needAuth.mock.calls[0][1]();
 
       expect(requestBooking).toHaveBeenCalledWith(
         expect.objectContaining({ specialRequests: 'Date Night' }),

@@ -18,9 +18,9 @@ jest.mock('next-auth/react', () => ({ useSession: () => sessionState }));
 const push = jest.fn();
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
 
-const openSignInWithCallback = jest.fn();
+const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 
 // Claimed by default: the unclaimed case is its own describe below
@@ -429,7 +429,7 @@ describe('ReservationPanel', () => {
 
       await user.click(reserve);
 
-      expect(openSignInWithCallback).toHaveBeenCalled();
+      expect(needAuth).toHaveBeenCalled();
       expect(push).not.toHaveBeenCalled();
     });
 
@@ -439,7 +439,7 @@ describe('ReservationPanel', () => {
 
       await user.click(screen.getByRole('button', { name: /Make Reservation/ }));
       // The dialog reports success by calling back
-      openSignInWithCallback.mock.calls[0][0]();
+      needAuth.mock.calls[0][1]();
 
       expect(push).toHaveBeenCalledWith('/places/p1/reserve');
     });

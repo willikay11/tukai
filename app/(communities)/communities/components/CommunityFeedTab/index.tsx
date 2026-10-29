@@ -91,7 +91,7 @@ export const CommunityFeedTab = ({
   footer,
 }: CommunityFeedTabProps) => {
   const router = useRouter();
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
   const [showAllRows, setShowAllRows] = useState(false);
 
   // Both slices are the reader's own, so neither tab means anything signed out
@@ -155,7 +155,7 @@ export const CommunityFeedTab = ({
         {/* Nothing to carry through: the tab is already open, and it fills in
             as soon as the session lands */}
         <Button
-          onClick={() => openSignInWithCallback(() => undefined)}
+          onClick={() => needAuth('join')}
           className="rounded-full px-6"
         >
           Sign in

@@ -54,7 +54,7 @@ export const ExperienceHostSection = ({ experience }: { experience: Experience }
   const { data: session } = useSession();
   const userId = session?.user?.id;
   const { toast } = useToast();
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
 
   const host = experience.host;
   const isOwnExperience = Boolean(session?.user?.id && host?.id && session.user.id === host.id);
@@ -92,7 +92,7 @@ export const ExperienceHostSection = ({ experience }: { experience: Experience }
   };
 
   // Signing in carries on to the join, so the one press is the one that counts
-  const handleJoin = () => (userId ? join() : openSignInWithCallback(join));
+  const handleJoin = () => (userId ? join() : needAuth('join', join));
 
   if (!host && !experience.hostCommunity) return null;
 

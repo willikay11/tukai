@@ -14,9 +14,9 @@ jest.mock('next-auth/react', () => ({
   useSession: () => ({ data: sessionUser ? { user: sessionUser } : null }),
 }));
 
-const openSignInWithCallback = jest.fn();
+const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 jest.mock('@/app/shared/hooks/useMoments', () => ({
   useToggleMomentLike: () => ({ mutate: mockToggleLike }),
@@ -206,7 +206,7 @@ describe('a reader who is not signed in', () => {
     fireEvent.click(heart());
 
     expect(mockToggleLike).not.toHaveBeenCalled();
-    expect(openSignInWithCallback).toHaveBeenCalled();
+    expect(needAuth).toHaveBeenCalled();
     // Nothing moves until they are actually signed in
     expect(heart().querySelector('.text-red-500')).not.toBeInTheDocument();
   });
@@ -215,7 +215,7 @@ describe('a reader who is not signed in', () => {
     render(<MomentDetail moment={makeMoment()} />);
 
     fireEvent.click(heart());
-    openSignInWithCallback.mock.calls[0][0]();
+    needAuth.mock.calls[0][1]();
 
     expect(mockToggleLike).toHaveBeenCalledWith('m1', expect.anything());
   });
@@ -225,7 +225,7 @@ describe('a reader who is not signed in', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /report/i }));
 
-    expect(openSignInWithCallback).toHaveBeenCalled();
+    expect(needAuth).toHaveBeenCalled();
   });
 });
 

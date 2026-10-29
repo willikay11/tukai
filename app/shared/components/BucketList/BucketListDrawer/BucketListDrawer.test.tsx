@@ -30,9 +30,9 @@ jest.mock('@/app/(experiences)/bucket-lists/[bucketListId]/components/SavedItemC
 const toast = jest.fn();
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
 
-const openSignInWithCallback = jest.fn();
+const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 
 const deleteBucketList = jest.fn();
@@ -248,7 +248,7 @@ describe('BucketListDrawer', () => {
       await userEvent.click(screen.getByText('Join bucket list'));
 
       expect(joinBucketList).not.toHaveBeenCalled();
-      expect(openSignInWithCallback).toHaveBeenCalled();
+      expect(needAuth).toHaveBeenCalled();
     });
   });
 

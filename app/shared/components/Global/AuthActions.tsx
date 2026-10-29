@@ -3,7 +3,6 @@
 import { useState } from 'react';
 
 import { signOut, useSession } from 'next-auth/react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
@@ -23,7 +22,7 @@ import { CreateMenuItemId } from './CreateMenu/items';
 import { ProfileMenu } from './ProfileMenu';
 
 export const AuthActions = () => {
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth, openSignIn, openRegister } = useAuthDialog();
   const { openConnectPlace } = useConnectPlaceDrawer()!;
   const { openCreateExperience } = useCreateExperienceDrawer()!;
   const { openCreateCommunity } = useCreateCommunityDrawer()!;
@@ -53,7 +52,7 @@ export const AuthActions = () => {
       return;
     }
 
-    openSignInWithCallback(() => openCreateExperience());
+    needAuth('host', () => openCreateExperience());
   };
 
   // Closes the Create popover first, then does whatever the row promised - a
@@ -159,23 +158,25 @@ export const AuthActions = () => {
         </>
       ) : (
         /* Two doors, as the design has them: one for whoever already has an
-           account, and one for whoever does not. */
+           account, and one for whoever does not. Create account hides below
+           720px per the design's top bar spec; Sign in shows at every width. */
         <>
-          <Link
-            href="/auth/sign-in"
+          <button
+            type="button"
+            onClick={openSignIn}
             className="inline-flex h-11 flex-shrink-0 items-center rounded-full border border-line bg-white px-[18px] text-sm font-semibold text-brand-ink transition-colors hover:bg-surface"
           >
             Sign in
-          </Link>
+          </button>
 
-          <Link href="/auth/sign-up" className="inline-flex">
-            <Button
-              variant="gradient"
-              className="h-11 flex-shrink-0 rounded-full px-[18px] text-sm font-semibold"
-            >
-              Create account
-            </Button>
-          </Link>
+          <Button
+            type="button"
+            onClick={openRegister}
+            variant="gradient"
+            className="hidden h-11 flex-shrink-0 rounded-full px-[18px] text-sm font-semibold min-[720px]:inline-flex"
+          >
+            Create account
+          </Button>
         </>
       )}
 

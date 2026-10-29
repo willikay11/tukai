@@ -7,7 +7,7 @@ import { BucketListItem } from '@/types/bucket-list';
 import { SavedExperienceCard, SavedPlaceCard } from './SavedItemCard';
 
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback: jest.fn(), setOpenSignIn: jest.fn() }),
+  useAuthDialog: () => ({ needAuth: jest.fn() }),
 }));
 jest.mock('@/app/shared/components/BucketList', () => ({ BucketListPicker: () => null }));
 
