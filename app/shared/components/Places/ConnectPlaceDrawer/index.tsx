@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-
 import { IconComponent } from '@/app/shared/components/Icons';
 import { toast } from '@/app/shared/hooks/useToast';
 import {
@@ -15,12 +13,12 @@ import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
 import { Textarea } from '@/components/ui/textarea';
 import { useConnectPlaceDrawer as useConnectPlaceDrawerStore } from '@/context/ConnectPlaceDrawerContext';
-import { placePath } from '@/utils/detail-paths';
 
 import { CommunitySection } from './CommunitySection';
 import { DocumentsSection } from './DocumentsSection';
 import { NewPlaceForm } from './NewPlaceForm';
 import { PlaceSection } from './PlaceSection';
+import { SetupReservations } from './SetupReservations';
 import { YourClaimView } from './YourClaimView';
 import { joinPlaceNames, useConnectPlaceDrawer } from './useConnectPlaceDrawer';
 
@@ -154,11 +152,11 @@ export const ConnectPlaceDrawer = () => {
       displayedClaim.places[0].isOnTukai
     ) {
       return (
-        <Button asChild variant="lime" className="ml-auto h-12 rounded-full px-6 text-[15px]">
-          <Link href={placePath(displayedClaim.places[0])} onClick={handleClose}>
-            Set up reservations
-          </Link>
-        </Button>
+        <SetupReservations
+          place={displayedClaim.places[0]}
+          variant="footer"
+          onNavigate={handleClose}
+        />
       );
     }
 
@@ -250,6 +248,8 @@ export const ConnectPlaceDrawer = () => {
                 pickedDocumentTypes={documents.pickedDocumentTypes}
                 onToggleDocumentType={documents.togglePickedDocumentType}
                 pendingDocuments={documents.pendingDocuments}
+                sentDocuments={documents.sentDocuments}
+                attachedCount={documents.attachedCount}
                 onAttach={documents.attachDocument}
                 onRemove={documents.removeDocument}
                 onError={onError}
@@ -305,6 +305,8 @@ export const ConnectPlaceDrawer = () => {
                 pickedDocumentTypes={documents.pickedDocumentTypes}
                 onToggleDocumentType={documents.togglePickedDocumentType}
                 pendingDocuments={documents.pendingDocuments}
+                sentDocuments={documents.sentDocuments}
+                attachedCount={documents.attachedCount}
                 onAttach={documents.attachDocument}
                 onRemove={documents.removeDocument}
                 onError={onError}
@@ -333,6 +335,7 @@ export const ConnectPlaceDrawer = () => {
             <YourClaimView
               claim={displayedClaim}
               onCancelClaim={() => setIsCancelConfirmOpen(true)}
+              onNavigate={handleClose}
             />
           )}
 

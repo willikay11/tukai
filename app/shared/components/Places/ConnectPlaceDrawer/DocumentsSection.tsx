@@ -5,6 +5,8 @@ import { ChangeEvent, useRef } from 'react';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { cn } from '@/lib/utils';
 
+import type { ClaimDocument } from '@/types/claim';
+
 import { OWNERSHIP_DOCUMENT_TYPES, REQUIRED_DOCUMENT_COUNT } from './documentTypes';
 import type { PendingDocument } from './useConnectPlaceDrawer';
 
@@ -22,6 +24,8 @@ export interface DocumentsSectionProps {
   pickedDocumentTypes: string[];
   onToggleDocumentType: (value: string) => void;
   pendingDocuments: PendingDocument[];
+  sentDocuments?: ClaimDocument[];
+  attachedCount: number;
   onAttach: (documentType: string, file: File) => void;
   onRemove: (documentType: string) => void;
   onError: (message: string) => void;
@@ -37,6 +41,8 @@ export const DocumentsSection = ({
   pickedDocumentTypes,
   onToggleDocumentType,
   pendingDocuments,
+  sentDocuments = [],
+  attachedCount,
   onAttach,
   onRemove,
   onError,
@@ -110,7 +116,13 @@ export const DocumentsSection = ({
             const label =
               OWNERSHIP_DOCUMENT_TYPES.find((option) => option.value === documentType)?.label ??
               documentType;
-            const attached = pendingDocuments.find((document) => document.documentType === documentType);
+            const pending = pendingDocuments.find((document) => document.documentType === documentType);
+            const sent = sentDocuments.find((document) => document.documentType === documentType);
+            const attached = pending ?? sent;
+            const fileName = pending ? pending.file.name : sent?.fileName;
+            const sizeLabel = pending
+              ? `${Math.round(pending.file.size / 1024)} KB`
+              : [sent?.fileSizeLabel, 'Already sent'].filter(Boolean).join(' · ');
 
             return (
               <div key={documentType} className="flex flex-col gap-2">
@@ -126,11 +138,9 @@ export const DocumentsSection = ({
                     />
                     <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <span className="truncate text-[14.5px] font-semibold text-brand-ink">
-                        {attached.file.name}
+                        {fileName}
                       </span>
-                      <span className="text-[12.5px] text-ink">
-                        {Math.round(attached.file.size / 1024)} KB
-                      </span>
+                      <span className="text-[12.5px] text-ink">{sizeLabel}</span>
                     </div>
                     <button
                       type="button"
@@ -167,9 +177,9 @@ export const DocumentsSection = ({
       )}
 
       <p className="text-[13.5px] leading-relaxed text-ink-muted">
-        {helpLine(pendingDocuments.length)} One set covers every place in the claim, and only
+        {helpLine(attachedCount)} One set covers every place in the claim, and only
         Tukai&apos;s reviewers see them.
-        {pendingDocuments.length < REQUIRED_DOCUMENT_COUNT && ' At least two are required.'}
+        {attachedCount < REQUIRED_DOCUMENT_COUNT && ' At least two are required.'}
       </p>
     </section>
   );

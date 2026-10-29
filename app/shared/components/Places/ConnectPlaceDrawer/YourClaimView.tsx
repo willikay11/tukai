@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { Claim, ClaimStatus } from '@/types/claim';
 import { placePath } from '@/utils/detail-paths';
 
+import { SetupReservations } from './SetupReservations';
 import { OWNERSHIP_DOCUMENT_TYPES } from './documentTypes';
 import { joinPlaceNames } from './useConnectPlaceDrawer';
 
@@ -69,9 +70,11 @@ const statusLine = (claim: Claim) => {
 export const YourClaimView = ({
   claim,
   onCancelClaim,
+  onNavigate = () => {},
 }: {
   claim: Claim;
   onCancelClaim: () => void;
+  onNavigate?: () => void;
 }) => {
   const status = STATUS_CONFIG[claim.status];
   const canCancel = claim.status === 'review' || claim.status === 'more';
@@ -97,23 +100,29 @@ export const YourClaimView = ({
         {claim.places.map((place) => (
           <div key={place.id} className="flex flex-wrap items-center gap-2.5">
             <div className="flex min-w-[220px] flex-1 items-center gap-3">
-              <span className="relative block h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-surface-brand">
-                <PhotoImage src={place.photo} alt="" fill className="object-cover" fallbackIconSize={16} />
+              <span className="relative flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-surface-brand text-lg font-bold text-brand-ink">
+                {place.photo ? (
+                  <PhotoImage
+                    src={place.photo}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    fallbackIconSize={16}
+                  />
+                ) : (
+                  <span aria-hidden="true">{place.title.charAt(0).toUpperCase()}</span>
+                )}
               </span>
               <div className="flex min-w-0 flex-col gap-0.5">
                 <span className="text-[15.5px] font-semibold text-gray-800">{place.title}</span>
-                {place.locality && <span className="text-[13.5px] text-ink-muted">{place.locality}</span>}
+                {place.locality && (
+                  <span className="text-[13.5px] text-ink-muted">{place.locality}</span>
+                )}
               </div>
             </div>
 
             {claim.status === 'approved' && place.isOnTukai && (
-              <Link
-                href={placePath(place)}
-                className="inline-flex h-11 flex-shrink-0 items-center gap-2 rounded-full bg-surface-brand px-4 text-sm font-semibold text-brand hover:bg-surface-tab"
-              >
-                <IconComponent iconName="Settings02Icon" size={18} color="currentColor" />
-                Set up reservations
-              </Link>
+              <SetupReservations place={place} variant="row" onNavigate={onNavigate} />
             )}
 
             {place.isOnTukai && (
@@ -133,7 +142,13 @@ export const YourClaimView = ({
         <span className="text-[13px] font-semibold text-ink-muted">Community that owns it</span>
         <div className="flex items-center gap-3">
           <span className="relative block h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-surface-brand">
-            <PhotoImage src={claim.communityPhoto} alt="" fill className="object-cover" fallbackIconSize={14} />
+            <PhotoImage
+              src={claim.communityPhoto}
+              alt=""
+              fill
+              className="object-cover"
+              fallbackIconSize={14}
+            />
           </span>
           <span className="text-[15.5px] font-semibold text-gray-800">{claim.communityName}</span>
         </div>
@@ -143,12 +158,20 @@ export const YourClaimView = ({
         <section className="flex flex-col gap-2.5" aria-label="Documents">
           <span className="text-[13px] font-semibold text-ink-muted">Documents</span>
           {claim.documents.map((document) => (
-            <div key={document.id} className="flex min-h-14 items-center gap-3 rounded-xl bg-surface px-3.5 py-2">
-              <IconComponent iconName="Copy01Icon" size={20} color="currentColor" className="flex-shrink-0 text-brand" />
+            <div
+              key={document.id}
+              className="flex min-h-14 items-center gap-3 rounded-xl bg-surface px-3.5 py-2"
+            >
+              <IconComponent
+                iconName="Copy01Icon"
+                size={20}
+                color="currentColor"
+                className="flex-shrink-0 text-brand"
+              />
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span className="text-[14.5px] font-semibold text-gray-800">
-                  {OWNERSHIP_DOCUMENT_TYPES.find((type) => type.value === document.documentType)?.label ??
-                    document.documentType}
+                  {OWNERSHIP_DOCUMENT_TYPES.find((type) => type.value === document.documentType)
+                    ?.label ?? document.documentType}
                 </span>
                 <span className="truncate text-[13px] text-ink-muted">{document.fileName}</span>
               </div>
