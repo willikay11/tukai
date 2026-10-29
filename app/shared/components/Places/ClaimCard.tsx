@@ -22,7 +22,7 @@ const WHAT_YOU_GET: { icon: string; title: string; detail: string }[] = [
   },
   {
     icon: 'ChartLineData01Icon',
-    title: 'Manage it from Control center',
+    title: 'Manage it from your Dashboard',
     detail: 'The listing joins Your places, alongside the experiences your community runs.',
   },
   {

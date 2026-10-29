@@ -465,7 +465,7 @@ export const publishExperience = async (id: string): Promise<ApiResponse> => {
 //
 // Per the spec this "cancels the experience, refunding any completed
 // purchases", so it serves both callers: clearing an unfinished draft on the
-// resume screen, and cancelling a live experience from Control Center. The
+// resume screen, and cancelling a live experience from the Dashboard. The
 // refunds are the API's business, not the client's.
 export const cancelExperience = async (id: string): Promise<ApiResponse> => {
   try {

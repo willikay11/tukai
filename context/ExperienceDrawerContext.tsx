@@ -3,11 +3,18 @@
 import { ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 import { ExperienceDrawer } from '@/app/shared/components/Experiences';
+import { HostTabId } from '@/app/shared/components/Experiences/ExperienceDrawer/host/types';
+
+export type OpenExperienceOptions = {
+  /** Lands straight on this host tab, e.g. the Dashboard's "Tickets created" chip. */
+  hostTab?: HostTabId;
+};
 
 type ExperienceDrawerValue = {
   /** The experience currently open, or null. */
   openExperienceId: string | null;
-  openExperience: (experienceId: string) => void;
+  openHostTab?: HostTabId;
+  openExperience: (experienceId: string, options?: OpenExperienceOptions) => void;
   closeExperience: () => void;
 };
 
@@ -22,16 +29,20 @@ const ExperienceDrawerContext = createContext<ExperienceDrawerValue | null>(null
  */
 export const ExperienceDrawerProvider = ({ children }: { children: ReactNode }) => {
   const [openExperienceId, setOpenExperienceId] = useState<string | null>(null);
+  const [openHostTab, setOpenHostTab] = useState<HostTabId | undefined>(undefined);
 
   const openExperience = useCallback(
-    (experienceId: string) => setOpenExperienceId(experienceId),
+    (experienceId: string, options?: OpenExperienceOptions) => {
+      setOpenExperienceId(experienceId);
+      setOpenHostTab(options?.hostTab);
+    },
     [],
   );
   const closeExperience = useCallback(() => setOpenExperienceId(null), []);
 
   const value = useMemo(
-    () => ({ openExperienceId, openExperience, closeExperience }),
-    [openExperienceId, openExperience, closeExperience],
+    () => ({ openExperienceId, openHostTab, openExperience, closeExperience }),
+    [openExperienceId, openHostTab, openExperience, closeExperience],
   );
 
   return (
@@ -41,6 +52,7 @@ export const ExperienceDrawerProvider = ({ children }: { children: ReactNode }) 
         experienceId={openExperienceId}
         isOpen={Boolean(openExperienceId)}
         onClose={closeExperience}
+        initialHostTab={openHostTab}
       />
     </ExperienceDrawerContext.Provider>
   );

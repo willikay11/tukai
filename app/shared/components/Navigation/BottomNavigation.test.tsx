@@ -44,7 +44,6 @@ describe('BottomNavigation', () => {
 
   it.each([
     '/experiences',
-    '/experiences/create',
     '/experiences/see-all',
     '/experiences/type',
     '/places',

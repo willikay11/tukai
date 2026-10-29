@@ -104,7 +104,7 @@ export const usePlaces = ({
   });
 };
 
-/** The places this user owns, for Control Center. */
+/** The places this user owns, for the Dashboard. */
 export const useMyPlaces = (enabled: boolean = true) =>
   useQuery({
     queryKey: ['myPlaces'],

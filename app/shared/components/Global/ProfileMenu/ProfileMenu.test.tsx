@@ -48,7 +48,7 @@ describe('ProfileMenu', () => {
   it('links Dashboard to Control Center', () => {
     render(<ProfileMenu {...defaults} />);
 
-    expect(screen.getByText('Dashboard').closest('a')).toHaveAttribute('href', '/control-center');
+    expect(screen.getByText('Dashboard').closest('a')).toHaveAttribute('href', '/dashboard');
   });
 
   it('routes every row that has a destination', () => {

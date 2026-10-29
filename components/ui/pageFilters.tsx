@@ -61,7 +61,7 @@ export const PageFilters = () => {
   // Hide filters on Discover, Experiences and Communities (which render their
   // own tabs), Moments and Bucket Lists (no categories to filter by - either
   // would otherwise sit on the skeleton forever, since only the /places branch
-  // ever clears isLoading), detail pages (with IDs), and Control Center (a host
+  // ever clears isLoading), detail pages (with IDs), and the Dashboard (a host
   // dashboard, not browsable content)
   if (
     pathname === '/' ||
@@ -72,7 +72,7 @@ export const PageFilters = () => {
     pathname.startsWith('/places/') ||
     pathname.startsWith('/experiences/') ||
     pathname.startsWith('/communities/') ||
-    pathname.startsWith('/control-center') ||
+    pathname.startsWith('/dashboard') ||
     pathname.startsWith('/auth/') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/privacy') ||

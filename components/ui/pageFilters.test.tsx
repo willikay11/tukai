@@ -89,7 +89,7 @@ describe('PageFilters', () => {
       '/places/123',
       '/experiences/456',
       '/communities/789',
-      '/control-center/experiences/456',
+      '/dashboard/experiences/456',
       '/moments',
       '/moments?momentId=abc',
       '/auth/login',

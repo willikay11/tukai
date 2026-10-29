@@ -15,7 +15,7 @@ import {
   submitCommunityVerification,
   uploadVerificationDocument,
 } from '@/services/community';
-import { CommunityPostsQueryParams, CreateCommunity } from '@/types/community';
+import { Community, CommunityPostsQueryParams, CreateCommunity } from '@/types/community';
 
 /**
  * A single community, for the membership records the LIST endpoint leaves out.
@@ -89,6 +89,33 @@ export const useGetCommunities = (
       ),
     enabled: enabled,
   });
+};
+
+/**
+ * Communities a person owns, and separately the ones they've joined - deduped
+ * against the owned list, since owning one also follows it. Shared between
+ * the Profile's Communities tab and the Dashboard's My communities section.
+ */
+export const useMyCommunities = (userId: string | null | undefined) => {
+  const enabled = Boolean(userId);
+
+  const { data: ownedResponse, isLoading: isLoadingOwned } = useGetCommunities({
+    page: 1,
+    enabled,
+    createdBy: userId ?? undefined,
+  });
+  const { data: joinedResponse, isLoading: isLoadingJoined } = useGetCommunities({
+    page: 1,
+    enabled,
+    following: true,
+  });
+
+  const owned: Community[] = ownedResponse?.data?.results ?? [];
+  const joined: Community[] = (joinedResponse?.data?.results ?? []).filter(
+    (community: Community) => !owned.some((own) => own.id === community.id),
+  );
+
+  return { owned, joined, isLoading: isLoadingOwned || isLoadingJoined };
 };
 
 /**

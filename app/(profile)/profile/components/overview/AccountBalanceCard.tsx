@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { WithdrawDrawer } from '@/app/(control-center)/control-center/components/WithdrawDrawer';
+import { WithdrawDrawer } from '@/app/(dashboard)/dashboard/components/WithdrawDrawer';
 import { money } from '@/app/(profile)/hooks';
 import { IconComponent } from '@/app/shared/components/Icons';
 

@@ -20,8 +20,7 @@ import { cancelExperience } from '@/services/experience';
 import { Experience } from '@/types/experience';
 import { parseApiError } from '@/utils/parseApiError';
 
-// An unfinished draft is offered for resuming before the wizard opens -
-// mirrors the full page's own CreateEntryState (app/(experiences)/experiences/create/page.tsx)
+// An unfinished draft is offered for resuming before the wizard opens.
 type CreateEntryState = 'gate' | 'wizard';
 
 export interface DrawerStepMeta {

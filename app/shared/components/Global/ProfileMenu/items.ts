@@ -14,15 +14,13 @@ export interface ProfileMenuItem {
  * these destinations are the bottom bar as well; on a desktop this menu is
  * the only way to them, which is why they live here and not in the tab strip.
  *
- * "Dashboard" is this app's /control-center, the only dashboard-like route
- * that exists - the canvas's name for the same destination. "TukAI" has no
- * feature (window, floating trigger, anything) behind it anywhere in the
- * app yet, so it has no `href` and renders disabled, same as any other row
- * shown ahead of its own destination.
+ * "TukAI" has no feature (window, floating trigger, anything) behind it
+ * anywhere in the app yet, so it has no `href` and renders disabled, same as
+ * any other row shown ahead of its own destination.
  */
 export const PROFILE_MENU_GROUP_ONE: ProfileMenuItem[] = [
   { label: 'Profile', icon: 'UserCircleIcon', href: '/profile' },
-  { label: 'Dashboard', icon: 'DashboardCircleAddIcon', href: '/control-center' },
+  { label: 'Dashboard', icon: 'DashboardCircleAddIcon', href: '/dashboard' },
   { label: 'TukAI', icon: 'SparklesIcon' },
   { label: 'Communities', icon: 'UserMultipleIcon', href: '/communities' },
   { label: 'Bucket lists', icon: 'ShoppingBasketAdd02Icon', href: '/bucket-lists' },

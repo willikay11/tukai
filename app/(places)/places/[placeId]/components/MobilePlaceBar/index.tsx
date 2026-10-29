@@ -5,14 +5,12 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 
 import { MomentComposer } from '@/app/shared/components/Moments';
-import { ClaimCard } from '@/app/shared/components/Places/ClaimCard';
 import { usePlaceManager, usePlaceOwnership } from '@/app/shared/hooks/usePlaces';
 import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
+import { useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
 
 import { ReservationPanel } from '../ReservationPanel';
-
-type SheetView = 'reservation' | 'claim';
 
 /**
  * The two things a reader can do at a place on a phone, kept on screen at any
@@ -26,13 +24,20 @@ type SheetView = 'reservation' | 'claim';
  * A place nobody has claimed cannot take reservations at all, so offering
  * "Reserve" there leads to a disabled button. It offers the way out of that
  * state instead, and explains what claiming is before asking for anything.
+ * That goes straight to the same global Connect-a-place drawer the desktop
+ * column opens (`ClaimCard`'s own button) rather than opening this bar's
+ * sheet first - the sheet and that drawer are both the shared, portaled
+ * `Drawer` component, and nesting one inside the other means two overlays at
+ * the same fixed z-index, so the sheet (mounted later, painting on top) was
+ * silently hiding the claim drawer the moment "Start claim" opened it.
  *
  * To the community that owns the place the sheet is the manage panel, so the
  * button names that job rather than one its reader will not do.
  */
 export const MobilePlaceBar = ({ placeId, placeName }: { placeId: string; placeName: string }) => {
-  const [openView, setOpenView] = useState<SheetView | null>(null);
+  const [openView, setOpenView] = useState<'reservation' | null>(null);
   const [isComposerOpen, setIsComposerOpen] = useState(false);
+  const connectDrawer = useConnectPlaceDrawer();
 
   // Asked only of a signed-in reader: the endpoint 401s without a token, and
   // claiming needs an account anyway
@@ -67,7 +72,11 @@ export const MobilePlaceBar = ({ placeId, placeName }: { placeId: string; placeN
           </Button>
           <Button
             variant="lime"
-            onClick={() => setOpenView(isUnclaimed ? 'claim' : 'reservation')}
+            onClick={() =>
+              isUnclaimed
+                ? connectDrawer?.openConnectPlace({ placeId })
+                : setOpenView('reservation')
+            }
             className="h-11 rounded-full px-6"
           >
             {isUnclaimed ? 'Claim this place' : isManager ? 'Manage place' : 'Reserve'}
@@ -80,7 +89,6 @@ export const MobilePlaceBar = ({ placeId, placeName }: { placeId: string; placeN
           {openView === 'reservation' && (
             <ReservationPanel placeId={placeId} placeName={placeName} />
           )}
-          {openView === 'claim' && <ClaimCard placeId={placeId} placeName={placeName} />}
         </div>
       </Drawer>
 

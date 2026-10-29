@@ -8,29 +8,23 @@ import { BookingPanel } from '@/app/(experiences)/experiences/components/Booking
 import { Bookmark } from '@/app/shared/components/Bookmark';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
-import { ContextMoments } from '@/app/shared/components/Moments';
 import { PlaceDrawerTabs } from '@/app/shared/components/Places/PlaceDrawer/PlaceDrawerTabs';
-import { PlacePhotoStrip } from '@/app/shared/components/Places/PlaceDrawer/PlacePhotoStrip';
 import { Share } from '@/app/shared/components/Share';
 import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
 import { useScrollSpy } from '@/app/shared/hooks/useScrollSpy';
 import { Drawer } from '@/components/ui/drawer';
-import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
-import { coverPhotoUrl, Photo, photoUrl } from '@/types/photo';
+import { coverPhotoUrl } from '@/types/photo';
 import { isTicketPaused } from '@/types/ticket';
 import { formatExperienceHeaderDate } from '@/utils/date-utils';
 import { experiencePath } from '@/utils/detail-paths';
-import { toPlainText } from '@/utils/safe-text-utils';
 
-import { ExperienceCancellationSection } from './ExperienceCancellationSection';
 import { ExperienceDrawerFooter } from './ExperienceDrawerFooter';
-import { ExperienceHostSection } from './ExperienceHostSection';
-import { ExperienceItinerarySection } from './ExperienceItinerarySection';
-import { ExperienceLocationSection } from './ExperienceLocationSection';
-import { ExperienceMyTickets } from './ExperienceMyTickets';
-import { ExperienceTicketsSection } from './ExperienceTicketsSection';
-import { EXPERIENCE_SECTIONS, experienceDrawerTabs } from './tabs';
+import { ExperienceGuestContent } from './ExperienceGuestContent';
+import { HostExperiencePanel } from './host/HostExperiencePanel';
+import { HOST_TABS, HostTabId } from './host/types';
+import { useHostMode } from './host/useHostMode';
+import { experienceDrawerTabs } from './tabs';
 
 /** The round grey disc each of the header's controls sits in. */
 const DISC = 'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-surface';
@@ -42,62 +36,6 @@ const DISC = 'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-f
  * `scroll-mt`.
  */
 const TAB_OFFSET = 148;
-
-/**
- * Matches the design's 3-line clamp (`pn.aboutClamp`) rather than
- * `DescriptionShowMore`'s character slice, which cuts mid-sentence and never
- * reaches 3 lines consistently. No `aboutRich`/`aboutBlocks` structure here:
- * the API sends one description string, so the design's structured About
- * blocks (headings, bullets) are not built - see ED-04.
- */
-const ABOUT_CLAMP_THRESHOLD = 240;
-
-const AboutClamp = ({ text }: { text: string }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const plainText = toPlainText(text);
-  const shouldTruncate = plainText.length > ABOUT_CLAMP_THRESHOLD;
-
-  return (
-    <div className="flex flex-col gap-2">
-      <p
-        className={cn(
-          'whitespace-pre-line text-[15px] leading-relaxed text-brand-ink',
-          shouldTruncate && !isExpanded && 'line-clamp-3',
-        )}
-      >
-        {plainText}
-      </p>
-
-      {shouldTruncate && (
-        <button
-          type="button"
-          onClick={() => setIsExpanded((current) => !current)}
-          aria-expanded={isExpanded}
-          className="inline-flex w-fit items-center gap-1.5 text-[15px] font-medium text-brand hover:underline"
-        >
-          {isExpanded ? 'Show less' : 'Show more'}
-          <IconComponent
-            iconName={isExpanded ? 'ArrowUp01Icon' : 'ArrowDown01Icon'}
-            size={17}
-            color="currentColor"
-          />
-        </button>
-      )}
-    </div>
-  );
-};
-
-/** Cover photo first, same ordering `Experiences/Single` uses for its carousel. */
-const galleryPhotos = (photos: Photo[]): string[] =>
-  photos
-    .filter((photo) => photo.mediaType === 'photo' && photo.photo)
-    .sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0))
-    .map((photo) => photoUrl(photo, 'md'))
-    .filter((url): url is string => Boolean(url));
-
-/** Whether to show the moments section's past-experience note (ED-09). */
-const hasEnded = (experience: Experience): boolean => new Date(experience.endDate) < new Date();
 
 const Loading = () => (
   <div className="space-y-4 px-6 py-6">
@@ -119,10 +57,13 @@ export const ExperienceDrawer = ({
   experienceId,
   isOpen,
   onClose,
+  initialHostTab,
 }: {
   experienceId: string | null;
   isOpen: boolean;
   onClose: () => void;
+  /** Lands straight on this host tab - the Dashboard's "Tickets created"/"Sold" chips. */
+  initialHostTab?: HostTabId;
 }) => {
   const { data: session } = useSession();
 
@@ -148,6 +89,14 @@ export const ExperienceDrawer = ({
     isOpen && experienceId ? experienceId : '',
   );
   const experience: Experience | undefined = data?.data;
+
+  // Host mode (ED-host): the drawer's owner sees the host's own tab set
+  // (About/Sales/Tickets created/Invited guests/Moments/Analytics) instead
+  // of the guest's single-scroll view.
+  const isHostMode = Boolean(
+    session?.user?.id && experience?.host?.id && session.user.id === experience.host.id,
+  );
+  const host = useHostMode(experienceId, initialHostTab);
 
   const hasTickets = (experience?.tickets ?? []).some((ticket) => !isTicketPaused(ticket));
   const hasHost = Boolean(experience?.host || experience?.hostCommunity);
@@ -178,14 +127,22 @@ export const ExperienceDrawer = ({
           <div className="sticky top-0 z-30 bg-white">
             <div className="flex items-start justify-between gap-4 border-b border-line px-6 py-4">
               <div className="flex min-w-0 flex-1 items-center gap-2">
-                {view === 'reservation' && (
+                {(view === 'reservation' || (isHostMode && host.view === 'editTicket')) && (
                   <button
                     type="button"
                     onClick={() =>
-                      isCheckingOut ? setIsCheckingOut(false) : setView('experience')
+                      isHostMode && host.view === 'editTicket'
+                        ? host.closeEditTicket()
+                        : isCheckingOut
+                          ? setIsCheckingOut(false)
+                          : setView('experience')
                     }
                     aria-label={
-                      isCheckingOut ? 'Back to Make reservation' : `Back to ${experience.title}`
+                      isHostMode && host.view === 'editTicket'
+                        ? 'Back to Tickets created'
+                        : isCheckingOut
+                          ? 'Back to Make reservation'
+                          : `Back to ${experience.title}`
                     }
                     className={`${DISC} text-brand hover:bg-surface-brand`}
                   >
@@ -198,12 +155,16 @@ export const ExperienceDrawer = ({
                     ? isCheckingOut
                       ? 'Complete your payment'
                       : 'Make reservation'
-                    : formatExperienceHeaderDate(experience.startDate, experience.endDate)}
+                    : isHostMode
+                      ? host.view === 'editTicket'
+                        ? 'Edit ticket details'
+                        : experience.title
+                      : formatExperienceHeaderDate(experience.startDate, experience.endDate)}
                 </h2>
               </div>
 
               <div className="flex flex-shrink-0 items-center gap-2">
-                {view === 'experience' && (
+                {view === 'experience' && !(isHostMode && host.view === 'editTicket') && (
                   <>
                     <div className={DISC}>
                       <Share
@@ -238,9 +199,19 @@ export const ExperienceDrawer = ({
               </div>
             </div>
 
-            {view === 'experience' && (
+            {view === 'experience' && !isHostMode && (
               <div className="px-6 py-3">
                 <PlaceDrawerTabs tabs={tabs} activeId={activeId} onSelect={scrollTo} />
+              </div>
+            )}
+
+            {isHostMode && host.view === 'tab' && (
+              <div className="px-6 py-3">
+                <PlaceDrawerTabs
+                  tabs={HOST_TABS}
+                  activeId={host.hostTab}
+                  onSelect={(id) => host.selectTab(id as HostTabId)}
+                />
               </div>
             )}
           </div>
@@ -295,57 +266,19 @@ export const ExperienceDrawer = ({
                 />
               </div>
             </div>
+          ) : isHostMode ? (
+            <HostExperiencePanel
+              experience={experience}
+              hostTab={host.hostTab}
+              view={host.view}
+              editingTicket={host.editingTicket}
+              onEditTicket={host.openEditTicket}
+              onBackFromEdit={host.closeEditTicket}
+              onBuyTickets={() => setView('reservation')}
+            />
           ) : (
             <>
-              <div className="flex-1 space-y-6 px-6 py-6">
-                <section id={EXPERIENCE_SECTIONS.about} className="scroll-mt-[156px] space-y-6">
-                  <PlacePhotoStrip
-                    photos={galleryPhotos(experience.photos)}
-                    alt={experience.title}
-                  />
-
-                  <div className="space-y-2">
-                    <h2 className="text-[26px] font-bold leading-tight tracking-[-0.5px] text-brand-ink">
-                      {experience.title}
-                    </h2>
-
-                    {experience.description && <AboutClamp text={experience.description} />}
-                  </div>
-                </section>
-
-                <ExperienceItinerarySection experience={experience} />
-
-                <ExperienceMyTickets experience={experience} />
-
-                <ExperienceTicketsSection experience={experience} />
-
-                <ExperienceLocationSection experience={experience} />
-
-                <ExperienceHostSection experience={experience} />
-
-                <section
-                  id={EXPERIENCE_SECTIONS.moments}
-                  className="scroll-mt-[156px] space-y-4 border-t border-line pt-6"
-                >
-                  {hasEnded(experience) && (
-                    <p className="text-[14px] text-ink-muted">
-                      This experience has already happened.
-                    </p>
-                  )}
-                  <ContextMoments
-                    title="Moments"
-                    contextLabel={experience.title}
-                    emptyMessage={`No moments from ${experience.title} yet. Yours could be the first.`}
-                    experienceId={experience.id}
-                    placeId={experience.place?.id}
-                    placeLabel={experience.place?.title}
-                    communityId={experience.hostCommunity?.id}
-                    communityLabel={experience.hostCommunity?.title}
-                  />
-                </section>
-
-                <ExperienceCancellationSection experience={experience} />
-              </div>
+              <ExperienceGuestContent experience={experience} />
 
               <ExperienceDrawerFooter
                 experience={experience}

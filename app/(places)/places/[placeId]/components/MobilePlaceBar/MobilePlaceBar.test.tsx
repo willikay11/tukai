@@ -25,10 +25,9 @@ jest.mock('@/app/shared/hooks/usePlaces', () => ({
   usePlaceManager: () => ({ isManager, isLoading: false }),
 }));
 
-jest.mock('@/app/shared/components/Places/ClaimCard', () => ({
-  ClaimCard: ({ placeName }: { placeName: string }) => (
-    <div data-testid="claim-prompt">{placeName}</div>
-  ),
+const openConnectPlace = jest.fn();
+jest.mock('@/context/ConnectPlaceDrawerContext', () => ({
+  useConnectPlaceDrawer: () => ({ openConnectPlace }),
 }));
 
 jest.mock('@/app/shared/components/Moments', () => ({
@@ -43,6 +42,7 @@ describe('MobilePlaceBar', () => {
     ownership = { success: true, data: { id: 'o1' } };
     isLoadingOwnership = false;
     isManager = false;
+    openConnectPlace.mockClear();
   });
 
   // The sheet resolves an owner to the manage actions itself, so the button
@@ -101,13 +101,18 @@ describe('MobilePlaceBar', () => {
       expect(screen.queryByRole('button', { name: 'Reserve' })).not.toBeInTheDocument();
     });
 
-    it('explains what claiming means before the form does', async () => {
+    // Regression: this used to open the bar's own sheet with ClaimCard
+    // inside it, stacking a second Drawer on top of the global
+    // Connect-a-place drawer ClaimCard's own button opens - both the shared,
+    // portaled Drawer component at the same fixed z-index, so the sheet
+    // (mounted later) silently painted over the claim drawer underneath it.
+    it('opens the global claim drawer directly, not a local sheet', async () => {
       const user = userEvent.setup();
       renderBar();
 
       await user.click(screen.getByRole('button', { name: 'Claim this place' }));
 
-      expect(screen.getByTestId('claim-prompt')).toHaveTextContent('Kraftory Biergarten');
+      expect(openConnectPlace).toHaveBeenCalledWith({ placeId: 'p1' });
       expect(screen.queryByTestId('reservation-panel')).not.toBeInTheDocument();
     });
   });
