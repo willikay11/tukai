@@ -98,8 +98,7 @@ export default function ManageExperiencePage() {
     <main className="mx-auto max-w-6xl space-y-6 px-6 py-6">
       <Breadcrumb
         items={[
-          // No href yet - the Control Center landing page does not exist
-          { label: 'Control Center' },
+          { label: 'Dashboard', href: '/dashboard' },
           { label: 'Manage Experience' },
         ]}
       />

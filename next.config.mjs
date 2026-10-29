@@ -10,29 +10,40 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Creator Studio became Control Center. Links already handed out — bookmarks,
-  // emails, anything shared — keep working rather than 404ing.
+  // Creator Studio became Control Center, which became the Dashboard. Links
+  // already handed out — bookmarks, emails, anything shared — keep working
+  // rather than 404ing.
   async redirects() {
     return [
       {
         source: '/creator-studio',
-        destination: '/control-center',
+        destination: '/dashboard',
         permanent: true,
       },
       {
         source: '/creator-studio/:path*',
-        destination: '/control-center/:path*',
+        destination: '/dashboard/:path*',
         permanent: true,
       },
       {
         source: '/control-centre',
-        destination: '/control-center',
+        destination: '/dashboard',
         permanent: false,
       },
       {
         source: '/control-centre/:path*',
-        destination: '/control-center/:path*',
+        destination: '/dashboard/:path*',
         permanent: false,
+      },
+      {
+        source: '/control-center',
+        destination: '/dashboard',
+        permanent: true,
+      },
+      {
+        source: '/control-center/:path*',
+        destination: '/dashboard/:path*',
+        permanent: true,
       },
       {
         source: '/community/:path*',

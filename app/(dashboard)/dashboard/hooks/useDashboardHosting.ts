@@ -49,7 +49,7 @@ const buildItem = (experience: Experience): DashboardHostingItem => {
           experience.totalAmountSold?.currency ?? experience.currency,
         );
 
-  const base = `/control-center/experiences/${experience.id}`;
+  const base = `/dashboard/experiences/${experience.id}`;
 
   return {
     key: experience.id,
@@ -72,7 +72,7 @@ const buildItem = (experience: Experience): DashboardHostingItem => {
  * experiences, grouped onto a day rail, plus the latest saved draft (for the
  * "Continue your draft" CTA). `ticketsCreated`/`ticketsSold`/`totalAmountSold`
  * are already denormalized on `Experience` for its host, so no per-experience
- * fetch is needed - unlike the old Control Center's "Recent reservations".
+ * fetch is needed - unlike the old Control Center page's "Recent reservations".
  */
 export const useDashboardHosting = (userId: string | undefined, selectedOffset: number | null) => {
   const { data, isLoading } = useExperiences(

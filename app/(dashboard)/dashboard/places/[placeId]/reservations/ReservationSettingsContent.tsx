@@ -318,7 +318,7 @@ export const ReservationSettingsContent = ({ place }: { place: Place }) => {
               <div className="flex gap-2 pt-2 lg:gap-3">
                 <button
                   type="button"
-                  onClick={() => router.push(`/control-center/places/${place.id}`)}
+                  onClick={() => router.push(`/dashboard/places/${place.id}`)}
                   className="text-xs font-medium text-destructive hover:text-destructive/80"
                 >
                   Cancel
@@ -343,7 +343,7 @@ export const ReservationSettingsContent = ({ place }: { place: Place }) => {
         open={isSavedModalOpen}
         onOpenChange={(open) => {
           setIsSavedModalOpen(open);
-          if (!open) router.push(`/control-center/places/${place.id}`);
+          if (!open) router.push(`/dashboard/places/${place.id}`);
         }}
         title="Reservations Are Open!"
         description={`${place.title} now takes reservations on the days and hours you set. Requests will appear here for you to accept or decline.`}

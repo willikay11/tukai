@@ -34,11 +34,11 @@ describe('HostingCard', () => {
     expect(screen.getByText('34 / 40 tickets sold')).toBeInTheDocument();
   });
 
-  it('routes Manage to the control center for published experiences', () => {
+  it('routes Manage to the dashboard for published experiences', () => {
     render(<HostingCard experience={baseExperience} />);
     expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute(
       'href',
-      '/control-center/experiences/exp-1',
+      '/dashboard/experiences/exp-1',
     );
   });
 
@@ -55,7 +55,7 @@ describe('HostingCard', () => {
     expect(openCreateExperience).toHaveBeenCalledWith({ experienceId: 'exp-1' });
   });
 
-  it('renders Cancelled badge with hidden-from-explore footer and control center routing', () => {
+  it('renders Cancelled badge with hidden-from-explore footer and dashboard routing', () => {
     render(
       <HostingCard
         experience={{ ...baseExperience, status: 'cancelled' } as unknown as Experience}
@@ -67,7 +67,7 @@ describe('HostingCard', () => {
     expect(screen.getByText('Hidden from Explore')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute(
       'href',
-      '/control-center/experiences/exp-1',
+      '/dashboard/experiences/exp-1',
     );
   });
 

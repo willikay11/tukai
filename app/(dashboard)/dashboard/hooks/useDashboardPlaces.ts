@@ -73,7 +73,7 @@ export const useDashboardPlaces = (userId: string | undefined) => {
     const profileId = profileIdByPlace.get(place.id);
     const requests: PlaceBookingRequest[] = requestQueries[index]?.data?.data?.results ?? [];
     const pending = requests.filter((request) => request.status === 'requested').length;
-    const reservationsHref = `/control-center/places/${place.id}/reservations`;
+    const reservationsHref = `/dashboard/places/${place.id}/reservations`;
 
     const reservationStat: DashboardPlaceStat = profileId
       ? {

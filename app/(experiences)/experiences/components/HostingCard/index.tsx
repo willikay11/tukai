@@ -77,8 +77,8 @@ export const HostingCard = ({ experience }: HostingCardProps) => {
   const status = normalizeStatus(experience.status);
   const isDraft = status === Status.Draft;
   // A draft has nothing to manage yet, so it reopens in the create drawer.
-  // Anything published goes to the host's Control Center dashboard - this card
-  // only ever renders in host contexts (Hosting tab, pre-wizard listing).
+  // Anything published goes to the host's Dashboard - this card only ever
+  // renders in host contexts (Hosting tab, pre-wizard listing).
 
   const metaLine = buildHostingMetaLine(experience);
   const footerText = buildHostingFooterText(experience);
@@ -127,7 +127,7 @@ export const HostingCard = ({ experience }: HostingCardProps) => {
             </button>
           ) : (
             <Link
-              href={`/control-center/experiences/${experience.id}`}
+              href={`/dashboard/experiences/${experience.id}`}
               className="flex-shrink-0 text-sm font-semibold text-primary hover:underline"
             >
               Manage

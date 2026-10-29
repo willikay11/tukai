@@ -10,7 +10,6 @@ import { useMyCommunities } from '@/app/shared/hooks/useCommunities';
 import { DashboardBalanceCard } from './components/DashboardBalanceCard';
 import { DashboardSkeleton } from './components/DashboardSkeleton';
 import { DashboardTabId, DashboardTabs } from './components/DashboardTabs';
-import { EarningsSection } from './components/EarningsSection';
 import { HostingPlanCard } from './components/HostingPlanCard';
 import { MyCommunitiesSection } from './components/MyCommunitiesSection';
 import { MyExperiencesHostingSection } from './components/MyExperiencesHostingSection';
@@ -19,14 +18,10 @@ import { MyReservationsSection } from './components/MyReservationsSection';
 import { useDashboardPlaces } from './hooks/useDashboardPlaces';
 
 /**
- * The Dashboard (`/control-center` - the account menu's "Dashboard" entry
- * already points here). Replaces the old single-column Control Center with
- * the handoff's tabbed layout: Overview shows every section, any other tab
- * shows only its own section at full width.
- *
- * The old Control Center's payout history (`EarningsSection`/`WalletsSection`)
- * isn't part of the handoff's visible layout, but stays reachable - tucked
- * below the four Dashboard sections - rather than being dropped.
+ * The Dashboard (`/dashboard` - the account menu's "Dashboard" entry already
+ * points here). Replaces the old single-column Control Center with the
+ * handoff's tabbed layout: Overview shows every section, any other tab shows
+ * only its own section at full width.
  */
 export const DashboardContent = () => {
   const { data: session, status } = useSession();
@@ -97,10 +92,6 @@ export const DashboardContent = () => {
             </div>
           )}
         </div>
-      </div>
-
-      <div className="mt-10">
-        <EarningsSection currency="KES" />
       </div>
     </PageContainer>
   );

@@ -12,7 +12,7 @@ export default function robots(): MetadataRoute.Robots {
         // Signed-in-only or personal: nothing here is the same page twice,
         // let alone worth a crawl budget
         '/auth/',
-        '/control-center/',
+        '/dashboard/',
         '/inbox/',
         '/profile/',
         '/plans/',

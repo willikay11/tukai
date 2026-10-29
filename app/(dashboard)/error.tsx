@@ -13,7 +13,7 @@ export default function SegmentError({
     <ErrorState
       error={error}
       reset={reset}
-      title="Control Center could not load"
+      title="Dashboard could not load"
       description="Something went wrong loading this page. Try again, or head back to Discover."
       homeHref="/"
       homeLabel="Back to Discover"

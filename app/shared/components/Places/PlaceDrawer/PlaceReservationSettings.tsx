@@ -144,7 +144,7 @@ export const PlaceReservationSettings = ({
 
       <div className="flex justify-end border-t border-line pt-6">
         <Link
-          href={`/control-center/places/${place.id}/reservations`}
+          href={`/dashboard/places/${place.id}/reservations`}
           className="inline-flex h-12 items-center gap-2.5 rounded-full bg-lime px-6 text-[15px] font-bold text-brand-ink transition-colors hover:bg-lime-dark"
         >
           <IconComponent iconName="PencilEdit02Icon" size={20} color="currentColor" />
