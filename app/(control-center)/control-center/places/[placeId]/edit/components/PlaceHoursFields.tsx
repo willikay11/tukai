@@ -1,8 +1,7 @@
 'use client';
 
+import { WEEKDAYS as DAYS, WeekdayPills } from '@/app/shared/components/Places/WeekdayPills';
 import { TimePicker, formatTimeLabel } from '@/components/ui/time-picker';
-
-import { WEEKDAYS as DAYS, WeekdayPills } from '../../components/WeekdayPills';
 
 export type HoursValue = { days: string[]; opensAt: string; closesAt: string };
 
