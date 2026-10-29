@@ -19,6 +19,7 @@ import {
 import { useScrollSpy } from '@/app/shared/hooks/useScrollSpy';
 import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
+import { useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
 import { Experience } from '@/types/experience';
 import { Place } from '@/types/place';
 import { PlaceAvailabilityRule, PlaceReservationProfile } from '@/types/placeReservation';
@@ -116,6 +117,21 @@ export const PlaceDrawer = ({
   const rules: PlaceAvailabilityRule[] = availability?.data?.rules ?? [];
 
   useEffect(() => setView('place'), [placeId]);
+
+  // "Start claim" (ClaimCard, below) opens the global Connect-a-place
+  // drawer - a second, separate `Drawer`, not a view this one swaps to in
+  // place like review/moment/reservations do. Both are the same portaled,
+  // fixed-position component, and the global one is mounted once at the app
+  // root, so this drawer (mounted per-page, later) always paints over it at
+  // the same z-index. Closing this drawer the moment that one opens keeps
+  // the same "takes it over, never stacks" rule the other views already
+  // follow, just via two drawers handing off rather than one swapping
+  // content.
+  const connectDrawer = useConnectPlaceDrawer();
+  useEffect(() => {
+    if (connectDrawer?.isOpen) onClose();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectDrawer?.isOpen]);
 
   // The same request UpcomingExperiences makes, so React Query shares the one
   // response. It only decides whether the Experiences tab and section exist.

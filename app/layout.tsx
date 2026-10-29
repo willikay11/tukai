@@ -104,11 +104,16 @@ export default function RootLayout({
                       <PlanProvider>
                         <CreateCommunityDrawerProvider>
                           <HostingPlanProvider>
-                            <PlaceDrawerProvider>
-                              <ExperienceDrawerProvider>
-                                <BucketListDrawerProvider>
-                                  <CommunityDrawerProvider>
-                                    <ConnectPlaceDrawerProvider>
+                            {/* Outside PlaceDrawerProvider: PlaceDrawer (below) renders as a
+                                sibling to {children} inside that provider, not a descendant of
+                                it, so it needs this one wrapping further out to reach it at all -
+                                a provider nested inside PlaceDrawerProvider is invisible to
+                                PlaceDrawer itself, only to the page content underneath it. */}
+                            <ConnectPlaceDrawerProvider>
+                              <PlaceDrawerProvider>
+                                <ExperienceDrawerProvider>
+                                  <BucketListDrawerProvider>
+                                    <CommunityDrawerProvider>
                                       <CreateExperienceDrawerProvider>
                                         <div className="relative flex min-h-screen flex-col">
                                           {/* The auth screens draw their own bar, so the app's
@@ -210,11 +215,11 @@ export default function RootLayout({
                                           </Suspense>
                                         </ChromeGate>
                                       </CreateExperienceDrawerProvider>
-                                    </ConnectPlaceDrawerProvider>
-                                  </CommunityDrawerProvider>
-                                </BucketListDrawerProvider>
-                              </ExperienceDrawerProvider>
-                            </PlaceDrawerProvider>
+                                    </CommunityDrawerProvider>
+                                  </BucketListDrawerProvider>
+                                </ExperienceDrawerProvider>
+                              </PlaceDrawerProvider>
+                            </ConnectPlaceDrawerProvider>
                           </HostingPlanProvider>
                         </CreateCommunityDrawerProvider>
                       </PlanProvider>

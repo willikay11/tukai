@@ -115,6 +115,10 @@ jest.mock('./PlaceDrawerReviews', () => ({
 jest.mock('@/app/shared/components/Places/ClaimCard', () => ({
   ClaimCard: ({ placeName }: { placeName: string }) => <div data-testid="claim">{placeName}</div>,
 }));
+let connectDrawerIsOpen = false;
+jest.mock('@/context/ConnectPlaceDrawerContext', () => ({
+  useConnectPlaceDrawer: () => ({ isOpen: connectDrawerIsOpen }),
+}));
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: { iconName: string }) => <span data-testid={iconName} />,
 }));
@@ -134,6 +138,24 @@ describe('PlaceDrawer', () => {
     usePlaceOwnership.mockReturnValue({ data: { success: true, data: null } });
     usePlaceManager.mockReturnValue({ isManager: false, owningCommunity: undefined });
     useExperiences.mockReturnValue({ data: { data: { results: [{ id: 'e1' }] } } });
+    connectDrawerIsOpen = false;
+  });
+
+  // Regression: "Start claim" (inside ClaimCard, below) opens the global
+  // Connect-a-place drawer - a second, separate `Drawer` at the same fixed
+  // z-index as this one, mounted earlier (app root) so it painted underneath
+  // this one and never showed. Closing this drawer the moment that one opens
+  // is the fix - same effect as the swap review/moment/reservations already do.
+  it('closes itself when the global claim drawer opens, instead of stacking behind it', () => {
+    const onClose = jest.fn();
+    const { rerender } = render(<PlaceDrawer placeId="p1" isOpen onClose={onClose} />);
+
+    expect(onClose).not.toHaveBeenCalled();
+
+    connectDrawerIsOpen = true;
+    rerender(<PlaceDrawer placeId="p1" isOpen onClose={onClose} />);
+
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('shows the place and its sections', () => {
