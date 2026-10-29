@@ -21,7 +21,7 @@ import { MomentComments } from './MomentComments';
 export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
   const { data: session } = useSession();
   const isSignedIn = Boolean(session?.user?.id);
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
   const { mutate: toggleLike } = useToggleMomentLike();
   const { mutate: flag, isPending: isFlagging } = useFlagMoment();
   const [isFlagOpen, setIsFlagOpen] = useState(false);
@@ -53,7 +53,7 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
   // straight on to the like, so the one press they made is the one that lands.
   // `like` is handed over rather than this handler: the callback runs with the
   // closure it was created in, where `isSignedIn` is still false.
-  const onLike = () => (isSignedIn ? like() : openSignInWithCallback(like));
+  const onLike = () => (isSignedIn ? like() : needAuth(undefined, like));
 
   const onFlag = (reasonId: string) =>
     flag(
@@ -150,7 +150,7 @@ export const MomentDetail = ({ moment: item }: { moment: Moment }) => {
         <button
           type="button"
           onClick={() =>
-            isSignedIn ? setIsFlagOpen(true) : openSignInWithCallback(() => setIsFlagOpen(true))
+            isSignedIn ? setIsFlagOpen(true) : needAuth(undefined, () => setIsFlagOpen(true))
           }
           className="ml-auto text-gray-300 hover:text-gray-500"
           aria-label="Report this moment"

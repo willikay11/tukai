@@ -12,9 +12,9 @@ jest.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }));
 
 const toast = jest.fn();
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
-const openSignInWithCallback = jest.fn();
+const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 
 const joinMutate = jest.fn();
@@ -195,7 +195,7 @@ describe('JoinCommunityPanel', () => {
       await user.click(screen.getByRole('button', { name: 'Join Community' }));
 
       expect(joinMutate).not.toHaveBeenCalled();
-      expect(openSignInWithCallback).toHaveBeenCalled();
+      expect(needAuth).toHaveBeenCalled();
     });
 
     it('joins once signing in is done, so the press is not wasted', async () => {
@@ -204,7 +204,7 @@ describe('JoinCommunityPanel', () => {
 
       render(<JoinCommunityPanel community={community()} currentUserId="" />);
       await user.click(screen.getByRole('button', { name: 'Join Community' }));
-      openSignInWithCallback.mock.calls[0][0]();
+      needAuth.mock.calls[0][1]();
 
       expect(joinMutate).toHaveBeenCalledWith('c1', expect.anything());
     });

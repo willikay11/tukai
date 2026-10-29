@@ -12,9 +12,9 @@ const push = jest.fn();
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
 jest.mock('next-auth/react', () => ({ useSession: () => ({ data: { user: { id: 'me' } } }) }));
 
-const openSignInWithCallback = jest.fn();
+const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 
 const useGetCommunities = jest.fn();
@@ -173,7 +173,7 @@ describe('CommunityFeedTab', () => {
 
       await user.click(screen.getByRole('button', { name: 'Sign in' }));
 
-      expect(openSignInWithCallback).toHaveBeenCalled();
+      expect(needAuth).toHaveBeenCalled();
     });
 
     it('says what signing in gets them', () => {

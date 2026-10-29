@@ -32,7 +32,7 @@ jest.mock('next-auth/react', () => ({
 }));
 
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ setOpenSignIn: jest.fn(), setOpenSignUp: jest.fn() }),
+  useAuthDialog: () => ({ needAuth: jest.fn() }),
 }));
 
 jest.mock('next/navigation', () => ({

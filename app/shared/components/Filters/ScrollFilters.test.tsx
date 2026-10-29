@@ -55,10 +55,9 @@ describe('ScrollFilters', () => {
     jest.spyOn(SelectedCategoryContext, 'useSelectedCategory').mockReturnValue(mockContextValue);
 
     const mockAuthDialog = {
-      openSignIn: false,
-      setOpenSignIn: jest.fn(),
+      needAuth: jest.fn(),
     };
-    jest.spyOn(AuthDialogContext, 'useAuthDialog').mockReturnValue(mockAuthDialog);
+    jest.spyOn(AuthDialogContext, 'useAuthDialog').mockReturnValue(mockAuthDialog as any);
   });
 
   describe('rendering', () => {
@@ -187,11 +186,10 @@ describe('ScrollFilters', () => {
         status: 'unauthenticated',
       });
 
-      const mockSetOpenSignIn = jest.fn();
+      const mockNeedAuth = jest.fn();
       jest.spyOn(AuthDialogContext, 'useAuthDialog').mockReturnValue({
-        openSignIn: false,
-        setOpenSignIn: mockSetOpenSignIn,
-      });
+        needAuth: mockNeedAuth,
+      } as any);
 
       const filtersWithAuth = [
         { label: 'All', value: 'all', icon: 'Home01Icon' },
@@ -202,7 +200,7 @@ describe('ScrollFilters', () => {
 
       await user.click(screen.getByText('Premium'));
 
-      expect(mockSetOpenSignIn).toHaveBeenCalledWith(true);
+      expect(mockNeedAuth).toHaveBeenCalledWith();
     });
 
     it('allows filter selection for logged in users even with shouldBeLoggedIn flag', async () => {

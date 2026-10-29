@@ -81,7 +81,7 @@ export const ReservePageContent = ({ place }: { place: Place }) => {
   const { mutate: requestBooking, isPending } = useCreatePlaceBookingRequest(place.id, profile?.id);
   const { data: session } = useSession();
   const isSignedIn = Boolean(session?.user?.id);
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
 
   const coverPhoto =
     place.photos?.find((photo: Photo) => photo.isCover)?.photo || place.photos?.[0]?.photo;
@@ -140,7 +140,7 @@ export const ReservePageContent = ({ place }: { place: Place }) => {
     // land here directly. Either way the dialog opens over the form and the
     // request goes out on the other side - nothing typed is lost.
     if (!isSignedIn) {
-      openSignInWithCallback(() => submitBooking(result.data));
+      needAuth('reserve', () => submitBooking(result.data));
       return;
     }
 

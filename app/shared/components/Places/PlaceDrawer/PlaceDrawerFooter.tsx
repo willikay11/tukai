@@ -27,7 +27,7 @@ export const PlaceDrawerFooter = ({
 }) => {
   const [isPlanOpen, setIsPlanOpen] = useState(false);
   const { data: session } = useSession();
-  const { setOpenSignIn } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
 
   const directions = mapsHref({
     lat: place.location?.pointLat,
@@ -47,7 +47,7 @@ export const PlaceDrawerFooter = ({
             // Reviewing needs an account; the dialog returns them here rather
             // than to a sign-in page they have to navigate back from
             if (!session?.user?.id) {
-              setOpenSignIn(true);
+              needAuth(undefined, onAddReview);
               return;
             }
             onAddReview();

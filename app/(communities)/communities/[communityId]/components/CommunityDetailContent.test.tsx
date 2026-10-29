@@ -51,9 +51,9 @@ jest.mock('@/app/shared/hooks/useToast', () => ({
   useToast: () => ({ toast: jest.fn() }),
 }));
 
-const openSignInWithCallback = jest.fn();
+const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 
 const community = (extra: Record<string, unknown> = {}): Community =>

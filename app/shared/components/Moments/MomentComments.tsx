@@ -23,7 +23,7 @@ import { MomentAvatar } from './MomentAvatar';
 const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: string }) => {
   const { data: session } = useSession();
   const isSignedIn = Boolean(session?.user?.id);
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
   const { mutate: toggleLike } = useToggleCommentLike(momentId);
 
   /**
@@ -92,7 +92,7 @@ const CommentRow = ({ comment, momentId }: { comment: MomentComment; momentId: s
   };
 
   // Reading a comment needs no account; liking one does
-  const onLike = () => (isSignedIn ? like() : openSignInWithCallback(like));
+  const onLike = () => (isSignedIn ? like() : needAuth(undefined, like));
 
   return (
     <div className="flex gap-3">
@@ -131,7 +131,7 @@ export const MomentComments = ({
 }) => {
   const { data: session } = useSession();
   const isSignedIn = Boolean(session?.user?.id);
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
   const currentUserName = session?.user?.name ?? '';
   const currentUserImage = session?.user?.image ?? null;
 
@@ -210,7 +210,7 @@ export const MomentComments = ({
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-gray-50 px-4 py-3">
             <p className="text-sm text-gray-600">Sign in to join the conversation</p>
             <Button
-              onClick={() => openSignInWithCallback(() => undefined)}
+              onClick={() => needAuth()}
               className="flex-shrink-0 rounded-full px-6"
             >
               Sign in

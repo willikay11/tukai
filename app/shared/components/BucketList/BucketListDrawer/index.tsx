@@ -98,7 +98,7 @@ export const BucketListDrawer = ({
   const { data: session } = useSession();
   const userId = session?.user?.id;
   const { toast } = useToast();
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
 
   const [view, setView] = useState<BucketListDrawerView>('list');
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -235,7 +235,7 @@ export const BucketListDrawer = ({
     }
 
     if (!userId) {
-      openSignInWithCallback(join);
+      needAuth('lists', join);
       return;
     }
 

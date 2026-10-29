@@ -27,7 +27,7 @@ export const PlaceActions = ({
   coverPhoto: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { setOpenSignIn } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
   const { data: session } = useSession();
 
   const {
@@ -61,7 +61,7 @@ export const PlaceActions = ({
         <Button
           onClick={() => {
             if (!session?.user?.id) {
-              setOpenSignIn(true);
+              needAuth(undefined, () => setIsOpen(true));
             } else {
               setIsOpen(true);
             }

@@ -72,7 +72,7 @@ export const CommunitiesPageContent = () => {
 
   const { data: session, status } = useSession();
   const isSignedIn = Boolean(session?.user?.id);
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
 
   const { data: categories, isLoading: isLoadingCategories } = useGetInterestCategories();
 
@@ -200,7 +200,7 @@ export const CommunitiesPageContent = () => {
             <div className="mt-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-gray-50 px-4 py-3">
               <p className="text-sm text-gray-600">Sign in to follow communities and join in</p>
               <Button
-                onClick={() => openSignInWithCallback(() => undefined)}
+                onClick={() => needAuth('join')}
                 className="flex-shrink-0 rounded-full px-6"
               >
                 Sign in

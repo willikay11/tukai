@@ -43,13 +43,13 @@ export const ReservationPanel = ({
   const { data: session } = useSession();
   const isSignedIn = Boolean(session?.user?.id);
   const router = useRouter();
-  const { openSignInWithCallback } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
 
   const reservePath = `/places/${placeId}/reserve`;
 
   // Signing in lands on the form, so the one press the reader made is the one
   // that gets them there
-  const startReservation = () => openSignInWithCallback(() => router.push(reservePath));
+  const startReservation = () => needAuth('reserve', () => router.push(reservePath));
 
   const { data: ownership, isLoading: isLoadingOwnership } = usePlaceOwnership(
     placeId,

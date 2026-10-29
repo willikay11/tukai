@@ -30,7 +30,7 @@ jest.mock('@/components/ui/image', () => ({
   TukaiImage: ({ alt }: { alt: string }) => <img alt={alt || 'avatar'} />,
 }));
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback: jest.fn() }),
+  useAuthDialog: () => ({ needAuth: jest.fn() }),
 }));
 jest.mock('@/app/shared/components/Subscription', () => ({
   SubscriptionModalFlow: () => null,

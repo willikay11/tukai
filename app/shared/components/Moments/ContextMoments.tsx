@@ -62,7 +62,7 @@ export const ContextMoments = ({
   const isPanel = variant === 'panel';
 
   const { status: sessionStatus } = useSession();
-  const { setOpenSignIn } = useAuthDialog();
+  const { needAuth } = useAuthDialog();
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [openMoment, setOpenMoment] = useState<Moment | null>(null);
 
@@ -83,7 +83,7 @@ export const ContextMoments = ({
       type="button"
       onClick={() => {
         if (!canPost) {
-          setOpenSignIn(true);
+          needAuth('moment', () => (onShare ? onShare() : setIsComposerOpen(true)));
           return;
         }
         if (onShare) onShare();

@@ -8,9 +8,9 @@ import { BucketListButton } from './index';
 let sessionState: { data: { user: { id: string } } | null } = { data: { user: { id: 'u1' } } };
 jest.mock('next-auth/react', () => ({ useSession: () => sessionState }));
 
-const openSignInWithCallback = jest.fn();
+const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ openSignInWithCallback, setOpenSignIn: jest.fn() }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 
 jest.mock('@/app/shared/components/BucketList', () => ({
@@ -41,10 +41,10 @@ describe('BucketListButton', () => {
     await user.click(screen.getByRole('button', { name: /Add to Bucket List/ }));
 
     expect(screen.queryByTestId('picker')).not.toBeInTheDocument();
-    expect(openSignInWithCallback).toHaveBeenCalled();
+    expect(needAuth).toHaveBeenCalled();
 
     // What signing in runs
-    openSignInWithCallback.mock.calls[0][0]();
+    needAuth.mock.calls[0][1]();
     expect(await screen.findByTestId('picker')).toBeInTheDocument();
   });
 

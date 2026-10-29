@@ -35,9 +35,9 @@ jest.mock('./MomentComposer', () => ({
     ) : null,
 }));
 
-const setOpenSignIn = jest.fn();
+const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
-  useAuthDialog: () => ({ setOpenSignIn }),
+  useAuthDialog: () => ({ needAuth }),
 }));
 
 jest.mock('@/app/shared/components/Icons', () => ({
@@ -170,7 +170,7 @@ describe('ContextMoments', () => {
       renderForExperience();
       await user.click(screen.getByRole('button', { name: /share moment/i }));
 
-      expect(setOpenSignIn).toHaveBeenCalledWith(true);
+      expect(needAuth).toHaveBeenCalledWith('moment', expect.any(Function));
       expect(screen.queryByTestId('composer')).not.toBeInTheDocument();
     });
   });
@@ -241,7 +241,7 @@ describe('ContextMoments', () => {
       );
       await user.click(screen.getByRole('button', { name: /share moment/i }));
 
-      expect(setOpenSignIn).toHaveBeenCalledWith(true);
+      expect(needAuth).toHaveBeenCalledWith('moment', expect.any(Function));
       expect(onShare).not.toHaveBeenCalled();
     });
   });

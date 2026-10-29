@@ -1,13 +1,24 @@
 'use client';
 
+import { useEffect } from 'react';
+
 import { useRouter } from 'next/navigation';
 
-import { AuthCard } from '@/app/shared/components/Auth';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 
+/**
+ * Retired as a standalone page (AU-00 decision 1) - registration now lives in
+ * the dialog everywhere. This keeps the old URL working by opening it over home.
+ */
 export default function Page() {
   const router = useRouter();
+  const { openRegister } = useAuthDialog();
 
-  // The card is the page: the same one the sign-in dialog shows, so the two
-  // offer the same options in the same order
-  return <AuthCard onLogin={() => router.push('/')} />;
+  useEffect(() => {
+    openRegister();
+    router.replace('/');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return null;
 }
