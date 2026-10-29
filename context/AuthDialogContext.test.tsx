@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -43,8 +44,15 @@ const ViewProbe = () => {
   );
 };
 
-const renderWithProvider = (children: React.ReactNode) =>
-  render(<AuthDialogProvider>{children}</AuthDialogProvider>);
+const renderWithProvider = (children: React.ReactNode) => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
+  render(
+    <QueryClientProvider client={queryClient}>
+      <AuthDialogProvider>{children}</AuthDialogProvider>
+    </QueryClientProvider>,
+  );
+  return queryClient;
+};
 
 describe('AuthDialogProvider', () => {
   beforeEach(() => {
@@ -164,5 +172,44 @@ describe('AuthDialogProvider', () => {
 
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     expect(screen.getByTestId('view')).toHaveTextContent('register');
+  });
+
+  // The Profile page's "My interests" reads off its own `['profile', userId]`
+  // query, not the session - this is what keeps that section current once the
+  // shared interests modal (opened with `openEditInterests`) saves.
+  it('invalidates the cached profile once an edit is saved, so that section refreshes', async () => {
+    mockUseSession.mockReturnValue({
+      data: { user: { id: 'u1', interests: [{ id: 'i1', name: 'Hiking' }] } },
+      status: 'authenticated',
+      update: jest.fn(),
+    });
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ status: 200 }),
+    }) as jest.Mock;
+
+    const user = userEvent.setup();
+
+    const EditInterestsFlow = () => {
+      const { openEditInterests, toggleInterest, submitInterests } = useAuthDialog();
+      return (
+        <>
+          <button onClick={openEditInterests}>Edit interests</button>
+          <button onClick={() => toggleInterest('i2')}>Toggle i2</button>
+          <button onClick={() => void submitInterests()}>Save interests</button>
+        </>
+      );
+    };
+
+    const queryClient = renderWithProvider(<EditInterestsFlow />);
+    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+
+    await user.click(screen.getByRole('button', { name: 'Edit interests' }));
+    await user.click(screen.getByRole('button', { name: 'Toggle i2' }));
+    await user.click(screen.getByRole('button', { name: 'Save interests' }));
+
+    await waitFor(() =>
+      expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['profile', 'u1'] }),
+    );
   });
 });
