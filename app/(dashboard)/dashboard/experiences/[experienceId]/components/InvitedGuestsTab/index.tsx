@@ -17,6 +17,14 @@ interface InvitedGuestsTabProps {
   experienceId: string;
   guests: Experience['guests'];
   communities?: Experience['communities'];
+  /**
+   * The host-mode drawer's "Invited guests" tab pairs this with the shared
+   * `HostActionBar` instead (same sticky bar, same button sizing, as Sales
+   * and Tickets created), so it hides this component's own inline pair.
+   * The page-based Manage Experience route, this component's other caller,
+   * keeps them - it has no action bar of its own.
+   */
+  hideActions?: boolean;
 }
 
 type GuestsView = 'guests' | 'communities';
@@ -73,8 +81,11 @@ export const InvitedGuestsTab = ({
   experienceId,
   guests,
   communities = [],
+  hideActions = false,
 }: InvitedGuestsTabProps) => {
-  const { openCreateExperience } = useCreateExperienceDrawer()!;
+  const { openCreateExperience } = useCreateExperienceDrawer() ?? {
+    openCreateExperience: () => {},
+  };
   const { toast } = useToast();
   const [view, setView] = useState<GuestsView>('guests');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -192,26 +203,28 @@ export const InvitedGuestsTab = ({
         </p>
       )}
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-4">
-        <Button
-          type="button"
-          variant="gradient"
-          onClick={() => openCreateExperience({ experienceId, step: 'guests' })}
-          className="rounded-full px-5"
-        >
-          Invite More Guests
-        </Button>
+      {!hideActions && (
+        <div className="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-4">
+          <Button
+            type="button"
+            variant="gradient"
+            onClick={() => openCreateExperience({ experienceId, step: 'guests' })}
+            className="rounded-full px-5"
+          >
+            Invite More Guests
+          </Button>
 
-        <Button
-          type="button"
-          variant="lime"
-          disabled
-          title="Resending invites is not available yet"
-          className="rounded-full px-5"
-        >
-          Resend Invites
-        </Button>
-      </div>
+          <Button
+            type="button"
+            variant="lime"
+            disabled
+            title="Resending invites is not available yet"
+            className="rounded-full px-5"
+          >
+            Resend Invites
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

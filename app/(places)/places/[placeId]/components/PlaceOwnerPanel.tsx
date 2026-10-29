@@ -63,7 +63,9 @@ const ROW_CLASS =
 export const PlaceOwnerPanel = ({ placeId, placeName }: { placeId: string; placeName: string }) => {
   // TODO: seed the create flow with this place - it holds `about.placeId` but
   // does not read one from an opener yet
-  const { openCreateExperience } = useCreateExperienceDrawer()!;
+  const { openCreateExperience } = useCreateExperienceDrawer() ?? {
+    openCreateExperience: () => {},
+  };
 
   return (
     <div className="space-y-5">

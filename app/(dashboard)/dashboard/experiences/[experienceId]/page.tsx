@@ -29,7 +29,9 @@ export default function ManageExperiencePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status: sessionStatus } = useSession();
-  const { openCreateExperience } = useCreateExperienceDrawer()!;
+  const { openCreateExperience } = useCreateExperienceDrawer() ?? {
+    openCreateExperience: () => {},
+  };
 
   const experienceId =
     typeof params?.experienceId === 'string'

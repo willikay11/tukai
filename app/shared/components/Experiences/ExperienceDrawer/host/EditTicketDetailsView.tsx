@@ -144,7 +144,7 @@ export const EditTicketDetailsView = ({
 
   return (
     <>
-      <div className="flex flex-1 flex-col gap-7 overflow-y-auto px-6 py-5">
+      <div className="flex flex-1 flex-col gap-7 px-6 py-5">
         <div className="flex flex-col gap-3.5">
           <div className="flex items-start gap-3">
             <IconComponent iconName="Ticket01Icon" size={24} color="currentColor" className="mt-0.5 flex-shrink-0 text-brand" />
@@ -318,7 +318,7 @@ export const EditTicketDetailsView = ({
         </div>
       </div>
 
-      <div className="flex min-h-[88px] flex-wrap items-center gap-2.5 border-t border-surface-muted bg-white px-6 py-[18px]">
+      <div className="sticky bottom-0 z-[4] flex min-h-[88px] flex-wrap items-center gap-2.5 border-t border-surface-muted bg-white px-6 py-[18px]">
         <button
           type="button"
           onClick={onBack}

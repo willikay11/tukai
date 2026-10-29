@@ -32,7 +32,9 @@ export const MyExperiencesHostingSection = ({
   ownsCommunity: boolean;
 }) => {
   const router = useRouter();
-  const { openCreateExperience } = useCreateExperienceDrawer()!;
+  const { openCreateExperience } = useCreateExperienceDrawer() ?? {
+    openCreateExperience: () => {},
+  };
   const {
     items,
     days,

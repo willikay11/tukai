@@ -17,7 +17,7 @@ import { DiscountCodesSection } from '@/app/(dashboard)/dashboard/experiences/[e
 import { SalesDeadlineSection } from '@/app/(dashboard)/dashboard/experiences/[experienceId]/components/SalesDeadlineSection';
 
 import { EditTicketDetailsView } from './EditTicketDetailsView';
-import { HostActionBar } from './HostActionBar';
+import { HostActionBar, messageAllBuyersAction } from './HostActionBar';
 import { TicketBlock } from './TicketBlock';
 import { HostView } from './useHostMode';
 
@@ -91,7 +91,7 @@ export const TicketsCreatedHostTab = ({
 
   return (
     <>
-      <div className="flex flex-1 flex-col gap-7 overflow-y-auto px-6 py-5">
+      <div className="flex flex-1 flex-col gap-7 px-6 py-5">
         {active.map(block)}
 
         {paused.length > 0 && (
@@ -110,7 +110,15 @@ export const TicketsCreatedHostTab = ({
         />
       </div>
 
-      <HostActionBar buyerCount={buyerCount} />
+      <HostActionBar
+        primary={messageAllBuyersAction(buyerCount, toast)}
+        secondary={{
+          label: 'Create another ticket',
+          iconName: 'Ticket01Icon',
+          onClick: () =>
+            toast({ description: 'Add a new ticket type with its own name, price and quantity.' }),
+        }}
+      />
 
       <SuccessDialog
         open={Boolean(generatedCode)}
