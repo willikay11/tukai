@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 
 import { interestName } from '@/app/(profile)/profile/profile';
+import { IconComponent } from '@/app/shared/components/Icons';
 
 const COLLAPSED_COUNT = 4;
 
@@ -27,8 +28,9 @@ export const MyInterests = ({
         <h2 className="text-17 font-bold tracking-[-0.2px] text-brand-ink">My interests</h2>
         <Link
           href="/auth/interests"
-          className="h-11 px-1 text-[13.5px] font-semibold text-brand hover:underline"
+          className="inline-flex h-11 items-center gap-1.5 px-1 text-[13.5px] font-semibold text-brand hover:underline"
         >
+          <IconComponent iconName="Edit04Icon" size={16} color="currentColor" />
           Edit
         </Link>
       </div>
