@@ -8,13 +8,21 @@ import type { DraftPhoto } from '@/app/(communities)/communities/components/Crea
 import { useGetInterestCategories } from '@/app/shared/hooks/useAuth';
 import {
   useCreateCommunity,
+  useDeleteVerificationDocument,
   useGetCommunities,
   useSubmitCommunityVerification,
   useUploadVerificationDocument,
 } from '@/app/shared/hooks/useCommunities';
-import { useClaimPlaceOwnership, useCreatePlace, usePlace, usePlaces } from '@/app/shared/hooks/usePlaces';
+import {
+  useClaimPlaceOwnership,
+  useCreatePlace,
+  useDeletePlaceOwnership,
+  usePlace,
+  usePlaces,
+} from '@/app/shared/hooks/usePlaces';
 import { toast } from '@/app/shared/hooks/useToast';
 import { useConnectPlaceDrawer as useConnectPlaceDrawerStore } from '@/context/ConnectPlaceDrawerContext';
+import { ClaimDocument } from '@/types/claim';
 import { Community } from '@/types/community';
 import { Place } from '@/types/place';
 
@@ -24,6 +32,7 @@ import {
   isNewPlaceComplete,
 } from './claimSchema';
 import { OWNERSHIP_DOCUMENT_TYPES, REQUIRED_DOCUMENT_COUNT } from './documentTypes';
+import { useResolvedClaim } from './useResolvedClaim';
 
 export type CommunityVisibility = 'public' | 'private';
 export type PlaceSource = 'existing' | 'new';
@@ -48,8 +57,8 @@ export const joinPlaceNames = (names: string[]) => {
 
 /**
  * Everything the Connect a place drawer needs: the draft itself, plus the
- * mock claim store (see ConnectPlaceDrawerContext) for the parts with no real
- * API yet - claim status, cancel, and multi-place claims.
+ * claims sent in this session (see ConnectPlaceDrawerContext), whose live
+ * status and documents useResolvedClaim reads back from the API.
  */
 export const useConnectPlaceDrawer = () => {
   // Always rendered inside its own provider (ConnectPlaceDrawerContext), so
@@ -73,9 +82,23 @@ export const useConnectPlaceDrawer = () => {
   // the store on every render is what lets a cancel or a resubmit (which
   // mutate the store's claims array) show up here immediately, instead of
   // this hook going on displaying a snapshot taken at submit time.
+  const { data: communitiesResponse, isLoading: isLoadingCommunities } = useGetCommunities({
+    page: 1,
+    enabled: Boolean(userId) && isOpen,
+    createdBy: userId,
+  });
+  const communities: Community[] = useMemo(
+    () => communitiesResponse?.data?.results ?? [],
+    [communitiesResponse],
+  );
+
   const [justSubmittedClaimId, setJustSubmittedClaimId] = useState<string | null>(null);
   const activeClaimId = justSubmittedClaimId ?? options.claimId;
-  const displayedClaim = activeClaimId ? getClaim(activeClaimId) : undefined;
+  const displayedClaim = useResolvedClaim(
+    activeClaimId ? getClaim(activeClaimId) : undefined,
+    communities,
+    isOpen,
+  );
 
   const view: 'form' | 'documents' | 'claim' = displayedClaim
     ? justSubmittedClaimId
@@ -90,16 +113,6 @@ export const useConnectPlaceDrawer = () => {
   const [isNewCommunityBoxOpen, setIsNewCommunityBoxOpen] = useState(false);
   const [newCommunityName, setNewCommunityName] = useState('');
   const [newCommunityVisibility, setNewCommunityVisibility] = useState<CommunityVisibility>('public');
-
-  const { data: communitiesResponse, isLoading: isLoadingCommunities } = useGetCommunities({
-    page: 1,
-    enabled: Boolean(userId) && isOpen,
-    createdBy: userId,
-  });
-  const communities: Community[] = useMemo(
-    () => communitiesResponse?.data?.results ?? [],
-    [communitiesResponse],
-  );
 
   useEffect(() => {
     if (!isOpen || view !== 'form') return;
@@ -296,29 +309,53 @@ export const useConnectPlaceDrawer = () => {
     ]);
   };
 
+  const [removedDocumentTypes, setRemovedDocumentTypes] = useState<string[]>([]);
+
+  const sentDocuments: ClaimDocument[] =
+    view === 'documents' && displayedClaim ? displayedClaim.documents : [];
+
   const removeDocument = (documentType: string) => {
-    setPendingDocuments((current) => current.filter((entry) => entry.documentType !== documentType));
+    if (pendingDocuments.some((entry) => entry.documentType === documentType)) {
+      setPendingDocuments((current) => current.filter((entry) => entry.documentType !== documentType));
+      return;
+    }
+    setRemovedDocumentTypes((current) => [...current, documentType]);
   };
+
+  const prefillKey = displayedClaim
+    ? [displayedClaim.id, displayedClaim.notes, ...displayedClaim.documents.map((d) => d.id)].join('|')
+    : '';
 
   // Documents mode opens prefilled with whatever was already sent
   useEffect(() => {
-    if (view === 'documents' && displayedClaim) {
+    if (isOpen && view === 'documents' && displayedClaim) {
       setPickedDocumentTypes(displayedClaim.documents.map((document) => document.documentType));
+      setPendingDocuments([]);
+      setRemovedDocumentTypes([]);
       setNotes(displayedClaim.notes ?? '');
     }
-  }, [view, displayedClaim]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- prefillKey is what identifies the sent documents
+  }, [isOpen, view, prefillKey]);
+
+  const keptSentDocuments = sentDocuments.filter(
+    (sent) =>
+      !removedDocumentTypes.includes(sent.documentType) &&
+      !pendingDocuments.some((pending) => pending.documentType === sent.documentType),
+  );
+  const attachedCount = keptSentDocuments.length + pendingDocuments.length;
+  const hasDocumentChanges = pendingDocuments.length > 0 || removedDocumentTypes.length > 0;
 
   // ── Submit readiness ──
   const isNewPlaceReady = isNewPlaceComplete(newPlace);
   const hasCommunity = Boolean(selectedCommunityId);
   const hasPlace = source === 'existing' ? connectedPlaces.length > 0 : isNewPlaceReady;
-  const hasEnoughDocuments = pendingDocuments.length >= REQUIRED_DOCUMENT_COUNT;
+  const hasEnoughDocuments = attachedCount >= REQUIRED_DOCUMENT_COUNT;
 
   const missingStep: string | null =
     view === 'documents'
-      ? pendingDocuments.length === 0
+      ? !hasEnoughDocuments
         ? 'Attach at least two documents.'
-        : !hasEnoughDocuments
+        : !hasDocumentChanges
           ? 'Attach the document Tukai asked for.'
           : null
       : !hasCommunity
@@ -342,6 +379,8 @@ export const useConnectPlaceDrawer = () => {
   const { mutateAsync: claimPlaceOwnership } = useClaimPlaceOwnership();
   const { mutateAsync: submitVerification } = useSubmitCommunityVerification();
   const { mutateAsync: uploadDocument } = useUploadVerificationDocument();
+  const { mutateAsync: deleteDocument } = useDeleteVerificationDocument();
+  const { mutateAsync: deleteOwnership } = useDeletePlaceOwnership();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
@@ -425,10 +464,15 @@ export const useConnectPlaceDrawer = () => {
   };
 
   const handleResubmitDocuments = async () => {
-    if (!displayedClaim || !hasEnoughDocuments || isSubmitting) return;
+    if (!displayedClaim || !canSubmit || isSubmitting) return;
     setIsSubmitting(true);
 
     try {
+      const replacedTypes = [...removedDocumentTypes, ...pendingDocuments.map((d) => d.documentType)];
+      for (const document of sentDocuments.filter((sent) => replacedTypes.includes(sent.documentType))) {
+        await deleteDocument({ communityId: displayedClaim.communityId, documentId: document.id });
+      }
+
       for (const document of pendingDocuments) {
         await uploadDocument({
           communityId: displayedClaim.communityId,
@@ -438,7 +482,11 @@ export const useConnectPlaceDrawer = () => {
         });
       }
 
-      resubmitDocuments(displayedClaim.id, toClaimDocuments(), notes.trim() || undefined);
+      resubmitDocuments(
+        displayedClaim.id,
+        [...keptSentDocuments, ...toClaimDocuments()],
+        notes.trim() || undefined,
+      );
       toast({ description: 'Documents sent. Your claim is back under review.' });
       closeConnectPlace();
     } catch (error) {
@@ -452,12 +500,25 @@ export const useConnectPlaceDrawer = () => {
     }
   };
 
-  const handleConfirmCancelClaim = () => {
+  const handleConfirmCancelClaim = async () => {
     if (!displayedClaim) return;
     const placeNames = joinPlaceNames(displayedClaim.places.map((place) => place.title));
-    cancelClaim(displayedClaim.id);
-    setIsCancelConfirmOpen(false);
-    toast({ description: `Claim cancelled. ${placeNames} stays unclaimed.` });
+
+    try {
+      for (const place of displayedClaim.places) {
+        await deleteOwnership(place.id);
+      }
+      cancelClaim(displayedClaim.id);
+      toast({ description: `Claim cancelled. ${placeNames} stays unclaimed.` });
+    } catch (error) {
+      toast({
+        title: 'Could not cancel this claim',
+        description: (error as { message?: string })?.message ?? 'Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCancelConfirmOpen(false);
+    }
   };
 
   const resetDraft = () => {
@@ -472,6 +533,7 @@ export const useConnectPlaceDrawer = () => {
     setNewPlace(EMPTY_NEW_PLACE);
     setPickedDocumentTypes([OWNERSHIP_DOCUMENT_TYPES[0].value]);
     setPendingDocuments([]);
+    setRemovedDocumentTypes([]);
     setNotes('');
     setJustSubmittedClaimId(null);
   };
@@ -534,6 +596,8 @@ export const useConnectPlaceDrawer = () => {
       pickedDocumentTypes,
       togglePickedDocumentType,
       pendingDocuments,
+      sentDocuments: keptSentDocuments,
+      attachedCount,
       attachDocument,
       removeDocument,
     },

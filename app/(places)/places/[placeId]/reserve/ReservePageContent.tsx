@@ -155,10 +155,8 @@ export const ReservePageContent = ({ place }: { place: Place }) => {
         requestedDate: moment(data.date).format('YYYY-MM-DD'),
         requestedTime: data.time,
         partySize: data.partySize,
-        // The serializer has no field for what the reader called the booking,
-        // so it rides in special_requests, where the venue sees it
-        specialRequests: data.name,
-        message: message.trim() || undefined,
+        message: data.name,
+        specialRequests: message.trim() || undefined,
       },
       {
         onSuccess: () => setIsRequestedModalOpen(true),

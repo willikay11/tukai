@@ -1,3 +1,6 @@
+import { Photo } from '@/types/photo';
+import { LinkedUser } from '@/types/user';
+
 /** A place's bookability configuration, set up by its owning community. */
 export type PlaceReservationProfile = {
   id: string;
@@ -5,14 +8,12 @@ export type PlaceReservationProfile = {
   reservationType: 'restaurant_reservation' | 'cinema_reservation';
   status: 'draft' | 'active' | 'paused';
   seatingCapacity?: number;
-  // Not in the documented serializer yet - read back if the API starts
-  // returning it, so the form opens on what was saved
-  maxPartySize?: number;
   // Creating a profile auto-provisions a draft "anchor" experience; bookings
   // hang off it server-side. Diners never see it.
   experienceId?: string;
   experienceTitle?: string;
   experienceDescription?: string;
+  photos?: Photo[];
 };
 
 /** Fixed weekly opening hours for a profile. */
@@ -33,6 +34,15 @@ export type PlaceAvailabilityException = {
   // YYYY-MM-DD
   date: string;
   isClosed?: boolean;
+  openTime?: string;
+  closeTime?: string;
+};
+
+export type CreatePlaceAvailabilityException = {
+  // YYYY-MM-DD
+  date: string;
+  isClosed: boolean;
+  // 'HH:MM', only when part of the day stays open
   openTime?: string;
   closeTime?: string;
 };
@@ -62,8 +72,11 @@ export type PlaceBookingRequest = {
     | 'refunded';
   restaurantDetail?: RestaurantReservationDetail;
   occurrence?: { id: string; startDate?: string; endDate?: string };
+  user?: LinkedUser;
+  message?: string;
   // When the venue must respond by
   respondBy?: string;
+  payBy?: string;
   declineReason?: string;
   cancellationReason?: string;
   dateCreated?: string;
@@ -97,7 +110,6 @@ export type ReservationSettingsDraft = {
   profile: {
     reservationType: PlaceReservationProfile['reservationType'];
     seatingCapacity?: number;
-    maxPartySize?: number;
   };
   rules: {
     dayOfWeek: number;
@@ -107,4 +119,6 @@ export type ReservationSettingsDraft = {
   }[];
   existingRules: PlaceAvailabilityRule[];
   isActive: boolean;
+  /** Lent to the profile's anchor experience when it has none, so activation can go through */
+  placePhotos?: Photo[];
 };

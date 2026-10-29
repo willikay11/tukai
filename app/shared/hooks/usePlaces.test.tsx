@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 
 import * as placeService from '@/services/place';
+import { ReservationSettingsDraft } from '@/types/placeReservation';
+import { placePhotosAsUploads } from '@/utils/place-photo-uploads';
 
 import {
   useBookmarkPlace,
@@ -16,14 +18,20 @@ import {
   useLikePlaceReview,
   useLikePlaceReviewComment,
   usePlaceCategories,
+  usePlaceManager,
   usePlaceReviewComments,
   usePlaceReviews,
   usePlaces,
+  useSaveReservationSettings,
   useUpdatePlaceReview,
   useUploadPlaceReviewImages,
 } from './usePlaces';
 
 jest.mock('@/services/place');
+
+const session: { data: { user: { id: string } } | null } = { data: { user: { id: 'u1' } } };
+jest.mock('next-auth/react', () => ({ useSession: () => session }));
+jest.mock('@/utils/place-photo-uploads');
 
 const mockPlaceService = placeService as jest.Mocked<typeof placeService>;
 
@@ -496,6 +504,192 @@ describe('Place Hooks', () => {
 
       expect(mockPlaceService.updatePlaceReview).toHaveBeenCalled();
     });
+  });
+});
+
+describe('usePlaceManager', () => {
+  const placeWith = (verifiedOwner: unknown) =>
+    mockPlaceService.fetchPlace.mockResolvedValue({
+      status: 200,
+      success: true,
+      data: { id: 'place-123', title: 'Coffee Shop', verifiedOwner },
+    });
+
+  const community = {
+    id: 'c1',
+    title: 'Weekend Readers',
+    owners: [{ id: 'u-owner' }],
+    admins: [{ id: 'u1' }],
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    session.data = { user: { id: 'u1' } };
+  });
+
+  const render = () => renderHook(() => usePlaceManager('place-123'), { wrapper: createWrapper() });
+
+  it('is true for an admin of the community whose claim was approved', async () => {
+    placeWith(community);
+
+    const { result } = render();
+
+    await waitFor(() => expect(result.current.isManager).toBe(true));
+    expect(result.current.owningCommunity).toEqual({ id: 'c1', title: 'Weekend Readers' });
+  });
+
+  it('is true for an owner too', async () => {
+    placeWith({ ...community, owners: [{ id: 'u1' }], admins: [] });
+
+    const { result } = render();
+
+    await waitFor(() => expect(result.current.isManager).toBe(true));
+  });
+
+  it('is false for someone who is not in that community’s leadership', async () => {
+    placeWith({ ...community, admins: [{ id: 'someone-else' }] });
+
+    const { result } = render();
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.isManager).toBe(false);
+  });
+
+  it('is false where no claim has been approved, as while one is under review', async () => {
+    placeWith(null);
+
+    const { result } = render();
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.isManager).toBe(false);
+    expect(result.current.owningCommunity).toBeUndefined();
+  });
+
+  it('asks nothing of a signed-out reader', () => {
+    session.data = null;
+
+    const { result } = render();
+
+    expect(mockPlaceService.fetchPlace).not.toHaveBeenCalled();
+    expect(result.current.isManager).toBe(false);
+  });
+});
+
+describe('useSaveReservationSettings', () => {
+  const placePhotos = [
+    { id: 'ph1', mediaType: 'photo' as const, order: 0, photoUrl: 'https://cdn/ph1.jpg' },
+  ];
+  const uploads = [new File(['bytes'], 'reservation-anchor-0.jpg', { type: 'image/jpeg' })];
+
+  const draft = (extra: Partial<ReservationSettingsDraft> = {}): ReservationSettingsDraft => ({
+    profile: { reservationType: 'restaurant_reservation', seatingCapacity: 30 },
+    rules: [],
+    existingRules: [],
+    isActive: false,
+    placePhotos,
+    ...extra,
+  });
+
+  const save = async (value: ReservationSettingsDraft) => {
+    const { result } = renderHook(() => useSaveReservationSettings('place-123'), {
+      wrapper: createWrapper(),
+    });
+    await act(async () => {
+      await result.current.mutateAsync(value).catch(() => undefined);
+    });
+    return result;
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockPlaceService.createReservationProfile.mockResolvedValue({
+      status: 201,
+      success: true,
+      data: { id: 'prof-1' },
+    });
+    mockPlaceService.fetchPlaceReservationProfile.mockResolvedValue({
+      status: 200,
+      success: true,
+      data: { id: 'prof-1', photos: [] },
+    });
+    mockPlaceService.addReservationProfilePhotos.mockResolvedValue({
+      status: 200,
+      success: true,
+    });
+    mockPlaceService.activateReservationProfile.mockResolvedValue({ status: 200, success: true });
+    jest.mocked(placePhotosAsUploads).mockResolvedValue(uploads);
+  });
+
+  it('sends the place photos to the new profile before it opens it', async () => {
+    const order: string[] = [];
+    mockPlaceService.addReservationProfilePhotos.mockImplementation(async () => {
+      order.push('photos');
+      return { status: 200, success: true };
+    });
+    mockPlaceService.activateReservationProfile.mockImplementation(async () => {
+      order.push('activate');
+      return { status: 200, success: true };
+    });
+
+    await save(draft());
+
+    expect(placePhotosAsUploads).toHaveBeenCalledWith(placePhotos);
+    expect(mockPlaceService.addReservationProfilePhotos).toHaveBeenCalledWith(
+      'place-123',
+      'prof-1',
+      uploads,
+    );
+    expect(order).toEqual(['photos', 'activate']);
+  });
+
+  it('leaves a profile that already has a photo alone', async () => {
+    mockPlaceService.fetchPlaceReservationProfile.mockResolvedValue({
+      status: 200,
+      success: true,
+      data: { id: 'prof-1', photos: [{ id: 'x' }] },
+    });
+
+    await save(draft());
+
+    expect(placePhotosAsUploads).not.toHaveBeenCalled();
+    expect(mockPlaceService.addReservationProfilePhotos).not.toHaveBeenCalled();
+    expect(mockPlaceService.activateReservationProfile).toHaveBeenCalledWith('place-123', 'prof-1');
+  });
+
+  it('does not look for photos when the place has none to lend', async () => {
+    await save(draft({ placePhotos: [] }));
+
+    expect(mockPlaceService.fetchPlaceReservationProfile).not.toHaveBeenCalled();
+    expect(mockPlaceService.addReservationProfilePhotos).not.toHaveBeenCalled();
+    expect(mockPlaceService.activateReservationProfile).toHaveBeenCalled();
+  });
+
+  it('still tries to open the profile when no photo could be downloaded', async () => {
+    jest.mocked(placePhotosAsUploads).mockResolvedValue([]);
+
+    await save(draft());
+
+    expect(mockPlaceService.addReservationProfilePhotos).not.toHaveBeenCalled();
+    expect(mockPlaceService.activateReservationProfile).toHaveBeenCalled();
+  });
+
+  it('does not touch photos or activation on a profile that is already live', async () => {
+    mockPlaceService.updateReservationProfile.mockResolvedValue({ status: 200, success: true });
+
+    await save(draft({ profileId: 'prof-1', isActive: true }));
+
+    expect(mockPlaceService.fetchPlaceReservationProfile).not.toHaveBeenCalled();
+    expect(mockPlaceService.addReservationProfilePhotos).not.toHaveBeenCalled();
+    expect(mockPlaceService.activateReservationProfile).not.toHaveBeenCalled();
+  });
+
+  it('does not try to open the profile when the photos are refused', async () => {
+    mockPlaceService.addReservationProfilePhotos.mockRejectedValue(new Error('Too large'));
+
+    const result = await save(draft());
+
+    expect(mockPlaceService.activateReservationProfile).not.toHaveBeenCalled();
+    await waitFor(() => expect(result.current.error).toEqual(new Error('Too large')));
   });
 });
 

@@ -1,13 +1,17 @@
 import { useSession } from 'next-auth/react';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
+import { fetchTicketPurchases } from '@/services/experience';
 import {
+  acceptPlaceBookingRequest,
   activateReservationProfile,
+  addReservationProfilePhotos,
+  admitPlaceBookingRequest,
   bookmarkPlace,
   cancelPlaceBookingRequest,
   claimPlaceOwnership,
+  createAvailabilityException,
   createAvailabilityRule,
   createPlace,
   createPlaceBookingRequest,
@@ -16,7 +20,10 @@ import {
   createPlaceReviewComment,
   createPlaceSocialLink,
   createReservationProfile,
+  declinePlaceBookingRequest,
+  deleteAvailabilityException,
   deleteAvailabilityRule,
+  deletePlaceOwnership,
   deletePlacePhoto,
   deletePlaceProperty,
   deletePlaceReview,
@@ -32,6 +39,7 @@ import {
   fetchPlaceBookingRequests,
   fetchPlaceCategories,
   fetchPlaceOwnership,
+  fetchPlaceReservationProfile,
   fetchPlaceReservationProfiles,
   fetchPlaceReviewComments,
   fetchPlaceReviews,
@@ -46,11 +54,33 @@ import {
   uploadPlacePhoto,
   uploadPlaceReviewImages,
 } from '@/services/place';
-import { Community } from '@/types/community';
+import { ApiResponse } from '@/types/apiResponse';
 import { PlaceCategoryParams } from '@/types/networkParam';
+import { Photo } from '@/types/photo';
+import { PlaceVerifiedOwner } from '@/types/place';
 import { PlaceEditDraft } from '@/types/placeEdit';
-import { ReservationSettingsDraft } from '@/types/placeReservation';
-import { CreatePlaceBookingRequest } from '@/types/placeReservation';
+import {
+  CreatePlaceAvailabilityException,
+  CreatePlaceBookingRequest,
+  ReservationSettingsDraft,
+} from '@/types/placeReservation';
+import { placePhotosAsUploads } from '@/utils/place-photo-uploads';
+
+const lendPlacePhotosToProfile = async (
+  placeId: string,
+  profileId: string,
+  placePhotos: Photo[],
+) => {
+  if (placePhotos.length === 0) return;
+
+  const detail = await fetchPlaceReservationProfile(placeId, profileId);
+  if (detail.data?.photos?.length) return;
+
+  const uploads = await placePhotosAsUploads(placePhotos);
+  if (uploads.length === 0) return;
+
+  await addReservationProfilePhotos(placeId, profileId, uploads);
+};
 
 export const usePlaces = ({
   categoryId,
@@ -288,40 +318,50 @@ export const usePlaceOwnership = (placeId: string, enabled = true) =>
     staleTime: 5 * 60 * 1000,
   });
 
+export const usePlaceOwnerships = (placeIds: string[], enabled = true) =>
+  useQueries({
+    queries: placeIds.map((placeId) => ({
+      queryKey: ['placeOwnership', placeId],
+      queryFn: async () => await fetchPlaceOwnership(placeId),
+      enabled,
+      staleTime: 5 * 60 * 1000,
+    })),
+  });
+
+/** The people who run a place are the owners and admins of the community that holds it. */
+export const isVerifiedPlaceOwner = (
+  verifiedOwner: PlaceVerifiedOwner | null | undefined,
+  userId: string | null | undefined,
+): boolean => {
+  if (!verifiedOwner || !userId) return false;
+
+  return [...(verifiedOwner.owners ?? []), ...(verifiedOwner.admins ?? [])].some(
+    (member) => member.id === userId,
+  );
+};
+
 /**
  * Whether the reader manages this place.
  *
- * Ownership is held by a community, not a person, so this is true when the
- * claiming community is one the reader created. It stays false while either
- * question is unanswered - an owner-only strip must never flash for a visitor.
+ * Read from the place's verified owner, which the API only fills once a claim
+ * is approved - so a claim still under review does not make anyone a manager,
+ * and a visitor is told nothing they could not already see. It stays false
+ * until the place and the session have both answered.
  */
 export const usePlaceManager = (placeId: string) => {
   const { data: session } = useSession();
-  // The session types it as possibly null; the hooks below take undefined
   const userId = session?.user?.id ?? undefined;
 
-  const { data: ownership, isLoading: isLoadingOwnership } = usePlaceOwnership(
-    placeId,
-    Boolean(userId),
-  );
-  const owningCommunityId: string | undefined = ownership?.data?.community;
-
-  const { data: communitiesResponse, isLoading: isLoadingCommunities } = useGetCommunities({
-    page: 1,
-    enabled: Boolean(userId && owningCommunityId),
-    createdBy: userId,
-  });
-  const communities: Community[] = communitiesResponse?.data?.results ?? [];
-
-  // The community itself, not just its id: a manager is told which of their
-  // communities holds the place, and an id is not something to show anyone
-  const owningCommunity = communities.find((community) => community.id === owningCommunityId);
+  const { data: placeResponse, isLoading } = usePlace(placeId, Boolean(userId && placeId));
+  const verifiedOwner: PlaceVerifiedOwner | null | undefined = placeResponse?.data?.verifiedOwner;
 
   return {
-    isManager: Boolean(owningCommunityId && owningCommunity),
-    isLoading: isLoadingOwnership || isLoadingCommunities,
-    owningCommunityId,
-    owningCommunity,
+    isManager: isVerifiedPlaceOwner(verifiedOwner, userId),
+    isLoading,
+    owningCommunityId: verifiedOwner?.id,
+    owningCommunity: verifiedOwner
+      ? { id: verifiedOwner.id, title: verifiedOwner.title }
+      : undefined,
   };
 };
 
@@ -368,6 +408,7 @@ export const useCreatePlaceBookingRequest = (placeId: string, profileId: string 
     onSuccess: () => {
       // The new request has to show up under "My Reservations" straight away
       queryClient.invalidateQueries({ queryKey: ['placeBookingRequests', placeId, profileId] });
+      queryClient.invalidateQueries({ queryKey: ['myPlaceReservations', placeId] });
     },
   });
 };
@@ -379,6 +420,82 @@ export const useCancelPlaceBookingRequest = (placeId: string, profileId: string 
     mutationFn: async (purchaseId: string) => await cancelPlaceBookingRequest(purchaseId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['placeBookingRequests', placeId, profileId] });
+      queryClient.invalidateQueries({ queryKey: ['myPlaceReservations', placeId] });
+    },
+  });
+};
+
+// The booking-requests list is the venue's and empty for a guest, so a guest's own bookings come off the purchases list
+export const useMyPlaceReservations = (placeId: string, profileId: string | undefined) => {
+  const { data: session } = useSession();
+  const userId = session?.user?.id ?? undefined;
+
+  return useQuery({
+    queryKey: ['myPlaceReservations', placeId, profileId, userId],
+    queryFn: async () => {
+      const profile = await fetchPlaceReservationProfile(placeId, profileId!);
+      return await fetchTicketPurchases({ experience: profile.data.experienceId, user: userId });
+    },
+    enabled: Boolean(placeId && profileId && userId),
+  });
+};
+
+const useBookingRequestAction = (
+  placeId: string,
+  profileId: string | undefined,
+  action: (purchaseId: string) => Promise<ApiResponse>,
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (purchaseId: string) => await action(purchaseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeBookingRequests', placeId, profileId] });
+    },
+  });
+};
+
+export const useAcceptPlaceBookingRequest = (placeId: string, profileId: string | undefined) =>
+  useBookingRequestAction(placeId, profileId, acceptPlaceBookingRequest);
+
+export const useDeclinePlaceBookingRequest = (placeId: string, profileId: string | undefined) =>
+  useBookingRequestAction(placeId, profileId, declinePlaceBookingRequest);
+
+export const useAdmitPlaceBookingRequest = (placeId: string, profileId: string | undefined) =>
+  useBookingRequestAction(placeId, profileId, admitPlaceBookingRequest);
+
+export const useHoldOffReservations = (placeId: string, profileId: string | undefined) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      replacedExceptionIds,
+      exceptions,
+    }: {
+      replacedExceptionIds: string[];
+      exceptions: CreatePlaceAvailabilityException[];
+    }) => {
+      for (const exceptionId of replacedExceptionIds) {
+        await deleteAvailabilityException(placeId, profileId!, exceptionId);
+      }
+      for (const exception of exceptions) {
+        await createAvailabilityException(placeId, profileId!, exception);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeAvailability', placeId, profileId] });
+    },
+  });
+};
+
+export const useResumeReservations = (placeId: string, profileId: string | undefined) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (exceptionId: string) =>
+      await deleteAvailabilityException(placeId, profileId!, exceptionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['placeAvailability', placeId, profileId] });
     },
   });
 };
@@ -398,12 +515,27 @@ export const useClaimPlaceOwnership = () => {
   return useMutation({
     // The place travels with the mutation rather than with the hook: a claim on
     // a place that was only just created has no id until submit time
-    mutationFn: async ({ placeId, communityId }: { placeId: string; communityId: string }) =>
-      await claimPlaceOwnership(placeId, communityId),
+    mutationFn: async ({ placeId, communityId }: { placeId: string; communityId: string }) => {
+      const existing = await fetchPlaceOwnership(placeId).catch(() => null);
+      if (existing?.data?.community === communityId) return existing;
+      return await claimPlaceOwnership(placeId, communityId);
+    },
     onSuccess: (_data, { placeId }) => {
       // A granted claim is what makes the place bookable, so the panel has to
       // re-read its profiles
       queryClient.invalidateQueries({ queryKey: ['placeReservationProfiles', placeId] });
+      queryClient.invalidateQueries({ queryKey: ['placeOwnership', placeId] });
+    },
+  });
+};
+
+export const useDeletePlaceOwnership = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (placeId: string) => await deletePlaceOwnership(placeId),
+    onSuccess: (_data, placeId) => {
+      queryClient.invalidateQueries({ queryKey: ['placeOwnership', placeId] });
     },
   });
 };
@@ -501,7 +633,7 @@ export const useSaveReservationSettings = (placeId: string) => {
 
   return useMutation({
     mutationFn: async (draft: ReservationSettingsDraft) => {
-      const { profileId, profile, rules, existingRules, isActive } = draft;
+      const { profileId, profile, rules, existingRules, isActive, placePhotos = [] } = draft;
 
       const saved = profileId
         ? await updateReservationProfile(placeId, profileId, profile)
@@ -536,8 +668,11 @@ export const useSaveReservationSettings = (placeId: string) => {
         if (!isUnchanged) await createAvailabilityRule(placeId, id, rule);
       }
 
-      // A draft profile is invisible to diners, so saving settings opens it
-      if (!isActive) await activateReservationProfile(placeId, id);
+      // A draft profile is invisible to diners, so saving settings opens it, once it has a photo
+      if (!isActive) {
+        await lendPlacePhotosToProfile(placeId, id, placePhotos);
+        await activateReservationProfile(placeId, id);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['placeReservationProfiles', placeId] });

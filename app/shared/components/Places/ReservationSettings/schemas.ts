@@ -15,9 +15,6 @@ export const reservationSettingsSchema = z
     seatingCapacity: z
       .string()
       .refine((value) => value === '' || Number(value) > 0, 'Enter a number greater than zero'),
-    maxPartySize: z
-      .string()
-      .refine((value) => value === '' || Number(value) > 0, 'Enter a number greater than zero'),
     days: z.array(z.string()).min(1, 'Pick at least one day'),
     opensAt: z.string().min(1, 'Set an opening time'),
     closesAt: z.string().min(1, 'Set a closing time'),

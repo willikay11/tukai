@@ -26,6 +26,16 @@ export type Place = {
   // requests for them. The list endpoint does not return them.
   properties?: PlaceProperty[];
   socialLinks?: PlaceSocialLink[];
+  // The detail endpoint only. The community whose claim was approved, or null
+  // where none has been - a claim still under review does not show up here.
+  verifiedOwner?: PlaceVerifiedOwner | null;
+};
+
+export type PlaceVerifiedOwner = {
+  id: string;
+  title: string;
+  owners: { id: string }[];
+  admins: { id: string }[];
 };
 
 export type PlaceProperty = {

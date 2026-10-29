@@ -1,6 +1,6 @@
 'use client';
 
-import { SelectablePill } from '../../components/WeekdayPills';
+import { SelectablePill } from '@/app/shared/components/Places/WeekdayPills';
 
 /**
  * One property, chosen from pills.
