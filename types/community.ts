@@ -39,6 +39,8 @@ export type Community = {
   categories: CommunityCategory[];
   isPublic: boolean;
   verified?: boolean;
+  /** Where the latest proof-of-ownership application stands; null before one is sent. */
+  verificationStatus?: 'pending' | 'under_review' | 'approved' | 'rejected' | null;
   status: string;
   photos: Photo[];
   location: Location;

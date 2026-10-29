@@ -12,7 +12,7 @@ const cancelBooking = jest.fn();
 const toast = jest.fn();
 
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
-  usePlaceBookingRequests: (...args: unknown[]) => useBookings(...args),
+  useMyPlaceReservations: (...args: unknown[]) => useBookings(...args),
   useCancelPlaceBookingRequest: () => ({
     mutate: (...args: unknown[]) => cancelBooking(...args),
     isPending: false,

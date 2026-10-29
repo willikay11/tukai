@@ -47,7 +47,7 @@ describe('ReservationSettingsContent', () => {
       'true',
     );
     expect(screen.getByLabelText('Total Seating Capacity')).toBeInTheDocument();
-    expect(screen.getByLabelText('Max Party Size Per Booking')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Max Party Size Per Booking')).not.toBeInTheDocument();
     expect(screen.getByLabelText('Buffer between bookings')).toBeInTheDocument();
     expect(screen.getByText('Active days of the week')).toBeInTheDocument();
   });
@@ -68,7 +68,6 @@ describe('ReservationSettingsContent', () => {
     await user.click(screen.getByRole('button', { name: 'Monday' }));
     await user.click(screen.getByRole('button', { name: 'Saturday' }));
     await user.type(screen.getByLabelText('Total Seating Capacity'), '40');
-    await user.type(screen.getByLabelText('Max Party Size Per Booking'), '8');
     // The pickers are Radix selects: the trigger is the combobox
     const [opening, closing] = screen.getAllByRole('combobox');
     await user.click(opening);
@@ -84,7 +83,6 @@ describe('ReservationSettingsContent', () => {
     expect(draft.profile).toEqual({
       reservationType: 'restaurant_reservation',
       seatingCapacity: 40,
-      maxPartySize: 8,
     });
     // Monday is 0 and Saturday is 5, per the API's own numbering
     expect(draft.rules).toEqual([
@@ -94,12 +92,12 @@ describe('ReservationSettingsContent', () => {
     expect(draft.profileId).toBeUndefined();
   });
 
-  it('will not take a party size of zero', async () => {
+  it('will not take a seating capacity of zero', async () => {
     const user = userEvent.setup();
     renderSettings();
 
     await user.click(screen.getByRole('button', { name: 'Monday' }));
-    await user.type(screen.getByLabelText('Max Party Size Per Booking'), '0');
+    await user.type(screen.getByLabelText('Total Seating Capacity'), '0');
     await user.click(screen.getByRole('button', { name: 'Save Changes' }));
 
     expect(save).not.toHaveBeenCalled();
@@ -150,7 +148,6 @@ describe('ReservationSettingsContent', () => {
         reservationType: 'restaurant_reservation',
         status: 'active',
         seatingCapacity: 40,
-        maxPartySize: 8,
       },
     ];
     rules = [
@@ -173,7 +170,6 @@ describe('ReservationSettingsContent', () => {
     renderSettings();
 
     expect(screen.getByLabelText('Total Seating Capacity')).toHaveValue(40);
-    expect(screen.getByLabelText('Max Party Size Per Booking')).toHaveValue(8);
     expect(screen.getByLabelText('Buffer between bookings')).toHaveValue(30);
     expect(screen.getByRole('button', { name: 'Monday' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: 'Tuesday' })).toHaveAttribute(

@@ -63,7 +63,7 @@ export const reservationSummary = (
   profile: PlaceReservationProfile | undefined,
   rules: PlaceAvailabilityRule[],
 ): string => {
-  if (!profile) return 'Reservations are not open here yet.';
+  if (!profile) return 'Reservations are off. Choose how guests book, your capacity and hours.';
 
   const days = activeDays(rules, true);
   const hours = openingHours(rules);

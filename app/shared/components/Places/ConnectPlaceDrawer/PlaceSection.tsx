@@ -46,10 +46,16 @@ export const PlaceSection = ({
 }: PlaceSectionProps) => {
   const connectedIds = new Set(connectedPlaces.map((place) => place.id));
   // Connected places first, then up to 8 matches not already connected
-  const unconnectedResults = searchResults.filter((place) => !connectedIds.has(place.id)).slice(0, 8);
+  const unconnectedResults = searchResults
+    .filter((place) => !connectedIds.has(place.id))
+    .slice(0, 8);
   const cards = [...connectedPlaces, ...unconnectedResults];
   const hasSearched = debouncedQuery.length >= 2;
-  const hasNoMatches = hasSearched && !isSearchingPlaces && unconnectedResults.length === 0 && connectedPlaces.length === 0;
+  const hasNoMatches =
+    hasSearched &&
+    !isSearchingPlaces &&
+    unconnectedResults.length === 0 &&
+    connectedPlaces.length === 0;
 
   return (
     <section className="flex flex-col gap-3" aria-label="Existing or new place">
@@ -91,15 +97,22 @@ export const PlaceSection = ({
 
       {source === 'existing' && (
         <div className="-mt-1 flex flex-col gap-3.5">
-          <Input
-            value={query}
-            onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="Search by the name of the place"
-            aria-label="Search by the name of the place"
-            autoComplete="off"
-            icon={<IconComponent iconName="Search01Icon" size={20} className="text-ink-muted" />}
-            containerClassName="h-14 rounded-xl"
-          />
+          <label className="flex flex-col gap-2">
+            <span className="text-[15px] font-semibold text-gray-800">
+              Name{' '}
+              <span className="text-[13.5px] font-normal text-ink-muted">(name of the place)</span>
+            </span>
+            <Input
+              value={query}
+              onChange={(event) => onQueryChange(event.target.value)}
+              placeholder="Search by the name of the place"
+              autoComplete="off"
+              suffixIcon={
+                <IconComponent iconName="Search01Icon" size={20} className="text-ink-muted" />
+              }
+              containerClassName="h-14 rounded-xl"
+            />
+          </label>
 
           {cards.length > 0 && (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-x-3.5 gap-y-[18px]">

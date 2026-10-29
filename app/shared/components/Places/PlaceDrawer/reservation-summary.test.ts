@@ -108,6 +108,6 @@ describe('reservationSummary', () => {
   });
 
   it('says so when reservations are not set up at all', () => {
-    expect(reservationSummary(undefined, [])).toBe('Reservations are not open here yet.');
+    expect(reservationSummary(undefined, [])).toBe('Reservations are off. Choose how guests book, your capacity and hours.');
   });
 });

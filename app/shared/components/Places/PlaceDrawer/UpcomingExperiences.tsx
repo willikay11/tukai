@@ -3,21 +3,17 @@
 import { useMemo, useState } from 'react';
 
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
-import { IconComponent } from '@/app/shared/components/Icons';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
-import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
 
+import { WeekStrip } from './WeekStrip';
 import {
-  StripDay,
   addWeeks,
   buildWeek,
   dayKey,
   dayLabel,
   experiencesOnDay,
   isCurrentWeek,
-  isLastWeek,
-  weekLabel,
   weekStart,
 } from './week-strip';
 
@@ -33,79 +29,6 @@ export const UPCOMING_PAGE_SIZE = 50;
  * design's 44px height, and the count is already in the cards below.
  */
 const MAX_DAY_DOTS = 3;
-
-const PagerArrow = ({
-  direction,
-  label,
-  disabled,
-  onClick,
-}: {
-  direction: 'back' | 'next';
-  label: string;
-  disabled?: boolean;
-  onClick: () => void;
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    disabled={disabled}
-    aria-label={label}
-    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-brand-ink transition-colors hover:bg-surface disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
-  >
-    <IconComponent
-      iconName={direction === 'back' ? 'ArrowLeft01Icon' : 'ArrowRight01Icon'}
-      size={20}
-      color="currentColor"
-    />
-  </button>
-);
-
-const DayPill = ({
-  day,
-  isSelected,
-  onSelect,
-}: {
-  day: StripDay;
-  isSelected: boolean;
-  onSelect: () => void;
-}) => {
-  const dots = Math.min(day.experienceCount, MAX_DAY_DOTS);
-
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      disabled={day.isPast}
-      aria-pressed={isSelected}
-      className={cn(
-        'inline-flex h-11 flex-shrink-0 items-center gap-[5px] rounded-full border px-3.5 text-[14.5px] transition-colors',
-        day.isPast
-          ? 'cursor-default border-transparent bg-surface text-ink-subtle'
-          : isSelected
-            ? 'border-transparent bg-green-200 text-brand'
-            : 'border-line bg-white text-brand-ink hover:bg-surface',
-        isSelected && 'font-semibold',
-      )}
-    >
-      <span>{day.weekday}</span>
-      <span className="font-bold">{day.dayOfMonth}</span>
-      {/* A dot rather than a count: the number is in the cards below */}
-      {dots > 0 && !day.isPast && (
-        <span aria-hidden className="ml-0.5 flex items-center gap-[3px]">
-          {Array.from({ length: dots }, (_, index) => (
-            <span
-              key={index}
-              className={cn(
-                'h-[5px] w-[5px] rounded-full',
-                isSelected ? 'bg-brand' : 'bg-lime-dark',
-              )}
-            />
-          ))}
-        </span>
-      )}
-    </button>
-  );
-};
 
 /**
  * What is on at a place, a week at a time.
@@ -156,34 +79,14 @@ export const UpcomingExperiences = ({
         </p>
       </div>
 
-      <div className="-ml-3 flex items-center gap-0.5">
-        <PagerArrow
-          direction="back"
-          label="Previous week"
-          disabled={isCurrentWeek(anchor)}
-          onClick={() => moveTo(-1)}
-        />
-        <span aria-live="polite" className="text-[15.5px] font-semibold text-brand-ink">
-          {weekLabel(week)}
-        </span>
-        <PagerArrow
-          direction="next"
-          label="Next week"
-          disabled={isLastWeek(anchor)}
-          onClick={() => moveTo(1)}
-        />
-      </div>
-
-      <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-        {week.map((day) => (
-          <DayPill
-            key={day.key}
-            day={day}
-            isSelected={day.key === selectedKey}
-            onSelect={() => setSelectedKey(day.key)}
-          />
-        ))}
-      </div>
+      <WeekStrip
+        anchor={anchor}
+        week={week}
+        selectedKey={selectedKey}
+        dotsFor={(day) => Math.min(day.experienceCount, MAX_DAY_DOTS)}
+        onSelect={setSelectedKey}
+        onMove={moveTo}
+      />
 
       {isLoading ? (
         <div className="aspect-square w-[184px] animate-pulse rounded-xl bg-gray-200" />

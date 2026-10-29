@@ -247,7 +247,7 @@ describe('ReservePageContent', () => {
       needAuth.mock.calls[0][1]();
 
       expect(requestBooking).toHaveBeenCalledWith(
-        expect.objectContaining({ specialRequests: 'Date Night' }),
+        expect.objectContaining({ message: 'Date Night' }),
         expect.any(Object),
       );
     });
@@ -285,8 +285,8 @@ describe('ReservePageContent', () => {
           requestedDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
           requestedTime: expect.stringMatching(/^\d{2}:\d{2}$/),
           partySize: 2,
-          specialRequests: 'Date Night',
-          message: 'Window seat',
+          message: 'Date Night',
+          specialRequests: 'Window seat',
         }),
         expect.anything(),
       );

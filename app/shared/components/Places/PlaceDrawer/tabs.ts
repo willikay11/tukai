@@ -9,6 +9,7 @@ export type PlaceDrawerTab = {
 
 export const PLACE_SECTIONS = {
   about: 'place-about',
+  reservations: 'place-reservations',
   experiences: 'place-experiences',
   moments: 'place-moments',
   reviews: 'place-reviews',
@@ -19,13 +20,18 @@ export const PLACE_SECTIONS = {
  * drawer at once and the pills follow the reader down it.
  *
  * Experiences is only offered when the place has some - an empty tab would
- * scroll to a section with nothing in it.
+ * scroll to a section with nothing in it. Reservations is the manager's own
+ * view of the place's bookings, so it is offered only to them.
  */
 export const placeDrawerTabs = (
   reviewCount: number | null,
   hasExperiences: boolean,
+  hasReservations = false,
 ): PlaceDrawerTab[] => [
   { id: PLACE_SECTIONS.about, label: 'About', icon: 'InformationCircleIcon' },
+  ...(hasReservations
+    ? [{ id: PLACE_SECTIONS.reservations, label: 'Reservations', icon: 'CalendarCheckIn01Icon' }]
+    : []),
   ...(hasExperiences
     ? [{ id: PLACE_SECTIONS.experiences, label: 'Experiences', icon: CANVAS_ICONS.calendar }]
     : []),

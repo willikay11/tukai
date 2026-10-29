@@ -30,6 +30,8 @@ let profileResponse: { success: boolean; data?: MyProfile } = { success: true };
 let isLoading = false;
 jest.mock('@/app/shared/hooks/useAuth', () => ({
   useMyProfile: () => ({ data: profileResponse, isLoading }),
+  useGetInterestCategories: () => ({ data: [], isLoading: false }),
+  useUpdateMyProfile: () => ({ mutate: jest.fn(), isPending: false }),
 }));
 
 jest.mock('./components/EditProfileDrawer', () => ({

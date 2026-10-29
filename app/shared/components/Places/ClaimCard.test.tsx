@@ -21,6 +21,8 @@ jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useCreateCommunity: () => ({ mutateAsync: jest.fn(), isPending: false }),
   useSubmitCommunityVerification: () => ({ mutateAsync: jest.fn().mockResolvedValue({}) }),
   useUploadVerificationDocument: () => ({ mutateAsync: jest.fn().mockResolvedValue({}) }),
+  useDeleteVerificationDocument: () => ({ mutateAsync: jest.fn().mockResolvedValue({}) }),
+  useVerificationDocuments: () => ({ data: undefined }),
 }));
 
 const PLACE = {
@@ -35,6 +37,9 @@ const PLACE = {
 
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   useClaimPlaceOwnership: () => ({ mutateAsync: jest.fn().mockResolvedValue({}) }),
+  useDeletePlaceOwnership: () => ({ mutateAsync: jest.fn().mockResolvedValue({}) }),
+  usePlaceOwnerships: (placeIds: string[]) => placeIds.map(() => ({ data: undefined })),
+  usePlaceReservationProfiles: () => ({ data: undefined }),
   useCreatePlace: () => ({ mutateAsync: jest.fn() }),
   usePlace: (_id: string | null, enabled = true) => ({ data: enabled ? { data: PLACE } : undefined }),
   usePlaces: () => ({ data: { data: { results: [] } }, isFetching: false }),
