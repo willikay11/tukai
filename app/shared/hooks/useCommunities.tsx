@@ -3,9 +3,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createCommunity,
   createCommunityPhotos,
+  deleteVerificationDocument,
   fetchCommunity,
   fetchCommunityPostPhotos,
   fetchCommunityPosts,
+  fetchVerificationDocuments,
   getCommunities,
   joinCommunity,
   joinCommunityWithToken,
@@ -181,8 +183,31 @@ export const useSubmitCommunityVerification = () => {
   });
 };
 
-export const useUploadVerificationDocument = () => {
+export const useVerificationDocuments = (communityId: string, enabled: boolean) => {
+  return useQuery({
+    queryKey: ['verificationDocuments', communityId],
+    queryFn: async () => await fetchVerificationDocuments(communityId),
+    enabled: enabled && Boolean(communityId),
+  });
+};
+
+export const useDeleteVerificationDocument = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
+    mutationFn: async ({ communityId, documentId }: { communityId: string; documentId: string }) =>
+      await deleteVerificationDocument(communityId, documentId),
+    onSuccess: (_result, { communityId }) =>
+      queryClient.invalidateQueries({ queryKey: ['verificationDocuments', communityId] }),
+  });
+};
+
+export const useUploadVerificationDocument = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    onSuccess: (_result, { communityId }) =>
+      queryClient.invalidateQueries({ queryKey: ['verificationDocuments', communityId] }),
     mutationFn: async ({
       communityId,
       documentType,
