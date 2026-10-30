@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import {
@@ -8,6 +8,7 @@ import {
   OpenConnectPlaceOptions,
   useConnectPlaceDrawer,
 } from '@/context/ConnectPlaceDrawerContext';
+import { renderWithStore } from '@/test-utils/renderWithStore';
 
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: { iconName: string }) => <span data-testid={iconName} />,
@@ -92,7 +93,7 @@ const OpenOnMount = ({ options }: { options?: OpenConnectPlaceOptions }) => {
 };
 
 const renderDrawer = (options?: OpenConnectPlaceOptions) =>
-  render(
+  renderWithStore(
     <ConnectPlaceDrawerProvider>
       <OpenOnMount options={options} />
     </ConnectPlaceDrawerProvider>,
@@ -265,7 +266,7 @@ const OpenSentClaim = ({
 };
 
 const renderSentClaim = (view: 'claim' | 'documents', ...sent: SentDocument[]) =>
-  render(
+  renderWithStore(
     <ConnectPlaceDrawerProvider>
       <OpenSentClaim sent={sent} view={view} />
     </ConnectPlaceDrawerProvider>,

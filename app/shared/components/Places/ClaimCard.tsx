@@ -1,8 +1,12 @@
 'use client';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { useCommunityDetail } from '@/app/shared/hooks/useCommunities';
+import { usePlaceOwnership } from '@/app/shared/hooks/usePlaces';
 import { Button } from '@/components/ui/button';
 import { useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
+
+type Ownership = { community: string; approved: boolean } | null;
 
 /**
  * "Claim {place}" - shown only for an unclaimed place, on both the place page
@@ -11,8 +15,17 @@ import { useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
  * docs/tasks/place-drawer/PD-14-claim.md); this is the one the handoff's
  * tk-claimcard / tk-claimst markup describes, now shared by both.
  *
- * Reads the mock claim store off ConnectPlaceDrawerContext to switch to the
- * "claim already open" status strip once the reader has started one.
+ * Whether a claim is open comes from the real ownership endpoint
+ * (`usePlaceOwnership`) - a claim exists and is unapproved - not from this
+ * browser's own remembered claims, so it still shows up after a reload, or
+ * from a different device, or once a claim is cancelled/rejected server-side
+ * without this browser ever hearing about it. `getClaimForPlace` (the
+ * claims ConnectPlaceDrawerContext remembers, since the API has no claim
+ * record of its own - see slices/claimsSlice.ts) only adds detail on top:
+ * the community's name without another fetch, and a real claim id so "View
+ * claim"/"Add documents" can open it. Without that - a claim only this
+ * card's live check found - the strip shows with no such button, since
+ * there is nothing to open.
  */
 const WHAT_YOU_GET: { icon: string; title: string; detail: string }[] = [
   {
@@ -36,8 +49,26 @@ export const ClaimCard = ({ placeId, placeName }: { placeId: string; placeName: 
   const connectDrawer = useConnectPlaceDrawer();
   const claim = connectDrawer?.getClaimForPlace(placeId);
 
-  if (claim) {
-    const isMoreDocuments = claim.status === 'more';
+  const { data: ownershipResponse, isLoading: isLoadingOwnership } = usePlaceOwnership(placeId);
+  const ownership = ownershipResponse?.data as Ownership;
+  // While the real check is in flight, go with what this browser already
+  // remembers rather than flashing "Claim this place" first - it settles a
+  // moment later once the query answers, usually confirming the same state.
+  const hasOpenClaim = isLoadingOwnership
+    ? Boolean(claim)
+    : Boolean(ownership) && !ownership?.approved;
+
+  // Only fetched when this browser has no claim of its own to name the
+  // community from - a community detail page is public, so this works
+  // regardless of whether the viewer belongs to it.
+  const { data: communityResponse } = useCommunityDetail(
+    ownership?.community ?? '',
+    hasOpenClaim && !claim && Boolean(ownership?.community),
+  );
+  const communityName = claim?.communityName ?? communityResponse?.data?.title ?? 'another community';
+
+  if (hasOpenClaim) {
+    const isMoreDocuments = claim?.status === 'more';
 
     return (
       <div className="flex flex-col gap-3.5 rounded-xl bg-warn-surface p-[18px]">
@@ -53,32 +84,34 @@ export const ClaimCard = ({ placeId, placeName }: { placeId: string; placeName: 
               {isMoreDocuments ? 'Tukai needs more documents' : 'Your claim is under review'}
             </h3>
             <p className="text-sm leading-relaxed text-[#5B4A2E]">
-              Sent for {claim.communityName}. Tukai usually reviews claims within 2 working days,
-              and nothing changes here until it&apos;s approved.
+              Sent for {communityName}. Tukai usually reviews claims within 2 working days, and
+              nothing changes here until it&apos;s approved.
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 pl-[34px]">
-          <button
-            type="button"
-            onClick={() => connectDrawer?.openConnectPlace({ claimId: claim.id })}
-            className="inline-flex h-11 items-center rounded-full bg-white px-[18px] text-[14.5px] font-semibold text-warn hover:bg-white/70"
-          >
-            View claim
-          </button>
-          {isMoreDocuments && (
+        {claim && (
+          <div className="flex flex-wrap gap-2 pl-[34px]">
             <button
               type="button"
-              onClick={() =>
-                connectDrawer?.openConnectPlace({ claimId: claim.id, view: 'documents' })
-              }
-              className="inline-flex h-11 items-center px-3 text-[14.5px] font-semibold text-warn hover:underline"
+              onClick={() => connectDrawer?.openConnectPlace({ claimId: claim.id })}
+              className="inline-flex h-11 items-center rounded-full bg-white px-[18px] text-[14.5px] font-semibold text-warn hover:bg-white/70"
             >
-              Add documents
+              View claim
             </button>
-          )}
-        </div>
+            {isMoreDocuments && (
+              <button
+                type="button"
+                onClick={() =>
+                  connectDrawer?.openConnectPlace({ claimId: claim.id, view: 'documents' })
+                }
+                className="inline-flex h-11 items-center px-3 text-[14.5px] font-semibold text-warn hover:underline"
+              >
+                Add documents
+              </button>
+            )}
+          </div>
+        )}
       </div>
     );
   }
