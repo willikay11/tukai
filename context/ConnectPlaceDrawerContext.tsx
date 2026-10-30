@@ -2,7 +2,11 @@
 
 import { ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
 
+import { useDispatch, useSelector } from 'react-redux';
+
 import { ConnectPlaceDrawer } from '@/app/shared/components/Places/ConnectPlaceDrawer';
+import { addClaim, cancelClaim as cancelClaimAction, resubmitClaimDocuments } from '@/slices/claimsSlice';
+import { AppDispatch, RootState } from '@/store/store';
 import { Claim, ClaimDocument, ClaimPlaceSummary, ClaimStatus } from '@/types/claim';
 
 export type ConnectPlaceDrawerView = 'form' | 'documents' | 'claim';
@@ -32,9 +36,10 @@ type ConnectPlaceDrawerValue = {
   openConnectPlace: (opts?: OpenConnectPlaceOptions) => void;
   closeConnectPlace: () => void;
   /**
-   * The claims sent in this session: which places and community went together.
-   * The API has no claim record, so this is in memory only and resets on reload;
-   * useResolvedClaim reads each one's live status and documents.
+   * The claims this browser has sent: which places and community went
+   * together. The API has no claim record, so this is kept in redux-persist
+   * rather than fetched, and survives a reload; useResolvedClaim reads each
+   * one's live status and documents.
    */
   claims: Claim[];
   getClaimForPlace: (placeId: string) => Claim | undefined;
@@ -53,13 +58,15 @@ const makeId = (prefix: string) => `${prefix}-${Date.now()}-${Math.random().toSt
  * menu, Dashboard > Places, an unclaimed place's drawer, and the mobile place
  * bar.
  *
- * Also remembers the claims sent in this session, since the API has no claim
- * record that groups several places under one set of documents.
+ * Also remembers the claims this browser has sent, since the API has no
+ * claim record that groups several places under one set of documents - see
+ * slices/claimsSlice.ts.
  */
 export const ConnectPlaceDrawerProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [options, setOptions] = useState<OpenConnectPlaceOptions>({});
-  const [claims, setClaims] = useState<Claim[]>([]);
+  const claims = useSelector((state: RootState) => state.claimsReducer.claims);
+  const dispatch = useDispatch<AppDispatch>();
 
   const openConnectPlace = useCallback((opts?: OpenConnectPlaceOptions) => {
     setOptions(opts ?? {});
@@ -81,43 +88,39 @@ export const ConnectPlaceDrawerProvider = ({ children }: { children: ReactNode }
     [claims],
   );
 
-  const submitClaim = useCallback((input: SubmitClaimInput): Claim => {
-    const claim: Claim = {
-      id: makeId('claim'),
-      communityId: input.communityId,
-      communityName: input.communityName,
-      communityPhoto: input.communityPhoto,
-      places: input.places,
-      documents: input.documents,
-      notes: input.notes,
-      status: 'review' as ClaimStatus,
-      sentAt: new Date().toISOString(),
-    };
+  const submitClaim = useCallback(
+    (input: SubmitClaimInput): Claim => {
+      const claim: Claim = {
+        id: makeId('claim'),
+        communityId: input.communityId,
+        communityName: input.communityName,
+        communityPhoto: input.communityPhoto,
+        places: input.places,
+        documents: input.documents,
+        notes: input.notes,
+        status: 'review' as ClaimStatus,
+        sentAt: new Date().toISOString(),
+      };
 
-    setClaims((current) => [...current, claim]);
-    return claim;
-  }, []);
+      dispatch(addClaim(claim));
+      return claim;
+    },
+    [dispatch],
+  );
 
   const resubmitDocuments = useCallback(
     (claimId: string, documents: ClaimDocument[], notes?: string) => {
-      setClaims((current) =>
-        current.map((claim) =>
-          claim.id === claimId
-            ? { ...claim, documents, notes: notes ?? claim.notes, status: 'review' as ClaimStatus }
-            : claim,
-        ),
-      );
+      dispatch(resubmitClaimDocuments({ claimId, documents, notes }));
     },
-    [],
+    [dispatch],
   );
 
-  const cancelClaim = useCallback((claimId: string) => {
-    setClaims((current) =>
-      current.map((claim) =>
-        claim.id === claimId ? { ...claim, status: 'cancelled' as ClaimStatus } : claim,
-      ),
-    );
-  }, []);
+  const cancelClaim = useCallback(
+    (claimId: string) => {
+      dispatch(cancelClaimAction(claimId));
+    },
+    [dispatch],
+  );
 
   const value = useMemo(
     () => ({
