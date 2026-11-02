@@ -21,6 +21,8 @@ jest.mock('@/app/shared/components/Images/SquarePhotoStrip', () => ({
   SquarePhotoStrip: ({ photos }: { photos: string[] }) => <div>{`strip-${photos.length}`}</div>,
 }));
 jest.mock('@/app/shared/components/Share', () => ({
+  // The content builders are plain functions; only the sheet is stood in for
+  ...jest.requireActual('@/app/shared/components/Share/shareContent'),
   Share: () => <button type="button">Share</button>,
 }));
 jest.mock('@/app/shared/components/Moments', () => ({

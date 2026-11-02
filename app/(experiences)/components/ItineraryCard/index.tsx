@@ -28,7 +28,14 @@ import { experienceRunBy, isFree } from '../ExperienceCard/experience-flag';
  * click opens it in the same drawer the other experience cards use, the same
  * pattern `ExperienceCard` follows.
  */
-export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
+export const ItineraryCard = ({
+  itinerary,
+  className,
+}: {
+  itinerary: Experience;
+  /** Sizing from the rail, such as RAIL_CARD_RESPONSIVE_WIDTH */
+  className?: string;
+}) => {
   const { data: session } = useSession();
   const drawer = useExperienceDrawer();
 
@@ -66,7 +73,7 @@ export const ItineraryCard = ({ itinerary }: { itinerary: Experience }) => {
       sizes="184px"
       ratio="square"
       radius="rounded-xl"
-      className="w-[184px] flex-shrink-0 snap-start"
+      className={cn('w-[184px] flex-shrink-0 snap-start', className)}
       overlay={
         <>
           <div className="absolute right-0 top-0">

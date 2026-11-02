@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
+import type { ShareContent } from '@/app/shared/components/Share';
 import { ReservationTicket } from '@/types/ticket-purchase';
 import { formatReservationDateTime } from '@/utils/date-utils';
 
@@ -19,7 +20,7 @@ interface ReservationCardProps {
   ticketCount: number;
   status: string;
   tickets: ReservationTicket[];
-  shareLink: string;
+  share: ShareContent;
   onDownloadAll: () => void;
   isDownloading?: boolean;
 }
@@ -33,7 +34,7 @@ export const ReservationCard = ({
   ticketCount,
   status,
   tickets,
-  shareLink,
+  share,
   onDownloadAll,
   isDownloading = false,
 }: ReservationCardProps) => {
@@ -105,7 +106,7 @@ export const ReservationCard = ({
         occurrenceEnd={occurrenceEnd}
         paymentStatus={status}
         tickets={tickets}
-        shareLink={shareLink}
+        share={share}
         onDownloadAll={onDownloadAll}
         isDownloading={isDownloading}
       />

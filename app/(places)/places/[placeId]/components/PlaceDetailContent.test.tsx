@@ -13,7 +13,11 @@ jest.mock('@/app/shared/components/Images/SquarePhotoStrip', () => ({
     <div data-testid="hero" data-variant={variant}>{`photos-${photos.length}`}</div>
   ),
 }));
-jest.mock('@/app/shared/components/Share', () => ({ Share: () => <button>Share</button> }));
+jest.mock('@/app/shared/components/Share', () => ({
+  // The content builders are plain functions; only the sheet is stood in for
+  ...jest.requireActual('@/app/shared/components/Share/shareContent'),
+  Share: () => <button>Share</button>,
+}));
 jest.mock('@/app/shared/components/Global', () => ({
   DescriptionShowMore: ({ text }: { text: string }) => <p>{text}</p>,
   OpenInMapsLink: ({

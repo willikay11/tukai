@@ -4,9 +4,8 @@ import { useSession } from 'next-auth/react';
 
 import { Bookmark } from '@/app/shared/components/Bookmark';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { Share } from '@/app/shared/components/Share';
+import { Share, placeShare } from '@/app/shared/components/Share';
 import { Place } from '@/types/place';
-import { placePath } from '@/utils/detail-paths';
 
 /** The round grey disc each of the header's controls sits in. */
 const DISC =
@@ -48,13 +47,7 @@ export const PlaceDrawerHeader = ({
 
       <div className="flex flex-shrink-0 items-center gap-2">
         <div className={`${DISC} hover:bg-surface-brand`}>
-          <Share
-            coverPhoto={place.photos?.[0]?.photo ?? ''}
-            title={place.title}
-            link={`${process.env.NEXT_PUBLIC_APP_URL}${placePath(place)}`}
-            kind="place"
-            variant="icon"
-          />
+          <Share content={placeShare(place)} variant="icon" />
         </div>
 
         <div className={`${DISC} hover:bg-surface-brand`}>

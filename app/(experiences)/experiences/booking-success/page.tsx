@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { PaymentStatusBadge } from '@/app/(experiences)/experiences/components/PaymentStatusBadge';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
-import { Share } from '@/app/shared/components/Share';
+import { Share, experienceShare } from '@/app/shared/components/Share';
 import {
   useExperienceTicketPurchases,
   useFetchSingleExperience,
@@ -17,7 +17,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { TicketPurchase } from '@/types/ticket-purchase';
 import { formatBookingDateTime, formatPaidAt } from '@/utils/date-utils';
-import { experiencePath } from '@/utils/detail-paths';
 
 import { BookingConfirmation, purchasesFromSameCheckout, toConfirmation } from './confirmation';
 
@@ -268,14 +267,12 @@ const BookingSuccessContent = () => {
 
             {/* Share brings its own outlined trigger button */}
             <Share
-              coverPhoto={data.experience.thumbnail}
-              title={data.experience.title}
-              link={
-                experience
-                  ? `${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`
-                  : `${process.env.NEXT_PUBLIC_APP_URL}/experiences`
-              }
-              kind="experience"
+              content={experienceShare({
+                ...experience,
+                id: experience?.id ?? experienceId ?? '',
+                title: data.experience.title,
+                image: data.experience.thumbnail,
+              })}
             />
           </div>
         </div>

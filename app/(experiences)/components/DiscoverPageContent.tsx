@@ -22,7 +22,12 @@ import { SectionHeader } from '@/app/(experiences)/experiences/components/Sectio
 import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
 import { filtersFromParams, hasSearch } from '@/app/shared/components/Filters/filters';
 import { PageContainer } from '@/app/shared/components/Layout';
-import { CardGrid, CardRail, SeeAllCard } from '@/app/shared/components/Lists';
+import {
+  CardGrid,
+  CardRail,
+  RAIL_CARD_RESPONSIVE_WIDTH,
+  SeeAllCard,
+} from '@/app/shared/components/Lists';
 import { ShowMoreButton } from '@/app/shared/components/Lists';
 import { MomentCard, MomentComposer, MomentDrawer } from '@/app/shared/components/Moments';
 import { usePublicBucketLists } from '@/app/shared/hooks/useBucketLists';
@@ -208,7 +213,12 @@ export const DiscoverPageContent = () => {
             <RowSkeleton cardClassName="aspect-square w-[184px]" />
           ) : (
             promotedPlaces.map((place, index) => (
-              <PlaceCard key={place.id} place={place} priority={index < EAGER_IN_ROW} />
+              <PlaceCard
+                key={place.id}
+                place={place}
+                priority={index < EAGER_IN_ROW}
+                className={RAIL_CARD_RESPONSIVE_WIDTH}
+              />
             ))
           )}
         </CardRail>
@@ -225,6 +235,7 @@ export const DiscoverPageContent = () => {
                   key={experience.id}
                   experience={experience}
                   priority={index < EAGER_IN_ROW}
+                  className={RAIL_CARD_RESPONSIVE_WIDTH}
                 />
               ))}
 
@@ -232,6 +243,7 @@ export const DiscoverPageContent = () => {
                 <SeeAllCard
                   href="/experiences"
                   previewPhotos={soonExperiences.slice(0, 3).map(coverPhotoOf)}
+                  className={RAIL_CARD_RESPONSIVE_WIDTH}
                 />
               )}
             </>
@@ -242,7 +254,7 @@ export const DiscoverPageContent = () => {
       {(isLoadingCities || cities.length > 0) && (
         <CardRail title="Discover by city" subtitle="Switch the city and everything above follows">
           {isLoadingCities ? (
-            <RowSkeleton cardClassName="aspect-[8/3] w-[184px]" />
+            <RowSkeleton cardClassName="h-[65px] w-[184px]" />
           ) : (
             cities.map((category) => (
               <CityCard
@@ -251,6 +263,7 @@ export const DiscoverPageContent = () => {
                 city={category.name}
                 imageUrl={categoryImageOf(category) ?? ''}
                 href={cityExperiencesHref(category.name)}
+                className={`aspect-auto h-[65px] ${RAIL_CARD_RESPONSIVE_WIDTH}`}
               />
             ))
           )}
@@ -271,7 +284,12 @@ export const DiscoverPageContent = () => {
             <RowSkeleton cardClassName="aspect-square w-[184px]" />
           ) : (
             guidedTours.map((tour, index) => (
-              <ExperienceCard key={tour.id} experience={tour} priority={index < EAGER_IN_ROW} />
+              <ExperienceCard
+                key={tour.id}
+                experience={tour}
+                priority={index < EAGER_IN_ROW}
+                className={RAIL_CARD_RESPONSIVE_WIDTH}
+              />
             ))
           )}
         </CardRail>

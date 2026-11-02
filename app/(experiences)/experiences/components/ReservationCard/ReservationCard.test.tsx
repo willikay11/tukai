@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { experienceShare } from '@/app/shared/components/Share/shareContent';
 import { ReservationTicket } from '@/types/ticket-purchase';
 
 import { ReservationCard } from './index';
@@ -33,7 +34,7 @@ const defaultProps = {
   ticketCount: 2,
   status: 'completed',
   tickets,
-  shareLink: 'https://tukai.co/experiences/exp-1',
+  share: experienceShare({ id: 'exp-1', title: 'Sunset hike' }),
   onDownloadAll: jest.fn(),
 };
 

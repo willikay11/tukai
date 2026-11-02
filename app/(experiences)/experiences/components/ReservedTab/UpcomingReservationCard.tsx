@@ -6,6 +6,7 @@ import numeral from 'numeral';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
+import type { ShareContent } from '@/app/shared/components/Share';
 import { formatReservationDateTime } from '@/utils/date-utils';
 
 import { TicketModal } from '../TicketModal';
@@ -13,14 +14,14 @@ import { ExperienceReservationView, isSettled } from './types';
 
 interface UpcomingReservationCardProps {
   reservation: ExperienceReservationView;
-  shareLink: string;
+  share: ShareContent;
   onDownloadAll: () => void;
   isDownloading?: boolean;
 }
 
 export const UpcomingReservationCard = ({
   reservation,
-  shareLink,
+  share,
   onDownloadAll,
   isDownloading = false,
 }: UpcomingReservationCardProps) => {
@@ -94,7 +95,7 @@ export const UpcomingReservationCard = ({
         occurrenceEnd={reservation.end}
         paymentStatus={reservation.status}
         tickets={reservation.tickets}
-        shareLink={shareLink}
+        share={share}
         onDownloadAll={onDownloadAll}
         isDownloading={isDownloading}
       />

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 
+import { experienceShare } from '@/app/shared/components/Share';
 import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
 import { Experience } from '@/types/experience';
@@ -47,8 +48,20 @@ export const ReservedTab = ({
   // every row rather than mounting a modal per row
   const [calendarTicket, setCalendarTicket] = useState<ExperienceReservationView | null>(null);
 
-  const shareLink = (experienceId: string) =>
-    `${process.env.NEXT_PUBLIC_APP_URL}/experiences/${experienceId}`;
+  // The experience itself where it is loaded, for its visibility and price;
+  // the booked occurrence's dates either way, since that is what was booked
+  const shareFor = (view: ExperienceReservationView) => {
+    const experience = reservedExperiences.find((item) => item.id === view.experienceId);
+
+    return experienceShare({
+      ...experience,
+      id: view.experienceId,
+      title: view.title,
+      image: view.coverPhoto,
+      startDate: view.start ?? experience?.startDate,
+      endDate: view.end ?? experience?.endDate,
+    });
+  };
 
   // A row covers every occurrence of its experience, so downloading walks all
   // of that experience's reservations
@@ -107,7 +120,7 @@ export const ReservedTab = ({
           occurrenceEnd={calendarTicket.end}
           paymentStatus={calendarTicket.status}
           tickets={calendarTicket.tickets}
-          shareLink={shareLink(calendarTicket.experienceId)}
+          share={shareFor(calendarTicket)}
           onDownloadAll={() => downloadForExperience(calendarTicket.experienceId)}
           isDownloading={isDownloadingExperience(calendarTicket.experienceId)}
         />

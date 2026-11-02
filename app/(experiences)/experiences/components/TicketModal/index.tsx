@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { PRESSABLE } from '@/app/shared/components/Motion';
-import { Share } from '@/app/shared/components/Share';
+import { Share, ShareContent } from '@/app/shared/components/Share';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
@@ -24,7 +24,7 @@ interface TicketModalProps {
   occurrenceEnd: string | null;
   paymentStatus: string;
   tickets: ReservationTicket[];
-  shareLink: string;
+  share: ShareContent;
   onDownloadAll: () => void;
   isDownloading?: boolean;
 }
@@ -39,7 +39,7 @@ export const TicketModal = ({
   occurrenceEnd,
   paymentStatus,
   tickets,
-  shareLink,
+  share,
   onDownloadAll,
   isDownloading = false,
 }: TicketModalProps) => {
@@ -236,12 +236,7 @@ export const TicketModal = ({
               {isDownloading ? 'Downloading…' : `Download all (${downloadableCount})`}
             </Button>
             <div className="flex-1 [&_button]:w-full [&_button]:justify-center">
-              <Share
-                coverPhoto={coverPhoto ?? ''}
-                title={experienceTitle}
-                link={shareLink}
-                kind="experience"
-              />
+              <Share content={share} />
             </div>
           </div>
         </div>

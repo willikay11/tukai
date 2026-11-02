@@ -4,10 +4,9 @@ import moment from 'moment';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
-import { Share } from '@/app/shared/components/Share';
+import { Share, experienceShare } from '@/app/shared/components/Share';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
-import { experiencePath } from '@/utils/detail-paths';
 
 import { ManageExperienceMetrics } from '../../utils/manage-metrics';
 
@@ -75,12 +74,7 @@ export const ManageExperienceHero = ({ experience, metrics }: ManageExperienceHe
           </div>
 
           <div className="flex-shrink-0">
-            <Share
-              coverPhoto={coverPhoto ?? ''}
-              title={experience.title}
-              link={`${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`}
-              kind="experience"
-            />
+            <Share content={experienceShare(experience)} />
           </div>
         </div>
 

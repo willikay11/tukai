@@ -2,6 +2,8 @@ import React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react';
 
+import { experienceShare } from '@/app/shared/components/Share/shareContent';
+
 import { UpcomingReservationCard } from './UpcomingReservationCard';
 import { ExperienceReservationView } from './types';
 
@@ -34,7 +36,10 @@ const makeView = (overrides: Partial<ExperienceReservationView> = {}): Experienc
     ...overrides,
   }) as ExperienceReservationView;
 
-const defaults = { shareLink: 'https://tukai.co/e/1', onDownloadAll: jest.fn() };
+const defaults = {
+  share: experienceShare({ id: '1', title: 'Sunset hike' }),
+  onDownloadAll: jest.fn(),
+};
 
 describe('UpcomingReservationCard', () => {
   // The amount is what this user paid, from reserved_tickets_amount - not the
