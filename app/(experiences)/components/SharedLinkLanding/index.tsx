@@ -15,7 +15,7 @@ export type SharedLinkKind = 'place' | 'experience' | 'community';
  * drawer over it - the drawer is where its locked and unavailable states
  * live, which the full pages do not show the same way.
  *
- * The short-link route carries the id, so this opens the drawer from that
+ * The short-link route resolves its slug to the id, so this opens the drawer from that
  * rather than from a query parameter: Discover reads its whole search from
  * the URL, and a `?place=` there would swap the rails for a results list.
  *
