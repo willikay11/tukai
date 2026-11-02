@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
-import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { MomentComposer } from '@/app/shared/components/Moments';
 import { useUnreadNotificationCount } from '@/app/shared/hooks/useNotifications';
@@ -13,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { TukaiImage } from '@/components/ui/image';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAuthDialog } from '@/context/AuthDialogContext';
+import { useBucketListDrawer } from '@/context/BucketListDrawerContext';
 import { useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
 import { useCreateCommunityDrawer } from '@/context/CreateCommunityDrawerContext';
 import { useCreateExperienceDrawer } from '@/context/CreateExperienceDrawerContext';
@@ -26,11 +26,11 @@ export const AuthActions = () => {
   const { openConnectPlace } = useConnectPlaceDrawer()!;
   const { openCreateExperience } = useCreateExperienceDrawer()!;
   const { openCreateCommunity } = useCreateCommunityDrawer()!;
+  const bucketListDrawer = useBucketListDrawer();
   const router = useRouter();
   const { data: session } = useSession();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
-  const [isBucketListModalOpen, setIsBucketListModalOpen] = useState(false);
   const [isMomentComposerOpen, setIsMomentComposerOpen] = useState(false);
 
   // The dot on the Notifications row was hardcoded true, so it was on for
@@ -63,7 +63,11 @@ export const AuthActions = () => {
     if (id === 'experience') handleCreateExperience();
     if (id === 'community') openCreateCommunity();
     if (id === 'place') openConnectPlace();
-    if (id === 'bucketList') setIsBucketListModalOpen(true);
+    if (id === 'bucketList') {
+      const openCreate = () => bucketListDrawer?.openCreateBucketList();
+      if (session?.user) openCreate();
+      else needAuth('lists', openCreate);
+    }
     if (id === 'moment') setIsMomentComposerOpen(true);
   };
 
@@ -179,8 +183,6 @@ export const AuthActions = () => {
           </Button>
         </>
       )}
-
-      <CreateBucketListModal open={isBucketListModalOpen} onOpenChange={setIsBucketListModalOpen} />
 
       {/* Opened with no context, same as the Discover page's own "Been
           somewhere good?" tile - the moment posts untagged */}

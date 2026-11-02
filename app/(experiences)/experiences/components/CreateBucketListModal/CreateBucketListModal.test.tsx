@@ -95,16 +95,14 @@ describe('CreateBucketListModal', () => {
 
       expect(screen.getByText('Your bucket list is ready')).toBeInTheDocument();
       expect(screen.getByText(/Date Nights/)).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'View bucket list' })).toHaveAttribute(
-        'href',
-        '/bucket-lists/new-list-1',
-      );
+      // Opens the new list in the bucket list panel rather than leaving the page
+      expect(screen.getByRole('button', { name: 'View bucket list' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Share link/ })).toBeInTheDocument();
       // The form is gone, not just hidden
       expect(screen.queryByPlaceholderText(/Enter bucket list name/)).not.toBeInTheDocument();
     });
 
-    it('copies the new list\'s link when Share link is pressed', async () => {
+    it("copies the new list's link when Share link is pressed", async () => {
       const user = userEvent.setup();
       // After setup(): userEvent installs its own clipboard stub, which would
       // otherwise shadow this one

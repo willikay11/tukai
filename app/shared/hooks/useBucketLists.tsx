@@ -1,15 +1,23 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
+  acceptBucketListInvite,
   addBucketListItem,
   createBucketList,
+  declineBucketListInvite,
   deleteBucketList,
   fetchBucketList,
+  fetchBucketListMembers,
+  fetchFollowingBucketLists,
+  fetchMyBucketListMembership,
   fetchMyBucketLists,
   fetchPublicBucketLists,
+  inviteBucketListMember,
   joinBucketList,
+  joinPublicBucketList,
   leaveBucketList,
   removeBucketListItem,
+  removeBucketListMember,
   reorderBucketListItems,
   updateBucketList,
 } from '@/services/bucket-list';
@@ -154,5 +162,109 @@ export const useReorderBucketListItems = (bucketListId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bucket-list', bucketListId] });
     },
+  });
+};
+
+/** The lists the reader has joined and does not own - the Following tab. */
+export const useFollowingBucketLists = (enabled: boolean = true) =>
+  useQuery({
+    queryKey: ['bucket-lists', 'following'],
+    queryFn: () => fetchFollowingBucketLists(),
+    enabled,
+  });
+
+/**
+ * Every public list, a page at a time - the Discover tab, where Show more adds
+ * the next page rather than asking again for everything already on screen.
+ */
+export const useInfinitePublicBucketLists = (pageSize = 12) =>
+  useInfiniteQuery({
+    queryKey: ['bucket-lists', 'public', 'pages', pageSize],
+    queryFn: ({ pageParam }) => fetchPublicBucketLists(pageParam, pageSize),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, pages) => (lastPage?.data?.next ? pages.length + 1 : undefined),
+    staleTime: 5 * 60 * 1000,
+  });
+
+/** Joins a public list by its id, as the drawer's Join button does. */
+export const useJoinPublicBucketList = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (bucketListId: string) => joinPublicBucketList(bucketListId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bucket-lists'] });
+      queryClient.invalidateQueries({ queryKey: ['bucket-list'] });
+    },
+  });
+};
+
+/** Everyone on a list, invites included. Only the owner may ask. */
+export const useBucketListMembers = (bucketListId: string, enabled: boolean = true) =>
+  useQuery({
+    queryKey: ['bucket-list', bucketListId, 'members'],
+    queryFn: () => fetchBucketListMembers(bucketListId),
+    enabled: enabled && Boolean(bucketListId),
+  });
+
+/**
+ * The reader's own place on a list, if any - a 404 just means they have none,
+ * so it is not retried.
+ */
+export const useMyBucketListMembership = (bucketListId: string, enabled: boolean = true) =>
+  useQuery({
+    queryKey: ['bucket-list', bucketListId, 'membership'],
+    queryFn: () => fetchMyBucketListMembership(bucketListId),
+    enabled: enabled && Boolean(bucketListId),
+    retry: false,
+  });
+
+export type BucketListInvitee = { userId?: string; email?: string };
+
+/**
+ * Sends every invite picked at once. The API takes one person per request, so
+ * they go out together and the mutation settles when the last one does.
+ */
+export const useInviteBucketListMembers = (bucketListId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (invitees: BucketListInvitee[]) =>
+      Promise.all(invitees.map((invitee) => inviteBucketListMember(bucketListId, invitee))),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bucket-list', bucketListId] }),
+  });
+};
+
+/** Takes a member off, or cancels an invite they have not answered. */
+export const useRemoveBucketListMember = (bucketListId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (userId: string) => removeBucketListMember(bucketListId, userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bucket-list', bucketListId] });
+      queryClient.invalidateQueries({ queryKey: ['bucket-lists'] });
+    },
+  });
+};
+
+export const useAcceptBucketListInvite = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (bucketListId: string) => acceptBucketListInvite(bucketListId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bucket-lists'] });
+      queryClient.invalidateQueries({ queryKey: ['bucket-list'] });
+    },
+  });
+};
+
+export const useDeclineBucketListInvite = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (bucketListId: string) => declineBucketListInvite(bucketListId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bucket-list'] }),
   });
 };

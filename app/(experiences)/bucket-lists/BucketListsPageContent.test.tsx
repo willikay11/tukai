@@ -5,111 +5,232 @@ import userEvent from '@testing-library/user-event';
 
 import { BucketListsPageContent } from './BucketListsPageContent';
 
-let sessionState: { data: { user: { id: string } } | null; status: string } = {
-  data: { user: { id: 'u1' } },
-  status: 'authenticated',
-};
+let sessionState: { data: { user: { id: string } } | null } = { data: { user: { id: 'u1' } } };
 jest.mock('next-auth/react', () => ({ useSession: () => sessionState }));
 
-let response: { data: { results: unknown[] } } | undefined;
-let isLoading = false;
+let search = new URLSearchParams();
+const replace = jest.fn();
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ replace }),
+  usePathname: () => '/bucket-lists',
+  useSearchParams: () => search,
+}));
+
+jest.mock('@/app/shared/components/Icons', () => ({
+  IconComponent: () => <span />,
+}));
+jest.mock('@/app/shared/components/Images', () => ({
+  PhotoImage: ({ alt }: { alt: string }) => <img alt={alt} />,
+}));
+jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast: jest.fn() }) }));
+
+const needAuth = jest.fn();
+jest.mock('@/context/AuthDialogContext', () => ({ useAuthDialog: () => ({ needAuth }) }));
+
+const openBucketList = jest.fn();
+const openCreateBucketList = jest.fn();
+jest.mock('@/context/BucketListDrawerContext', () => ({
+  useBucketListDrawer: () => ({ openBucketList, openCreateBucketList }),
+}));
+
+let publicLists: unknown[] = [];
+let hasNextPage = false;
+const fetchNextPage = jest.fn();
+let followingLists: unknown[] = [];
+let myLists: unknown[] = [];
+let membership: { status: string; invitedBy?: unknown } | undefined;
+const accept = jest.fn();
+const decline = jest.fn();
 
 jest.mock('@/app/shared/hooks/useBucketLists', () => ({
-  useMyBucketLists: () => ({ data: response, isLoading }),
-  // The real one is a plain function, so it is kept rather than stubbed away
-  isSharedWithMe: (list: { owner?: { id: string } }, userId?: string | null) =>
-    Boolean(list.owner?.id && userId && list.owner.id !== userId),
-  useJoinBucketList: () => ({ mutate: jest.fn(), isPending: false }),
-  useLeaveBucketList: () => ({ mutate: jest.fn(), isPending: false }),
-  useCreateBucketList: () => ({ mutate: jest.fn(), isPending: false }),
-  useUpdateBucketList: () => ({ mutate: jest.fn(), isPending: false }),
+  useInfinitePublicBucketLists: () => ({
+    data: { pages: [{ data: { results: publicLists } }] },
+    isLoading: false,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage: false,
+  }),
+  useFollowingBucketLists: () => ({
+    data: { data: { results: followingLists } },
+    isLoading: false,
+  }),
+  useMyBucketLists: () => ({ data: { data: { results: myLists } }, isLoading: false }),
+  useMyBucketListMembership: () => ({ data: membership ? { data: membership } : undefined }),
+  useBucketList: () => ({
+    data: { data: { id: 'inv1', name: 'Mum’s 60th weekend', itemCount: 3 } },
+  }),
+  useAcceptBucketListInvite: () => ({ mutate: accept, isPending: false }),
+  useDeclineBucketListInvite: () => ({ mutate: decline, isPending: false }),
 }));
 
 const list = (extra: Record<string, unknown> = {}) => ({
   id: 'bl1',
-  name: 'Weekend Hikes',
-  visibility: 'private',
-  itemCount: 3,
+  name: 'Slow Sundays in Nairobi',
+  visibility: 'public',
+  itemCount: 6,
   memberCount: 0,
-  owner: { id: 'u1', displayName: 'You' },
+  owner: { id: 'u2', displayName: 'Otieno Ouma' },
   ...extra,
 });
 
 describe('BucketListsPageContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    sessionState = { data: { user: { id: 'u1' } }, status: 'authenticated' };
-    response = { data: { results: [list()] } };
-    isLoading = false;
+    sessionState = { data: { user: { id: 'u1' } } };
+    search = new URLSearchParams();
+    publicLists = [];
+    hasNextPage = false;
+    followingLists = [];
+    myLists = [];
+    membership = undefined;
   });
 
-  it('lists what the reader keeps, each opening its own page', () => {
+  it('opens on Following, with a tab panel for it', () => {
+    followingLists = [list()];
     render(<BucketListsPageContent />);
 
-    expect(screen.getByRole('heading', { name: 'Bucket List' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Weekend Hikes/ })).toHaveAttribute(
-      'href',
-      '/bucket-lists/bl1',
+    expect(screen.getByRole('heading', { level: 1, name: 'Bucket lists' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Following/ })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tabpanel')).toHaveAttribute(
+      'aria-labelledby',
+      'bucket-lists-tab-following',
     );
+    expect(screen.getByRole('heading', { name: 'Following' })).toBeInTheDocument();
   });
 
-  // One endpoint returns both; the owner is what tells them apart
-  it('separates the lists shared with the reader from their own', () => {
-    response = {
-      data: {
-        results: [
-          list(),
-          list({
-            id: 'bl2',
-            name: 'Tony’s Picks',
-            owner: { id: 'someone-else', displayName: 'Tony Ouma' },
-            shareToken: 'tok',
-          }),
-        ],
-      },
-    };
-
+  it('names each card in full and opens it in the panel', async () => {
+    followingLists = [list()];
     render(<BucketListsPageContent />);
 
-    expect(screen.getByText('Shared with you')).toBeInTheDocument();
-    // One card serves both sections now, and it credits the owner the same way
-    expect(screen.getByText('by Tony Ouma')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Join list' })).toBeInTheDocument();
+    const card = screen.getByRole('button', {
+      name: 'Slow Sundays in Nairobi, by Otieno Ouma, 6 saved',
+    });
+    await userEvent.click(card);
+
+    expect(openBucketList).toHaveBeenCalledWith('bl1');
   });
 
-  it('says nothing is shared when nothing is', () => {
+  it('sends a reader who follows nothing to Discover', async () => {
     render(<BucketListsPageContent />);
 
-    expect(screen.queryByText('Shared with you')).not.toBeInTheDocument();
+    expect(screen.getByText(/You aren’t following any bucket lists yet/)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Discover bucket lists' }));
+
+    expect(replace).toHaveBeenCalledWith('/bucket-lists?tab=discover', { scroll: false });
   });
 
-  it('offers a first list to someone with none', async () => {
-    const user = userEvent.setup();
-    response = { data: { results: [] } };
-
+  it('moves between tabs with the arrow keys', async () => {
     render(<BucketListsPageContent />);
 
-    expect(screen.getByText(/No bucket lists yet/)).toBeInTheDocument();
+    screen.getByRole('tab', { name: /Following/ }).focus();
+    await userEvent.keyboard('{ArrowRight}');
 
-    await user.click(screen.getByRole('button', { name: /Create your first bucket list/ }));
-
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(replace).toHaveBeenCalledWith('/bucket-lists?tab=mine', { scroll: false });
   });
 
-  it('opens the create dialog from the header', async () => {
-    const user = userEvent.setup();
-    render(<BucketListsPageContent />);
+  describe('Discover', () => {
+    beforeEach(() => {
+      search = new URLSearchParams('tab=discover');
+    });
 
-    await user.click(screen.getByRole('button', { name: /New bucket list/ }));
+    it('shows public lists the reader does not own', () => {
+      publicLists = [list(), list({ id: 'mine', name: 'My own', owner: { id: 'u1' } })];
+      render(<BucketListsPageContent />);
 
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Public bucket lists' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Slow Sundays/ })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /My own/ })).not.toBeInTheDocument();
+    });
+
+    it('offers Show more while there are more', async () => {
+      publicLists = [list()];
+      hasNextPage = true;
+      render(<BucketListsPageContent />);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Show more' }));
+
+      expect(fetchNextPage).toHaveBeenCalled();
+    });
+
+    it('says so when there are none', () => {
+      render(<BucketListsPageContent />);
+
+      expect(screen.getByText('There are no public bucket lists yet.')).toBeInTheDocument();
+    });
   });
 
-  it('asks a signed-out reader to sign in', () => {
-    sessionState = { data: null, status: 'unauthenticated' };
+  describe('My bucket lists', () => {
+    beforeEach(() => {
+      search = new URLSearchParams('tab=mine');
+    });
 
-    render(<BucketListsPageContent />);
+    it('shows the reader’s lists with their visibility', () => {
+      myLists = [
+        list({
+          id: 'm1',
+          name: 'Saturday with my cousins',
+          visibility: 'private',
+          owner: { id: 'u1' },
+        }),
+      ];
+      render(<BucketListsPageContent />);
 
-    expect(screen.getByText('Sign in to keep bucket lists.')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Created by you' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Saturday with my cousins, Private, 6 saved' }),
+      ).toBeInTheDocument();
+    });
+
+    it('opens Create from the empty state', async () => {
+      render(<BucketListsPageContent />);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Create bucket list' }));
+
+      expect(openCreateBucketList).toHaveBeenCalled();
+    });
+
+    it('asks a signed-out reader to sign up before creating', async () => {
+      sessionState = { data: null };
+      render(<BucketListsPageContent />);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Create bucket list' }));
+
+      expect(openCreateBucketList).not.toHaveBeenCalled();
+      expect(needAuth).toHaveBeenCalledWith('lists', expect.any(Function));
+    });
+  });
+
+  describe('an invite', () => {
+    beforeEach(() => {
+      search = new URLSearchParams('invite=inv1');
+      membership = { status: 'pending', invitedBy: { id: 'u5', firstName: 'Amina' } };
+    });
+
+    it('shows the banner and a badge on Following', () => {
+      render(<BucketListsPageContent />);
+
+      expect(screen.getByText('Amina invited you to Mum’s 60th weekend')).toBeInTheDocument();
+      expect(screen.getByText('Private list, 3 ideas')).toBeInTheDocument();
+      expect(screen.getByLabelText('1 invite waiting')).toBeInTheDocument();
+      // The banner stands in for the empty state
+      expect(screen.queryByText(/You aren’t following/)).not.toBeInTheDocument();
+    });
+
+    it('accepts it', async () => {
+      render(<BucketListsPageContent />);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+      expect(accept).toHaveBeenCalledWith('inv1', expect.anything());
+    });
+
+    it('hides once it is no longer pending', () => {
+      membership = { status: 'accepted' };
+      render(<BucketListsPageContent />);
+
+      expect(screen.queryByText(/invited you to/)).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('1 invite waiting')).not.toBeInTheDocument();
+    });
   });
 });
