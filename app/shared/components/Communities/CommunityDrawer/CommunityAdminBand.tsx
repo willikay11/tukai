@@ -3,59 +3,55 @@
 import { useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { PhotoImage } from '@/app/shared/components/Images';
 import { SendMessage } from '@/app/shared/components/SendMessage';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { CommunityMember } from '@/types/community';
 
 import { nameOfMember } from './community-drawer';
+import { Avatar } from './parts';
+
+/** Owners write to every member - there is no endpoint for that yet. */
+export const MESSAGE_MEMBERS_UNAVAILABLE = "Messaging all members isn't available yet.";
 
 /**
- * The handoff's Admin band: the community's owner, with a way to message
- * them. When the signed-in reader IS the owner there is nobody singular to
- * message about their own community - the API has no bulk-message endpoint,
- * so "Message members" toasts instead of opening anything (see the drawer
- * fork's backend-gap report).
+ * The Admin band: the community's owner, how much they have organised, and a
+ * way to write to them - or, on the reader's own community, to its members.
  */
 export const CommunityAdminBand = ({
   owner,
   isOwnerSelf,
+  pastExperiences,
 }: {
   owner?: CommunityMember;
   isOwnerSelf: boolean;
+  pastExperiences: number;
 }) => {
   const { toast } = useToast();
   const [isMessageOpen, setIsMessageOpen] = useState(false);
 
   if (!owner) return null;
 
-  const name = isOwnerSelf ? 'You' : nameOfMember(owner);
+  const ownerName = nameOfMember(owner);
+  const name = isOwnerSelf ? 'You' : ownerName;
 
   return (
-    <div className="-mx-6 flex flex-wrap items-center gap-3.5 bg-surface px-6 py-4">
-      <span className="relative h-[52px] w-[52px] flex-shrink-0 overflow-hidden rounded-full bg-surface-brand">
-        <PhotoImage
-          src={owner.user?.picture}
-          alt=""
-          fill
-          sizes="52px"
-          className="object-cover"
-          fallback={
-            <div className="flex h-full w-full items-center justify-center text-base font-bold text-brand-ink">
-              {name.charAt(0).toUpperCase()}
-            </div>
-          }
-        />
-      </span>
+    <div className="-mx-6 -mt-2 flex flex-wrap items-center gap-3.5 bg-surface px-6 py-4">
+      <Avatar src={owner.user?.picture} name={ownerName} size={52} />
 
-      <div className="min-w-0 flex-1 basis-[220px]">
+      <div className="flex min-w-0 flex-[1_1_220px] flex-col gap-0.5">
         <button
           type="button"
-          onClick={() => toast({ description: `Opening ${name}'s profile` })}
-          className="inline-flex max-w-full items-center gap-1.5 text-[15px] text-gray-900 transition-colors hover:text-brand"
+          onClick={() =>
+            toast({
+              description: isOwnerSelf ? 'Opens your profile.' : `Opens ${ownerName}'s profile.`,
+            })
+          }
+          className="-mb-2 -mt-2.5 inline-flex min-h-11 max-w-full items-center gap-1.5 self-start text-left text-[15px] text-gray-800 transition-colors hover:text-brand"
         >
           <span className="text-ink-muted">Admin:</span>
-          <span className="truncate font-semibold">{name}</span>
+          <span className="min-w-0 truncate font-semibold">{name}</span>
+          {/* ⚠️ Every admin gets the badge, as the handoff draws it - its Open
+              item 1 asks whether it should mean a verified person */}
           <span role="img" aria-label="Verified" className="flex-shrink-0">
             <IconComponent
               iconName="CheckmarkBadge01Icon"
@@ -72,16 +68,19 @@ export const CommunityAdminBand = ({
             className="flex-shrink-0 text-brand"
           />
         </button>
+        {pastExperiences > 0 && (
+          <span className="text-[13.5px] text-ink-muted">
+            {pastExperiences} past {pastExperiences === 1 ? 'experience' : 'experiences'} organised
+          </span>
+        )}
       </div>
 
       <button
         type="button"
         onClick={() =>
-          isOwnerSelf
-            ? toast({ description: "Message members isn't available yet" })
-            : setIsMessageOpen(true)
+          isOwnerSelf ? toast({ description: MESSAGE_MEMBERS_UNAVAILABLE }) : setIsMessageOpen(true)
         }
-        className="inline-flex h-12 flex-shrink-0 items-center gap-2 rounded-full bg-gradient-to-b from-brand-mid to-brand-deep px-5 text-[14.5px] font-bold text-white transition-[filter] hover:brightness-105 active:scale-[0.98]"
+        className="inline-flex h-12 flex-none items-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-b from-brand-mid to-brand-deep px-5 text-[14.5px] font-bold text-white active:scale-[0.98]"
       >
         <IconComponent iconName="BubbleChatIcon" size={18} color="currentColor" />
         {isOwnerSelf ? 'Message members' : 'Message host'}

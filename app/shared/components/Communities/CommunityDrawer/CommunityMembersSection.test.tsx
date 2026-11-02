@@ -8,84 +8,87 @@ import { CommunityMember } from '@/types/community';
 import { CommunityMembersSection } from './CommunityMembersSection';
 
 jest.mock('@/app/shared/components/Images', () => ({
-  PhotoImage: ({ alt }: { alt: string }) => <img alt={alt} />,
+  PhotoImage: () => <span data-testid="photo" />,
 }));
 
 const toast = jest.fn();
 jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
 
+jest.mock('@/app/shared/hooks/useCommunities', () => ({
+  useCancelCommunityInvite: () => ({ mutate: jest.fn(), isPending: false }),
+}));
+
 const member = (
   id: string,
   name: string,
   role: CommunityMember['role'] = 'regular',
-  userId = `u-${id}`,
-) => ({ id, role, user: { id: userId, displayName: name } }) as CommunityMember;
+  inviteStatus: CommunityMember['inviteStatus'] = 'accepted',
+) => ({ id, role, inviteStatus, user: { id: `u-${id}`, displayName: name } }) as CommunityMember;
+
+const renderSection = (
+  members: CommunityMember[],
+  props: Partial<React.ComponentProps<typeof CommunityMembersSection>> = {},
+) =>
+  render(
+    <CommunityMembersSection
+      communityId="c1"
+      communityTitle="City Sketchers"
+      members={members}
+      memberCount={members.length}
+      isOwnerSelf={false}
+      {...props}
+    />,
+  );
+
+const chipNames = () =>
+  Array.from(document.querySelectorAll('span.truncate')).map((node) => node.textContent);
 
 describe('CommunityMembersSection', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('says so where the community has no members', () => {
-    render(<CommunityMembersSection members={[]} />);
+  it('counts the members from the API total', () => {
+    renderSection([member('1', 'Amina', 'owner')], { memberCount: 32 });
 
-    expect(screen.getByText('No members yet.')).toBeInTheDocument();
+    expect(screen.getByText('32 members')).toBeInTheDocument();
   });
 
-  it('shows the owner first, labelled Admin, then the rest', () => {
-    render(
-      <CommunityMembersSection
-        members={[
-          member('1', 'Amina Hassan', 'owner'),
-          member('2', 'Kevo Otieno', 'regular'),
-          member('3', 'Tony Ouma', 'regular'),
-        ]}
-      />,
-    );
+  it('puts the admin first, then the reader, then everyone else', () => {
+    renderSection([member('2', 'Baraka'), member('3', 'Wanjiku'), member('1', 'Amina', 'owner')], {
+      currentUserId: 'u-3',
+    });
 
-    expect(screen.getByText('3 members')).toBeInTheDocument();
-    expect(screen.getByText('Amina Hassan')).toBeInTheDocument();
+    expect(chipNames()).toEqual(['Amina', 'Wanjiku', 'Baraka']);
     expect(screen.getByText('Admin')).toBeInTheDocument();
-    expect(screen.getByText('Kevo Otieno')).toBeInTheDocument();
-    expect(screen.getByText('Tony Ouma')).toBeInTheDocument();
+    expect(screen.getByText('You')).toBeInTheDocument();
   });
 
-  it("labels the owner's own chip You instead of Admin", () => {
-    render(
-      <CommunityMembersSection
-        members={[member('1', 'Amina Hassan', 'owner', 'me')]}
-        currentUserId="me"
-      />,
-    );
+  it('calls the owner "You" on their own community', () => {
+    renderSection([member('1', 'Amina', 'owner')], { currentUserId: 'u-1', isOwnerSelf: true });
 
     expect(screen.getByText('You')).toBeInTheDocument();
     expect(screen.queryByText('Admin')).not.toBeInTheDocument();
   });
 
-  it("shows a signed-in member's own chip as You, separate from the owner", () => {
-    render(
-      <CommunityMembersSection
-        members={[
-          member('1', 'Amina Hassan', 'owner'),
-          member('2', 'Kevo Otieno', 'regular', 'me'),
-        ]}
-        currentUserId="me"
-      />,
-    );
+  it('leaves out anyone who has not accepted', () => {
+    renderSection([member('1', 'Amina', 'owner'), member('2', 'Baraka', 'regular', 'pending')]);
 
-    expect(screen.getByText('Admin')).toBeInTheDocument();
-    expect(screen.getByText('You')).toBeInTheDocument();
+    expect(chipNames()).toEqual(['Amina']);
   });
 
-  it('holds a long roster behind a "+N" chip that toasts for now', async () => {
-    const members = Array.from({ length: 12 }, (_, index) => member(`${index}`, `Member ${index}`));
-    render(<CommunityMembersSection members={members} />);
+  it('stops at nine chips and counts the rest', async () => {
+    const members = Array.from({ length: 12 }, (_, index) => member(String(index), `M${index}`));
+    renderSection(members, { memberCount: 32 });
 
-    const overflow = screen.getByRole('button', { name: 'See all 12 members' });
-    expect(overflow).toHaveTextContent('+3');
+    expect(chipNames()).toHaveLength(9);
+    await userEvent.click(screen.getByRole('button', { name: 'See all 32 members' }));
 
-    await userEvent.click(overflow);
+    expect(screen.getByRole('button', { name: 'See all 32 members' })).toHaveTextContent('+23');
+    expect(toast).toHaveBeenCalledWith({ description: 'Opens all 32 members of City Sketchers.' });
+  });
 
-    expect(toast).toHaveBeenCalledWith(
-      expect.objectContaining({ description: 'See all 12 members' }),
-    );
+  it('never shows more chips than the member count', () => {
+    renderSection([member('1', 'Amina', 'owner'), member('2', 'Baraka')], { memberCount: 1 });
+
+    expect(chipNames()).toHaveLength(1);
   });
 });

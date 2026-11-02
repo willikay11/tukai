@@ -5,13 +5,16 @@ import {
   createCommunityPhotos,
   deleteVerificationDocument,
   fetchCommunity,
+  fetchCommunityContact,
   fetchCommunityPostPhotos,
   fetchCommunityPosts,
+  fetchCommunityRatings,
   fetchVerificationDocuments,
   getCommunities,
   joinCommunity,
   joinCommunityWithToken,
   leaveCommunity,
+  removeCommunityMember,
   submitCommunityVerification,
   uploadVerificationDocument,
 } from '@/services/community';
@@ -152,11 +155,41 @@ export const useLeaveCommunity = () => {
 
   return useMutation({
     mutationKey: ['leaveCommunity'],
-    mutationFn: async ({ communityId, userId }: { communityId: string; userId: string }) =>
-      await leaveCommunity(communityId, userId),
+    // `userId` is still accepted from older callers; the `leave` route reads
+    // who is leaving from the session
+    mutationFn: async ({ communityId }: { communityId: string; userId?: string }) =>
+      await leaveCommunity(communityId),
     onSuccess: () => invalidateCommunity(queryClient),
   });
 };
+
+/** An owner withdrawing an invite nobody has accepted yet. */
+export const useCancelCommunityInvite = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['cancelCommunityInvite'],
+    mutationFn: async ({ communityId, userId }: { communityId: string; userId: string }) =>
+      await removeCommunityMember(communityId, userId),
+    onSuccess: () => invalidateCommunity(queryClient),
+  });
+};
+
+export const useCommunityContact = (communityId: string, enabled: boolean) =>
+  useQuery({
+    queryKey: ['community', communityId, 'contact'],
+    queryFn: async () => await fetchCommunityContact(communityId),
+    enabled: enabled && Boolean(communityId),
+    staleTime: 5 * 60 * 1000,
+  });
+
+export const useCommunityRatings = (communityId: string, enabled: boolean) =>
+  useQuery({
+    queryKey: ['community', communityId, 'ratings'],
+    queryFn: async () => await fetchCommunityRatings(communityId),
+    enabled: enabled && Boolean(communityId),
+    staleTime: 5 * 60 * 1000,
+  });
 
 export const useJoinCommunityViaInvite = () => {
   return useMutation({

@@ -4,10 +4,20 @@ import { ReactNode, createContext, useCallback, useContext, useMemo, useState } 
 
 import { CommunityDrawer } from '@/app/shared/components/Communities';
 
+export type OpenCommunityOptions = {
+  /**
+   * Opens the community on top of another drawer - an experience's host, a
+   * place's owner - rather than in place of it. The community gets a Back
+   * button, which closes just it and shows the drawer below again; Close runs
+   * this as well, so the whole stack goes.
+   */
+  onCloseBelow?: () => void;
+};
+
 type CommunityDrawerValue = {
   /** The community currently open, or null. */
   openCommunityId: string | null;
-  openCommunity: (communityId: string) => void;
+  openCommunity: (communityId: string, options?: OpenCommunityOptions) => void;
   closeCommunity: () => void;
 };
 
@@ -20,12 +30,27 @@ const CommunityDrawerContext = createContext<CommunityDrawerValue | null>(null);
  * Held in state rather than the URL: a card still carries its own href to
  * `/communities/[id]`, so a new tab or a copied link still lands on the full
  * page.
+ *
+ * Each drawer portals its own panel, and the last one opened sits on top - so
+ * "stacking" a community over an experience is just opening it while the
+ * experience stays open, and Back is closing the community alone.
  */
 export const CommunityDrawerProvider = ({ children }: { children: ReactNode }) => {
   const [openCommunityId, setOpenCommunityId] = useState<string | null>(null);
+  // A function in state has to be wrapped, or React calls it as an updater
+  const [closeBelow, setCloseBelow] = useState<{ run: () => void } | null>(null);
 
-  const openCommunity = useCallback((communityId: string) => setOpenCommunityId(communityId), []);
+  const openCommunity = useCallback((communityId: string, options?: OpenCommunityOptions) => {
+    setOpenCommunityId(communityId);
+    setCloseBelow(options?.onCloseBelow ? { run: options.onCloseBelow } : null);
+  }, []);
+
   const closeCommunity = useCallback(() => setOpenCommunityId(null), []);
+
+  const closeAll = useCallback(() => {
+    closeBelow?.run();
+    setOpenCommunityId(null);
+  }, [closeBelow]);
 
   const value = useMemo(
     () => ({ openCommunityId, openCommunity, closeCommunity }),
@@ -38,7 +63,8 @@ export const CommunityDrawerProvider = ({ children }: { children: ReactNode }) =
       <CommunityDrawer
         communityId={openCommunityId}
         isOpen={Boolean(openCommunityId)}
-        onClose={closeCommunity}
+        onClose={closeAll}
+        onBack={closeBelow ? closeCommunity : undefined}
       />
     </CommunityDrawerContext.Provider>
   );

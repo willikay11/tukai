@@ -6,6 +6,7 @@ import {
   AVATAR_LIMIT,
   ownerFaces,
 } from '@/app/(experiences)/experiences/components/AvatarStack/community-faces';
+import { useOpenCommunityClick } from '@/app/shared/components/Communities/CommunityLink';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Community } from '@/types/community';
 import { coverPhotoUrl } from '@/types/photo';
@@ -31,6 +32,7 @@ export const CommunityRow = ({
   community: Community;
   priority?: boolean;
 }) => {
+  const onClick = useOpenCommunityClick(community);
   const faces = ownerFaces(community.owners);
   const memberCount = community.membersCount ?? 0;
   const categories = (community.categories ?? []).filter((category) => category.icon);
@@ -38,6 +40,7 @@ export const CommunityRow = ({
   return (
     <MediaRow
       href={communityPath(community)}
+      onClick={onClick}
       photo={coverPhotoUrl(community.photos, 'thumb')}
       title={community.title}
       priority={priority}

@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-
 import {
   AvatarStack,
   type AvatarStackUser,
@@ -10,12 +8,12 @@ import {
   AVATAR_LIMIT,
   ownerFaces,
 } from '@/app/(experiences)/experiences/components/AvatarStack/community-faces';
+import { CommunityLink } from '@/app/shared/components/Communities/CommunityLink';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { useCommunityDetail } from '@/app/shared/hooks/useCommunities';
 import { Community, CommunityMember, CommunityOwner } from '@/types/community';
 import { photoUrl } from '@/types/photo';
-import { communityPath } from '@/utils/detail-paths';
 
 import { communityCardAriaLabel } from './community-card';
 
@@ -76,9 +74,9 @@ export const CommunityCard = ({
   const ariaLabel = communityCardAriaLabel(community, { memberCount });
 
   return (
-    <Link
-      href={communityPath(community)}
-      aria-label={ariaLabel}
+    <CommunityLink
+      community={community}
+      ariaLabel={ariaLabel}
       className={className ?? 'flex w-full min-w-0 items-start gap-2.5 text-left'}
     >
       <div className="relative h-[62px] w-[62px] flex-shrink-0 overflow-hidden rounded-xl bg-surface">
@@ -141,6 +139,6 @@ export const CommunityCard = ({
           </div>
         )}
       </div>
-    </Link>
+    </CommunityLink>
   );
 };
