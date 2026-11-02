@@ -66,6 +66,11 @@ jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useCommunityDetail: () => ({ data: undefined }),
 }));
 
+let interests: { id: string; name: string; icon?: string }[] = [];
+jest.mock('@/app/shared/hooks/useAuth', () => ({
+  useGetInterestCategories: () => ({ data: interests }),
+}));
+
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   usePlaceCategories: () => ({ data: { data: { results: [] } }, isLoading: false }),
 }));
@@ -133,15 +138,16 @@ const respondWith = (pool: Community[], { isLoading = false, isFailed = false } 
 const typeChip = (name: string) =>
   within(screen.getByRole('group', { name: 'Community types' })).getByText(name);
 
-// "Nairobi Hikers" matches both the near-you and view-by-type pools, so
+// "Nairobi Hikers" matches both the all-communities and view-by-type pools, so
 // queries scoped to one section have to say which
-const nearYouSection = () =>
-  within(screen.getByRole('heading', { name: 'Communities near you' }).closest('section') as HTMLElement);
+const allSection = () =>
+  within(screen.getByRole('heading', { name: 'All communities' }).closest('section') as HTMLElement);
 
 describe('CommunitiesPageContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     currentQuery = '';
+    interests = [];
     sessionState = { data: { user: { id: 'u1' } }, status: 'authenticated' };
     locationState = { city: 'Nairobi', setCity: jest.fn() };
     respondWith([community('1', 'Nairobi Hikers'), community('2', 'Mall Rats')]);
@@ -218,7 +224,7 @@ describe('CommunitiesPageContent', () => {
       currentQuery = 'tab=nonsense';
       render(<CommunitiesPageContent />);
 
-      expect(screen.getByRole('heading', { name: 'Communities near you' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'All communities' })).toBeInTheDocument();
     });
   });
 
@@ -268,48 +274,39 @@ describe('CommunitiesPageContent', () => {
     });
   });
 
-  describe('Discover - communities near you', () => {
-    it('names the current city', () => {
+  describe('Discover - all communities', () => {
+    it('shows a card per community', () => {
       render(<CommunitiesPageContent />);
 
-      expect(screen.getByRole('heading', { name: 'Communities near you' })).toBeInTheDocument();
-      expect(screen.getByText('In Nairobi')).toBeInTheDocument();
-    });
-
-    it('shows a card per nearby community', () => {
-      render(<CommunitiesPageContent />);
-
-      expect(nearYouSection().getByText('Nairobi Hikers')).toBeInTheDocument();
-      expect(nearYouSection().getByText('Mall Rats')).toBeInTheDocument();
+      expect(allSection().getByText('Nairobi Hikers')).toBeInTheDocument();
+      expect(allSection().getByText('Mall Rats')).toBeInTheDocument();
     });
 
     it('links each card to its community, by slug', () => {
       render(<CommunitiesPageContent />);
 
-      expect(nearYouSection().getByRole('link', { name: /Nairobi Hikers/ })).toHaveAttribute(
+      expect(allSection().getByRole('link', { name: /Nairobi Hikers/ })).toHaveAttribute(
         'href',
         '/communities/nairobi-hikers',
       );
     });
 
-    it('leaves out a community from another city', () => {
+    it('includes communities from every city', () => {
       respondWith([
         community('1', 'Nairobi Hikers'),
         community('2', 'Kilifi Sailors', { location: { city: 'Kilifi' } as Community['location'] }),
       ]);
       render(<CommunitiesPageContent />);
 
-      expect(nearYouSection().getByText('Nairobi Hikers')).toBeInTheDocument();
-      expect(nearYouSection().queryByText('Kilifi Sailors')).not.toBeInTheDocument();
+      expect(allSection().getByText('Nairobi Hikers')).toBeInTheDocument();
+      expect(allSection().getByText('Kilifi Sailors')).toBeInTheDocument();
     });
 
-    it('says so when there is nothing nearby', () => {
+    it('says so when there are none', () => {
       respondWith([]);
       render(<CommunitiesPageContent />);
 
-      expect(
-        screen.getByText('No communities in Nairobi yet. Pick another city below.'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('No communities to discover yet.')).toBeInTheDocument();
     });
 
     it('shows skeletons while loading', () => {
@@ -328,11 +325,33 @@ describe('CommunitiesPageContent', () => {
       expect(typeChip('Hiking')).toBeInTheDocument();
     });
 
-    it('is hidden where no community carries a category', () => {
+    // It is the filter, so it stays even when nothing is tagged yet
+    it('offers every interest, including ones no community carries', () => {
+      interests = [{ id: 'cat-sailing', name: 'Sailing' }];
       respondWith([community('1', 'Nairobi Hikers', { categories: [] })]);
       render(<CommunitiesPageContent />);
 
-      expect(screen.queryByRole('heading', { name: 'View by type' })).not.toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'View by type' })).toBeInTheDocument();
+      expect(typeChip('Sailing')).toBeInTheDocument();
+      expect(screen.getByText('No sailing communities yet.')).toBeInTheDocument();
+    });
+
+    it('still shows when there are no interests at all', () => {
+      respondWith([community('1', 'Nairobi Hikers', { categories: [] })]);
+      render(<CommunitiesPageContent />);
+
+      expect(screen.getByRole('heading', { name: 'View by type' })).toBeInTheDocument();
+      expect(screen.getByText('No types to filter by yet.')).toBeInTheDocument();
+    });
+
+    it('starts on a type that has communities', () => {
+      interests = [
+        { id: 'cat-sailing', name: 'Sailing' },
+        { id: 'cat-hiking', name: 'Hiking' },
+      ];
+      render(<CommunitiesPageContent />);
+
+      expect(typeChip('Hiking').closest('button')).toHaveAttribute('aria-pressed', 'true');
     });
   });
 
@@ -345,7 +364,7 @@ describe('CommunitiesPageContent', () => {
       render(<CommunitiesPageContent />);
 
       expect(screen.getByText('Communities could not load')).toBeInTheDocument();
-      expect(screen.queryByText('Communities near you')).not.toBeInTheDocument();
+      expect(screen.queryByText('All communities')).not.toBeInTheDocument();
     });
 
     it('offers a retry', async () => {
@@ -367,7 +386,7 @@ describe('CommunitiesPageContent', () => {
     it('still browses Discover', () => {
       render(<CommunitiesPageContent />);
 
-      expect(nearYouSection().getByText('Nairobi Hikers')).toBeInTheDocument();
+      expect(allSection().getByText('Nairobi Hikers')).toBeInTheDocument();
     });
 
     it('is invited to sign in for the parts that need an account', async () => {

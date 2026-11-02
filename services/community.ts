@@ -50,11 +50,15 @@ export async function getCommunities(
   }
 }
 
-export async function fetchCommunity(communityId: string) {
+export async function fetchCommunity(communityId: string, withSession = false) {
   try {
-    // No Authorization header: signed out this sent "Bearer undefined", which
-    // the API rejects - and the community page is public now.
-    const response = await api.get(`/v1/communities/${communityId}`);
+    // No Authorization header by default: signed out this sent "Bearer
+    // undefined", which the API rejects - and the community page is public now.
+    // Client callers pass `withSession` so a signed-in reader is still
+    // recognised: the API turns away anonymous requests where it is locked
+    // down (staging), and the members then never arrive.
+    const client = withSession ? await apiWithToken() : api;
+    const response = await client.get(`/v1/communities/${communityId}`);
     return {
       status: response.status,
       success: true,

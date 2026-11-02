@@ -8,6 +8,7 @@ import {
   AvatarStack,
   type AvatarStackUser,
 } from '@/app/(experiences)/experiences/components/AvatarStack';
+import { AVATAR_LIMIT } from '@/app/(experiences)/experiences/components/AvatarStack/community-faces';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { useJoinCommunity, useLeaveCommunity } from '@/app/shared/hooks/useCommunities';
@@ -25,8 +26,6 @@ import { Button } from '@/components/ui/button';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { cn } from '@/lib/utils';
 import { Community, CommunityMember } from '@/types/community';
-
-const AVATAR_LIMIT = 3;
 
 type Membership = 'none' | 'pending' | 'member';
 

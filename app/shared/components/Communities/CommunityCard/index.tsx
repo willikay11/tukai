@@ -12,6 +12,7 @@ import {
 } from '@/app/(experiences)/experiences/components/AvatarStack/community-faces';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
+import { useCommunityDetail } from '@/app/shared/hooks/useCommunities';
 import { Community, CommunityMember, CommunityOwner } from '@/types/community';
 import { photoUrl } from '@/types/photo';
 import { communityPath } from '@/utils/detail-paths';
@@ -34,19 +35,31 @@ export const CommunityCard = ({
   community,
   showFaces = true,
   showMeta = true,
+  showMemberAvatars = false,
   className,
 }: {
   community: Community;
-  /** Near you / View by type: faces only. */
+  /** View by type: faces only. */
   showFaces?: boolean;
-  /** Following / Created or hosted by you: both faces and meta. */
+  /** Following / Created or hosted by you / All communities: both faces and meta. */
   showMeta?: boolean;
+  /** Fetches the community's members so the faces are real members rather
+   * than just its owners - the list endpoint returns none. One request per
+   * card, so it is opt-in: only the reader's own, smaller grids turn it on. */
+  showMemberAvatars?: boolean;
   className?: string;
 }) => {
   const photo = photoUrl(community.photos?.[0], 'thumb');
   const memberCount = community.membersCount ?? community.members?.length ?? 0;
 
-  const members: CommunityMember[] = community.members ?? [];
+  const listMembers: CommunityMember[] = community.members ?? [];
+  const { data: detail } = useCommunityDetail(
+    community.id,
+    showMemberAvatars && showFaces && listMembers.length === 0,
+  );
+  const members: CommunityMember[] = listMembers.length
+    ? listMembers
+    : (detail?.data?.members ?? []);
   const owners: CommunityOwner[] = community.owners ?? [];
   const faces: AvatarStackUser[] = members.length
     ? members.slice(0, AVATAR_LIMIT).map((member) => ({

@@ -64,7 +64,7 @@ describe('CommunityDiscoverCard facepile', () => {
     useCommunityDetail.mockReturnValue({ data: undefined });
   });
 
-  it('overlaps the first three member avatars', () => {
+  it('overlaps the first five member avatars, then counts the rest', () => {
     const { container } = render(
       <CommunityDiscoverCard
         community={community({
@@ -74,6 +74,8 @@ describe('CommunityDiscoverCard facepile', () => {
             member('2', 'Ben'),
             member('3', 'Cara'),
             member('4', 'Dan'),
+            member('5', 'Eve'),
+            member('6', 'Fay'),
           ],
         })}
       />,
@@ -81,9 +83,10 @@ describe('CommunityDiscoverCard facepile', () => {
 
     const pile = facepile(container);
     expect(pile).toBeInTheDocument();
-    // three faces, and the overlap that makes it a stack
-    expect(pile?.querySelectorAll('[data-testid="photo"]')).toHaveLength(3);
+    // five faces, and the overlap that makes it a stack
+    expect(pile?.querySelectorAll('[data-testid="photo"]')).toHaveLength(5);
     expect(pile).toHaveClass('-space-x-2');
+    expect(pile).toHaveTextContent('+4');
   });
 
   // The count is everyone not pictured, taken from the API total - not from the

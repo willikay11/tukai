@@ -264,7 +264,7 @@ export const CommunityFeedTab = ({
 
         <div className={cn('mt-5', COMMUNITY_GRID)}>
           {visible.map((community) => (
-            <CommunityCard key={community.id} community={community} />
+            <CommunityCard key={community.id} community={community} showMemberAvatars />
           ))}
         </div>
 

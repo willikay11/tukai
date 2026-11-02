@@ -8,14 +8,13 @@ import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
 import { useAuthDialog } from '@/context/AuthDialogContext';
-import { useLocation } from '@/context/LocationContext';
 import { Community } from '@/types/community';
 
+import { AllCommunitiesSection } from './AllCommunitiesSection';
 import { DiscoverByCitySection } from './DiscoverByCitySection';
-import { NearYouSection } from './NearYouSection';
 import { ViewByTypeSection } from './ViewByTypeSection';
 
-// Wide enough that the near-you/view-by-type sections, both narrowed
+// Wide enough that the all-communities/view-by-type sections, both narrowed
 // client-side from this one pool, have something left after excluding what
 // the reader owns or follows - the API offers no city or "fresh" filter.
 const DISCOVER_POOL_SIZE = 60;
@@ -35,7 +34,7 @@ const GridSkeleton = () => (
 );
 
 /**
- * The Communities page's Discover tab: near-you, view-by-type and
+ * The Communities page's Discover tab: all communities, view-by-type and
  * discover-by-city, all narrowed client-side from one shared pool of public
  * communities (not the reader's own, not already followed) - the list
  * endpoint has no city, "fresh" or friends filter to ask for instead.
@@ -48,7 +47,6 @@ export const DiscoverTab = ({ isSignedIn }: { isSignedIn: boolean }) => {
   const { data: session } = useSession();
   const userId = session?.user?.id ?? undefined;
   const { needAuth } = useAuthDialog();
-  const { city } = useLocation();
 
   const { data, isLoading, isFetching, refetch } = useGetCommunities({
     page: 1,
@@ -85,12 +83,9 @@ export const DiscoverTab = ({ isSignedIn }: { isSignedIn: boolean }) => {
     [pool, excludedIds],
   );
 
-  const nearYou = useMemo(
-    () =>
-      (city ? fresh.filter((community) => community.location?.city === city) : fresh)
-        .slice()
-        .sort((a, b) => (b.membersCount ?? 0) - (a.membersCount ?? 0)),
-    [fresh, city],
+  const byMembers = useMemo(
+    () => fresh.slice().sort((a, b) => (b.membersCount ?? 0) - (a.membersCount ?? 0)),
+    [fresh],
   );
 
   return (
@@ -109,7 +104,7 @@ export const DiscoverTab = ({ isSignedIn }: { isSignedIn: boolean }) => {
         </div>
       ) : (
         <>
-          <NearYouSection city={city} communities={nearYou} />
+          <AllCommunitiesSection communities={byMembers} />
           <ViewByTypeSection communities={fresh} />
         </>
       )}

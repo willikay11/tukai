@@ -18,9 +18,10 @@ jest.mock('@/context/AuthDialogContext', () => ({
 }));
 
 const useGetCommunities = jest.fn();
+const useCommunityDetail = jest.fn();
 jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useGetCommunities: (params: unknown) => useGetCommunities(params),
-  useCommunityDetail: () => ({ data: undefined }),
+  useCommunityDetail: (id: string, enabled: boolean) => useCommunityDetail(id, enabled),
 }));
 
 // useQueries is handed one config per community; the mock runs each queryFn so
@@ -113,6 +114,7 @@ const renderTab = (props: Partial<React.ComponentProps<typeof CommunityFeedTab>>
 describe('CommunityFeedTab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useCommunityDetail.mockReturnValue({ data: undefined });
     following([community('c1', 'Kanunga + Twin Falls'), community('c2', 'Evo owners club')]);
     fetchExperiences.mockReturnValue({ data: { results: [] } });
     fetchMoments.mockReturnValue({ data: { results: [] } });
@@ -140,6 +142,40 @@ describe('CommunityFeedTab', () => {
 
     const grid = screen.getByText('Evo owners club').closest(`.${COMMUNITY_GRID.split(' ')[0]}`);
     expect(grid?.className).toContain(COMMUNITY_GRID);
+  });
+
+  // The list endpoint carries owners but no members, so each card asks for its
+  // own - otherwise the faces are only ever the owner
+  describe('member faces', () => {
+    const member = (id: string, name: string) => ({
+      id,
+      user: { displayName: name, picture: null },
+    });
+
+    it('asks each card for its members', () => {
+      renderTab();
+
+      expect(useCommunityDetail).toHaveBeenCalledWith('c1', true);
+      expect(useCommunityDetail).toHaveBeenCalledWith('c2', true);
+    });
+
+    it('shows the first five, then counts the rest', () => {
+      following([{ ...community('c1', 'Evo owners club'), membersCount: 9 } as Community]);
+      useCommunityDetail.mockReturnValue({
+        data: {
+          data: {
+            members: ['Ann', 'Ben', 'Cara', 'Dan', 'Eve', 'Fay'].map((name, index) =>
+              member(String(index), name),
+            ),
+          },
+        },
+      });
+      renderTab();
+
+      const card = screen.getByRole('link', { name: /Evo owners club/ });
+      expect(card.querySelectorAll('.-space-x-2 [data-testid="photo"]')).toHaveLength(5);
+      expect(card).toHaveTextContent('+4');
+    });
   });
 
   it('shows the moments in the fixed-span mosaic, not the masonry', () => {

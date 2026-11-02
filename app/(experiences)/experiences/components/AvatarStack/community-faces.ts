@@ -3,7 +3,7 @@ import { CommunityOwner } from '@/types/community';
 import { AvatarStackUser } from './index';
 
 /** The faces a stack shows for a community, and how many it does not. */
-export const AVATAR_LIMIT = 3;
+export const AVATAR_LIMIT = 5;
 
 /**
  * Owner records as faces.

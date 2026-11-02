@@ -28,7 +28,7 @@ import { Community, CommunityPostsQueryParams, CreateCommunity } from '@/types/c
 export const useCommunityDetail = (communityId: string, enabled: boolean) => {
   return useQuery({
     queryKey: ['community', communityId],
-    queryFn: async () => await fetchCommunity(communityId),
+    queryFn: async () => await fetchCommunity(communityId, true),
     enabled: enabled && Boolean(communityId),
     staleTime: 5 * 60 * 1000,
   });
