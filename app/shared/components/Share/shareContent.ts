@@ -25,7 +25,7 @@ export type ShareContent = {
   image?: string;
   title: string;
   sub: string;
-  /** The absolute link, `https://tukai.co/p/{id}` */
+  /** The absolute link, `https://tukai.co/p/{slug}` */
   url: string;
   /** The message's opening and the email subject - "The Roastery on Tukai" */
   lead: string;
@@ -39,10 +39,11 @@ export type ShareContent = {
  * that land on Discover with the drawer open (app/(experiences)/p and its
  * siblings); `/m` redirects to the Moments page with the moment open.
  *
- * The id rather than the slug: the handoff asks for opaque ids, and a slug
- * spells out a private community's name to anyone who sees the link.
+ * The slug where the record has one, as the detail paths use, falling back to
+ * the id; the routes resolve either. Moments have no slug, so they use the id.
  */
-const shareUrl = (type: 'p' | 'e' | 'c' | 'm', id: string) => `${APP_ORIGIN}/${type}/${id}`;
+const shareUrl = (type: 'p' | 'e' | 'c' | 'm', record: { id: string; slug?: string }) =>
+  `${APP_ORIGIN}/${type}/${record.slug || record.id}`;
 
 const joinDot = (parts: (string | null | undefined)[]) => parts.filter(Boolean).join(' · ');
 
@@ -89,6 +90,7 @@ const sharePrice = (experience: Partial<Pick<Experience, 'isPaid' | 'priceStarts
 
 export const placeShare = (
   place: Pick<Place, 'id' | 'title'> & {
+    slug?: string;
     photos?: Photo[];
     categories?: Place['categories'];
     location?: Partial<Location> | null;
@@ -100,7 +102,7 @@ export const placeShare = (
   image: coverPhotoUrl(place.photos, 'md'),
   title: place.title,
   sub: joinDot([place.categories?.[0]?.name, areaOf(place.location)]),
-  url: shareUrl('p', place.id),
+  url: shareUrl('p', place),
   lead: `${place.title} on Tukai`,
   isPrivate: false,
   note: `Anyone with the link can see ${place.title}, its hours and what is on there.`,
@@ -118,6 +120,7 @@ export const experienceShare = (
         | 'isPaid'
         | 'priceStartsFrom'
         | 'experienceType'
+        | 'slug'
       >
     > & {
       /** A cover already resolved by the caller, where it has no photos array */
@@ -137,7 +140,7 @@ export const experienceShare = (
     image: experience.image || coverPhotoUrl(experience.photos, 'md'),
     title: experience.title,
     sub: joinDot([when, sharePrice(experience)]),
-    url: shareUrl('e', experience.id),
+    url: shareUrl('e', experience),
     lead: `${experience.title}${when ? `, ${when}` : ''} on Tukai`,
     isPrivate,
     note: isPrivate
@@ -148,7 +151,7 @@ export const experienceShare = (
 
 export const communityShare = (
   community: Pick<Community, 'id' | 'title' | 'isPublic'> &
-    Partial<Pick<Community, 'photos' | 'location' | 'membersCount' | 'members'>>,
+    Partial<Pick<Community, 'slug' | 'photos' | 'location' | 'membersCount' | 'members'>>,
 ): ShareContent => {
   const isPrivate = !community.isPublic;
   const count = community.membersCount ?? community.members?.length;
@@ -163,7 +166,7 @@ export const communityShare = (
       count === undefined ? null : `${count} ${count === 1 ? 'member' : 'members'}`,
       areaOf(community.location),
     ]),
-    url: shareUrl('c', community.id),
+    url: shareUrl('c', community),
     lead: `${community.title} on Tukai`,
     isPrivate,
     note: isPrivate
@@ -190,7 +193,7 @@ export const momentShare = (
     image: momentPhotos(moment)[0]?.photo,
     title: `Moment by ${momentAuthorName(moment.author)}`,
     sub: attachedTo,
-    url: shareUrl('m', moment.id),
+    url: shareUrl('m', moment),
     lead: `A moment from ${attachedTo} on Tukai`,
     isPrivate,
     note: privateCommunity

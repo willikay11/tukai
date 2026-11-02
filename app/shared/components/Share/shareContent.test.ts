@@ -179,3 +179,33 @@ describe('momentShare', () => {
     });
   });
 });
+
+describe('the shared link', () => {
+  // The slug reads well in a message; the id stays the fallback for records
+  // without one, and the short-link routes resolve either
+  it.each([
+    [
+      'place',
+      placeShare({ id: 'p5', slug: 'the-roastery', title: 'The Roastery' }),
+      '/p/the-roastery',
+    ],
+    [
+      'experience',
+      experienceShare({ id: 'e1', slug: 'sunrise-hike', title: 'Sunrise hike' }),
+      '/e/sunrise-hike',
+    ],
+    [
+      'community',
+      communityShare({ id: 'c1', slug: 'nairobi-hikers', title: 'Nairobi hikers', isPublic: true }),
+      '/c/nairobi-hikers',
+    ],
+  ])('carries the %s slug where it has one', (_kind, content, path) => {
+    expect(content.url).toBe(`https://tukai.co${path}`);
+  });
+
+  it('falls back to the id where there is no slug', () => {
+    expect(placeShare({ id: 'p5', slug: '', title: 'The Roastery' }).url).toBe(
+      'https://tukai.co/p/p5',
+    );
+  });
+});

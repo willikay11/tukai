@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 
-import { Share08Icon } from '@hugeicons/react-pro';
-
+import { IconComponent } from '@/app/shared/components/Icons/IconComponent';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -51,7 +50,7 @@ export const Share = ({
             showLabel ? 'gap-1.5 text-sm font-semibold' : 'h-full w-full justify-center',
           )}
         >
-          <Share08Icon size={20} variant="twotone" />
+          <IconComponent iconName="Share08Icon" size={20} color="currentColor" />
           {showLabel && 'Share'}
         </button>
       ) : (
@@ -62,7 +61,7 @@ export const Share = ({
           variant="outline"
         >
           <span>Share</span>
-          <Share08Icon size={16} variant="twotone" className="ml-2" />
+          <IconComponent iconName="Share08Icon" size={16} color="currentColor" className="ml-2" />
         </Button>
       )}
 
