@@ -8,19 +8,17 @@ import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStri
 import { PageContainer } from '@/app/shared/components/Layout';
 import { RevealOnScroll, useHasScrolled } from '@/app/shared/components/Motion';
 import { PlanThisButton } from '@/app/shared/components/Plans';
-import { Share } from '@/app/shared/components/Share';
+import { Share, experienceShare } from '@/app/shared/components/Share';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
-import { Photo } from '@/types/photo';
 import { coverPhotoUrl } from '@/types/photo';
 import {
   formatFirstExperienceDate,
   formatItineraryDateRange,
   inferUIExperienceType,
 } from '@/utils/date-utils';
-import { experiencePath } from '@/utils/detail-paths';
 
 import { BackToExplore } from '../components/BackToExplore';
 import { BookingPanel } from '../components/BookingPanel';
@@ -74,7 +72,6 @@ export const ViewExperiencePageContent = ({
   // Copy before sorting - sort() mutates, and in preview this array belongs to
   // a memoised object that would be reordered on every render
   const sortedPhotos = [...photos].sort((a, b) => Number(b.isCover) - Number(a.isCover));
-  const coverPhoto = photos.find((photo: Photo) => photo.isCover)?.photo || photos[0]?.photo || '';
   const categories = experience.categories ?? [];
   const locationLabel = [experience.location?.city, experience.location?.country]
     .filter(Boolean)
@@ -131,12 +128,7 @@ export const ViewExperiencePageContent = ({
             // Visible but inert in preview, so the creator sees the real chrome
             inert={isPreview}
           />
-          <Share
-            coverPhoto={coverPhoto}
-            title={experience.title}
-            link={`${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`}
-            kind="experience"
-          />
+          <Share content={experienceShare(experience)} />
         </div>
       </div>
 

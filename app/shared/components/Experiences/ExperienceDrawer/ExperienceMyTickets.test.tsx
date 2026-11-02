@@ -24,6 +24,8 @@ jest.mock('@/services/experience', () => ({
 }));
 
 jest.mock('@/app/shared/components/Share', () => ({
+  // The content builders are plain functions; only the sheet is stood in for
+  ...jest.requireActual('@/app/shared/components/Share/shareContent'),
   Share: () => <button type="button">share</button>,
 }));
 jest.mock('@/app/shared/components/Icons', () => ({
@@ -49,7 +51,13 @@ const experience = {
 const purchase = (id: string, status: string, ticketName: string, qrCodeImage: string | null) => ({
   id,
   ticketNumber: `TKT-${id}`,
-  ticket: { id: `ticket-${ticketName}`, name: ticketName, price: '1500.00', currency: 'KES', experience: 'e1' },
+  ticket: {
+    id: `ticket-${ticketName}`,
+    name: ticketName,
+    price: '1500.00',
+    currency: 'KES',
+    experience: 'e1',
+  },
   occurrence: { id: 'occ-a', startDate: '2026-08-27T14:00:00Z', endDate: '2026-08-27T17:00:00Z' },
   qrCodeImage,
   ticketPdf: qrCodeImage ? 'https://x/pdf' : null,
@@ -198,9 +206,7 @@ describe('ExperienceMyTickets', () => {
     fireEvent.click(screen.getByRole('button', { name: /download/i }));
 
     await waitFor(() =>
-      expect(toast).toHaveBeenCalledWith(
-        expect.objectContaining({ variant: 'destructive' }),
-      ),
+      expect(toast).toHaveBeenCalledWith(expect.objectContaining({ variant: 'destructive' })),
     );
   });
 

@@ -6,14 +6,13 @@ import { BackToExplore } from '@/app/(experiences)/experiences/components/BackTo
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PageContainer } from '@/app/shared/components/Layout';
 import { MomentsGridSection, UpcomingExperiencesSection } from '@/app/shared/components/Sections';
-import { Share } from '@/app/shared/components/Share';
+import { Share, communityShare } from '@/app/shared/components/Share';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useMoments } from '@/app/shared/hooks/useMoments';
 import { useScrollSpy } from '@/app/shared/hooks/useScrollSpy';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Moment } from '@/types/moment';
-import { communityPath } from '@/utils/detail-paths';
 
 import { CommunityAnchorTabs } from './CommunityAnchorTabs';
 import { JoinCommunityPanel } from './JoinCommunityPanel';
@@ -61,8 +60,6 @@ export const CommunityDetailContent = ({
     [],
   );
 
-  const coverPhoto = community.photos?.[0]?.photo ?? '';
-
   return (
     <PageContainer variant="detail" className="py-6">
       <BackToExplore href="/communities" label="All communities" />
@@ -88,12 +85,7 @@ export const CommunityDetailContent = ({
         </div>
 
         <div className="flex-shrink-0">
-          <Share
-            coverPhoto={coverPhoto}
-            title={community.title}
-            link={`${process.env.NEXT_PUBLIC_APP_URL}${communityPath(community)}`}
-            kind="community"
-          />
+          <Share content={communityShare(community)} />
         </div>
       </div>
 

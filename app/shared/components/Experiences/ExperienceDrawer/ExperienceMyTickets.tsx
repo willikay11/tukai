@@ -6,18 +6,12 @@ import { useSession } from 'next-auth/react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
-import { Share } from '@/app/shared/components/Share';
+import { Share, experienceShare } from '@/app/shared/components/Share';
 import { useExperienceTicketPurchases } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { downloadTicketPdf } from '@/services/experience';
 import { Experience } from '@/types/experience';
-import { coverPhotoUrl } from '@/types/photo';
-import { experiencePath } from '@/utils/detail-paths';
-import {
-  groupPurchasesByType,
-  TicketTypeGroup,
-  TicketTypeGroupTicket,
-} from '@/utils/ticket-utils';
+import { TicketTypeGroup, TicketTypeGroupTicket, groupPurchasesByType } from '@/utils/ticket-utils';
 
 const downloadOne = async (ticket: TicketTypeGroupTicket) => {
   const blob = await downloadTicketPdf(ticket.id);
@@ -60,9 +54,6 @@ export const ExperienceMyTickets = ({ experience }: { experience: Experience }) 
   const activeGroup = ticketGroups[Math.min(activeIndex, ticketGroups.length - 1)];
   const activeTicket =
     activeGroup.tickets[Math.min(activeTicketIndex, activeGroup.tickets.length - 1)];
-
-  const shareLink = `${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`;
-  const coverPhoto = coverPhotoUrl(experience.photos, 'md') ?? '';
 
   const toastDownloadError = () => {
     toast({
@@ -216,14 +207,7 @@ export const ExperienceMyTickets = ({ experience }: { experience: Experience }) 
             )}
 
             <div className="flex items-center justify-center gap-2.5">
-              <Share
-                coverPhoto={coverPhoto}
-                title={experience.title}
-                link={shareLink}
-                kind="experience"
-                variant="icon"
-                showLabel
-              />
+              <Share content={experienceShare(experience)} variant="icon" showLabel />
 
               <span aria-hidden="true" className="h-1 w-1 flex-shrink-0 rounded-full bg-dot" />
 
@@ -285,13 +269,7 @@ export const ExperienceMyTickets = ({ experience }: { experience: Experience }) 
 
               <div className="flex flex-shrink-0 items-center gap-2.5">
                 <div className="flex h-5 w-5 items-center justify-center">
-                  <Share
-                    coverPhoto={coverPhoto}
-                    title={experience.title}
-                    link={shareLink}
-                    kind="experience"
-                    variant="icon"
-                  />
+                  <Share content={experienceShare(experience)} variant="icon" />
                 </div>
 
                 <span aria-hidden="true" className="h-1 w-1 flex-shrink-0 rounded-full bg-dot" />

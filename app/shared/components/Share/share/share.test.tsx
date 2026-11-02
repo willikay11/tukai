@@ -1,6 +1,9 @@
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 
+import { toast } from '@/app/shared/hooks/useToast';
+
+import type { ShareContent } from '../shareContent';
 import { Share } from './index';
 
 jest.mock('next/image', () => ({
@@ -12,118 +15,167 @@ jest.mock('next/image', () => ({
   },
 }));
 
-const props = {
-  coverPhoto: 'https://example.com/photo.jpg',
-  title: 'Test Title',
-  link: 'https://example.com/thing',
+jest.mock('@/app/shared/hooks/useToast', () => ({ toast: jest.fn() }));
+jest.mock('@/app/shared/components/Icons', () => ({
+  IconComponent: ({ iconName }: { iconName: string }) => <span data-testid={iconName} />,
+}));
+
+const content: ShareContent = {
+  heading: 'Share place',
+  kind: 'Place',
+  kindIcon: 'Location01Icon',
+  image: 'https://example.com/photo.jpg',
+  title: 'The Roastery',
+  sub: 'Cafe · Westlands',
+  url: 'https://tukai.co/p/p5',
+  lead: 'The Roastery on Tukai',
+  isPrivate: false,
+  note: 'Anyone with the link can see The Roastery, its hours and what is on there.',
 };
 
-const openDialog = () => {
-  fireEvent.click(screen.getByTestId('Share08Icon'));
+const openSheet = (props: Partial<ShareContent> = {}) => {
+  render(<Share content={{ ...content, ...props }} variant="icon" />);
+  fireEvent.click(screen.getByRole('button', { name: 'Share' }));
   return screen.getByRole('dialog');
 };
 
 describe('Share', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     Object.assign(navigator, { clipboard: { writeText: jest.fn().mockResolvedValue(undefined) } });
-    // No device sheet by default; the grid is what most desktops get
+    // No device menu by default; most desktop browsers have none
     Object.assign(navigator, { share: undefined });
   });
 
-  it('renders the share control', () => {
-    render(<Share {...props} />);
-
-    expect(screen.getByTestId('Share08Icon')).toBeInTheDocument();
+  it('names the dialog for what is being shared', () => {
+    expect(openSheet()).toHaveAccessibleName('Share place');
   });
 
-  /**
-   * It said "Share Location" over an experience, a community and a bucket list
-   * alike. The heading names what is actually being sent.
-   */
-  it.each([
-    ['place', 'Share this place'],
-    ['experience', 'Share this experience'],
-    ['community', 'Share this community'],
-    ['bucket list', 'Share this bucket list'],
-  ] as const)('names a %s in the heading', (kind, heading) => {
-    render(<Share {...props} kind={kind} />);
+  it('previews the thing, its kind, and the link without https://', () => {
+    const dialog = openSheet();
 
-    expect(within(openDialog()).getByText(heading)).toBeInTheDocument();
+    expect(within(dialog).getByRole('heading', { name: 'The Roastery' })).toBeInTheDocument();
+    expect(within(dialog).getByText('Cafe · Westlands')).toBeInTheDocument();
+    expect(within(dialog).getByText('Place')).toBeInTheDocument();
+    expect(within(dialog).getByRole('textbox', { name: 'Link' })).toHaveValue('tukai.co/p/p5');
   });
 
-  it('defaults to a place where the caller says nothing', () => {
-    render(<Share {...props} />);
+  it('starts on Copy link', () => {
+    openSheet();
 
-    expect(within(openDialog()).getByText('Share this place')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy link' })).toHaveFocus();
   });
 
-  it('shows what is about to be sent, and where it points', () => {
-    render(<Share {...props} kind="experience" />);
-    const dialog = openDialog();
+  it('copies the link, turns into Copied and toasts', async () => {
+    openSheet();
 
-    expect(within(dialog).getByText('Test Title')).toBeInTheDocument();
-    expect(within(dialog).getByText('https://example.com/thing')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Copy link' }));
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(content.url);
+    expect(await screen.findByRole('button', { name: 'Copied' })).toBeInTheDocument();
+    expect(toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Link copied.' }));
   });
 
-  it('copies the link and says it did', async () => {
-    render(<Share {...props} />);
-    openDialog();
+  it('is back to Copy link the next time it opens', async () => {
+    openSheet();
+    fireEvent.click(screen.getByRole('button', { name: 'Copy link' }));
+    await screen.findByRole('button', { name: 'Copied' });
 
-    fireEvent.click(screen.getByText('Copy link'));
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Share' }));
 
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(props.link);
-    expect(await screen.findByText('Link copied')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
   });
 
-  // Each destination is a real link, so it opens where the reader expects
-  it('points every destination at the thing being shared', () => {
-    render(<Share {...props} kind="experience" />);
-    const dialog = openDialog();
+  it('leaves the link selected where the clipboard is refused', async () => {
+    Object.assign(navigator, {
+      clipboard: { writeText: jest.fn().mockRejectedValue(new Error('denied')) },
+    });
+    openSheet();
 
-    const hrefFor = (name: string) =>
-      within(dialog).getByRole('link', { name }).getAttribute('href') ?? '';
+    fireEvent.click(screen.getByRole('button', { name: 'Copy link' }));
 
-    expect(decodeURIComponent(hrefFor('WhatsApp'))).toContain(props.link);
-    expect(decodeURIComponent(hrefFor('Telegram'))).toContain(props.link);
-    expect(decodeURIComponent(hrefFor('X'))).toContain(props.link);
-    expect(decodeURIComponent(hrefFor('Facebook'))).toContain(props.link);
-    expect(decodeURIComponent(hrefFor('Email'))).toContain(props.link);
+    await waitFor(() => expect(screen.getByRole('textbox', { name: 'Link' })).toHaveFocus());
+    expect(screen.queryByRole('button', { name: 'Copied' })).not.toBeInTheDocument();
   });
 
-  it('names the kind in the message that goes out', () => {
-    render(<Share {...props} kind="community" />);
-    const dialog = openDialog();
+  it('sends "{lead}: {link}" to WhatsApp and Email', () => {
+    const dialog = openSheet();
+    const message = 'The Roastery on Tukai: https://tukai.co/p/p5';
 
-    const whatsapp = within(dialog).getByRole('link', { name: 'WhatsApp' });
-    expect(decodeURIComponent(whatsapp.getAttribute('href') ?? '')).toContain(
-      'this community on Tukai',
+    const whatsapp = within(dialog).getByRole('link', { name: /WhatsApp/ });
+    expect(whatsapp).toHaveAttribute('href', `https://wa.me/?text=${encodeURIComponent(message)}`);
+    expect(whatsapp).toHaveAttribute('target', '_blank');
+    expect(whatsapp).toHaveAccessibleName('WhatsApp, opens in a new tab');
+
+    expect(within(dialog).getByRole('link', { name: 'Email' })).toHaveAttribute(
+      'href',
+      `mailto:?subject=${encodeURIComponent('The Roastery on Tukai')}&body=${encodeURIComponent(message)}`,
     );
   });
 
-  describe('on a device with a share sheet of its own', () => {
-    it('offers it, and hands it the link', async () => {
+  it('says who the link works for', () => {
+    const dialog = openSheet();
+
+    expect(within(dialog).getByText(content.note)).toBeInTheDocument();
+    expect(within(dialog).getByTestId('ViewIcon')).toBeInTheDocument();
+  });
+
+  it('shows the lock beside the note for something private', () => {
+    const dialog = openSheet({ isPrivate: true, note: 'Only members can open this link.' });
+
+    expect(within(dialog).getByTestId('SquareLock02Icon')).toBeInTheDocument();
+  });
+
+  it('closes on Close', () => {
+    openSheet();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('closes on Escape without the Escape reaching what sits underneath', () => {
+    const underneath = jest.fn();
+    document.addEventListener('keydown', underneath);
+    openSheet();
+
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Copy link' }), { key: 'Escape' });
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(underneath).not.toHaveBeenCalled();
+    document.removeEventListener('keydown', underneath);
+  });
+
+  it('hides More where the browser has no share menu', () => {
+    const dialog = openSheet();
+
+    expect(within(dialog).queryByRole('button', { name: 'More' })).not.toBeInTheDocument();
+  });
+
+  describe('on a device with a share menu', () => {
+    it('offers More, and hands it the title, the lead and the link', async () => {
       const share = jest.fn().mockResolvedValue(undefined);
       Object.assign(navigator, { share });
+      openSheet();
 
-      render(<Share {...props} kind="place" />);
-      openDialog();
-
-      const button = await screen.findByRole('button', { name: /Share via/ });
-      fireEvent.click(button);
+      fireEvent.click(await screen.findByRole('button', { name: 'More' }));
 
       await waitFor(() =>
-        expect(share).toHaveBeenCalledWith(expect.objectContaining({ url: props.link })),
+        expect(share).toHaveBeenCalledWith({
+          title: 'The Roastery',
+          text: 'The Roastery on Tukai',
+          url: content.url,
+        }),
       );
     });
 
-    // Dismissing the OS sheet rejects; that is not a failure worth reporting
-    it('stays put when the sheet is dismissed', async () => {
+    // Dismissing the device's menu rejects; that is not a failure worth reporting
+    it('stays open when the menu is dismissed', async () => {
       Object.assign(navigator, { share: jest.fn().mockRejectedValue(new Error('AbortError')) });
+      openSheet();
 
-      render(<Share {...props} />);
-      openDialog();
-
-      fireEvent.click(await screen.findByRole('button', { name: /Share via/ }));
+      fireEvent.click(await screen.findByRole('button', { name: 'More' }));
 
       await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
     });

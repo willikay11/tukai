@@ -35,8 +35,6 @@ jest.mock('@/app/shared/hooks/useBucketLists', () => ({
   useMyBucketLists: () => ({ data: undefined, isLoading: false }),
 }));
 
-jest.mock('@/app/shared/components/Share', () => ({ Share: () => <div data-testid="share" /> }));
-
 // Each card carries the basket, which reaches for the sign-in dialog
 jest.mock('@/context/AuthDialogContext', () => ({
   useAuthDialog: () => ({ needAuth: jest.fn() }),
@@ -99,8 +97,26 @@ describe('BucketListPageContent', () => {
 
     expect(screen.getByRole('heading', { name: 'Bucket List' })).toBeInTheDocument();
     expect(screen.getByText('Private')).toBeInTheDocument();
-    expect(screen.getByTestId('share')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Back to bucket lists' })).toBeInTheDocument();
+  });
+
+  // Bucket lists copy their link rather than opening the share sheet, and say
+  // who that link works for
+  it('copies a members-only link for a private list', async () => {
+    const user = userEvent.setup();
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    renderPage();
+
+    await user.click(screen.getByRole('button', { name: 'Share' }));
+
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('/bucket-lists/bl1'));
+    expect(toast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Member link copied. Only people on this list can open it.',
+      }),
+    );
   });
 
   // Experiences and places are saved together but read as two different things

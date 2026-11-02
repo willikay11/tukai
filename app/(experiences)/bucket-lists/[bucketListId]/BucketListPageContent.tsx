@@ -8,13 +8,13 @@ import { useRouter } from 'next/navigation';
 import { AvatarStack } from '@/app/(experiences)/experiences/components/AvatarStack';
 import { countLine } from '@/app/(experiences)/experiences/components/BucketListCard/bucket-list-card';
 import { CreateBucketListModal } from '@/app/(experiences)/experiences/components/CreateBucketListModal';
+import { useCopyBucketListLink } from '@/app/shared/components/BucketList';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PageContainer } from '@/app/shared/components/Layout';
-import { Share } from '@/app/shared/components/Share';
 import { useBucketList, useDeleteBucketList } from '@/app/shared/hooks/useBucketLists';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
-import { BucketListDetail, BucketListItem, bucketListCoverPhoto } from '@/types/bucket-list';
+import { BucketListDetail, BucketListItem } from '@/types/bucket-list';
 import { linkedUserName } from '@/types/user';
 import { CANVAS_ICONS } from '@/utils/canvas-icons';
 
@@ -24,6 +24,7 @@ import { SavedExperienceCard, SavedPlaceCard } from './components/SavedItemCard'
 export const BucketListPageContent = ({ bucketListId }: { bucketListId: string }) => {
   const router = useRouter();
   const { toast } = useToast();
+  const copyLink = useCopyBucketListLink();
   const { data: session, status } = useSession();
   const isSignedIn = Boolean(session?.user?.id);
 
@@ -132,12 +133,24 @@ export const BucketListPageContent = ({ bucketListId }: { bucketListId: string }
         <div className="flex items-center gap-2">
           {isOwner && <div className="hidden items-center gap-2 md:flex">{ownerActions}</div>}
 
-          <Share
-            coverPhoto={bucketListCoverPhoto(bucketList) ?? ''}
-            title={bucketList.name}
-            link={`${process.env.NEXT_PUBLIC_APP_URL}/bucket-lists/${bucketList.id}`}
-            kind="bucket list"
-          />
+          {/* Bucket lists copy their link rather than opening the share
+              sheet, as the drawer's Share does */}
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-full"
+            onClick={() =>
+              copyLink(
+                bucketList.id,
+                isPublic
+                  ? 'Link copied. Anyone with it can view and join this list.'
+                  : 'Member link copied. Only people on this list can open it.',
+              )
+            }
+          >
+            <span>Share</span>
+            <IconComponent iconName="Share08Icon" size={16} color="currentColor" className="ml-2" />
+          </Button>
         </div>
       </div>
 

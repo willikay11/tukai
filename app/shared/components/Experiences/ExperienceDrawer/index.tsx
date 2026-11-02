@@ -9,7 +9,7 @@ import { Bookmark } from '@/app/shared/components/Bookmark';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { PlaceDrawerTabs } from '@/app/shared/components/Places/PlaceDrawer/PlaceDrawerTabs';
-import { Share } from '@/app/shared/components/Share';
+import { Share, experienceShare } from '@/app/shared/components/Share';
 import { useFetchSingleExperience } from '@/app/shared/hooks/useExperiences';
 import { useScrollSpy } from '@/app/shared/hooks/useScrollSpy';
 import { Drawer } from '@/components/ui/drawer';
@@ -17,7 +17,6 @@ import { Experience } from '@/types/experience';
 import { coverPhotoUrl } from '@/types/photo';
 import { isTicketPaused } from '@/types/ticket';
 import { formatExperienceHeaderDate } from '@/utils/date-utils';
-import { experiencePath } from '@/utils/detail-paths';
 
 import { ExperienceDrawerFooter } from './ExperienceDrawerFooter';
 import { ExperienceGuestContent } from './ExperienceGuestContent';
@@ -167,13 +166,7 @@ export const ExperienceDrawer = ({
                 {view === 'experience' && !(isHostMode && host.view === 'editTicket') && (
                   <>
                     <div className={DISC}>
-                      <Share
-                        coverPhoto={coverPhotoUrl(experience.photos, 'md') ?? ''}
-                        title={experience.title}
-                        link={`${process.env.NEXT_PUBLIC_APP_URL}${experiencePath(experience)}`}
-                        kind="experience"
-                        variant="icon"
-                      />
+                      <Share content={experienceShare(experience)} variant="icon" />
                     </div>
 
                     <div className={DISC}>

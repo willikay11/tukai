@@ -11,7 +11,7 @@ import { RevealOnScroll, useHasScrolled } from '@/app/shared/components/Motion';
 import { PlanThisButton } from '@/app/shared/components/Plans';
 import { Rating } from '@/app/shared/components/Rating/Rating';
 import { MomentsGridSection, UpcomingExperiencesSection } from '@/app/shared/components/Sections';
-import { Share } from '@/app/shared/components/Share';
+import { Share, placeShare } from '@/app/shared/components/Share';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useMoments } from '@/app/shared/hooks/useMoments';
 import { useLocation } from '@/context/LocationContext';
@@ -21,7 +21,6 @@ import { Moment } from '@/types/moment';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
 import { PlaceCategory } from '@/types/placeCategory';
-import { placePath } from '@/utils/detail-paths';
 import { haversineKm } from '@/utils/geo-utils';
 
 import { MobilePlaceBar } from './MobilePlaceBar';
@@ -98,12 +97,7 @@ export const PlaceDetailContent = ({ place }: { place: Place }) => {
             }}
             className="hidden sm:inline-flex"
           />
-          <Share
-            coverPhoto={photos[0] ?? ''}
-            title={place.title}
-            link={`${process.env.NEXT_PUBLIC_APP_URL}${placePath(place)}`}
-            kind="place"
-          />
+          <Share content={placeShare(place)} />
         </div>
       </div>
 

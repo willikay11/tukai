@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 
 import { AddReview } from '@/app/(places)/components/Review/AddReview';
 import { Bookmark } from '@/app/shared/components/Bookmark';
-import { Share } from '@/app/shared/components/Share';
+import { Share, placeShare } from '@/app/shared/components/Share';
 import {
   useCreatePlaceReview,
   useDeletePlaceReviewImage,
@@ -52,10 +52,11 @@ export const PlaceActions = ({
         />
         <div className="mx-2 h-[8px] w-[1px] rounded bg-gray-300" />
         <Share
-          coverPhoto={coverPhoto}
-          title={placeTitle}
-          link={`Check out this place ${placeTitle} on Tukai, ${process.env.NEXT_PUBLIC_APP_URL}/places/${placeId}`}
-          kind="place"
+          content={placeShare({
+            id: placeId,
+            title: placeTitle,
+            photos: coverPhoto ? [{ id: placeId, mediaType: 'photo', photo: coverPhoto }] : [],
+          })}
         />
         <div className="mr-2" />
         <Button

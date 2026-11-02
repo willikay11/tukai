@@ -19,6 +19,8 @@ jest.mock('@/app/shared/components/Images', () => ({
   PhotoImage: ({ alt }: { alt: string }) => <span role="img" aria-label={alt || undefined} />,
 }));
 jest.mock('@/app/shared/components/Share', () => ({
+  // The content builders are plain functions; only the sheet is stood in for
+  ...jest.requireActual('@/app/shared/components/Share/shareContent'),
   Share: () => <button type="button">share</button>,
 }));
 jest.mock('@/app/shared/components/SendMessage', () => ({

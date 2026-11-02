@@ -10,7 +10,7 @@ import {
   MomentDrawer,
   useMomentComposer,
 } from '@/app/shared/components/Moments';
-import { Share } from '@/app/shared/components/Share';
+import { Share, communityShare } from '@/app/shared/components/Share';
 import {
   useCommunityContact,
   useCommunityDetail,
@@ -27,7 +27,6 @@ import { useAuthDialog } from '@/context/AuthDialogContext';
 import { Community, CommunityContact, CommunityRating } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { Moment } from '@/types/moment';
-import { communityPath } from '@/utils/detail-paths';
 
 import { CommunityAboutSection } from './CommunityAboutSection';
 import { CommunityAdminBand } from './CommunityAdminBand';
@@ -428,13 +427,7 @@ export const CommunityDrawer = ({
 
             {view === 'community' && community && isFullView && (
               <div className={`${DISC} hover:bg-surface-brand`}>
-                <Share
-                  coverPhoto={community.photos?.[0]?.photo ?? ''}
-                  title={community.title}
-                  link={`${process.env.NEXT_PUBLIC_APP_URL}${communityPath(community)}`}
-                  kind="community"
-                  variant="icon"
-                />
+                <Share content={communityShare(community)} variant="icon" />
               </div>
             )}
 

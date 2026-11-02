@@ -67,6 +67,12 @@ const nextConfig = {
         destination: '/moments?momentId=:momentId',
         permanent: false,
       },
+      // The share sheet's short links. Temporary, so where a link lands can
+      // change; the detail routes resolve the id and check access themselves
+      { source: '/p/:id', destination: '/places/:id', permanent: false },
+      { source: '/e/:id', destination: '/experiences/:id', permanent: false },
+      { source: '/c/:id', destination: '/communities/:id', permanent: false },
+      { source: '/m/:id', destination: '/moments?momentId=:id', permanent: false },
       {
         source: '/experiences/:experienceId/reserve',
         destination: '/experiences/:experienceId',

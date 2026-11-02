@@ -17,6 +17,8 @@ jest.mock('@/app/shared/components/Bookmark', () => ({
   Bookmark: () => <button type="button">bookmark</button>,
 }));
 jest.mock('@/app/shared/components/Share', () => ({
+  // The content builders are plain functions; only the sheet is stood in for
+  ...jest.requireActual('@/app/shared/components/Share/shareContent'),
   Share: () => <button type="button">share</button>,
 }));
 jest.mock('@/app/shared/components/Icons', () => ({
@@ -217,7 +219,9 @@ describe('ExperienceDrawer', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Back to Pottery for beginners' }));
 
       expect(
-        screen.getByRole('heading', { name: /Sat 3 Oct, \d{1,2}:\d{2} [AP]M - \d{1,2}:\d{2} [AP]M/ }),
+        screen.getByRole('heading', {
+          name: /Sat 3 Oct, \d{1,2}:\d{2} [AP]M - \d{1,2}:\d{2} [AP]M/,
+        }),
       ).toBeInTheDocument();
       expect(screen.getByText('footer make reservation')).toBeInTheDocument();
     });
@@ -254,7 +258,9 @@ describe('ExperienceDrawer', () => {
       fireEvent.click(screen.getByRole('button', { name: 'booking panel complete purchase' }));
 
       expect(
-        screen.getByRole('heading', { name: /Sat 3 Oct, \d{1,2}:\d{2} [AP]M - \d{1,2}:\d{2} [AP]M/ }),
+        screen.getByRole('heading', {
+          name: /Sat 3 Oct, \d{1,2}:\d{2} [AP]M - \d{1,2}:\d{2} [AP]M/,
+        }),
       ).toBeInTheDocument();
       expect(screen.getByText('footer make reservation')).toBeInTheDocument();
       expect(screen.queryByTestId('booking-panel')).not.toBeInTheDocument();

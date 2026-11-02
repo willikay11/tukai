@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
+
 import { IconComponent } from '@/app/shared/components/Icons';
-import { toast } from '@/app/shared/hooks/useToast';
+import { ShareSheet, momentShare } from '@/app/shared/components/Share';
 import { Drawer } from '@/components/ui/drawer';
 import { Moment } from '@/types/moment';
 
@@ -22,29 +24,7 @@ export const MomentDrawer = ({
   moment: Moment | null;
   onClose: () => void;
 }) => {
-  // Shares the moment's own URL, which opens it again for whoever follows it
-  const share = async (item: Moment) => {
-    const url = `${window.location.origin}/moments?momentId=${item.id}`;
-
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: 'Moment', url });
-        return;
-      }
-
-      await navigator.clipboard.writeText(url);
-      toast({ title: 'Link copied' });
-    } catch (error) {
-      // Dismissing the share sheet rejects the promise; that is not a failure
-      if (error instanceof DOMException && error.name === 'AbortError') return;
-
-      toast({
-        title: 'Could not share',
-        description: 'Please try again.',
-        variant: 'destructive',
-      });
-    }
-  };
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   return (
     <Drawer
@@ -64,9 +44,9 @@ export const MomentDrawer = ({
             {moment && (
               <button
                 type="button"
-                onClick={() => share(moment)}
-                aria-label="Share moment"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200"
+                onClick={() => setIsShareOpen(true)}
+                aria-label="Share"
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-surface text-brand transition-colors hover:bg-surface-brand"
               >
                 <IconComponent iconName="Share08Icon" size={20} color="currentColor" />
               </button>
@@ -87,6 +67,17 @@ export const MomentDrawer = ({
           {moment && <MomentDetail key={moment.id} moment={moment} />}
         </div>
       </div>
+
+      {/* ⚠️ A moment carries only its community's id and title, so one in a
+          private community still gets the public note here. The link checks
+          access when it is opened either way. */}
+      {moment && isShareOpen && (
+        <ShareSheet
+          content={momentShare(moment)}
+          open={isShareOpen}
+          onOpenChange={setIsShareOpen}
+        />
+      )}
     </Drawer>
   );
 };

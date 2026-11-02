@@ -18,6 +18,8 @@ jest.mock('@/app/shared/components/Bookmark', () => ({
   ),
 }));
 jest.mock('@/app/shared/components/Share', () => ({
+  // The content builders are plain functions; only the sheet is stood in for
+  ...jest.requireActual('@/app/shared/components/Share/shareContent'),
   Share: ({ variant }: { variant?: string }) => (
     <button type="button" aria-label="Share this place" data-variant={variant}>
       share
