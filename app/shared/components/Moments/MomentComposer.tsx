@@ -72,6 +72,7 @@ export const MomentComposer = ({
               isLoading={composer.isPending}
               className="h-12 rounded-full px-6 text-[15px] disabled:bg-[#E4F4B5] disabled:text-[#5E7A45] disabled:opacity-100"
             >
+              <IconComponent iconName="Share08Icon" size={18} color="currentColor" />
               Share moment
             </Button>
           </footer>

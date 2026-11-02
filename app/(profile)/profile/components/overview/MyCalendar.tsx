@@ -156,7 +156,7 @@ const CalendarItemRow = ({
           className="inline-flex h-11 items-center"
         >
           <span className="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface pl-2.5 pr-3 text-13 font-semibold text-gray-900">
-            <IconComponent iconName="Camera01Icon" size={15} color="currentColor" />
+            <IconComponent iconName="Share08Icon" size={15} color="currentColor" />
             Share a moment
           </span>
         </button>

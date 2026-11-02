@@ -33,7 +33,7 @@ export const CREATE_MENU_ITEMS: CreateMenuItem[] = [
     id: 'moment',
     label: 'Share a moment',
     description: 'Attach it to a community, place or experience.',
-    icon: 'DashboardCircleAddIcon',
+    icon: 'Share08Icon',
   },
   {
     id: 'place',

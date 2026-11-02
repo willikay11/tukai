@@ -41,6 +41,22 @@ describe('middleware', () => {
       },
     );
 
+    // A shared link has to open for whoever it was sent to, account or not
+    it.each(['/p/abc123', '/e/abc123', '/c/abc123'])(
+      'lets them open the shared link %s',
+      async (path) => {
+        expect(await go(path)).toEqual({ kind: 'next' });
+      },
+    );
+
+    // The short-link prefixes carry their slash, so they open nothing else
+    it.each(['/profile', '/plans', '/create'])(
+      'still sends them to sign in for %s',
+      async (path) => {
+        expect(await go(path)).toEqual({ kind: 'redirect', to: '/auth/sign-in' });
+      },
+    );
+
     it.each(['/.well-known/apple-app-site-association', '/.well-known/assetlinks.json'])(
       'serves the app link file %s without sign-in so iOS and Android can verify the app',
       async (path) => {

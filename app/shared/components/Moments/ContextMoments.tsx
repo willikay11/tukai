@@ -97,7 +97,7 @@ export const ContextMoments = ({
       )}
     >
       <IconComponent
-        iconName="DashboardCircleAddIcon"
+        iconName="Share08Icon"
         variant="duotone"
         size={isPanel ? 19 : 20}
         color="currentColor"

@@ -35,8 +35,9 @@ export type ShareContent = {
 };
 
 /**
- * The short link for one thing. `/p`, `/e`, `/c` and `/m` redirect to the
- * detail routes in next.config.mjs, which resolve the id.
+ * The short link for one thing. `/p`, `/e` and `/c` are routes of their own
+ * that land on Discover with the drawer open (app/(experiences)/p and its
+ * siblings); `/m` redirects to the Moments page with the moment open.
  *
  * The id rather than the slug: the handoff asks for opaque ids, and a slug
  * spells out a private community's name to anyone who sees the link.

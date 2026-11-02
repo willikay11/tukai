@@ -26,7 +26,9 @@ const stubDate = (iso: string) => {
   return `${day} ${month}, ${hours12}:${minutes} ${ampm}`;
 };
 
-const Divider = () => <div aria-hidden="true" className="-mx-6 h-px flex-shrink-0 bg-surface-muted" />;
+const Divider = () => (
+  <div aria-hidden="true" className="-mx-6 h-px flex-shrink-0 bg-surface-muted" />
+);
 
 const BuyerRow = ({
   buyer,
@@ -85,7 +87,10 @@ const BuyerRow = ({
     </button>
 
     {open && (
-      <div id={`sales-buyer-${buyer.key}`} className="flex flex-col items-start gap-3 px-6 pb-[18px] pl-[76px]">
+      <div
+        id={`sales-buyer-${buyer.key}`}
+        className="flex flex-col items-start gap-3 px-6 pb-[18px] pl-[76px]"
+      >
         {buyer.stubs.map((stub) => (
           <div
             key={stub.key}
@@ -101,16 +106,26 @@ const BuyerRow = ({
                 />
               ) : (
                 <span className="flex h-14 w-14 items-center justify-center rounded-lg bg-white">
-                  <IconComponent iconName="QrCodeIcon" size={24} color="currentColor" className="text-ink-subtle" />
+                  <IconComponent
+                    iconName="QrCodeIcon"
+                    size={24}
+                    color="currentColor"
+                    className="text-ink-subtle"
+                  />
                 </span>
               )}
             </span>
-            <span aria-hidden="true" className="w-0 flex-shrink-0 self-stretch border-l-[1.5px] border-dashed border-blue-200" />
+            <span
+              aria-hidden="true"
+              className="w-0 flex-shrink-0 self-stretch border-l-[1.5px] border-dashed border-blue-200"
+            />
             <span className="flex min-w-0 flex-1 flex-col gap-1 px-3.5 py-2.5">
-              <span className="truncate text-15 font-semibold text-ink-pill">{stub.ticketName}</span>
+              <span className="truncate text-15 font-semibold text-ink-pill">
+                {stub.ticketName}
+              </span>
               <span className="text-[13.5px] leading-snug text-ink">
-                {stub.qty === 1 ? '1 ticket' : `${stub.qty} tickets`} · {money(stub.amount, currency)} ·{' '}
-                {stubDate(stub.at)}
+                {stub.qty === 1 ? '1 ticket' : `${stub.qty} tickets`} ·{' '}
+                {money(stub.amount, currency)} · {stubDate(stub.at)}
               </span>
             </span>
           </div>
@@ -155,7 +170,9 @@ export const SalesHostTab = ({ experience }: { experience: Experience }) => {
   );
 
   const query = search.trim().toLowerCase();
-  const matches = query ? buyers.filter((buyer) => buyer.name.toLowerCase().includes(query)) : buyers;
+  const matches = query
+    ? buyers.filter((buyer) => buyer.name.toLowerCase().includes(query))
+    : buyers;
   const visible = query || showAll ? matches : matches.slice(0, PAGE_SIZE);
   const hasMore = !query && !showAll && matches.length > PAGE_SIZE;
 
@@ -170,7 +187,7 @@ export const SalesHostTab = ({ experience }: { experience: Experience }) => {
   const salesActions = [
     {
       label: 'Share buyers list',
-      iconName: 'Download01Icon',
+      iconName: 'Share08Icon',
       onClick: () =>
         toast({
           description:
@@ -235,7 +252,12 @@ export const SalesHostTab = ({ experience }: { experience: Experience }) => {
         <div className="-mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
           {salesActions.map((action, index) => (
             <div key={action.label} className="flex items-center gap-x-3">
-              {index > 0 && <span aria-hidden="true" className="h-[5px] w-[5px] flex-shrink-0 rounded-full bg-distance" />}
+              {index > 0 && (
+                <span
+                  aria-hidden="true"
+                  className="h-[5px] w-[5px] flex-shrink-0 rounded-full bg-distance"
+                />
+              )}
               <button
                 type="button"
                 onClick={action.onClick}
@@ -297,9 +319,13 @@ export const SalesHostTab = ({ experience }: { experience: Experience }) => {
                   buyer={buyer}
                   currency={currency}
                   open={openKey === buyer.key}
-                  onToggle={() => setOpenKey((current) => (current === buyer.key ? null : buyer.key))}
+                  onToggle={() =>
+                    setOpenKey((current) => (current === buyer.key ? null : buyer.key))
+                  }
                   onMessage={() =>
-                    toast({ description: `Write to ${buyer.name}. It arrives in their Tukai inbox.` })
+                    toast({
+                      description: `Write to ${buyer.name}. It arrives in their Tukai inbox.`,
+                    })
                   }
                 />
               ))}

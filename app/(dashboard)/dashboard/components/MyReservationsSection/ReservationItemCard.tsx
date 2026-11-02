@@ -70,7 +70,7 @@ export const ReservationItemCard = ({
             onClick={() => setIsMomentOpen(true)}
             className="inline-flex h-11 items-center gap-1.5 text-sm font-semibold text-brand"
           >
-            <IconComponent iconName="Camera01Icon" size={16} color="currentColor" />
+            <IconComponent iconName="Share08Icon" size={16} color="currentColor" />
             Share a moment
           </button>
 

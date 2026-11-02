@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+import { IconComponent } from '@/app/shared/components/Icons';
 import {
   ContextMoments,
   MomentComposerForm,
@@ -271,6 +272,7 @@ export const PlaceDrawer = ({
                     isLoading={momentComposer.isPending}
                     className="h-12 rounded-full px-6 text-[15px]"
                   >
+                    <IconComponent iconName="Share08Icon" size={18} color="currentColor" />
                     Share moment
                   </Button>
                 </div>

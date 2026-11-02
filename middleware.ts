@@ -24,6 +24,11 @@ export async function middleware(request: NextRequest) {
     // for sign-in where it is pressed rather than at the door.
     pathname.startsWith('/moments') ||
     pathname.startsWith('/place') ||
+    // The share sheet's links: Discover with a place, experience or community
+    // open in its drawer, as public as the pages they stand for
+    pathname.startsWith('/p/') ||
+    pathname.startsWith('/e/') ||
+    pathname.startsWith('/c/') ||
     // Browsing hosting plans needs no account; signing in is only prompted
     // when a plan button is actually pressed (see PricingPageContent).
     pathname.startsWith('/pricing') ||
