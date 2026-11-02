@@ -18,9 +18,10 @@ jest.mock('@/context/AuthDialogContext', () => ({
 }));
 
 const useGetCommunities = jest.fn();
+const useCommunityDetail = jest.fn();
 jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useGetCommunities: (params: unknown) => useGetCommunities(params),
-  useCommunityDetail: () => ({ data: undefined }),
+  useCommunityDetail: (id: string, enabled: boolean) => useCommunityDetail(id, enabled),
 }));
 
 // useQueries is handed one config per community; the mock runs each queryFn so
@@ -48,13 +49,13 @@ jest.mock('@/app/shared/components/Images', () => ({
 }));
 
 jest.mock('@/app/shared/components/Moments', () => ({
-  MomentsMasonry: ({
-    moments,
-    columnsClassName,
-  }: {
-    moments: { id: string }[];
-    columnsClassName?: string;
-  }) => <div data-testid="masonry" data-count={moments.length} data-columns={columnsClassName} />,
+  MomentDrawer: () => null,
+}));
+
+jest.mock('@/app/shared/components/Communities/MomentsMosaicGrid', () => ({
+  MomentsMosaicGrid: ({ moments }: { moments: { id: string }[] }) => (
+    <div data-testid="mosaic" data-count={moments.length} />
+  ),
 }));
 
 jest.mock('@/app/shared/components/Bookmark', () => ({
@@ -105,6 +106,7 @@ const renderTab = (props: Partial<React.ComponentProps<typeof CommunityFeedTab>>
       signedOutBlurb="What they have coming up, and the moments they post, all in one place."
       emptyMessage="You are not following any communities yet"
       failureMessage="Your communities could not load"
+      showMoreCount={4}
       {...props}
     />,
   );
@@ -112,6 +114,7 @@ const renderTab = (props: Partial<React.ComponentProps<typeof CommunityFeedTab>>
 describe('CommunityFeedTab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useCommunityDetail.mockReturnValue({ data: undefined });
     following([community('c1', 'Kanunga + Twin Falls'), community('c2', 'Evo owners club')]);
     fetchExperiences.mockReturnValue({ data: { results: [] } });
     fetchMoments.mockReturnValue({ data: { results: [] } });
@@ -141,9 +144,41 @@ describe('CommunityFeedTab', () => {
     expect(grid?.className).toContain(COMMUNITY_GRID);
   });
 
-  // The masonry defaults to three columns, which on a full-width page made each
-  // tile enormous
-  it('packs the moments tighter than the moments page does', () => {
+  // The list endpoint carries owners but no members, so each card asks for its
+  // own - otherwise the faces are only ever the owner
+  describe('member faces', () => {
+    const member = (id: string, name: string) => ({
+      id,
+      user: { displayName: name, picture: null },
+    });
+
+    it('asks each card for its members', () => {
+      renderTab();
+
+      expect(useCommunityDetail).toHaveBeenCalledWith('c1', true);
+      expect(useCommunityDetail).toHaveBeenCalledWith('c2', true);
+    });
+
+    it('shows the first five, then counts the rest', () => {
+      following([{ ...community('c1', 'Evo owners club'), membersCount: 9 } as Community]);
+      useCommunityDetail.mockReturnValue({
+        data: {
+          data: {
+            members: ['Ann', 'Ben', 'Cara', 'Dan', 'Eve', 'Fay'].map((name, index) =>
+              member(String(index), name),
+            ),
+          },
+        },
+      });
+      renderTab();
+
+      const card = screen.getByRole('link', { name: /Evo owners club/ });
+      expect(card.querySelectorAll('.-space-x-2 [data-testid="photo"]')).toHaveLength(5);
+      expect(card).toHaveTextContent('+4');
+    });
+  });
+
+  it('shows the moments in the fixed-span mosaic, not the masonry', () => {
     fetchMoments.mockReturnValue({
       data: {
         results: [{ id: 'm1', title: 'One', media: [{ id: 'a', photo: 'https://cdn/a.jpg' }] }],
@@ -152,10 +187,8 @@ describe('CommunityFeedTab', () => {
 
     renderTab();
 
-    expect(screen.getByTestId('masonry')).toHaveAttribute(
-      'data-columns',
-      'columns-3 gap-3 md:columns-4 xl:columns-5',
-    );
+    // Both fanned-out communities' mocked queries return the same moment
+    expect(screen.getByTestId('mosaic')).toHaveAttribute('data-count', '2');
   });
 
   describe('signed out', () => {
@@ -219,7 +252,7 @@ describe('CommunityFeedTab', () => {
       renderTab();
 
       const titles = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
-      expect(titles).toContain('Happening in your Communities');
+      expect(titles).toContain('Happening in your communities');
 
       const cards = screen.getAllByText(/^(soon|late)$/).map((node) => node.textContent);
       expect(cards).toEqual(['soon', 'late']);
@@ -229,7 +262,7 @@ describe('CommunityFeedTab', () => {
       renderTab();
 
       expect(
-        screen.queryByRole('heading', { name: 'Happening in your Communities' }),
+        screen.queryByRole('heading', { name: 'Happening in your communities' }),
       ).not.toBeInTheDocument();
     });
 
@@ -246,7 +279,7 @@ describe('CommunityFeedTab', () => {
       renderTab();
 
       // Two communities fanned out, one usable moment each
-      expect(screen.getByTestId('masonry')).toHaveAttribute('data-count', '2');
+      expect(screen.getByTestId('mosaic')).toHaveAttribute('data-count', '2');
     });
   });
 

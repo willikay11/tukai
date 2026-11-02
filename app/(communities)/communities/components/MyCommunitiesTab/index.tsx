@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 
 import { CommunityFeedTab } from '../CommunityFeedTab';
 import { CreateCommunityCta } from '../CreateCommunityCta';
+import { EmptyMyCommunities } from './EmptyMyCommunities';
 
 /**
  * The communities a reader runs.
@@ -21,11 +22,13 @@ export const MyCommunitiesTab = ({ isSignedIn }: { isSignedIn: boolean }) => {
       <CommunityFeedTab
         isSignedIn={isSignedIn && Boolean(userId)}
         query={{ createdBy: userId }}
-        listHeading="Created or Hosted by You"
+        listHeading="Created or hosted by you"
         signedOutMessage="Sign in to see the communities you run"
         signedOutBlurb="Everything you have created or host, and what is coming up in them."
-        emptyMessage="You have not created a community yet"
         failureMessage="Your communities could not load"
+        // Every one the reader owns shows, with no Show more - different from
+        // Following, per the handoff's own table
+        renderEmpty={() => <EmptyMyCommunities />}
       />
 
       {/* Below md it floats over the foot of the page in place of the main

@@ -3,8 +3,8 @@
 import { useState } from 'react';
 
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 
+import { CommunityLink } from '@/app/shared/components/Communities/CommunityLink';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { SendMessage } from '@/app/shared/components/SendMessage/SendMessage';
@@ -12,10 +12,10 @@ import { useCommunityDetail, useJoinCommunity } from '@/app/shared/hooks/useComm
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuthDialog } from '@/context/AuthDialogContext';
+import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { CommunityMember } from '@/types/community';
 import { Experience } from '@/types/experience';
 import { photoUrl } from '@/types/photo';
-import { communityPath } from '@/utils/detail-paths';
 
 import { EXPERIENCE_SECTIONS } from './tabs';
 
@@ -55,6 +55,7 @@ export const ExperienceHostSection = ({ experience }: { experience: Experience }
   const userId = session?.user?.id;
   const { toast } = useToast();
   const { needAuth } = useAuthDialog();
+  const experienceDrawer = useExperienceDrawer();
 
   const host = experience.host;
   const isOwnExperience = Boolean(session?.user?.id && host?.id && session.user.id === host.id);
@@ -97,7 +98,10 @@ export const ExperienceHostSection = ({ experience }: { experience: Experience }
   if (!host && !experience.hostCommunity) return null;
 
   return (
-    <div id={EXPERIENCE_SECTIONS.host} className="scroll-mt-[156px] space-y-4 border-t border-line pt-6">
+    <div
+      id={EXPERIENCE_SECTIONS.host}
+      className="scroll-mt-[156px] space-y-4 border-t border-line pt-6"
+    >
       {host && (
         <>
           {!isOwnExperience && (
@@ -159,9 +163,10 @@ export const ExperienceHostSection = ({ experience }: { experience: Experience }
             )}
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-3">
-                <Link
-                  href={communityPath(experience.hostCommunity)}
-                  target="_blank"
+                {/* Stacks the community on this experience: its Back comes here */}
+                <CommunityLink
+                  community={experience.hostCommunity}
+                  drawerOptions={{ onCloseBelow: experienceDrawer?.closeExperience }}
                   className="flex min-w-0 items-center gap-1 transition-colors hover:text-brand-ink"
                 >
                   <p className="truncate text-[15px] font-semibold text-brand-ink">
@@ -173,7 +178,7 @@ export const ExperienceHostSection = ({ experience }: { experience: Experience }
                     color="currentColor"
                     className="flex-shrink-0 text-brand"
                   />
-                </Link>
+                </CommunityLink>
 
                 {canJoinCommunity && (
                   <button

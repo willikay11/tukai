@@ -96,6 +96,22 @@ const config: Config = {
         // The blue dot before a distance or a rating count in the place drawer's
         // photo row, a 5px circle rather than a glyph
         distance: '#60A5FA',
+        // The community drawer's Socials pills: each network's own tint and
+        // ink, from the community drawer handoff. Scoped to that one row.
+        social: {
+          whatsapp: '#15803D',
+          'whatsapp-surface': '#DCFCE7',
+          website: '#1D4ED8',
+          'website-surface': '#DBEAFE',
+          instagram: '#86399E',
+          'instagram-surface': '#F1E4F4',
+          tiktok: '#B80F45',
+          'tiktok-surface': '#FFDCE7',
+          youtube: '#B91C1C',
+          'youtube-surface': '#FFE1E1',
+          x: '#0369A1',
+          'x-surface': '#E0F2FE',
+        },
         // The light grey frame behind a card - the profile card, the account
         // balance card, the calendar panel - one shade paler than `surface`
         shell: '#F9FAFB',

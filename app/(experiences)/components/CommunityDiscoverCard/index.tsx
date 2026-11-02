@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-
 import {
   AvatarStack,
   type AvatarStackUser,
@@ -10,13 +8,13 @@ import {
   AVATAR_LIMIT,
   ownerFaces,
 } from '@/app/(experiences)/experiences/components/AvatarStack/community-faces';
+import { CommunityLink } from '@/app/shared/components/Communities/CommunityLink';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { CARD_LIFT, MEDIA_ZOOM, TITLE_TINT } from '@/app/shared/components/Motion';
 import { useCommunityDetail } from '@/app/shared/hooks/useCommunities';
 import { cn } from '@/lib/utils';
 import { Community, CommunityMember, CommunityOwner } from '@/types/community';
 import { coverPhotoUrl } from '@/types/photo';
-import { communityPath } from '@/utils/detail-paths';
 import { toPlainText } from '@/utils/safe-text-utils';
 
 export const CommunityDiscoverCard = ({
@@ -70,8 +68,8 @@ export const CommunityDiscoverCard = ({
   const totalMembers = community.membersCount ?? members.length;
 
   return (
-    <Link
-      href={communityPath(community)}
+    <CommunityLink
+      community={community}
       className={cn('group w-[320px] flex-shrink-0 snap-start', CARD_LIFT, className)}
     >
       <div className="relative h-[180px] w-full overflow-hidden rounded-2xl">
@@ -110,6 +108,6 @@ export const CommunityDiscoverCard = ({
           </div>
         )}
       </div>
-    </Link>
+    </CommunityLink>
   );
 };

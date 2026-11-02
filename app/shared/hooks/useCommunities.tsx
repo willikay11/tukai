@@ -5,13 +5,16 @@ import {
   createCommunityPhotos,
   deleteVerificationDocument,
   fetchCommunity,
+  fetchCommunityContact,
   fetchCommunityPostPhotos,
   fetchCommunityPosts,
+  fetchCommunityRatings,
   fetchVerificationDocuments,
   getCommunities,
   joinCommunity,
   joinCommunityWithToken,
   leaveCommunity,
+  removeCommunityMember,
   submitCommunityVerification,
   uploadVerificationDocument,
 } from '@/services/community';
@@ -28,7 +31,7 @@ import { Community, CommunityPostsQueryParams, CreateCommunity } from '@/types/c
 export const useCommunityDetail = (communityId: string, enabled: boolean) => {
   return useQuery({
     queryKey: ['community', communityId],
-    queryFn: async () => await fetchCommunity(communityId),
+    queryFn: async () => await fetchCommunity(communityId, true),
     enabled: enabled && Boolean(communityId),
     staleTime: 5 * 60 * 1000,
   });
@@ -37,6 +40,7 @@ export const useCommunityDetail = (communityId: string, enabled: boolean) => {
 export const useGetCommunities = (
   {
     page,
+    pageSize = 12,
     enabled,
     category,
     search,
@@ -47,6 +51,10 @@ export const useGetCommunities = (
     createdBy,
   }: {
     page: number;
+    /** Overrides the default page of 12 - the Discover page's own sections
+     * (near you, by type) have no city or taxonomy filter on the API, so they
+     * read a wider page and narrow it client-side instead. */
+    pageSize?: number;
     enabled: boolean;
     category?: string[];
     search?: string;
@@ -67,6 +75,7 @@ export const useGetCommunities = (
     queryKey: [
       'communities',
       page,
+      pageSize,
       category,
       search,
       createdBy,
@@ -79,7 +88,7 @@ export const useGetCommunities = (
       await getCommunities(
         category,
         page,
-        12,
+        pageSize,
         search,
         showUpComingExperiences,
         recommendedCommunities,
@@ -146,11 +155,41 @@ export const useLeaveCommunity = () => {
 
   return useMutation({
     mutationKey: ['leaveCommunity'],
-    mutationFn: async ({ communityId, userId }: { communityId: string; userId: string }) =>
-      await leaveCommunity(communityId, userId),
+    // `userId` is still accepted from older callers; the `leave` route reads
+    // who is leaving from the session
+    mutationFn: async ({ communityId }: { communityId: string; userId?: string }) =>
+      await leaveCommunity(communityId),
     onSuccess: () => invalidateCommunity(queryClient),
   });
 };
+
+/** An owner withdrawing an invite nobody has accepted yet. */
+export const useCancelCommunityInvite = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['cancelCommunityInvite'],
+    mutationFn: async ({ communityId, userId }: { communityId: string; userId: string }) =>
+      await removeCommunityMember(communityId, userId),
+    onSuccess: () => invalidateCommunity(queryClient),
+  });
+};
+
+export const useCommunityContact = (communityId: string, enabled: boolean) =>
+  useQuery({
+    queryKey: ['community', communityId, 'contact'],
+    queryFn: async () => await fetchCommunityContact(communityId),
+    enabled: enabled && Boolean(communityId),
+    staleTime: 5 * 60 * 1000,
+  });
+
+export const useCommunityRatings = (communityId: string, enabled: boolean) =>
+  useQuery({
+    queryKey: ['community', communityId, 'ratings'],
+    queryFn: async () => await fetchCommunityRatings(communityId),
+    enabled: enabled && Boolean(communityId),
+    staleTime: 5 * 60 * 1000,
+  });
 
 export const useJoinCommunityViaInvite = () => {
   return useMutation({

@@ -7,8 +7,10 @@ import { Community } from '@/types/community';
 
 import { CommunitiesPageContent } from './CommunitiesPageContent';
 
-const push = jest.fn();
-let sessionState: { data: { user: { id: string } } | null; status: string } = {
+let sessionState: {
+  data: { user: { id: string } } | null;
+  status: string;
+} = {
   data: { user: { id: 'u1' } },
   status: 'authenticated',
 };
@@ -19,6 +21,14 @@ jest.mock('@/context/AuthDialogContext', () => ({
   useAuthDialog: () => ({ needAuth }),
 }));
 
+let locationState: { city?: string; setCity: (city: string) => void } = {
+  city: 'Nairobi',
+  setCity: jest.fn(),
+};
+jest.mock('@/context/LocationContext', () => ({
+  useLocation: () => locationState,
+}));
+
 // The tab lives in the URL, so the mock has to round-trip it: `replace` writes
 // the query string and `useSearchParams` reads it back
 let currentQuery = '';
@@ -27,7 +37,7 @@ const replace = jest.fn((url: string) => {
 });
 
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({ push, replace }),
+  useRouter: () => ({ push: jest.fn(), replace }),
   usePathname: () => '/communities',
   useSearchParams: () => new URLSearchParams(currentQuery),
 }));
@@ -36,7 +46,8 @@ jest.mock('@/app/shared/components/Images', () => ({
   PhotoImage: () => <span data-testid="photo" />,
 }));
 
-// The Following view is covered by its own tests; here only the handover
+// The Following and My Communities views are covered by their own tests;
+// here only the handover between tabs
 jest.mock('./FollowingTab', () => ({
   FollowingTab: ({ isSignedIn }: { isSignedIn: boolean }) => (
     <div data-testid="following-tab" data-signed-in={String(isSignedIn)} />
@@ -50,67 +61,96 @@ jest.mock('./MyCommunitiesTab', () => ({
 }));
 
 const useGetCommunities = jest.fn();
-const useCommunityDetail = jest.fn();
 jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useGetCommunities: (params: unknown) => useGetCommunities(params),
-  // Each row asks for its own members, since the list endpoint omits them
-  useCommunityDetail: (id: string, enabled: boolean) => useCommunityDetail(id, enabled),
+  useCommunityDetail: () => ({ data: undefined }),
 }));
 
-const useGetInterestCategories = jest.fn();
+let interests: { id: string; name: string; icon?: string }[] = [];
 jest.mock('@/app/shared/hooks/useAuth', () => ({
-  useGetInterestCategories: () => useGetInterestCategories(),
+  useGetInterestCategories: () => ({ data: interests }),
 }));
 
-const HIKING = { id: 'cat-hiking', name: 'Hiking', icon: 'Directions01Icon' };
-const SHOPPING = { id: 'cat-shopping', name: 'Shopping', icon: 'ShoppingBasket01Icon' };
+jest.mock('@/app/shared/hooks/usePlaces', () => ({
+  usePlaceCategories: () => ({ data: { data: { results: [] } }, isLoading: false }),
+}));
 
-const community = (id: string, title: string, categories = [HIKING]): Community =>
+const community = (
+  id: string,
+  title: string,
+  overrides: Partial<Community> = {},
+): Community =>
   ({
     id,
     title,
     slug: `${title.toLowerCase().replace(/ /g, '-')}`,
     description: '<div>A crew that walks</div>',
-    categories,
+    categories: [{ id: 'cat-hiking', name: 'Hiking', icon: 'Directions01Icon' }],
+    isPublic: true,
     photos: [],
     membersCount: 4,
+    location: { city: 'Nairobi' } as Community['location'],
     owners: [{ id: 'o1', firstName: 'Lily', lastName: 'W', displayName: 'Lily', picture: null }],
+    ...overrides,
   }) as unknown as Community;
 
 const refetch = jest.fn();
-const respondWith = (results: Community[], isLoading = false) =>
-  useGetCommunities.mockReturnValue({
-    data: { success: true, data: { results } },
-    isLoading,
-    isFetching: false,
-    refetch,
-  });
 
-// The service catches its own errors and resolves with success: false, so this
-// is what a throttled or failed request actually looks like to the component
-const failWith = (message: string) =>
-  useGetCommunities.mockReturnValue({
-    data: { success: false, status: 429, message },
-    isLoading: false,
-    isFetching: false,
-    refetch,
-  });
+// The Discover tab fires three `useGetCommunities` calls (the pool, the
+// following-exclusion set, the owned-exclusion set) - the mock tells them
+// apart by which flag is set, the same way the real params do.
+const respondWith = (pool: Community[], { isLoading = false, isFailed = false } = {}) => {
+  useGetCommunities.mockImplementation(
+    (params: { following?: boolean; createdBy?: string; enabled?: boolean }) => {
+      // A disabled query fetches nothing, same as the real hook
+      if (!params.enabled) {
+        return { data: undefined, isLoading: false, isFetching: false, refetch };
+      }
 
-// A category name appears both as a filter pill and beside the icons on every
-// row that carries it, so pill queries are scoped to the filter row
-const typePill = (name: string) =>
-  within(
-    screen.getByRole('heading', { name: 'View by Type' }).closest('section') as HTMLElement,
-  ).getByText(name);
+      if (params.following || params.createdBy) {
+        return {
+          data: { success: true, data: { results: [] } },
+          isLoading: false,
+          isFetching: false,
+          refetch,
+        };
+      }
+
+      if (isFailed) {
+        return {
+          data: { success: false, status: 429, message: 'Request was throttled.' },
+          isLoading: false,
+          isFetching: false,
+          refetch,
+        };
+      }
+
+      return {
+        data: { success: true, data: { results: pool } },
+        isLoading,
+        isFetching: false,
+        refetch,
+      };
+    },
+  );
+};
+
+const typeChip = (name: string) =>
+  within(screen.getByRole('group', { name: 'Community types' })).getByText(name);
+
+// "Nairobi Hikers" matches both the all-communities and view-by-type pools, so
+// queries scoped to one section have to say which
+const allSection = () =>
+  within(screen.getByRole('heading', { name: 'All communities' }).closest('section') as HTMLElement);
 
 describe('CommunitiesPageContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     currentQuery = '';
+    interests = [];
     sessionState = { data: { user: { id: 'u1' } }, status: 'authenticated' };
-    useCommunityDetail.mockReturnValue({ data: undefined });
-    useGetInterestCategories.mockReturnValue({ data: [HIKING, SHOPPING], isLoading: false });
-    respondWith([community('1', 'Nairobi Hikers'), community('2', 'Mall Rats', [SHOPPING])]);
+    locationState = { city: 'Nairobi', setCity: jest.fn() };
+    respondWith([community('1', 'Nairobi Hikers'), community('2', 'Mall Rats')]);
   });
 
   describe('header', () => {
@@ -130,7 +170,10 @@ describe('CommunitiesPageContent', () => {
     it('opens on Discover, with all three tabs', () => {
       render(<CommunitiesPageContent />);
 
-      expect(screen.getByRole('tab', { name: /Discover/ })).toHaveAttribute('data-state', 'active');
+      expect(screen.getByRole('tab', { name: /Discover/ })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
       expect(screen.getByRole('tab', { name: /Following/ })).toBeInTheDocument();
       expect(screen.getByRole('tab', { name: /My Communities/ })).toBeInTheDocument();
     });
@@ -181,17 +224,7 @@ describe('CommunitiesPageContent', () => {
       currentQuery = 'tab=nonsense';
       render(<CommunitiesPageContent />);
 
-      expect(screen.getByRole('heading', { name: 'All Communities' })).toBeInTheDocument();
-    });
-
-    // Nothing to fetch for a view that renders no list of its own
-    it('asks the API for nothing while they are open', () => {
-      currentQuery = 'tab=mine';
-      render(<CommunitiesPageContent />);
-
-      expect(useGetCommunities).toHaveBeenLastCalledWith(
-        expect.objectContaining({ enabled: false }),
-      );
+      expect(screen.getByRole('heading', { name: 'All communities' })).toBeInTheDocument();
     });
   });
 
@@ -241,116 +274,106 @@ describe('CommunitiesPageContent', () => {
     });
   });
 
-  describe('view by type', () => {
-    it('offers a pill per interest category', () => {
-      render(<CommunitiesPageContent />);
-
-      expect(screen.getByRole('heading', { name: 'View by Type' })).toBeInTheDocument();
-      expect(typePill('Hiking')).toBeInTheDocument();
-      expect(typePill('Shopping')).toBeInTheDocument();
-    });
-
-    it('starts on everything, with no category filter', () => {
-      render(<CommunitiesPageContent />);
-
-      expect(screen.getByRole('heading', { name: 'All Communities' })).toBeInTheDocument();
-      expect(useGetCommunities).toHaveBeenCalledWith(
-        expect.objectContaining({ category: undefined }),
-      );
-    });
-
-    it('narrows the list to the chosen type', async () => {
-      const user = userEvent.setup();
-      render(<CommunitiesPageContent />);
-
-      await user.click(typePill('Hiking'));
-
-      expect(useGetCommunities).toHaveBeenLastCalledWith(
-        expect.objectContaining({ category: ['cat-hiking'] }),
-      );
-      expect(await screen.findByRole('heading', { name: 'Hiking' })).toBeInTheDocument();
-    });
-
-    // There is no separate "All" pill, so the chosen one has to let go
-    it('clears the filter when the chosen type is pressed again', async () => {
-      const user = userEvent.setup();
-      render(<CommunitiesPageContent />);
-
-      await user.click(typePill('Hiking'));
-      await user.click(typePill('Hiking'));
-
-      expect(useGetCommunities).toHaveBeenLastCalledWith(
-        expect.objectContaining({ category: undefined }),
-      );
-    });
-  });
-
-  describe('the grid', () => {
+  describe('Discover - all communities', () => {
     it('shows a card per community', () => {
       render(<CommunitiesPageContent />);
 
-      expect(screen.getByText('Nairobi Hikers')).toBeInTheDocument();
-      expect(screen.getByText('Mall Rats')).toBeInTheDocument();
-    });
-
-    // Cards in a matrix, not one per row: the page is browsed, not scanned.
-    // Scoped to the listing - PageContainer is itself a 12-column grid.
-    it('lays the cards out as a grid', () => {
-      render(<CommunitiesPageContent />);
-
-      const listing = screen
-        .getByRole('link', { name: /Nairobi Hikers/ })
-        .closest('.grid') as HTMLElement;
-
-      expect(listing.className).toContain('sm:grid-cols-2');
-      expect(listing.className).toContain('lg:grid-cols-3');
+      expect(allSection().getByText('Nairobi Hikers')).toBeInTheDocument();
+      expect(allSection().getByText('Mall Rats')).toBeInTheDocument();
     });
 
     it('links each card to its community, by slug', () => {
       render(<CommunitiesPageContent />);
 
-      expect(screen.getByRole('link', { name: /Nairobi Hikers/ })).toHaveAttribute(
+      expect(allSection().getByRole('link', { name: /Nairobi Hikers/ })).toHaveAttribute(
         'href',
         '/communities/nairobi-hikers',
       );
     });
 
-    // Descriptions are stored as HTML - the markup used to leak into the card
-    it('shows the description as text, not markup', () => {
+    it('includes communities from every city', () => {
+      respondWith([
+        community('1', 'Nairobi Hikers'),
+        community('2', 'Kilifi Sailors', { location: { city: 'Kilifi' } as Community['location'] }),
+      ]);
       render(<CommunitiesPageContent />);
 
-      expect(screen.getAllByText('A crew that walks').length).toBeGreaterThan(0);
-      expect(screen.queryByText(/<div>/)).not.toBeInTheDocument();
+      expect(allSection().getByText('Nairobi Hikers')).toBeInTheDocument();
+      expect(allSection().getByText('Kilifi Sailors')).toBeInTheDocument();
     });
 
-    it('fetches members so the facepile shows more than the owner', () => {
+    it('says so when there are none', () => {
+      respondWith([]);
       render(<CommunitiesPageContent />);
 
-      expect(useCommunityDetail).toHaveBeenCalledWith('1', true);
+      expect(screen.getByText('No communities to discover yet.')).toBeInTheDocument();
     });
 
     it('shows skeletons while loading', () => {
-      respondWith([], true);
+      respondWith([], { isLoading: true });
       const { container } = render(<CommunitiesPageContent />);
 
       expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0);
     });
   });
 
-  describe('when nothing comes back', () => {
-    it('offers a way out of a filter that found nothing', async () => {
+  describe('Discover - view by type', () => {
+    it('offers one chip per interest that has a community', () => {
+      render(<CommunitiesPageContent />);
+
+      expect(screen.getByRole('heading', { name: 'View by type' })).toBeInTheDocument();
+      expect(typeChip('Hiking')).toBeInTheDocument();
+    });
+
+    // It is the filter, so it stays even when nothing is tagged yet
+    it('offers every interest, including ones no community carries', () => {
+      interests = [{ id: 'cat-sailing', name: 'Sailing' }];
+      respondWith([community('1', 'Nairobi Hikers', { categories: [] })]);
+      render(<CommunitiesPageContent />);
+
+      expect(screen.getByRole('heading', { name: 'View by type' })).toBeInTheDocument();
+      expect(typeChip('Sailing')).toBeInTheDocument();
+      expect(screen.getByText('No sailing communities yet.')).toBeInTheDocument();
+    });
+
+    it('still shows when there are no interests at all', () => {
+      respondWith([community('1', 'Nairobi Hikers', { categories: [] })]);
+      render(<CommunitiesPageContent />);
+
+      expect(screen.getByRole('heading', { name: 'View by type' })).toBeInTheDocument();
+      expect(screen.getByText('No types to filter by yet.')).toBeInTheDocument();
+    });
+
+    it('starts on a type that has communities', () => {
+      interests = [
+        { id: 'cat-sailing', name: 'Sailing' },
+        { id: 'cat-hiking', name: 'Hiking' },
+      ];
+      render(<CommunitiesPageContent />);
+
+      expect(typeChip('Hiking').closest('button')).toHaveAttribute('aria-pressed', 'true');
+    });
+  });
+
+  describe('when the Discover pool fails to load', () => {
+    beforeEach(() => {
+      respondWith([], { isFailed: true });
+    });
+
+    it('says so rather than claiming there are none', () => {
+      render(<CommunitiesPageContent />);
+
+      expect(screen.getByText('Communities could not load')).toBeInTheDocument();
+      expect(screen.queryByText('All communities')).not.toBeInTheDocument();
+    });
+
+    it('offers a retry', async () => {
       const user = userEvent.setup();
       render(<CommunitiesPageContent />);
 
-      await user.click(typePill('Hiking'));
-      respondWith([]);
-      await user.click(typePill('Shopping'));
+      await user.click(screen.getByRole('button', { name: 'Try again' }));
 
-      expect(await screen.findByText('No communities under Shopping yet')).toBeInTheDocument();
-
-      await user.click(screen.getByRole('button', { name: 'Show all communities' }));
-
-      expect(screen.getByRole('heading', { name: 'All Communities' })).toBeInTheDocument();
+      expect(refetch).toHaveBeenCalled();
     });
   });
 
@@ -363,8 +386,7 @@ describe('CommunitiesPageContent', () => {
     it('still browses Discover', () => {
       render(<CommunitiesPageContent />);
 
-      expect(screen.getByText('Nairobi Hikers')).toBeInTheDocument();
-      expect(useGetCommunities).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
+      expect(allSection().getByText('Nairobi Hikers')).toBeInTheDocument();
     });
 
     it('is invited to sign in for the parts that need an account', async () => {
@@ -382,44 +404,5 @@ describe('CommunitiesPageContent', () => {
 
       expect(screen.queryByRole('button', { name: 'Sign in' })).not.toBeInTheDocument();
     });
-  });
-});
-
-/**
- * A 429 from the API used to render as "No communities right now" - the same
- * screen as a genuinely empty result - because the service resolves rather than
- * throws, so React Query never reports an error.
- */
-describe('when the request fails', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    sessionState = { data: { user: { id: 'u1' } }, status: 'authenticated' };
-    useCommunityDetail.mockReturnValue({ data: undefined });
-    useGetInterestCategories.mockReturnValue({ data: [HIKING, SHOPPING], isLoading: false });
-    failWith('Request was throttled. Expected available in 300 seconds.');
-  });
-
-  it('says so rather than claiming there are none', () => {
-    render(<CommunitiesPageContent />);
-
-    expect(screen.getByText('Communities could not load')).toBeInTheDocument();
-    expect(screen.queryByText('No communities right now')).not.toBeInTheDocument();
-  });
-
-  it('passes on what the API said', () => {
-    render(<CommunitiesPageContent />);
-
-    expect(
-      screen.getByText('Request was throttled. Expected available in 300 seconds.'),
-    ).toBeInTheDocument();
-  });
-
-  it('offers a retry', async () => {
-    const user = userEvent.setup();
-    render(<CommunitiesPageContent />);
-
-    await user.click(screen.getByRole('button', { name: 'Try again' }));
-
-    expect(refetch).toHaveBeenCalled();
   });
 });

@@ -7,10 +7,12 @@ import { useRouter } from 'next/navigation';
 
 import { useQueries } from '@tanstack/react-query';
 
-import { CommunityDiscoverCard } from '@/app/(experiences)/components/CommunityDiscoverCard';
+import { CommunityCard } from '@/app/shared/components/Communities/CommunityCard';
+import { MomentsMosaicGrid } from '@/app/shared/components/Communities/MomentsMosaicGrid';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { MomentsMasonry } from '@/app/shared/components/Moments';
+import { MomentDrawer } from '@/app/shared/components/Moments';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
+import { useShowMore } from '@/app/shared/hooks/useShowMore';
 import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
 import { useAuthDialog } from '@/context/AuthDialogContext';
@@ -22,7 +24,7 @@ import { Experience } from '@/types/experience';
 import { Moment, momentPhotos } from '@/types/moment';
 
 import { CommunityHappeningCard } from '../CommunityHappeningCard';
-import { COMMUNITY_GRID, COMMUNITY_GRID_COLLAPSED } from '../grid';
+import { COMMUNITY_GRID } from '../grid';
 
 /**
  * How many followed communities the two feeds below fan out across.
@@ -46,7 +48,9 @@ const SectionHeading = ({
   /** Renders the chevron. Omitted where there is nowhere to go. */
   href?: string;
 }) => {
-  const heading = <h2 className="text-xl font-bold text-gray-900">{title}</h2>;
+  const heading = (
+    <h2 className="text-[22px] font-bold tracking-[-0.3px] text-brand-ink">{title}</h2>
+  );
 
   if (!href) return heading;
 
@@ -62,12 +66,21 @@ export interface CommunityFeedTabProps {
   isSignedIn: boolean;
   /** Which slice of the reader's communities this tab is: their follows, or the ones they run. */
   query: { following?: boolean; createdBy?: string };
-  /** Heading over the grid - "Following", "Created or Hosted by You". */
+  /** Heading over the grid - "Following", "Created or hosted by you". */
   listHeading: string;
   signedOutMessage: string;
   signedOutBlurb: string;
-  emptyMessage: string;
   failureMessage: string;
+  /** Cards shown before "Show more" reveals the rest. Omitted shows every
+   * card with no Show more at all - the "My communities" tab's own rule. */
+  showMoreCount?: number;
+  /** The default empty block's title - above `emptyMessage`. */
+  emptyTitle?: string;
+  emptyMessage?: string;
+  /** The default empty block's button, e.g. "Discover communities". */
+  emptyAction?: { label: string; onClick: () => void };
+  /** Replaces the default empty block entirely - "My communities"'s own richer one. */
+  renderEmpty?: () => ReactNode;
   /** Rendered under the grid: the create CTA on the reader's own tab. */
   footer?: ReactNode;
 }
@@ -86,13 +99,17 @@ export const CommunityFeedTab = ({
   listHeading,
   signedOutMessage,
   signedOutBlurb,
-  emptyMessage,
   failureMessage,
+  showMoreCount,
+  emptyTitle,
+  emptyMessage,
+  emptyAction,
+  renderEmpty,
   footer,
 }: CommunityFeedTabProps) => {
   const router = useRouter();
   const { needAuth } = useAuthDialog();
-  const [showAllRows, setShowAllRows] = useState(false);
+  const [openMoment, setOpenMoment] = useState<Moment | null>(null);
 
   // Both slices are the reader's own, so neither tab means anything signed out
   const { data, isLoading, isFetching, refetch } = useGetCommunities({
@@ -106,6 +123,11 @@ export const CommunityFeedTab = ({
   const hasFailed = data?.success === false;
   const communities: Community[] = data?.data?.results ?? [];
   const fanOutIds = communities.slice(0, FEED_FANOUT).map((community) => community.id);
+
+  const { visible, isExpanded, hasMore, toggle } = useShowMore(
+    communities,
+    showMoreCount ?? communities.length,
+  );
 
   const experienceQueries = useQueries({
     queries: fanOutIds.map((communityId) => ({
@@ -154,10 +176,7 @@ export const CommunityFeedTab = ({
         <p className="max-w-sm text-center text-sm text-gray-400">{signedOutBlurb}</p>
         {/* Nothing to carry through: the tab is already open, and it fills in
             as soon as the session lands */}
-        <Button
-          onClick={() => needAuth('join')}
-          className="rounded-full px-6"
-        >
+        <Button onClick={() => needAuth('join')} className="rounded-full px-6">
           Sign in
         </Button>
       </div>
@@ -193,24 +212,30 @@ export const CommunityFeedTab = ({
   }
 
   if (communities.length === 0) {
+    if (renderEmpty) return <>{renderEmpty()}</>;
+
     return (
-      <div className="flex flex-col items-center gap-4 py-16">
-        <NoData message={emptyMessage} />
+      <div className="flex flex-col items-center gap-4 py-16 text-center">
+        {emptyTitle && <h2 className="text-xl font-bold text-gray-900">{emptyTitle}</h2>}
+        <NoData message={emptyMessage ?? 'Nothing here yet'} />
+        {emptyAction && (
+          <Button onClick={emptyAction.onClick} className="rounded-full px-6">
+            {emptyAction.label}
+          </Button>
+        )}
       </div>
     );
   }
-
-  const visibleCards = showAllRows ? communities : communities.slice(0, COMMUNITY_GRID_COLLAPSED);
 
   return (
     <div className="mt-8 space-y-10">
       {(isLoadingExperiences || happening.length > 0) && (
         <section>
-          <SectionHeading title="Happening in your Communities" />
+          <SectionHeading title="Happening in your communities" />
 
-          <div className="mt-4">
+          <div className="mt-[18px]">
             {isLoadingExperiences ? (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(168px,1fr))] gap-x-4 gap-y-[26px]">
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div key={index} className="space-y-3">
                     <div className="aspect-square w-full animate-pulse rounded-2xl bg-gray-100" />
@@ -220,7 +245,7 @@ export const CommunityFeedTab = ({
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(168px,1fr))] gap-x-4 gap-y-[26px]">
                 {happening.map((experience, index) => (
                   <CommunityHappeningCard
                     key={experience.id}
@@ -237,28 +262,21 @@ export const CommunityFeedTab = ({
       <section className="border-t border-gray-100 pt-8">
         <SectionHeading title={listHeading} />
 
-        <div className={cn('mt-4', COMMUNITY_GRID)}>
-          {visibleCards.map((community, index) => (
-            <CommunityDiscoverCard
-              key={community.id}
-              community={community}
-              // The card is sized for the Discover scroll row by default
-              className="w-full"
-              showMemberAvatars
-              priority={index < 4}
-            />
+        <div className={cn('mt-5', COMMUNITY_GRID)}>
+          {visible.map((community) => (
+            <CommunityCard key={community.id} community={community} showMemberAvatars />
           ))}
         </div>
 
-        {communities.length > COMMUNITY_GRID_COLLAPSED && (
+        {hasMore && (
           <Button
             variant="text"
-            onClick={() => setShowAllRows((previous) => !previous)}
+            onClick={toggle}
             className="mt-2 flex items-center gap-1 px-0 font-medium text-primary"
           >
-            {showAllRows ? 'Show Less' : 'Show More'}
+            {isExpanded ? 'Show Less' : 'Show More'}
             <IconComponent
-              iconName={showAllRows ? 'ArrowUp01Icon' : 'ArrowDown01Icon'}
+              iconName={isExpanded ? 'ArrowUp01Icon' : 'ArrowDown01Icon'}
               size={18}
               color="currentColor"
             />
@@ -272,33 +290,25 @@ export const CommunityFeedTab = ({
         <section className="border-t border-gray-100 pt-8">
           <SectionHeading title="Moments" href="/moments" />
 
-          <div className="mt-4">
+          <div className="mt-[18px]">
             {isLoadingMoments ? (
-              <div className="columns-3 gap-3 md:columns-4 xl:columns-5">
-                {[220, 300, 180, 260, 200, 320].map((height, index) => (
-                  <div
-                    key={index}
-                    style={{ height }}
-                    className="mb-4 w-full animate-pulse break-inside-avoid rounded-2xl bg-gray-200"
-                  />
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-1.5">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index} className="h-[170px] animate-pulse rounded-xl bg-gray-200" />
                 ))}
               </div>
             ) : (
-              <MomentsMasonry
-                moments={moments}
-                // The masonry opens a pane on the moments page; here a tile is
-                // a link into it, deep-linked to the one that was pressed
-                onSelect={(id) => router.push(`/moments?momentId=${id}`)}
-                // Paging belongs to the moments page. This is a glimpse of what
-                // the reader's communities have posted, not the whole feed.
-                onLoadMore={() => undefined}
-                hasMore={false}
-                isLoadingMore={false}
-                // Denser than the moments page, which gives the masonry half a
-                // screen beside a detail pane. Here it has the full width, and
-                // the default three columns made each tile enormous.
-                columnsClassName="columns-3 gap-3 md:columns-4 xl:columns-5"
-              />
+              <>
+                <MomentsMosaicGrid
+                  moments={moments}
+                  onSelect={(id) => {
+                    const found = moments.find((moment) => moment.id === id);
+                    if (found) setOpenMoment(found);
+                    else router.push(`/moments?momentId=${id}`);
+                  }}
+                />
+                <MomentDrawer moment={openMoment} onClose={() => setOpenMoment(null)} />
+              </>
             )}
           </div>
         </section>

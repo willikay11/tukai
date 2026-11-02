@@ -48,9 +48,50 @@ export type Community = {
   // For a list row use `membersCount` and `owners` instead.
   members: CommunityMember[];
   membersCount?: number;
+  /** The detail endpoint only. The claimed places that make it a verified business. */
+  verifiedPlaces?: CommunityPlace[];
   owners?: CommunityOwner[];
   dateCreated: string;
   dateModified: string;
+};
+
+/** `PlaceMini` on the API: the summary a community carries of each place it owns. */
+export type CommunityPlace = {
+  id: string;
+  slug?: string;
+  title: string;
+  description?: string;
+  location?: Location;
+  photos?: Photo[];
+};
+
+/**
+ * `/communities/{id}/contact/` - kept off the detail payload. Every field is
+ * optional in practice: Create community collects none of them yet.
+ */
+export type CommunityContact = {
+  id: string;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  whatsapp?: string | null;
+  websiteUrl?: string | null;
+  instagramUrl?: string | null;
+  tiktokUrl?: string | null;
+  youtubeUrl?: string | null;
+  xUrl?: string | null;
+};
+
+/** `/communities/{id}/ratings/`: a rating of one of the community's past experiences. */
+export type CommunityRating = {
+  id: string;
+  /** The experience's id - the rating carries no title of its own. */
+  experience: string;
+  attendee: User;
+  rating: number;
+  review?: string | null;
+  photos?: Photo[];
+  dateCreated: string;
 };
 
 export type CreateCommunity = {

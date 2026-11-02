@@ -1,15 +1,15 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 
+import { CommunityLink } from '@/app/shared/components/Communities/CommunityLink';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { useCommunityDetail, useJoinCommunity } from '@/app/shared/hooks/useCommunities';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { useAuthDialog } from '@/context/AuthDialogContext';
+import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { CommunityMember } from '@/types/community';
-import { communityPath } from '@/utils/detail-paths';
 
 const nameOf = (member: CommunityMember) =>
   member.user?.displayName ||
@@ -37,6 +37,7 @@ export const PlaceCommunity = ({ communityId }: { communityId: string }) => {
   const userId = session?.user?.id;
   const { toast } = useToast();
   const { needAuth } = useAuthDialog();
+  const placeDrawer = usePlaceDrawer();
 
   const { data: response } = useCommunityDetail(communityId, Boolean(communityId));
   const { mutate: joinCommunity, isPending: isJoining } = useJoinCommunity();
@@ -72,7 +73,12 @@ export const PlaceCommunity = ({ communityId }: { communityId: string }) => {
       <h3 className="text-[19px] font-bold tracking-[-0.2px] text-brand-ink">Community</h3>
 
       <div className="flex items-center gap-4">
-        <Link href={communityPath(community)} className="flex min-w-0 flex-1 items-center gap-4">
+        {/* Stacks the owner community on this place: its Back comes here */}
+        <CommunityLink
+          community={community}
+          drawerOptions={{ onCloseBelow: placeDrawer?.closePlace }}
+          className="flex min-w-0 flex-1 items-center gap-4"
+        >
           <PhotoImage
             src={community.photos?.[0]?.photo}
             alt=""
@@ -95,7 +101,7 @@ export const PlaceCommunity = ({ communityId }: { communityId: string }) => {
               {owner ? `Hosted by ${nameOf(owner)}` : `${memberCount} members`}
             </span>
           </span>
-        </Link>
+        </CommunityLink>
 
         {canJoin(currentMember) && (
           <button

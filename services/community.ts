@@ -50,11 +50,15 @@ export async function getCommunities(
   }
 }
 
-export async function fetchCommunity(communityId: string) {
+export async function fetchCommunity(communityId: string, withSession = false) {
   try {
-    // No Authorization header: signed out this sent "Bearer undefined", which
-    // the API rejects - and the community page is public now.
-    const response = await api.get(`/v1/communities/${communityId}`);
+    // No Authorization header by default: signed out this sent "Bearer
+    // undefined", which the API rejects - and the community page is public now.
+    // Client callers pass `withSession` so a signed-in reader is still
+    // recognised: the API turns away anonymous requests where it is locked
+    // down (staging), and the members then never arrive.
+    const client = withSession ? await apiWithToken() : api;
+    const response = await client.get(`/v1/communities/${communityId}`);
     return {
       status: response.status,
       success: true,
@@ -90,12 +94,31 @@ export async function joinCommunity(communityId: string) {
 }
 
 /**
- * Leaving is done through `remove-member` - the API has no dedicated leave or
- * unfollow route (both 404). The endpoint is documented as owner/admin only,
- * so a regular member removing themselves may be rejected by the backend; the
- * error is surfaced to the caller rather than swallowed.
+ * The swagger's own `leave` route. `remove-member`, which this used before, is
+ * documented as owner/admin only, so a member removing themselves could be
+ * turned away. Owners cannot leave their own community.
  */
-export async function leaveCommunity(communityId: string, userId: string) {
+export async function leaveCommunity(communityId: string) {
+  try {
+    const api = await apiWithToken();
+
+    const response = await api.post(`/v1/communities/${communityId}/leave/`, {});
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(parseApiError(error.response?.data, 'An unexpected error occurred'));
+  }
+}
+
+/**
+ * Takes someone out of a community - here, an owner cancelling an invite that
+ * was never accepted. Owner/admin only on the API.
+ */
+export async function removeCommunityMember(communityId: string, userId: string) {
   try {
     const api = await apiWithToken();
 
@@ -110,6 +133,46 @@ export async function leaveCommunity(communityId: string, userId: string) {
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
     throw new Error(parseApiError(error.response?.data, 'An unexpected error occurred'));
+  }
+}
+
+/** Phone, email and socials - a separate endpoint from the detail one. */
+export async function fetchCommunityContact(communityId: string) {
+  try {
+    const api = await apiWithToken();
+    const response = await api.get(`/v1/communities/${communityId}/contact/`);
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
+  }
+}
+
+/** Ratings of the community's past experiences, newest first. */
+export async function fetchCommunityRatings(communityId: string, pageSize = 100) {
+  try {
+    const api = await apiWithToken();
+    const response = await api.get(`/v1/communities/${communityId}/ratings/`, {
+      params: { page: 1, page_size: pageSize },
+    });
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    };
+  } catch (error: any) {
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
   }
 }
 
