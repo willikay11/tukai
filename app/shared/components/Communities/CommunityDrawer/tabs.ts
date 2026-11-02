@@ -6,16 +6,24 @@ import { PlaceDrawerTab } from '@/app/shared/components/Places/PlaceDrawer/tabs'
  */
 export const COMMUNITY_SECTIONS = {
   about: 'community-about',
-  experiences: 'community-experiences',
   members: 'community-members',
+  experiences: 'community-experiences',
   moments: 'community-moments',
 } as const;
 
-export const communityDrawerTabs = (): PlaceDrawerTab[] => [
+/**
+ * The drawer's tabs, in the Communities handoff's order: About, Members,
+ * Experiences, Moments. Experiences is only offered when the community has
+ * something upcoming - an empty tab would scroll to a section with nothing in
+ * it. (Places and Reviews are left out entirely - neither has a backend yet.)
+ */
+export const communityDrawerTabs = (hasExperiences: boolean): PlaceDrawerTab[] => [
   { id: COMMUNITY_SECTIONS.about, label: 'About', icon: 'InformationCircleIcon' },
-  { id: COMMUNITY_SECTIONS.experiences, label: 'Experiences', icon: 'Ticket02Icon' },
-  { id: COMMUNITY_SECTIONS.members, label: 'Members', icon: 'UserGroupIcon' },
-  { id: COMMUNITY_SECTIONS.moments, label: 'Moments', icon: 'Camera01Icon' },
+  { id: COMMUNITY_SECTIONS.members, label: 'Members', icon: 'UserMultipleIcon' },
+  ...(hasExperiences
+    ? [{ id: COMMUNITY_SECTIONS.experiences, label: 'Experiences', icon: 'Calendar03Icon' }]
+    : []),
+  { id: COMMUNITY_SECTIONS.moments, label: 'Moments', icon: 'DashboardCircleIcon' },
 ];
 
 export const COMMUNITY_SECTION_IDS = Object.values(COMMUNITY_SECTIONS);

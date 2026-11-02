@@ -19,3 +19,7 @@ export const nameOfMember = (member: CommunityMember): string =>
   member.user?.displayName ||
   `${member.user?.firstName ?? ''} ${member.user?.lastName ?? ''}`.trim() ||
   'Member';
+
+/** The community's owner, from the detail endpoint's own member records. */
+export const ownerOf = (members: CommunityMember[]): CommunityMember | undefined =>
+  members.find((member) => member.role === 'owner');

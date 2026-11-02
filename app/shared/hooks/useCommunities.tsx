@@ -37,6 +37,7 @@ export const useCommunityDetail = (communityId: string, enabled: boolean) => {
 export const useGetCommunities = (
   {
     page,
+    pageSize = 12,
     enabled,
     category,
     search,
@@ -47,6 +48,10 @@ export const useGetCommunities = (
     createdBy,
   }: {
     page: number;
+    /** Overrides the default page of 12 - the Discover page's own sections
+     * (near you, by type) have no city or taxonomy filter on the API, so they
+     * read a wider page and narrow it client-side instead. */
+    pageSize?: number;
     enabled: boolean;
     category?: string[];
     search?: string;
@@ -67,6 +72,7 @@ export const useGetCommunities = (
     queryKey: [
       'communities',
       page,
+      pageSize,
       category,
       search,
       createdBy,
@@ -79,7 +85,7 @@ export const useGetCommunities = (
       await getCommunities(
         category,
         page,
-        12,
+        pageSize,
         search,
         showUpComingExperiences,
         recommendedCommunities,

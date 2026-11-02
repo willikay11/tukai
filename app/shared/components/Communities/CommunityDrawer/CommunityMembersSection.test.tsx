@@ -11,64 +11,81 @@ jest.mock('@/app/shared/components/Images', () => ({
   PhotoImage: ({ alt }: { alt: string }) => <img alt={alt} />,
 }));
 
-const member = (id: string, name: string, role: CommunityMember['role'] = 'regular') =>
-  ({ id, role, user: { id: `u-${id}`, displayName: name } }) as CommunityMember;
+const toast = jest.fn();
+jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
+
+const member = (
+  id: string,
+  name: string,
+  role: CommunityMember['role'] = 'regular',
+  userId = `u-${id}`,
+) => ({ id, role, user: { id: userId, displayName: name } }) as CommunityMember;
 
 describe('CommunityMembersSection', () => {
-  it('shows nothing-yet where the community has no members', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('says so where the community has no members', () => {
     render(<CommunityMembersSection members={[]} />);
 
-    expect(screen.getByText('No members yet')).toBeInTheDocument();
+    expect(screen.getByText('No members yet.')).toBeInTheDocument();
   });
 
-  it('splits administrators from regular members', () => {
+  it('shows the owner first, labelled Admin, then the rest', () => {
     render(
       <CommunityMembersSection
         members={[
           member('1', 'Amina Hassan', 'owner'),
-          member('2', 'Kevo Otieno', 'admin'),
+          member('2', 'Kevo Otieno', 'regular'),
           member('3', 'Tony Ouma', 'regular'),
         ]}
       />,
     );
 
-    expect(screen.getByText('Administrators')).toBeInTheDocument();
+    expect(screen.getByText('3 members')).toBeInTheDocument();
     expect(screen.getByText('Amina Hassan')).toBeInTheDocument();
+    expect(screen.getByText('Admin')).toBeInTheDocument();
     expect(screen.getByText('Kevo Otieno')).toBeInTheDocument();
-    expect(screen.getByText('Members (1)')).toBeInTheDocument();
     expect(screen.getByText('Tony Ouma')).toBeInTheDocument();
   });
 
-  it('filters by name as the reader types', async () => {
+  it("labels the owner's own chip You instead of Admin", () => {
     render(
       <CommunityMembersSection
-        members={[member('1', 'Amina Hassan'), member('2', 'Kevo Otieno')]}
+        members={[member('1', 'Amina Hassan', 'owner', 'me')]}
+        currentUserId="me"
       />,
     );
 
-    await userEvent.type(screen.getByPlaceholderText('Find a member'), 'Kevo');
-
-    expect(screen.getByText('Kevo Otieno')).toBeInTheDocument();
-    expect(screen.queryByText('Amina Hassan')).not.toBeInTheDocument();
+    expect(screen.getByText('You')).toBeInTheDocument();
+    expect(screen.queryByText('Admin')).not.toBeInTheDocument();
   });
 
-  it('says so where a search matches nobody', async () => {
-    render(<CommunityMembersSection members={[member('1', 'Amina Hassan')]} />);
+  it("shows a signed-in member's own chip as You, separate from the owner", () => {
+    render(
+      <CommunityMembersSection
+        members={[
+          member('1', 'Amina Hassan', 'owner'),
+          member('2', 'Kevo Otieno', 'regular', 'me'),
+        ]}
+        currentUserId="me"
+      />,
+    );
 
-    await userEvent.type(screen.getByPlaceholderText('Find a member'), 'Zzz');
-
-    expect(screen.getByText('No members matching "Zzz"')).toBeInTheDocument();
+    expect(screen.getByText('Admin')).toBeInTheDocument();
+    expect(screen.getByText('You')).toBeInTheDocument();
   });
 
-  it('holds a long roster behind "Show N more"', async () => {
-    const members = Array.from({ length: 10 }, (_, index) => member(`${index}`, `Member ${index}`));
+  it('holds a long roster behind a "+N" chip that toasts for now', async () => {
+    const members = Array.from({ length: 12 }, (_, index) => member(`${index}`, `Member ${index}`));
     render(<CommunityMembersSection members={members} />);
 
-    expect(screen.queryByText('Member 9')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Show 2 more' })).toBeInTheDocument();
+    const overflow = screen.getByRole('button', { name: 'See all 12 members' });
+    expect(overflow).toHaveTextContent('+3');
 
-    await userEvent.click(screen.getByRole('button', { name: 'Show 2 more' }));
+    await userEvent.click(overflow);
 
-    expect(screen.getByText('Member 9')).toBeInTheDocument();
+    expect(toast).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'See all 12 members' }),
+    );
   });
 });

@@ -28,7 +28,7 @@ describe('MyCommunitiesTab', () => {
     expect(feedProps).toHaveBeenCalledWith(
       expect.objectContaining({
         query: { createdBy: 'me' },
-        listHeading: 'Created or Hosted by You',
+        listHeading: 'Created or hosted by you',
       }),
     );
   });

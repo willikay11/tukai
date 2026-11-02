@@ -1,6 +1,6 @@
 import { CommunityMember } from '@/types/community';
 
-import { membershipOf, nameOfMember } from './community-drawer';
+import { membershipOf, nameOfMember, ownerOf } from './community-drawer';
 
 const member = (overrides: Partial<CommunityMember> = {}): CommunityMember =>
   ({
@@ -47,5 +47,16 @@ describe('nameOfMember', () => {
 
   it('falls back to "Member" where the API sent neither', () => {
     expect(nameOfMember(member({ user: { id: 'u1' } } as never))).toBe('Member');
+  });
+});
+
+describe('ownerOf', () => {
+  it('finds the member with the owner role', () => {
+    const owner = member({ id: 'm-owner', role: 'owner' });
+    expect(ownerOf([member({ id: 'm-regular' }), owner])).toBe(owner);
+  });
+
+  it('is undefined where no member owns it', () => {
+    expect(ownerOf([member({ id: 'm-regular' })])).toBeUndefined();
   });
 });

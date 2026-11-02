@@ -16,8 +16,32 @@ jest.mock('@/app/shared/components/Images', () => ({
 jest.mock('@/app/shared/components/Share', () => ({
   Share: () => <button type="button">share</button>,
 }));
+jest.mock('@/app/shared/components/SendMessage', () => ({
+  SendMessage: () => null,
+}));
 jest.mock('./CommunityDrawerFooter', () => ({
   CommunityDrawerFooter: () => <div data-testid="footer" />,
+}));
+
+const toast = jest.fn();
+jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) }));
+
+const handleShare = jest.fn();
+jest.mock('@/app/shared/components/Moments', () => ({
+  MomentComposerForm: () => <div data-testid="moment-form" />,
+  MomentComposerTrigger: ({ placeholder, onOpen }: { placeholder: string; onOpen: () => void }) => (
+    <button type="button" onClick={onOpen}>
+      {placeholder}
+    </button>
+  ),
+  MomentDrawer: () => null,
+  useMomentComposer: () => ({
+    handleShare,
+    canShare: false,
+    isPending: false,
+    sharedMoment: null,
+    onCloseSharedMoment: jest.fn(),
+  }),
 }));
 
 let communityResponse: { data: unknown } | undefined;
@@ -48,6 +72,7 @@ const community = (overrides: Record<string, unknown> = {}) => ({
     verified: false,
     categories: [],
     photos: [],
+    location: { city: 'Nairobi' },
     members: [],
     membersCount: 3,
     ...overrides,
@@ -56,8 +81,13 @@ const community = (overrides: Record<string, unknown> = {}) => ({
 
 const renderDrawer = () => render(<CommunityDrawer communityId="c1" isOpen onClose={jest.fn()} />);
 
+// A week from now, so it never falls on "today" and the day-picker's own
+// empty-day message renders instead of a real ExperienceCard
+const inAWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
 describe('CommunityDrawer', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     communityResponse = community();
     isLoading = false;
     isError = false;
@@ -81,38 +111,39 @@ describe('CommunityDrawer', () => {
     expect(screen.getByText('This community could not be loaded.')).toBeInTheDocument();
   });
 
-  it('shows the title, visibility, and a verified badge', () => {
-    communityResponse = community({ verified: true });
+  it('marks a verified business and a private community', () => {
+    communityResponse = community({ verified: true, isPublic: false });
     renderDrawer();
 
-    expect(screen.getByText('Nairobi Trail Runners')).toBeInTheDocument();
-    expect(screen.getByText('Public community')).toBeInTheDocument();
-    expect(screen.getByTestId('icon-CheckmarkBadge01Icon')).toBeInTheDocument();
+    expect(screen.getByLabelText('Verified business')).toBeInTheDocument();
+    expect(screen.getByLabelText('Private community')).toBeInTheDocument();
   });
 
-  it('says private for a private community', () => {
-    communityResponse = community({ isPublic: false });
-    renderDrawer();
-
-    expect(screen.getByText('Private community')).toBeInTheDocument();
-  });
-
-  it('shows the four tabs - About, Experiences, Members, Moments', () => {
+  it('shows About, Members and Moments by default, with no upcoming experiences', () => {
     renderDrawer();
 
     expect(screen.getByRole('tab', { name: /About/ })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /Experiences/ })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Members/ })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Moments/ })).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /Experiences/ })).not.toBeInTheDocument();
   });
 
-  it('shows the description and the members/experiences facts', () => {
-    experiencesResponse = { data: { results: [{ id: 'e1' }, { id: 'e2' }] } };
+  it('adds the Experiences tab once there is an upcoming one', () => {
+    experiencesResponse = { data: { results: [{ id: 'e1', startDate: inAWeek }] } };
+    renderDrawer();
+
+    expect(screen.getByRole('tab', { name: /Experiences/ })).toBeInTheDocument();
+  });
+
+  it('shows the description and the member count', () => {
+    communityResponse = community({
+      members: [{ id: 'm1', role: 'owner', user: { id: 'owner-1', displayName: 'Amina' } }],
+    });
     renderDrawer();
 
     expect(screen.getByText('Weekend trail runs around the city.')).toBeInTheDocument();
-    expect(screen.getByText('3')).toBeInTheDocument();
-    expect(screen.getByText('2 upcoming')).toBeInTheDocument();
+    expect(screen.getByText('1 member')).toBeInTheDocument();
+    expect(screen.getByText('Admin')).toBeInTheDocument();
   });
 
   it('closes on the close button', async () => {
@@ -128,5 +159,35 @@ describe('CommunityDrawer', () => {
     renderDrawer();
 
     expect(screen.getByTestId('footer')).toBeInTheDocument();
+  });
+
+  it('swaps to the moment composer for a member, and hides the footer while composing', async () => {
+    communityResponse = community({
+      members: [{ id: 'm1', user: { id: 'u1' }, inviteStatus: 'accepted' }],
+    });
+    renderDrawer();
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Share a moment from Nairobi Trail Runners' }),
+    );
+
+    expect(screen.getByText('New moment')).toBeInTheDocument();
+    expect(screen.getByTestId('moment-form')).toBeInTheDocument();
+    expect(screen.queryByTestId('footer')).not.toBeInTheDocument();
+  });
+
+  it('toasts instead of composing for a reader who has not joined', async () => {
+    renderDrawer();
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Share a moment from Nairobi Trail Runners' }),
+    );
+
+    expect(toast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: expect.stringContaining('Join Nairobi Trail Runners to share moments here'),
+      }),
+    );
+    expect(screen.queryByTestId('moment-form')).not.toBeInTheDocument();
   });
 });

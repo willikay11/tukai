@@ -2,49 +2,54 @@
 
 import { DescriptionShowMore } from '@/app/shared/components/Global';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
-import { DetailsGrid } from '@/app/shared/components/Sections';
+import { PlacePhotoStrip } from '@/app/shared/components/Places/PlaceDrawer/PlacePhotoStrip';
 import { Community } from '@/types/community';
-import { Photo } from '@/types/photo';
 
 import { COMMUNITY_SECTIONS } from './tabs';
 
+/** The handoff's "Show more" threshold on the About text. */
+const ABOUT_MAX_LENGTH = 180;
+
 /**
- * Photos, description, categories and the two facts the API actually sends -
- * same content as the full page's own About section (AboutSection.tsx), built
- * fresh for the drawer rather than shared with it: a different scroll offset
- * and a narrower column, the same reason the place drawer carries its own
- * PlaceAboutSection instead of the page's.
+ * Photos, the city chip, description and categories - the Communities
+ * handoff's Photos / City chip / About blocks, kept together since they sit
+ * back to back with nothing else between them.
+ *
+ * Contact details and Socials are left out: the `Community` type carries no
+ * phone, email or socials fields yet (see the drawer fork's report for the
+ * backend-gap list).
  */
-export const CommunityAboutSection = ({
-  community,
-  upcomingCount,
-}: {
-  community: Community;
-  upcomingCount: number;
-}) => {
+export const CommunityAboutSection = ({ community }: { community: Community }) => {
   const photos = (community.photos ?? [])
-    .map((photo: Photo) => photo.photo)
-    .filter((photo): photo is string => Boolean(photo));
+    .map((photo) => photo.photo)
+    .filter((photo): photo is string => Boolean(photo))
+    .slice(0, 8);
 
-  const memberCount = community.membersCount ?? community.members?.length ?? 0;
-
-  // ⚠️ No phone, email, location or meeting schedule on a community - only
-  // these two rows have a source
-  const details = [
-    { icon: 'UserGroupIcon', label: 'Members', value: `${memberCount}` },
-    { icon: 'Calendar03Icon', label: 'Experiences hosted', value: `${upcomingCount} upcoming` },
-  ];
+  const city = community.location?.city;
 
   return (
-    <section id={COMMUNITY_SECTIONS.about} className="scroll-mt-[148px] space-y-6">
+    <section id={COMMUNITY_SECTIONS.about} className="scroll-mt-[148px] space-y-5">
       {photos.length > 0 && (
-        <div className="-mx-6">
-          <SquarePhotoStrip photos={photos} variant="hero" />
+        <div className="-mx-6 px-6">
+          <PlacePhotoStrip photos={photos} alt={community.title} />
         </div>
       )}
 
-      <DescriptionShowMore text={community.description} />
+      {city && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-[14.5px] text-ink-muted">
+            <IconComponent
+              iconName="Building03Icon"
+              size={19}
+              color="currentColor"
+              className="text-brand"
+            />
+            {city}, Kenya
+          </span>
+        </div>
+      )}
+
+      <DescriptionShowMore text={community.description} maxLength={ABOUT_MAX_LENGTH} />
 
       {community.categories?.length > 0 && (
         <div className="flex flex-wrap gap-2">
@@ -59,11 +64,6 @@ export const CommunityAboutSection = ({
           ))}
         </div>
       )}
-
-      <div>
-        <p className="mb-3 text-sm font-bold text-gray-900">Details</p>
-        <DetailsGrid rows={details} />
-      </div>
     </section>
   );
 };

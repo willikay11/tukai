@@ -1,121 +1,100 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-
 import { PhotoImage } from '@/app/shared/components/Images';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { NoData } from '@/components/ui/noData';
+import { useToast } from '@/app/shared/hooks/useToast';
 import { CommunityMember } from '@/types/community';
 
 import { nameOfMember } from './community-drawer';
 import { COMMUNITY_SECTIONS } from './tabs';
 
-// Shown before a "Show N more" reveals the rest - keeps a long roster from
-// pushing everything else below it out of the first screenful
-const VISIBLE_REGULARS = 8;
+/** Chips shown before the "+{rest}" overflow chip takes over. */
+const MAX_CHIPS = 9;
 
-const MemberRow = ({ member }: { member: CommunityMember }) => {
+const MemberChip = ({ member, role }: { member: CommunityMember; role?: string }) => {
   const name = nameOfMember(member);
 
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-surface p-3">
-      <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-surface-brand">
+    <span className="inline-flex h-11 max-w-[220px] items-center gap-2 rounded-full bg-surface px-[5px] pr-4 text-sm text-gray-900">
+      <span className="relative h-[34px] w-[34px] flex-shrink-0 overflow-hidden rounded-full bg-surface-brand">
         <PhotoImage
           src={member.user?.picture}
-          alt={name}
+          alt=""
           fill
-          sizes="40px"
+          sizes="34px"
           className="object-cover"
           fallback={
-            <div className="flex h-full w-full items-center justify-center text-xs font-bold text-brand">
+            <div className="flex h-full w-full items-center justify-center text-[13px] font-bold text-brand-ink">
               {name.charAt(0).toUpperCase()}
             </div>
           }
         />
-      </div>
-
-      <p className="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">{name}</p>
-    </div>
+      </span>
+      <span className="min-w-0 flex-1 truncate">{name}</span>
+      {role && <span className="flex-shrink-0 text-[12.5px] font-semibold text-brand">{role}</span>}
+    </span>
   );
 };
 
-export const CommunityMembersSection = ({ members }: { members: CommunityMember[] }) => {
-  const [query, setQuery] = useState('');
-  const [showAllRegulars, setShowAllRegulars] = useState(false);
+/**
+ * The handoff's member chip roster: the owner first (labelled "Admin", or
+ * "You" when it is the signed-in reader), then the reader's own chip if they
+ * are a separate member, then the rest - up to 9 chips, with a "+{rest}"
+ * overflow chip that toasts for now (there is nowhere real for it to go yet).
+ */
+export const CommunityMembersSection = ({
+  members,
+  currentUserId,
+}: {
+  members: CommunityMember[];
+  currentUserId?: string;
+}) => {
+  const { toast } = useToast();
+  const memberCount = members.length;
 
-  const { admins, regulars } = useMemo(() => {
-    const term = query.trim().toLowerCase();
-    const matching = term
-      ? members.filter((member) => nameOfMember(member).toLowerCase().includes(term))
-      : members;
+  const owner = members.find((member) => member.role === 'owner');
+  const isOwnerSelf = owner?.user?.id === currentUserId;
+  const self = members.find((member) => member.user?.id === currentUserId);
+  const showSelfSeparately = Boolean(self) && !isOwnerSelf;
 
-    return {
-      admins: matching.filter((member) => member.role === 'admin' || member.role === 'owner'),
-      regulars: matching.filter((member) => member.role !== 'admin' && member.role !== 'owner'),
-    };
-  }, [members, query]);
+  const rest = members.filter(
+    (member) => member.id !== owner?.id && (!showSelfSeparately || member.id !== self?.id),
+  );
 
-  const visibleRegulars = showAllRegulars ? regulars : regulars.slice(0, VISIBLE_REGULARS);
-  const hiddenCount = regulars.length - visibleRegulars.length;
+  const ordered = [
+    ...(owner ? [{ member: owner, role: isOwnerSelf ? 'You' : 'Admin' }] : []),
+    ...(showSelfSeparately && self ? [{ member: self, role: 'You' }] : []),
+    ...rest.map((member) => ({ member, role: undefined })),
+  ];
+
+  const visible = ordered.slice(0, MAX_CHIPS);
+  const overflow = ordered.length - visible.length;
 
   return (
-    <section id={COMMUNITY_SECTIONS.members} className="scroll-mt-[148px] space-y-5">
-      <h2 className="text-19 font-bold text-gray-900">Members</h2>
+    <section id={COMMUNITY_SECTIONS.members} className="scroll-mt-[148px] space-y-3.5">
+      <h3 className="text-19 font-bold tracking-[-0.2px] text-gray-800">Members</h3>
+      <p className="-mt-1 text-sm leading-snug text-ink-muted">
+        {memberCount} {memberCount === 1 ? 'member' : 'members'}
+      </p>
 
-      <Input
-        placeholder="Find a member"
-        value={query}
-        onChange={(event) => {
-          setQuery(event.target.value);
-          setShowAllRegulars(false);
-        }}
-        className="text-[14px] leading-[18px]"
-      />
+      <div className="flex flex-wrap gap-2">
+        {visible.map(({ member, role }) => (
+          <MemberChip key={member.id} member={member} role={role} />
+        ))}
 
-      {admins.length === 0 && regulars.length === 0 ? (
-        <div className="py-8">
-          <NoData message={query ? `No members matching "${query}"` : 'No members yet'} />
-        </div>
-      ) : (
-        <div className="space-y-5">
-          {admins.length > 0 && (
-            <div className="space-y-2.5">
-              <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                Administrators
-              </p>
-              <div className="space-y-2">
-                {admins.map((member) => (
-                  <MemberRow key={member.id} member={member} />
-                ))}
-              </div>
-            </div>
-          )}
+        {overflow > 0 && (
+          <button
+            type="button"
+            onClick={() => toast({ description: `See all ${memberCount} members` })}
+            aria-label={`See all ${memberCount} members`}
+            className="inline-flex h-11 min-w-11 items-center justify-center rounded-full bg-surface-brand px-3.5 text-sm font-bold text-brand transition-colors hover:bg-surface-tab"
+          >
+            +{overflow}
+          </button>
+        )}
+      </div>
 
-          {regulars.length > 0 && (
-            <div className="space-y-2.5">
-              <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                Members ({regulars.length})
-              </p>
-              <div className="space-y-2">
-                {visibleRegulars.map((member) => (
-                  <MemberRow key={member.id} member={member} />
-                ))}
-              </div>
-
-              {hiddenCount > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowAllRegulars(true)}
-                  className="w-full rounded-full"
-                >
-                  Show {hiddenCount} more
-                </Button>
-              )}
-            </div>
-          )}
-        </div>
+      {ordered.length === 0 && (
+        <p className="text-sm leading-snug text-ink-muted">No members yet.</p>
       )}
     </section>
   );
