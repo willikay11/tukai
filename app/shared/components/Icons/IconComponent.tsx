@@ -42,6 +42,7 @@ import {
 import {
   CalendarAdd01Icon as CalendarAdd01IconDuotone,
   DashboardCircleAddIcon as DashboardCircleAddIconDuotone,
+  Share08Icon as Share08IconDuotone,
   ShoppingBasketAdd02Icon as ShoppingBasketAdd02IconDuotone,
   StoreVerified01Icon as StoreVerified01IconDuotone,
   UserMultipleIcon as UserMultipleIconDuotone,
@@ -577,6 +578,7 @@ const BULK_ICONS = {
 const DUOTONE_ICONS = {
   CalendarAdd01Icon: CalendarAdd01IconDuotone,
   DashboardCircleAddIcon: DashboardCircleAddIconDuotone,
+  Share08Icon: Share08IconDuotone,
   ShoppingBasketAdd02Icon: ShoppingBasketAdd02IconDuotone,
   StoreVerified01Icon: StoreVerified01IconDuotone,
   UserMultipleIcon: UserMultipleIconDuotone,

@@ -67,12 +67,7 @@ export const CommunityDrawerFooter = ({
         onClick={onShareMoment}
         className={`${BUTTON} bg-lime text-brand-ink hover:bg-lime-dark hover:shadow-[0_6px_16px_rgba(176,232,0,.4)]`}
       >
-        <IconComponent
-          iconName="DashboardCircleAddIcon"
-          variant="duotone"
-          size={20}
-          color="currentColor"
-        />
+        <IconComponent iconName="Share08Icon" variant="duotone" size={20} color="currentColor" />
         Share moment
       </button>
 

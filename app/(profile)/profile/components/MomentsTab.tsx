@@ -27,7 +27,7 @@ export const MomentsTab = ({ userId }: { userId?: string | null }) => {
           onClick={() => setIsComposerOpen(true)}
           className="inline-flex h-11 flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-lime px-4 pl-[13px] text-[14.5px] font-semibold text-brand-ink hover:bg-lime-dark"
         >
-          <IconComponent iconName="Camera01Icon" size={18} color="currentColor" />
+          <IconComponent iconName="Share08Icon" size={18} color="currentColor" />
           Share a moment
         </button>
       </div>
