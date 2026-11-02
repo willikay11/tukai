@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { shouldShowSeeAll } from '@/app/(experiences)/experiences/see-all/config';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
-import { ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
+import { RAIL_CARD_RESPONSIVE_WIDTH, ScrollRow, SeeAllCard } from '@/app/shared/components/Lists';
 import { CARD_LIFT } from '@/app/shared/components/Motion';
 import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { cn } from '@/lib/utils';
@@ -53,7 +53,10 @@ export const ExperienceRow = ({
       ) : (
         <ScrollRow>
           {experiences.map((experience) => (
-            <div key={experience.id} className="w-[184px] flex-shrink-0 snap-start">
+            <div
+              key={experience.id}
+              className={cn('w-[184px] flex-shrink-0 snap-start', RAIL_CARD_RESPONSIVE_WIDTH)}
+            >
               <Link
                 href={experiencePath(experience)}
                 onClick={(event) => {
@@ -81,7 +84,11 @@ export const ExperienceRow = ({
           ))}
 
           {seeAllHref && shouldShowSeeAll(total) && (
-            <SeeAllCard href={seeAllHref} previewPhotos={experiences.slice(0, 3).map(coverOf)} />
+            <SeeAllCard
+              href={seeAllHref}
+              previewPhotos={experiences.slice(0, 3).map(coverOf)}
+              className={RAIL_CARD_RESPONSIVE_WIDTH}
+            />
           )}
         </ScrollRow>
       )}

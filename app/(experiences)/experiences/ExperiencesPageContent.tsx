@@ -37,7 +37,7 @@ import { shouldShowSeeAll } from '@/app/(experiences)/experiences/see-all/config
 import { CategoryChipRow } from '@/app/shared/components/Filters/CategoryChipRow';
 import type { CategoryChip } from '@/app/shared/components/Filters/CategoryChipRow';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { CardRail, SeeAllCard } from '@/app/shared/components/Lists';
+import { CardRail, RAIL_CARD_RESPONSIVE_WIDTH, SeeAllCard } from '@/app/shared/components/Lists';
 import { PillTabs } from '@/app/shared/components/Tabs';
 import { isSharedWithMe, useMyBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
@@ -328,6 +328,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                     key={experience.id}
                     experience={experience}
                     priority={index < EAGER_IN_ROW}
+                    className={RAIL_CARD_RESPONSIVE_WIDTH}
                   />
                 ))
               )}
@@ -383,7 +384,11 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
               ) : (
                 <>
                   {itineraries.map((itinerary) => (
-                    <ItineraryCard key={itinerary.id} itinerary={itinerary} />
+                    <ItineraryCard
+                      key={itinerary.id}
+                      itinerary={itinerary}
+                      className={RAIL_CARD_RESPONSIVE_WIDTH}
+                    />
                   ))}
 
                   {/* Only when the API holds more than the row shows: a full
@@ -394,6 +399,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
                       previewPhotos={itineraries
                         .slice(0, 3)
                         .map((itinerary) => coverPhotoUrl(itinerary.photos, 'md'))}
+                      className={RAIL_CARD_RESPONSIVE_WIDTH}
                     />
                   )}
                 </>
