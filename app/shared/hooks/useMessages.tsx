@@ -2,8 +2,14 @@ import { useMemo } from 'react';
 
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { deleteConversation, fetchMessages, markMessageRead, sendMessage } from '@/services/comm';
-import { Message, isThreadUnread, otherParty, toThreads } from '@/types/message';
+import {
+  deleteConversation,
+  fetchConversation,
+  fetchMessages,
+  markMessageRead,
+  sendMessage,
+} from '@/services/comm';
+import { Message, isThreadUnread, mergeMessages, otherParty, toThreads } from '@/types/message';
 
 const MESSAGES = ['messages'];
 
@@ -72,25 +78,42 @@ export const useUnreadConversationCount = (myId?: string, enabled = true) => {
 };
 
 /**
- * One conversation, kept fresh while it is open so the other side's replies
- * show up at the bottom. With no person, nothing is open and nothing polls.
+ * One conversation, all of it, kept fresh while it is open so the other
+ * side's replies show up at the bottom. With no person, nothing is open and
+ * nothing polls.
+ *
+ * Read from the conversation's own endpoint: the inbox list is one page of
+ * every message, so a conversation built from it alone loses its earlier
+ * messages. What the list holds is merged in too, so a message just sent shows
+ * at once and something just read stays read.
  */
 export const useConversation = (myId?: string, personId?: string | null) => {
   const isOpen = Boolean(myId && personId);
-  const { data: response, isLoading } = useMessages(
-    isOpen,
-    isOpen ? OPEN_CONVERSATION_POLL_MS : false,
-  );
+  const poll = isOpen ? OPEN_CONVERSATION_POLL_MS : false;
 
-  const thread = useMemo(
-    () =>
-      myId && personId
-        ? (toThreads(messageList(response?.data), myId).find(
-            (candidate) => candidate.personId === personId,
-          ) ?? null)
-        : null,
-    [response?.data, myId, personId],
-  );
+  const { data: list } = useMessages(isOpen, poll);
+  const { data: history, isLoading } = useQuery({
+    // Under MESSAGES, so whatever refreshes the list refreshes this too
+    queryKey: [...MESSAGES, 'between', myId, personId],
+    queryFn: async () => await fetchConversation(myId as string, personId as string),
+    enabled: isOpen,
+    refetchInterval: poll,
+  });
+
+  const thread = useMemo(() => {
+    if (!myId || !personId) return null;
+
+    const fromList = messageList(list?.data).filter(
+      (one) => otherParty(one, myId)?.id === personId,
+    );
+    const fromHistory = history?.success ? (history.data as Message[]) : [];
+
+    return (
+      toThreads(mergeMessages(fromHistory, fromList), myId).find(
+        (candidate) => candidate.personId === personId,
+      ) ?? null
+    );
+  }, [list?.data, history, myId, personId]);
 
   return { thread, isLoading };
 };
@@ -120,6 +143,7 @@ export const useSendMessageTo = () => {
       if (!senderId) return undefined;
 
       const pending: Message = {
+        // The prefix is what `mergeMessages` knows a not-yet-sent one by
         id: `pending-${Date.now()}`,
         sender: { id: senderId },
         recipient: { id: recipientId },

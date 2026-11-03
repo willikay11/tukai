@@ -4,6 +4,7 @@ import {
   isMine,
   isThreadUnread,
   matchesThread,
+  mergeMessages,
   otherParty,
   threadPreview,
   toConversationRows,
@@ -213,5 +214,35 @@ describe('toConversationRows', () => {
     const rows = toConversationRows([fromMe()], ME);
 
     expect(rows[1]).toEqual(expect.objectContaining({ kind: 'message', mine: true }));
+  });
+});
+
+describe('mergeMessages', () => {
+  it('keeps every message once, by id', () => {
+    const merged = mergeMessages(
+      [message({ id: 'a' }), message({ id: 'b' })],
+      [message({ id: 'b' }), message({ id: 'c' })],
+    );
+
+    expect(merged.map((one) => one.id)).toEqual(['a', 'b', 'c']);
+  });
+
+  // Reading only goes one way, so a stale copy cannot make it unread again
+  it('keeps a message read if either copy says so', () => {
+    const [merged] = mergeMessages([message({ isRead: false })], [message({ isRead: true })]);
+
+    expect(merged.isRead).toBe(true);
+  });
+
+  it('drops a message waiting on the server once the real one is in', () => {
+    const pending = fromMe({
+      id: 'pending-1',
+      content: 'On my way',
+      dateCreated: '2026-09-29T10:00:00Z',
+    });
+    const sent = fromMe({ id: 'm9', content: 'On my way', dateCreated: '2026-09-29T10:00:02Z' });
+
+    expect(mergeMessages([sent], [pending]).map((one) => one.id)).toEqual(['m9']);
+    expect(mergeMessages([], [pending]).map((one) => one.id)).toEqual(['pending-1']);
   });
 });

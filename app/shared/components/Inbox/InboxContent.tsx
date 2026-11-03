@@ -81,7 +81,8 @@ export const InboxContent = ({
   const panelId = (id: InboxTab) => `${baseId}-panel-${id}`;
 
   return (
-    <>
+    // The design keeps 28px between the tabs and what is under them
+    <div className="flex flex-col gap-7">
       <div role="tablist" aria-label="Inbox" onKeyDown={onKeyDown} className="flex flex-wrap gap-2">
         {TABS.map((option) => {
           const isActive = tab === option.id;
@@ -128,6 +129,6 @@ export const InboxContent = ({
           <MessagesTab myId={myId} onOpenConversation={onOpenConversation} />
         )}
       </div>
-    </>
+    </div>
   );
 };

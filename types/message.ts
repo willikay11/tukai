@@ -32,6 +32,37 @@ export type MessageThread = {
 
 const when = (message: Message) => new Date(message.dateCreated ?? 0).getTime();
 
+const PENDING = 'pending-';
+
+/**
+ * Two lists of the same conversation as one, by id. Read wins over unread,
+ * since reading only goes one way, and a message still waiting on the server
+ * gives way once the real one with the same words from the same person is in.
+ */
+export const mergeMessages = (...lists: Message[][]): Message[] => {
+  const byId = new Map<string, Message>();
+
+  lists.flat().forEach((message) => {
+    const seen = byId.get(message.id);
+    byId.set(
+      message.id,
+      seen ? { ...seen, ...message, isRead: seen.isRead || message.isRead } : message,
+    );
+  });
+
+  const merged = Array.from(byId.values());
+  const isSent = (pending: Message) =>
+    merged.some(
+      (one) =>
+        !one.id.startsWith(PENDING) &&
+        one.sender?.id === pending.sender?.id &&
+        one.content === pending.content &&
+        when(one) >= when(pending) - 60_000,
+    );
+
+  return merged.filter((one) => !one.id.startsWith(PENDING) || !isSent(one));
+};
+
 /** The person on the other side of a message from the reader. */
 export const otherParty = (message: Message, myId: string): LinkedUser | undefined =>
   message.sender?.id === myId ? message.recipient : message.sender;
