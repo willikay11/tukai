@@ -1,21 +1,12 @@
 'use client';
 
-import { useEffect, useId, useMemo, useState } from 'react';
+import { useId, useMemo } from 'react';
 
 import { PhotoImage } from '@/app/shared/components/Images';
-import { useMarkMessageRead, useMessages } from '@/app/shared/hooks/useMessages';
+import { useMessages } from '@/app/shared/hooks/useMessages';
 import { cn } from '@/lib/utils';
-import {
-  Message,
-  MessageThread,
-  isMine,
-  isThreadUnread,
-  threadPreview,
-  toThreads,
-} from '@/types/message';
+import { Message, MessageThread, isThreadUnread, threadPreview, toThreads } from '@/types/message';
 import { inboxStamp } from '@/types/notification';
-
-import { ConversationView } from '../ConversationView';
 
 const ThreadList = ({
   labelledBy,
@@ -85,18 +76,23 @@ const ThreadList = ({
 );
 
 /**
- * The reader's conversations: Unread, then Read, newest first.
+ * The reader's conversations: Unread, then Read, newest first. Opening one is
+ * the caller's - the panel stacks the conversation on top of the inbox.
  *
  * The API has no threads, so they are grouped here from the one flat list of
  * every message the reader is party to.
  */
-export const MessagesTab = ({ myId }: { myId: string }) => {
+export const MessagesTab = ({
+  myId,
+  onOpenConversation,
+}: {
+  myId: string;
+  onOpenConversation: (personId: string) => void;
+}) => {
   const unreadId = useId();
   const readId = useId();
-  const [openPersonId, setOpenPersonId] = useState<string | null>(null);
 
   const { data: response, isLoading } = useMessages();
-  const { mutate: markRead } = useMarkMessageRead();
 
   const payload = response?.data;
 
@@ -107,25 +103,9 @@ export const MessagesTab = ({ myId }: { myId: string }) => {
 
     return toThreads(messages, myId);
   }, [payload, myId]);
-  const open = threads.find((thread) => thread.personId === openPersonId) ?? null;
-
-  // Opening a conversation is reading it, so what was sent to the reader stops
-  // being unread
-  useEffect(() => {
-    if (!open) return;
-
-    open.messages
-      .filter((message) => !message.isRead && !isMine(message, myId))
-      .forEach((message) => markRead(message.id));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open?.personId, open?.messages.length]);
 
   if (isLoading) {
     return <div aria-hidden="true" className="h-40 animate-pulse rounded-xl bg-surface" />;
-  }
-
-  if (open) {
-    return <ConversationView thread={open} myId={myId} onBack={() => setOpenPersonId(null)} />;
   }
 
   if (threads.length === 0) {
@@ -151,7 +131,7 @@ export const MessagesTab = ({ myId }: { myId: string }) => {
             threads={unread}
             myId={myId}
             isUnread
-            onOpen={setOpenPersonId}
+            onOpen={onOpenConversation}
           />
         </>
       )}
@@ -166,7 +146,7 @@ export const MessagesTab = ({ myId }: { myId: string }) => {
             threads={read}
             myId={myId}
             isUnread={false}
-            onOpen={setOpenPersonId}
+            onOpen={onOpenConversation}
           />
         </>
       )}

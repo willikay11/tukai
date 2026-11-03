@@ -1,10 +1,12 @@
 import {
   Message,
+  conversationBreak,
   isMine,
   isThreadUnread,
   matchesThread,
   otherParty,
   threadPreview,
+  toConversationRows,
   toThreads,
 } from './message';
 
@@ -169,5 +171,47 @@ describe('matchesThread', () => {
 
   it('drops what matches neither', () => {
     expect(matchesThread(thread, 'mombasa')).toBe(false);
+  });
+});
+
+describe('conversationBreak', () => {
+  it('writes the day, date and time', () => {
+    expect(conversationBreak(new Date(2026, 10, 1, 12, 58))).toBe('Sun, Nov 1 at 12:58 PM');
+    expect(conversationBreak(new Date(2026, 10, 3, 9, 14))).toBe('Tue, Nov 3 at 9:14 AM');
+  });
+});
+
+describe('toConversationRows', () => {
+  const at = (hours: number, minutes: number) =>
+    new Date(2026, 10, 1, hours, minutes).toISOString();
+
+  it('breaks before the first message and after more than two hours, dividing the rest', () => {
+    const rows = toConversationRows(
+      [
+        message({ id: 'a', dateCreated: at(12, 58) }),
+        fromMe({ id: 'b', dateCreated: at(13, 6) }),
+        message({ id: 'c', dateCreated: at(15, 6) }),
+        message({ id: 'd', dateCreated: at(17, 7) }),
+      ],
+      ME,
+    );
+
+    expect(
+      rows.map((row) => (row.kind === 'break' ? 'break' : `${row.key}${row.divided ? '|' : ''}`)),
+    ).toEqual([
+      'break',
+      'a',
+      'b|',
+      // Exactly two hours is still the same stretch
+      'c|',
+      'break',
+      'd',
+    ]);
+  });
+
+  it('marks what the reader sent', () => {
+    const rows = toConversationRows([fromMe()], ME);
+
+    expect(rows[1]).toEqual(expect.objectContaining({ kind: 'message', mine: true }));
   });
 });

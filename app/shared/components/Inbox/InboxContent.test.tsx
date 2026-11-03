@@ -34,7 +34,15 @@ const Harness = ({
 }) => {
   const [tab, setTab] = useState<InboxTab>(start);
 
-  return <InboxContent myId="u1" tab={tab} onTabChange={setTab} autoFocus={autoFocus} />;
+  return (
+    <InboxContent
+      myId="u1"
+      tab={tab}
+      onTabChange={setTab}
+      onOpenConversation={jest.fn()}
+      autoFocus={autoFocus}
+    />
+  );
 };
 
 describe('the inbox tabs', () => {

@@ -131,6 +131,8 @@ const config: Config = {
           // The hover on a full-bleed inbox row, notification or conversation -
           // paler again than `stat-hover`, from the notifications handoff
           row: '#FAFBFA',
+          // The hover on a grey secondary button, such as Keep conversation
+          hover: '#EDEFEC',
         },
         line: {
           DEFAULT: '#DDE3DF', // 176 — hairline borders and dividers
@@ -160,6 +162,8 @@ const config: Config = {
           // The second red, asked for by the claim status view's "Not
           // approved" text - distinct from DEFAULT, used only there.
           deep: '#B42318',
+          // The hover on a solid red button, such as Delete conversation
+          hover: '#C81E2E',
         },
         // The claim status view's "Under review" / "Needs more documents"
         // banner - amber, with no prior use in the canvas before this screen.

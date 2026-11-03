@@ -6,8 +6,9 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { InboxContent, InboxTab } from '@/app/shared/components/Inbox';
+import { ConversationView, InboxContent, InboxTab } from '@/app/shared/components/Inbox';
 import { PageContainer } from '@/app/shared/components/Layout';
+import { useConversation } from '@/app/shared/hooks/useMessages';
 import { Button } from '@/components/ui/button';
 
 /**
@@ -19,6 +20,8 @@ export const InboxPageContent = () => {
   const { data: session, status } = useSession();
   const userId = session?.user?.id;
   const [tab, setTab] = useState<InboxTab>('notifications');
+  const [conversationWith, setConversationWith] = useState<string | null>(null);
+  const { thread } = useConversation(userId ?? undefined, conversationWith);
 
   if (status === 'loading') {
     return (
@@ -39,6 +42,25 @@ export const InboxPageContent = () => {
     );
   }
 
+  if (conversationWith) {
+    return (
+      <PageContainer className="py-6">
+        {/* A frame of its own, so the composer stays pinned under the messages */}
+        <div className="h-[75dvh] min-h-[420px] overflow-hidden rounded-18 border border-surface-muted bg-white">
+          <ConversationView
+            personId={conversationWith}
+            thread={thread}
+            me={{ id: userId, name: session?.user?.name, photo: session?.user?.image }}
+            onBack={() => {
+              setConversationWith(null);
+              setTab('messages');
+            }}
+          />
+        </div>
+      </PageContainer>
+    );
+  }
+
   return (
     <PageContainer className="flex flex-col gap-7 py-6">
       <h1 className="text-[24px] font-bold tracking-[-0.4px] text-gray-800">Inbox</h1>
@@ -48,6 +70,7 @@ export const InboxPageContent = () => {
         tab={tab}
         onTabChange={setTab}
         onOpenNotification={(href) => href && router.push(href)}
+        onOpenConversation={setConversationWith}
       />
     </PageContainer>
   );

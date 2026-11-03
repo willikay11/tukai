@@ -31,12 +31,14 @@ export const InboxContent = ({
   tab,
   onTabChange,
   onOpenNotification,
+  onOpenConversation,
   autoFocus = false,
 }: {
   myId: string;
   tab: InboxTab;
   onTabChange: (tab: InboxTab) => void;
   onOpenNotification?: (href: string | null) => void;
+  onOpenConversation: (personId: string) => void;
   autoFocus?: boolean;
 }) => {
   const baseId = useId();
@@ -123,7 +125,7 @@ export const InboxContent = ({
             onMarkedAll={() => tabRefs.current.notifications?.focus()}
           />
         ) : (
-          <MessagesTab myId={myId} />
+          <MessagesTab myId={myId} onOpenConversation={onOpenConversation} />
         )}
       </div>
     </>

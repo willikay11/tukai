@@ -96,3 +96,54 @@ export const matchesThread = (thread: MessageThread, query: string): boolean => 
     thread.messages.some((message) => message.content.toLowerCase().includes(wanted))
   );
 };
+
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** A time break in a conversation: "Sun, Nov 1 at 12:58 PM", in the reader's time zone. */
+export const conversationBreak = (date: Date): string => {
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+
+  return `${DAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()} at ${hours % 12 || 12}:${minutes} ${hours >= 12 ? 'PM' : 'AM'}`;
+};
+
+// A pause longer than this starts a new stretch, with its own time break
+const BREAK_AFTER_MS = 2 * 60 * 60 * 1000;
+
+export type ConversationRow =
+  | { kind: 'break'; key: string; label: string }
+  | { kind: 'message'; key: string; message: Message; mine: boolean; divided: boolean };
+
+/**
+ * A conversation as it is drawn, oldest first: a time break before the first
+ * message and before any sent more than two hours after the one above it, and
+ * a divider between messages in the same stretch - never right after a break.
+ */
+export const toConversationRows = (messages: Message[], myId: string): ConversationRow[] => {
+  const rows: ConversationRow[] = [];
+  let previous: Message | null = null;
+
+  messages.forEach((message) => {
+    const at = when(message);
+    const isBreak = !previous || at - when(previous) > BREAK_AFTER_MS;
+
+    if (isBreak) {
+      rows.push({
+        kind: 'break',
+        key: `break-${message.id}`,
+        label: conversationBreak(new Date(at)),
+      });
+    }
+    rows.push({
+      kind: 'message',
+      key: message.id,
+      message,
+      mine: isMine(message, myId),
+      divided: !isBreak,
+    });
+    previous = message;
+  });
+
+  return rows;
+};
