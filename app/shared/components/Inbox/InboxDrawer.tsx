@@ -59,7 +59,7 @@ export const InboxDrawer = ({
           </button>
         </div>
 
-        <div className="flex flex-1 flex-col gap-7 px-6 pb-9 pt-5">
+        <div className="flex flex-1 flex-col gap-0 px-6 pb-9 pt-5">
           {myId && (
             <InboxContent
               myId={myId}
