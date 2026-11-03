@@ -59,13 +59,10 @@ describe('ProfileMenu', () => {
     });
   });
 
-  // No TukAI window or trigger exists anywhere yet - shown to match the
-  // design, but with nowhere to go
-  it('shows TukAI as disabled, with nowhere to go yet', () => {
+  it('links TukAI to its page', () => {
     render(<ProfileMenu {...defaults} />);
 
-    const tukai = screen.getByText('TukAI').closest('button');
-    expect(tukai).toBeDisabled();
+    expect(screen.getByText('TukAI').closest('a')).toHaveAttribute('href', '/ai');
   });
 
   it('falls back to the inbox page where there is no panel to open', () => {

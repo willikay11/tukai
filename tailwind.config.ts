@@ -68,6 +68,10 @@ const config: Config = {
         lime: {
           DEFAULT: '#B0E800', // 69
           dark: '#A3D900', // 27 — hover and pressed
+          // TukAI's pale lime: the writing helpers, suggestion chips, the price
+          // card and the free plan card, and their hover
+          soft: '#F2FAD9',
+          'soft-hover': '#E7F5BF',
         },
         // The two accents a meta line is made of: a rating's star, and the
         // dot between one fact and the next. Both sampled from the designs —
@@ -133,6 +137,12 @@ const config: Config = {
           row: '#FAFBFA',
           // The hover on a grey secondary button, such as Keep conversation
           hover: '#EDEFEC',
+          // TukAI: your own message bubble
+          bubble: '#EEF6F1',
+          // TukAI: the sticky section headings in Your chats
+          sticky: '#F7F8F7',
+          // TukAI: Send while it cannot send
+          off: '#E5E9E7',
         },
         line: {
           DEFAULT: '#DDE3DF', // 176 — hairline borders and dividers
@@ -262,6 +272,25 @@ const config: Config = {
           '0%': { opacity: '1', transform: 'none', filter: 'blur(0)' },
           '100%': { opacity: '0', transform: 'translateY(-.36em)', filter: 'blur(6px)' },
         },
+        // TukAI (design_handoff_tukai section 13). Every use goes through
+        // `motion-safe:`, so reduced motion turns them off.
+        // The sparkle on Ask TukAI, popping in once
+        'tk-spark': {
+          '0%': { transform: 'scale(0) rotate(-140deg)', opacity: '0' },
+          '45%': { transform: 'scale(1.28) rotate(16deg)', opacity: '1' },
+          '62%': { transform: 'scale(.9) rotate(-8deg)' },
+          '78%': { transform: 'scale(1.07) rotate(3deg)' },
+          '100%': { transform: 'scale(1) rotate(0deg)', opacity: '1' },
+        },
+        // The three "Looking through Tukai" and "Listening" dots
+        'tk-dot': {
+          '0%, 80%, 100%': { opacity: '.25', transform: 'translateY(0)' },
+          '40%': { opacity: '1', transform: 'translateY(-3px)' },
+        },
+        // Each block of a new reply fading up into place
+        'tk-line-in': {
+          from: { opacity: '0', transform: 'translateY(8px)' },
+        },
       },
       animation: {
         pop: 'pop 300ms ease-out',
@@ -270,6 +299,9 @@ const config: Config = {
         'auth-spin': 'auth-spin 0.8s linear infinite',
         'auth-letter-in': 'auth-letter-in .62s cubic-bezier(.2,.8,.2,1) both',
         'auth-word-out': 'auth-word-out .42s cubic-bezier(.4,0,.2,1) both',
+        'tk-spark': 'tk-spark 1.3s ease-out .35s both',
+        'tk-dot': 'tk-dot 1.2s ease-in-out infinite',
+        'tk-line-in': 'tk-line-in .55s cubic-bezier(.22,.8,.24,1) both',
       },
       borderRadius: {
         lg: 'var(--radius)',
