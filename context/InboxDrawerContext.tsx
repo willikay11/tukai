@@ -31,11 +31,13 @@ const InboxDrawerContext = createContext<InboxDrawerValue | null>(null);
  *
  * The tab stays as picked while the panel is open; opening it always sets it.
  * Opening a notification with somewhere to go closes the panel and goes there.
+ * Opening a conversation stacks it on top, and Back returns to Messages.
  */
 export const InboxDrawerProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [tab, setTab] = useState<InboxTab>('notifications');
+  const [conversationWith, setConversationWith] = useState<string | null>(null);
   const opener = useRef<HTMLElement | null>(null);
 
   const openInbox = useCallback((next: InboxTab, returnFocusTo?: HTMLElement | null) => {
@@ -43,10 +45,18 @@ export const InboxDrawerProvider = ({ children }: { children: ReactNode }) => {
     opener.current =
       returnFocusTo ?? (active instanceof HTMLElement && active !== document.body ? active : null);
     setTab(next);
+    setConversationWith(null);
     setIsOpen(true);
   }, []);
 
+  const backToMessages = useCallback(() => {
+    setConversationWith(null);
+    setTab('messages');
+  }, []);
+
   const closeInbox = useCallback(() => {
+    // The conversation is left in place so the panel does not flash back to
+    // the inbox as it slides away; opening the inbox clears it
     setIsOpen(false);
 
     const target = opener.current;
@@ -71,7 +81,10 @@ export const InboxDrawerProvider = ({ children }: { children: ReactNode }) => {
       <InboxDrawer
         isOpen={isOpen}
         tab={tab}
+        conversationWith={conversationWith}
         onTabChange={setTab}
+        onOpenConversation={setConversationWith}
+        onBack={backToMessages}
         onClose={closeInbox}
         onNavigate={navigate}
       />

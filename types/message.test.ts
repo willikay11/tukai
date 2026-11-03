@@ -1,10 +1,13 @@
 import {
   Message,
+  conversationBreak,
   isMine,
   isThreadUnread,
   matchesThread,
+  mergeMessages,
   otherParty,
   threadPreview,
+  toConversationRows,
   toThreads,
 } from './message';
 
@@ -169,5 +172,77 @@ describe('matchesThread', () => {
 
   it('drops what matches neither', () => {
     expect(matchesThread(thread, 'mombasa')).toBe(false);
+  });
+});
+
+describe('conversationBreak', () => {
+  it('writes the day, date and time', () => {
+    expect(conversationBreak(new Date(2026, 10, 1, 12, 58))).toBe('Sun, Nov 1 at 12:58 PM');
+    expect(conversationBreak(new Date(2026, 10, 3, 9, 14))).toBe('Tue, Nov 3 at 9:14 AM');
+  });
+});
+
+describe('toConversationRows', () => {
+  const at = (hours: number, minutes: number) =>
+    new Date(2026, 10, 1, hours, minutes).toISOString();
+
+  it('breaks before the first message and after more than two hours, dividing the rest', () => {
+    const rows = toConversationRows(
+      [
+        message({ id: 'a', dateCreated: at(12, 58) }),
+        fromMe({ id: 'b', dateCreated: at(13, 6) }),
+        message({ id: 'c', dateCreated: at(15, 6) }),
+        message({ id: 'd', dateCreated: at(17, 7) }),
+      ],
+      ME,
+    );
+
+    expect(
+      rows.map((row) => (row.kind === 'break' ? 'break' : `${row.key}${row.divided ? '|' : ''}`)),
+    ).toEqual([
+      'break',
+      'a',
+      'b|',
+      // Exactly two hours is still the same stretch
+      'c|',
+      'break',
+      'd',
+    ]);
+  });
+
+  it('marks what the reader sent', () => {
+    const rows = toConversationRows([fromMe()], ME);
+
+    expect(rows[1]).toEqual(expect.objectContaining({ kind: 'message', mine: true }));
+  });
+});
+
+describe('mergeMessages', () => {
+  it('keeps every message once, by id', () => {
+    const merged = mergeMessages(
+      [message({ id: 'a' }), message({ id: 'b' })],
+      [message({ id: 'b' }), message({ id: 'c' })],
+    );
+
+    expect(merged.map((one) => one.id)).toEqual(['a', 'b', 'c']);
+  });
+
+  // Reading only goes one way, so a stale copy cannot make it unread again
+  it('keeps a message read if either copy says so', () => {
+    const [merged] = mergeMessages([message({ isRead: false })], [message({ isRead: true })]);
+
+    expect(merged.isRead).toBe(true);
+  });
+
+  it('drops a message waiting on the server once the real one is in', () => {
+    const pending = fromMe({
+      id: 'pending-1',
+      content: 'On my way',
+      dateCreated: '2026-09-29T10:00:00Z',
+    });
+    const sent = fromMe({ id: 'm9', content: 'On my way', dateCreated: '2026-09-29T10:00:02Z' });
+
+    expect(mergeMessages([sent], [pending]).map((one) => one.id)).toEqual(['m9']);
+    expect(mergeMessages([], [pending]).map((one) => one.id)).toEqual(['pending-1']);
   });
 });

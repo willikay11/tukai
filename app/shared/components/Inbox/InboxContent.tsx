@@ -31,12 +31,14 @@ export const InboxContent = ({
   tab,
   onTabChange,
   onOpenNotification,
+  onOpenConversation,
   autoFocus = false,
 }: {
   myId: string;
   tab: InboxTab;
   onTabChange: (tab: InboxTab) => void;
   onOpenNotification?: (href: string | null) => void;
+  onOpenConversation: (personId: string) => void;
   autoFocus?: boolean;
 }) => {
   const baseId = useId();
@@ -79,7 +81,8 @@ export const InboxContent = ({
   const panelId = (id: InboxTab) => `${baseId}-panel-${id}`;
 
   return (
-    <>
+    // The design keeps 28px between the tabs and what is under them
+    <div className="flex flex-col gap-7">
       <div role="tablist" aria-label="Inbox" onKeyDown={onKeyDown} className="flex flex-wrap gap-2">
         {TABS.map((option) => {
           const isActive = tab === option.id;
@@ -123,9 +126,9 @@ export const InboxContent = ({
             onMarkedAll={() => tabRefs.current.notifications?.focus()}
           />
         ) : (
-          <MessagesTab myId={myId} />
+          <MessagesTab myId={myId} onOpenConversation={onOpenConversation} />
         )}
       </div>
-    </>
+    </div>
   );
 };

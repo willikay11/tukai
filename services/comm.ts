@@ -19,7 +19,11 @@ export const fetchEmailPreferences = async () => {
     const response = await client.get('/v1/comms/email-preferences/');
     const results = parseSnakeToCamel(response.data)?.results ?? [];
 
-    return { status: response.status, success: true, data: results[0] as NotificationPreferences | undefined };
+    return {
+      status: response.status,
+      success: true,
+      data: results[0] as NotificationPreferences | undefined,
+    };
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
 
@@ -46,7 +50,9 @@ export const updateEmailPreferences = async (
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
 
-    throw new Error(parseApiError(error.response?.data, 'Could not save your notification settings'));
+    throw new Error(
+      parseApiError(error.response?.data, 'Could not save your notification settings'),
+    );
   }
 };
 
@@ -210,6 +216,49 @@ export const fetchMessages = async (
   }
 };
 
+/**
+ * One conversation, every page of it. The schema names the two people sender
+ * and recipient without saying whether it is one direction or both, so it is
+ * asked both ways and the answers merged by id.
+ */
+export const fetchConversation = async (myId: string, personId: string) => {
+  const pageOf = async (sender: string, recipient: string) => {
+    const api = await apiWithToken();
+    const messages: unknown[] = [];
+
+    // A long conversation is several pages; the cap is a guard against a
+    // `next` that never ends
+    for (let page = 1; page <= 20; page += 1) {
+      const response = await api.get(`/v1/comms/messages/between/${sender}/${recipient}/`, {
+        params: { page, page_size: 100 },
+      });
+      const data = parseSnakeToCamel(response.data);
+      const results = Array.isArray(data) ? data : (data?.results ?? []);
+
+      messages.push(...results);
+      if (Array.isArray(data) || !data?.next || results.length === 0) break;
+    }
+
+    return messages;
+  };
+
+  try {
+    const [mine, theirs] = await Promise.all([pageOf(myId, personId), pageOf(personId, myId)]);
+    const byId = new Map<string, unknown>();
+    [...mine, ...theirs].forEach((message) => byId.set((message as { id: string }).id, message));
+
+    return { status: 200, success: true, data: Array.from(byId.values()) };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load this conversation'),
+    };
+  }
+};
+
 export const markMessageRead = async (messageId: string) => {
   try {
     const api = await apiWithToken();
@@ -223,7 +272,10 @@ export const markMessageRead = async (messageId: string) => {
   }
 };
 
-/** Deletes the whole conversation, both sides of it, for good. */
+/**
+ * Deletes the conversation from the reader's side only; the other person
+ * still sees it.
+ */
 export const deleteConversation = async (senderId: string, recipientId: string) => {
   try {
     const api = await apiWithToken();
