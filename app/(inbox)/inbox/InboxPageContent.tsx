@@ -4,31 +4,21 @@ import { useState } from 'react';
 
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
+import { InboxContent, InboxTab } from '@/app/shared/components/Inbox';
 import { PageContainer } from '@/app/shared/components/Layout';
-import { useUnreadNotificationCount } from '@/app/shared/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { unreadBadge } from '@/types/notification';
-
-import { MessagesTab } from './components/MessagesTab';
-import { NotificationsTab } from './components/NotificationsTab';
-
-type InboxTab = 'notifications' | 'messages';
 
 /**
- * The inbox the profile menu pointed at nothing.
- *
- * Two tabs, as the canvas has it: what happened, and what was said.
+ * The inbox as a page, for a link that lands here. The account menu opens the
+ * same content in the side panel instead.
  */
 export const InboxPageContent = () => {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const userId = session?.user?.id;
-  const isSignedIn = Boolean(userId);
   const [tab, setTab] = useState<InboxTab>('notifications');
-
-  const { data: countResponse } = useUnreadNotificationCount(isSignedIn);
-  const badge = unreadBadge(Number(countResponse?.data?.count ?? 0));
 
   if (status === 'loading') {
     return (
@@ -38,7 +28,7 @@ export const InboxPageContent = () => {
     );
   }
 
-  if (!isSignedIn) {
+  if (!userId) {
     return (
       <PageContainer className="py-16 text-center">
         <p className="text-sm text-gray-500">Sign in to see your inbox.</p>
@@ -49,52 +39,16 @@ export const InboxPageContent = () => {
     );
   }
 
-  const tabs: Array<{ id: InboxTab; label: string; badge?: string | null }> = [
-    { id: 'notifications', label: 'Notifications', badge },
-    { id: 'messages', label: 'Messages' },
-  ];
-
   return (
-    <PageContainer className="space-y-4 py-6">
-      <h1 className="text-3xl font-bold text-gray-900">Inbox</h1>
+    <PageContainer className="flex flex-col gap-7 py-6">
+      <h1 className="text-[24px] font-bold tracking-[-0.4px] text-gray-800">Inbox</h1>
 
-      <div
-        role="tablist"
-        aria-label="Inbox"
-        className="inline-flex items-center gap-1 rounded-full bg-surface p-1"
-      >
-        {tabs.map((option) => {
-          const isActive = tab === option.id;
-
-          return (
-            <button
-              key={option.id}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              onClick={() => setTab(option.id)}
-              className={cn(
-                'flex h-11 items-center gap-2 rounded-full px-[18px] text-15 font-medium transition-colors',
-                isActive ? 'bg-emerald-200 text-brand-deep' : 'text-gray-900 hover:bg-white/60',
-              )}
-            >
-              {option.label}
-              {option.badge && (
-                <span className="rounded-full bg-danger px-1.5 text-13 font-semibold text-white">
-                  {option.badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {tab === 'notifications' ? (
-        <NotificationsTab />
-      ) : (
-        // Reached only past the signed-out branch above, so the id is there
-        <MessagesTab myId={userId as string} />
-      )}
+      <InboxContent
+        myId={userId}
+        tab={tab}
+        onTabChange={setTab}
+        onOpenNotification={(href) => href && router.push(href)}
+      />
     </PageContainer>
   );
 };

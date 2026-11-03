@@ -68,18 +68,31 @@ describe('ProfileMenu', () => {
     expect(tukai).toBeDisabled();
   });
 
-  it('sends Notifications and Messages to the inbox', () => {
+  it('falls back to the inbox page where there is no panel to open', () => {
     render(<ProfileMenu {...defaults} />);
 
     expect(screen.getByText('Notifications').closest('a')).toHaveAttribute('href', '/inbox');
     expect(screen.getByText('Messages').closest('a')).toHaveAttribute('href', '/inbox');
   });
 
-  it('shows the unread count as a badge on Notifications only', () => {
-    render(<ProfileMenu {...defaults} unreadNotificationCount={3} />);
+  it('opens the inbox panel on the tab each row names, and closes the menu', () => {
+    const onOpenInbox = jest.fn();
+    const onItemSelect = jest.fn();
+    render(<ProfileMenu {...defaults} onOpenInbox={onOpenInbox} onItemSelect={onItemSelect} />);
 
-    const notifications = screen.getByText('Notifications').closest('a');
-    expect(notifications).toHaveTextContent('3');
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Notifications' }));
+    expect(onOpenInbox).toHaveBeenLastCalledWith('notifications');
+
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Messages' }));
+    expect(onOpenInbox).toHaveBeenLastCalledWith('messages');
+    expect(onItemSelect).toHaveBeenCalledTimes(2);
+  });
+
+  it('counts unread notifications and conversations on their own rows', () => {
+    render(<ProfileMenu {...defaults} unreadNotificationCount={3} unreadConversationCount={2} />);
+
+    expect(screen.getByText('Notifications').closest('a')).toHaveTextContent('3');
+    expect(screen.getByText('Messages').closest('a')).toHaveTextContent('2');
   });
 
   it('hides the badge when there is nothing unread', () => {

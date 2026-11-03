@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { MomentComposer } from '@/app/shared/components/Moments';
+import { useUnreadConversationCount } from '@/app/shared/hooks/useMessages';
 import { useUnreadNotificationCount } from '@/app/shared/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
 import { TukaiImage } from '@/components/ui/image';
@@ -16,6 +17,7 @@ import { useBucketListDrawer } from '@/context/BucketListDrawerContext';
 import { useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
 import { useCreateCommunityDrawer } from '@/context/CreateCommunityDrawerContext';
 import { useCreateExperienceDrawer } from '@/context/CreateExperienceDrawerContext';
+import { useInboxDrawer } from '@/context/InboxDrawerContext';
 
 import { CreateMenu } from './CreateMenu';
 import { CreateMenuItemId } from './CreateMenu/items';
@@ -27,6 +29,7 @@ export const AuthActions = () => {
   const { openCreateExperience } = useCreateExperienceDrawer()!;
   const { openCreateCommunity } = useCreateCommunityDrawer()!;
   const bucketListDrawer = useBucketListDrawer();
+  const inboxDrawer = useInboxDrawer();
   const router = useRouter();
   const { data: session } = useSession();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -37,6 +40,17 @@ export const AuthActions = () => {
   // everybody forever
   const { data: unreadResponse } = useUnreadNotificationCount(Boolean(session?.user?.id));
   const unreadCount = Number(unreadResponse?.data?.count ?? 0);
+  // Messages come as one list with no count endpoint, so they are only
+  // fetched once the menu opens - which is the only place this badge shows
+  const unreadConversations = useUnreadConversationCount(
+    session?.user?.id ?? undefined,
+    isProfileOpen,
+  );
+
+  const accountButton = useRef<HTMLButtonElement>(null);
+  // Set while a menu row hands over to the inbox panel, so the closing menu
+  // does not pull focus back to the account button from inside the panel
+  const isOpeningInbox = useRef(false);
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
@@ -118,6 +132,7 @@ export const AuthActions = () => {
               and the reader's face. The menu icon is what says the rest of the
               app is behind it, which a bare avatar does not. */}
             <PopoverTrigger
+              ref={accountButton}
               aria-label="Account menu"
               aria-haspopup="menu"
               aria-expanded={isProfileOpen}
@@ -149,9 +164,23 @@ export const AuthActions = () => {
               sideOffset={8}
               collisionPadding={12}
               className="w-auto rounded-2xl p-0"
+              onCloseAutoFocus={(event) => {
+                if (!isOpeningInbox.current) return;
+                isOpeningInbox.current = false;
+                event.preventDefault();
+              }}
             >
               <ProfileMenu
                 unreadNotificationCount={unreadCount}
+                unreadConversationCount={unreadConversations}
+                onOpenInbox={
+                  inboxDrawer
+                    ? (tab) => {
+                        isOpeningInbox.current = true;
+                        inboxDrawer.openInbox(tab, accountButton.current);
+                      }
+                    : undefined
+                }
                 onSignOut={handleLogout}
                 // Client navigation leaves the popover mounted, so choosing a row
                 // has to close it explicitly

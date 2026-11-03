@@ -45,14 +45,20 @@ describe('the notifications tab', () => {
   it('says what happened, and when, absolutely', () => {
     render(<NotificationsTab />);
 
-    expect(screen.getByText('Kevin Mwangi joined your community Trails And Us.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Kevin Mwangi joined your community Trails And Us.'),
+    ).toBeInTheDocument();
     expect(screen.getByText('Nov 3, 9:20 AM')).toBeInTheDocument();
   });
 
   it('keeps what is new apart from what has been seen, each list named by its heading', () => {
     response = answer([
       notification(),
-      notification({ id: 'n2', content: 'Your review of Board games night is live.', isRead: true }),
+      notification({
+        id: 'n2',
+        content: 'Your review of Board games night is live.',
+        isRead: true,
+      }),
     ]);
     render(<NotificationsTab />);
 

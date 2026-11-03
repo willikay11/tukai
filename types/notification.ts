@@ -47,11 +47,67 @@ export const splitByRead = (notifications: AppNotification[]) => ({
   read: notifications.filter((one) => one.isRead),
 });
 
-/** What the badge shows. Past 9 it stops counting, as badges do. */
+/**
+ * What the lime badge shows. The handoff leaves the cap open (its question 12)
+ * and suggests 99+, which is what this does.
+ */
 export const unreadBadge = (count: number): string | null => {
   if (count <= 0) return null;
 
-  return count > 9 ? '9+' : String(count);
+  return count > 99 ? '99+' : String(count);
+};
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/**
+ * When, always absolute, as the inbox writes it: "Nov 3, 9:20 AM". 12-hour
+ * clock, no leading zero on the hour, in the reader's own time zone.
+ */
+export const inboxStamp = (iso?: string | null): string | null => {
+  if (!iso) return null;
+
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+
+  return `${MONTHS[date.getMonth()]} ${date.getDate()}, ${hours % 12 || 12}:${minutes} ${hours >= 12 ? 'PM' : 'AM'}`;
+};
+
+/**
+ * Where opening a notification goes.
+ *
+ * The API has no structured target yet - only `source`, a free string. It is
+ * followed only when it is a path inside the app; anything else leaves the
+ * row as one that just marks itself read, as the design does for a
+ * notification with no destination.
+ */
+export const notificationHref = (notification: AppNotification): string | null => {
+  const source = notification.source?.trim();
+
+  return source && source.startsWith('/') && !source.startsWith('//') ? source : null;
+};
+
+/** The list out of either shape the API answers with, paginated or bare. */
+export const notificationList = (
+  payload?: AppNotification[] | { results?: AppNotification[] } | null,
+): AppNotification[] => (Array.isArray(payload) ? payload : (payload?.results ?? []));
+
+/**
+ * The same answer with some notifications read, keeping its shape - for
+ * updating the cache before the server confirms.
+ */
+export const withRead = <T extends AppNotification[] | { results?: AppNotification[] }>(
+  payload: T,
+  isTarget: (notification: AppNotification) => boolean,
+): T => {
+  const mark = (list: AppNotification[]) =>
+    list.map((one) => (isTarget(one) ? { ...one, isRead: true } : one));
+
+  if (Array.isArray(payload)) return mark(payload) as T;
+
+  return { ...payload, results: mark(payload.results ?? []) };
 };
 
 /**

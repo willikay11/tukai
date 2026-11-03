@@ -110,7 +110,7 @@ describe('notification settings', () => {
     await userEvent.click(saveButton());
 
     expect(toast).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Notification settings saved' }),
+      expect.objectContaining({ title: 'Notification settings saved.' }),
     );
     expect(onClose).toHaveBeenCalled();
   });

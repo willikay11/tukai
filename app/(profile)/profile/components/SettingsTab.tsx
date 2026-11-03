@@ -45,7 +45,16 @@ const notificationsLine = (prefs?: NotificationPreferences): string => {
     'pushGuides',
   ] as const;
   const on = keys.filter((key) => prefs[key]).length;
-  return `${on} of ${keys.length} on`;
+
+  // A channel counts as on while any of its own switches is. There is no
+  // WhatsApp channel on the wire.
+  const channels = [
+    prefs.pushCommunity || prefs.pushExperiences || prefs.pushSocial || prefs.pushGuides ? 'push' : null,
+    prefs.marketing || prefs.communities || prefs.experiences ? 'email' : null,
+  ].filter(Boolean);
+  const by = channels.length ? channels.join(' and ') : 'no channel';
+
+  return `${on} of ${keys.length} on, by ${by}`;
 };
 
 const SettingsRow = ({
