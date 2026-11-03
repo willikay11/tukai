@@ -4,6 +4,7 @@ import storage from 'redux-persist/lib/storage';
 
 import { claimsReducer } from '../slices/claimsSlice';
 import resetReducer from '../slices/resetSlice';
+import { tukaiReducer } from '../slices/tukaiSlice';
 import userReducer from '../slices/userSlice';
 
 const persistConfig = {
@@ -13,7 +14,7 @@ const persistConfig = {
 
 const persistedReducer = persistReducer(
   persistConfig,
-  combineReducers({ userReducer, resetReducer, claimsReducer }),
+  combineReducers({ userReducer, resetReducer, claimsReducer, tukaiReducer }),
 );
 
 export const store = configureStore({
@@ -22,7 +23,9 @@ export const store = configureStore({
   // redux-persist wraps actions/state with non-serializable internals; the
   // default middleware's check is for app state, which stays plain here
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({ serializableCheck: { ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'] } }),
+    getDefaultMiddleware({
+      serializableCheck: { ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'] },
+    }),
 });
 
 export const persistor = persistStore(store);

@@ -15,6 +15,8 @@ import { useRouter } from 'next/navigation';
 import { InboxDrawer, InboxTab } from '@/app/shared/components/Inbox';
 
 type InboxDrawerValue = {
+  /** Whether the panel is showing, so floating controls such as Ask TukAI can stand aside. */
+  isOpen: boolean;
   /**
    * Opens the inbox on a tab. `returnFocusTo` is what gets focus back on
    * close - the account button, since the menu row that opened it is gone by
@@ -73,7 +75,7 @@ export const InboxDrawerProvider = ({ children }: { children: ReactNode }) => {
     [closeInbox, router],
   );
 
-  const value = useMemo(() => ({ openInbox, closeInbox }), [openInbox, closeInbox]);
+  const value = useMemo(() => ({ isOpen, openInbox, closeInbox }), [isOpen, openInbox, closeInbox]);
 
   return (
     <InboxDrawerContext.Provider value={value}>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TukAI map</title>
+<!--
+  The map beside TukAI's answers, loaded in an iframe by the TukAI page
+  (app/(tukai)/ai/components/TukaiMapFrame.tsx). From the design handoff's
+  "TukAI Map.html": OpenFreeMap's liberty style drawn by MapLibre inside
+  Leaflet, which needs no key and allows commercial use.
+
+  Messages, same origin only:
+    map -> page  { type: 'tk-map-ready' } | { type: 'tk-pin', id } | { type: 'tk-open', id }
+    page -> map  { type: 'tk-pins', pins, route, sel, padL } | { type: 'tk-sel', id }
+-->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400..700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; background: #E8F1ED; font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif; }
+  #map { position: absolute; inset: 0; background: #E8F1ED; }
+  .tk-pin { width: 32px; height: 32px; box-sizing: border-box; border-radius: 999px; border: 2px solid #FFFFFF; background: #013334; color: #FFFFFF; font: 700 13px/28px 'Figtree', sans-serif; text-align: center; box-shadow: 0 2px 8px rgba(1, 51, 52, .35); transition: transform .15s ease, background-color .15s ease; cursor: pointer; }
+  .tk-pin.is-sel { background: #B0E800; color: #013334; transform: scale(1.18); }
+  .leaflet-tooltip.tk-label { padding: 3px 8px; border: none; border-radius: 999px; background: rgba(255,255,255,.95); box-shadow: 0 2px 8px rgba(1, 51, 52, .16); font-family: 'Figtree', sans-serif; font-size: 12.5px; font-weight: 600; color: #1F2937; }
+  .leaflet-tooltip.tk-label::before { display: none; }
+  .tk-day { padding: 2px 8px; border-radius: 999px; background: #066349; color: #FFFFFF; font: 700 11.5px/18px 'Figtree', sans-serif; white-space: nowrap; box-shadow: 0 2px 6px rgba(1, 51, 52, .25); }
+  .tk-note { position: absolute; z-index: 500; left: 50%; top: 16px; transform: translateX(-50%); max-width: calc(100% - 32px); box-sizing: border-box; padding: 10px 16px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 6px 20px rgba(1, 51, 52, .14); font-size: 14px; color: #1F2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tk-note[hidden] { display: none; }
+  .tk-pop .leaflet-popup-content-wrapper { padding: 0; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(1, 51, 52, .22); }
+  .tk-pop .leaflet-popup-content { margin: 0; width: 300px !important; font-family: 'Figtree', sans-serif; color: #1F2937; }
+  .tk-pop .leaflet-popup-tip { box-shadow: none; }
+  .tk-card-img { position: relative; height: 148px; background: #E8F1ED; }
+  .tk-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .tk-card-when { position: absolute; left: 10px; top: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(1, 51, 52, .86); color: #FFFFFF; font-size: 12px; font-weight: 600; }
+  .tk-card-x { position: absolute; right: 0; top: 0; width: 44px; height: 44px; padding: 0; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .tk-card-x span { width: 30px; height: 30px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 2px 8px rgba(1, 51, 52, .2); display: flex; align-items: center; justify-content: center; color: #1F2937; }
+  .tk-card-b { display: flex; flex-direction: column; gap: 3px; padding: 12px 14px 14px; }
+  .tk-card-k { font-size: 12.5px; font-weight: 600; color: #066349; }
+  .tk-card-t { font-size: 15.5px; font-weight: 700; line-height: 1.3; color: #1F2937; }
+  .tk-card-m { font-size: 13px; line-height: 1.4; color: #5B6B66; }
+  .tk-card-go { margin-top: 10px; min-height: 44px; border: none; border-radius: 999px; background: linear-gradient(180deg, #0C7A50 0%, #044B36 100%); color: #FFFFFF; font: 600 14.5px 'Figtree', sans-serif; cursor: pointer; }
+  .tk-card-go:hover { filter: brightness(1.06); }
+  .leaflet-control-attribution { font-family: 'Figtree', sans-serif; font-size: 11px; }
+  .leaflet-bar a { color: #013334; }
+</style>
+</head>
+<body>
+<div id="map" role="region" aria-label="Map of TukAI suggestions"></div>
+<div class="tk-note" id="note">Places TukAI suggests show up here</div>
+<script>
+(function () {
+  var ORIGIN = window.location.origin;
+  function tell(msg) { if (window.parent !== window) window.parent.postMessage(msg, ORIGIN); }
+  var HOME = [-1.2864, 36.8172];
+  var map = L.map('map', { zoomControl: true }).setView(HOME, 11);
+  map.zoomControl.setPosition('bottomright');
+  // Without WebGL the pins and route still draw on the plain ground
+  try {
+    if (L.maplibreGL) L.maplibreGL({ style: 'https://tiles.openfreemap.org/styles/liberty', attribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &copy; <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' }).addTo(map);
+  } catch (e) {}
+  var layer = L.layerGroup().addTo(map), markers = {}, note = document.getElementById('note');
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function safeUrl(u) { return /^https?:\/\//i.test(String(u || '')) ? u : ''; }
+  function icon(p, sel) { return L.divIcon({ className: '', html: '<div class="tk-pin' + (sel ? ' is-sel' : '') + '">' + esc(p.n) + '</div>', iconSize: [32, 32], iconAnchor: [16, 16] }); }
+  function select(id) {
+    Object.keys(markers).forEach(function (k) { var m = markers[k]; m.setIcon(icon(m._tk, k === id)); m.setZIndexOffset(k === id ? 1000 : 0); });
+    if (id && markers[id]) { var ll = markers[id].getLatLng(); if (!map.getBounds().pad(-0.1).contains(ll)) map.panTo(ll); }
+  }
+  var popId = null;
+  function card(p) {
+    var x = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+    var img = safeUrl(p.img);
+    return '<div class="tk-card"><div class="tk-card-img">' + (img ? '<img src="' + esc(img) + '" alt="">' : '') + (p.when ? '<span class="tk-card-when">' + esc(p.when) + '</span>' : '')
+      + '<button type="button" class="tk-card-x" data-tk-close aria-label="Close"><span>' + x + '</span></button></div>'
+      + '<div class="tk-card-b"><span class="tk-card-k">' + esc(p.kind) + '</span><span class="tk-card-t">' + esc(p.title) + '</span>'
+      + (p.meta ? '<span class="tk-card-m">' + esc(p.meta) + '</span>' : '') + (p.fact ? '<span class="tk-card-m">' + esc(p.fact) + '</span>' : '')
+      + '<button type="button" class="tk-card-go" data-tk-open="' + esc(p.id) + '">View details</button></div></div>';
+  }
+  function openCard(p) {
+    popId = p.id;
+    L.popup({ className: 'tk-pop', closeButton: false, maxWidth: 300, minWidth: 300, offset: [0, -12], autoPanPaddingTopLeft: [24, 24], autoPanPaddingBottomRight: [24, 24] })
+      .setLatLng([p.lat, p.lng]).setContent(card(p)).openOn(map);
+  }
+  map.on('popupclose', function () { popId = null; });
+  document.addEventListener('click', function (e) {
+    var go = e.target.closest && e.target.closest('[data-tk-open]'); if (go) { tell({ type: 'tk-open', id: go.getAttribute('data-tk-open') }); return; }
+    if (e.target.closest && e.target.closest('[data-tk-close]')) map.closePopup();
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && popId) map.closePopup(); });
+  var DAYC = ['#066349', '#2F74D0', '#B45309', '#7C3AED', '#E02D3C', '#0E7490', '#4D7C0F'];
+  function setPins(pins, isRoute, sel, padL) {
+    map.closePopup(); layer.clearLayers(); markers = {};
+    pins = (pins || []).filter(function (p) { return typeof p.lat === 'number' && typeof p.lng === 'number'; });
+    note.hidden = pins.length > 0;
+    if (!pins.length) { map.setView(HOME, 11); return; }
+    var pts = [];
+    pins.forEach(function (p) {
+      var m = L.marker([p.lat, p.lng], { icon: icon(p, p.id === sel), keyboard: true, title: p.title, riseOnHover: true });
+      m._tk = p;
+      m.bindTooltip(esc(p.title), { className: 'tk-label', direction: 'right', offset: [14, 0], permanent: true });
+      m.on('click', function () { select(p.id); openCard(p); tell({ type: 'tk-pin', id: p.id }); });
+      m.addTo(layer); markers[p.id] = m; pts.push([p.lat, p.lng]);
+    });
+    if (isRoute) {
+      var days = {};
+      pins.forEach(function (p) { (days[p.day || 0] = days[p.day || 0] || []).push(p); });
+      Object.keys(days).forEach(function (k) {
+        var ps = days[k], c = DAYC[(+k - 1 + DAYC.length) % DAYC.length];
+        if (ps.length > 1) L.polyline(ps.map(function (p) { return [p.lat, p.lng]; }), { color: c, weight: 3, opacity: 0.85, dashArray: '6 8' }).addTo(layer);
+        if (+k > 0) L.marker([ps[0].lat, ps[0].lng], { interactive: false, icon: L.divIcon({ className: '', html: '<div class="tk-day" style="background:' + c + '">Day ' + k + '</div>', iconSize: null, iconAnchor: [-2, 34] }) }).addTo(layer);
+      });
+    }
+    var pad = { paddingTopLeft: [padL || 48, 56], paddingBottomRight: [140, 48], maxZoom: 14 };
+    if (pts.length === 1) map.setView(pts[0], 14); else map.fitBounds(L.latLngBounds(pts), pad);
+  }
+  window.addEventListener('message', function (e) {
+    if (e.origin !== ORIGIN || e.source !== window.parent) return;
+    var d = e.data; if (!d || typeof d !== 'object') return;
+    if (d.type === 'tk-pins') setPins(d.pins, d.route, d.sel, d.padL);
+    else if (d.type === 'tk-sel') { if (popId && popId !== d.id) map.closePopup(); select(d.id); }
+  });
+  window.addEventListener('resize', function () { map.invalidateSize(); });
+  tell({ type: 'tk-map-ready' });
+})();
+</script>
+</body>
+</html>
