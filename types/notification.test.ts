@@ -1,4 +1,13 @@
-import { AppNotification, notificationIcon, splitByRead, unreadBadge } from './notification';
+import {
+  AppNotification,
+  inboxStamp,
+  notificationHref,
+  notificationIcon,
+  notificationList,
+  splitByRead,
+  unreadBadge,
+  withRead,
+} from './notification';
 
 const notification = (overrides: Partial<AppNotification> = {}): AppNotification => ({
   id: 'n1',
@@ -46,14 +55,74 @@ describe('unreadBadge', () => {
     expect(unreadBadge(3)).toBe('3');
   });
 
-  // Past nine a badge stops counting
-  it('stops counting past nine', () => {
-    expect(unreadBadge(10)).toBe('9+');
-    expect(unreadBadge(9)).toBe('9');
+  // The handoff's suggestion for its open question 12
+  it('stops counting past 99', () => {
+    expect(unreadBadge(99)).toBe('99');
+    expect(unreadBadge(100)).toBe('99+');
   });
 
   it('shows nothing when there is nothing unread', () => {
     expect(unreadBadge(0)).toBeNull();
     expect(unreadBadge(-1)).toBeNull();
+  });
+});
+
+describe('inboxStamp', () => {
+  // Built from local parts so the test reads the same in any time zone
+  const local = (month: number, day: number, hours: number, minutes: number) =>
+    new Date(2026, month, day, hours, minutes).toISOString();
+
+  it('writes the time absolutely, on a 12-hour clock with no leading zero', () => {
+    expect(inboxStamp(local(10, 3, 9, 20))).toBe('Nov 3, 9:20 AM');
+    expect(inboxStamp(local(10, 2, 18, 5))).toBe('Nov 2, 6:05 PM');
+  });
+
+  it('writes midnight and noon as 12', () => {
+    expect(inboxStamp(local(0, 1, 0, 0))).toBe('Jan 1, 12:00 AM');
+    expect(inboxStamp(local(0, 1, 12, 30))).toBe('Jan 1, 12:30 PM');
+  });
+
+  it('writes nothing for a missing or broken date', () => {
+    expect(inboxStamp(undefined)).toBeNull();
+    expect(inboxStamp('not a date')).toBeNull();
+  });
+});
+
+describe('notificationHref', () => {
+  it('follows a path inside the app', () => {
+    expect(notificationHref(notification({ source: '/communities/trails-and-us' }))).toBe(
+      '/communities/trails-and-us',
+    );
+  });
+
+  // `source` is a free string on the wire, so only an in-app path is trusted
+  it('goes nowhere for anything else', () => {
+    expect(notificationHref(notification())).toBeNull();
+    expect(notificationHref(notification({ source: 'community' }))).toBeNull();
+    expect(notificationHref(notification({ source: 'https://example.com' }))).toBeNull();
+    expect(notificationHref(notification({ source: '//example.com' }))).toBeNull();
+  });
+});
+
+describe('notificationList', () => {
+  it('reads a paginated answer as well as a bare list', () => {
+    expect(notificationList([notification()])).toHaveLength(1);
+    expect(notificationList({ results: [notification()] })).toHaveLength(1);
+    expect(notificationList(undefined)).toEqual([]);
+  });
+});
+
+describe('withRead', () => {
+  it('reads only what it is told to, keeping the shape', () => {
+    const rows = [notification(), notification({ id: 'n2' })];
+
+    expect(withRead(rows, (one) => one.id === 'n2').map((one) => one.isRead)).toEqual([
+      false,
+      true,
+    ]);
+    expect(withRead({ results: rows, count: 2 }, () => true)).toEqual({
+      results: rows.map((one) => ({ ...one, isRead: true })),
+      count: 2,
+    });
   });
 });

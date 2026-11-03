@@ -1,3 +1,5 @@
+import type { InboxTab } from '@/app/shared/components/Inbox';
+
 export interface ProfileMenuItem {
   label: string;
   icon: string;
@@ -6,6 +8,11 @@ export interface ProfileMenuItem {
   href?: string;
   /** A lime numeric badge, e.g. unread notifications. No data yet renders no badge. */
   badgeCount?: number;
+  /**
+   * Opens the inbox panel on this tab instead of following `href`. The href
+   * stays as the fallback where there is no panel to open.
+   */
+  inboxTab?: InboxTab;
 }
 
 /**
@@ -27,12 +34,13 @@ export const PROFILE_MENU_GROUP_ONE: ProfileMenuItem[] = [
 ];
 
 /**
- * Messages have no page of their own; the inbox names the tab they land in, so
- * Messages points there too.
+ * Notifications and Messages each open the inbox panel on their own tab. The
+ * menu draws Messages with `chatting-01` and the inbox tab with
+ * `message-multiple-01`, as the handoff does (its open question 13).
  */
 export const PROFILE_MENU_GROUP_TWO: ProfileMenuItem[] = [
-  { label: 'Notifications', icon: 'Notification02Icon', href: '/inbox' },
-  { label: 'Messages', icon: 'Message01Icon', href: '/inbox' },
+  { label: 'Notifications', icon: 'Notification02Icon', href: '/inbox', inboxTab: 'notifications' },
+  { label: 'Messages', icon: 'Chatting01Icon', href: '/inbox', inboxTab: 'messages' },
   { label: 'Help', icon: 'InformationCircleIcon', href: '/help' },
 ];
 

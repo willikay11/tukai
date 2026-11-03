@@ -75,11 +75,24 @@ describe('the messages tab', () => {
     expect(screen.getByText('You: Yes, 6am.')).toBeInTheDocument();
   });
 
-  it('counts what has not been read', () => {
-    messages = [fromThem(), fromThem({ id: 'm2', content: 'Still coming?' })];
+  it('keeps unread conversations apart from read ones', () => {
+    messages = [
+      fromThem(),
+      fromThem({ id: 'm2', sender: { id: 'other', displayName: 'Kevo' }, isRead: true }),
+    ];
     render(<MessagesTab myId={ME} />);
 
-    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Unread messages' })).toHaveTextContent('Amina');
+    expect(screen.getByRole('list', { name: 'Read messages' })).toHaveTextContent('Kevo');
+  });
+
+  // Replying is reading, as the design has it
+  it('files a conversation the reader has answered under read', () => {
+    messages = [fromThem(), fromMe({ id: 'm2', dateCreated: '2026-09-29T11:00:00Z' })];
+    render(<MessagesTab myId={ME} />);
+
+    expect(screen.queryByRole('heading', { name: 'Unread messages' })).not.toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Read messages' })).toHaveTextContent('Amina');
   });
 
   it('opens a conversation', async () => {
@@ -108,31 +121,6 @@ describe('the messages tab', () => {
     expect(markRead).not.toHaveBeenCalled();
   });
 
-  it('narrows the list by name or by what was said', async () => {
-    messages = [
-      fromThem(),
-      fromThem({
-        id: 'm2',
-        sender: { id: 'other', displayName: 'Kevo' },
-        content: 'Sent the invoice',
-      }),
-    ];
-    render(<MessagesTab myId={ME} />);
-
-    await userEvent.type(screen.getByLabelText('Search messages'), 'invoice');
-
-    expect(screen.getByText('Kevo')).toBeInTheDocument();
-    expect(screen.queryByText('Amina')).not.toBeInTheDocument();
-  });
-
-  it('says when nothing matches the search', async () => {
-    render(<MessagesTab myId={ME} />);
-
-    await userEvent.type(screen.getByLabelText('Search messages'), 'zzz');
-
-    expect(screen.getByText('No one matches that search.')).toBeInTheDocument();
-  });
-
   it('reads a paginated answer as well as a bare list', () => {
     messages = { results: [fromThem()] };
     render(<MessagesTab myId={ME} />);
@@ -144,6 +132,8 @@ describe('the messages tab', () => {
     messages = [];
     render(<MessagesTab myId={ME} />);
 
-    expect(screen.getByText('No messages yet')).toBeInTheDocument();
+    expect(
+      screen.getByText('No messages yet. Conversations with hosts and friends show up here.'),
+    ).toBeInTheDocument();
   });
 });

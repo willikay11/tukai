@@ -1,4 +1,12 @@
-import { Message, isMine, matchesThread, otherParty, threadPreview, toThreads } from './message';
+import {
+  Message,
+  isMine,
+  isThreadUnread,
+  matchesThread,
+  otherParty,
+  threadPreview,
+  toThreads,
+} from './message';
 
 const ME = 'me';
 
@@ -103,6 +111,30 @@ describe('toThreads', () => {
 
   it('drops a message with nobody on the other side', () => {
     expect(toThreads([message({ sender: undefined, recipient: undefined })], ME)).toHaveLength(0);
+  });
+});
+
+describe('isThreadUnread', () => {
+  it('counts a conversation with something unread sent to the reader', () => {
+    const [thread] = toThreads([message()], ME);
+
+    expect(isThreadUnread(thread, ME)).toBe(true);
+  });
+
+  it('stops counting once it is read', () => {
+    const [thread] = toThreads([message({ isRead: true })], ME);
+
+    expect(isThreadUnread(thread, ME)).toBe(false);
+  });
+
+  // Replying is reading, as the design has it
+  it('stops counting once the reader replies', () => {
+    const [thread] = toThreads(
+      [message(), fromMe({ id: 'm2', dateCreated: '2026-09-29T11:00:00Z' })],
+      ME,
+    );
+
+    expect(isThreadUnread(thread, ME)).toBe(false);
   });
 });
 

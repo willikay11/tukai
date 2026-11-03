@@ -1,6 +1,9 @@
+import { useMemo } from 'react';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { deleteConversation, fetchMessages, markMessageRead, sendMessage } from '@/services/comm';
+import { Message, isThreadUnread, toThreads } from '@/types/message';
 
 const MESSAGES = ['messages'];
 
@@ -14,6 +17,23 @@ export const useMessages = (enabled = true) =>
     queryFn: async () => await fetchMessages({ page: 1, page_size: 200 }),
     enabled,
   });
+
+/**
+ * Conversations still waiting on the reader, for the Messages badges. The
+ * same query as the list, so opening the inbox costs nothing more.
+ */
+export const useUnreadConversationCount = (myId?: string, enabled = true) => {
+  const { data: response } = useMessages(Boolean(myId) && enabled);
+
+  return useMemo(() => {
+    if (!myId) return 0;
+
+    const payload = response?.data;
+    const messages: Message[] = Array.isArray(payload) ? payload : (payload?.results ?? []);
+
+    return toThreads(messages, myId).filter((thread) => isThreadUnread(thread, myId)).length;
+  }, [response?.data, myId]);
+};
 
 /**
  * Sending to one person.

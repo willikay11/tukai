@@ -75,6 +75,14 @@ export const toThreads = (messages: Message[], myId: string): MessageThread[] =>
     .sort((a, b) => when(b.last) - when(a.last));
 };
 
+/**
+ * Whether a conversation counts as unread: something sent to the reader is
+ * still unread and they have not answered since. Replying is reading, as the
+ * design has it, even though the API leaves those messages unread.
+ */
+export const isThreadUnread = (thread: MessageThread, myId: string): boolean =>
+  thread.unreadCount > 0 && !isMine(thread.last, myId);
+
 /** What a thread row shows of its last message, as the canvas prefixes it. */
 export const threadPreview = (thread: MessageThread, myId: string): string =>
   `${isMine(thread.last, myId) ? 'You: ' : ''}${thread.last.content}`;

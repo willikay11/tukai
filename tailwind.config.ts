@@ -128,6 +128,9 @@ const config: Config = {
           // The profile card's stat cell hover - lighter than `surface`,
           // unique to this one control
           'stat-hover': '#F7F8F6',
+          // The hover on a full-bleed inbox row, notification or conversation -
+          // paler again than `stat-hover`, from the notifications handoff
+          row: '#FAFBFA',
         },
         line: {
           DEFAULT: '#DDE3DF', // 176 — hairline borders and dividers

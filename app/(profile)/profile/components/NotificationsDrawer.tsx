@@ -111,7 +111,7 @@ export const NotificationsDrawer = ({ isOpen, onClose }: { isOpen: boolean; onCl
       },
       {
         onSuccess: () => {
-          toast({ title: 'Notification settings saved', variant: 'success' });
+          toast({ title: 'Notification settings saved.', variant: 'success' });
           close();
         },
         onError: (failure: Error) => toast({ title: 'Could not save', description: failure.message, variant: 'destructive' }),
