@@ -2,8 +2,10 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 
+import DOMPurify from 'dompurify';
+
 import { IconComponent } from '@/app/shared/components/Icons';
-import { safeText, toPlainText } from '@/utils/safe-text-utils';
+import { toPlainText } from '@/utils/safe-text-utils';
 
 export const PlaceDescription = ({ text }: { text: string }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -32,14 +34,14 @@ export const PlaceDescription = ({ text }: { text: string }) => {
       {isExpanded ? (
         <div
           className="prose prose-sm max-w-none text-[15px] leading-[1.6] text-ink-pill prose-headings:text-ink-pill prose-a:text-brand prose-strong:text-ink-pill"
-          dangerouslySetInnerHTML={{ __html: safeText(text) }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(text) }}
         />
       ) : (
         // Clamped to three lines. The toggle only shows once the browser says
         // the clamp is cutting text, so a short description has no toggle
         <p
           ref={collapsedRef}
-          className="line-clamp-3 text-[15px] leading-[1.6] text-ink-pill text-pretty"
+          className="line-clamp-3 text-pretty text-[15px] leading-[1.6] text-ink-pill"
         >
           {plainText}
         </p>
