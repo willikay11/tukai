@@ -113,8 +113,7 @@ export const usePlaces = ({
 
   return useQuery({
     queryKey: ['places', { categoryId, page, lat, lng, search, userId }],
-    queryFn: async () =>
-      await fetchPlaces(page, 12, categoryId, search, lat, lng, { withAuth }),
+    queryFn: async () => await fetchPlaces(page, 12, categoryId, search, lat, lng, { withAuth }),
     enabled,
   });
 };
@@ -333,13 +332,18 @@ export const usePlaceOwnership = (placeId: string, enabled = true) =>
     staleTime: 5 * 60 * 1000,
   });
 
-export const usePlaceOwnerships = (placeIds: string[], enabled = true) =>
+/**
+ * `staleTime` 0 reads each one fresh on mount - for a screen whose whole job
+ * is to report where a claim stands, where five minutes of cache is long
+ * enough to keep showing a claim as under review after it was approved.
+ */
+export const usePlaceOwnerships = (placeIds: string[], enabled = true, staleTime = 5 * 60 * 1000) =>
   useQueries({
     queries: placeIds.map((placeId) => ({
       queryKey: ['placeOwnership', placeId],
       queryFn: async () => await fetchPlaceOwnership(placeId),
       enabled,
-      staleTime: 5 * 60 * 1000,
+      staleTime,
     })),
   });
 
@@ -777,12 +781,7 @@ export const useFeaturedPlaces = (enabled = true) => {
  * The places nearest the reader. The API orders them by distance from the
  * coordinates it is sent, so the query only runs once both are known.
  */
-export const useNearbyPlaces = (
-  lat?: number,
-  lng?: number,
-  categoryId?: string,
-  perPage = 10,
-) => {
+export const useNearbyPlaces = (lat?: number, lng?: number, categoryId?: string, perPage = 10) => {
   const { userId, withAuth } = usePlaceListViewer();
 
   return useQuery({
