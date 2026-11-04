@@ -5,6 +5,7 @@ import { format, isBefore, isValid, parseISO, startOfDay } from 'date-fns';
 import type { useCreateExperienceFlow } from '@/app/(experiences)/experiences/create/hooks/useCreateExperienceFlow';
 import { OpenInMapsLink } from '@/app/shared/components/Global';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { itineraryDayDate } from '@/types/itinerary';
 
 type Flow = ReturnType<typeof useCreateExperienceFlow>;
@@ -119,7 +120,8 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
     missing.push('where the experience takes place');
   }
   if (dateType.experienceType === 'one-time' && !dateType.isRecurring) {
-    if (!dateType.date || !dateType.startTime || !dateType.endTime) missing.push('the date and time');
+    if (!dateType.date || !dateType.startTime || !dateType.endTime)
+      missing.push('the date and time');
     else if (isPast(dateType.date)) missing.push('dates that are not in the past');
   }
   if (dateType.experienceType === 'one-time' && dateType.isRecurring) {
@@ -147,9 +149,12 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
     if (!hasAnyPlace) missing.push('at least one place in the itinerary');
   }
   const hasValidTicket = tickets.items.some((item) =>
-    isPaid ? item.name.trim() && item.amount > 0 && item.quantity > 0 : item.name.trim() && item.quantity > 0,
+    isPaid
+      ? item.name.trim() && item.amount > 0 && item.quantity > 0
+      : item.name.trim() && item.quantity > 0,
   );
-  if (!hasValidTicket) missing.push(isPaid ? 'a ticket with a price and quantity' : 'the number of spaces');
+  if (!hasValidTicket)
+    missing.push(isPaid ? 'a ticket with a price and quantity' : 'the number of spaces');
   if (isPaid && !flow.hasSavedWallets && !wallet.selectedWallet && !wallet.phoneNumber?.trim()) {
     missing.push('payout details');
   }
@@ -162,7 +167,8 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
       return `${formatDateShort(dateType.date)}, ${formatTime12h(dateType.startTime)} - ${formatTime12h(dateType.endTime)}`;
     }
     if (dateType.experienceType === 'one-time' && dateType.isRecurring) {
-      if (dateType.recurringDays.length === 0 || !dateType.recurrenceStartDate) return 'Not added yet';
+      if (dateType.recurringDays.length === 0 || !dateType.recurrenceStartDate)
+        return 'Not added yet';
       const days = joinWithAnd(dateType.recurringDays.map((d) => DAY_ABBREV[d] ?? d));
       const start = formatDateShortNoWeekday(dateType.recurrenceStartDate);
       const end = formatDateShortNoWeekday(dateType.recurrenceEndDate);
@@ -191,7 +197,8 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
 
   // ---- Experience type line ----------------------------------------------
   const experienceTypeLine = (() => {
-    if (dateType.experienceType === 'one-time' && !dateType.isRecurring) return 'One-time, single day';
+    if (dateType.experienceType === 'one-time' && !dateType.isRecurring)
+      return 'One-time, single day';
     if (dateType.experienceType === 'one-time' && dateType.isRecurring) {
       return dateType.recurringDays.length === 0
         ? 'Recurring, days not chosen yet'
@@ -237,8 +244,7 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
       {about.photos.length > 0 && (
         <div className="-mx-6 flex gap-2 overflow-x-auto px-6 scrollbar-hide">
           {about.photos.map((photo) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <PlainImage
               key={photo.id}
               src={photo.url}
               alt=""
@@ -266,7 +272,10 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
             .split('\n')
             .filter((line) => line.trim())
             .map((line, index) => (
-              <div key={index} className="flex items-start gap-2.5 text-15 leading-relaxed text-gray-800">
+              <div
+                key={index}
+                className="flex items-start gap-2.5 text-15 leading-relaxed text-gray-800"
+              >
                 <IconComponent
                   iconName="Tick02Icon"
                   size={19}
@@ -285,7 +294,10 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
             .split('\n')
             .filter((line) => line.trim())
             .map((line, index) => (
-              <div key={index} className="flex items-start gap-2.5 text-15 leading-relaxed text-gray-800">
+              <div
+                key={index}
+                className="flex items-start gap-2.5 text-15 leading-relaxed text-gray-800"
+              >
                 <IconComponent
                   iconName="Cancel01Icon"
                   size={19}
@@ -315,7 +327,9 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
 
       <RvSection title="Visibility" note="(who can see and book it)" gap="gap-2">
         <p className="text-15 text-gray-800">
-          {about.visibility === 'private' ? 'Private, only invited people' : 'Public, open to everyone'}
+          {about.visibility === 'private'
+            ? 'Private, only invited people'
+            : 'Public, open to everyone'}
         </p>
       </RvSection>
 
@@ -332,7 +346,12 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
                 className="inline-flex h-10 items-center gap-2 rounded-full bg-surface px-4 text-[14.5px] text-gray-800"
               >
                 {category.icon && (
-                  <IconComponent iconName={category.icon} size={18} color="#1F2937" className="-ml-0.5" />
+                  <IconComponent
+                    iconName={category.icon}
+                    size={18}
+                    color="#1F2937"
+                    className="-ml-0.5"
+                  />
                 )}
                 {category.name}
               </span>
@@ -353,7 +372,7 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
                 <span className="whitespace-nowrap text-[15px] font-semibold text-gray-800">
                   {item.name}
                 </span>
-                <span className="whitespace-nowrap text-14 text-ink">
+                <span className="text-14 whitespace-nowrap text-ink">
                   {item.quantity} {isPaid ? 'tickets' : 'spaces'}
                   {isPaid
                     ? ` · KES ${(item.buyerPrice ?? item.amount).toLocaleString('en-KE', { minimumFractionDigits: 0 })}`
@@ -403,15 +422,18 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
                             className="flex w-full items-center gap-3.5 text-left hover:opacity-85"
                           >
                             {activity.placeImageUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
+                              <PlainImage
                                 src={activity.placeImageUrl}
                                 alt=""
                                 className="h-[84px] w-[84px] flex-shrink-0 rounded-xl bg-surface-brand object-cover"
                               />
                             ) : (
                               <span className="flex h-[84px] w-[84px] flex-shrink-0 items-center justify-center rounded-xl bg-surface-brand text-brand">
-                                <IconComponent iconName="Location01Icon" size={24} color="#066349" />
+                                <IconComponent
+                                  iconName="Location01Icon"
+                                  size={24}
+                                  color="#066349"
+                                />
                               </span>
                             )}
                             <span className="flex min-w-0 flex-col gap-1.5">
@@ -431,7 +453,8 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
                                 )}
                                 {activity.startTime && activity.endTime && (
                                   <span>
-                                    {formatTime12h(activity.startTime)} - {formatTime12h(activity.endTime)}
+                                    {formatTime12h(activity.startTime)} -{' '}
+                                    {formatTime12h(activity.endTime)}
                                   </span>
                                 )}
                               </span>
@@ -458,8 +481,7 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
             </h3>
             <div className="flex items-center gap-4">
               {about.placeImageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <PlainImage
                   src={about.placeImageUrl}
                   alt=""
                   className="h-[72px] w-[72px] flex-shrink-0 rounded-xl bg-surface object-cover"
@@ -483,7 +505,7 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
                     lat={resolvedLocation?.pointLat}
                     lng={resolvedLocation?.pointLong}
                     query={locationMapsQuery}
-                    className="-mb-1.5 mt-[-2px] min-h-11 self-start text-14 font-semibold text-brand"
+                    className="text-14 -mb-1.5 mt-[-2px] min-h-11 self-start font-semibold text-brand"
                   >
                     <IconComponent iconName="Location01Icon" size={17} color="currentColor" />
                     View on Google Maps
@@ -520,8 +542,7 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
       {dateType.community && (
         <RvSection title="Host community">
           <div className="flex items-center gap-4">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <PlainImage
               src={dateType.community.imageUrl}
               alt=""
               className="h-[72px] w-[72px] flex-shrink-0 rounded-2xl bg-surface-brand object-cover"
@@ -562,13 +583,14 @@ export const ReviewView = ({ flow }: ReviewViewProps) => {
                 key={community.id}
                 className="inline-flex h-[52px] items-center gap-2.5 rounded-full bg-surface pl-1.5 pr-[18px]"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <PlainImage
                   src={community.imageUrl}
                   alt=""
                   className="h-10 w-10 flex-shrink-0 rounded-full bg-surface-brand object-cover"
                 />
-                <span className="max-w-[200px] truncate text-15 text-gray-800">{community.name}</span>
+                <span className="max-w-[200px] truncate text-15 text-gray-800">
+                  {community.name}
+                </span>
               </span>
             ))}
           </div>

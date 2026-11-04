@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 
 import { DateField, TimeField } from '@/app/shared/components/Forms';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { cn } from '@/lib/utils';
 import type { ItineraryActivity } from '@/types/itinerary';
 
@@ -92,8 +93,7 @@ export const ItineraryStop = ({
       )}
 
       <div className="flex items-center gap-3.5">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <PlainImage
           src={stop.placeImageUrl ?? undefined}
           alt=""
           draggable={false}
@@ -115,7 +115,9 @@ export const ItineraryStop = ({
             className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-ink"
           >
             {isSpecificDates && date && <span>{format(date, 'EEE d MMM')}</span>}
-            {isSpecificDates && date && <span className="h-[5px] w-[5px] rounded-full bg-[#B7C3BE]" />}
+            {isSpecificDates && date && (
+              <span className="h-[5px] w-[5px] rounded-full bg-[#B7C3BE]" />
+            )}
             <span
               className={cn(
                 'text-ink',
@@ -147,7 +149,12 @@ export const ItineraryStop = ({
                 yet (see types/itinerary.ts), so this stays pinned to the
                 day's own date rather than offering a different one. */}
             {isSpecificDates && (
-              <DateField label="Date" value={date ? format(date, 'yyyy-MM-dd') : null} onChange={() => {}} disabled />
+              <DateField
+                label="Date"
+                value={date ? format(date, 'yyyy-MM-dd') : null}
+                onChange={() => {}}
+                disabled
+              />
             )}
             <TimeField
               label="Start time"

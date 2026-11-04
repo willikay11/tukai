@@ -5,6 +5,7 @@ import { ChangeEvent, DragEvent, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 
 type FileUploadFieldProps = {
   id: string;
@@ -335,8 +336,7 @@ export const FileUploadField = ({
                   className={`rounded-xl object-cover ${isDragging ? 'opacity-0' : ''}`}
                 />
               ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <PlainImage
                   src={previewUrl}
                   alt={`Selected photo ${index + 1}`}
                   className={`h-full w-full rounded-xl object-cover ${isDragging ? 'opacity-0' : ''}`}

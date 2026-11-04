@@ -5,6 +5,7 @@ import { render, screen } from '@testing-library/react';
 import { Experience } from '@/types/experience';
 
 import { ItineraryCard } from './index';
+import { crossfadeOffset, itineraryCoverPhotos } from './itinerary-card';
 
 jest.mock('next-auth/react', () => ({ useSession: () => ({ data: null }) }));
 jest.mock('@/app/shared/components/Bookmark', () => ({
@@ -12,6 +13,7 @@ jest.mock('@/app/shared/components/Bookmark', () => ({
 }));
 jest.mock('next/image', () => {
   function MockImage({ alt, src }: { alt: string; src: string }) {
+    // eslint-disable-next-line @next/next/no-img-element
     return <img alt={alt} src={src} />;
   }
   MockImage.displayName = 'MockImage';
@@ -42,52 +44,85 @@ const makeItinerary = (overrides: Partial<Experience> = {}): Experience =>
     id: 'it1',
     title: 'Weekend in Naivasha',
     photos: [
-      photo('p1', 'https://cdn.tukai.co/cover.jpg', true),
       photo('p2', 'https://cdn.tukai.co/stop-1.jpg'),
+      photo('p1', 'https://cdn.tukai.co/cover.jpg', true),
       photo('p3', 'https://cdn.tukai.co/stop-2.jpg'),
       photo('p4', 'https://cdn.tukai.co/stop-3.jpg'),
       photo('p5', 'https://cdn.tukai.co/stop-4.jpg'),
     ],
-    startDate: '2026-10-10T08:00:00Z',
-    endDate: '2026-10-12T18:00:00Z',
+    startDate: '2026-09-26T09:00:00',
+    endDate: '2026-09-26T22:00:00',
     isPaid: true,
     isSoldOut: false,
     isBookmarked: false,
-    priceStartsFrom: { amount: 3000, currency: 'KES' },
+    priceStartsFrom: { amount: 6500, currency: 'KES' },
     host: { firstName: 'Amina', lastName: 'Otieno' },
-    hostCommunity: { id: 'c1', title: 'Rift Valley Walkers' },
+    hostCommunity: { id: 'c1', title: 'City Sketchers' },
     ...overrides,
   }) as unknown as Experience;
 
-describe('ItineraryCard', () => {
-  it('renders the cover and the title', () => {
-    render(<ItineraryCard itinerary={makeItinerary()} />);
+// en-GB writes September as "Sep" or "Sept" depending on the ICU version
+const WHEN = /^Sat 26 Sept?, 09:00 - 22:00$/;
 
-    expect(screen.getByAltText('Weekend in Naivasha')).toHaveAttribute(
-      'src',
+const fanSources = (container: HTMLElement) =>
+  Array.from(container.querySelectorAll('span[aria-hidden="true"].pointer-events-none img')).map(
+    (image) => image.getAttribute('src'),
+  );
+
+describe('itineraryCoverPhotos', () => {
+  it('leads with the cover, then the next three, without repeats', () => {
+    expect(itineraryCoverPhotos(makeItinerary().photos)).toEqual([
       'https://cdn.tukai.co/cover.jpg',
-    );
-    expect(screen.getByText('Weekend in Naivasha')).toBeInTheDocument();
+      'https://cdn.tukai.co/stop-1.jpg',
+      'https://cdn.tukai.co/stop-2.jpg',
+      'https://cdn.tukai.co/stop-3.jpg',
+    ]);
   });
 
-  it('leads the body with the community running it', () => {
+  it('is empty without photos', () => {
+    expect(itineraryCoverPhotos(undefined)).toEqual([]);
+  });
+});
+
+describe('crossfadeOffset', () => {
+  it('staggers runs of five by 0.7s', () => {
+    expect([0, 1, 2, 3, 4, 5, 6].map(crossfadeOffset)).toEqual([0, 700, 1400, 2100, 2800, 0, 700]);
+  });
+});
+
+describe('ItineraryCard', () => {
+  it('is one link to the itinerary, named by its text', () => {
     render(<ItineraryCard itinerary={makeItinerary()} />);
 
-    expect(screen.getByText('Rift Valley Walkers')).toBeInTheDocument();
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', expect.stringContaining('it1'));
+    expect(link).toHaveTextContent('Weekend in Naivasha');
   });
 
-  it('shows the starting price and the dates', () => {
+  it('keeps Save outside the link', () => {
     render(<ItineraryCard itinerary={makeItinerary()} />);
 
-    expect(screen.getByText('from KES 3,000')).toBeInTheDocument();
-    expect(screen.getByText('10 Oct - 12 Oct')).toBeInTheDocument();
+    expect(screen.getByRole('link')).not.toContainElement(screen.getByText('bookmark'));
+  });
+
+  it('leads with the organising community, never a rating', () => {
+    render(<ItineraryCard itinerary={makeItinerary()} />);
+
+    expect(screen.getByText('City Sketchers')).toBeInTheDocument();
+  });
+
+  it('shows "from" the starting price, then when', () => {
+    render(<ItineraryCard itinerary={makeItinerary()} />);
+
+    expect(screen.getByText('KES 6,500').parentElement).toHaveTextContent('from KES 6,500');
+    expect(screen.getByText(WHEN)).toBeInTheDocument();
   });
 
   it('says Free for a free itinerary rather than a price', () => {
     render(<ItineraryCard itinerary={makeItinerary({ isPaid: false })} />);
 
     expect(screen.getByText('Free')).toBeInTheDocument();
-    expect(screen.queryByText(/from KES/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/from/)).not.toBeInTheDocument();
   });
 
   it('leaves the price out when the API has none', () => {
@@ -102,36 +137,48 @@ describe('ItineraryCard', () => {
     expect(screen.queryByText(/from/)).not.toBeInTheDocument();
   });
 
-  it('fans the first three non-cover photos as stops', () => {
+  it('fans stops two to four, centre last so it sits on top', () => {
     const { container } = render(<ItineraryCard itinerary={makeItinerary()} />);
 
-    const stops = container.querySelectorAll('span[aria-hidden="true"] img');
-    // DOM order is left, right, then centre (centre sits on top), so compare as a set
-    expect(Array.from(stops).map((img) => img.getAttribute('src'))).toHaveLength(3);
-    expect(stops).toHaveLength(3);
-    for (const url of [
+    expect(fanSources(container)).toEqual([
       'https://cdn.tukai.co/stop-1.jpg',
-      'https://cdn.tukai.co/stop-2.jpg',
       'https://cdn.tukai.co/stop-3.jpg',
-    ]) {
-      expect(container.querySelector(`img[src="${url}"]`)).toBeInTheDocument();
-    }
-    expect(container.querySelector('img[src="https://cdn.tukai.co/stop-4.jpg"]')).toBeNull();
+      'https://cdn.tukai.co/stop-2.jpg',
+    ]);
   });
 
-  it('draws no stops when the itinerary has only its cover', () => {
+  it('draws no fan when the itinerary has only its cover', () => {
     const { container } = render(
       <ItineraryCard
         itinerary={makeItinerary({ photos: [photo('p1', 'https://cdn.tukai.co/cover.jpg', true)] })}
       />,
     );
 
-    expect(container.querySelector('span[aria-hidden="true"] img')).toBeNull();
+    expect(fanSources(container)).toEqual([]);
   });
 
-  it('links to the itinerary page', () => {
+  it('has no flag in the section', () => {
     render(<ItineraryCard itinerary={makeItinerary()} />);
 
-    expect(screen.getByRole('link')).toHaveAttribute('href', expect.stringContaining('it1'));
+    expect(screen.queryByText('Itinerary')).not.toBeInTheDocument();
+  });
+
+  describe('in the Discover experiences grid', () => {
+    it('is flagged, and prices per person after the date', () => {
+      render(<ItineraryCard itinerary={makeItinerary()} variant="grid" />);
+
+      expect(screen.getByText('Itinerary')).toBeInTheDocument();
+
+      const when = screen.getByText(WHEN);
+      const price = screen.getByText('KES 6,500/person');
+      expect(when.compareDocumentPosition(price) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(screen.queryByText(/from/)).not.toBeInTheDocument();
+    });
+
+    it('does not clamp the title', () => {
+      render(<ItineraryCard itinerary={makeItinerary()} variant="grid" />);
+
+      expect(screen.getByText('Weekend in Naivasha')).not.toHaveClass('line-clamp-2');
+    });
   });
 });

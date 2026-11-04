@@ -6,6 +6,10 @@ import { useSearchParams } from 'next/navigation';
 
 import { BucketListRow } from '@/app/(experiences)/components/BucketListRow';
 import { CommunityRow } from '@/app/(experiences)/components/CommunityRow';
+import {
+  DiscoverItineraries,
+  DiscoverItinerariesSkeleton,
+} from '@/app/(experiences)/components/DiscoverItineraries';
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
 import {
   happeningSoon,
@@ -13,13 +17,18 @@ import {
 } from '@/app/(experiences)/components/ExperienceCard/happening-soon';
 import { ExploringCityBar } from '@/app/(experiences)/components/ExploringCityBar';
 import { ROW_GRID, RowGridSkeleton } from '@/app/(experiences)/components/MediaRow';
-import { MomentComposeCard } from '@/app/(experiences)/components/MomentCard/MomentComposeCard';
 import { PlaceCard } from '@/app/(experiences)/components/PlaceCard';
+import {
+  RecentMomentsRail,
+  RecentMomentsRailSkeleton,
+} from '@/app/(experiences)/components/RecentMomentsRail';
+import { RAIL_FETCH_SIZE } from '@/app/(experiences)/components/RecentMomentsRail/recent-moments';
 import { SearchResults } from '@/app/(experiences)/components/SearchResults';
 import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
 import { RowSkeleton } from '@/app/(experiences)/experiences/components/ExperienceRow';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
+import { useUpcomingItineraries } from '@/app/(experiences)/hooks';
 import { filtersFromParams, hasSearch } from '@/app/shared/components/Filters/filters';
 import { PageContainer } from '@/app/shared/components/Layout';
 import {
@@ -29,7 +38,7 @@ import {
   SeeAllCard,
 } from '@/app/shared/components/Lists';
 import { ShowMoreButton } from '@/app/shared/components/Lists';
-import { MomentCard, MomentComposer, MomentDrawer } from '@/app/shared/components/Moments';
+import { MomentDrawer } from '@/app/shared/components/Moments';
 import { usePublicBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
@@ -59,8 +68,6 @@ const SOON_PAGE_SIZE = 50;
 
 /** The canvas fills the "Places with experiences" grid five at a time. */
 const PLACES_PER_PAGE = 5;
-
-const MOMENTS_SUBTITLE = 'Proof it happened, shared by the people who were there';
 
 /** Four across, two rows - what the list sections show before "View more". */
 const ROW_GRID_SIZE = 8;
@@ -103,9 +110,6 @@ export const DiscoverPageContent = () => {
   const filters = filtersFromParams(searchParams);
   const isSearching = hasSearch(filters);
 
-  // Discover has no place, experience or community of its own to post a
-  // moment at, so the composer opens untagged - see MomentComposer
-  const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [openMoment, setOpenMoment] = useState<Moment | null>(null);
 
   // "View more" reveals another grid's worth in place rather than navigating -
@@ -171,15 +175,18 @@ export const DiscoverPageContent = () => {
   const publicLists: BucketList[] = publicListsResponse?.data?.results ?? [];
   const shownPublicLists = publicLists.slice(0, visibleListCount);
 
+  // Forty tiles and the three photos stacked on See all
   const { data: momentsResponse, isLoading: isLoadingMoments } = useMoments({
     page: 1,
-    page_size: ROW_SIZE,
+    page_size: RAIL_FETCH_SIZE,
   });
   // This row is photo-led. Media whose photo is null (a video, or an upload
   // still processing) cannot be rendered and would throw in next/image.
   const moments: Moment[] = (momentsResponse?.data?.results ?? []).filter(
     (moment: Moment) => momentPhotos(moment).length > 0,
   );
+
+  const { itineraries, isLoading: isLoadingItineraries } = useUpcomingItineraries(!isSearching);
 
   // Same queries the /experiences rows issue
   const userCity = city ?? DEFAULT_CITY;
@@ -270,6 +277,22 @@ export const DiscoverPageContent = () => {
         </CardRail>
       )}
 
+      {/* Two moments make the first column; one alone would sit half-empty,
+          so the section waits for a second. */}
+      {isLoadingMoments ? (
+        <RecentMomentsRailSkeleton />
+      ) : (
+        moments.length >= 2 && <RecentMomentsRail moments={moments} onOpen={setOpenMoment} />
+      )}
+
+      {/* Keyed by city: a different city is a different pool, so the
+          section starts collapsed again */}
+      {isLoadingItineraries ? (
+        <DiscoverItinerariesSkeleton />
+      ) : (
+        <DiscoverItineraries key={userCity} itineraries={itineraries} />
+      )}
+
       {/* Tours are experiences the API provisions behind a guide's profile,
           so `experience_type=guide_booking` is the whole query - there is no
           separate tours endpoint, and GET /guides/ returns profiles with no
@@ -347,35 +370,6 @@ export const DiscoverPageContent = () => {
         </section>
       )}
 
-      {/* A rail of tall cards closed by an invitation to post one, with See
-          all in the header - not the masonry the Moments page uses, which was
-          going into this rail as a column layout. */}
-      {(isLoadingMoments || moments.length > 0) && (
-        <CardRail
-          title="Recent moments"
-          subtitle={MOMENTS_SUBTITLE}
-          seeAllHref="/moments"
-          showArrows={false}
-        >
-          {isLoadingMoments ? (
-            <RowSkeleton cardClassName="aspect-[3/4] w-[265px]" />
-          ) : (
-            <>
-              {moments.map((moment, index) => (
-                <MomentCard
-                  key={moment.id}
-                  moment={moment}
-                  priority={index < EAGER_IN_ROW}
-                  onClick={() => setOpenMoment(moment)}
-                />
-              ))}
-
-              <MomentComposeCard onClick={() => setIsComposerOpen(true)} />
-            </>
-          )}
-        </CardRail>
-      )}
-
       {(isLoadingPublicLists || publicLists.length > 0) && (
         <section>
           <SectionHeader
@@ -408,7 +402,6 @@ export const DiscoverPageContent = () => {
       )}
 
       <MomentDrawer moment={openMoment} onClose={() => setOpenMoment(null)} />
-      <MomentComposer open={isComposerOpen} onOpenChange={setIsComposerOpen} />
     </PageContainer>
   );
 };

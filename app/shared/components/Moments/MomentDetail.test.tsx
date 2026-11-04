@@ -274,7 +274,7 @@ describe('what the moment was posted against', () => {
     [
       'experience',
       { community: null, experience: { id: 'e1', title: 'Mara Trip' } },
-      'Ticket01Icon',
+      'Calendar03Icon',
       'Experience',
     ],
     [

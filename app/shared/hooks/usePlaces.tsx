@@ -710,6 +710,25 @@ export const usePopularPlaces = (enabled = true, perPage = 10) =>
   });
 
 /**
+ * The places in one category, best rated first - the Moments feed's Popular
+ * restaurants rail. A wider page than the rail shows, because the API filters
+ * by category but not by city, so the caller narrows it to one.
+ */
+export const usePopularPlacesInCategory = (
+  categoryId: string | undefined,
+  enabled = true,
+  perPage = 50,
+) =>
+  useQuery({
+    queryKey: ['places', 'popular', 'category', categoryId, perPage],
+    queryFn: async () =>
+      await fetchPlaces(1, perPage, categoryId, undefined, undefined, undefined, {
+        sortBy: 'popular',
+      }),
+    enabled: enabled && Boolean(categoryId),
+  });
+
+/**
  * The places staff have featured - the "Promoted places" row.
  *
  * `GET /places/featured/` returns them in equal-time rotation order, so this

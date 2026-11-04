@@ -1,9 +1,9 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { useMemo, useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { Drawer } from '@/components/ui/drawer';
 import { useTukai } from '@/context/TukaiContext';
 import { cn } from '@/lib/utils';
@@ -158,7 +158,7 @@ export const TukaiChatsDrawer = () => {
                       )}
                     >
                       {img ? (
-                        <img
+                        <PlainImage
                           src={img}
                           alt=""
                           className="block h-14 w-14 flex-shrink-0 rounded-xl bg-surface-brand object-cover"

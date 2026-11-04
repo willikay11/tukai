@@ -3,6 +3,7 @@
 import { ReactNode, useRef } from 'react';
 
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
+import { ItineraryCard } from '@/app/(experiences)/components/ItineraryCard';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { Button } from '@/components/ui/button';
 import { NoData } from '@/components/ui/noData';
@@ -83,11 +84,22 @@ export const DiscoverGrid = ({
         </div>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,184px)] justify-start gap-x-4 gap-y-[26px] 2xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-7">
-          {experiences.map((experience) => (
-            // w-full so the card fills its column once columns are fixed in
-            // count (2xl+) rather than fixed in width
-            <ExperienceCard key={experience.id} experience={experience} className="w-full" />
-          ))}
+          {experiences.map((experience, index) =>
+            // An itinerary keeps its stop crossfade among the experiences,
+            // staggered by its place in the whole grid
+            experience.experienceType === 'itinerary' ? (
+              <ItineraryCard
+                key={experience.id}
+                itinerary={experience}
+                variant="grid"
+                position={index}
+              />
+            ) : (
+              // w-full so the card fills its column once columns are fixed in
+              // count (2xl+) rather than fixed in width
+              <ExperienceCard key={experience.id} experience={experience} className="w-full" />
+            ),
+          )}
         </div>
       )}
 

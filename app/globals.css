@@ -242,3 +242,72 @@ input[type='number'] {
     scroll-behavior: auto !important;
   }
 }
+
+/**
+ * Image loading, from the design handoff: while a photo downloads its own box
+ * pulses between two greys, then the photo fades in over 2s - transparent,
+ * blurred and slightly enlarged, settling to sharp and full size. The state
+ * rides on `data-fx`, set by `useImageFx`.
+ *
+ * The fade has only a `from` frame, so it ends on the image's own opacity,
+ * filter and transform; `backwards` holds that first frame from the moment the
+ * state flips, so a photo never flashes in sharp first. It touches opacity,
+ * filter and transform only, so nothing around it moves.
+ */
+@keyframes tkSkel {
+  0%,
+  100% {
+    background-color: #f1f3f1;
+  }
+  50% {
+    background-color: #dfe5e2;
+  }
+}
+
+@keyframes tkImgIn {
+  from {
+    opacity: 0;
+    filter: blur(14px);
+    transform: scale(1.04);
+  }
+}
+
+@keyframes tkImgInR {
+  from {
+    opacity: 0;
+  }
+}
+
+img[data-fx='wait'] {
+  animation: tkSkel 1.6s ease-in-out infinite;
+}
+
+img[data-fx='in'] {
+  animation: tkImgIn 2s cubic-bezier(0.22, 0.8, 0.24, 1) backwards;
+}
+
+/* A photo with a filter or transform of its own - a closed place in grayscale,
+   a tilted tile - fades only, so the blur and scale don't replace them. */
+img[data-fx='in'][data-fx-fade-only] {
+  animation: tkImgInR 2s ease-out backwards;
+}
+
+/**
+ * Reduced motion: no pulse, just a still loading colour so the box isn't
+ * empty, then a short opacity-only fade.
+ *
+ * The fade's `!important` beats the app-wide net above, which would otherwise
+ * cut it to nothing: a 0.3s fade with no movement is the handoff's call for
+ * these readers, and higher specificity is what lets it win.
+ */
+@media (prefers-reduced-motion: reduce) {
+  img[data-fx='wait'] {
+    animation: none;
+    background-color: #f1f3f1;
+  }
+
+  img[data-fx='in'],
+  img[data-fx='in'][data-fx-fade-only] {
+    animation: tkImgInR 0.3s ease-out backwards !important;
+  }
+}

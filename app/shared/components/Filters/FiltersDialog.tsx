@@ -13,6 +13,7 @@ import {
   matchesInterests,
 } from '@/app/shared/components/Filters/where';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { isOngoing } from '@/app/shared/components/Places/PlaceDrawer/happening-now';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { usePlaceCategories } from '@/app/shared/hooks/usePlaces';
@@ -570,8 +571,7 @@ export const FiltersDialog = ({
                       >
                         <span className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full bg-surface-muted">
                           {image && (
-                            // eslint-disable-next-line @next/next/no-img-element -- a small round chip thumbnail, not worth next/image's overhead here
-                            <img src={image} alt="" className="h-full w-full object-cover" />
+                            <PlainImage src={image} alt="" className="h-full w-full object-cover" />
                           )}
                         </span>
                         {city.name}

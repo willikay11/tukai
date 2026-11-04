@@ -1,7 +1,8 @@
 'use client';
 
-import { IconComponent } from '@/app/shared/components/Icons';
 import { OpenInMapsLink } from '@/app/shared/components/Global/OpenInMapsLink';
+import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { Interest } from '@/types/interest';
 
 import type { CommunityVisibility, DraftPhoto, InvitedPerson } from './useCreateCommunityDrawer';
@@ -35,15 +36,16 @@ export const CommunityPreview = ({
   lat,
   lng,
 }: CommunityPreviewProps) => {
-  const selectedCategories = categories.filter((category) => selectedCategoryIds.includes(category.id));
+  const selectedCategories = categories.filter((category) =>
+    selectedCategoryIds.includes(category.id),
+  );
 
   return (
     <div className="flex flex-col gap-7">
       {photos.length > 0 && (
         <div className="-mx-6 flex gap-2 overflow-x-auto px-6 scrollbar-hide">
           {photos.map((photo) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <PlainImage
               key={photo.id}
               src={photo.url}
               alt=""
@@ -144,8 +146,7 @@ export const CommunityPreview = ({
                   className="inline-flex h-[52px] max-w-full items-center gap-2.5 rounded-full bg-surface py-0 pl-1.5 pr-[18px]"
                 >
                   {person.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <PlainImage
                       src={person.image}
                       alt=""
                       className="h-10 w-10 flex-shrink-0 rounded-full object-cover"

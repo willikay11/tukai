@@ -3,6 +3,7 @@
 import Image from 'next/image';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 
 interface PreviewGridProps {
   previews: Array<{ url: string; index: number; id: string }>;
@@ -35,8 +36,7 @@ export const PreviewGrid = ({
               className="rounded-xl object-cover"
             />
           ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <PlainImage
               src={url}
               alt={`Preview ${index + 1}`}
               className="h-full w-full rounded-xl object-cover"

@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { useExperienceTicketPurchases } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Experience } from '@/types/experience';
@@ -59,8 +60,7 @@ const BuyerRow = ({
       />
 
       {buyer.picture ? (
-        // eslint-disable-next-line @next/next/no-img-element -- remote buyer photo, not one next/image can optimize at this size
-        <img
+        <PlainImage
           src={buyer.picture}
           alt=""
           className="h-12 w-12 flex-shrink-0 rounded-full bg-surface-brand object-cover"
@@ -98,8 +98,7 @@ const BuyerRow = ({
           >
             <span className="flex-shrink-0 p-2.5 pl-3">
               {stub.code ? (
-                // eslint-disable-next-line @next/next/no-img-element -- remote ticket QR, not one next/image can optimize at this size
-                <img
+                <PlainImage
                   src={stub.code}
                   alt={`Ticket code for ${buyer.name}`}
                   className="block h-14 w-14 rounded-lg bg-white"
