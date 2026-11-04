@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Place } from '@/types/place';
 
-import { PlaceResultCard } from './PlaceResultCard';
+import { PlaceCardLockReason, PlaceResultCard } from './PlaceResultCard';
 import type { PlaceSource } from './useConnectPlaceDrawer';
 
 const SOURCE_OPTIONS: { value: PlaceSource; label: string; note?: string }[] = [
@@ -24,7 +24,7 @@ export interface PlaceSectionProps {
   connectedPlaces: Place[];
   onToggleConnectedPlace: (place: Place) => void;
   onAddAsNewPlace: () => void;
-  getLockReason: (placeId: string) => 'inClaim' | null;
+  getLockReason: (placeId: string) => PlaceCardLockReason;
 }
 
 /**
