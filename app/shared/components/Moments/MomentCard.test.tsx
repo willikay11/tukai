@@ -18,9 +18,6 @@ jest.mock('@/app/shared/components/Moments/MomentAvatar', () => ({
 }));
 jest.mock('@/app/shared/components/Images', () => ({
   PhotoImage: ({ alt, src }: { alt: string; src: string }) => <img alt={alt} src={src} />,
-  FannedPhotos: ({ photos }: { photos: string[] }) => (
-    <span data-testid="photo-pile">{photos.length}</span>
-  ),
 }));
 jest.mock('next/image', () => {
   function MockImage({ alt, src }: { alt: string; src: string }) {
@@ -51,35 +48,79 @@ describe('MomentCard', () => {
   });
 
   it('renders the photo, the caption and the byline', () => {
-    render(<MomentCard moment={makeMoment()} onClick={jest.fn()} />);
+    const { container } = render(<MomentCard moment={makeMoment()} onClick={jest.fn()} />);
 
-    expect(screen.getByAltText('First bowl')).toHaveAttribute('src', 'https://cdn.tukai.co/m1.jpg');
+    // The button's label already says it, so the photo is alt=""
+    expect(container.querySelector('img')).toHaveAttribute('src', 'https://cdn.tukai.co/m1.jpg');
+    expect(container.querySelector('img')).toHaveAttribute('alt', '');
     expect(screen.getByText('First bowl off the wheel.')).toBeInTheDocument();
     expect(screen.getByText('Amina Njeri')).toBeInTheDocument();
     expect(screen.getByText('2 Oct')).toBeInTheDocument();
   });
 
-  // A moment can carry several photos; the pile over the corner says so
-  describe('the photo pile', () => {
-    it('is absent for a moment with one photo', () => {
-      render(<MomentCard moment={makeMoment()} onClick={jest.fn()} />);
+  it('labels the photo with who, where and what', () => {
+    render(<MomentCard moment={makeMoment()} onClick={jest.fn()} />);
 
-      expect(screen.queryByTestId('photo-pile')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', {
+        name: 'Moment by Amina Njeri at Nairobi Makers Circle: First bowl off the wheel.',
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it('marks your own moment and says so in the label', () => {
+    useSession.mockReturnValue({ data: { user: { id: 'u1' } } });
+
+    render(<MomentCard moment={makeMoment()} onClick={jest.fn()} />);
+
+    expect(screen.getByText('Yours')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /, yours$/ })).toBeInTheDocument();
+  });
+
+  it('shows an experience with the calendar', () => {
+    render(
+      <MomentCard
+        moment={makeMoment({ community: null, experience: { id: 'e1', title: 'Mara Trip' } })}
+        onClick={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByTestId('Calendar03Icon')).toBeInTheDocument();
+    expect(screen.getByText('Mara Trip')).toBeInTheDocument();
+  });
+
+  // An album shows a dot per photo in place of a count, and only its first
+  // photo until it is hovered
+  describe('an album', () => {
+    const album = makeMoment({
+      media: [0, 1, 2, 3].map((order) => ({
+        id: `md${order}`,
+        mediaType: 'photo',
+        photo: `https://cdn.tukai.co/m${order}.jpg`,
+        order,
+      })) as never,
     });
 
-    it('shows the photos behind the first one', () => {
-      const several = makeMoment({
-        media: [0, 1, 2, 3].map((order) => ({
-          id: `md${order}`,
-          mediaType: 'photo',
-          photo: `https://cdn.tukai.co/m${order}.jpg`,
-          order,
-        })) as never,
-      });
+    it('is labelled with its photo count', () => {
+      render(<MomentCard moment={album} onClick={jest.fn()} />);
 
-      render(<MomentCard moment={several} onClick={jest.fn()} />);
+      expect(screen.getByRole('button', { name: /^4 photos by Amina Njeri/ })).toBeInTheDocument();
+    });
 
-      expect(screen.getByTestId('photo-pile')).toHaveTextContent('3');
+    it('loads only the first photo at rest, and the rest on hover', () => {
+      const { container } = render(<MomentCard moment={album} onClick={jest.fn()} />);
+
+      expect(container.querySelectorAll('img')).toHaveLength(1);
+
+      fireEvent.mouseEnter(screen.getByRole('button', { name: /photos by/ }));
+
+      expect(container.querySelectorAll('img')).toHaveLength(4);
+    });
+
+    it('draws no dots for a single photo', () => {
+      const { container } = render(<MomentCard moment={makeMoment()} onClick={jest.fn()} />);
+
+      expect(container.querySelector('[aria-hidden="true"] > span')).not.toBeInTheDocument();
     });
   });
 
