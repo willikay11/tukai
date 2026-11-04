@@ -118,11 +118,34 @@ export const usePlaces = ({
   });
 };
 
-/** The places this user owns, for the Dashboard. */
+const MY_PLACES_PAGE_SIZE = 50;
+
+/**
+ * The places this user owns, for the Dashboard - every page of them, as one
+ * response. It used to read page 1 only, so a place approved past the twelfth
+ * never reached My places.
+ */
 export const useMyPlaces = (enabled: boolean = true) =>
   useQuery({
     queryKey: ['myPlaces'],
-    queryFn: async () => await fetchMyPlaces(),
+    queryFn: async () => {
+      const first = await fetchMyPlaces(1, MY_PLACES_PAGE_SIZE);
+      if (!first.success) return first;
+
+      const results = [...(first.data?.results ?? [])];
+      const count: number = first.data?.count ?? results.length;
+
+      for (let page = 2; results.length < count; page += 1) {
+        const next = await fetchMyPlaces(page, MY_PLACES_PAGE_SIZE);
+        const rows = next.data?.results ?? [];
+        // A failed or empty page ends it rather than looping on a count
+        // that has drifted since the first page
+        if (!next.success || rows.length === 0) break;
+        results.push(...rows);
+      }
+
+      return { ...first, data: { ...first.data, results } };
+    },
     enabled,
   });
 

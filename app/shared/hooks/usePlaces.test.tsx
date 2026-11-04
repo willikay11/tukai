@@ -17,6 +17,7 @@ import {
   useGoogleMapsAutocomplete,
   useLikePlaceReview,
   useLikePlaceReviewComment,
+  useMyPlaces,
   usePlaceCategories,
   usePlaceManager,
   usePlaceReviewComments,
@@ -766,5 +767,54 @@ describe('useFeaturedPlaces', () => {
     renderHook(() => useFeaturedPlaces(false), { wrapper: createWrapper() });
 
     expect(mockPlaceService.fetchFeaturedPlaces).not.toHaveBeenCalled();
+  });
+});
+
+describe('useMyPlaces', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const page = (ids: string[], count: number) => ({
+    status: 200,
+    success: true,
+    data: { count, results: ids.map((id) => ({ ...mockPlace, id })) },
+  });
+
+  it('reads every page, not just the first', async () => {
+    mockPlaceService.fetchMyPlaces
+      .mockResolvedValueOnce(page(['p1', 'p2'], 3) as never)
+      .mockResolvedValueOnce(page(['orchid'], 3) as never);
+
+    const { result } = renderHook(() => useMyPlaces(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.data?.results.map((place: { id: string }) => place.id)).toEqual([
+      'p1',
+      'p2',
+      'orchid',
+    ]);
+    expect(mockPlaceService.fetchMyPlaces).toHaveBeenNthCalledWith(2, 2, 50);
+  });
+
+  it('asks once when everything fits on the first page', async () => {
+    mockPlaceService.fetchMyPlaces.mockResolvedValueOnce(page(['p1'], 1) as never);
+
+    const { result } = renderHook(() => useMyPlaces(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockPlaceService.fetchMyPlaces).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops at an empty page rather than looping on a stale count', async () => {
+    mockPlaceService.fetchMyPlaces
+      .mockResolvedValueOnce(page(['p1'], 5) as never)
+      .mockResolvedValueOnce(page([], 5) as never);
+
+    const { result } = renderHook(() => useMyPlaces(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.data?.results).toHaveLength(1);
+    expect(mockPlaceService.fetchMyPlaces).toHaveBeenCalledTimes(2);
   });
 });
