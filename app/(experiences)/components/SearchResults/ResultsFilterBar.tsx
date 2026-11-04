@@ -36,7 +36,7 @@ export const ResultsFilterBar = ({
   sortOptions: SortOption[];
   onSortChange: (next: SortOption) => void;
 }) => (
-  <div className="sticky top-16 z-20 -mx-6 mt-1.5 flex items-center gap-3 bg-white px-6 py-2.5">
+  <div className="sticky top-[var(--top-bar-h,0px)] z-20 -mx-6 mt-1.5 flex items-center gap-3 bg-white px-6 py-2.5">
     <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto scrollbar-hide">
       <button
         type="button"

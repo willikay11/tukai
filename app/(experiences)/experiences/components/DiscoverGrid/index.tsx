@@ -66,10 +66,11 @@ export const DiscoverGrid = ({
       <SectionHeader title="Discover experiences" subtitle={subtitle} />
 
       {filters && (
-        // Sticks under the top bar. The bar is sticky only from md up, so on a
-        // phone the filters stick to the top of the screen. 69px is the desktop
-        // bar: 12px padding, the 44px tab row, and its 1px border.
-        <div className="sticky top-0 z-40 bg-white/95 py-3 md:top-[69px]">{filters}</div>
+        // Sticks under the top bar, at the height `TopBar` measures, and runs
+        // edge to edge across the 24px page edge
+        <div className="sticky top-[var(--top-bar-h,0px)] z-20 -mx-6 bg-white px-6 py-2.5">
+          {filters}
+        </div>
       )}
 
       {isEmpty ? (

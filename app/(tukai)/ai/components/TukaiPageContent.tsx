@@ -167,7 +167,7 @@ export const TukaiPageContent = () => {
   return (
     <div
       data-screen-label="TukAI"
-      className="fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-20 flex bg-white text-gray-800 md:bottom-0"
+      className="fixed inset-x-0 bottom-[calc(69px+env(safe-area-inset-bottom))] z-20 flex bg-white text-gray-800 min-[720px]:bottom-0"
       style={{ top }}
     >
       <div className="relative mx-auto flex h-full w-full max-w-[1360px] gap-0 min-[1100px]:gap-6 min-[1100px]:px-6 min-[1100px]:pt-4">
@@ -177,7 +177,7 @@ export const TukaiPageContent = () => {
             'relative flex min-w-0 flex-1 flex-col',
             // An empty chat scrolls as a whole, so the heading, composer and
             // starters still fit on a short screen
-            isEmptyChat && 'scrollbar-hide overflow-y-auto',
+            isEmptyChat && 'overflow-y-auto scrollbar-hide',
           )}
         >
           <TukaiHeader isEmptyChat={isEmptyChat} />

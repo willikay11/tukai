@@ -7,39 +7,34 @@ import { PageContainer } from './PageContainer';
 const column = () => screen.getByRole('main').firstElementChild;
 
 describe('PageContainer', () => {
-  it('lays the page out on the shared 12-column grid', () => {
+  // The handoff's page edge: 1360px, centred, 24px each side at every width
+  it('centres the page in a 1360px column with a 24px edge', () => {
+    render(<PageContainer>content</PageContainer>);
+
+    expect(screen.getByRole('main')).toHaveClass('mx-auto', 'max-w-[1360px]', 'px-6');
+  });
+
+  it('keeps a 12-column grid inside it', () => {
     render(<PageContainer>content</PageContainer>);
 
     expect(screen.getByRole('main')).toHaveClass('grid', 'grid-cols-12');
   });
 
-  it('gives browse pages the wide column', () => {
+  it('gives browse pages the whole content width', () => {
     render(<PageContainer>content</PageContainer>);
 
-    expect(column()).toHaveClass('md:col-span-10', 'md:col-start-2');
+    expect(column()).toHaveClass('col-span-12');
+    expect(column()).not.toHaveClass('md:col-span-8');
   });
 
-  // Detail pages are reading pages, so they sit one column narrower each side
-  it('insets detail pages by an extra column on both sides', () => {
+  // Detail pages are reading pages, so they sit two columns in each side
+  it('insets detail pages from a tablet up', () => {
     render(<PageContainer variant="detail">content</PageContainer>);
 
     expect(column()).toHaveClass('md:col-span-8', 'md:col-start-3');
-    expect(column()).not.toHaveClass('md:col-span-10');
   });
 
-  it('keeps the inset at every breakpoint', () => {
-    render(<PageContainer variant="detail">content</PageContainer>);
-
-    // browse: 8/start-3 and 6/start-4 - detail steps in one column further
-    expect(column()).toHaveClass(
-      '3xl:col-span-6',
-      '3xl:col-start-4',
-      '4xl:col-span-4',
-      '4xl:col-start-5',
-    );
-  });
-
-  it('still spans the full width on mobile', () => {
+  it('still spans the full width on a phone', () => {
     render(<PageContainer variant="detail">content</PageContainer>);
 
     expect(column()).toHaveClass('col-span-12');

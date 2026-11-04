@@ -219,7 +219,7 @@ export const ConversationView = ({
         </div>
       </div>
 
-      <div className="flex-shrink-0 border-t border-surface-muted bg-white px-4 pb-[calc(14px+env(safe-area-inset-bottom))] pt-3.5">
+      <div className="flex-shrink-0 border-t border-surface-muted bg-white px-4 pb-[calc(14px+var(--drawer-inset-bottom,env(safe-area-inset-bottom)))] pt-3.5">
         <div className="relative">
           <input
             type="text"

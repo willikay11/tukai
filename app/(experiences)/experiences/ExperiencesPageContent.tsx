@@ -40,6 +40,7 @@ import { useUpcomingItineraries } from '@/app/(experiences)/hooks';
 import { CategoryChipRow } from '@/app/shared/components/Filters/CategoryChipRow';
 import type { CategoryChip } from '@/app/shared/components/Filters/CategoryChipRow';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PAGE_GRID } from '@/app/shared/components/Layout';
 import { CardRail, RAIL_CARD_RESPONSIVE_WIDTH } from '@/app/shared/components/Lists';
 import { PillTabs } from '@/app/shared/components/Tabs';
 import { isSharedWithMe, useMyBucketLists } from '@/app/shared/hooks/useBucketLists';
@@ -299,16 +300,16 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const visibleTabs = session?.user ? TABS : TABS.filter((tab) => tab.value === 'all');
 
   return (
-    <main className="grid grid-cols-12 gap-x-4 px-4 md:px-0">
+    <main className={PAGE_GRID}>
       {/* Filter tabs: hidden while there is only the All tab, so no lone pill shows */}
       {visibleTabs.length > 1 && (
-        <div className="col-span-12 pt-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+        <div className="col-span-12 pt-6">
           <PillTabs tabs={visibleTabs} value={activeTab} onChange={handleTabChange} />
         </div>
       )}
 
       {isAll ? (
-        <div className="col-span-12 space-y-10 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+        <div className="col-span-12 space-y-10 py-6">
           {/* Featured experiences: a paged rail of cards, as the design has it.
               Hidden when nothing is featured, so no empty heading shows. */}
           {(isLoadingFeatured || featuredExperiences.length > 0) && (
@@ -416,7 +417,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
            itself inside this 12-col grid; the Saved tab has its own layout. */
         <>
           {activeTab === 'saved' && (
-            <div className="col-span-12 space-y-10 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+            <div className="col-span-12 space-y-10 py-6">
               {/* Your Bucket Lists */}
               <section>
                 {/* Wraps rather than squeezing the button against the heading
@@ -483,7 +484,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             </div>
           )}
           {activeTab === 'hosting' && (
-            <div className="col-span-12 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+            <div className="col-span-12 py-6">
               <SectionHeader
                 title="Hosting"
                 subtitle="Every experience you host, in all statuses"
@@ -515,7 +516,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             </div>
           )}
           {activeTab === 'reserved' && (
-            <div className="col-span-12 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+            <div className="col-span-12 py-6">
               <ReservedTab
                 reservations={reservations}
                 reservedExperiences={reservedExperiences}
