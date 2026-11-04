@@ -82,6 +82,18 @@ const lendPlacePhotosToProfile = async (
   await addReservationProfilePhotos(placeId, profileId, uploads);
 };
 
+/**
+ * Who a place list is being read for. `is_bookmarked` on a list is only true
+ * for a signed-in reader whose token went with the request, so the token goes
+ * whenever there is one, and the reader's id goes into each list's query key -
+ * otherwise the anonymous answer cached before sign-in kept every basket empty.
+ */
+const usePlaceListViewer = () => {
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
+  return { userId, withAuth: Boolean(userId) };
+};
+
 export const usePlaces = ({
   categoryId,
   page,
@@ -97,9 +109,12 @@ export const usePlaces = ({
   lng?: number;
   search?: string;
 }) => {
+  const { userId, withAuth } = usePlaceListViewer();
+
   return useQuery({
-    queryKey: ['places', { categoryId, page, lat, lng, search }],
-    queryFn: async () => await fetchPlaces(page, 12, categoryId, search, lat, lng),
+    queryKey: ['places', { categoryId, page, lat, lng, search, userId }],
+    queryFn: async () =>
+      await fetchPlaces(page, 12, categoryId, search, lat, lng, { withAuth }),
     enabled,
   });
 };
@@ -684,30 +699,38 @@ export const useSaveReservationSettings = (placeId: string) => {
 /**
  * Places with something on - the "Places with experiences" section.
  */
-export const usePlacesWithExperiences = (enabled = true, perPage = 10) =>
-  useQuery({
-    queryKey: ['places', 'with-experiences', perPage],
+export const usePlacesWithExperiences = (enabled = true, perPage = 10) => {
+  const { userId, withAuth } = usePlaceListViewer();
+
+  return useQuery({
+    queryKey: ['places', 'with-experiences', perPage, userId],
     queryFn: async () =>
       await fetchPlaces(1, perPage, undefined, undefined, undefined, undefined, {
         hasExperiences: true,
+        withAuth,
       }),
     enabled,
   });
+};
 
 /**
  * The places ranked by reviews - the "Popular places" rail. The API orders
  * them by highest average rating, unrated places last, so the order is not
  * re-sorted here.
  */
-export const usePopularPlaces = (enabled = true, perPage = 10) =>
-  useQuery({
-    queryKey: ['places', 'popular', perPage],
+export const usePopularPlaces = (enabled = true, perPage = 10) => {
+  const { userId, withAuth } = usePlaceListViewer();
+
+  return useQuery({
+    queryKey: ['places', 'popular', perPage, userId],
     queryFn: async () =>
       await fetchPlaces(1, perPage, undefined, undefined, undefined, undefined, {
         sortBy: 'popular',
+        withAuth,
       }),
     enabled,
   });
+};
 
 /**
  * The places in one category, best rated first - the Moments feed's Popular
@@ -718,15 +741,19 @@ export const usePopularPlacesInCategory = (
   categoryId: string | undefined,
   enabled = true,
   perPage = 50,
-) =>
-  useQuery({
-    queryKey: ['places', 'popular', 'category', categoryId, perPage],
+) => {
+  const { userId, withAuth } = usePlaceListViewer();
+
+  return useQuery({
+    queryKey: ['places', 'popular', 'category', categoryId, perPage, userId],
     queryFn: async () =>
       await fetchPlaces(1, perPage, categoryId, undefined, undefined, undefined, {
         sortBy: 'popular',
+        withAuth,
       }),
     enabled: enabled && Boolean(categoryId),
   });
+};
 
 /**
  * The places staff have featured - the "Promoted places" row.
@@ -736,31 +763,49 @@ export const usePopularPlacesInCategory = (
  * which is right anyway, since /places lists every place rather than more of
  * these.
  */
-export const useFeaturedPlaces = (enabled = true) =>
-  useQuery({
-    queryKey: ['places', 'featured'],
-    queryFn: async () => await fetchFeaturedPlaces(),
+export const useFeaturedPlaces = (enabled = true) => {
+  const { userId, withAuth } = usePlaceListViewer();
+
+  return useQuery({
+    queryKey: ['places', 'featured', userId],
+    queryFn: async () => await fetchFeaturedPlaces(withAuth),
     enabled,
   });
+};
 
 /**
  * The places nearest the reader. The API orders them by distance from the
  * coordinates it is sent, so the query only runs once both are known.
  */
-export const useNearbyPlaces = (lat?: number, lng?: number, categoryId?: string, perPage = 10) =>
-  useQuery({
-    queryKey: ['places', 'nearby', { lat, lng, categoryId, perPage }],
-    queryFn: async () => await fetchPlaces(1, perPage, categoryId, undefined, lat, lng),
+export const useNearbyPlaces = (
+  lat?: number,
+  lng?: number,
+  categoryId?: string,
+  perPage = 10,
+) => {
+  const { userId, withAuth } = usePlaceListViewer();
+
+  return useQuery({
+    queryKey: ['places', 'nearby', { lat, lng, categoryId, perPage, userId }],
+    queryFn: async () =>
+      await fetchPlaces(1, perPage, categoryId, undefined, lat, lng, { withAuth }),
     enabled: lat !== undefined && lng !== undefined,
   });
+};
 
 /**
  * The places in one city, for its rail on /places. The city is a place
  * category, so it goes through the same `category` filter the list uses.
  */
-export const usePlacesInCity = (cityCategoryId: string, enabled = true, perPage = 10) =>
-  useQuery({
-    queryKey: ['places', 'city', cityCategoryId, perPage],
-    queryFn: async () => await fetchPlaces(1, perPage, cityCategoryId),
+export const usePlacesInCity = (cityCategoryId: string, enabled = true, perPage = 10) => {
+  const { userId, withAuth } = usePlaceListViewer();
+
+  return useQuery({
+    queryKey: ['places', 'city', cityCategoryId, perPage, userId],
+    queryFn: async () =>
+      await fetchPlaces(1, perPage, cityCategoryId, undefined, undefined, undefined, {
+        withAuth,
+      }),
     enabled: enabled && Boolean(cityCategoryId),
   });
+};

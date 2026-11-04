@@ -94,7 +94,29 @@ describe('Place Hooks', () => {
         undefined,
         -1.2,
         36.8,
+        { withAuth: true },
       );
+    });
+
+    it('fetches anonymously when nobody is signed in', async () => {
+      const signedIn = session.data;
+      session.data = null;
+      mockPlaceService.fetchPlaces.mockResolvedValue({ data: { results: [], count: 0 } });
+
+      renderHook(() => usePlaces({ page: 1, enabled: true }), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(mockPlaceService.fetchPlaces).toHaveBeenCalledWith(
+          1,
+          12,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          { withAuth: false },
+        );
+      });
+      session.data = signedIn;
     });
 
     it('does not fetch when enabled is false', () => {
@@ -134,6 +156,7 @@ describe('Place Hooks', () => {
           undefined,
           undefined,
           undefined,
+          { withAuth: true },
         );
       });
     });
@@ -728,12 +751,13 @@ describe('useFeaturedPlaces', () => {
   });
 
   it('calls the featured endpoint, not the general places list', async () => {
+    session.data = { user: { id: 'u1' } };
     respond([]);
 
     const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockPlaceService.fetchFeaturedPlaces).toHaveBeenCalledWith();
+    expect(mockPlaceService.fetchFeaturedPlaces).toHaveBeenCalledWith(true);
   });
 
   it('does not fetch while disabled', () => {
