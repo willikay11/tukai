@@ -32,9 +32,6 @@ jest.mock('@/components/ui/image', () => ({
 jest.mock('@/context/AuthDialogContext', () => ({
   useAuthDialog: () => ({ needAuth: jest.fn() }),
 }));
-jest.mock('@/app/shared/components/Subscription', () => ({
-  SubscriptionModalFlow: () => null,
-}));
 // The dot on Notifications is driven by the real unread count now
 jest.mock('@/app/shared/hooks/useNotifications', () => ({
   useUnreadNotificationCount: () => ({ data: { data: { count: 0 } } }),
