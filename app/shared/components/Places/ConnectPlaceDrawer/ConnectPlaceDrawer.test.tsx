@@ -58,6 +58,7 @@ const PLACE = {
 
 const deleteOwnership = jest.fn().mockResolvedValue({});
 let placeOwnerships: Record<string, unknown> = {};
+let searchResults: unknown[] = [];
 jest.mock('@/app/shared/hooks/usePlaces', () => ({
   useClaimPlaceOwnership: () => ({ mutateAsync: jest.fn().mockResolvedValue({}) }),
   useDeletePlaceOwnership: () => ({ mutateAsync: deleteOwnership }),
@@ -68,8 +69,10 @@ jest.mock('@/app/shared/hooks/usePlaces', () => ({
   // Mirrors real React Query: no data while disabled, so the drawer's own
   // reset-on-fresh-open effect (which runs before this resolves) isn't
   // racing a prefill that was never supposed to have arrived yet.
-  usePlace: (_id: string | null, enabled = true) => ({ data: enabled ? { data: PLACE } : undefined }),
-  usePlaces: () => ({ data: { data: { results: [] } }, isFetching: false }),
+  usePlace: (_id: string | null, enabled = true) => ({
+    data: enabled ? { data: PLACE } : undefined,
+  }),
+  usePlaces: () => ({ data: { data: { results: searchResults } }, isFetching: false }),
 }));
 
 jest.mock('@/app/shared/hooks/useAuth', () => ({
@@ -99,7 +102,11 @@ const renderDrawer = (options?: OpenConnectPlaceOptions) =>
     </ConnectPlaceDrawerProvider>,
   );
 
-const attachDocument = async (user: ReturnType<typeof userEvent.setup>, label: RegExp, file: File) => {
+const attachDocument = async (
+  user: ReturnType<typeof userEvent.setup>,
+  label: RegExp,
+  file: File,
+) => {
   await user.click(screen.getByRole('button', { name: label }));
   fireEvent.change(screen.getByLabelText('Attach document'), { target: { files: [file] } });
 };
@@ -109,6 +116,7 @@ const resetBackend = () => {
   communityVerificationStatus = null;
   verificationDocuments = undefined;
   placeOwnerships = {};
+  searchResults = [];
 };
 
 describe('ConnectPlaceDrawer', () => {
@@ -129,7 +137,9 @@ describe('ConnectPlaceDrawer', () => {
       new File(['a'], 'cert.pdf', { type: 'application/pdf' }),
     );
     expect(submit).toBeDisabled();
-    expect(screen.getByText('Attach one more document. Claims need at least two.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Attach one more document. Claims need at least two.'),
+    ).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /Business license/ }));
     await attachDocument(
@@ -228,13 +238,7 @@ const SENT: Record<'certificate' | 'license', SentDocument> = {
   },
 };
 
-const OpenSentClaim = ({
-  sent,
-  view,
-}: {
-  sent: SentDocument[];
-  view: 'claim' | 'documents';
-}) => {
+const OpenSentClaim = ({ sent, view }: { sent: SentDocument[]; view: 'claim' | 'documents' }) => {
   const { submitClaim, openConnectPlace, claims } = useConnectPlaceDrawer()!;
   const claimId = useRef<string | null>(null);
 
@@ -252,10 +256,7 @@ const OpenSentClaim = ({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => openConnectPlace({ claimId: claimId.current!, view })}
-      >
+      <button type="button" onClick={() => openConnectPlace({ claimId: claimId.current!, view })}>
         Reopen claim
       </button>
       <output data-testid="claim-files">
@@ -448,11 +449,7 @@ describe('ConnectPlaceDrawer resubmitting documents', () => {
     expect(resubmit()).toBeDisabled();
     expect(screen.getByText('Attach at least two documents.')).toBeInTheDocument();
 
-    await attachDocument(
-      user,
-      /Attach certificate of incorporation/i,
-      pdf('certificate-2.pdf'),
-    );
+    await attachDocument(user, /Attach certificate of incorporation/i, pdf('certificate-2.pdf'));
 
     expect(resubmit()).toBeEnabled();
   });
@@ -531,5 +528,41 @@ describe('ConnectPlaceDrawer resubmitting documents', () => {
     expect(screen.queryByText('abandoned.pdf')).not.toBeInTheDocument();
     expect(screen.getAllByText(/Already sent/)).toHaveLength(2);
     expect(resubmit()).toBeDisabled();
+  });
+});
+
+describe('ConnectPlaceDrawer search', () => {
+  beforeEach(resetBackend);
+
+  const result = (id: string, title: string) => ({ ...PLACE, id, title, slug: id });
+
+  it('locks a place a community already owns, and leaves the rest to connect', async () => {
+    searchResults = [result('owned', 'The Good Grain'), result('free', 'Orchid')];
+    placeOwnerships = {
+      owned: { status: 200, success: true, data: { community: 'c9', approved: true } },
+      free: { status: 404, success: true, data: null },
+    };
+    const user = userEvent.setup();
+    renderDrawer();
+
+    await user.type(await screen.findByPlaceholderText('Search by the name of the place'), 'gr');
+
+    const owned = await screen.findByRole('button', { name: 'Connect The Good Grain' });
+    expect(owned).toBeDisabled();
+    expect(owned).toHaveTextContent('Claimed');
+    expect(screen.getByRole('button', { name: 'Connect Orchid' })).toBeEnabled();
+  });
+
+  it('leaves a place with only a pending claim open to claim', async () => {
+    searchResults = [result('pending', 'Orchid')];
+    placeOwnerships = {
+      pending: { status: 200, success: true, data: { community: 'c9', approved: false } },
+    };
+    const user = userEvent.setup();
+    renderDrawer();
+
+    await user.type(await screen.findByPlaceholderText('Search by the name of the place'), 'or');
+
+    expect(await screen.findByRole('button', { name: 'Connect Orchid' })).toBeEnabled();
   });
 });

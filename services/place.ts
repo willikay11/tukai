@@ -17,7 +17,9 @@ export async function fetchPlaces(
   lng?: number,
   // `sort_by` is the only ordering the API offers, and only 'popular' is
   // accepted. An object so the next one does not become an eighth argument.
-  options?: { sortBy?: 'popular'; hasExperiences?: boolean },
+  // `withAuth` sends the reader's token, without which the API cannot tell
+  // which places they have saved and reports `is_bookmarked: false` on all.
+  options?: { sortBy?: 'popular'; hasExperiences?: boolean; withAuth?: boolean },
 ): Promise<ApiResponse> {
   try {
     const queryParams = new URLSearchParams();
@@ -42,7 +44,8 @@ export async function fetchPlaces(
     // when it is wanted
     if (options?.hasExperiences) queryParams.append('has_experiences', 'true');
 
-    const res = await api.get(`/v1/places/?${queryParams.toString()}`);
+    const axiosInstance = options?.withAuth ? await apiWithToken() : api;
+    const res = await axiosInstance.get(`/v1/places/?${queryParams.toString()}`);
 
     return {
       status: res.status,
@@ -68,9 +71,10 @@ export async function fetchPlaces(
  * rotation, ... }` - so `res.data` already carries `results` and is not
  * re-wrapped here.
  */
-export async function fetchFeaturedPlaces(): Promise<ApiResponse> {
+export async function fetchFeaturedPlaces(withAuth: boolean = false): Promise<ApiResponse> {
   try {
-    const res = await api.get('/v1/places/featured/');
+    const axiosInstance = withAuth ? await apiWithToken() : api;
+    const res = await axiosInstance.get('/v1/places/featured/');
 
     return {
       status: res.status,

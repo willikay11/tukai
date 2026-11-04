@@ -67,6 +67,16 @@ export const ClaimCard = ({ placeId, placeName }: { placeId: string; placeName: 
   );
   const communityName = claim?.communityName ?? communityResponse?.data?.title ?? 'another community';
 
+  // Already claimed: a community holds the approved ownership, so there is
+  // nothing left to claim. The place detail's `verifiedOwner` can still read
+  // null for a moment after approval, which is how "Start claim" ended up on
+  // a place that already had an owner.
+  if (ownership?.approved) return null;
+
+  // Nothing remembered here and the check still in flight: show nothing
+  // rather than flashing "Start claim" on what may well be a claimed place
+  if (isLoadingOwnership && !claim) return null;
+
   if (hasOpenClaim) {
     const isMoreDocuments = claim?.status === 'more';
 
