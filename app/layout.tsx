@@ -10,7 +10,7 @@ import { ChromeGate } from '@/app/shared/components/Global';
 import { Footer } from '@/app/shared/components/Global';
 import { appFont } from '@/app/shared/components/Global';
 import { GlobalLoading } from '@/app/shared/components/Global';
-import { LocationPrompt, LocationToast } from '@/app/shared/components/LocationPicker';
+import { LocationPrompt } from '@/app/shared/components/LocationPicker';
 import { BottomNavigation, TopBar } from '@/app/shared/components/Navigation';
 import { AskTukaiButton } from '@/app/shared/components/TukAI';
 import { PageFilters } from '@/components/ui/pageFilters';
@@ -137,7 +137,6 @@ export default function RootLayout({
                                                 </Suspense>
                                                 <LocationPrompt />
                                               </ChromeGate>
-                                              <LocationToast />
 
                                               <div className="flex-grow">{children}</div>
 

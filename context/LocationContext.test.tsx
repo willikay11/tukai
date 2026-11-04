@@ -3,30 +3,25 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { toast } from '@/app/shared/hooks/useToast';
+
 import { LocationProvider, useLocation } from './LocationContext';
+
+jest.mock('@/app/shared/hooks/useToast', () => ({ toast: jest.fn() }));
+
+const mockToast = toast as jest.Mock;
 
 const getCurrentPosition = jest.fn();
 
 const Probe = () => {
-  const {
-    status,
-    isUsingLocation,
-    area,
-    city,
-    away,
-    homeCity,
-    locationToast,
-    setUsingLocation,
-    setCity,
-    goHome,
-  } = useLocation();
+  const { status, isUsingLocation, area, city, away, homeCity, setUsingLocation, setCity, goHome } =
+    useLocation();
 
   return (
     <div>
       <p data-testid="state">{`${status}|${isUsingLocation}`}</p>
       <p data-testid="where">{area ?? city ?? '-'}</p>
       <p data-testid="away">{`${away}`}</p>
-      <p data-testid="toast">{locationToast ?? '-'}</p>
       <button onClick={() => setUsingLocation(true)}>on</button>
       <button onClick={() => setUsingLocation(false)}>off</button>
       <button onClick={() => setCity('Mombasa')}>pick Mombasa</button>
@@ -158,10 +153,11 @@ describe('using my location', () => {
 
     await userEvent.click(screen.getByText('on'));
 
+    // Through the app's one Toaster, not a pill of the location bar's own
     await waitFor(() =>
-      expect(screen.getByTestId('toast')).toHaveTextContent(
-        'Location on. Closest first, around Westlands, Nairobi.',
-      ),
+      expect(mockToast).toHaveBeenCalledWith({
+        title: 'Location on. Closest first, around Westlands, Nairobi.',
+      }),
     );
   });
 });
@@ -206,6 +202,6 @@ describe('home and away', () => {
     expect(screen.getByTestId('where')).toHaveTextContent(
       screen.getByTestId('home-city').textContent ?? '',
     );
-    expect(screen.getByTestId('toast')).toHaveTextContent('Back to Nairobi.');
+    expect(mockToast).toHaveBeenCalledWith({ title: 'Back to Nairobi.' });
   });
 });
