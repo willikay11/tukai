@@ -1,3 +1,5 @@
+import { useSession } from 'next-auth/react';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
@@ -46,6 +48,12 @@ import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
 import { ItineraryDayPayload } from '@/types/itinerary';
 
 export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean) => {
+  // `is_bookmarked` on a list is only true for a signed-in reader whose token
+  // went with the request. The reader's id goes into the key too, or the
+  // anonymous answer cached before sign-in kept every basket empty.
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
+
   return useQuery({
     queryKey: [
       'experiences',
@@ -68,8 +76,9 @@ export const useExperiences = (params: ExperiencesQueryParams, enabled: boolean)
       // and each served the last one's results
       params.place,
       params.community,
+      userId,
     ],
-    queryFn: async () => await fetchExperiences(params),
+    queryFn: async () => await fetchExperiences(params, Boolean(userId)),
     enabled: enabled,
   });
 };

@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -33,6 +34,68 @@ describe('CardShell', () => {
 
     expect(onClick).toHaveBeenCalled();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  /**
+   * The bookmark's bucket-list picker portals out of the card, but React still
+   * bubbles its events through it - pressing "Create bucket list" opened the
+   * place drawer over the picker.
+   */
+  describe('with something portalled out of an overlay', () => {
+    const portalled = (
+      <>
+        {createPortal(
+          <>
+            <button type="button">Create bucket list</button>
+            <input aria-label="List name" />
+          </>,
+          document.body,
+        )}
+      </>
+    );
+
+    it('does not treat a press inside the portal as a press on the card', async () => {
+      const onClick = jest.fn();
+      const user = userEvent.setup();
+      render(<CardShell {...media} onClick={onClick} overlay={portalled} />);
+
+      await user.click(screen.getByRole('button', { name: 'Create bucket list' }));
+
+      expect(onClick).not.toHaveBeenCalled();
+    });
+
+    it('does not let a portal press reach a link card either', async () => {
+      const onClick = jest.fn();
+      const user = userEvent.setup();
+      render(
+        <CardShell {...media} href="/experiences/hike" onClick={onClick} overlay={portalled} />,
+      );
+
+      await user.click(screen.getByRole('button', { name: 'Create bucket list' }));
+
+      expect(onClick).not.toHaveBeenCalled();
+    });
+
+    it('lets a space be typed into a field inside the portal', async () => {
+      const onClick = jest.fn();
+      const user = userEvent.setup();
+      render(<CardShell {...media} onClick={onClick} overlay={portalled} />);
+
+      await user.type(screen.getByRole('textbox', { name: 'List name' }), 'Road trip');
+
+      expect(screen.getByRole('textbox', { name: 'List name' })).toHaveValue('Road trip');
+      expect(onClick).not.toHaveBeenCalled();
+    });
+
+    it('still opens on a press of the card itself', async () => {
+      const onClick = jest.fn();
+      const user = userEvent.setup();
+      render(<CardShell {...media} onClick={onClick} overlay={portalled} />);
+
+      await user.click(screen.getByAltText('A hike'));
+
+      expect(onClick).toHaveBeenCalled();
+    });
   });
 
   /**

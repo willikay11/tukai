@@ -132,7 +132,7 @@ export const CommunityFeedTab = ({
   const experienceQueries = useQueries({
     queries: fanOutIds.map((communityId) => ({
       queryKey: ['experiences', 'community', communityId],
-      queryFn: () => fetchExperiences({ community: communityId, page: 1, page_size: 6 }),
+      queryFn: () => fetchExperiences({ community: communityId, page: 1, page_size: 6 }, true),
       enabled: isSignedIn,
     })),
   });
