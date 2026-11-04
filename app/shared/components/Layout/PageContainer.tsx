@@ -2,22 +2,27 @@ import { ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
 
-// The gutter every browse page shares: a 12-column grid whose content column
-// narrows as the viewport widens. Previously this class string was pasted into
-// each page, so pages drifted apart - Discover and Moments were on a plain
-// max-w-7xl and did not line up with Experiences, Places or Communities.
-export const PAGE_CONTENT_COLUMNS =
-  'col-span-12 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4';
+/**
+ * The page edge every screen shares, per the mobile handoff: a 1360px column,
+ * centred, with a 24px edge at every width - so content is up to 1312px wide,
+ * and lines up with the top bar and the footer above and below it.
+ *
+ * It keeps a 12-column grid inside, for pages that place a narrower column.
+ * Pages that draw their own `<main>` use this string for the same edge.
+ */
+export const PAGE_GRID = 'mx-auto grid w-full max-w-[1360px] grid-cols-12 gap-x-4 px-6';
+
+/** The browse column: the whole content width. */
+export const PAGE_CONTENT_COLUMNS = 'col-span-12';
 
 /**
- * One column narrower on each side than the browse gutter.
+ * Two columns in from each side.
  *
  * Detail pages - a single experience, place or community - are reading pages
- * rather than grids of cards, so they sit inside the browse column with an
- * extra empty column either side.
+ * rather than grids of cards, so they take a narrower column than the browse
+ * pages, from the width a tablet gives them.
  */
-export const PAGE_DETAIL_COLUMNS =
-  'col-span-12 md:col-span-8 md:col-start-3 3xl:col-span-6 3xl:col-start-4 4xl:col-span-4 4xl:col-start-5';
+export const PAGE_DETAIL_COLUMNS = 'col-span-12 md:col-span-8 md:col-start-3';
 
 export const PageContainer = ({
   children,
@@ -29,7 +34,7 @@ export const PageContainer = ({
   className?: string;
   variant?: 'browse' | 'detail';
 }) => (
-  <main className="grid grid-cols-12 gap-x-4 px-4 md:px-0">
+  <main className={PAGE_GRID}>
     <div
       className={cn(variant === 'detail' ? PAGE_DETAIL_COLUMNS : PAGE_CONTENT_COLUMNS, className)}
     >

@@ -92,11 +92,27 @@ describe('Search bar', () => {
     });
 
     // The canvas sets the query at 13.5px/500 inside the bar
-    it('sets the field text to the canvas size', () => {
+    it('sets the field text to the canvas size from 720px', () => {
       render(<Search />);
 
       const field = screen.getByRole('textbox', { name: 'Search Tukai' });
-      expect(field).toHaveClass('text-[13.5px]', 'font-medium');
+      expect(field).toHaveClass('min-[720px]:text-[13.5px]', 'font-medium');
+    });
+
+    // iOS Safari zooms the page into any field under 16px when it is focused
+    it('is 16px on a phone', () => {
+      render(<Search />);
+
+      expect(screen.getByRole('textbox', { name: 'Search Tukai' })).toHaveClass('text-base');
+    });
+
+    it('asks the long question on a wide screen', () => {
+      render(<Search />);
+
+      expect(screen.getByRole('textbox', { name: 'Search Tukai' })).toHaveAttribute(
+        'placeholder',
+        'Experiences, places, lists, communities',
+      );
     });
   });
 
@@ -250,6 +266,42 @@ describe('Search bar', () => {
 
         expect(screen.getByText('Looking for: all')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('on a phone', () => {
+    const wideMatchMedia = window.matchMedia;
+
+    beforeEach(() => {
+      window.matchMedia = ((query: string) => ({
+        ...wideMatchMedia(query),
+        matches: query.includes('max-width: 719.98px'),
+      })) as typeof window.matchMedia;
+    });
+
+    afterEach(() => {
+      window.matchMedia = wideMatchMedia;
+    });
+
+    it('asks the short question', () => {
+      render(<Search />);
+
+      expect(screen.getByRole('textbox', { name: 'Search Tukai' })).toHaveAttribute(
+        'placeholder',
+        'Search Tukai',
+      );
+    });
+
+    // So the results it opens are not half hidden behind the keyboard
+    it('puts the keyboard away when a search runs', async () => {
+      const user = userEvent.setup();
+      render(<Search />);
+
+      const field = screen.getByRole('textbox', { name: 'Search Tukai' });
+      await user.type(field, 'hikes{Enter}');
+
+      expect(field).not.toHaveFocus();
+      expect(replace).toHaveBeenCalledWith('/?q=hikes');
     });
   });
 });

@@ -9,6 +9,7 @@ import { debounce } from 'lodash';
 import { FiltersDialog } from '@/app/shared/components/Filters';
 import { paramsFromFilters } from '@/app/shared/components/Filters/filters';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { isPhoneWidth, useIsPhone } from '@/app/shared/hooks/useIsPhone';
 import { useLocation } from '@/context/LocationContext';
 import { useSelectedCategory } from '@/context/SelectedCategoryContext';
 import { PlaceCategory } from '@/types/placeCategory';
@@ -42,6 +43,7 @@ const DEBOUNCE_MS = 400;
 export const Search = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const isPhone = useIsPhone();
   const searchParams = useSearchParams();
   const { setSelectedCitySearchId } = useSelectedCategory();
   const { city, area, status, isUsingLocation, away, homeCity, goHome } = useLocation();
@@ -110,6 +112,17 @@ export const Search = () => {
   const debouncedSubmit = useMemo(() => debounce(handleSubmitSearch, DEBOUNCE_MS), []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => debouncedSubmit.cancel(), [debouncedSubmit]);
 
+  /**
+   * Running a search on purpose - Enter or the search button, not a pause in
+   * typing. On a phone that also puts the keyboard away, so the results it
+   * has just opened are not half hidden behind it.
+   */
+  const runSearch = () => {
+    debouncedSubmit.cancel();
+    handleSubmitSearch();
+    if (isPhoneWidth()) inputElRef.current?.blur();
+  };
+
   return (
     <FiltersDialog
       filters={filtersDraft}
@@ -117,7 +130,7 @@ export const Search = () => {
       onClose={() => setIsFiltersOpen(false)}
       onApply={applyFilters}
     >
-      <div className="my-4 w-full md:my-0">
+      <div className="w-full">
         <SearchBarShell
           // "Near me" only once location is actually resolved - while it is
           // still being found, the chip keeps saying whatever it said before
@@ -130,10 +143,7 @@ export const Search = () => {
           filterCount={tag ? 1 : 0}
           isFilterOpen={isFiltersOpen}
           canSearch={!isFieldEmpty}
-          onSearch={() => {
-            debouncedSubmit.cancel();
-            handleSubmitSearch();
-          }}
+          onSearch={runSearch}
         >
           {/* The Filters dialog seeds its own category pick from this tag but
           does not write back to it, so the chip's own close button stays the
@@ -159,17 +169,17 @@ export const Search = () => {
             ref={inputElRef}
             type="text"
             aria-label="Search Tukai"
-            placeholder="Experiences, places, lists, communities"
-            className="min-w-0 flex-1 border-none bg-transparent text-[13.5px] font-medium text-gray-900 outline-none placeholder:text-ink-subtle"
+            placeholder={isPhone ? 'Search Tukai' : 'Experiences, places, lists, communities'}
+            // 16px on a phone: iOS Safari zooms the page into any field
+            // smaller than that the moment it is focused
+            className="min-w-0 flex-1 border-none bg-transparent text-base font-medium text-gray-900 outline-none placeholder:text-ink-subtle min-[720px]:text-[13.5px]"
             onChange={(event) => {
               setIsFieldEmpty(event.target.value.length === 0);
               setQuery(event.target.value);
               debouncedSubmit();
             }}
             onKeyDown={(event) => {
-              if (event.key !== 'Enter') return;
-              debouncedSubmit.cancel();
-              handleSubmitSearch();
+              if (event.key === 'Enter') runSearch();
             }}
           />
         </SearchBarShell>

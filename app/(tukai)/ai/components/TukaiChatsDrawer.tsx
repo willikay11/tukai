@@ -233,7 +233,7 @@ export const TukaiChatsDrawer = () => {
           )}
         </div>
 
-        <div className="sticky bottom-0 flex-shrink-0 border-t border-surface-muted bg-white px-6 pb-[calc(16px+env(safe-area-inset-bottom))] pt-4">
+        <div className="sticky bottom-0 flex-shrink-0 border-t border-surface-muted bg-white px-6 pb-[calc(16px+var(--drawer-inset-bottom,env(safe-area-inset-bottom)))] pt-4">
           <div
             className={cn(
               'flex flex-col gap-1 rounded-xl px-4 py-3.5',

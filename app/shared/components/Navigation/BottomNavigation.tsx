@@ -2,10 +2,12 @@
 
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { useCloseAllPanels } from '@/app/shared/hooks/useCloseAllPanels';
 import { TukaiImage } from '@/components/ui/image';
+import { useAuthDialog } from '@/context/AuthDialogContext';
 import { cn } from '@/lib/utils';
 
 import { DESTINATIONS, isDestinationActive } from './destinations';
@@ -32,8 +34,11 @@ const isDetailPage = (pathname: string): boolean => {
 
 export const BottomNavigation = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
+  const { needAuth } = useAuthDialog();
+  const closeAllPanels = useCloseAllPanels();
 
   // A single experience puts its booking bar along the bottom edge, and that
   // CTA is the point of the page - two bars would sit on top of each other
@@ -45,59 +50,71 @@ export const BottomNavigation = () => {
   if (pathname === '/communities' && searchParams.get('tab') === 'mine') return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 bg-white shadow-top-md md:hidden">
-      {/* Five equal columns across the full width, each an icon over its label.
-          The active one takes a soft pill behind its icon and a heavier label. */}
-      <nav
-        aria-label="Primary"
-        className="grid grid-cols-5 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2"
-      >
-        {DESTINATIONS.map((link) => {
-          const active = isDestinationActive(link.href, pathname);
-          // The reader's face stands in for the "You" icon once it is known
-          const face = link.showsFace ? session?.user?.image : undefined;
+    // Phones only. Four equal columns, each an icon pill over its label; the
+    // current one takes a soft pill and a heavier label. The bottom padding
+    // carries the home-indicator inset, so the bar is 69px plus that inset -
+    // the height sheets and floating elements clear.
+    //
+    // z-49: over the sheets (48) it sits beneath, under the dialogs and
+    // popovers (50) that dim or cover everything. The handoff's 60/61/85 are
+    // the same order, renumbered around the z-50 the dialog primitives use.
+    <nav
+      aria-label="Main"
+      className="fixed inset-x-0 bottom-0 z-[49] grid grid-cols-4 border-t border-surface-muted bg-white px-1 pb-[calc(4px+env(safe-area-inset-bottom))] pt-1 min-[720px]:hidden"
+    >
+      {DESTINATIONS.map((destination) => {
+        const active = isDestinationActive(destination, pathname);
+        // The reader's face stands in for the "You" icon once it is known
+        const face = destination.showsFace ? session?.user?.image : undefined;
 
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              aria-current={active ? 'page' : undefined}
+        return (
+          <Link
+            key={destination.href}
+            href={destination.href}
+            aria-current={active ? 'page' : undefined}
+            onClick={(event) => {
+              // A panel open over the page would stay open over the next one
+              closeAllPanels();
+
+              if (!destination.needsAccount || session?.user) return;
+              event.preventDefault();
+              needAuth(destination.needsAccount, () => router.push(destination.href));
+            }}
+            className={cn(
+              'flex min-h-[60px] min-w-0 flex-col items-center justify-start gap-[3px] px-0.5 pb-1 pt-1.5 text-center text-[11.5px] leading-[1.2]',
+              active ? 'font-bold text-brand-ink' : 'font-medium text-ink-muted',
+            )}
+          >
+            <span
               className={cn(
-                'flex flex-col items-center gap-1 text-[11px] transition-colors duration-200 active:scale-95 motion-reduce:transform-none',
-                active ? 'font-semibold text-gray-900' : 'font-medium text-gray-500',
+                'relative flex h-[30px] w-[52px] flex-shrink-0 items-center justify-center rounded-full',
+                active && 'bg-surface-brand',
               )}
             >
-              <span
-                className={cn(
-                  'flex h-8 w-16 items-center justify-center rounded-full transition-colors duration-200',
-                  active && 'bg-surface-tab',
-                )}
-              >
-                {face ? (
-                  <span className="relative h-6 w-6 overflow-hidden rounded-full">
-                    <TukaiImage
-                      src={face}
-                      alt={session?.user?.name || link.label}
-                      fill
-                      sizes="24px"
-                      style={{ objectFit: 'cover' }}
-                      showNotFoundText={false}
-                    />
-                  </span>
-                ) : (
-                  <IconComponent
-                    iconName={link.icon}
-                    size={22}
-                    color="currentColor"
-                    variant={active ? 'bulk' : 'twotone'}
+              {face ? (
+                <span
+                  className={cn(
+                    'relative h-6 w-6 overflow-hidden rounded-full bg-surface-brand',
+                    active ? 'ring-2 ring-brand' : 'ring-2 ring-white',
+                  )}
+                >
+                  <TukaiImage
+                    src={face}
+                    alt=""
+                    fill
+                    sizes="24px"
+                    style={{ objectFit: 'cover' }}
+                    showNotFoundText={false}
                   />
-                )}
-              </span>
-              {link.label}
-            </Link>
-          );
-        })}
-      </nav>
-    </div>
+                </span>
+              ) : (
+                <IconComponent iconName={destination.icon} size={21} color="currentColor" />
+              )}
+            </span>
+            <span className="max-w-full text-balance">{destination.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
   );
 };

@@ -1,14 +1,14 @@
+import type { AuthReason } from '@/app/shared/components/Auth/AuthDialog/authReasons';
+
+import { DISCOVER_TABS } from './tabs';
+
 /**
- * The app's primary destinations.
+ * The app's primary destinations: on a phone, the bottom tab bar.
  *
- * The canvas carries five, and they are not the four this app shipped with:
- * Experiences, Places and Moments are tabs on Discover there, while Bucket
- * lists, Plans and You are destinations of their own. Those three were buried
- * in the avatar menu here.
- *
- * The three demoted routes keep their URLs - they stay addressable, every link
- * to them keeps working, and Discover's tab strip selects between them. Only
- * their place in the bar changed.
+ * Four, per the mobile handoff: Discover, Bucket lists, Communities and You.
+ * Experiences, Places and Moments are tabs on Discover rather than
+ * destinations, and Plans lives in the account menu. Every one of those keeps
+ * its URL, so links to them still resolve.
  */
 export interface Destination {
   label: string;
@@ -20,21 +20,47 @@ export interface Destination {
    * what the canvas does for "You".
    */
   showsFace?: boolean;
+  /** Other sections this destination is current on, beyond its own href. */
+  alsoCurrentOn?: string[];
+  /** Set where a signed-out reader is asked to sign in instead of going. */
+  needsAccount?: AuthReason;
 }
 
 export const DESTINATIONS: Destination[] = [
-  { label: 'Discover', href: '/', icon: 'CompassIcon' },
-  { label: 'Bucket lists', href: '/bucket-lists', icon: 'ShoppingBasketAdd02Icon' },
+  {
+    label: 'Discover',
+    href: '/',
+    icon: 'CompassIcon',
+    // Discover's other three faces are routes of their own here, not tabs in
+    // state, and Discover stays current on each
+    alsoCurrentOn: DISCOVER_TABS.map((tab) => tab.href).filter((href) => href !== '/'),
+  },
+  {
+    label: 'Bucket lists',
+    href: '/bucket-lists',
+    icon: 'ShoppingBasketAdd02Icon',
+    needsAccount: 'lists',
+  },
   { label: 'Communities', href: '/communities', icon: 'UserMultipleIcon' },
-  { label: 'Plans', href: '/plans', icon: 'Calendar03Icon' },
-  { label: 'You', href: '/profile', icon: 'UserIcon', showsFace: true },
+  {
+    label: 'You',
+    href: '/profile',
+    icon: 'UserIcon',
+    showsFace: true,
+    alsoCurrentOn: ['/help', '/dashboard'],
+    needsAccount: 'profile',
+  },
 ];
 
 /**
- * Whether a destination is the one being looked at.
+ * Whether `pathname` is `href` or beneath it.
  *
- * Discover is the root, so it matches only itself - every other path starts
- * with `/` and would otherwise light it up permanently.
+ * The root matches only itself - every other path starts with `/` and would
+ * otherwise light it up permanently.
  */
-export const isDestinationActive = (href: string, pathname: string): boolean =>
+const isWithin = (href: string, pathname: string): boolean =>
   href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
+
+/** Whether a destination is the one being looked at. */
+export const isDestinationActive = (destination: Destination, pathname: string): boolean =>
+  [destination.href, ...(destination.alsoCurrentOn ?? [])].some((href) => isWithin(href, pathname));

@@ -130,8 +130,7 @@ describe('Drawer', () => {
       </Drawer>,
     );
 
-    const wrapper = document.body.querySelector('[role="dialog"]')
-      ?.parentElement as HTMLElement;
+    const wrapper = document.body.querySelector('[role="dialog"]')?.parentElement as HTMLElement;
 
     expect(wrapper.className).toContain('pointer-events-none');
   });
@@ -157,5 +156,58 @@ describe('Drawer', () => {
     );
 
     expect(document.body.style.overflow).not.toBe('hidden');
+  });
+
+  describe('the sheet', () => {
+    const panel = () => document.body.querySelector('[role="dialog"]') as HTMLElement;
+    const handle = () => panel().querySelector('[aria-hidden="true"]');
+
+    it('draws a handle at the top', () => {
+      setViewport(true);
+      render(
+        <Drawer isOpen setIsOpen={jest.fn()}>
+          <p>Pick a list</p>
+        </Drawer>,
+      );
+
+      expect(handle()).toHaveClass('h-[5px]', 'w-10', 'rounded-full', 'bg-line');
+    });
+
+    it('draws no handle on the side panel', () => {
+      render(
+        <Drawer isOpen setIsOpen={jest.fn()}>
+          <p>Pick a list</p>
+        </Drawer>,
+      );
+
+      expect(handle()).toBeNull();
+    });
+  });
+
+  // The frame holds still; its body scrolls, and that is what panelRef sees
+  it('scrolls its body, not the frame, and hands that body to panelRef', () => {
+    const panelRef = React.createRef<HTMLDivElement>();
+    render(
+      <Drawer isOpen setIsOpen={jest.fn()} panelRef={panelRef}>
+        <p>Pick a list</p>
+      </Drawer>,
+    );
+
+    const frame = document.body.querySelector('[role="dialog"]') as HTMLElement;
+    expect(frame).toHaveClass('overflow-hidden');
+    expect(panelRef.current).toHaveClass('overflow-y-auto', 'overscroll-contain');
+    expect(panelRef.current).toContainElement(screen.getByText('Pick a list'));
+  });
+
+  // Under the bottom tab bar (49) and the dialogs a panel opens over itself (50)
+  it('layers beneath the tab bar and the dialogs', () => {
+    render(
+      <Drawer isOpen setIsOpen={jest.fn()}>
+        <p>Pick a list</p>
+      </Drawer>,
+    );
+
+    const frame = document.body.querySelector('[role="dialog"]') as HTMLElement;
+    expect(frame.parentElement).toHaveClass('z-[48]');
   });
 });

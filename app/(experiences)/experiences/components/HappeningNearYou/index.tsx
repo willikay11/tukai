@@ -5,7 +5,7 @@ import { SectionHeader } from '@/app/(experiences)/experiences/components/Sectio
 import { NEAR_ME_RADIUS_KM } from '@/app/(experiences)/experiences/see-all/config';
 import { SingleExperience } from '@/app/shared/components/Experiences/Single';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { ScrollRow } from '@/app/shared/components/Lists';
+import { RAIL_CARD_RESPONSIVE_WIDTH, ScrollRow } from '@/app/shared/components/Lists';
 import { CARD_LIFT } from '@/app/shared/components/Motion';
 import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { cn } from '@/lib/utils';
@@ -110,7 +110,10 @@ export const HappeningNearYou = ({
       ) : (
         <ScrollRow>
           {experiences.map((experience) => (
-            <div key={experience.id} className="w-[184px] flex-shrink-0 snap-start">
+            <div
+              key={experience.id}
+              className={cn('w-[184px] flex-shrink-0 snap-start', RAIL_CARD_RESPONSIVE_WIDTH)}
+            >
               <NearCard experience={experience} />
             </div>
           ))}
