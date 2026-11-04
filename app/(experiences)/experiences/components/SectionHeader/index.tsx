@@ -25,6 +25,8 @@ interface SectionHeaderProps {
    * control is neither - the grids that grow in place take a ShowMoreButton.
    */
   action?: React.ReactNode;
+  /** Sits in the heading after its text - the 24px arrow that expands a section. */
+  titleAction?: React.ReactNode;
   // ⚠️ Retired with the canvas's header, which carries no icon. Kept only for
   // the communities category groups, which still stack an icon above a title.
   icon?: string;
@@ -82,6 +84,7 @@ export const SectionHeader = ({
   atEnd = false,
   railLabel,
   action,
+  titleAction,
   icon,
   iconBgClass = 'bg-primary/10',
   iconColorClass = 'text-primary',
@@ -110,8 +113,14 @@ export const SectionHeader = ({
         )}
 
         <div className="flex min-w-0 flex-col">
-          <h2 className="text-[22px] font-bold leading-tight tracking-[-0.3px] text-brand-ink">
+          <h2
+            className={cn(
+              'text-[22px] font-bold leading-tight tracking-[-0.3px] text-brand-ink',
+              titleAction && 'flex items-center gap-2.5',
+            )}
+          >
             {title}
+            {titleAction}
           </h2>
           {subtitle && <p className="mt-[5px] text-13 text-ink-muted">{subtitle}</p>}
         </div>

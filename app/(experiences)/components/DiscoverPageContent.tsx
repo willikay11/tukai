@@ -6,6 +6,10 @@ import { useSearchParams } from 'next/navigation';
 
 import { BucketListRow } from '@/app/(experiences)/components/BucketListRow';
 import { CommunityRow } from '@/app/(experiences)/components/CommunityRow';
+import {
+  DiscoverItineraries,
+  DiscoverItinerariesSkeleton,
+} from '@/app/(experiences)/components/DiscoverItineraries';
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
 import {
   happeningSoon,
@@ -24,6 +28,7 @@ import { CityCard } from '@/app/(experiences)/experiences/components/CityCard';
 import { RowSkeleton } from '@/app/(experiences)/experiences/components/ExperienceRow';
 import { SectionHeader } from '@/app/(experiences)/experiences/components/SectionHeader';
 import { DEFAULT_CITY, cityExperiencesHref } from '@/app/(experiences)/experiences/see-all/config';
+import { useUpcomingItineraries } from '@/app/(experiences)/hooks';
 import { filtersFromParams, hasSearch } from '@/app/shared/components/Filters/filters';
 import { PageContainer } from '@/app/shared/components/Layout';
 import {
@@ -181,6 +186,8 @@ export const DiscoverPageContent = () => {
     (moment: Moment) => momentPhotos(moment).length > 0,
   );
 
+  const { itineraries, isLoading: isLoadingItineraries } = useUpcomingItineraries(!isSearching);
+
   // Same queries the /experiences rows issue
   const userCity = city ?? DEFAULT_CITY;
 
@@ -276,6 +283,14 @@ export const DiscoverPageContent = () => {
         <RecentMomentsRailSkeleton />
       ) : (
         moments.length >= 2 && <RecentMomentsRail moments={moments} onOpen={setOpenMoment} />
+      )}
+
+      {/* Keyed by city: a different city is a different pool, so the
+          section starts collapsed again */}
+      {isLoadingItineraries ? (
+        <DiscoverItinerariesSkeleton />
+      ) : (
+        <DiscoverItineraries key={userCity} itineraries={itineraries} />
       )}
 
       {/* Tours are experiences the API provisions behind a guide's profile,
