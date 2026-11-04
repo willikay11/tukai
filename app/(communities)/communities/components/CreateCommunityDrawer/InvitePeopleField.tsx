@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { z } from 'zod';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { Input } from '@/components/ui/input';
 
 import type { InvitedPerson } from './useCreateCommunityDrawer';
@@ -100,8 +101,7 @@ export const InvitePeopleField = ({
                 className="flex min-h-[52px] items-center gap-3 rounded-[10px] px-2.5 py-1.5 text-left hover:bg-surface"
               >
                 {person.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <PlainImage
                     src={person.image}
                     alt=""
                     className="h-10 w-10 flex-shrink-0 rounded-full object-cover"
@@ -132,9 +132,7 @@ export const InvitePeopleField = ({
                   <IconComponent iconName="Mail01Icon" size={18} color="currentColor" />
                 </span>
                 <span className="flex min-w-0 flex-col gap-px">
-                  <span className="truncate text-[15px] font-medium text-gray-800">
-                    {trimmed}
-                  </span>
+                  <span className="truncate text-[15px] font-medium text-gray-800">{trimmed}</span>
                   <span className="text-13 text-ink-muted">Invite by email</span>
                 </span>
               </button>
@@ -157,8 +155,7 @@ export const InvitePeopleField = ({
               className="inline-flex h-[52px] max-w-full items-center gap-2 rounded-full bg-surface py-0 pl-1.5 pr-0.5"
             >
               {person.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <PlainImage
                   src={person.image}
                   alt=""
                   className="h-10 w-10 flex-shrink-0 rounded-full object-cover"

@@ -4,3 +4,5 @@ export { useExperiences, useFetchSingleExperience } from './useExperiences';
 export { usePlaces, usePlaceCategories, usePlaceReviews } from './usePlaces';
 export { useSearch } from './useSearch';
 export { useToast, toast } from './useToast';
+export { useImageFx } from './useImageFx';
+export type { ImageFxState } from './useImageFx';

@@ -7,6 +7,7 @@ import { z } from 'zod';
 import type { useCreateExperienceFlow } from '@/app/(experiences)/experiences/create/hooks/useCreateExperienceFlow';
 import type { CommunityOption } from '@/app/(experiences)/experiences/create/hooks/useCreateExperienceFlow';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { useGetUsers } from '@/app/shared/hooks/useAuth';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
 import { getCommunityPhoto } from '@/components/ui/community-pill';
@@ -241,8 +242,7 @@ export const InviteGuestsStep = ({ flow }: InviteGuestsStepProps) => {
                   className="flex min-h-[52px] items-center gap-3 rounded-[10px] px-2.5 py-1.5 text-left hover:bg-surface"
                 >
                   {person.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <PlainImage
                       src={person.image}
                       alt=""
                       className="h-10 w-10 flex-shrink-0 rounded-full object-cover"
@@ -302,8 +302,7 @@ export const InviteGuestsStep = ({ flow }: InviteGuestsStepProps) => {
                   className="inline-flex h-[52px] max-w-full items-center gap-2 rounded-full bg-surface py-0 pl-1.5 pr-0.5"
                 >
                   {display?.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <PlainImage
                       src={display.image}
                       alt=""
                       className="h-10 w-10 flex-shrink-0 rounded-full object-cover"
@@ -360,15 +359,14 @@ export const InviteGuestsStep = ({ flow }: InviteGuestsStepProps) => {
                       aria-pressed={active}
                       onClick={() => toggleCommunity(community)}
                       className={cn(
-                        'inline-flex max-w-full min-h-[52px] items-center gap-2.5 whitespace-nowrap rounded-full py-1.5 pl-1.5 pr-5 text-[15px] font-medium transition-colors',
+                        'inline-flex min-h-[52px] max-w-full items-center gap-2.5 whitespace-nowrap rounded-full py-1.5 pl-1.5 pr-5 text-[15px] font-medium transition-colors',
                         active
                           ? 'bg-gradient-to-b from-brand-mid to-brand-deep text-white'
                           : 'bg-surface text-gray-800',
                       )}
                     >
                       {photo ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
+                        <PlainImage
                           src={photo}
                           alt=""
                           className="h-10 w-10 flex-shrink-0 rounded-full bg-surface-brand object-cover"

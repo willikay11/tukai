@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { cn } from '@/lib/utils';
 
 const MAX_PHOTOS = 6;
@@ -85,8 +86,7 @@ export const PhotoField = ({
               )}
             >
               <span className="absolute inset-0 overflow-hidden rounded-xl bg-surface">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <PlainImage
                   src={photo.url}
                   alt=""
                   draggable={false}

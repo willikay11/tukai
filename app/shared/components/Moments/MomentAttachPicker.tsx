@@ -3,11 +3,15 @@
 import { useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 
-import type { AttachmentKind } from './useMomentComposer';
 import { type MomentAttachOption, useMomentAttachSearch } from './useMomentAttachSearch';
+import type { AttachmentKind } from './useMomentComposer';
 
-const COPY: Record<AttachmentKind, { title: string; searchPlaceholder: string; emptyKind: string }> = {
+const COPY: Record<
+  AttachmentKind,
+  { title: string; searchPlaceholder: string; emptyKind: string }
+> = {
   experience: {
     title: 'Attach an experience',
     searchPlaceholder: 'Search experiences',
@@ -62,7 +66,12 @@ export const MomentAttachPicker = ({
       </div>
 
       <div className="flex h-12 items-center gap-2.5 rounded-full bg-white px-4">
-        <IconComponent iconName="Search01Icon" size={18} color="currentColor" className="text-ink-muted" />
+        <IconComponent
+          iconName="Search01Icon"
+          size={18}
+          color="currentColor"
+          className="text-ink-muted"
+        />
         <input
           type="text"
           value={query}
@@ -74,11 +83,7 @@ export const MomentAttachPicker = ({
         />
       </div>
 
-      <div
-        role="listbox"
-        aria-label={copy.title}
-        className="flex flex-col gap-0.5"
-      >
+      <div role="listbox" aria-label={copy.title} className="flex flex-col gap-0.5">
         {isLoading ? (
           <div className="flex flex-col gap-1 p-1">
             {[0, 1, 2].map((key) => (
@@ -104,8 +109,7 @@ export const MomentAttachPicker = ({
               className="flex min-h-[60px] items-center gap-3 rounded-xl p-2 text-left hover:bg-white"
             >
               {option.thumb ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <PlainImage
                   src={option.thumb}
                   alt=""
                   className="h-11 w-11 flex-shrink-0 rounded-[10px] object-cover"

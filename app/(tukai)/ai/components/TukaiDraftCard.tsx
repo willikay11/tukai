@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+import { PlainImage } from '@/app/shared/components/Images';
 import type { TukaiDraft, TukaiItem } from '@/types/tukai';
 import { shortDay, toTwelveHour } from '@/utils/tukai';
 
@@ -37,7 +37,7 @@ export const TukaiDraftCard = ({
   return (
     <div className="my-[18px] flex flex-col gap-2">
       <span className="flex items-center gap-1.5 text-[12.5px] font-semibold text-brand">
-        <img
+        <PlainImage
           src="/images/icons/pill-calendar-bulk-green.svg"
           alt=""
           className="block h-4 w-4 flex-shrink-0"

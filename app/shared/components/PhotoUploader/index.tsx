@@ -23,7 +23,7 @@ import {
 } from '@dnd-kit/sortable';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { ImageCropDialog } from '@/app/shared/components/Images';
+import { ImageCropDialog, PlainImage } from '@/app/shared/components/Images';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { cn } from '@/lib/utils';
 import { getImageDimensions, imageNeedsCrop } from '@/utils/image-crop-utils';
@@ -118,8 +118,7 @@ const PhotoGridShell = ({
             )}
           >
             {activePhoto.file ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <PlainImage
                 src={getBlobUrl(activePhoto.file)}
                 alt="Dragging"
                 className="h-full w-full object-cover"
