@@ -37,16 +37,18 @@ export const useDashboardBalance = (userId: string | undefined) => {
     return sum + remaining * toAmount(experience.priceStartsFrom);
   }, 0);
 
+  const currency = summary?.currentBalance?.currency ?? 'KES';
+
   return {
     isLoading: isLoadingEarnings || isLoadingExperiences,
-    totalLabel: formatCurrencyAmount(summary?.currentBalance, 'KES'),
+    totalLabel: formatCurrencyAmount(summary?.currentBalance?.amount, currency),
     balances: [
-      { label: 'Available', value: formatCurrencyAmount(summary?.availableBalance, 'KES') },
-      { label: 'Pending', value: formatCurrencyAmount(summary?.pendingBalance, 'KES') },
-      { label: 'Tickets on sale', value: formatCurrencyAmount(ticketsOnSale, 'KES') },
+      { label: 'Available', value: formatCurrencyAmount(summary?.availableBalance?.amount, currency) },
+      { label: 'Pending', value: formatCurrencyAmount(summary?.pendingBalance?.amount, currency) },
+      { label: 'Tickets on sale', value: formatCurrencyAmount(ticketsOnSale, currency) },
     ],
     // Raw figures, for the Withdraw drawer
-    availableBalance: summary?.availableBalance ?? '0',
-    pendingBalance: payoutAmount(summary?.pendingBalance),
+    availableBalance: summary?.availableBalance?.amount ?? '0',
+    pendingBalance: payoutAmount(summary?.pendingBalance?.amount),
   };
 };

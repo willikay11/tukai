@@ -50,17 +50,21 @@ export type Wallet = {
 /**
  * What a host has earned, and what of it they can take out.
  *
- * Every figure is a decimal string on the wire. The three balances are not
- * interchangeable: `available` is what a withdrawal can draw on now, `pending`
- * is money not yet settled, and `current` is the two together.
+ * Every figure is a `{ amount, currency }` object on the wire, `amount` a
+ * decimal string - not the bare string services/api.json declares. The three
+ * balances are not interchangeable: `available` is what a withdrawal can draw
+ * on now, `pending` is money not yet settled, and `current` is the two
+ * together.
  */
+export type MoneyAmount = { amount: string; currency: string };
+
 export type HostEarningsSummary = {
-  totalTicketSales: string;
-  availableBalance: string;
-  pendingBalance: string;
-  currentBalance: string;
-  commissionDeducted: string;
-  estimatedPayoutFee: string;
+  totalTicketSales: MoneyAmount;
+  availableBalance: MoneyAmount;
+  pendingBalance: MoneyAmount;
+  currentBalance: MoneyAmount;
+  commissionDeducted: MoneyAmount;
+  estimatedPayoutFee: MoneyAmount | null;
 };
 
 export type PayoutKind = 'split_advance' | 'transfer' | 'withdrawal' | 'clawback';
@@ -89,19 +93,23 @@ export type HostPayout = {
   dateSettled?: string | null;
 };
 
-/** What a withdrawal of a given amount would actually pay out. */
+/**
+ * What a withdrawal of a given amount would actually pay out. Like the
+ * earnings summary, every figure is a `{ amount, currency }` object on the
+ * wire, not the bare string services/api.json declares.
+ */
 export type PayoutQuote = {
   currency: string;
   destinationType: string;
-  availableBalance: string;
-  requestedAmount: string;
-  paystackTransferFee: string;
-  tukaiPayoutFee: string;
-  netAmount: string;
-  tukaiCommissionDeducted: string;
-  maxPayoutAmount: string;
+  availableBalance: MoneyAmount;
+  requestedAmount: MoneyAmount;
+  paystackTransferFee: MoneyAmount;
+  tukaiPayoutFee: MoneyAmount;
+  netAmount: MoneyAmount;
+  tukaiCommissionDeducted: MoneyAmount;
+  maxPayoutAmount: MoneyAmount;
   /** The API's own words about why the maximum is what it is. */
-  limitMessage: string;
+  limitMessage: string | null;
 };
 
 /** A decimal string as money. Blank and unparseable both read as zero. */
