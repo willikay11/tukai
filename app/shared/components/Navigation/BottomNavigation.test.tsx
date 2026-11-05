@@ -28,6 +28,11 @@ jest.mock('next-auth/react', () => ({
   useSession: () => ({ data: mockSession }),
 }));
 
+// The face itself comes from the profile, falling back to the session's
+jest.mock('@/app/shared/hooks/useAuth', () => ({
+  useMyPicture: () => mockSession?.user?.image ?? null,
+}));
+
 const needAuth = jest.fn();
 jest.mock('@/context/AuthDialogContext', () => ({
   useAuthDialog: () => ({ needAuth }),

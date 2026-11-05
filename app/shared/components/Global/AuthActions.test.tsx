@@ -49,6 +49,7 @@ jest.mock('@/app/shared/hooks/useMoments', () => ({
 jest.mock('@/app/shared/hooks/useAuth', () => ({
   useGetInterestCategories: () => ({ data: [] }),
   useGetUsers: () => ({ data: [], isFetching: false }),
+  useMyPicture: () => null,
 }));
 jest.mock('@/app/shared/hooks/useCommunities', () => ({
   useCreateCommunity: () => ({ mutate: jest.fn(), isPending: false }),
