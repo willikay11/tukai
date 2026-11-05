@@ -1,1 +1,0 @@
-export { JoinTukaiPremium } from './JoinTukaiPremium';

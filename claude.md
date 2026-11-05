@@ -117,9 +117,6 @@ app/
         communityTabs.tsx, communityPosts.tsx
 
   (auth)/
-    hooks/
-      useSubscriptions.tsx
-      index.ts
     layout.tsx
     sign-in/
       page.tsx
@@ -172,8 +169,6 @@ app/
         Single/index.tsx (SingleExperience)
       Rating/
         Rating.tsx
-      JoinTukaiPremium/
-        JoinTukaiPremium.tsx
       SendMessage/
         SendMessage.tsx
       Review/
@@ -209,7 +204,7 @@ types/                              # ALL types live here (root level)
   placeCategory.ts, experienceCategory.ts
   location.ts, interest.ts
   googleMaps.ts, networkParam.ts
-  search.ts, subscription.ts
+  search.ts
   purchaser.ts
 
   NOTE: All types stay at root. Core domain types (experience, place,

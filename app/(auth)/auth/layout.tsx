@@ -38,10 +38,6 @@ const backgroundImages = [
   },
   {
     image: '/images/santorini.webp',
-    path: '/auth/subscribe',
-  },
-  {
-    image: '/images/santorini.webp',
     path: '/auth/otp-confirmation',
   },
 ];

@@ -187,7 +187,9 @@ export const WithdrawDrawer = ({
                   autoComplete="off"
                   value={amount}
                   onChange={(event) => {
-                    setAmount(event.target.value.replace(/[^0-9.,]/g, '').slice(0, 12));
+                    // Digits and a point only - the quote and the withdrawal both
+                    // send this as-is, and "2,000" reads as no amount at all
+                    setAmount(event.target.value.replace(/[^0-9.]/g, '').slice(0, 12));
                     setError(null);
                   }}
                   placeholder="0"
@@ -243,11 +245,15 @@ export const WithdrawDrawer = ({
                 <p className="text-15 text-ink-muted">Working out the fees…</p>
               ) : quote ? (
                 <>
-                  <QuoteRow label="You asked for" value={money(currency, quote.requestedAmount)} />
-                  <QuoteRow label="Transfer fee" value={money(currency, quote.paystackTransferFee)} />
-                  <QuoteRow label="Tukai payout fee" value={money(currency, quote.tukaiPayoutFee)} />
+                  <QuoteRow label="You asked for" value={money(currency, quote.requestedAmount?.amount)} />
+                  {/* Fees come off what was asked for, so they read as deductions */}
+                  <QuoteRow
+                    label="Paystack transfer fee"
+                    value={`-${money(currency, quote.paystackTransferFee?.amount)}`}
+                  />
+                  <QuoteRow label="Tukai payout fee" value={`-${money(currency, quote.tukaiPayoutFee?.amount)}`} />
                   <div className="my-1 h-px bg-line" />
-                  <QuoteRow label="You receive" value={money(currency, quote.netAmount)} strong />
+                  <QuoteRow label="You receive" value={money(currency, quote.netAmount?.amount)} strong />
 
                   {quote.limitMessage && (
                     <p className="mt-2 text-13 leading-relaxed text-ink-muted">

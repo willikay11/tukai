@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { useMyPicture } from '@/app/shared/hooks/useAuth';
 import { useCloseAllPanels } from '@/app/shared/hooks/useCloseAllPanels';
 import { TukaiImage } from '@/components/ui/image';
 import { useAuthDialog } from '@/context/AuthDialogContext';
@@ -37,6 +38,7 @@ export const BottomNavigation = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
+  const picture = useMyPicture();
   const { needAuth } = useAuthDialog();
   const closeAllPanels = useCloseAllPanels();
 
@@ -65,7 +67,7 @@ export const BottomNavigation = () => {
       {DESTINATIONS.map((destination) => {
         const active = isDestinationActive(destination, pathname);
         // The reader's face stands in for the "You" icon once it is known
-        const face = destination.showsFace ? session?.user?.image : undefined;
+        const face = destination.showsFace ? picture : undefined;
 
         return (
           <Link

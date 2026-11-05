@@ -1,7 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-
 import {
   CheckListIcon,
   Edit01Icon,
@@ -17,6 +15,7 @@ import {
 } from '@hugeicons/react-pro';
 
 import { Anchor, Button } from '@/app/shared/components/Forms';
+import { useHostingPlan } from '@/context/HostingPlanContext';
 
 const features = [
   {
@@ -84,7 +83,7 @@ const features = [
   },
 ];
 export default function Page() {
-  const router = useRouter();
+  const hostingPlan = useHostingPlan();
 
   return (
     <>
@@ -124,7 +123,7 @@ export default function Page() {
       </div>
 
       <div className="mb-2.5">
-        <Button block onClick={() => router.push('/auth/subscribe')}>
+        <Button block onClick={() => hostingPlan?.openHostingPlanFlow({ view: 'choose' })}>
           Start Your Subscription
         </Button>
       </div>
