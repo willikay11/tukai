@@ -82,6 +82,9 @@ export type TukaiReply = {
   suggestions: string[];
   /** Every catalogue entry the reply names, by id. */
   items: Record<string, TukaiItem>;
+  /** The agent wants a yes or no before it acts on `actions`. */
+  requiresConfirmation?: boolean;
+  actions?: TukaiAction[];
 };
 
 export type TukaiMessage = {
@@ -99,6 +102,10 @@ export type TukaiMessage = {
   writing?: TukaiWriting;
   suggestions?: string[];
   items?: Record<string, TukaiItem>;
+  requiresConfirmation?: boolean;
+  actions?: TukaiAction[];
+  /** Set once the person answers a reply that `requiresConfirmation`. */
+  confirmation?: 'confirmed' | 'declined';
 };
 
 export type TukaiChat = {
@@ -121,17 +128,20 @@ export type TukaiAccess = {
 /** Why the paywall is showing: its title and text follow from this. */
 export type TukaiPaywallReason = 'chats' | 'cap' | 'upgrade' | 'helper';
 
-/** One past turn, as the chat route reads it. */
-export type TukaiHistoryTurn = { role: 'user' | 'assistant'; content: string };
+/**
+ * Something the agent proposes or did, from `actions` in its replies. Untyped
+ * for now: the agent's API does not define its shape yet.
+ */
+export type TukaiAction = Record<string, unknown>;
 
+/** What the browser sends to /api/tukai/chat. The chat's id is the agent's session id. */
 export type TukaiChatRequest = {
-  messages: TukaiHistoryTurn[];
-  /** The text of the latest user message, which also narrows the catalogue. */
-  question: string;
-  city: string;
-  lat?: number;
-  lng?: number;
-  /** Today in the person's own time zone, "Tuesday 3 November 2026". */
-  today: string;
-  draftTitle?: string | null;
+  sessionId: string;
+  message: string;
+};
+
+/** The person's answer to a reply that `requiresConfirmation`. */
+export type TukaiConfirmRequest = {
+  sessionId: string;
+  confirmed: boolean;
 };

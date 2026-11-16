@@ -1,7 +1,6 @@
 import type { TukaiItem, TukaiMessage } from '@/types/tukai';
 
 import {
-  buildTukaiHistory,
   chatTitleFrom,
   cleanTukaiText,
   idsInReply,
@@ -173,22 +172,6 @@ describe('parseTukaiReply', () => {
       [],
     );
     expect(idsInReply(reply).sort()).toEqual(['c1', 'e1', 'p1']);
-  });
-});
-
-describe('buildTukaiHistory', () => {
-  it('skips failed replies, merges neighbours and starts with the person', () => {
-    const messages: TukaiMessage[] = [
-      { id: '0', role: 'ai', text: 'stray', createdAt: '' },
-      { id: '1', role: 'user', text: 'Hi', createdAt: '' },
-      { id: '2', role: 'ai', text: 'Oops', error: true, createdAt: '' },
-      { id: '3', role: 'user', text: 'Again', createdAt: '' },
-      { id: '4', role: 'ai', text: 'Here', cards: ['p1'], createdAt: '' },
-    ];
-    const turns = buildTukaiHistory(messages);
-    expect(turns.map((t) => t.role)).toEqual(['user', 'assistant']);
-    expect(turns[0].content).toBe('Hi\nAgain');
-    expect(JSON.parse(turns[1].content)).toMatchObject({ reply: 'Here', cards: ['p1'] });
   });
 });
 
