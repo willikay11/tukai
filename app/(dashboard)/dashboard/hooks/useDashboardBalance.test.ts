@@ -25,10 +25,6 @@ jest.mock('@/app/(experiences)/hooks/usePayment', () => ({
   useEarningsSummary: () => earnings,
 }));
 
-jest.mock('@/app/shared/hooks/useExperiences', () => ({
-  useExperiences: () => ({ data: { data: { results: [] } }, isLoading: false }),
-}));
-
 describe('useDashboardBalance', () => {
   beforeEach(() => {
     earnings = { data: { data: summary }, isLoading: false };
@@ -36,31 +32,37 @@ describe('useDashboardBalance', () => {
 
   // Reading these objects as strings printed KES 0.00 for every host
   it('shows the balances from the money objects', () => {
-    const { result } = renderHook(() => useDashboardBalance('host-1'));
+    const { result } = renderHook(() => useDashboardBalance());
 
     expect(result.current.totalLabel).toBe('KES 9,120.50');
     expect(result.current.balances[0]).toEqual({ label: 'Available', value: 'KES 7,500.50' });
     expect(result.current.balances[1]).toEqual({ label: 'Pending', value: 'KES 1,620.00' });
   });
 
+  // The sales email's "Ticket sales" line: list price, before promo discounts
+  it('shows ticket sales from the summary', () => {
+    const { result } = renderHook(() => useDashboardBalance());
+
+    expect(result.current.balances[2]).toEqual({ label: 'Ticket sales', value: 'KES 12,000.00' });
+  });
+
+  // Ticket sales are not money received, so they stay out of the total
+  it('totals the current balance, not ticket sales', () => {
+    const { result } = renderHook(() => useDashboardBalance());
+
+    expect(result.current.totalLabel).not.toBe('KES 12,000.00');
+  });
+
   it('hands the Withdraw drawer the available amount as a decimal string', () => {
-    const { result } = renderHook(() => useDashboardBalance('host-1'));
+    const { result } = renderHook(() => useDashboardBalance());
 
     expect(result.current.availableBalance).toBe('7500.50');
     expect(result.current.pendingBalance).toBe(1620);
   });
 
-  // List price before promo discounts: never shown as money received
-  it('never shows total ticket sales as a balance', () => {
-    const { result } = renderHook(() => useDashboardBalance('host-1'));
-    const shown = [result.current.totalLabel, ...result.current.balances.map((row) => row.value)];
-
-    expect(shown).not.toContain('KES 12,000.00');
-  });
-
   it('shows zero while there is no summary yet', () => {
     earnings = { data: { data: null }, isLoading: true };
-    const { result } = renderHook(() => useDashboardBalance('host-1'));
+    const { result } = renderHook(() => useDashboardBalance());
 
     expect(result.current.isLoading).toBe(true);
     expect(result.current.totalLabel).toBe('KES 0.00');

@@ -8,9 +8,9 @@ import { Button } from '@/components/ui/button';
 import { useDashboardBalance } from '../../hooks/useDashboardBalance';
 import { WithdrawDrawer } from '../WithdrawDrawer';
 
-export const DashboardBalanceCard = ({ userId }: { userId: string | undefined }) => {
+export const DashboardBalanceCard = () => {
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
-  const { totalLabel, balances, availableBalance, pendingBalance } = useDashboardBalance(userId);
+  const { totalLabel, balances, availableBalance, pendingBalance } = useDashboardBalance();
 
   return (
     <div className="flex flex-col gap-1.5 rounded-xl border-[0.5px] border-line-shell bg-shell p-1.5">
