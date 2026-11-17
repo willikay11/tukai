@@ -8,6 +8,7 @@ import { RRule } from 'rrule';
 import { v4 as uuidv4 } from 'uuid';
 
 import { buildRecurrenceRule } from '@/app/(experiences)/experiences/create/utils/buildRecurrenceRule';
+import { draftIdFromConflict } from '@/app/(experiences)/experiences/create/utils/draft-conflict';
 import { buildExperienceDates } from '@/app/(experiences)/experiences/create/utils/experience-dates';
 import {
   buildPreviewExperience,
@@ -1351,6 +1352,20 @@ export const useCreateExperienceFlow = ({
       setActiveStep(nextStep);
       return true;
     } catch (error: any) {
+      // A host keeps one draft at a time. Creating another names the one they
+      // already have (409 draft_exists): open it rather than fail. Loading it
+      // fills the form from the draft, from its first step.
+      const existingDraftId = draftIdFromConflict(error);
+      if (existingDraftId) {
+        handleExperienceCreated(existingDraftId, 'dates-type');
+        toast({
+          title: 'You already have a draft',
+          description:
+            "We've opened it so you can finish it. To start a new one instead, close and discard this draft.",
+        });
+        return false;
+      }
+
       const message = parseApiError(error, 'Failed to save experience');
       setApiError(message);
       toast({
