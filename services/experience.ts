@@ -205,6 +205,9 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
       status: error.response?.status || 500,
       success: false,
       message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+      // The API's own error list, kept so a caller can act on a code, e.g. a
+      // 409 draft_exists naming the host's existing draft
+      errors: error.response?.data?.errors,
     };
   }
 }
