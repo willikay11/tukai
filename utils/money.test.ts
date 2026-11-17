@@ -1,4 +1,28 @@
-import { currencyFullName, moneyAmount } from './money';
+import { currencyFullName, formatCurrencyAmount, moneyAmount } from './money';
+
+describe('formatCurrencyAmount', () => {
+  // Every balance on the earnings summary arrives like this. Reading it as a
+  // string printed KES 0.00 for every host.
+  it('formats a money object with its own currency', () => {
+    expect(formatCurrencyAmount({ amount: '389856.00', currency: 'KES' })).toBe('KES 389,856.00');
+    expect(formatCurrencyAmount({ amount: '12.5', currency: 'USD' })).toBe('USD 12.50');
+  });
+
+  it('lets a passed currency win over the object one', () => {
+    expect(formatCurrencyAmount({ amount: '10', currency: 'KES' }, 'USD')).toBe('USD 10.00');
+  });
+
+  it('still takes a bare decimal string or number', () => {
+    expect(formatCurrencyAmount('34839.8')).toBe('KES 34,839.80');
+    expect(formatCurrencyAmount(1500, 'USD')).toBe('USD 1,500.00');
+  });
+
+  it('reads nothing and nonsense as zero', () => {
+    expect(formatCurrencyAmount(null)).toBe('KES 0.00');
+    expect(formatCurrencyAmount(undefined)).toBe('KES 0.00');
+    expect(formatCurrencyAmount('free')).toBe('KES 0.00');
+  });
+});
 
 describe('moneyAmount', () => {
   // What the API actually sends for a promo discount, a buyer price, a total

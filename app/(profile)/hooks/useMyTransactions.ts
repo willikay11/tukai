@@ -7,7 +7,13 @@ import moment from 'moment';
 import { useEarningsSummary, usePayouts } from '@/app/(experiences)/hooks/usePayment';
 import { useExperiences, useTicketPurchases } from '@/app/shared/hooks/useExperiences';
 import { Experience } from '@/types/experience';
-import { HostPayout, PAYOUT_KIND_LABEL, payoutAmount, payoutDestinationLabel } from '@/types/payment';
+import {
+  HostEarningsSummary,
+  HostPayout,
+  PAYOUT_KIND_LABEL,
+  payoutAmount,
+  payoutDestinationLabel,
+} from '@/types/payment';
 import { TicketPurchase } from '@/types/ticket-purchase';
 
 export type TransactionDirection = 'in' | 'out';
@@ -56,11 +62,13 @@ export const useMyTransactions = (userId?: string | null) => {
   );
   const payouts: HostPayout[] = useMemo(() => {
     const payload = payoutsResponse?.data;
-    return Array.isArray(payload) ? payload : payload?.results ?? [];
+    return Array.isArray(payload) ? payload : (payload?.results ?? []);
   }, [payoutsResponse]);
 
   const transactions: TransactionRow[] = useMemo(() => {
-    const experienceById = new Map(reservedExperiences.map((experience) => [experience.id, experience]));
+    const experienceById = new Map(
+      reservedExperiences.map((experience) => [experience.id, experience]),
+    );
 
     const ticketRows: TransactionRow[] = purchases.map((purchase) => {
       const experience = experienceById.get(purchase.ticket.experience);
@@ -90,17 +98,19 @@ export const useMyTransactions = (userId?: string | null) => {
     );
   }, [purchases, reservedExperiences, payouts]);
 
-  const availableBalance = summaryResponse?.data?.availableBalance ?? '0';
+  const summary: HostEarningsSummary | null = summaryResponse?.data ?? null;
+  // Balances are { amount, currency } objects; the Withdraw drawer takes the decimal string
+  const availableBalance = summary?.availableBalance?.amount ?? '0';
 
   return {
     isLoading: isLoadingPurchases || isLoadingReserved || isLoadingPayouts || isLoadingSummary,
     transactions,
     balances: {
-      currency: payouts[0]?.currency ?? 'KES',
+      currency: summary?.availableBalance?.currency ?? payouts[0]?.currency ?? 'KES',
       // Kept as the raw decimal string too - WithdrawDrawer takes it as such
       availableBalance,
       available: payoutAmount(availableBalance),
-      pending: payoutAmount(summaryResponse?.data?.pendingBalance),
+      pending: payoutAmount(summary?.pendingBalance),
       // No lifetime "paid out" figure exists on the summary - only the three
       // live balances - so this totals every settled payout instead.
       paidOut: payouts

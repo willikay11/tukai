@@ -1,3 +1,8 @@
+import { MoneyLike, moneyAmount } from '@/utils/money';
+
+/** Money as the API sends it. */
+export type Money = { amount: string; currency: string };
+
 export type CreatePhoneWallet = {
   phone: string;
 };
@@ -50,17 +55,33 @@ export type Wallet = {
 /**
  * What a host has earned, and what of it they can take out.
  *
- * Every figure is a decimal string on the wire. The three balances are not
- * interchangeable: `available` is what a withdrawal can draw on now, `pending`
- * is money not yet settled, and `current` is the two together.
+ * Every figure is a `{ amount, currency }` object on the wire. The three
+ * balances are not interchangeable: `available` is what a withdrawal can draw
+ * on now, `pending` is money not yet settled, and `current` is the two
+ * together.
+ *
+ * `totalTicketSales` is the list price, before promo discounts - never show it
+ * as money received. What buyers paid is `amountPaid`, and what the host
+ * earned is `hostNet`:
+ *
+ *   totalTicketSales - hostFundedDiscount - commissionDeducted = hostNet
+ *   amountPaid = totalTicketSales - hostFundedDiscount - tukaiFundedDiscount
  */
 export type HostEarningsSummary = {
-  totalTicketSales: string;
-  availableBalance: string;
-  pendingBalance: string;
-  currentBalance: string;
-  commissionDeducted: string;
-  estimatedPayoutFee: string;
+  totalTicketSales: Money;
+  amountPaid: Money;
+  /** Promo discounts the host paid for; comes off their earnings. */
+  hostFundedDiscount: Money;
+  /** Promo discounts Tukai paid for; not the host's cost. */
+  tukaiFundedDiscount: Money;
+  hostNet: Money;
+  availableBalance: Money;
+  pendingBalance: Money;
+  currentBalance: Money;
+  commissionDeducted: Money;
+  estimatedPayoutFee: Money;
+  /** Tickets the host can still sell, at buyer price. */
+  ticketsOnSale: Money;
 };
 
 export type PayoutKind = 'split_advance' | 'transfer' | 'withdrawal' | 'clawback';
@@ -104,12 +125,11 @@ export type PayoutQuote = {
   limitMessage: string;
 };
 
-/** A decimal string as money. Blank and unparseable both read as zero. */
-export const payoutAmount = (value?: string | number | null): number => {
-  const parsed = typeof value === 'string' ? parseFloat(value) : value;
-
-  return typeof parsed === 'number' && Number.isFinite(parsed) ? parsed : 0;
-};
+/**
+ * Money as a number: the API's `{ amount, currency }` object, or a bare
+ * decimal string or number. Blank and unparseable both read as zero.
+ */
+export const payoutAmount = (value?: MoneyLike): number => moneyAmount(value ?? null) ?? 0;
 
 export const PAYOUT_STATUS_LABEL: Record<PayoutStatus, string> = {
   pending: 'Requested',

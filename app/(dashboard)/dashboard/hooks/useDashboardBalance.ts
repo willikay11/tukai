@@ -39,14 +39,15 @@ export const useDashboardBalance = (userId: string | undefined) => {
 
   return {
     isLoading: isLoadingEarnings || isLoadingExperiences,
-    totalLabel: formatCurrencyAmount(summary?.currentBalance, 'KES'),
+    // Balances are { amount, currency } objects, so each carries its own currency
+    totalLabel: formatCurrencyAmount(summary?.currentBalance),
     balances: [
-      { label: 'Available', value: formatCurrencyAmount(summary?.availableBalance, 'KES') },
-      { label: 'Pending', value: formatCurrencyAmount(summary?.pendingBalance, 'KES') },
+      { label: 'Available', value: formatCurrencyAmount(summary?.availableBalance) },
+      { label: 'Pending', value: formatCurrencyAmount(summary?.pendingBalance) },
       { label: 'Tickets on sale', value: formatCurrencyAmount(ticketsOnSale, 'KES') },
     ],
-    // Raw figures, for the Withdraw drawer
-    availableBalance: summary?.availableBalance ?? '0',
+    // Raw figures, for the Withdraw drawer, which takes a decimal string
+    availableBalance: summary?.availableBalance?.amount ?? '0',
     pendingBalance: payoutAmount(summary?.pendingBalance),
   };
 };
