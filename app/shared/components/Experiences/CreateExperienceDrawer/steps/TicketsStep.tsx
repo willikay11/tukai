@@ -18,6 +18,7 @@ import { getDaysBetween } from '@/utils/date-utils';
 import { parseApiError } from '@/utils/parseApiError';
 import { buildSingleOccurrenceRule, calculateDurationMinutes } from '@/utils/slot-template-utils';
 import { getTicketBuyerAmount } from '@/utils/ticket-utils';
+import { localTimeToUtcTime } from '@/utils/utc-time';
 
 type Flow = ReturnType<typeof useCreateExperienceFlow>;
 type TicketItem = Flow['formData']['tickets']['items'][number];
@@ -169,7 +170,8 @@ export const TicketsStep = ({ flow }: TicketsStepProps) => {
     }
 
     const promise = createSlotTemplate(flow.experienceId, {
-      start_time: multiDayStartTime,
+      // The API stores slot start times in UTC, on the experience's first day
+      start_time: localTimeToUtcTime(multiDayStartDate, multiDayStartTime),
       duration_minutes: calculateDurationMinutes(multiDayStartTime, multiDayEndTime),
       recurrence_rule: buildSingleOccurrenceRule(multiDayStartDate, multiDayStartTime),
     })

@@ -373,9 +373,7 @@ describe('BookingPanel purchase flow', () => {
     await waitFor(() => expect(document.querySelector('iframe')).toBeInTheDocument());
     fireEvent(window, new MessageEvent('message', { data: { status: 'success' } }));
 
-    await waitFor(() =>
-      expect(onPurchaseComplete).toHaveBeenCalledWith('TRN-20260714-4OIK5LDP'),
-    );
+    await waitFor(() => expect(onPurchaseComplete).toHaveBeenCalledWith('TRN-20260714-4OIK5LDP'));
     expect(mockPush).not.toHaveBeenCalled();
   });
 
@@ -404,11 +402,12 @@ describe('BookingPanel purchase flow', () => {
     expect(document.querySelector('iframe')).not.toBeInTheDocument();
   });
 
+  // Occurrences start at 14:00 and 18:00 UTC: 5 PM and 9 PM in Nairobi
   it('shows both occurrence slots for the auto-selected first date', () => {
     render(<BookingPanel experience={experience} />);
 
-    expect(screen.getByText('2:00 PM - 5:00 PM')).toBeInTheDocument();
-    expect(screen.getByText('6:00 PM - 9:00 PM')).toBeInTheDocument();
+    expect(screen.getByText('5:00 PM - 8:00 PM')).toBeInTheDocument();
+    expect(screen.getByText('9:00 PM - 12:00 AM')).toBeInTheDocument();
   });
 
   it('divides the date and slot picker from Select ticket', () => {
@@ -434,7 +433,7 @@ describe('BookingPanel purchase flow', () => {
     expect(screen.getByText('Normal')).toBeInTheDocument();
     expect(screen.queryByText('VIP')).not.toBeInTheDocument();
 
-    await user.click(screen.getByText('6:00 PM - 9:00 PM'));
+    await user.click(screen.getByText('9:00 PM - 12:00 AM'));
 
     expect(screen.getByText('VIP')).toBeInTheDocument();
     expect(screen.queryByText('Normal')).not.toBeInTheDocument();
@@ -515,7 +514,7 @@ describe('BookingPanel purchase flow', () => {
 
     // Pick a "Normal" ticket on the first slot, then switch slots
     await user.click(screen.getAllByRole('button', { name: 'Increase quantity' })[0]);
-    await user.click(screen.getByText('6:00 PM - 9:00 PM'));
+    await user.click(screen.getByText('9:00 PM - 12:00 AM'));
 
     // Pay stays clickable; the hidden slot's quantity is inert, so pressing it
     // reports the missing ticket rather than submitting
@@ -606,9 +605,7 @@ describe('delivery contact defaults', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Edit delivery email' }));
 
-    expect(screen.getByPlaceholderText('Enter email address')).toHaveValue(
-      'wanjiku@example.com',
-    );
+    expect(screen.getByPlaceholderText('Enter email address')).toHaveValue('wanjiku@example.com');
   });
 
   it('leaves the field blank and editable when the session carries no address', async () => {

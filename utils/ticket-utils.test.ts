@@ -116,11 +116,12 @@ describe('buildRecurringTicketValidity', () => {
 });
 
 describe('buildAbsoluteTicketValidity', () => {
+  // Local times go out as UTC instants (Nairobi is UTC+3, pinned in jest.config.js)
   it('builds correct payload when both dates and times set', () => {
     const result = buildAbsoluteTicketValidity('2026-03-24', '09:00', '2026-03-31', '18:00');
     expect(result).toEqual({
-      sales_start_date: '2026-03-24T09:00:00',
-      sales_end_date: '2026-03-31T18:00:00',
+      sales_start_date: '2026-03-24T06:00:00Z',
+      sales_end_date: '2026-03-31T15:00:00Z',
     });
   });
 

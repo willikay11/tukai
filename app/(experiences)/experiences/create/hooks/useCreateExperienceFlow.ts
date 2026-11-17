@@ -8,6 +8,7 @@ import { RRule } from 'rrule';
 import { v4 as uuidv4 } from 'uuid';
 
 import { buildRecurrenceRule } from '@/app/(experiences)/experiences/create/utils/buildRecurrenceRule';
+import { buildExperienceDates } from '@/app/(experiences)/experiences/create/utils/experience-dates';
 import {
   buildPreviewExperience,
   mapGeocodeResultToLocation,
@@ -57,10 +58,11 @@ import { parseApiError } from '@/utils/parseApiError';
 import {
   SlotTemplateRecord,
   buildSlotTemplatePayload,
-  calculateEndTime,
   diffSlotTemplates,
+  slotTemplateToTimeSlot,
 } from '@/utils/slot-template-utils';
 import { getTicketBuyerAmount, parseSalesEndRelativeFromTicket } from '@/utils/ticket-utils';
+import { utcDateOf, utcIsoToLocalParts } from '@/utils/utc-time';
 
 import {
   aboutSchema,
@@ -78,24 +80,6 @@ export type ExperienceStepId =
   | 'guests'
   | 'wallet'
   | 'preview';
-
-const formatDateWithTime = (
-  date: string,
-  time: string | null = null,
-  isEndOfDay: boolean = false,
-): string => {
-  if (!date) return '';
-  // Date format is assumed to be ISO string (YYYY-MM-DD)
-  // Time format is assumed to be HH:mm (24-hour format)
-  if (time) {
-    return `${date}T${time}:00`;
-  }
-  if (isEndOfDay) {
-    return `${date}T23:59:59`;
-  } else {
-    return `${date}T00:00:00`;
-  }
-};
 
 const parseExperienceStepId = (step: string | null): ExperienceStepId | null => {
   const validSteps: ExperienceStepId[] = [
@@ -597,14 +581,9 @@ export const useCreateExperienceFlow = ({
 
     hasHydrated.current = true;
 
-    // Parse dates from ISO format (extract without timezone conversion)
-    const startDate = experience.startDate?.split('T')[0];
-    const startTime = experience.startDate
-      ? (experience.startDate.split('T')[1]?.substring(0, 5) ?? null)
-      : null;
-    const endTime = experience.endDate
-      ? (experience.endDate.split('T')[1]?.substring(0, 5) ?? null)
-      : null;
+    // The API's UTC datetimes as the local date and time the form shows
+    const { date: startDate, time: startTime } = utcIsoToLocalParts(experience.startDate);
+    const { date: localEndDate, time: endTime } = utcIsoToLocalParts(experience.endDate);
 
     // Update about form
     updateAboutFormData({
@@ -662,21 +641,15 @@ export const useCreateExperienceFlow = ({
 
     // For itinerary experiences, populate the itinerary date fields
     if (uiExperienceType === 'itinerary') {
-      const endDate = experience.endDate?.split('T')[0];
       dateTypeUpdate.itineraryStartDate = startDate;
-      dateTypeUpdate.itineraryEndDate = endDate;
+      dateTypeUpdate.itineraryEndDate = localEndDate;
     }
 
     // For multi-day experiences, also populate the multi-day date/time fields
     if (uiExperienceType === 'multi-day') {
-      const endDate = experience.endDate?.split('T')[0];
-      const endTime = experience.endDate
-        ? (experience.endDate.split('T')[1]?.substring(0, 5) ?? null)
-        : null;
-
       dateTypeUpdate.multiDayStartDate = startDate;
       dateTypeUpdate.multiDayStartTime = startTime;
-      dateTypeUpdate.multiDayEndDate = endDate;
+      dateTypeUpdate.multiDayEndDate = localEndDate;
       dateTypeUpdate.multiDayEndTime = endTime;
     }
 
@@ -689,14 +662,20 @@ export const useCreateExperienceFlow = ({
         const records: { id: string; name?: string; startTime: string; durationMinutes: number }[] =
           slotTemplatesResponse?.data?.results ?? [];
 
-        // Store slot template records for sync operations
-        const recordsForState: SlotTemplateRecord[] = records.map((record, index) => ({
-          uiId: `slot-${index}`,
-          templateId: record.id,
-          startTime: record.startTime,
-          endTime: calculateEndTime(record.startTime, record.durationMinutes),
-          name: record.name,
-        }));
+        // Slot start times are UTC, on the UTC date of the experience's start
+        // (the day the backend places them on). The form and the records the
+        // syncs diff against both hold local times.
+        const utcFirstDay = utcDateOf(experience.startDate);
+        const recordsForState: SlotTemplateRecord[] = records.map((record, index) => {
+          const slot = slotTemplateToTimeSlot(record, utcFirstDay);
+          return {
+            uiId: `slot-${index}`,
+            templateId: record.id,
+            startTime: slot.startTime,
+            endTime: slot.endTime,
+            name: record.name,
+          };
+        });
         setSlotTemplateRecords(recordsForState);
 
         dateTypeUpdate = {
@@ -709,9 +688,9 @@ export const useCreateExperienceFlow = ({
           recurrenceStartDate: moment(rule.options.dtstart).format('YYYY-MM-DD'),
           recurrenceEndDate: moment(rule.options.until).format('YYYY-MM-DD'),
           // date: null,
-          timeSlots: records.map((record) => ({
+          timeSlots: recordsForState.map((record) => ({
             startTime: record.startTime,
-            endTime: calculateEndTime(record.startTime, record.durationMinutes),
+            endTime: record.endTime,
           })),
         };
       } catch (error) {
@@ -735,13 +714,8 @@ export const useCreateExperienceFlow = ({
     // Load tickets from saved experience
     if (experience.tickets && experience.tickets.length > 0) {
       const savedTickets = experience.tickets.map((ticket: any) => {
-        // Extract date and time from ISO datetime strings
-        const extractDateTime = (isoString: string | null) => {
-          if (!isoString) return { date: null, time: null };
-          const date = isoString.split('T')[0];
-          const time = isoString.split('T')[1]?.substring(0, 5) ?? null;
-          return { date, time };
-        };
+        // The API's UTC datetimes as local date and time
+        const extractDateTime = utcIsoToLocalParts;
 
         const salesStartDateTime = extractDateTime(
           ticket.salesStartDate || ticket.sales_start_date,
@@ -1063,10 +1037,13 @@ export const useCreateExperienceFlow = ({
     setInvitedCommunities(communities);
   }, []);
 
+  // `currentSlots` hold local times; `localFirstDay` is the experience's first
+  // day, which their UTC start times are worked out on.
   const syncSlotTemplates = async (
     experienceId: string,
     currentSlots: { startTime: string; endTime: string }[],
     recurrenceRule: string | null,
+    localFirstDay: string,
   ): Promise<void> => {
     const { toCreate, toUpdate, toDelete } = diffSlotTemplates(currentSlots, slotTemplateRecords);
 
@@ -1088,7 +1065,7 @@ export const useCreateExperienceFlow = ({
         await updateSlotTemplate(
           experienceId,
           record.templateId,
-          buildSlotTemplatePayload({ startTime, endTime }, recurrenceRule),
+          buildSlotTemplatePayload({ startTime, endTime }, recurrenceRule, localFirstDay),
         );
         // Update local record
         const idx = newRecords.findIndex((r) => r.templateId === record.templateId);
@@ -1107,7 +1084,7 @@ export const useCreateExperienceFlow = ({
       toCreate.map(async (slot) => {
         const response = await createSlotTemplate(
           experienceId,
-          buildSlotTemplatePayload(slot, recurrenceRule),
+          buildSlotTemplatePayload(slot, recurrenceRule, localFirstDay),
         );
         newRecords.push({
           uiId: `slot-${Date.now()}-${Math.random()}`,
@@ -1166,53 +1143,12 @@ export const useCreateExperienceFlow = ({
     try {
       const photoFiles = formData.about.photos.filter((p) => p.file).map((p) => p.file!);
 
-      // Determine which date/time fields to use based on experience type
-      const isMultiDay = formData.dateType.experienceType === 'multi-day';
-      const isRecurring = formData.dateType.isRecurring;
       const isItinerary = formData.dateType.experienceType === 'itinerary';
 
-      let startDateValue = '';
-      let endDateValue = '';
-      let startTime: string | null = null;
-      let endTime: string | null = null;
-
-      if (isItinerary) {
-        // Itinerary uses its own dedicated date fields (no times)
-        startDateValue = formData.dateType.itineraryStartDate || '';
-        endDateValue = formData.dateType.itineraryEndDate || '';
-        startTime = null;
-        endTime = null;
-      } else if (isMultiDay) {
-        // Multi-day uses its own dedicated date + time fields
-        startDateValue = formData.dateType.multiDayStartDate || '';
-        endDateValue = formData.dateType.multiDayEndDate || '';
-        startTime = formData.dateType.multiDayStartTime || null;
-        endTime = formData.dateType.multiDayEndTime || null;
-      } else if (isRecurring) {
-        // Recurring uses recurrence start/end date range with first time slot
-        startDateValue = formData.dateType.recurrenceStartDate || '';
-        endDateValue = formData.dateType.recurrenceEndDate || '';
-        startTime = formData.dateType.timeSlots?.[0]?.startTime || null;
-        endTime = formData.dateType.timeSlots?.[0]?.endTime || null;
-      } else {
-        // Single-day uses single date with start/end times
-        startDateValue = formData.dateType.date || '';
-        endDateValue = formData.dateType.date || '';
-        startTime = formData.dateType.startTime || null;
-        endTime = formData.dateType.endTime || null;
-      }
-
-      // Validate that all required date/time fields are populated (skip time validation for itinerary)
-      if (!startDateValue || !endDateValue) {
-        setApiError('Please set start and end dates before continuing.');
-        setIsSavingExperience(false);
-        return false;
-      }
-
-      if (!isItinerary && (!startTime || !endTime)) {
-        setApiError(
-          'Please set a start date, end date, start time and end time before continuing.',
-        );
+      // The form's local dates and times as the UTC instants the API stores
+      const dates = buildExperienceDates(formData.dateType);
+      if ('error' in dates) {
+        setApiError(dates.error);
         setIsSavingExperience(false);
         return false;
       }
@@ -1225,8 +1161,8 @@ export const useCreateExperienceFlow = ({
           : formData.about.locationPlaceId
             ? { googleMapPlaceId: formData.about.locationPlaceId }
             : {}),
-        startDate: formatDateWithTime(startDateValue, startTime),
-        endDate: formatDateWithTime(endDateValue, endTime, true),
+        startDate: dates.startDate,
+        endDate: dates.endDate,
         recurrence_rule: buildRecurrenceRule(formData.dateType),
         categoriesIds: formData.about.categories.map((c) => c.id),
         isPublic: formData.about.visibility === 'public',
@@ -1246,7 +1182,8 @@ export const useCreateExperienceFlow = ({
             ...basePayload,
             experienceType: 'itinerary' as const,
             itineraryMode: 'fixed' as const, // this should be removed when the API is updated
-            itineraryDurationDays: moment(endDateValue).diff(moment(startDateValue), 'days') + 1,
+            itineraryDurationDays:
+              moment(dates.localEndDate).diff(moment(dates.localStartDate), 'days') + 1,
           }
         : basePayload;
 
@@ -1290,6 +1227,7 @@ export const useCreateExperienceFlow = ({
                 experienceId,
                 validSlots,
                 buildRecurrenceRule(formData.dateType),
+                formData.dateType.recurrenceStartDate ?? '',
               );
             } catch (slotError) {
               console.error('[handleSaveAbout] Slot sync failed:', slotError);
@@ -1338,7 +1276,11 @@ export const useCreateExperienceFlow = ({
                 timeSlots.map((slot) =>
                   createSlotTemplate(
                     newExperienceId,
-                    buildSlotTemplatePayload(slot, buildRecurrenceRule(formData.dateType)),
+                    buildSlotTemplatePayload(
+                      slot,
+                      buildRecurrenceRule(formData.dateType),
+                      formData.dateType.recurrenceStartDate ?? '',
+                    ),
                   ),
                 ),
               );

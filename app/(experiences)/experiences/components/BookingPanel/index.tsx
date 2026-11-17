@@ -65,23 +65,19 @@ interface BookingPanelProps {
   onPurchaseComplete?: (reference?: string) => void;
 }
 
-const formatSlotLabel = (startTime: string, durationMinutes: number): string => {
-  const [hour, min] = startTime.split(':').map(Number);
-  const start = moment({ hour, minute: min });
-  const end = start.clone().add(durationMinutes, 'minutes');
-  return `${start.format('h:mm A')} - ${end.format('h:mm A')}`;
-};
-
-// Itinerary occurrences carry no slot template, so fall back to the times on
-// the occurrence itself rather than reading through a null template
+// The occurrence's own start is the real moment, served in UTC, so moment()
+// shows it in local time. The slot template's start_time is a bare UTC clock
+// time, so it is read only for the slot's length.
 const occurrenceLabel = (occurrence: ExperienceOccurrence): string => {
-  const { startTime, durationMinutes } = occurrence.slotTemplate ?? {};
+  const durationMinutes = occurrence.slotTemplate?.durationMinutes;
+  const start = moment(occurrence.startDate);
 
-  if (startTime && durationMinutes != null) {
-    return formatSlotLabel(startTime, durationMinutes);
+  if (start.isValid() && durationMinutes != null) {
+    const end = start.clone().add(durationMinutes, 'minutes');
+    return `${start.format('h:mm A')} - ${end.format('h:mm A')}`;
   }
 
-  const start = moment(occurrence.startDate);
+  // Itinerary occurrences carry no slot template: use the occurrence's own times
   const end = moment(occurrence.endDate);
 
   if (!start.isValid()) return '';
@@ -757,7 +753,9 @@ export const BookingPanel = ({
                 type="button"
                 onClick={() => {
                   if (deliveryMethod !== 'email') {
-                    setDeliveryContact(isLoggedIn && session?.user?.email ? session.user.email : '');
+                    setDeliveryContact(
+                      isLoggedIn && session?.user?.email ? session.user.email : '',
+                    );
                     setIsEditingDeliveryContact(false);
                   }
                   setDeliveryMethod('email');
