@@ -12,7 +12,12 @@ jest.mock('@/app/shared/hooks/useExperiences', () => ({
 }));
 
 // Each of these is its own unit; this suite is about the drawer's shell
-jest.mock('next-auth/react', () => ({ useSession: () => ({ data: null }) }));
+// Signed out unless a test signs in; signing in as the host turns on host mode
+let mockSession: { user: { id: string } } | null = null;
+jest.mock('next-auth/react', () => ({ useSession: () => ({ data: mockSession }) }));
+jest.mock('./host/HostExperiencePanel', () => ({
+  HostExperiencePanel: () => <div data-testid="host-panel" />,
+}));
 jest.mock('@/app/shared/components/Bookmark', () => ({
   Bookmark: () => <button type="button">bookmark</button>,
 }));
@@ -101,6 +106,7 @@ const experience = {
 describe('ExperienceDrawer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSession = null;
     useFetchSingleExperience.mockReturnValue({
       data: { data: experience },
       isLoading: false,
@@ -129,6 +135,24 @@ describe('ExperienceDrawer', () => {
 
   // The sticky header shows when the experience runs, not the title - the
   // title itself lives once, below the gallery
+  // The host's own experience: the same date line as guests see, with the
+  // name under it, since the host view has no title in its body
+  it('shows the host when it runs, with the name beneath', () => {
+    mockSession = { user: { id: 'u1' } };
+    useFetchSingleExperience.mockReturnValue({
+      data: { data: { ...experience, host: { id: 'u1' } } },
+      isLoading: false,
+      isError: false,
+    });
+    render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
+
+    expect(screen.getByTestId('host-panel')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /Sat 3 Oct, \d{1,2}:\d{2} [AP]M - \d{1,2}:\d{2} [AP]M/ }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Pottery for beginners')).toBeInTheDocument();
+  });
+
   it('shows the title once, below the gallery, and the date in the sticky header', () => {
     render(<ExperienceDrawer experienceId="e1" isOpen onClose={jest.fn()} />);
 
