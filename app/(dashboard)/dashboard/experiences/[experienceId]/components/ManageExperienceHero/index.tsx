@@ -1,12 +1,11 @@
 'use client';
 
-import moment from 'moment';
-
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
 import { Share, experienceShare } from '@/app/shared/components/Share';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
+import { experienceMoment } from '@/utils/utc-time';
 
 import { ManageExperienceMetrics } from '../../utils/manage-metrics';
 
@@ -27,8 +26,10 @@ export const ManageExperienceHero = ({ experience, metrics }: ManageExperienceHe
     experience.photos?.find((photo: Photo) => photo.isCover)?.photo ||
     experience.photos?.[0]?.photo;
 
-  const start = experience.startDate ? moment(experience.startDate) : null;
-  const end = experience.endDate ? moment(experience.endDate) : null;
+  const start = experience.startDate
+    ? experienceMoment(experience.startDate, experience.timezone)
+    : null;
+  const end = experience.endDate ? experienceMoment(experience.endDate, experience.timezone) : null;
 
   const dateLine = start?.isValid()
     ? [

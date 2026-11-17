@@ -2,13 +2,13 @@
 
 import { useMemo } from 'react';
 
-import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
+import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { usePlaces } from '@/app/shared/hooks/usePlaces';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
-import { Place } from '@/types/place';
 import { coverPhotoUrl } from '@/types/photo';
+import { Place } from '@/types/place';
 import { formatShortDate } from '@/utils/date-utils';
 
 import type { AttachmentKind } from './useMomentComposer';
@@ -58,10 +58,10 @@ export const useMomentAttachSearch = (kind: AttachmentKind, query: string) => {
 
   const total: number =
     kind === 'experience'
-      ? experiencesResponse?.data?.count ?? 0
+      ? (experiencesResponse?.data?.count ?? 0)
       : kind === 'community'
-        ? communitiesResponse?.data?.count ?? 0
-        : placesResponse?.data?.count ?? 0;
+        ? (communitiesResponse?.data?.count ?? 0)
+        : (placesResponse?.data?.count ?? 0);
 
   const options: MomentAttachOption[] = useMemo(() => {
     if (kind === 'experience') {
@@ -69,7 +69,7 @@ export const useMomentAttachSearch = (kind: AttachmentKind, query: string) => {
       return experiences.slice(0, limit).map((experience) => ({
         id: experience.id,
         label: experience.title,
-        meta: formatShortDate(experience.startDate),
+        meta: formatShortDate(experience.startDate, experience.timezone),
         thumb: coverPhotoUrl(experience.photos, 'thumb'),
       }));
     }
@@ -101,7 +101,8 @@ export const useMomentAttachSearch = (kind: AttachmentKind, query: string) => {
         : isFetchingPlaces;
 
   // Nothing joined at all - distinct from a search with no matches
-  const hasNoCommunities = kind === 'community' && !isSearching && !isLoading && options.length === 0;
+  const hasNoCommunities =
+    kind === 'community' && !isSearching && !isLoading && options.length === 0;
 
   return { options, total, isLoading, isSearching, hasNoCommunities };
 };

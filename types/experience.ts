@@ -24,6 +24,9 @@ export type Experience = {
   location: Location;
   startDate: string;
   endDate: string;
+  // IANA zone where the experience happens, e.g. 'Africa/Nairobi'. The dates
+  // are UTC instants; this is the zone to show them in and edit them in.
+  timezone?: string;
   recurrenceRule?: string | null;
   // Returned by the API alongside the dates; drives the itinerary vs standard
   // split (see inferUIExperienceType)
@@ -118,6 +121,9 @@ export type CreateExperience = {
   placeId?: string;
   startDate: string;
   endDate: string;
+  // IANA zone the dates were entered in. Optional: the API defaults to the
+  // host's profile zone, or Africa/Nairobi.
+  timezone?: string;
   recurrence_rule: string;
   categoriesIds: string[];
   isPublic?: boolean;
@@ -132,7 +138,9 @@ export type CreateExperience = {
   meetingPlace?: string | null;
   meetingTime?: string | null;
   experienceType?: 'standard' | 'itinerary';
-  itineraryMode?: 'fixed' | 'flexible';
+  // Fixed: the host sets the dates. Open: the buyer picks a departure date
+  // within start_date..end_date (the web only creates fixed ones so far).
+  itineraryMode?: 'fixed' | 'open';
   itineraryDurationDays?: number;
   // When ticket sales stop, relative to the experience. One setting for the
   // whole experience, which every ticket's expiry is then read from.

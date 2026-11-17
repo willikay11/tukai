@@ -28,7 +28,9 @@ const ExperienceRow = ({ experience }: { experience: Experience }) => {
         <p className="truncate text-sm font-bold text-gray-900">{experience.title}</p>
         <p className="mt-0.5 truncate text-sm text-gray-400">
           {price ? `From ${price.currency} ${numeral(price.amount).format('0,0')}` : 'Free'}
-          {experience.startDate ? ` | ${formatFirstExperienceDate(experience.startDate)}` : ''}
+          {experience.startDate
+            ? ` | ${formatFirstExperienceDate(experience.startDate, experience.timezone)}`
+            : ''}
         </p>
       </div>
 

@@ -24,7 +24,12 @@ export const ExperienceDrawerFooter = ({
   const [isPlanOpen, setIsPlanOpen] = useState(false);
 
   const priceLine = experiencePriceLine(experience);
-  const dateLine = formatExperienceHeaderDate(experience.startDate, experience.endDate);
+  const dateLine = formatExperienceHeaderDate(
+    experience.startDate,
+    experience.endDate,
+    undefined,
+    experience.timezone,
+  );
 
   return (
     <div className="sticky bottom-0 z-30 border-t border-line bg-white px-6 pb-[max(1rem,var(--drawer-inset-bottom,env(safe-area-inset-bottom)))] pt-4">

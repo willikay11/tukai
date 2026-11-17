@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 
-import moment from 'moment';
 import numeral from 'numeral';
 
 import { Bookmark } from '@/app/shared/components/Bookmark';
@@ -20,6 +19,7 @@ import { Experience } from '@/types/experience';
 import { Photo, coverPhotoUrl, photoUrl } from '@/types/photo';
 import { formatDateAndTimeRange } from '@/utils/date-utils';
 import { haversineKm } from '@/utils/geo-utils';
+import { experienceMoment } from '@/utils/utc-time';
 
 export const SingleExperience = ({
   type,
@@ -67,7 +67,11 @@ export const SingleExperience = ({
       .join(' · ');
 
     // Null for an experience with no start date, rather than a stray comma
-    const when = formatDateAndTimeRange(experience.startDate, experience.endDate);
+    const when = formatDateAndTimeRange(
+      experience.startDate,
+      experience.endDate,
+      experience.timezone,
+    );
 
     return (
       <div className="flex flex-col">
@@ -128,9 +132,12 @@ export const SingleExperience = ({
   const dateSlot = experience?.startDate ? (
     <div className="inline-flex items-center">
       <span className="text-xs font-normal text-gray-500">
-        {moment(experience?.startDate).isSame(moment(experience?.endDate), 'day')
-          ? `${moment(experience?.startDate).format('MMM D, h:mm A')} - ${moment(experience?.endDate).format('h:mm A')}`
-          : `${moment(experience?.startDate).format('MMM D, YYYY HH:mm A')} - ${moment(experience?.endDate).format('MMM D, YYYY HH:mm A')}`}
+        {experienceMoment(experience?.startDate ?? '', experience?.timezone).isSame(
+          experienceMoment(experience?.endDate ?? '', experience?.timezone),
+          'day',
+        )
+          ? `${experienceMoment(experience?.startDate ?? '', experience?.timezone).format('MMM D, h:mm A')} - ${experienceMoment(experience?.endDate ?? '', experience?.timezone).format('h:mm A')}`
+          : `${experienceMoment(experience?.startDate ?? '', experience?.timezone).format('MMM D, YYYY HH:mm A')} - ${experienceMoment(experience?.endDate ?? '', experience?.timezone).format('MMM D, YYYY HH:mm A')}`}
       </span>
     </div>
   ) : null;
@@ -138,9 +145,7 @@ export const SingleExperience = ({
   return (
     <>
       <div className="relative mb-2 flex flex-col">
-        <div
-          className="relative aspect-square w-full overflow-hidden rounded-[5px]"
-        >
+        <div className="relative aspect-square w-full overflow-hidden rounded-[5px]">
           {!hasError ? (
             <ImageCarousel
               images={experience.photos

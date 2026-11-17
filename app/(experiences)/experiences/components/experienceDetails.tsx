@@ -1,12 +1,12 @@
 'use client';
 
-import moment from 'moment';
 import numeral from 'numeral';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Button } from '@/components/ui/button';
 import { Experience } from '@/types/experience';
 import { getTicketBuyerPrice } from '@/utils/ticket-utils';
+import { experienceMoment } from '@/utils/utc-time';
 
 export const ExperienceDetails = ({ experience }: { experience: Experience }) => {
   return (
@@ -18,8 +18,8 @@ export const ExperienceDetails = ({ experience }: { experience: Experience }) =>
         <div className="flex flex-col">
           <p className="text-sm font-medium text-gray-700">Date & Duration</p>
           <p className="mt-1 text-sm font-normal text-gray-500">
-            {moment(experience.startDate).format('MMM D, YYYY')} -{' '}
-            {moment(experience.endDate).format('MMM D, YYYY')}
+            {experienceMoment(experience.startDate, experience.timezone).format('MMM D, YYYY')} -{' '}
+            {experienceMoment(experience.endDate, experience.timezone).format('MMM D, YYYY')}
           </p>
           {/* <Button variant="primary-text" size="sm" className="mt-1 justify-start">
             View Other Dates
@@ -35,7 +35,7 @@ export const ExperienceDetails = ({ experience }: { experience: Experience }) =>
           <p className="text-sm font-medium text-gray-700">Charges</p>
           <ul className="mt-1 list-disc pl-4">
             {experience.tickets.map((ticket) => (
-              <li className="text-sm font-normal text-gray-500">
+              <li key={ticket.id} className="text-sm font-normal text-gray-500">
                 <span className="text-gray-700">{ticket.name}</span>&nbsp;-&nbsp;
                 <span className="text-gray-500">
                   {experience.currency} {numeral(getTicketBuyerPrice(ticket)).format('0,0')}

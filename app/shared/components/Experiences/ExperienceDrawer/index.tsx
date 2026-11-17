@@ -157,8 +157,12 @@ export const ExperienceDrawer = ({
                         : 'Make reservation'
                       : isHostMode && host.view === 'editTicket'
                         ? 'Edit ticket details'
-                        : (formatExperienceHeaderDate(experience.startDate, experience.endDate) ??
-                          experience.title)}
+                        : (formatExperienceHeaderDate(
+                            experience.startDate,
+                            experience.endDate,
+                            undefined,
+                            experience.timezone,
+                          ) ?? experience.title)}
                   </h2>
                   {/* Hosts get the same date line as guests; their body has no
                       title of its own, so the name sits under it here */}
@@ -235,6 +239,8 @@ export const ExperienceDrawer = ({
                     const headerDate = formatExperienceHeaderDate(
                       experience.startDate,
                       experience.endDate,
+                      undefined,
+                      experience.timezone,
                     );
                     const [dayLabel, timeLabel] = headerDate?.split(', ') ?? [];
 

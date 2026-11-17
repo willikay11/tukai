@@ -1,6 +1,9 @@
 import {
+  experienceMoment,
+  isTimeZone,
   localDateTimeToUtcIso,
   localTimeToUtcTime,
+  shiftToZone,
   utcDateOf,
   utcIsoToLocalParts,
   utcTimeToLocalTime,
@@ -81,5 +84,69 @@ describe('slot start times', () => {
 describe('utcDateOf', () => {
   it('is the UTC calendar date, not the local one', () => {
     expect(utcDateOf('2026-07-04T22:30:00Z')).toBe('2026-07-04');
+  });
+});
+
+// An experience's own zone wins over the browser's (Nairobi, from jest.config.js)
+describe("in the experience's time zone", () => {
+  it('sends a London summer time as its UTC instant', () => {
+    expect(localDateTimeToUtcIso('2026-07-05', '08:00', false, 'Europe/London')).toBe(
+      '2026-07-05T07:00:00Z',
+    );
+  });
+
+  it('reads an API datetime back in New York time', () => {
+    expect(utcIsoToLocalParts('2026-07-05T12:00:00Z', 'America/New_York')).toEqual({
+      date: '2026-07-05',
+      time: '08:00',
+    });
+  });
+
+  it('follows a daylight-saving change', () => {
+    // London is UTC+0 in January and UTC+1 in July
+    expect(localDateTimeToUtcIso('2026-01-15', '09:00', false, 'Europe/London')).toBe(
+      '2026-01-15T09:00:00Z',
+    );
+    expect(localDateTimeToUtcIso('2026-07-15', '09:00', false, 'Europe/London')).toBe(
+      '2026-07-15T08:00:00Z',
+    );
+  });
+
+  it('converts slot times in the zone', () => {
+    expect(localTimeToUtcTime('2026-07-05', '08:00', 'America/New_York')).toBe('12:00');
+    expect(utcTimeToLocalTime('2026-07-05', '12:00', 'America/New_York')).toBe('08:00');
+  });
+
+  it('falls back to the browser zone for an unknown name', () => {
+    expect(isTimeZone('Mars/Olympus')).toBe(false);
+    expect(localDateTimeToUtcIso('2026-07-05', '08:00', false, 'Mars/Olympus')).toBe(
+      '2026-07-05T05:00:00Z',
+    );
+  });
+
+  it('round-trips an experience in another zone', () => {
+    const sent = localDateTimeToUtcIso('2026-03-29', '23:30', false, 'Asia/Tokyo');
+    expect(utcIsoToLocalParts(sent, 'Asia/Tokyo')).toEqual({ date: '2026-03-29', time: '23:30' });
+  });
+});
+
+describe('showing an instant in a zone', () => {
+  it("shifts a Date so its local getters read the zone's wall clock", () => {
+    const shifted = shiftToZone(new Date('2026-07-05T12:00:00Z'), 'America/New_York');
+    expect([shifted.getDate(), shifted.getHours()]).toEqual([5, 8]);
+  });
+
+  it('leaves the Date alone without a zone', () => {
+    const date = new Date('2026-07-05T12:00:00Z');
+    expect(shiftToZone(date, null)).toBe(date);
+  });
+
+  it('formats an API datetime in the zone', () => {
+    expect(
+      experienceMoment('2026-11-25T03:30:00Z', 'Africa/Nairobi').format('ddd D MMM, h:mm A'),
+    ).toBe('Wed 25 Nov, 6:30 AM');
+    expect(experienceMoment('2026-11-25T03:30:00Z', 'Europe/London').format('h:mm A')).toBe(
+      '3:30 AM',
+    );
   });
 });

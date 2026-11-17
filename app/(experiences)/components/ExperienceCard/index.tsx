@@ -57,7 +57,7 @@ export const ExperienceCard = ({
 
   const flag = experienceFlag(experience);
   const runBy = experienceRunBy(experience);
-  const when = formatCardDateTime(experience.startDate, experience.endDate);
+  const when = formatCardDateTime(experience.startDate, experience.endDate, experience.timezone);
   const whenWithDistance =
     when && resultDistanceKm !== undefined
       ? `${when} · ${formatDistanceKm(resultDistanceKm)}`

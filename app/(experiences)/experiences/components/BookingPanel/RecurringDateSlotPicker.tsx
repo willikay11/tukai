@@ -7,6 +7,7 @@ import { RRule } from 'rrule';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { formatFullDayLabel } from '@/utils/recurrence-utils';
+import { shiftToZone } from '@/utils/utc-time';
 
 interface RecurringTimeSlot {
   id: string;
@@ -24,6 +25,9 @@ interface RecurringDateSlotPickerProps {
   onDateChange: (date: string) => void;
   selectedSlotId: string | null;
   onSlotChange: (slotId: string) => void;
+  // The experience's IANA zone: its days are the days where it happens.
+  // The viewer's own zone when not given.
+  timeZone?: string | null;
 }
 
 // RRule weekday numbers: 0 = Monday … 6 = Sunday
@@ -47,6 +51,7 @@ export const RecurringDateSlotPicker = ({
   onDateChange,
   selectedSlotId,
   onSlotChange,
+  timeZone,
 }: RecurringDateSlotPickerProps) => {
   const [page, setPage] = useState(0);
 
@@ -55,10 +60,12 @@ export const RecurringDateSlotPicker = ({
       const rule = new RRule(RRule.parseString(recurrenceRule));
       const byweekday: number[] = (rule.options.byweekday ?? []) as number[];
 
-      // Show days from today (or the rule start, if later) through the rule end
-      const start = moment.max(moment(), moment(rule.options.dtstart)).startOf('day');
+      // Show days from today (or the rule start, if later) through the rule
+      // end, as calendar days in the experience's zone
+      const inZone = (date: Date) => moment(shiftToZone(date, timeZone));
+      const start = moment.max(inZone(new Date()), inZone(rule.options.dtstart)).startOf('day');
       const end = rule.options.until
-        ? moment(rule.options.until).startOf('day')
+        ? inZone(rule.options.until).startOf('day')
         : start.clone().add(MAX_STRIP_DAYS - 1, 'days');
 
       const days: { date: string; enabled: boolean }[] = [];
@@ -76,7 +83,7 @@ export const RecurringDateSlotPicker = ({
     } catch {
       return null;
     }
-  }, [recurrenceRule]);
+  }, [recurrenceRule, timeZone]);
 
   const firstEnabledDate = parsed?.days.find((day) => day.enabled)?.date ?? null;
 
@@ -122,7 +129,7 @@ export const RecurringDateSlotPicker = ({
             onClick={() => setPage((current) => Math.max(current - 1, 0))}
             disabled={page === 0}
             aria-label="Previous dates"
-            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors disabled:opacity-40 enabled:hover:text-gray-700"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors enabled:hover:text-gray-700 disabled:opacity-40"
           >
             <IconComponent iconName="ArrowLeft01Icon" size={18} color="currentColor" />
           </button>
@@ -134,7 +141,7 @@ export const RecurringDateSlotPicker = ({
             onClick={() => setPage((current) => Math.min(current + 1, totalPages - 1))}
             disabled={page >= totalPages - 1}
             aria-label="Next dates"
-            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors disabled:opacity-40 enabled:hover:text-gray-700"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors enabled:hover:text-gray-700 disabled:opacity-40"
           >
             <IconComponent iconName="ArrowRight01Icon" size={18} color="currentColor" />
           </button>

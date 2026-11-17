@@ -1,4 +1,5 @@
 import { ExperienceType } from '@/types/experience';
+import { shiftToZone } from '@/utils/utc-time';
 
 export const getOrdinalDate = (dateString: string): string => {
   try {
@@ -64,8 +65,8 @@ export const formatLongDateWithOrdinal = (date: Date): string => {
 };
 
 // → "Sat 4 July"
-export const formatShortDate = (isoString: string): string => {
-  const date = new Date(isoString);
+export const formatShortDate = (isoString: string, timeZone?: string | null): string => {
+  const date = shiftToZone(new Date(isoString), timeZone);
   if (Number.isNaN(date.getTime())) return '';
 
   const weekday = date.toLocaleDateString('en-GB', { weekday: 'short' });
@@ -219,9 +220,9 @@ export const formatTimeForPreview = (isoString: string | null): string | null =>
   }
 };
 
-export const formatFirstExperienceDate = (dateString: string): string => {
+export const formatFirstExperienceDate = (dateString: string, timeZone?: string | null): string => {
   try {
-    const date = new Date(dateString);
+    const date = shiftToZone(new Date(dateString), timeZone);
     const dayName = date.toLocaleDateString('en-GB', { weekday: 'long' });
     const day = date.getDate();
     const month = date.toLocaleDateString('en-GB', { month: 'long' });
@@ -231,10 +232,14 @@ export const formatFirstExperienceDate = (dateString: string): string => {
   }
 };
 
-export const formatItineraryDateRange = (startDate: string, endDate: string): string => {
+export const formatItineraryDateRange = (
+  startDate: string,
+  endDate: string,
+  timeZone?: string | null,
+): string => {
   try {
     const fmt = (d: string) => {
-      const date = new Date(d);
+      const date = shiftToZone(new Date(d), timeZone);
       const day = date.getDate();
       const month = date.toLocaleDateString('en-GB', { month: 'short' });
       return `${day} ${month}`;
@@ -338,10 +343,11 @@ export const formatPaidAt = (isoString: string): string => {
 export const formatDateAndTimeRange = (
   start: string | null | undefined,
   end: string | null | undefined,
+  timeZone?: string | null,
 ): string | null => {
   if (!start) return null;
 
-  const startDate = new Date(start);
+  const startDate = shiftToZone(new Date(start), timeZone);
   if (Number.isNaN(startDate.getTime())) return null;
 
   // en-US for "Sep 11" - en-GB renders "11 Sept", which is not the shape this
@@ -354,7 +360,7 @@ export const formatDateAndTimeRange = (
     return `${hours % 12 || 12}:${String(date.getMinutes()).padStart(2, '0')} ${period}`;
   };
 
-  const endDate = end ? new Date(end) : null;
+  const endDate = end ? shiftToZone(new Date(end), timeZone) : null;
   const hasEnd = endDate && !Number.isNaN(endDate.getTime());
 
   return `${day}, ${time(startDate)}${hasEnd ? ` - ${time(endDate)}` : ''}`;
@@ -371,10 +377,11 @@ export const formatDateAndTimeRange = (
 export const formatCardDateTime = (
   start: string | null | undefined,
   end: string | null | undefined,
+  timeZone?: string | null,
 ): string | null => {
   if (!start) return null;
 
-  const startDate = new Date(start);
+  const startDate = shiftToZone(new Date(start), timeZone);
   if (Number.isNaN(startDate.getTime())) return null;
 
   const day = startDate.toLocaleDateString('en-GB', {
@@ -386,7 +393,7 @@ export const formatCardDateTime = (
   const time = (date: Date) =>
     `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 
-  const endDate = end ? new Date(end) : null;
+  const endDate = end ? shiftToZone(new Date(end), timeZone) : null;
   const hasEnd = endDate && !Number.isNaN(endDate.getTime());
 
   return `${day}, ${time(startDate)}${hasEnd ? ` - ${time(endDate)}` : ''}`;
@@ -403,13 +410,17 @@ export const formatExperienceHeaderDate = (
   start: string | null | undefined,
   end: string | null | undefined,
   now: Date = new Date(),
+  timeZone?: string | null,
 ): string | null => {
   if (!start) return null;
 
-  const startDate = new Date(start);
+  // Read every date as a wall clock in the experience's zone, "now" included,
+  // so Today/Tomorrow mean the days where it happens
+  const startDate = shiftToZone(new Date(start), timeZone);
   if (Number.isNaN(startDate.getTime())) return null;
+  const today = shiftToZone(now, timeZone);
 
-  const endDate = end ? new Date(end) : null;
+  const endDate = end ? shiftToZone(new Date(end), timeZone) : null;
   const hasValidEnd = Boolean(endDate && !Number.isNaN(endDate.getTime()));
 
   const sameDay = !hasValidEnd || startDate.toDateString() === (endDate as Date).toDateString();
@@ -423,13 +434,14 @@ export const formatExperienceHeaderDate = (
   };
 
   if (!sameDay) {
-    const day = (date: Date) => date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const day = (date: Date) =>
+      date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
     return `${day(startDate)} - ${day(endDate as Date)}`;
   }
 
   const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const diffDays = Math.round(
-    (startOfDay(startDate).getTime() - startOfDay(now).getTime()) / (1000 * 60 * 60 * 24),
+    (startOfDay(startDate).getTime() - startOfDay(today).getTime()) / (1000 * 60 * 60 * 24),
   );
 
   const dayLabel =
@@ -437,7 +449,11 @@ export const formatExperienceHeaderDate = (
       ? 'Today'
       : diffDays === 1
         ? 'Tomorrow'
-        : startDate.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+        : startDate.toLocaleDateString('en-GB', {
+            weekday: 'short',
+            day: 'numeric',
+            month: 'short',
+          });
 
   return `${dayLabel}, ${time(startDate)}${hasValidEnd ? ` - ${time(endDate as Date)}` : ''}`;
 };

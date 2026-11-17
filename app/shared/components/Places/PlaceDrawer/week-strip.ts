@@ -1,4 +1,5 @@
 import { Experience } from '@/types/experience';
+import { shiftToZone } from '@/utils/utc-time';
 
 /** How far ahead the strip reads, counted from the current week. */
 export const MAX_WEEKS_AHEAD = 12;
@@ -57,9 +58,9 @@ export const isCurrentWeek = (anchor: Date, now: Date = new Date()): boolean =>
 export const isLastWeek = (anchor: Date, now: Date = new Date()): boolean =>
   dayKey(anchor) >= dayKey(addWeeks(weekStart(now), MAX_WEEKS_AHEAD));
 
-/** What an experience is filed under: the day it starts, locally. */
+/** What an experience is filed under: the day it starts, where it happens. */
 export const experienceDayKey = (experience: Experience): string | null => {
-  const start = new Date(experience.startDate);
+  const start = shiftToZone(new Date(experience.startDate), experience.timezone);
   return Number.isNaN(start.getTime()) ? null : dayKey(start);
 };
 

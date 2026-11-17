@@ -47,8 +47,7 @@ export async function fetchExperiences(
     // can only return public/published rows - so a host's own drafts (and their
     // reservations) are invisible without it. `withAuth` sends it for any other
     // list too, without which the API reports `is_bookmarked: false` on all.
-    const needsAuth =
-      withAuth || Boolean(params.invited || params.hosted_by || params.reserved_by);
+    const needsAuth = withAuth || Boolean(params.invited || params.hosted_by || params.reserved_by);
 
     let response;
     if (needsAuth) {
@@ -127,6 +126,9 @@ export async function createExperience(data: CreateExperience): Promise<ApiRespo
     }
     formData.append('start_date', data.startDate);
     formData.append('end_date', data.endDate);
+    if (data.timezone) {
+      formData.append('timezone', data.timezone);
+    }
     formData.append('recurrence_rule', data.recurrence_rule);
     data.categoriesIds.forEach((id) => formData.append('categories_ids', id));
     if (data.isPublic !== undefined) {
@@ -233,6 +235,9 @@ export async function updateExperience(
     }
     if (data.endDate !== undefined) {
       formData.append('end_date', data.endDate);
+    }
+    if (data.timezone) {
+      formData.append('timezone', data.timezone);
     }
     if (data.recurrence_rule !== undefined) {
       formData.append('recurrence_rule', data.recurrence_rule);

@@ -28,6 +28,7 @@ import { Experience, ExperienceOccurrence } from '@/types/experience';
 import { moneyAmount } from '@/utils/money';
 import { parseApiError } from '@/utils/parseApiError';
 import { getTicketBuyerPrice } from '@/utils/ticket-utils';
+import { experienceMoment } from '@/utils/utc-time';
 
 import { type AppliedDiscount, DiscountCodeField } from './DiscountCodeField';
 import { ExperienceMoments } from './ExperienceMoments';
@@ -68,9 +69,9 @@ interface BookingPanelProps {
 // The occurrence's own start is the real moment, served in UTC, so moment()
 // shows it in local time. The slot template's start_time is a bare UTC clock
 // time, so it is read only for the slot's length.
-const occurrenceLabel = (occurrence: ExperienceOccurrence): string => {
+const occurrenceLabel = (occurrence: ExperienceOccurrence, timeZone?: string | null): string => {
   const durationMinutes = occurrence.slotTemplate?.durationMinutes;
-  const start = moment(occurrence.startDate);
+  const start = experienceMoment(occurrence.startDate, timeZone);
 
   if (start.isValid() && durationMinutes != null) {
     const end = start.clone().add(durationMinutes, 'minutes');
@@ -78,7 +79,7 @@ const occurrenceLabel = (occurrence: ExperienceOccurrence): string => {
   }
 
   // Itinerary occurrences carry no slot template: use the occurrence's own times
-  const end = moment(occurrence.endDate);
+  const end = experienceMoment(occurrence.endDate, timeZone);
 
   if (!start.isValid()) return '';
   if (!end.isValid()) return start.format('h:mm A');
@@ -170,18 +171,21 @@ export const BookingPanel = ({
   const timeSlots: { id: string; label: string; isPast: boolean }[] = useMemo(() => {
     const source = isRecurring
       ? occurrences.filter(
-          (occurrence) => moment(occurrence.startDate).format('YYYY-MM-DD') === selectedDate,
+          // The picker's days are the experience's days, so group by those
+          (occurrence) =>
+            experienceMoment(occurrence.startDate, experience.timezone).format('YYYY-MM-DD') ===
+            selectedDate,
         )
       : occurrences;
 
     return source.map((occurrence) => ({
       id: occurrence.id,
-      label: occurrenceLabel(occurrence),
+      label: occurrenceLabel(occurrence, experience.timezone),
       // An elapsed slot is shown struck through, not left out - see
       // RecurringDateSlotPicker
       isPast: moment(occurrence.endDate).isBefore(moment()),
     }));
-  }, [occurrences, isRecurring, selectedDate]);
+  }, [occurrences, isRecurring, selectedDate, experience.timezone]);
 
   // Keep an occurrence selected: default to the first slot still ahead of now,
   // and re-default when the selected date changes and the previous occurrence
@@ -446,7 +450,9 @@ export const BookingPanel = ({
     });
   };
 
-  const dateRange = `${moment(experience.startDate).format('ddd D MMM')} · ${moment(experience.startDate).format('h:mm A')} - ${moment(experience.endDate).format('h:mm A')}`;
+  const start = experienceMoment(experience.startDate, experience.timezone);
+  const end = experienceMoment(experience.endDate, experience.timezone);
+  const dateRange = `${start.format('ddd D MMM')} · ${start.format('h:mm A')} - ${end.format('h:mm A')}`;
   const currency = experience.currency ?? 'Ksh.';
 
   // Checkout takes the panel over rather than opening a drawer or a dialog on
@@ -543,6 +549,7 @@ export const BookingPanel = ({
               onDateChange={setSelectedDate}
               selectedSlotId={selectedSlotId}
               onSlotChange={setSelectedSlotId}
+              timeZone={experience.timezone}
             />
           ) : (
             appearance === 'card' && (
