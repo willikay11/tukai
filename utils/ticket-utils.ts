@@ -2,6 +2,7 @@ import type { CreateExperienceTicket } from '@/types/experience';
 import type { Ticket } from '@/types/ticket';
 import type { Reservation, TicketPurchase } from '@/types/ticket-purchase';
 import { moneyAmount } from '@/utils/money';
+import { localDateTimeToUtcIso } from '@/utils/utc-time';
 
 export type RelativeUnit = 'hour' | 'day' | 'week';
 export type ApiTicketUnit = 'days' | 'hours' | 'minutes';
@@ -112,9 +113,10 @@ export const buildAbsoluteTicketValidity = (
   salesEndDate: string | null,
   salesEndTime: string | null,
 ): Pick<CreateExperienceTicket, 'sales_start_date' | 'sales_end_date'> => {
+  // Local date and time as the UTC instant the API stores
   const buildDateTime = (date: string | null, time: string | null): string | null => {
     if (!date || !time) return null;
-    return `${date}T${time}:00`;
+    return localDateTimeToUtcIso(date, time);
   };
 
   return {

@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const nextJest = require('next/jest');
 
+// Date tests convert between local time and the API's UTC, so they need a
+// fixed local zone. Nairobi (UTC+3, no daylight saving) is where Tukai runs.
+// Set here, before the workers start, because a test file can't change it.
+process.env.TZ = 'Africa/Nairobi';
+
 const createJestConfig = nextJest({
   dir: './',
 });
@@ -15,8 +20,7 @@ const customJestConfig = {
       '<rootDir>/__mocks__/@hugeicons-pro/core-twotone-rounded.js', // ESM package jest can't parse
     '^@hugeicons-pro/core-solid-rounded$':
       '<rootDir>/__mocks__/@hugeicons-pro/core-solid-rounded.js', // ESM package jest can't parse
-    '^@hugeicons-pro/core-bulk-rounded$':
-      '<rootDir>/__mocks__/@hugeicons-pro/core-bulk-rounded.js', // ESM package jest can't parse
+    '^@hugeicons-pro/core-bulk-rounded$': '<rootDir>/__mocks__/@hugeicons-pro/core-bulk-rounded.js', // ESM package jest can't parse
     // IconComponent loads each icon through this subpath instead of the
     // bare package above - same ESM problem, so it gets the same treatment
     '^@hugeicons-pro/core-twotone-rounded/loader$':

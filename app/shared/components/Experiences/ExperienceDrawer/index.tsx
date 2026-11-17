@@ -149,17 +149,23 @@ export const ExperienceDrawer = ({
                   </button>
                 )}
 
-                <h2 className="min-w-0 truncate text-[26px] font-bold leading-tight text-brand-ink">
-                  {view === 'reservation'
-                    ? isCheckingOut
-                      ? 'Complete your payment'
-                      : 'Make reservation'
-                    : isHostMode
-                      ? host.view === 'editTicket'
+                <div className="min-w-0">
+                  <h2 className="min-w-0 truncate text-[26px] font-bold leading-tight text-brand-ink">
+                    {view === 'reservation'
+                      ? isCheckingOut
+                        ? 'Complete your payment'
+                        : 'Make reservation'
+                      : isHostMode && host.view === 'editTicket'
                         ? 'Edit ticket details'
-                        : experience.title
-                      : formatExperienceHeaderDate(experience.startDate, experience.endDate)}
-                </h2>
+                        : (formatExperienceHeaderDate(experience.startDate, experience.endDate) ??
+                          experience.title)}
+                  </h2>
+                  {/* Hosts get the same date line as guests; their body has no
+                      title of its own, so the name sits under it here */}
+                  {view === 'experience' && isHostMode && host.view !== 'editTicket' && (
+                    <p className="truncate text-[14px] text-ink-muted">{experience.title}</p>
+                  )}
+                </div>
               </div>
 
               <div className="flex flex-shrink-0 items-center gap-2">

@@ -1,9 +1,11 @@
 import {
   SlotTemplateRecord,
+  buildSingleOccurrenceRule,
   buildSlotTemplatePayload,
   calculateDurationMinutes,
   calculateEndTime,
   diffSlotTemplates,
+  slotTemplateToTimeSlot,
 } from '@/utils/slot-template-utils';
 
 describe('calculateDurationMinutes', () => {
@@ -61,50 +63,95 @@ describe('calculateEndTime', () => {
   });
 });
 
+// jest.config.js pins the local zone to Africa/Nairobi (UTC+3)
+const FIRST_DAY = '2026-07-05';
+
 describe('buildSlotTemplatePayload', () => {
-  it('builds correct payload for basic slot', () => {
+  // The API stores slot start times in UTC (DEV-454)
+  it('sends the local start time as UTC', () => {
     expect(
-      buildSlotTemplatePayload({
-        startTime: '09:00',
-        endTime: '11:00',
-      }),
+      buildSlotTemplatePayload({ startTime: '09:00', endTime: '11:00' }, null, FIRST_DAY),
     ).toEqual({
-      start_time: '09:00',
+      start_time: '06:00',
       duration_minutes: 120,
       name: undefined,
       recurrence_rule: null,
     });
   });
 
+  it("sends a slot just after midnight as the previous UTC day's time", () => {
+    const result = buildSlotTemplatePayload(
+      { startTime: '01:30', endTime: '03:00' },
+      null,
+      FIRST_DAY,
+    );
+    expect(result.start_time).toBe('22:30');
+    expect(result.duration_minutes).toBe(90);
+  });
+
   it('includes name when provided', () => {
-    const result = buildSlotTemplatePayload({
-      startTime: '09:00',
-      endTime: '11:00',
-      name: 'Morning Session',
-    });
+    const result = buildSlotTemplatePayload(
+      { startTime: '09:00', endTime: '11:00', name: 'Morning Session' },
+      null,
+      FIRST_DAY,
+    );
     expect(result.name).toBe('Morning Session');
   });
 
   it('includes recurrence_rule when provided', () => {
     const rrule = 'FREQ=WEEKLY;BYDAY=MO,WE';
-    const result = buildSlotTemplatePayload({ startTime: '09:00', endTime: '11:00' }, rrule);
+    const result = buildSlotTemplatePayload(
+      { startTime: '09:00', endTime: '11:00' },
+      rrule,
+      FIRST_DAY,
+    );
     expect(result.recurrence_rule).toBe(rrule);
   });
 
   it('sets recurrence_rule to null when not provided', () => {
-    const result = buildSlotTemplatePayload({
-      startTime: '09:00',
-      endTime: '11:00',
-    });
+    const result = buildSlotTemplatePayload(
+      { startTime: '09:00', endTime: '11:00' },
+      undefined,
+      FIRST_DAY,
+    );
     expect(result.recurrence_rule).toBeNull();
   });
 
   it('calculates correct duration for 45 min slot', () => {
-    const result = buildSlotTemplatePayload({
-      startTime: '10:00',
-      endTime: '10:45',
-    });
+    const result = buildSlotTemplatePayload(
+      { startTime: '10:00', endTime: '10:45' },
+      null,
+      FIRST_DAY,
+    );
     expect(result.duration_minutes).toBe(45);
+  });
+});
+
+describe('slotTemplateToTimeSlot', () => {
+  it('shows a UTC slot in local time', () => {
+    expect(
+      slotTemplateToTimeSlot({ id: 't1', startTime: '06:00:00', durationMinutes: 120 }, FIRST_DAY),
+    ).toEqual({ id: 't1', startTime: '09:00', endTime: '11:00', name: undefined });
+  });
+
+  it('round-trips with buildSlotTemplatePayload on the UTC start date', () => {
+    // 01:30 local on 5 Jul starts at 22:30 UTC on 4 Jul
+    const sent = buildSlotTemplatePayload(
+      { startTime: '01:30', endTime: '03:00' },
+      null,
+      FIRST_DAY,
+    );
+    const shown = slotTemplateToTimeSlot(
+      { id: 't1', startTime: sent.start_time, durationMinutes: sent.duration_minutes },
+      '2026-07-04',
+    );
+    expect(shown).toMatchObject({ startTime: '01:30', endTime: '03:00' });
+  });
+});
+
+describe('buildSingleOccurrenceRule', () => {
+  it('starts at the true UTC instant of the local date and time', () => {
+    expect(buildSingleOccurrenceRule(FIRST_DAY, '08:00')).toContain('DTSTART:20260705T050000Z');
   });
 });
 
