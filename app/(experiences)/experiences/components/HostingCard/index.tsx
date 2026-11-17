@@ -10,6 +10,7 @@ import { useCreateExperienceDrawer } from '@/context/CreateExperienceDrawerConte
 import { Status } from '@/enums/status';
 import { Experience } from '@/types/experience';
 import { Photo } from '@/types/photo';
+import { experienceMoment } from '@/utils/utc-time';
 
 import { PaymentStatusBadge, StatusConfig } from '../PaymentStatusBadge';
 
@@ -32,8 +33,12 @@ const buildHostingMetaLine = (experience: Experience): string => {
     case Status.Published:
       return [
         city,
-        experience.startDate ? moment(experience.startDate).format('ddd D MMMM') : null,
-        experience.startDate ? moment(experience.startDate).format('h:mm A') : null,
+        experience.startDate
+          ? experienceMoment(experience.startDate, experience.timezone).format('ddd D MMMM')
+          : null,
+        experience.startDate
+          ? experienceMoment(experience.startDate, experience.timezone).format('h:mm A')
+          : null,
       ]
         .filter(Boolean)
         .join(' · ');

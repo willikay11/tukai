@@ -1,11 +1,10 @@
 'use client';
 
-import moment from 'moment';
-
 import { IconComponent } from '@/app/shared/components/Icons';
 import { Experience } from '@/types/experience';
 import { inferUIExperienceType } from '@/utils/date-utils';
 import { safeText } from '@/utils/safe-text-utils';
+import { experienceMoment } from '@/utils/utc-time';
 
 import { ManageExperienceMetrics } from '../../utils/manage-metrics';
 import { CancelExperienceAction } from '../CancelExperienceAction';
@@ -40,8 +39,10 @@ const SummaryRow = ({ label, value }: { label: string; value: string }) => (
 );
 
 export const AboutTab = ({ experience, metrics }: AboutTabProps) => {
-  const start = experience.startDate ? moment(experience.startDate) : null;
-  const end = experience.endDate ? moment(experience.endDate) : null;
+  const start = experience.startDate
+    ? experienceMoment(experience.startDate, experience.timezone)
+    : null;
+  const end = experience.endDate ? experienceMoment(experience.endDate, experience.timezone) : null;
 
   const dateValue = start?.isValid()
     ? [

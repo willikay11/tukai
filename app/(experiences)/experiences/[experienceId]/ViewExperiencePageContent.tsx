@@ -1,7 +1,5 @@
 'use client';
 
-import moment from 'moment';
-
 import { DescriptionShowMore } from '@/app/shared/components/Global';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { SquarePhotoStrip } from '@/app/shared/components/Images/SquarePhotoStrip';
@@ -19,6 +17,7 @@ import {
   formatItineraryDateRange,
   inferUIExperienceType,
 } from '@/utils/date-utils';
+import { experienceMoment } from '@/utils/utc-time';
 
 import { BackToExplore } from '../components/BackToExplore';
 import { BookingPanel } from '../components/BookingPanel';
@@ -81,15 +80,23 @@ export const ViewExperiencePageContent = ({
   // A run spanning more than one calendar day (multi-day, itinerary, or a
   // recurring window) shows the span; a single day shows its weekday.
   const experienceDay = (() => {
-    const start = experience.startDate ? moment(experience.startDate) : null;
+    const start = experience.startDate
+      ? experienceMoment(experience.startDate, experience.timezone)
+      : null;
     if (!start?.isValid()) return undefined;
 
-    const end = experience.endDate ? moment(experience.endDate) : null;
+    const end = experience.endDate
+      ? experienceMoment(experience.endDate, experience.timezone)
+      : null;
     if (end?.isValid() && !end.isSame(start, 'day')) {
-      return formatItineraryDateRange(experience.startDate, experience.endDate);
+      return formatItineraryDateRange(
+        experience.startDate,
+        experience.endDate,
+        experience.timezone,
+      );
     }
 
-    return formatFirstExperienceDate(experience.startDate);
+    return formatFirstExperienceDate(experience.startDate, experience.timezone);
   })();
 
   // Recurring is checked first: inferUIExperienceType folds recurring into the

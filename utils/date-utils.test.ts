@@ -1,6 +1,9 @@
 import {
   formatCardDateTime,
+  formatDateAndTimeRange,
   formatExperienceHeaderDate,
+  formatFirstExperienceDate,
+  formatItineraryDateRange,
   formatShortDate,
   inferUIExperienceType,
 } from './date-utils';
@@ -145,21 +148,21 @@ describe('formatExperienceHeaderDate', () => {
   const NOW = new Date('2026-10-07T08:00:00');
 
   it('leads with Today for a same-day experience happening today', () => {
-    expect(
-      formatExperienceHeaderDate('2026-10-07T10:00:00', '2026-10-07T12:00:00', NOW),
-    ).toBe('Today, 10:00 AM - 12:00 PM');
+    expect(formatExperienceHeaderDate('2026-10-07T10:00:00', '2026-10-07T12:00:00', NOW)).toBe(
+      'Today, 10:00 AM - 12:00 PM',
+    );
   });
 
   it('leads with Tomorrow for a same-day experience happening tomorrow', () => {
-    expect(
-      formatExperienceHeaderDate('2026-10-08T06:30:00', '2026-10-08T09:00:00', NOW),
-    ).toBe('Tomorrow, 6:30 AM - 9:00 AM');
+    expect(formatExperienceHeaderDate('2026-10-08T06:30:00', '2026-10-08T09:00:00', NOW)).toBe(
+      'Tomorrow, 6:30 AM - 9:00 AM',
+    );
   });
 
   it('falls back to the weekday and date further out', () => {
-    expect(
-      formatExperienceHeaderDate('2026-10-11T10:00:00', '2026-10-11T12:00:00', NOW),
-    ).toBe('Sun 11 Oct, 10:00 AM - 12:00 PM');
+    expect(formatExperienceHeaderDate('2026-10-11T10:00:00', '2026-10-11T12:00:00', NOW)).toBe(
+      'Sun 11 Oct, 10:00 AM - 12:00 PM',
+    );
   });
 
   it('gives just the start time when there is no end', () => {
@@ -167,13 +170,52 @@ describe('formatExperienceHeaderDate', () => {
   });
 
   it('shows a date range for a multi-day experience, even if it starts today', () => {
-    expect(
-      formatExperienceHeaderDate('2026-10-07T10:00:00', '2026-10-09T12:00:00', NOW),
-    ).toBe('7 Oct - 9 Oct');
+    expect(formatExperienceHeaderDate('2026-10-07T10:00:00', '2026-10-09T12:00:00', NOW)).toBe(
+      '7 Oct - 9 Oct',
+    );
   });
 
   it('is null without a usable start', () => {
     expect(formatExperienceHeaderDate(null, '2026-10-07T12:00:00', NOW)).toBeNull();
     expect(formatExperienceHeaderDate('whenever', null, NOW)).toBeNull();
+  });
+});
+
+// An experience's dates show in its own zone, wherever the viewer is.
+// jest.config.js pins the viewer to Nairobi (UTC+3).
+describe('formatting in the experience time zone', () => {
+  const start = '2026-11-25T11:30:00Z'; // 6:30 AM in New York, 2:30 PM in Nairobi
+  const end = '2026-11-25T13:30:00Z';
+
+  it('shows the drawer header in the experience zone', () => {
+    const now = new Date('2026-11-01T12:00:00Z');
+    expect(formatExperienceHeaderDate(start, end, now, 'America/New_York')).toBe(
+      'Wed 25 Nov, 6:30 AM - 8:30 AM',
+    );
+    expect(formatExperienceHeaderDate(start, end, now)).toBe('Wed 25 Nov, 2:30 PM - 4:30 PM');
+  });
+
+  // 01:00 UTC on the 26th is still the evening of the 25th in New York
+  it('picks Today and Tomorrow by the experience zone', () => {
+    const now = new Date('2026-11-26T01:00:00Z');
+    expect(formatExperienceHeaderDate(start, end, now, 'America/New_York')).toMatch(/^Today, /);
+  });
+
+  it('shows card and row dates in the experience zone', () => {
+    expect(formatCardDateTime(start, end, 'America/New_York')).toBe('Wed 25 Nov, 06:30 - 08:30');
+    expect(formatDateAndTimeRange(start, end, 'America/New_York')).toBe(
+      'Nov 25, 6:30 AM - 8:30 AM',
+    );
+  });
+
+  it('shows the calendar day where the experience happens', () => {
+    // 02:00 UTC on the 26th is the 25th in New York
+    expect(formatShortDate('2026-11-26T02:00:00Z', 'America/New_York')).toBe('Wed 25 November');
+    expect(formatFirstExperienceDate('2026-11-26T02:00:00Z', 'America/New_York')).toBe(
+      'Wednesday 25, November',
+    );
+    expect(
+      formatItineraryDateRange('2026-11-26T02:00:00Z', '2026-11-29T02:00:00Z', 'America/New_York'),
+    ).toBe('25 Nov - 28 Nov');
   });
 });

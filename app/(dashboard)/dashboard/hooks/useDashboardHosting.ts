@@ -1,14 +1,16 @@
 import { useMemo } from 'react';
 
-import moment from 'moment';
-
-import { pickLatestDraft, selectDrafts } from '@/app/(experiences)/experiences/create/utils/draft-progress';
+import {
+  pickLatestDraft,
+  selectDrafts,
+} from '@/app/(experiences)/experiences/create/utils/draft-progress';
 import { HostTabId } from '@/app/shared/components/Experiences/ExperienceDrawer/host/types';
 import { useExperiences } from '@/app/shared/hooks/useExperiences';
 import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { Experience } from '@/types/experience';
 import { coverPhotoUrl } from '@/types/photo';
 import { formatCurrencyAmount } from '@/utils/money';
+import { experienceMoment } from '@/utils/utc-time';
 
 import { DateRailDay } from '../components/DateRail';
 import { isActive, isHostedBy, toAmount } from '../utils/control-center-metrics';
@@ -36,8 +38,10 @@ const buildItem = (
   openExperience: (experienceId: string, options?: { hostTab?: HostTabId }) => void,
 ): DashboardHostingItem => {
   const offset = experience.startDate ? dayOffsetOf(experience.startDate) : null;
-  const start = experience.startDate ? moment(experience.startDate) : null;
-  const end = experience.endDate ? moment(experience.endDate) : null;
+  const start = experience.startDate
+    ? experienceMoment(experience.startDate, experience.timezone)
+    : null;
+  const end = experience.endDate ? experienceMoment(experience.endDate, experience.timezone) : null;
   const when = start
     ? `${start.format('ddd D MMM')}, ${start.format('HH:mm')}${
         end && end.isValid() && !end.isSame(start, 'minute') ? ` - ${end.format('HH:mm')}` : ''
@@ -91,7 +95,10 @@ export const useDashboardHosting = (userId: string | undefined, selectedOffset: 
   const { openExperience } = useExperienceDrawer() ?? { openExperience: () => {} };
 
   const experiences: Experience[] = useMemo(
-    () => (data?.data?.results ?? []).filter((experience: Experience) => isHostedBy(experience, userId)),
+    () =>
+      (data?.data?.results ?? []).filter((experience: Experience) =>
+        isHostedBy(experience, userId),
+      ),
     [data, userId],
   );
 

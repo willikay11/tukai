@@ -171,9 +171,13 @@ export const TicketsStep = ({ flow }: TicketsStepProps) => {
 
     const promise = createSlotTemplate(flow.experienceId, {
       // The API stores slot start times in UTC, on the experience's first day
-      start_time: localTimeToUtcTime(multiDayStartDate, multiDayStartTime),
+      start_time: localTimeToUtcTime(multiDayStartDate, multiDayStartTime, flow.timeZone),
       duration_minutes: calculateDurationMinutes(multiDayStartTime, multiDayEndTime),
-      recurrence_rule: buildSingleOccurrenceRule(multiDayStartDate, multiDayStartTime),
+      recurrence_rule: buildSingleOccurrenceRule(
+        multiDayStartDate,
+        multiDayStartTime,
+        flow.timeZone,
+      ),
     })
       .then((response) => response.data?.id as string | undefined)
       .catch((error) => {

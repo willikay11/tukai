@@ -62,7 +62,7 @@ import {
   slotTemplateToTimeSlot,
 } from '@/utils/slot-template-utils';
 import { getTicketBuyerAmount, parseSalesEndRelativeFromTicket } from '@/utils/ticket-utils';
-import { utcDateOf, utcIsoToLocalParts } from '@/utils/utc-time';
+import { browserTimeZone, isTimeZone, utcDateOf, utcIsoToLocalParts } from '@/utils/utc-time';
 
 import {
   aboutSchema,
@@ -367,6 +367,10 @@ export const useCreateExperienceFlow = ({
   const [ticketsErrors, setTicketsErrors] = useState<Record<string, string>>({});
   const [walletErrors, setWalletErrors] = useState<Record<string, string>>({});
   const [slotTemplateRecords, setSlotTemplateRecords] = useState<SlotTemplateRecord[]>([]);
+  // The IANA zone the form's dates and times are in: the browser's for a new
+  // experience, the experience's own once one is loaded. Sent on create; an
+  // edit keeps the zone the experience already has.
+  const [timeZone, setTimeZone] = useState<string>(browserTimeZone);
 
   const hasHydrated = useRef(false);
 
@@ -581,9 +585,13 @@ export const useCreateExperienceFlow = ({
 
     hasHydrated.current = true;
 
+    // Edit in the zone the experience happens in, not the browser's
+    const zone = isTimeZone(experience.timezone) ? experience.timezone : browserTimeZone();
+    setTimeZone(zone);
+
     // The API's UTC datetimes as the local date and time the form shows
-    const { date: startDate, time: startTime } = utcIsoToLocalParts(experience.startDate);
-    const { date: localEndDate, time: endTime } = utcIsoToLocalParts(experience.endDate);
+    const { date: startDate, time: startTime } = utcIsoToLocalParts(experience.startDate, zone);
+    const { date: localEndDate, time: endTime } = utcIsoToLocalParts(experience.endDate, zone);
 
     // Update about form
     updateAboutFormData({
@@ -667,7 +675,7 @@ export const useCreateExperienceFlow = ({
         // syncs diff against both hold local times.
         const utcFirstDay = utcDateOf(experience.startDate);
         const recordsForState: SlotTemplateRecord[] = records.map((record, index) => {
-          const slot = slotTemplateToTimeSlot(record, utcFirstDay);
+          const slot = slotTemplateToTimeSlot(record, utcFirstDay, zone);
           return {
             uiId: `slot-${index}`,
             templateId: record.id,
@@ -715,7 +723,7 @@ export const useCreateExperienceFlow = ({
     if (experience.tickets && experience.tickets.length > 0) {
       const savedTickets = experience.tickets.map((ticket: any) => {
         // The API's UTC datetimes as local date and time
-        const extractDateTime = utcIsoToLocalParts;
+        const extractDateTime = (iso: string | null) => utcIsoToLocalParts(iso, zone);
 
         const salesStartDateTime = extractDateTime(
           ticket.salesStartDate || ticket.sales_start_date,
@@ -1065,7 +1073,7 @@ export const useCreateExperienceFlow = ({
         await updateSlotTemplate(
           experienceId,
           record.templateId,
-          buildSlotTemplatePayload({ startTime, endTime }, recurrenceRule, localFirstDay),
+          buildSlotTemplatePayload({ startTime, endTime }, recurrenceRule, localFirstDay, timeZone),
         );
         // Update local record
         const idx = newRecords.findIndex((r) => r.templateId === record.templateId);
@@ -1084,7 +1092,7 @@ export const useCreateExperienceFlow = ({
       toCreate.map(async (slot) => {
         const response = await createSlotTemplate(
           experienceId,
-          buildSlotTemplatePayload(slot, recurrenceRule, localFirstDay),
+          buildSlotTemplatePayload(slot, recurrenceRule, localFirstDay, timeZone),
         );
         newRecords.push({
           uiId: `slot-${Date.now()}-${Math.random()}`,
@@ -1146,7 +1154,7 @@ export const useCreateExperienceFlow = ({
       const isItinerary = formData.dateType.experienceType === 'itinerary';
 
       // The form's local dates and times as the UTC instants the API stores
-      const dates = buildExperienceDates(formData.dateType);
+      const dates = buildExperienceDates(formData.dateType, timeZone);
       if ('error' in dates) {
         setApiError(dates.error);
         setIsSavingExperience(false);
@@ -1241,7 +1249,8 @@ export const useCreateExperienceFlow = ({
           }
         }
       } else {
-        const response = await createExperienceAsync(payload);
+        // A new experience happens in the zone its times were entered in
+        const response = await createExperienceAsync({ ...payload, timezone: timeZone });
         const newExperienceId = response.data?.id || '';
 
         if (!newExperienceId) {
@@ -1280,6 +1289,7 @@ export const useCreateExperienceFlow = ({
                       slot,
                       buildRecurrenceRule(formData.dateType),
                       formData.dateType.recurrenceStartDate ?? '',
+                      timeZone,
                     ),
                   ),
                 ),
@@ -1364,6 +1374,7 @@ export const useCreateExperienceFlow = ({
     handleExperienceCreated,
     syncSlotTemplates,
     slotTemplateRecords,
+    timeZone,
     toast,
   ]);
 
@@ -1747,6 +1758,7 @@ export const useCreateExperienceFlow = ({
     },
 
     slotTemplateRecords,
+    timeZone,
 
     handlers: {
       handleStepChange,

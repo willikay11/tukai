@@ -117,7 +117,11 @@ export const CommunityHappeningCard = ({
 
           {experience.startDate && (
             <p className="mt-0.5 text-sm text-gray-400">
-              {formatDateAndTimeRange(experience.startDate, experience.endDate)}
+              {formatDateAndTimeRange(
+                experience.startDate,
+                experience.endDate,
+                experience.timezone,
+              )}
             </p>
           )}
         </Link>

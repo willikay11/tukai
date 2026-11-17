@@ -59,7 +59,7 @@ export const ItineraryCard = ({
 
   const photos = itineraryCoverPhotos(itinerary.photos);
   const host = experienceRunBy(itinerary);
-  const when = formatCardDateTime(itinerary.startDate, itinerary.endDate);
+  const when = formatCardDateTime(itinerary.startDate, itinerary.endDate, itinerary.timezone);
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
     // A modifier asks the browser for something else - a new tab, a new window -

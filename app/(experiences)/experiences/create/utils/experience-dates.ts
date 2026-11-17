@@ -31,8 +31,9 @@ export type ExperienceDates =
   | { error: string };
 
 /**
- * The experience's start_date and end_date, from the form's local fields, as
- * the UTC instants the API stores. Which fields count depends on the kind of
+ * The experience's start_date and end_date, from the form's local fields (in
+ * `timeZone`, the experience's; the browser's when not given), as the UTC
+ * instants the API stores. Which fields count depends on the kind of
  * experience:
  *
  * - Itinerary: its first and last day, whole days.
@@ -44,7 +45,10 @@ export type ExperienceDates =
  *   occurrence, and the API rejects that.
  * - Single day: the date, from start to end time.
  */
-export const buildExperienceDates = (fields: ExperienceDateFields): ExperienceDates => {
+export const buildExperienceDates = (
+  fields: ExperienceDateFields,
+  timeZone?: string | null,
+): ExperienceDates => {
   const isItinerary = fields.experienceType === 'itinerary';
 
   let startDate = '';
@@ -86,8 +90,8 @@ export const buildExperienceDates = (fields: ExperienceDateFields): ExperienceDa
   }
 
   return {
-    startDate: localDateTimeToUtcIso(startDate, startTime),
-    endDate: localDateTimeToUtcIso(endDate, endTime, true),
+    startDate: localDateTimeToUtcIso(startDate, startTime, false, timeZone),
+    endDate: localDateTimeToUtcIso(endDate, endTime, true, timeZone),
     localStartDate: startDate,
     localEndDate: endDate,
   };

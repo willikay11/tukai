@@ -212,7 +212,11 @@ export const usePopularRails = (enabled: boolean): Record<PopularRailKind, Popul
     )
     .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
     .map((experience) => {
-      const when = formatCardDateTime(experience.startDate, experience.endDate);
+      const when = formatCardDateTime(
+        experience.startDate,
+        experience.endDate,
+        experience.timezone,
+      );
       return {
         id: experience.id,
         name: experience.title,

@@ -1,5 +1,6 @@
 import { Experience } from '@/types/experience';
 import { QuickDate, TimeOfDay } from '@/types/search';
+import { shiftToZone } from '@/utils/utc-time';
 
 export const QUICK_DATES: Array<{ value: QuickDate; label: string }> = [
   { value: 'today', label: 'Today' },
@@ -20,7 +21,8 @@ export const TIME_OF_DAY: Array<{
   { value: 'lateNight', label: 'Late night', description: 'After 9 PM', icon: 'Moon02Icon' },
 ];
 
-const startOfDay = (date: Date): Date => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+const startOfDay = (date: Date): Date =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
 const addDays = (date: Date, days: number): Date => {
   const next = new Date(date);
@@ -68,10 +70,14 @@ const bandOf = (hour: number): TimeOfDay => {
   return 'lateNight';
 };
 
-/** No bands picked means every start time. */
+/**
+ * No bands picked means every start time. The hour is read where the
+ * experience happens: a morning walk is a morning walk wherever you look.
+ */
 export const matchesTimeOfDay = (experience: Experience, bands: TimeOfDay[]): boolean => {
   if (bands.length === 0) return true;
   if (!experience.startDate) return false;
 
-  return bands.includes(bandOf(new Date(experience.startDate).getHours()));
+  const start = shiftToZone(new Date(experience.startDate), experience.timezone);
+  return bands.includes(bandOf(start.getHours()));
 };

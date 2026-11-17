@@ -1,6 +1,6 @@
 import { RRule } from 'rrule';
 
-import { localTimeToUtcTime, utcTimeToLocalTime } from './utc-time';
+import { localDateTimeToUtcIso, localTimeToUtcTime, utcTimeToLocalTime } from './utc-time';
 
 export interface SlotTemplatePayload {
   start_time: string;
@@ -18,17 +18,19 @@ export interface SlotTemplateRecord {
 }
 
 /**
- * A rule for one occurrence, starting at a local date and time. The Date is
- * built in local time, so RRule writes DTSTART as its true UTC instant.
+ * A rule for one occurrence, starting at a local date and time in
+ * `timeZone` (the browser's when not given). RRule writes DTSTART as that
+ * moment's UTC instant.
  */
-export const buildSingleOccurrenceRule = (startDate: string, startTime: string): string => {
-  const [year, month, day] = startDate.split('-').map(Number);
-  const [hour, minute] = startTime.split(':').map(Number);
-
+export const buildSingleOccurrenceRule = (
+  startDate: string,
+  startTime: string,
+  timeZone?: string | null,
+): string => {
   const rule = new RRule({
     freq: RRule.DAILY,
     count: 1,
-    dtstart: new Date(year, month - 1, day, hour, minute, 0),
+    dtstart: new Date(localDateTimeToUtcIso(startDate, startTime, false, timeZone)),
   });
 
   return rule.toString();
@@ -55,25 +57,27 @@ export const calculateEndTime = (startTime: string, durationMinutes: number): st
 };
 
 /**
- * The API body for a slot. `slot` holds local times; the API stores
- * `start_time` in UTC, converted on `localFirstDay` (the experience's first
- * day, `YYYY-MM-DD`), which is the day the backend places every slot on.
- * The length is the same in either zone.
+ * The API body for a slot. `slot` holds local times in `timeZone` (the
+ * experience's; the browser's when not given); the API stores `start_time` in
+ * UTC, converted on `localFirstDay` (the experience's first day,
+ * `YYYY-MM-DD`), which is the day the backend places every slot on. The
+ * length is the same in either zone.
  */
 export const buildSlotTemplatePayload = (
   slot: { startTime: string; endTime: string; name?: string },
   recurrenceRule: string | null | undefined,
   localFirstDay: string,
+  timeZone?: string | null,
 ): SlotTemplatePayload => ({
-  start_time: localTimeToUtcTime(localFirstDay, slot.startTime),
+  start_time: localTimeToUtcTime(localFirstDay, slot.startTime, timeZone),
   duration_minutes: calculateDurationMinutes(slot.startTime, slot.endTime),
   name: slot.name ?? undefined,
   recurrence_rule: recurrenceRule ?? null,
 });
 
 /**
- * A slot template from the API as the local times the form shows.
- * `utcFirstDay` is the UTC date of the experience's start.
+ * A slot template from the API as the local times the form shows, in
+ * `timeZone`. `utcFirstDay` is the UTC date of the experience's start.
  */
 export const slotTemplateToTimeSlot = (
   template: {
@@ -83,8 +87,9 @@ export const slotTemplateToTimeSlot = (
     name?: string;
   },
   utcFirstDay: string,
+  timeZone?: string | null,
 ) => {
-  const startTime = utcTimeToLocalTime(utcFirstDay, template.startTime);
+  const startTime = utcTimeToLocalTime(utcFirstDay, template.startTime, timeZone);
   return {
     id: template.id,
     startTime,
