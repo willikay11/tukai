@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { useRemoveExperienceGuest } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
@@ -46,8 +47,7 @@ const InviteChipPill = ({
 }) => (
   <span className="inline-flex h-[52px] max-w-full items-center gap-2 rounded-full bg-surface pl-1.5 pr-0.5">
     {chip.image ? (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <PlainImage
         src={chip.image}
         alt=""
         className="h-10 w-10 flex-shrink-0 rounded-full bg-surface-brand object-cover"

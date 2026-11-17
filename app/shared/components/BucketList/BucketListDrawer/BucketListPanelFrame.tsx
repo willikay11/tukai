@@ -104,7 +104,7 @@ export const BucketListPanelFrame = ({
       <div className="flex-1 px-6 pb-9 pt-5">{children}</div>
 
       {footer && (
-        <footer className="sticky bottom-0 z-10 flex min-h-[88px] flex-shrink-0 flex-wrap items-center gap-2.5 border-t border-surface-muted bg-white px-6 pb-[calc(18px+env(safe-area-inset-bottom))] pt-[18px]">
+        <footer className="sticky bottom-0 z-10 flex min-h-[88px] flex-shrink-0 flex-wrap items-center gap-2.5 border-t border-surface-muted bg-white px-6 pb-[calc(18px+var(--drawer-inset-bottom,env(safe-area-inset-bottom)))] pt-[18px]">
           {footer}
         </footer>
       )}

@@ -25,13 +25,13 @@ jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast }) })
 const aQuote = (overrides: Partial<PayoutQuote> = {}): PayoutQuote => ({
   currency: 'KES',
   destinationType: 'bank',
-  availableBalance: '45000.00',
-  requestedAmount: '10000.00',
-  paystackTransferFee: '100.00',
-  tukaiPayoutFee: '150.00',
-  netAmount: '9750.00',
-  tukaiCommissionDeducted: '0.00',
-  maxPayoutAmount: '45000.00',
+  availableBalance: { amount: '45000.00', currency: 'KES' },
+  requestedAmount: { amount: '10000.00', currency: 'KES' },
+  paystackTransferFee: { amount: '100.00', currency: 'KES' },
+  tukaiPayoutFee: { amount: '150.00', currency: 'KES' },
+  netAmount: { amount: '9750.00', currency: 'KES' },
+  tukaiCommissionDeducted: { amount: '0.00', currency: 'KES' },
+  maxPayoutAmount: { amount: '45000.00', currency: 'KES' },
   limitMessage: 'You can withdraw up to KES 45,000 today.',
   ...overrides,
 });
@@ -125,8 +125,10 @@ describe('withdrawing', () => {
 
     await type('10000');
 
-    expect(screen.getByText('Transfer fee')).toBeInTheDocument();
-    expect(screen.getByText('KES 100.00')).toBeInTheDocument();
+    expect(screen.getByText('Paystack transfer fee')).toBeInTheDocument();
+    expect(screen.getByText('-KES 100.00')).toBeInTheDocument();
+    expect(screen.getByText('Tukai payout fee')).toBeInTheDocument();
+    expect(screen.getByText('-KES 150.00')).toBeInTheDocument();
     expect(screen.getByText('You receive')).toBeInTheDocument();
     expect(screen.getByText('KES 9,750.00')).toBeInTheDocument();
   });

@@ -7,6 +7,7 @@ import {
   ticketShareMessage,
 } from '@/app/(dashboard)/dashboard/experiences/[experienceId]/components/TicketsCreatedTab/ticket-stats';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
@@ -15,7 +16,9 @@ import { Ticket, isTicketPaused } from '@/types/ticket';
 import { useQrDataUrl } from './useQrDataUrl';
 
 const StatCell = ({ stat, muted }: { stat: TicketStat; muted: boolean }) => (
-  <div className={cn('flex min-w-0 flex-col gap-1 bg-surface px-4 py-3', stat.full && 'col-span-3')}>
+  <div
+    className={cn('flex min-w-0 flex-col gap-1 bg-surface px-4 py-3', stat.full && 'col-span-3')}
+  >
     <span className="text-[13.5px] leading-snug text-ink-muted">{stat.label}</span>
     <span
       className={cn(
@@ -47,7 +50,9 @@ const RowAction = ({
     disabled={disabled}
     className={cn(
       'inline-flex h-11 flex-shrink-0 items-center gap-2 rounded-full px-2.5 text-15 font-medium transition-colors disabled:opacity-50',
-      tone === 'danger' ? 'text-danger hover:bg-danger-surface' : 'text-brand hover:bg-surface-brand',
+      tone === 'danger'
+        ? 'text-danger hover:bg-danger-surface'
+        : 'text-brand hover:bg-surface-brand',
     )}
   >
     <IconComponent iconName={icon} size={20} color="currentColor" />
@@ -118,13 +123,14 @@ export const TicketBlock = ({
       <div
         className={cn(
           'flex items-center rounded-14 border-[1.5px] border-dashed',
-          paused ? 'border-line bg-surface' : 'border-blue-200 bg-gradient-to-b from-blue-50 to-blue-100',
+          paused
+            ? 'border-line bg-surface'
+            : 'border-blue-200 bg-gradient-to-b from-blue-50 to-blue-100',
         )}
       >
         <span className="flex-shrink-0 py-3 pl-3 pr-3.5">
           {qr && (
-            // eslint-disable-next-line @next/next/no-img-element -- a data: URL, not something next/image can optimize
-            <img
+            <PlainImage
               src={qr}
               alt={`Code for ${ticket.name}`}
               width={64}
@@ -144,19 +150,31 @@ export const TicketBlock = ({
 
         <span className="grid min-w-0 flex-1 grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.7fr)] gap-x-3.5 gap-y-1.5 px-4 py-2.5">
           <span className="flex min-w-0 flex-col gap-0.5">
-            <span className={cn('truncate text-base font-bold', paused ? 'text-ink-muted' : 'text-gray-900')}>
+            <span
+              className={cn(
+                'truncate text-base font-bold',
+                paused ? 'text-ink-muted' : 'text-gray-900',
+              )}
+            >
               {ticket.name}
             </span>
             <span className="text-13 text-ink-muted">Ticket name</span>
           </span>
           <span className="flex min-w-0 flex-col gap-0.5">
-            <span className={cn('whitespace-nowrap text-base font-bold', paused ? 'text-ink-muted' : 'text-gray-900')}>
+            <span
+              className={cn(
+                'whitespace-nowrap text-base font-bold',
+                paused ? 'text-ink-muted' : 'text-gray-900',
+              )}
+            >
               {price ? `${currency} ${price.toLocaleString('en-US')}` : 'Free'}
             </span>
             <span className="text-13 text-ink-muted">Amount per ticket</span>
           </span>
           <span className="flex min-w-0 flex-col gap-0.5">
-            <span className={cn('text-base font-bold', paused ? 'text-ink-muted' : 'text-gray-900')}>
+            <span
+              className={cn('text-base font-bold', paused ? 'text-ink-muted' : 'text-gray-900')}
+            >
               {String(Number(ticket.quantity) || 0)}
             </span>
             <span className="text-13 text-ink-muted">Quantity</span>
@@ -184,7 +202,12 @@ export const TicketBlock = ({
 
       <div className="-mt-1 flex flex-wrap items-center justify-end gap-x-1.5 gap-y-1">
         {paused ? (
-          <RowAction icon="PlayIcon" label="Resume ticket sales" onClick={onToggleSales} disabled={isBusy} />
+          <RowAction
+            icon="PlayIcon"
+            label="Resume ticket sales"
+            onClick={onToggleSales}
+            disabled={isBusy}
+          />
         ) : (
           <>
             <RowAction

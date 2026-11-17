@@ -220,7 +220,10 @@ describe('card tile', () => {
       <MomentsMasonry {...defaults} tile="card" moments={[cardMoment('a'), cardMoment('b')]} />,
     );
 
-    expect(screen.getByAltText('Moment a')).toHaveAttribute('src', 'https://cdn.tukai.co/a.jpg');
+    // The card's label says what the photo shows, so the photo itself is alt=""
+    expect(
+      screen.getByRole('button', { name: 'Moment by Amina Njeri: Caption a' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Caption a')).toBeInTheDocument();
     expect(screen.getByText('Caption b')).toBeInTheDocument();
   });

@@ -159,7 +159,9 @@ describe('CreateExperienceDrawer', () => {
     // A returning host (has a published experience, just no draft) skips the
     // Intro screen entirely - only a host who has never hosted sees it.
     jest.requireMock('@/app/shared/hooks/useExperiences').useExperiences.mockReturnValue({
-      data: { data: { results: [{ id: 'live-1', status: 'published', dateCreated: '2026-01-01' }] } },
+      data: {
+        data: { results: [{ id: 'live-1', status: 'published', dateCreated: '2026-01-01' }] },
+      },
       isLoading: false,
       refetch: jest.fn(),
     });
@@ -204,7 +206,10 @@ describe('CreateExperienceDrawer', () => {
 
     fireEvent.click(screen.getByLabelText('Close'));
 
-    await waitFor(() => expect(screen.queryByLabelText('Close')).not.toBeInTheDocument());
+    // The drawer leaves the DOM once its 1s closing slide has run
+    await waitFor(() => expect(screen.queryByLabelText('Close')).not.toBeInTheDocument(), {
+      timeout: 2000,
+    });
     expect(screen.queryByText('Save your experience before you leave?')).not.toBeInTheDocument();
   });
 
@@ -239,7 +244,10 @@ describe('CreateExperienceDrawer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Discard experience' }));
 
     await waitFor(() => expect(cancelExperience).toHaveBeenCalledWith('exp-1'));
-    await waitFor(() => expect(screen.queryByLabelText('Close')).not.toBeInTheDocument());
+    // The drawer leaves the DOM once its 1s closing slide has run
+    await waitFor(() => expect(screen.queryByLabelText('Close')).not.toBeInTheDocument(), {
+      timeout: 2000,
+    });
   });
 
   it('a saved draft shows Resume first; Continue proceeds to the wizard', async () => {

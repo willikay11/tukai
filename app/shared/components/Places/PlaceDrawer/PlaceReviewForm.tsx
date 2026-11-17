@@ -5,7 +5,7 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { PhotoImage } from '@/app/shared/components/Images';
+import { PhotoImage, PlainImage } from '@/app/shared/components/Images';
 import {
   useCreatePlaceReview,
   useDeletePlaceReviewImage,
@@ -217,8 +217,11 @@ export const PlaceReviewForm = ({ place, onDone }: { place: Place; onDone: () =>
               <div key={photo.previewUrl} className="relative">
                 {/* The preview is an object URL, which next/image cannot
                     optimise and should not try to */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.previewUrl} alt="" className="h-20 w-20 rounded-lg object-cover" />
+                <PlainImage
+                  src={photo.previewUrl}
+                  alt=""
+                  className="h-20 w-20 rounded-lg object-cover"
+                />
                 <button
                   type="button"
                   onClick={() => removePhoto(index)}

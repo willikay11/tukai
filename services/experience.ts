@@ -38,12 +38,17 @@ export type ExperiencesQueryParams = {
   long?: number;
 };
 
-export async function fetchExperiences(params: ExperiencesQueryParams): Promise<ApiResponse> {
+export async function fetchExperiences(
+  params: ExperiencesQueryParams,
+  withAuth: boolean = false,
+): Promise<ApiResponse> {
   try {
     // User-scoped queries need the bearer token. Anonymously, the list endpoint
     // can only return public/published rows - so a host's own drafts (and their
-    // reservations) are invisible without it.
-    const needsAuth = Boolean(params.invited || params.hosted_by || params.reserved_by);
+    // reservations) are invisible without it. `withAuth` sends it for any other
+    // list too, without which the API reports `is_bookmarked: false` on all.
+    const needsAuth =
+      withAuth || Boolean(params.invited || params.hosted_by || params.reserved_by);
 
     let response;
     if (needsAuth) {

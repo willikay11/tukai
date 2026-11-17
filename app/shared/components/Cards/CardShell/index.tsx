@@ -23,6 +23,24 @@ import { cn } from '@/lib/utils';
  */
 export type CardRatio = '4/3' | 'square' | '16/9';
 
+/**
+ * Whether an event started inside the card's own DOM. A control over the photo
+ * can open something that portals out - the bookmark's bucket-list picker - and
+ * React still bubbles that portal's events up through the card. Without this,
+ * pressing "Create bucket list" in the picker opened the place drawer over it.
+ */
+const isOwnEvent = (event: React.SyntheticEvent<HTMLElement>) =>
+  event.currentTarget.contains(event.target as Node);
+
+/**
+ * Stops a portal's click at the card's edge. Ignoring it in the card's own
+ * handler is not enough for the link variant: `Link` would still navigate,
+ * and its preventDefault would swallow a form submit in the portal.
+ */
+const stopPortalClick = (event: React.MouseEvent<HTMLElement>) => {
+  if (!isOwnEvent(event)) event.stopPropagation();
+};
+
 const RATIOS: Record<CardRatio, string> = {
   '4/3': 'aspect-[4/3]',
   square: 'aspect-square',
@@ -64,8 +82,9 @@ export const CardShell = ({
   className?: string;
   mediaClassName?: string;
 }) => {
+  // `contents` so the wrapper takes no part in the layout
   const body = (
-    <>
+    <div className="contents" onClick={stopPortalClick}>
       <div className={cn('relative w-full overflow-hidden', RATIOS[ratio], radius, mediaClassName)}>
         <PhotoImage
           src={src}
@@ -80,7 +99,7 @@ export const CardShell = ({
       </div>
 
       {children}
-    </>
+    </div>
   );
 
   // `group` here rather than inside: the photo and the title both respond to a
@@ -117,6 +136,9 @@ export const CardShell = ({
       onClick={onClick}
       onKeyDown={(event) => {
         if (event.key !== 'Enter' && event.key !== ' ') return;
+        // A key typed into a portal's field, like a new list's name - left
+        // alone, Space never reached the input
+        if (!isOwnEvent(event)) return;
         // Space scrolls the page otherwise
         event.preventDefault();
         onClick(event as unknown as React.MouseEvent<HTMLElement>);

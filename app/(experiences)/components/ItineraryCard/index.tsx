@@ -1,53 +1,65 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 
 import { Bookmark } from '@/app/shared/components/Bookmark';
-import { CardShell } from '@/app/shared/components/Cards/CardShell';
+import { IconComponent } from '@/app/shared/components/Icons';
 import { PhotoImage } from '@/app/shared/components/Images';
-import { TITLE_TINT } from '@/app/shared/components/Motion';
+import { CARD_LIFT, TITLE_TINT } from '@/app/shared/components/Motion';
 import { useExperienceDrawer } from '@/context/ExperienceDrawerContext';
 import { cn } from '@/lib/utils';
 import { Experience } from '@/types/experience';
-import { Photo, coverPhotoUrl, photoUrl } from '@/types/photo';
-import { formatItineraryDateRange } from '@/utils/date-utils';
+import { CANVAS_ICONS } from '@/utils/canvas-icons';
+import { formatCardDateTime } from '@/utils/date-utils';
 import { experiencePath } from '@/utils/detail-paths';
-import { moneyAmount } from '@/utils/money';
 
-import { experienceRunBy, isFree } from '../ExperienceCard/experience-flag';
+import { experiencePriceLine, experienceRunBy, isFree } from '../ExperienceCard/experience-flag';
+import { StopCrossfade } from './StopCrossfade';
+import { crossfadeOffset, itineraryCoverPhotos, startingPrice } from './itinerary-card';
+
+const FOCUS_RING =
+  'rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2';
 
 /**
- * An itinerary, as the canvas draws it in a rail: a square photo at 184px with
- * the save control over its top corner and three stop photos fanned in its
- * bottom corner. Beneath, the host, the title, the starting price and the dates.
+ * An itinerary card: a square cover that crossfades through the itinerary's
+ * stops, three of them fanned in its bottom corner, and the save control over
+ * its top corner. Beneath, the organising community, the title, and when and
+ * for how much.
  *
- * The stop photos are the itinerary's own photos after the cover - the list
- * response carries no stop list, so the cover is the only thing guaranteed.
+ * `variant` is where it sits. `section` is the Discover itineraries rail and
+ * grid: title clamped to two lines, "from" price before the date. `grid` is
+ * the Discover experiences grid, where it sits among experience cards: their
+ * line order and price, and an "Itinerary" flag to tell it apart.
  *
- * An itinerary is an `Experience` (`experience_type: 'itinerary'`), so a plain
- * click opens it in the same drawer the other experience cards use, the same
- * pattern `ExperienceCard` follows.
+ * Cover and text are one link, so a keyboard reader passes one stop per card
+ * rather than two that go to the same place; Save sits outside it. A plain
+ * click opens the itinerary in the experience drawer, as `ExperienceCard`
+ * does, and the link still works for a new tab.
  */
 export const ItineraryCard = ({
   itinerary,
+  variant = 'section',
+  position = 0,
+  priority = false,
   className,
+  style,
 }: {
   itinerary: Experience;
-  /** Sizing from the rail, such as RAIL_CARD_RESPONSIVE_WIDTH */
+  variant?: 'section' | 'grid';
+  /** The card's place among its neighbours, which staggers the first play-through. */
+  position?: number;
+  priority?: boolean;
   className?: string;
+  /** The rail's measured card width. */
+  style?: React.CSSProperties;
 }) => {
   const { data: session } = useSession();
   const drawer = useExperienceDrawer();
 
-  const cover = coverPhotoUrl(itinerary.photos, 'md');
-  const stops = stopPhotos(itinerary.photos, cover);
-
+  const photos = itineraryCoverPhotos(itinerary.photos);
   const host = experienceRunBy(itinerary);
-  const price = startingPriceLine(itinerary);
-  const when =
-    itinerary.startDate && itinerary.endDate
-      ? formatItineraryDateRange(itinerary.startDate, itinerary.endDate)
-      : null;
+  const when = formatCardDateTime(itinerary.startDate, itinerary.endDate);
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
     // A modifier asks the browser for something else - a new tab, a new window -
@@ -65,85 +77,126 @@ export const ItineraryCard = ({
   };
 
   return (
-    <CardShell
-      href={experiencePath(itinerary)}
-      onClick={drawer ? handleOpen : undefined}
-      src={cover}
-      alt={itinerary.title}
-      sizes="184px"
-      ratio="square"
-      radius="rounded-xl"
-      className={cn('w-[184px] flex-shrink-0 snap-start', className)}
-      overlay={
-        <>
-          <div className="absolute right-0 top-0">
-            <Bookmark
-              bookmarked={itinerary.isBookmarked}
-              userId={session?.user?.id}
-              experienceId={itinerary.id}
-              itemName={itinerary.title}
-              className="text-white"
-            />
-          </div>
+    <div className={cn('group relative min-w-0', CARD_LIFT, className)} style={style}>
+      <Link
+        href={experiencePath(itinerary)}
+        onClick={drawer ? handleOpen : undefined}
+        className={cn('flex min-w-0 flex-col gap-[9px]', FOCUS_RING)}
+      >
+        <span className="relative block aspect-square w-full overflow-hidden rounded-xl bg-surface">
+          {/* The title is the link's own text below, so the photo stays
+              unnamed rather than reading it twice */}
+          <StopCrossfade
+            photos={photos}
+            alt=""
+            offsetMs={crossfadeOffset(position)}
+            sizes="(min-width: 1536px) 16vw, 184px"
+            priority={priority}
+          />
 
-          {stops.length > 0 && <StopPhotos photos={stops} />}
-        </>
-      }
-    >
-      <div className="mt-[9px] flex flex-col gap-0.5">
-        {host && <span className="truncate text-[10px] font-semibold text-brand">{host}</span>}
-
-        <p
-          className={cn(
-            'line-clamp-2 text-sm font-semibold leading-snug text-brand-ink',
-            TITLE_TINT,
+          {variant === 'grid' && (
+            <span className="absolute left-2.5 top-2.5 z-[3] inline-flex h-[26px] items-center gap-[5px] rounded-full bg-black/55 px-2.5 text-[11.5px] font-bold text-white backdrop-blur-md">
+              <IconComponent iconName={CANVAS_ICONS.pin} size={14} color="currentColor" />
+              Itinerary
+            </span>
           )}
-        >
-          {itinerary.title}
-        </p>
 
-        {price && <p className="mt-0.5 text-[13px] text-ink-muted">{price}</p>}
+          <StopFan photos={photos.slice(1)} />
+        </span>
 
-        {when && <p className="text-[12.5px] text-ink-muted">{when}</p>}
+        <span className="flex min-w-0 flex-col gap-0.5">
+          {host && <span className="truncate text-[10px] font-semibold text-brand">{host}</span>}
+
+          <span
+            className={cn(
+              'text-sm font-semibold leading-[1.35] text-brand-ink',
+              variant === 'section' ? 'line-clamp-2' : '[text-wrap:pretty]',
+              TITLE_TINT,
+            )}
+          >
+            {itinerary.title}
+          </span>
+
+          {variant === 'section' ? (
+            <>
+              <PriceFrom itinerary={itinerary} />
+              {when && <span className="text-[12.5px] text-ink-muted">{when}</span>}
+            </>
+          ) : (
+            <>
+              {when && <span className="text-[12.5px] text-ink-muted">{when}</span>}
+              <GridPrice itinerary={itinerary} />
+            </>
+          )}
+        </span>
+      </Link>
+
+      {/* Outside the link: saving never opens the itinerary */}
+      <div className="absolute right-0 top-0 z-[4]">
+        <Bookmark
+          bookmarked={itinerary.isBookmarked}
+          userId={session?.user?.id}
+          experienceId={itinerary.id}
+          itemName={itinerary.title}
+          className="text-white"
+        />
       </div>
-    </CardShell>
+    </div>
   );
 };
 
-/** Up to three non-cover photos, in the order the API returns them. */
-const stopPhotos = (photos: Photo[] | null | undefined, cover: string | undefined): string[] =>
-  (photos ?? [])
-    .map((photo) => photoUrl(photo, 'md'))
-    .filter((url): url is string => Boolean(url) && url !== cover)
-    .slice(0, 3);
+/** "from KES 6,500", or "Free". Nothing when the API has no price. */
+const PriceFrom = ({ itinerary }: { itinerary: Experience }) => {
+  if (isFree(itinerary)) {
+    return <span className="mt-0.5 text-[13px] font-semibold text-ink-pill">Free</span>;
+  }
 
-/** "Free", or "from KES 3,000". Nothing when the API has no price. */
-const startingPriceLine = (itinerary: Experience): string | null => {
-  if (isFree(itinerary)) return 'Free';
+  const price = startingPrice(itinerary);
+  if (!price) return null;
 
-  const amount = moneyAmount(itinerary.priceStartsFrom);
-  if (amount === null) return null;
+  return (
+    <span className="mt-0.5 text-[13px] text-ink-muted">
+      from <span className="font-semibold text-ink-pill">{price}</span>
+    </span>
+  );
+};
 
-  const currency = itinerary.priceStartsFrom?.currency ?? '';
-  return `from ${currency} ${amount.toLocaleString('en-US')}`.trim();
+/** "KES 6,500/person", the experience card's own price line. */
+const GridPrice = ({ itinerary }: { itinerary: Experience }) => {
+  const line = experiencePriceLine(itinerary);
+  if (!line) return null;
+
+  return <span className="mt-0.5 text-[13px] font-semibold text-ink-pill">{line}</span>;
 };
 
 /**
- * Three small photos fanned in the corner: the second sits centred and in
- * front, the first and third tilt out behind it. With fewer than three, the
- * ones there are keep their place in the fan.
+ * Stops two to four fanned over the cover's corner: the middle one in front,
+ * the outer two tilted out behind it. With fewer, the ones there keep their
+ * place in the fan.
  */
-const StopPhotos = ({ photos }: { photos: string[] }) => {
-  const [first, second, third] = photos;
+const StopFan = ({ photos }: { photos: string[] }) => {
+  const [left, centre, right] = photos;
+  if (!left) return null;
 
   return (
     <span
       aria-hidden="true"
-      className="pointer-events-none absolute bottom-2.5 right-2.5 h-[42px] w-[66px]"
+      className="pointer-events-none absolute bottom-2.5 right-2.5 z-[3] h-[42px] w-[66px]"
     >
-      {first && <StopTile src={first} className="bottom-px left-0 h-8 w-[30px] -rotate-[14deg]" />}
-      {third && <StopTile src={third} className="bottom-px right-0 h-8 w-[30px] rotate-[14deg]" />}
-      {second && <StopTile src={second} className="bottom-[3px] left-4 h-9 w-[34px]" />}
+      <StopTile
+        src={left}
+        className="bottom-px left-0 h-8 w-[30px] -rotate-[14deg] rounded-[7px]"
+      />
+      {right && (
+        <StopTile
+          src={right}
+          className="bottom-px right-0 h-8 w-[30px] rotate-[14deg] rounded-[7px]"
+        />
+      )}
+      {/* Last, so it sits on top */}
+      {centre && (
+        <StopTile src={centre} className="bottom-[3px] left-4 h-9 w-[34px] rounded-[8px]" />
+      )}
     </span>
   );
 };
@@ -151,7 +204,7 @@ const StopPhotos = ({ photos }: { photos: string[] }) => {
 const StopTile = ({ src, className }: { src: string; className: string }) => (
   <span
     className={cn(
-      'absolute block overflow-hidden rounded-lg border-2 border-white bg-gray-200 shadow-md',
+      'absolute block overflow-hidden border-2 border-white bg-surface shadow-[0_2px_7px_rgba(0,0,0,.3)]',
       className,
     )}
   >

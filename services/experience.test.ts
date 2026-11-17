@@ -69,6 +69,14 @@ describe('Experience Service', () => {
       expect(result.success).toBe(true);
     });
 
+    it('fetches experiences with authentication when asked to', async () => {
+      mockApi.get.mockResolvedValue({ data: { results: [], count: 0 }, status: 200 });
+
+      await experienceService.fetchExperiences({ page: 1 }, true);
+
+      expect(mockApiWithToken).toHaveBeenCalled();
+    });
+
     it('handles error response', async () => {
       const error = {
         response: {

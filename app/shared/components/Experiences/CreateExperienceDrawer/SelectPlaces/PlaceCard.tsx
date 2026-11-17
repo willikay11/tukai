@@ -1,6 +1,7 @@
 'use client';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { coverPhotoUrl } from '@/types/photo';
 import type { Place } from '@/types/place';
 
@@ -29,8 +30,11 @@ export const PlaceCard = ({ place, isSelected, onToggle, actionLabels }: PlaceCa
       className="flex min-w-0 flex-col gap-2.5 text-left active:scale-[0.99]"
     >
       <span className="relative block aspect-square w-full overflow-hidden rounded-xl bg-surface-brand">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={coverPhotoUrl(place.photos)} alt="" className="block h-full w-full object-cover" />
+        <PlainImage
+          src={coverPhotoUrl(place.photos)}
+          alt=""
+          className="block h-full w-full object-cover"
+        />
 
         <span
           aria-hidden="true"
@@ -40,7 +44,7 @@ export const PlaceCard = ({ place, isSelected, onToggle, actionLabels }: PlaceCa
         />
 
         <span
-          className={`absolute right-2.5 top-2.5 inline-flex h-9 items-center gap-1.5 rounded-full pl-2.5 pr-3.5 text-14 font-semibold shadow-[0_2px_8px_rgba(1,51,52,.2)] ${
+          className={`text-14 absolute right-2.5 top-2.5 inline-flex h-9 items-center gap-1.5 rounded-full pl-2.5 pr-3.5 font-semibold shadow-[0_2px_8px_rgba(1,51,52,.2)] ${
             isSelected ? 'bg-brand-ink text-white' : 'bg-white text-brand-ink'
           }`}
         >

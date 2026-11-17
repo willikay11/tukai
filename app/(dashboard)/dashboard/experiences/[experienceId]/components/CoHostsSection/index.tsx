@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { z } from 'zod';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import {
   useAddCoHosts,
   useCoHostInvites,
@@ -39,8 +40,11 @@ const Person = ({
 }) => (
   <div className="flex items-center gap-3 border-b border-gray-100 py-3 last:border-b-0">
     {image ? (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={image} alt="" className="h-10 w-10 flex-shrink-0 rounded-full object-cover" />
+      <PlainImage
+        src={image}
+        alt=""
+        className="h-10 w-10 flex-shrink-0 rounded-full object-cover"
+      />
     ) : (
       <span
         aria-hidden="true"

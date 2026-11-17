@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { cn } from '@/lib/utils';
 
 import type { DraftMomentPhoto } from './useMomentComposer';
@@ -93,8 +94,7 @@ export const MomentPhotosField = ({
               )}
             >
               <span className="absolute inset-0 overflow-hidden rounded-xl bg-surface">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <PlainImage
                   src={photo.url}
                   alt=""
                   draggable={false}

@@ -3,7 +3,10 @@ import { useEffect } from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { ConnectPlaceDrawerProvider, useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
+import {
+  ConnectPlaceDrawerProvider,
+  useConnectPlaceDrawer,
+} from '@/context/ConnectPlaceDrawerContext';
 import { renderWithStore } from '@/test-utils/renderWithStore';
 
 import { ClaimCard } from './ClaimCard';
@@ -52,7 +55,9 @@ jest.mock('@/app/shared/hooks/usePlaces', () => ({
   usePlaceOwnerships: (placeIds: string[]) => placeIds.map(() => ({ data: undefined })),
   usePlaceReservationProfiles: () => ({ data: undefined }),
   useCreatePlace: () => ({ mutateAsync: jest.fn() }),
-  usePlace: (_id: string | null, enabled = true) => ({ data: enabled ? { data: PLACE } : undefined }),
+  usePlace: (_id: string | null, enabled = true) => ({
+    data: enabled ? { data: PLACE } : undefined,
+  }),
   usePlaces: () => ({ data: { data: { results: [] } }, isFetching: false }),
 }));
 
@@ -107,7 +112,9 @@ describe('ClaimCard', () => {
       </ConnectPlaceDrawerProvider>,
     );
 
-    expect(screen.queryByRole('heading', { name: 'Connect a business or place' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Connect a business or place' }),
+    ).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /Start claim/i }));
 
@@ -172,6 +179,32 @@ describe('ClaimCard', () => {
     );
 
     expect(screen.queryByText(/under review/)).not.toBeInTheDocument();
+  });
+
+  it('shows nothing for a place a community already owns', () => {
+    ownership = { community: 'c1', approved: true };
+
+    const { container } = renderWithStore(
+      <ConnectPlaceDrawerProvider>
+        <ClaimCard placeId="place-1" placeName="Karura Forest" />
+      </ConnectPlaceDrawerProvider>,
+    );
+
+    expect(screen.queryByRole('button', { name: /Start claim/i })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Nobody has claimed/)).not.toBeInTheDocument();
+    expect(container.querySelector('h3')).toBeNull();
+  });
+
+  it('shows nothing while the API check is in flight and this browser has no claim', () => {
+    isLoadingOwnership = true;
+
+    renderWithStore(
+      <ConnectPlaceDrawerProvider>
+        <ClaimCard placeId="place-1" placeName="Karura Forest" />
+      </ConnectPlaceDrawerProvider>,
+    );
+
+    expect(screen.queryByRole('button', { name: /Start claim/i })).not.toBeInTheDocument();
   });
 
   it('trusts this browser while the API check is in flight, to avoid a flash of Start claim', () => {

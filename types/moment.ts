@@ -60,7 +60,7 @@ export type MomentContext = {
   label: string;
   kind: 'Community' | 'Experience' | 'Place';
   /** A key in CANVAS_ICONS */
-  icon: 'users' | 'ticket' | 'pin';
+  icon: 'users' | 'calendar' | 'pin';
   id: string;
 };
 
@@ -78,7 +78,9 @@ export const momentContext = (item: Pick<Moment, 'community' | 'experience' | 'p
     return {
       label: item.experience.title,
       kind: 'Experience',
-      icon: 'ticket',
+      // The calendar, not the ticket: an experience is something on a date,
+      // and the canvas settled on it (docs/design/PENDING.md)
+      icon: 'calendar',
       id: item.experience.id,
     } as MomentContext;
 

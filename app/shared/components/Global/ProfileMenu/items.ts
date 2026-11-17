@@ -18,8 +18,8 @@ export interface ProfileMenuItem {
 /**
  * The canvas's own two groups, each its own white card inside the menu's
  * tray: where your things are, then what is waiting for you. On a phone
- * these destinations are the bottom bar as well; on a desktop this menu is
- * the only way to them, which is why they live here and not in the tab strip.
+ * some of these are the bottom bar as well; on a desktop this menu is the
+ * only way to them, which is why they live here and not in the tab strip.
  */
 export const PROFILE_MENU_GROUP_ONE: ProfileMenuItem[] = [
   { label: 'Profile', icon: 'UserCircleIcon', href: '/profile' },
@@ -27,6 +27,8 @@ export const PROFILE_MENU_GROUP_ONE: ProfileMenuItem[] = [
   { label: 'TukAI', icon: 'SparklesIcon', href: '/ai' },
   { label: 'Communities', icon: 'UserMultipleIcon', href: '/communities' },
   { label: 'Bucket lists', icon: 'ShoppingBasketAdd02Icon', href: '/bucket-lists' },
+  // Not one of the bottom bar's four, so on a phone this is the way to it
+  { label: 'Plans', icon: 'Calendar03Icon', href: '/plans' },
 ];
 
 /**

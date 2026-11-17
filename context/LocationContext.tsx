@@ -10,6 +10,8 @@ import React, {
   useState,
 } from 'react';
 
+import { toast } from '@/app/shared/hooks/useToast';
+
 type LocationState = {
   lat?: number;
   lng?: number;
@@ -55,9 +57,7 @@ type LocationContextType = LocationState & {
   away: boolean;
   /** Back to the home city, off location, as the chip's own home button does. */
   goHome: () => void;
-  /** The one toast the location bar shows at a time, or none. */
-  locationToast: string | null;
-  /** Puts up a toast for 4.2s, replacing whichever one is already showing. */
+  /** Puts up the app's toast, replacing whichever one is already showing. */
   showLocationToast: (message: string) => void;
 };
 
@@ -69,8 +69,6 @@ const STORAGE_KEY = 'user_location';
 // question on where that would live.
 const HOME_CITY = 'Nairobi';
 
-const TOAST_DURATION_MS = 4200;
-
 export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [lat, setLat] = useState<number | undefined>(undefined);
   const [lng, setLng] = useState<number | undefined>(undefined);
@@ -79,7 +77,6 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [area, setArea] = useState<string | undefined>(undefined);
   const [placeId, setPlaceId] = useState<string | undefined>(undefined);
   const [isUsingLocation, setIsUsingLocation] = useState(false);
-  const [locationToast, setLocationToast] = useState<string | null>(null);
 
   // Guards a geolocation call in flight: bumped whenever one is cancelled, so
   // a result that arrives after the reader picked a city or went home is
@@ -89,20 +86,12 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   // set the moment the switch is turned on, so a slow reverse geocode still
   // ends in the toast the reader was told to expect.
   const toastPendingRef = useRef(false);
-  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
+  // Through the one Toaster rather than a pill of its own, which sat in the
+  // same spot and could land on top of any other toast showing at the time
   const showLocationToast = useCallback((message: string) => {
-    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    setLocationToast(message);
-    toastTimeoutRef.current = setTimeout(() => setLocationToast(null), TOAST_DURATION_MS);
+    toast({ title: message });
   }, []);
-
-  useEffect(
-    () => () => {
-      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    },
-    [],
-  );
 
   const save = (lat?: number, lng?: number, st?: LocationState['status']) => {
     if (lat !== undefined && lng !== undefined) {
@@ -299,7 +288,6 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
         homeCity: HOME_CITY,
         away,
         goHome,
-        locationToast,
         showLocationToast,
       }}
     >

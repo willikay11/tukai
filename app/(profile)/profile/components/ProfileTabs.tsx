@@ -23,11 +23,8 @@ const TABS: { id: ProfileTabId; label: string; icon: string }[] = [
 /**
  * The page's sticky tab rail.
  *
- * ⚠️ The design calls for this bleeding to the viewport edge under a fixed
- * 24px gutter. `PageContainer` instead puts the page on a responsive
- * 12-column grid with no single gutter width to bleed against, so this stays
- * the full width of the content column and reuses the sticky offset
- * `PageFilters` already established for "under the top bar" elsewhere.
+ * Sticks under the top bar, at the height `TopBar` measures, and bleeds
+ * across the page's 24px edge to the viewport's, as the design has it.
  */
 export const ProfileTabs = ({
   active,
@@ -38,11 +35,11 @@ export const ProfileTabs = ({
   onChange: (tab: ProfileTabId) => void;
   reviewsCount: number;
 }) => (
-  <div className="sticky top-0 z-40 -mx-4 mt-[18px] bg-white py-2.5 min-[720px]:top-[165px] md:mx-0">
+  <div className="sticky top-[var(--top-bar-h,0px)] z-20 -mx-6 mt-[18px] bg-white py-2.5">
     <div
       role="tablist"
       aria-label="Profile sections"
-      className="scrollbar-hide relative flex items-center justify-center gap-2 overflow-x-auto px-4 [mask-image:linear-gradient(to_right,transparent,#000_48px,#000_calc(100%-48px),transparent)] md:px-12"
+      className="relative flex items-center justify-center gap-2 overflow-x-auto px-6 scrollbar-hide [mask-image:linear-gradient(to_right,transparent,#000_48px,#000_calc(100%-48px),transparent)] md:px-12"
     >
       {TABS.map((tab) => {
         const selected = tab.id === active;

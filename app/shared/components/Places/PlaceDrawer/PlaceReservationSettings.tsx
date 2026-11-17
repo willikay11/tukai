@@ -80,7 +80,9 @@ export const PlaceReservationSettings = ({
   const days = activeDays(rules);
   const hours = openingHours(rules);
   const interval = slotInterval(rules);
-  const closeTime12 = rules[0]?.closeTime ? formatTimeTo12Hour(rules[0].closeTime.slice(0, 5)) : null;
+  const closeTime12 = rules[0]?.closeTime
+    ? formatTimeTo12Hour(rules[0].closeTime.slice(0, 5))
+    : null;
   const status = profile?.status ?? 'draft';
   const locality = place.location?.city ?? place.location?.name;
 
@@ -265,7 +267,7 @@ export const PlaceReservationSettings = ({
         )}
       </div>
 
-      <div className="sticky bottom-0 z-30 flex items-center gap-2.5 border-t border-surface-muted bg-white px-6 pb-[calc(12px_+_env(safe-area-inset-bottom))] pt-3">
+      <div className="sticky bottom-0 z-30 flex items-center gap-2.5 border-t border-surface-muted bg-white px-6 pb-[calc(12px_+_var(--drawer-inset-bottom,env(safe-area-inset-bottom)))] pt-3">
         {mode === 'edit' ? (
           <>
             <button

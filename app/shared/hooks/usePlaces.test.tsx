@@ -17,6 +17,7 @@ import {
   useGoogleMapsAutocomplete,
   useLikePlaceReview,
   useLikePlaceReviewComment,
+  useMyPlaces,
   usePlaceCategories,
   usePlaceManager,
   usePlaceReviewComments,
@@ -94,7 +95,29 @@ describe('Place Hooks', () => {
         undefined,
         -1.2,
         36.8,
+        { withAuth: true },
       );
+    });
+
+    it('fetches anonymously when nobody is signed in', async () => {
+      const signedIn = session.data;
+      session.data = null;
+      mockPlaceService.fetchPlaces.mockResolvedValue({ data: { results: [], count: 0 } });
+
+      renderHook(() => usePlaces({ page: 1, enabled: true }), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(mockPlaceService.fetchPlaces).toHaveBeenCalledWith(
+          1,
+          12,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          { withAuth: false },
+        );
+      });
+      session.data = signedIn;
     });
 
     it('does not fetch when enabled is false', () => {
@@ -134,6 +157,7 @@ describe('Place Hooks', () => {
           undefined,
           undefined,
           undefined,
+          { withAuth: true },
         );
       });
     });
@@ -728,12 +752,13 @@ describe('useFeaturedPlaces', () => {
   });
 
   it('calls the featured endpoint, not the general places list', async () => {
+    session.data = { user: { id: 'u1' } };
     respond([]);
 
     const { result } = renderHook(() => useFeaturedPlaces(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockPlaceService.fetchFeaturedPlaces).toHaveBeenCalledWith();
+    expect(mockPlaceService.fetchFeaturedPlaces).toHaveBeenCalledWith(true);
   });
 
   it('does not fetch while disabled', () => {
@@ -742,5 +767,54 @@ describe('useFeaturedPlaces', () => {
     renderHook(() => useFeaturedPlaces(false), { wrapper: createWrapper() });
 
     expect(mockPlaceService.fetchFeaturedPlaces).not.toHaveBeenCalled();
+  });
+});
+
+describe('useMyPlaces', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const page = (ids: string[], count: number) => ({
+    status: 200,
+    success: true,
+    data: { count, results: ids.map((id) => ({ ...mockPlace, id })) },
+  });
+
+  it('reads every page, not just the first', async () => {
+    mockPlaceService.fetchMyPlaces
+      .mockResolvedValueOnce(page(['p1', 'p2'], 3) as never)
+      .mockResolvedValueOnce(page(['orchid'], 3) as never);
+
+    const { result } = renderHook(() => useMyPlaces(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.data?.results.map((place: { id: string }) => place.id)).toEqual([
+      'p1',
+      'p2',
+      'orchid',
+    ]);
+    expect(mockPlaceService.fetchMyPlaces).toHaveBeenNthCalledWith(2, 2, 50);
+  });
+
+  it('asks once when everything fits on the first page', async () => {
+    mockPlaceService.fetchMyPlaces.mockResolvedValueOnce(page(['p1'], 1) as never);
+
+    const { result } = renderHook(() => useMyPlaces(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockPlaceService.fetchMyPlaces).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops at an empty page rather than looping on a stale count', async () => {
+    mockPlaceService.fetchMyPlaces
+      .mockResolvedValueOnce(page(['p1'], 5) as never)
+      .mockResolvedValueOnce(page([], 5) as never);
+
+    const { result } = renderHook(() => useMyPlaces(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.data?.results).toHaveLength(1);
+    expect(mockPlaceService.fetchMyPlaces).toHaveBeenCalledTimes(2);
   });
 });

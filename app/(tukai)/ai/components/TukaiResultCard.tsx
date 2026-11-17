@@ -1,10 +1,10 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { useState } from 'react';
 
 import { BucketListPicker } from '@/app/shared/components/BucketList';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import type { TukaiItem } from '@/types/tukai';
 import { itemKindLabel } from '@/utils/tukai';
 
@@ -84,7 +84,7 @@ export const TukaiResultCard = ({
           className="-mr-5 flex snap-x snap-proximity gap-2 overflow-x-auto pr-5 scrollbar-hide"
         >
           {item.photos.map((src) => (
-            <img
+            <PlainImage
               key={src}
               src={src}
               alt=""

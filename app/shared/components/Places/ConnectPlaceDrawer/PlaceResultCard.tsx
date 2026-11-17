@@ -5,7 +5,7 @@ import { PhotoImage } from '@/app/shared/components/Images';
 import { cn } from '@/lib/utils';
 import { Place } from '@/types/place';
 
-export type PlaceCardLockReason = 'inClaim' | null;
+export type PlaceCardLockReason = 'inClaim' | 'claimed' | null;
 
 export const PlaceResultCard = ({
   place,
@@ -15,9 +15,8 @@ export const PlaceResultCard = ({
 }: {
   place: Place;
   isConnected: boolean;
-  // "Yours" / "Claimed by {community}" need per-place ownership data the
-  // search endpoint doesn't return, so only this session's own mock claims
-  // (see ConnectPlaceDrawerContext) are reflected as locked here.
+  // 'inClaim': in a claim this browser sent. 'claimed': a community already
+  // holds the approved ownership, so the API would turn a claim down.
   lockReason: PlaceCardLockReason;
   onToggle: (place: Place) => void;
 }) => {
@@ -25,7 +24,14 @@ export const PlaceResultCard = ({
   const cover = place.photos?.find((photo) => photo.isCover)?.photo ?? place.photos?.[0]?.photo;
 
   const pillIcon = isLocked ? 'SquareLock01Icon' : isConnected ? 'Tick02Icon' : 'Link01Icon';
-  const pillLabel = isLocked ? 'In a claim' : isConnected ? 'Connected' : 'Connect';
+  const pillLabel =
+    lockReason === 'claimed'
+      ? 'Claimed'
+      : lockReason === 'inClaim'
+        ? 'In a claim'
+        : isConnected
+          ? 'Connected'
+          : 'Connect';
 
   return (
     <button

@@ -3,6 +3,7 @@
 import Image from 'next/image';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { cn } from '@/lib/utils';
 
 import type { FormPhoto } from './index';
@@ -75,8 +76,7 @@ export const PhotoTile = ({
           className="object-cover"
         />
       ) : (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt={`Photo ${index + 1}`} className="h-full w-full object-cover" />
+        <PlainImage src={src} alt={`Photo ${index + 1}`} className="h-full w-full object-cover" />
       )}
 
       <button

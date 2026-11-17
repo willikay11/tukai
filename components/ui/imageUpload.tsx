@@ -5,6 +5,7 @@ import { type ChangeEvent, type DragEvent, useEffect, useRef, useState } from 'r
 import Image from 'next/image';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { Photo } from '@/types/photo';
 
 import { Button } from './button';
@@ -100,8 +101,7 @@ export const ImageUpload = ({
                     className="rounded-lg object-cover"
                   />
                 ) : (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <PlainImage
                     src={preview || '/placeholder.svg'}
                     alt={`Preview ${index + 1}`}
                     className="h-32 w-full rounded-lg object-cover"

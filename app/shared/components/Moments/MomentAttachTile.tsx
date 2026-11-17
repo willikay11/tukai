@@ -1,6 +1,7 @@
 'use client';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 
 import type { AttachmentKind, MomentAttachment } from './useMomentComposer';
 
@@ -44,13 +45,20 @@ export const MomentAttachTile = ({
         }`}
       >
         <div className="flex items-start justify-between gap-1.5">
-          <IconComponent iconName={meta.icon} size={28} color="currentColor" className="text-brand" />
+          <IconComponent
+            iconName={meta.icon}
+            size={28}
+            color="currentColor"
+            className="text-brand"
+          />
           <span className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-full bg-lime text-brand-ink">
             <IconComponent iconName="Add01Icon" size={18} color="currentColor" />
           </span>
         </div>
 
-        <span className="text-[15px] font-bold leading-tight text-gray-900">{meta.selectLabel}</span>
+        <span className="text-[15px] font-bold leading-tight text-gray-900">
+          {meta.selectLabel}
+        </span>
       </button>
     );
   }
@@ -59,8 +67,7 @@ export const MomentAttachTile = ({
     <div className="relative">
       <div className="relative flex aspect-square flex-col justify-end overflow-hidden rounded-xl bg-surface p-3">
         {attachment.thumb && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <PlainImage
             src={attachment.thumb}
             alt=""
             className="absolute inset-0 h-full w-full object-cover"

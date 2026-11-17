@@ -20,6 +20,9 @@ import {
 
 jest.mock('@/services/experience');
 
+const session: { data: { user: { id: string } } | null } = { data: { user: { id: 'u1' } } };
+jest.mock('next-auth/react', () => ({ useSession: () => session }));
+
 const mockExperienceService = experienceService as jest.Mocked<typeof experienceService>;
 
 const createWrapper = () => {
@@ -86,6 +89,28 @@ describe('Experience Hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockExperiencesResponse);
+      expect(mockExperienceService.fetchExperiences).toHaveBeenCalledWith(
+        { page: 1, page_size: 10 },
+        true,
+      );
+    });
+
+    it('fetches anonymously when nobody is signed in', async () => {
+      const signedIn = session.data;
+      session.data = null;
+      mockExperienceService.fetchExperiences.mockResolvedValue(mockExperiencesResponse);
+
+      renderHook(() => useExperiences({ page: 1, page_size: 10 }, true), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(mockExperienceService.fetchExperiences).toHaveBeenCalledWith(
+          { page: 1, page_size: 10 },
+          false,
+        );
+      });
+      session.data = signedIn;
     });
 
     it('does not fetch when enabled is false', () => {

@@ -4,31 +4,10 @@ import { ReactNode, useState } from 'react';
 
 import Image, { ImageProps } from 'next/image';
 
+import { useImageFx } from '@/app/shared/hooks/useImageFx';
 import { cn } from '@/lib/utils';
 
 import { ImageFallback } from './ImageFallback';
-
-/**
- * What a photo looks like before it arrives: a 4×4 PNG of a soft neutral
- * gradient, 88 bytes, which `next/image` blows up behind a Gaussian blur.
- *
- * It is the same for every photo because nothing on the client can know a
- * remote image's colours without downloading it first, and the API sends no
- * dominant colour or LQIP. A real blur-up would come from the API's
- * `photo_webp_thumb_url`, which is generated for almost nothing in the library
- * today - when that is backfilled, a caller can pass it as `blurDataURL` and
- * this constant stops being used for that surface.
- *
- * Lighter at the top than the bottom: it reads as a photograph rather than as
- * a grey box, without leaning on a colour that would clash once the real image
- * lands.
- */
-export const PHOTO_PLACEHOLDER_BLUR =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAH0lEQVR42mN4+fwJHDE8enAXjhhu3bgKRwyXL56DIwBGLCkx6HiKjQAAAABJRU5ErkJggg==';
-
-// Below this, `next/image` warns that a placeholder costs more than it saves -
-// and blurring something the size of an avatar is a flicker, not a fade
-const MIN_AREA_FOR_BLUR = 1600;
 
 /**
  * `next/image` that degrades to {@link ImageFallback} when the photo fails to
@@ -36,6 +15,9 @@ const MIN_AREA_FOR_BLUR = 1600;
  *
  * A missing `src` takes the fallback path too rather than reaching next/image,
  * which throws on a null src and on relative paths without a leading slash.
+ *
+ * Loads with the app's image animation - a pulse, then a fade in - see
+ * {@link useImageFx}.
  */
 export const PhotoImage = ({
   src,
@@ -45,8 +27,8 @@ export const PhotoImage = ({
   fallbackIconSize,
   fallbackClassName,
   onError,
-  placeholder,
-  blurDataURL,
+  onLoad,
+  onAnimationEnd,
   ...props
 }: Omit<ImageProps, 'src'> & {
   src: ImageProps['src'] | null | undefined;
@@ -58,6 +40,14 @@ export const PhotoImage = ({
   fallbackClassName?: string;
 }) => {
   const [hasError, setHasError] = useState(false);
+  const fx = useImageFx(src, {
+    onLoad,
+    onError: (event) => {
+      setHasError(true);
+      onError?.(event);
+    },
+    onAnimationEnd,
+  });
 
   // A bare storage key - "experiences/photos/abc.jpg" - is neither a URL nor a
   // rooted path, and next/image throws on it during render rather than firing
@@ -96,29 +86,5 @@ export const PhotoImage = ({
     );
   }
 
-  // Anything with real dimensions that are too small to blur usefully - an
-  // avatar, an icon - keeps the plain treatment
-  const area =
-    typeof props.width === 'number' && typeof props.height === 'number'
-      ? props.width * props.height
-      : undefined;
-  const canBlur = area === undefined || area >= MIN_AREA_FOR_BLUR;
-
-  const blur =
-    placeholder || !canBlur
-      ? { placeholder, blurDataURL }
-      : { placeholder: 'blur' as const, blurDataURL: blurDataURL ?? PHOTO_PLACEHOLDER_BLUR };
-
-  return (
-    <Image
-      src={src}
-      alt={alt}
-      onError={(event) => {
-        setHasError(true);
-        onError?.(event);
-      }}
-      {...blur}
-      {...props}
-    />
-  );
+  return <Image src={src} alt={alt} {...props} {...fx} />;
 };

@@ -13,7 +13,7 @@ const STATUS_STYLE: Record<ClaimStatus, { label: string; bg: string; fg: string 
   cancelled: { label: 'Cancelled', bg: 'bg-surface', fg: 'text-ink-muted' },
 };
 
-/** Claims not yet approved, or approved in the last 7 days - see useDashboardPlaces. */
+/** Claims not yet approved - an approved one's place is in My places - see useDashboardPlaces. */
 export const ClaimsBlock = ({
   claims,
   onOpenClaim,

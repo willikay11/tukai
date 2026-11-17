@@ -1,8 +1,5 @@
 import { MoneyLike, moneyAmount } from '@/utils/money';
 
-/** Money as the API sends it. */
-export type Money = { amount: string; currency: string };
-
 export type CreatePhoneWallet = {
   phone: string;
 };
@@ -52,6 +49,9 @@ export type Wallet = {
   dateCreated: string;
 };
 
+/** Money as the API sends it. */
+export type MoneyAmount = { amount: string; currency: string };
+
 /**
  * What a host has earned, and what of it they can take out.
  *
@@ -68,20 +68,20 @@ export type Wallet = {
  *   amountPaid = totalTicketSales - hostFundedDiscount - tukaiFundedDiscount
  */
 export type HostEarningsSummary = {
-  totalTicketSales: Money;
-  amountPaid: Money;
+  totalTicketSales: MoneyAmount;
+  amountPaid: MoneyAmount;
   /** Promo discounts the host paid for; comes off their earnings. */
-  hostFundedDiscount: Money;
+  hostFundedDiscount: MoneyAmount;
   /** Promo discounts Tukai paid for; not the host's cost. */
-  tukaiFundedDiscount: Money;
-  hostNet: Money;
-  availableBalance: Money;
-  pendingBalance: Money;
-  currentBalance: Money;
-  commissionDeducted: Money;
-  estimatedPayoutFee: Money;
+  tukaiFundedDiscount: MoneyAmount;
+  hostNet: MoneyAmount;
+  availableBalance: MoneyAmount;
+  pendingBalance: MoneyAmount;
+  currentBalance: MoneyAmount;
+  commissionDeducted: MoneyAmount;
+  estimatedPayoutFee: MoneyAmount | null;
   /** Tickets the host can still sell, at buyer price. */
-  ticketsOnSale: Money;
+  ticketsOnSale: MoneyAmount;
 };
 
 export type PayoutKind = 'split_advance' | 'transfer' | 'withdrawal' | 'clawback';
@@ -110,19 +110,23 @@ export type HostPayout = {
   dateSettled?: string | null;
 };
 
-/** What a withdrawal of a given amount would actually pay out. */
+/**
+ * What a withdrawal of a given amount would actually pay out. Like the
+ * earnings summary, every figure is a `{ amount, currency }` object on the
+ * wire, not the bare string services/api.json declares.
+ */
 export type PayoutQuote = {
   currency: string;
   destinationType: string;
-  availableBalance: string;
-  requestedAmount: string;
-  paystackTransferFee: string;
-  tukaiPayoutFee: string;
-  netAmount: string;
-  tukaiCommissionDeducted: string;
-  maxPayoutAmount: string;
+  availableBalance: MoneyAmount;
+  requestedAmount: MoneyAmount;
+  paystackTransferFee: MoneyAmount;
+  tukaiPayoutFee: MoneyAmount;
+  netAmount: MoneyAmount;
+  tukaiCommissionDeducted: MoneyAmount;
+  maxPayoutAmount: MoneyAmount;
   /** The API's own words about why the maximum is what it is. */
-  limitMessage: string;
+  limitMessage: string | null;
 };
 
 /**

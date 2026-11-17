@@ -18,6 +18,7 @@ import {
   useCreatePlace,
   useDeletePlaceOwnership,
   usePlace,
+  usePlaceOwnerships,
   usePlaces,
 } from '@/app/shared/hooks/usePlaces';
 import { toast } from '@/app/shared/hooks/useToast';
@@ -31,6 +32,7 @@ import {
   NewPlaceDraftFields,
   isNewPlaceComplete,
 } from './claimSchema';
+import type { PlaceCardLockReason } from './PlaceResultCard';
 import { OWNERSHIP_DOCUMENT_TYPES, REQUIRED_DOCUMENT_COUNT } from './documentTypes';
 import { useResolvedClaim } from './useResolvedClaim';
 
@@ -223,11 +225,21 @@ export const useConnectPlaceDrawer = () => {
     );
   };
 
-  // "Yours" / "Claimed by {community}" need per-place ownership data the
-  // search endpoint doesn't return - only this session's own mock claims are
-  // reflected as locked (see ConnectPlaceDrawerContext).
-  const getLockReasonForPlace = (placeId: string): 'inClaim' | null =>
-    getClaimForPlace(placeId) ? 'inClaim' : null;
+  // The search endpoint does not say who owns a place, so each result's
+  // ownership is asked for - the drawer is only ever open to a signed-in
+  // reader, and the endpoint needs the token. Only an APPROVED owner locks a
+  // place: the API turns a claim down then, but not while another is pending.
+  const searchResultIds = useMemo(() => searchResults.map((place) => place.id), [searchResults]);
+  const searchOwnershipQueries = usePlaceOwnerships(
+    searchResultIds,
+    isOpen && Boolean(userId) && searchResultIds.length > 0,
+  );
+  const claimedPlaceIds = new Set(
+    searchResultIds.filter((_, index) => searchOwnershipQueries[index]?.data?.data?.approved),
+  );
+
+  const getLockReasonForPlace = (placeId: string): PlaceCardLockReason =>
+    getClaimForPlace(placeId) ? 'inClaim' : claimedPlaceIds.has(placeId) ? 'claimed' : null;
 
   const handleAddAsNewPlace = () => {
     setSource('new');

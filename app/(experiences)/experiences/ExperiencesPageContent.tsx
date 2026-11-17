@@ -7,8 +7,11 @@ import { useRouter } from 'next/navigation';
 
 import moment from 'moment';
 
+import {
+  DiscoverItineraries,
+  DiscoverItinerariesSkeleton,
+} from '@/app/(experiences)/components/DiscoverItineraries';
 import { ExperienceCard } from '@/app/(experiences)/components/ExperienceCard';
-import { ItineraryCard } from '@/app/(experiences)/components/ItineraryCard';
 import { BucketListCard } from '@/app/(experiences)/experiences/components/BucketListCard';
 import { CitiesRail } from '@/app/(experiences)/experiences/components/CitiesRail';
 import { CommunitiesSection } from '@/app/(experiences)/experiences/components/CommunitiesSection';
@@ -33,11 +36,12 @@ import {
   FEATURED_PAGE_SIZE,
   featuredOnly,
 } from '@/app/(experiences)/experiences/components/featured-experiences';
-import { shouldShowSeeAll } from '@/app/(experiences)/experiences/see-all/config';
+import { useUpcomingItineraries } from '@/app/(experiences)/hooks';
 import { CategoryChipRow } from '@/app/shared/components/Filters/CategoryChipRow';
 import type { CategoryChip } from '@/app/shared/components/Filters/CategoryChipRow';
 import { IconComponent } from '@/app/shared/components/Icons';
-import { CardRail, RAIL_CARD_RESPONSIVE_WIDTH, SeeAllCard } from '@/app/shared/components/Lists';
+import { PAGE_GRID } from '@/app/shared/components/Layout';
+import { CardRail, RAIL_CARD_RESPONSIVE_WIDTH } from '@/app/shared/components/Lists';
 import { PillTabs } from '@/app/shared/components/Tabs';
 import { isSharedWithMe, useMyBucketLists } from '@/app/shared/hooks/useBucketLists';
 import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
@@ -52,7 +56,6 @@ import { downloadTicketPdf } from '@/services/experience';
 import { BucketList } from '@/types/bucket-list';
 import { Community } from '@/types/community';
 import { Experience } from '@/types/experience';
-import { coverPhotoUrl } from '@/types/photo';
 import { PlaceCategory } from '@/types/placeCategory';
 import { Reservation } from '@/types/ticket-purchase';
 import { formatLongDateWithOrdinal } from '@/utils/date-utils';
@@ -65,9 +68,6 @@ const TABS = [{ value: 'all', label: 'All' }];
 
 /** Cards in a horizontal row that are fetched straight away rather than lazily. */
 const EAGER_IN_ROW = 3;
-
-/** Itineraries the Discover itineraries rail asks for. */
-const ITINERARY_PAGE_SIZE = 8;
 
 /** The place-category group the experience category chips are read from. */
 const CATEGORY_CHIP_GROUP = 'interests';
@@ -241,14 +241,8 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
     .filter((category: PlaceCategory) => category.group === 'cities')
     .sort((a: PlaceCategory, b: PlaceCategory) => b.placesCount - a.placesCount);
 
-  // Discover itineraries: published itinerary-type experiences. The rail is
-  // hidden when there are none, so no empty heading shows.
-  const { data: itinerariesResponse, isLoading: isLoadingItineraries } = useExperiences(
-    { page: 1, page_size: ITINERARY_PAGE_SIZE, status: 'published', experience_type: 'itinerary' },
-    isAll,
-  );
-  const itineraries: Experience[] = itinerariesResponse?.data?.results ?? [];
-  const itineraryTotal = itinerariesResponse?.data?.count ?? 0;
+  // The same pool Discover's itineraries section reads
+  const { itineraries, isLoading: isLoadingItineraries } = useUpcomingItineraries(isAll);
 
   // Communities running what is on: the list is filtered to those with an
   // upcoming experience. Hidden when empty or when the request fails.
@@ -306,16 +300,16 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
   const visibleTabs = session?.user ? TABS : TABS.filter((tab) => tab.value === 'all');
 
   return (
-    <main className="grid grid-cols-12 gap-x-4 px-4 md:px-0">
+    <main className={PAGE_GRID}>
       {/* Filter tabs: hidden while there is only the All tab, so no lone pill shows */}
       {visibleTabs.length > 1 && (
-        <div className="col-span-12 pt-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+        <div className="col-span-12 pt-6">
           <PillTabs tabs={visibleTabs} value={activeTab} onChange={handleTabChange} />
         </div>
       )}
 
       {isAll ? (
-        <div className="col-span-12 space-y-10 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+        <div className="col-span-12 space-y-10 py-6">
           {/* Featured experiences: a paged rail of cards, as the design has it.
               Hidden when nothing is featured, so no empty heading shows. */}
           {(isLoadingFeatured || featuredExperiences.length > 0) && (
@@ -377,34 +371,12 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             isLoading={isLoadingTomorrow}
           />
 
-          {(isLoadingItineraries || itineraries.length > 0) && (
-            <CardRail title="Discover itineraries" subtitle="Several places in one plan">
-              {isLoadingItineraries ? (
-                <RowSkeleton cardClassName="aspect-square w-[184px]" />
-              ) : (
-                <>
-                  {itineraries.map((itinerary) => (
-                    <ItineraryCard
-                      key={itinerary.id}
-                      itinerary={itinerary}
-                      className={RAIL_CARD_RESPONSIVE_WIDTH}
-                    />
-                  ))}
-
-                  {/* Only when the API holds more than the row shows: a full
-                      row that is every itinerary there is would lead nowhere new */}
-                  {shouldShowSeeAll(itineraryTotal) && (
-                    <SeeAllCard
-                      href="/experiences/see-all?type=itineraries"
-                      previewPhotos={itineraries
-                        .slice(0, 3)
-                        .map((itinerary) => coverPhotoUrl(itinerary.photos, 'md'))}
-                      className={RAIL_CARD_RESPONSIVE_WIDTH}
-                    />
-                  )}
-                </>
-              )}
-            </CardRail>
+          {/* Keyed by city: a different city is a different pool, so the
+              section starts collapsed again */}
+          {isLoadingItineraries ? (
+            <DiscoverItinerariesSkeleton />
+          ) : (
+            <DiscoverItineraries key={userCity} itineraries={itineraries} />
           )}
 
           <CommunitiesSection
@@ -445,7 +417,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
            itself inside this 12-col grid; the Saved tab has its own layout. */
         <>
           {activeTab === 'saved' && (
-            <div className="col-span-12 space-y-10 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+            <div className="col-span-12 space-y-10 py-6">
               {/* Your Bucket Lists */}
               <section>
                 {/* Wraps rather than squeezing the button against the heading
@@ -512,7 +484,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             </div>
           )}
           {activeTab === 'hosting' && (
-            <div className="col-span-12 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+            <div className="col-span-12 py-6">
               <SectionHeader
                 title="Hosting"
                 subtitle="Every experience you host, in all statuses"
@@ -544,7 +516,7 @@ export const ExperiencesPageContent = ({ initialCategory }: { initialCategory: s
             </div>
           )}
           {activeTab === 'reserved' && (
-            <div className="col-span-12 py-6 md:col-span-10 md:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+            <div className="col-span-12 py-6">
               <ReservedTab
                 reservations={reservations}
                 reservedExperiences={reservedExperiences}

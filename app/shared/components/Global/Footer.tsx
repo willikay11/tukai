@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import moment from 'moment';
 
@@ -13,26 +14,36 @@ import { CityPicker } from '@/app/shared/components/Search/CityPicker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_HREF, SOCIAL_LINKS } from '@/config/contacts';
 import { useLocation } from '@/context/LocationContext';
+import { TUKAI_ROUTE } from '@/context/TukaiContext';
 
 const APP_STORE_URL = 'https://apps.apple.com/us/app/tukai/id6751051486';
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.tukaitravels.app&hl=en';
 
-// Discover is left out here. The footer lists the other destinations only
-const FOOTER_DESTINATIONS = DESTINATIONS.filter((destination) => destination.href !== '/');
+// Discover is left out here. The footer lists the other destinations, and
+// Plans, which has no place in the bottom bar
+const FOOTER_DESTINATIONS = [
+  ...DESTINATIONS.filter((destination) => destination.href !== '/'),
+  { label: 'Plans', href: '/plans', icon: 'Calendar03Icon' },
+];
 
 const HEADING = 'text-sm font-semibold text-gray-700';
 const LINK = 'text-gray-800 transition-colors hover:text-primary';
 
 export const Footer = () => {
+  const pathname = usePathname();
   const { city, isUsingLocation } = useLocation();
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const locationLabel = isUsingLocation ? 'Near me' : city;
 
-  // On mobile the floating bottom navigation sits over the bottom of the page,
-  // so the footer keeps its last line clear of it (24px offset + ~48px pill)
+  // The TukAI page fills the screen under the top bar, and has no foot
+  if (pathname === TUKAI_ROUTE) return null;
+
+  // Below 720px the bottom tab bar sits over the foot of the page, so the
+  // footer's last line clears it: the bar's 69px, a little air, and the
+  // home-indicator inset. Same 1360px column and 24px edge as the pages.
   return (
-    <footer className="border-t border-gray-100 bg-gray-50 pb-24 pt-8 md:pb-6 md:pt-10">
-      <div className="mx-4 md:mx-auto md:max-w-[1312px]">
+    <footer className="border-t border-gray-100 bg-gray-50 pb-[calc(72px+env(safe-area-inset-bottom))] pt-8 min-[720px]:pb-6 md:pt-10">
+      <div className="mx-auto max-w-[1360px] px-6">
         {/* Top: logo, location, contacts, company */}
         <div className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
           <div className="col-span-2 md:col-span-1">

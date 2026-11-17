@@ -349,7 +349,7 @@ export const PlaceDrawer = ({
                   </section>
                 </div>
 
-                <div className="sticky bottom-0 z-30 border-t border-surface-muted bg-white px-6 pb-[calc(12px_+_env(safe-area-inset-bottom))] pt-3">
+                <div className="sticky bottom-0 z-30 border-t border-surface-muted bg-white px-6 pb-[calc(12px_+_var(--drawer-inset-bottom,env(safe-area-inset-bottom)))] pt-3">
                   <PlaceDrawerFooter
                     place={place}
                     onAddReview={() => setView('review')}

@@ -7,6 +7,7 @@ import { addDays, format, isValid, parseISO } from 'date-fns';
 import type { useCreateExperienceFlow } from '@/app/(experiences)/experiences/create/hooks/useCreateExperienceFlow';
 import { DateField, TimeField } from '@/app/shared/components/Forms';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { useCreateCommunityDrawer } from '@/context/CreateCommunityDrawerContext';
 
 type Flow = ReturnType<typeof useCreateExperienceFlow>;
@@ -103,7 +104,9 @@ export const DateTypeStep = ({ flow, hasOwnedCommunity }: DateTypeStepProps) => 
   }, [formData.recurrenceStartDate, formData.recurrenceEndDate, formData.recurringDays]);
 
   const itineraryOrMultiDayStart =
-    formData.experienceType === 'multi-day' ? formData.multiDayStartDate : formData.itineraryStartDate;
+    formData.experienceType === 'multi-day'
+      ? formData.multiDayStartDate
+      : formData.itineraryStartDate;
   const itineraryOrMultiDayEnd =
     formData.experienceType === 'multi-day' ? formData.multiDayEndDate : formData.itineraryEndDate;
   const endMinDate =
@@ -131,7 +134,11 @@ export const DateTypeStep = ({ flow, hasOwnedCommunity }: DateTypeStepProps) => 
                   aria-checked={formData.community?.id === community.id}
                   onClick={() =>
                     update({
-                      community: { id: community.id, name: community.name, imageUrl: community.imageUrl },
+                      community: {
+                        id: community.id,
+                        name: community.name,
+                        imageUrl: community.imageUrl,
+                      },
                     })
                   }
                   className={`inline-flex max-w-full items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-5 text-15 font-medium active:scale-[0.98] ${
@@ -140,8 +147,7 @@ export const DateTypeStep = ({ flow, hasOwnedCommunity }: DateTypeStepProps) => 
                       : 'bg-surface text-gray-800'
                   }`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <PlainImage
                     src={community.imageUrl}
                     alt=""
                     className="h-10 w-10 flex-shrink-0 rounded-full bg-surface-brand object-cover"

@@ -2,6 +2,8 @@ export { ContextMoments } from './ContextMoments';
 export { MomentAvatar } from './MomentAvatar';
 export { MomentCard, MOMENT_CARD_WIDTH } from './MomentCard';
 export { MomentCardSkeleton } from './MomentCardSkeleton';
+export { momentLabel } from './moment-card';
+export { AlbumCrossfade } from './AlbumCrossfade';
 export { MomentDetail } from './MomentDetail';
 export { MomentDrawer } from './MomentDrawer';
 export { MomentsMasonry } from './MomentsMasonry';

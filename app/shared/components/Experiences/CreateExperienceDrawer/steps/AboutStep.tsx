@@ -5,6 +5,7 @@ import { useId, useState } from 'react';
 import type { useCreateExperienceFlow } from '@/app/(experiences)/experiences/create/hooks/useCreateExperienceFlow';
 import { PhotoField, RichTextField, TimeField } from '@/app/shared/components/Forms';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { useGetInterestCategories } from '@/app/shared/hooks/useAuth';
 import { useDeleteExperiencePhoto } from '@/app/shared/hooks/useExperiences';
 import { useGoogleMapsAutocomplete, usePlaces } from '@/app/shared/hooks/usePlaces';
@@ -20,7 +21,10 @@ interface AboutStepProps {
   onRequestWherePlace: () => void;
 }
 
-const uuid = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `tmp-${Date.now()}-${Math.random()}`);
+const uuid = () =>
+  typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `tmp-${Date.now()}-${Math.random()}`;
 
 /**
  * A Tukai-then-Google place combobox (tk-combo). Used for "Where will the
@@ -54,7 +58,10 @@ const PlaceCombobox = ({
   const tukaiPlaces: Place[] = (!googleOnly && placesResponse?.data?.results) || [];
 
   const showGoogle = googleOnly || (query.trim().length > 1 && tukaiPlaces.length === 0);
-  const { data: googleResponse } = useGoogleMapsAutocomplete(query, showGoogle && query.trim().length > 1);
+  const { data: googleResponse } = useGoogleMapsAutocomplete(
+    query,
+    showGoogle && query.trim().length > 1,
+  );
   const googlePredictions: GoogleMapsAutocompletePrediction[] = Array.isArray(googleResponse?.data)
     ? googleResponse.data
     : [];
@@ -110,8 +117,7 @@ const PlaceCombobox = ({
                     }}
                     className="flex min-h-14 items-center gap-3 rounded-[10px] px-2.5 text-left hover:bg-surface"
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <PlainImage
                       src={place.photos?.[0]?.photo}
                       alt=""
                       className="h-10 w-10 flex-shrink-0 rounded-lg bg-surface-brand object-cover"
@@ -121,13 +127,15 @@ const PlaceCombobox = ({
                         {place.title}
                       </span>
                       <span className="truncate text-13 text-ink-muted">
-                        {[place.categories?.[0]?.name, place.location?.city].filter(Boolean).join(' · ')}
+                        {[place.categories?.[0]?.name, place.location?.city]
+                          .filter(Boolean)
+                          .join(' · ')}
                       </span>
                     </span>
                   </button>
                 ))
               ) : (
-                <p className="px-2.5 py-2 text-14 leading-relaxed text-ink-muted">
+                <p className="text-14 px-2.5 py-2 leading-relaxed text-ink-muted">
                   No places on Tukai match &ldquo;{query}&rdquo;.
                 </p>
               )}
@@ -165,7 +173,9 @@ const PlaceCombobox = ({
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => {
                       onPickGoogle(prediction);
-                      setQuery(prediction.structured_formatting?.main_text ?? prediction.description);
+                      setQuery(
+                        prediction.structured_formatting?.main_text ?? prediction.description,
+                      );
                       setIsOpen(false);
                     }}
                     className="flex min-h-14 items-center gap-3 rounded-[10px] px-2.5 text-left hover:bg-surface"
@@ -186,11 +196,13 @@ const PlaceCombobox = ({
                   </button>
                 ))
               ) : (
-                <p className="px-2.5 py-2 text-14 leading-relaxed text-ink-muted">
+                <p className="text-14 px-2.5 py-2 leading-relaxed text-ink-muted">
                   No places found on Google Maps. Try a landmark, building or street name.
                 </p>
               )}
-              <span className="self-end px-2.5 pb-0.5 pt-1 text-xs text-ink-muted">Powered by Google</span>
+              <span className="self-end px-2.5 pb-0.5 pt-1 text-xs text-ink-muted">
+                Powered by Google
+              </span>
             </>
           )}
         </div>
@@ -330,8 +342,7 @@ export const AboutStep = ({ flow, onRequestWherePlace }: AboutStepProps) => {
         {isPlacePicked ? (
           <div className="flex items-center gap-3.5 rounded-xl bg-surface p-2.5">
             {formData.placeImageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <PlainImage
                 src={formData.placeImageUrl}
                 alt=""
                 className="h-14 w-14 flex-shrink-0 rounded-[10px] object-cover"
@@ -342,7 +353,9 @@ export const AboutStep = ({ flow, onRequestWherePlace }: AboutStepProps) => {
               </span>
             )}
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span className="truncate text-15 font-semibold text-gray-800">{formData.location}</span>
+              <span className="truncate text-15 font-semibold text-gray-800">
+                {formData.location}
+              </span>
             </span>
             <button
               type="button"
@@ -418,7 +431,9 @@ export const AboutStep = ({ flow, onRequestWherePlace }: AboutStepProps) => {
           placeholder="Search Google Maps for a meeting point"
           googleOnly
           onPickGoogle={(prediction) =>
-            update({ meetingPoint: prediction.structured_formatting?.main_text ?? prediction.description })
+            update({
+              meetingPoint: prediction.structured_formatting?.main_text ?? prediction.description,
+            })
           }
         />
         <TimeField
@@ -444,7 +459,9 @@ export const AboutStep = ({ flow, onRequestWherePlace }: AboutStepProps) => {
                 aria-pressed={isSelected}
                 onClick={() => toggleCategory(category)}
                 className={`inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full px-[18px] text-[14.5px] font-medium ${
-                  isSelected ? 'bg-gradient-to-b from-brand-mid to-brand-deep text-white' : 'bg-surface text-gray-800'
+                  isSelected
+                    ? 'bg-gradient-to-b from-brand-mid to-brand-deep text-white'
+                    : 'bg-surface text-gray-800'
                 }`}
               >
                 {category.icon && (

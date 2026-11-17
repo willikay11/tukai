@@ -91,26 +91,22 @@ export const PageFilters = () => {
     router.replace(`${pathname}?${params.toString()}`, { scroll: true });
   };
 
-  // Sticks under the top bar. The bar is sticky only from 720px up (the same
-  // breakpoint the header itself switches on in app/layout.tsx), so on a
-  // phone the row sticks to the top of the screen. 165px is the desktop bar,
-  // worked out from its classes there: the header is 68px (12px padding, the
-  // 44px auth button, 12px padding) and the search row is 74px (the 54px
-  // search bar and its 20px bottom padding), plus the bar's 1px border. Change
-  // this if the bar changes.
+  // Sticks under the top bar, whose height `TopBar` measures into
+  // --top-bar-h: it changes with the width, and on a phone with whether the
+  // search shows.
   const showRow = isFetching || chips.length > 0;
 
   return (
     <div
       className={cn(
         showRow &&
-          'sticky top-0 z-40 border-b border-gray-100 bg-white pb-3 pt-4 min-[720px]:top-[165px]',
+          'sticky top-[var(--top-bar-h,0px)] z-20 border-b border-gray-100 bg-white pb-3 pt-4',
       )}
     >
-      <div className="col-span-12 gap-4 px-4 md:px-0">
+      <div className="mx-auto w-full max-w-[1360px] px-6">
         <div className="w-full">
           <div className="grid grid-cols-12 gap-4">
-            <div className="relative col-span-12 md:col-span-10 md:col-start-2 md:mx-0 lg:col-span-10 lg:col-start-2 xl:col-span-10 xl:col-start-2 3xl:col-span-8 3xl:col-start-3 4xl:col-span-6 4xl:col-start-4">
+            <div className="relative col-span-12">
               {isFetching ? (
                 <PillsSkeleton />
               ) : (

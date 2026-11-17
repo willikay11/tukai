@@ -62,13 +62,11 @@ export const useMyTransactions = (userId?: string | null) => {
   );
   const payouts: HostPayout[] = useMemo(() => {
     const payload = payoutsResponse?.data;
-    return Array.isArray(payload) ? payload : (payload?.results ?? []);
+    return Array.isArray(payload) ? payload : payload?.results ?? [];
   }, [payoutsResponse]);
 
   const transactions: TransactionRow[] = useMemo(() => {
-    const experienceById = new Map(
-      reservedExperiences.map((experience) => [experience.id, experience]),
-    );
+    const experienceById = new Map(reservedExperiences.map((experience) => [experience.id, experience]));
 
     const ticketRows: TransactionRow[] = purchases.map((purchase) => {
       const experience = experienceById.get(purchase.ticket.experience);
@@ -99,7 +97,6 @@ export const useMyTransactions = (userId?: string | null) => {
   }, [purchases, reservedExperiences, payouts]);
 
   const summary: HostEarningsSummary | null = summaryResponse?.data ?? null;
-  // Balances are { amount, currency } objects; the Withdraw drawer takes the decimal string
   const availableBalance = summary?.availableBalance?.amount ?? '0';
 
   return {
@@ -110,7 +107,7 @@ export const useMyTransactions = (userId?: string | null) => {
       // Kept as the raw decimal string too - WithdrawDrawer takes it as such
       availableBalance,
       available: payoutAmount(availableBalance),
-      pending: payoutAmount(summary?.pendingBalance),
+      pending: payoutAmount(summary?.pendingBalance?.amount),
       // No lifetime "paid out" figure exists on the summary - only the three
       // live balances - so this totals every settled payout instead.
       paidOut: payouts

@@ -1,16 +1,19 @@
+import { useMemo } from 'react';
+
 import { useQueries } from '@tanstack/react-query';
 
-import { useMyPlaces } from '@/app/shared/hooks/usePlaces';
+import { claimStatusFrom } from '@/app/shared/components/Places/ConnectPlaceDrawer/useResolvedClaim';
+import { useGetCommunities } from '@/app/shared/hooks/useCommunities';
+import { useMyPlaces, usePlaceOwnerships } from '@/app/shared/hooks/usePlaces';
 import { useConnectPlaceDrawer } from '@/context/ConnectPlaceDrawerContext';
 import { usePlaceDrawer } from '@/context/PlaceDrawerContext';
 import { fetchPlaceBookingRequests, fetchPlaceReservationProfiles } from '@/services/place';
 import { Claim } from '@/types/claim';
+import { Community } from '@/types/community';
 import { Photo } from '@/types/photo';
 import { Place } from '@/types/place';
 import { PlaceBookingRequest } from '@/types/placeReservation';
 import { placePath } from '@/utils/detail-paths';
-
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
 const coverOf = (place: Place): string | undefined =>
   place.photos?.find((photo: Photo) => photo.isCover)?.photo || place.photos?.[0]?.photo;
@@ -109,12 +112,62 @@ export const useDashboardPlaces = (userId: string | undefined) => {
   );
 
   const connectDrawer = useConnectPlaceDrawer();
-  // "Approved" has no decidedAt on Claim yet - approximated with sentAt, see
-  // the Dashboard backend-gaps note.
-  const claims: Claim[] = (connectDrawer?.claims ?? []).filter(
-    (claim) =>
-      claim.status !== 'cancelled' &&
-      (claim.status !== 'approved' || Date.now() - new Date(claim.sentAt).getTime() < SEVEN_DAYS_MS),
+  const sentClaims = useMemo(
+    () => (connectDrawer?.claims ?? []).filter((claim) => claim.status !== 'cancelled'),
+    [connectDrawer?.claims],
+  );
+
+  // The stored claim keeps the status it was sent with, which is always
+  // 'review' - so a claim approved on the backend still read "Under review"
+  // here. The API is the source of truth: the store only remembers which
+  // places were claimed together (the API has no claim record to list), and
+  // each one's status is read live, by the same rule the Connect a place
+  // drawer uses for "Your claim".
+  const claimedPlaceIds = useMemo(
+    () => Array.from(new Set(sentClaims.flatMap((claim) => claim.places.map((place) => place.id)))),
+    [sentClaims],
+  );
+  const ownershipQueries = usePlaceOwnerships(claimedPlaceIds, Boolean(userId), 0);
+  const ownershipByPlace = new Map(
+    claimedPlaceIds.map((placeId, index) => {
+      const response = ownershipQueries[index]?.data;
+      return [
+        placeId,
+        response
+          ? { exists: Boolean(response.data), approved: Boolean(response.data?.approved) }
+          : null,
+      ];
+    }),
+  );
+
+  // Only for a rejection - the community's verification is what turns one down
+  const { data: communitiesResponse } = useGetCommunities({
+    page: 1,
+    enabled: Boolean(userId) && sentClaims.length > 0,
+    createdBy: userId,
+  });
+  const communities: Community[] = communitiesResponse?.data?.results ?? [];
+
+  // A place in My places is one the API already counts as this person's, so
+  // its claim is settled even before its ownership lookup comes back
+  const ownedPlaceIds = new Set(places.map((place) => place.id));
+
+  const resolvedClaims: Claim[] = sentClaims.map((claim) => ({
+    ...claim,
+    status:
+      claim.places.length > 0 && claim.places.every((place) => ownedPlaceIds.has(place.id))
+        ? 'approved'
+        : claimStatusFrom({
+            sentStatus: claim.status,
+            ownerships: claim.places.map((place) => ownershipByPlace.get(place.id) ?? null),
+            verificationStatus: communities.find((community) => community.id === claim.communityId)
+              ?.verificationStatus,
+          }),
+  }));
+
+  // An approved claim leaves this list: its place is in My places now
+  const claims: Claim[] = resolvedClaims.filter(
+    (claim) => claim.status !== 'cancelled' && claim.status !== 'approved',
   );
 
   return {

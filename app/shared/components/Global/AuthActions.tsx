@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { MomentComposer } from '@/app/shared/components/Moments';
+import { useMyPicture } from '@/app/shared/hooks/useAuth';
 import { useUnreadConversationCount } from '@/app/shared/hooks/useMessages';
 import { useUnreadNotificationCount } from '@/app/shared/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,7 @@ export const AuthActions = () => {
   const inboxDrawer = useInboxDrawer();
   const router = useRouter();
   const { data: session } = useSession();
+  const picture = useMyPicture();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
   const [isMomentComposerOpen, setIsMomentComposerOpen] = useState(false);
@@ -146,7 +148,7 @@ export const AuthActions = () => {
               />
               <div className="relative aspect-square h-8 w-8">
                 <TukaiImage
-                  src={session?.user?.image || ''}
+                  src={picture || ''}
                   // The button is already named "Account menu" via aria-label
                   // above, so the photo need not repeat the person's name
                   alt=""

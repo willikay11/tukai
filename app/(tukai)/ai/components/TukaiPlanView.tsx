@@ -1,9 +1,9 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { Fragment } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { PlainImage } from '@/app/shared/components/Images';
 import { toast } from '@/app/shared/hooks/useToast';
 import { useBucketListDrawer } from '@/context/BucketListDrawerContext';
 import type { TukaiItem, TukaiMessage } from '@/types/tukai';
@@ -125,7 +125,7 @@ export const TukaiPlanView = ({
                     >
                       <span className="relative h-16 w-16 flex-shrink-0">
                         {item?.photos[0] ? (
-                          <img
+                          <PlainImage
                             src={item.photos[0]}
                             alt=""
                             loading="lazy"

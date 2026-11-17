@@ -27,7 +27,7 @@ export const ExperienceDrawerFooter = ({
   const dateLine = formatExperienceHeaderDate(experience.startDate, experience.endDate);
 
   return (
-    <div className="sticky bottom-0 z-30 border-t border-line bg-white px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
+    <div className="sticky bottom-0 z-30 border-t border-line bg-white px-6 pb-[max(1rem,var(--drawer-inset-bottom,env(safe-area-inset-bottom)))] pt-4">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           {priceLine && (
