@@ -39,7 +39,7 @@ export const TukaiReplyView = ({
   communityTitles: Record<string, string>;
   onOpenItem: (item: TukaiItem | undefined) => void;
 }) => {
-  const { busy, ask, retry, showOnMap, selectPin } = useTukai();
+  const { busy, ask, retry, confirm, showOnMap, selectPin } = useTukai();
   const items = message.items ?? {};
   const isNew = Date.now() - new Date(message.createdAt).getTime() < REVEAL_MS;
 
@@ -124,6 +124,36 @@ export const TukaiReplyView = ({
 
   if (message.writing) {
     blocks.push({ key: 'writing', node: <TukaiWritingOptions writing={message.writing} /> });
+  }
+
+  if (message.requiresConfirmation) {
+    blocks.push({
+      key: 'confirm',
+      node: message.confirmation ? (
+        <p className="m-0 text-sm font-semibold text-gray-600">
+          {message.confirmation === 'confirmed' ? 'You confirmed this.' : 'You said no to this.'}
+        </p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => confirm(message.id, true)}
+            className="inline-flex min-h-11 items-center rounded-full bg-brand-ink px-5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+          >
+            Confirm
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => confirm(message.id, false)}
+            className="inline-flex min-h-11 items-center rounded-full bg-surface px-5 text-sm font-semibold text-gray-800 hover:bg-surface-brand disabled:opacity-50"
+          >
+            No, thanks
+          </button>
+        </div>
+      ),
+    });
   }
 
   if (hasPins && !isShownOnMap) {

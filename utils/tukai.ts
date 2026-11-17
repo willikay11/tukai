@@ -1,6 +1,5 @@
 import type {
   TukaiDraft,
-  TukaiHistoryTurn,
   TukaiItem,
   TukaiMessage,
   TukaiPlan,
@@ -118,34 +117,6 @@ export const planStopCount = (plan: TukaiPlan): number =>
   plan.days.reduce((total, day) => total + day.stops.length, 0);
 
 export const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
-
-/**
- * The last 14 messages as model turns. TukAI's own replies go back as the
- * JSON they came from, minus the items, so the model sees what it already
- * suggested. Failed replies are left out, and same-role neighbours merge.
- */
-export const buildTukaiHistory = (messages: TukaiMessage[]): TukaiHistoryTurn[] => {
-  const turns: TukaiHistoryTurn[] = [];
-  messages.slice(-14).forEach((m) => {
-    if (m.error) return;
-    const role = m.role === 'user' ? 'user' : 'assistant';
-    const content =
-      m.role === 'user'
-        ? m.text
-        : JSON.stringify({
-            reply: m.text || '',
-            cards: m.cards ?? [],
-            plan: m.plan ? m.plan.title : null,
-            draft: m.draft ? m.draft.title : null,
-            writing: m.writing ? m.writing.options : null,
-          });
-    const last = turns[turns.length - 1];
-    if (last && last.role === role) last.content += `\n${content}`;
-    else turns.push({ role, content });
-  });
-  while (turns.length && turns[0].role !== 'user') turns.shift();
-  return turns;
-};
 
 /**
  * The checks every reply goes through before it reaches the person: ids not

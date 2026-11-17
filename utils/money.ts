@@ -29,20 +29,17 @@ export const currencyFullName = (currency: string): string =>
   /usd|\$/i.test(currency) ? 'US dollars' : 'Kenya shillings';
 
 /**
- * A decimal string or number as "KES 34,839.80" - en-US grouping, always two
- * decimals. Blank and unparseable both read as zero, same rule as
- * `payoutAmount` in types/payment.ts (not imported here - utils/ sits below
- * types/ in the dependency layers, so this re-implements the same parse
- * rather than importing it).
+ * Money as "KES 34,839.80" - en-US grouping, always two decimals. Takes the
+ * API's `{ amount, currency }` object as well as a bare decimal string or
+ * number. Blank and unparseable both read as zero.
+ *
+ * The currency is the one passed in, else the money object's own, else KES.
  */
-export const formatCurrencyAmount = (
-  value: string | number | null | undefined,
-  currency = 'KES',
-): string => {
-  const parsed = typeof value === 'string' ? parseFloat(value) : value;
-  const amount = typeof parsed === 'number' && Number.isFinite(parsed) ? parsed : 0;
+export const formatCurrencyAmount = (value: MoneyLike, currency?: string): string => {
+  const amount = moneyAmount(value) ?? 0;
+  const code = currency ?? (typeof value === 'object' ? value?.currency : undefined) ?? 'KES';
 
-  return `${currency} ${amount.toLocaleString('en-US', {
+  return `${code} ${amount.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;

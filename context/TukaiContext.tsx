@@ -17,21 +17,27 @@ import { usePathname, useRouter } from 'next/navigation';
 import { toast } from '@/app/shared/hooks/useToast';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { useHostingPlan } from '@/context/HostingPlanContext';
-import { useLocation } from '@/context/LocationContext';
-import { sendTukaiMessage } from '@/services/tukai';
+import { confirmTukaiAction, deleteTukaiSession, sendTukaiMessage } from '@/services/tukai';
 import {
   addTukaiMessage,
   deleteTukaiChat,
+  patchTukaiMessage,
   removeTukaiMessage,
   setTukaiPlanRenewal,
   startTukaiChat,
 } from '@/slices/tukaiSlice';
 import type { RootState } from '@/store/store';
-import type { TukaiAccess, TukaiChat, TukaiMessage, TukaiPaywallReason } from '@/types/tukai';
+import type { ApiResponse } from '@/types/apiResponse';
+import type {
+  TukaiAccess,
+  TukaiChat,
+  TukaiMessage,
+  TukaiPaywallReason,
+  TukaiReply,
+} from '@/types/tukai';
 import {
   TUKAI_FREE_CHATS,
   TUKAI_FREE_MESSAGES,
-  buildTukaiHistory,
   chatTitleFrom,
   countUserMessages,
 } from '@/utils/tukai';
@@ -52,15 +58,34 @@ const ERROR_TEXT = 'TukAI could not answer just now. Check your connection and t
 const newId = (prefix: string) =>
   `${prefix}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
-const todayLine = () =>
-  new Date()
-    .toLocaleDateString('en-GB', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    })
-    .replace(',', '');
+/** A reply from the chat or confirm route as a chat message, or the error line. */
+const toAiMessage = (result: ApiResponse<TukaiReply>): TukaiMessage => {
+  const reply = result.data;
+  if (!result.success || !reply) {
+    return {
+      id: newId('m'),
+      role: 'ai',
+      createdAt: new Date().toISOString(),
+      text: ERROR_TEXT,
+      error: true,
+    };
+  }
+  return {
+    id: newId('m'),
+    role: 'ai',
+    createdAt: new Date().toISOString(),
+    text: reply.text,
+    error: reply.error,
+    cards: reply.cards,
+    plan: reply.plan ?? undefined,
+    draft: reply.draft ?? undefined,
+    writing: reply.writing ?? undefined,
+    suggestions: reply.suggestions,
+    items: reply.items,
+    requiresConfirmation: reply.requiresConfirmation || undefined,
+    actions: reply.actions?.length ? reply.actions : undefined,
+  };
+};
 
 type TukaiContextValue = {
   isSignedIn: boolean;
@@ -86,6 +111,8 @@ type TukaiContextValue = {
   openTukai: () => void;
   ask: (text: string) => void;
   retry: (messageId: string) => void;
+  /** Answers a reply that asked for confirmation before TukAI acts. */
+  confirm: (messageId: string, confirmed: boolean) => void;
   newChat: () => void;
   openChat: (chatId: string) => void;
   deleteChat: (chatId: string) => void;
@@ -133,7 +160,6 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
   const { data: session } = useSession();
   const { needAuth } = useAuthDialog();
   const hostingPlan = useHostingPlan();
-  const location = useLocation();
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useDispatch();
@@ -210,50 +236,33 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
     go();
   }, [needAuth, router]);
 
-  const run = useCallback(
-    async (chatId: string, messages: TukaiMessage[]) => {
+  /** Waits on one call to TukAI and adds its reply to the chat. */
+  const reply = useCallback(
+    async (chatId: string, call: () => Promise<ApiResponse<TukaiReply>>) => {
       busyRef.current = true;
       setBusy(true);
-      const question = [...messages].reverse().find((m) => m.role === 'user')?.text ?? '';
-      const result = await sendTukaiMessage({
-        messages: buildTukaiHistory(messages),
-        question,
-        city: location.city || location.homeCity || 'Nairobi',
-        lat: location.lat,
-        lng: location.lng,
-        today: todayLine(),
-      });
-      const reply = result.data;
-      const message: TukaiMessage =
-        result.success && reply
-          ? {
-              id: newId('m'),
-              role: 'ai',
-              createdAt: new Date().toISOString(),
-              text: reply.text,
-              error: reply.error,
-              cards: reply.cards,
-              plan: reply.plan ?? undefined,
-              draft: reply.draft ?? undefined,
-              writing: reply.writing ?? undefined,
-              suggestions: reply.suggestions,
-              items: reply.items,
-            }
-          : {
-              id: newId('m'),
-              role: 'ai',
-              createdAt: new Date().toISOString(),
-              text: ERROR_TEXT,
-              error: true,
-            };
+      const message = toAiMessage(await call());
       dispatch(addTukaiMessage({ chatId, message }));
       // A new reply takes the map, unless the person picked an older one
       setMapMessageId(null);
       setSelectedPinId(null);
       busyRef.current = false;
       setBusy(false);
+      return message;
     },
-    [dispatch, location.city, location.homeCity, location.lat, location.lng],
+    [dispatch],
+  );
+
+  /**
+   * Sends the latest message. The chat's id is the agent's session id, and
+   * the agent keeps the history, so only the new message goes.
+   */
+  const run = useCallback(
+    (chatId: string, messages: TukaiMessage[]) => {
+      const message = [...messages].reverse().find((m) => m.role === 'user')?.text ?? '';
+      return reply(chatId, () => sendTukaiMessage({ sessionId: chatId, message }));
+    },
+    [reply],
   );
 
   const ask = useCallback(
@@ -310,6 +319,25 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
     [currentChat, dispatch, run],
   );
 
+  const confirm = useCallback(
+    async (messageId: string, confirmed: boolean) => {
+      if (busyRef.current || !currentChat) return;
+      const chatId = currentChat.id;
+      const confirmation = confirmed ? 'confirmed' : 'declined';
+      dispatch(patchTukaiMessage({ chatId, messageId, patch: { confirmation } }));
+      const message = await reply(chatId, () =>
+        confirmTukaiAction({ sessionId: chatId, confirmed }),
+      );
+      // Failed: the question stays open so the person can answer again
+      if (message.error) {
+        dispatch(removeTukaiMessage({ chatId, messageId: message.id }));
+        dispatch(patchTukaiMessage({ chatId, messageId, patch: { confirmation: undefined } }));
+        toast({ description: ERROR_TEXT });
+      }
+    },
+    [currentChat, dispatch, reply],
+  );
+
   const showPaywall = useCallback((reason: TukaiPaywallReason) => {
     setPaywallReason(reason);
     setView('paywall');
@@ -341,6 +369,8 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
   const deleteChat = useCallback(
     (chatId: string) => {
       dispatch(deleteTukaiChat(chatId));
+      // Ends the agent's session too; the chat is gone here either way
+      deleteTukaiSession(chatId);
       if (chatId === currentChatId) {
         setCurrentChatId(null);
         setMapMessageId(null);
@@ -416,6 +446,7 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       openTukai,
       ask,
       retry,
+      confirm,
       newChat,
       openChat,
       deleteChat,
@@ -464,6 +495,7 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       openTukai,
       ask,
       retry,
+      confirm,
       newChat,
       openChat,
       deleteChat,

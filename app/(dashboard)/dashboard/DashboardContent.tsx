@@ -58,9 +58,9 @@ export const DashboardContent = () => {
       <div className="flex flex-wrap items-start gap-7 pt-[18px]">
         <aside
           aria-label="Account balance"
-          className="flex min-w-0 flex-[1_1_340px] max-w-[380px] flex-col gap-2"
+          className="flex min-w-0 max-w-[380px] flex-[1_1_340px] flex-col gap-2"
         >
-          <DashboardBalanceCard userId={userId} />
+          <DashboardBalanceCard />
           <HostingPlanCard ownedCommunities={ownedCommunities} />
         </aside>
 
