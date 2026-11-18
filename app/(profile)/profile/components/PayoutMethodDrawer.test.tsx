@@ -12,6 +12,8 @@ const patchPhone = jest.fn();
 const createBank = jest.fn();
 const patchBank = jest.fn();
 const makeActive = jest.fn();
+const sendOtp = jest.fn();
+const verifyOtp = jest.fn();
 let wallets: Wallet[] = [];
 
 jest.mock('@/app/(experiences)/hooks/usePayment', () => ({
@@ -21,6 +23,8 @@ jest.mock('@/app/(experiences)/hooks/usePayment', () => ({
   useCreateBankWallet: () => ({ mutate: createBank, isPending: false }),
   usePatchBankWallet: () => ({ mutate: patchBank, isPending: false }),
   useSetActiveWallet: () => ({ mutate: makeActive, isPending: false }),
+  useSendWalletOtp: () => ({ mutateAsync: sendOtp, isPending: false }),
+  useVerifyWalletOtp: () => ({ mutateAsync: verifyOtp, isPending: false }),
 }));
 
 const toast = jest.fn();
@@ -182,5 +186,97 @@ describe('payout method settings', () => {
     await userEvent.click(saveButton());
 
     expect(await screen.findByText('That number is already in use.')).toBeInTheDocument();
+  });
+
+  // DEV-448: payouts only go to a verified M-Pesa number
+  describe('verifying the M-Pesa number', () => {
+    beforeEach(() => {
+      sendOtp.mockResolvedValue({ sentTo: '+254***678' });
+      verifyOtp.mockResolvedValue({ id: 'w2', isVerified: true });
+    });
+
+    it('asks for the code straight after a new number is saved', async () => {
+      createPhone.mockImplementation((_data, { onSuccess }) =>
+        onSuccess({ data: { id: 'w2', walletType: 'phone', isVerified: false } }),
+      );
+      renderDrawer();
+
+      await userEvent.type(screen.getByLabelText('M-Pesa number'), '712345678');
+      await userEvent.type(screen.getByLabelText('Name on the M-Pesa account'), 'Wanjiku Maina');
+      await userEvent.click(saveButton());
+
+      expect(makeActive).toHaveBeenCalledWith('w2');
+      expect(sendOtp).toHaveBeenCalledWith('w2');
+      expect(await screen.findByText(/Enter the 6-digit code we sent to/)).toBeInTheDocument();
+      expect(screen.getByText('+254***678')).toBeInTheDocument();
+    });
+
+    it('treats a changed number as unverified even when the update response is silent', async () => {
+      wallets = [aPhoneWallet({ isVerified: true })];
+      patchPhone.mockImplementation((_data, { onSuccess }) => onSuccess({ data: { id: 'w1' } }));
+      renderDrawer();
+
+      await userEvent.clear(screen.getByLabelText('M-Pesa number'));
+      await userEvent.type(screen.getByLabelText('M-Pesa number'), '798765432');
+      await userEvent.type(screen.getByLabelText('Name on the M-Pesa account'), 'Wanjiku Maina');
+      await userEvent.click(saveButton());
+
+      expect(sendOtp).toHaveBeenCalledWith('w1');
+    });
+
+    it('confirms and closes once the 6th digit checks out', async () => {
+      const onClose = jest.fn();
+      createPhone.mockImplementation((_data, { onSuccess }) =>
+        onSuccess({ data: { id: 'w2', walletType: 'phone', isVerified: false } }),
+      );
+      renderDrawer(onClose);
+
+      await userEvent.type(screen.getByLabelText('M-Pesa number'), '712345678');
+      await userEvent.type(screen.getByLabelText('Name on the M-Pesa account'), 'Wanjiku Maina');
+      await userEvent.click(saveButton());
+      await userEvent.type(await screen.findByLabelText('6-digit code'), '123456');
+
+      expect(verifyOtp).toHaveBeenCalledWith({ walletId: 'w2', otp: '123456' });
+      expect(toast).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'M-Pesa number verified' }),
+      );
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it('says why and keeps the code screen open for a wrong code', async () => {
+      verifyOtp.mockRejectedValue({
+        status: 400,
+        errors: [{ code: 'invalid_otp', detail: 'Invalid code.', attr: 'otp' }],
+      });
+      createPhone.mockImplementation((_data, { onSuccess }) =>
+        onSuccess({ data: { id: 'w2', walletType: 'phone', isVerified: false } }),
+      );
+      renderDrawer();
+
+      await userEvent.type(screen.getByLabelText('M-Pesa number'), '712345678');
+      await userEvent.type(screen.getByLabelText('Name on the M-Pesa account'), 'Wanjiku Maina');
+      await userEvent.click(saveButton());
+      await userEvent.type(await screen.findByLabelText('6-digit code'), '000000');
+
+      expect(await screen.findByRole('alert')).toHaveTextContent("That code isn't right");
+      expect(screen.getByLabelText('6-digit code')).toBeInTheDocument();
+    });
+
+    it('offers to verify a saved number that is not verified yet', async () => {
+      wallets = [aPhoneWallet({ isVerified: false })];
+      renderDrawer();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Verify now' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Send code' }));
+
+      expect(sendOtp).toHaveBeenCalledWith('w1');
+    });
+
+    it('says nothing about verifying a verified number', () => {
+      wallets = [aPhoneWallet({ isVerified: true })];
+      renderDrawer();
+
+      expect(screen.queryByRole('button', { name: 'Verify now' })).not.toBeInTheDocument();
+    });
   });
 });

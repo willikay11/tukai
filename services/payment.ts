@@ -234,3 +234,47 @@ export async function setActiveWallet(walletId: string) {
     throw new Error(parseApiError(error.response?.data, 'Could not make this the active wallet'));
   }
 }
+
+/**
+ * Texts a 6-digit code to an M-Pesa wallet's number (DEV-448). Payouts only
+ * go to a verified wallet; bank wallets need no code. A new code can be
+ * asked for once a minute, and each lasts 10 minutes.
+ *
+ * Returns the masked number it went to. Errors keep the API's `errors`
+ * list, whose `code` says why: not_required, already_verified, cooldown
+ * (429) or no_phone.
+ */
+export async function sendWalletOtp(walletId: string): Promise<{ sentTo: string }> {
+  try {
+    const api = await apiWithToken();
+    const response = await api.post(`/v1/payments/wallets/${walletId}/send-otp/`);
+    return { sentTo: response.data?.sent_to ?? '' };
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      message: parseApiError(error.response?.data, 'Could not send the code'),
+      errors: error.response?.data?.errors,
+    };
+  }
+}
+
+/**
+ * Checks the code from sendWalletOtp and returns the wallet, now verified.
+ * Error codes: invalid_otp, otp_expired, no_otp, max_attempts_exceeded
+ * (after 5 wrong codes), already_verified, not_required.
+ */
+export async function verifyWalletOtp(walletId: string, otp: string) {
+  try {
+    const api = await apiWithToken();
+    const response = await api.post(`/v1/payments/wallets/${walletId}/verify-otp/`, { otp });
+    return parseSnakeToCamel(response.data);
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      message: parseApiError(error.response?.data, 'Could not check the code'),
+      errors: error.response?.data?.errors,
+    };
+  }
+}
