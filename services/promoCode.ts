@@ -54,7 +54,14 @@ export async function createPromoCode(payload: CreatePromoCode): Promise<PromoCo
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
 
-    throw new Error(parseApiError(error.response?.data, 'Could not create this code'));
+    // The API's error list rides along, so a caller can act on a code (e.g.
+    // plan_limit_discount_codes)
+    throw Object.assign(
+      new Error(parseApiError(error.response?.data, 'Could not create this code')),
+      {
+        errors: error.response?.data?.errors,
+      },
+    );
   }
 }
 
@@ -77,7 +84,12 @@ export async function updatePromoCode(id: string, payload: UpdatePromoCode): Pro
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
 
-    throw new Error(parseApiError(error.response?.data, 'Could not save this code'));
+    throw Object.assign(
+      new Error(parseApiError(error.response?.data, 'Could not save this code')),
+      {
+        errors: error.response?.data?.errors,
+      },
+    );
   }
 }
 

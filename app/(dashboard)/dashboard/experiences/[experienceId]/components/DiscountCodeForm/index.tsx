@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { IconComponent } from '@/app/shared/components/Icons';
+import { usePlanLimitAction } from '@/app/shared/hooks/usePlanLimitAction';
 import { useCreatePromoCode, useUpdatePromoCode } from '@/app/shared/hooks/usePromoCodes';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Button } from '@/components/ui/button';
@@ -62,6 +63,7 @@ export const DiscountCodeForm = ({
   onGenerated,
 }: DiscountCodeFormProps) => {
   const { toast } = useToast();
+  const planLimitAction = usePlanLimitAction();
   const { mutate: createCode, isPending: isCreating } = useCreatePromoCode();
   const { mutate: updateCode, isPending: isSaving } = useUpdatePromoCode();
 
@@ -100,6 +102,8 @@ export const DiscountCodeForm = ({
         title: editing ? 'Could not save this code' : 'Could not generate this code',
         description: error.message,
         variant: 'destructive',
+        // Discount codes aren't on every plan: offer the way to one that has them
+        action: planLimitAction(error),
       });
 
     if (editing) {

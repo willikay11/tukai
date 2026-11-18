@@ -487,6 +487,20 @@ describe('Experience Service', () => {
         status: 400,
         success: false,
         message: 'Cannot publish an experience without tickets.',
+        errors: [{ detail: 'Cannot publish an experience without tickets.' }],
+      });
+    });
+
+    // Callers act on the code, e.g. offering the hosting plans (DEV-351)
+    it('keeps the API error list, codes included', async () => {
+      const errors = [
+        { code: 'plan_limit_live_experiences', detail: 'Your Basic plan allows 3…', attr: null },
+      ];
+      mockApi.post.mockRejectedValue({ response: { status: 400, data: { errors } } });
+
+      await expect(experienceService.publishExperience('exp-1')).rejects.toMatchObject({
+        status: 400,
+        errors,
       });
     });
   });
