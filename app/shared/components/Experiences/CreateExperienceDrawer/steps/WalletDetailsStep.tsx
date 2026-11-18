@@ -7,6 +7,7 @@ import { SelectField } from '@/app/shared/components/Forms';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Input } from '@/components/ui/input';
+import { toKenyanE164 } from '@/utils/phone';
 
 type Flow = ReturnType<typeof useCreateExperienceFlow>;
 
@@ -37,10 +38,17 @@ const PayoutPill = ({
     aria-checked={active}
     onClick={onClick}
     className={`inline-flex min-h-[52px] items-center gap-2.5 whitespace-nowrap rounded-full py-0 pl-4 pr-5 text-15 font-medium active:scale-[0.98] ${
-      active ? 'bg-gradient-to-b from-brand-mid to-brand-deep text-white' : 'bg-surface text-gray-800'
+      active
+        ? 'bg-gradient-to-b from-brand-mid to-brand-deep text-white'
+        : 'bg-surface text-gray-800'
     }`}
   >
-    <IconComponent iconName={icon} size={22} color="currentColor" variant={active ? 'bulk' : 'twotone'} />
+    <IconComponent
+      iconName={icon}
+      size={22}
+      color="currentColor"
+      variant={active ? 'bulk' : 'twotone'}
+    />
     {children}
   </button>
 );
@@ -126,11 +134,10 @@ const bareInputClassName =
  * because nothing else in this screen would ever actually call
  * createBankWallet/patchBankWallet otherwise.
  *
- * Billing "Postcode" has no field on the Wallet API (`types/payment.ts`) -
- * composed into the single `address` string on save, same choice the old
- * `BankAccountDetailsForm` already made. The bank-only "Phone number" field
- * likewise has nowhere to persist to - kept as local-only state, never sent.
- * See the create_experience_drawer_backend_gaps memory (item 4).
+ * Billing postcode, town and the bank-only "Phone number" are their own
+ * fields on the API (`postcode`, `town`, `contact_phone`, DEV-426). A bank
+ * wallet saved before those existed has them joined into `address`, so the
+ * town falls back to that.
  */
 export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
   const { toast } = useToast();
@@ -164,10 +171,9 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
     accountNumber: existingBankWallet?.accountNumber ?? '',
     swiftCode: existingBankWallet?.swiftCode ?? '',
     billingCountry: existingBankWallet?.country ?? '',
-    postcode: '',
-    townCity: existingBankWallet?.address ?? '',
-    // Not part of the Wallet API - local only, see the doc comment above.
-    phoneNumber: '',
+    postcode: existingBankWallet?.postcode ?? '',
+    townCity: existingBankWallet?.town ?? existingBankWallet?.address ?? '',
+    phoneNumber: existingBankWallet?.contactPhone ?? '',
   });
   const [bankErrors, setBankErrors] = useState<Record<string, string>>({});
 
@@ -183,7 +189,9 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
       accountNumber: existingBankWallet.accountNumber ?? prev.accountNumber,
       swiftCode: existingBankWallet.swiftCode ?? prev.swiftCode,
       billingCountry: existingBankWallet.country ?? prev.billingCountry,
-      townCity: existingBankWallet.address ?? prev.townCity,
+      postcode: existingBankWallet.postcode ?? prev.postcode,
+      townCity: existingBankWallet.town ?? existingBankWallet.address ?? prev.townCity,
+      phoneNumber: existingBankWallet.contactPhone ?? prev.phoneNumber,
     }));
     // Only when the saved wallet itself changes identity, not on every render
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -192,11 +200,7 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
   const handlePhoneBlur = () => {
     const digits = formData.phoneNumber.replace(/\D/g, '');
     if (digits.length < 9) return;
-    const normalized = digits.startsWith('254')
-      ? `+${digits}`
-      : digits.startsWith('0')
-        ? `+254${digits.slice(1)}`
-        : `+254${digits}`;
+    const normalized = toKenyanE164(formData.phoneNumber);
 
     if (existingPhoneWallet?.id) {
       if (existingPhoneWallet.phone === normalized) return;
@@ -204,7 +208,11 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
         { walletId: existingPhoneWallet.id, phone: normalized },
         {
           onSuccess: () =>
-            toast({ title: 'Wallet updated', description: 'Your M-Pesa number was saved.', variant: 'success' }),
+            toast({
+              title: 'Wallet updated',
+              description: 'Your M-Pesa number was saved.',
+              variant: 'success',
+            }),
           onError: (error: Error) =>
             toast({ title: 'Unable to save', description: error.message, variant: 'destructive' }),
         },
@@ -214,7 +222,11 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
         { phone: normalized },
         {
           onSuccess: () =>
-            toast({ title: 'Wallet saved', description: 'Your M-Pesa number was saved.', variant: 'success' }),
+            toast({
+              title: 'Wallet saved',
+              description: 'Your M-Pesa number was saved.',
+              variant: 'success',
+            }),
           onError: (error: Error) =>
             toast({ title: 'Unable to save', description: error.message, variant: 'destructive' }),
         },
@@ -236,10 +248,7 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
     setBankErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    // No Postcode/Town fields on CreateBankWallet/UpdateBankWallet - composed
-    // into the single `address` string client-side. See the
-    // create_experience_drawer_backend_gaps memory, item 4.
-    const address = [bank.postcode.trim(), bank.townCity.trim()].filter(Boolean).join(', ');
+    // Optional fields left blank are left out of the request, not sent empty
     const payload = {
       bankName: bank.bankName.trim(),
       accountNumber: bank.accountNumber.trim(),
@@ -248,17 +257,26 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
       branchCode: bank.branchCode.trim(),
       country: bank.country,
       swiftCode: bank.swiftCode.trim().toUpperCase(),
-      address,
+      postcode: bank.postcode.trim(),
+      town: bank.townCity.trim(),
+      contactPhone: toKenyanE164(bank.phoneNumber),
     };
     const onSettled = {
       onSuccess: () =>
-        toast({ title: 'Wallet saved', description: 'Your bank account details were saved.', variant: 'success' }),
+        toast({
+          title: 'Wallet saved',
+          description: 'Your bank account details were saved.',
+          variant: 'success',
+        }),
       onError: (error: Error) =>
         toast({ title: 'Unable to save', description: error.message, variant: 'destructive' }),
     };
 
     if (existingBankWallet?.id) {
-      flow.walletMutations.patchBankWallet({ walletId: existingBankWallet.id, ...payload }, onSettled);
+      flow.walletMutations.patchBankWallet(
+        { walletId: existingBankWallet.id, ...payload },
+        onSettled,
+      );
     } else {
       flow.walletMutations.createBankWallet(payload, onSettled);
     }
@@ -276,7 +294,9 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
       </div>
 
       <div className="flex flex-col gap-3">
-        <span className="text-15 font-semibold text-gray-800">Select your preferred payout method</span>
+        <span className="text-15 font-semibold text-gray-800">
+          Select your preferred payout method
+        </span>
         <div className="flex flex-wrap gap-2.5" role="radiogroup">
           <PayoutPill
             active={formData.paymentMethod === 'phone'}
@@ -326,7 +346,9 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
             containerClassName={inputContainer}
             icon={<IconComponent iconName="BankIcon" size={20} color="#5B6B66" />}
           />
-          {bankErrors.bankName && <span className="text-[13.5px] text-danger-deep">{bankErrors.bankName}</span>}
+          {bankErrors.bankName && (
+            <span className="text-[13.5px] text-danger-deep">{bankErrors.bankName}</span>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <Input
               placeholder="Branch"
@@ -343,7 +365,9 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
               icon={<IconComponent iconName="Building03Icon" size={20} color="#5B6B66" />}
             />
           </div>
-          {bankErrors.bankBranch && <span className="text-[13.5px] text-danger-deep">{bankErrors.bankBranch}</span>}
+          {bankErrors.bankBranch && (
+            <span className="text-[13.5px] text-danger-deep">{bankErrors.bankBranch}</span>
+          )}
           <Input
             placeholder="Account name"
             value={bank.accountHolderName}
@@ -403,16 +427,14 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
               icon={<IconComponent iconName="Location01Icon" size={20} color="#5B6B66" />}
             />
           </div>
-          {bankErrors.townCity && <span className="text-[13.5px] text-danger-deep">{bankErrors.townCity}</span>}
+          {bankErrors.townCity && (
+            <span className="text-[13.5px] text-danger-deep">{bankErrors.townCity}</span>
+          )}
 
           <div className="-mx-6 h-px bg-gray-200" aria-hidden="true" />
 
-          {/* Bank-only "Phone number" field, per the handoff. It has no
-              backing field on CreateBankWallet/UpdateBankWallet (`types/
-              payment.ts` has only `phone` on the separate phone-wallet
-              types) - rendered so the UI matches the design, kept as
-              local-only state, and never sent to the API. See the
-              create_experience_drawer_backend_gaps memory, item 4. */}
+          {/* Bank-only "Phone number": the account holder's contact number
+              (`contact_phone`), not where payouts go. Optional. */}
           <Field label="Phone number">
             <PhoneInput
               value={bank.phoneNumber}
@@ -424,7 +446,9 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
           <button
             type="button"
             onClick={handleSaveBankDetails}
-            disabled={flow.walletMutations.isCreatingBankWallet || flow.walletMutations.isPatchingBankWallet}
+            disabled={
+              flow.walletMutations.isCreatingBankWallet || flow.walletMutations.isPatchingBankWallet
+            }
             className="h-11 self-start rounded-full bg-lime px-6 text-[14.5px] font-semibold text-brand-ink hover:bg-lime-dark disabled:opacity-60"
           >
             {flow.walletMutations.isCreatingBankWallet || flow.walletMutations.isPatchingBankWallet

@@ -30,15 +30,11 @@ type Draft = {
 
 const digits = (value: string) => value.replace(/\D/g, '');
 
-/**
- * Not sent anywhere: the backend has no field for a name on an M-Pesa
- * wallet, only `phone`. Kept in the form because the handoff asks for it,
- * validated like any other field, but it never reaches the API.
- */
+/** The form as it opens: the saved wallets, M-Pesa holder name included. */
 const draftFrom = (phoneWallet?: Wallet, bankWallet?: Wallet, active?: Wallet): Draft => ({
   method: active?.walletType === 'bank' ? 'bank' : 'mpesa',
   phone: phoneWallet?.phone ? digits(phoneWallet.phone).replace(/^254/, '') : '',
-  mpName: '',
+  mpName: phoneWallet?.accountHolderName ?? '',
   bank: bankWallet?.bankName ?? '',
   branch: bankWallet?.bankBranch ?? '',
   accName: bankWallet?.accountHolderName ?? '',
@@ -47,11 +43,19 @@ const draftFrom = (phoneWallet?: Wallet, bankWallet?: Wallet, active?: Wallet): 
 
 const sameDraft = (a: Draft, b: Draft) => JSON.stringify(a) === JSON.stringify(b);
 
-export const PayoutMethodDrawer = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+export const PayoutMethodDrawer = ({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) => {
   const { toast } = useToast();
   const { data: walletsResponse } = useGetWallets();
   const walletsPayload = walletsResponse?.data;
-  const wallets: Wallet[] = Array.isArray(walletsPayload) ? walletsPayload : walletsPayload?.results ?? [];
+  const wallets: Wallet[] = Array.isArray(walletsPayload)
+    ? walletsPayload
+    : (walletsPayload?.results ?? []);
 
   const phoneWallet = wallets.find((wallet) => wallet.walletType === 'phone');
   const bankWallet = wallets.find((wallet) => wallet.walletType === 'bank');
@@ -117,38 +121,44 @@ export const PayoutMethodDrawer = ({ isOpen, onClose }: { isOpen: boolean; onClo
       const message = `Payout method saved. Withdrawals go to M-Pesa ending ${digits(draft.phone).slice(-3)} from now on.`;
 
       if (phoneWallet) {
-        patchPhone({ walletId: phoneWallet.id, phone }, {
-          onSuccess: () => activateThenFinish(phoneWallet.id, message),
-          onError,
-        });
+        patchPhone(
+          { walletId: phoneWallet.id, phone, accountHolderName: draft.mpName.trim() },
+          {
+            onSuccess: () => activateThenFinish(phoneWallet.id, message),
+            onError,
+          },
+        );
       } else {
-        createPhone({ phone }, {
-          onSuccess: (response) => activateThenFinish(response?.data?.id, message),
-          onError,
-        });
+        createPhone(
+          { phone, accountHolderName: draft.mpName.trim() },
+          {
+            onSuccess: (response) => activateThenFinish(response?.data?.id, message),
+            onError,
+          },
+        );
       }
       return;
     }
 
-    // `branchCode`, `swiftCode` and `address` have no field on this screen -
-    // the create endpoint requires all three (see profile_page_backend_gaps.md)
+    // Branch code, SWIFT code and address are optional for Kenyan banks and
+    // have no field here, so they're left out rather than sent empty
     const bankFields = {
       bankName: draft.bank.trim(),
       bankBranch: draft.branch.trim(),
       accountHolderName: draft.accName.trim(),
       accountNumber: digits(draft.accNo),
-      branchCode: '',
       country: 'KE',
-      swiftCode: '',
-      address: '',
     };
     const message = `Payout method saved. Withdrawals go to ${draft.bank} ending ${digits(draft.accNo).slice(-4)} from now on.`;
 
     if (bankWallet) {
-      patchBank({ walletId: bankWallet.id, ...bankFields }, {
-        onSuccess: () => activateThenFinish(bankWallet.id, message),
-        onError,
-      });
+      patchBank(
+        { walletId: bankWallet.id, ...bankFields },
+        {
+          onSuccess: () => activateThenFinish(bankWallet.id, message),
+          onError,
+        },
+      );
     } else {
       createBank(bankFields, {
         onSuccess: (response) => activateThenFinish(response?.data?.id, message),
@@ -200,10 +210,17 @@ export const PayoutMethodDrawer = ({ isOpen, onClose }: { isOpen: boolean; onClo
                     }}
                     className={cn(
                       'inline-flex h-[52px] items-center gap-2.5 whitespace-nowrap rounded-full pl-[18px] pr-6 text-[15.5px] font-medium active:scale-[0.98]',
-                      on ? 'bg-gradient-to-b from-brand-mid to-brand-deep text-white' : 'bg-surface text-gray-900',
+                      on
+                        ? 'bg-gradient-to-b from-brand-mid to-brand-deep text-white'
+                        : 'bg-surface text-gray-900',
                     )}
                   >
-                    <IconComponent iconName={icon} variant={on ? 'bulk' : 'twotone'} size={21} color="currentColor" />
+                    <IconComponent
+                      iconName={icon}
+                      variant={on ? 'bulk' : 'twotone'}
+                      size={21}
+                      color="currentColor"
+                    />
                     {label}
                   </button>
                 );
@@ -250,7 +267,10 @@ export const PayoutMethodDrawer = ({ isOpen, onClose }: { isOpen: boolean; onClo
                   autoComplete="off"
                   value={draft.mpName}
                   onChange={(event) => {
-                    setDraft((current) => ({ ...current, mpName: event.target.value.slice(0, 50) }));
+                    setDraft((current) => ({
+                      ...current,
+                      mpName: event.target.value.slice(0, 50),
+                    }));
                     setError(null);
                   }}
                   placeholder="As registered with Safaricom"
@@ -299,7 +319,10 @@ export const PayoutMethodDrawer = ({ isOpen, onClose }: { isOpen: boolean; onClo
                   autoComplete="off"
                   value={draft.branch}
                   onChange={(event) => {
-                    setDraft((current) => ({ ...current, branch: event.target.value.slice(0, 40) }));
+                    setDraft((current) => ({
+                      ...current,
+                      branch: event.target.value.slice(0, 40),
+                    }));
                     setError(null);
                   }}
                   placeholder="e.g. Westlands"
@@ -317,7 +340,10 @@ export const PayoutMethodDrawer = ({ isOpen, onClose }: { isOpen: boolean; onClo
                   autoComplete="off"
                   value={draft.accName}
                   onChange={(event) => {
-                    setDraft((current) => ({ ...current, accName: event.target.value.slice(0, 50) }));
+                    setDraft((current) => ({
+                      ...current,
+                      accName: event.target.value.slice(0, 50),
+                    }));
                     setError(null);
                   }}
                   placeholder="As it appears on your statement"
@@ -357,8 +383,8 @@ export const PayoutMethodDrawer = ({ isOpen, onClose }: { isOpen: boolean; onClo
               className="mt-px flex-shrink-0 text-brand"
             />
             <span>
-              For your safety, we send a code to your current number before a new payout method takes
-              effect. Withdrawals pause until you confirm it.
+              For your safety, we send a code to your current number before a new payout method
+              takes effect. Withdrawals pause until you confirm it.
             </span>
           </p>
 

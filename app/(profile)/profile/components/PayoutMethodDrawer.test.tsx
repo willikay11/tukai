@@ -63,15 +63,21 @@ describe('payout method settings', () => {
     expect(screen.getByLabelText('M-Pesa number')).toHaveValue('712345815');
   });
 
+  // DEV-425: the name is saved with the wallet, so it comes back
+  it('shows the saved name on the M-Pesa account', () => {
+    wallets = [aPhoneWallet({ accountHolderName: 'Wanjiku Maina' })];
+    renderDrawer();
+
+    expect(screen.getByLabelText('Name on the M-Pesa account')).toHaveValue('Wanjiku Maina');
+  });
+
   it('keeps Save changes disabled for a number that is too short', async () => {
     renderDrawer();
 
     await userEvent.type(screen.getByLabelText('M-Pesa number'), '12345');
 
     expect(saveButton()).toBeDisabled();
-    expect(
-      screen.getByText('Enter the M-Pesa number withdrawals go to.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Enter the M-Pesa number withdrawals go to.')).toBeInTheDocument();
   });
 
   it('requires the name on the M-Pesa account too', async () => {
@@ -90,7 +96,10 @@ describe('payout method settings', () => {
     await userEvent.type(screen.getByLabelText('Name on the M-Pesa account'), 'Wanjiku Maina');
     await userEvent.click(saveButton());
 
-    expect(createPhone).toHaveBeenCalledWith({ phone: '254712345678' }, expect.anything());
+    expect(createPhone).toHaveBeenCalledWith(
+      { phone: '254712345678', accountHolderName: 'Wanjiku Maina' },
+      expect.anything(),
+    );
   });
 
   it('updates the existing phone wallet instead of creating a new one', async () => {
@@ -103,7 +112,7 @@ describe('payout method settings', () => {
     await userEvent.click(saveButton());
 
     expect(patchPhone).toHaveBeenCalledWith(
-      { walletId: 'w1', phone: '254798765432' },
+      { walletId: 'w1', phone: '254798765432', accountHolderName: 'Wanjiku Maina' },
       expect.anything(),
     );
   });
@@ -119,7 +128,8 @@ describe('payout method settings', () => {
     expect(screen.getByLabelText('Account number')).toBeInTheDocument();
   });
 
-  it('creates a bank wallet with Kenya and blank extra fields the screen does not collect', async () => {
+  // DEV-367: blank optional fields failed the API's minLength and blocked a first bank account
+  it('creates a bank wallet in Kenya without the fields the screen does not collect', async () => {
     renderDrawer();
 
     await userEvent.click(screen.getByRole('radio', { name: /Bank account/ }));
@@ -130,25 +140,20 @@ describe('payout method settings', () => {
     await userEvent.click(saveButton());
 
     expect(createBank).toHaveBeenCalledWith(
-      expect.objectContaining({
+      {
         bankName: 'Equity Bank',
         bankBranch: 'Westlands',
         accountHolderName: 'Wanjiku Maina',
         accountNumber: '1122334455',
         country: 'KE',
-        branchCode: '',
-        swiftCode: '',
-        address: '',
-      }),
+      },
       expect.anything(),
     );
   });
 
   it('activates the wallet and confirms once saved', async () => {
     const onClose = jest.fn();
-    createPhone.mockImplementation((_data, { onSuccess }) =>
-      onSuccess({ data: { id: 'w2' } }),
-    );
+    createPhone.mockImplementation((_data, { onSuccess }) => onSuccess({ data: { id: 'w2' } }));
     renderDrawer(onClose);
 
     await userEvent.type(screen.getByLabelText('M-Pesa number'), '712345678');
@@ -165,7 +170,9 @@ describe('payout method settings', () => {
   });
 
   it('shows the refusal the API gave', async () => {
-    patchPhone.mockImplementation((_data, { onError }) => onError(new Error('That number is already in use.')));
+    patchPhone.mockImplementation((_data, { onError }) =>
+      onError(new Error('That number is already in use.')),
+    );
     wallets = [aPhoneWallet()];
     renderDrawer();
 
