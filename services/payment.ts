@@ -10,6 +10,32 @@ import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 import { apiWithToken } from './apiService';
 
+/**
+ * A wallet body in the API's field names, leaving out every optional field
+ * that is blank. An empty string is a value to the API: a blank branch code,
+ * SWIFT code or address used to fail `minLength: 1` and block a first bank
+ * account (DEV-367).
+ */
+export const walletBody = (fields: Record<string, string | undefined>) =>
+  Object.fromEntries(
+    Object.entries(fields).filter(([, value]) => value !== undefined && value.trim() !== ''),
+  );
+
+const bankBody = (data: CreateBankWallet) =>
+  walletBody({
+    bank_name: data.bankName,
+    account_number: data.accountNumber,
+    account_holder_name: data.accountHolderName,
+    bank_branch: data.bankBranch,
+    country: data.country,
+    branch_code: data.branchCode,
+    swift_code: data.swiftCode,
+    address: data.address,
+    postcode: data.postcode,
+    town: data.town,
+    contact_phone: data.contactPhone,
+  });
+
 export async function fetchWallets() {
   try {
     const api = await apiWithToken();
@@ -29,9 +55,10 @@ export async function createPhoneWallet(data: CreatePhoneWallet) {
   try {
     const api = await apiWithToken();
 
-    const response = await api.post(`/v1/payments/wallets/phone/`, {
-      phone: data.phone,
-    });
+    const response = await api.post(
+      `/v1/payments/wallets/phone/`,
+      walletBody({ phone: data.phone, account_holder_name: data.accountHolderName }),
+    );
     return {
       status: response.status,
       success: true,
@@ -47,9 +74,10 @@ export async function patchPhoneWallet(data: UpdatePhoneWallet) {
   try {
     const api = await apiWithToken();
 
-    const response = await api.patch(`/v1/payments/wallets/${data.walletId}/phone/`, {
-      phone: data.phone,
-    });
+    const response = await api.patch(
+      `/v1/payments/wallets/${data.walletId}/phone/`,
+      walletBody({ phone: data.phone, account_holder_name: data.accountHolderName }),
+    );
     return {
       status: response.status,
       success: true,
@@ -65,16 +93,7 @@ export async function createBankWallet(data: CreateBankWallet) {
   try {
     const api = await apiWithToken();
 
-    const response = await api.post(`/v1/payments/wallets/bank/`, {
-      bank_name: data.bankName,
-      account_number: data.accountNumber,
-      account_holder_name: data.accountHolderName,
-      bank_branch: data.bankBranch,
-      branch_code: data.branchCode,
-      country: data.country,
-      swift_code: data.swiftCode,
-      address: data.address,
-    });
+    const response = await api.post(`/v1/payments/wallets/bank/`, bankBody(data));
 
     return {
       status: response.status,
@@ -91,16 +110,7 @@ export async function patchBankWallet(data: UpdateBankWallet) {
   try {
     const api = await apiWithToken();
 
-    const response = await api.patch(`/v1/payments/wallets/${data.walletId}/bank/`, {
-      bank_name: data.bankName,
-      account_number: data.accountNumber,
-      account_holder_name: data.accountHolderName,
-      bank_branch: data.bankBranch,
-      branch_code: data.branchCode,
-      country: data.country,
-      swift_code: data.swiftCode,
-      address: data.address,
-    });
+    const response = await api.patch(`/v1/payments/wallets/${data.walletId}/bank/`, bankBody(data));
 
     return {
       status: response.status,

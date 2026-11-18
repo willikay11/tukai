@@ -2,34 +2,39 @@ import { MoneyLike, moneyAmount } from '@/utils/money';
 
 export type CreatePhoneWallet = {
   phone: string;
+  // The name on the M-Pesa account (DEV-425)
+  accountHolderName?: string;
 };
 
 export type UpdatePhoneWallet = {
   walletId: string;
   phone: string;
+  accountHolderName?: string;
 };
 
+/**
+ * A bank payout account. The API requires bank name, branch, account number,
+ * holder name and country; the rest are optional. Branch code, SWIFT code and
+ * address are only needed outside Kenya (DEV-367). Postcode, town and a
+ * contact phone are their own fields (DEV-426) - the contact phone is for
+ * reaching the account holder, not a mobile money destination.
+ */
 export type CreateBankWallet = {
   bankName: string;
   accountNumber: string;
   accountHolderName: string;
   bankBranch: string;
-  branchCode: string;
   country: string;
-  swiftCode: string;
-  address: string;
+  branchCode?: string;
+  swiftCode?: string;
+  address?: string;
+  postcode?: string;
+  town?: string;
+  contactPhone?: string;
 };
 
-export type UpdateBankWallet = {
+export type UpdateBankWallet = CreateBankWallet & {
   walletId: string;
-  bankName: string;
-  accountNumber: string;
-  accountHolderName: string;
-  bankBranch: string;
-  branchCode: string;
-  country: string;
-  swiftCode: string;
-  address: string;
 };
 
 export type Wallet = {
@@ -45,7 +50,18 @@ export type Wallet = {
   country: string;
   swiftCode?: string;
   address?: string;
+  postcode?: string;
+  town?: string;
+  contactPhone?: string;
   isActive: boolean;
+  // Payouts only go to a verified wallet. Bank wallets are verified when
+  // saved; M-Pesa wallets need a code sent to their number (DEV-448).
+  isVerified?: boolean;
+  verifiedAt?: string | null;
+  // A bank wallet's Paystack sync, which checks the account name
+  syncStatus?: string;
+  // The account name Paystack resolved for a bank wallet
+  resolvedAccountName?: string | null;
   dateCreated: string;
 };
 
