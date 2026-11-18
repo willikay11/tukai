@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import type { useCreateExperienceFlow } from '@/app/(experiences)/experiences/create/hooks/useCreateExperienceFlow';
 import { SelectField } from '@/app/shared/components/Forms';
 import { IconComponent } from '@/app/shared/components/Icons';
+import { VerifyMpesaWallet } from '@/app/shared/components/Payouts';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Input } from '@/components/ui/input';
 import { toKenyanE164 } from '@/utils/phone';
@@ -197,6 +198,13 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existingBankWallet?.id]);
 
+  // An M-Pesa number needs a texted code before payouts can go to it
+  // (DEV-448). Saving one sends the code straight away; a number saved
+  // earlier and still unverified waits for "Send code".
+  const [sendCodeFor, setSendCodeFor] = useState<string | null>(null);
+  const unverifiedPhoneWallet =
+    existingPhoneWallet?.isVerified === false ? existingPhoneWallet : undefined;
+
   const handlePhoneBlur = () => {
     const digits = formData.phoneNumber.replace(/\D/g, '');
     if (digits.length < 9) return;
@@ -207,12 +215,16 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
       flow.walletMutations.patchPhoneWallet(
         { walletId: existingPhoneWallet.id, phone: normalized },
         {
-          onSuccess: () =>
+          onSuccess: () => {
+            // A changed number is unverified again; its code goes out once
+            // the refreshed wallet shows it
+            setSendCodeFor(existingPhoneWallet.id);
             toast({
               title: 'Wallet updated',
-              description: 'Your M-Pesa number was saved.',
+              description: 'Your M-Pesa number was saved. Enter the code we text to it.',
               variant: 'success',
-            }),
+            });
+          },
           onError: (error: Error) =>
             toast({ title: 'Unable to save', description: error.message, variant: 'destructive' }),
         },
@@ -221,12 +233,14 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
       flow.walletMutations.createPhoneWallet(
         { phone: normalized },
         {
-          onSuccess: () =>
+          onSuccess: (response: { data?: { id?: string } }) => {
+            if (response?.data?.id) setSendCodeFor(response.data.id);
             toast({
               title: 'Wallet saved',
-              description: 'Your M-Pesa number was saved.',
+              description: 'Your M-Pesa number was saved. Enter the code we text to it.',
               variant: 'success',
-            }),
+            });
+          },
           onError: (error: Error) =>
             toast({ title: 'Unable to save', description: error.message, variant: 'destructive' }),
         },
@@ -321,14 +335,34 @@ export const WalletDetailsStep = ({ flow }: WalletDetailsStepProps) => {
       </div>
 
       {formData.paymentMethod === 'phone' ? (
-        <Field label="M-Pesa number">
-          <PhoneInput
-            value={formData.phoneNumber}
-            onChange={(phoneNumber) => flow.updateWalletFormData({ phoneNumber })}
-            onBlur={handlePhoneBlur}
-            placeholder="7XX XXX XXX"
-          />
-        </Field>
+        <>
+          <Field label="M-Pesa number">
+            <PhoneInput
+              value={formData.phoneNumber}
+              onChange={(phoneNumber) => flow.updateWalletFormData({ phoneNumber })}
+              onBlur={handlePhoneBlur}
+              placeholder="7XX XXX XXX"
+            />
+          </Field>
+          {unverifiedPhoneWallet && (
+            <div className="rounded-xl border border-line bg-white p-4">
+              <VerifyMpesaWallet
+                key={unverifiedPhoneWallet.id}
+                walletId={unverifiedPhoneWallet.id}
+                phone={unverifiedPhoneWallet.phone}
+                sendOnOpen={sendCodeFor === unverifiedPhoneWallet.id}
+                onVerified={() => {
+                  setSendCodeFor(null);
+                  toast({
+                    title: 'M-Pesa number verified',
+                    description: 'Payouts for this experience can go to it.',
+                    variant: 'success',
+                  });
+                }}
+              />
+            </div>
+          )}
+        </>
       ) : (
         <div className="flex flex-col gap-3.5">
           <span className="text-15 font-semibold text-gray-800">Add your bank account details</span>

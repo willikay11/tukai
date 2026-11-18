@@ -1,5 +1,12 @@
 import { apiWithToken } from './apiService';
-import { createBankWallet, createPhoneWallet, patchBankWallet, walletBody } from './payment';
+import {
+  createBankWallet,
+  createPhoneWallet,
+  patchBankWallet,
+  sendWalletOtp,
+  verifyWalletOtp,
+  walletBody,
+} from './payment';
 
 jest.mock('./apiService', () => ({ apiWithToken: jest.fn() }));
 
@@ -73,5 +80,24 @@ describe('wallet requests', () => {
       phone: '254712345678',
       account_holder_name: 'Wanjiku Maina',
     });
+  });
+
+  // DEV-448: M-Pesa wallets are verified with a texted code
+  it('sends a code and says where it went', async () => {
+    api.post.mockResolvedValue({
+      status: 200,
+      data: { detail: 'Code sent', sent_to: '+254***678' },
+    });
+
+    await expect(sendWalletOtp('w1')).resolves.toEqual({ sentTo: '+254***678' });
+    expect(api.post).toHaveBeenCalledWith('/v1/payments/wallets/w1/send-otp/');
+  });
+
+  it('checks the code and keeps the error code when it fails', async () => {
+    const errors = [{ code: 'invalid_otp', detail: 'Invalid code.', attr: 'otp' }];
+    api.post.mockRejectedValue({ response: { status: 400, data: { errors } } });
+
+    await expect(verifyWalletOtp('w1', '000000')).rejects.toMatchObject({ status: 400, errors });
+    expect(api.post).toHaveBeenCalledWith('/v1/payments/wallets/w1/verify-otp/', { otp: '000000' });
   });
 });

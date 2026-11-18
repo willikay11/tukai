@@ -10,7 +10,9 @@ import {
   patchBankWallet,
   patchPhoneWallet,
   requestWithdrawal,
+  sendWalletOtp,
   setActiveWallet,
+  verifyWalletOtp,
 } from '@/services/payment';
 import {
   CreateBankWallet,
@@ -122,5 +124,25 @@ export const useSetActiveWallet = () => {
   return useMutation({
     mutationFn: async (walletId: string) => await setActiveWallet(walletId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['wallets'] }),
+  });
+};
+
+/** Texts a verification code to an M-Pesa wallet's number. */
+export const useSendWalletOtp = () =>
+  useMutation({
+    mutationKey: ['sendWalletOtp'],
+    mutationFn: async (walletId: string) => await sendWalletOtp(walletId),
+  });
+
+/** Checks the code; on success the wallet comes back verified. */
+export const useVerifyWalletOtp = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['verifyWalletOtp'],
+    mutationFn: async ({ walletId, otp }: { walletId: string; otp: string }) =>
+      await verifyWalletOtp(walletId, otp),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['wallets'] });
+    },
   });
 };
