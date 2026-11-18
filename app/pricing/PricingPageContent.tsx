@@ -21,7 +21,7 @@ export const PricingPageContent = () => {
 
   if (!hostingPlan) return null;
 
-  const { plans, currentPlan, hasActivePlan, openHostingPlanFlow } = hostingPlan;
+  const { plans, effectivePlanId, hasActivePlan, openHostingPlanFlow } = hostingPlan;
 
   const handleChoose = (planId: HostingPlanId) => {
     const open = () => openHostingPlanFlow({ view: 'choose', planId });
@@ -38,8 +38,8 @@ export const PricingPageContent = () => {
     <PageContainer className="space-y-8 py-10" variant="detail">
       <ChoosePlanView
         plans={plans}
-        currentPlanId={currentPlan.planId}
-        currentPlanName={currentPlan.planId ? getHostingPlan(currentPlan.planId)?.name : undefined}
+        currentPlanId={effectivePlanId}
+        currentPlanName={effectivePlanId ? getHostingPlan(effectivePlanId)?.name : undefined}
         isChangeMode={hasActivePlan}
         onChoose={handleChoose}
       />

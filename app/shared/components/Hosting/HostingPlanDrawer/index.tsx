@@ -28,7 +28,7 @@ export const HostingPlanDrawer = () => {
     isOpen,
     view,
     plans,
-    currentPlan,
+    effectivePlanId,
     currentPlanName,
     renewalDateLabel,
     isChangeMode,
@@ -96,7 +96,7 @@ export const HostingPlanDrawer = () => {
             <ChoosePlanView
               plans={plans}
               selectedPlanId={selectedPlanId}
-              currentPlanId={currentPlan.planId}
+              currentPlanId={effectivePlanId}
               currentPlanName={currentPlanName}
               renewalDateLabel={renewalDateLabel}
               isChangeMode={isChangeMode}

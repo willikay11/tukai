@@ -8,6 +8,7 @@ import {
   OpenHostingPlanOptions,
   useHostingPlan,
 } from '@/context/HostingPlanContext';
+import type { HostingPlan } from '@/types/hostingPlan';
 
 jest.mock('@/app/shared/components/Icons', () => ({
   IconComponent: ({ iconName }: { iconName: string }) => <span data-testid={iconName} />,
@@ -18,7 +19,11 @@ jest.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
 
 const openCreateCommunity = jest.fn();
 jest.mock('@/context/CreateCommunityDrawerContext', () => ({
-  useCreateCommunityDrawer: () => ({ openCreateCommunity, isOpen: false, closeCreateCommunity: jest.fn() }),
+  useCreateCommunityDrawer: () => ({
+    openCreateCommunity,
+    isOpen: false,
+    closeCreateCommunity: jest.fn(),
+  }),
 }));
 
 // The real component is a Paystack-hosted iframe watched via postMessage -
@@ -36,7 +41,7 @@ jest.mock('@/components/ui/paystack', () => ({
   ),
 }));
 
-const PLANS = [
+const PLANS: HostingPlan[] = [
   {
     id: 'basic',
     name: 'Basic',
@@ -111,9 +116,12 @@ jest.mock('@/services/hostingPlans', () => ({
   fetchCurrentHostingSubscription: () => fetchCurrentHostingSubscription(),
   getHostingPlan: (id: string) => PLANS.find((plan) => plan.id === id),
   startHostingCheckout: (planId: string) => startHostingCheckout(planId),
-  confirmHostingSubscription: (subscriptionId: string) => confirmHostingSubscription(subscriptionId),
+  confirmHostingSubscription: (subscriptionId: string) =>
+    confirmHostingSubscription(subscriptionId),
   cancelHostingSubscription: (subscriptionId: string) => cancelHostingSubscription(subscriptionId),
-  resumeHostingSubscription: jest.fn((current) => Promise.resolve({ ...current, status: 'active' })),
+  resumeHostingSubscription: jest.fn((current) =>
+    Promise.resolve({ ...current, status: 'active' }),
+  ),
 }));
 
 /**
@@ -273,6 +281,28 @@ describe('HostingPlanDrawer', () => {
     await screen.findByText('Change your plan');
     expect(screen.getByRole('radio', { name: /Basic/ })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Your current plan' })).toBeDisabled();
+  });
+
+  // DEV-451: without a subscription, a host is on the default plan (Basic)
+  it('without a subscription, Basic is the current plan and the others are upgrades', async () => {
+    const basic = PLANS.find((plan) => plan.id === 'basic')!;
+    basic.isDefault = true;
+    try {
+      const user = userEvent.setup();
+      renderDrawer();
+
+      await screen.findByText('Choose your plan');
+      expect(
+        screen.getByText(/You’re on Basic, the plan every host starts on/),
+      ).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: /Basic/ })).toBeDisabled();
+
+      await user.click(screen.getByRole('radio', { name: /Premium/ }));
+      expect(screen.getByRole('radio', { name: /Premium/ })).toBeEnabled();
+      expect(cancelHostingSubscription).not.toHaveBeenCalled();
+    } finally {
+      basic.isDefault = false;
+    }
   });
 
   it('Compare every feature closes the drawer and goes to the Pricing page', async () => {

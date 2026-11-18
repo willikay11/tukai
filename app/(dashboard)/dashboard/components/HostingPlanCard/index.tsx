@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { useHostingPlan } from '@/context/HostingPlanContext';
 import { getHostingPlan } from '@/services/hostingPlans';
 import { Community } from '@/types/community';
+import { HostingPlan } from '@/types/hostingPlan';
 
 /** One name, "A and B" for two, "{n} communities" for three or more. */
 const nameList = (communities: Community[]): string => {
@@ -32,6 +33,25 @@ const nameList = (communities: Community[]): string => {
  * than through props. `ownedCommunities` is only used to word the
  * verified-business-aware note and cancel copy the handoff calls for.
  */
+/**
+ * What a host on the default plan can't do yet, from its own terms:
+ * "Up to 3 live experiences. Recurring experiences and discount codes need
+ * an upgrade."
+ */
+const defaultPlanNote = (plan: HostingPlan): string => {
+  const limit =
+    typeof plan.maxLiveExperiences === 'number'
+      ? `Up to ${plan.maxLiveExperiences} live experience${plan.maxLiveExperiences === 1 ? '' : 's'}.`
+      : '';
+  const missing = [
+    !plan.allowsRecurringExperiences && 'Recurring experiences',
+    !plan.allowsDiscountCodes &&
+      (plan.allowsRecurringExperiences ? 'Discount codes' : 'discount codes'),
+  ].filter(Boolean) as string[];
+  const upgrade = missing.length ? ` ${missing.join(' and ')} need an upgrade.` : '';
+  return `${limit}${upgrade}`.trim() || 'Every host starts on this plan.';
+};
+
 export const HostingPlanCard = ({ ownedCommunities }: { ownedCommunities: Community[] }) => {
   const hostingPlan = useHostingPlan();
   const { toast } = useToast();
@@ -39,9 +59,19 @@ export const HostingPlanCard = ({ ownedCommunities }: { ownedCommunities: Commun
 
   if (!hostingPlan) return null;
 
-  const { currentPlan, openHostingPlanFlow, cancel, resume, isCancelling, isResuming } =
-    hostingPlan;
-  const plan = currentPlan.planId ? getHostingPlan(currentPlan.planId) : undefined;
+  const {
+    currentPlan,
+    effectivePlanId,
+    hasActivePlan,
+    openHostingPlanFlow,
+    cancel,
+    resume,
+    isCancelling,
+    isResuming,
+  } = hostingPlan;
+  // The subscribed plan, or else Basic: every host without a subscription is on it
+  const plan = effectivePlanId ? getHostingPlan(effectivePlanId) : undefined;
+  const isOnDefaultPlan = Boolean(plan?.isDefault) && !hasActivePlan;
   const renewalLabel = currentPlan.currentPeriodEnd
     ? moment(currentPlan.currentPeriodEnd).format('ddd D MMM')
     : null;
@@ -52,19 +82,21 @@ export const HostingPlanCard = ({ ownedCommunities }: { ownedCommunities: Commun
 
   const note = !plan
     ? null
-    : plan.priceAmount > 0
-      ? `Covers every community you own.${
-          verifiedBusinesses.length ? ' Verified businesses pay 8% per paid ticket.' : ''
-        }`
-      : verifiedBusinesses.length
-        ? `Free for ${nameList(verifiedBusinesses)}.${
-            otherCommunities.length
-              ? ` ${nameList(otherCommunities)} ${
-                  otherCommunities.length === 1 ? 'needs' : 'need'
-                } Premium or Business to host.`
-              : ''
+    : isOnDefaultPlan
+      ? defaultPlanNote(plan)
+      : plan.priceAmount > 0
+        ? `Covers every community you own.${
+            verifiedBusinesses.length ? ' Verified businesses pay 8% per paid ticket.' : ''
           }`
-        : 'Free for verified businesses. Communities that own a claimed place host free on Basic.';
+        : verifiedBusinesses.length
+          ? `Free for ${nameList(verifiedBusinesses)}.${
+              otherCommunities.length
+                ? ` ${nameList(otherCommunities)} ${
+                    otherCommunities.length === 1 ? 'needs' : 'need'
+                  } Premium or Business to host.`
+                : ''
+            }`
+          : 'Free for verified businesses. Communities that own a claimed place host free on Basic.';
 
   const handleCancel = () => {
     cancel().then(() => {
@@ -126,14 +158,25 @@ export const HostingPlanCard = ({ ownedCommunities }: { ownedCommunities: Commun
                   <span className="text-[21px] font-bold leading-[1.25] tracking-[-0.35px] text-brand-ink">
                     {plan.name}
                   </span>
-                  <span className="whitespace-nowrap text-[14.5px] font-semibold text-gray-800">
-                    {plan.priceLabel}
-                  </span>
+                  {!isOnDefaultPlan && (
+                    <span className="whitespace-nowrap text-[14.5px] font-semibold text-gray-800">
+                      {plan.priceLabel}
+                    </span>
+                  )}
                 </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-2 gap-x-3">
-                {off ? (
+                {isOnDefaultPlan ? (
+                  <span className="inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full bg-surface-brand px-2.5 text-[13px] font-semibold text-brand">
+                    <IconComponent
+                      iconName="CheckmarkCircle02Icon"
+                      size={14}
+                      color="currentColor"
+                    />
+                    Default plan
+                  </span>
+                ) : off ? (
                   <span className="inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full bg-warn-surface px-2.5 text-[13px] font-semibold text-warn">
                     <IconComponent iconName="Clock01Icon" size={14} color="currentColor" />
                     {renewalLabel ? `Ends ${renewalLabel}` : 'Ending soon'}
@@ -181,9 +224,9 @@ export const HostingPlanCard = ({ ownedCommunities }: { ownedCommunities: Commun
                       className="h-11 rounded-full bg-surface px-[18px] text-[14.5px] font-semibold text-brand hover:bg-surface-tab"
                       onClick={() => openHostingPlanFlow({ view: 'choose' })}
                     >
-                      Change plan
+                      {isOnDefaultPlan ? 'Upgrade' : 'Change plan'}
                     </Button>
-                    {plan.priceAmount > 0 && (
+                    {!isOnDefaultPlan && plan.priceAmount > 0 && (
                       <button
                         type="button"
                         onClick={() => setIsCancelConfirmOpen(true)}

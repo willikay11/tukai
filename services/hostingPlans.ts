@@ -1,76 +1,49 @@
 import { apiWithToken } from '@/services/apiService';
-import { CreatorPlanState, HostingPlan, HostingPlanId, HostingPlanStatus } from '@/types/hostingPlan';
+import {
+  CreatorPlanState,
+  HostingPlan,
+  HostingPlanId,
+  HostingPlanStatus,
+} from '@/types/hostingPlan';
+import { moneyAmount } from '@/utils/money';
 import { parseApiError } from '@/utils/parseApiError';
 import { parseSnakeToCamel } from '@/utils/parseSnakeToCamel';
 
 /**
- * Hosting plans.
+ * Hosting plans, from `GET /v1/subscriptions/plans/?product=hosting`
+ * (DEV-458). The API gives each plan's price, commission and limits, and
+ * marks one `is_default` (Basic): what a host with no subscription is on.
  *
- * There is no creator-tier-specific API - this calls the same generic
- * `/v1/subscriptions/` endpoints the unrelated "Tukai Premium" subscription
- * uses. The backend only knows a plan's id/name/price, so the catalog below
- * (tagline, features, icon) stays a local, static presentation layer:
- * fetchHostingPlans() matches real plans to it by name and attaches
- * `backendId`, the UUID subscribing actually sends.
- *
- * Today the backend has exactly one real plan ("Monthly"), none of them
- * named Basic/Premium/Business - so none of the catalog below currently
- * get a `backendId` and are shown disabled, while whatever the backend
- * actually has is synthesized straight from its own name/description/price
- * and shown above the catalog, since it's the only one really
- * subscribable. Once the backend adds plans named to match the catalog,
- * they take over those entries (full copy, icon, features) automatically
- * and stop being synthesized.
+ * Only presentation is local: the tagline, icon, "most popular" badge and
+ * the feature lines the API has no field for, matched by plan name. The
+ * lines about limits (live experiences, recurring, discount codes) are
+ * written from the plan's own terms, so they change when the admin does.
  */
-const CATALOG: HostingPlan[] = [
-  {
-    id: 'basic',
-    name: 'Basic',
+
+/** What a plan charges when it doesn't set its own commission. */
+export const PLATFORM_COMMISSION_PCT = 4;
+
+type PlanPresentation = Pick<HostingPlan, 'tagline' | 'icon' | 'isMostPopular' | 'aiFeatures'> & {
+  /** Feature lines beyond the plan's terms, which the API knows nothing of */
+  extraFeatures: string[];
+};
+
+const PRESENTATION: Record<string, PlanPresentation> = {
+  basic: {
     tagline: 'Start hosting experiences on Tukai.',
-    priceAmount: 1,
-    priceCurrency: 'USD',
-    priceLabel: '$1 / month',
-    commissionPct: 8,
     icon: 'Plant02Icon',
-    features: [
-      'Up to 3 live experiences',
-      'Paid & free ticketing',
-      'Withdraw to Tukai Wallet',
-      'Basic analytics',
-    ],
+    extraFeatures: ['Paid & free ticketing', 'Withdraw to Tukai Wallet', 'Basic analytics'],
   },
-  {
-    id: 'premium',
-    name: 'Premium',
+  premium: {
     tagline: 'Grow your experience business with advanced tools & visibility.',
-    priceAmount: 15,
-    priceCurrency: 'USD',
-    priceLabel: '$15 / month',
-    commissionPct: 3.5,
     icon: 'Rocket01Icon',
-    features: [
-      'Unlimited live experiences',
-      'Recurring experiences',
-      'Discount codes & coupons',
-      'Featured creator badge',
-    ],
     isMostPopular: true,
+    extraFeatures: ['Featured creator badge'],
   },
-  {
-    id: 'business',
-    name: 'Business',
+  business: {
     tagline: 'For operators managing teams & high-volume bookings.',
-    priceAmount: 49,
-    priceCurrency: 'USD',
-    priceLabel: '$49 / month',
-    commissionPct: 3,
     icon: 'Building03Icon',
-    features: [
-      'Everything in Premium',
-      '10+ team members',
-      'Dedicated account support',
-      'Lowest 3% ticket fee',
-    ],
+    extraFeatures: ['10+ team members', 'Dedicated account support'],
     aiFeatures: [
       { icon: 'QuillWrite02Icon', text: 'Writes experience pages and day-by-day itineraries' },
       { icon: 'ChartIncreaseIcon', text: 'Suggests prices and dates from your past bookings' },
@@ -78,13 +51,26 @@ const CATALOG: HostingPlan[] = [
       { icon: 'AnalyticsUpIcon', text: 'Weekly summary of sales, guests and reviews' },
     ],
   },
-];
+};
 
-type BackendPlan = { id: string; name: string; description: string; price: string };
+/** The plan as the API sends it, after parseSnakeToCamel. */
+export type BackendPlan = {
+  id: string;
+  product?: string;
+  name: string;
+  description?: string;
+  price: { amount: string; currency: string } | string;
+  isDefault?: boolean;
+  commissionPercentage?: string | null;
+  maxLiveExperiences?: number | null;
+  allowsRecurringExperiences?: boolean;
+  allowsDiscountCodes?: boolean;
+};
 
 type BackendSubscription = {
   id: string;
   plan: string;
+  product?: string;
   dateSubscribed: string | null;
   startDate: string | null;
   endDate: string | null;
@@ -93,92 +79,131 @@ type BackendSubscription = {
   status: 'pending' | 'active' | 'cancelled' | 'completed';
 };
 
-// Seeded with the static catalog so getHostingPlan() has names/icons/taglines
-// to show even before fetchHostingPlans() resolves; backendId fills in once it does.
-let planCache: HostingPlan[] = CATALOG;
+/** "$15", "KES 1,500", "$3.50" */
+const formatPrice = (amount: number, currency: string): string => {
+  const figure = Number.isInteger(amount)
+    ? amount.toLocaleString('en-US')
+    : amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return currency === 'USD' ? `$${figure}` : `${currency} ${figure}`;
+};
+
+/** The feature lines a plan's own terms say, before any marketing extras. */
+export const termFeatures = (
+  plan: Pick<
+    HostingPlan,
+    'maxLiveExperiences' | 'allowsRecurringExperiences' | 'allowsDiscountCodes'
+  >,
+): string[] => {
+  const lines: string[] = [];
+  if (plan.maxLiveExperiences === null) {
+    lines.push('Unlimited live experiences');
+  } else if (typeof plan.maxLiveExperiences === 'number') {
+    const plural = plan.maxLiveExperiences === 1 ? '' : 's';
+    lines.push(`Up to ${plan.maxLiveExperiences} live experience${plural}`);
+  }
+  if (plan.allowsRecurringExperiences) lines.push('Recurring experiences');
+  if (plan.allowsDiscountCodes) lines.push('Discount codes & coupons');
+  return lines;
+};
+
+/** A plan from the API, in the shape the plan cards show. */
+export const toHostingPlan = (backendPlan: BackendPlan): HostingPlan => {
+  const presentation = PRESENTATION[backendPlan.name.trim().toLowerCase()];
+  const amount = moneyAmount(backendPlan.price) ?? 0;
+  const currency = (typeof backendPlan.price === 'object' && backendPlan.price?.currency) || 'USD';
+  const commission =
+    backendPlan.commissionPercentage != null
+      ? Number.parseFloat(backendPlan.commissionPercentage)
+      : NaN;
+
+  const terms = {
+    maxLiveExperiences: backendPlan.maxLiveExperiences ?? null,
+    allowsRecurringExperiences: Boolean(backendPlan.allowsRecurringExperiences),
+    allowsDiscountCodes: Boolean(backendPlan.allowsDiscountCodes),
+  };
+
+  return {
+    id: backendPlan.id,
+    backendId: backendPlan.id,
+    name: backendPlan.name,
+    tagline:
+      presentation?.tagline ?? backendPlan.description ?? `Tukai's ${backendPlan.name} plan.`,
+    priceAmount: amount,
+    priceCurrency: currency,
+    priceLabel: `${formatPrice(amount, currency)} / month`,
+    commissionPct: Number.isFinite(commission) ? commission : PLATFORM_COMMISSION_PCT,
+    ...terms,
+    isDefault: Boolean(backendPlan.isDefault),
+    icon: presentation?.icon ?? 'Calendar03Icon',
+    features: [...termFeatures(terms), ...(presentation?.extraFeatures ?? [])],
+    isMostPopular: presentation?.isMostPopular,
+    aiFeatures: presentation?.aiFeatures,
+  };
+};
+
+/**
+ * Shown, disabled, when the API doesn't return a plan of that name: there's
+ * nothing to subscribe to, but the line-up keeps its shape. Its terms are
+ * unknown, so it lists only its marketing lines.
+ */
+const missingPlan = (name: string): HostingPlan => {
+  const presentation = PRESENTATION[name];
+  return {
+    id: name,
+    name: name.charAt(0).toUpperCase() + name.slice(1),
+    tagline: presentation.tagline,
+    priceAmount: 0,
+    priceCurrency: 'USD',
+    priceLabel: '',
+    icon: presentation.icon,
+    features: presentation.extraFeatures,
+    isMostPopular: presentation.isMostPopular,
+    aiFeatures: presentation.aiFeatures,
+  };
+};
+
+let planCache: HostingPlan[] = [];
 
 export const getHostingPlan = (planId: HostingPlanId): HostingPlan | undefined =>
   planCache.find((plan) => plan.id === planId);
+
+/** Basic: the plan a host with no hosting subscription is on. */
+export const getDefaultPlan = (): HostingPlan | undefined =>
+  planCache.find((plan) => plan.isDefault);
 
 const findPlanByBackendId = (backendId: string): HostingPlan | undefined =>
   planCache.find((plan) => plan.backendId === backendId);
 
 /**
- * Shown price for a plan this catalog has no name match for, keyed by the
- * backend's own plan name (lowercased) - a display override, not what
- * Paystack actually charges. ⚠️ The "Monthly" plan's real price on the
- * backend is whatever its Plan record says, which may not be $1 - if it
- * isn't, a subscriber sees "$1 / month" here and a different amount on
- * Paystack's own checkout page. Safe only as long as that record really is
- * priced at $1; fix the mismatch on the backend, not here, if it's not.
+ * The line-up, cheapest first, from the API. A known plan the API didn't
+ * return is listed disabled (DEV-451: "Show a plan as disabled only if it's
+ * missing from the response"). On failure the line-up is empty.
  */
-const DISPLAY_PRICE_OVERRIDE: Record<string, number> = {
-  monthly: 1,
-};
-
-/**
- * Builds a real, subscribable plan straight from the backend's own fields,
- * for a plan the static catalog has nothing named to match it to. No
- * currency field exists on the generic Plan model - USD is assumed, same
- * as every catalog entry; confirm with backend if that ever changes.
- */
-const synthesizeHostingPlan = (backendPlan: BackendPlan): HostingPlan => {
-  const override = DISPLAY_PRICE_OVERRIDE[backendPlan.name.toLowerCase()];
-  const amount = override ?? (Number.parseFloat(backendPlan.price) || 0);
-  const amountLabel = Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
-
-  return {
-    id: backendPlan.id,
-    name: backendPlan.name,
-    tagline: backendPlan.description || `Tukai's ${backendPlan.name} plan.`,
-    priceAmount: amount,
-    priceCurrency: 'USD',
-    priceLabel: `$${amountLabel} / month`,
-    icon: 'Calendar03Icon',
-    features: [],
-    backendId: backendPlan.id,
-  };
-};
-
 export const fetchHostingPlans = async (): Promise<HostingPlan[]> => {
   try {
     const api = await apiWithToken();
-    const response = await api.get('/v1/subscriptions/plans/');
-    // Paginated like every other list endpoint here - not a bare array.
-    const backendPlans = (parseSnakeToCamel(response.data)?.results ?? []) as BackendPlan[];
-
-    const matchedCatalog = CATALOG.map((plan) => {
-      const match = backendPlans.find(
-        (backendPlan) => backendPlan.name.toLowerCase() === plan.name.toLowerCase(),
-      );
-      return match ? { ...plan, backendId: match.id } : plan;
+    const response = await api.get('/v1/subscriptions/plans/', {
+      params: { product: 'hosting' },
     });
+    const payload = parseSnakeToCamel(response.data);
+    const backendPlans = (
+      Array.isArray(payload) ? payload : (payload?.results ?? [])
+    ) as BackendPlan[];
 
-    // Whatever's left is real, but has no catalog entry to fill in yet -
-    // synthesized and shown first, since it's the only one actually
-    // subscribable right now.
-    const matchedNames = new Set(
-      matchedCatalog.filter((plan) => plan.backendId).map((plan) => plan.name.toLowerCase()),
-    );
-    const unlistedBackendPlans = backendPlans.filter(
-      (backendPlan) => !matchedNames.has(backendPlan.name.toLowerCase()),
-    );
+    const plans = backendPlans
+      .filter((plan) => !plan.product || plan.product === 'hosting')
+      .map(toHostingPlan)
+      .sort((left, right) => left.priceAmount - right.priceAmount);
 
-    planCache = [...unlistedBackendPlans.map(synthesizeHostingPlan), ...matchedCatalog];
+    const returned = new Set(plans.map((plan) => plan.name.trim().toLowerCase()));
+    const missing = Object.keys(PRESENTATION)
+      .filter((name) => !returned.has(name))
+      .map(missingPlan);
 
-    const stillDisabled = matchedCatalog.filter((plan) => !plan.backendId);
-    if (stillDisabled.length > 0) {
-      console.info(
-        '[hostingPlans] Shown disabled - no backend plan named these yet:',
-        stillDisabled.map((plan) => plan.name),
-      );
-    }
+    planCache = [...plans, ...missing];
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
-    // Keep the static catalog for display even on failure - every entry
-    // shows disabled, same as a real "no plan named this yet" result,
-    // rather than this screen itself breaking.
-    planCache = CATALOG;
+    planCache = [];
   }
 
   return planCache;
@@ -225,11 +250,9 @@ const toCreatorPlanState = (sub: BackendSubscription): CreatorPlanState => {
 };
 
 /**
- * The signed-in account's current hosting plan, if any - called on
- * HostingPlanProvider mount to replace what localStorage used to seed.
- * Lists every subscription on the account (hosting and the unrelated Tukai
- * Premium one alike) and keeps only the one whose plan matches our hosting
- * catalog; an account can only hold one of those at a time.
+ * The signed-in account's hosting subscription, if any. Call after
+ * fetchHostingPlans: a subscription is matched to its plan by id. Null
+ * means no subscription - the host is on the default plan.
  */
 export const fetchCurrentHostingSubscription = async (): Promise<CreatorPlanState | null> => {
   try {
@@ -238,7 +261,14 @@ export const fetchCurrentHostingSubscription = async (): Promise<CreatorPlanStat
     const subscriptions = (parseSnakeToCamel(response.data)?.results ??
       []) as BackendSubscription[];
 
-    const hostingSubscription = subscriptions.find((sub) => findPlanByBackendId(sub.plan));
+    // A TukAI subscription is on the same list; keep the hosting one, and
+    // only one that's still running
+    const hostingSubscription = subscriptions.find(
+      (sub) =>
+        (!sub.product || sub.product === 'hosting') &&
+        (sub.status === 'active' || sub.status === 'pending') &&
+        findPlanByBackendId(sub.plan),
+    );
     return hostingSubscription ? toCreatorPlanState(hostingSubscription) : null;
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);

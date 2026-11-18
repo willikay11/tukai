@@ -1,18 +1,14 @@
 /**
  * A creator's hosting plan: what lets an account create and publish
- * experiences.
+ * experiences, at what fee, with which limits.
  *
- * Backed by the backend's generic `/v1/subscriptions/` endpoints (the same
- * ones the unrelated "Tukai Premium" subscription uses) rather than a
- * creator-tier-specific API - there isn't one. The backend currently has
- * exactly one real plan ("Monthly"), not three - so services/hostingPlans.ts
- * matches real plans to the static Basic/Premium/Business catalog below by
- * name where it can, and otherwise synthesizes a plan straight from
- * whatever the backend actually returned. A plan with no `backendId` has
- * nothing to subscribe to yet and is shown disabled rather than offered.
- * The current plan still lives only in memory, for HostingPlanContext's
- * lifetime - never written to localStorage - but is now re-fetched from
- * the backend on mount rather than always starting empty.
+ * Read from `GET /v1/subscriptions/plans/?product=hosting` (DEV-458): each
+ * plan's price, commission and limits come from the API. Only the
+ * marketing copy (tagline, icon, extra feature lines) is local, matched by
+ * plan name in services/hostingPlans.ts. One plan is the default
+ * (`isDefault`, Basic): a host with no hosting subscription gets its terms
+ * and hosts on it. The current plan lives only in memory, for
+ * HostingPlanContext's lifetime, re-fetched from the backend on mount.
  */
 export type HostingPlanId = string;
 
@@ -30,11 +26,16 @@ export type HostingPlan = {
   /** "$15 / month" - already formatted, since the catalog is static. */
   priceLabel: string;
   /**
-   * e.g. 8 for "8% per paid ticket". Undefined for a plan synthesized
-   * straight from the backend - the generic Plan model has no such field,
-   * so this is shown only where the static catalog actually defines it.
+   * Tukai's fee on each paid ticket, e.g. 8 for "8% per paid ticket". A
+   * plan that doesn't set one charges the platform default (4%).
    */
   commissionPct?: number;
+  /** How many experiences can be published at once. Null means no limit. */
+  maxLiveExperiences?: number | null;
+  allowsRecurringExperiences?: boolean;
+  allowsDiscountCodes?: boolean;
+  /** Basic: what a host with no hosting subscription is on. */
+  isDefault?: boolean;
   /** Hugeicons name for the card's icon tile. */
   icon: string;
   features: string[];
@@ -42,10 +43,9 @@ export type HostingPlan = {
   /** Business only: the "TukAI for your team" block. */
   aiFeatures?: HostingPlanAiFeature[];
   /**
-   * The real plan's UUID on `/v1/subscriptions/plans/`. Undefined for a
-   * static catalog entry the backend has no matching plan for yet - that
-   * plan is shown but disabled, since there's nothing real to subscribe
-   * it to.
+   * The plan's UUID on `/v1/subscriptions/plans/`. Undefined only for a
+   * plan the API didn't return: it's shown, but disabled, since there's
+   * nothing to subscribe to.
    */
   backendId?: string;
 };
