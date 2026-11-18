@@ -15,8 +15,12 @@ export interface TicketPurchase {
   ticket: {
     id: string;
     name: string;
-    price: string;
-    currency: string;
+    // The host's base price as a money object; read this, not price/currency
+    basePrice?: { amount: string; currency: string } | null;
+    // Deprecated: read basePrice
+    price?: string;
+    // Deprecated: read basePrice
+    currency?: string;
     experience: string; // experience uuid only - details need a join
   };
   occurrence: {

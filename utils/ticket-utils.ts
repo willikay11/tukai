@@ -21,14 +21,38 @@ export const getTicketBuyerAmount = (
 ): number | null => toNumber((ticket.buyerPrice ?? ticket.buyer_price)?.amount);
 
 /**
+ * A ticket's base price: what the host set, before the buyer's share of fees.
+ * The API sends it as `base_price`, `{ amount, currency }`; `price` and
+ * `currency` (`price_currency` on full tickets) are deprecated in responses
+ * and only read when `base_price` is missing. `currency` is null when neither
+ * says.
+ */
+export const getTicketBasePrice = (ticket: {
+  basePrice?: { amount?: number | string | null; currency?: string } | null;
+  base_price?: { amount?: number | string | null; currency?: string } | null;
+  price?: number | string | null;
+  currency?: string | null;
+  priceCurrency?: string | null;
+}): { amount: number; currency: string | null } => {
+  const base = ticket.basePrice ?? ticket.base_price;
+  if (base) {
+    return { amount: toNumber(base.amount) ?? 0, currency: base.currency || null };
+  }
+  return {
+    amount: toNumber(ticket.price) ?? 0,
+    currency: ticket.currency || ticket.priceCurrency || null,
+  };
+};
+
+/**
  * The amount a buyer is charged for one ticket. `buyer_price` is computed by the
  * API from the experience's fees_allocation, so anything shown to or totalled
  * for a buyer must use it rather than `price` (the host's base amount), which
  * is what remains as the fallback.
  */
 export const getTicketBuyerPrice = (
-  ticket: Pick<Ticket, 'price' | 'buyerPrice' | 'buyer_price'>,
-): number => getTicketBuyerAmount(ticket) ?? toNumber(ticket.price) ?? 0;
+  ticket: Pick<Ticket, 'price' | 'basePrice' | 'base_price' | 'buyerPrice' | 'buyer_price'>,
+): number => getTicketBuyerAmount(ticket) ?? getTicketBasePrice(ticket).amount;
 
 export const mapRelativeUnit = (unit: RelativeUnit): ApiTicketUnit => {
   const map: Record<RelativeUnit, ApiTicketUnit> = {

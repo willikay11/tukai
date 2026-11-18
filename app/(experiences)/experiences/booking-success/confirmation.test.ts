@@ -102,6 +102,30 @@ describe('toConfirmation', () => {
     expect(confirmation?.amountPaid).toBe(25000);
   });
 
+  // The API now sends base_price; price and currency are deprecated
+  it('reads the price and currency from base_price', () => {
+    const confirmation = toConfirmation(
+      [
+        purchase({
+          id: 'p1',
+          ticket: {
+            id: 't1',
+            name: 'Locals',
+            basePrice: { amount: '1200.00', currency: 'KES' },
+            experience: 'e1',
+          },
+        }),
+      ],
+      experience,
+      'TRN-123',
+    );
+
+    expect(confirmation?.lineItems).toEqual([
+      { label: 'Locals', quantity: 1, unitPrice: 1200, lineTotal: 1200 },
+    ]);
+    expect(confirmation?.currency).toBe('KES');
+  });
+
   it('shows the reference the buyer arrived with', () => {
     expect(toConfirmation([purchase()], experience, 'TRN-123')?.reference).toBe('TRN-123');
   });

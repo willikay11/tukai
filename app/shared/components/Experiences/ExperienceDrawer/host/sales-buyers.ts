@@ -1,4 +1,5 @@
 import { TicketPurchase } from '@/types/ticket-purchase';
+import { getTicketBasePrice } from '@/utils/ticket-utils';
 
 export type BuyerStub = {
   key: string;
@@ -26,7 +27,8 @@ export type SalesSummary = {
   pending: number;
 };
 
-const purchasePrice = (purchase: TicketPurchase): number => parseFloat(purchase.ticket?.price ?? '0') || 0;
+const purchasePrice = (purchase: TicketPurchase): number =>
+  purchase.ticket ? getTicketBasePrice(purchase.ticket).amount : 0;
 
 const buyerName = (purchase: TicketPurchase): string =>
   purchase.user?.displayName ||
@@ -61,7 +63,10 @@ export const buildSalesData = (
   const completed = purchases.filter((purchase) => purchase.status === 'completed');
   const pending = purchases.filter((purchase) => purchase.status === 'pending');
 
-  const buyerGroups = groupBy(completed, (purchase) => purchase.user?.id ?? `purchase:${purchase.id}`);
+  const buyerGroups = groupBy(
+    completed,
+    (purchase) => purchase.user?.id ?? `purchase:${purchase.id}`,
+  );
 
   const buyers: (Buyer & { latestAt: string })[] = Array.from(buyerGroups.values()).map((group) => {
     const first = group[0];

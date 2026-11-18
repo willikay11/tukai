@@ -2,6 +2,7 @@ import { parseSnakeToCamel } from './parseSnakeToCamel';
 import {
   buildAbsoluteTicketValidity,
   buildRecurringTicketValidity,
+  getTicketBasePrice,
   getTicketBuyerAmount,
   getTicketBuyerPrice,
   mapAnchorToCondition,
@@ -477,5 +478,40 @@ describe('mergeReservationStatus', () => {
 
   it('keeps the existing status when neither is actionable or usable', () => {
     expect(mergeReservationStatus('expired', 'refunded')).toBe('expired');
+  });
+});
+
+// `price` and `currency` are deprecated in responses; `base_price` replaces them
+describe('getTicketBasePrice', () => {
+  it('reads base_price', () => {
+    expect(getTicketBasePrice({ basePrice: { amount: '1200.00', currency: 'KES' } })).toEqual({
+      amount: 1200,
+      currency: 'KES',
+    });
+  });
+
+  it('reads base_price before the deprecated fields', () => {
+    expect(
+      getTicketBasePrice({
+        basePrice: { amount: '25.00', currency: 'USD' },
+        price: '999',
+        currency: 'KES',
+      }),
+    ).toEqual({ amount: 25, currency: 'USD' });
+  });
+
+  it('falls back to price and currency when base_price is missing', () => {
+    expect(getTicketBasePrice({ price: '1500.00', currency: 'KES' })).toEqual({
+      amount: 1500,
+      currency: 'KES',
+    });
+    expect(getTicketBasePrice({ price: 800, priceCurrency: 'KES' })).toEqual({
+      amount: 800,
+      currency: 'KES',
+    });
+  });
+
+  it('is zero with no currency when there is no price at all', () => {
+    expect(getTicketBasePrice({})).toEqual({ amount: 0, currency: null });
   });
 });
