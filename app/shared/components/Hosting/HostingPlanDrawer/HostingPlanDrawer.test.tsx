@@ -101,6 +101,13 @@ const confirmHostingSubscription = jest.fn((subscriptionId: string) =>
   }),
 );
 
+const changeHostingPlan = jest.fn((_subscriptionId: string, planId: string) =>
+  Promise.resolve({
+    subscriptionId: `sub-${planId}`,
+    authorizationUrl: 'https://checkout.paystack.com/test-ref',
+  }),
+);
+
 const cancelHostingSubscription = jest.fn((_subscriptionId: string) =>
   Promise.resolve({
     planId: null,
@@ -118,6 +125,8 @@ jest.mock('@/services/hostingPlans', () => ({
   startHostingCheckout: (planId: string) => startHostingCheckout(planId),
   confirmHostingSubscription: (subscriptionId: string) =>
     confirmHostingSubscription(subscriptionId),
+  changeHostingPlan: (subscriptionId: string, planId: string) =>
+    changeHostingPlan(subscriptionId, planId),
   cancelHostingSubscription: (subscriptionId: string) => cancelHostingSubscription(subscriptionId),
   resumeHostingSubscription: jest.fn((current) =>
     Promise.resolve({ ...current, status: 'active' }),
@@ -251,7 +260,8 @@ describe('HostingPlanDrawer', () => {
     });
   };
 
-  it('with an active plan, picking a different one cancels it and starts a fresh checkout', async () => {
+  // DEV-400: switching keeps the current plan until the new one is paid
+  it('with an active plan, picking a different one switches it in one step', async () => {
     const user = userEvent.setup();
     renderDrawer();
     await subscribeToBasicThenClose(user);
@@ -264,11 +274,11 @@ describe('HostingPlanDrawer', () => {
     await user.click(screen.getByRole('radio', { name: /Premium/ }));
     await user.click(screen.getByRole('button', { name: 'Switch to Premium' }));
 
-    await waitFor(() => expect(cancelHostingSubscription).toHaveBeenCalledWith('sub-basic'));
-    // No atomic "change plan" endpoint - switching cancels the old
-    // subscription, then pays for the new one through the same checkout.
+    await waitFor(() => expect(changeHostingPlan).toHaveBeenCalledWith('sub-basic', 'premium'));
     await screen.findByText('Subscribe to Premium');
-    expect(startHostingCheckout).toHaveBeenCalledWith('premium');
+    // Nothing is cancelled up front: if this payment fails, Basic carries on
+    expect(cancelHostingSubscription).not.toHaveBeenCalled();
+    expect(startHostingCheckout).toHaveBeenCalledTimes(1);
   });
 
   it('the current plan cannot be re-picked in change mode', async () => {

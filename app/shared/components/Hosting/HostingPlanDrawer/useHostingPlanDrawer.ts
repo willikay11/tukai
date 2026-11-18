@@ -84,14 +84,14 @@ export const useHostingPlanDrawer = () => {
     effectivePlanId,
     isStartingCheckout,
     startCheckout,
+    changePlan,
     isConfirming,
     confirmSubscription,
-    cancel,
     closeHostingPlanFlow,
   } = hostingPlan;
 
-  // Already paying for something: Continue cancels it and starts a fresh
-  // checkout for the new plan. No plan yet: Continue starts the first one.
+  // Already paying for something: Continue switches it to the new plan, which
+  // takes over once paid. No plan yet: Continue starts the first one.
   const isChangeMode = hasActivePlan;
   const selectedPlan = plans.find((plan) => plan.id === selectedPlanId) ?? null;
   // The plan the host is on - their subscription's, or the default Basic -
@@ -122,11 +122,12 @@ export const useHostingPlanDrawer = () => {
     setInitiationError(null);
 
     try {
-      if (isChangeMode && currentPlan.subscriptionId) {
-        await cancel();
-      }
-
-      const checkout = await startCheckout(selectedPlan.id);
+      // Switching keeps the current plan until the new one is paid (DEV-400);
+      // cancelling first left the host on nothing if the payment then failed
+      const checkout =
+        isChangeMode && currentPlan.subscriptionId
+          ? await changePlan(selectedPlan.id)
+          : await startCheckout(selectedPlan.id);
       setPendingSubscriptionId(checkout.subscriptionId);
       setCheckoutUrl(checkout.authorizationUrl);
       setCheckoutPhase('frame');
