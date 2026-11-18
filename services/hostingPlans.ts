@@ -298,16 +298,49 @@ export const startHostingCheckout = async (planId: HostingPlanId): Promise<Hosti
   try {
     const api = await apiWithToken();
     const response = await api.post('/v1/subscriptions/', { plan: plan.backendId });
-    const data = parseSnakeToCamel(response.data);
-    const purchasedItem = data?.order?.purchasedItem;
-
-    return {
-      subscriptionId: purchasedItem?.type === 'subscription' ? purchasedItem.id : '',
-      authorizationUrl: data?.paymentDetails?.authorizationUrl ?? null,
-    };
+    return toCheckout(response.data);
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);
     throw new Error(parseApiError(error.response?.data, 'Could not start your subscription.'));
+  }
+};
+
+/** The new subscription and where to pay for it, from a subscribe response. */
+const toCheckout = (raw: unknown): HostingCheckout => {
+  const data = parseSnakeToCamel(raw) as any;
+  const purchasedItem = data?.order?.purchasedItem;
+
+  return {
+    subscriptionId: purchasedItem?.type === 'subscription' ? purchasedItem.id : '',
+    authorizationUrl: data?.paymentDetails?.authorizationUrl ?? null,
+  };
+};
+
+/**
+ * Moves a subscription to another plan in one step (DEV-400): starts the new
+ * plan's subscription and payment, like subscribing. The current plan stays
+ * active until the new one is paid, then the backend cancels it (on Paystack
+ * too) - so there's no gap, no double billing, and if the payment never
+ * completes nothing changes.
+ */
+export const changeHostingPlan = async (
+  subscriptionId: string,
+  planId: HostingPlanId,
+): Promise<HostingCheckout> => {
+  const plan = getHostingPlan(planId);
+  if (!plan?.backendId) {
+    throw new Error(`${plan?.name ?? 'This plan'} isn't available to switch to right now.`);
+  }
+
+  try {
+    const api = await apiWithToken();
+    const response = await api.post(`/v1/subscriptions/${subscriptionId}/change-plan/`, {
+      plan: plan.backendId,
+    });
+    return toCheckout(response.data);
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw new Error(parseApiError(error.response?.data, 'Could not switch your plan.'));
   }
 };
 
@@ -335,7 +368,10 @@ export const cancelHostingSubscription = async (
 ): Promise<CreatorPlanState> => {
   try {
     const api = await apiWithToken();
-    const response = await api.post(`/v1/subscriptions/${subscriptionId}/cancel/`, {});
+    // Answers 204 with no body: read the subscription back to see it now ends
+    // at the period's close rather than renewing
+    await api.post(`/v1/subscriptions/${subscriptionId}/cancel/`, {});
+    const response = await api.get(`/v1/subscriptions/${subscriptionId}/`);
     return toCreatorPlanState(parseSnakeToCamel(response.data) as BackendSubscription);
   } catch (error: any) {
     console.error('API Error:', error.response?.data || error.message);

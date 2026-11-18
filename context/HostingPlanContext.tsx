@@ -15,6 +15,7 @@ import {
   HostingCheckout,
   PLATFORM_COMMISSION_PCT,
   cancelHostingSubscription,
+  changeHostingPlan,
   confirmHostingSubscription,
   fetchCurrentHostingSubscription,
   fetchHostingPlans,
@@ -61,6 +62,11 @@ type HostingPlanContextValue = {
   /** Creates the pending subscription and returns where to pay for it. */
   isStartingCheckout: boolean;
   startCheckout: (planId: HostingPlanId) => Promise<HostingCheckout>;
+  /**
+   * Switches the current subscription to another plan (DEV-400): the old one
+   * keeps running until the new one is paid. Returns where to pay.
+   */
+  changePlan: (planId: HostingPlanId) => Promise<HostingCheckout>;
   /** Reads the subscription back once Paystack reports success. */
   isConfirming: boolean;
   confirmSubscription: (subscriptionId: string) => Promise<CreatorPlanState>;
@@ -132,6 +138,19 @@ export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const changePlan = useCallback(
+    async (planId: HostingPlanId) => {
+      if (!currentPlan.subscriptionId) throw new Error('There is no plan to switch from.');
+      setIsStartingCheckout(true);
+      try {
+        return await changeHostingPlan(currentPlan.subscriptionId, planId);
+      } finally {
+        setIsStartingCheckout(false);
+      }
+    },
+    [currentPlan.subscriptionId],
+  );
+
   const confirmSubscription = useCallback(async (subscriptionId: string) => {
     setIsConfirming(true);
     try {
@@ -177,6 +196,7 @@ export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
       canHost: hasActivePlan || Boolean(defaultPlan),
       isStartingCheckout,
       startCheckout,
+      changePlan,
       isConfirming,
       confirmSubscription,
       isCancelling,
@@ -196,6 +216,7 @@ export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
       effectivePlanId,
       isStartingCheckout,
       startCheckout,
+      changePlan,
       isConfirming,
       confirmSubscription,
       isCancelling,

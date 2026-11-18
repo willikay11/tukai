@@ -46,7 +46,7 @@ export const ChoosePlanView = ({
       </h2>
       <p className="text-[15px] leading-relaxed text-ink-muted">
         {isChangeMode
-          ? `You’re on ${currentPlanName ?? 'a plan'}${renewalDateLabel ? ` until ${renewalDateLabel}` : ''}. Switching cancels it and starts a new plan right away - you’ll pay for it now.`
+          ? `You’re on ${currentPlanName ?? 'a plan'}${renewalDateLabel ? ` until ${renewalDateLabel}` : ''}. Switch any time: you pay for the new plan now, and keep this one until that payment goes through.`
           : currentPlanId
             ? `You’re on ${currentPlanName ?? 'Basic'}, the plan every host starts on. Upgrade any time - you’ll pay for the new plan now.`
             : 'You need a plan to create experiences on Tukai. Every plan includes ticketing, payouts and community tools, and you can change or cancel any time.'}

@@ -2,6 +2,8 @@ import { apiWithToken } from './apiService';
 import {
   BackendPlan,
   PLATFORM_COMMISSION_PCT,
+  cancelHostingSubscription,
+  changeHostingPlan,
   fetchCurrentHostingSubscription,
   fetchHostingPlans,
   getDefaultPlan,
@@ -11,7 +13,7 @@ import {
 
 jest.mock('./apiService', () => ({ apiWithToken: jest.fn() }));
 
-const api = { get: jest.fn() };
+const api = { get: jest.fn(), post: jest.fn() };
 
 // GET /v1/subscriptions/plans/?product=hosting, as the API sends it
 const apiPlan = (overrides: Record<string, unknown>) => ({
@@ -159,5 +161,53 @@ describe('hosting plans from the API (DEV-458)', () => {
     });
 
     await expect(fetchCurrentHostingSubscription()).resolves.toBeNull();
+  });
+
+  // DEV-400: one call, and the current plan runs until the new one is paid
+  it('switches plan in one step and returns where to pay', async () => {
+    api.get.mockResolvedValueOnce({
+      data: {
+        results: [apiPlan({}), apiPlan({ id: 'plan-premium', name: 'Premium', is_default: false })],
+      },
+    });
+    await fetchHostingPlans();
+    api.post.mockResolvedValue({
+      data: {
+        order: { purchased_item: { type: 'subscription', id: 'sub-new' } },
+        payment_details: { authorization_url: 'https://checkout.paystack.com/x' },
+      },
+    });
+
+    await expect(changeHostingPlan('sub-old', 'plan-premium')).resolves.toEqual({
+      subscriptionId: 'sub-new',
+      authorizationUrl: 'https://checkout.paystack.com/x',
+    });
+    expect(api.post).toHaveBeenCalledWith('/v1/subscriptions/sub-old/change-plan/', {
+      plan: 'plan-premium',
+    });
+  });
+
+  // The cancel endpoint answers 204 with no body
+  it('reads a cancelled plan back: it runs to the end of the period', async () => {
+    api.get.mockResolvedValueOnce({ data: { results: [apiPlan({})] } });
+    await fetchHostingPlans();
+    api.post.mockResolvedValue({ status: 204, data: '' });
+    api.get.mockResolvedValueOnce({
+      data: {
+        id: 'sub-host',
+        plan: 'plan-basic',
+        product: 'hosting',
+        status: 'active',
+        auto_renew: false,
+        end_date: '2026-12-18T00:00:00Z',
+      },
+    });
+
+    await expect(cancelHostingSubscription('sub-host')).resolves.toMatchObject({
+      planId: 'plan-basic',
+      status: 'cancel_pending',
+      currentPeriodEnd: '2026-12-18T00:00:00Z',
+    });
+    expect(api.post).toHaveBeenCalledWith('/v1/subscriptions/sub-host/cancel/', {});
   });
 });
