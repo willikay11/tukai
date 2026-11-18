@@ -133,15 +133,19 @@ export const AboutTab = ({ experience, metrics }: AboutTabProps) => {
         </div>
 
         <div className="mt-4 space-y-3 border-t border-gray-100 pt-4">
-          <SummaryRow
-            label="Gross revenue"
-            value={`${experience.currency ?? 'Ksh.'} ${metrics.revenue.toLocaleString()}`}
-          />
+          <SummaryRow label="Gross revenue" value={metrics.revenueText} />
           <SummaryRow
             label="Days to go"
             value={metrics.daysToGo === null ? '-' : `${metrics.daysToGo} days`}
           />
-          <SummaryRow label="Avg. daily sales" value={`+${metrics.averageDailySales} / day`} />
+          <SummaryRow
+            label="Avg. daily sales"
+            value={
+              metrics.averageDailySales === null
+                ? '-'
+                : `+${Number(metrics.averageDailySales.toFixed(1))} tickets / day`
+            }
+          />
         </div>
       </div>
     </div>

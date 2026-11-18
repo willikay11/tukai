@@ -115,9 +115,7 @@ export const SalesTab = ({ experienceId, currency, metrics }: SalesTabProps) => 
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm text-white/70">Current Ticket Sales</p>
-            <p className="mt-1 text-3xl font-bold text-white">
-              {currency} {metrics.revenue.toLocaleString()}
-            </p>
+            <p className="mt-1 text-3xl font-bold text-white">{metrics.revenueText}</p>
           </div>
 
           <Button
@@ -142,9 +140,7 @@ export const SalesTab = ({ experienceId, currency, metrics }: SalesTabProps) => 
           </div>
           <div>
             <p className="text-xs text-white/60">Pending Payments</p>
-            <p className="mt-0.5 text-lg font-bold text-lime">
-              {currency} {metrics.pendingPayments.toLocaleString()}
-            </p>
+            <p className="mt-0.5 text-lg font-bold text-lime">{metrics.pendingPaymentsText}</p>
           </div>
         </div>
       </div>

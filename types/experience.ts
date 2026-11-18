@@ -167,3 +167,30 @@ export type CreateExperienceTicket = {
 export function isExperience(item: any): item is Experience {
   return 'ticketsAvailable' in item && 'isSoldOut' in item;
 }
+
+type SalesMoney = { amount: string; currency: string };
+
+/**
+ * GET /v1/experiences/{id}/sales-stats/ (DEV-371): one experience's sales,
+ * for its primary host only (a co-host gets 403).
+ *
+ * revenue is what buyers paid, after promo discounts; listSales is the same
+ * sales at list price. hostNet = listSales - hostFundedDiscount - commission.
+ * pendingBalance is host net not withdrawable yet; availableBalance can be
+ * withdrawn now. dailySales sums to revenue.
+ */
+export type ExperienceSalesStats = {
+  currency: string;
+  revenue: SalesMoney;
+  listSales: SalesMoney;
+  hostFundedDiscount: SalesMoney;
+  tukaiFundedDiscount: SalesMoney;
+  commission: SalesMoney;
+  hostNet: SalesMoney;
+  availableBalance: SalesMoney;
+  pendingBalance: SalesMoney;
+  ticketsSold: number;
+  /** Tickets sold per day since the first sale, e.g. "4.0" */
+  averageDailySales: string;
+  dailySales: { date: string; tickets: number; amount: SalesMoney }[];
+};
