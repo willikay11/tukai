@@ -7,11 +7,12 @@ import { IconComponent } from '@/app/shared/components/Icons';
 import { useUpdateExperienceTicket } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { useHostingPlan } from '@/context/HostingPlanContext';
-import { getHostingPlan } from '@/services/hostingPlans';
 import { cn } from '@/lib/utils';
+import { getHostingPlan } from '@/services/hostingPlans';
 import { Experience } from '@/types/experience';
 import { Ticket } from '@/types/ticket';
 import { currencyFullName } from '@/utils/money';
+import { getTicketBasePrice } from '@/utils/ticket-utils';
 
 type FeeAllocation = 'host_pays' | 'customer_pays' | 'split';
 
@@ -48,13 +49,15 @@ export const EditTicketDetailsView = ({
 }) => {
   const { toast } = useToast();
   const hostingPlan = useHostingPlan();
-  const plan = hostingPlan?.currentPlan.planId ? getHostingPlan(hostingPlan.currentPlan.planId) : undefined;
+  const plan = hostingPlan?.currentPlan.planId
+    ? getHostingPlan(hostingPlan.currentPlan.planId)
+    : undefined;
   const ratePct = plan?.commissionPct ?? 4;
 
   const sold = ticketsSold(ticket);
-  const isPaid = Number(ticket.price) > 0;
+  const originalPrice = getTicketBasePrice(ticket).amount;
+  const isPaid = originalPrice > 0;
   const originalName = ticket.name;
-  const originalPrice = Number(ticket.price) || 0;
   const originalQty = Number(ticket.quantity) || 0;
 
   const [name, setName] = useState(originalName);
@@ -105,7 +108,8 @@ export const EditTicketDetailsView = ({
           ? `${sold} tickets are already sold, so the quantity cannot go below ${sold}.`
           : '';
 
-  const changed = name.trim() !== originalName || (isPaid && amount !== originalPrice) || qty !== originalQty;
+  const changed =
+    name.trim() !== originalName || (isPaid && amount !== originalPrice) || qty !== originalQty;
   const canSave = !error && changed;
 
   const notes: string[] = [];
@@ -130,7 +134,12 @@ export const EditTicketDetailsView = ({
     if (!canSave) return;
 
     updateTicket(
-      { experience: experience.id, name: name.trim(), quantity: qty, price: String(isPaid ? amount : 0) },
+      {
+        experience: experience.id,
+        name: name.trim(),
+        quantity: qty,
+        price: String(isPaid ? amount : 0),
+      },
       {
         onSuccess: () => {
           toast({ description: `Changes to ${name.trim()} are saved.`, variant: 'success' });
@@ -147,7 +156,12 @@ export const EditTicketDetailsView = ({
       <div className="flex flex-1 flex-col gap-7 px-6 py-5">
         <div className="flex flex-col gap-3.5">
           <div className="flex items-start gap-3">
-            <IconComponent iconName="Ticket01Icon" size={24} color="currentColor" className="mt-0.5 flex-shrink-0 text-brand" />
+            <IconComponent
+              iconName="Ticket01Icon"
+              size={24}
+              color="currentColor"
+              className="mt-0.5 flex-shrink-0 text-brand"
+            />
             <h3 className="min-w-0 text-xl font-bold leading-snug tracking-tight text-gray-900">
               {originalName}
             </h3>
@@ -156,7 +170,10 @@ export const EditTicketDetailsView = ({
             {summaryStats.map((stat) => (
               <div
                 key={stat.label}
-                className={cn('flex min-w-0 flex-col gap-1 bg-surface px-4 py-3', stat.full && 'col-span-3')}
+                className={cn(
+                  'flex min-w-0 flex-col gap-1 bg-surface px-4 py-3',
+                  stat.full && 'col-span-3',
+                )}
               >
                 <span className="text-[13.5px] leading-snug text-ink-muted">{stat.label}</span>
                 <span className="break-words text-base font-semibold leading-snug text-gray-900">
@@ -248,9 +265,13 @@ export const EditTicketDetailsView = ({
           {isPaid && amount > 0 && qty > 0 && (
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border-[1.5px] border-dashed border-line bg-[#F7F8F7] px-4 py-3 text-[14.5px] text-gray-900">
               <span>
-                All tickets cost: <span className="font-bold">{money2(currency, amount * qty)}</span>
+                All tickets cost:{' '}
+                <span className="font-bold">{money2(currency, amount * qty)}</span>
               </span>
-              <span aria-hidden="true" className="h-[5px] w-[5px] flex-shrink-0 rounded-full bg-distance" />
+              <span
+                aria-hidden="true"
+                className="h-[5px] w-[5px] flex-shrink-0 rounded-full bg-distance"
+              />
               <span>
                 What the customer sees:{' '}
                 <span className="font-bold">{money2(currency, amount * multiplier)}</span>
@@ -261,9 +282,17 @@ export const EditTicketDetailsView = ({
           {isPaid && (
             <div className="flex flex-col gap-2.5">
               <span className="text-15 font-semibold text-gray-900">
-                Fees allocation <span className="font-normal text-ink-muted">(who pays Tukai&rsquo;s commission?)</span>
+                Fees allocation{' '}
+                <span className="font-normal text-ink-muted">
+                  (who pays Tukai&rsquo;s commission?)
+                </span>
               </span>
-              <div role="radiogroup" aria-label="Who pays the commission" aria-disabled="true" className="flex flex-col items-start gap-2.5">
+              <div
+                role="radiogroup"
+                aria-label="Who pays the commission"
+                aria-disabled="true"
+                className="flex flex-col items-start gap-2.5"
+              >
                 {FEE_OPTIONS.map((option) => {
                   const chosen = option.value === feeAllocation;
                   return (
@@ -292,7 +321,12 @@ export const EditTicketDetailsView = ({
                 })}
               </div>
               <span className="flex items-start gap-2 text-[13.5px] leading-[1.45] text-ink-muted">
-                <IconComponent iconName="SquareLock02Icon" size={17} color="currentColor" className="mt-px flex-shrink-0" />
+                <IconComponent
+                  iconName="SquareLock02Icon"
+                  size={17}
+                  color="currentColor"
+                  className="mt-px flex-shrink-0"
+                />
                 Set when the experience was created. It cannot change once tickets are on sale.
               </span>
             </div>

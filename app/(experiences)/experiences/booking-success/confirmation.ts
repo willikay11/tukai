@@ -2,6 +2,7 @@ import moment from 'moment';
 
 import { Experience } from '@/types/experience';
 import { TicketPurchase } from '@/types/ticket-purchase';
+import { getTicketBasePrice } from '@/utils/ticket-utils';
 
 export interface BookingConfirmation {
   reference: string;
@@ -67,7 +68,7 @@ const toLineItems = (purchases: TicketPurchase[]): BookingConfirmation['lineItem
 
   purchases.forEach((purchase) => {
     const label = purchase.ticket?.name ?? 'Ticket';
-    const unitPrice = Number(purchase.ticket?.price ?? 0);
+    const unitPrice = purchase.ticket ? getTicketBasePrice(purchase.ticket).amount : 0;
     const existing = byTicket.get(label);
 
     byTicket.set(label, {
@@ -113,7 +114,8 @@ export const toConfirmation = (
     },
     lineItems,
     amountPaid: lineItems.reduce((sum, line) => sum + line.lineTotal, 0),
-    currency: first.ticket?.currency || experience?.currency || 'Ksh.',
+    currency:
+      (first.ticket && getTicketBasePrice(first.ticket).currency) || experience?.currency || 'Ksh.',
     paidAt: first.dateCreated,
     status: first.status,
   };

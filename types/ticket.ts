@@ -7,7 +7,12 @@ export type Ticket = {
   id: string;
   name: string;
   quantity: number;
-  // The host's base amount, before Tukai's commission is allocated
+  // The host's base amount, before Tukai's commission is allocated, as a
+  // money object. Read this one: `price` is deprecated in responses.
+  basePrice?: TicketPrice | null;
+  base_price?: TicketPrice | null;
+  // Deprecated in responses (read basePrice); still what create and update
+  // send to set the price
   price: number | string;
   // What the buyer is charged - the API derives it from the experience's
   // fees_allocation, so it is the only price a buyer should be shown

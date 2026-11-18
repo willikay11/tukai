@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NoData } from '@/components/ui/noData';
 import { TicketPurchase } from '@/types/ticket-purchase';
+import { getTicketBasePrice } from '@/utils/ticket-utils';
 
 import { ManageExperienceMetrics } from '../../utils/manage-metrics';
 
@@ -55,7 +56,7 @@ const buildBuyerRows = (purchases: TicketPurchase[]): BuyerRow[] => {
       [purchase.user?.firstName, purchase.user?.lastName].filter(Boolean).join(' ') ||
       'Guest';
     const key = `${purchase.user?.id ?? name}-${purchase.status}`;
-    const price = parseFloat(purchase.ticket?.price ?? '0') || 0;
+    const price = purchase.ticket ? getTicketBasePrice(purchase.ticket).amount : 0;
 
     const existing = grouped.get(key);
     if (existing) {

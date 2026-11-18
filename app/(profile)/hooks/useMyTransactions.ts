@@ -15,6 +15,7 @@ import {
   payoutDestinationLabel,
 } from '@/types/payment';
 import { TicketPurchase } from '@/types/ticket-purchase';
+import { getTicketBasePrice } from '@/utils/ticket-utils';
 
 export type TransactionDirection = 'in' | 'out';
 
@@ -62,11 +63,13 @@ export const useMyTransactions = (userId?: string | null) => {
   );
   const payouts: HostPayout[] = useMemo(() => {
     const payload = payoutsResponse?.data;
-    return Array.isArray(payload) ? payload : payload?.results ?? [];
+    return Array.isArray(payload) ? payload : (payload?.results ?? []);
   }, [payoutsResponse]);
 
   const transactions: TransactionRow[] = useMemo(() => {
-    const experienceById = new Map(reservedExperiences.map((experience) => [experience.id, experience]));
+    const experienceById = new Map(
+      reservedExperiences.map((experience) => [experience.id, experience]),
+    );
 
     const ticketRows: TransactionRow[] = purchases.map((purchase) => {
       const experience = experienceById.get(purchase.ticket.experience);
@@ -77,7 +80,10 @@ export const useMyTransactions = (userId?: string | null) => {
         title: experience?.title ?? purchase.ticket.name,
         image: experience?.photos?.[0]?.photo,
         via: `Ticket · ${purchase.ticket.name}`,
-        amount: money(parseFloat(purchase.ticket.price) || 0, purchase.ticket.currency),
+        amount: money(
+          getTicketBasePrice(purchase.ticket).amount,
+          getTicketBasePrice(purchase.ticket).currency ?? 'KES',
+        ),
         direction: 'out',
       };
     });

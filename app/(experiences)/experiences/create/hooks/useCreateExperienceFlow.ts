@@ -63,7 +63,11 @@ import {
   diffSlotTemplates,
   slotTemplateToTimeSlot,
 } from '@/utils/slot-template-utils';
-import { getTicketBuyerAmount, parseSalesEndRelativeFromTicket } from '@/utils/ticket-utils';
+import {
+  getTicketBasePrice,
+  getTicketBuyerAmount,
+  parseSalesEndRelativeFromTicket,
+} from '@/utils/ticket-utils';
 import { browserTimeZone, isTimeZone, utcDateOf, utcIsoToLocalParts } from '@/utils/utc-time';
 
 import {
@@ -762,7 +766,7 @@ export const useCreateExperienceFlow = ({
           apiId: ticket.id,
           name: ticket.name,
           quantity: ticket.availableQuantity || ticket.quantity,
-          amount: Number(ticket.price),
+          amount: getTicketBasePrice(ticket).amount,
           buyerPrice: getTicketBuyerAmount(ticket),
           salesStartDate: salesStartDateTime.date,
           salesStartTime: salesStartDateTime.time,

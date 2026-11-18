@@ -4,6 +4,7 @@ import { Experience } from '@/types/experience';
 import { Ticket, isTicketPaused } from '@/types/ticket';
 import { experiencePath } from '@/utils/detail-paths';
 import { currencyFullName } from '@/utils/money';
+import { getTicketBasePrice } from '@/utils/ticket-utils';
 
 /**
  * The seven figures the canvas shows under a ticket type, in its order and
@@ -19,7 +20,7 @@ export type TicketStat = { label: string; value: string; full?: boolean };
 export const ticketsSold = (ticket: Ticket): number =>
   Math.max((Number(ticket.quantity) || 0) - (Number(ticket.availableQuantity) || 0), 0);
 
-export const ticketPrice = (ticket: Ticket): number => parseFloat(String(ticket.price)) || 0;
+export const ticketPrice = (ticket: Ticket): number => getTicketBasePrice(ticket).amount;
 
 export const ticketStats = (ticket: Ticket, currency: string): TicketStat[] => {
   const created = Number(ticket.quantity) || 0;

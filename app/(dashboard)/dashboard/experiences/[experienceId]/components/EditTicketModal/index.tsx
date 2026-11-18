@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Ticket } from '@/types/ticket';
+import { getTicketBasePrice } from '@/utils/ticket-utils';
 
 import { EditTicketValues, editTicketSchema, ticketQuantity, ticketsSoldFor } from './schema';
 
@@ -88,7 +89,7 @@ export const EditTicketModal = ({
   useEffect(() => {
     reset(
       ticket
-        ? { price: Number(ticket.price) || 0, quantity: ticketQuantity(ticket) }
+        ? { price: getTicketBasePrice(ticket).amount, quantity: ticketQuantity(ticket) }
         : { price: 0, quantity: 0 },
     );
   }, [ticket, reset]);
