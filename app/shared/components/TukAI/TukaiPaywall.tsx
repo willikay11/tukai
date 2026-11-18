@@ -3,7 +3,6 @@
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useTukai } from '@/context/TukaiContext';
 import type { TukaiPaywallReason } from '@/types/tukai';
-import { TUKAI_PRICE_LABEL } from '@/utils/tukai';
 
 import { TukaiMark } from './TukaiMark';
 
@@ -35,7 +34,7 @@ const FEATURES = [
 
 /** What TukAI costs and what it unlocks, worded for why it showed. */
 export const TukaiPaywall = () => {
-  const { paywallReason, goToPay, backFromPaywall } = useTukai();
+  const { paywallReason, goToPay, backFromPaywall, priceLabel } = useTukai();
   const copy = COPY[paywallReason ?? 'upgrade'];
 
   return (
@@ -53,7 +52,7 @@ export const TukaiPaywall = () => {
           <span className="text-base font-bold text-brand-ink">TukAI</span>
           <span className="whitespace-nowrap">
             <span className="text-[26px] font-bold tabular-nums leading-none tracking-[-0.03em] text-brand-ink">
-              {TUKAI_PRICE_LABEL}
+              {priceLabel}
             </span>
             <span className="ml-[5px] text-sm text-ink-muted">/ month</span>
           </span>
@@ -81,7 +80,7 @@ export const TukaiPaywall = () => {
         onClick={goToPay}
         className="flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-full bg-gradient-to-b from-brand-mid to-brand-deep px-6 text-base font-semibold text-white hover:brightness-[1.06]"
       >
-        Get TukAI for {TUKAI_PRICE_LABEL} a month
+        Get TukAI for {priceLabel} a month
       </button>
       <p className="-mt-1.5 text-pretty text-center text-[13px] leading-normal text-ink-muted">
         Cancel any time. TukAI keeps working until the end of the month you paid for.

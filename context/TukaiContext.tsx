@@ -14,16 +14,23 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+
 import { toast } from '@/app/shared/hooks/useToast';
 import { useAuthDialog } from '@/context/AuthDialogContext';
 import { useHostingPlan } from '@/context/HostingPlanContext';
 import { confirmTukaiAction, deleteTukaiSession, sendTukaiMessage } from '@/services/tukai';
 import {
+  confirmTukaiSubscription,
+  fetchTukaiPlan,
+  fetchTukaiSubscription,
+  startTukaiCheckout,
+} from '@/services/tukaiPlan';
+import {
   addTukaiMessage,
   deleteTukaiChat,
   patchTukaiMessage,
   removeTukaiMessage,
-  setTukaiPlanRenewal,
   startTukaiChat,
 } from '@/slices/tukaiSlice';
 import type { RootState } from '@/store/store';
@@ -38,6 +45,7 @@ import type {
 import {
   TUKAI_FREE_CHATS,
   TUKAI_FREE_MESSAGES,
+  TUKAI_PRICE_LABEL,
   chatTitleFrom,
   countUserMessages,
 } from '@/utils/tukai';
@@ -45,14 +53,8 @@ import {
 export const TUKAI_ROUTE = '/ai';
 
 export type TukaiView = 'chat' | 'paywall' | 'pay' | 'paid';
-export type TukaiPayMethod = 'mpesa' | 'card';
-
-/**
- * Payments for the TukAI plan have no API yet. With this set to `demo` the
- * Pay step confirms after 1.6 seconds, as the prototype does, so the paid
- * experience can be tried; otherwise Pay says it is not open yet.
- */
-const DEMO_PAYMENTS = process.env.NEXT_PUBLIC_TUKAI_PAYMENTS === 'demo';
+const PAYMENT_FAILED =
+  "The payment didn't go through, and nothing was charged. Try again, or use another method.";
 const ERROR_TEXT = 'TukAI could not answer just now. Check your connection and try again.';
 
 const newId = (prefix: string) =>
@@ -124,12 +126,21 @@ type TukaiContextValue = {
   showPaywall: (reason: TukaiPaywallReason) => void;
   goToPay: () => void;
   backFromPaywall: () => void;
-  payMethod: TukaiPayMethod;
-  setPayMethod: (method: TukaiPayMethod) => void;
-  phone: string;
-  setPhone: (value: string) => void;
-  isPaying: boolean;
-  pay: () => void;
+  /** The TukAI plan's price from the API, e.g. "$14.99". */
+  priceLabel: string;
+  /**
+   * Paying (DEV-373): opening the Pay step starts a TukAI subscription and
+   * loads its Paystack checkout here. The buyer picks M-Pesa or card there.
+   */
+  checkoutUrl: string | null;
+  isStartingCheckout: boolean;
+  /** Paystack reported a payment; reading the subscription back. */
+  isConfirmingPayment: boolean;
+  payError: string | null;
+  /** Paystack's answer: true once paid, false when it failed or was cancelled. */
+  onPaymentResult: (paid: boolean) => void;
+  /** Starts a fresh checkout, after a failure. */
+  retryCheckout: () => void;
   continueAfterPaid: () => void;
 
   /** The upgrade drawer, opened by writing helpers for someone without TukAI. */
@@ -170,7 +181,23 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
   const mine = Boolean(userId) && stored?.ownerId === userId;
   const chats = useMemo(() => (mine ? stored.chats : []), [mine, stored?.chats]);
   const freeChatsUsed = mine ? stored.freeChatsUsed : 0;
-  const planRenewsAt = mine ? stored.planRenewsAt : null;
+
+  // The TukAI plan and the account's live TukAI subscription, from the API.
+  // Access follows the subscription, so it's the same on every device.
+  const queryClient = useQueryClient();
+  const { data: tukaiPlan } = useQuery({
+    queryKey: ['tukai-plan'],
+    queryFn: fetchTukaiPlan,
+    enabled: Boolean(userId),
+    staleTime: 60 * 60 * 1000,
+  });
+  const { data: tukaiSubscription } = useQuery({
+    queryKey: ['tukai-subscription', userId],
+    queryFn: fetchTukaiSubscription,
+    enabled: Boolean(userId),
+  });
+  const planRenewsAt = tukaiSubscription?.renewsAt ?? null;
+  const priceLabel = tukaiPlan?.priceLabel ?? TUKAI_PRICE_LABEL;
 
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [view, setView] = useState<TukaiView>('chat');
@@ -179,9 +206,11 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
   const [busy, setBusy] = useState(false);
   const [input, setInputState] = useState('');
   const [focusRequest, setFocusRequest] = useState(0);
-  const [payMethod, setPayMethod] = useState<TukaiPayMethod>('mpesa');
-  const [phone, setPhone] = useState('');
-  const [isPaying, setIsPaying] = useState(false);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  const [pendingSubscriptionId, setPendingSubscriptionId] = useState<string | null>(null);
+  const [isStartingCheckout, setIsStartingCheckout] = useState(false);
+  const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
   const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
   const [isHistoryOpen, setHistoryOpen] = useState(false);
   const [mapMessageId, setMapMessageId] = useState<string | null>(null);
@@ -200,7 +229,7 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       hostingPlan?.plans.find((p) => p.id === hostingPlan.currentPlan.planId)?.name ??
         String(hostingPlan?.currentPlan.planId ?? ''),
     );
-  const hasTukaiPlan = Boolean(planRenewsAt && new Date(planRenewsAt).getTime() > Date.now());
+  const hasTukaiPlan = Boolean(tukaiSubscription);
 
   const access: TukaiAccess = {
     plan: hasTukaiPlan ? 'tukai' : businessPlan ? 'business' : 'free',
@@ -381,35 +410,82 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
     [currentChatId, dispatch],
   );
 
+  const clearCheckout = useCallback(() => {
+    setCheckoutUrl(null);
+    setPendingSubscriptionId(null);
+    setPayError(null);
+  }, []);
+
   const backFromPaywall = useCallback(() => {
     if (view === 'pay') {
+      // Nothing is charged until Paystack confirms; leaving drops the checkout
+      clearCheckout();
       setView('paywall');
       return;
     }
     if (paywallReason === 'helper') setIsUpgradeOpen(false);
     setView('chat');
     setPaywallReason(null);
-  }, [paywallReason, view]);
+  }, [clearCheckout, paywallReason, view]);
 
-  const pay = useCallback(() => {
-    if (isPaying || !userId) return;
-    if (payMethod === 'mpesa' && phone.replace(/\D/g, '').length < 9) {
-      toast({ description: 'Add the M-Pesa number to pay from.' });
+  // Starts the TukAI subscription and loads its Paystack checkout
+  const startCheckout = useCallback(async () => {
+    if (isStartingCheckout || !userId) return;
+    if (!tukaiPlan) {
+      setPayError("TukAI can't be bought just now. Nothing was charged. Try again later.");
       return;
     }
-    if (!DEMO_PAYMENTS) {
-      toast({ description: 'Payments for TukAI open soon. Nothing was charged.' });
-      return;
+    clearCheckout();
+    setIsStartingCheckout(true);
+    try {
+      const checkout = await startTukaiCheckout(tukaiPlan.id);
+      if (!checkout.authorizationUrl) throw new Error('Could not open the payment.');
+      setPendingSubscriptionId(checkout.subscriptionId);
+      setCheckoutUrl(checkout.authorizationUrl);
+    } catch (error: any) {
+      setPayError(error?.message ?? 'Could not open the payment. Try again.');
+    } finally {
+      setIsStartingCheckout(false);
     }
-    setIsPaying(true);
-    window.setTimeout(() => {
-      const renews = new Date();
-      renews.setMonth(renews.getMonth() + 1);
-      dispatch(setTukaiPlanRenewal({ ownerId: userId, renewsAt: renews.toISOString() }));
-      setIsPaying(false);
-      setView('paid');
-    }, 1600);
-  }, [dispatch, isPaying, payMethod, phone, userId]);
+  }, [clearCheckout, isStartingCheckout, tukaiPlan, userId]);
+
+  const goToPay = useCallback(() => {
+    setView('pay');
+    void startCheckout();
+  }, [startCheckout]);
+
+  const onPaymentResult = useCallback(
+    async (paid: boolean) => {
+      if (!paid) {
+        setPayError(PAYMENT_FAILED);
+        return;
+      }
+      setPayError(null);
+      setIsConfirmingPayment(true);
+      try {
+        const live = pendingSubscriptionId
+          ? await confirmTukaiSubscription(pendingSubscriptionId)
+          : null;
+        await queryClient.invalidateQueries({ queryKey: ['tukai-subscription'] });
+        if (live) {
+          queryClient.setQueryData(['tukai-subscription', userId], live);
+          clearCheckout();
+          setView('paid');
+        } else {
+          setPayError(
+            'Paystack has your payment and we are still confirming it. Give it a minute, then open TukAI again.',
+          );
+        }
+      } catch {
+        setPayError(
+          'Your payment went through, but we could not confirm it yet. Try again in a minute.',
+        );
+      } finally {
+        setIsConfirmingPayment(false);
+      }
+    },
+    [clearCheckout, pendingSubscriptionId, queryClient, userId],
+  );
 
   const continueAfterPaid = useCallback(() => {
     const waiting = pending;
@@ -453,14 +529,15 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       isCapped,
       hasNoFreeChats,
       showPaywall,
-      goToPay: () => setView('pay'),
+      goToPay,
       backFromPaywall,
-      payMethod,
-      setPayMethod,
-      phone,
-      setPhone: (v: string) => setPhone(v.slice(0, 20)),
-      isPaying,
-      pay,
+      priceLabel,
+      checkoutUrl,
+      isStartingCheckout,
+      isConfirmingPayment,
+      payError,
+      onPaymentResult,
+      retryCheckout: () => void startCheckout(),
       continueAfterPaid,
       isUpgradeOpen,
       closeUpgrade: () => setIsUpgradeOpen(false),
@@ -502,11 +579,15 @@ export const TukaiProvider = ({ children }: { children: ReactNode }) => {
       isCapped,
       hasNoFreeChats,
       showPaywall,
+      goToPay,
       backFromPaywall,
-      payMethod,
-      phone,
-      isPaying,
-      pay,
+      priceLabel,
+      checkoutUrl,
+      isStartingCheckout,
+      isConfirmingPayment,
+      payError,
+      onPaymentResult,
+      startCheckout,
       continueAfterPaid,
       isUpgradeOpen,
       isHistoryOpen,

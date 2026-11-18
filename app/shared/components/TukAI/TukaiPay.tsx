@@ -1,14 +1,8 @@
 'use client';
 
 import { IconComponent } from '@/app/shared/components/Icons';
-import { TukaiPayMethod, useTukai } from '@/context/TukaiContext';
-import { cn } from '@/lib/utils';
-import { TUKAI_PRICE_LABEL } from '@/utils/tukai';
-
-const METHODS: { id: TukaiPayMethod; label: string; icon: string }[] = [
-  { id: 'mpesa', label: 'M-Pesa', icon: 'SmartPhone01Icon' },
-  { id: 'card', label: 'Card', icon: 'CreditCardIcon' },
-];
+import { Paystack } from '@/components/ui/paystack';
+import { useTukai } from '@/context/TukaiContext';
 
 /** "3 December 2026", a month from today. */
 export const tukaiRenewalDate = (from = new Date()) => {
@@ -17,15 +11,29 @@ export const tukaiRenewalDate = (from = new Date()) => {
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 };
 
+const Spinner = () => (
+  <span
+    aria-hidden="true"
+    className="h-5 w-5 flex-shrink-0 animate-auth-spin rounded-full border-[2.5px] border-brand/25 border-t-brand"
+  />
+);
+
 /**
- * Paying for the TukAI plan: M-Pesa or a saved card.
- *
- * ⚠️ The saved card is the design's sample ("Visa ending 4242"): the API has
- * no saved-card endpoint yet. See the handoff's open questions 1 and 2 on
- * charging a USD plan through M-Pesa.
+ * Paying for the TukAI plan (DEV-373). Opening this step starts a TukAI
+ * subscription and loads its Paystack checkout below the plan summary, the
+ * same way hosting plans are paid: the buyer picks M-Pesa or card on
+ * Paystack's own page. Nothing is charged until Paystack confirms.
  */
 export const TukaiPay = () => {
-  const { payMethod, setPayMethod, phone, setPhone, isPaying, pay } = useTukai();
+  const {
+    priceLabel,
+    checkoutUrl,
+    isStartingCheckout,
+    isConfirmingPayment,
+    payError,
+    onPaymentResult,
+    retryCheckout,
+  } = useTukai();
 
   return (
     <div className="flex w-full max-w-[460px] flex-shrink-0 flex-col gap-[18px] self-center px-0.5 pb-1">
@@ -40,82 +48,65 @@ export const TukaiPay = () => {
 
       <div className="flex items-baseline justify-between gap-3 rounded-xl bg-surface px-4 py-3.5">
         <span className="text-[15px] text-gray-800">TukAI, monthly</span>
-        <span className="text-[17px] font-bold tabular-nums text-brand-ink">
-          {TUKAI_PRICE_LABEL}
-        </span>
+        <span className="text-[17px] font-bold tabular-nums text-brand-ink">{priceLabel}</span>
       </div>
 
-      <div className="flex flex-col gap-2.5">
-        <span id="tk-paywith" className="text-[15px] font-semibold text-gray-800">
-          Pay with
-        </span>
-        <div role="radiogroup" aria-labelledby="tk-paywith" className="flex flex-wrap gap-2">
-          {METHODS.map((method) => {
-            const on = payMethod === method.id;
-            return (
-              <button
-                key={method.id}
-                type="button"
-                role="radio"
-                aria-checked={on}
-                onClick={() => setPayMethod(method.id)}
-                className={cn(
-                  'inline-flex min-h-12 items-center gap-2 rounded-full pl-4 pr-5 text-[15px] font-medium',
-                  on
-                    ? 'bg-gradient-to-b from-brand-mid to-brand-deep text-white'
-                    : 'bg-surface text-gray-800',
-                )}
-              >
-                <IconComponent iconName={method.icon} size={19} color="currentColor" />
-                {method.label}
-              </button>
-            );
-          })}
+      <p className="-mt-1 text-[13.5px] leading-[1.45] text-ink-muted">
+        Pay with M-Pesa or card on Paystack&rsquo;s secure checkout below.
+      </p>
+
+      {isConfirmingPayment ? (
+        <div
+          role="status"
+          className="flex min-h-[200px] items-center justify-center gap-3 rounded-[14px] border border-surface-muted bg-white p-5 text-[14.5px] text-brand"
+        >
+          <Spinner />
+          Confirming your payment with Paystack. This takes a few seconds.
         </div>
-      </div>
+      ) : checkoutUrl ? (
+        <div
+          role="region"
+          aria-label="Paystack checkout"
+          className="h-[70vh] max-h-[640px] overflow-hidden rounded-[14px] border border-surface-muted bg-white shadow-sm"
+        >
+          <Paystack url={checkoutUrl} onPaymentSuccess={onPaymentResult} />
+        </div>
+      ) : isStartingCheckout ? (
+        <div
+          role="status"
+          className="flex min-h-[200px] items-center justify-center gap-3 rounded-[14px] border border-surface-muted bg-white p-5 text-[14.5px] text-ink-muted"
+        >
+          <Spinner />
+          Opening the payment
+        </div>
+      ) : null}
 
-      {payMethod === 'mpesa' ? (
-        <label className="flex flex-col gap-2">
-          <span className="text-[15px] font-semibold text-gray-800">M-Pesa number</span>
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            autoComplete="tel"
-            placeholder="0712 345 678"
-            className="h-14 w-full rounded-xl border border-line bg-white px-4 text-[15px] text-gray-800 outline-none focus:border-brand focus:shadow-[0_0_0_3px_theme(colors.surface.brand)]"
-          />
-          <span className="text-[13px] leading-[1.45] text-ink-muted">
-            You get a prompt on your phone to enter your M-Pesa PIN.
-          </span>
-        </label>
-      ) : (
-        <div className="flex items-center gap-3 rounded-xl bg-surface px-4 py-3.5">
-          <IconComponent
-            iconName="CreditCardIcon"
-            size={22}
-            color="currentColor"
-            className="flex-shrink-0 text-brand"
-          />
-          <span className="min-w-0 flex-1 text-[15px] text-gray-800">Visa ending 4242</span>
-          <span className="text-[13px] text-ink-muted">Expires 08/28</span>
+      {payError && (
+        <div className="flex flex-col gap-3">
+          <p
+            role="alert"
+            className="flex items-start gap-2 text-[13.5px] leading-[1.45] text-danger-deep"
+          >
+            <IconComponent
+              iconName="InformationCircleIcon"
+              size={17}
+              color="currentColor"
+              className="mt-px flex-shrink-0"
+            />
+            {payError}
+          </p>
+          {!isConfirmingPayment && (
+            <button
+              type="button"
+              onClick={retryCheckout}
+              disabled={isStartingCheckout}
+              className="flex min-h-[52px] w-full items-center justify-center rounded-full bg-gradient-to-b from-brand-mid to-brand-deep px-6 text-base font-semibold text-white hover:brightness-[1.06] disabled:opacity-60"
+            >
+              Try again
+            </button>
+          )}
         </div>
       )}
-
-      <button
-        type="button"
-        onClick={pay}
-        aria-busy={isPaying}
-        className="flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-full bg-gradient-to-b from-brand-mid to-brand-deep px-6 text-base font-semibold text-white hover:brightness-[1.06]"
-      >
-        {isPaying && (
-          <span
-            aria-hidden="true"
-            className="h-5 w-5 flex-shrink-0 animate-auth-spin rounded-full border-[2.5px] border-white/35 border-t-white"
-          />
-        )}
-        {isPaying ? 'Confirming payment' : `Pay ${TUKAI_PRICE_LABEL}`}
-      </button>
     </div>
   );
 };
