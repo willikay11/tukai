@@ -15,7 +15,14 @@ jest.mock('@/app/shared/hooks/usePromoCodes', () => ({
   useUpdatePromoCode: () => ({ mutate: updateCode, isPending: false }),
 }));
 
-jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast: jest.fn() }) }));
+const mockToast = jest.fn();
+jest.mock('@/app/shared/hooks/useToast', () => ({ useToast: () => ({ toast: mockToast }) }));
+
+const mockPlanAction = <button type="button">See plans</button>;
+jest.mock('@/app/shared/hooks/usePlanLimitAction', () => ({
+  usePlanLimitAction: () => (error: { errors?: { code: string }[] }) =>
+    error.errors?.[0]?.code.startsWith('plan_limit_') ? mockPlanAction : undefined,
+}));
 
 const renderForm = (props: Partial<React.ComponentProps<typeof DiscountCodeForm>> = {}) =>
   render(
@@ -127,6 +134,30 @@ describe('generating a discount code', () => {
         discountAmount: 500,
       },
       expect.anything(),
+    );
+  });
+
+  // DEV-351: a plan without discount codes is refused with the API's own words
+  it('offers the hosting plans when the plan has no discount codes', async () => {
+    createCode.mockImplementation((_payload, { onError }) =>
+      onError(
+        Object.assign(new Error("Discount codes aren't included in the host's Basic plan."), {
+          errors: [{ code: 'plan_limit_discount_codes', detail: '…', attr: 'discount_type' }],
+        }),
+      ),
+    );
+    renderForm();
+
+    await userEvent.type(screen.getByLabelText(/Discount code/), 'JULY500');
+    await userEvent.type(screen.getByLabelText(/Enter amount/), '500');
+    await waitFor(() => expect(primary()).toBeEnabled());
+    await userEvent.click(primary());
+
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: "Discount codes aren't included in the host's Basic plan.",
+        action: mockPlanAction,
+      }),
     );
   });
 

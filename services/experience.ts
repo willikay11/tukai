@@ -302,6 +302,9 @@ export async function updateExperience(
       status: error.response?.status || 500,
       success: false,
       message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+      // The API's own error list, so a caller can act on a code (e.g. a
+      // plan_limit_* refusal)
+      errors: error.response?.data?.errors,
     };
   }
 }
@@ -468,6 +471,9 @@ export const publishExperience = async (id: string): Promise<ApiResponse> => {
       status: error.response?.status || 500,
       success: false,
       message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+      // The API's own error list, so a caller can act on a code (e.g. a
+      // plan_limit_* refusal)
+      errors: error.response?.data?.errors,
     };
   }
 };

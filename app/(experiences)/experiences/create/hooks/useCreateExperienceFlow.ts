@@ -34,6 +34,7 @@ import {
   useUpdateExperience,
 } from '@/app/shared/hooks/useExperiences';
 import { useGoogleMapsPlaceGeocode, usePlace } from '@/app/shared/hooks/usePlaces';
+import { usePlanLimitAction } from '@/app/shared/hooks/usePlanLimitAction';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { InvitedMember } from '@/components/ui/invite-members';
 import {
@@ -344,6 +345,8 @@ export const useCreateExperienceFlow = ({
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
+  // "See plans" on a toast when the host's plan doesn't allow what they tried
+  const planLimitAction = usePlanLimitAction();
   // Always called, even when its value goes unused below - conditionally
   // calling a hook would break the rules of hooks.
   const searchParams = useSearchParams();
@@ -1372,6 +1375,8 @@ export const useCreateExperienceFlow = ({
         title: 'Error',
         description: message,
         variant: 'destructive',
+        // e.g. "Recurring experiences aren't included in your Basic plan"
+        action: planLimitAction(error),
       });
       console.error('[handleSaveAbout] Error:', error);
       return false;
@@ -1391,6 +1396,7 @@ export const useCreateExperienceFlow = ({
     slotTemplateRecords,
     timeZone,
     toast,
+    planLimitAction,
   ]);
 
   const handleAddPhotos = useCallback(
@@ -1621,13 +1627,15 @@ export const useCreateExperienceFlow = ({
         title: 'Error',
         description: message,
         variant: 'destructive',
+        // e.g. "Your Basic plan allows 3 live experiences at a time"
+        action: planLimitAction(error),
       });
       console.error('[handlePublish] Error:', error);
       return false;
     } finally {
       setIsSavingExperience(false);
     }
-  }, [experienceId, publishAsync, toast]);
+  }, [experienceId, publishAsync, toast, planLimitAction]);
 
   /**
    * PATCHes fees_allocation on its own. Fired as soon as the picker is clicked,
