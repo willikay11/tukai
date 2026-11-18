@@ -9,6 +9,7 @@ import { Breadcrumb } from '@/app/shared/components/Breadcrumb';
 import { CreateStepContentSkeleton } from '@/app/shared/components/Cards';
 import { ComingSoon } from '@/app/shared/components/ComingSoon';
 import {
+  useExperienceSalesStats,
   useExperienceTicketPurchases,
   useFetchSingleExperience,
 } from '@/app/shared/hooks/useExperiences';
@@ -19,7 +20,11 @@ import { TicketPurchase } from '@/types/ticket-purchase';
 import { AboutTab } from './components/AboutTab';
 import { InvitedGuestsTab } from './components/InvitedGuestsTab';
 import { ManageExperienceHero } from './components/ManageExperienceHero';
-import { MANAGE_TABS, ManageExperienceTabs, type ManageTabId } from './components/ManageExperienceTabs';
+import {
+  MANAGE_TABS,
+  ManageExperienceTabs,
+  type ManageTabId,
+} from './components/ManageExperienceTabs';
 import { SalesTab } from './components/SalesTab';
 import { TicketsCreatedTab } from './components/TicketsCreatedTab';
 import { buildManageExperienceMetrics } from './utils/manage-metrics';
@@ -54,14 +59,21 @@ export default function ManageExperiencePage() {
   const { data: purchasesResponse } = useExperienceTicketPurchases(experienceId, true);
   const purchases: TicketPurchase[] = purchasesResponse?.data?.results ?? [];
 
-  const metrics = useMemo(
-    () => buildManageExperienceMetrics(experience, purchases),
-    [experience, purchases],
-  );
-
   // Only the host may see a creator dashboard for their own experience
   const currentUserId = session?.user?.id;
   const isHost = Boolean(currentUserId && experience?.host?.id === currentUserId);
+
+  // Revenue, balances and daily sales (DEV-371). The primary host's only, so
+  // nobody else asks; days are counted where the experience happens.
+  const { data: salesStats } = useExperienceSalesStats(experienceId, {
+    enabled: isHost,
+    timeZone: experience?.timezone,
+  });
+
+  const metrics = useMemo(
+    () => buildManageExperienceMetrics(experience, purchases, salesStats),
+    [experience, purchases, salesStats],
+  );
   const isResolving = isLoading || sessionStatus === 'loading';
 
   if (isResolving) {
@@ -101,10 +113,7 @@ export default function ManageExperiencePage() {
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-6 py-6">
       <Breadcrumb
-        items={[
-          { label: 'Dashboard', href: '/dashboard' },
-          { label: 'Manage Experience' },
-        ]}
+        items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Manage Experience' }]}
       />
 
       <ManageExperienceHero experience={experience} metrics={metrics} />

@@ -1,7 +1,7 @@
-import { Experience } from '@/types/experience';
+import { Experience, ExperienceSalesStats } from '@/types/experience';
 import { TicketPurchase } from '@/types/ticket-purchase';
 
-import { buildManageExperienceMetrics, countBuyers } from './manage-metrics';
+import { buildManageExperienceMetrics, compactMoney, countBuyers } from './manage-metrics';
 
 // Mirrors the host payload: tickets_sold / total_tickets are the host's own
 // figures, while reserved_tickets_count is the REQUESTING USER's own bookings
@@ -143,5 +143,60 @@ describe('buildManageExperienceMetrics buyers', () => {
 
   it('defaults to no buyers when purchases are not supplied', () => {
     expect(buildManageExperienceMetrics(published).buyers).toBe(0);
+  });
+});
+
+const kes = (amount: string) => ({ amount, currency: 'KES' });
+
+// GET /experiences/{id}/sales-stats/, after parseSnakeToCamel (DEV-371)
+const salesStats = (overrides: Partial<ExperienceSalesStats> = {}): ExperienceSalesStats => ({
+  currency: 'KES',
+  revenue: kes('34839.00'),
+  listSales: kes('36000.00'),
+  hostFundedDiscount: kes('1161.00'),
+  tukaiFundedDiscount: kes('0.00'),
+  commission: kes('2880.00'),
+  hostNet: kes('31959.00'),
+  availableBalance: kes('12000.00'),
+  pendingBalance: kes('19959.00'),
+  ticketsSold: 30,
+  averageDailySales: '4.0',
+  dailySales: [],
+  ...overrides,
+});
+
+describe('sales figures from the sales stats', () => {
+  it('shows what buyers paid, pending and daily sales', () => {
+    const metrics = buildManageExperienceMetrics(experience(), [], salesStats());
+
+    expect(metrics.revenue).toBe(34839);
+    expect(metrics.revenueText).toBe('KES 34,839.00');
+    expect(metrics.revenueLabel).toBe('KES 34.8K');
+    expect(metrics.pendingPayments).toBe(19959);
+    expect(metrics.pendingPaymentsText).toBe('KES 19,959.00');
+    expect(metrics.availableBalance).toBe(12000);
+    expect(metrics.averageDailySales).toBe(4);
+  });
+
+  // The sample figures (KES 34,839 revenue, 78,238 pending) are gone
+  it('shows dashes, never made-up numbers, until the stats load', () => {
+    const metrics = buildManageExperienceMetrics(experience());
+
+    expect(metrics.revenue).toBeNull();
+    expect(metrics.revenueText).toBe('-');
+    expect(metrics.revenueLabel).toBe('-');
+    expect(metrics.pendingPayments).toBeNull();
+    expect(metrics.averageDailySales).toBeNull();
+  });
+});
+
+describe('compactMoney', () => {
+  it.each([
+    [950, 'KES 950'],
+    [34839, 'KES 34.8K'],
+    [1000, 'KES 1K'],
+    [1250000, 'KES 1.3M'],
+  ])('writes %s as %s', (amount, text) => {
+    expect(compactMoney(amount, 'KES')).toBe(text);
   });
 });

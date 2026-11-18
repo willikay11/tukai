@@ -4,9 +4,13 @@ import { useMemo, useState } from 'react';
 
 import { IconComponent } from '@/app/shared/components/Icons';
 import { PlainImage } from '@/app/shared/components/Images';
-import { useExperienceTicketPurchases } from '@/app/shared/hooks/useExperiences';
+import {
+  useExperienceSalesStats,
+  useExperienceTicketPurchases,
+} from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Experience } from '@/types/experience';
+import { formatCurrencyAmount, moneyAmount } from '@/utils/money';
 
 import { HostActionBar, messageAllBuyersAction } from './HostActionBar';
 import { Buyer, buildSalesData } from './sales-buyers';
@@ -145,10 +149,10 @@ const BuyerRow = ({
 
 /**
  * A hosted experience's Sales tab: what has sold, who bought it, and the
- * sales-facing actions around that. Real data throughout - `useExperienceTicketPurchases`
- * already exists for this, built for the old manage-experience page's own
- * `SalesTab`. Only `completed` purchases count as buyers; `pending` feeds the
- * summary's own pending figure instead of the handoff's fixed-18% sample.
+ * sales-facing actions around that. The money comes from the experience's
+ * sales stats (DEV-371): current sales are what buyers paid after promo
+ * discounts, pending is earnings not withdrawable yet. Buyers are counted from
+ * the purchase list; only `completed` purchases count.
  *
  * Share buyers list, Generate sale QR, Admission QR, Send message, Message
  * all buyers and Scan ticket are all out of scope per the handoff - every one
@@ -162,6 +166,10 @@ export const SalesHostTab = ({ experience }: { experience: Experience }) => {
   const [showAll, setShowAll] = useState(false);
 
   const { data: purchasesResponse, isLoading } = useExperienceTicketPurchases(experience.id);
+  // Only the primary host sees this tab, so the stats are theirs to read
+  const { data: stats } = useExperienceSalesStats(experience.id, {
+    timeZone: experience.timezone,
+  });
 
   const { summary, buyers } = useMemo(
     () => buildSalesData(purchasesResponse?.data?.results ?? []),
@@ -175,12 +183,16 @@ export const SalesHostTab = ({ experience }: { experience: Experience }) => {
   const visible = query || showAll ? matches : matches.slice(0, PAGE_SIZE);
   const hasMore = !query && !showAll && matches.length > PAGE_SIZE;
 
-  const available = summary.total - summary.pending;
+  // A dash until the stats load - never a figure worked out from list prices
+  const salesText = stats ? formatCurrencyAmount(stats.revenue) : '-';
+  const pendingText = stats ? formatCurrencyAmount(stats.pendingBalance) : '-';
+  const availableText = stats ? formatCurrencyAmount(stats.availableBalance) : '-';
+  const hasSales = (stats ? moneyAmount(stats.revenue) : summary.total) ?? 0;
 
-  const stats = [
-    { label: 'Tickets sold', value: String(summary.ticketsSold) },
+  const figures = [
+    { label: 'Tickets sold', value: String(stats?.ticketsSold ?? summary.ticketsSold) },
     { label: 'Total buyers', value: String(summary.buyers) },
-    { label: 'Pending payments', value: money(summary.pending, currency) },
+    { label: 'Pending payments', value: pendingText },
   ];
 
   const salesActions = [
@@ -217,7 +229,7 @@ export const SalesHostTab = ({ experience }: { experience: Experience }) => {
             <div className="min-w-0">
               <h3 className="text-[14.5px] text-ink-pill">Current ticket sales</h3>
               <p className="mt-1 text-[28px] font-bold leading-[1.15] tracking-[-0.6px] text-ink-pill">
-                {money(summary.total, currency)}
+                {salesText}
               </p>
             </div>
 
@@ -226,8 +238,8 @@ export const SalesHostTab = ({ experience }: { experience: Experience }) => {
               onClick={() =>
                 toast({
                   description:
-                    summary.total > 0
-                      ? `Choose an amount to send to M-Pesa ending 815. ${money(available, currency)} is available now, ${money(summary.pending, currency)} is still clearing.`
+                    hasSales > 0
+                      ? `Choose an amount to send to your payout account. ${availableText} is available now, ${pendingText} is still clearing.`
                       : 'There is nothing to withdraw yet. Ticket sales show up here as they come in.',
                 })
               }
@@ -239,7 +251,7 @@ export const SalesHostTab = ({ experience }: { experience: Experience }) => {
           </div>
 
           <div className="flex flex-wrap gap-px overflow-hidden rounded-xl bg-surface-muted shadow-[0_1px_3px_rgba(1,51,52,.07)]">
-            {stats.map((stat) => (
+            {figures.map((stat) => (
               <div key={stat.label} className="min-w-0 flex-1 basis-[120px] bg-white p-3.5">
                 <p className="text-13 text-ink-muted">{stat.label}</p>
                 <p className="mt-1 text-[15.5px] font-bold text-ink-pill">{stat.value}</p>

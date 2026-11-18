@@ -25,6 +25,7 @@ import {
   fetchExperience,
   fetchExperienceOccurrences,
   fetchExperienceRatings,
+  fetchExperienceSalesStats,
   fetchExperiences,
   fetchItineraryDays,
   fetchPurchase,
@@ -134,6 +135,22 @@ export const useExperienceTicketPurchases = (
     queryKey: ['purchases', 'experience', experienceId],
     queryFn: () => fetchTicketPurchases({ experience: experienceId!, page_size: 100 }),
     enabled: enabled && !!experienceId,
+  });
+
+/**
+ * One experience's sales, for its primary host (DEV-371). Days are counted
+ * in `timeZone`, the experience's. Pass enabled=false for anyone else: a
+ * co-host gets 403, and nothing else should ask.
+ */
+export const useExperienceSalesStats = (
+  experienceId: string | undefined,
+  { enabled = true, timeZone }: { enabled?: boolean; timeZone?: string } = {},
+) =>
+  useQuery({
+    queryKey: ['experience-sales-stats', experienceId, timeZone],
+    queryFn: () => fetchExperienceSalesStats(experienceId!, { timeZone }),
+    enabled: enabled && !!experienceId,
+    retry: false,
   });
 
 export const useBookmarkExperience = () => {

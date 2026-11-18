@@ -3,7 +3,7 @@ import { ca } from 'date-fns/locale';
 import { api, apiWithToken } from '@/services/apiService';
 import { ApiResponse } from '@/types/apiResponse';
 import { ExperienceType } from '@/types/experience';
-import { CreateExperience, CreateExperienceTicket } from '@/types/experience';
+import { CreateExperience, CreateExperienceTicket, ExperienceSalesStats } from '@/types/experience';
 import { ItineraryDayPayload } from '@/types/itinerary';
 import { assertValidImageFiles } from '@/utils/images';
 import { parseApiError } from '@/utils/parseApiError';
@@ -1231,6 +1231,33 @@ export const deleteItineraryDayActivity = async (
       status: error.response?.status || 500,
       success: false,
       message: parseApiError(error.response?.data, 'An unexpected error occurred'),
+    };
+  }
+};
+
+/**
+ * One experience's sales for its primary host (DEV-371): revenue, host net,
+ * available and pending balances, tickets sold and a per-day series.
+ * `timeZone` is the zone its days are counted in; `days` how many to return.
+ * A co-host gets 403.
+ */
+export const fetchExperienceSalesStats = async (
+  experienceId: string,
+  { timeZone, days }: { timeZone?: string; days?: number } = {},
+): Promise<ExperienceSalesStats> => {
+  try {
+    const axiosInstance = await apiWithToken();
+    const response = await axiosInstance.get(`/v1/experiences/${experienceId}/sales-stats/`, {
+      params: { ...(timeZone ? { tz: timeZone } : {}), ...(days ? { days } : {}) },
+    });
+    return parseSnakeToCamel(response.data) as ExperienceSalesStats;
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+    throw {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load the sales figures'),
+      errors: error.response?.data?.errors,
     };
   }
 };

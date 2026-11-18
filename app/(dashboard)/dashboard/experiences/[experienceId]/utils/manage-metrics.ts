@@ -1,19 +1,19 @@
 import moment from 'moment';
 
 import { Status } from '@/enums/status';
-import { Experience } from '@/types/experience';
+import { Experience, ExperienceSalesStats } from '@/types/experience';
 import { TicketPurchase } from '@/types/ticket-purchase';
+import { formatCurrencyAmount, moneyAmount } from '@/utils/money';
 
 import { experienceProgress } from '../../../utils/control-center-metrics';
 
 /**
  * Host-facing metrics for the Manage Experience dashboard.
  *
- * Some of these are real - derived from the fetched experience. Others have NO
- * backing endpoint anywhere in the API (there is no revenue, earnings, payout
- * or pending-payments resource), so they are placeholders until one exists.
- * Every placeholder is listed in PLACEHOLDER_METRICS below and nowhere else, so
- * swapping in a real endpoint is a single edit.
+ * Ticket counts come from the experience; the money comes from its sales
+ * stats (GET /experiences/{id}/sales-stats/, DEV-371). Until those load, or
+ * for a co-host (who may not see them), the money figures are null and show
+ * as a dash - never a made-up number.
  */
 export interface ManageExperienceMetrics {
   // ─── Derived from real data ───
@@ -26,22 +26,34 @@ export interface ManageExperienceMetrics {
   // Distinct people who hold a purchase - counted from the purchase list
   buyers: number;
 
-  // ─── Placeholders: no endpoint ───
-  revenue: number;
+  // ─── From the sales stats; null until they load ───
+  /** What buyers paid, after promo discounts */
+  revenue: number | null;
+  /** "KES 34,839.00", or "-" */
+  revenueText: string;
+  /** "KES 34.8K" for the hero's narrow stat, or "-" */
   revenueLabel: string;
-  pendingPayments: number;
-  averageDailySales: number;
+  /** Host net not withdrawable yet */
+  pendingPayments: number | null;
+  pendingPaymentsText: string;
+  /** Host net that can be withdrawn now */
+  availableBalance: number | null;
+  /** Tickets sold per day since the first sale */
+  averageDailySales: number | null;
 }
 
-/**
- * TODO: replace once host revenue/payout endpoints exist. Values mirror the
- * design so the dashboard reads correctly in review.
- */
-const PLACEHOLDER_METRICS = {
-  revenue: 34839,
-  revenueLabel: 'Ksh 34.8K',
-  pendingPayments: 78238,
-  averageDailySales: 4,
+const NO_FIGURE = '-';
+
+/** "KES 950", "KES 34.8K", "KES 1.2M" */
+export const compactMoney = (amount: number, currency: string): string => {
+  const abs = Math.abs(amount);
+  const short =
+    abs >= 1_000_000
+      ? `${Number((amount / 1_000_000).toFixed(1))}M`
+      : abs >= 1_000
+        ? `${Number((amount / 1_000).toFixed(1))}K`
+        : `${Math.round(amount)}`;
+  return `${currency} ${short}`;
 };
 
 /**
@@ -56,9 +68,39 @@ export const countBuyers = (purchases: TicketPurchase[]): number =>
 
 const normalizeStatus = (status: string): string => String(status).toUpperCase();
 
+/** The money figures, from the sales stats, or dashes without them. */
+const salesFigures = (stats?: ExperienceSalesStats | null) => {
+  if (!stats) {
+    return {
+      revenue: null,
+      revenueText: NO_FIGURE,
+      revenueLabel: NO_FIGURE,
+      pendingPayments: null,
+      pendingPaymentsText: NO_FIGURE,
+      availableBalance: null,
+      averageDailySales: null,
+    };
+  }
+
+  const currency = stats.revenue?.currency || stats.currency;
+  const revenue = moneyAmount(stats.revenue) ?? 0;
+  const average = Number.parseFloat(stats.averageDailySales);
+
+  return {
+    revenue,
+    revenueText: formatCurrencyAmount(stats.revenue),
+    revenueLabel: compactMoney(revenue, currency),
+    pendingPayments: moneyAmount(stats.pendingBalance) ?? 0,
+    pendingPaymentsText: formatCurrencyAmount(stats.pendingBalance),
+    availableBalance: moneyAmount(stats.availableBalance) ?? 0,
+    averageDailySales: Number.isFinite(average) ? average : 0,
+  };
+};
+
 export const buildManageExperienceMetrics = (
   experience: Experience | undefined,
   purchases: TicketPurchase[] = [],
+  salesStats?: ExperienceSalesStats | null,
 ): ManageExperienceMetrics => {
   /**
    * tickets_sold and total_tickets are the host's own figures. This used to read
@@ -90,6 +132,6 @@ export const buildManageExperienceMetrics = (
     daysToGo,
     isSelling,
     buyers: countBuyers(purchases),
-    ...PLACEHOLDER_METRICS,
+    ...salesFigures(salesStats),
   };
 };
