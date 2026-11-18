@@ -278,3 +278,31 @@ export async function verifyWalletOtp(walletId: string, otp: string) {
     };
   }
 }
+
+/**
+ * A host's income ledger (DEV-372): every ticket sale booked to them, and
+ * every refund, cancellation or correction that changed it, newest first.
+ * Empty for someone who hosts nothing.
+ */
+export async function fetchHostIncome(
+  params: { page?: number; page_size?: number; experience?: string } = {},
+): Promise<ApiResponse> {
+  try {
+    const api = await apiWithToken();
+    const response = await api.get('/v1/payments/wallets/income/', { params });
+
+    return {
+      status: response.status,
+      success: true,
+      data: parseSnakeToCamel(response.data),
+    } as ApiResponse;
+  } catch (error: any) {
+    console.error('API Error:', error.response?.data || error.message);
+
+    return {
+      status: error.response?.status || 500,
+      success: false,
+      message: parseApiError(error.response?.data, 'Could not load your ticket sales'),
+    } as ApiResponse;
+  }
+}

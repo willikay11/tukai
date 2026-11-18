@@ -170,3 +170,30 @@ export const PAYOUT_KIND_LABEL: Record<PayoutKind, string> = {
 /** What to call the place the money went. */
 export const payoutDestinationLabel = (destination: HostPayout['destinationType']): string =>
   destination === 'bank' ? 'Bank account' : 'Mobile money';
+
+/**
+ * One row of a host's ticket-sales income ledger (GET /wallets/income/,
+ * DEV-372): a journal entry that changed what the host is owed.
+ *
+ * kind is sale, sale_reversal (a refund or cancellation) or correction.
+ * amount is the host's net from it - negative for a reversal. saleAmount is
+ * what the buyer paid, after any promo discount.
+ */
+export type HostIncomeEntry = {
+  id: string;
+  kind: 'sale' | 'sale_reversal' | 'correction' | string;
+  datePosted: string;
+  currency: string;
+  amount: MoneyAmount;
+  saleAmount: MoneyAmount;
+  listAmount: MoneyAmount;
+  hostFundedDiscount: MoneyAmount;
+  tukaiFundedDiscount: MoneyAmount;
+  commission: MoneyAmount;
+  promoCode: string | null;
+  experience: { id: string; title: string; slug: string } | null;
+  purchaseId: string;
+  purchaseNumber: string;
+  /** The ticket type sold, e.g. "VIP" */
+  productName: string | null;
+};

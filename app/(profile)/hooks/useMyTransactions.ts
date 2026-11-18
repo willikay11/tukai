@@ -4,11 +4,16 @@ import { useMemo } from 'react';
 
 import moment from 'moment';
 
-import { useEarningsSummary, usePayouts } from '@/app/(experiences)/hooks/usePayment';
+import {
+  useEarningsSummary,
+  useHostIncome,
+  usePayouts,
+} from '@/app/(experiences)/hooks/usePayment';
 import { useExperiences, useTicketPurchases } from '@/app/shared/hooks/useExperiences';
 import { Experience } from '@/types/experience';
 import {
   HostEarningsSummary,
+  HostIncomeEntry,
   HostPayout,
   PAYOUT_KIND_LABEL,
   payoutAmount,
@@ -16,6 +21,8 @@ import {
 } from '@/types/payment';
 import { TicketPurchase } from '@/types/ticket-purchase';
 import { getTicketBasePrice } from '@/utils/ticket-utils';
+
+import { incomeRows } from './income-rows';
 
 export type TransactionDirection = 'in' | 'out';
 
@@ -33,11 +40,13 @@ const money = (amount: number, currency: string) =>
   `${currency} ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 /**
- * What a reader's money has done, read off the two ledgers the API actually
- * has: tickets they bought (always money out - there is no sales-income
- * ledger to show the matching "money in" side of a host's own sales) and
- * payouts sent to them (also out). One row per purchased ticket, not per
- * checkout - the purchase endpoint carries no grouped total of its own.
+ * What a reader's money has done, newest first, from three ledgers:
+ *
+ * - tickets they bought: money out, one row per ticket;
+ * - payouts sent to them: money out;
+ * - their income as a host (DEV-372): each ticket sale is money in, and a
+ *   refund or cancellation takes it back out. Empty for someone who
+ *   hosts nothing.
  */
 export const useMyTransactions = (userId?: string | null) => {
   const enabled = Boolean(userId);
@@ -51,6 +60,7 @@ export const useMyTransactions = (userId?: string | null) => {
     enabled,
   );
   const { data: payoutsResponse, isLoading: isLoadingPayouts } = usePayouts(enabled);
+  const { data: incomeResponse, isLoading: isLoadingIncome } = useHostIncome(enabled);
   const { data: summaryResponse, isLoading: isLoadingSummary } = useEarningsSummary(enabled);
 
   const purchases: TicketPurchase[] = useMemo(
@@ -65,6 +75,10 @@ export const useMyTransactions = (userId?: string | null) => {
     const payload = payoutsResponse?.data;
     return Array.isArray(payload) ? payload : (payload?.results ?? []);
   }, [payoutsResponse]);
+  const income: HostIncomeEntry[] = useMemo(() => {
+    const payload = incomeResponse?.data;
+    return Array.isArray(payload) ? payload : (payload?.results ?? []);
+  }, [incomeResponse]);
 
   const transactions: TransactionRow[] = useMemo(() => {
     const experienceById = new Map(
@@ -97,16 +111,21 @@ export const useMyTransactions = (userId?: string | null) => {
       direction: 'out',
     }));
 
-    return [...ticketRows, ...payoutRows].sort(
+    return [...ticketRows, ...payoutRows, ...incomeRows(income)].sort(
       (a, b) => moment(b.date).valueOf() - moment(a.date).valueOf(),
     );
-  }, [purchases, reservedExperiences, payouts]);
+  }, [purchases, reservedExperiences, payouts, income]);
 
   const summary: HostEarningsSummary | null = summaryResponse?.data ?? null;
   const availableBalance = summary?.availableBalance?.amount ?? '0';
 
   return {
-    isLoading: isLoadingPurchases || isLoadingReserved || isLoadingPayouts || isLoadingSummary,
+    isLoading:
+      isLoadingPurchases ||
+      isLoadingReserved ||
+      isLoadingPayouts ||
+      isLoadingIncome ||
+      isLoadingSummary,
     transactions,
     balances: {
       currency: summary?.availableBalance?.currency ?? payouts[0]?.currency ?? 'KES',

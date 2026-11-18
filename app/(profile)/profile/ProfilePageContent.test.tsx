@@ -49,6 +49,7 @@ jest.mock('@/app/shared/hooks/useExperiences', () => ({
 jest.mock('@/app/(experiences)/hooks/usePayment', () => ({
   useEarningsSummary: () => ({ data: { data: null }, isLoading: false }),
   usePayouts: () => ({ data: { data: { results: [] } }, isLoading: false }),
+  useHostIncome: () => ({ data: { data: { results: [] } }, isLoading: false }),
   useGetWallets: () => ({ data: { data: { results: [] } }, isLoading: false }),
   usePayoutQuote: () => ({ data: undefined, isFetching: false }),
   useRequestWithdrawal: () => ({ mutate: jest.fn(), isPending: false }),
@@ -65,7 +66,10 @@ jest.mock('@/context/AuthDialogContext', () => ({
   useAuthDialog: () => ({ openEditInterests: jest.fn() }),
 }));
 jest.mock('@/app/(profile)/hooks/useNotificationPreferences', () => ({
-  useNotificationPreferences: () => ({ data: { success: true, data: undefined }, isLoading: false }),
+  useNotificationPreferences: () => ({
+    data: { success: true, data: undefined },
+    isLoading: false,
+  }),
   useUpdateNotificationPreferences: () => ({ mutate: jest.fn(), isPending: false }),
 }));
 
