@@ -90,15 +90,14 @@ const PillOption = ({
  * Step 4: Tickets (tk-tickets / tk-ticket / tk-sumbox in create-experience.css).
  *
  * Free experiences relabel "tickets" as "spaces" throughout and skip the fee
- * allocation, partial-payment toggle and currency picker entirely.
+ * allocation and currency picker entirely.
  *
- * Two deliberate resolutions versus the handoff markup, both called out again
- * in the PR/report rather than hidden here:
- *  - Partial payments: `acceptPartialPayment` lives per ticket item in
- *    `FormData['tickets']['items']`, but the handoff shows one shared toggle
- *    above the whole list. This renders ONE switch that sets the flag on
- *    every item at once, shown "on" only when every current item already has
- *    it on.
+ * No "Accept partial payments" toggle: ticketed experiences can't take part
+ * payment - checkout always charges the full price, and the API refuses a
+ * deposit on a standard or itinerary ticket (DEV-420). Deposits exist only
+ * for reservations, where the host accepts first.
+ *
+ * One deliberate resolution versus the handoff markup:
  *  - Ticket currency: `FormData['tickets']` has no currency field (grepped
  *    useCreateExperienceFlow.ts - not present). This renders the picker as
  *    local-only UI state defaulting to KES; there is nowhere to persist it
@@ -113,7 +112,6 @@ export const TicketsStep = ({ flow }: TicketsStepProps) => {
   const isEachDay = isMultiDay && tickets.ticketMode === 'each-day';
   const isRecurring = dateType.experienceType === 'one-time' && dateType.isRecurring;
 
-  const [showPartialInfo, setShowPartialInfo] = useState(false);
   // No currency field exists on FormData['tickets'] yet - this is local-only
   // UI state defaulting to KES. Nothing here is persisted to `flow`.
   const [currency, setCurrency] = useState<'KES' | 'USD'>('KES');
@@ -261,16 +259,6 @@ export const TicketsStep = ({ flow }: TicketsStepProps) => {
     flow.updateTicketsFormData({ items: [...tickets.items, blankTicketItem()] });
   };
 
-  const allAcceptPartial =
-    tickets.items.length > 0 && tickets.items.every((item) => item.acceptPartialPayment);
-
-  const togglePartialPayment = () => {
-    const next = !allAcceptPartial;
-    flow.updateTicketsFormData({
-      items: tickets.items.map((item) => ({ ...item, acceptPartialPayment: next })),
-    });
-  };
-
   const handleCommissionChange = (commission: 'host' | 'customer' | 'split') => {
     flow.updateTicketsFormData({ commission });
     // Known-inaccurate per product: this hard-codes a 4% commission and
@@ -306,46 +294,6 @@ export const TicketsStep = ({ flow }: TicketsStepProps) => {
                 </PillOption>
               ))}
             </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={allAcceptPartial}
-                onClick={togglePartialPayment}
-                className="inline-flex min-h-11 items-center gap-3.5 text-15 text-gray-800"
-              >
-                <span
-                  className={`relative h-8 w-14 flex-shrink-0 rounded-full transition-colors ${
-                    allAcceptPartial ? 'bg-brand' : 'bg-line'
-                  }`}
-                >
-                  <span
-                    className={`absolute top-[3px] h-[26px] w-[26px] rounded-full bg-white shadow-[0_1px_3px_rgba(1,51,52,.3)] transition-all ${
-                      allAcceptPartial ? 'left-[27px]' : 'left-[3px]'
-                    }`}
-                  />
-                </span>
-                Accept partial payments on this experience
-              </button>
-              <button
-                type="button"
-                aria-label="About partial payments"
-                aria-expanded={showPartialInfo}
-                onClick={() => setShowPartialInfo((prev) => !prev)}
-                className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-ink-muted hover:bg-surface-brand"
-              >
-                <IconComponent iconName="InformationCircleIcon" size={20} color="currentColor" />
-              </button>
-            </div>
-            {showPartialInfo && (
-              <p className="rounded-xl bg-surface-brand px-4 py-3 text-[14.5px] leading-relaxed text-brand-ink">
-                Guests pay part of the price when they book and the rest a week before the
-                experience.
-              </p>
-            )}
           </div>
 
           <div className="-mx-6 h-px bg-gray-200" aria-hidden="true" />
