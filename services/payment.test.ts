@@ -2,6 +2,7 @@ import { apiWithToken } from './apiService';
 import {
   createBankWallet,
   createPhoneWallet,
+  fetchHostIncome,
   patchBankWallet,
   sendWalletOtp,
   verifyWalletOtp,
@@ -10,7 +11,7 @@ import {
 
 jest.mock('./apiService', () => ({ apiWithToken: jest.fn() }));
 
-const api = { post: jest.fn(), patch: jest.fn() };
+const api = { post: jest.fn(), patch: jest.fn(), get: jest.fn() };
 
 describe('wallet requests', () => {
   beforeEach(() => {
@@ -99,5 +100,20 @@ describe('wallet requests', () => {
 
     await expect(verifyWalletOtp('w1', '000000')).rejects.toMatchObject({ status: 400, errors });
     expect(api.post).toHaveBeenCalledWith('/v1/payments/wallets/w1/verify-otp/', { otp: '000000' });
+  });
+
+  // DEV-372: the host's ticket-sales income ledger
+  it('reads the income ledger', async () => {
+    api.get.mockResolvedValue({
+      status: 200,
+      data: { results: [{ id: 'e1', kind: 'sale', promo_code: 'JULY500' }] },
+    });
+
+    const response = await fetchHostIncome({ page: 1, page_size: 50 });
+
+    expect(api.get).toHaveBeenCalledWith('/v1/payments/wallets/income/', {
+      params: { page: 1, page_size: 50 },
+    });
+    expect(response.data.results[0]).toEqual({ id: 'e1', kind: 'sale', promoCode: 'JULY500' });
   });
 });

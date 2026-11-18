@@ -4,6 +4,7 @@ import {
   createBankWallet,
   createPhoneWallet,
   fetchEarningsSummary,
+  fetchHostIncome,
   fetchPayoutQuote,
   fetchPayouts,
   fetchWallets,
@@ -84,6 +85,14 @@ export const useEarningsSummary = (enabled = true) =>
   });
 
 /** Every payout the host has been sent. */
+/** The host's income ledger: ticket sales, refunds and corrections (DEV-372). */
+export const useHostIncome = (enabled = true) =>
+  useQuery({
+    queryKey: ['host-income'],
+    queryFn: async () => await fetchHostIncome({ page: 1, page_size: 50 }),
+    enabled,
+  });
+
 export const usePayouts = (enabled = true) =>
   useQuery({
     queryKey: ['payouts'],
