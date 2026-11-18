@@ -49,13 +49,10 @@ export const CreateExperienceDrawerProvider = ({ children }: { children: ReactNo
 
   const openCreateExperience = useCallback(
     (opts?: OpenCreateExperienceOptions) => {
-      // Creating an experience needs an active plan - every entry point
-      // opens Choose a plan first instead, same as the design spec's own
-      // plan-gating rule. hasActivePlan reads false before the stored plan
-      // loads too, same as it would for a real "no plan" account - the read
-      // is synchronous enough (localStorage, on mount) that nobody can click
-      // faster than it resolves.
-      if (hostingPlan && !hostingPlan.hasActivePlan) {
+      // Creating an experience needs a plan to host on: a paid one, or the
+      // default (Basic) every host without a subscription is on. Only when
+      // neither exists does Choose a plan open instead.
+      if (hostingPlan && !hostingPlan.canHost) {
         hostingPlan.openHostingPlanFlow({ view: 'choose' });
         return;
       }

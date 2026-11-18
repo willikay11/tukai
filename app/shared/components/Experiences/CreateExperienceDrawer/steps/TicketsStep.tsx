@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { useCreateExperienceFlow } from '@/app/(experiences)/experiences/create/hooks/useCreateExperienceFlow';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useToast } from '@/app/shared/hooks/useToast';
+import { formatFeePct, useHostingFee } from '@/context/HostingPlanContext';
 import {
   createExperienceTicket,
   createSlotTemplate,
@@ -27,10 +28,16 @@ interface TicketsStepProps {
   flow: Flow;
 }
 
-const COMMISSION_OPTIONS: { value: 'host' | 'customer' | 'split'; label: string }[] = [
+/** Who pays Tukai's fee. Splitting it means half of the host's plan fee each. */
+const commissionOptions = (
+  ratePct: number,
+): { value: 'host' | 'customer' | 'split'; label: string }[] => [
   { value: 'host', label: 'I will pay the full commission' },
   { value: 'customer', label: 'Customer pays the commission' },
-  { value: 'split', label: 'Split 50-50 between the customer and me' },
+  {
+    value: 'split',
+    label: `Split 50-50 between the customer and me (${formatFeePct(ratePct / 2)} each)`,
+  },
 ];
 
 const CURRENCY_OPTIONS: { value: 'KES' | 'USD'; label: string; note: string }[] = [
@@ -105,6 +112,8 @@ const PillOption = ({
  */
 export const TicketsStep = ({ flow }: TicketsStepProps) => {
   const { toast } = useToast();
+  // The host's real plan fee, not a fixed 4% (DEV-350)
+  const fee = useHostingFee();
   const { dateType, tickets } = flow.formData;
   const errors = flow.ticketsErrors;
   const isPaid = dateType.experiencePricing === 'paid';
@@ -261,10 +270,6 @@ export const TicketsStep = ({ flow }: TicketsStepProps) => {
 
   const handleCommissionChange = (commission: 'host' | 'customer' | 'split') => {
     flow.updateTicketsFormData({ commission });
-    // Known-inaccurate per product: this hard-codes a 4% commission and
-    // ignores the host's real plan fee (Basic 8%, Premium 3.5%, Business 3%).
-    // Rendered as specified in the handoff - tracked separately, see the
-    // README's "Open questions" section.
     void flow.handlers.handleUpdateFeesAllocation(commission);
   };
 
@@ -280,11 +285,12 @@ export const TicketsStep = ({ flow }: TicketsStepProps) => {
             <span className="text-15 font-semibold text-gray-800">
               Fees allocation{' '}
               <span className="font-normal text-ink-muted">
-                (Tukai charges a 4% commission. Who should pay it?)
+                (Tukai charges {formatFeePct(fee.ratePct)}
+                {fee.planName ? ` on your ${fee.planName} plan` : ''}. Who should pay it?)
               </span>
             </span>
             <div className="flex flex-col items-start gap-2.5" role="radiogroup">
-              {COMMISSION_OPTIONS.map((option) => (
+              {commissionOptions(fee.ratePct).map((option) => (
                 <PillOption
                   key={option.value}
                   active={tickets.commission === option.value}

@@ -13,6 +13,7 @@ import {
 import { HostingPlanDrawer } from '@/app/shared/components/Hosting/HostingPlanDrawer';
 import {
   HostingCheckout,
+  PLATFORM_COMMISSION_PCT,
   cancelHostingSubscription,
   confirmHostingSubscription,
   fetchCurrentHostingSubscription,
@@ -43,8 +44,19 @@ type HostingPlanContextValue = {
   closeHostingPlanFlow: () => void;
 
   plans: HostingPlan[];
+  /** The host's hosting subscription. planId is null without one. */
   currentPlan: CreatorPlanState;
+  /** Pays for a hosting plan (active, or cancelled but not ended yet). */
   hasActivePlan: boolean;
+  /** Basic: what a host with no hosting subscription is on. */
+  defaultPlan: HostingPlan | null;
+  /**
+   * The plan the host is on: their subscription's, or else the default.
+   * What "Current plan" and the fee shown on tickets go by.
+   */
+  effectivePlanId: HostingPlanId | null;
+  /** Can create and publish experiences: a paid plan, or the default one. */
+  canHost: boolean;
 
   /** Creates the pending subscription and returns where to pay for it. */
   isStartingCheckout: boolean;
@@ -82,12 +94,27 @@ export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
   const [isCancelling, setIsCancelling] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
 
+  // Plans first: a subscription is matched to its plan by id, so reading it
+  // before the plans have loaded found no match and the host looked plan-less
   useEffect(() => {
-    fetchHostingPlans().then(setPlans);
-    fetchCurrentHostingSubscription().then((subscription) => {
-      if (subscription) setCurrentPlan(subscription);
-    });
+    let cancelled = false;
+    fetchHostingPlans()
+      .then((loaded) => {
+        if (cancelled) return null;
+        setPlans(loaded);
+        return fetchCurrentHostingSubscription();
+      })
+      .then((subscription) => {
+        if (!cancelled && subscription) setCurrentPlan(subscription);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  const defaultPlan = useMemo(() => plans.find((plan) => plan.isDefault) ?? null, [plans]);
+  const hasActivePlan = hasActiveHostingPlan(currentPlan);
+  const effectivePlanId = hasActivePlan ? currentPlan.planId : (defaultPlan?.id ?? null);
 
   const openHostingPlanFlow = useCallback((opts?: OpenHostingPlanOptions) => {
     setOptions(opts ?? {});
@@ -144,7 +171,10 @@ export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
       closeHostingPlanFlow,
       plans,
       currentPlan,
-      hasActivePlan: hasActiveHostingPlan(currentPlan),
+      hasActivePlan,
+      defaultPlan,
+      effectivePlanId,
+      canHost: hasActivePlan || Boolean(defaultPlan),
       isStartingCheckout,
       startCheckout,
       isConfirming,
@@ -161,6 +191,9 @@ export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
       closeHostingPlanFlow,
       plans,
       currentPlan,
+      hasActivePlan,
+      defaultPlan,
+      effectivePlanId,
       isStartingCheckout,
       startCheckout,
       isConfirming,
@@ -188,3 +221,20 @@ export const HostingPlanProvider = ({ children }: { children: ReactNode }) => {
  * (e.g. a dashboard card in a test) can render without one.
  */
 export const useHostingPlan = (): HostingPlanContextValue | null => useContext(HostingPlanContext);
+
+/** "8%", "3.5%", "1.75%" */
+export const formatFeePct = (pct: number): string => `${Number(pct.toFixed(2))}%`;
+
+/**
+ * Tukai's fee on each paid ticket for this host: their plan's commission,
+ * Basic's when they have no subscription, the platform default (4%) when
+ * neither is known. Splitting the fee means half of it each (DEV-350).
+ */
+export const useHostingFee = (): { ratePct: number; planName: string | null } => {
+  const hostingPlan = useHostingPlan();
+  const plan = hostingPlan?.plans.find((candidate) => candidate.id === hostingPlan.effectivePlanId);
+  return {
+    ratePct: plan?.commissionPct ?? PLATFORM_COMMISSION_PCT,
+    planName: plan?.name ?? null,
+  };
+};

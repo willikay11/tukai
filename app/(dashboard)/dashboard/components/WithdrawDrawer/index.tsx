@@ -2,12 +2,17 @@
 
 import { useState } from 'react';
 
-import { useGetWallets, usePayoutQuote, useRequestWithdrawal } from '@/app/(experiences)/hooks/usePayment';
+import {
+  useGetWallets,
+  usePayoutQuote,
+  useRequestWithdrawal,
+} from '@/app/(experiences)/hooks/usePayment';
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useToast } from '@/app/shared/hooks/useToast';
 import { Drawer } from '@/components/ui/drawer';
+import { formatFeePct, useHostingFee } from '@/context/HostingPlanContext';
 import { cn } from '@/lib/utils';
-import { PayoutQuote, payoutAmount, Wallet } from '@/types/payment';
+import { PayoutQuote, Wallet, payoutAmount } from '@/types/payment';
 import { formatCurrencyAmount } from '@/utils/money';
 
 const money = (currency: string, value?: string | number | null) =>
@@ -76,6 +81,7 @@ export const WithdrawDrawer = ({
   onClose: () => void;
 }) => {
   const { toast } = useToast();
+  const fee = useHostingFee();
   const [amount, setAmount] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -89,7 +95,9 @@ export const WithdrawDrawer = ({
   const canWithdraw = available >= 100;
 
   const walletsPayload = walletsResponse?.data;
-  const wallets: Wallet[] = Array.isArray(walletsPayload) ? walletsPayload : walletsPayload?.results ?? [];
+  const wallets: Wallet[] = Array.isArray(walletsPayload)
+    ? walletsPayload
+    : (walletsPayload?.results ?? []);
   const destination = payoutDestination(wallets.find((wallet) => wallet.isActive) ?? wallets[0]);
   const destinationLabel = destination?.label ?? 'your payout method';
 
@@ -166,77 +174,77 @@ export const WithdrawDrawer = ({
               {money(currency, availableBalance)}
             </span>
             <p className="text-[13.5px] leading-[1.45] text-ink-muted">
-              {money(currency, pending)} is still clearing. Ticket sales come in after Tukai&rsquo;s
-              fee, 8% for verified businesses or 4% for other communities, and become available 48
-              hours after each experience ends.
+              {money(currency, pending)} is still clearing. Ticket sales come in after Tukai&rsquo;s{' '}
+              {formatFeePct(fee.ratePct)} fee and become available 48 hours after each experience
+              ends.
             </p>
           </div>
 
           <div className="flex flex-col gap-2.5">
-              <label htmlFor="wd-amt" className="text-[15px] font-semibold text-gray-900">
-                Amount
-              </label>
-              <div className="relative">
-                <span className="pointer-events-none absolute left-4 top-1/2 flex -translate-y-1/2 items-center border-r border-line pr-2.5 text-[15px] font-semibold text-gray-900">
-                  {currency}
-                </span>
-                <input
-                  id="wd-amt"
-                  type="text"
-                  inputMode="decimal"
-                  autoComplete="off"
-                  value={amount}
-                  onChange={(event) => {
-                    // Digits and a point only - the quote and the withdrawal both
-                    // send this as-is, and "2,000" reads as no amount at all
-                    setAmount(event.target.value.replace(/[^0-9.]/g, '').slice(0, 12));
-                    setError(null);
-                  }}
-                  placeholder="0"
-                  className={cn(
-                    'h-14 w-full rounded-xl border bg-white pl-[72px] pr-4 text-[15px] text-gray-900 outline-none placeholder:text-ink-subtle',
-                    'focus:border-brand focus:ring-[3px] focus:ring-surface-brand',
-                    error ? 'border-danger' : 'border-line',
-                  )}
-                />
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {chipAmounts.map((amt) => {
-                  const selected = requested === amt;
-
-                  return (
-                    <button
-                      key={amt}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => pickAmount(amt)}
-                      className={cn(
-                        'h-11 whitespace-nowrap rounded-full px-4 text-sm hover:brightness-[.97]',
-                        selected
-                          ? 'bg-surface-brand font-semibold text-brand-deep'
-                          : 'bg-surface font-medium text-gray-900',
-                      )}
-                    >
-                      {currency} {amt.toLocaleString('en-US')}
-                    </button>
-                  );
-                })}
-                <button
-                  type="button"
-                  aria-pressed={requested === available}
-                  onClick={() => pickAmount(available)}
-                  className={cn(
-                    'h-11 whitespace-nowrap rounded-full px-4 text-sm hover:brightness-[.97]',
-                    requested === available
-                      ? 'bg-surface-brand font-semibold text-brand-deep'
-                      : 'bg-surface font-medium text-gray-900',
-                  )}
-                >
-                  All available
-                </button>
-              </div>
+            <label htmlFor="wd-amt" className="text-[15px] font-semibold text-gray-900">
+              Amount
+            </label>
+            <div className="relative">
+              <span className="pointer-events-none absolute left-4 top-1/2 flex -translate-y-1/2 items-center border-r border-line pr-2.5 text-[15px] font-semibold text-gray-900">
+                {currency}
+              </span>
+              <input
+                id="wd-amt"
+                type="text"
+                inputMode="decimal"
+                autoComplete="off"
+                value={amount}
+                onChange={(event) => {
+                  // Digits and a point only - the quote and the withdrawal both
+                  // send this as-is, and "2,000" reads as no amount at all
+                  setAmount(event.target.value.replace(/[^0-9.]/g, '').slice(0, 12));
+                  setError(null);
+                }}
+                placeholder="0"
+                className={cn(
+                  'h-14 w-full rounded-xl border bg-white pl-[72px] pr-4 text-[15px] text-gray-900 outline-none placeholder:text-ink-subtle',
+                  'focus:border-brand focus:ring-[3px] focus:ring-surface-brand',
+                  error ? 'border-danger' : 'border-line',
+                )}
+              />
             </div>
+
+            <div className="flex flex-wrap gap-2">
+              {chipAmounts.map((amt) => {
+                const selected = requested === amt;
+
+                return (
+                  <button
+                    key={amt}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => pickAmount(amt)}
+                    className={cn(
+                      'h-11 whitespace-nowrap rounded-full px-4 text-sm hover:brightness-[.97]',
+                      selected
+                        ? 'bg-surface-brand font-semibold text-brand-deep'
+                        : 'bg-surface font-medium text-gray-900',
+                    )}
+                  >
+                    {currency} {amt.toLocaleString('en-US')}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                aria-pressed={requested === available}
+                onClick={() => pickAmount(available)}
+                className={cn(
+                  'h-11 whitespace-nowrap rounded-full px-4 text-sm hover:brightness-[.97]',
+                  requested === available
+                    ? 'bg-surface-brand font-semibold text-brand-deep'
+                    : 'bg-surface font-medium text-gray-900',
+                )}
+              >
+                All available
+              </button>
+            </div>
+          </div>
 
           {/* What will actually land, before anything is committed */}
           {canWithdraw && requested > 0 && (
@@ -245,15 +253,25 @@ export const WithdrawDrawer = ({
                 <p className="text-15 text-ink-muted">Working out the fees…</p>
               ) : quote ? (
                 <>
-                  <QuoteRow label="You asked for" value={money(currency, quote.requestedAmount?.amount)} />
+                  <QuoteRow
+                    label="You asked for"
+                    value={money(currency, quote.requestedAmount?.amount)}
+                  />
                   {/* Fees come off what was asked for, so they read as deductions */}
                   <QuoteRow
                     label="Paystack transfer fee"
                     value={`-${money(currency, quote.paystackTransferFee?.amount)}`}
                   />
-                  <QuoteRow label="Tukai payout fee" value={`-${money(currency, quote.tukaiPayoutFee?.amount)}`} />
+                  <QuoteRow
+                    label="Tukai payout fee"
+                    value={`-${money(currency, quote.tukaiPayoutFee?.amount)}`}
+                  />
                   <div className="my-1 h-px bg-line" />
-                  <QuoteRow label="You receive" value={money(currency, quote.netAmount?.amount)} strong />
+                  <QuoteRow
+                    label="You receive"
+                    value={money(currency, quote.netAmount?.amount)}
+                    strong
+                  />
 
                   {quote.limitMessage && (
                     <p className="mt-2 text-13 leading-relaxed text-ink-muted">
@@ -274,14 +292,20 @@ export const WithdrawDrawer = ({
             <span className="text-[15px] font-semibold text-gray-900">Sends to</span>
             <div className="flex items-center gap-3.5 rounded-xl bg-surface py-2 pl-3 pr-2">
               <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-white text-brand">
-                <IconComponent iconName={destination?.icon ?? 'Wallet02Icon'} size={21} color="currentColor" />
+                <IconComponent
+                  iconName={destination?.icon ?? 'Wallet02Icon'}
+                  size={21}
+                  color="currentColor"
+                />
               </span>
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span className="truncate text-[15px] font-semibold text-gray-900">
                   {destination?.label ?? 'Add how you get paid out'}
                 </span>
                 {destination?.holder && (
-                  <span className="truncate text-[13.5px] text-ink-muted">{destination.holder}</span>
+                  <span className="truncate text-[13.5px] text-ink-muted">
+                    {destination.holder}
+                  </span>
                 )}
               </div>
               <button
@@ -328,9 +352,13 @@ export const WithdrawDrawer = ({
             onClick={submit}
             disabled={!canWithdraw || isPending}
             aria-busy={isPending}
-            className="h-14 w-full rounded-full bg-lime text-base font-semibold text-brand-ink shadow-[0_8px_20px_rgba(176,232,0,.4)] enabled:hover:bg-lime-dark disabled:opacity-40 active:scale-[0.98]"
+            className="h-14 w-full rounded-full bg-lime text-base font-semibold text-brand-ink shadow-[0_8px_20px_rgba(176,232,0,.4)] active:scale-[0.98] enabled:hover:bg-lime-dark disabled:opacity-40"
           >
-            {isPending ? 'Sending' : requested > 0 ? `Withdraw ${money(currency, amount)}` : 'Withdraw'}
+            {isPending
+              ? 'Sending'
+              : requested > 0
+                ? `Withdraw ${money(currency, amount)}`
+                : 'Withdraw'}
           </button>
         </div>
       </div>

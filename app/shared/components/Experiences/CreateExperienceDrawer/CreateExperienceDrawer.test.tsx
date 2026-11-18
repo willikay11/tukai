@@ -20,7 +20,13 @@ const openHostingPlanFlow = jest.fn();
 const mockHostingPlan: Record<string, unknown> = {};
 const setMockHostingPlan = (overrides: Record<string, unknown>) => {
   Object.keys(mockHostingPlan).forEach((key) => delete mockHostingPlan[key]);
-  Object.assign(mockHostingPlan, { hasActivePlan: false, openHostingPlanFlow, ...overrides });
+  // canHost: a paid plan, or the default Basic every host without one is on
+  Object.assign(mockHostingPlan, {
+    hasActivePlan: false,
+    canHost: overrides.canHost ?? overrides.hasActivePlan ?? false,
+    openHostingPlanFlow,
+    ...overrides,
+  });
 };
 
 jest.mock('@/context/HostingPlanContext', () => ({
@@ -147,7 +153,24 @@ describe('CreateExperienceDrawer', () => {
     });
   });
 
-  it('with no active hosting plan, opening the drawer opens Choose a plan instead of the wizard', async () => {
+  // No subscription, but Basic is the default plan: hosts can start right away (DEV-451)
+  it('with no subscription but a default plan, opens the wizard without asking for a plan', async () => {
+    setMockHostingPlan({ hasActivePlan: false, canHost: true });
+    jest.requireMock('@/app/shared/hooks/useExperiences').useExperiences.mockReturnValue({
+      data: {
+        data: { results: [{ id: 'live-1', status: 'published', dateCreated: '2026-01-01' }] },
+      },
+      isLoading: false,
+      refetch: jest.fn(),
+    });
+
+    renderDrawer();
+
+    expect(await findWizard()).toBeInTheDocument();
+    expect(openHostingPlanFlow).not.toHaveBeenCalled();
+  });
+
+  it('with no plan to host on at all, opening the drawer opens Choose a plan instead of the wizard', async () => {
     renderDrawer();
 
     await waitFor(() => expect(openHostingPlanFlow).toHaveBeenCalledWith({ view: 'choose' }));

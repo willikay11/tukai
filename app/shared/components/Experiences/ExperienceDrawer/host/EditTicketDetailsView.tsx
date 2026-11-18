@@ -6,9 +6,8 @@ import { TicketStat } from '@/app/(dashboard)/dashboard/experiences/[experienceI
 import { IconComponent } from '@/app/shared/components/Icons';
 import { useUpdateExperienceTicket } from '@/app/shared/hooks/useExperiences';
 import { useToast } from '@/app/shared/hooks/useToast';
-import { useHostingPlan } from '@/context/HostingPlanContext';
+import { useHostingFee } from '@/context/HostingPlanContext';
 import { cn } from '@/lib/utils';
-import { getHostingPlan } from '@/services/hostingPlans';
 import { Experience } from '@/types/experience';
 import { Ticket } from '@/types/ticket';
 import { currencyFullName } from '@/utils/money';
@@ -48,11 +47,8 @@ export const EditTicketDetailsView = ({
   onBack: () => void;
 }) => {
   const { toast } = useToast();
-  const hostingPlan = useHostingPlan();
-  const plan = hostingPlan?.currentPlan.planId
-    ? getHostingPlan(hostingPlan.currentPlan.planId)
-    : undefined;
-  const ratePct = plan?.commissionPct ?? 4;
+  // The host's plan fee: their subscription's, or Basic's without one
+  const { ratePct } = useHostingFee();
 
   const sold = ticketsSold(ticket);
   const originalPrice = getTicketBasePrice(ticket).amount;

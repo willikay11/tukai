@@ -38,12 +38,18 @@ export const ChoosePlanView = ({
   <div className="flex flex-col gap-[22px]">
     <div className="flex flex-col gap-2">
       <h2 className="text-[22px] font-bold leading-tight tracking-[-0.3px] text-gray-800">
-        {isChangeMode ? 'Change your plan' : 'Pick a plan to start hosting'}
+        {isChangeMode
+          ? 'Change your plan'
+          : currentPlanId
+            ? 'Choose your plan'
+            : 'Pick a plan to start hosting'}
       </h2>
       <p className="text-[15px] leading-relaxed text-ink-muted">
         {isChangeMode
           ? `You’re on ${currentPlanName ?? 'a plan'}${renewalDateLabel ? ` until ${renewalDateLabel}` : ''}. Switching cancels it and starts a new plan right away - you’ll pay for it now.`
-          : 'You need a plan to create experiences on Tukai. Every plan includes ticketing, payouts and community tools, and you can change or cancel any time.'}
+          : currentPlanId
+            ? `You’re on ${currentPlanName ?? 'Basic'}, the plan every host starts on. Upgrade any time - you’ll pay for the new plan now.`
+            : 'You need a plan to create experiences on Tukai. Every plan includes ticketing, payouts and community tools, and you can change or cancel any time.'}
       </p>
     </div>
 
@@ -53,8 +59,8 @@ export const ChoosePlanView = ({
           key={plan.id}
           plan={plan}
           isSelected={plan.id === selectedPlanId}
-          isCurrent={isChangeMode && plan.id === currentPlanId}
-          disabled={disabled || (isChangeMode && plan.id === currentPlanId)}
+          isCurrent={plan.id === currentPlanId}
+          disabled={disabled || plan.id === currentPlanId}
           onChoose={() => onChoose(plan.id)}
         />
       ))}

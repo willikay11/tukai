@@ -65,7 +65,7 @@ export const useHostingPlanDrawer = () => {
     if (!isOpen) return;
 
     setView(options?.view ?? 'choose');
-    setSelectedPlanId(options?.planId ?? hostingPlan?.currentPlan.planId ?? null);
+    setSelectedPlanId(options?.planId ?? hostingPlan?.effectivePlanId ?? null);
     setIsInitiatingCheckout(false);
     setInitiationError(null);
     setPendingSubscriptionId(null);
@@ -81,6 +81,7 @@ export const useHostingPlanDrawer = () => {
     plans,
     currentPlan,
     hasActivePlan,
+    effectivePlanId,
     isStartingCheckout,
     startCheckout,
     isConfirming,
@@ -93,8 +94,10 @@ export const useHostingPlanDrawer = () => {
   // checkout for the new plan. No plan yet: Continue starts the first one.
   const isChangeMode = hasActivePlan;
   const selectedPlan = plans.find((plan) => plan.id === selectedPlanId) ?? null;
-  const isCurrentPlanSelected = isChangeMode && selectedPlanId === currentPlan.planId;
-  const currentPlanRecord = plans.find((plan) => plan.id === currentPlan.planId) ?? null;
+  // The plan the host is on - their subscription's, or the default Basic -
+  // can't be picked again
+  const isCurrentPlanSelected = selectedPlanId === effectivePlanId;
+  const currentPlanRecord = plans.find((plan) => plan.id === effectivePlanId) ?? null;
   const renewalDateLabel = currentPlan.currentPeriodEnd
     ? moment(currentPlan.currentPeriodEnd).format('ddd D MMM')
     : null;
@@ -184,6 +187,7 @@ export const useHostingPlanDrawer = () => {
     view,
     plans,
     currentPlan,
+    effectivePlanId,
     currentPlanName: currentPlanRecord?.name,
     renewalDateLabel,
     isChangeMode,
