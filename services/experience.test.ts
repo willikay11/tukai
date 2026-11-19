@@ -321,6 +321,34 @@ describe('Experience Service', () => {
       ).rejects.toBeDefined();
       expect(mockApi.post).not.toHaveBeenCalled();
     });
+
+    // DEV-510: the reason reached the host as "An unexpected error occurred"
+    it('keeps the reason a file was refused before sending', async () => {
+      mockAssertValidImageFiles.mockRejectedValue(new Error('Invalid image file(s): clip.mov'));
+      const photoFile = new File(['photo'], 'clip.mov', { type: 'video/quicktime' });
+
+      await expect(
+        experienceService.addExperiencePhotos('exp-1', [photoFile]),
+      ).rejects.toMatchObject({ message: 'Invalid image file(s): clip.mov' });
+    });
+
+    it('reads the reason from the API when it refuses the upload', async () => {
+      mockAssertValidImageFiles.mockResolvedValue(undefined);
+      mockApi.post.mockRejectedValue({
+        response: {
+          status: 400,
+          data: {
+            type: 'validation_error',
+            errors: [{ code: 'invalid', detail: 'Upload a valid image.', attr: 'new_photos' }],
+          },
+        },
+      });
+      const photoFile = new File(['photo'], 'photo.jpg', { type: 'image/jpeg' });
+
+      await expect(
+        experienceService.addExperiencePhotos('exp-1', [photoFile]),
+      ).rejects.toMatchObject({ status: 400, message: 'Upload a valid image.' });
+    });
   });
 
   describe('createExperienceTicket', () => {
